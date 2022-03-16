@@ -64,7 +64,7 @@ var MouseToRay;
     function createScene() {
         MouseToRay.root.addChild(new ƒAid.NodeCoordinateSystem());
         ƒAid.addStandardLightComponents(MouseToRay.root);
-        let cube = new ƒAid.Node("Cube", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("RED"))), new ƒ.MeshCube());
+        let cube = new ƒAid.Node("Cube", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("RED"))), new ƒ.MeshCube());
         MouseToRay.root.addChild(cube);
     }
 })(MouseToRay || (MouseToRay = {}));

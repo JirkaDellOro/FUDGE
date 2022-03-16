@@ -222,6 +222,7 @@ declare namespace FudgeCore {
         /**
          * Decorator allows to attach {@link Mutable} functionality to existing classes.
          */
+        static getMutatorFromPath(_mutator: Mutator, _path: string[]): Mutator;
         /**
          * Retrieves the type of this mutable subclass as the name of the runtime class
          * @returns The type of the mutable
@@ -258,10 +259,15 @@ declare namespace FudgeCore {
          */
         updateMutator(_mutator: Mutator): void;
         /**
-         * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
-         * @param _mutator
+         * Updates the attribute values of the instance according to the state of the mutator.
+         * The mutation may be restricted to a subset of the mutator and the event dispatching suppressed.
+         * Uses mutateBase, but can be overwritten in subclasses
          */
-        mutate(_mutator: Mutator): Promise<void>;
+        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
+        /**
+         * Base method for mutation, always available to subclasses. Do not overwrite in subclasses!
+         */
+        protected mutateBase(_mutator: Mutator, _selection?: string[]): Promise<void>;
         /**
          * Reduces the attributes of the general mutator according to desired options for mutation. To be implemented in subclasses
          * @param _mutator
@@ -387,6 +393,7 @@ declare namespace FudgeCore {
         static readonly subclasses: typeof Component[];
         protected singleton: boolean;
         protected active: boolean;
+        constructor();
         protected static registerSubclass(_subclass: typeof Component): number;
         get isActive(): boolean;
         /**
@@ -411,6 +418,8 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Wraps a regular Javascript Array and offers very limited functionality geared solely towards avoiding garbage colletion.
+     * @author Jirka Dell'Oro-Friedl, HFU, 2021
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Recycler
      */
     class RecycableArray<T> {
         #private;
@@ -419,6 +428,7 @@ declare namespace FudgeCore {
          * Sets the virtual length of the array to zero but keeps the entries beyond.
          */
         reset(): void;
+        recycle(): void;
         push(_entry: T): number;
         pop(): T;
         /**
@@ -445,25 +455,17 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class RenderInjectorCoat extends RenderInjector {
         static decorate(_constructor: Function): void;
-        protected static injectCoatColored(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
-        protected static injectCoatTextured(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        protected static injectCoatColored(this: CoatColored, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        protected static injectCoatRemissive(this: CoatRemissive, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        protected static injectCoatTextured(this: CoatTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        protected static injectCoatRemissiveTextured(this: CoatRemissiveTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
     }
 }
 declare namespace FudgeCore {
-    interface RenderBuffers {
-        vertices: WebGLBuffer;
-        indices: WebGLBuffer;
-        textureUVs: WebGLBuffer;
-        normalsVertex: WebGLBuffer;
-        verticesFlat: WebGLBuffer;
-        indicesFlat: WebGLBuffer;
-        normalsFlat: WebGLBuffer;
-        textureUVsFlat: WebGLBuffer;
-    }
     class RenderInjectorMesh {
         static decorate(_constructor: Function): void;
-        protected static createRenderBuffers(this: Mesh): void;
-        protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): number;
+        protected static getRenderBuffers(this: Mesh, _shader: typeof Shader): RenderBuffers;
+        protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers;
         protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
     }
 }
@@ -473,7 +475,9 @@ declare namespace FudgeCore {
     }
     /**
      * Keeps a depot of objects that have been marked for reuse, sorted by type.
-     * Using {@link Recycler} reduces load on the carbage collector and thus supports smooth performance
+     * Using {@link Recycler} reduces load on the carbage collector and thus supports smooth performance.
+     * @author Jirka Dell'Oro-Friedl, HFU, 2021
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Recycler
      */
     abstract class Recycler {
         private static depot;
@@ -482,7 +486,7 @@ declare namespace FudgeCore {
          * If the depot for that type is empty it returns a new object of the requested type
          * @param _T The class identifier of the desired object
          */
-        static get<T extends Recycable>(_T: new () => T): T;
+        static get<T extends Recycable | RecycableArray<T>>(_T: new () => T): T;
         /**
          * Returns a reference to an object of the requested type in the depot, but does not remove it there.
          * If no object of the requested type was in the depot, one is created, stored and borrowed.
@@ -1813,7 +1817,6 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
-        mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
         private hndAudioReady;
         private hndAudioEnded;
@@ -2032,15 +2035,38 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMesh extends Component {
+        #private;
         static readonly iSubclass: number;
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
         mesh: Mesh;
-        constructor(_mesh?: Mesh);
+        constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance);
         get radius(): number;
+        get skeleton(): SkeletonInstance;
+        bindSkeleton(_skeleton: SkeletonInstance): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
+    }
+}
+declare namespace FudgeCore {
+    enum PICK {
+        RADIUS = "radius",
+        CAMERA = "camera",
+        PHYSICS = "physics"
+    }
+    /**
+     * Base class for scripts the user writes
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
+     */
+    class ComponentPick extends Component {
+        static readonly iSubclass: number;
+        pick: PICK;
+        pickAndDispatch(_ray: Ray, _event: PointerEvent): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
     }
 }
 declare namespace FudgeCore {
@@ -2054,6 +2080,21 @@ declare namespace FudgeCore {
         constructor();
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Synchronizes the graph instance this component is attached to with the graph and vice versa
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
+     */
+    class ComponentSyncGraph extends Component {
+        static readonly iSubclass: number;
+        constructor();
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        private hndEvent;
+        private hndMutation;
     }
 }
 declare namespace FudgeCore {
@@ -2601,6 +2642,10 @@ declare namespace FudgeCore {
          * Set this node to be a recreation of the {@link Graph} given
          */
         set(_graph: Graph): Promise<void>;
+        /**
+         * Retrieve the graph this instances refers to
+         */
+        get(): Graph;
     }
 }
 declare namespace FudgeCore {
@@ -2618,19 +2663,29 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
     }
+}
+declare namespace FudgeCore {
     /**
      * The simplest {@link Coat} providing just a color
      */
     class CoatColored extends Coat {
         color: Color;
-        shininess: number;
-        constructor(_color?: Color, _shininess?: number);
+        constructor(_color?: Color);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
+}
+declare namespace FudgeCore {
     /**
-     * A {@link Coat} to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
+     * The simplest {@link Coat} providing just a color
      */
+    class CoatRemissive extends CoatColored {
+        specular: number;
+        diffuse: number;
+        constructor(_color?: Color, _diffuse?: number, _specular?: number);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
 }
 declare namespace FudgeCore {
     /**
@@ -2639,6 +2694,18 @@ declare namespace FudgeCore {
     class CoatTextured extends CoatColored {
         texture: Texture;
         constructor(_color?: Color, _texture?: Texture);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * A {@link Coat} providing a texture and additional data for texturing
+     */
+    class CoatRemissiveTextured extends CoatTextured {
+        specular: number;
+        diffuse: number;
+        constructor(_color?: Color, _texture?: Texture, _diffuse?: number, _specular?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -2710,7 +2777,6 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
-        mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -3569,27 +3635,9 @@ declare namespace FudgeCore {
         static readonly subclasses: typeof Mesh[];
         idResource: string;
         name: string;
-        renderBuffers: RenderBuffers;
-        protected cloud: Vertices;
-        protected faces: Face[];
-        /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
-        protected ƒvertices: Float32Array;
-        /** indices to create faces from the vertices, rotation determines direction of face-normal */
-        protected ƒindices: Uint16Array;
-        /** texture coordinates associated with the vertices by the position in the array */
-        protected ƒtextureUVs: Float32Array;
-        /** normals of the faces, not used for rendering but computation of flat- and vertex-normals */
-        protected ƒnormalsFaceUnscaled: Float32Array;
-        /** vertex normals for smooth shading, interpolated between vertices during rendering */
-        protected ƒnormalsVertex: Float32Array;
-        /** flat-shading: normalized face normals, every third entry is used only */
-        protected ƒnormalsFlat: Float32Array;
-        /** flat-shading: extra vertex array, since using vertices with multiple faces is rarely possible due to the limitation above */
-        protected ƒverticesFlat: Float32Array;
-        /** flat-shading: therefore an extra indices-array is needed */
-        protected ƒindicesFlat: Uint16Array;
-        /** flat-shading: and an extra textureUV-array */
-        protected ƒtextureUVsFlat: Float32Array;
+        vertices: Vertices;
+        faces: Face[];
+        protected renderMesh: RenderMesh;
         /** bounding box AABB */
         protected ƒbox: Box;
         /** bounding radius */
@@ -3597,27 +3645,15 @@ declare namespace FudgeCore {
         constructor(_name?: string);
         protected static registerSubclass(_subClass: typeof Mesh): number;
         get type(): string;
-        get vertices(): Float32Array;
-        get indices(): Uint16Array;
-        get normalsVertex(): Float32Array;
-        get textureUVs(): Float32Array;
-        get verticesFlat(): Float32Array;
-        get indicesFlat(): Uint16Array;
-        get normalsFlat(): Float32Array;
-        get textureUVsFlat(): Float32Array;
         get boundingBox(): Box;
         get radius(): number;
-        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): number;
-        createRenderBuffers(): void;
+        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): RenderBuffers;
+        getRenderBuffers(_shader: typeof Shader): RenderBuffers;
         deleteRenderBuffers(_shader: typeof Shader): void;
         clear(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
-        protected createVerticesFlat(): Float32Array;
-        protected createNormalsFlat(): Float32Array;
-        protected createTextureUVsFlat(): Float32Array;
-        protected calculateFaceCrossProducts(): Float32Array;
         protected createRadius(): number;
         protected createBoundingBox(): Box;
     }
@@ -3700,6 +3736,18 @@ declare namespace FudgeCore {
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createFlatNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Mesh loaded from a GLTF-file
+     * @author Matthias Roming, HFU, 2022
+     */
+    class MeshGLTF extends Mesh {
+        private uriGLTF;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        load(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF>;
     }
 }
 declare namespace FudgeCore {
@@ -3848,6 +3896,25 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class RenderInjectorMeshSkin extends RenderInjectorMesh {
+        static decorate(_constructor: Function): void;
+        protected static getRenderBuffers(this: MeshSkin, _shader: typeof Shader): RenderBuffers;
+        protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
+        protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Mesh influenced by a skeleton
+     * @author Matthias Roming, HFU, 2022
+     */
+    class MeshSkin extends MeshGLTF {
+        load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
+        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
+        protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace FudgeCore {
     /**
      * Generate a UV Sphere with a given number of sectors and stacks (clamped at 128*128)
      * Implementation based on http://www.songho.ca/opengl/gl_sphere.html
@@ -3925,11 +3992,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    interface Bone {
+        index: number;
+        weight: number;
+    }
     class Vertex {
         position: Vector3;
         uv: Vector2;
         normal: Vector3;
         referTo: number;
+        bones: Bone[];
         /**
          * Represents a vertex of a mesh with extended information such as the uv coordinates and the vertex normal.
          * It may refer to another vertex via an index into some array, in which case the position and the normal are stored there.
@@ -3947,6 +4019,10 @@ declare namespace FudgeCore {
      */
     class Vertices extends Array<Vertex> {
         /**
+         * Returns the subset of vertices that do not refer to other vertices
+         */
+        get originals(): Array<Vertex>;
+        /**
          * returns the position associated with the vertex addressed, resolving references between vertices
          */
         position(_index: number): Vector3;
@@ -3958,6 +4034,10 @@ declare namespace FudgeCore {
          * returns the uv-coordinates associated with the vertex addressed
          */
         uv(_index: number): Vector2;
+        /**
+         * returns the position associated with the vertex addressed, resolving references between vertices
+         */
+        bones(_index: number): Bone[];
     }
 }
 declare namespace FudgeCore {
@@ -4945,12 +5025,12 @@ declare namespace FudgeCore {
          * Takes a ray plus min and max values for the near and far planes to construct the picker-camera,
          * then renders the pick-texture and returns an unsorted {@link Pick}-array with information about the hits of the ray.
          */
-        static pickRay(_branch: Node, _ray: Ray, _min: number, _max: number): Pick[];
+        static pickRay(_nodes: Node[], _ray: Ray, _min: number, _max: number): Pick[];
         /**
          * Takes a camera and a point on its virtual normed projection plane (distance 1) to construct the picker-camera,
          * then renders the pick-texture and returns an unsorted {@link Pick}-array with information about the hits of the ray.
          */
-        static pickCamera(_branch: Node, _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[];
+        static pickCamera(_nodes: Node[], _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[];
         /**
          * Takes the camera of the given viewport and a point the client surface to construct the picker-camera,
          * then renders the pick-texture and returns an unsorted {@link Pick}-array with information about the hits of the ray.
@@ -5008,6 +5088,7 @@ declare namespace FudgeCore {
         static rectClip: Rectangle;
         static pickBuffer: Int32Array;
         static nodesPhysics: RecycableArray<Node>;
+        static componentsPick: RecycableArray<ComponentPick>;
         private static nodesSimple;
         private static nodesAlpha;
         private static timestampUpdate;
@@ -5021,11 +5102,69 @@ declare namespace FudgeCore {
          * Used with a {@link Picker}-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted {@link Pick}-array
          */
-        static pickBranch(_branch: Node, _cmpCamera: ComponentCamera): Pick[];
+        static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera): Pick[];
         static draw(_cmpCamera: ComponentCamera): void;
         private static drawListAlpha;
         private static drawList;
         private static transformByPhysics;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Inserted into a {@link Mesh}, an instance of this class calculates and represents the mesh data in the form needed by the render engine
+     */
+    interface RenderBuffers {
+        vertices?: WebGLBuffer;
+        indices?: WebGLBuffer;
+        textureUVs?: WebGLBuffer;
+        normals?: WebGLBuffer;
+        iBones?: WebGLBuffer;
+        weights?: WebGLBuffer;
+        nIndices?: number;
+    }
+    class RenderMesh {
+        smooth: RenderBuffers;
+        flat: RenderBuffers;
+        mesh: Mesh;
+        /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
+        protected ƒvertices: Float32Array;
+        /** indices to create faces from the vertices, rotation determines direction of face-normal */
+        protected ƒindices: Uint16Array;
+        /** texture coordinates associated with the vertices by the position in the array */
+        protected ƒtextureUVs: Float32Array;
+        /** vertex normals for smooth shading, interpolated between vertices during rendering */
+        protected ƒnormalsVertex: Float32Array;
+        /** bones */
+        protected ƒiBones: Uint8Array;
+        protected ƒweights: Float32Array;
+        /** flat-shading: normalized face normals, every third entry is used only */
+        protected ƒnormalsFlat: Float32Array;
+        /** flat-shading: extra vertex array, since using vertices with multiple faces is rarely possible due to the limitation above */
+        protected ƒverticesFlat: Float32Array;
+        /** flat-shading: therefore an extra indices-array is needed */
+        protected ƒindicesFlat: Uint16Array;
+        /** flat-shading: and an extra textureUV-array */
+        protected ƒtextureUVsFlat: Float32Array;
+        /** bones */
+        protected ƒiBonesFlat: Uint8Array;
+        protected ƒweightsFlat: Float32Array;
+        constructor(_mesh: Mesh);
+        get iBones(): Uint8Array;
+        get weights(): Float32Array;
+        get vertices(): Float32Array;
+        get indices(): Uint16Array;
+        get normalsVertex(): Float32Array;
+        get textureUVs(): Float32Array;
+        get verticesFlat(): Float32Array;
+        get indicesFlat(): Uint16Array;
+        get normalsFlat(): Float32Array;
+        get textureUVsFlat(): Float32Array;
+        get iBonesFlat(): Uint8Array;
+        get weightsFlat(): Float32Array;
+        clear(): void;
+        protected createVerticesFlat(): Float32Array;
+        protected createNormalsFlat(): Float32Array;
+        protected createTextureUVsFlat(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -5039,7 +5178,8 @@ declare namespace FudgeCore {
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
      * through a series of {@link Framing} objects. The stages involved are in order of rendering
      * {@link Render}.viewport -> {@link Viewport}.source -> {@link Viewport}.destination -> DOM-Canvas -> Client(CSS)
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Viewport
      */
     class Viewport extends EventTargetƒ {
         #private;
@@ -5055,6 +5195,7 @@ declare namespace FudgeCore {
         adjustingFrames: boolean;
         adjustingCamera: boolean;
         physicsDebugMode: PHYSICS_DEBUGMODE;
+        componentsPick: RecycableArray<ComponentPick>;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
@@ -5101,6 +5242,7 @@ declare namespace FudgeCore {
          * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh}es
          */
         calculateTransforms(): void;
+        dispatchPointerEvent(_event: PointerEvent): void;
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */
@@ -5308,6 +5450,725 @@ declare namespace FudgeCore {
         private static deserializeResource;
     }
 }
+declare namespace GLTF {
+    type GlTfId = number;
+    /**
+     * An object pointing to a buffer view containing the indices of deviating accessor values. The number of indices is equal to `accessor.sparse.count`. Indices **MUST** strictly increase.
+     */
+    interface AccessorSparseIndices {
+        /**
+         * The index of the buffer view with sparse indices. The referenced buffer view **MUST NOT** have its `target` or `byteStride` properties defined. The buffer view and the optional `byteOffset` **MUST** be aligned to the `componentType` byte length.
+         */
+        "bufferView": GlTfId;
+        /**
+         * The offset relative to the start of the buffer view in bytes.
+         */
+        "byteOffset"?: number;
+        /**
+         * The indices data type.
+         */
+        "componentType": number | number | number | number;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * An object pointing to a buffer view containing the deviating accessor values. The number of elements is equal to `accessor.sparse.count` times number of components. The elements have the same component type as the base accessor. The elements are tightly packed. Data **MUST** be aligned following the same rules as the base accessor.
+     */
+    interface AccessorSparseValues {
+        /**
+         * The index of the bufferView with sparse values. The referenced buffer view **MUST NOT** have its `target` or `byteStride` properties defined.
+         */
+        "bufferView": GlTfId;
+        /**
+         * The offset relative to the start of the bufferView in bytes.
+         */
+        "byteOffset"?: number;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * Sparse storage of accessor values that deviate from their initialization value.
+     */
+    interface AccessorSparse {
+        /**
+         * Number of deviating accessor values stored in the sparse array.
+         */
+        "count": number;
+        /**
+         * An object pointing to a buffer view containing the indices of deviating accessor values. The number of indices is equal to `count`. Indices **MUST** strictly increase.
+         */
+        "indices": AccessorSparseIndices;
+        /**
+         * An object pointing to a buffer view containing the deviating accessor values.
+         */
+        "values": AccessorSparseValues;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * A typed view into a buffer view that contains raw binary data.
+     */
+    interface Accessor {
+        /**
+         * The index of the bufferView.
+         */
+        "bufferView"?: GlTfId;
+        /**
+         * The offset relative to the start of the buffer view in bytes.
+         */
+        "byteOffset"?: number;
+        /**
+         * The datatype of the accessor's components.
+         */
+        "componentType": number | number | number | number | number | number | number;
+        /**
+         * Specifies whether integer data values are normalized before usage.
+         */
+        "normalized"?: boolean;
+        /**
+         * The number of elements referenced by this accessor.
+         */
+        "count": number;
+        /**
+         * Specifies if the accessor's elements are scalars, vectors, or matrices.
+         */
+        "type": any | any | any | any | any | any | any | string;
+        /**
+         * Maximum value of each component in this accessor.
+         */
+        "max"?: number[];
+        /**
+         * Minimum value of each component in this accessor.
+         */
+        "min"?: number[];
+        /**
+         * Sparse storage of elements that deviate from their initialization value.
+         */
+        "sparse"?: AccessorSparse;
+        "name"?: any;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * The descriptor of the animated property.
+     */
+    interface AnimationChannelTarget {
+        /**
+         * The index of the node to animate. When undefined, the animated object **MAY** be defined by an extension.
+         */
+        "node"?: GlTfId;
+        /**
+         * The name of the node's TRS property to animate, or the `"weights"` of the Morph Targets it instantiates. For the `"translation"` property, the values that are provided by the sampler are the translation along the X, Y, and Z axes. For the `"rotation"` property, the values are a quaternion in the order (x, y, z, w), where w is the scalar. For the `"scale"` property, the values are the scaling factors along the X, Y, and Z axes.
+         */
+        "path": any | any | any | any | string;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * An animation channel combines an animation sampler with a target property being animated.
+     */
+    interface AnimationChannel {
+        /**
+         * The index of a sampler in this animation used to compute the value for the target.
+         */
+        "sampler": GlTfId;
+        /**
+         * The descriptor of the animated property.
+         */
+        "target": AnimationChannelTarget;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * An animation sampler combines timestamps with a sequence of output values and defines an interpolation algorithm.
+     */
+    interface AnimationSampler {
+        /**
+         * The index of an accessor containing keyframe timestamps.
+         */
+        "input": GlTfId;
+        /**
+         * Interpolation algorithm.
+         */
+        "interpolation"?: any | any | any | string;
+        /**
+         * The index of an accessor, containing keyframe output values.
+         */
+        "output": GlTfId;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * A keyframe animation.
+     */
+    interface Animation {
+        /**
+         * An array of animation channels. An animation channel combines an animation sampler with a target property being animated. Different channels of the same animation **MUST NOT** have the same targets.
+         */
+        "channels": AnimationChannel[];
+        /**
+         * An array of animation samplers. An animation sampler combines timestamps with a sequence of output values and defines an interpolation algorithm.
+         */
+        "samplers": AnimationSampler[];
+        "name"?: any;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * Metadata about the glTF asset.
+     */
+    interface Asset {
+        /**
+         * A copyright message suitable for display to credit the content creator.
+         */
+        "copyright"?: string;
+        /**
+         * Tool that generated this glTF model.  Useful for debugging.
+         */
+        "generator"?: string;
+        /**
+         * The glTF version in the form of `<major>.<minor>` that this asset targets.
+         */
+        "version": string;
+        /**
+         * The minimum glTF version in the form of `<major>.<minor>` that this asset targets. This property **MUST NOT** be greater than the asset version.
+         */
+        "minVersion"?: string;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * A buffer points to binary geometry, animation, or skins.
+     */
+    interface Buffer {
+        /**
+         * The URI (or IRI) of the buffer.
+         */
+        "uri"?: string;
+        /**
+         * The length of the buffer in bytes.
+         */
+        "byteLength": number;
+        "name"?: any;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * A view into a buffer generally representing a subset of the buffer.
+     */
+    interface BufferView {
+        /**
+         * The index of the buffer.
+         */
+        "buffer": GlTfId;
+        /**
+         * The offset into the buffer in bytes.
+         */
+        "byteOffset"?: number;
+        /**
+         * The length of the bufferView in bytes.
+         */
+        "byteLength": number;
+        /**
+         * The stride, in bytes.
+         */
+        "byteStride"?: number;
+        /**
+         * The hint representing the intended GPU buffer type to use with this buffer view.
+         */
+        "target"?: number | number | number;
+        "name"?: any;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * An orthographic camera containing properties to create an orthographic projection matrix.
+     */
+    interface CameraOrthographic {
+        /**
+         * The floating-point horizontal magnification of the view. This value **MUST NOT** be equal to zero. This value **SHOULD NOT** be negative.
+         */
+        "xmag": number;
+        /**
+         * The floating-point vertical magnification of the view. This value **MUST NOT** be equal to zero. This value **SHOULD NOT** be negative.
+         */
+        "ymag": number;
+        /**
+         * The floating-point distance to the far clipping plane. This value **MUST NOT** be equal to zero. `zfar` **MUST** be greater than `znear`.
+         */
+        "zfar": number;
+        /**
+         * The floating-point distance to the near clipping plane.
+         */
+        "znear": number;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * A perspective camera containing properties to create a perspective projection matrix.
+     */
+    interface CameraPerspective {
+        /**
+         * The floating-point aspect ratio of the field of view.
+         */
+        "aspectRatio"?: number;
+        /**
+         * The floating-point vertical field of view in radians. This value **SHOULD** be less than π.
+         */
+        "yfov": number;
+        /**
+         * The floating-point distance to the far clipping plane.
+         */
+        "zfar"?: number;
+        /**
+         * The floating-point distance to the near clipping plane.
+         */
+        "znear": number;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * A camera's projection.  A node **MAY** reference a camera to apply a transform to place the camera in the scene.
+     */
+    interface Camera {
+        /**
+         * An orthographic camera containing properties to create an orthographic projection matrix. This property **MUST NOT** be defined when `perspective` is defined.
+         */
+        "orthographic"?: CameraOrthographic;
+        /**
+         * A perspective camera containing properties to create a perspective projection matrix. This property **MUST NOT** be defined when `orthographic` is defined.
+         */
+        "perspective"?: CameraPerspective;
+        /**
+         * Specifies if the camera uses a perspective or orthographic projection.
+         */
+        "type": any | any | string;
+        "name"?: any;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * Image data used to create a texture. Image **MAY** be referenced by an URI (or IRI) or a buffer view index.
+     */
+    interface Image {
+        /**
+         * The URI (or IRI) of the image.
+         */
+        "uri"?: string;
+        /**
+         * The image's media type. This field **MUST** be defined when `bufferView` is defined.
+         */
+        "mimeType"?: any | any | string;
+        /**
+         * The index of the bufferView that contains the image. This field **MUST NOT** be defined when `uri` is defined.
+         */
+        "bufferView"?: GlTfId;
+        "name"?: any;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * Reference to a texture.
+     */
+    interface TextureInfo {
+        /**
+         * The index of the texture.
+         */
+        "index": GlTfId;
+        /**
+         * The set index of texture's TEXCOORD attribute used for texture coordinate mapping.
+         */
+        "texCoord"?: number;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * A set of parameter values that are used to define the metallic-roughness material model from Physically-Based Rendering (PBR) methodology.
+     */
+    interface MaterialPbrMetallicRoughness {
+        /**
+         * The factors for the base color of the material.
+         */
+        "baseColorFactor"?: number[];
+        /**
+         * The base color texture.
+         */
+        "baseColorTexture"?: TextureInfo;
+        /**
+         * The factor for the metalness of the material.
+         */
+        "metallicFactor"?: number;
+        /**
+         * The factor for the roughness of the material.
+         */
+        "roughnessFactor"?: number;
+        /**
+         * The metallic-roughness texture.
+         */
+        "metallicRoughnessTexture"?: TextureInfo;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    interface MaterialNormalTextureInfo {
+        "index"?: any;
+        "texCoord"?: any;
+        /**
+         * The scalar parameter applied to each normal vector of the normal texture.
+         */
+        "scale"?: number;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    interface MaterialOcclusionTextureInfo {
+        "index"?: any;
+        "texCoord"?: any;
+        /**
+         * A scalar multiplier controlling the amount of occlusion applied.
+         */
+        "strength"?: number;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * The material appearance of a primitive.
+     */
+    interface Material {
+        "name"?: any;
+        "extensions"?: any;
+        "extras"?: any;
+        /**
+         * A set of parameter values that are used to define the metallic-roughness material model from Physically Based Rendering (PBR) methodology. When undefined, all the default values of `pbrMetallicRoughness` **MUST** apply.
+         */
+        "pbrMetallicRoughness"?: MaterialPbrMetallicRoughness;
+        /**
+         * The tangent space normal texture.
+         */
+        "normalTexture"?: MaterialNormalTextureInfo;
+        /**
+         * The occlusion texture.
+         */
+        "occlusionTexture"?: MaterialOcclusionTextureInfo;
+        /**
+         * The emissive texture.
+         */
+        "emissiveTexture"?: TextureInfo;
+        /**
+         * The factors for the emissive color of the material.
+         */
+        "emissiveFactor"?: number[];
+        /**
+         * The alpha rendering mode of the material.
+         */
+        "alphaMode"?: any | any | any | string;
+        /**
+         * The alpha cutoff value of the material.
+         */
+        "alphaCutoff"?: number;
+        /**
+         * Specifies whether the material is double sided.
+         */
+        "doubleSided"?: boolean;
+        [k: string]: any;
+    }
+    /**
+     * Geometry to be rendered with the given material.
+     */
+    interface MeshPrimitive {
+        /**
+         * A plain JSON object, where each key corresponds to a mesh attribute semantic and each value is the index of the accessor containing attribute's data.
+         */
+        "attributes": {
+            [k: string]: GlTfId;
+        };
+        /**
+         * The index of the accessor that contains the vertex indices.
+         */
+        "indices"?: GlTfId;
+        /**
+         * The index of the material to apply to this primitive when rendering.
+         */
+        "material"?: GlTfId;
+        /**
+         * The topology type of primitives to render.
+         */
+        "mode"?: number | number | number | number | number | number | number | number;
+        /**
+         * An array of morph targets.
+         */
+        "targets"?: {
+            [k: string]: GlTfId;
+        }[];
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * A set of primitives to be rendered.  Its global transform is defined by a node that references it.
+     */
+    interface Mesh {
+        /**
+         * An array of primitives, each defining geometry to be rendered.
+         */
+        "primitives": MeshPrimitive[];
+        /**
+         * Array of weights to be applied to the morph targets. The number of array elements **MUST** match the number of morph targets.
+         */
+        "weights"?: number[];
+        "name"?: any;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * A node in the node hierarchy.  When the node contains `skin`, all `mesh.primitives` **MUST** contain `JOINTS_0` and `WEIGHTS_0` attributes.  A node **MAY** have either a `matrix` or any combination of `translation`/`rotation`/`scale` (TRS) properties. TRS properties are converted to matrices and postmultiplied in the `T * R * S` order to compose the transformation matrix; first the scale is applied to the vertices, then the rotation, and then the translation. If none are provided, the transform is the identity. When a node is targeted for animation (referenced by an animation.channel.target), `matrix` **MUST NOT** be present.
+     */
+    interface Node {
+        /**
+         * The index of the camera referenced by this node.
+         */
+        "camera"?: GlTfId;
+        /**
+         * The indices of this node's children.
+         */
+        "children"?: GlTfId[];
+        /**
+         * The index of the skin referenced by this node.
+         */
+        "skin"?: GlTfId;
+        /**
+         * A floating-point 4x4 transformation matrix stored in column-major order.
+         */
+        "matrix"?: number[];
+        /**
+         * The index of the mesh in this node.
+         */
+        "mesh"?: GlTfId;
+        /**
+         * The node's unit quaternion rotation in the order (x, y, z, w), where w is the scalar.
+         */
+        "rotation"?: number[];
+        /**
+         * The node's non-uniform scale, given as the scaling factors along the x, y, and z axes.
+         */
+        "scale"?: number[];
+        /**
+         * The node's translation along the x, y, and z axes.
+         */
+        "translation"?: number[];
+        /**
+         * The weights of the instantiated morph target. The number of array elements **MUST** match the number of morph targets of the referenced mesh. When defined, `mesh` **MUST** also be defined.
+         */
+        "weights"?: number[];
+        "name"?: any;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * Texture sampler properties for filtering and wrapping modes.
+     */
+    interface Sampler {
+        /**
+         * Magnification filter.
+         */
+        "magFilter"?: number | number | number;
+        /**
+         * Minification filter.
+         */
+        "minFilter"?: number | number | number | number | number | number | number;
+        /**
+         * S (U) wrapping mode.
+         */
+        "wrapS"?: number | number | number | number;
+        /**
+         * T (V) wrapping mode.
+         */
+        "wrapT"?: number | number | number | number;
+        "name"?: any;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * The root nodes of a scene.
+     */
+    interface Scene {
+        /**
+         * The indices of each root node.
+         */
+        "nodes"?: GlTfId[];
+        "name"?: any;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * Joints and matrices defining a skin.
+     */
+    interface Skin {
+        /**
+         * The index of the accessor containing the floating-point 4x4 inverse-bind matrices.
+         */
+        "inverseBindMatrices"?: GlTfId;
+        /**
+         * The index of the node used as a skeleton root.
+         */
+        "skeleton"?: GlTfId;
+        /**
+         * Indices of skeleton nodes, used as joints in this skin.
+         */
+        "joints": GlTfId[];
+        "name"?: any;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * A texture and its sampler.
+     */
+    interface Texture {
+        /**
+         * The index of the sampler used by this texture. When undefined, a sampler with repeat wrapping and auto filtering **SHOULD** be used.
+         */
+        "sampler"?: GlTfId;
+        /**
+         * The index of the image used by this texture. When undefined, an extension or other mechanism **SHOULD** supply an alternate texture source, otherwise behavior is undefined.
+         */
+        "source"?: GlTfId;
+        "name"?: any;
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+    /**
+     * The root object for a glTF asset.
+     */
+    interface GlTf {
+        /**
+         * Names of glTF extensions used in this asset.
+         */
+        "extensionsUsed"?: string[];
+        /**
+         * Names of glTF extensions required to properly load this asset.
+         */
+        "extensionsRequired"?: string[];
+        /**
+         * An array of accessors.
+         */
+        "accessors"?: Accessor[];
+        /**
+         * An array of keyframe animations.
+         */
+        "animations"?: Animation[];
+        /**
+         * Metadata about the glTF asset.
+         */
+        "asset": Asset;
+        /**
+         * An array of buffers.
+         */
+        "buffers"?: Buffer[];
+        /**
+         * An array of bufferViews.
+         */
+        "bufferViews"?: BufferView[];
+        /**
+         * An array of cameras.
+         */
+        "cameras"?: Camera[];
+        /**
+         * An array of images.
+         */
+        "images"?: Image[];
+        /**
+         * An array of materials.
+         */
+        "materials"?: Material[];
+        /**
+         * An array of meshes.
+         */
+        "meshes"?: Mesh[];
+        /**
+         * An array of nodes.
+         */
+        "nodes"?: Node[];
+        /**
+         * An array of samplers.
+         */
+        "samplers"?: Sampler[];
+        /**
+         * The index of the default scene.
+         */
+        "scene"?: GlTfId;
+        /**
+         * An array of scenes.
+         */
+        "scenes"?: Scene[];
+        /**
+         * An array of skins.
+         */
+        "skins"?: Skin[];
+        /**
+         * An array of textures.
+         */
+        "textures"?: Texture[];
+        "extensions"?: any;
+        "extras"?: any;
+        [k: string]: any;
+    }
+}
+declare namespace FudgeCore {
+    class GLTFLoader {
+        #private;
+        private static loaders;
+        private static defaultMaterial;
+        private static defaultSkinMaterial;
+        readonly gltf: GLTF.GlTf;
+        readonly uri: string;
+        private constructor();
+        static LOAD(_uri: string): Promise<GLTFLoader>;
+        getScene(_name?: string): Promise<GraphInstance>;
+        getSceneByIndex(_iScene?: number): Promise<GraphInstance>;
+        getNode(_name: string): Promise<Node>;
+        getNodeByIndex(_iNode: number): Promise<Node>;
+        getCamera(_name: string): Promise<ComponentCamera>;
+        getCameraByIndex(_iCamera: number): Promise<ComponentCamera>;
+        getAnimation(_name: string): Promise<Animation>;
+        getAnimationByIndex(_iAnimation: number): Promise<Animation>;
+        getMesh(_name: string): Promise<MeshGLTF>;
+        getMeshByIndex(_iMesh: number): Promise<MeshGLTF>;
+        getSkeleton(_name: string): Promise<SkeletonInstance>;
+        getSkeletonByIndex(_iSkeleton: number): Promise<SkeletonInstance>;
+        getUint8Array(_iAccessor: number): Promise<Uint8Array>;
+        getUint16Array(_iAccessor: number): Promise<Uint16Array>;
+        getUint32Array(_iAccessor: number): Promise<Uint32Array>;
+        getFloat32Array(_iAccessor: number): Promise<Float32Array>;
+        private getBufferData;
+        private isSkeletalAnimation;
+        private findSkeletalAnimationIndices;
+        private isBoneIndex;
+        private getAnimationSequenceVector3;
+    }
+}
 declare namespace FudgeCore {
     /**
      * Static superclass for the representation of WebGl shaderprograms.
@@ -5318,6 +6179,7 @@ declare namespace FudgeCore {
         static readonly baseClass: typeof Shader;
         /** list of all the subclasses derived from this class, if they registered properly*/
         static readonly subclasses: typeof Shader[];
+        static define: string[];
         static vertexShaderSource: string;
         static fragmentShaderSource: string;
         static program: WebGLProgram;
@@ -5341,6 +6203,17 @@ declare namespace FudgeCore {
     /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderFlat extends Shader {
         static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderFlatSkin extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -5350,6 +6223,7 @@ declare namespace FudgeCore {
     /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderFlatTextured extends Shader {
         static readonly iSubclass: number;
+        static define: string[];
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -5359,6 +6233,17 @@ declare namespace FudgeCore {
     /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderGouraud extends Shader {
         static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderGouraudSkin extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -5368,6 +6253,7 @@ declare namespace FudgeCore {
     /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderGouraudTextured extends Shader {
         static readonly iSubclass: number;
+        static define: string[];
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -5377,6 +6263,7 @@ declare namespace FudgeCore {
     /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderLit extends Shader {
         static readonly iSubclass: number;
+        static define: string[];
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -5386,6 +6273,7 @@ declare namespace FudgeCore {
     /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderLitTextured extends Shader {
         static readonly iSubclass: number;
+        static define: string[];
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -5395,6 +6283,7 @@ declare namespace FudgeCore {
     /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderMatCap extends Shader {
         static readonly iSubclass: number;
+        static define: string[];
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -5404,6 +6293,7 @@ declare namespace FudgeCore {
     /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderPhong extends Shader {
         static readonly iSubclass: number;
+        static define: string[];
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -5412,6 +6302,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderPick extends Shader {
+        static define: string[];
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
@@ -5419,8 +6310,82 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderPickTextured extends Shader {
+        static define: string[];
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    interface BoneList {
+        [boneName: string]: Node;
+    }
+}
+declare namespace FudgeCore {
+    interface BoneMatrixList {
+        [boneName: string]: Matrix4x4;
+    }
+}
+declare namespace FudgeCore {
+    class Skeleton extends Graph {
+        readonly bones: BoneList;
+        readonly mtxBindInverses: BoneMatrixList;
+        /**
+         * Creates a new skeleton with a name
+         */
+        constructor(_name?: string);
+        /**
+         * Appends a node to this skeleton or the given parent and registers it as a bone
+         * @param _mtxInit initial local matrix
+         * @param _parentName name of the parent node, that must be registered as a bone
+         */
+        addBone(_bone: Node, _mtxInit?: Matrix4x4, _parentName?: string): void;
+        /**
+         * Registers a node as a bone with its bind inverse matrix
+         * @param _bone the node to be registered, that should be a descendant of this skeleton
+         * @param _mtxBindInverse a precalculated inverse matrix of the bind pose from the bone
+         */
+        registerBone(_bone: Node, _mtxBindInverse?: Matrix4x4): void;
+        /**
+         * Sets the current state of this skeleton as the default pose
+         * by updating the inverse bind matrices
+         */
+        setDefaultPose(): void;
+        indexOfBone(_boneName: string): number;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        /**
+         * Calculates and sets the world matrix of a bone relative to its parent
+         */
+        private calculateMtxWorld;
+        /**
+         * Deregisters all bones of a removed node
+         */
+        private hndChildRemove;
+    }
+}
+declare namespace FudgeCore {
+    class SkeletonInstance extends GraphInstance {
+        #private;
+        private skeletonSource;
+        static CREATE(_skeleton: Skeleton): Promise<SkeletonInstance>;
+        get bones(): BoneList;
+        get mtxBoneLocals(): BoneMatrixList;
+        /**
+         * Gets the bone transformations for a vertex
+         */
+        get mtxBones(): Matrix4x4[];
+        /**
+         * Set this skeleton instance to be a recreation of the {@link Skeleton} given
+         */
+        set(_skeleton: Skeleton): Promise<void>;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        /**
+         * Resets this skeleton instance to its default pose
+         */
+        resetPose(): void;
+        applyAnimation(_mutator: Mutator): void;
+        private calculateMtxBones;
+        private registerBones;
     }
 }
 declare namespace FudgeCore {

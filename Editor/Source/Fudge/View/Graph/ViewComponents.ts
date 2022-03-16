@@ -70,8 +70,18 @@ namespace Fudge {
         case CONTEXTMENU.ADD_JOINT:
           component = ƒ.Joint.subclasses[iSubclass];
       }
+
       //@ts-ignore
       let cmpNew: ƒ.Component = new component();
+      if (cmpNew instanceof ƒ.ComponentRigidbody)
+        if (!this.node.cmpTransform) {
+          alert("To attach ComponentRigidbody, first attach ComponentTransform!");
+          return;
+        }
+      if (cmpNew instanceof ƒ.ComponentSyncGraph && !(this.node instanceof ƒ.GraphInstance)) {
+        alert("Attach ComponentSyncGraph only to GraphInstances");
+        return;
+      }
       ƒ.Debug.info(cmpNew.type, cmpNew);
 
       this.node.addComponent(cmpNew);
@@ -221,6 +231,8 @@ namespace Fudge {
         this.transform3(dtl.transform, value, mtxTransform, distance);
       if (mtxTransform instanceof ƒ.Matrix3x3)
         this.transform2(dtl.transform, value.toVector2(), mtxTransform, 1);
+
+      component.dispatchEvent(new CustomEvent(ƒ.EVENT.MUTATE, { detail: { mutator: controller.getMutator() } }));
     }
 
     private transform3(_transform: TRANSFORM, _value: ƒ.Vector3, _mtxTransform: ƒ.Matrix4x4, _distance: number): void {

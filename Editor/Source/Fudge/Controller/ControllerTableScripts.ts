@@ -40,7 +40,7 @@ namespace Fudge {
 
     public getLabel(_object: ScriptInfo): string { return ""; }
     public rename(_object: ScriptInfo, _new: string): boolean { return false; }
-    public delete(_focussed: ScriptInfo[]): ScriptInfo[] { return null; }
+    public delete(_focussed: ScriptInfo[]): Promise<ScriptInfo[]> { return null; }
     public copy(_originals: ScriptInfo[]): Promise<ScriptInfo[]> { return null; }
 
 

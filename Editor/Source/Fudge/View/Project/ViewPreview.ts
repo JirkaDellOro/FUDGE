@@ -16,6 +16,7 @@ namespace Fudge {
     private resource: ƒ.SerializableResource | DirectoryEntry | Function;
     private viewport: ƒ.Viewport;
     private cmrOrbit: ƒAid.CameraOrbit;
+    private previewNode: ƒ.Node;
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
@@ -29,6 +30,7 @@ namespace Fudge {
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("Preview", null, cmpCamera, canvas);
       this.cmrOrbit = ƒAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+      this.previewNode = this.createStandardGraph();
 
       this.fillContent();
 
@@ -42,7 +44,7 @@ namespace Fudge {
     }
 
     private static createStandardMaterial(): ƒ.Material {
-      let mtrStandard: ƒ.Material = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("white")));
+      let mtrStandard: ƒ.Material = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("white")));
       ƒ.Project.deregister(mtrStandard);
       return mtrStandard;
     }
@@ -73,13 +75,6 @@ namespace Fudge {
       }
     }
 
-    private illuminateGraph(): void {
-      let nodeLight: ƒ.Node = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
-      if (nodeLight) {
-        nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU.ILLUMINATE).checked);
-        this.redraw();
-      }
-    }
     //#endregion
 
     private fillContent(): void {
@@ -97,7 +92,7 @@ namespace Fudge {
         type = "Mesh";
 
       // console.log(type);
-      let graph: ƒ.Node;
+      let previewObject: ƒ.Node = new ƒ.Node("PreviewObject");
       let preview: HTMLElement;
       switch (type) {
         case "Function":
@@ -111,20 +106,23 @@ namespace Fudge {
             this.dom.appendChild(preview);
           break;
         case "Mesh":
-          graph = this.createStandardGraph();
-          graph.addComponent(new ƒ.ComponentMesh(<ƒ.Mesh>this.resource));
-          graph.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
+          previewObject.addComponent(new ƒ.ComponentMesh(<ƒ.Mesh>this.resource));
+          previewObject.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
+          this.setViewObject(previewObject);
+          this.resetCamera();
           this.redraw();
           break;
         case "Material":
-          graph = this.createStandardGraph();
-          graph.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
-          graph.addComponent(new ƒ.ComponentMaterial(<ƒ.Material>this.resource));
+          previewObject.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
+          previewObject.addComponent(new ƒ.ComponentMaterial(<ƒ.Material>this.resource));
+          this.setViewObject(previewObject);
+          this.resetCamera();
           this.redraw();
           break;
         case "Graph":
-          graph = this.createStandardGraph(true);
-          graph.appendChild(<ƒ.Graph>this.resource);
+          previewObject.appendChild(<ƒ.Graph>this.resource);
+          this.setViewObject(previewObject);
+          previewObject.addEventListener(ƒ.EVENT.MUTATE, (_event: Event) => { this.redraw(); });
           this.redraw();
           break;
         case "TextureImage":
@@ -140,18 +138,35 @@ namespace Fudge {
       }
     }
 
-    private createStandardGraph(_graphIllumination: boolean = false): ƒ.Node {
+    private createStandardGraph(): ƒ.Node {
       let graph: ƒ.Node = new ƒ.Node("PreviewScene");
       this.viewport.setBranch(graph);
 
       let nodeLight: ƒ.Node = new ƒ.Node("PreviewIllumination");
       graph.addChild(nodeLight);
       ƒAid.addStandardLightComponents(nodeLight);
-      if (_graphIllumination) // otherwise, light is always on!
-        this.illuminateGraph();
 
       this.dom.appendChild(this.viewport.getCanvas());
-      return graph;
+
+      let previewNode: ƒ.Node = new ƒ.Node("PreviewNode");
+      graph.addChild(previewNode);
+      return previewNode;
+    }
+
+    private setViewObject(_node: ƒ.Node, _graphIllumination: boolean = false): void {
+      this.previewNode.removeAllChildren();
+      this.previewNode.addChild(_node);
+      if (_graphIllumination) // otherwise, light is always on!
+        this.illuminateGraph();
+      this.dom.appendChild(this.viewport.getCanvas());
+    }
+
+    private illuminateGraph(): void {
+      let nodeLight: ƒ.Node = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
+      if (nodeLight) {
+        nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU.ILLUMINATE).checked);
+        this.redraw();
+      }
     }
 
     private createFilePreview(_entry: DirectoryEntry): HTMLElement {
@@ -197,10 +212,10 @@ namespace Fudge {
         //   this.resource = undefined;
         //   break;
         case ƒUi.EVENT.CHANGE:
-        case ƒUi.EVENT.MUTATE:
         case EVENT_EDITOR.UPDATE:
-          if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
+          if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture /*  || this.resource instanceof ƒ.Material */)
             this.fillContent();
+        case ƒUi.EVENT.MUTATE:
           this.redraw();
           break;
         default:
@@ -231,7 +246,6 @@ namespace Fudge {
 
     private redraw = () => {
       try {
-        this.resetCamera();
         this.viewport.draw();
       } catch (_error: unknown) {
         //nop

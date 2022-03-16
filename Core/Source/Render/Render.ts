@@ -12,6 +12,7 @@ namespace FudgeCore {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
     public static pickBuffer: Int32Array;
     public static nodesPhysics: RecycableArray<Node> = new RecycableArray();
+    public static componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
     private static nodesSimple: RecycableArray<Node> = new RecycableArray();
     private static nodesAlpha: RecycableArray<Node> = new RecycableArray();
     private static timestampUpdate: number;
@@ -32,6 +33,7 @@ namespace FudgeCore {
         Render.nodesSimple.reset();
         Render.nodesAlpha.reset();
         Render.nodesPhysics.reset();
+        Render.componentsPick.reset();
         Render.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
       }
 
@@ -58,6 +60,12 @@ namespace FudgeCore {
         Render.nodesPhysics.push(_branch); // add this node to physics list
         if (!_options?.ignorePhysics)
           this.transformByPhysics(_branch, cmpRigidbody);
+      }
+
+      
+      let cmpPick: ComponentPick = _branch.getComponent(ComponentPick);
+      if (cmpPick && cmpPick.isActive) { 
+        Render.componentsPick.push(cmpPick); // add this component to pick list
       }
 
 
@@ -119,13 +127,13 @@ namespace FudgeCore {
      * Used with a {@link Picker}-camera, this method renders one pixel with picking information 
      * for each node in the line of sight and return that as an unsorted {@link Pick}-array
      */
-    public static pickBranch(_branch: Node, _cmpCamera: ComponentCamera): Pick[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+    public static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera): Pick[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       Render.ƒpicked = [];
-      let size: number = Math.ceil(Math.sqrt(_branch.nNodesInBranch));
+      let size: number = Math.ceil(Math.sqrt(_nodes.length));
       Render.createPickTexture(size);
       Render.setBlendMode(BLEND.OPAQUE);
 
-      for (let node of _branch.getIterator(true)) {
+      for (let node of _nodes) {
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
         let cmpMaterial: ComponentMaterial = node.getComponent(ComponentMaterial);
         if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {

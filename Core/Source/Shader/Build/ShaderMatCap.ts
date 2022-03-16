@@ -4,6 +4,11 @@ namespace FudgeCore {
 export abstract class ShaderMatCap extends Shader {
   public static readonly iSubclass: number = Shader.registerSubclass(ShaderMatCap);
 
+  public static define: string[] = [
+    "CAMERA",
+    "MATCAP"
+];
+
   public static getCoat(): typeof Coat { return CoatTextured; }
 
   public static getVertexShaderSource(): string { 
@@ -18,21 +23,14 @@ return `#version 300 es
 
   // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxMeshToView;
-
-  // FLAT: offer buffers for face normals and their transformation
-  #if defined(FLAT)
-in vec3 a_vctPositionFlat;
-in vec3 a_vctNormalFace;
-uniform mat4 u_mtxNormalMeshToWorld;
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
 in vec3 a_vctPosition;
-out vec4 v_vctColor;
-  #endif
 
   // LIGHT: offer buffers for lighting vertices with different light types
   #if defined(LIGHT)
+uniform mat4 u_mtxNormalMeshToWorld;
+in vec3 a_vctNormal;
+uniform float u_fDiffuse;
+
 struct LightAmbient {
   vec4 vctColor;
 };
@@ -56,52 +54,74 @@ out vec2 v_vctTexture;
   #endif
 
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-out vec2 v_vctTexture;
-  #endif
-
-  // GOURAUD: offer buffers for vertex normals, their transformation and the shininess
-  #if defined(GOURAUD)||defined(MATCAP)
-in vec3 a_vctNormalVertex;
+in vec3 a_vctNormal;
 uniform mat4 u_mtxNormalMeshToWorld;
+out vec2 v_vctTexture;
   #endif
 
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
   #if defined(CAMERA)
-uniform float u_fShininess;
+uniform float u_fSpecular;
 uniform mat4 u_mtxMeshToWorld;
 uniform mat4 u_mtxWorldToView;
 uniform vec3 u_vctCamera;
 
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fShininess) {
-  if(_fShininess <= 0.0)
+float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
+  if(_fSpecular <= 0.0)
     return 0.0;
   vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fScpecular = dot(vctReflection, _vctView);
-  return pow(max(fScpecular, 0.0), _fShininess * 10.0) * _fShininess;
-  // return max(spec_dot, 0.0) * shininess;
+  float fHitCamera = dot(vctReflection, _vctView);
+  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
 }
   #endif
 
+  #if defined(SKIN)
+uniform mat4 u_mtxMeshToWorld;
+// Bones
+struct Bone {
+  mat4 matrix;
+};
+
+const uint MAX_BONES = 10u;
+
+in uvec4 a_iBone;
+in vec4 a_fWeight;
+
+uniform Bone u_bones[MAX_BONES];
+  #endif
+
+  // FLAT: outbuffer is flat
+  #if defined(FLAT)
+flat out vec4 v_vctColor;
+  #else
+  // regular if not FLAT
+out vec4 v_vctColor;
+  #endif
+
 void main() {
-  vec4 vctPosition;
+  vec4 vctPosition = vec4(a_vctPosition, 1.0);
+  mat4 mtxMeshToView = u_mtxMeshToView;
 
-    #if defined(FLAT)
-    // FLAT: use the special vertex and normal buffers for flat shading
-  vctPosition = vec4(a_vctPositionFlat, 1.0);
-  vec3 vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormalFace);
-  v_vctColor = u_ambient.vctColor;
-    #else 
-  vctPosition = vec4(a_vctPosition, 1.0);
+    #if defined(LIGHT) || defined(MATCAP)
+  vec3 vctNormal = a_vctNormal;
+  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
+      #if defined(LIGHT)
+  v_vctColor = u_fDiffuse * u_ambient.vctColor;
+      #endif
     #endif
 
-    // use the regular vertex buffer
-  gl_Position = u_mtxMeshToView * vctPosition;
+    #if defined(SKIN)
+  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
+    a_fWeight.y * u_bones[a_iBone.y].matrix +
+    a_fWeight.z * u_bones[a_iBone.z].matrix +
+    a_fWeight.w * u_bones[a_iBone.w].matrix;
 
-    // GOURAUD: use the vertex normals
-    #if defined(GOURAUD)
-  v_vctColor = u_ambient.vctColor;
-  vec3 vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormalVertex);
+  mtxMeshToView *= mtxSkin;
+  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
     #endif
+
+    // calculate position and normal according to input and defines
+  gl_Position = mtxMeshToView * vctPosition;
 
     #if defined(CAMERA)
   // view vector needed
@@ -111,13 +131,14 @@ void main() {
     #endif
 
     #if defined(LIGHT)
+  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
   // calculate the directional lighting effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
     if(fIllumination > 0.0f) {
-      v_vctColor += fIllumination * u_directional[i].vctColor;
+      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
         #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fShininess);
+      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
       v_vctColor += fReflection * u_directional[i].vctColor;
         #endif
     }
@@ -130,7 +151,7 @@ void main() {
     #endif
 
     #if defined(MATCAP)
-  vec3 vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormalVertex);
+  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
   vctNormal = mat3(u_mtxWorldToView) * vctNormal;
   v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
   v_vctTexture.y *= -1.0;

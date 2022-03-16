@@ -4,7 +4,8 @@ namespace FudgeCore {
    * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
    * through a series of {@link Framing} objects. The stages involved are in order of rendering
    * {@link Render}.viewport -> {@link Viewport}.source -> {@link Viewport}.destination -> DOM-Canvas -> Client(CSS)
-   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
+   * @link https://github.com/JirkaDellOro/FUDGE/wiki/Viewport
    */
   export class Viewport extends EventTargetƒ {
     private static focus: Viewport;
@@ -27,6 +28,7 @@ namespace FudgeCore {
     public adjustingCamera: boolean = true;
     public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
 
+    public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
 
     #branch: Node = null; // The to render with all its descendants.
     #crc2: CanvasRenderingContext2D = null;
@@ -156,8 +158,28 @@ namespace FudgeCore {
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
       Render.prepare(this.#branch, null, mtxRoot);
+      this.componentsPick = Render.componentsPick;
     }
 
+    public dispatchPointerEvent(_event: PointerEvent): void {
+      let posClient: Vector2 = new Vector2(_event.clientX, _event.clientY);
+      let ray: Ray = this.getRayFromClient(posClient);
+      // let cameraPicks: RecycableArray<Node> = Recycler.get(RecycableArray); //TODO: think about optimization later
+      let cameraPicks: Node[] = [];
+      let otherPicks: ComponentPick[] = [];
+      for (let cmpPick of this.componentsPick)
+        cmpPick.pick == PICK.CAMERA ? cameraPicks.push(cmpPick.node) : otherPicks.push(cmpPick);
+
+      if (cameraPicks.length) {
+        let picks: Pick[] = Picker.pickCamera(cameraPicks, this.camera, this.pointClientToProjection(posClient));
+        for (let pick of picks)
+          pick.node.dispatchEvent(_event);
+      }
+
+      for (let cmpPick of otherPicks) {
+        cmpPick.pickAndDispatch(ray, _event);
+      }
+    }
 
     /**
      * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas

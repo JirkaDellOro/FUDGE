@@ -4,6 +4,8 @@ namespace FudgeCore {
 export abstract class ShaderPhong extends Shader {
   public static readonly iSubclass: number = Shader.registerSubclass(ShaderPhong);
 
+  public static define: string[] = [];
+
   public static getCoat(): typeof Coat { return CoatColored; }
 
   public static getVertexShaderSource(): string { 
@@ -58,7 +60,7 @@ uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
 in vec3 f_normal;
 in vec3 v_position;
 uniform vec4 u_vctColor;
-uniform float u_fShininess;
+uniform float u_fSpecular;
 out vec4 vctFrag;
 
 vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
@@ -78,7 +80,7 @@ void main() {
 
         float illuminance = dot(light_dir, N);
         if(illuminance > 0.0) {
-            vec3 reflection = calculateReflection(light_dir, view_dir, N, u_fShininess);
+            vec3 reflection = calculateReflection(light_dir, view_dir, N, u_fSpecular);
             vctFrag += vec4(reflection, 1.0) * illuminance * u_directional[i].color;
         }
     }

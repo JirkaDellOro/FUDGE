@@ -233,8 +233,10 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.axisFirst = new Vector3(...<number[]>(Object.values(_mutator.axisFirst)));
-      this.axisSecond = new Vector3(...<number[]>(Object.values(_mutator.axisSecond)));
+      if (typeof (_mutator.axisFirst) !== "undefined")
+        this.axisFirst = new Vector3(...<number[]>(Object.values(_mutator.axisFirst)));
+      if (typeof (_mutator.axisSecond) !== "undefined")
+        this.axisSecond = new Vector3(...<number[]>(Object.values(_mutator.axisSecond)));
       delete _mutator.axisFirst;
       delete _mutator.axisSecond;
       this.#mutate(_mutator);
@@ -269,18 +271,11 @@ namespace FudgeCore {
     }
 
     #mutate = (_mutator: Mutator): void => {
-      this.springDampingFirst = _mutator.springDampingFirst;
-      this.springFrequencyFirst = _mutator.springFrequencyFirst;
-      this.springDampingSecond = _mutator.springDampingSecond;
-      this.springFrequencySecond = _mutator.springFrequencySecond;
-      this.maxRotorFirst = _mutator.maxRotorFirst;
-      this.minRotorFirst = _mutator.minRotorFirst;
-      this.rotorSpeedFirst = _mutator.rotorSpeedFirst;
-      this.rotorTorqueFirst = _mutator.rotorTorqueFirst;
-      this.maxRotorSecond = _mutator.maxRotorSecond;
-      this.minRotorSecond = _mutator.minRotorSecond;
-      this.rotorSpeedSecond = _mutator.rotorSpeedSecond;
-      this.rotorTorqueSecond = _mutator.rotorTorqueSecond;
+      this.mutateBase(_mutator, [
+        "springDampingFirst", "springFrequencyFirst", "springDampingSecond", "springFrequencySecond",
+        "maxRotorFirst", "minRotorFirst", "rotorSpeedFirst", "rotorTorqueFirst",
+        "maxRotorSecond", "minRotorSecond", "rotorSpeedSecond", ".rotorTorqueSecond"]
+      );
     }
     //#endregion
 

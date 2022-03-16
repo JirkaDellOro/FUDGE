@@ -192,7 +192,7 @@ namespace FudgeCore {
 
     // public static getConstructor<T extends Serializable>(_type: string, _namespace: Object = FudgeCore): new () => T {
     public static getConstructor<T extends Serializable>(_path: string): new () => T {
-      let typeName: string = _path.substr(_path.lastIndexOf(".") + 1);
+      let typeName: string = _path.substring(_path.lastIndexOf(".") + 1);
       let namespace: Object = Serializer.getNamespace(_path);
       if (!namespace)
         throw new Error(`Constructor of serializable object of type ${_path} not found. Maybe the namespace hasn't been registered?`);

@@ -18,8 +18,15 @@
       "idResource": "MeshSphere|2021-02-26T06:52:46.550Z|27017",
       "name": "MeshSphere",
       "type": "MeshSphere",
-      "sectors": 4,
-      "stacks": 2
+      "shape": {
+        "ƒ.Vector2": [
+          "[0, 0.5]",
+          "[0.5, 0]",
+          "[0, -0.5]"
+        ]
+      },
+      "longitudes": 3,
+      "latitudes": 2
     }
   },
   "Material|2021-02-26T06:53:57.625Z|88423": {
@@ -29,7 +36,6 @@
       "shader": "ShaderLit",
       "coat": {
         "ƒ.CoatColored": {
-          "name": "Coat",
           "color": "[1, 1, 1, 1]"
         }
       }
@@ -38,30 +44,46 @@
   "MeshQuad|2021-02-26T06:57:39.734Z|68763": {
     "ƒ.MeshQuad": {
       "idResource": "MeshQuad|2021-02-26T06:57:39.734Z|68763",
-      "name": "MeshQuad",
-      "type": "MeshQuad"
+      "name": "MeshQuad"
     }
   },
   "MeshTorus|2021-02-26T06:58:39.903Z|54864": {
     "ƒ.MeshTorus": {
       "idResource": "MeshTorus|2021-02-26T06:58:39.903Z|54864",
       "name": "MeshTorus",
-      "type": "MeshTorus"
+      "type": "MeshTorus",
+      "shape": {
+        "ƒ.Vector2": [
+          "[0.25, 0]",
+          "[0.3125, 0.10825317353010178]",
+          "[0.4375, 0.10825317353010178]",
+          "[0.5, 1.5308085657314598e-17]",
+          "[0.4375, -0.10825317353010178]",
+          "[0.3125, -0.10825317353010178]",
+          "[0.25, -3.0616171314629196e-17]"
+        ]
+      },
+      "longitudes": 8,
+      "latitudes": 6,
+      "size": 0.25
     }
   },
   "Graph|2021-02-26T06:53:19.490Z|55445": {
     "ƒ.Graph": {
       "name": "Scene",
+      "active": true,
       "components": {},
       "children": [
         {
           "ƒ.Node": {
             "name": "Zoo",
+            "active": true,
             "components": {},
             "children": [
               {
                 "ƒ.Node": {
                   "name": "Cube",
+                  "active": true,
                   "components": {
                     "ComponentMaterial": [
                       {
@@ -102,6 +124,7 @@
               {
                 "ƒ.Node": {
                   "name": "Sphere",
+                  "active": true,
                   "components": {
                     "ComponentMaterial": [
                       {
@@ -142,6 +165,7 @@
               {
                 "ƒ.Node": {
                   "name": "Pyramid",
+                  "active": true,
                   "components": {
                     "ComponentMaterial": [
                       {
@@ -182,6 +206,7 @@
               {
                 "ƒ.Node": {
                   "name": "Quad",
+                  "active": true,
                   "components": {
                     "ComponentMaterial": [
                       {
@@ -222,6 +247,7 @@
               {
                 "ƒ.Node": {
                   "name": "Torus",
+                  "active": true,
                   "components": {
                     "ComponentMesh": [
                       {

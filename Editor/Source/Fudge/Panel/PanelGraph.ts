@@ -49,7 +49,6 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.REFRESH, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
@@ -87,8 +86,6 @@ namespace Fudge {
         case EVENT_EDITOR.SET_GRAPH:
           this.setGraph(_event.detail);
           break;
-        case EVENT_EDITOR.REFRESH:
-          break;
         case EVENT_EDITOR.SET_PROJECT:
         case EVENT_EDITOR.UPDATE:
           // TODO: meaningful difference between update and setgraph
@@ -98,9 +95,11 @@ namespace Fudge {
               _event = new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: newGraph });
           }
       }
+
       this.broadcastEvent(_event);
       _event.stopPropagation();
     }
+
     private hndFocusNode = (_event: CustomEvent): void => {
       let event: CustomEvent = new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: false, detail: _event.detail.data });
       this.broadcastEvent(event);

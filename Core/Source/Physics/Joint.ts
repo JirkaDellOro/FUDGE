@@ -48,7 +48,7 @@ namespace FudgeCore {
       this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
       this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeJoint);
     }
-    
+
     protected static registerSubclass(_subclass: typeof Joint): number { return Joint.subclasses.push(_subclass) - 1; }
 
     /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
@@ -216,9 +216,11 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.anchor = new Vector3(...<number[]>(Object.values(_mutator.anchor)));
+      if (typeof (_mutator.anchor) !== "undefined")
+        this.anchor = new Vector3(...<number[]>(Object.values(_mutator.anchor)));
       delete _mutator.anchor;
-      this.connectChild(_mutator.nameChildToConnect);
+      if (typeof (_mutator.nameChildToConnect) !== "undefined")
+        this.connectChild(_mutator.nameChildToConnect);
       this.#mutate(_mutator);
       this.deleteFromMutator(_mutator, this.#getMutator());
       super.mutate(_mutator);
@@ -235,9 +237,7 @@ namespace FudgeCore {
     }
 
     #mutate = (_mutator: Mutator): void => {
-      this.internalCollision = _mutator.internalCollision;
-      this.breakForce = _mutator.breakForce;
-      this.breakTorque = _mutator.breakTorque;
+      this.mutateBase(_mutator, ["internalCollision", "breakForce", "breakTorque"]);
     }
 
     protected reduceMutator(_mutator: Mutator): void {

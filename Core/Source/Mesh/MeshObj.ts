@@ -83,20 +83,20 @@ namespace FudgeCore {
           }
       }
 
-      this.cloud = new Vertices(...positions.map((_p: Vector3) => new Vertex(_p)));
+      this.vertices = new Vertices(...positions.map((_p: Vector3) => new Vertex(_p)));
       for (let i: number = 0; i < faceInfo.length; i += 3) {
         let indices: number[] = [];
         for (let v: number = 0; v < 3; v++) {
           let info: FaceInfo = faceInfo[i + v];
           let index: number = info.iPosition;
-          if (this.cloud[index].uv) {
-            index = this.cloud.length;
-            this.cloud.push(new Vertex(info.iPosition));
+          if (this.vertices[index].uv) {
+            index = this.vertices.length;
+            this.vertices.push(new Vertex(info.iPosition));
           }
-          this.cloud[index].uv = uvs[info.iUV];
+          this.vertices[index].uv = uvs[info.iUV];
           indices.push(index);
         }
-        this.faces.push(new Face(this.cloud, indices[0], indices[1], indices[2]));
+        this.faces.push(new Face(this.vertices, indices[0], indices[1], indices[2]));
       }
     }
 
@@ -114,7 +114,8 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      this.load(_mutator.url);
+      if (typeof (_mutator.url) !== "undefined")
+        this.load(_mutator.url);
     }
     //#endregion
   }

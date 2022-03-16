@@ -50,24 +50,12 @@ namespace FudgeCore {
      */
     public get normal(): Vector3 {
       let cmpMesh: ComponentMesh = this.node.getComponent(ComponentMesh);
-      let mesh: Mesh = cmpMesh.mesh;
-      let normal: Vector3 = Vector3.ZERO();
-      let vertex: Vector3 = Vector3.ZERO();
-      let minDistance: number = Infinity;
       let result: Vector3;
 
-      for (let i: number = 2; i < mesh.indices.length; i += 3) {
-        let iVertex: number = mesh.indices[i];
-        let [x, y, z] = mesh.vertices.subarray(iVertex * 3, (iVertex + 1) * 3);
-        vertex.set(x, y, z);
-        [x, y, z] = mesh.normalsFlat.subarray(iVertex * 3, (iVertex + 1) * 3);
-        normal.set(x, y, z);
-
-        let difference: Vector3 = Vector3.DIFFERENCE(this.posMesh, vertex);
-        let distance: number = Math.abs(Vector3.DOT(normal, difference));
-        if (distance < minDistance) {
-          result = normal.clone;
-          minDistance = distance;
+      for (let face of cmpMesh.mesh.faces) {
+        if (face.isInside(this.posMesh)) {
+          result = face.normal.clone;
+          break;
         }
       }
 

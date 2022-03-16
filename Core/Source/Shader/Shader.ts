@@ -13,9 +13,10 @@ namespace FudgeCore {
     /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Shader[] = [];
 
+    public static define: string[];
     public static vertexShaderSource: string;
     public static fragmentShaderSource: string;
-
+    
     public static program: WebGLProgram;
     public static attributes: { [name: string]: number };
     public static uniforms: { [name: string]: WebGLUniformLocation };

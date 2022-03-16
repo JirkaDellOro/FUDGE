@@ -6,7 +6,15 @@ namespace FudgeCore {
    */
   export class Vertices extends Array<Vertex> {
     // TODO: this class may become more powerful by hiding the array and add more service methods like calculating bounding box, radius etc.
-    // see if a proxy of the array interfacing [] would do a good job
+    // see if a proxy of the array interfacing [] would do a good job -> tested: proxy is about 20 times slower!
+
+    /**
+     * Returns the subset of vertices that do not refer to other vertices
+     */
+    public get originals(): Array<Vertex> {
+      return this.filter(_vertex => _vertex.referTo == undefined);
+    }   
+    
     /**
      * returns the position associated with the vertex addressed, resolving references between vertices 
      */
@@ -28,6 +36,14 @@ namespace FudgeCore {
      */
     public uv(_index: number): Vector2 {
       return this[_index].uv;
+    }
+
+    /**
+     * returns the position associated with the vertex addressed, resolving references between vertices 
+     */
+     public bones(_index: number): Bone[] {
+      let vertex: Vertex = this[_index];
+      return (vertex.referTo == undefined) ? vertex.bones : this[vertex.referTo].bones;
     }
   }
 }

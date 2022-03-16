@@ -246,6 +246,8 @@ namespace FudgeCore {
           this.addEventListener(EVENT.COMPONENT_DEACTIVATE, this.removeRigidbodyFromWorld);
           // this.node.addEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld, true); // use capture to react to broadcast!
           this.node.addEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld, true);
+          if (!this.node.cmpTransform)
+            Debug.warn(`ComponentRigidbody attached to node missing ComponentTransform`, this.node);
           break;
         case EVENT.COMPONENT_REMOVE:
           // this.removeEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
@@ -254,11 +256,10 @@ namespace FudgeCore {
           this.node.removeEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld, true);
           this.removeRigidbodyFromWorld();
           break;
-        // case EVENT.NODE_DESERIALIZED:
-        //   // if deserialized the node is now fully reconstructed and access to all its components and children is possible
-        //   this.node.addEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld);
-        //   this.node.addEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld);
-        //   break;
+        case EVENT.NODE_DESERIALIZED:
+          if (!this.node.cmpTransform)
+            Debug.error(`ComponentRigidbody attached to node missing ComponentTransform`, this.node);
+          break;
       }
     }
 
@@ -357,7 +358,7 @@ namespace FudgeCore {
     public initialize(): void {
       if (!this.node) // delay initialization until this rigidbody is attached to a node
         return;
-      switch (this.initialization) {
+      switch (Number(this.initialization)) {
         case BODY_INIT.TO_NODE:
           this.mtxPivot = Matrix4x4.IDENTITY();
           break;
@@ -653,22 +654,30 @@ namespace FudgeCore {
 
     /** Change properties by an associative array */
     public async mutate(_mutator: Mutator): Promise<void> {
+      if (_mutator.typeBody != undefined)
+        _mutator.typeBody = parseInt(_mutator.typeBody);
+      if (_mutator.typeCollider != undefined)
+        _mutator.typeCollider = parseInt(_mutator.typeCollider);
+      if (_mutator.initialization != undefined)
+        _mutator.initialization = parseInt(_mutator.initialization);
       super.mutate(_mutator);
+      if (_mutator.initialization != undefined && this.isActive)
+        this.initialize();
+      // TODO: see if this alternative should be, at least partially, done with mutateSelection
+      // let callIfExist: Function = (_key: string, _setter: Function) => {
+      //   if (_mutator[_key])
+      //     _setter(_mutator[_key]);
+      // };
 
-      let callIfExist: Function = (_key: string, _setter: Function) => {
-        if (_mutator[_key])
-          _setter(_mutator[_key]);
-      };
-
-      callIfExist("friction", (_value: number) => this.friction = _value);
-      callIfExist("restitution", (_value: number) => this.restitution = _value);
-      callIfExist("mass", (_value: number) => this.mass = _value);
-      callIfExist("dampTranslation", (_value: number) => this.dampTranslation = _value);
-      callIfExist("dampRotation", (_value: number) => this.dampRotation = _value);
-      callIfExist("effectGravity", (_value: number) => this.effectGravity = _value);
-      callIfExist("collisionGroup", (_value: COLLISION_GROUP) => this.collisionGroup = _value);
-      callIfExist("typeBody", (_value: string) => this.typeBody = parseInt(_value));
-      callIfExist("typeCollider", (_value: string) => this.typeCollider = parseInt(_value));
+      // callIfExist("friction", (_value: number) => this.friction = _value);
+      // callIfExist("restitution", (_value: number) => this.restitution = _value);
+      // callIfExist("mass", (_value: number) => this.mass = _value);
+      // callIfExist("dampTranslation", (_value: number) => this.dampTranslation = _value);
+      // callIfExist("dampRotation", (_value: number) => this.dampRotation = _value);
+      // callIfExist("effectGravity", (_value: number) => this.effectGravity = _value);
+      // callIfExist("collisionGroup", (_value: COLLISION_GROUP) => this.collisionGroup = _value);
+      // callIfExist("typeBody", (_value: string) => this.typeBody = parseInt(_value));
+      // callIfExist("typeCollider", (_value: string) => this.typeCollider = parseInt(_value));
 
       this.dispatchEvent(new Event(EVENT.MUTATE));
     }

@@ -15,7 +15,7 @@ namespace FudgeCore {
     public constructor(_name: string = "MeshCube") {
       super(_name);
       // this.create();
-      this.cloud = new Vertices(
+      this.vertices = new Vertices(
         // front
         new Vertex(new Vector3(-0.5, 0.5, 0.5), new Vector2(0, 0)), // 0
         new Vertex(new Vector3(-0.5, -0.5, 0.5), new Vector2(0, 1)), // 1
@@ -38,12 +38,12 @@ namespace FudgeCore {
       );
 
       this.faces = [
-        ...new Quad(this.cloud, 0, 1, 2, 3).faces, // front
-        ...new Quad(this.cloud, 7, 6, 5, 4).faces, // back
-        ...new Quad(this.cloud, 3, 2, 6, 7).faces, // right
-        ...new Quad(this.cloud, 4, 5, 9, 8).faces, // left
-        ...new Quad(this.cloud, 0, 10, 11, 12).faces, // top
-        ...new Quad(this.cloud, 13, 1, 15, 14).faces  // bottom
+        ...new Quad(this.vertices, 0, 1, 2, 3).faces, // front
+        ...new Quad(this.vertices, 7, 6, 5, 4).faces, // back
+        ...new Quad(this.vertices, 3, 2, 6, 7).faces, // right
+        ...new Quad(this.vertices, 4, 5, 9, 8).faces, // left
+        ...new Quad(this.vertices, 0, 10, 11, 12).faces, // top
+        ...new Quad(this.vertices, 13, 1, 15, 14).faces  // bottom
       ];
     }
   }

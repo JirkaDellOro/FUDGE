@@ -639,6 +639,7 @@ var Fudge;
             document.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, Page.hndEvent);
             document.addEventListener("mutate" /* MUTATE */, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.REFRESH, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.DESTROY, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
         }
@@ -1102,7 +1103,7 @@ var Fudge;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SET_PROJECT:
                 case Fudge.EVENT_EDITOR.UPDATE:
-                case "mutate" /* MUTATE */:
+                    // case ƒui.EVENT.MUTATE:
                     this.listResources();
                     break;
                 case "removeChild" /* REMOVE_CHILD */:
@@ -1141,19 +1142,24 @@ var Fudge;
             this.domElement.addEventListener("drop" /* DROP */, this.hndDrop);
             this.domElement.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
         }
-        //#region hack getMutator in order to specifically exclude parts of it (e.g. recreate mesh everytime mtxPivot changes...)
-        getMutatorStripped = (_mutator, _types) => {
-            let mutator = super.getMutator(_mutator, _types);
-            delete (mutator.mesh);
-            return mutator;
-        };
         mutateOnInput = async (_event) => {
+            // TODO: move this to Ui.Controller as a general optimization to only mutate what has been changed...!
             this.getMutator = super.getMutator;
-            if (this.mutable instanceof ƒ.ComponentMesh) {
-                let found = _event.composedPath().find((_dom) => _dom == this.domElement || _dom.getAttribute("key") == "mesh");
-                if (found == this.domElement)
-                    this.getMutator = this.getMutatorStripped;
+            let path = [];
+            for (let target of _event.composedPath()) {
+                if (target == document)
+                    break;
+                let key = target.getAttribute("key");
+                if (key)
+                    path.push(key);
             }
+            path.pop();
+            path.reverse();
+            let mutator = ƒ.Mutable.getMutatorFromPath(this.getMutator(), path);
+            this.getMutator = (_mutator, _types) => {
+                this.getMutator = super.getMutator; // reset
+                return mutator;
+            };
         };
         //#endregion
         hndKey = (_event) => {
@@ -1602,7 +1608,6 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.REFRESH, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
             this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
@@ -1634,8 +1639,6 @@ var Fudge;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SET_GRAPH:
                     this.setGraph(_event.detail);
-                    break;
-                case Fudge.EVENT_EDITOR.REFRESH:
                     break;
                 case Fudge.EVENT_EDITOR.SET_PROJECT:
                 case Fudge.EVENT_EDITOR.UPDATE:
@@ -1754,6 +1757,7 @@ var Fudge;
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.REFRESH, this.hndEvent);
             this.setTitle("Project | " + Fudge.project.name);
             this.broadcastEvent(new Event(Fudge.EVENT_EDITOR.SET_PROJECT));
         }
@@ -2458,6 +2462,15 @@ var Fudge;
             }
             //@ts-ignore
             let cmpNew = new component();
+            if (cmpNew instanceof ƒ.ComponentRigidbody)
+                if (!this.node.cmpTransform) {
+                    alert("To attach ComponentRigidbody, first attach ComponentTransform!");
+                    return;
+                }
+            if (cmpNew instanceof ƒ.ComponentSyncGraph && !(this.node instanceof ƒ.GraphInstance)) {
+                alert("Attach ComponentSyncGraph only to GraphInstances");
+                return;
+            }
             ƒ.Debug.info(cmpNew.type, cmpNew);
             this.node.addComponent(cmpNew);
             this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.node } }));
@@ -2593,6 +2606,7 @@ var Fudge;
                 this.transform3(dtl.transform, value, mtxTransform, distance);
             if (mtxTransform instanceof ƒ.Matrix3x3)
                 this.transform2(dtl.transform, value.toVector2(), mtxTransform, 1);
+            component.dispatchEvent(new CustomEvent("mutate" /* MUTATE */, { detail: { mutator: controller.getMutator() } }));
         };
         transform3(_transform, _value, _mtxTransform, _distance) {
             switch (_transform) {
@@ -3025,6 +3039,7 @@ var Fudge;
         resource;
         viewport;
         cmrOrbit;
+        previewNode;
         constructor(_container, _state) {
             super(_container, _state);
             // create viewport for 3D-resources
@@ -3036,6 +3051,7 @@ var Fudge;
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Preview", null, cmpCamera, canvas);
             this.cmrOrbit = ƒAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+            this.previewNode = this.createStandardGraph();
             this.fillContent();
             _container.on("resize", this.redraw);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
@@ -3046,7 +3062,7 @@ var Fudge;
             // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
         }
         static createStandardMaterial() {
-            let mtrStandard = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("white")));
+            let mtrStandard = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("white")));
             ƒ.Project.deregister(mtrStandard);
             return mtrStandard;
         }
@@ -3071,13 +3087,6 @@ var Fudge;
                     break;
             }
         }
-        illuminateGraph() {
-            let nodeLight = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
-            if (nodeLight) {
-                nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU.ILLUMINATE).checked);
-                this.redraw();
-            }
-        }
         //#endregion
         fillContent() {
             this.dom.innerHTML = "";
@@ -3092,7 +3101,7 @@ var Fudge;
             if (this.resource instanceof ƒ.Mesh)
                 type = "Mesh";
             // console.log(type);
-            let graph;
+            let previewObject = new ƒ.Node("PreviewObject");
             let preview;
             switch (type) {
                 case "Function":
@@ -3106,20 +3115,23 @@ var Fudge;
                         this.dom.appendChild(preview);
                     break;
                 case "Mesh":
-                    graph = this.createStandardGraph();
-                    graph.addComponent(new ƒ.ComponentMesh(this.resource));
-                    graph.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
+                    previewObject.addComponent(new ƒ.ComponentMesh(this.resource));
+                    previewObject.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
+                    this.setViewObject(previewObject);
+                    this.resetCamera();
                     this.redraw();
                     break;
                 case "Material":
-                    graph = this.createStandardGraph();
-                    graph.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
-                    graph.addComponent(new ƒ.ComponentMaterial(this.resource));
+                    previewObject.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
+                    previewObject.addComponent(new ƒ.ComponentMaterial(this.resource));
+                    this.setViewObject(previewObject);
+                    this.resetCamera();
                     this.redraw();
                     break;
                 case "Graph":
-                    graph = this.createStandardGraph(true);
-                    graph.appendChild(this.resource);
+                    previewObject.appendChild(this.resource);
+                    this.setViewObject(previewObject);
+                    previewObject.addEventListener("mutate" /* MUTATE */, (_event) => { this.redraw(); });
                     this.redraw();
                     break;
                 case "TextureImage":
@@ -3134,16 +3146,30 @@ var Fudge;
                 default: break;
             }
         }
-        createStandardGraph(_graphIllumination = false) {
+        createStandardGraph() {
             let graph = new ƒ.Node("PreviewScene");
             this.viewport.setBranch(graph);
             let nodeLight = new ƒ.Node("PreviewIllumination");
             graph.addChild(nodeLight);
             ƒAid.addStandardLightComponents(nodeLight);
+            this.dom.appendChild(this.viewport.getCanvas());
+            let previewNode = new ƒ.Node("PreviewNode");
+            graph.addChild(previewNode);
+            return previewNode;
+        }
+        setViewObject(_node, _graphIllumination = false) {
+            this.previewNode.removeAllChildren();
+            this.previewNode.addChild(_node);
             if (_graphIllumination) // otherwise, light is always on!
                 this.illuminateGraph();
             this.dom.appendChild(this.viewport.getCanvas());
-            return graph;
+        }
+        illuminateGraph() {
+            let nodeLight = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
+            if (nodeLight) {
+                nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU.ILLUMINATE).checked);
+                this.redraw();
+            }
         }
         createFilePreview(_entry) {
             let mime = _entry.getMimeType();
@@ -3186,10 +3212,10 @@ var Fudge;
                 //   this.resource = undefined;
                 //   break;
                 case "change" /* CHANGE */:
-                case "mutate" /* MUTATE */:
                 case Fudge.EVENT_EDITOR.UPDATE:
-                    if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
+                    if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture /*  || this.resource instanceof ƒ.Material */)
                         this.fillContent();
+                case "mutate" /* MUTATE */:
                     this.redraw();
                     break;
                 default:
@@ -3216,7 +3242,6 @@ var Fudge;
         }
         redraw = () => {
             try {
-                this.resetCamera();
                 this.viewport.draw();
             }
             catch (_error) {

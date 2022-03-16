@@ -129,7 +129,7 @@
               {
                 "ƒ.Node": {
                   "name": "Box",
-                  "active": false,
+                  "active": true,
                   "components": {
                     "ComponentMesh": [
                       {
@@ -295,7 +295,7 @@
         {
           "ƒ.GraphInstance": {
             "name": "Pyramid",
-            "active": false,
+            "active": true,
             "components": {
               "ComponentMesh": [
                 {
@@ -384,6 +384,13 @@
                     }
                   }
                 }
+              ],
+              "ComponentSyncGraph": [
+                {
+                  "ƒ.ComponentSyncGraph": {
+                    "active": true
+                  }
+                }
               ]
             },
             "children": [
@@ -454,7 +461,7 @@
                       {
                         "ƒ.ComponentTransform": {
                           "local": {
-                            "translation": "[0, 0, 0]",
+                            "translation": "[0, 0.8495044708251953, 0]",
                             "rotation": "[0, 0, 0]",
                             "scaling": "[1, 1, 1]"
                           },
@@ -639,7 +646,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[0, 0, 0]",
+                      "translation": "[0, 0.8338287472724915, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },

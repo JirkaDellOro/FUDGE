@@ -59,13 +59,13 @@ namespace FudgeCore {
       else
         this.heightMapFunction = new Noise2().sample;
 
-      this.cloud = new Vertices();
+      this.vertices = new Vertices();
       //Iterate over each cell to generate grid of vertices
       for (let z: number = 0; z <= this.resolution.y; z++) {
         for (let x: number = 0; x <= this.resolution.x; x++) {
           let xNorm: number = x / this.resolution.x;
           let zNorm: number = z / this.resolution.y;
-          this.cloud.push(new Vertex(
+          this.vertices.push(new Vertex(
             new Vector3(xNorm - 0.5, this.heightMapFunction(xNorm * this.scale.x, zNorm * this.scale.y), zNorm - 0.5),
             new Vector2(xNorm, zNorm)
           ));
@@ -77,7 +77,7 @@ namespace FudgeCore {
       for (let z: number = 0; z < this.resolution.y; z++) {
         for (let x: number = 0; x < this.resolution.x; x++) {
           quads.push(new Quad(
-            this.cloud,
+            this.vertices,
             (x + 0) + (z + 0) * (this.resolution.x + 1),
             (x + 0) + (z + 1) * (this.resolution.x + 1),
             (x + 1) + (z + 1) * (this.resolution.x + 1),
@@ -150,11 +150,7 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      this.create(
-        new Vector2(_mutator.resolution.x, _mutator.resolution.y),
-        new Vector2(_mutator.scale.x, _mutator.scale.y),
-        _mutator.seed
-      );
+      this.create(this.resolution, this.scale, this.seed);
     }
     //#endregion
   }

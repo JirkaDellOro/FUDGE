@@ -89,29 +89,28 @@ namespace FudgeCore {
         PHYSIC_OBJECTS_ONLY
     }
 
-    /** Info about Raycasts shot from the physics system. */
-    export class RayHitInfo {
-        public hit: boolean;
-        public hitDistance: number;
-        public hitPoint: Vector3;
-        public rigidbodyComponent: ComponentRigidbody;
-        public hitNormal: Vector3;
-        public rayOrigin: Vector3;
-        public rayEnd: Vector3;
+  /** Info about Raycasts shot from the physics system. */
+  export class RayHitInfo {
+    public hit: boolean;
+    public hitDistance: number;
+    public hitPoint: Vector3 = Vector3.ZERO();
+    public rigidbodyComponent: ComponentRigidbody;
+    public hitNormal: Vector3 = Vector3.ZERO();
+    public rayEnd: Vector3 = Vector3.ZERO();
+    public rayOrigin: Vector3 = Vector3.ZERO();
 
         constructor() {
             this.recycle();
         }
 
-        public recycle(): void {
-            this.hit = false;
-            this.hitDistance = 0;
-            this.hitPoint = Vector3.ZERO();
-            this.rigidbodyComponent = null;
-            this.hitNormal = Vector3.ZERO();
-            this.rayOrigin = Vector3.ZERO();
-            this.rayEnd = Vector3.ZERO();
-        }
+    public recycle(): void {
+      this.hit = false;
+      this.hitDistance = 0;
+      this.hitPoint.recycle();
+      this.rigidbodyComponent = null;
+      this.hitNormal.recycle();
+      this.rayOrigin.recycle();
+      this.rayEnd.recycle();
     }
 
     /** General settings for the physic simulation and the debug of it. */
