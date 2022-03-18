@@ -9,6 +9,7 @@ namespace FudgeCore {
     /** id of the resource that instance was created from */
     // TODO: examine, if this should be a direct reference to the Graph, instead of the id
     #idSource: string = undefined;
+    #sync: boolean = true;
 
     /**
      * This constructor allone will not create a reconstruction, but only save the id.
@@ -16,7 +17,9 @@ namespace FudgeCore {
      * Prefer Project.createGraphInstance(_graph).
      */
     constructor(_graph?: Graph) {
-      super("Graph");
+      super("GraphInstance");
+      this.addEventListener(EVENT.MUTATE, this.hndMutationInstance, true);
+
       if (!_graph)
         return;
       this.#idSource = _graph.idResource;
@@ -53,7 +56,8 @@ namespace FudgeCore {
 
     public connectToGraph(): void {
       let graph: Graph = this.get();
-      graph.addEventListener(EVENT.MUTATE, () => console.log("MUTATION"));
+      // graph.addEventListener(EVENT.MUTATE, (_event: CustomEvent) => this.hndMutation, true);
+      graph.addEventListener(EVENT.MUTATE, this.hndMutationGraph, true);
     }
 
     /**
@@ -76,6 +80,44 @@ namespace FudgeCore {
      */
     public get(): Graph {
       return <Graph>Project.resources[this.#idSource];
+    }
+
+
+    private hndMutationGraph = async (_event: CustomEvent): Promise<void> => {
+      if (!this.#sync) {
+        this.#sync = true;
+        return;
+      }
+
+      let path: Node[] = Reflect.get(_event, "path");
+      let index: number = path.indexOf(<Node>_event.currentTarget);
+      if (index > -1)
+        path.splice(index);
+      let node: Node = this;
+      for (let i: number = path.length - 1; i >= 0; i--)
+        node = node.getChildrenByName(path[i].name)[0]; // TODO: respect index for non-singleton components...
+      let cmpMutate: Component = node.getComponent(_event.detail.component.constructor);
+      this.#sync = false; // do not sync again, since mutation is already a synchronization
+      await cmpMutate.mutate(_event.detail.mutator); // expect endless calls, since this component calls graph again
+      this.#sync = true;
+
+      console.log("Graph mutates", node.name, cmpMutate.constructor.name, _event.detail.mutator);
+    }
+
+
+    private hndMutationInstance = async (_event: CustomEvent): Promise<void> => {
+      if (!this.#sync)
+        return;
+
+      let graph: Graph = this.get();
+      let path: Node[] = Reflect.get(_event, "path");
+      path.splice(path.indexOf(this));
+      let node: Node = graph;
+      while (path.length)
+        node = node.getChildrenByName(path.pop().name)[0];
+      let cmpMutate: Component = node.getComponent(_event.detail.component.constructor);
+      await cmpMutate.mutate(_event.detail.mutator);
+      console.log("Instance mutates", node.name, cmpMutate.constructor.name, _event.detail.mutator);
     }
   }
 }

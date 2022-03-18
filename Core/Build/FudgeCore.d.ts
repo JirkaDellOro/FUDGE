@@ -2095,7 +2095,6 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         private hndEvent;
-        private hndMutation;
     }
 }
 declare namespace FudgeCore {
@@ -2648,6 +2647,8 @@ declare namespace FudgeCore {
          * Retrieve the graph this instances refers to
          */
         get(): Graph;
+        private hndMutationGraph;
+        private hndMutationInstance;
     }
 }
 declare namespace FudgeCore {
