@@ -1128,9 +1128,9 @@ var Fudge;
         UrlOnTexture: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         UrlOnMeshObj: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "MeshObj", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         UrlOnAudio: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
-        MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
+        MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
         MeshOnComponentMesh: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
-        MeshOnMeshLabel: { fromViews: [Fudge.ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
+        // MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
         TextureOnMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
         TextureOnMeshRelief: { fromViews: [Fudge.ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
     };
@@ -1184,14 +1184,14 @@ var Fudge;
             if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial))
                 return;
             // Mesh on ComponentMesh
-            if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, (_sources) => {
-                let key = this.getAncestorWithType(_event.target).getAttribute("key");
-                return (key == "mesh");
-            }))
+            // if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, (_sources: Object[]) => {
+            //   let key: string = this.getAncestorWithType(_event.target).getAttribute("key");
+            //   return (key == "mesh");
+            // })) return;
+            if (this.filterDragDrop(_event, filter.MeshOnComponentMesh))
                 return;
             // Mesh on MeshLabel
-            if (this.filterDragDrop(_event, filter.MeshOnMeshLabel))
-                return;
+            // if (this.filterDragDrop(_event, filter.MeshOnMeshLabel)) return;
             // Texture on Material
             if (this.filterDragDrop(_event, filter.TextureOnMaterial))
                 return;
@@ -1218,6 +1218,11 @@ var Fudge;
                 if (!this.mutable[key])
                     return false;
                 this.mutable[key] = _sources[0];
+                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                return true;
+            };
+            let setMaterial = (_sources) => {
+                this.mutable["material"] = _sources[0];
                 this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                 return true;
             };
@@ -1249,14 +1254,13 @@ var Fudge;
             if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink))
                 return;
             // Material on ComponentMaterial
-            if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial, setResource))
+            if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial, setMaterial))
                 return;
             // Mesh on ComponentMesh
-            if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, setResource))
+            if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, setMesh))
                 return;
             // Mesh on MeshLabel
-            if (this.filterDragDrop(_event, filter.MeshOnMeshLabel, setMesh))
-                return;
+            // if (this.filterDragDrop(_event, filter.MeshOnMeshLabel, setMesh)) return;
             // Texture on Material
             if (this.filterDragDrop(_event, filter.TextureOnMaterial, setTexture))
                 return;
@@ -2473,6 +2477,10 @@ var Fudge;
                     console.log(this.node);
                     return;
                 }
+            // if (cmpNew instanceof ƒ.ComponentMaterial) {
+            //   alert("Drop a material into the Component view to attach it to the node");
+            //   return;
+            // }
             ƒ.Debug.info(cmpNew.type, cmpNew);
             this.node.addComponent(cmpNew);
             this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.node } }));
