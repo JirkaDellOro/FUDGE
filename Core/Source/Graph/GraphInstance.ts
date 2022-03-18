@@ -8,7 +8,7 @@ namespace FudgeCore {
   export class GraphInstance extends Node {
     /** id of the resource that instance was created from */
     // TODO: examine, if this should be a direct reference to the Graph, instead of the id
-    private idSource: string = undefined;
+    #idSource: string = undefined;
 
     /**
      * This constructor allone will not create a reconstruction, but only save the id.
@@ -19,42 +19,55 @@ namespace FudgeCore {
       super("Graph");
       if (!_graph)
         return;
-      this.idSource = _graph.idResource;
+      this.#idSource = _graph.idResource;
+    }
+
+    public get idSource(): string {
+      return this.#idSource;
     }
 
     /**
      * Recreate this node from the {@link Graph} referenced
      */
     public async reset(): Promise<void> {
-      let resource: Graph = <Graph>await Project.getResource(this.idSource);
+      let resource: Graph = <Graph>await Project.getResource(this.#idSource);
       await this.set(resource);
     }
 
     //TODO: optimize using the referenced Graph, serialize/deserialize only the differences
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
-      serialization.idSource = this.idSource;
+      serialization.idSource = this.#idSource;
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      this.#idSource = _serialization.idSource;
       await super.deserialize(_serialization);
-      this.idSource = _serialization.idSource;
+      if (this.get())
+        this.connectToGraph();
+      else
+        Project.registerGraphInstanceForResync(this);
       return this;
+    }
+
+    public connectToGraph(): void {
+      let graph: Graph = this.get();
+      graph.addEventListener(EVENT.MUTATE, () => console.log("MUTATION"));
     }
 
     /**
      * Set this node to be a recreation of the {@link Graph} given
      */
     public async set(_graph: Graph): Promise<void> {
-      // TODO: examine, if the serialization should be stored in the Graph for optimization
+      // TODO: examine, if the serialization should be stored in the Graph for optimization <- also useful for sync with instances
       let serialization: Serialization = Serializer.serialize(_graph);
       //Serializer.deserialize(serialization);
       for (let path in serialization) {
         await this.deserialize(serialization[path]);
         break;
       }
-      this.idSource = _graph.idResource;
+      this.#idSource = _graph.idResource;
       this.dispatchEvent(new Event(EVENT.GRAPH_INSTANTIATED));
     }
 
@@ -62,7 +75,7 @@ namespace FudgeCore {
      * Retrieve the graph this instances refers to
      */
     public get(): Graph {
-      return <Graph>Project.resources[this.idSource];
+      return <Graph>Project.resources[this.#idSource];
     }
   }
 }

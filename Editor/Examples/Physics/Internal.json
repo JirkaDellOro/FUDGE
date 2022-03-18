@@ -576,6 +576,13 @@
               }
             }
           }
+        ],
+        "ComponentSyncGraph": [
+          {
+            "ƒ.ComponentSyncGraph": {
+              "active": true
+            }
+          }
         ]
       },
       "children": [

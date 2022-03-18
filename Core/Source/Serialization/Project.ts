@@ -25,6 +25,10 @@ namespace FudgeCore {
     [namespace: string]: ComponentScript[];
   }
 
+  interface GraphInstancesToResync {
+    [idResource: string]: GraphInstance[];
+  }
+
   /**
    * Static class handling the resources used with the current FUDGE-instance.  
    * Keeps a list of the resources and generates ids to retrieve them.  
@@ -36,6 +40,7 @@ namespace FudgeCore {
     public static scriptNamespaces: ScriptNamespaces = {};
     public static baseURL: URL = new URL(location.toString());
     public static mode: MODE = MODE.RUNTIME;
+    public static graphInstancesToResync: GraphInstancesToResync = {};
 
     /**
      * Registers the resource and generates an id for it by default.  
@@ -138,6 +143,21 @@ namespace FudgeCore {
       let instance: GraphInstance = new GraphInstance(); // TODO: cleanup since creation moved here
       await instance.set(_graph);
       return instance;
+    }
+
+    public static registerGraphInstanceForResync(_instance: GraphInstance): void {
+      let instances: GraphInstance[] = Project.graphInstancesToResync[_instance.idSource] || [];
+      instances.push(_instance);
+      Project.graphInstancesToResync[_instance.idSource] = instances;
+    }
+
+    public static resyncGraphInstances(_graph: Graph): void {
+      let instances: GraphInstance[] = Project.graphInstancesToResync[_graph.idResource];
+      if (!instances)
+        return;
+      for (let instance of instances)
+        instance.connectToGraph();
+      delete(Project.graphInstancesToResync[_graph.idResource]);
     }
 
     public static registerScriptNamespace(_namespace: Object): void {

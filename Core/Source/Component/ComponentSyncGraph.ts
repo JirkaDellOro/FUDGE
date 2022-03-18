@@ -12,6 +12,7 @@ namespace FudgeCore {
 
       this.addEventListener(EVENT.COMPONENT_ADD, this.hndEvent);
       this.addEventListener(EVENT.COMPONENT_REMOVE, this.hndEvent);
+      this.addEventListener(EVENT.RENDER_PREPARE_START, this.hndEvent); // to node
     }
 
     public serialize(): Serialization {
@@ -26,6 +27,8 @@ namespace FudgeCore {
     private hndEvent = (_event: Event): void => {
       switch (_event.type) {
         case EVENT.COMPONENT_ADD:
+          this.node.addEventListener(EVENT.CHILD_APPEND, () => console.log("Append graph instance"), true);
+          this.node.addEventListener(EVENT.CHILD_REMOVE, () => console.log("Remove graph instance"), true);
           this.node.addEventListener(EVENT.MUTATE, this.hndMutation, true);
           if (!(this.node instanceof GraphInstance))
             Debug.error(`ComponentSyncGraph attached to node of a type other than GraphInstance`, this.node);
@@ -33,11 +36,18 @@ namespace FudgeCore {
         case EVENT.COMPONENT_REMOVE:
           this.node.removeEventListener(EVENT.MUTATE, this.hndMutation, true);
           break;
+        case EVENT.NODE_DESERIALIZED:
+          let graph: Graph = (<GraphInstance>this.node).get();
+          graph.addEventListener(EVENT.MUTATE, () => console.log("Graph mutation"));
+          break;
       }
     }
 
     private hndMutation = (_event: CustomEvent): void => {
       // console.log("MUTATION!", _event, _event.detail);
+      if (!(this.node instanceof GraphInstance))
+        return;
+
       let graph: Graph = (<GraphInstance>this.node).get();
       let path: Node[] = Reflect.get(_event, "path");
       path.splice(path.indexOf(this.node));
