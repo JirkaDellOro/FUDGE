@@ -84,10 +84,6 @@ namespace Fudge {
           console.log(this.node);
           return;
         }
-      // if (cmpNew instanceof ƒ.ComponentMaterial) {
-      //   alert("Drop a material into the Component view to attach it to the node");
-      //   return;
-      // }
       ƒ.Debug.info(cmpNew.type, cmpNew);
 
       this.node.addComponent(cmpNew);

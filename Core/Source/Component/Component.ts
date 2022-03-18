@@ -24,6 +24,8 @@ namespace FudgeCore {
         if (this.#node) {
           // TODO: find the number of the component in the array if not singleton
           _event.detail.component = this;
+          //@ts-ignore
+          _event.detail.componentIndex = this.node.getComponents(this.constructor).indexOf(this);
           this.#node.dispatchEvent(_event);
         }
       });
