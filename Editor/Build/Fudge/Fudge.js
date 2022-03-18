@@ -2608,7 +2608,7 @@ var Fudge;
                 this.transform3(dtl.transform, value, mtxTransform, distance);
             if (mtxTransform instanceof ƒ.Matrix3x3)
                 this.transform2(dtl.transform, value.toVector2(), mtxTransform, 1);
-            component.dispatchEvent(new CustomEvent("mutate" /* MUTATE */, { detail: { mutator: controller.getMutator() } }));
+            component.mutate(component.getMutator());
         };
         transform3(_transform, _value, _mtxTransform, _distance) {
             switch (_transform) {
@@ -2887,6 +2887,7 @@ var Fudge;
             ƒ.Physics.activeInstance = new ƒ.Physics();
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             this.viewport.setBranch(this.graph);
+            // this.graph.addEventListener(ƒ.EVENT.MUTATE, this.redraw);
             this.redraw();
         }
         //#region  ContextMenu
@@ -3133,7 +3134,9 @@ var Fudge;
                 case "Graph":
                     previewObject.appendChild(this.resource);
                     this.setViewObject(previewObject);
-                    previewObject.addEventListener("mutate" /* MUTATE */, (_event) => { this.redraw(); });
+                    previewObject.addEventListener("mutate" /* MUTATE */, (_event) => {
+                        this.redraw();
+                    });
                     this.redraw();
                     break;
                 case "TextureImage":

@@ -234,7 +234,7 @@ namespace Fudge {
       if (mtxTransform instanceof ƒ.Matrix3x3)
         this.transform2(dtl.transform, value.toVector2(), mtxTransform, 1);
 
-      component.dispatchEvent(new CustomEvent(ƒ.EVENT.MUTATE, { detail: { mutator: controller.getMutator() } }));
+      component.mutate(component.getMutator());
     }
 
     private transform3(_transform: TRANSFORM, _value: ƒ.Vector3, _mtxTransform: ƒ.Matrix4x4, _distance: number): void {

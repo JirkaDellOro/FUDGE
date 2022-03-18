@@ -85,6 +85,7 @@ namespace Fudge {
       ƒ.Physics.activeInstance = new ƒ.Physics();
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       this.viewport.setBranch(this.graph);
+      // this.graph.addEventListener(ƒ.EVENT.MUTATE, this.redraw);
       this.redraw();
     }
 

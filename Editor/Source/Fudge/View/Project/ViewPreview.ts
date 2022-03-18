@@ -122,7 +122,9 @@ namespace Fudge {
         case "Graph":
           previewObject.appendChild(<ƒ.Graph>this.resource);
           this.setViewObject(previewObject);
-          previewObject.addEventListener(ƒ.EVENT.MUTATE, (_event: Event) => { this.redraw(); });
+          previewObject.addEventListener(ƒ.EVENT.MUTATE, (_event: Event) => {
+            this.redraw();
+          });
           this.redraw();
           break;
         case "TextureImage":

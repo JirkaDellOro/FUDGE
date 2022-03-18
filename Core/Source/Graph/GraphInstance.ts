@@ -91,10 +91,8 @@ namespace FudgeCore {
 
       let path: Node[] = Reflect.get(_event, "path");
       let index: number = path.indexOf(<Node>_event.currentTarget);
-      if (index > -1)
-        path.splice(index);
       let node: Node = this;
-      for (let i: number = path.length - 1; i >= 0; i--)
+      for (let i: number = index - 1; i >= 0; i--)
         node = node.getChildrenByName(path[i].name)[0]; // TODO: respect index for non-singleton components...
       let cmpMutate: Component = node.getComponent(_event.detail.component.constructor);
       this.#sync = false; // do not sync again, since mutation is already a synchronization
