@@ -3,6 +3,7 @@ namespace Fudge {
     // SKETCH = ViewSketch,
     ADD_NODE,
     ACTIVATE_NODE,
+    DELETE_NODE,
     ADD_COMPONENT,
     DELETE_COMPONENT,
     ADD_COMPONENT_SCRIPT,

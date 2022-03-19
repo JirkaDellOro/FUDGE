@@ -19,18 +19,19 @@ declare namespace Fudge {
     enum CONTEXTMENU {
         ADD_NODE = 0,
         ACTIVATE_NODE = 1,
-        ADD_COMPONENT = 2,
-        DELETE_COMPONENT = 3,
-        ADD_COMPONENT_SCRIPT = 4,
-        EDIT = 5,
-        CREATE_MESH = 6,
-        CREATE_MATERIAL = 7,
-        CREATE_GRAPH = 8,
-        REMOVE_COMPONENT = 9,
-        ADD_JOINT = 10,
-        TRANSLATE = 11,
-        ROTATE = 12,
-        SCALE = 13
+        DELETE_NODE = 2,
+        ADD_COMPONENT = 3,
+        DELETE_COMPONENT = 4,
+        ADD_COMPONENT_SCRIPT = 5,
+        EDIT = 6,
+        CREATE_MESH = 7,
+        CREATE_MATERIAL = 8,
+        CREATE_GRAPH = 9,
+        REMOVE_COMPONENT = 10,
+        ADD_JOINT = 11,
+        TRANSLATE = 12,
+        ROTATE = 13,
+        SCALE = 14
     }
     enum MENU {
         QUIT = "quit",
@@ -526,7 +527,7 @@ declare namespace Fudge {
         private graph;
         private tree;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
-        setGraph(_graph: ƒ.Node): void;
+        setGraph(_graph: ƒ.Graph): void;
         getSelection(): ƒ.Node[];
         getDragDropSources(): ƒ.Node[];
         focusNode(_node: ƒ.Node): void;

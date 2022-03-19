@@ -7,7 +7,7 @@ namespace Fudge {
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
    */
   export class ViewHierarchy extends View {
-    private graph: ƒ.Node;
+    private graph: ƒ.Graph;
     // private selectedNode: ƒ.Node;
     private tree: ƒUi.Tree<ƒ.Node>;
 
@@ -22,7 +22,7 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
     }
 
-    public setGraph(_graph: ƒ.Node): void {
+    public setGraph(_graph: ƒ.Graph): void {
       if (!_graph) {
         this.graph = undefined;
         this.dom.innerHTML = "";
@@ -107,6 +107,8 @@ namespace Fudge {
       menu.append(item);
       item = new remote.MenuItem({ label: "De- / Acvtivate", id: String(CONTEXTMENU.ACTIVATE_NODE), click: _callback, accelerator: "A" });
       menu.append(item);
+      item = new remote.MenuItem({ label: "Delete", id: String(CONTEXTMENU.DELETE_NODE), click: _callback, accelerator: "D" });
+      menu.append(item);
       return menu;
     }
 
@@ -124,7 +126,17 @@ namespace Fudge {
         case CONTEXTMENU.ACTIVATE_NODE:
           focus.activate(!focus.isActive);
           this.tree.findVisible(focus).refreshAttributes();
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.REFRESH, {bubbles: true}));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.REFRESH, { bubbles: true }));
+          break;
+        case CONTEXTMENU.DELETE_NODE:
+          // focus.addChild(child);
+          if (!focus)
+            return;
+          this.tree.delete([focus]);
+          focus.getParent().removeChild(focus);
+          ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
+          ƒ.Physics.cleanup();
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
           break;
       }
     }

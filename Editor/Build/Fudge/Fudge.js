@@ -29,18 +29,19 @@ var Fudge;
         // SKETCH = ViewSketch,
         CONTEXTMENU[CONTEXTMENU["ADD_NODE"] = 0] = "ADD_NODE";
         CONTEXTMENU[CONTEXTMENU["ACTIVATE_NODE"] = 1] = "ACTIVATE_NODE";
-        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 2] = "ADD_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["DELETE_COMPONENT"] = 3] = "DELETE_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 4] = "ADD_COMPONENT_SCRIPT";
-        CONTEXTMENU[CONTEXTMENU["EDIT"] = 5] = "EDIT";
-        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 6] = "CREATE_MESH";
-        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 7] = "CREATE_MATERIAL";
-        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 8] = "CREATE_GRAPH";
-        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 9] = "REMOVE_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 10] = "ADD_JOINT";
-        CONTEXTMENU[CONTEXTMENU["TRANSLATE"] = 11] = "TRANSLATE";
-        CONTEXTMENU[CONTEXTMENU["ROTATE"] = 12] = "ROTATE";
-        CONTEXTMENU[CONTEXTMENU["SCALE"] = 13] = "SCALE";
+        CONTEXTMENU[CONTEXTMENU["DELETE_NODE"] = 2] = "DELETE_NODE";
+        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 3] = "ADD_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["DELETE_COMPONENT"] = 4] = "DELETE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 5] = "ADD_COMPONENT_SCRIPT";
+        CONTEXTMENU[CONTEXTMENU["EDIT"] = 6] = "EDIT";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 7] = "CREATE_MESH";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 8] = "CREATE_MATERIAL";
+        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 9] = "CREATE_GRAPH";
+        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 10] = "REMOVE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 11] = "ADD_JOINT";
+        CONTEXTMENU[CONTEXTMENU["TRANSLATE"] = 12] = "TRANSLATE";
+        CONTEXTMENU[CONTEXTMENU["ROTATE"] = 13] = "ROTATE";
+        CONTEXTMENU[CONTEXTMENU["SCALE"] = 14] = "SCALE";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -2803,6 +2804,8 @@ var Fudge;
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "De- / Acvtivate", id: String(Fudge.CONTEXTMENU.ACTIVATE_NODE), click: _callback, accelerator: "A" });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Delete", id: String(Fudge.CONTEXTMENU.DELETE_NODE), click: _callback, accelerator: "D" });
+            menu.append(item);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
@@ -2819,6 +2822,16 @@ var Fudge;
                     focus.activate(!focus.isActive);
                     this.tree.findVisible(focus).refreshAttributes();
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.REFRESH, { bubbles: true }));
+                    break;
+                case Fudge.CONTEXTMENU.DELETE_NODE:
+                    // focus.addChild(child);
+                    if (!focus)
+                        return;
+                    this.tree.delete([focus]);
+                    focus.getParent().removeChild(focus);
+                    ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
+                    ƒ.Physics.cleanup();
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     break;
             }
         }
