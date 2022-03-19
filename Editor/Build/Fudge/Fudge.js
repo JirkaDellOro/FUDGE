@@ -42,6 +42,7 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["TRANSLATE"] = 12] = "TRANSLATE";
         CONTEXTMENU[CONTEXTMENU["ROTATE"] = 13] = "ROTATE";
         CONTEXTMENU[CONTEXTMENU["SCALE"] = 14] = "SCALE";
+        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 15] = "DELETE_RESOURCE";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -1025,6 +1026,8 @@ var Fudge;
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Create Graph", id: String(Fudge.CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Delete Resource", id: String(Fudge.CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
+            menu.append(item);
             // ContextMenu.appendCopyPaste(menu);
             return menu;
         }
@@ -1032,7 +1035,7 @@ var Fudge;
             let choice = Number(_item.id);
             ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
             let iSubclass = _item["iSubclass"];
-            if (choice != Fudge.CONTEXTMENU.CREATE_GRAPH && !iSubclass) {
+            if (!iSubclass && (choice == Fudge.CONTEXTMENU.CREATE_MESH || choice == Fudge.CONTEXTMENU.CREATE_MATERIAL)) {
                 alert("Funky Electron-Error... please try again");
                 return;
             }
@@ -1055,10 +1058,10 @@ var Fudge;
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     this.table.selectInterval(graph, graph);
                     break;
-                // case CONTEXTMENU.EDIT:
-                //   let resource: ƒ.SerializableResource = this.table.getFocussed();
-                //   this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
-                //   break;
+                case Fudge.CONTEXTMENU.DELETE_RESOURCE:
+                    await this.table.controller.delete([this.table.getFocussed()]);
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    break;
             }
         }
         //#endregion

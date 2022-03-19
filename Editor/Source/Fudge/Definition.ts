@@ -15,7 +15,8 @@ namespace Fudge {
     ADD_JOINT,
     TRANSLATE,
     ROTATE,
-    SCALE
+    SCALE,
+    DELETE_RESOURCE
   }
 
 

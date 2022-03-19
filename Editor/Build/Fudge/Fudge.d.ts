@@ -31,7 +31,8 @@ declare namespace Fudge {
         ADD_JOINT = 11,
         TRANSLATE = 12,
         ROTATE = 13,
-        SCALE = 14
+        SCALE = 14,
+        DELETE_RESOURCE = 15
     }
     enum MENU {
         QUIT = "quit",

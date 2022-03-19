@@ -69,6 +69,9 @@ namespace Fudge {
       item = new remote.MenuItem({ label: "Create Graph", id: String(CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
       menu.append(item);
 
+      item = new remote.MenuItem({ label: "Delete Resource", id: String(CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
+      menu.append(item);
+
       // ContextMenu.appendCopyPaste(menu);
       return menu;
     }
@@ -77,7 +80,7 @@ namespace Fudge {
       let choice: CONTEXTMENU = Number(_item.id);
       ƒ.Debug.fudge(`MenuSelect | id: ${CONTEXTMENU[_item.id]} | event: ${_event}`);
       let iSubclass: number = _item["iSubclass"];
-      if (choice != CONTEXTMENU.CREATE_GRAPH && !iSubclass) {
+      if (!iSubclass && (choice == CONTEXTMENU.CREATE_MESH || choice == CONTEXTMENU.CREATE_MATERIAL) ) {
         alert("Funky Electron-Error... please try again");
         return;
       }
@@ -101,10 +104,10 @@ namespace Fudge {
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
           this.table.selectInterval(graph, graph);
           break;
-        // case CONTEXTMENU.EDIT:
-        //   let resource: ƒ.SerializableResource = this.table.getFocussed();
-        //   this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
-        //   break;
+        case CONTEXTMENU.DELETE_RESOURCE:
+          await this.table.controller.delete([this.table.getFocussed()]);
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          break;
       }
     }
     //#endregion
@@ -159,7 +162,7 @@ namespace Fudge {
       switch (_event.type) {
         case EVENT_EDITOR.SET_PROJECT:
         case EVENT_EDITOR.UPDATE:
-        // case ƒui.EVENT.MUTATE:
+          // case ƒui.EVENT.MUTATE:
           this.listResources();
           break;
         case ƒui.EVENT.REMOVE_CHILD:
