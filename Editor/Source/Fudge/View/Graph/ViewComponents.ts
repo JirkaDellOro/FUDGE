@@ -53,6 +53,12 @@ namespace Fudge {
         submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.ADD_JOINT, ƒ.Joint, _callback)
       });
       menu.append(item);
+      item = new remote.MenuItem({
+        label: "Delete Component",
+        submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.ADD_JOINT, ƒ.Joint, _callback)
+      });
+      item = new remote.MenuItem({ label: "Delete Component", id: String(CONTEXTMENU.DELETE_COMPONENT), click: _callback, accelerator: "D" });
+      menu.append(item);
 
       // ContextMenu.appendCopyPaste(menu);
       return menu;
@@ -69,6 +75,21 @@ namespace Fudge {
           break;
         case CONTEXTMENU.ADD_JOINT:
           component = ƒ.Joint.subclasses[iSubclass];
+          break;
+        case CONTEXTMENU.DELETE_COMPONENT:
+          let element: Element = document.activeElement;
+          if (element.tagName == "BODY")
+            return;
+          do {
+            console.log(element.tagName);
+            let controller: ControllerComponent = Reflect.get(element, "controller");
+            if (element.tagName == "DETAILS" && controller) {
+              this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.DELETE, { detail: { mutable: controller.getMutable() } }));
+              break;
+            }
+            element = element.parentElement;
+          } while (element);
+          return;
       }
 
       //@ts-ignore

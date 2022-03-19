@@ -20,16 +20,17 @@ declare namespace Fudge {
         ADD_NODE = 0,
         ACTIVATE_NODE = 1,
         ADD_COMPONENT = 2,
-        ADD_COMPONENT_SCRIPT = 3,
-        EDIT = 4,
-        CREATE_MESH = 5,
-        CREATE_MATERIAL = 6,
-        CREATE_GRAPH = 7,
-        REMOVE_COMPONENT = 8,
-        ADD_JOINT = 9,
-        TRANSLATE = 10,
-        ROTATE = 11,
-        SCALE = 12
+        DELETE_COMPONENT = 3,
+        ADD_COMPONENT_SCRIPT = 4,
+        EDIT = 5,
+        CREATE_MESH = 6,
+        CREATE_MATERIAL = 7,
+        CREATE_GRAPH = 8,
+        REMOVE_COMPONENT = 9,
+        ADD_JOINT = 10,
+        TRANSLATE = 11,
+        ROTATE = 12,
+        SCALE = 13
     }
     enum MENU {
         QUIT = "quit",

@@ -30,16 +30,17 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["ADD_NODE"] = 0] = "ADD_NODE";
         CONTEXTMENU[CONTEXTMENU["ACTIVATE_NODE"] = 1] = "ACTIVATE_NODE";
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 2] = "ADD_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 3] = "ADD_COMPONENT_SCRIPT";
-        CONTEXTMENU[CONTEXTMENU["EDIT"] = 4] = "EDIT";
-        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 5] = "CREATE_MESH";
-        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 6] = "CREATE_MATERIAL";
-        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 7] = "CREATE_GRAPH";
-        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 8] = "REMOVE_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 9] = "ADD_JOINT";
-        CONTEXTMENU[CONTEXTMENU["TRANSLATE"] = 10] = "TRANSLATE";
-        CONTEXTMENU[CONTEXTMENU["ROTATE"] = 11] = "ROTATE";
-        CONTEXTMENU[CONTEXTMENU["SCALE"] = 12] = "SCALE";
+        CONTEXTMENU[CONTEXTMENU["DELETE_COMPONENT"] = 3] = "DELETE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 4] = "ADD_COMPONENT_SCRIPT";
+        CONTEXTMENU[CONTEXTMENU["EDIT"] = 5] = "EDIT";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 6] = "CREATE_MESH";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 7] = "CREATE_MATERIAL";
+        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 8] = "CREATE_GRAPH";
+        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 9] = "REMOVE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 10] = "ADD_JOINT";
+        CONTEXTMENU[CONTEXTMENU["TRANSLATE"] = 11] = "TRANSLATE";
+        CONTEXTMENU[CONTEXTMENU["ROTATE"] = 12] = "ROTATE";
+        CONTEXTMENU[CONTEXTMENU["SCALE"] = 13] = "SCALE";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -2452,6 +2453,12 @@ var Fudge;
                 submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.ADD_JOINT, ƒ.Joint, _callback)
             });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({
+                label: "Delete Component",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.ADD_JOINT, ƒ.Joint, _callback)
+            });
+            item = new Fudge.remote.MenuItem({ label: "Delete Component", id: String(Fudge.CONTEXTMENU.DELETE_COMPONENT), click: _callback, accelerator: "D" });
+            menu.append(item);
             // ContextMenu.appendCopyPaste(menu);
             return menu;
         }
@@ -2465,6 +2472,21 @@ var Fudge;
                     break;
                 case Fudge.CONTEXTMENU.ADD_JOINT:
                     component = ƒ.Joint.subclasses[iSubclass];
+                    break;
+                case Fudge.CONTEXTMENU.DELETE_COMPONENT:
+                    let element = document.activeElement;
+                    if (element.tagName == "BODY")
+                        return;
+                    do {
+                        console.log(element.tagName);
+                        let controller = Reflect.get(element, "controller");
+                        if (element.tagName == "DETAILS" && controller) {
+                            this.dom.dispatchEvent(new CustomEvent("delete" /* DELETE */, { detail: { mutable: controller.getMutable() } }));
+                            break;
+                        }
+                        element = element.parentElement;
+                    } while (element);
+                    return;
             }
             //@ts-ignore
             let cmpNew = new component();
