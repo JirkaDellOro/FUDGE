@@ -159,10 +159,12 @@ declare namespace Fudge {
         private static idCounter;
         private static goldenLayout;
         private static panels;
+        private static physics;
         static setDefaultProject(): void;
         static getPanelInfo(): string;
         static setPanelInfo(_panelInfos: string): void;
         static setTransform(_mode: TRANSFORM): void;
+        static getPhysics(_graph: ƒ.Graph): ƒ.Physics;
         private static start;
         private static setupGoldenLayout;
         private static add;
@@ -548,7 +550,7 @@ declare namespace Fudge {
         private graph;
         constructor(_container: ComponentContainer, _state: JsonValue);
         createUserInterface(): void;
-        setGraph(_node: ƒ.Node): void;
+        setGraph(_node: ƒ.Graph): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected openContextMenu: (_event: Event) => void;

@@ -660,7 +660,7 @@ namespace FudgeCore {
         _mutator.typeCollider = parseInt(_mutator.typeCollider);
       if (_mutator.initialization != undefined)
         _mutator.initialization = parseInt(_mutator.initialization);
-      super.mutate(_mutator);
+      await super.mutate(_mutator);
       if (_mutator.initialization != undefined && this.isActive)
         this.initialize();
       // TODO: see if this alternative should be, at least partially, done with mutateSelection
@@ -679,7 +679,7 @@ namespace FudgeCore {
       // callIfExist("typeBody", (_value: string) => this.typeBody = parseInt(_value));
       // callIfExist("typeCollider", (_value: string) => this.typeCollider = parseInt(_value));
 
-      this.dispatchEvent(new Event(EVENT.MUTATE));
+      // this.dispatchEvent(new Event(EVENT.MUTATE));
     }
 
     public getMutator(): Mutator {

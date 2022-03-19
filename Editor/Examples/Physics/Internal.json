@@ -267,7 +267,7 @@
                                 "mass": 0.5000000000000001,
                                 "dampTranslation": 0.1,
                                 "dampRotation": 0.1,
-                                "effectGravity": -1,
+                                "effectGravity": 1,
                                 "typeBody": "DYNAMIC",
                                 "typeCollider": "CUBE",
                                 "isTrigger": false,
@@ -287,7 +287,7 @@
                             {
                               "ƒ.ComponentTransform": {
                                 "local": {
-                                  "translation": "[0.9999998807907104, 0.999504566192627, 0]",
+                                  "translation": "[0.2707085609436035, 0.999504566192627, 0]",
                                   "rotation": "[0, 0, 0]",
                                   "scaling": "[1, 1, 1]"
                                 },
@@ -478,7 +478,7 @@
                                 "mass": 0.5000000000000001,
                                 "dampTranslation": 0.1,
                                 "dampRotation": 0.1,
-                                "effectGravity": -1,
+                                "effectGravity": 1,
                                 "typeBody": "DYNAMIC",
                                 "typeCollider": "CUBE",
                                 "isTrigger": false,
@@ -498,7 +498,7 @@
                             {
                               "ƒ.ComponentTransform": {
                                 "local": {
-                                  "translation": "[0.9999998807907104, 0.999504566192627, 0]",
+                                  "translation": "[0.2707085609436035, 0.999504566192627, 0]",
                                   "rotation": "[0, 0, 0]",
                                   "scaling": "[1, 1, 1]"
                                 },
@@ -673,7 +673,7 @@
                     "mass": 0.5000000000000001,
                     "dampTranslation": 0.1,
                     "dampRotation": 0.1,
-                    "effectGravity": -1,
+                    "effectGravity": 1,
                     "typeBody": "DYNAMIC",
                     "typeCollider": "CUBE",
                     "isTrigger": false,
@@ -693,7 +693,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[0.9999998807907104, 0.999504566192627, 0]",
+                      "translation": "[0.2707085609436035, 0.999504566192627, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },

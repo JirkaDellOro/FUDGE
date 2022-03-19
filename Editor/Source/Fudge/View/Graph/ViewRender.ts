@@ -12,7 +12,7 @@ namespace Fudge {
     private cmrOrbit: ƒAid.CameraOrbit;
     private viewport: ƒ.Viewport;
     private canvas: HTMLCanvasElement;
-    private graph: ƒ.Node;
+    private graph: ƒ.Graph;
 
     constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
@@ -70,7 +70,7 @@ namespace Fudge {
       this.canvas.addEventListener("pick", this.hndPick);
     }
 
-    public setGraph(_node: ƒ.Node): void {
+    public setGraph(_node: ƒ.Graph): void {
       if (!_node) {
         this.graph = undefined;
         this.dom.innerHTML = "Drop a graph here to edit";
@@ -82,7 +82,9 @@ namespace Fudge {
       }
       this.graph = _node;
       ƒ.Physics.cleanup();
-      ƒ.Physics.activeInstance = new ƒ.Physics();
+      ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
+      ƒ.Physics.cleanup();
+      ƒ.Physics.connectJoints();
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       this.viewport.setBranch(this.graph);
       // this.graph.addEventListener(ƒ.EVENT.MUTATE, this.redraw);
@@ -166,7 +168,6 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      ƒ.Physics.connectJoints();
       switch (_event.type) {
         case EVENT_EDITOR.CLEAR_PROJECT:
           this.setGraph(null);
@@ -233,6 +234,8 @@ namespace Fudge {
 
     private redraw = () => {
       try {
+        ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
+        ƒ.Physics.connectJoints();
         this.viewport.draw();
       } catch (_error: unknown) {
         //nop

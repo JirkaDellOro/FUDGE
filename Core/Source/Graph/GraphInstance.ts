@@ -99,7 +99,7 @@ namespace FudgeCore {
       await cmpMutate.mutate(_event.detail.mutator); // expect endless calls, since this component calls graph again
       this.#sync = true;
 
-      console.log("Graph mutates", node.name, cmpMutate.constructor.name, _event.detail.mutator);
+      // console.log("Graph mutates", node.name, cmpMutate.constructor.name, _event.detail.mutator);
     }
 
 
@@ -115,7 +115,7 @@ namespace FudgeCore {
         node = node.getChildrenByName(path.pop().name)[0];
       let cmpMutate: Component = node.getComponent(_event.detail.component.constructor);
       await cmpMutate.mutate(_event.detail.mutator);
-      console.log("Instance mutates", node.name, cmpMutate.constructor.name, _event.detail.mutator);
+      // console.log("Instance mutates", node.name, cmpMutate.constructor.name, _event.detail.mutator);
     }
   }
 }

@@ -121,6 +121,7 @@ namespace Fudge {
           break;
         case "Graph":
           previewObject.appendChild(<ƒ.Graph>this.resource);
+          ƒ.Physics.activeInstance = Page.getPhysics(<ƒ.Graph>this.resource);
           this.setViewObject(previewObject);
           previewObject.addEventListener(ƒ.EVENT.MUTATE, (_event: Event) => {
             this.redraw();
@@ -248,6 +249,8 @@ namespace Fudge {
 
     private redraw = () => {
       try {
+        if (this.resource instanceof ƒ.Graph)
+          ƒ.Physics.activeInstance = Page.getPhysics(this.resource);
         this.viewport.draw();
       } catch (_error: unknown) {
         //nop

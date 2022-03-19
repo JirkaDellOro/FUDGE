@@ -299,8 +299,6 @@ var Fudge;
             this.name = _base.toString().split("/").slice(-2, -1)[0];
             this.fileIndex = _base.toString().split("/").pop() || this.fileIndex;
             ƒ.Project.clear();
-            let physics = new ƒ.Physics();
-            ƒ.Physics.activeInstance = physics;
         }
         async openDialog() {
             let promise = ƒui.Dialog.prompt(Fudge.project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
@@ -318,6 +316,7 @@ var Fudge;
             console.log(mutator, this);
         };
         async load(htmlContent) {
+            ƒ.Physics.activeInstance = new ƒ.Physics();
             const parser = new DOMParser();
             this.#document = parser.parseFromString(htmlContent, "text/html");
             const head = this.#document.querySelector("head");
@@ -347,6 +346,7 @@ var Fudge;
             let panelInfo = settings?.getAttribute("panels");
             panelInfo = panelInfo?.replace(/'/g, "\"");
             Fudge.Page.setPanelInfo(panelInfo || "[]");
+            ƒ.Physics.cleanup(); // remove potential rigidbodies
         }
         getProjectJSON() {
             let serialization = ƒ.Project.serialize();
@@ -526,13 +526,11 @@ var Fudge;
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
-// /<reference types="../../GoldenLayout/golden-layout" />
 ///<reference path="Project.ts"/>
 var Fudge;
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
-// /<reference types="../../GoldenLayout/golden-layout" />
 ///<reference path="Project.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
@@ -548,6 +546,7 @@ var Fudge;
         static idCounter = 0;
         static goldenLayout;
         static panels = [];
+        static physics = {};
         static setDefaultProject() {
             if (Fudge.project)
                 localStorage.setItem("project", Fudge.project.base.toString());
@@ -568,6 +567,9 @@ var Fudge;
         static setTransform(_mode) {
             Page.modeTransform = _mode;
             ƒ.Debug.fudge(`Transform mode: ${_mode}`);
+        }
+        static getPhysics(_graph) {
+            return Page.physics[_graph.idResource] || (Page.physics[_graph.idResource] = new ƒ.Physics());
         }
         // called by windows load-listener
         static async start() {
@@ -2477,10 +2479,6 @@ var Fudge;
                     console.log(this.node);
                     return;
                 }
-            // if (cmpNew instanceof ƒ.ComponentMaterial) {
-            //   alert("Drop a material into the Component view to attach it to the node");
-            //   return;
-            // }
             ƒ.Debug.info(cmpNew.type, cmpNew);
             this.node.addComponent(cmpNew);
             this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.node } }));
@@ -2892,7 +2890,9 @@ var Fudge;
             }
             this.graph = _node;
             ƒ.Physics.cleanup();
-            ƒ.Physics.activeInstance = new ƒ.Physics();
+            ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
+            ƒ.Physics.cleanup();
+            ƒ.Physics.connectJoints();
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             this.viewport.setBranch(this.graph);
             // this.graph.addEventListener(ƒ.EVENT.MUTATE, this.redraw);
@@ -2965,7 +2965,6 @@ var Fudge;
             this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
         }
         hndEvent = (_event) => {
-            ƒ.Physics.connectJoints();
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.CLEAR_PROJECT:
                     this.setGraph(null);
@@ -3023,6 +3022,8 @@ var Fudge;
         };
         redraw = () => {
             try {
+                ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
+                ƒ.Physics.connectJoints();
                 this.viewport.draw();
             }
             catch (_error) {
@@ -3141,6 +3142,7 @@ var Fudge;
                     break;
                 case "Graph":
                     previewObject.appendChild(this.resource);
+                    ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);
                     this.setViewObject(previewObject);
                     previewObject.addEventListener("mutate" /* MUTATE */, (_event) => {
                         this.redraw();
@@ -3255,6 +3257,8 @@ var Fudge;
         }
         redraw = () => {
             try {
+                if (this.resource instanceof ƒ.Graph)
+                    ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);
                 this.viewport.draw();
             }
             catch (_error) {

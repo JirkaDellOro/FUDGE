@@ -1,7 +1,6 @@
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
-// /<reference types="../../GoldenLayout/golden-layout" />
 ///<reference path="Project.ts"/>
 
 namespace Fudge {
@@ -31,6 +30,7 @@ namespace Fudge {
     private static idCounter: number = 0;
     private static goldenLayout: GoldenLayout;
     private static panels: Panel[] = [];
+    private static physics: { [idGraph: string]: ƒ.Physics } = {};
 
     public static setDefaultProject(): void {
       if (project)
@@ -56,6 +56,10 @@ namespace Fudge {
     public static setTransform(_mode: TRANSFORM): void {
       Page.modeTransform = _mode;
       ƒ.Debug.fudge(`Transform mode: ${_mode}`);
+    }
+
+    public static getPhysics(_graph: ƒ.Graph): ƒ.Physics {
+      return Page.physics[_graph.idResource] || (Page.physics[_graph.idResource] = new ƒ.Physics());
     }
 
     // called by windows load-listener
@@ -158,7 +162,7 @@ namespace Fudge {
 
     private static hndKey = (_event: KeyboardEvent): void => {
       document.exitPointerLock();
-      
+
       switch (_event.code) {
         case ƒ.KEYBOARD_CODE.T:
           Page.setTransform(TRANSFORM.TRANSLATE);
@@ -175,7 +179,7 @@ namespace Fudge {
 
     private static hndEvent(_event: CustomEvent): void {
       // ƒ.Debug.fudge("Page received", _event.type, _event);
-      
+
       switch (_event.type) {
         case EVENT_EDITOR.DESTROY:
           let view: View = _event.detail;
