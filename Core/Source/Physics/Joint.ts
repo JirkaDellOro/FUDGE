@@ -45,8 +45,8 @@ namespace FudgeCore {
         Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
         actual constraint ain't existent until the game starts
       */
-      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
-      this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeJoint);
+      this.addEventListener(EVENT.COMPONENT_ADD, this.hndEvent);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.hndEvent);
     }
 
     protected static registerSubclass(_subclass: typeof Joint): number { return Joint.subclasses.push(_subclass) - 1; }
@@ -277,6 +277,19 @@ namespace FudgeCore {
     protected deleteFromMutator(_mutator: Mutator, _delete: Mutator): void {
       for (let key in _delete)
         delete _mutator[key];
+    }
+
+    private hndEvent = (_event: Event) => {
+      switch (_event.type) {
+        case EVENT.COMPONENT_ADD:
+          this.node.addEventListener(EVENT.DISCONNECT_JOINT, () => { this.disconnect(); this.dirtyStatus(); }, true);
+          this.dirtyStatus();
+          break;
+        case EVENT.COMPONENT_REMOVE:
+          this.node.removeEventListener(EVENT.DISCONNECT_JOINT, () => { this.disconnect(); this.dirtyStatus(); }, true);
+          this.removeJoint();
+          break;
+      }
     }
   }
 }

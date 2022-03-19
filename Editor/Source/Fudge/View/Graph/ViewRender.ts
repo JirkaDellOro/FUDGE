@@ -60,13 +60,8 @@ namespace Fudge {
 
       this.setGraph(null);
 
-      // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
-      // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
-
-      //Focus cameracontrols on new viewport
-      // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
-
-      this.canvas.addEventListener(ƒUi.EVENT.CLICK, this.activeViewport);
+      // this.canvas.addEventListener(ƒUi.EVENT.CLICK, this.activeViewport);
+      this.canvas.addEventListener("pointerdown", this.activeViewport);
       this.canvas.addEventListener("pick", this.hndPick);
     }
 
@@ -80,14 +75,15 @@ namespace Fudge {
         this.dom.innerHTML = "";
         this.dom.appendChild(this.canvas);
       }
+      // this.graph.broadcastEvent(new Event(ƒ.EVENT.DISCONNECT_JOINT));
+      // ƒ.Physics.cleanup();
       this.graph = _node;
-      ƒ.Physics.cleanup();
       ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
       ƒ.Physics.cleanup();
+      this.graph.broadcastEvent(new Event(ƒ.EVENT.DISCONNECT_JOINT));
       ƒ.Physics.connectJoints();
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       this.viewport.setBranch(this.graph);
-      // this.graph.addEventListener(ƒ.EVENT.MUTATE, this.redraw);
       this.redraw();
     }
 
@@ -207,7 +203,7 @@ namespace Fudge {
       }
       this.#pointerMoved ||= (_event.movementX != 0 || _event.movementY != 0);
 
-      this.dom.focus({preventScroll: true});
+      this.dom.focus({ preventScroll: true });
       let restriction: string;
       if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.X]))
         restriction = "x";
@@ -228,15 +224,15 @@ namespace Fudge {
     }
 
     private activeViewport = (_event: MouseEvent): void => {
-      // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
+      ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
       _event.cancelBubble = true;
     }
 
     private redraw = () => {
       try {
         ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
-        ƒ.Physics.connectJoints();
         this.viewport.draw();
+        // ƒ.Physics.connectJoints();
       } catch (_error: unknown) {
         //nop
       }

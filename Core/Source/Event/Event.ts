@@ -47,7 +47,9 @@ namespace FudgeCore {
     /** dispatched to {@link Node} when recalculating transforms for render */
     RENDER_PREPARE = "renderPrepare",
     RENDER_PREPARE_START = "renderPrepareStart",
-    RENDER_PREPARE_END = "renderPrepareEnd"
+    RENDER_PREPARE_END = "renderPrepareEnd",
+    /** dispatched to Joint-Components in order to disconnect */
+    DISCONNECT_JOINT = "disconnectJoint"
   }
 
 

@@ -168,7 +168,9 @@ declare namespace FudgeCore {
         /** dispatched to {@link Node} when recalculating transforms for render */
         RENDER_PREPARE = "renderPrepare",
         RENDER_PREPARE_START = "renderPrepareStart",
-        RENDER_PREPARE_END = "renderPrepareEnd"
+        RENDER_PREPARE_END = "renderPrepareEnd",
+        /** dispatched to Joint-Components in order to disconnect */
+        DISCONNECT_JOINT = "disconnectJoint"
     }
     type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | ((_event: EventPhysics) => void) | ((_event: CustomEvent) => void) | EventListenerOrEventListenerObject;
     type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics | CustomEvent;
@@ -1241,6 +1243,7 @@ declare namespace FudgeCore {
         protected constructJoint(..._configParams: Object[]): void;
         protected configureJoint(): void;
         protected deleteFromMutator(_mutator: Mutator, _delete: Mutator): void;
+        private hndEvent;
     }
 }
 declare namespace FudgeCore {
@@ -4849,7 +4852,6 @@ declare namespace FudgeCore {
         private bodyList;
         private jointList;
         constructor();
-        getOimoWorld(): OIMO.World;
         /**
          * Define the currently active Physics instance
          */
@@ -4921,6 +4923,7 @@ declare namespace FudgeCore {
         private static getRayEndPoint;
         /** Internal function to get the distance in which a ray hit by subtracting points from each other and get the square root of the squared product of each component. */
         private static getRayDistance;
+        getOimoWorld(): OIMO.World;
     }
 }
 declare namespace FudgeCore {

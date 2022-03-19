@@ -2871,11 +2871,8 @@ var Fudge;
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             // this.viewport.draw();
             this.setGraph(null);
-            // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
-            // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
-            //Focus cameracontrols on new viewport
-            // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
-            this.canvas.addEventListener("click" /* CLICK */, this.activeViewport);
+            // this.canvas.addEventListener(ƒUi.EVENT.CLICK, this.activeViewport);
+            this.canvas.addEventListener("pointerdown", this.activeViewport);
             this.canvas.addEventListener("pick", this.hndPick);
         }
         setGraph(_node) {
@@ -2888,14 +2885,15 @@ var Fudge;
                 this.dom.innerHTML = "";
                 this.dom.appendChild(this.canvas);
             }
+            // this.graph.broadcastEvent(new Event(ƒ.EVENT.DISCONNECT_JOINT));
+            // ƒ.Physics.cleanup();
             this.graph = _node;
-            ƒ.Physics.cleanup();
             ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
             ƒ.Physics.cleanup();
+            this.graph.broadcastEvent(new Event("disconnectJoint" /* DISCONNECT_JOINT */));
             ƒ.Physics.connectJoints();
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             this.viewport.setBranch(this.graph);
-            // this.graph.addEventListener(ƒ.EVENT.MUTATE, this.redraw);
             this.redraw();
         }
         //#region  ContextMenu
@@ -3017,14 +3015,14 @@ var Fudge;
             this.redraw();
         };
         activeViewport = (_event) => {
-            // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
+            ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
             _event.cancelBubble = true;
         };
         redraw = () => {
             try {
                 ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
-                ƒ.Physics.connectJoints();
                 this.viewport.draw();
+                // ƒ.Physics.connectJoints();
             }
             catch (_error) {
                 //nop
