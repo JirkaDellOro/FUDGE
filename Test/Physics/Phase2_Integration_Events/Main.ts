@@ -15,9 +15,9 @@ namespace FudgePhysics_Communication {
     let cubes: f.Node[] = new Array();
 
 
-    let hitMaterial: f.Material = new f.Material("hitMat", f.ShaderFlat, new f.CoatColored(new f.Color(0.3, 0, 0, 1)));
-    let triggeredMaterial: f.Material = new f.Material("triggerMat", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0.3, 0, 1)));
-    let normalMaterial: f.Material = new f.Material("NormalMat", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1)));
+    let hitMaterial: f.Material = new f.Material("hitMat", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.3, 0, 0, 1)));
+    let triggeredMaterial: f.Material = new f.Material("triggerMat", f.ShaderFlat, new f.CoatRemissive(new f.Color(0, 0.3, 0, 1)));
+    let normalMaterial: f.Material = new f.Material("NormalMat", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 0, 0, 1)));
 
 
 
@@ -26,7 +26,7 @@ namespace FudgePhysics_Communication {
         f.Debug.log(app);
         hierarchy = new f.Node("Scene");
 
-        let ground: f.Node = createCompleteMeshNode("GroundCollider", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
+        let ground: f.Node = createCompleteMeshNode("GroundCollider", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
         let cmpGroundMesh: f.ComponentTransform = ground.getComponent(f.ComponentTransform);
         cmpGroundMesh.mtxLocal.scale(new f.Vector3(10, 0.3, 10));
 
@@ -38,17 +38,17 @@ namespace FudgePhysics_Communication {
         hierarchy.appendChild(cubes[0]);
         cmpCubeTransform.mtxLocal.translate(new f.Vector3(0, 7, 0));
 
-        cubes[1] = createCompleteMeshNode("Cube", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
+        cubes[1] = createCompleteMeshNode("Cube", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
         let cmpCubeTransform2: f.ComponentTransform = cubes[1].getComponent(f.ComponentTransform);
         hierarchy.appendChild(cubes[1]);
         cmpCubeTransform2.mtxLocal.translate(new f.Vector3(0, 3.5, 0.48));
 
-        cubes[2] = createCompleteMeshNode("Cube", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
+        cubes[2] = createCompleteMeshNode("Cube", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
         let cmpCubeTransform3: f.ComponentTransform = cubes[2].getComponent(f.ComponentTransform);
         hierarchy.appendChild(cubes[2]);
         cmpCubeTransform3.mtxLocal.translate(new f.Vector3(0.6, 7, 0.5));
 
-        cubes[3] = createCompleteMeshNode("Trigger", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 1, 0, 1))), new f.MeshSphere(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.SPHERE);
+        cubes[3] = createCompleteMeshNode("Trigger", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0, 1, 0, 1))), new f.MeshSphere(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.SPHERE);
         cubes[3].getComponent(f.ComponentRigidbody).isTrigger = true;
         let cmpCubeTransform4: f.ComponentTransform = cubes[3].getComponent(f.ComponentTransform);
         hierarchy.appendChild(cubes[3]);

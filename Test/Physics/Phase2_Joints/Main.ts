@@ -50,7 +50,7 @@ namespace FudgePhysics_Communication {
     document.addEventListener("keypress", hndKey);
     document.addEventListener("keydown", hndKeyDown);
 
-    ground = createCompleteMeshNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
+    ground = createCompleteMeshNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
     let cmpGroundMesh: f.ComponentTransform = ground.getComponent(f.ComponentTransform);
     cmpGroundMesh.mtxLocal.scale(new f.Vector3(14, 0.3, 14));
 
@@ -58,7 +58,7 @@ namespace FudgePhysics_Communication {
     hierarchy.appendChild(ground);
 
     //Prismatic Joints
-    bodies[0] = createCompleteMeshNode("Spring_Floor", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
+    bodies[0] = createCompleteMeshNode("Spring_Floor", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
     let cmpCubeTransform: f.ComponentTransform = bodies[0].getComponent(f.ComponentTransform);
     hierarchy.appendChild(bodies[0]);
     cmpCubeTransform.mtxLocal.translate(new f.Vector3(0, 1, 0));
@@ -71,12 +71,12 @@ namespace FudgePhysics_Communication {
     prismaticJoint.minMotor = 0;
     prismaticJoint.internalCollision = true;
 
-    bodies[3] = createCompleteMeshNode("CubeJointBase", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
+    bodies[3] = createCompleteMeshNode("CubeJointBase", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
     hierarchy.appendChild(bodies[3]);
     bodies[3].mtxLocal.translate(new f.Vector3(-4, 2, -2));
     bodies[3].mtxLocal.scale(new f.Vector3(2, 0.5, 0.5));
 
-    bodies[4] = createCompleteMeshNode("CubeJointSlide", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
+    bodies[4] = createCompleteMeshNode("CubeJointSlide", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
     hierarchy.appendChild(bodies[4]);
     bodies[4].mtxLocal.translate(new f.Vector3(-4, 2, -2));
     prismaticJointSlide = new f.JointPrismatic(bodies[3].getComponent(f.ComponentRigidbody), bodies[4].getComponent(f.ComponentRigidbody), new f.Vector3(1, 0, 0));
@@ -86,12 +86,12 @@ namespace FudgePhysics_Communication {
     prismaticJointSlide.maxMotor = 1;
 
     //Revolute Joint
-    bodies[5] = createCompleteMeshNode("Handle", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
+    bodies[5] = createCompleteMeshNode("Handle", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
     hierarchy.appendChild(bodies[5]);
     bodies[5].mtxLocal.translate(new f.Vector3(3.5, 2, -2));
     bodies[5].mtxLocal.scale(new f.Vector3(0.5, 2, 0.5));
 
-    bodies[6] = createCompleteMeshNode("SwingDoor", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
+    bodies[6] = createCompleteMeshNode("SwingDoor", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
     hierarchy.appendChild(bodies[6]);
     bodies[6].mtxLocal.translate(new f.Vector3(4.25, 2, -2));
     bodies[6].mtxLocal.scale(new f.Vector3(1.5, 2, 0.2));
@@ -102,12 +102,12 @@ namespace FudgePhysics_Communication {
     revoluteJointSwingDoor.maxMotor = 60;
 
     //Cylindrical Joint
-    bodies[7] = createCompleteMeshNode("Holder", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
+    bodies[7] = createCompleteMeshNode("Holder", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
     hierarchy.appendChild(bodies[7]);
     bodies[7].mtxLocal.translate(new f.Vector3(1.5, 3, -2));
     bodies[7].mtxLocal.scale(new f.Vector3(0.5, 1, 0.5));
 
-    bodies[8] = createCompleteMeshNode("MovingDrill", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
+    bodies[8] = createCompleteMeshNode("MovingDrill", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
     hierarchy.appendChild(bodies[8]);
     bodies[8].mtxLocal.translate(new f.Vector3(1.5, 2.5, -2));
     bodies[8].mtxLocal.scale(new f.Vector3(0.3, 2, 0.3));
@@ -119,12 +119,12 @@ namespace FudgePhysics_Communication {
     cylindricalJoint.rotorTorque = 10;
 
     //Spherical Joint
-    bodies[9] = createCompleteMeshNode("Socket", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
+    bodies[9] = createCompleteMeshNode("Socket", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
     hierarchy.appendChild(bodies[9]);
     bodies[9].mtxLocal.translate(new f.Vector3(-1.5, 3, 2.5));
     bodies[9].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
 
-    bodies[10] = createCompleteMeshNode("BallJoint", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
+    bodies[10] = createCompleteMeshNode("BallJoint", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
     hierarchy.appendChild(bodies[10]);
     bodies[10].mtxLocal.translate(new f.Vector3(-1.5, 2, 2.5));
     bodies[10].mtxLocal.scale(new f.Vector3(0.3, 2, 0.3));
@@ -132,12 +132,12 @@ namespace FudgePhysics_Communication {
     bodies[9].addComponent(sphericalJoint);
 
     //Universal Joint
-    bodies[11] = createCompleteMeshNode("Holder", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
+    bodies[11] = createCompleteMeshNode("Holder", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
     hierarchy.appendChild(bodies[11]);
     bodies[11].mtxLocal.translate(new f.Vector3(-5.5, 5, 2.5));
     bodies[11].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
 
-    bodies[12] = createCompleteMeshNode("Universal1", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
+    bodies[12] = createCompleteMeshNode("Universal1", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
     hierarchy.appendChild(bodies[12]);
     bodies[12].mtxLocal.translate(new f.Vector3(-5.5, 3.75, 2.5));
     bodies[12].mtxLocal.scale(new f.Vector3(0.3, 2, 0.3));
@@ -145,7 +145,7 @@ namespace FudgePhysics_Communication {
     bodies[11].addComponent(universalJoint);
 
 
-    bodies[13] = createCompleteMeshNode("Universal2", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
+    bodies[13] = createCompleteMeshNode("Universal2", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
     hierarchy.appendChild(bodies[13]);
     bodies[13].mtxLocal.translate(new f.Vector3(-5.5, 1.75, 2.5));
     bodies[13].mtxLocal.scale(new f.Vector3(0.3, 2, 0.3));
@@ -154,23 +154,23 @@ namespace FudgePhysics_Communication {
 
 
     //Miscellaneous
-    bodies[1] = createCompleteMeshNode("Cube_2", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
+    bodies[1] = createCompleteMeshNode("Cube_2", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
     let cmpCubeTransform2: f.ComponentTransform = bodies[1].getComponent(f.ComponentTransform);
     hierarchy.appendChild(bodies[1]);
     cmpCubeTransform2.mtxLocal.translate(new f.Vector3(0, 2, 0));
 
-    bodies[2] = createCompleteMeshNode("Cube_3", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
+    bodies[2] = createCompleteMeshNode("Cube_3", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
     let cmpCubeTransform3: f.ComponentTransform = bodies[2].getComponent(f.ComponentTransform);
     hierarchy.appendChild(bodies[2]);
     cmpCubeTransform3.mtxLocal.translate(new f.Vector3(0.5, 3, 0.5));
 
-    bodies[40] = createCompleteMeshNode("Cube_NonePhysics", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 1, 1, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
+    bodies[40] = createCompleteMeshNode("Cube_NonePhysics", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0, 1, 1, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
     bodies[40].removeComponent(bodies[40].getComponent(f.ComponentRigidbody));
     hierarchy.appendChild(bodies[40]);
     bodies[40].mtxLocal.translate(new f.Vector3(-4.5, 3.5, 0.5));
 
     //Kinematic
-    bodies[3] = createCompleteMeshNode("PlayerControlledCube", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube(), 1, f.BODY_TYPE.KINEMATIC);
+    bodies[3] = createCompleteMeshNode("PlayerControlledCube", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0, 0, 1, 1))), new f.MeshCube(), 1, f.BODY_TYPE.KINEMATIC);
     moveableTransform = bodies[3].getComponent(f.ComponentTransform);
     hierarchy.appendChild(bodies[3]);
     moveableTransform.mtxLocal.translate(new f.Vector3(5, 6, 5));
@@ -334,48 +334,48 @@ namespace FudgePhysics_Communication {
   function createRagdoll(): void {
     let pos: f.Vector3 = new f.Vector3(5, 4, 5);
     let scale: f.Vector3 = new f.Vector3(0.4, 0.5, 0.4);
-    head = createCompleteMeshNode("HeadRD", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
+    head = createCompleteMeshNode("HeadRD", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
     hierarchy.appendChild(head);
     pos.add(new f.Vector3(0, 0.4, 0));
     head.mtxLocal.translate(pos);
     head.mtxLocal.scale(scale);
 
-    body1 = createCompleteMeshNode("body1", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
+    body1 = createCompleteMeshNode("body1", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
     hierarchy.appendChild(body1);
     pos.add(new f.Vector3(0, -0.55, 0));
     scale = new f.Vector3(0.6, 0.6, 0.4);
     body1.mtxLocal.translate(pos);
     body1.mtxLocal.scale(scale);
 
-    body2 = createCompleteMeshNode("body2", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
+    body2 = createCompleteMeshNode("body2", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
     hierarchy.appendChild(body2);
     pos.add(new f.Vector3(0, -0.35, 0));
     scale = new f.Vector3(0.4, 0.4, 0.35);
     body2.mtxLocal.translate(pos);
     body2.mtxLocal.scale(scale);
 
-    legL = createCompleteMeshNode("legL", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
+    legL = createCompleteMeshNode("legL", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
     hierarchy.appendChild(legL);
     pos.add(new f.Vector3(-0.25, -0.8, 0));
     scale = new f.Vector3(0.3, 1, 0.3);
     legL.mtxLocal.translate(pos);
     legL.mtxLocal.scale(scale);
 
-    legR = createCompleteMeshNode("legR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
+    legR = createCompleteMeshNode("legR", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
     hierarchy.appendChild(legR);
     pos.add(new f.Vector3(0.5, 0, 0));
     scale = new f.Vector3(0.3, 1, 0.3);
     legR.mtxLocal.translate(pos);
     legR.mtxLocal.scale(scale);
 
-    armR = createCompleteMeshNode("armR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
+    armR = createCompleteMeshNode("armR", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
     hierarchy.appendChild(armR);
     pos.add(new f.Vector3(0.45, 1.5, 0));
     scale = new f.Vector3(1, 0.2, 0.2);
     armR.mtxLocal.translate(pos);
     armR.mtxLocal.scale(scale);
 
-    armL = createCompleteMeshNode("armL", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
+    armL = createCompleteMeshNode("armL", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.7, 1, 0.3, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.CUBE);
     hierarchy.appendChild(armL);
     pos.add(new f.Vector3(-1.45, 0, 0));
     scale = new f.Vector3(1, 0.2, 0.2);

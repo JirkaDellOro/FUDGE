@@ -195,17 +195,33 @@
                         }
                       }
                     ],
-                    "JointWelding": [
+                    "JointWelding": [],
+                    "JointCylindrical": [
                       {
-                        "ƒ.JointWelding": {
-                          "Joint": {
-                            "nameChildToConnect": "Box",
-                            "internalCollision": false,
-                            "breakForce": 0,
-                            "breakTorque": 0,
-                            "anchor": "[0, 0, 0]",
-                            "Component": {
-                              "active": true
+                        "ƒ.JointCylindrical": {
+                          "motorForce": 0,
+                          "springDampingRotation": 0,
+                          "springFrequencyRotation": 0,
+                          "maxRotor": 360,
+                          "minRotor": 0,
+                          "rotorTorque": 0,
+                          "rotorSpeed": 0,
+                          "JointAxial": {
+                            "springDamping": 0,
+                            "springFrequency": 0,
+                            "maxMotor": 10,
+                            "minMotor": -10,
+                            "motorSpeed": 0,
+                            "axis": "[0.49999991059303284, 0, 0]",
+                            "Joint": {
+                              "nameChildToConnect": "Box",
+                              "internalCollision": false,
+                              "breakForce": 5,
+                              "breakTorque": 5,
+                              "anchor": "[0, 0, 0]",
+                              "Component": {
+                                "active": true
+                              }
                             }
                           }
                         }
@@ -280,7 +296,7 @@
                             {
                               "ƒ.ComponentTransform": {
                                 "local": {
-                                  "translation": "[0.2707085609436035, 0.999504566192627, 0]",
+                                  "translation": "[0.2707085609436035, 1.3750553131103516, 0]",
                                   "rotation": "[0, 0, 0]",
                                   "scaling": "[1, 1, 1]"
                                 },
@@ -418,7 +434,7 @@
                     "ComponentGraphFilter": [
                       {
                         "ƒ.ComponentGraphFilter": {
-                          "active": true
+                          "active": false
                         }
                       }
                     ]
@@ -491,7 +507,7 @@
                             {
                               "ƒ.ComponentTransform": {
                                 "local": {
-                                  "translation": "[0.2707085609436035, 0.999504566192627, 0]",
+                                  "translation": "[0.2707085609436035, 1.3750553131103516, 0]",
                                   "rotation": "[0, 0, 0]",
                                   "scaling": "[1, 1, 1]"
                                 },
@@ -679,7 +695,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[0.2707085609436035, 0.999504566192627, 0]",
+                      "translation": "[0.2707085609436035, 1.3750553131103516, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },

@@ -28,7 +28,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
 
     //PHYSICS - Basic Plane and Cube
     //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
-    bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
+    bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
     bodies[0].mtxLocal.scale(new f.Vector3(14, 0.3, 14)); //Scale the body with it's standard ComponentTransform
     bodies[0].mtxLocal.rotateX(3, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
     hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
@@ -94,19 +94,19 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     hierarchy.appendChild(chair);
 
     //Creating a chair, base + back + 4 legs
-    let base: f.Node = createCompleteNode("Base", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
+    let base: f.Node = createCompleteNode("Base", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
     base.mtxLocal.translate(new f.Vector3(0, 3.5 + spawnHeight, 0));
     base.mtxLocal.scale(new f.Vector3(1, 0.2, 1));
     chair.appendChild(base);
 
-    let back: f.Node = createCompleteNode("Back", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
+    let back: f.Node = createCompleteNode("Back", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
     back.mtxLocal.translate(new f.Vector3(0.4, 4 + spawnHeight, 0));
     back.mtxLocal.scale(new f.Vector3(0.2, 1, 1));
     chair.appendChild(back);
     let weldingJoint: f.JointWelding = new f.JointWelding(base.getComponent(f.ComponentRigidbody), back.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
 
-    let leg: f.Node = createCompleteNode("Leg_BL", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
+    let leg: f.Node = createCompleteNode("Leg_BL", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
     leg.mtxLocal.translate(new f.Vector3(0.4, 3 + spawnHeight, 0.4));
     leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
     chair.appendChild(leg);
@@ -114,7 +114,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     weldingJoint = new f.JointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
 
-    leg = createCompleteNode("Leg_BR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
+    leg = createCompleteNode("Leg_BR", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
     leg.mtxLocal.translate(new f.Vector3(0.4, 3 + spawnHeight, -0.4));
     leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
     chair.appendChild(leg);
@@ -122,7 +122,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     weldingJoint = new f.JointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
 
-    leg = createCompleteNode("Leg_FR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
+    leg = createCompleteNode("Leg_FR", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
     leg.mtxLocal.translate(new f.Vector3(-0.4, 3 + spawnHeight, -0.4));
     leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
     chair.appendChild(leg);
@@ -130,7 +130,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     weldingJoint = new f.JointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
 
-    leg = createCompleteNode("Leg_FR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
+    leg = createCompleteNode("Leg_FR", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
     leg.mtxLocal.translate(new f.Vector3(-0.4, 3 + spawnHeight, 0.4));
     leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
     chair.appendChild(leg);
