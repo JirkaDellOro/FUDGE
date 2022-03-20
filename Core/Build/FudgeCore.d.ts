@@ -2658,6 +2658,7 @@ declare namespace FudgeCore {
          */
         private hndMutationInstance;
         private reflectMutation;
+        private isFiltered;
     }
 }
 declare namespace FudgeCore {

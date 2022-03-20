@@ -414,6 +414,13 @@
                           }
                         }
                       }
+                    ],
+                    "ComponentGraphFilter": [
+                      {
+                        "ƒ.ComponentGraphFilter": {
+                          "active": true
+                        }
+                      }
                     ]
                   },
                   "children": [

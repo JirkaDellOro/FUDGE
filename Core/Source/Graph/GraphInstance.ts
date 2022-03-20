@@ -90,8 +90,8 @@ namespace FudgeCore {
         this.#sync = true;
         return;
       }
-      
-      if (this.getComponent(ComponentGraphFilter))
+
+      if (this.isFiltered())
         return;
 
       this.#sync = false; // do not sync again, since mutation is already a synchronization
@@ -106,7 +106,7 @@ namespace FudgeCore {
       if (!this.#sync)
         return;
 
-      if (this.getComponent(ComponentGraphFilter))
+      if (this.isFiltered())
         return;
 
       await this.reflectMutation(_event, this, this.get());
@@ -119,7 +119,13 @@ namespace FudgeCore {
       for (let i: number = index - 1; i >= 0; i--)
         _destination = _destination.getChildrenByName(path[i].name)[0]; // TODO: respect index for non-singleton components...
       let cmpMutate: Component = _destination.getComponent(_event.detail.component.constructor);
-      await cmpMutate.mutate(_event.detail.mutator);
+      if (cmpMutate)
+        await cmpMutate.mutate(_event.detail.mutator);
+    }
+
+    private isFiltered(): boolean {
+      let cmpFilter: ComponentGraphFilter = this.getComponent(ComponentGraphFilter);
+      return (cmpFilter && cmpFilter.isActive);
     }
   }
 }
