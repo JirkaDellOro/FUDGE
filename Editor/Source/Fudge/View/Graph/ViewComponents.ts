@@ -99,7 +99,7 @@ namespace Fudge {
           alert("To attach ComponentRigidbody, first attach ComponentTransform!");
           return;
         }
-      if (cmpNew instanceof ƒ.ComponentSyncGraph)
+      if (cmpNew instanceof ƒ.ComponentGraphFilter)
         if (!(this.node instanceof ƒ.Graph || this.node instanceof ƒ.GraphInstance)) {
           alert("Attach ComponentSyncGraph only to GraphInstances or Graph");
           console.log(this.node);

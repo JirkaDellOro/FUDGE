@@ -210,13 +210,6 @@
                           }
                         }
                       }
-                    ],
-                    "ComponentSyncGraph": [
-                      {
-                        "ƒ.ComponentSyncGraph": {
-                          "active": true
-                        }
-                      }
                     ]
                   },
                   "children": [
@@ -421,13 +414,6 @@
                           }
                         }
                       }
-                    ],
-                    "ComponentSyncGraph": [
-                      {
-                        "ƒ.ComponentSyncGraph": {
-                          "active": true
-                        }
-                      }
                     ]
                   },
                   "children": [
@@ -614,13 +600,6 @@
                   "active": true
                 }
               }
-            }
-          }
-        ],
-        "ComponentSyncGraph": [
-          {
-            "ƒ.ComponentSyncGraph": {
-              "active": true
             }
           }
         ]

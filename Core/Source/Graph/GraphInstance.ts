@@ -82,40 +82,44 @@ namespace FudgeCore {
       return <Graph>Project.resources[this.#idSource];
     }
 
-
+    /**
+     * Source graph mutated, reflect mutation in this instance
+     */
     private hndMutationGraph = async (_event: CustomEvent): Promise<void> => {
       if (!this.#sync) {
         this.#sync = true;
         return;
       }
+      
+      if (this.getComponent(ComponentGraphFilter))
+        return;
 
-      let path: Node[] = Reflect.get(_event, "path");
-      let index: number = path.indexOf(<Node>_event.currentTarget);
-      let node: Node = this;
-      for (let i: number = index - 1; i >= 0; i--)
-        node = node.getChildrenByName(path[i].name)[0]; // TODO: respect index for non-singleton components...
-      let cmpMutate: Component = node.getComponent(_event.detail.component.constructor);
       this.#sync = false; // do not sync again, since mutation is already a synchronization
-      await cmpMutate.mutate(_event.detail.mutator); // expect endless calls, since this component calls graph again
+      await this.reflectMutation(_event, <Graph>_event.currentTarget, this);
       this.#sync = true;
-
-      // console.log("Graph mutates", node.name, cmpMutate.constructor.name, _event.detail.mutator);
     }
 
-
+    /**
+     * This instance mutated, reflect mutation in source graph
+     */
     private hndMutationInstance = async (_event: CustomEvent): Promise<void> => {
       if (!this.#sync)
         return;
 
-      let graph: Graph = this.get();
+      if (this.getComponent(ComponentGraphFilter))
+        return;
+
+      await this.reflectMutation(_event, this, this.get());
+    }
+
+    private async reflectMutation(_event: CustomEvent, _source: Node, _destination: Node): Promise<void> {
+      // console.log("Reflect mutation", _source, _destination);
       let path: Node[] = Reflect.get(_event, "path");
-      path.splice(path.indexOf(this));
-      let node: Node = graph;
-      while (path.length)
-        node = node.getChildrenByName(path.pop().name)[0];
-      let cmpMutate: Component = node.getComponent(_event.detail.component.constructor);
+      let index: number = path.indexOf(_source);
+      for (let i: number = index - 1; i >= 0; i--)
+        _destination = _destination.getChildrenByName(path[i].name)[0]; // TODO: respect index for non-singleton components...
+      let cmpMutate: Component = _destination.getComponent(_event.detail.component.constructor);
       await cmpMutate.mutate(_event.detail.mutator);
-      // console.log("Instance mutates", node.name, cmpMutate.constructor.name, _event.detail.mutator);
     }
   }
 }

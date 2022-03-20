@@ -1933,6 +1933,19 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Synchronizes the graph instance this component is attached to with the graph and vice versa
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
+     */
+    class ComponentGraphFilter extends Component {
+        static readonly iSubclass: number;
+        constructor();
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
     type TypeOfLight = new () => Light;
     /**
      * Baseclass for different kinds of lights.
@@ -2084,20 +2097,6 @@ declare namespace FudgeCore {
         constructor();
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Synchronizes the graph instance this component is attached to with the graph and vice versa
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2022
-     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
-     */
-    class ComponentSyncGraph extends Component {
-        static readonly iSubclass: number;
-        constructor();
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        private hndEvent;
     }
 }
 declare namespace FudgeCore {
@@ -2650,8 +2649,15 @@ declare namespace FudgeCore {
          * Retrieve the graph this instances refers to
          */
         get(): Graph;
+        /**
+         * Source graph mutated, reflect mutation in this instance
+         */
         private hndMutationGraph;
+        /**
+         * This instance mutated, reflect mutation in source graph
+         */
         private hndMutationInstance;
+        private reflectMutation;
     }
 }
 declare namespace FudgeCore {
