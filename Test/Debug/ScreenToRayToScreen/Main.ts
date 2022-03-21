@@ -123,7 +123,7 @@ namespace ScreenToRayToScreen {
     cube.addComponent(cmpMesh);
 
     let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(
-      new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("RED")))
+      new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("RED")))
     );
     cube.addComponent(cmpMaterial);
 
