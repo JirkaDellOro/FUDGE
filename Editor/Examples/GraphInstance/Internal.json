@@ -1,0 +1,82 @@
+{
+  "Graph|2022-03-21T09:59:28.656Z|10572": {
+    "ƒ.Graph": {
+      "name": "Scene",
+      "active": true,
+      "components": {},
+      "children": [
+        {
+          "ƒ.GraphInstance": {
+            "deserializeFromSource": true,
+            "idSource": "Graph|2022-03-21T09:59:57.684Z|37738"
+          }
+        }
+      ],
+      "idResource": "Graph|2022-03-21T09:59:28.656Z|10572",
+      "type": "Graph"
+    }
+  },
+  "MeshCube|2022-03-21T10:06:32.731Z|12043": {
+    "ƒ.MeshCube": {
+      "idResource": "MeshCube|2022-03-21T10:06:32.731Z|12043",
+      "name": "MeshCube",
+      "type": "MeshCube"
+    }
+  },
+  "Material|2022-03-21T10:06:45.579Z|58150": {
+    "ƒ.Material": {
+      "name": "ShaderLit",
+      "idResource": "Material|2022-03-21T10:06:45.579Z|58150",
+      "shader": "ShaderLit",
+      "coat": {
+        "ƒ.CoatColored": {
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
+  "Graph|2022-03-21T09:59:57.684Z|37738": {
+    "ƒ.Graph": {
+      "name": "Graph",
+      "active": true,
+      "components": {
+        "ComponentMesh": [
+          {
+            "ƒ.ComponentMesh": {
+              "idMesh": "MeshCube|2022-03-21T10:06:32.731Z|12043",
+              "pivot": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "Component": {
+                "active": true
+              }
+            }
+          }
+        ],
+        "ComponentMaterial": [
+          {
+            "ƒ.ComponentMaterial": {
+              "sortForAlpha": false,
+              "clrPrimary": "[0.9764705882352941, 0.00392156862745098, 0.5215686274509804, 1]",
+              "clrSecondary": "[1, 1, 1, 1]",
+              "pivot": {
+                "translation": "[0, 0]",
+                "rotation": 0,
+                "scaling": "[1, 1]"
+              },
+              "Component": {
+                "active": true
+              },
+              "idMaterial": "Material|2022-03-21T10:06:45.579Z|58150"
+            }
+          }
+        ]
+      },
+      "children": [],
+      "idResource": "Graph|2022-03-21T09:59:57.684Z|37738",
+      "type": "Graph"
+    }
+  }
+}

@@ -10,6 +10,7 @@ namespace FudgeCore {
     // TODO: examine, if this should be a direct reference to the Graph, instead of the id
     #idSource: string = undefined;
     #sync: boolean = true;
+    #deserializeFromSource: boolean = true;
 
     /**
      * This constructor allone will not create a reconstruction, but only save the id.
@@ -39,23 +40,41 @@ namespace FudgeCore {
 
     //TODO: optimize using the referenced Graph, serialize/deserialize only the differences
     public serialize(): Serialization {
-      let serialization: Serialization = super.serialize();
+      let filter: ComponentGraphFilter = this.getComponent(ComponentGraphFilter);
+      let serialization: Serialization = {};
+
+      if (filter && filter.isActive) // if graph synchronisation is unfiltered, knowing the source is sufficient for serialization
+        serialization = super.serialize();
+      else
+        serialization.deserializeFromSource = true;
+
       serialization.idSource = this.#idSource;
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.#idSource = _serialization.idSource;
-      await super.deserialize(_serialization);
-      if (this.get())
-        this.connectToGraph();
-      else
+      if (!_serialization.deserializeFromSource) 
+        await super.deserialize(_serialization); // instance is deserialized from individual data
+      let graph: Graph = this.get();
+
+      if (graph)
+        if (_serialization.deserializeFromSource) // no components-> assume synchronized GraphInstance
+          this.set(graph); // recreate complete instance from source graph
+        else {
+          this.connectToGraph(); // otherwise just connect
+        }
+      else {
         Project.registerGraphInstanceForResync(this);
+      }
       return this;
     }
 
     public connectToGraph(): void {
       let graph: Graph = this.get();
+      if (this.#deserializeFromSource)
+        this.set(graph);
+
       // graph.addEventListener(EVENT.MUTATE, (_event: CustomEvent) => this.hndMutation, true);
       graph.addEventListener(EVENT.MUTATE, this.hndMutationGraph, true);
     }
