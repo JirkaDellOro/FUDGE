@@ -41,6 +41,7 @@ var SkeletonTest;
         ƒ.Loop.start();
     }
     class MeshSkinCylinder extends ƒ.MeshSkin {
+        static ƒskeleton;
         constructor() {
             super();
             const meshSource = new ƒ.MeshRotation("MeshRotation", [
