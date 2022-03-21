@@ -1,0 +1,18 @@
+span {
+  display: inline-block;
+  width: 3em;
+  text-align: center;
+  animation: ping 1s;
+  background-color: white;
+}
+
+@keyframes ping {
+  0% {
+    background-color: orange;
+  }
+}
+
+th {
+  width: 5em;
+  text-align: left;
+}

@@ -14,6 +14,7 @@ namespace FudgeCore {
     GROUP = 0x101,
     GROUPCOLLAPSED = 0x102,
     GROUPEND = 0x104,
+    SOURCE = 0x200,
     MESSAGES = INFO | LOG | WARN | ERROR | FUDGE,
     FORMAT = CLEAR | GROUP | GROUPCOLLAPSED | GROUPEND,
     ALL = MESSAGES | FORMAT
@@ -24,7 +25,8 @@ namespace FudgeCore {
     [DEBUG_FILTER.LOG]: "✎",
     [DEBUG_FILTER.WARN]: "⚠",
     [DEBUG_FILTER.ERROR]: "❌",
-    [DEBUG_FILTER.FUDGE]: "🎲"
+    [DEBUG_FILTER.FUDGE]: "🎲",
+    [DEBUG_FILTER.SOURCE]: "🔗"
   };
 
   export type MapDebugTargetToDelegate = Map<DebugTarget, Function>;

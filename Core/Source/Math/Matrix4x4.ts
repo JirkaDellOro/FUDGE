@@ -1,7 +1,7 @@
 namespace FudgeCore {
 
   /**
-   * Represents the matrix as translation, rotation and scaling vector, being calculated from the matrix
+   * Represents the matrix as translation, rotation and scaling {@link Vector3}, being calculated from the matrix
    */
   interface VectorRepresentation {
     translation: Vector3;
@@ -21,71 +21,18 @@ namespace FudgeCore {
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
 
-  export class Matrix4x4 extends Mutable implements Serializable {
+  export class Matrix4x4 extends Mutable implements Serializable, Recycable {
+    private static deg2rad: number = Math.PI / 180;
+    #eulerAngles: Vector3 = Vector3.ZERO();
+    #vectors: VectorRepresentation = { translation: Vector3.ZERO(), rotation: Vector3.ZERO(), scaling: Vector3.ZERO() };
+
     private data: Float32Array = new Float32Array(16); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
     private vectors: VectorRepresentation; // vector representation of this matrix
 
     public constructor() {
       super();
-      this.data.set([
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-      ]);
-      this.resetCache();
-    }
-
-    /** 
-     * - get: a copy of the calculated translation vector   
-     * - set: effect the matrix ignoring its rotation and scaling
-     */
-    public get translation(): Vector3 {
-      if (!this.vectors.translation) {
-        this.vectors.translation = Recycler.get(Vector3);
-        this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
-      }
-      return this.vectors.translation.copy;
-    }
-    public set translation(_translation: Vector3) {
-      this.data.set(_translation.get(), 12);
-      // no full cache reset required
-      this.vectors.translation = _translation.copy;
-      this.mutator = null;
-    }
-
-    /** 
-     * - get: a copy of the calculated rotation vector   
-     * - set: effect the matrix
-     */
-    public get rotation(): Vector3 {
-      if (!this.vectors.rotation)
-        this.vectors.rotation = this.getEulerAngles();
-      return this.vectors.rotation.copy;
-    }
-    public set rotation(_rotation: Vector3) {
-      this.mutate({ "rotation": _rotation });
-      this.resetCache();
-    }
-
-    /** 
-     * - get: a copy of the calculated scale vector   
-     * - set: effect the matrix
-     */
-    public get scaling(): Vector3 {
-      if (!this.vectors.scaling) {
-        this.vectors.scaling = Recycler.get(Vector3);
-        this.vectors.scaling.set(
-          Math.hypot(this.data[0], this.data[1], this.data[2]),
-          Math.hypot(this.data[4], this.data[5], this.data[6]),
-          Math.hypot(this.data[8], this.data[9], this.data[10])
-        );
-      }
-      return this.vectors.scaling.copy;
-    }
-    public set scaling(_scaling: Vector3) {
-      this.mutate({ "scaling": _scaling });
+      this.recycle();
       this.resetCache();
     }
 
@@ -94,27 +41,30 @@ namespace FudgeCore {
      * Retrieve a new identity matrix
      */
     public static IDENTITY(): Matrix4x4 {
-      // const result: Matrix4x4 = new Matrix4x4();
-      const result: Matrix4x4 = Recycler.get(Matrix4x4);
-      result.data.set([
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-      ]);
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      return mtxResult;
+    }
+
+
+    /**
+     * Constructs a new matrix according to the translation, rotation and scaling {@link Vector3}s given
+     */
+    public static CONSTRUCTION(_vectors: VectorRepresentation): Matrix4x4 {
+      let result: Matrix4x4 = Matrix4x4.IDENTITY();
+      result.mutate(_vectors);
       return result;
     }
 
     /**
      * Computes and returns the product of two passed matrices.
-     * @param _a The matrix to multiply.
-     * @param _b The matrix to multiply by.
+     * @param _mtxLeft The matrix to multiply.
+     * @param _mtxRight The matrix to multiply by.
      */
-    public static MULTIPLICATION(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4 {
-      let a: Float32Array = _a.data;
-      let b: Float32Array = _b.data;
+    public static MULTIPLICATION(_mtxLeft: Matrix4x4, _mtxRight: Matrix4x4): Matrix4x4 {
+      let a: Float32Array = _mtxLeft.data;
+      let b: Float32Array = _mtxRight.data;
       // let matrix: Matrix4x4 = new Matrix4x4();
-      const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
       let a00: number = a[0 * 4 + 0];
       let a01: number = a[0 * 4 + 1];
       let a02: number = a[0 * 4 + 2];
@@ -147,7 +97,7 @@ namespace FudgeCore {
       let b31: number = b[3 * 4 + 1];
       let b32: number = b[3 * 4 + 2];
       let b33: number = b[3 * 4 + 3];
-      matrix.data.set(
+      mtxResult.data.set(
         [
           b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30,
           b00 * a01 + b01 * a11 + b02 * a21 + b03 * a31,
@@ -166,15 +116,436 @@ namespace FudgeCore {
           b30 * a02 + b31 * a12 + b32 * a22 + b33 * a32,
           b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33
         ]);
-      return matrix;
+      return mtxResult;
+    }
+    
+    /**
+     * Computes and returns the transpose of a passed matrix.
+     */
+    public static TRANSPOSE(_mtx: Matrix4x4): Matrix4x4 {
+      let m: Float32Array = _mtx.data;
+      let result: Matrix4x4 = Recycler.get(Matrix4x4);
+      result.data.set([
+        m[0], m[4], m[8], m[12],
+        m[1], m[5], m[9], m[13],
+        m[2], m[6], m[10], m[14],
+        m[3], m[7], m[11], m[15]
+      ]);
+      return result;
     }
 
     /**
      * Computes and returns the inverse of a passed matrix.
-     * @param _matrix The matrix to compute the inverse of.
+     * @param _mtx The matrix to compute the inverse of.
      */
-    public static INVERSION(_matrix: Matrix4x4): Matrix4x4 {
-      let m: Float32Array = _matrix.data;
+    public static INVERSION(_mtx: Matrix4x4): Matrix4x4 {
+      let m: Float32Array = _mtx.data;
+      let m00: number = m[0 * 4 + 0];
+      let m01: number = m[0 * 4 + 1];
+      let m02: number = m[0 * 4 + 2];
+      let m03: number = m[0 * 4 + 3];
+      let m10: number = m[1 * 4 + 0];
+      let m11: number = m[1 * 4 + 1];
+      let m12: number = m[1 * 4 + 2];
+      let m13: number = m[1 * 4 + 3];
+      let m20: number = m[2 * 4 + 0];
+      let m21: number = m[2 * 4 + 1];
+      let m22: number = m[2 * 4 + 2];
+      let m23: number = m[2 * 4 + 3];
+      let m30: number = m[3 * 4 + 0];
+      let m31: number = m[3 * 4 + 1];
+      let m32: number = m[3 * 4 + 2];
+      let m33: number = m[3 * 4 + 3];
+      let tmp0: number = m22 * m33;
+      let tmp1: number = m32 * m23;
+      let tmp2: number = m12 * m33;
+      let tmp3: number = m32 * m13;
+      let tmp4: number = m12 * m23;
+      let tmp5: number = m22 * m13;
+      let tmp6: number = m02 * m33;
+      let tmp7: number = m32 * m03;
+      let tmp8: number = m02 * m23;
+      let tmp9: number = m22 * m03;
+      let tmp10: number = m02 * m13;
+      let tmp11: number = m12 * m03;
+      let tmp12: number = m20 * m31;
+      let tmp13: number = m30 * m21;
+      let tmp14: number = m10 * m31;
+      let tmp15: number = m30 * m11;
+      let tmp16: number = m10 * m21;
+      let tmp17: number = m20 * m11;
+      let tmp18: number = m00 * m31;
+      let tmp19: number = m30 * m01;
+      let tmp20: number = m00 * m21;
+      let tmp21: number = m20 * m01;
+      let tmp22: number = m00 * m11;
+      let tmp23: number = m10 * m01;
+
+      let t0: number = (tmp0 * m11 + tmp3 * m21 + tmp4 * m31) -
+        (tmp1 * m11 + tmp2 * m21 + tmp5 * m31);
+
+      let t1: number = (tmp1 * m01 + tmp6 * m21 + tmp9 * m31) -
+        (tmp0 * m01 + tmp7 * m21 + tmp8 * m31);
+      let t2: number = (tmp2 * m01 + tmp7 * m11 + tmp10 * m31) -
+        (tmp3 * m01 + tmp6 * m11 + tmp11 * m31);
+      let t3: number = (tmp5 * m01 + tmp8 * m11 + tmp11 * m21) -
+        (tmp4 * m01 + tmp9 * m11 + tmp10 * m21);
+
+      let d: number = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
+
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      mtxResult.data.set([
+        d * t0, // [0]
+        d * t1, // [1]
+        d * t2, // [2]
+        d * t3, // [3]
+        d * ((tmp1 * m10 + tmp2 * m20 + tmp5 * m30) - (tmp0 * m10 + tmp3 * m20 + tmp4 * m30)),        // [4]
+        d * ((tmp0 * m00 + tmp7 * m20 + tmp8 * m30) - (tmp1 * m00 + tmp6 * m20 + tmp9 * m30)),        // [5]
+        d * ((tmp3 * m00 + tmp6 * m10 + tmp11 * m30) - (tmp2 * m00 + tmp7 * m10 + tmp10 * m30)),      // [6]
+        d * ((tmp4 * m00 + tmp9 * m10 + tmp10 * m20) - (tmp5 * m00 + tmp8 * m10 + tmp11 * m20)),      // [7]
+        d * ((tmp12 * m13 + tmp15 * m23 + tmp16 * m33) - (tmp13 * m13 + tmp14 * m23 + tmp17 * m33)),  // [8]
+        d * ((tmp13 * m03 + tmp18 * m23 + tmp21 * m33) - (tmp12 * m03 + tmp19 * m23 + tmp20 * m33)),  // [9]
+        d * ((tmp14 * m03 + tmp19 * m13 + tmp22 * m33) - (tmp15 * m03 + tmp18 * m13 + tmp23 * m33)),  // [10]
+        d * ((tmp17 * m03 + tmp20 * m13 + tmp23 * m23) - (tmp16 * m03 + tmp21 * m13 + tmp22 * m23)),  // [11]
+        d * ((tmp14 * m22 + tmp17 * m32 + tmp13 * m12) - (tmp16 * m32 + tmp12 * m12 + tmp15 * m22)),  // [12]
+        d * ((tmp20 * m32 + tmp12 * m02 + tmp19 * m22) - (tmp18 * m22 + tmp21 * m32 + tmp13 * m02)),  // [13]
+        d * ((tmp18 * m12 + tmp23 * m32 + tmp15 * m02) - (tmp22 * m32 + tmp14 * m02 + tmp19 * m12)),  // [14]
+        d * ((tmp22 * m22 + tmp16 * m02 + tmp21 * m12) - (tmp20 * m12 + tmp23 * m22 + tmp17 * m02))  // [15]
+      ]);
+      return mtxResult;
+    }
+
+    /**
+     * Computes and returns a matrix with the given translation, its z-axis pointing directly at the given target,
+     * and a minimal angle between its y-axis and the given up-{@link Vector3}, respetively calculating yaw and pitch.
+     */
+    public static LOOK_AT(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      let zAxis: Vector3 = Vector3.DIFFERENCE(_target, _translation);
+      zAxis.normalize();
+      let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
+      let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
+      mtxResult.data.set(
+        [
+          xAxis.x, xAxis.y, xAxis.z, 0,
+          yAxis.x, yAxis.y, yAxis.z, 0,
+          zAxis.x, zAxis.y, zAxis.z, 0,
+          _translation.x,
+          _translation.y,
+          _translation.z,
+          1
+        ]);
+      return mtxResult;
+    }
+
+    /**
+     * Computes and returns a matrix with the given translation, its y-axis matching the given up-{@link Vector3}
+     * and its z-axis facing towards the given target at a minimal angle, respetively calculating yaw only.
+     */
+    public static SHOW_TO(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      let zAxis: Vector3 = Vector3.DIFFERENCE(_target, _translation);
+      zAxis.normalize();
+      let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
+      // let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
+      zAxis = Vector3.NORMALIZATION(Vector3.CROSS(xAxis, _up));
+      mtxResult.data.set(
+        [
+          xAxis.x, xAxis.y, xAxis.z, 0,
+          _up.x, _up.y, _up.z, 0,
+          zAxis.x, zAxis.y, zAxis.z, 0,
+          _translation.x,
+          _translation.y,
+          _translation.z,
+          1
+        ]);
+      return mtxResult;
+    }
+
+    /**
+     * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given {@link Vector3}.
+     */
+    public static TRANSLATION(_translate: Vector3): Matrix4x4 {
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      mtxResult.data.set([
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        _translate.x, _translate.y, _translate.z, 1
+      ]);
+      return mtxResult;
+    }
+
+    /**
+     * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
+     */
+    public static ROTATION_X(_angleInDegrees: number): Matrix4x4 {
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      let angleInRadians: number = _angleInDegrees * Matrix4x4.deg2rad;
+      let sin: number = Math.sin(angleInRadians);
+      let cos: number = Math.cos(angleInRadians);
+      mtxResult.data.set([
+        1, 0, 0, 0,
+        0, cos, sin, 0,
+        0, -sin, cos, 0,
+        0, 0, 0, 1
+      ]);
+      return mtxResult;
+    }
+
+    /**
+     * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
+     */
+    public static ROTATION_Y(_angleInDegrees: number): Matrix4x4 {
+      let mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      let angleInRadians: number = _angleInDegrees * Matrix4x4.deg2rad;
+      let sin: number = Math.sin(angleInRadians);
+      let cos: number = Math.cos(angleInRadians);
+      mtxResult.data.set([
+        cos, 0, -sin, 0,
+        0, 1, 0, 0,
+        sin, 0, cos, 0,
+        0, 0, 0, 1
+      ]);
+      return mtxResult;
+    }
+
+    /**
+     * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
+     */
+    public static ROTATION_Z(_angleInDegrees: number): Matrix4x4 {
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      let angleInRadians: number = _angleInDegrees * Matrix4x4.deg2rad;
+      let sin: number = Math.sin(angleInRadians);
+      let cos: number = Math.cos(angleInRadians);
+      mtxResult.data.set([
+        cos, sin, 0, 0,
+        -sin, cos, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+      ]);
+      return mtxResult;
+    }
+
+    /**
+     * Returns a matrix that rotates coordinates when multiplied by, using the angles given.
+     * Rotation occurs around the axis in the order Z-Y-X .
+     */
+    public static ROTATION(_eulerAnglesInDegrees: Vector3): Matrix4x4 {
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      let anglesInRadians: Vector3 = Vector3.SCALE(_eulerAnglesInDegrees, Matrix4x4.deg2rad);
+      let sinX: number = Math.sin(anglesInRadians.x);
+      let cosX: number = Math.cos(anglesInRadians.x);
+      let sinY: number = Math.sin(anglesInRadians.y);
+      let cosY: number = Math.cos(anglesInRadians.y);
+      let sinZ: number = Math.sin(anglesInRadians.z);
+      let cosZ: number = Math.cos(anglesInRadians.z);
+      mtxResult.data.set([
+        /**/                 cosZ * cosY, /**/                 sinZ * cosY, /**/       -sinY, 0,
+        cosZ * sinY * sinX - sinZ * cosX, sinZ * sinY * sinX + cosZ * cosX, /**/ cosY * sinX, 0,
+        cosZ * sinY * cosX + sinZ * sinX, sinZ * sinY * cosX - cosZ * sinX, /**/ cosY * cosX, 0,
+        0, 0, 0, 1
+      ]);
+      return mtxResult;
+    }
+
+    /**
+     * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given {@link Vector3}
+     */
+    public static SCALING(_scalar: Vector3): Matrix4x4 {
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      mtxResult.data.set([
+        _scalar.x, 0, 0, 0,
+        0, _scalar.y, 0, 0,
+        0, 0, _scalar.z, 0,
+        0, 0, 0, 1
+      ]);
+      return mtxResult;
+    }
+
+    /**
+     * Returns a representation of the given matrix relative to the given base.
+     * If known, pass the inverse of the base to avoid unneccesary calculation 
+     */
+    public static RELATIVE(_mtx: Matrix4x4, _mtxBase: Matrix4x4, _mtxInverse?: Matrix4x4): Matrix4x4 {
+      if (_mtxInverse)
+       return Matrix4x4.MULTIPLICATION(_mtxInverse, _mtx);
+
+      let mtxInverse: Matrix4x4 = Matrix4x4.INVERSION(_mtxBase);
+      let mtxResult: Matrix4x4 = Matrix4x4.MULTIPLICATION(mtxInverse, _mtx);
+      Recycler.store(mtxInverse);
+      return mtxResult;
+    }
+    //#endregion
+
+    //#region PROJECTIONS
+    /**
+     * Computes and returns a matrix that applies perspective to an object, if its transform is multiplied by it.
+     * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
+     * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
+     * @param _near The near clipspace border on the z-axis.
+     * @param _far The far clipspace border on the z-axis.
+     * @param _direction The plane on which the fieldOfView-Angle is given 
+     */
+    public static PROJECTION_CENTRAL(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4 {
+      //TODO: camera looks down negative z-direction, should be positive
+      let fieldOfViewInRadians: number = _fieldOfViewInDegrees * Matrix4x4.deg2rad;
+      let f: number = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
+      let rangeInv: number = 1.0 / (_near - _far);
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      mtxResult.data.set([
+        f, 0, 0, 0,
+        0, f, 0, 0,
+        0, 0, (_near + _far) * rangeInv, -1,
+        0, 0, _near * _far * rangeInv * 2, 0
+      ]);
+
+      if (_direction == FIELD_OF_VIEW.DIAGONAL) {
+        _aspect = Math.sqrt(_aspect);
+        mtxResult.data[0] = f / _aspect;
+        mtxResult.data[5] = f * _aspect;
+      }
+      else if (_direction == FIELD_OF_VIEW.VERTICAL)
+        mtxResult.data[0] = f / _aspect;
+      else //FOV_DIRECTION.HORIZONTAL
+        mtxResult.data[5] = f * _aspect;
+
+      // HACK: matrix should look in positive z-direction, preferably the matrix should be calculated like that right away
+      mtxResult.rotateY(180);
+
+      return mtxResult;
+    }
+
+    /**
+     * Computes and returns a matrix that applies orthographic projection to an object, if its transform is multiplied by it.
+     * @param _left The positionvalue of the projectionspace's left border.
+     * @param _right The positionvalue of the projectionspace's right border.
+     * @param _bottom The positionvalue of the projectionspace's bottom border.
+     * @param _top The positionvalue of the projectionspace's top border.
+     * @param _near The positionvalue of the projectionspace's near border.
+     * @param _far The positionvalue of the projectionspace's far border
+     */
+    public static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near: number = -400, _far: number = 400): Matrix4x4 {
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      mtxResult.data.set([
+        2 / (_right - _left), 0, 0, 0,
+        0, 2 / (_top - _bottom), 0, 0,
+        0, 0, 2 / (_near - _far), 0,
+        (_left + _right) / (_left - _right),
+        (_bottom + _top) / (_bottom - _top),
+        (_near + _far) / (_near - _far),
+        1
+      ]);
+      return mtxResult;
+    }
+    //#endregion
+
+    //#region  Accessors
+    /** 
+     * - get: return a vector representation of the translation {@link Vector3}.  
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
+     * - set: effect the matrix ignoring its rotation and scaling
+     */
+    public set translation(_translation: Vector3) {
+      this.data.set(_translation.get(), 12);
+      // no full cache reset required
+      if (this.vectors.translation)
+        this.vectors.translation.set(_translation.x, _translation.y, _translation.z);
+      else
+        this.vectors.translation = _translation.clone;
+      this.mutator = null;
+    }
+    public get translation(): Vector3 {
+      if (!this.vectors.translation) {
+        this.vectors.translation = this.#vectors.translation;
+        this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
+      }
+      return this.vectors.translation; // .clone;
+    }
+
+    /** 
+     * - get: return a vector representation of the rotation {@link Vector3}.  
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
+     * - set: effect the matrix
+     */
+    public get rotation(): Vector3 {
+      if (!this.vectors.rotation)
+        this.vectors.rotation = this.getEulerAngles().clone;
+      return this.vectors.rotation; //.clone;
+    }
+    public set rotation(_rotation: Vector3) {
+      this.mutate({ "rotation": _rotation });
+      this.resetCache();
+    }
+
+    /** 
+     * - get: return a vector representation of the scaling {@link Vector3}.  
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
+     * - set: effect the matrix
+     */
+    public get scaling(): Vector3 {
+      if (!this.vectors.scaling) {
+        this.vectors.scaling = this.#vectors.scaling;
+        this.vectors.scaling.set(
+          Math.hypot(this.data[0], this.data[1], this.data[2]),
+          Math.hypot(this.data[4], this.data[5], this.data[6]),
+          Math.hypot(this.data[8], this.data[9], this.data[10])
+        );
+      }
+      return this.vectors.scaling; // .clone;
+    }
+    public set scaling(_scaling: Vector3) {
+      this.mutate({ "scaling": _scaling });
+      this.resetCache();
+    }
+
+    /**
+     * Return a copy of this
+     */
+    public get clone(): Matrix4x4 {
+      let mtxClone: Matrix4x4 = Recycler.get(Matrix4x4);
+      mtxClone.set(this);
+      return mtxClone;
+    }
+    //#endregion
+
+    public recycle(): void {
+      this.data.set([
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+      ]);
+      this.resetCache(); 
+    }
+
+    //#region Rotation
+    /**
+     * Rotate this matrix by given {@link Vector3} in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
+     * The rotation is appended to already applied transforms, thus multiplied from the right. Set _fromLeft to true to switch and put it in front.
+     */
+    public rotate(_by: Vector3, _fromLeft: boolean = false): void {
+      // this.rotateZ(_by.z, _fromLeft);
+      // this.rotateY(_by.y, _fromLeft);
+      // this.rotateX(_by.x, _fromLeft);
+      let mtxRotation: Matrix4x4 = Matrix4x4.ROTATION(_by);
+      this.multiply(mtxRotation, _fromLeft);
+      Recycler.store(mtxRotation);
+    }
+
+    public transpose(): Matrix4x4 {
+      let matrix: Float32Array = this.data;
+      this.data.set([
+        matrix[0], matrix[4], matrix[8],  matrix[12],
+        matrix[1], matrix[5], matrix[9],  matrix[13],
+        matrix[2], matrix[6], matrix[10], matrix[14],
+        matrix[3], matrix[7], matrix[11], matrix[15]
+      ]);
+      return this;
+    }
+
+    public inverse(): Matrix4x4 {
+      let m: Float32Array = this.data;
       let m00: number = m[0 * 4 + 0];
       let m01: number = m[0 * 4 + 1];
       let m02: number = m[0 * 4 + 2];
@@ -252,286 +623,111 @@ namespace FudgeCore {
     }
 
     /**
-     * Computes and returns a matrix with the given translation, its z-axis pointing directly at the given target,
-     * and a minimal angle between its y-axis and the given up-Vector, respetively calculating yaw and pitch.
-     */
-    public static LOOK_AT(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
-      // const matrix: Matrix4x4 = new Matrix4x4;
-      const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
-      let zAxis: Vector3 = Vector3.DIFFERENCE(_target, _translation);
-      zAxis.normalize();
-      let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
-      let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
-      matrix.data.set(
-        [
-          xAxis.x, xAxis.y, xAxis.z, 0,
-          yAxis.x, yAxis.y, yAxis.z, 0,
-          zAxis.x, zAxis.y, zAxis.z, 0,
-          _translation.x,
-          _translation.y,
-          _translation.z,
-          1
-        ]);
-      return matrix;
-    }
-
-    /**
-     * Computes and returns a matrix with the given translation, its y-axis matching the given up-vector
-     * and its z-axis facing towards the given target at a minimal angle, respetively calculating yaw only.
-     */
-    public static SHOW_TO(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
-      // const matrix: Matrix4x4 = new Matrix4x4;
-      const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
-      let zAxis: Vector3 = Vector3.DIFFERENCE(_target, _translation);
-      zAxis.normalize();
-      let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
-      // let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
-      zAxis = Vector3.NORMALIZATION(Vector3.CROSS(xAxis, _up));
-      matrix.data.set(
-        [
-          xAxis.x, xAxis.y, xAxis.z, 0,
-          _up.x, _up.y, _up.z, 0,
-          zAxis.x, zAxis.y, zAxis.z, 0,
-          _translation.x,
-          _translation.y,
-          _translation.z,
-          1
-        ]);
-      return matrix;
-    }
-
-    /**
-     * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
-     */
-    public static TRANSLATION(_translate: Vector3): Matrix4x4 {
-      // let matrix: Matrix4x4 = new Matrix4x4;
-      const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
-      matrix.data.set([
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        _translate.x, _translate.y, _translate.z, 1
-      ]);
-      return matrix;
-    }
-
-    /**
-     * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
-     * @param _angleInDegrees The value of the rotation.
-     */
-    public static ROTATION_X(_angleInDegrees: number): Matrix4x4 {
-      // const matrix: Matrix4x4 = new Matrix4x4;
-      const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
-      let angleInRadians: number = _angleInDegrees * Math.PI / 180;
-      let sin: number = Math.sin(angleInRadians);
-      let cos: number = Math.cos(angleInRadians);
-      matrix.data.set([
-        1, 0, 0, 0,
-        0, cos, sin, 0,
-        0, -sin, cos, 0,
-        0, 0, 0, 1
-      ]);
-      return matrix;
-    }
-
-    /**
-     * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
-     * @param _angleInDegrees The value of the rotation.
-     */
-    public static ROTATION_Y(_angleInDegrees: number): Matrix4x4 {
-      // const matrix: Matrix4x4 = new Matrix4x4;
-      let matrix: Matrix4x4 = Recycler.get(Matrix4x4);
-      let angleInRadians: number = _angleInDegrees * Math.PI / 180;
-      let sin: number = Math.sin(angleInRadians);
-      let cos: number = Math.cos(angleInRadians);
-      matrix.data.set([
-        cos, 0, -sin, 0,
-        0, 1, 0, 0,
-        sin, 0, cos, 0,
-        0, 0, 0, 1
-      ]);
-      return matrix;
-    }
-
-    /**
-     * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
-     * @param _angleInDegrees The value of the rotation.
-     */
-    public static ROTATION_Z(_angleInDegrees: number): Matrix4x4 {
-      // const matrix: Matrix4x4 = new Matrix4x4;
-      const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
-      let angleInRadians: number = _angleInDegrees * Math.PI / 180;
-      let sin: number = Math.sin(angleInRadians);
-      let cos: number = Math.cos(angleInRadians);
-      matrix.data.set([
-        cos, sin, 0, 0,
-        -sin, cos, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-      ]);
-      return matrix;
-    }
-
-    /**
-     * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
-     */
-    public static SCALING(_scalar: Vector3): Matrix4x4 {
-      // const matrix: Matrix4x4 = new Matrix4x4;
-      const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
-      matrix.data.set([
-        _scalar.x, 0, 0, 0,
-        0, _scalar.y, 0, 0,
-        0, 0, _scalar.z, 0,
-        0, 0, 0, 1
-      ]);
-      return matrix;
-    }
-    //#endregion
-
-    //#region PROJECTIONS
-    /**
-     * Computes and returns a matrix that applies perspective to an object, if its transform is multiplied by it.
-     * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
-     * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
-     * @param _near The near clipspace border on the z-axis.
-     * @param _far The far clipspace border on the z-axis.
-     * @param _direction The plane on which the fieldOfView-Angle is given 
-     */
-    public static PROJECTION_CENTRAL(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4 {
-      //TODO: camera looks down negative z-direction, should be positive
-      let fieldOfViewInRadians: number = _fieldOfViewInDegrees * Math.PI / 180;
-      let f: number = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
-      let rangeInv: number = 1.0 / (_near - _far);
-      // const matrix: Matrix4x4 = new Matrix4x4;
-      const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
-      matrix.data.set([
-        f, 0, 0, 0,
-        0, f, 0, 0,
-        0, 0, (_near + _far) * rangeInv, -1,
-        0, 0, _near * _far * rangeInv * 2, 0
-      ]);
-
-      if (_direction == FIELD_OF_VIEW.DIAGONAL) {
-        _aspect = Math.sqrt(_aspect);
-        matrix.data[0] = f / _aspect;
-        matrix.data[5] = f * _aspect;
-      }
-      else if (_direction == FIELD_OF_VIEW.VERTICAL)
-        matrix.data[0] = f / _aspect;
-      else //FOV_DIRECTION.HORIZONTAL
-        matrix.data[5] = f * _aspect;
-
-      // HACK: matrix should look in positive z-direction, preferably the matrix should be calculated like that right away
-      matrix.rotateY(180);
-
-      return matrix;
-    }
-
-    /**
-     * Computes and returns a matrix that applies orthographic projection to an object, if its transform is multiplied by it.
-     * @param _left The positionvalue of the projectionspace's left border.
-     * @param _right The positionvalue of the projectionspace's right border.
-     * @param _bottom The positionvalue of the projectionspace's bottom border.
-     * @param _top The positionvalue of the projectionspace's top border.
-     * @param _near The positionvalue of the projectionspace's near border.
-     * @param _far The positionvalue of the projectionspace's far border
-     */
-    public static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near: number = -400, _far: number = 400): Matrix4x4 {
-      // const matrix: Matrix4x4 = new Matrix4x4;
-      const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
-      matrix.data.set([
-        2 / (_right - _left), 0, 0, 0,
-        0, 2 / (_top - _bottom), 0, 0,
-        0, 0, 2 / (_near - _far), 0,
-        (_left + _right) / (_left - _right),
-        (_bottom + _top) / (_bottom - _top),
-        (_near + _far) / (_near - _far),
-        1
-      ]);
-      return matrix;
-    }
-    //#endregion
-
-    //#region Rotation
-    /**
-     * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
-     * @param _by 
-     */
-    public rotate(_by: Vector3, _fromLeft: boolean = false): void {
-      this.rotateZ(_by.z, _fromLeft);
-      this.rotateY(_by.y, _fromLeft);
-      this.rotateX(_by.x, _fromLeft);
-    }
-
-    /**
      * Adds a rotation around the x-axis to this matrix
      */
     public rotateX(_angleInDegrees: number, _fromLeft: boolean = false): void {
-      let rotation: Matrix4x4 = Matrix4x4.ROTATION_X(_angleInDegrees);
-      this.multiply(rotation, _fromLeft);
-      Recycler.store(rotation);
+      let mtxRotation: Matrix4x4 = Matrix4x4.ROTATION_X(_angleInDegrees);
+      this.multiply(mtxRotation, _fromLeft);
+      Recycler.store(mtxRotation);
     }
 
     /**
      * Adds a rotation around the y-axis to this matrix
      */
     public rotateY(_angleInDegrees: number, _fromLeft: boolean = false): void {
-      let rotation: Matrix4x4 = Matrix4x4.ROTATION_Y(_angleInDegrees);
-      this.multiply(rotation, _fromLeft);
-      Recycler.store(rotation);
+      let mtxRotation: Matrix4x4 = Matrix4x4.ROTATION_Y(_angleInDegrees);
+      this.multiply(mtxRotation, _fromLeft);
+      Recycler.store(mtxRotation);
     }
 
     /**
      * Adds a rotation around the z-axis to this matrix
      */
     public rotateZ(_angleInDegrees: number, _fromLeft: boolean = false): void {
-      let rotation: Matrix4x4 = Matrix4x4.ROTATION_Z(_angleInDegrees);
-      this.multiply(rotation, _fromLeft);
-      Recycler.store(rotation);
+      let mtxRotation: Matrix4x4 = Matrix4x4.ROTATION_Z(_angleInDegrees);
+      this.multiply(mtxRotation, _fromLeft);
+      Recycler.store(mtxRotation);
     }
 
     /**
-     * Adjusts the rotation of this matrix to point the y-axis directly at the given target and tilts it to accord with the given up vector,
-     * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used. 
+     * Adjusts the rotation of this matrix to point the z-axis directly at the given target and tilts it to accord with the given up-{@link Vector3},
+     * respectively calculating yaw and pitch. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used. 
      * When _preserveScaling is false, a rotated identity matrix is the result. 
      */
     public lookAt(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
       if (!_up)
         _up = this.getY();
 
-      const matrix: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up);
+      const mtxResult: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up);
       if (_preserveScaling)
-        matrix.scale(this.scaling);
-      this.set(matrix);
-      Recycler.store(matrix);
+        mtxResult.scale(this.scaling);
+      this.set(mtxResult);
+      Recycler.store(mtxResult);
+    }
+    /**
+     * Same as {@link Matrix4x4.lookAt}, but optimized and needs testing
+     */
+    // TODO: testing lookat that really just rotates the matrix rather than creating a new one
+    public lookAtRotate(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
+      if (!_up)
+        _up = this.getY();
+
+      let scaling: Vector3 = this.scaling;
+      let difference: Vector3 = Vector3.DIFFERENCE(_target, this.translation);
+      difference.normalize();
+      let cos: number = Vector3.DOT(Vector3.NORMALIZATION(this.getZ()), difference);
+      let sin: number = Vector3.DOT(Vector3.NORMALIZATION(this.getX()), difference);
+      // console.log(sin, cos);
+      let mtxRotation: Matrix4x4 = Recycler.borrow(Matrix4x4);
+      mtxRotation.data.set([
+        cos, 0, -sin, 0,
+        0, 1, 0, 0,
+        sin, 0, cos, 0,
+        0, 0, 0, 1
+      ]);
+      this.multiply(mtxRotation, false);
+
+      cos = Vector3.DOT(Vector3.NORMALIZATION(this.getZ()), difference);
+      sin = -Vector3.DOT(Vector3.NORMALIZATION(this.getY()), difference);
+      // console.log(sin, cos);
+      mtxRotation.data.set([
+        1, 0, 0, 0,
+        0, cos, sin, 0,
+        0, -sin, cos, 0,
+        0, 0, 0, 1
+      ]);
+      this.multiply(mtxRotation, false);
+      this.scaling = scaling;
     }
 
     /**
-     * Adjusts the rotation of this matrix to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
-     * respectively calculating yaw only. If no up vector is given, the previous up-vector is used. 
+     * Adjusts the rotation of this matrix to match its y-axis with the given up-{@link Vector3} and facing its z-axis toward the given target at minimal angle,
+     * respectively calculating yaw only. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used. 
      * When _preserveScaling is false, a rotated identity matrix is the result. 
      */
     public showTo(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
       if (!_up)
         _up = this.getY();
 
-      const matrix: Matrix4x4 = Matrix4x4.SHOW_TO(this.translation, _target, _up); 
+      const mtxResult: Matrix4x4 = Matrix4x4.SHOW_TO(this.translation, _target, _up);
       if (_preserveScaling)
-        matrix.scale(this.scaling);
-      this.set(matrix);
-      Recycler.store(matrix);
+        mtxResult.scale(this.scaling);
+      this.set(mtxResult);
+      Recycler.store(mtxResult);
     }
     //#endregion
 
     //#region Translation
     /**
-     * Add a translation by the given vector to this matrix 
+     * Add a translation by the given {@link Vector3} to this matrix.
+     * If _local is true, translation occurs according to the current rotation and scaling of this matrix,
+     * according to the parent otherwise. 
      */
     public translate(_by: Vector3, _local: boolean = true): void {
       if (_local) {
-        let translation: Matrix4x4 = Matrix4x4.TRANSLATION(_by);
-        this.multiply(translation);
-        Recycler.store(translation);
+        let mtxTranslation: Matrix4x4 = Matrix4x4.TRANSLATION(_by);
+        this.multiply(mtxTranslation);
+        Recycler.store(mtxTranslation);
       } else {
         this.data[12] += _by.x;
         this.data[13] += _by.y;
@@ -576,37 +772,40 @@ namespace FudgeCore {
 
     //#region Scaling
     /**
-     * Add a scaling by the given vector to this matrix 
+     * Add a scaling by the given {@link Vector3} to this matrix 
      */
     public scale(_by: Vector3): void {
-      const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by));
-      this.set(matrix);
-      Recycler.store(matrix);
+      const mtxResult: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by));
+      this.set(mtxResult);
+      Recycler.store(mtxResult);
     }
 
     /**
      * Add a scaling along the x-axis by the given amount to this matrix 
      */
     public scaleX(_by: number): void {
-      let vector: Vector3 = Recycler.borrow(Vector3);
+      let vector: Vector3 = Recycler.get(Vector3);
       vector.set(_by, 1, 1);
       this.scale(vector);
+      Recycler.store(vector);
     }
     /**
      * Add a scaling along the y-axis by the given amount to this matrix 
      */
     public scaleY(_by: number): void {
-      let vector: Vector3 = Recycler.borrow(Vector3);
+      let vector: Vector3 = Recycler.get(Vector3);
       vector.set(1, _by, 1);
       this.scale(vector);
+      Recycler.store(vector);
     }
     /**
      * Add a scaling along the z-axis by the given amount to this matrix 
      */
     public scaleZ(_by: number): void {
-      let vector: Vector3 = Recycler.borrow(Vector3);
+      let vector: Vector3 = Recycler.get(Vector3);
       vector.set(1, 1, _by);
       this.scale(vector);
+      Recycler.store(vector);
     }
     //#endregion
 
@@ -615,15 +814,16 @@ namespace FudgeCore {
      * Multiply this matrix with the given matrix
      */
     public multiply(_matrix: Matrix4x4, _fromLeft: boolean = false): void {
-      const matrix: Matrix4x4 = _fromLeft ? Matrix4x4.MULTIPLICATION(_matrix, this) : Matrix4x4.MULTIPLICATION(this, _matrix);
-      this.set(matrix);
-      Recycler.store(matrix);
+      const mtxResult: Matrix4x4 = _fromLeft ? Matrix4x4.MULTIPLICATION(_matrix, this) : Matrix4x4.MULTIPLICATION(this, _matrix);
+      this.set(mtxResult);
+      Recycler.store(mtxResult);
     }
     //#endregion
 
     //#region Transfer
     /**
-     * Calculates and returns the euler-angles representing the current rotation of this matrix
+     * Calculates and returns the euler-angles representing the current rotation of this matrix.  
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
      */
     public getEulerAngles(): Vector3 {
       let scaling: Vector3 = this.scaling;
@@ -662,19 +862,21 @@ namespace FudgeCore {
         z1 = 0;
       }
 
-      let rotation: Vector3 = Recycler.get(Vector3);
-      rotation.set(x1, y1, z1);
-      rotation.scale(180 / Math.PI);
+      // let rotation: Vector3 = Recycler.borrow(Vector3);
+      this.#eulerAngles.set(x1, y1, z1);
+      this.#eulerAngles.scale(180 / Math.PI);
 
-      return rotation;
+      return this.#eulerAngles;
     }
 
     /**
      * Sets the elements of this matrix to the values of the given matrix
      */
-    public set(_to: Matrix4x4): void {
-      // this.data = _to.get();
-      this.data.set(_to.data);
+    public set(_mtxTo: Matrix4x4 | Float32Array): void {
+      if (_mtxTo instanceof Float32Array)
+        this.data.set(_mtxTo);
+      else
+        this.data.set(_mtxTo.data);
       this.resetCache();
     }
 
@@ -743,27 +945,30 @@ namespace FudgeCore {
     }
 
     /**
-     * Return a copy of this
+     * Returns the tranlation from this matrix to the target matrix
      */
-    public get copy(): Matrix4x4 {
-      let copy: Matrix4x4 = new Matrix4x4();
-      copy.set(this);
-      return copy;
-    }
-
-    public getTranslationTo(_target: Matrix4x4): Vector3 {
+    public getTranslationTo(_mtxTarget: Matrix4x4): Vector3 {
       let difference: Vector3 = Recycler.get(Vector3);
-      difference.set(_target.data[12] - this.data[12], _target.data[13] - this.data[13], _target.data[14] - this.data[14]);
+      difference.set(_mtxTarget.data[12] - this.data[12], _mtxTarget.data[13] - this.data[13], _mtxTarget.data[14] - this.data[14]);
       return difference;
     }
 
     public serialize(): Serialization {
-      // TODO: save translation, rotation and scale as vectors for readability and manipulation
-      let serialization: Serialization = this.getMutator();
+      // this.getMutator();
+      let serialization: Serialization = {
+        translation: this.translation.serialize(),
+        rotation: this.rotation.serialize(),
+        scaling: this.scaling.serialize()
+      };
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
-      this.mutate(_serialization);
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      let mutator: Mutator = {
+        translation: await this.translation.deserialize(_serialization.translation),
+        rotation: await this.rotation.deserialize(_serialization.rotation),
+        scaling: await this.scaling.deserialize(_serialization.scaling)
+      };
+      this.mutate(mutator);
       return this;
     }
 
@@ -782,7 +987,7 @@ namespace FudgeCore {
       return mutator;
     }
 
-    public mutate(_mutator: Mutator): void {
+    public async mutate(_mutator: Mutator): Promise<void> {
       let oldTranslation: Vector3 = this.translation;
       let oldRotation: Vector3 = this.rotation;
       let oldScaling: Vector3 = this.scaling;
@@ -791,7 +996,7 @@ namespace FudgeCore {
       let newScaling: Vector3 = <Vector3>_mutator["scaling"];
       let vectors: VectorRepresentation = { translation: oldTranslation, rotation: oldRotation, scaling: oldScaling };
       if (newTranslation) {
-        vectors.translation = Recycler.get(Vector3);
+        vectors.translation = vectors.translation || this.#vectors.translation;
         vectors.translation.set(
           newTranslation.x != undefined ? newTranslation.x : oldTranslation.x,
           newTranslation.y != undefined ? newTranslation.y : oldTranslation.y,
@@ -799,7 +1004,7 @@ namespace FudgeCore {
         );
       }
       if (newRotation) {
-        vectors.rotation = Recycler.get(Vector3);
+        vectors.rotation = vectors.rotation || this.#vectors.rotation;
         vectors.rotation.set(
           newRotation.x != undefined ? newRotation.x : oldRotation.x,
           newRotation.y != undefined ? newRotation.y : oldRotation.y,
@@ -807,7 +1012,7 @@ namespace FudgeCore {
         );
       }
       if (newScaling) {
-        vectors.scaling = Recycler.get(Vector3);
+        vectors.scaling = vectors.scaling || this.#vectors.scaling;
         vectors.scaling.set(
           newScaling.x != undefined ? newScaling.x : oldScaling.x,
           newScaling.y != undefined ? newScaling.y : oldScaling.y,
@@ -816,21 +1021,22 @@ namespace FudgeCore {
       }
 
       // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/quotients
-      let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
+      let mtxResult: Matrix4x4 = Matrix4x4.IDENTITY();
       if (vectors.translation)
-        matrix.translate(vectors.translation);
+        mtxResult.translate(vectors.translation);
       if (vectors.rotation) {
-        matrix.rotateZ(vectors.rotation.z);
-        matrix.rotateY(vectors.rotation.y);
-        matrix.rotateX(vectors.rotation.x);
+        // mtxResult.rotateZ(vectors.rotation.z);
+        // mtxResult.rotateY(vectors.rotation.y);
+        // mtxResult.rotateX(vectors.rotation.x);
+        mtxResult.rotate(vectors.rotation);
       }
       if (vectors.scaling)
-        matrix.scale(vectors.scaling);
+        mtxResult.scale(vectors.scaling);
 
-      this.set(matrix);
+      this.set(mtxResult);
       this.vectors = vectors;
 
-      Recycler.store(matrix);
+      Recycler.store(mtxResult);
     }
 
     public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {

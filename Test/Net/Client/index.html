@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta settings='"server": "ws://localhost:8080", "login": "Test", "partner": "Test"'>
+  <script src="../../../Core/Build/FudgeCore.js"></script>
+  <script src="../../../Net/Build/Client/FudgeClient.js"></script>
+  <!-- <script src="https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js"></script> -->
+  <!-- <script src="https://jirkadelloro.github.io/FUDGE/Net/Build/Client/FudgeClient.js"></script> -->
+  <script src="Client.js" defer></script>
+  <title>New Test Client</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <form id="connect">
+    <fieldset>
+      <legend>WS (WebSocket)</legend>
+      <input type="text" name="server" value="wss://fudge-server.herokuapp.com" list="urls">
+      <!-- <input type="text" name="server" value="" list="urls"> -->
+      <datalist id="urls">
+        <option value="ws://localhost:8080">
+        <option value="wss://fudge-server.herokuapp.com">
+      </datalist>
+      <button type="button" id="connect">Connect</button><br />
+      <input type="text" id="id" value="" disabled> id <br />
+      <input type="text" name="name" value="" disabled>
+      <button type="button" id="rename">&lt;-Name</button>
+      <input type="text" name="proposal" value=""><br />
+    </fieldset>
+    <fieldset>
+      <legend>WebRTC</legend>
+      <button type="button" id="mesh" disabled>create mesh</button>
+      <button type="button" id="host" disabled>become host</button>
+      <button type="button" id="disconnect">disconnect</button>
+      <button type="button" id="reset">reset all connections</button>
+    </fieldset>
+  </form>
+  <fieldset>
+    <legend>Status</legend>
+    <table> </table>
+  </fieldset>
+  <form id="communication">
+    <fieldset>
+      <legend>Communication</legend>
+      Send <textarea cols=70 rows="1" name="message">Test</textarea><br />
+      using
+      <input type="radio" name="protocol" value="ws" id="ws" /><label for="ws">WS</label>
+      <input type="radio" name="protocol" value="rtc" id="rtc" checked /><label for="rtc">RTC</label>
+      to <button type="button" id="sendServer">server (TCP only)</button>
+      <button type="button" id="sendHost">host</button>
+      <button type="button" id="sendAll">all</button>
+      <button type="button" id="sendClient">client id:</button>
+      <input type="text" name="receiver" /><br />
+
+      Received<br>
+      <textarea cols=80 rows="10" id="received"></textarea>
+    </fieldset>
+  </form>
+</body>
+
+</html>

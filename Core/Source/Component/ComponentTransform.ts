@@ -1,28 +1,125 @@
 namespace FudgeCore {
+
+  export enum BASE {
+    SELF, PARENT, WORLD, NODE
+  }
+
   /**
-   * Attaches a transform-[[Matrix4x4]] to the node, moving, scaling and rotating it in space relative to its parent.
+   * Attaches a transform-[[Matrix4x4} to the node, moving, scaling and rotating it in space relative to its parent.
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class ComponentTransform extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentTransform);
-    public local: Matrix4x4;
+    public mtxLocal: Matrix4x4;
 
-    public constructor(_matrix: Matrix4x4 = Matrix4x4.IDENTITY()) {
+    public constructor(_mtxInit: Matrix4x4 = Matrix4x4.IDENTITY()) {
       super();
-      this.local = _matrix;
+      this.mtxLocal = _mtxInit;
     }
+
+    //#region Transformations respecting the hierarchy
+
+    /**
+     * Adjusts the rotation to point the z-axis directly at the given target point in world space and tilts it to accord with the given up vector,
+     * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used. 
+     */
+    public lookAt(_targetWorld: Vector3, _up?: Vector3): void {
+      let container: Node = this.node;
+      if (!container && !container.getParent())
+        return this.mtxLocal.lookAt(_targetWorld, _up);
+
+      // component is attached to a child node -> transform respecting the hierarchy
+      let mtxWorld: Matrix4x4 = container.mtxWorld.clone;
+      mtxWorld.lookAt(_targetWorld, _up, true);
+      let mtxLocal: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
+      this.mtxLocal = mtxLocal;
+    }
+
+    /**
+     * Adjusts the rotation to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
+     * respectively calculating yaw only. If no up vector is given, the previous up-vector is used. 
+     */
+    public showTo(_targetWorld: Vector3, _up?: Vector3): void {
+      let container: Node = this.node;
+      if (!container && !container.getParent())
+        return this.mtxLocal.showTo(_targetWorld, _up);
+
+      // component is attached to a child node -> transform respecting the hierarchy
+      let mtxWorld: Matrix4x4 = container.mtxWorld.clone;
+      mtxWorld.showTo(_targetWorld, _up, true);
+      let mtxLocal: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
+      this.mtxLocal = mtxLocal;
+    }
+
+    /**
+     * recalculates this local matrix to yield the identical world matrix based on the given node.
+     * Use rebase before appending the container of this component to another node while preserving its transformation in the world.
+     */
+    public rebase(_node: Node = null): void {
+      let mtxResult: Matrix4x4 = this.mtxLocal;
+      let container: Node = this.node;
+      if (container)
+        mtxResult = container.mtxWorld;
+
+      if (_node)
+        mtxResult = Matrix4x4.RELATIVE(mtxResult, null, _node.mtxWorldInverse);
+
+      this.mtxLocal = mtxResult;
+    }
+
+    /**
+     * Applies the given transformation relative to the selected base (SELF, PARENT, WORLD) or a particular other node (NODE)
+     */
+    public transform(_mtxTransform: Matrix4x4, _base: BASE = BASE.SELF, _node: Node = null): void {
+      switch (_base) {
+        case BASE.SELF:
+          this.mtxLocal.multiply(_mtxTransform);
+          break;
+        case BASE.PARENT:
+          this.mtxLocal.multiply(_mtxTransform, true);
+          break;
+        case BASE.NODE:
+          if (!_node)
+            throw new Error("BASE.NODE requires a node given as base");
+        case BASE.WORLD:
+          this.rebase(_node);
+          this.mtxLocal.multiply(_mtxTransform, true);
+
+          let node: Node = this.node;
+          if (node) {
+            let mtxTemp: Matrix4x4;
+            if (_base == BASE.NODE) {
+              // fix mtxWorld of container for subsequent rebasing 
+              mtxTemp = Matrix4x4.MULTIPLICATION(_node.mtxWorld, node.mtxLocal);
+              node.mtxWorld.set(mtxTemp);
+              Recycler.store(mtxTemp);
+            }
+
+            let parent: Node = node.getParent();
+            if (parent) {
+              // fix mtxLocal for current parent
+              this.rebase(node.getParent());
+              mtxTemp = Matrix4x4.MULTIPLICATION(node.getParent().mtxWorld, node.mtxLocal);
+              node.mtxWorld.set(mtxTemp);
+              Recycler.store(mtxTemp);
+            }
+          }
+          break;
+      }
+    }
+    //#endregion
 
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = {
-        local: this.local.serialize(),
+        local: this.mtxLocal.serialize(),
         [super.constructor.name]: super.serialize()
       };
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
-      super.deserialize(_serialization[super.constructor.name]);
-      this.local.deserialize(_serialization.local);
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization[super.constructor.name]);
+      await this.mtxLocal.deserialize(_serialization.local);
       return this;
     }
 

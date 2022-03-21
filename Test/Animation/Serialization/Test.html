@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Animation</title>
+  <link rel="stylesheet" href="../../TestInstructions.css">
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+  <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
+  <script type="text/javascript" src="../../../Aid/Build/FudgeAid.js"></script>
+  <script type="text/javascript" src="AnimatorComponentTest.js"></script>
+
+  <style type="text/css">
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    TestInstructions.display({
+      Name: "ComponentAnimator",
+      Test: [
+        "ComponentAnimator is complex and largely extensible, so this test was created to check the serialization and deserialization.",
+        "It also tests if the Component is attached and detached from the node and deactivated, when the node gets removed from the graph, so that no events and timers leak in memory."
+      ],
+      Setup: [
+        "A small animation rotating the cube with 5 seconds of length, a label at 2 seconds and an event triggered at 3 seconds",
+        "A ComponentAnimator with a speed of 2, playmode loop and continous time, reacting to the event if triggered with console output",
+        "A reconstruction of this component created by serialization/deserialization"
+      ],
+      Act: [
+        "Switch to use the orginal component or the reconstruction",
+        "Add an additional event listener to make the animation jump to the label when the event is triggered",
+        "Choose to detach the component or remove the whole node after 8 seconds"
+      ],
+      Observe: [
+        "Compare the animations of the original and the reconstruction",
+        "In the console, see if the serializations match",
+        "Observe the output from the event handler."
+      ],
+      /* Control: [
+        //"no controls"
+      ], */
+      Expect: [
+        "Identical behavior of the original and the reconstructed component.",
+        "Serializations should match.",
+        "The output in the console should end when the component was detached or the node removed."
+      ]
+    });
+  </script>
+
+  <form>
+    <fieldset id="use">
+      <legend>Use</legend>
+      <input type="radio" name="use" id="original" value="original" /><label for="original">Original</label>
+      <input type="radio" name="use" id="reconstruction" value="reconstruction" checked /><label
+        for="reconstruction">Reconstruction</label><br/>
+      <input type="checkbox" id="jump" name="jump" /><label for="jump">jump</label>
+    </fieldset>
+    <fieldset id="destroy">
+      <legend>After 8 seconds</legend>
+      <input type="radio" name="destroy" id="nothing" value="nothing" checked /><label for="nothing">keep going</label>
+      <input type="radio" name="destroy" id="detach" value="detach" /><label for="detach">detach component</label>
+      <input type="radio" name="destroy" id="remove" value="remove" /><label for="remove">remove node</label>
+    </fieldset>
+  </form>
+
+</body>

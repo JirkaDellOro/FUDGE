@@ -3,90 +3,117 @@ namespace FudgeCore {
    * Abstract base class for all meshes. 
    * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
    * 
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2019/22
    */
   @RenderInjectorMesh.decorate
-  export abstract class Mesh implements SerializableResource {
+  export abstract class Mesh extends Mutable implements SerializableResource {
     /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
     public static readonly baseClass: typeof Mesh = Mesh;
     /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Mesh[] = [];
 
-    // TODO: check if these arrays must be cached like this or if calling the methods is better.
-    public vertices: Float32Array;
-    public indices: Uint16Array;
-    public textureUVs: Float32Array;
-    public normalsFace: Float32Array;
+    // TODO: at this time, creating the buffers for flat shading is a brute force algorithm and should be optimized in the different subclasses
+    // TODO: rename vertices to verticesSmooth or just cloud, and cloud to vertices
+    // 
 
     public idResource: string = undefined;
+    public name: string = "Mesh";
+    // base structure for meshes in FUDGE
+    public vertices: Vertices = new Vertices();
+    public faces: Face[] = [];
 
-    public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
+    // public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
+    protected renderMesh: RenderMesh; /* defined by RenderInjector*/
 
-    public static getBufferSpecification(): BufferSpecification {
-      return { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 };
+
+    /** bounding box AABB */
+    protected ƒbox: Box;
+    // TODO: explore mathematics for easy transformations of radius 
+    /** bounding radius */
+    protected ƒradius: number;
+
+
+    public constructor(_name: string = "Mesh") {
+      super();
+      this.name = _name;
+      this.clear();
+      Project.register(this);
     }
 
     protected static registerSubclass(_subClass: typeof Mesh): number { return Mesh.subclasses.push(_subClass) - 1; }
 
+    public get type(): string {
+      return this.constructor.name;
+    }
 
-    public useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {/* injected by RenderInjector*/ }
-    public createRenderBuffers(): void {/* injected by RenderInjector*/ }
+    public get boundingBox(): Box {
+      if (this.ƒbox == null)
+        this.ƒbox = this.createBoundingBox();
+
+      return this.ƒbox;
+    }
+    public get radius(): number {
+      if (this.ƒradius == null)
+        this.ƒradius = this.createRadius();
+
+      return this.ƒradius;
+    }
+
+    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): RenderBuffers { return null; /* injected by RenderInjector*/ }
+    public getRenderBuffers(_shader: typeof Shader): RenderBuffers { return null; /* injected by RenderInjector*/ }
     public deleteRenderBuffers(_shader: typeof Shader): void {/* injected by RenderInjector*/ }
 
-    public getVertexCount(): number {
-      return this.vertices.length / Mesh.getBufferSpecification().size;
-    }
-    public getIndexCount(): number {
-      return this.indices.length;
+    public clear(): void {
+      this.ƒbox = undefined;
+      this.ƒradius = undefined;
+
+      this.renderMesh?.clear();
     }
 
-    public create(): void {
-      this.vertices = this.createVertices();
-      this.indices = this.createIndices();
-      this.textureUVs = this.createTextureUVs();
-      this.normalsFace = this.createFaceNormals();
-      this.createRenderBuffers();
-    }
-
+    //#region Transfer
     // Serialize/Deserialize for all meshes that calculate without parameters
     public serialize(): Serialization {
       let serialization: Serialization = {
-        idResource: this.idResource
+        idResource: this.idResource,
+        name: this.name,
+        type: this.type // store for editor view
       }; // no data needed ...
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
-      this.create(); // TODO: must not be created, if an identical mesh already exists
-      this.idResource = _serialization.idResource;
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      Project.register(this, _serialization.idResource);
+      this.name = _serialization.name;
+      // type is an accessor and must not be deserialized
       return this;
     }
 
-    // public abstract create(): void;
+    protected reduceMutator(_mutator: Mutator): void {
+      // TODO: so much to delete... rather just gather what to mutate
+      delete _mutator.ƒbox;
+      delete _mutator.ƒradius;
 
-    protected calculateFaceNormals(): Float32Array {
-      let normals: number[] = [];
-      let vertices: Vector3[] = [];
+      delete _mutator.renderBuffers;
+    }
+    //#endregion
 
-      for (let v: number = 0; v < this.vertices.length; v += 3)
-        vertices.push(new Vector3(this.vertices[v], this.vertices[v + 1], this.vertices[v + 2]));
 
-      for (let i: number = 0; i < this.indices.length; i += 3) {
-        let vertex: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
-
-        let v0: Vector3 = Vector3.DIFFERENCE(vertices[vertex[0]], vertices[vertex[1]]);
-        let v1: Vector3 = Vector3.DIFFERENCE(vertices[vertex[0]], vertices[vertex[2]]);
-        let normal: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(v0, v1));
-        let index: number = vertex[2] * 3;
-        normals[index] = normal.x;
-        normals[index + 1] = normal.y;
-        normals[index + 2] = normal.z;
+    protected createRadius(): number {
+      //TODO: radius and bounding box could be created on construction of vertex-array
+      let radius: number = 0;
+      for (let i: number = 0; i < this.vertices.length; i++) {
+        radius = Math.max(radius, this.vertices.position(i).magnitudeSquared);
       }
-      return new Float32Array(normals);
+      return Math.sqrt(radius);
     }
 
-    protected abstract createVertices(): Float32Array;
-    protected abstract createTextureUVs(): Float32Array;
-    protected abstract createIndices(): Uint16Array;
-    protected abstract createFaceNormals(): Float32Array;
+    protected createBoundingBox(): Box {
+      let box: Box = Recycler.get(Box);
+      box.set();
+      for (let i: number = 0; i < this.vertices.length; i ++) {
+        let point: Vector3 = this.vertices.position(i);
+        box.expand(point);
+      }
+      return box;
+    }
   }
 }

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Matrix</title>
+  <script src="../../../Core/Build/FudgeCore.js"></script>
+  <script src="../../../Aid/Build/FudgeAid.js"></script>
+  <script src="Matrix.js"></script>
+
+  <style type="text/css">
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+    }
+
+    canvas {
+      width: 100vw;
+      height: 600px;
+    }
+
+    fieldset {
+      display: inline;
+      float: left;
+    }
+
+    fieldset#Hierarchy {
+      display: block;
+      float: none;
+    }
+
+
+    input:not([type=radio]) {
+      width: 55px;
+    }
+
+    span {
+      width: 8em;
+      display: inline-block;
+      text-align: right;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas></canvas>
+  <div>
+    <fieldset id="Hierarchy">
+      <legend>Hierarchy</legend>
+      <input type="radio" name="Hierarchy" value="none" id="hNone"></input><label for="hNone">none </label>
+      <input type="radio" name="Hierarchy" value="01" id="h01"></input><label for="h01">0 parent of 1 </label>
+      <input type="radio" name="Hierarchy" value="10" id="h10"></input><label for="h10">1 parent of 0 </label>
+      <input type="checkbox" name="Preserve" checked="false" id="preserve"></input>
+      <label for="preserve">preserve world transform </label>
+    </fieldset>
+  </div>
+
+  <div>
+    <fieldset id="Matrix0">
+      <legend>Matrix0</legend>
+    </fieldset>
+    <fieldset id="Interact0">
+      <legend>Interact0</legend>
+      <form>
+        Base: <input type="radio" name="Base" value="self" id="self0" checked="true">
+        </input><label for="self0">self</label>
+        <input type="radio" name="Base" value="parent" id="parent0"></input>
+        <label for="parent0">parent </label>
+        <input type="radio" name="Base" value="world" id="world0"></input>
+        <label for="world0">world </label>
+        <input type="radio" name="Base" value="other" id="other0"></input>
+        <label for="other0">other </label>
+    </fieldset>
+    </form>
+  </div>
+
+  <div>
+    <fieldset id="Matrix1">
+      <legend>Matrix1</legend>
+    </fieldset>
+    <fieldset id="Interact1">
+      <legend>Interact1</legend>
+      <form>
+        Base: <input type="radio" name="Base" value="self" id="self1" checked="true"></input>
+        <label for="self1">self</label>
+        <input type="radio" name="Base" value="parent" id="parent1"></input>
+        <label for="parent1">parent </label>
+        <input type="radio" name="Base" value="world" id="world1"></input>
+        <label for="world1">world </label>
+        <input type="radio" name="Base" value="other" id="other1"></input>
+        <label for="other1">other </label>
+      </form>
+    </fieldset>
+  </div>
+</body>
+
+</html>

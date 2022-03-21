@@ -9,7 +9,7 @@ namespace TestInstructions {
   let dialog: HTMLDialogElement;
   let instructions: object;
 
-  export function display(_instructions: object): void {
+  export function display(_instructions: object, _open: boolean = true): void {
     instructions = _instructions;
     dialog = document.createElement("dialog");
     dialogPolyfill.registerDialog(dialog);
@@ -41,20 +41,26 @@ namespace TestInstructions {
           break;
       }
       document.body.appendChild(dialog);
-      dialog.show();
+      dialog.style.zIndex = "100";
+      if (_open)
+        //@ts-ignore
+        dialog.show();
     }
     dialog.className = "dialog";
   }
 
   function handleKeypress(_event: KeyboardEvent): void {
     if (_event.code == "F1" && _event.ctrlKey)
+      //@ts-ignore
       if (dialog.open)
+        //@ts-ignore
         dialog.close();
       else
+        //@ts-ignore
         dialog.show();
   }
 
   export function get(_key: string): HTMLUListElement | string {
     return <HTMLUListElement>dialog.querySelector("ul#" + _key);
   }
-} 
+}

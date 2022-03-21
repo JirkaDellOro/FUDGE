@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta type="settings" />
+  <title>Pick Shader</title>
+  <script type="text/javascript" src="../../../Core/Build/FudgeCore.js">  </script>
+  <script type="text/javascript" src="../../../Aid/Build/FudgeAid.js">  </script>
+  <script type="text/javascript" src="../../../UserInterface/Build/FudgeUserInterface.js">  </script>
+  <script type="text/javascript" src="Picking.js">  </script>
+  <link type="resources" src="QuadStack.json" />
+  <style>
+    html,
+    body {
+      padding: 0px;
+      margin: 0px;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    canvas.fullscreen {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    div {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background-color: ivory;
+    }
+
+    span {
+      display: inline-block;
+      width: 40px;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+  <script>
+    TestInstructions.display({
+      Name: "Pick shader and sorting",
+      Test: [
+        "The pick shader renders the pixel under the cursor onto a texture, each object occupying one pixel on that texture.",
+        "The pixels don't contain color information but an identifier for the object rendered and the distance to the camera.",
+        "The resulting texture is then read pixel by pixel and the information may be sorted by distance.",
+      ],
+      Setup: [
+        "Four overlapping quads of different color and distance to the camera.",
+      ],
+      Act: [
+        "Move the mouse over the quads.",
+      ],
+      Observe: [
+        "See the numbers in the upper right corner displaying the distance in clip space.",
+      ],
+      Expect: [
+        "Moving over the quad makes the numbers change for each quad under the cursor.",
+        "Numbers range from almost -1 (close to the near plane) to almost +1 (close to the far plane).",
+      ]
+    });
+  </script>
+  <!--Canvas for FUDGE to render to-->
+  <canvas class="fullscreen"></canvas>
+
+  <div id="ui">
+    <span>Red</span> <input type="number" key="red" value="0" /><br />
+    <span>Green</span> <input type="number" key="green" value="0" /><br />
+    <span>Blue</span> <input type="number" key="blue" value="0" /><br />
+    <span>Yellow</span> <input type="number" key="yellow" value="0" /><br />
+    <span>Cursor</span> <input type="number" key="Cursor" value="0" /><br />
+
+  </div>
+</body>
+
+</html>

@@ -13,7 +13,7 @@ namespace FudgeUserInterface {
     }
 
     /**
-     * Opens the tree along the given path to show the objects the path includes
+     * Expands the tree along the given path to show the objects the path includes
      * @param _path An array of objects starting with one being contained in this treelist and following the correct hierarchy of successors
      * @param _focus If true (default) the last object found in the tree gets the focus
      */
@@ -25,7 +25,7 @@ namespace FudgeUserInterface {
         item.focus();
         let content: TreeList<T> = item.getBranch();
         if (!content) {
-          item.open(true);
+          item.expand(true);
           content = item.getBranch();
         }
         currentTree = content;
@@ -45,7 +45,7 @@ namespace FudgeUserInterface {
           found.setLabel(item.display);
           found.hasChildren = item.hasChildren;
           if (!found.hasChildren)
-            found.open(false);
+            found.expand(false);
           items.push(found);
         }
         else
@@ -117,14 +117,15 @@ namespace FudgeUserInterface {
 
       for (let item of items)
         if (_data.indexOf(item.data) > -1) {
-          item.dispatchEvent(new Event(EVENT_TREE.UPDATE, { bubbles: true }));
+          // item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
+          item.dispatchEvent(new Event(EVENT.REMOVE_CHILD, { bubbles: true }));
           deleted.push(item.parentNode.removeChild(item));
         }
 
       return deleted;
     }
 
-    public findOpen(_data: T): TreeItem<T> {
+    public findVisible(_data: T): TreeItem<T> {
       let items: NodeListOf<TreeItem<T>> = <NodeListOf<TreeItem<T>>>this.querySelectorAll("li");
       for (let item of items)
         if (_data == item.data)

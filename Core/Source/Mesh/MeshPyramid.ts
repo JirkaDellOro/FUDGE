@@ -12,56 +12,32 @@ namespace FudgeCore {
   export class MeshPyramid extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshPyramid);
 
-    public constructor() {
-      super();
-      this.create();
-    }
+    public constructor(_name: string = "MeshPyramid") {
+      super(_name);
+      // this.create();
 
-
-    protected createVertices(): Float32Array {
-      let vertices: Float32Array = new Float32Array([
-                // floor
-                /*0*/ -1, 0, 1, /*1*/ 1, 0, 1,  /*2*/ 1, 0, -1, /*3*/ -1, 0, -1,
-                // tip
-                /*4*/ 0, 2, 0,  // double height will be scaled down
-                // floor again for texturing and normals
-                /*5*/ -1, 0, 1, /*6*/ 1, 0, 1,  /*7*/ 1, 0, -1, /*8*/ -1, 0, -1
-      ]);
-
-      // scale down to a length of 1 for bottom edges and height
-      vertices = vertices.map(_value => _value / 2);
-      return vertices;
-    }
-
-    protected createIndices(): Uint16Array {
-      let indices: Uint16Array = new Uint16Array([
-        // front
-        4, 0, 1,
-        // right
-        4, 1, 2,
-        // back
-        4, 2, 3,
-        // left
-        4, 3, 0,
-        // bottom
-        5 + 0, 5 + 2, 5 + 1, 5 + 0, 5 + 3, 5 + 2
-      ]);
-      return indices;
-    }
-
-    protected createTextureUVs(): Float32Array {
-      let textureUVs: Float32Array = new Float32Array([
-                // front
-                /*0*/ 0, 1, /*1*/ 0.5, 1,  /*2*/ 1, 1, /*3*/ 0.5, 1,
-                // back
-                /*4*/ 0.5, 0,
-                /*5*/ 0, 0, /*6*/ 1, 0,  /*7*/ 1, 1, /*8*/ 0, 1
-      ]);
-      return textureUVs;
-    }
-
-    protected createFaceNormals(): Float32Array {
-      return new Float32Array(this.calculateFaceNormals());
+      this.vertices = new Vertices(
+        // ground vertices
+        new Vertex(new Vector3(-0.5, 0.0, 0.5), new Vector2(0, 1)),
+        new Vertex(new Vector3(0.5, 0.0, 0.5), new Vector2(1, 1)),
+        new Vertex(new Vector3(0.5, 0.0, -0.5), new Vector2(1, 0)),
+        new Vertex(new Vector3(-0.5, 0.0, -0.5), new Vector2(0, 0)),
+        // tip (vertex #4)
+        new Vertex(new Vector3(0.0, 1.0, 0.0), new Vector2(0.5, 0.5)),
+        // floor again for downside texture
+        new Vertex(0, new Vector2(0, 0)),
+        new Vertex(1, new Vector2(1, 0)),
+        new Vertex(2, new Vector2(1, 1)),
+        new Vertex(3, new Vector2(0, 1))
+      );
+      this.faces = [
+        new Face(this.vertices, 4, 0, 1),
+        new Face(this.vertices, 4, 1, 2),
+        new Face(this.vertices, 4, 2, 3),
+        new Face(this.vertices, 4, 3, 0),
+        new Face(this.vertices, 5 + 0, 5 + 2, 5 + 1),
+        new Face(this.vertices, 5 + 0, 5 + 3, 5 + 2)
+      ];
     }
   }
 }

@@ -2,7 +2,7 @@
 // / <reference path="../Transfer/Mutable.ts"/>
 namespace FudgeCore {
   /** 
-   * Superclass for all [[Component]]s that can be attached to [[Node]]s.
+   * Superclass for all {@link Component}s that can be attached to {@link Node}s.
    * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jascha Karagöl, HFU, 2019  
    * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
    */
@@ -14,16 +14,26 @@ namespace FudgeCore {
     /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Component[] = [];
 
+    #node: Node | null = null;
     protected singleton: boolean = true;
-    private container: Node | null = null;
-    private active: boolean = true;
+    protected active: boolean = true;
+
+    public constructor() {
+      super();
+      this.addEventListener(EVENT.MUTATE, (_event: CustomEvent) => {
+        if (this.#node) {
+          // TODO: find the number of the component in the array if not singleton
+          _event.detail.component = this;
+          //@ts-ignore
+          _event.detail.componentIndex = this.node.getComponents(this.constructor).indexOf(this);
+          this.#node.dispatchEvent(_event);
+        }
+      });
+    }
 
     protected static registerSubclass(_subclass: typeof Component): number { return Component.subclasses.push(_subclass) - 1; }
 
-    public activate(_on: boolean): void {
-      this.active = _on;
-      this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));
-    }
+
     public get isActive(): boolean {
       return this.active;
     }
@@ -34,31 +44,37 @@ namespace FudgeCore {
     public get isSingleton(): boolean {
       return this.singleton;
     }
+
     /**
      * Retrieves the node, this component is currently attached to
-     * @returns The container node or null, if the component is not attached to
      */
-    public getContainer(): Node | null {
-      return this.container;
+    public get node(): Node | null {
+      return this.#node;
     }
+
+    public activate(_on: boolean): void {
+      this.active = _on;
+      this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));
+    }
+
     /**
-     * Tries to add the component to the given node, removing it from the previous container if applicable
-     * @param _container The node to attach this component to
+     * Tries to attach the component to the given node, removing it from the node it was attached to if applicable
      */
-    public setContainer(_container: Node | null): void {
-      if (this.container == _container)
+    public attachToNode(_container: Node | null): void {
+      if (this.#node == _container)
         return;
-      let previousContainer: Node = this.container;
+      let previousContainer: Node = this.#node;
       try {
         if (previousContainer)
           previousContainer.removeComponent(this);
-        this.container = _container;
-        if (this.container)
-          this.container.addComponent(this);
+        this.#node = _container;
+        if (this.#node)
+          this.#node.addComponent(this);
       } catch (_error) {
-        this.container = previousContainer;
+        this.#node = previousContainer;
       }
     }
+
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = {
@@ -66,14 +82,20 @@ namespace FudgeCore {
       };
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
-      this.active = _serialization.active;
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      this.activate(_serialization.active);
       return this;
+    }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      await super.mutate(_mutator);
+      if (typeof (_mutator.active) !== "undefined")
+        this.activate(_mutator.active);
     }
 
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.singleton;
-      delete _mutator.container;
+      delete _mutator.mtxWorld;
     }
     //#endregion
   }

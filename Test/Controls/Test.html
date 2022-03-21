@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Controls</title>
+  <title>Test</title>
+  <style>
+    input[type=range],
+    textarea {
+      width: 100%;
+    }
+
+    input[type=range]:enabled {
+      box-shadow: 0px 0px 1px #cccccc;
+    }
+
+    strong {
+      display: inline-block;
+      width: 6em;
+    }
+
+    fieldset {
+      border: 0px #dddddd solid;
+    }
+
+    fieldset#Input {
+      background-color: azure;
+    }
+
+    fieldset#Output {
+      background-color: beige;
+    }
+
+    fieldset#Mode {
+      background-color: rgb(245, 220, 220);
+    }
+
+    fieldset#Signal {
+      background-color: floralwhite;
+    }
+
+    dialog {
+      top: 0px;
+    }
+  </style>
+
+  <script type="text/javascript" src="../../Core/Build/FudgeCore.js"></script>
+  <script type="text/javascript" src="Controls.js"></script>
+  <link rel="stylesheet" href="../TestInstructions.css">
+  <script src="../dialog-polyfill.min.js"></script>
+  <script src="../TestInstructions.js"></script>
+</head>
+
+<body>
+  <script>
+    //ToDo: look what makes passive and active
+    TestInstructions.display({
+      Name: "Controls",
+      Test: [
+        "The controller processes the received input to a selected output : PROPORTIONAL, INTEGRAL, DIFFERENTIAL"
+      ],
+      Setup: [
+        "3 controllers with different types",
+        "3 different input possibilities: keyboard, input field absolute and relative",
+        "Number input fields for different settings: Factor, Delay"
+      ],
+      Act: [
+        "Change between polling and events mode",
+        "Control one input with A / D or by moving the respective slider"
+      ],
+      Observe: [
+        "see the incoming input signals",
+        "look at the outputs to see how the controller processes the inputs"
+      ],
+      Control: [
+        "<strong>Keys: </strong>  A: gives a negative input value equal to the factor | D: gives a positive input value equal to the factor",
+        "<strong>Slider: </strong>  increase and decrease the input ",
+        "<strong>Checkboxes: </strong>  choose polling or events mode",
+        "<strong>Number-Stepper: </strong>  Enter a delay for the outputs and the scaling factor"
+      ],
+      Expect: [
+        "The proportional controller outputs the amount of input received multiplied by its factor",
+        "The integral controller adds the received input multiplied by a factor to the current value",
+        "The differential controller gives an impulse in the amount of the received input multiplied by its factor"
+      ]
+    });
+  </script>
+  <!-- <fieldset>
+    <legend>Instructions</legend>
+    <script>document.write(TestInstructions.get("Control").innerHTML);</script>
+  </fieldset> -->
+  <fieldset id="Mode">
+    <legend>Mode</legend>
+    <meter id="Update"></meter>
+    <input type="radio" name="Mode" id="Polling" checked></input>
+    <label for="Polling">Polling</label>
+    <input type="radio" name="Mode" id="Events"></input>
+    <label for="Events">Events</label>
+  </fieldset>
+
+  <fieldset id="Input">
+    <legend>Input</legend>
+  </fieldset>
+
+  <fieldset id="Output">
+    <legend>Output</legend>
+  </fieldset>
+
+  <fieldset id="Signal">
+    <legend>Signal</legend>
+    <textarea cols="80" rows="10"></textarea>
+  </fieldset>
+
+
+</body>

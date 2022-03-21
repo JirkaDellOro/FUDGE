@@ -1,0 +1,434 @@
+{
+  "MeshQuad|2020-11-03T14:12:08.998Z|43579": {
+    "ƒ.MeshQuad": {
+      "idResource": "MeshQuad|2020-11-03T14:12:08.998Z|43579",
+      "name": "Ground",
+      "type": "MeshQuad"
+    }
+  },
+  "Material|2020-11-03T14:12:46.920Z|91404": {
+    "ƒ.Material": {
+      "name": "Ground",
+      "idResource": "Material|2020-11-03T14:12:46.920Z|91404",
+      "shader": "ShaderUniColor",
+      "coat": {
+        "ƒ.CoatColored": {
+          "name": "Coat",
+          "color": "[0.1803921568627451, 0.2901960784313726, 0.09019607843137255, 1]"
+        }
+      }
+    }
+  },
+  "MeshSphere|2020-11-03T14:20:01.094Z|85510": {
+    "ƒ.MeshSphere": {
+      "idResource": "MeshSphere|2020-11-03T14:20:01.094Z|85510",
+      "name": "Crown",
+      "type": "MeshSphere",
+      "sectors": 6,
+      "stacks": 5
+    }
+  },
+  "Material|2020-11-03T14:16:50.063Z|27939": {
+    "ƒ.Material": {
+      "name": "Flat",
+      "idResource": "Material|2020-11-03T14:16:50.063Z|27939",
+      "shader": "ShaderFlat",
+      "coat": {
+        "ƒ.CoatColored": {
+          "name": "Coat",
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
+  "MeshPyramid|2020-11-03T14:16:46.689Z|55994": {
+    "ƒ.MeshPyramid": {
+      "idResource": "MeshPyramid|2020-11-03T14:16:46.689Z|55994",
+      "name": "Trunk",
+      "type": "MeshPyramid"
+    }
+  },
+  "Graph|2020-11-03T14:39:09.038Z|31358": {
+    "ƒ.Graph": {
+      "name": "Forest",
+      "components": {
+        "ComponentLight": [
+          {
+            "ƒ.ComponentLight": {
+              "pivot": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "light": {
+                "ƒ.LightAmbient": {
+                  "color": "[0.21176470588235294, 0.20784313725490197, 0.20784313725490197, 1]"
+                }
+              }
+            }
+          },
+          {
+            "ƒ.ComponentLight": {
+              "pivot": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[46, 16, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "light": {
+                "ƒ.LightDirectional": {
+                  "color": "[0.9176470588235294, 0.8705882352941177, 0.2235294117647059, 1]"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "Ground",
+            "components": {
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2020-11-03T14:12:46.920Z|91404"
+                  }
+                }
+              ],
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshQuad|2020-11-03T14:12:08.998Z|43579",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[-90, 0, 0]",
+                      "scaling": "[9, 9, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.GraphInstance": {
+            "name": "Tree",
+            "components": {},
+            "children": [
+              {
+                "ƒ.Node": {
+                  "name": "Crown",
+                  "components": {
+                    "ComponentMesh": [
+                      {
+                        "ƒ.ComponentMesh": {
+                          "idMesh": "MeshSphere|2020-11-03T14:20:01.094Z|85510",
+                          "pivot": {
+                            "translation": "[0, 1.4999998807907104, 0]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[1, 1, 1]"
+                          },
+                          "Component": {
+                            "active": true
+                          }
+                        }
+                      }
+                    ],
+                    "ComponentMaterial": [
+                      {
+                        "ƒ.ComponentMaterial": {
+                          "sortForAlpha": "undefined",
+                          "clrPrimary": "[0.35294117647058826, 0.7843137254901961, 0.19607843137254902, 0.61]",
+                          "clrSecondary": "[1, 1, 1, 1]",
+                          "pivot": {
+                            "translation": "[0, 0]",
+                            "rotation": 0,
+                            "scaling": "[1, 1]"
+                          },
+                          "Component": {
+                            "active": true
+                          },
+                          "idMaterial": "Material|2020-11-03T14:16:50.063Z|27939"
+                        }
+                      }
+                    ]
+                  },
+                  "children": []
+                }
+              },
+              {
+                "ƒ.GraphInstance": {
+                  "name": "Trunk",
+                  "components": {
+                    "ComponentMesh": [
+                      {
+                        "ƒ.ComponentMesh": {
+                          "idMesh": "MeshPyramid|2020-11-03T14:16:46.689Z|55994",
+                          "pivot": {
+                            "translation": "[0, 0, 0]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[0.19999995827674866, 2, 0.19999998807907104]"
+                          },
+                          "Component": {
+                            "active": true
+                          }
+                        }
+                      }
+                    ],
+                    "ComponentMaterial": [
+                      {
+                        "ƒ.ComponentMaterial": {
+                          "clrPrimary": "[0.3215686274509804, 0.1803921568627451, 0.11764705882352941, 1]",
+                          "clrSecondary": "[1, 1, 1, 1]",
+                          "pivot": {
+                            "translation": "[0, 0]",
+                            "rotation": 0,
+                            "scaling": "[1, 1]"
+                          },
+                          "Component": {
+                            "active": true
+                          },
+                          "idMaterial": "Material|2020-11-03T14:16:50.063Z|27939"
+                        }
+                      }
+                    ]
+                  },
+                  "children": [],
+                  "idSource": "Graph|2020-11-03T14:18:52.228Z|31408"
+                }
+              }
+            ],
+            "idSource": "Graph|2020-11-03T14:21:27.451Z|82699"
+          }
+        },
+        {
+          "ƒ.GraphInstance": {
+            "name": "Tree",
+            "components": {
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[1, 0, 1]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": [
+              {
+                "ƒ.Node": {
+                  "name": "Crown",
+                  "components": {
+                    "ComponentMesh": [
+                      {
+                        "ƒ.ComponentMesh": {
+                          "idMesh": "MeshSphere|2020-11-03T14:20:01.094Z|85510",
+                          "pivot": {
+                            "translation": "[0, 1.4999998807907104, 0]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[1, 1, 1]"
+                          },
+                          "Component": {
+                            "active": true
+                          }
+                        }
+                      }
+                    ],
+                    "ComponentMaterial": [
+                      {
+                        "ƒ.ComponentMaterial": {
+                          "sortForAlpha": "undefined",
+                          "clrPrimary": "[0.6078431372549019, 0.5764705882352941, 0.15294117647058825, 0.67]",
+                          "clrSecondary": "[1, 1, 1, 1]",
+                          "pivot": {
+                            "translation": "[0, 0]",
+                            "rotation": 0,
+                            "scaling": "[1, 1]"
+                          },
+                          "Component": {
+                            "active": true
+                          },
+                          "idMaterial": "Material|2020-11-03T14:16:50.063Z|27939"
+                        }
+                      }
+                    ]
+                  },
+                  "children": []
+                }
+              },
+              {
+                "ƒ.GraphInstance": {
+                  "name": "Trunk",
+                  "components": {
+                    "ComponentMesh": [
+                      {
+                        "ƒ.ComponentMesh": {
+                          "idMesh": "MeshPyramid|2020-11-03T14:16:46.689Z|55994",
+                          "pivot": {
+                            "translation": "[0, 0, 0]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[0.19999995827674866, 2, 0.19999998807907104]"
+                          },
+                          "Component": {
+                            "active": true
+                          }
+                        }
+                      }
+                    ],
+                    "ComponentMaterial": [
+                      {
+                        "ƒ.ComponentMaterial": {
+                          "clrPrimary": "[0.3215686274509804, 0.1803921568627451, 0.11764705882352941, 1]",
+                          "clrSecondary": "[1, 1, 1, 1]",
+                          "pivot": {
+                            "translation": "[0, 0]",
+                            "rotation": 0,
+                            "scaling": "[1, 1]"
+                          },
+                          "Component": {
+                            "active": true
+                          },
+                          "idMaterial": "Material|2020-11-03T14:16:50.063Z|27939"
+                        }
+                      }
+                    ]
+                  },
+                  "children": [],
+                  "idSource": "Graph|2020-11-03T14:18:52.228Z|31408"
+                }
+              }
+            ],
+            "idSource": "Graph|2020-11-03T14:21:27.451Z|82699"
+          }
+        }
+      ],
+      "idResource": "Graph|2020-11-03T14:39:09.038Z|31358",
+      "type": "Graph"
+    }
+  },
+  "Graph|2020-11-03T14:21:27.451Z|82699": {
+    "ƒ.Graph": {
+      "name": "Tree",
+      "components": {},
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "Crown",
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshSphere|2020-11-03T14:20:01.094Z|85510",
+                    "pivot": {
+                      "translation": "[0, 1.4999998807907104, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "clrPrimary": "[0.35294117647058826, 0.7843137254901961, 0.19607843137254902, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2020-11-03T14:16:50.063Z|27939"
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.GraphInstance": {
+            "name": "Trunk",
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshPyramid|2020-11-03T14:16:46.689Z|55994",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[0.19999995827674866, 2, 0.19999998807907104]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "clrPrimary": "[0.3215686274509804, 0.1803921568627451, 0.11764705882352941, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2020-11-03T14:16:50.063Z|27939"
+                  }
+                }
+              ]
+            },
+            "children": [],
+            "idSource": "Graph|2020-11-03T14:18:52.228Z|31408"
+          }
+        }
+      ],
+      "idResource": "Graph|2020-11-03T14:21:27.451Z|82699",
+      "type": "Graph"
+    }
+  }
+}

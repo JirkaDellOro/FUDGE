@@ -1,9 +1,10 @@
 {
-    "mode": "file",
+    "entryPoints": ["."],
+    "entryPointStrategy": "expand",
     "out": "../../Documentation/Reference/Core/",
     "name": "Fudge Core",
     "readme": "none",
     "excludePrivate": "true",
     "excludeProtected": "true",
-    "ignoreCompilerErrors": "true"
+    "plugin": "typedoc-plugin-merge-modules"
 }

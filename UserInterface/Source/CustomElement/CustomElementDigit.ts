@@ -12,15 +12,6 @@ namespace FudgeUserInterface {
       super();
     }
 
-    connectedCallback(): void {
-      if (this.initialized)
-        return;
-      this.initialized = true;
-
-      this.value = 0;
-      this.tabIndex = -1;
-    }
-
     public set value(_value: number) {
       _value = Math.trunc(_value);
       if (_value > 9 || _value < 0)
@@ -31,6 +22,16 @@ namespace FudgeUserInterface {
     public get value(): number {
       return parseInt(this.textContent);
     }
+    
+    connectedCallback(): void {
+      if (this.initialized)
+        return;
+      this.initialized = true;
+
+      this.value = 0;
+      this.tabIndex = -1;
+    }
+
 
     public add(_addend: number): void {
       _addend = Math.trunc(_addend);

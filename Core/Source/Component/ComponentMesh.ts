@@ -1,19 +1,88 @@
 namespace FudgeCore {
   /**
-   * Attaches a [[Mesh]] to the node
+   * Attaches a {@link Mesh} to the node
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class ComponentMesh extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentMesh);
-    public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
-    public mesh: Mesh = null;
+    public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
+    public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
+    public mesh: Mesh;
     public showToCamera: boolean = false;
 
-    public constructor(_mesh: Mesh = null, _showToCamera: boolean = false) {
+    #skeleton: SkeletonInstance;
+
+    public constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance, _showToCamera: boolean = false) {
       super();
       this.mesh = _mesh;
       this.showToCamera = _showToCamera;
+      if (_skeleton)
+        this.bindSkeleton(_skeleton);
     }
+
+    public get radius(): number {
+      let scaling: Vector3 = this.mtxWorld.scaling;
+      let scale: number = Math.max(Math.abs(scaling.x), Math.abs(scaling.y), Math.abs(scaling.z));
+      return this.mesh.radius * scale;
+    }
+
+    public get skeleton(): SkeletonInstance {
+      return this.#skeleton;
+    }
+
+    public bindSkeleton(_skeleton: SkeletonInstance): void {
+      this.#skeleton = _skeleton;
+
+      if (!this.skeleton && !this.node)
+        this.addEventListener(EVENT.COMPONENT_ADD, (_event: Event) => {
+          if (_event.target != this) return;
+          this.node.addChild(this.skeleton);
+        });
+      else if (this.node)
+        this.node.addChild(this.skeleton);
+    }
+
+    // /**
+    //  * Calculates the position of a vertex transformed by the skeleton
+    //  * @param _index index of the vertex
+    //  */
+    // public getVertexPosition(_index: number): Vector3 {
+    //   // extract the vertex data (vertices: 3D vectors, bone indices & weights: 4D vectors)
+    //   const iVertex: number = _index * 3;
+    //   const iBoneInfluence: number = _index * 4;
+      
+    //   const vertex: Vector3 = new Vector3(...Reflect.get(this.mesh, "renderMesh").vertices.slice(iVertex, iVertex + 3));
+    //   if (!(this.mesh instanceof MeshSkin)) return vertex;
+
+    //   const iBones: Uint8Array = this.mesh.iBones.slice(iBoneInfluence, iBoneInfluence + 4);
+    //   const weights: Float32Array = this.mesh.weights.slice(iBoneInfluence, iBoneInfluence + 4);
+
+    //   // get bone matrices
+    //   const mtxBones: Array<Matrix4x4> = this.skeleton.mtxBones;
+
+    //   // skin matrix S = sum_i=1^m{w_i * B_i}
+    //   const skinMatrix: Matrix4x4 = new Matrix4x4();
+    //   skinMatrix.set(Array
+    //     .from(iBones)
+    //     .map((iBone, iWeight) => mtxBones[iBone].get().map(value => value * weights[iWeight])) // apply weight on each matrix
+    //     .reduce((mtxSum, mtxBone) => mtxSum.map((value, index) => value + mtxBone[index])) // sum up the matrices
+    //   );
+
+    //   // transform vertex
+    //   vertex.transform(skinMatrix);
+
+    //   return vertex;
+    // }
+
+    // TODO: remove or think if the transformed bounding box is of value or can be made to be
+    // public get boundingBox(): Box {
+    //   let box: Box = Recycler.get(Box);
+    //   box.set(
+    //     Vector3.TRANSFORMATION(this.mesh.boundingBox.min, this.mtxWorld, true),
+    //     Vector3.TRANSFORMATION(this.mesh.boundingBox.max, this.mtxWorld, true)
+    //   );
+    //   return box;
+    // }
 
     //#region Transfer
     public serialize(): Serialization {
@@ -25,28 +94,40 @@ namespace FudgeCore {
       else
         serialization = { mesh: Serializer.serialize(this.mesh) };
 
-      serialization.pivot = this.pivot.serialize();
+      if (this.skeleton)
+        serialization.skeleton = this.skeleton.name;
+
+      serialization.pivot = this.mtxPivot.serialize();
       serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
 
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       let mesh: Mesh;
       if (_serialization.idMesh)
-        mesh = <Mesh>ResourceManager.get(_serialization.idMesh);
+        mesh = <Mesh>await Project.getResource(_serialization.idMesh);
       else
-        mesh = <Mesh>Serializer.deserialize(_serialization.mesh);
+        mesh = <Mesh>await Serializer.deserialize(_serialization.mesh);
       this.mesh = mesh;
 
-      this.pivot.deserialize(_serialization.pivot);
-      super.deserialize(_serialization[super.constructor.name]);
+      if (_serialization.skeleton)
+        this.addEventListener(EVENT.COMPONENT_ADD, (_event: Event) => {
+          if (_event.target != this) return;
+          this.node.addEventListener(EVENT.CHILD_APPEND, (_event: Event) => {
+            if (_event.target instanceof SkeletonInstance && _event.target.name == _serialization.skeleton)
+              this.#skeleton = _event.target;
+          });
+        });
+
+      await this.mtxPivot.deserialize(_serialization.pivot);
+      await super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
 
     public getMutatorForUserInterface(): MutatorForUserInterface {
       let mutator: MutatorForUserInterface = <MutatorForUserInterface>this.getMutator();
-      if (!this.mesh)
-        mutator.mesh = Mesh;
+      // if (!this.mesh)
+      //   mutator.mesh = Mesh;
       return mutator;
     }
     //#endregion

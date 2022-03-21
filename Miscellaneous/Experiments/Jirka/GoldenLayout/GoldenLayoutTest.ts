@@ -1,11 +1,33 @@
+// /<reference path="Panel.ts"/>
 namespace GoldenLayoutTest {
-    let dim1: GoldenLayout.Dimensions = { borderWidth: 10 };
-    let dim2: GoldenLayout.Dimensions = { borderWidth: 10 };
+  export let glDoc: GoldenLayout;
+  window.addEventListener("load", start);
 
-    let config: GoldenLayout.Config = { dimensions: dim1 };
-    let golden: GoldenLayout = new GoldenLayout(config);
+  let configPanel: GoldenLayout.Config = {
+    content: [{
+      type: "row",
+      content: [
+        {
+          type: "component",
+          componentName: "Panel",
+          componentState: { text: "Panel 1" },
+          title: "Panel1"
+        // }, {
+        //   type: "component",
+        //   componentName: "Panel",
+        //   componentState: { text: "Panel 2" },
+        //   title: "Panel2"
+        }
+      ]
+    }]
+  };
 
-    console.log(dim1);
-    console.log(dim2);
-    console.log(golden);
+  function start(): void {
+    let btnAdd: HTMLButtonElement = document.querySelector("button");
+    btnAdd.addEventListener("click", Panel.add);
+
+    glDoc = new GoldenLayout(configPanel);
+    glDoc.registerComponent("Panel", Panel);
+    glDoc.init();
+  }
 }

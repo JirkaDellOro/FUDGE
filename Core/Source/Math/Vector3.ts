@@ -7,9 +7,9 @@ namespace FudgeCore {
    *            /
    *          +z   
    * ```
-   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
    */
-  export class Vector3 extends Mutable {
+  export class Vector3 extends Mutable implements Recycable {
     private data: Float32Array; // TODO: check why this shouldn't be x,y,z as numbers...
 
     public constructor(_x: number = 0, _y: number = 0, _z: number = 0) {
@@ -17,6 +17,169 @@ namespace FudgeCore {
       this.data = new Float32Array([_x, _y, _z]);
     }
 
+    //#region Static
+    /**
+     * Creates and returns a vector with the given length pointing in x-direction
+     */
+    public static X(_scale: number = 1): Vector3 {
+      const vector: Vector3 = Recycler.get(Vector3);
+      vector.set(_scale, 0, 0);
+      return vector;
+    }
+
+    /**
+     * Creates and returns a vector with the given length pointing in y-direction
+     */
+    public static Y(_scale: number = 1): Vector3 {
+      const vector: Vector3 = Recycler.get(Vector3);
+      vector.set(0, _scale, 0);
+      return vector;
+    }
+
+    /**
+     * Creates and returns a vector with the given length pointing in z-direction
+     */
+    public static Z(_scale: number = 1): Vector3 {
+      const vector: Vector3 = Recycler.get(Vector3);
+      vector.data.set([0, 0, _scale]);
+      return vector;
+    }
+
+    /**
+     * Creates and returns a vector with the value 0 on each axis
+     */
+    public static ZERO(): Vector3 {
+      const vector: Vector3 = Recycler.get(Vector3);
+      vector.set(0, 0, 0);
+      return vector;
+    }
+
+    /**
+     * Creates and returns a vector of the given size on each of the three axis
+     */
+    public static ONE(_scale: number = 1): Vector3 {
+      const vector: Vector3 = Recycler.get(Vector3);
+      vector.set(_scale, _scale, _scale);
+      return vector;
+    }
+
+    /**
+     * Creates and returns a vector through transformation of the given vector by the given matrix
+     */
+    public static TRANSFORMATION(_vector: Vector3, _mtxTransform: Matrix4x4, _includeTranslation: boolean = true): Vector3 {
+      let result: Vector3 = Recycler.get(Vector3);
+      let m: Float32Array = _mtxTransform.get();
+      let [x, y, z] = _vector.get();
+
+      result.x = m[0] * x + m[4] * y + m[8] * z;
+      result.y = m[1] * x + m[5] * y + m[9] * z;
+      result.z = m[2] * x + m[6] * y + m[10] * z;
+
+      if (_includeTranslation) {
+        result.add(_mtxTransform.translation);
+      }
+
+      return result;
+    }
+
+    /**
+     * Creates and returns a vector which is a copy of the given vector scaled to the given length
+     */
+    public static NORMALIZATION(_vector: Vector3, _length: number = 1): Vector3 {
+      let magnitudeSquared: number = _vector.magnitudeSquared;
+      let vector: Vector3 = _vector.clone;
+      if (magnitudeSquared == 0)
+        throw (new RangeError("Impossible normalization"));
+      vector.scale(_length / Math.sqrt(magnitudeSquared))
+      return vector;
+    }
+
+    /**
+     * Returns the resulting vector attained by addition of all given vectors.
+     */
+    public static SUM(..._vectors: Vector3[]): Vector3 {
+      let result: Vector3 = Recycler.get(Vector3);
+      for (let vector of _vectors)
+        result.set(result.x + vector.x, result.y + vector.y, result.z + vector.z);
+      return result;
+    }
+
+    /**
+     * Returns the result of the subtraction of two vectors.
+     */
+    public static DIFFERENCE(_minuend: Vector3, _subtrahend: Vector3): Vector3 {
+      let vector: Vector3 = Recycler.get(Vector3);
+      vector.set(_minuend.x - _subtrahend.x, _minuend.y - _subtrahend.y, _minuend.z - _subtrahend.z);
+      return vector;
+    }
+
+    /**
+     * Returns a new vector representing the given vector scaled by the given scaling factor
+     */
+    public static SCALE(_vector: Vector3, _scaling: number): Vector3 {
+      let scaled: Vector3 = Recycler.get(Vector3);
+      scaled.set(_vector.x * _scaling, _vector.y * _scaling, _vector.z * _scaling);
+      return scaled;
+    }
+
+    /**
+     * Computes the crossproduct of 2 vectors.
+     */
+    public static CROSS(_a: Vector3, _b: Vector3): Vector3 {
+      let vector: Vector3 = Recycler.get(Vector3);
+      vector.set(
+        _a.y * _b.z - _a.z * _b.y,
+        _a.z * _b.x - _a.x * _b.z,
+        _a.x * _b.y - _a.y * _b.x
+      );
+      return vector;
+    }
+    /**
+     * Computes the dotproduct of 2 vectors.
+     */
+    public static DOT(_a: Vector3, _b: Vector3): number {
+      let scalarProduct: number = _a.x * _b.x + _a.y * _b.y + _a.z * _b.z;
+      return scalarProduct;
+    }
+
+    /**
+     * Calculates and returns the reflection of the incoming vector at the given normal vector. The length of normal should be 1.
+     *     __________________
+     *           /|\
+     * incoming / | \ reflection
+     *         /  |  \   
+     *          normal
+     * 
+     */
+    public static REFLECTION(_incoming: Vector3, _normal: Vector3): Vector3 {
+      let dot: number = -Vector3.DOT(_incoming, _normal);
+      let reflection: Vector3 = Vector3.SUM(_incoming, Vector3.SCALE(_normal, 2 * dot));
+      return reflection;
+    }
+
+    /**
+     * Divides the dividend by the divisor component by component and returns the result
+     */
+    public static RATIO(_dividend: Vector3, _divisor: Vector3): Vector3 {
+      let vector: Vector3 = Recycler.get(Vector3);
+      vector.set(_dividend.x / _divisor.x, _dividend.y / _divisor.y, _dividend.z / _divisor.z);
+      return vector;
+    }
+
+    /**
+     * Creates a cartesian vector from geographic coordinates
+     */
+    public static GEO(_longitude: number = 0, _latitude: number = 0, _magnitude: number = 1): Vector3 {
+      let vector: Vector3 = Recycler.get(Vector3);
+      let geo: Geo3 = Recycler.get(Geo3);
+      geo.set(_longitude, _latitude, _magnitude);
+      vector.geo = geo;
+      Recycler.store(geo);
+      return vector;
+    }
+    //#endregion
+
+    //#region Accessors
     // TODO: implement equals-functions
     get x(): number {
       return this.data[0];
@@ -53,156 +216,39 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates and returns a vector with the given length pointing in x-direction
+     * Returns a copy of this vector
+     * TODO: rename this clone and create a new method copy, which copies the values from a vector given 
      */
-    public static X(_scale: number = 1): Vector3 {
-      const vector: Vector3 = Recycler.get(Vector3);
-      vector.data.set([_scale, 0, 0]);
-      return vector;
+    public get clone(): Vector3 {
+      let clone: Vector3 = Recycler.get(Vector3);
+      clone.data.set(this.data);
+      return clone;
     }
 
     /**
-     * Creates and returns a vector with the given length pointing in y-direction
+     * - get: returns a geographic representation of this vector  
+     * - set: adjust the cartesian values of this vector to represent the given as geographic coordinates
      */
-    public static Y(_scale: number = 1): Vector3 {
-      const vector: Vector3 = Recycler.get(Vector3);
-      vector.data.set([0, _scale, 0]);
-      return vector;
+    public set geo(_geo: Geo3) {
+      this.set(0, 0, _geo.magnitude);
+      this.transform(Matrix4x4.ROTATION_X(-_geo.latitude));
+      this.transform(Matrix4x4.ROTATION_Y(_geo.longitude));
     }
+    public get geo(): Geo3 {
+      let geo: Geo3 = Recycler.get(Geo3);
+      geo.magnitude = this.magnitude;
 
-    /**
-     * Creates and returns a vector with the given length pointing in z-direction
-     */
-    public static Z(_scale: number = 1): Vector3 {
-      const vector: Vector3 = Recycler.get(Vector3);
-      vector.data.set([0, 0, _scale]);
-      return vector;
+      if (geo.magnitude === 0)
+        return geo;
+
+      geo.longitude = 180 * Math.atan2(this.x / geo.magnitude, this.z / geo.magnitude) / Math.PI;
+      geo.latitude = 180 * Math.asin(this.y / geo.magnitude) / Math.PI;
+      return geo;
     }
+    //#endregion
 
-    /**
-     * Creates and returns a vector with the value 0 on each axis
-     */
-    public static ZERO(): Vector3 {
-      const vector: Vector3 = Recycler.get(Vector3);
-      vector.data.set([0, 0, 0]);
-      return vector;
-    }
-
-    /**
-     * Creates and returns a vector of the given size on each of the three axis
-     */
-    public static ONE(_scale: number = 1): Vector3 {
-      const vector: Vector3 = Recycler.get(Vector3);
-      vector.data.set([_scale, _scale, _scale]);
-      return vector;
-    }
-
-    /**
-     * Creates and returns a vector through transformation of the given vector by the given matrix
-     */
-    public static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4, _includeTranslation: boolean = true): Vector3 {
-      let result: Vector3 = Recycler.get(Vector3);
-      let m: Float32Array = _matrix.get();
-      let [x, y, z] = _vector.get();
-
-      result.x = m[0] * x + m[4] * y + m[8] * z;
-      result.y = m[1] * x + m[5] * y + m[9] * z;
-      result.z = m[2] * x + m[6] * y + m[10] * z;
-
-      if (_includeTranslation) {
-        result.add(_matrix.translation);
-      }
-
-      return result;
-    }
-
-    /**
-     * Creates and returns a vector which is a copy of the given vector scaled to the given length
-     */
-    public static NORMALIZATION(_vector: Vector3, _length: number = 1): Vector3 {
-      let magnitude: number = _vector.magnitude;
-      let vector: Vector3;
-      try {
-        if (magnitude == 0)
-          throw (new RangeError("Impossible normalization"));
-        vector = Vector3.ZERO();
-        let factor: number = _length / _vector.magnitude;
-        vector.data = new Float32Array([_vector.x * factor, _vector.y * factor, _vector.z * factor]);
-      } catch (_error) {
-        Debug.warn(_error);
-      }
-      return vector;
-    }
-
-    /**
-     * Returns the resulting vector attained by addition of all given vectors.
-     */
-    public static SUM(..._vectors: Vector3[]): Vector3 {
-      let result: Vector3 = Recycler.get(Vector3);
-      for (let vector of _vectors)
-        result.data = new Float32Array([result.x + vector.x, result.y + vector.y, result.z + vector.z]);
-      return result;
-    }
-
-    /**
-     * Returns the result of the subtraction of two vectors.
-     */
-    public static DIFFERENCE(_minuend: Vector3, _subtrahend: Vector3): Vector3 {
-      let vector: Vector3 = Recycler.get(Vector3);
-      vector.data = new Float32Array([_minuend.x - _subtrahend.x, _minuend.y - _subtrahend.y, _minuend.z - _subtrahend.z]);
-      return vector;
-    }
-
-    /**
-     * Returns a new vector representing the given vector scaled by the given scaling factor
-     */
-    public static SCALE(_vector: Vector3, _scaling: number): Vector3 {
-      let scaled: Vector3 = Recycler.get(Vector3);
-      scaled.data = new Float32Array([_vector.x * _scaling, _vector.y * _scaling, _vector.z * _scaling]);
-      return scaled;
-    }
-
-    /**
-     * Computes the crossproduct of 2 vectors.
-     */
-    public static CROSS(_a: Vector3, _b: Vector3): Vector3 {
-      let vector: Vector3 = Recycler.get(Vector3);
-      vector.data = new Float32Array([
-        _a.y * _b.z - _a.z * _b.y,
-        _a.z * _b.x - _a.x * _b.z,
-        _a.x * _b.y - _a.y * _b.x]);
-      return vector;
-    }
-    /**
-     * Computes the dotproduct of 2 vectors.
-     */
-    public static DOT(_a: Vector3, _b: Vector3): number {
-      let scalarProduct: number = _a.x * _b.x + _a.y * _b.y + _a.z * _b.z;
-      return scalarProduct;
-    }
-
-    /**
-     * Calculates and returns the reflection of the incoming vector at the given normal vector. The length of normal should be 1.
-     *     __________________
-     *           /|\
-     * incoming / | \ reflection
-     *         /  |  \   
-     *          normal
-     * 
-     */
-    public static REFLECTION(_incoming: Vector3, _normal: Vector3): Vector3 {
-      let dot: number = -Vector3.DOT(_incoming, _normal);
-      let reflection: Vector3 = Vector3.SUM(_incoming, Vector3.SCALE(_normal, 2 * dot));
-      return reflection;
-    }
-
-    /**
-     * Divides the dividend by the divisor component by component and returns the result
-     */
-    public static RATIO(_dividend: Vector3, _divisor: Vector3): Vector3 {
-      let vector: Vector3 = Recycler.get(Vector3);
-      vector.data = new Float32Array([_dividend.x / _divisor.x, _dividend.y / _divisor.y, _dividend.z / _divisor.z]);
-      return vector;
+    public recycle(): void {
+      this.data.set([0, 0, 0]);
     }
 
     /**
@@ -272,7 +318,9 @@ namespace FudgeCore {
      * Defines the components of this vector with the given numbers
      */
     public set(_x: number = 0, _y: number = 0, _z: number = 0): void {
-      this.data = new Float32Array([_x, _y, _z]);
+      this.data[0] = _x;
+      this.data[1] = _y;
+      this.data[2] = _z;
     }
 
     /**
@@ -283,20 +331,13 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a copy of this vector
-     */
-    public get copy(): Vector3 {
-      let copy: Vector3 = Recycler.get(Vector3);
-      copy.data.set(this.data);
-      return copy;
-    }
-
-    /**
      * Transforms this vector by the given matrix, including or exluding the translation.
      * Including is the default, excluding will only rotate and scale this vector.
      */
-    public transform(_matrix: Matrix4x4, _includeTranslation: boolean = true): void {
-      this.data = Vector3.TRANSFORMATION(this, _matrix, _includeTranslation).data;
+    public transform(_mtxTransform: Matrix4x4, _includeTranslation: boolean = true): void {
+      let transformed: Vector3 = Vector3.TRANSFORMATION(this, _mtxTransform, _includeTranslation);
+      this.data.set(transformed.data);
+      Recycler.store(transformed);
     }
 
     /**
@@ -307,7 +348,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Reflects this vector at a given normal. See [[REFLECTION]]
+     * Reflects this vector at a given normal. See {@link Vector3.REFLECTION}
      */
     public reflect(_normal: Vector3): void {
       const reflected: Vector3 = Vector3.REFLECTION(this, _normal);
@@ -318,9 +359,31 @@ namespace FudgeCore {
     /**
      * Shuffles the components of this vector
      */
-    public shuffle(): void {
+    shuffle(): void {
       let a: number[] = Array.from(this.data);
       this.set(Random.default.splice(a), Random.default.splice(a), a[0]);
+    }
+
+    public getDistance(_to: Vector3): number {
+      let difference: Vector3 = Vector3.DIFFERENCE(this, _to);
+      Recycler.store(difference);
+      return difference.magnitude;
+    }
+    /**
+     * For each dimension, moves the component to the minimum of this and the given vector
+     */
+    public min(_compare: Vector3): void {
+      this.x = Math.min(this.x, _compare.x);
+      this.y = Math.min(this.y, _compare.y);
+      this.z = Math.min(this.z, _compare.z);
+    }
+    /**
+     * For each dimension, moves the component to the maximum of this and the given vector
+     */
+    public max(_compare: Vector3): void {
+      this.x = Math.max(this.x, _compare.x);
+      this.y = Math.max(this.y, _compare.y);
+      this.z = Math.max(this.z, _compare.z);
     }
 
     /**
@@ -340,6 +403,23 @@ namespace FudgeCore {
       return copy;
     }
 
+    //#region Transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = this.getMutator();
+      // serialization.toJSON = () => { return `{ "r": ${this.r}, "g": ${this.g}, "b": ${this.b}, "a": ${this.a}}`; };
+      serialization.toJSON = () => { return `[${this.x}, ${this.y}, ${this.z}]`; };
+      return serialization;
+    }
+
+    public async deserialize(_serialization: Serialization): Promise<Vector3> {
+      if (typeof (_serialization) == "string") {
+        [this.x, this.y, this.z] = JSON.parse(<string><unknown>_serialization);
+      }
+      else
+        this.mutate(_serialization);
+      return this;
+    }
+
     public getMutator(): Mutator {
       let mutator: Mutator = {
         x: this.data[0], y: this.data[1], z: this.data[2]
@@ -347,5 +427,6 @@ namespace FudgeCore {
       return mutator;
     }
     protected reduceMutator(_mutator: Mutator): void {/** */ }
+    //#endregion Transfer
   }
 }

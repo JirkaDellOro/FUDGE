@@ -8,6 +8,7 @@ namespace FudgeCore {
    */
   export abstract class Keyboard {
     private static keysPressed: KeyPressed = Keyboard.initialize();
+    // private static code_en: Object;
 
     /**
      * Returns true if one of the given keys is is currently being pressed.
@@ -42,6 +43,32 @@ namespace FudgeCore {
         return _active;
       return _inactive;
     }
+
+    /**
+     * Returns a balanced ternary value (either -1, 0 or 1) 
+     * according to the match of the keys currently being pressed and the lists of keys given 
+     */
+    public static mapToTrit(_positive: KEYBOARD_CODE[], _negative: KEYBOARD_CODE[]): number {
+      return Keyboard.mapToValue(-1, 0, _negative) + Keyboard.mapToValue(1, 0, _positive);
+    }
+
+    // public static locale(_keyboard: Object): void {
+    //   if (!Keyboard.code_en) {
+    //     // save original keyboard codes to be able to switch back later
+    //     Keyboard.code_en = {};
+    //     Object.assign(Keyboard.code_en, KEYBOARD_CODE);
+    //   }
+
+    //   for (let key in _keyboard) {
+    //     let value: string = Reflect.get(_keyboard, key);
+    //     for (let original in KEYBOARD_CODE)
+    //       if (Reflect.get(KEYBOARD_CODE, original) == value)
+    //         // remove original key the yields the value
+    //         Reflect.deleteProperty(KEYBOARD_CODE, original);
+    //     // add new key to yield that value
+    //     Reflect.set(KEYBOARD_CODE, key, value);
+    //   }
+    // }
 
     private static initialize(): KeyPressed {
       let store: KeyPressed = {};

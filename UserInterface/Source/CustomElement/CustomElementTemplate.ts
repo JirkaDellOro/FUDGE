@@ -18,9 +18,37 @@ namespace FudgeUserInterface {
     public static register(_tagName: string): void {
       for (let template of document.querySelectorAll("template")) {
         if (template.content.firstElementChild.localName == _tagName) {
-          ƒ.Debug.fudge("Register", template);
+          ƒ.Debug.fudge("Register", template.content.children[0]);
           CustomElementTemplate.fragment.set(_tagName, template.content);
         }
+      }
+    }
+
+    /**
+     * Get the value of this element in a format compatible with [[FudgeCore.Mutator]]
+     */
+    public getMutatorValue(): ƒ.Mutator {
+      let mutator: ƒ.Mutator = {};
+      let elements: NodeListOf<HTMLInputElement> = this.querySelectorAll("[key");
+      for (let element of elements) {
+        let key: string = element.getAttribute("key");
+        if (element instanceof CustomElement)
+          mutator[key] = element.getMutatorValue();
+        else
+          mutator[key] = element.value;
+      }
+      return mutator;
+    }
+
+    public setMutatorValue(_mutator: ƒ.Mutator): void {
+      for (let key in _mutator) {
+        let element: HTMLInputElement = this.querySelector(`[key=${key}]`);
+        if (!element)
+          console.log(`Couldn't find ${key} in`, this);
+        if (element instanceof CustomElement)
+          element.setMutatorValue(_mutator[key]);
+        else
+          element.value = _mutator[key];
       }
     }
 
@@ -42,6 +70,10 @@ namespace FudgeUserInterface {
       for (let child of content.childNodes) {
         this.appendChild(child.cloneNode(true));
       }
+
+      let label: HTMLLabelElement = this.querySelector("label");
+      if (label)
+        label.textContent = this.getAttribute("label");
     }
   }
 }

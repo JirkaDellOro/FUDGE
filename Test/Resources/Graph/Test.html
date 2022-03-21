@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../TestInstructions.css">
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+  <title>Graph</title>
+
+  <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
+  <script type="text/javascript" src="../../../Aid/Build/FudgeAid.js"></script>
+  <script type="text/javascript" src="../../../Miscellaneous/TestCandidates/Serialization/Compare/Compare.js"></script>
+  <!-- toDo: compare.js move to the test folder  -->
+  <script type="text/javascript" src="AnimateSatellite.js"></script>
+  <script type="text/javascript" src="Graph.js"></script>
+
+  <style type="text/css">
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    TestInstructions.display({
+      Name: "Graph, GraphInstance",
+      Test: [
+        "The conversion of a complex node to a graph and the creation of multiple instances of that graph"
+      ],
+      Setup: [
+        "Generates a node with an orange pyramid and a child node with a small blue cube.",
+        "A script component attached to the blue cube rotates it around the parent and itself.",
+        "Registers the node as graph and creates a set of instances of that graph distributed equally in space.",
+      ],
+      // Act: [
+      //   "there are no actions"
+      // ],
+      Observe: [
+        "The scene, the animation and the output in the console",
+      ],
+      /* Control: [
+          "no control"
+      ], */
+      Expect: [
+        "25 identical instances of the graph appear in a 5x5x5 constellation.",
+        "Each cube has its own rotation and translation",
+        "All instances of the graph look the same"
+      ]
+    });
+  </script>
+  <canvas></canvas>
+</body>

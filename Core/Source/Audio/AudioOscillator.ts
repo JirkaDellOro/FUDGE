@@ -17,7 +17,7 @@
 //         endpoint: number;
 //     }
 //     /**
-//      * Add an [[AudioFilter]] to an [[Audio]]
+//      * Add an {@link AudioFilter} to an {@link Audio]]
 //      * @authors Thomas Dorner, HFU, 2019
 //      */
 //     export class AudioOscillator {

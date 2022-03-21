@@ -4,7 +4,7 @@ var TestInstructions;
     // see: https://developer.github.com/v3/issues/#create-an-issue
     let dialog;
     let instructions;
-    function display(_instructions) {
+    function display(_instructions, _open = true) {
         instructions = _instructions;
         dialog = document.createElement("dialog");
         dialogPolyfill.registerDialog(dialog);
@@ -34,16 +34,22 @@ var TestInstructions;
                     break;
             }
             document.body.appendChild(dialog);
-            dialog.show();
+            dialog.style.zIndex = "100";
+            if (_open)
+                //@ts-ignore
+                dialog.show();
         }
         dialog.className = "dialog";
     }
     TestInstructions.display = display;
     function handleKeypress(_event) {
         if (_event.code == "F1" && _event.ctrlKey)
+            //@ts-ignore
             if (dialog.open)
+                //@ts-ignore
                 dialog.close();
             else
+                //@ts-ignore
                 dialog.show();
     }
     function get(_key) {

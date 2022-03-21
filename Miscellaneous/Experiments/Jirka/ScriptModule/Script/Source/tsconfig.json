@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "system",
+    "moduleResolution": "Node",
+    "sourceMap": true,
+    "declaration": true,
+    "composite": true,
+    "outFile": "../Build/Script.js"
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}

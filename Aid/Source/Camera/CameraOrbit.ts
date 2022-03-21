@@ -6,11 +6,11 @@ namespace FudgeAid {
     public readonly axisRotateY: ƒ.Axis = new ƒ.Axis("RotateY", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
     public readonly axisDistance: ƒ.Axis = new ƒ.Axis("Distance", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
 
+    protected translator: ƒ.Node;
+    protected rotatorX: ƒ.Node;
     private maxRotX: number;
     private minDistance: number;
     private maxDistance: number;
-    private rotatorX: ƒ.Node;
-    private translator: ƒ.Node;
 
 
 
@@ -40,25 +40,11 @@ namespace FudgeAid {
       this.axisDistance.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, this.hndAxisOutput);
     }
 
-    public hndAxisOutput: EventListener = (_event: Event): void => {
-      let output: number = (<CustomEvent>_event).detail.output;
-      switch ((<ƒ.Axis>_event.target).name) {
-        case "RotateX":
-          this.rotateX(output);
-          break;
-        case "RotateY":
-          this.rotateY(output);
-          break;
-        case "Distance":
-          this.distance += output;
-      }
-    }
-
-    public get component(): ƒ.ComponentCamera {
+    public get cmpCamera(): ƒ.ComponentCamera {
       return this.translator.getComponent(ƒ.ComponentCamera);
     }
 
-    public get node(): ƒ.Node {
+    public get nodeCamera(): ƒ.Node {
       return this.translator;
     }
 
@@ -94,6 +80,30 @@ namespace FudgeAid {
 
     public rotateX(_delta: number): void {
       this.rotationX = this.rotatorX.mtxLocal.rotation.x + _delta;
+    }
+
+    // set position of camera component relative to the center of orbit
+    public positionCamera(_posWorld: ƒ.Vector3): void {
+      let difference: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(_posWorld, this.mtxWorld.translation);
+      let geo: ƒ.Geo3 = difference.geo;
+      this.rotationY = geo.longitude;
+      this.rotationX = -geo.latitude;
+      this.distance = geo.magnitude;
+    }
+    
+
+    public hndAxisOutput: EventListener = (_event: Event): void => {
+      let output: number = (<CustomEvent>_event).detail.output;
+      switch ((<ƒ.Axis>_event.target).name) {
+        case "RotateX":
+          this.rotateX(output);
+          break;
+        case "RotateY":
+          this.rotateY(output);
+          break;
+        case "Distance":
+          this.distance += output;
+      }
     }
   }
 }

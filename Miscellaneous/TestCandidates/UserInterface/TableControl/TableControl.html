@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TableControl</title>
+
+  <style>
+    ul {
+      list-style: none;
+    }
+
+    li {
+      white-space: nowrap;
+      margin-left: -30px;
+    }
+
+    input[type="checkbox"]:checked~ul {
+      display: block;
+    }
+
+    input[type="checkbox"]~ul {
+      display: none;
+    }
+
+    td > input {
+      background-color: lightgrey;
+    }
+    td > input:read-only {
+      background-color: inherit;
+    }
+
+    .selected {
+      background-color: lightblue;
+      font-weight: bold;
+    }
+  </style>
+
+  <script src="../../../../Core/Build/FudgeCore.js"></script>
+  <script src="../../../../Core/Build/FudgeCore.js"></script>
+  <script src="../../../../UserInterface/Build/FudgeUserInterface.js"></script>
+  <script src="Data.js"></script>
+  <script src="TableControl.js" defer></script>
+  <script src="Main.js" defer></script>
+</head>
+
+<body>
+</body>
+
+</html>

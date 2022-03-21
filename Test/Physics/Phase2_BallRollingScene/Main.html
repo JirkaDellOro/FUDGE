@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Fudge and Physics - Default</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="../../../../Physics/OimoPhysics.js"></script>
+    <script src="../../../../Core/Build/FudgeCore.js"></script>
+</head>
+
+<body>
+    <script src="../../dialog-polyfill.min.js"></script>
+    <script src="../../TestInstructions.js"></script>
+    <script>
+        TestInstructions.display({
+            Name: "Force/Impulse Physics - Slope/Drag/Body Rotation",
+            Test: [
+                "The correct application of force and impulses on a body",
+                "the ability to move through a landscape with slopes",
+                "the correct value transfer between OIMO Transforms and FUDGE TransformComponents"
+            ],
+            Setup: [
+                "A controlled ball that is influenced by forces",
+                "An environment consisting of blocks with different rotations/scalings/transforms"
+            ],
+            Act: [
+                "Move the ball through the enviroment by controlling the direction",
+                "Switch between using a force to 'push' the ball or a impulse to 'knock' the ball"
+            ],
+            Observe: [
+                "How the ball reacts to input",
+                "The influence of different bodies and interaction types"
+            ],
+            Control: [
+                "Use WASD to control the direction",
+                "Space to Jump",
+                "T - Toggle between Input applied as Force or Impulse"
+            ],
+            Expect: [
+                "There is no difference between what is displayed and how it behaves,",
+                "e.g. the ball falls of when it visually leaves the plattforms, no invisible walls etc.",
+                "The force/impulse moves the ball and the ball reacts to the environment like a ball would",
+                "force is gradually pushing the ball, it takes a lot of force to counter a movement into the opposive direction.",
+                "the instantaneous impulse is acting more direct like a 'kick' and is feeling 'stronger' with the same values"
+            ]
+        });
+    </script>
+
+    <h1>Fudge_Physics - Ball Rolling</h1>
+    <h2 id="FPS">FPS</h2>
+    <canvas width="600" height="400"></canvas>
+    <script src="Main.js"></script>
+    <p>Move - WASD, Press T - Switch Between Force/Impulse Application, Space for Jump</p>
+</body>
+
+</html>

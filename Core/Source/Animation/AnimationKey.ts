@@ -4,8 +4,8 @@
 namespace FudgeCore {
   /**
    * Holds information about set points in time, their accompanying values as well as their slopes. 
-   * Also holds a reference to the [[AnimationFunction]]s that come in and out of the sides. The [[AnimationFunction]]s are handled by the [[AnimationSequence]]s.
-   * Saved inside an [[AnimationSequence]].
+   * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
+   * Saved inside an {@link AnimationSequence}.
    * @author Lukas Scheuerle, HFU, 2019
    */
   export class AnimationKey extends Mutable implements Serializable {
@@ -36,6 +36,16 @@ namespace FudgeCore {
       this.functionOut = new AnimationFunction(this, null);
     }
 
+    /**
+     * Static comparation function to use in an array sort function to sort the keys by their time.
+     * @param _a the animation key to check
+     * @param _b the animation key to check against
+     * @returns >0 if a>b, 0 if a=b, <0 if a<b
+     */
+    static compare(_a: AnimationKey, _b: AnimationKey): number {
+      return _a.time - _b.time;
+    }
+    
     get Time(): number {
       return this.time;
     }
@@ -84,15 +94,6 @@ namespace FudgeCore {
       this.functionOut.calculate();
     }
 
-    /**
-     * Static comparation function to use in an array sort function to sort the keys by their time.
-     * @param _a the animation key to check
-     * @param _b the animation key to check against
-     * @returns >0 if a>b, 0 if a=b, <0 if a<b
-     */
-    static compare(_a: AnimationKey, _b: AnimationKey): number {
-      return _a.time - _b.time;
-    }
 
     //#region transfer
     serialize(): Serialization {
@@ -105,7 +106,7 @@ namespace FudgeCore {
       return s;
     }
 
-    deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.time = _serialization.time;
       this.value = _serialization.value;
       this.slopeIn = _serialization.slopeIn;

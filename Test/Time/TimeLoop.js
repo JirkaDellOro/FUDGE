@@ -4,25 +4,26 @@ var TimeLoop;
     window.addEventListener("load", handleLoad);
     function handleLoad(_event) {
         console.log("Start");
-        document.forms[0].addEventListener("change", handleChangeLoop);
-        document.forms[1].addEventListener("change", handleChangeTime);
+        document.forms[0].addEventListener("change", handleChangeTime);
+        document.forms[1].addEventListener("change", handleChangeLoop);
         document.querySelector("[name=start]").addEventListener("click", handleButtonClick);
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, handleFrame);
         loop();
         handleChangeLoop(null);
     }
     function handleChangeLoop(_event) {
-        let formData = new FormData(document.forms[0]);
+        let formData = new FormData(document.forms[1]);
         let mode = String(formData.get("mode"));
         let fps = Number(formData.get("fps"));
         ƒ.Loop.start(ƒ.LOOP_MODE[mode], fps, true);
         let fpsInput = document.querySelector("input[name=fps]");
         fpsInput.readOnly = (mode == "FRAME_REQUEST");
+        console.log(mode, fps);
     }
     function handleChangeTime(_event) {
         let formData = new FormData(_event.currentTarget);
         let scale = Number(formData.get("scale"));
-        ƒ.Time.game.setScale(scale);
+        ƒ.Time.game.setScale(scale); //ToDo: find out how scaling works -> in game time mode the second scaling is not calculated as expected
         console.log("Scale set to: " + scale);
     }
     function handleButtonClick(_event) {
@@ -38,7 +39,7 @@ var TimeLoop;
         let meter = document.querySelector("[name=frame]");
         meter.value = 1 + meter.value % 10;
         let avg = document.querySelector("[name=avg]");
-        avg.value = ƒ.Loop.getFpsRealAverage().toFixed(1);
+        avg.value = ƒ.Loop.fpsRealAverage.toFixed(0);
     }
     function loop() {
         let time = document.querySelector("[name=time]");

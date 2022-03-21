@@ -4,131 +4,66 @@ namespace FudgeCore {
    * Implementation based on http://www.songho.ca/opengl/gl_sphere.html
    * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
-  export class MeshSphere extends Mesh {
+  export class MeshSphere extends MeshRotation {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshSphere);
+    private latitudes: number;
 
-    public normals: Float32Array;
+    public constructor(_name: string = "MeshSphere", _longitudes: number = 8, _latitudes: number = 8) {
+      super(_name);
+      this.create(_longitudes, _latitudes);
+    }
 
-    private sectors: number;
-    private stacks: number;
-
-    // Dirty Workaround to have access to the normals from createVertices()
-    // private normals: Array<number> = [];
-    // private textureUVs: Array<number> = [];
-    // public textureUVs: Float32Array;
-
-    public constructor(_sectors: number = 12, _stacks: number = 8) {
-      super();
-
+    public create(_longitudes: number = 3, _latitudes: number = 2): void {
+      this.clear();
       //Clamp resolution to prevent performance issues
-      this.sectors = Math.min(_sectors, 128);
-      this.stacks = Math.min(_stacks, 128);
+      this.longitudes = Math.min(Math.round(_longitudes), 128);
+      this.latitudes = Math.min(Math.round(_latitudes), 128);
 
-      if (_sectors < 3 || _stacks < 2) {
-        Debug.warn("UV Sphere must have at least 3 sectors and 2 stacks to form a 3-dimensional shape.");
-        this.sectors = Math.max(3, _sectors);
-        this.stacks = Math.max(2, _stacks);
+      if (_longitudes < 3 || _latitudes < 2) {
+        Debug.warn("UV Sphere must have at least 3 longitudes and 2 latitudes to form a 3-dimensional shape.");
+        this.longitudes = Math.max(3, _longitudes);
+        this.latitudes = Math.max(2, _latitudes);
       }
 
-      this.create();
-    }
+      let shape: Vector2[] = [];
+      let step: number = Math.PI / this.latitudes;
+      for (let i: number = 0; i <= this.latitudes; ++i) {
+        let angle: number = Math.PI / 2 - i * step;
+        let x: number = Math.cos(angle);
+        let y: number = Math.sin(angle);
 
-    public create(): void {
-      let vertices: Array<number> = [];
-      let normals: number[] = [];
-      let textureUVs: number[] = [];
-
-      let x: number;
-      let z: number;
-      let xz: number;
-      let y: number;
-
-
-      let sectorStep: number = 2 * Math.PI / this.sectors;
-      let stackStep: number = Math.PI / this.stacks;
-      let stackAngle: number;
-      let sectorAngle: number;
-
-      /* add (sectorCount+1) vertices per stack.
-      the first and last vertices have same position and normal, 
-      but different tex coords */
-      for (let i: number = 0; i <= this.stacks; ++i) {
-        stackAngle = Math.PI / 2 - i * stackStep;
-        xz = Math.cos(stackAngle);
-        y = Math.sin(stackAngle);
-
-        // add (sectorCount+1) vertices per stack
-        // the first and last vertices have same position and normal, but different tex coords
-        for (let j: number = 0; j <= this.sectors; ++j) {
-          sectorAngle = j * sectorStep;
-
-          //vertex position
-          x = xz * Math.cos(sectorAngle);
-          z = xz * Math.sin(sectorAngle);
-          vertices.push(x, y, z);
-
-          //normals
-          normals.push(x, y, z);
-
-          //UV Coords
-          textureUVs.push(j / this.sectors * -1);
-          textureUVs.push(i / this.stacks);
-        }
+        shape.push(new Vector2(x / 2, y / 2));
       }
+      // place first and last vertex exactly on rotation axis
+      shape[0].x = 0;
+      shape[shape.length - 1].x = 0;
 
-      // scale down
-      vertices = vertices.map(_value => _value / 2);
-
-      this.textureUVs = new Float32Array(textureUVs);
-      this.normals = new Float32Array(normals);
-      this.vertices = new Float32Array(vertices);
-      this.normalsFace = this.createFaceNormals();
-      this.indices = this.createIndices();
-      this.createRenderBuffers();
+      super.rotate(shape, _longitudes);
     }
 
-    protected createIndices(): Uint16Array {
-      let inds: Array<number> = [];
 
-      let k1: number;
-      let k2: number;
-
-      for (let i: number = 0; i < this.stacks; ++i) {
-        k1 = i * (this.sectors + 1);   // beginning of current stack
-        k2 = k1 + this.sectors + 1;    // beginning of next stack
-
-        for (let j: number = 0; j < this.sectors; ++j, ++k1, ++k2) {
-
-          // 2 triangles per sector excluding first and last stacks
-          // k1 => k2 => k1+1
-          if (i != 0) {
-            inds.push(k1);
-            inds.push(k1 + 1);
-            inds.push(k2);
-          }
-
-          if (i != (this.stacks - 1)) {
-            inds.push(k1 + 1);
-            inds.push(k2 + 1);
-            inds.push(k2);
-          }
-        }
-      }
-      let indices: Uint16Array = new Uint16Array(inds);
-      return indices;
+    //#region Transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = super.serialize();
+      serialization.latitudes = this.latitudes;
+      return serialization;
     }
 
-    protected createVertices(): Float32Array {
-      return this.vertices;
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization);
+      this.create(_serialization.longitudes, _serialization.latitudes);
+      return this;
     }
 
-    protected createTextureUVs(): Float32Array {
-      return this.textureUVs;
+    public async mutate(_mutator: Mutator): Promise<void> {
+      super.mutate(_mutator);
+      this.create(this.longitudes, this.latitudes);
     }
 
-    //TODO: we also need REAL face normals
-    protected createFaceNormals(): Float32Array {
-      return this.normals;
+    protected reduceMutator(_mutator: Mutator): void {
+      super.reduceMutator(_mutator);
+      delete _mutator.shape;
     }
+    //#endregion
   }
 }

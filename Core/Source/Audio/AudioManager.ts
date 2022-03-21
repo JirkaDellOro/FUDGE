@@ -33,7 +33,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Determines FUDGE-graph to listen to. Each [[ComponentAudio]] in the graph will connect to this contexts master gain, all others disconnect.
+     * Determines FUDGE-graph to listen to. Each {@link ComponentAudio} in the graph will connect to this contexts master gain, all others disconnect.
      */
     public listenTo = (_graph: Node | null): void => {
       if (this.graph)
@@ -52,9 +52,9 @@ namespace FudgeCore {
     }
 
     /**
-     * Set the [[ComponentAudioListener]] that serves the spatial location and orientation for this contexts listener
+     * Set the {@link ComponentAudioListener} that serves the spatial location and orientation for this contexts listener
      */
-    public listen = (_cmpListener: ComponentAudioListener | null): void => {
+    public listenWith = (_cmpListener: ComponentAudioListener | null): void => {
       this.cmpListener = _cmpListener;
     }
 

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ListControl</title>
+
+  <style>
+    ul {
+      list-style: none;
+    }
+
+    li {
+      white-space: nowrap;
+      margin-left: -30px;
+    }
+
+    input[type="checkbox"]:checked~ul {
+      display: block;
+    }
+
+    input[type="checkbox"]~ul {
+      display: none;
+    }
+
+    td > input {
+      background-color: lightgrey;
+    }
+    td > input:read-only {
+      background-color: inherit;
+    }
+
+    .selected {
+      background-color: lightblue;
+      font-weight: bold;
+    }
+  </style>
+
+  <script src="../../../../Core/Build/FudgeCore.js"></script>
+  <script src="../../../../UserInterface/Build/FudgeUserInterface.js"></script>
+  <script src="Data.js"></script>
+  <script src="Main.js" defer></script>
+</head>
+
+<body>
+  <template>
+    <custom-vector2 style="text-align: right; display: inline-grid; grid-template-columns: 2em 8em 8em;">
+      <span>
+        <label>label</label>
+      </span>
+      <fudge-stepper key="x" label="x"></fudge-stepper>
+      <fudge-stepper key="y" label="y"></fudge-stepper>
+    </custom-vector2>
+  </template>
+  <script>
+    FudgeUserInterface.CustomElementTemplate.register("custom-vector2");
+    FudgeUserInterface.CustomElement.register("custom-vector2", class CustomVector2 extends FudgeUserInterface.CustomElementTemplate { });
+    FudgeUserInterface.CustomElement.map("Vector2", "custom-vector2");
+  </script>
+</body>
+
+</html>

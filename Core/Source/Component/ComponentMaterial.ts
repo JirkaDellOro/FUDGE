@@ -1,13 +1,16 @@
 namespace FudgeCore {
   /**
-   * Attaches a [[Material]] to the node
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+   * Attaches a {@link Material} to the node
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
    */
   export class ComponentMaterial extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentMaterial);
-    public material: Material;
     public clrPrimary: Color = Color.CSS("white");
     public clrSecondary: Color = Color.CSS("white");
+    public mtxPivot: Matrix3x3 = Matrix3x3.IDENTITY();
+    public material: Material;
+    //** support sorting of objects with transparency when rendering, render objects in the back first */
+    public sortForAlpha: boolean = false;
     // public mutatorCoat: MutatorForComponent;
 
     public constructor(_material: Material = null) {
@@ -18,25 +21,25 @@ namespace FudgeCore {
 
     //#region Transfer
     public serialize(): Serialization {
-      let serialization: Serialization;
-      /* at this point of time, serialization as resource and as inline object is possible. TODO: check if inline becomes obsolete */
-      let idMaterial: string = this.material.idResource;
-      if (idMaterial)
-        serialization = { idMaterial: idMaterial };
-      else
-        serialization = { material: Serializer.serialize(this.material) };
+      let serialization: Serialization = {
+        sortForAlpha: this.sortForAlpha,
+        clrPrimary: this.clrPrimary.serialize(),
+        clrSecondary: this.clrSecondary.serialize(),
+        pivot: this.mtxPivot.serialize(),
+        [super.constructor.name]: super.serialize(),
+        idMaterial: this.material.idResource
+      };
 
-      serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
-      let material: Material;
-      if (_serialization.idMaterial)
-        material = <Material>ResourceManager.get(_serialization.idMaterial);
-      else
-        material = <Material>Serializer.deserialize(_serialization.material);
-      this.material = material;
-      super.deserialize(_serialization[super.constructor.name]);
+
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      this.material = <Material>await Project.getResource(_serialization.idMaterial);
+      await this.clrPrimary.deserialize(_serialization.clrPrimary);
+      await this.clrSecondary.deserialize(_serialization.clrSecondary);
+      this.sortForAlpha = _serialization.sortForAlpha;
+      await this.mtxPivot.deserialize(_serialization.pivot);
+      await super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
 

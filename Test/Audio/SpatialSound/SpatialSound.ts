@@ -34,14 +34,14 @@ namespace AudioSpace {
   async function init(_event: Event): Promise<void> {
     out = document.querySelector("output");
 
-    const mtrWhite: ƒ.Material = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white")));
-    const mtrGrey: ƒ.Material = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("slategrey")));
+    const mtrWhite: ƒ.Material = new ƒ.Material("White", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("white")));
+    const mtrGrey: ƒ.Material = new ƒ.Material("White", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("slategrey")));
     const inner: ƒAid.Node = new ƒAid.Node("Inner", ƒ.Matrix4x4.IDENTITY(), mtrWhite, new ƒ.MeshPyramid());
     const outer: ƒAid.Node = new ƒAid.Node("Outer", ƒ.Matrix4x4.IDENTITY(), mtrGrey, new ƒ.MeshPyramid());
-    const mtxMesh: ƒ.Matrix4x4 = inner.pivot;
+    const mtxMesh: ƒ.Matrix4x4 = inner.mtxMeshPivot;
     mtxMesh.rotateX(-90);
     mtxMesh.translateZ(1, false);
-    outer.pivot.set(inner.pivot);
+    outer.mtxMeshPivot.set(inner.mtxMeshPivot);
     const speaker: ƒAid.Node = new ƒAid.Node("Speaker", ƒ.Matrix4x4.IDENTITY());
     speaker.addChild(inner);
     speaker.addChild(outer);
@@ -52,14 +52,14 @@ namespace AudioSpace {
     rotator.addChild(speaker);
     translator.addChild(rotator);
 
-    mtxRotatorX = speaker.local;
-    mtxRotatorY = rotator.local;
-    mtxTranslator = translator.local;
-    mtxInner = inner.local;
-    mtxOuter = outer.local;
+    mtxRotatorX = speaker.mtxLocal;
+    mtxRotatorY = rotator.mtxLocal;
+    mtxTranslator = translator.mtxLocal;
+    mtxInner = inner.mtxLocal;
+    mtxOuter = outer.mtxLocal;
 
     // audio setup
-    const audio: ƒ.Audio = await ƒ.Audio.load("hypnotic.mp3");
+    const audio: ƒ.Audio = new ƒ.Audio("hypnotic.mp3");
     cmpAudio = new ƒ.ComponentAudio(audio, true);
     speaker.addComponent(cmpAudio);
     cmpAudio.setPanner(ƒ.AUDIO_PANNER.CONE_OUTER_ANGLE, 180);
@@ -71,7 +71,7 @@ namespace AudioSpace {
     // camera setup
     const cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
     camera = new ƒAid.CameraOrbit(cmpCamera, 3, 80, 0.1, 20);
-    camera.node.addComponent(new ƒ.ComponentAudioListener());
+    camera.nodeCamera.addComponent(new ƒ.ComponentAudioListener());
     camera.axisRotateX.addControl(cntMouseY);
     camera.axisRotateY.addControl(cntMouseX);
 
@@ -85,7 +85,7 @@ namespace AudioSpace {
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
     viewport.initialize("Viewport", graph, cmpCamera, canvas);
     ƒ.AudioManager.default.listenTo(graph);
-    ƒ.AudioManager.default.listen(camera.node.getComponent(ƒ.ComponentAudioListener));
+    ƒ.AudioManager.default.listenWith(camera.nodeCamera.getComponent(ƒ.ComponentAudioListener));
 
     // setup event handling
     viewport.setFocus(true);

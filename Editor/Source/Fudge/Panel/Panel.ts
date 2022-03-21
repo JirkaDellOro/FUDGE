@@ -1,53 +1,65 @@
+///<reference path="../View/View.ts"/>
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
+
+  export interface PanelState {
+    [key: string]: string;
+  }
+
   /**
-   * Holds various views into the currently processed Fudge-project.  
-   * There must be only one ViewData in this panel, that displays data for the selected entity  
-   * Multiple panels may be created by the user, presets for different processing should be available
-   * @author Monika Galkewitsch, HFU, 2019
-   * @author Lukas Scheuerle, HFU, 2019
+   * Base class for all [[Panel]]s aggregating [[View]]s
+   * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
+   * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
 
-  export abstract class Panel extends EventTarget {
-    private static idCounter: number = 0;
-    views: View[] = [];
-    config: GoldenLayout.ItemConfig;
+  // TODO: class might become a customcomponent for HTML! = this.dom
 
-    /**
-     * Constructor for panel Objects. Generates an empty panel with a single ViewData.
-     * @param _name Panel Name
-     * @param _template Optional. Template to be used in the construction of the panel.
-     */
-    constructor(_name: string) {
-      super();
-      let id: string;
-      this.config = {
-        type: "row",
-        content: [],
-        title: _name,
-        id: this.generateID(_name)
+  // extends view vorrübergehend entfernt
+  export abstract class Panel extends View {
+    protected goldenLayout: GoldenLayout;
+    private views: View[] = [];
+    //public dom; // muss vielleicht weg
+
+    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+      super(_container, _state);
+      this.dom.style.width = "100%";
+      this.dom.style.overflow = "visible";
+      this.dom.removeAttribute("view");
+      this.dom.setAttribute("panel", this.constructor.name);
+
+      const config: LayoutConfig = {
+        settings: { showPopoutIcon: false, showMaximiseIcon: false },
+        root: {
+          type: "row",
+          isClosable: false,
+          content: [
+          ]
+        }
       };
 
+      this.goldenLayout = new Page.goldenLayoutModule.GoldenLayout(this.dom);
+
+      this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
+      this.goldenLayout.on("itemCreated", this.addViewComponent);
+      this.goldenLayout.loadLayout(config);
     }
-    /**
-     * Adds given View to the list of views on the panel. 
-     * @param _v View to be added
-     * @param _pushToPanelManager Wether or not the View should also be pushed to the Panelmanagers list of views
-     * @param _pushConfig Wether or not the config of the view should be pushed into the panel config. If this is false, you will have to push the view config manually. This is helpful for creating custom structures in the panel config.
-     */
-    public addView(_v: View, _pushToPanelManager: boolean = true, _pushConfig: boolean = true): void {
-      this.views.push(_v);
-      if (_pushConfig) {
-        this.config.content.push(_v.config);
-      }
-      if (_pushToPanelManager) {
-        PanelManager.instance.addView(_v);
+
+    /** Send custom copies of the given event to the views */
+    public broadcastEvent = (_event: Event): void => {
+      for (let view of this.views) {
+        let event: CustomEvent = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: (<CustomEvent>_event).detail });
+        view.dom.dispatchEvent(event);
       }
     }
 
-    private generateID(_name: string): string {
-      return "Panel" + Panel.idCounter++ + "_" + _name;
+    public abstract getState(): PanelState;
+
+    private addViewComponent = (_event: EventEmitter.BubblingEvent): void => {
+      // adjustmens for GoldenLayout 2
+      let target: ComponentItem = _event.target as ComponentItem;
+      if (target instanceof Page.goldenLayoutModule.ComponentItem) {
+        this.views.push(<View>target.component);
+      }
     }
   }
 }

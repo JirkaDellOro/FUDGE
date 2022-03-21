@@ -1,0 +1,9 @@
+{
+    "mode": "file",
+    "out": "../../Documentation/Reference/Core/",
+    "name": "Fudge Core",
+    "readme": "none",
+    "excludePrivate": "true",
+    "excludeProtected": "true",
+    "ignoreCompilerErrors": "true"
+}

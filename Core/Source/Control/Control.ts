@@ -51,7 +51,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Set the time-object to be used when calculating the output in [[CONTROL_TYPE.INTEGRAL]]
+     * Set the time-object to be used when calculating the output in {@link CONTROL_TYPE.INTEGRAL}
      */
     public setTimebase(_time: Time): void {
       this.time = _time;
@@ -59,9 +59,12 @@ namespace FudgeCore {
     }
 
     /**
-     * Feed an input value into this control and fire the events [[EVENT_CONTROL.INPUT]] and [[EVENT_CONTROL.OUTPUT]]
+     * Feed an input value into this control and fire the events {@link EVENT_CONTROL.INPUT} and {@link EVENT_CONTROL.OUTPUT}
      */
     public setInput(_input: number): void {
+      if (!this.active)
+        return;
+        
       this.outputBase = this.calculateOutput();
       this.valuePrevious = this.getValueDelayed();
       this.outputTarget = this.factor * _input;
@@ -78,6 +81,11 @@ namespace FudgeCore {
         this.dispatchOutput(this.valuePrevious);
       else
         this.dispatchOutput(null);
+    }
+
+    public pulse(_input: number): void {
+      this.setInput(_input);
+      this.setInput(0);
     }
 
     /**
@@ -100,7 +108,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Set the factor to multiply the input value given with [[setInput]] with
+     * Set the factor to multiply the input value given with {@link setInput} with
      */
     public setFactor(_factor: number): void {
       this.factor = _factor;
@@ -147,7 +155,9 @@ namespace FudgeCore {
       }
       return output;
     }
-
+    /**
+     * calculates the output considering the time of the delay
+     */
     private getValueDelayed(): number {
       if (this.timeValueDelay > 0) {
         let timeElapsedSinceInput: number = this.time.get() - this.timeOutputTargetSet;
@@ -156,8 +166,11 @@ namespace FudgeCore {
       }
       return this.outputTarget;
     }
-
+    
     private dispatchOutput = (_eventOrValue: EventTimer | number): void => {
+      if (!this.active)
+        return;
+        
       let timer: Timer = this.time.getTimer(this.idTimer);
       let output: number;
       if (typeof (_eventOrValue) == "number")
@@ -166,11 +179,11 @@ namespace FudgeCore {
         output = this.calculateOutput();
       let outputChanged: boolean = (output != this.outputPrevious);
 
-      if (timer)
+      if (timer) {
         timer.active = outputChanged;
-
-      if (!outputChanged)
-        return;
+        if (!outputChanged)
+          return;
+      }
 
       this.outputPrevious = output;
 

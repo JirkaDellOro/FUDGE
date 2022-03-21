@@ -3,7 +3,7 @@
 
 namespace FudgeCore {
   /**
-   * Calculates the values between [[AnimationKey]]s.
+   * Calculates the values between {@link AnimationKey}s.
    * Represented internally by a cubic function (`f(x) = ax³ + bx² + cx + d`). 
    * Only needs to be recalculated when the keys change, so at runtime it should only be calculated once.
    * @author Lukas Scheuerle, HFU, 2019

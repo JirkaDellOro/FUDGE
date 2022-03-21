@@ -1,11 +1,42 @@
 <!DOCTYPE html>
 
 <head>
+    <link rel="stylesheet" href="../../TestInstructions.css">
+    <script src="../../dialog-polyfill.min.js"></script>
+    <script src="../../TestInstructions.js"></script>
     <meta charset="UTF-8">
     <title>Subclass Registration</title>
+    <script type="text/javascript" src="../../../Physics/OimoPhysics.js"></script>
     <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
     <script type="text/javascript" src="SubclassRegistration.js"></script>
 </head>
 
 <body>
+    <script>
+        TestInstructions.display({
+            Name: "SubclassRegistration",
+            Test: [
+                "Proper registration of the subclasses included in FudgeCore and instantiation"
+            ],
+            Setup: [
+                "Iteration over all registered subclasses of ƒ.Mesh, ƒ.Component, ƒ.Shader",
+                "Attempt to create an instance of each class without parameters"
+            ],
+            /*  Act: [
+                ""
+            ], */
+            Observe: [
+                "Console to see all registered subclasses and results of instantiation"
+            ],
+            /* Control: [
+                
+            ], */
+            Expect: [
+                "All subclasses of Mesh, Component and Shader are shown in the console log",
+                "Compare with the source code of FudgeCore to verify that all subclasses present there are registered",
+                "Some cannot create instances without parameters, probably need to be looked into, especially for deserialization",
+            ]
+
+        });
+    </script>
 </body>

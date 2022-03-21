@@ -12,6 +12,8 @@ namespace FudgeUserInterface {
       super(_attributes);
       if (!_attributes.label)
         this.setAttribute("label", _attributes.key);
+
+      this.addEventListener(EVENT.KEY_DOWN, this.hndKey);
     }
 
     /**
@@ -36,6 +38,7 @@ namespace FudgeUserInterface {
       slider.max = "1";
       slider.step = "0.01";
       this.appendChild(slider);
+      slider.addEventListener(EVENT.WHEEL, this.hndWheel);
     }
 
     /**
@@ -46,7 +49,7 @@ namespace FudgeUserInterface {
       let alpha: string = (<HTMLInputElement>this.querySelector("input[type=range")).value;
       this.color.setHex(hex.substr(1, 6) + "ff");
       this.color.a = parseFloat(alpha);
-      return this.color.getMutator();
+      return this.color.getMutatorForUserInterface();
     }
     /**
      * Sets the values of color picker and slider
@@ -56,6 +59,21 @@ namespace FudgeUserInterface {
       let hex: string = this.color.getHex();
       (<HTMLInputElement>this.querySelector("input[type=color")).value = "#" + hex.substr(0, 6);
       (<HTMLInputElement>this.querySelector("input[type=range")).value = this.color.a.toString();
+    }
+
+    private hndKey(_event: KeyboardEvent): void {
+      _event.stopPropagation();
+    }
+    private hndWheel(_event: WheelEvent): void {
+      let slider: HTMLInputElement = (<HTMLInputElement>_event.target);
+      if (slider != document.activeElement)
+        return;
+      _event.stopPropagation();
+      _event.preventDefault();
+      // console.log(_event.deltaY / 1000);
+      let currentValue: number = Number(slider.value);
+      slider.value = String(currentValue - _event.deltaY / 1000);
+      slider.dispatchEvent(new Event(EVENT.INPUT, { bubbles: true }));
     }
   }
 }
