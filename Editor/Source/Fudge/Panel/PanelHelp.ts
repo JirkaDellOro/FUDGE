@@ -3,8 +3,8 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
 
   /**
-  * Shows a graph and offers means for manipulation
-  * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+  * Shows a help and documentation
+  * @authors Jirka Dell'Oro-Friedl, HFU, 2021
   */
   export class PanelHelp extends Panel {
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
