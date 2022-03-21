@@ -29,9 +29,9 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
 
 
     //Materials
-    let fixedJointMaterial: f.Material = new f.Material("fixedJointMat", f.ShaderFlat, new f.CoatColored(new f.Color(0.8, 0.21, 0.02, 1)));
-    let jointMaterial: f.Material = new f.Material("JointMat", f.ShaderFlat, new f.CoatColored(new f.Color(0.027, 0.8, 0.09, 1)));
-    let defaultMaterial: f.Material = new f.Material("DeafultMat", f.ShaderFlat, new f.CoatColored(new f.Color(0.55, 0.55, 0.5, 1)));
+    let fixedJointMaterial: f.Material = new f.Material("fixedJointMat", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.8, 0.21, 0.02, 1)));
+    let jointMaterial: f.Material = new f.Material("JointMat", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.027, 0.8, 0.09, 1)));
+    let defaultMaterial: f.Material = new f.Material("DeafultMat", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.55, 0.55, 0.5, 1)));
 
     //Function to initialize the Fudge Scene with a camera, light, viewport and PHYSCIAL Objects
     function init(_event: Event): void {
@@ -41,7 +41,7 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
         //#region Physics
         //PHYSICS - Basic Plane and Cube
         //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
-        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
+        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[0].mtxLocal.scale(new f.Vector3(14, 0.3, 14)); //Scale the body with it's standard ComponentTransform
         hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
 

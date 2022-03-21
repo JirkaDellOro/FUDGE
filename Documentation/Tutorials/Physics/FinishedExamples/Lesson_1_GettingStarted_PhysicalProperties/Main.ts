@@ -26,32 +26,32 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
 
         //PHYSICS - Step 2: Create some physical Nodes to play with 
         //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
-        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
+        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[0].mtxLocal.scale(new f.Vector3(14, 0.3, 14)); //Scale the body with it's standard ComponentTransform
         bodies[0].mtxLocal.rotateX(4, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
         hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
 
 
         //Creating some dynamic bodies - Same as static only a different physics interaction type
-        bodies[1] = createCompleteNode("Cube_1", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
+        bodies[1] = createCompleteNode("Cube_1", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
         bodies[1].mtxLocal.translate(new f.Vector3(3, 2, 0));
         hierarchy.appendChild(bodies[1]);
 
         //Creating a different collider shape - just change the collider type to a predefined shape
-        bodies[2] = createCompleteNode("Pyramid", new f.Material("Pyramid", f.ShaderFlat, new f.CoatColored(new f.Color(0.3, 0.5, 0.3, 1))), new f.MeshPyramid, 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.PYRAMID);
+        bodies[2] = createCompleteNode("Pyramid", new f.Material("Pyramid", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.3, 0.5, 0.3, 1))), new f.MeshPyramid, 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.PYRAMID);
         hierarchy.appendChild(bodies[2]);
         // -> best practice to think about placing objects in the world
         bodies[2].mtxLocal.translate(new f.Vector3(0, 2, 0)); //Translate first to the point you want it
         bodies[2].mtxLocal.scale(new f.Vector3(1.5, 1.5, 1.5)); //Then defined a size you want the object to have
         bodies[2].mtxLocal.rotateY(40, true); //Then rotate a object like you want it
 
-        bodies[3] = createCompleteNode("Sphere", new f.Material("Sphere", f.ShaderFlat, new f.CoatColored(new f.Color(0.8, 0.3, 0.3, 1))), new f.MeshSphere, 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.SPHERE);
+        bodies[3] = createCompleteNode("Sphere", new f.Material("Sphere", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.8, 0.3, 0.3, 1))), new f.MeshSphere, 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1, f.COLLIDER_TYPE.SPHERE);
         hierarchy.appendChild(bodies[3]);
         bodies[3].mtxLocal.translate(new f.Vector3(5, 2, 0)); //Translate first to the point you want it
 
 
         //Creating a kinematic body
-        bodies[4] = createCompleteNode("KinematicPlayerCube", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube(), 1, f.BODY_TYPE.KINEMATIC);
+        bodies[4] = createCompleteNode("KinematicPlayerCube", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0, 0, 1, 1))), new f.MeshCube(), 1, f.BODY_TYPE.KINEMATIC);
         kinematicBody = bodies[4]; //Reference this node specifically so we can access it for input more easily
         kinematicBody.mtxLocal.translate(new f.Vector3(-3, 2, 0));
         hierarchy.appendChild(bodies[4]);

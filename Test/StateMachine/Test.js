@@ -42,19 +42,19 @@ var StateMachine;
         }
     }
     class Guard extends ƒAid.StateMachine {
-        static instructions = GuardInstructions.get();
         constructor() {
             super();
             this.instructions = Guard.instructions;
         }
     }
+    Guard.instructions = GuardInstructions.get();
     class ComponentGuard extends ƒAid.ComponentStateMachine {
-        static instructions = GuardInstructions.get();
         constructor() {
             super();
             this.instructions = ComponentGuard.instructions;
         }
     }
+    ComponentGuard.instructions = GuardInstructions.get();
     function start() {
         let guard = new Guard();
         guard.act();

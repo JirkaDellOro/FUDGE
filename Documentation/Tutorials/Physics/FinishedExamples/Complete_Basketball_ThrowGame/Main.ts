@@ -31,9 +31,9 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
     let lastSpeed: number = 0;
 
     //Materials
-    let boardDefault: f.Material = new f.Material("Board", f.ShaderFlat, new f.CoatColored(new f.Color(0.85, 0.95, 0.85, 1)));
-    let boardGoal: f.Material = new f.Material("BoardGoal", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.95, 0.2, 1)));
-    let groundMaterial: f.Material = new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1)));
+    let boardDefault: f.Material = new f.Material("Board", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.85, 0.95, 0.85, 1)));
+    let boardGoal: f.Material = new f.Material("BoardGoal", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.95, 0.2, 1)));
+    let groundMaterial: f.Material = new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1)));
 
     //Function to initialize the Fudge Scene with a camera, light, viewport and PHYSCIAL Objects
     function init(_event: Event): void {
@@ -68,7 +68,7 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
         hierarchy.appendChild(bodies[3]);
 
         //Ball
-        bodies[4] = createCompleteNode("Basketball", new f.Material("Basketball", f.ShaderFlat, new f.CoatColored(new f.Color(181 / 255, 66 / 255, 19 / 255))), new f.MeshSphere(), 0.65, f.BODY_TYPE.KINEMATIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.SPHERE);
+        bodies[4] = createCompleteNode("Basketball", new f.Material("Basketball", f.ShaderFlat, new f.CoatRemissive(new f.Color(181 / 255, 66 / 255, 19 / 255))), new f.MeshSphere(), 0.65, f.BODY_TYPE.KINEMATIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.SPHERE);
         bodies[4].mtxLocal.translate(ballStart);
         bodies[4].mtxLocal.scale(new f.Vector3(0.26, 0.26, 0.26)); //26cm diameter basketball
         hierarchy.appendChild(bodies[4]);
@@ -192,7 +192,7 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
 
     //Creating a basket and a board with some decoration - 7 new bodies
     function createCourt(_bodyStartNo: number, _position: f.Vector3) {
-        let materialBasket: f.Material = new f.Material("Basket", f.ShaderFlat, new f.CoatColored(new f.Color(0.9, 0.2, 0.2, 1)));
+        let materialBasket: f.Material = new f.Material("Basket", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.9, 0.2, 0.2, 1)));
         let basketPosition: f.Vector3 = _position;
         //Basket - Square - Not completly real values of course since it's no circle
         bodies[_bodyStartNo] = createCompleteNode("BasketBack", materialBasket, new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
@@ -222,7 +222,7 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
 
         //Board black decoration
         let node: f.Node; //we do not add them to bodies they will only be decorative and therefore normal Fudge nodes
-        let decorationMaterial: f.Material = new f.Material("BoardDeco", f.ShaderFlat, new f.CoatColored(new f.Color(0.1, 0.1, 0.1, 1)));
+        let decorationMaterial: f.Material = new f.Material("BoardDeco", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.1, 0.1, 0.1, 1)));
         node = createStandardFudgeNode("BlackUpperStripe", decorationMaterial, new f.MeshCube());
         node.mtxLocal.translate(new f.Vector3(basketPosition.x, basketPosition.y + 0.5, basketPosition.z - 0.7235)); //Board 17.5 cm from basket
         node.mtxLocal.scale(new f.Vector3(0.59, 0.05, 0.05));
@@ -251,7 +251,7 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
 
     //Some Bodies on Joints that move when hit by the ball, just for visuals and fun - Lesson Joints
     function createShootableDecoration(_bodyStartNo: number, _position: f.Vector3, _height: number = 1) {
-        let stickMaterial: f.Material = new f.Material("JointStick", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0.15, 1, 0.7)))
+        let stickMaterial: f.Material = new f.Material("JointStick", f.ShaderFlat, new f.CoatRemissive(new f.Color(0, 0.15, 1, 0.7)))
         //Spherical Joint
         bodies[_bodyStartNo] = createCompleteNode("Socket", groundMaterial, new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
         hierarchy.appendChild(bodies[_bodyStartNo]);

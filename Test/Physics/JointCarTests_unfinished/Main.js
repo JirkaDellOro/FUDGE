@@ -14,7 +14,7 @@ var Turorials_FUDGEPhysics_Lesson1;
     let bodies = new Array(); // Array of all physical objects in the scene to have a quick reference
     let carBody;
     //Setting Variables
-    let materialPlayer = new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 0.5, 0.35, 1)));
+    let materialPlayer = new f.Material("Player", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.7, 0.5, 0.35, 1)));
     let speedChange = 5;
     //Car Settings / Joints
     let frontSuspensionRight;
@@ -42,7 +42,7 @@ var Turorials_FUDGEPhysics_Lesson1;
         //Experiment with defaultConstraintSolverType and defaultCorrectionAlgorithm
         //PHYSICS 
         //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
-        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
+        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
         bodies[0].mtxLocal.scale(new f.Vector3(25, 0.3, 25)); //Scale the body with it's standard ComponentTransform
         //bodies[0].mtxLocal.rotateX(4, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
         hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
