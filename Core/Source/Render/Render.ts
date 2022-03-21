@@ -15,6 +15,7 @@ namespace FudgeCore {
     public static componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
     private static nodesSimple: RecycableArray<Node> = new RecycableArray();
     private static nodesAlpha: RecycableArray<Node> = new RecycableArray();
+    // TODO: add nodesParticleSystem or add to nodesAlpha?
     private static timestampUpdate: number;
 
     // TODO: research if picking should be optimized using radius picking to filter
