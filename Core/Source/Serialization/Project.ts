@@ -151,12 +151,12 @@ namespace FudgeCore {
       Project.graphInstancesToResync[_instance.idSource] = instances;
     }
 
-    public static resyncGraphInstances(_graph: Graph): void {
+    public static async resyncGraphInstances(_graph: Graph): Promise<void> {
       let instances: GraphInstance[] = Project.graphInstancesToResync[_graph.idResource];
       if (!instances)
         return;
       for (let instance of instances)
-        instance.connectToGraph();
+        await instance.connectToGraph();
       delete(Project.graphInstancesToResync[_graph.idResource]);
     }
 

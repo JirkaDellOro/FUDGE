@@ -2641,7 +2641,7 @@ declare namespace FudgeCore {
         reset(): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        connectToGraph(): void;
+        connectToGraph(): Promise<void>;
         /**
          * Set this node to be a recreation of the {@link Graph} given
          */
@@ -5452,7 +5452,7 @@ declare namespace FudgeCore {
         static registerAsGraph(_node: Node, _replaceWithInstance?: boolean): Promise<Graph>;
         static createGraphInstance(_graph: Graph): Promise<GraphInstance>;
         static registerGraphInstanceForResync(_instance: GraphInstance): void;
-        static resyncGraphInstances(_graph: Graph): void;
+        static resyncGraphInstances(_graph: Graph): Promise<void>;
         static registerScriptNamespace(_namespace: Object): void;
         static getComponentScripts(): ComponentScripts;
         static loadScript(_url: RequestInfo): Promise<void>;

@@ -48,6 +48,7 @@ namespace FudgeCore {
       else
         serialization.deserializeFromSource = true;
 
+      serialization.name = this.name;
       serialization.idSource = this.#idSource;
       return serialization;
     }
@@ -60,9 +61,9 @@ namespace FudgeCore {
 
       if (graph)
         if (_serialization.deserializeFromSource) // no components-> assume synchronized GraphInstance
-          this.set(graph); // recreate complete instance from source graph
+          await this.set(graph); // recreate complete instance from source graph
         else {
-          this.connectToGraph(); // otherwise just connect
+          await this.connectToGraph(); // otherwise just connect
         }
       else {
         Project.registerGraphInstanceForResync(this);
@@ -70,10 +71,10 @@ namespace FudgeCore {
       return this;
     }
 
-    public connectToGraph(): void {
+    public async connectToGraph(): Promise<void> {
       let graph: Graph = this.get();
       if (this.#deserializeFromSource)
-        this.set(graph);
+        await this.set(graph);
 
       // graph.addEventListener(EVENT.MUTATE, (_event: CustomEvent) => this.hndMutation, true);
       graph.addEventListener(EVENT.MUTATE, this.hndMutationGraph, true);
