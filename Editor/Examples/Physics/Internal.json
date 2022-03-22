@@ -225,6 +225,13 @@
                           }
                         }
                       }
+                    ],
+                    "ComponentGraphFilter": [
+                      {
+                        "ƒ.ComponentGraphFilter": {
+                          "active": true
+                        }
+                      }
                     ]
                   },
                   "children": [
@@ -295,7 +302,7 @@
                             {
                               "ƒ.ComponentTransform": {
                                 "local": {
-                                  "translation": "[0.2707085609436035, 1.3750553131103516, 0]",
+                                  "translation": "[0.5099912285804749, 3.0362472534179688, 0]",
                                   "rotation": "[0, 0, 0]",
                                   "scaling": "[1, 1, 1]"
                                 },
@@ -309,8 +316,7 @@
                         "children": []
                       }
                     }
-                  ],
-                  "idSource": "Graph|2022-03-05T18:27:09.459Z|47242"
+                  ]
                 }
               }
             ]
@@ -339,6 +345,7 @@
             "children": [
               {
                 "ƒ.GraphInstance": {
+                  "deserializeFromSource": true,
                   "idSource": "Graph|2022-03-05T18:27:09.459Z|47242"
                 }
               }
@@ -512,7 +519,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[0.2707085609436035, 1.3750553131103516, 0]",
+                      "translation": "[0.8353768587112427, 1.3750553131103516, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
