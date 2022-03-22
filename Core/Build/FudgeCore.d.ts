@@ -1660,7 +1660,7 @@ declare namespace FudgeCore {
         /**
          * Determines FUDGE-graph to listen to. Each {@link ComponentAudio} in the graph will connect to this contexts master gain, all others disconnect.
          */
-        listenTo: (_graph: Node | null) => void;
+        listenTo: (_graph: Node) => void;
         /**
          * Retrieve the FUDGE-graph currently listening to
          */
@@ -1668,7 +1668,7 @@ declare namespace FudgeCore {
         /**
          * Set the {@link ComponentAudioListener} that serves the spatial location and orientation for this contexts listener
          */
-        listenWith: (_cmpListener: ComponentAudioListener | null) => void;
+        listenWith: (_cmpListener: ComponentAudioListener) => void;
         /**
          * Updates the spatial settings of the AudioNodes effected in the current FUDGE-graph
          */
@@ -2057,13 +2057,41 @@ declare namespace FudgeCore {
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
         mesh: Mesh;
-        constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance);
+        showToCamera: boolean;
+        constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance, _showToCamera?: boolean);
         get radius(): number;
         get skeleton(): SkeletonInstance;
         bindSkeleton(_skeleton: SkeletonInstance): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, size and all the defined values of the storage partition of the effect will cached here while evaluating the effect.
+     */
+    interface ParticleVariables {
+        [key: string]: number | number[];
+    }
+    /**
+     * Attaches a {@link ParticleEffect} to the node.
+     * @author Jonas Plotzky, HFU, 2020
+     */
+    class ComponentParticleSystem extends Component {
+        static readonly iSubclass: number;
+        variables: ParticleVariables;
+        private effect;
+        constructor(_particleEffect?: ParticleEffect, _size?: number);
+        get particleEffect(): ParticleEffect;
+        set particleEffect(_newParticleEffect: ParticleEffect);
+        get size(): number;
+        /**
+         * Sets the size of the particle effect. Caution: Setting this will result in the reevaluation of the system storage of the effect and the reinitialization of the randomNumbers array.
+         */
+        set size(_newSize: number);
+        evaluateStorage(_storageData: ParticleEffectData): void;
+        private initRandomNumbers;
     }
 }
 declare namespace FudgeCore {
@@ -4055,6 +4083,142 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * A function taking input factors (time, index, size and self defined ones) as the argument. Returning a number.
+    */
+    interface ParticleClosure {
+        (_variables: ParticleVariables): number;
+    }
+    /**
+     * Factory class to create closures.
+     * @author Jonas Plotzky, HFU, 2020
+     */
+    class ParticleClosureFactory {
+        private static closures;
+        /**
+         * Creates a closure of the given function type and passes the parameters to it.
+         * @param _function The function type of the closure you want to create.
+         * @param _parameters The parameters, which should be functions themselves, passed to the created closure.
+         */
+        static createClosure(_function: string, _parameters: Function[]): ParticleClosure;
+        /**
+         * Creates a closure which will return the sum of the given parameters,
+         *  i.e. ```_parameters[0] + ... + _parameters[n]```.
+         */
+        private static createAddition;
+        /**
+         * Creates a closure which will return the subtraction of the given parameters,
+         *  i.e. ```_parameters[0] - _parameters[1]```.
+         */
+        private static createSubtraction;
+        /**
+          * Creates a closure which will return the product of the given parameters,
+          *  i.e. ```_parameters[0] * ... * _parameters[n]```.
+          */
+        private static createMultiplication;
+        /**
+         * Creates a closure which will return the division of the given parameters,
+         *  i.e. ```_parameters[0] / _parameters[1]```.
+         */
+        private static createDivision;
+        /**
+         * Creates a closure which will return the modulo of the given parameters,
+         *  i.e. ```_parameters[0] % _parameters[1]```.
+         */
+        private static createModulo;
+        /**
+         * Interpolates a linear function between two given points.
+         * - ```_parameters[0]``` will be the input value for the function.
+         * - ```_parameters[1]``` x start value.
+         * - ```_parameters[2]``` y start value.
+         * - ```_parameters[3]``` x end value.
+         * - ```_parameters[4]``` y end value.
+         */
+        private static createLinear;
+        /**
+         * Creates a polynomial function of third degree. A,b,c and d will be evaluated while parsing.
+         * - ```_parameters[0]``` will be the input value for the function.
+         * - ```_parameters[1]``` a value.
+         * - ```_parameters[2]``` b value.
+         * - ```_parameters[3]``` c value.
+         * - ```_parameters[4]``` d value.
+         */
+        private static createPolynomial3;
+        /**
+         * Creates a closure which will return the square root of the given parameter,
+         * ```parameters[0]``` will be the input value for the function.
+         */
+        private static createSquareRoot;
+        /**
+         * Creates a closure which will return a number chosen from the randomNumbers array in _variables.
+         * - ```_parameters[0]``` representing the index of the number which will be chosen.
+         */
+        private static createRandom;
+    }
+}
+declare namespace FudgeCore {
+    enum PARTICLE_VARIBALE_NAMES {
+        TIME = "time",
+        INDEX = "index",
+        SIZE = "size",
+        RANDOM_NUMBERS = "randomNumbers"
+    }
+    /**
+     * The data format used to parse and store the paticle effect
+     */
+    interface ParticleEffectData {
+        [identifier: string]: General;
+    }
+    /**
+     * Holds all the information which defines the particle effect. Can load the said information out of a json file.
+     * @authors Jonas Plotzky, HFU, 2020
+     */
+    class ParticleEffect {
+        storageSystem: ParticleEffectData;
+        storageUpdate: ParticleEffectData;
+        storageParticle: ParticleEffectData;
+        transformLocal: ParticleEffectData;
+        transformWorld: ParticleEffectData;
+        componentMutations: ParticleEffectData;
+        cachedMutators: {
+            [key: string]: Mutator;
+        };
+        private definedVariables;
+        /**
+         * Asynchronously loads the json from the given url and parses it initializing this particle effect.
+         */
+        load(_request: RequestInfo): Promise<void>;
+        /**
+         * Parses the data initializing this particle effect with the corresponding closures
+         * @param _data The paticle effect data to parse.
+         */
+        private parse;
+        /**
+         * Creates entries in {@link definedVariables} for each defined closure in _data. Predefined variables (time, index...) and previously defined ones (in json) can not be overwritten.
+         * @param _data The paticle effect data to parse.
+         */
+        private preParseStorage;
+        /**
+         * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
+         * @param _data The particle effect data to parse recursivley.
+         */
+        private parseRecursively;
+        /**
+         * Parse the given closure data recursivley. Returns a function depending on the closure data.
+         * @param _data The closure data to parse recursively.
+         */
+        private parseClosure;
+        /**
+         * Create mutators from the given _data and cache them.
+         */
+        private cacheMutators;
+        /**
+         * Create an empty mutator from _data.
+         */
+        private createEmptyMutatorFrom;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Defines automatic adjustment of the collider
      */
     enum BODY_INIT {
@@ -5104,6 +5268,7 @@ declare namespace FudgeCore {
         static componentsPick: RecycableArray<ComponentPick>;
         private static nodesSimple;
         private static nodesAlpha;
+        private static nodesParticleSystem;
         private static timestampUpdate;
         /**
          * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
@@ -5117,6 +5282,7 @@ declare namespace FudgeCore {
          */
         static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera): Pick[];
         static draw(_cmpCamera: ComponentCamera): void;
+        private static drawListParticleSystem;
         private static drawListAlpha;
         private static drawList;
         private static transformByPhysics;
@@ -5181,8 +5347,17 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Class that is used inside of {@link Render} to draw the particle effects of nodes which have a {@link ComponentParticleSystem} attached.
+     * @author Jonas Plotzky, HFU, 2020
+     */
     abstract class RenderParticles extends Render {
-        static drawParticles(): void;
+        /**
+         * The render function for drawing a node which has a {@link ComponentParticleSystem} attached to it. The node represents a single particle of the particle system. Based on the attached ComponentParticleSystem the whole particle system will be drawn in its determined state.
+         */
+        static drawParticles(_node: Node, _nodeTransform: Matrix4x4, _cmpParticleSystem: ComponentParticleSystem, _cmpMesh: ComponentMesh, _cmpMaterial: ComponentMaterial, _cmpCamera: ComponentCamera): void;
+        private static applyTransform;
+        private static evaluateMutatorWith;
     }
 }
 declare namespace FudgeCore {

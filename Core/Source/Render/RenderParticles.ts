@@ -1,18 +1,17 @@
 namespace FudgeCore {
   /**
-   * Class that is used inside of [[RenderManager]] to draw the particle effects of nodes which have a [[ComponentParticleSystem]] attached.
+   * Class that is used inside of {@link Render} to draw the particle effects of nodes which have a {@link ComponentParticleSystem} attached.
    * @author Jonas Plotzky, HFU, 2020
    */
   export abstract class RenderParticles extends Render {
 
     /**
-     * The render function for drawing a node which has a [[ComponentParticleSystem]] attached to it. The node represents a single particle of the particle system. Based on the attached [[ComponentParticleSystem]] the whole particle system will be drawn in its determined state.
+     * The render function for drawing a node which has a {@link ComponentParticleSystem} attached to it. The node represents a single particle of the particle system. Based on the attached ComponentParticleSystem the whole particle system will be drawn in its determined state.
      */
-    public static drawParticles(_node: Node, _nodeTransform: Matrix4x4, _cmpParticleSystem: ComponentParticleSystem, _cmpMesh: ComponentMesh, _cmpCamera: ComponentCamera): void {
-      let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
+    public static drawParticles(_node: Node, _nodeTransform: Matrix4x4, _cmpParticleSystem: ComponentParticleSystem, _cmpMesh: ComponentMesh, _cmpMaterial: ComponentMaterial, _cmpCamera: ComponentCamera): void {
       let mesh: Mesh = _cmpMesh.mesh;
-      let shader: typeof Shader = cmpMaterial.material.getShader();
-      let coat: Coat = cmpMaterial.material.coat;
+      let shader: typeof Shader = _cmpMaterial.material.getShader();
+      let coat: Coat = _cmpMaterial.material.coat;
       shader.useProgram();
 
       //TODO: getting translationCamera is similiar to what happens in _cmpCamera.ViewProjectionMatrix. Further clean up is needed
@@ -22,11 +21,12 @@ namespace FudgeCore {
       } catch (_error) {
         // no container node or no world transformation found -> continue with pivot only
       }
-      let cameraViewProjectionMatrix: Matrix4x4 = _cmpCamera.mtxWorldToView;
+      let mtxWorldToView: Matrix4x4 = _cmpCamera.mtxWorldToView;
 
       let effect: ParticleEffect = _cmpParticleSystem.particleEffect;
       let variables: ParticleVariables = _cmpParticleSystem.variables;
       variables[PARTICLE_VARIBALE_NAMES.TIME] = Time.game.get() / 1000;
+      // TODO: unify transform and other components
       let dataTransformLocal: ParticleEffectData = effect.transformLocal;
       let dataTransformWorld: ParticleEffectData = effect.transformWorld;
       let dataComponentMutations: ParticleEffectData = effect.componentMutations;
@@ -56,16 +56,16 @@ namespace FudgeCore {
         _cmpParticleSystem.evaluateStorage(storageParticle);
 
         // apply transformations
-        let finalTransform: Matrix4x4 = Matrix4x4.IDENTITY();
-        finalTransform.multiply(_nodeTransform);
-        this.applyTransform(finalTransform, dataTransformLocal, cachedMutators, variables);
+        let mtxFinal: Matrix4x4 = Matrix4x4.IDENTITY();
+        mtxFinal.multiply(_nodeTransform);
+        this.applyTransform(mtxFinal, dataTransformLocal, cachedMutators, variables);
         if (_cmpMesh.showToCamera)
-          finalTransform.showTo(translationCamera);
-        finalTransform.multiply(_cmpMesh.mtxPivot);
+          mtxFinal.showTo(translationCamera);
+        mtxFinal.multiply(_cmpMesh.mtxPivot);
         if (dataTransformWorld) {
           let transformWorld: Matrix4x4 = Matrix4x4.IDENTITY();
           this.applyTransform(transformWorld, dataTransformWorld, cachedMutators, variables);
-          finalTransform.multiply(transformWorld, true);
+          mtxFinal.multiply(transformWorld, true);
           Recycler.store(transformWorld);
         }
 
@@ -75,13 +75,13 @@ namespace FudgeCore {
         }
 
         // render
-        let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(cameraViewProjectionMatrix, finalTransform);
-        let renderBuffers: RenderBuffers =  mesh.useRenderBuffers(shader, finalTransform, projection);
-        coat.useRenderData(shader, cmpMaterial);
+        let mtxProjection: Matrix4x4 = Matrix4x4.MULTIPLICATION(mtxWorldToView, mtxFinal);
+        let renderBuffers: RenderBuffers =  mesh.useRenderBuffers(shader, mtxFinal, mtxProjection);
+        coat.useRenderData(shader, _cmpMaterial);
         this.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
 
-        Recycler.store(projection);
-        Recycler.store(finalTransform);
+        Recycler.store(mtxProjection);
+        Recycler.store(mtxFinal);
       }
 
       // restore saved component state

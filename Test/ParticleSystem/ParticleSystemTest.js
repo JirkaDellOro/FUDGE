@@ -20,9 +20,9 @@ var ParticleSystemTest;
     let cmpParticleSystem1;
     let cmpParticleSystem2;
     async function hndLoad(_event) {
-        f.RenderManager.initialize(true, false);
-        f.RenderManager.setDepthTest(false);
-        f.RenderManager.setBlendMode(f.BLEND.PARTICLE);
+        f.Render.initialize(true, false);
+        f.Render.setDepthTest(false);
+        f.Render.setBlendMode(f.BLEND.PARTICLE);
         inputParticleNum1 = document.getElementById("particleNum1");
         inputParticleNum2 = document.getElementById("particleNum2");
         inputEffectName = document.getElementById("effectName");
@@ -34,14 +34,14 @@ var ParticleSystemTest;
         canvas.addEventListener("mouseup", () => document.exitPointerLock());
         // setup orbiting camera
         camera = new fAid.CameraOrbit(new f.ComponentCamera(), 4);
-        camera.component.backgroundColor = f.Color.CSS("black");
+        camera.cmpCamera.clrBackground = f.Color.CSS("black");
         root.addChild(camera);
         // setup coordinate axes
         let coordinateSystem = new fAid.NodeCoordinateSystem("Coordinates", f.Matrix4x4.SCALING(new f.Vector3(1, 1, 1)));
         root.addChild(coordinateSystem);
         // setup viewport
         viewport = new f.Viewport();
-        viewport.initialize("Viewport", root, camera.component, canvas);
+        viewport.initialize("Viewport", root, camera.cmpCamera, canvas);
         f.Debug.log("Viewport", viewport);
         // setup event handling
         viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
@@ -49,20 +49,18 @@ var ParticleSystemTest;
         viewport.addEventListener("\u0192pointermove" /* MOVE */, hndPointerMove);
         viewport.addEventListener("\u0192wheel" /* WHEEL */, hndWheelMove);
         // setup particles
-        let img = document.querySelector("img");
-        let txtImage = new f.TextureImage();
-        txtImage.image = img;
+        let txtImage = new f.TextureImage("particle.png");
         let coat = new f.CoatTextured();
         coat.texture = txtImage;
-        let material = new f.Material("Material", f.ShaderTexture, coat);
+        let material = new f.Material("Material", f.ShaderLitTextured, coat);
         // let material: ƒ.Material = new ƒ.Material("Material", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
         let mesh = new f.MeshQuad();
         particlesSystem1 = new fAid.Node("Particles", f.Matrix4x4.TRANSLATION(new f.Vector3(-1, 0, 0)), material, mesh);
         particlesSystem2 = new fAid.Node("Particles", f.Matrix4x4.TRANSLATION(new f.Vector3(1, 0, 0)), material, mesh);
-        particlesSystem1.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.2, 0.2, 0.2));
+        particlesSystem1.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.2, 0.2, 0.2));
         particlesSystem1.getComponent(f.ComponentMesh).showToCamera = true;
         particlesSystem1.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(1, 0.5, 0.2);
-        particlesSystem2.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.2, 0.2, 0.2));
+        particlesSystem2.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.2, 0.2, 0.2));
         // particlesSystem2.getComponent(f.ComponentMesh).showToCamera = true;
         particlesSystem2.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(0.5, 1, 0.2);
         let particleEffect = new f.ParticleEffect();

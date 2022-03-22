@@ -8,7 +8,7 @@ namespace FudgeCore {
   }
 
   /**
-   * Attaches a [[PaticleEffect]] to the node.
+   * Attaches a {@link ParticleEffect} to the node.
    * @author Jonas Plotzky, HFU, 2020
    */
   export class ComponentParticleSystem extends Component {

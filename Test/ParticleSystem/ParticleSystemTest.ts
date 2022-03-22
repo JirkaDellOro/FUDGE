@@ -23,9 +23,9 @@ namespace ParticleSystemTest {
   let cmpParticleSystem2: f.ComponentParticleSystem;
 
   async function hndLoad(_event: Event): Promise<void> {
-    f.RenderManager.initialize(true, false);
-    f.RenderManager.setDepthTest(false);
-    f.RenderManager.setBlendMode(f.BLEND.PARTICLE);
+    f.Render.initialize(true, false);
+    f.Render.setDepthTest(false);
+    f.Render.setBlendMode(f.BLEND.PARTICLE);
 
     inputParticleNum1 = <HTMLInputElement>document.getElementById("particleNum1");
     inputParticleNum2 = <HTMLInputElement>document.getElementById("particleNum2");
@@ -40,7 +40,7 @@ namespace ParticleSystemTest {
 
     // setup orbiting camera
     camera = new fAid.CameraOrbit(new f.ComponentCamera(), 4);
-    camera.component.backgroundColor = f.Color.CSS("black");
+    camera.cmpCamera.clrBackground = f.Color.CSS("black");
     root.addChild(camera);
 
     // setup coordinate axes
@@ -49,7 +49,7 @@ namespace ParticleSystemTest {
 
     // setup viewport
     viewport = new f.Viewport();
-    viewport.initialize("Viewport", root, camera.component, canvas);
+    viewport.initialize("Viewport", root, camera.cmpCamera, canvas);
     f.Debug.log("Viewport", viewport);
 
     // setup event handling
@@ -59,23 +59,21 @@ namespace ParticleSystemTest {
     viewport.addEventListener(f.EVENT_WHEEL.WHEEL, hndWheelMove);
 
     // setup particles
-    let img: HTMLImageElement = document.querySelector("img");
-    let txtImage: f.TextureImage = new f.TextureImage();
-    txtImage.image = img;
+    let txtImage: f.TextureImage = new f.TextureImage("particle.png");
     let coat: f.CoatTextured = new f.CoatTextured();
     coat.texture = txtImage;
 
-    let material: f.Material = new f.Material("Material", f.ShaderTexture, coat);
+    let material: f.Material = new f.Material("Material", f.ShaderLitTextured, coat);
     // let material: ƒ.Material = new ƒ.Material("Material", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
     let mesh: f.Mesh = new f.MeshQuad();
     particlesSystem1 = new fAid.Node("Particles", f.Matrix4x4.TRANSLATION(new f.Vector3(-1, 0, 0)), material, mesh);
     particlesSystem2 = new fAid.Node("Particles", f.Matrix4x4.TRANSLATION(new f.Vector3(1, 0, 0)), material, mesh);
 
-    particlesSystem1.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.2, 0.2, 0.2));
+    particlesSystem1.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.2, 0.2, 0.2));
     particlesSystem1.getComponent(f.ComponentMesh).showToCamera = true;
     particlesSystem1.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(1, 0.5, 0.2);
 
-    particlesSystem2.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.2, 0.2, 0.2));
+    particlesSystem2.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.2, 0.2, 0.2));
     // particlesSystem2.getComponent(f.ComponentMesh).showToCamera = true;
     particlesSystem2.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(0.5, 1, 0.2);
 

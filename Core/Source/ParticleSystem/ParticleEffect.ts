@@ -77,7 +77,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates entries in [[definedVariables]] for each defined closure in _data. Predefined variables (time, index...) and previously defined ones (in json) can not be overwritten.
+     * Creates entries in {@link definedVariables} for each defined closure in _data. Predefined variables (time, index...) and previously defined ones (in json) can not be overwritten.
      * @param _data The paticle effect data to parse.
      */
     private preParseStorage(_data: ParticleEffectData): void {
