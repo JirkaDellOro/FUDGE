@@ -55,7 +55,7 @@ namespace FudgeCore {
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.#idSource = _serialization.idSource;
-      if (!_serialization.deserializeFromSource) 
+      if (!_serialization.deserializeFromSource)
         await super.deserialize(_serialization); // instance is deserialized from individual data
       let graph: Graph = this.get();
 
@@ -136,8 +136,11 @@ namespace FudgeCore {
       // console.log("Reflect mutation", _source, _destination);
       let path: Node[] = Reflect.get(_event, "path");
       let index: number = path.indexOf(_source);
-      for (let i: number = index - 1; i >= 0; i--)
-        _destination = _destination.getChildrenByName(path[i].name)[0]; // TODO: respect index for non-singleton components...
+      for (let i: number = index - 1; i >= 0; i--) {
+        let childIndex: number = path[i].getParent().findChild(path[i]); // get the index of the childnode in the original path
+        _destination = _destination.getChild(childIndex); // get the corresponding child in this path
+        // TODO: respect index for non-singleton components...
+      }
       let cmpMutate: Component = _destination.getComponent(_event.detail.component.constructor);
       if (cmpMutate)
         await cmpMutate.mutate(_event.detail.mutator);

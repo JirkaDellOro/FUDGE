@@ -403,10 +403,11 @@ namespace FudgeCore {
         }
       }
 
-      for (let serializedChild of _serialization.children) {
-        let deserializedChild: Node = <Node>await Serializer.deserialize(serializedChild);
-        this.appendChild(deserializedChild);
-      }
+      if (_serialization.children)
+        for (let serializedChild of _serialization.children) {
+          let deserializedChild: Node = <Node>await Serializer.deserialize(serializedChild);
+          this.appendChild(deserializedChild);
+        }
 
       this.dispatchEvent(new Event(EVENT.NODE_DESERIALIZED));
       for (let component of this.getAllComponents())

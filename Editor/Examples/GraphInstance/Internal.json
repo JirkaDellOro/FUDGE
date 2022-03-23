@@ -6,9 +6,50 @@
       "components": {},
       "children": [
         {
-          "ƒ.GraphInstance": {
-            "deserializeFromSource": true,
-            "idSource": "Graph|2022-03-21T09:59:57.684Z|37738"
+          "ƒ.Node": {
+            "name": "Larger_0",
+            "active": true,
+            "components": {},
+            "children": [
+              {
+                "ƒ.GraphInstance": {
+                  "deserializeFromSource": true,
+                  "name": "Larger",
+                  "idSource": "Graph|2022-03-23T07:10:04.239Z|10820"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Larger_1",
+            "active": true,
+            "components": {
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 2, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": [
+              {
+                "ƒ.GraphInstance": {
+                  "deserializeFromSource": true,
+                  "name": "Larger",
+                  "idSource": "Graph|2022-03-23T07:10:04.239Z|10820"
+                }
+              }
+            ]
           }
         }
       ],
@@ -37,7 +78,7 @@
   },
   "Graph|2022-03-21T09:59:57.684Z|37738": {
     "ƒ.Graph": {
-      "name": "Graph",
+      "name": "Smallest",
       "active": true,
       "components": {
         "ComponentMesh": [
@@ -59,7 +100,7 @@
           {
             "ƒ.ComponentMaterial": {
               "sortForAlpha": false,
-              "clrPrimary": "[0.9764705882352941, 0.00392156862745098, 0.5215686274509804, 1]",
+              "clrPrimary": "[0.7568627450980392, 0.9098039215686274, 0.6313725490196078, 1]",
               "clrSecondary": "[1, 1, 1, 1]",
               "pivot": {
                 "translation": "[0, 0]",
@@ -76,6 +117,64 @@
       },
       "children": [],
       "idResource": "Graph|2022-03-21T09:59:57.684Z|37738",
+      "type": "Graph"
+    }
+  },
+  "Graph|2022-03-23T07:10:04.239Z|10820": {
+    "ƒ.Graph": {
+      "name": "Larger",
+      "active": true,
+      "components": {},
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "Smallest_0",
+            "active": true,
+            "components": {},
+            "children": [
+              {
+                "ƒ.GraphInstance": {
+                  "deserializeFromSource": true,
+                  "name": "Smallest",
+                  "idSource": "Graph|2022-03-21T09:59:57.684Z|37738"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Smallest_1",
+            "active": true,
+            "components": {
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[2, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": [
+              {
+                "ƒ.GraphInstance": {
+                  "deserializeFromSource": true,
+                  "name": "Smallest",
+                  "idSource": "Graph|2022-03-21T09:59:57.684Z|37738"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "idResource": "Graph|2022-03-23T07:10:04.239Z|10820",
       "type": "Graph"
     }
   }
