@@ -8,6 +8,11 @@ namespace FudgeCore {
     public idResource: string = undefined;
     public type: string = "Graph";
 
+    constructor(_name: string = "Graph") {
+      super(_name);
+      this.addEventListener(EVENT.MUTATE, this.hndMutate);
+    }
+
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
       serialization.idResource = this.idResource;
@@ -20,6 +25,12 @@ namespace FudgeCore {
       Project.register(this, _serialization.idResource);
       await Project.resyncGraphInstances(this);
       return this;
+    }
+
+    private hndMutate = async (_event: CustomEvent) => {
+      console.log("Graph mutates", this.name);
+      this.dispatchEvent(new CustomEvent(EVENT.MUTATE_GRAPH, { detail: _event.detail }));
+      this.dispatchEvent(new Event(EVENT.MUTATE_GRAPH_DONE));
     }
   }
 }

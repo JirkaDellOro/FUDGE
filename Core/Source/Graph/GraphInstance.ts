@@ -77,7 +77,8 @@ namespace FudgeCore {
         await this.set(graph);
 
       // graph.addEventListener(EVENT.MUTATE, (_event: CustomEvent) => this.hndMutation, true);
-      graph.addEventListener(EVENT.MUTATE, this.hndMutationGraph, true);
+      graph.addEventListener(EVENT.MUTATE_GRAPH, this.hndMutationGraph);
+      // graph.addEventListener(EVENT.MUTATE_GRAPH_DONE, () => { this.#sync = true; });
     }
 
     /**
@@ -106,17 +107,15 @@ namespace FudgeCore {
      * Source graph mutated, reflect mutation in this instance
      */
     private hndMutationGraph = async (_event: CustomEvent): Promise<void> => {
-      if (!this.#sync) {
-        this.#sync = true;
+      if (!this.#sync)
         return;
-      }
 
       if (this.isFiltered())
         return;
 
       this.#sync = false; // do not sync again, since mutation is already a synchronization
+      console.log("Reflect Graph-Mutation to Instance", (<Graph>_event.currentTarget).name, this.getPath().map(_node => _node.name));
       await this.reflectMutation(_event, <Graph>_event.currentTarget, this);
-      this.#sync = true;
     }
 
     /**
@@ -129,6 +128,8 @@ namespace FudgeCore {
       if (this.isFiltered())
         return;
 
+      this.#sync = false; // do not sync again, since mutation is already a synchronization
+      console.log("Reflect Instance-Mutation to Graph", this.getPath().map(_node => _node.name), this.get().name);
       await this.reflectMutation(_event, this, this.get());
     }
 
