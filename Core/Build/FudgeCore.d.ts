@@ -2617,6 +2617,7 @@ declare namespace FudgeCore {
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
      */
     class Graph extends Node implements SerializableResource {
+        #private;
         idResource: string;
         type: string;
         constructor(_name?: string);
@@ -2626,12 +2627,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * An instance of a {@link Graph}.
-     * This node keeps a reference to its resource an can thus optimize serialization
-     * @author Jirka Dell'Oro-Friedl, HFU, 2019
-     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
-     */
     class GraphInstance extends Node {
         #private;
         /**

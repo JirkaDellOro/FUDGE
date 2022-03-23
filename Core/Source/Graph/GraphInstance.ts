@@ -5,11 +5,16 @@ namespace FudgeCore {
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
    */
+
+  enum SYNC {
+    READY, GRAPH_SYNCED, GRAPH_DONE, INSTANCE
+  }
+
   export class GraphInstance extends Node {
     /** id of the resource that instance was created from */
     // TODO: examine, if this should be a direct reference to the Graph, instead of the id
     #idSource: string = undefined;
-    #sync: boolean = true;
+    #sync: SYNC = SYNC.READY;
     #deserializeFromSource: boolean = true;
 
     /**
@@ -78,7 +83,7 @@ namespace FudgeCore {
 
       // graph.addEventListener(EVENT.MUTATE, (_event: CustomEvent) => this.hndMutation, true);
       graph.addEventListener(EVENT.MUTATE_GRAPH, this.hndMutationGraph);
-      // graph.addEventListener(EVENT.MUTATE_GRAPH_DONE, () => { this.#sync = true; });
+      graph.addEventListener(EVENT.MUTATE_GRAPH_DONE, () => { console.log("Done", this.name); /* this.#sync = true; */ });
     }
 
     /**
@@ -107,14 +112,17 @@ namespace FudgeCore {
      * Source graph mutated, reflect mutation in this instance
      */
     private hndMutationGraph = async (_event: CustomEvent): Promise<void> => {
-      if (!this.#sync)
+      console.log("Reflect Graph-Mutation to Instance", SYNC[this.#sync], (<Graph>_event.currentTarget).name, this.getPath().map(_node => _node.name));
+      if (this.#sync != SYNC.READY) {
+        console.log("Sync aborted, switch to ready");
+        this.#sync = SYNC.READY;
         return;
+      }
 
       if (this.isFiltered())
         return;
 
-      this.#sync = false; // do not sync again, since mutation is already a synchronization
-      console.log("Reflect Graph-Mutation to Instance", (<Graph>_event.currentTarget).name, this.getPath().map(_node => _node.name));
+      this.#sync = SYNC.GRAPH_SYNCED; // do not sync again, since mutation is already a synchronization
       await this.reflectMutation(_event, <Graph>_event.currentTarget, this);
     }
 
@@ -122,20 +130,33 @@ namespace FudgeCore {
      * This instance mutated, reflect mutation in source graph
      */
     private hndMutationInstance = async (_event: CustomEvent): Promise<void> => {
-      if (!this.#sync)
+      console.log("Reflect Instance-Mutation to Graph", SYNC[this.#sync], this.getPath().map(_node => _node.name), this.get().name);
+      if (this.#sync != SYNC.READY) {
+        console.log("Sync aborted, switch to ready");
+        this.#sync = SYNC.READY;
         return;
+      }
+
+      if (_event.target instanceof GraphInstance && _event.target != this) {
+        console.log("Sync aborted, target already synced");
+        return;
+      }
 
       if (this.isFiltered())
         return;
 
-      this.#sync = false; // do not sync again, since mutation is already a synchronization
-      console.log("Reflect Instance-Mutation to Graph", this.getPath().map(_node => _node.name), this.get().name);
+      this.#sync = SYNC.INSTANCE; // do not sync again, since mutation is already a synchronization
       await this.reflectMutation(_event, this, this.get());
     }
 
     private async reflectMutation(_event: CustomEvent, _source: Node, _destination: Node): Promise<void> {
       // console.log("Reflect mutation", _source, _destination);
       let path: Node[] = Reflect.get(_event, "path");
+
+      for (let node of path)
+        if (node instanceof GraphInstance && node != this)
+          return;
+
       let index: number = path.indexOf(_source);
       for (let i: number = index - 1; i >= 0; i--) {
         let childIndex: number = path[i].getParent().findChild(path[i]); // get the index of the childnode in the original path
