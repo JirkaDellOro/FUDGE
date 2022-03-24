@@ -2617,7 +2617,6 @@ declare namespace FudgeCore {
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
      */
     class Graph extends Node implements SerializableResource {
-        #private;
         idResource: string;
         type: string;
         constructor(_name?: string);

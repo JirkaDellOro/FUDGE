@@ -65,11 +65,11 @@ namespace FudgeCore {
       let graph: Graph = this.get();
 
       if (graph)
-        if (_serialization.deserializeFromSource) // no components-> assume synchronized GraphInstance
-          await this.set(graph); // recreate complete instance from source graph
-        else {
+        // if (_serialization.deserializeFromSource) // no components-> assume synchronized GraphInstance
+        //   await this.set(graph); // recreate complete instance from source graph
+        // else {
           await this.connectToGraph(); // otherwise just connect
-        }
+        // }
       else {
         Project.registerGraphInstanceForResync(this);
       }
@@ -154,8 +154,12 @@ namespace FudgeCore {
       let path: Node[] = Reflect.get(_event, "path");
 
       for (let node of path)
-        if (node instanceof GraphInstance && node != this)
-          return;
+        if (node instanceof GraphInstance)
+          if (node == this) break;
+          else {
+            console.log("Sync aborted, target already synced");
+            return;
+          }
 
       let index: number = path.indexOf(_source);
       for (let i: number = index - 1; i >= 0; i--) {
