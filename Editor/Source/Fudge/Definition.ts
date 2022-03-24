@@ -49,7 +49,8 @@ namespace Fudge {
   export enum PANEL {
     GRAPH = "PanelGraph",
     PROJECT = "PanelProject",
-    HELP = "PanelHelp"
+    HELP = "PanelHelp",
+    ANIMATION = "PanelAnimation"
   }
 
 

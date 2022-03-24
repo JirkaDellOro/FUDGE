@@ -60,22 +60,22 @@ namespace Fudge {
       seq2.addKey(new FudgeCore.AnimationKey(1500, 0, -0.02));
       this.animation = new FudgeCore.Animation("TestAnimation", {
         components: {
-          ComponentTransform: [
-            {
-              "ƒ.ComponentTransform": {
-                position: {
-                  x: new FudgeCore.AnimationSequence(),
-                  y: seq2,
-                  z: new FudgeCore.AnimationSequence()
-                },
-                rotation: {
-                  x: new FudgeCore.AnimationSequence(),
-                  y: seq1,
-                  z: new FudgeCore.AnimationSequence()
-                }
-              }
-            }
-          ]
+          // ComponentTransform: [
+          //   {
+          //     "ƒ.ComponentTransform": {
+          //       position: {
+          //         x: new FudgeCore.AnimationSequence(),
+          //         y: seq2,
+          //         z: new FudgeCore.AnimationSequence()
+          //       },
+          //       rotation: {
+          //         x: new FudgeCore.AnimationSequence(),
+          //         y: seq1,
+          //         z: new FudgeCore.AnimationSequence()
+          //       }
+          //     }
+          //   }
+          // ]
         }
       },                                       60);
       this.animation.labels["One"] = 200;
@@ -257,6 +257,16 @@ namespace Fudge {
       buttons[6].id = "add-label";
       buttons[7].id = "add-event";
       buttons[8].id = "add-key";
+
+      buttons[0].innerText = "start";
+      buttons[1].innerText = "back";
+      buttons[2].innerText = "play";
+      buttons[3].innerText = "pause";
+      buttons[4].innerText = "forward";
+      buttons[5].innerText = "end";
+      buttons[6].innerText = "add-label";
+      buttons[7].innerText = "add-event";
+      buttons[8].innerText = "add-key";
 
       for (let b of buttons) {
         _tb.appendChild(b);
