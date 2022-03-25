@@ -51,6 +51,7 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT_NODE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
 
@@ -94,6 +95,7 @@ namespace Fudge {
             if (this.graph != newGraph)
               _event = new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: newGraph });
           }
+          break;
       }
 
       this.broadcastEvent(_event);

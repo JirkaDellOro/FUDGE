@@ -54,7 +54,8 @@ declare namespace Fudge {
         REFRESH = "refresh",
         DESTROY = "destroy",
         CLEAR_PROJECT = "clearProject",
-        TRANSFORM = "transform"
+        TRANSFORM = "transform",
+        SELECT_NODE = "selectNode"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
