@@ -38,7 +38,8 @@ namespace FudgeCore {
           
       console.log("Graph mutates", this.name);
       // this.#syncing = true;
-      this.dispatchEvent(new CustomEvent(EVENT.MUTATE_GRAPH, { detail: _event.detail }));
+      _event.detail.path = Reflect.get(_event, "path"); // save path to target in detail
+      this.dispatchEvent(new CustomEvent(EVENT.MUTATE_GRAPH, { detail: _event.detail}));
       this.dispatchEvent(new Event(EVENT.MUTATE_GRAPH_DONE));
       // this.#syncing = false;
     }

@@ -123,7 +123,7 @@ namespace FudgeCore {
         return;
 
       this.#sync = SYNC.GRAPH_SYNCED; // do not sync again, since mutation is already a synchronization
-      await this.reflectMutation(_event, <Graph>_event.currentTarget, this);
+      await this.reflectMutation(_event, <Graph>_event.currentTarget, this, _event.detail.path);
     }
 
     /**
@@ -146,14 +146,12 @@ namespace FudgeCore {
         return;
 
       this.#sync = SYNC.INSTANCE; // do not sync again, since mutation is already a synchronization
-      await this.reflectMutation(_event, this, this.get());
+      await this.reflectMutation(_event, this, this.get(), Reflect.get(_event, "path"));
     }
 
-    private async reflectMutation(_event: CustomEvent, _source: Node, _destination: Node): Promise<void> {
+    private async reflectMutation(_event: CustomEvent, _source: Node, _destination: Node, _path: Node[]): Promise<void> {
       // console.log("Reflect mutation", _source, _destination);
-      let path: Node[] = Reflect.get(_event, "path");
-
-      for (let node of path)
+      for (let node of _path)
         if (node instanceof GraphInstance)
           if (node == this) break;
           else {
@@ -161,9 +159,9 @@ namespace FudgeCore {
             return;
           }
 
-      let index: number = path.indexOf(_source);
+      let index: number = _path.indexOf(_source);
       for (let i: number = index - 1; i >= 0; i--) {
-        let childIndex: number = path[i].getParent().findChild(path[i]); // get the index of the childnode in the original path
+        let childIndex: number = _path[i].getParent().findChild(_path[i]); // get the index of the childnode in the original path
         _destination = _destination.getChild(childIndex); // get the corresponding child in this path
         // TODO: respect index for non-singleton components...
       }
