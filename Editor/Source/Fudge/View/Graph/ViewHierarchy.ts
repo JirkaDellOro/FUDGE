@@ -20,6 +20,7 @@ namespace Fudge {
       // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.setSelectedNode);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT_NODE, this.hndEvent);
     }
 
     public setGraph(_graph: ƒ.Graph): void {
@@ -59,7 +60,6 @@ namespace Fudge {
       let path: ƒ.Node[] = _node.getPath();
       path = path.splice(path.indexOf(this.graph));
       this.tree.show(path);
-      this.tree.displaySelection([_node]);
     }
 
     protected hndDragOver(_event: DragEvent, _viewSource: View): void {
@@ -148,6 +148,8 @@ namespace Fudge {
         case ƒUi.EVENT.DELETE:
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
           break;
+        case EVENT_EDITOR.SELECT_NODE:
+          this.tree.displaySelection([_event.detail]);
         case EVENT_EDITOR.FOCUS_NODE:
           this.focusNode(_event.detail);
           break;

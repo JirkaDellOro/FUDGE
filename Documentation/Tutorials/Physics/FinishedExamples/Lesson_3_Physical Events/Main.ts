@@ -19,8 +19,8 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
 
     //Setting Variables
     let force: number = 0.5; //The amount of movement with each keypress
-    let playerDefaultMat: f.Material = new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1)));
-    let playerTriggeredMat: f.Material = new f.Material("CubeTriggered", f.ShaderFlat, new f.CoatColored(new f.Color(0.9, 0.1, 0.1, 1)));
+    let playerDefaultMat: f.Material = new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0, 0, 1, 1)));
+    let playerTriggeredMat: f.Material = new f.Material("CubeTriggered", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.9, 0.1, 0.1, 1)));
 
     //Function to initialize the Fudge Scene with a camera, light, viewport and PHYSCIAL Objects
     function init(_event: Event): void {
@@ -31,7 +31,7 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
 
         //PHYSICS - Step 2: Create some physical Nodes to play with 
         //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
-        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
+        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[0].mtxLocal.scale(new f.Vector3(14, 0.3, 14)); //Scale the body with it's standard ComponentTransform
         bodies[0].mtxLocal.rotateX(4, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
         hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
@@ -47,20 +47,20 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
         //Step 2 - Create bodies - one used as a button when it collides it will an action will happen - one as a trigger, when it's overlapping it will trigger an action
         //The Collision Event is happening on a collision so a normal body can receive it
         //A use case for a collision event is for example when the player is hitting the ground to play a sound
-        bodies[2] = createCompleteNode("Collider_Button", new f.Material("Collider_Button", f.ShaderFlat, new f.CoatColored(new f.Color(0.3, 0.3, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC);
+        bodies[2] = createCompleteNode("Collider_Button", new f.Material("Collider_Button", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.3, 0.3, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC);
         bodies[2].mtxLocal.translate(new f.Vector3(-3, 1, 0));
         hierarchy.appendChild(bodies[2]);
 
         //The Trigger Event is happening when bodies overlap, so we need a special body that does not collide but overlap
         //So it must be flagged as trigger, and normally in games it's invisble, so it has no mesh component or is fully transparent.
         //A use case is something like spawning enemies when a player enters a room.
-        bodies[3] = createCompleteNode("Trigger_Button", new f.Material("Trigger_Button", f.ShaderFlat, new f.CoatColored(new f.Color(0.5, 0.3, 0.2, 0.3))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT);
+        bodies[3] = createCompleteNode("Trigger_Button", new f.Material("Trigger_Button", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.5, 0.3, 0.2, 0.3))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT);
         bodies[3].mtxLocal.translate(new f.Vector3(3, 1, 0));
         bodies[3].getComponent(f.ComponentRigidbody).isTrigger = true;
         hierarchy.appendChild(bodies[3]);
 
         //Trigger when player is falling of the plane
-        bodies[4] = createCompleteNode("Trigger_Reset", new f.Material("Trigger_Reset", f.ShaderFlat, new f.CoatColored(new f.Color(0.5, 0.3, 0.2, 0.3))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT);
+        bodies[4] = createCompleteNode("Trigger_Reset", new f.Material("Trigger_Reset", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.5, 0.3, 0.2, 0.3))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT);
         bodies[4].getComponent(f.ComponentRigidbody).isTrigger = true;
         bodies[4].removeComponent(bodies[4].getComponent(f.ComponentMesh)); //removing the mesh to have invisible trigger - standard practice
         bodies[4].mtxLocal.translate(new f.Vector3(0, -4, 0));

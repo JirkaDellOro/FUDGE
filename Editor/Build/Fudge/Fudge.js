@@ -67,6 +67,7 @@ var Fudge;
         EVENT_EDITOR["DESTROY"] = "destroy";
         EVENT_EDITOR["CLEAR_PROJECT"] = "clearProject";
         EVENT_EDITOR["TRANSFORM"] = "transform";
+        EVENT_EDITOR["SELECT_NODE"] = "selectNode";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
@@ -1621,6 +1622,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT_NODE, this.hndEvent);
             this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
             if (_state["graph"])
@@ -1659,6 +1661,7 @@ var Fudge;
                         if (this.graph != newGraph)
                             _event = new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: newGraph });
                     }
+                    break;
             }
             this.broadcastEvent(_event);
             _event.stopPropagation();
@@ -2737,6 +2740,7 @@ var Fudge;
             // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.setSelectedNode);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT_NODE, this.hndEvent);
         }
         setGraph(_graph) {
             if (!_graph) {
@@ -2769,7 +2773,6 @@ var Fudge;
             let path = _node.getPath();
             path = path.splice(path.indexOf(this.graph));
             this.tree.show(path);
-            this.tree.displaySelection([_node]);
         }
         hndDragOver(_event, _viewSource) {
             if (_viewSource == this) {
@@ -2845,6 +2848,8 @@ var Fudge;
                 case "delete" /* DELETE */:
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     break;
+                case Fudge.EVENT_EDITOR.SELECT_NODE:
+                    this.tree.displaySelection([_event.detail]);
                 case Fudge.EVENT_EDITOR.FOCUS_NODE:
                     this.focusNode(_event.detail);
                     break;
@@ -3021,7 +3026,7 @@ var Fudge;
         };
         hndPick = (_event) => {
             let picked = _event.detail.node;
-            // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: true, detail: picked }));
+            this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SELECT_NODE, { bubbles: true, detail: picked }));
             this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: picked } }));
         };
         // private animate = (_e: Event) => {

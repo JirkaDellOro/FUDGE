@@ -24,8 +24,8 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
     let pushStrength: number = 500; //Sterngth of the raycast push in Force (Newton)
 
     //Materials to switch between to indicate the picked object
-    let standardMaterial: f.Material = new f.Material("StandardMaterial", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1)));
-    let focusMaterial: f.Material = new f.Material("FocusMaterial", f.ShaderFlat, new f.CoatColored(new f.Color(0.5, 0.8, 0.5, 1)));
+    let standardMaterial: f.Material = new f.Material("StandardMaterial", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.75, 0.8, 0.75, 1)));
+    let focusMaterial: f.Material = new f.Material("FocusMaterial", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.5, 0.8, 0.5, 1)));
 
 
     //Function to initialize the Fudge Scene with a camera, light, viewport and PHYSCIAL Objects
@@ -36,17 +36,17 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
         //#region Physics
         //PHYSICS - Basic Plane and Cube
         //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
-        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
+        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[0].mtxLocal.scale(new f.Vector3(14, 0.3, 14)); //Scale the body with it's standard ComponentTransform
         bodies[0].mtxLocal.rotateX(3, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
         hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
         //Backwalls - So cubes are not pushed away easily
-        bodies[1] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
+        bodies[1] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[1].mtxLocal.translate(new f.Vector3(0, -7, -3.5));
         bodies[1].mtxLocal.scale(new f.Vector3(14, 0.3, 7));
         bodies[1].mtxLocal.rotateX(90, true);
         hierarchy.appendChild(bodies[1]);
-        bodies[2] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
+        bodies[2] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[2].mtxLocal.translate(new f.Vector3(3.5, 7, 0));
         bodies[2].mtxLocal.scale(new f.Vector3(7, 0.3, 14));
         bodies[2].mtxLocal.rotateZ(90, true);

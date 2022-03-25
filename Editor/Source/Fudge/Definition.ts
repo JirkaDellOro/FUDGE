@@ -34,6 +34,8 @@ namespace Fudge {
   }
 
 
+
+
   export enum EVENT_EDITOR {
     SET_GRAPH = "setGraph",
     FOCUS_NODE = "focusNode",
@@ -42,7 +44,8 @@ namespace Fudge {
     REFRESH = "refresh",
     DESTROY = "destroy",
     CLEAR_PROJECT = "clearProject",
-    TRANSFORM = "transform"
+    TRANSFORM = "transform",
+    SELECT_NODE = "selectNode"
   }
 
 

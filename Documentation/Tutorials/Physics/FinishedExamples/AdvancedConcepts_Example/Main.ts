@@ -20,9 +20,9 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
     let playerBody: f.ComponentRigidbody;
 
     //Setting Variables
-    let materialConvexShape: f.Material = new f.Material("MorningStarThingy", f.ShaderFlat, new f.CoatColored(new f.Color(0.5, 0.4, 0.35, 1)));
-    let materialPlayer: f.Material = new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 0.8, 0.6, 1)));
-    let environmentMat: f.Material = new f.Material("Environment", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1)));
+    let materialConvexShape: f.Material = new f.Material("MorningStarThingy", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.5, 0.4, 0.35, 1)));
+    let materialPlayer: f.Material = new f.Material("Player", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.7, 0.8, 0.6, 1)));
+    let environmentMat: f.Material = new f.Material("Environment", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1)));
 
     //Physical Player Variables
     let isGrounded: boolean;

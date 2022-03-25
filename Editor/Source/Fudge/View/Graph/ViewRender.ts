@@ -186,7 +186,7 @@ namespace Fudge {
     private hndPick = (_event: CustomEvent): void => {
       let picked: ƒ.Node = _event.detail.node;
 
-      // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: true, detail: picked }));
+      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SELECT_NODE, { bubbles: true, detail: picked }));
       this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: picked } }));
     }
 
