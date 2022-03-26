@@ -43,6 +43,7 @@ var Fudge;
         EVENT_EDITOR["DESTROY"] = "destroy";
         EVENT_EDITOR["CLEAR_PROJECT"] = "clearProject";
         EVENT_EDITOR["TRANSFORM"] = "transform";
+        EVENT_EDITOR["SELECT_NODE"] = "selectNode";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
