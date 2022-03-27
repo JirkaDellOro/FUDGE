@@ -2968,7 +2968,7 @@ var Fudge;
                 ]
             });
             menu.append(item);
-            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
+            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE], checked: false, type: "checkbox", click: _callback });
             menu.append(item);
             return menu;
         }
