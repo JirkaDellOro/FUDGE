@@ -39,10 +39,8 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 9] = "CREATE_GRAPH";
         CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 10] = "REMOVE_COMPONENT";
         CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 11] = "ADD_JOINT";
-        CONTEXTMENU[CONTEXTMENU["TRANSLATE"] = 12] = "TRANSLATE";
-        CONTEXTMENU[CONTEXTMENU["ROTATE"] = 13] = "ROTATE";
-        CONTEXTMENU[CONTEXTMENU["SCALE"] = 14] = "SCALE";
-        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 15] = "DELETE_RESOURCE";
+        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 12] = "DELETE_RESOURCE";
+        CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 13] = "ILLUMINATE";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -2874,6 +2872,7 @@ var Fudge;
         viewport;
         canvas;
         graph;
+        viewGraph;
         constructor(_container, _state) {
             super(_container, _state);
             this.graph = ƒ.Project.resources[_state["graph"]];
@@ -2899,6 +2898,12 @@ var Fudge;
             this.dom.addEventListener("pointerdown", this.hndPointer);
         }
         createUserInterface() {
+            this.viewGraph = new ƒ.Node("ViewGraph");
+            let viewNode = new ƒ.Node("ViewNode");
+            let nodeLight = new ƒ.Node("ViewIllumination");
+            viewNode.addChild(nodeLight);
+            viewNode.addChild(this.viewGraph);
+            ƒAid.addStandardLightComponents(nodeLight);
             let cmpCamera = new ƒ.ComponentCamera();
             // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
             // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
@@ -2909,7 +2914,7 @@ var Fudge;
             document.body.appendChild(this.canvas);
             // this.dom.append(this.canvas);
             this.viewport = new ƒ.Viewport();
-            this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+            this.viewport.initialize("ViewNode_Viewport", viewNode, cmpCamera, this.canvas);
             this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             // this.viewport.draw();
@@ -2936,7 +2941,10 @@ var Fudge;
             this.graph.broadcastEvent(new Event("disconnectJoint" /* DISCONNECT_JOINT */));
             ƒ.Physics.connectJoints();
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-            this.viewport.setBranch(this.graph);
+            // this.viewport.setBranch(this.graph);
+            this.viewGraph.removeAllChildren();
+            this.viewGraph.appendChild(this.graph);
+            this.illuminateGraph();
             this.redraw();
         }
         //#region  ContextMenu
@@ -2960,15 +2968,20 @@ var Fudge;
                 ]
             });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
+            menu.append(item);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
-            ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id] || _item.id}`);
+            ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
             switch (_item.id) {
                 case Fudge.TRANSFORM.TRANSLATE:
                 case Fudge.TRANSFORM.ROTATE:
                 case Fudge.TRANSFORM.SCALE:
                     Fudge.Page.setTransform(_item.id);
+                    break;
+                case Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]:
+                    this.illuminateGraph();
                     break;
                 case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.NONE]:
                 case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.COLLIDERS]:
@@ -3004,6 +3017,13 @@ var Fudge;
             let source = _viewSource.getDragDropSources()[0];
             // this.setGraph(<ƒ.Node>source);
             this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
+        }
+        illuminateGraph() {
+            let nodeLight = this.viewGraph.getParent().getChildrenByName("ViewIllumination")[0];
+            if (nodeLight) {
+                nodeLight.activate(this.contextMenu.getMenuItemById(Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]).checked);
+                this.redraw();
+            }
         }
         hndEvent = (_event) => {
             switch (_event.type) {
@@ -3078,10 +3098,6 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
-    let CONTEXTMENU;
-    (function (CONTEXTMENU) {
-        CONTEXTMENU["ILLUMINATE"] = "Illuminate";
-    })(CONTEXTMENU || (CONTEXTMENU = {}));
     /**
      * Preview a resource
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -3128,14 +3144,14 @@ var Fudge;
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let item;
-            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU.ILLUMINATE, checked: true, type: "checkbox", click: _callback });
+            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
             menu.append(item);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
             ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
             switch (_item.id) {
-                case CONTEXTMENU.ILLUMINATE:
+                case Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]:
                     this.illuminateGraph();
                     break;
             }
@@ -3223,7 +3239,7 @@ var Fudge;
         illuminateGraph() {
             let nodeLight = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
             if (nodeLight) {
-                nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU.ILLUMINATE).checked);
+                nodeLight.activate(this.contextMenu.getMenuItemById(Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]).checked);
                 this.redraw();
             }
         }

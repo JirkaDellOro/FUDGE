@@ -3,9 +3,6 @@ namespace Fudge {
   import ƒUi = FudgeUserInterface;
   import ƒAid = FudgeAid;
 
-  enum CONTEXTMENU {
-    ILLUMINATE = "Illuminate"
-  }
   /**
    * Preview a resource
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
@@ -60,7 +57,7 @@ namespace Fudge {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
 
-      item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU.ILLUMINATE, checked: true, type: "checkbox", click: _callback });
+      item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU[CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
       menu.append(item);
       return menu;
     }
@@ -69,7 +66,7 @@ namespace Fudge {
       ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
 
       switch (_item.id) {
-        case CONTEXTMENU.ILLUMINATE:
+        case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
           this.illuminateGraph();
           break;
       }
@@ -167,7 +164,7 @@ namespace Fudge {
     private illuminateGraph(): void {
       let nodeLight: ƒ.Node = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
       if (nodeLight) {
-        nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU.ILLUMINATE).checked);
+        nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU[CONTEXTMENU.ILLUMINATE]).checked);
         this.redraw();
       }
     }

@@ -1,34 +1,4 @@
 {
-  "MeshExtrusion|2021-04-06T08:45:20.931Z|66737": {
-    "ƒ.MeshExtrusion": {
-      "idResource": "MeshExtrusion|2021-04-06T08:45:20.931Z|66737",
-      "name": "MeshExtrusion",
-      "type": "MeshExtrusion",
-      "shape": {
-        "ƒ.Vector2": [
-          "[-1, -1]",
-          "[1, -1]",
-          "[0, 1]",
-          "[-0.8999999761581421, 1]"
-        ]
-      },
-      "fitTexture": true,
-      "transforms": {
-        "ƒ.Matrix4x4": [
-          {
-            "translation": "[0, 0, 0.5]",
-            "rotation": "[0, 0, -21]",
-            "scaling": "[1, 0.49999991059303284, 1]"
-          },
-          {
-            "translation": "[0, 0, -0.5]",
-            "rotation": "[0, 0, 0]",
-            "scaling": "[1, 1, 1]"
-          }
-        ]
-      }
-    }
-  },
   "MeshRotation|2021-04-06T08:46:49.731Z|14387": {
     "ƒ.MeshRotation": {
       "idResource": "MeshRotation|2021-04-06T08:46:49.731Z|14387",
@@ -47,8 +17,7 @@
           "[0, -3.3999991416931152]"
         ]
       },
-      "fitTexture": true,
-      "sectors": 4
+      "longitudes": 4
     }
   },
   "Material|2021-04-06T08:51:49.620Z|35129": {
@@ -57,16 +26,18 @@
       "idResource": "Material|2021-04-06T08:51:49.620Z|35129",
       "shader": "ShaderFlat",
       "coat": {
-        "ƒ.CoatColored": {
-          "name": "Coat",
-          "color": "[1, 1, 1, 1]"
+        "ƒ.CoatRemissive": {
+          "color": "[1, 1, 1, 1]",
+          "diffuse": 1,
+          "specular": 1
         }
       }
     }
   },
-  "Graph|2021-04-06T08:51:13.475Z|74846": {
+  "Graph|2022-03-27T16:21:44.893Z|68999": {
     "ƒ.Graph": {
       "name": "Sword",
+      "active": true,
       "components": {
         "ComponentMaterial": [
           {
@@ -113,6 +84,9 @@
                 "ƒ.LightAmbient": {
                   "color": "[0.34901960784313724, 0.34901960784313724, 0.34901960784313724, 1]"
                 }
+              },
+              "Component": {
+                "active": true
               }
             }
           },
@@ -125,15 +99,62 @@
               },
               "light": {
                 "ƒ.LightDirectional": {
-                  "color": "[1, 1, 1, 1]"
+                  "color": "[0.9254901960784314, 0.09411764705882353, 0.09411764705882353, 1]"
                 }
+              },
+              "Component": {
+                "active": true
               }
             }
           }
         ]
       },
       "children": [],
-      "idResource": "Graph|2021-04-06T08:51:13.475Z|74846",
+      "idResource": "Graph|2022-03-27T16:21:44.893Z|68999",
+      "type": "Graph"
+    }
+  },
+  "Graph|2022-03-27T16:22:20.626Z|56686": {
+    "ƒ.Graph": {
+      "name": "SwordDark",
+      "active": true,
+      "components": {
+        "ComponentMesh": [
+          {
+            "ƒ.ComponentMesh": {
+              "idMesh": "MeshRotation|2021-04-06T08:46:49.731Z|14387",
+              "pivot": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1, 0.2999999225139618]"
+              },
+              "Component": {
+                "active": true
+              }
+            }
+          }
+        ],
+        "ComponentMaterial": [
+          {
+            "ƒ.ComponentMaterial": {
+              "sortForAlpha": false,
+              "clrPrimary": "[1, 1, 1, 1]",
+              "clrSecondary": "[1, 1, 1, 1]",
+              "pivot": {
+                "translation": "[0, 0]",
+                "rotation": 0,
+                "scaling": "[1, 1]"
+              },
+              "Component": {
+                "active": true
+              },
+              "idMaterial": "Material|2021-04-06T08:51:49.620Z|35129"
+            }
+          }
+        ]
+      },
+      "children": [],
+      "idResource": "Graph|2022-03-27T16:22:20.626Z|56686",
       "type": "Graph"
     }
   }

@@ -13,10 +13,12 @@ namespace Fudge {
     private viewport: ƒ.Viewport;
     private canvas: HTMLCanvasElement;
     private graph: ƒ.Graph;
+    private viewGraph: ƒ.Node;
 
     constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
       this.graph = <ƒ.Graph>ƒ.Project.resources[_state["graph"]];
+
       this.createUserInterface();
 
       let title: string = `● Drop a graph from "Internal" here.\n`;
@@ -42,6 +44,13 @@ namespace Fudge {
     }
 
     createUserInterface(): void {
+      this.viewGraph = new ƒ.Node("ViewGraph");
+      let viewNode: ƒ.Node = new ƒ.Node("ViewNode");
+      let nodeLight: ƒ.Node = new ƒ.Node("ViewIllumination");
+      viewNode.addChild(nodeLight);
+      viewNode.addChild(this.viewGraph);
+      ƒAid.addStandardLightComponents(nodeLight);
+
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
       // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
       // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
@@ -53,7 +62,7 @@ namespace Fudge {
       // this.dom.append(this.canvas);
 
       this.viewport = new ƒ.Viewport();
-      this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+      this.viewport.initialize("ViewNode_Viewport", viewNode, cmpCamera, this.canvas);
       this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       // this.viewport.draw();
@@ -83,9 +92,13 @@ namespace Fudge {
       this.graph.broadcastEvent(new Event(ƒ.EVENT.DISCONNECT_JOINT));
       ƒ.Physics.connectJoints();
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-      this.viewport.setBranch(this.graph);
+      // this.viewport.setBranch(this.graph);
+      this.viewGraph.removeAllChildren();
+      this.viewGraph.appendChild(this.graph);
+      this.illuminateGraph();
       this.redraw();
     }
+    
 
     //#region  ContextMenu
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
@@ -109,17 +122,24 @@ namespace Fudge {
         ]
       });
       menu.append(item);
+
+      item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU[CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
+      menu.append(item);
+
       return menu;
     }
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id] || _item.id}`);
+      ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
 
       switch (_item.id) {
         case TRANSFORM.TRANSLATE:
         case TRANSFORM.ROTATE:
         case TRANSFORM.SCALE:
           Page.setTransform(_item.id);
+          break;
+        case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
+          this.illuminateGraph();
           break;
         case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.NONE]:
         case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.COLLIDERS]:
@@ -161,6 +181,14 @@ namespace Fudge {
       let source: Object = _viewSource.getDragDropSources()[0];
       // this.setGraph(<ƒ.Node>source);
       this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
+    }
+
+    private illuminateGraph(): void {
+      let nodeLight: ƒ.Node = this.viewGraph.getParent().getChildrenByName("ViewIllumination")[0];
+      if (nodeLight) {
+        nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU[CONTEXTMENU.ILLUMINATE]).checked);
+        this.redraw();
+      }
     }
 
     private hndEvent = (_event: CustomEvent): void => {

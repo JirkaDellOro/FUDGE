@@ -13,10 +13,8 @@ namespace Fudge {
     CREATE_GRAPH,
     REMOVE_COMPONENT,
     ADD_JOINT,
-    TRANSLATE,
-    ROTATE,
-    SCALE,
-    DELETE_RESOURCE
+    DELETE_RESOURCE, 
+    ILLUMINATE
   }
 
 
