@@ -29,10 +29,8 @@ declare namespace Fudge {
         CREATE_GRAPH = 9,
         REMOVE_COMPONENT = 10,
         ADD_JOINT = 11,
-        TRANSLATE = 12,
-        ROTATE = 13,
-        SCALE = 14,
-        DELETE_RESOURCE = 15
+        DELETE_RESOURCE = 12,
+        ILLUMINATE = 13
     }
     enum MENU {
         QUIT = "quit",
@@ -552,6 +550,7 @@ declare namespace Fudge {
         private viewport;
         private canvas;
         private graph;
+        private viewGraph;
         constructor(_container: ComponentContainer, _state: JsonValue);
         createUserInterface(): void;
         setGraph(_node: ƒ.Graph): void;
@@ -560,6 +559,7 @@ declare namespace Fudge {
         protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
+        private illuminateGraph;
         private hndEvent;
         private hndPick;
         private hndPointer;
