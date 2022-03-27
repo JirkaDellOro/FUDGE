@@ -3198,7 +3198,10 @@ var Fudge;
                     this.redraw();
                     break;
                 case "Graph":
-                    previewObject.appendChild(this.resource);
+                    ƒ.Project.createGraphInstance(this.resource).then((_instance) => {
+                        previewObject.appendChild(_instance);
+                        this.redraw();
+                    });
                     ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);
                     this.setViewObject(previewObject);
                     previewObject.addEventListener("mutate" /* MUTATE */, (_event) => {
