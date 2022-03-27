@@ -5091,7 +5091,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
+    type MapLightTypeToLightList = Map<TypeOfLight, RecycableArray<ComponentLight>>;
     interface RenderPrepareOptions {
         ignorePhysics?: boolean;
     }
@@ -5103,6 +5103,7 @@ declare namespace FudgeCore {
         static pickBuffer: Int32Array;
         static nodesPhysics: RecycableArray<Node>;
         static componentsPick: RecycableArray<ComponentPick>;
+        static lights: MapLightTypeToLightList;
         private static nodesSimple;
         private static nodesAlpha;
         private static timestampUpdate;

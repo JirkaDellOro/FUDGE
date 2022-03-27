@@ -1,5 +1,5 @@
 namespace FudgeCore {
-  export type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
+  export type MapLightTypeToLightList = Map<TypeOfLight, RecycableArray<ComponentLight>>;
 
   export interface RenderPrepareOptions {
     ignorePhysics?: boolean;
@@ -13,6 +13,7 @@ namespace FudgeCore {
     public static pickBuffer: Int32Array;
     public static nodesPhysics: RecycableArray<Node> = new RecycableArray();
     public static componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
+    public static lights: MapLightTypeToLightList = new Map();
     private static nodesSimple: RecycableArray<Node> = new RecycableArray();
     private static nodesAlpha: RecycableArray<Node> = new RecycableArray();
     private static timestampUpdate: number;
@@ -35,6 +36,7 @@ namespace FudgeCore {
         Render.nodesPhysics.reset();
         Render.componentsPick.reset();
         Render.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
+        Render.lights.forEach(_array => _array.reset());
       }
 
       if (!_branch.isActive)
@@ -74,9 +76,9 @@ namespace FudgeCore {
         if (!cmpLight.isActive)
           continue;
         let type: TypeOfLight = cmpLight.light.getType();
-        let lightsOfType: ComponentLight[] = _lights.get(type);
+        let lightsOfType: RecycableArray<ComponentLight> = _lights.get(type);
         if (!lightsOfType) {
-          lightsOfType = [];
+          lightsOfType = new RecycableArray<ComponentLight>();
           _lights.set(type, lightsOfType);
         }
         lightsOfType.push(cmpLight);

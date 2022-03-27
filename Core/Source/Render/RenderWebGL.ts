@@ -280,7 +280,7 @@ namespace FudgeCore {
       let ambient: WebGLUniformLocation = uni["u_ambient.vctColor"];
       if (ambient) {
         RenderWebGL.crc3.uniform4fv(ambient, [0, 0, 0, 0]);
-        let cmpLights: ComponentLight[] = _lights.get(LightAmbient);
+        let cmpLights: RecycableArray<ComponentLight> = _lights.get(LightAmbient);
         if (cmpLights) {
           // TODO: add up ambient lights to a single color
           let result: Color = new Color(0, 0, 0, 1);
@@ -294,18 +294,20 @@ namespace FudgeCore {
       let nDirectional: WebGLUniformLocation = uni["u_nLightsDirectional"];
       if (nDirectional) {
         RenderWebGL.crc3.uniform1ui(nDirectional, 0);
-        let cmpLights: ComponentLight[] = _lights.get(LightDirectional);
+        let cmpLights: RecycableArray<ComponentLight> = _lights.get(LightDirectional);
         if (cmpLights) {
           let n: number = cmpLights.length;
           RenderWebGL.crc3.uniform1ui(nDirectional, n);
-          for (let i: number = 0; i < n; i++) {
-            let cmpLight: ComponentLight = cmpLights[i];
+          let i: number = 0;
+          for (let cmpLight of cmpLights) {
+            // let cmpLight: ComponentLight = cmpLights[i];
             RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].vctColor`], cmpLight.light.color.getArray());
             let direction: Vector3 = Vector3.Z();
             direction.transform(cmpLight.mtxPivot, false);
             direction.transform(cmpLight.node.mtxWorld, false);
             direction.normalize();
             RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].vctDirection`], direction.get());
+            i++;
           }
         }
       }
