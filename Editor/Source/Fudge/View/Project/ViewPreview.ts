@@ -117,7 +117,12 @@ namespace Fudge {
           this.redraw();
           break;
         case "Graph":
-          previewObject.appendChild(<ƒ.Graph>this.resource);
+          ƒ.Project.createGraphInstance(<ƒ.Graph>this.resource).then(
+            (_instance: ƒ.GraphInstance) => {
+              previewObject.appendChild(_instance);
+              this.redraw();
+            }
+          );
           ƒ.Physics.activeInstance = Page.getPhysics(<ƒ.Graph>this.resource);
           this.setViewObject(previewObject);
           previewObject.addEventListener(ƒ.EVENT.MUTATE, (_event: Event) => {
