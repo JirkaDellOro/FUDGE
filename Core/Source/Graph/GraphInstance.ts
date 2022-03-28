@@ -83,7 +83,7 @@ namespace FudgeCore {
 
       // graph.addEventListener(EVENT.MUTATE, (_event: CustomEvent) => this.hndMutation, true);
       graph.addEventListener(EVENT.MUTATE_GRAPH, this.hndMutationGraph);
-      graph.addEventListener(EVENT.MUTATE_GRAPH_DONE, () => { console.log("Done", this.name); /* this.#sync = true; */ });
+      // graph.addEventListener(EVENT.MUTATE_GRAPH_DONE, () => { console.log("Done", this.name); /* this.#sync = true; */ });
     }
 
     /**
@@ -112,9 +112,9 @@ namespace FudgeCore {
      * Source graph mutated, reflect mutation in this instance
      */
     private hndMutationGraph = async (_event: CustomEvent): Promise<void> => {
-      console.log("Reflect Graph-Mutation to Instance", SYNC[this.#sync], (<Graph>_event.currentTarget).name, this.getPath().map(_node => _node.name));
+      // console.log("Reflect Graph-Mutation to Instance", SYNC[this.#sync], (<Graph>_event.currentTarget).name, this.getPath().map(_node => _node.name));
       if (this.#sync != SYNC.READY) {
-        console.log("Sync aborted, switch to ready");
+        // console.log("Sync aborted, switch to ready");
         this.#sync = SYNC.READY;
         return;
       }
@@ -130,15 +130,15 @@ namespace FudgeCore {
      * This instance mutated, reflect mutation in source graph
      */
     private hndMutationInstance = async (_event: CustomEvent): Promise<void> => {
-      console.log("Reflect Instance-Mutation to Graph", SYNC[this.#sync], this.getPath().map(_node => _node.name), this.get().name);
+      // console.log("Reflect Instance-Mutation to Graph", SYNC[this.#sync], this.getPath().map(_node => _node.name), this.get().name);
       if (this.#sync != SYNC.READY) {
-        console.log("Sync aborted, switch to ready");
+        // console.log("Sync aborted, switch to ready");
         this.#sync = SYNC.READY;
         return;
       }
 
       if (_event.target instanceof GraphInstance && _event.target != this) {
-        console.log("Sync aborted, target already synced");
+        // console.log("Sync aborted, target already synced");
         return;
       }
 

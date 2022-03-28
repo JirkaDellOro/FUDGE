@@ -42,12 +42,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns the game-time-object which starts automatically and serves as base for various internal operations. 
+     * Returns representions of the time given in milliseconds in various formats defined in {@link TimeUnits}
      */
-    // public static get game(): Time {
-    //   return Time.gameTime;
-    // }
-
     public static getUnits(_milliseconds: number): TimeUnits {
       let units: TimeUnits = {};
 

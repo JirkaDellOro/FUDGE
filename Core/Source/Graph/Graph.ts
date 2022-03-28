@@ -36,7 +36,7 @@ namespace FudgeCore {
       //   if (node instanceof GraphInstance && node.idSource != this.idResource)
       //     return;
           
-      console.log("Graph mutates", this.name);
+      // console.log("Graph mutates", this.name);
       // this.#syncing = true;
       _event.detail.path = Reflect.get(_event, "path"); // save path to target in detail
       this.dispatchEvent(new CustomEvent(EVENT.MUTATE_GRAPH, { detail: _event.detail}));
