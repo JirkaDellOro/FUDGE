@@ -12,10 +12,8 @@ declare namespace Fudge {
         CREATE_GRAPH = 9,
         REMOVE_COMPONENT = 10,
         ADD_JOINT = 11,
-        TRANSLATE = 12,
-        ROTATE = 13,
-        SCALE = 14,
-        DELETE_RESOURCE = 15
+        DELETE_RESOURCE = 12,
+        ILLUMINATE = 13
     }
     enum MENU {
         QUIT = "quit",

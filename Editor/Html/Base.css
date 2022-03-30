@@ -79,6 +79,9 @@ ul.tree li {
 ul.tree li[attributes~="inactive"]>input {
   text-decoration: line-through;
 }
+ul.tree li[attributes~="GraphInstance"]>input {
+  font-style: italic;
+}
 
 ul.tree ul {
   padding-left: 1em;

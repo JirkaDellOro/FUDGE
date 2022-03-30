@@ -60,8 +60,10 @@ namespace FudgeCore {
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.#idSource = _serialization.idSource;
-      if (!_serialization.deserializeFromSource)
+      if (!_serialization.deserializeFromSource){
         await super.deserialize(_serialization); // instance is deserialized from individual data
+        this.#deserializeFromSource = false;
+      }
       let graph: Graph = this.get();
 
       if (graph)

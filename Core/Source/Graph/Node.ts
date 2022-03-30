@@ -330,7 +330,7 @@ namespace FudgeCore {
         this.components[_component.type] = [_component];
       else
         if (cmpList.length && _component.isSingleton)
-          throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
+          throw new Error(`Component ${_component.type} is marked singleton and can't be attached, no more than one allowed`);
         else
           cmpList.push(_component);
 

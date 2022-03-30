@@ -1477,8 +1477,10 @@ var Fudge;
             return _node.name;
         }
         getAttributes(_node) {
-            let attributes = _node.isActive ? "active" : "inactive";
-            return attributes;
+            let attributes = [_node.isActive ? "active" : "inactive"];
+            if (_node instanceof ƒ.GraphInstance)
+                attributes.push("GraphInstance");
+            return attributes.join(" ");
         }
         rename(_node, _new) {
             _node.name = _new;
