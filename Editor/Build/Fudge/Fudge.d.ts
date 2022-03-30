@@ -59,7 +59,8 @@ declare namespace Fudge {
     enum PANEL {
         GRAPH = "PanelGraph",
         PROJECT = "PanelProject",
-        HELP = "PanelHelp"
+        HELP = "PanelHelp",
+        ANIMATION = "PanelAnimation"
     }
     enum VIEW {
         HIERARCHY = "ViewHierarchy",
@@ -352,6 +353,18 @@ declare namespace Fudge {
         broadcastEvent: (_event: Event) => void;
         abstract getState(): PanelState;
         private addViewComponent;
+    }
+}
+declare namespace Fudge {
+    /**
+     * TODO: add
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    class PanelAnimation extends Panel {
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        getState(): {
+            [key: string]: string;
+        };
     }
 }
 declare namespace Fudge {

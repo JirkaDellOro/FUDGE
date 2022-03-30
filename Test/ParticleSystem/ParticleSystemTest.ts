@@ -11,10 +11,6 @@ namespace ParticleSystemTest {
   let particlesSystem1: f.Node;
   let particlesSystem2: f.Node;
   let viewport: f.Viewport;
-  // let camera: fAid.CameraOrbit;
-  // let camera: f.ComponentCamera;
-  // let speedCameraRotation: number = 0.2;
-  // let speedCameraTranslation: number = 0.02;
 
   let inputParticleNum1: HTMLInputElement;
   let inputParticleNum2: HTMLInputElement;
@@ -24,7 +20,7 @@ namespace ParticleSystemTest {
   let cmpParticleSystem2: f.ComponentParticleSystem;
 
   async function hndLoad(_event: Event): Promise<void> {
-    // f.Render.initialize(true, false);
+    f.Render.initialize(true, false);
     f.Render.setDepthTest(false);
     f.Render.setBlendMode(f.BLEND.PARTICLE);
 
@@ -35,42 +31,14 @@ namespace ParticleSystemTest {
     f.Debug.log("Canvas", canvas);
     f.Debug.setFilter(f.DebugConsole, f.DEBUG_FILTER.ERROR);
 
-    // enable unlimited mouse-movement (user needs to click on canvas first)
-    // canvas.addEventListener("mousedown", canvas.requestPointerLock);
-    // canvas.addEventListener("mouseup", () => document.exitPointerLock());
-
     canvas.addEventListener("mousedown", canvas.requestPointerLock);
-    canvas.addEventListener("mouseup", function () { document.exitPointerLock(); });
-
-    // setup orbiting camera
-    // camera = new f.ComponentCamera();
-    // camera = new fAid.CameraOrbit(new f.ComponentCamera(), 4);
-    // camera.cmpCamera.clrBackground = f.Color.CSS("black");
-    // root.addChild(camera);
-
-    // setup coordinate axes
-    // let coordinateSystem: fAid.NodeCoordinateSystem = new fAid.NodeCoordinateSystem("Coordinates", f.Matrix4x4.SCALING(new f.Vector3(1, 1, 1)));
-    // root.addChild(coordinateSystem);
+    canvas.addEventListener("mouseup", () => document.exitPointerLock());
 
     // setup viewport
     viewport = new f.Viewport();
     viewport.initialize("Viewport", root, new f.ComponentCamera(), canvas);
     f.Debug.log("Viewport", viewport);
     fAid.Viewport.expandCameraToInteractiveOrbit(viewport);
-
-
-    // let nodee: f.Node = new f.Node("Nodee");
-    // nodee.addComponent(new f.ComponentMesh(new f.MeshCube()));
-    // nodee.addComponent(new f.ComponentMaterial(new f.Material("Material", f.ShaderLit, new f.CoatColored())));
-    // let transform = new f.ComponentTransform();
-    // nodee.addComponent(transform);
-    // root.addChild(nodee);
-
-    // setup event handling
-    // viewport.activatePointerEvent(f.EVENT_POINTER.MOVE, true);
-    // viewport.activateWheelEvent(f.EVENT_WHEEL.WHEEL, true);
-    // viewport.addEventListener(f.EVENT_POINTER.MOVE, hndPointerMove);
-    // viewport.addEventListener(f.EVENT_WHEEL.WHEEL, hndWheelMove);
 
     // setup particles
     let txtImage: f.TextureImage = new f.TextureImage("particle.png");
@@ -84,7 +52,7 @@ namespace ParticleSystemTest {
     particlesSystem2 = new fAid.Node("Particles", f.Matrix4x4.TRANSLATION(new f.Vector3(1, 0, 0)), material, mesh);
 
     particlesSystem1.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.2, 0.2, 0.2));
-    // particlesSystem1.getComponent(f.ComponentMesh).showToCamera = true;
+    particlesSystem1.getComponent(f.ComponentMesh).showToCamera = true;
     particlesSystem1.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(1, 0.5, 0.2);
 
     particlesSystem2.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.2, 0.2, 0.2));
@@ -135,15 +103,4 @@ namespace ParticleSystemTest {
     }
 
   }
-
-  // function hndPointerMove(_event: PointerEvent): void {
-  //   if (!_event.buttons)
-  //     return;
-  //   camera.rotateY(_event.movementX * speedCameraRotation);
-  //   camera.rotateX(_event.movementY * speedCameraRotation);
-  // }
-
-  // function hndWheelMove(_event: WheelEvent): void {
-  //   camera.distance = camera.distance + _event.deltaY * speedCameraTranslation;
-  // }
 }

@@ -73,6 +73,7 @@ var Fudge;
         PANEL["GRAPH"] = "PanelGraph";
         PANEL["PROJECT"] = "PanelProject";
         PANEL["HELP"] = "PanelHelp";
+        PANEL["ANIMATION"] = "PanelAnimation";
     })(PANEL = Fudge.PANEL || (Fudge.PANEL = {}));
     let VIEW;
     (function (VIEW) {
@@ -601,6 +602,7 @@ var Fudge;
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.PROJECT, Fudge.PanelProject);
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.GRAPH, Fudge.PanelGraph);
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.HELP, Fudge.PanelHelp);
+            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.ANIMATION, Fudge.PanelAnimation);
             Page.loadLayout();
         }
         static add(_panel, _state) {
@@ -702,6 +704,7 @@ var Fudge;
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_ANIMATION_OPEN, on: true });
             Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_PROJECT));
         }
         //#region Main-Events from Electron
@@ -712,6 +715,7 @@ var Fudge;
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
+                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_ANIMATION_OPEN, on: true });
                 Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_PROJECT));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_SAVE, (_event, _args) => {
@@ -738,8 +742,9 @@ var Fudge;
                 Page.setDefaultProject();
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_ANIMATION_OPEN, (_event, _args) => {
-                //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
-                //   PanelManager.instance.addPanel(panel);
+                Page.add(Fudge.PanelAnimation, null);
+                // let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
+                // PanelManager.instance.addPanel(panel);
             });
         }
     }
@@ -1579,6 +1584,96 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * TODO: add
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    class PanelAnimation extends Fudge.Panel {
+        constructor(_container, _state) {
+            super(_container, _state);
+            //old registercomponent
+            // this.goldenLayout.registerComponent(VIEW.INTERNAL, ViewInternal);
+            // this.goldenLayout.registerComponent(VIEW.EXTERNAL, ViewExternal);
+            // this.goldenLayout.registerComponent(VIEW.PROPERTIES, ViewProperties);
+            // this.goldenLayout.registerComponent(VIEW.PREVIEW, ViewPreview);
+            // this.goldenLayout.registerComponent(VIEW.SCRIPT, ViewScript);
+            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.RENDER, Fudge.ViewRender);
+            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.COMPONENTS, Fudge.ViewComponents);
+            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.ANIMATION, Fudge.ViewAnimation);
+            // const config = {
+            //           type: "column",
+            //           content: [
+            //             {
+            //               type: "row",
+            //               content: [
+            //                 {
+            //                   type: "component",
+            //                   componentName: Fudge.VIEW.RENDER,
+            //                   title: "Viewport"
+            //                 },
+            //                 {
+            //                   type: "component",
+            //                   componentName: Fudge.VIEW.COMPONENTS,
+            //                   title: "Inspector"
+            //                 }
+            //               ]
+            //             },
+            //             {
+            //               type: "component",
+            //               componentName: Fudge.VIEW.ANIMATION,
+            //               title: "Animator"
+            //             }
+            //           ]
+            //         };
+            let inner = this.goldenLayout.rootItem.contentItems[0];
+            const config = {
+                type: "column",
+                content: [
+                    {
+                        type: "row",
+                        content: [
+                            {
+                                type: "component",
+                                componentType: Fudge.VIEW.RENDER,
+                                componentState: _state,
+                                title: "Viewport"
+                            },
+                            {
+                                type: "component",
+                                componentType: Fudge.VIEW.COMPONENTS,
+                                componentState: _state,
+                                title: "Inspector"
+                            }
+                        ]
+                    },
+                    {
+                        type: "component",
+                        componentType: Fudge.VIEW.ANIMATION,
+                        componentState: _state,
+                        title: "Animator"
+                    }
+                ]
+            };
+            this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [
+                { typeId: 7 /* Root */ }
+            ]);
+            // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+            // this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
+            // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.REFRESH, this.hndEvent);
+            this.setTitle("Animation | ");
+            // this.broadcastEvent(new Event(EVENT_EDITOR.SET_PROJECT));
+        }
+        getState() {
+            // TODO: iterate over views and collect their states for reconstruction
+            return {};
+        }
+    }
+    Fudge.PanelAnimation = PanelAnimation;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     var ƒ = FudgeCore;
     /**
     * Shows a graph and offers means for manipulation
@@ -1820,22 +1915,22 @@ var Fudge;
             seq2.addKey(new FudgeCore.AnimationKey(1500, 0, -0.02));
             this.animation = new FudgeCore.Animation("TestAnimation", {
                 components: {
-                    ComponentTransform: [
-                        {
-                            "ƒ.ComponentTransform": {
-                                position: {
-                                    x: new FudgeCore.AnimationSequence(),
-                                    y: seq2,
-                                    z: new FudgeCore.AnimationSequence()
-                                },
-                                rotation: {
-                                    x: new FudgeCore.AnimationSequence(),
-                                    y: seq1,
-                                    z: new FudgeCore.AnimationSequence()
-                                }
-                            }
-                        }
-                    ]
+                // ComponentTransform: [
+                //   {
+                //     "ƒ.ComponentTransform": {
+                //       position: {
+                //         x: new FudgeCore.AnimationSequence(),
+                //         y: seq2,
+                //         z: new FudgeCore.AnimationSequence()
+                //       },
+                //       rotation: {
+                //         x: new FudgeCore.AnimationSequence(),
+                //         y: seq1,
+                //         z: new FudgeCore.AnimationSequence()
+                //       }
+                //     }
+                //   }
+                // ]
                 }
             }, 60);
             this.animation.labels["One"] = 200;
@@ -2000,6 +2095,15 @@ var Fudge;
             buttons[6].id = "add-label";
             buttons[7].id = "add-event";
             buttons[8].id = "add-key";
+            buttons[0].innerText = "start";
+            buttons[1].innerText = "back";
+            buttons[2].innerText = "play";
+            buttons[3].innerText = "pause";
+            buttons[4].innerText = "forward";
+            buttons[5].innerText = "end";
+            buttons[6].innerText = "add-label";
+            buttons[7].innerText = "add-event";
+            buttons[8].innerText = "add-key";
             for (let b of buttons) {
                 _tb.appendChild(b);
             }
