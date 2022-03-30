@@ -1,3 +1,5 @@
+goto Net
+
 @rem Core
 @rem CompileShaders
 echo --- Compile Shaders
@@ -34,13 +36,14 @@ cd ..
 cd ..
 pause
 
+:Net
 @rem Net
 echo --- Compile Net
-call code Net --run-task foo
-cd UserInterface/Source/
-call tsc -p tsconfig.json
-echo --- Generate Documentation
-call typedoc
-cd ..
+cd Net
+call tsc -p ./tsconfig.message.json
+echo module.exports = {FudgeNet: FudgeNet}; >> .\\Source\\Server\\Message.js
+call AddExport .\\Source\\Server\\Message.d.ts
+call tsc -p ./tsconfig.server.json
+call tsc -p ./tsconfig.client.json
 cd ..
 pause
