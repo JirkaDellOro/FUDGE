@@ -57,8 +57,8 @@ namespace Fudge {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
 
-      item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU[CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
-      menu.append(item);
+      // item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU[CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
+      // menu.append(item);
       return menu;
     }
 
@@ -66,9 +66,9 @@ namespace Fudge {
       ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
 
       switch (_item.id) {
-        case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
-          this.illuminateGraph();
-          break;
+        // case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
+        //   this.illuminateGraph();
+        //   break;
       }
     }
 
@@ -82,7 +82,8 @@ namespace Fudge {
         return;
       }
 
-      this.setTitle("Preview | " + this.resource.name);
+      let lightsPresent: boolean = true;
+
       //@ts-ignore
       let type: string = this.resource.type || "Function";
       if (this.resource instanceof ƒ.Mesh)
@@ -120,6 +121,13 @@ namespace Fudge {
           ƒ.Project.createGraphInstance(<ƒ.Graph>this.resource).then(
             (_instance: ƒ.GraphInstance) => {
               previewObject.appendChild(_instance);
+              ƒ.Render.prepare(_instance);
+              lightsPresent = false;
+              ƒ.Render.lights.forEach((_array: ƒ.RecycableArray<ƒ.ComponentLight>) => lightsPresent ||= _array.length > 0);
+              this.illuminate(!lightsPresent);
+              this.setTitle(`${lightsPresent ? "Preview" : "PREVIEW"} | ${this.resource.name}`);
+              //@ts-ignore
+              this.container.tab.titleElement.setAttribute("Lit", "true");
               this.redraw();
             }
           );
@@ -141,6 +149,8 @@ namespace Fudge {
           break;
         default: break;
       }
+      
+      this.setTitle(`Preview | ${this.resource.name}`);
     }
 
     private createStandardGraph(): ƒ.Node {
@@ -161,17 +171,14 @@ namespace Fudge {
     private setViewObject(_node: ƒ.Node, _graphIllumination: boolean = false): void {
       this.previewNode.removeAllChildren();
       this.previewNode.addChild(_node);
-      if (_graphIllumination) // otherwise, light is always on!
-        this.illuminateGraph();
+      this.illuminate(true);
       this.dom.appendChild(this.viewport.getCanvas());
     }
 
-    private illuminateGraph(): void {
+    private illuminate(_on: boolean): void {
       let nodeLight: ƒ.Node = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
-      if (nodeLight) {
-        nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU[CONTEXTMENU.ILLUMINATE]).checked);
-        this.redraw();
-      }
+      nodeLight.activate(_on);
+      this.redraw();
     }
 
     private createFilePreview(_entry: DirectoryEntry): HTMLElement {

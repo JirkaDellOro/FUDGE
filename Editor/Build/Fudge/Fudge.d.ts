@@ -587,7 +587,7 @@ declare namespace Fudge {
         private fillContent;
         private createStandardGraph;
         private setViewObject;
-        private illuminateGraph;
+        private illuminate;
         private createFilePreview;
         private createTextPreview;
         private createImagePreview;

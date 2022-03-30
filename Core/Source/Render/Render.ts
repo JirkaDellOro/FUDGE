@@ -26,7 +26,7 @@ namespace FudgeCore {
      * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
      * render passes.
      */
-    public static prepare(_branch: Node, _options: RenderPrepareOptions = {}, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
+    public static prepare(_branch: Node, _options: RenderPrepareOptions = {}, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _shadersUsed: (typeof Shader)[] = null): void {
       let firstLevel: boolean = (_shadersUsed == null);
       if (firstLevel) {
         _shadersUsed = [];
@@ -76,10 +76,10 @@ namespace FudgeCore {
         if (!cmpLight.isActive)
           continue;
         let type: TypeOfLight = cmpLight.light.getType();
-        let lightsOfType: RecycableArray<ComponentLight> = _lights.get(type);
+        let lightsOfType: RecycableArray<ComponentLight> = Render.lights.get(type);
         if (!lightsOfType) {
           lightsOfType = new RecycableArray<ComponentLight>();
-          _lights.set(type, lightsOfType);
+          Render.lights.set(type, lightsOfType);
         }
         lightsOfType.push(cmpLight);
       }
@@ -103,7 +103,7 @@ namespace FudgeCore {
       }
 
       for (let child of _branch.getChildren()) {
-        Render.prepare(child, _options, _branch.mtxWorld, _lights, _shadersUsed);
+        Render.prepare(child, _options, _branch.mtxWorld, _shadersUsed);
 
         _branch.nNodesInBranch += child.nNodesInBranch;
         let cmpMeshChild: ComponentMesh = child.getComponent(ComponentMesh);
@@ -116,7 +116,7 @@ namespace FudgeCore {
       if (firstLevel) {
         Render.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
         for (let shader of _shadersUsed)
-          Render.setLightsInShader(shader, _lights);
+          Render.setLightsInShader(shader, Render.lights);
       }
 
       //Calculate Physics based on all previous calculations    

@@ -2946,7 +2946,10 @@ var Fudge;
             // this.viewport.setBranch(this.graph);
             this.viewGraph.removeAllChildren();
             this.viewGraph.appendChild(this.graph);
-            this.illuminateGraph();
+            let lightsPresent = false;
+            ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
+            this.illuminateGraph(!lightsPresent);
+            this.setTitle(`${lightsPresent ? "Render" : "RENDER"} | ${this.graph.name}`);
             this.redraw();
         }
         //#region  ContextMenu
@@ -2970,8 +2973,6 @@ var Fudge;
                 ]
             });
             menu.append(item);
-            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE], checked: false, type: "checkbox", click: _callback });
-            menu.append(item);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
@@ -2981,9 +2982,6 @@ var Fudge;
                 case Fudge.TRANSFORM.ROTATE:
                 case Fudge.TRANSFORM.SCALE:
                     Fudge.Page.setTransform(_item.id);
-                    break;
-                case Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]:
-                    this.illuminateGraph();
                     break;
                 case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.NONE]:
                 case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.COLLIDERS]:
@@ -3020,12 +3018,10 @@ var Fudge;
             // this.setGraph(<ƒ.Node>source);
             this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
         }
-        illuminateGraph() {
+        illuminateGraph(_on) {
             let nodeLight = this.viewGraph.getParent().getChildrenByName("ViewIllumination")[0];
-            if (nodeLight) {
-                nodeLight.activate(this.contextMenu.getMenuItemById(Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]).checked);
-                this.redraw();
-            }
+            nodeLight.activate(_on);
+            this.redraw();
         }
         hndEvent = (_event) => {
             switch (_event.type) {
@@ -3146,16 +3142,16 @@ var Fudge;
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let item;
-            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
-            menu.append(item);
+            // item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU[CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
+            // menu.append(item);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
             ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
             switch (_item.id) {
-                case Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]:
-                    this.illuminateGraph();
-                    break;
+                // case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
+                //   this.illuminateGraph();
+                //   break;
             }
         }
         //#endregion
@@ -3166,7 +3162,7 @@ var Fudge;
                 this.setTitle("Preview");
                 return;
             }
-            this.setTitle("Preview | " + this.resource.name);
+            let lightsPresent = true;
             //@ts-ignore
             let type = this.resource.type || "Function";
             if (this.resource instanceof ƒ.Mesh)
@@ -3202,6 +3198,13 @@ var Fudge;
                 case "Graph":
                     ƒ.Project.createGraphInstance(this.resource).then((_instance) => {
                         previewObject.appendChild(_instance);
+                        ƒ.Render.prepare(_instance);
+                        lightsPresent = false;
+                        ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
+                        this.illuminate(!lightsPresent);
+                        this.setTitle(`${lightsPresent ? "Preview" : "PREVIEW"} | ${this.resource.name}`);
+                        //@ts-ignore
+                        this.container.tab.titleElement.setAttribute("Lit", "true");
                         this.redraw();
                     });
                     ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);
@@ -3222,6 +3225,7 @@ var Fudge;
                     break;
                 default: break;
             }
+            this.setTitle(`Preview | ${this.resource.name}`);
         }
         createStandardGraph() {
             let graph = new ƒ.Node("PreviewScene");
@@ -3237,16 +3241,13 @@ var Fudge;
         setViewObject(_node, _graphIllumination = false) {
             this.previewNode.removeAllChildren();
             this.previewNode.addChild(_node);
-            if (_graphIllumination) // otherwise, light is always on!
-                this.illuminateGraph();
+            this.illuminate(true);
             this.dom.appendChild(this.viewport.getCanvas());
         }
-        illuminateGraph() {
+        illuminate(_on) {
             let nodeLight = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
-            if (nodeLight) {
-                nodeLight.activate(this.contextMenu.getMenuItemById(Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]).checked);
-                this.redraw();
-            }
+            nodeLight.activate(_on);
+            this.redraw();
         }
         createFilePreview(_entry) {
             let mime = _entry.getMimeType();

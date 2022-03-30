@@ -95,10 +95,13 @@ namespace Fudge {
       // this.viewport.setBranch(this.graph);
       this.viewGraph.removeAllChildren();
       this.viewGraph.appendChild(this.graph);
-      this.illuminateGraph();
+      let lightsPresent: boolean = false;
+      ƒ.Render.lights.forEach((_array: ƒ.RecycableArray<ƒ.ComponentLight>) => lightsPresent ||= _array.length > 0);
+      this.illuminateGraph(!lightsPresent);
+      this.setTitle(`${lightsPresent ? "Render" : "RENDER"} | ${this.graph.name}`);
       this.redraw();
     }
-    
+
 
     //#region  ContextMenu
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
@@ -123,9 +126,6 @@ namespace Fudge {
       });
       menu.append(item);
 
-      item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU[CONTEXTMENU.ILLUMINATE], checked: false, type: "checkbox", click: _callback });
-      menu.append(item);
-
       return menu;
     }
 
@@ -137,9 +137,6 @@ namespace Fudge {
         case TRANSFORM.ROTATE:
         case TRANSFORM.SCALE:
           Page.setTransform(_item.id);
-          break;
-        case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
-          this.illuminateGraph();
           break;
         case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.NONE]:
         case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.COLLIDERS]:
@@ -183,12 +180,10 @@ namespace Fudge {
       this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
     }
 
-    private illuminateGraph(): void {
+    private illuminateGraph(_on: boolean): void {
       let nodeLight: ƒ.Node = this.viewGraph.getParent().getChildrenByName("ViewIllumination")[0];
-      if (nodeLight) {
-        nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU[CONTEXTMENU.ILLUMINATE]).checked);
-        this.redraw();
-      }
+      nodeLight.activate(_on);
+      this.redraw();
     }
 
     private hndEvent = (_event: CustomEvent): void => {
