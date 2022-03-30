@@ -93,7 +93,7 @@ var ScreenToRayToScreen;
         let cube = new ƒ.Node("Cube");
         let cmpMesh = new ƒ.ComponentMesh(new ƒ.MeshCube());
         cube.addComponent(cmpMesh);
-        let cmpMaterial = new ƒ.ComponentMaterial(new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("RED"))));
+        let cmpMaterial = new ƒ.ComponentMaterial(new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("RED"))));
         cube.addComponent(cmpMaterial);
         let cmpTransform = new ƒ.ComponentTransform();
         cube.addComponent(cmpTransform);

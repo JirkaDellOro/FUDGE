@@ -21,51 +21,53 @@
   "ShaderFlat": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
-    "coat": "CoatColored",
-    "namespace": "FudgeCore",
-    "outdir": "Build/",
-    "register": "true",
-    "define": [
-      "LIGHT",
-      "FLAT"
-    ]
-  },
-  "ShaderFlatTextured": {
-    "vertex": "Source/ShaderUniversal.vert",
-    "fragment": "Source/ShaderUniversal.frag",
-    "coat": "CoatTextured",
+    "coat": "CoatRemissive",
     "namespace": "FudgeCore",
     "outdir": "Build/",
     "register": "true",
     "define": [
       "LIGHT",
       "FLAT",
-      "TEXTURE"
+      "CAMERA"
+    ]
+  },
+  "ShaderFlatTextured": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatRemissiveTextured",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "FLAT",
+      "TEXTURE",
+      "CAMERA"
     ]
   },
   "ShaderGouraud": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
-    "coat": "CoatColored",
+    "coat": "CoatRemissive",
     "namespace": "FudgeCore",
     "outdir": "Build/",
     "register": "true",
     "define": [
       "LIGHT",
-      "GOURAUD"
+      "CAMERA"
     ]
   },
   "ShaderGouraudTextured": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
-    "coat": "CoatTextured",
+    "coat": "CoatRemissiveTextured",
     "namespace": "FudgeCore",
     "outdir": "Build/",
     "register": "true",
     "define": [
       "LIGHT",
-      "GOURAUD",
-      "TEXTURE"
+      "TEXTURE",
+      "CAMERA"
     ]
   },
   "ShaderPhong": {
@@ -77,12 +79,16 @@
     "register": "true"
   },
   "ShaderMatCap": {
-    "vertex": "Source/ShaderMatCap.vert",
-    "fragment": "Source/ShaderMatCap.frag",
-    "coat": "CoatMatCap",
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatTextured",
     "namespace": "FudgeCore",
     "outdir": "Build/",
-    "register": "true"
+    "register": "true",
+    "define": [
+      "CAMERA",
+      "MATCAP"
+    ]
   },
   "ShaderPick": {
     "vertex": "Source/ShaderPick.vert",
@@ -97,5 +103,30 @@
     "namespace": "FudgeCore",
     "outdir": "Build/",
     "register": "false"
+  },
+  "ShaderFlatSkin": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatRemissive",
+    "namespace": "FudgeCore",
+    "outdir": "Build",
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "FLAT",
+      "SKIN"
+    ]
+  },
+  "ShaderGouraudSkin": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatRemissive",
+    "namespace": "FudgeCore",
+    "outdir": "Build",
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "SKIN"
+    ]
   }
 }

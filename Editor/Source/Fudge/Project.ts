@@ -24,7 +24,6 @@ namespace Fudge {
       this.fileIndex = _base.toString().split("/").pop() || this.fileIndex;
 
       ƒ.Project.clear();
-      ƒ.Physics.initializePhysics();
     }
 
     public async openDialog(): Promise<boolean> {
@@ -46,6 +45,7 @@ namespace Fudge {
     }
 
     public async load(htmlContent: string): Promise<void> {
+      ƒ.Physics.activeInstance = new ƒ.Physics();
       const parser: DOMParser = new DOMParser();
       this.#document = parser.parseFromString(htmlContent, "text/html");
       const head: HTMLHeadElement = this.#document.querySelector("head");
@@ -79,6 +79,7 @@ namespace Fudge {
       let panelInfo: string = settings?.getAttribute("panels");
       panelInfo = panelInfo?.replace(/'/g, "\"");
       Page.setPanelInfo(panelInfo || "[]");
+      ƒ.Physics.cleanup(); // remove potential rigidbodies
     }
 
     public getProjectJSON(): string {

@@ -18,17 +18,19 @@ declare namespace Fudge {
 declare namespace Fudge {
     enum CONTEXTMENU {
         ADD_NODE = 0,
-        ADD_COMPONENT = 1,
-        ADD_COMPONENT_SCRIPT = 2,
-        EDIT = 3,
-        CREATE_MESH = 4,
-        CREATE_MATERIAL = 5,
-        CREATE_GRAPH = 6,
-        REMOVE_COMPONENT = 7,
-        ADD_JOINT = 8,
-        TRANSLATE = 9,
-        ROTATE = 10,
-        SCALE = 11
+        ACTIVATE_NODE = 1,
+        DELETE_NODE = 2,
+        ADD_COMPONENT = 3,
+        DELETE_COMPONENT = 4,
+        ADD_COMPONENT_SCRIPT = 5,
+        EDIT = 6,
+        CREATE_MESH = 7,
+        CREATE_MATERIAL = 8,
+        CREATE_GRAPH = 9,
+        REMOVE_COMPONENT = 10,
+        ADD_JOINT = 11,
+        DELETE_RESOURCE = 12,
+        ILLUMINATE = 13
     }
     enum MENU {
         QUIT = "quit",
@@ -50,7 +52,8 @@ declare namespace Fudge {
         REFRESH = "refresh",
         DESTROY = "destroy",
         CLEAR_PROJECT = "clearProject",
-        TRANSFORM = "transform"
+        TRANSFORM = "transform",
+        SELECT_NODE = "selectNode"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
@@ -158,10 +161,12 @@ declare namespace Fudge {
         private static idCounter;
         private static goldenLayout;
         private static panels;
+        private static physics;
         static setDefaultProject(): void;
         static getPanelInfo(): string;
         static setPanelInfo(_panelInfos: string): void;
         static setTransform(_mode: TRANSFORM): void;
+        static getPhysics(_graph: ƒ.Graph): ƒ.Physics;
         private static start;
         private static setupGoldenLayout;
         private static add;
@@ -259,7 +264,6 @@ declare namespace Fudge {
     import ƒUi = FudgeUserInterface;
     class ControllerComponent extends ƒUi.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
-        getMutatorStripped: (_mutator?: ƒ.Mutator, _types?: ƒ.Mutator) => ƒ.Mutator;
         protected mutateOnInput: (_event: Event) => Promise<void>;
         private hndKey;
         private hndDragOver;
@@ -277,7 +281,7 @@ declare namespace Fudge {
         getLabel(_object: ƒ.SerializableResource): string;
         rename(_object: ƒ.SerializableResource, _new: string): boolean;
         copy(_originals: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]>;
-        delete(_focussed: ƒ.SerializableResource[]): ƒ.SerializableResource[];
+        delete(_focussed: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]>;
         sort(_data: ƒ.SerializableResource[], _key: string, _direction: number): void;
     }
 }
@@ -298,7 +302,7 @@ declare namespace Fudge {
         getHead(): ƒui.TABLE[];
         getLabel(_object: ScriptInfo): string;
         rename(_object: ScriptInfo, _new: string): boolean;
-        delete(_focussed: ScriptInfo[]): ScriptInfo[];
+        delete(_focussed: ScriptInfo[]): Promise<ScriptInfo[]>;
         copy(_originals: ScriptInfo[]): Promise<ScriptInfo[]>;
         sort(_data: ScriptInfo[], _key: string, _direction: number): void;
     }
@@ -307,6 +311,7 @@ declare namespace Fudge {
     import ƒUi = FudgeUserInterface;
     class ControllerTreeDirectory extends ƒUi.TreeController<DirectoryEntry> {
         getLabel(_entry: DirectoryEntry): string;
+        getAttributes(_object: DirectoryEntry): string;
         rename(_entry: DirectoryEntry, _new: string): boolean;
         hasChildren(_entry: DirectoryEntry): boolean;
         getChildren(_entry: DirectoryEntry): DirectoryEntry[];
@@ -320,6 +325,7 @@ declare namespace Fudge {
     import ƒUi = FudgeUserInterface;
     class ControllerTreeHierarchy extends ƒUi.TreeController<ƒ.Node> {
         getLabel(_node: ƒ.Node): string;
+        getAttributes(_node: ƒ.Node): string;
         rename(_node: ƒ.Node, _new: string): boolean;
         hasChildren(_node: ƒ.Node): boolean;
         getChildren(_node: ƒ.Node): ƒ.Node[];
@@ -521,7 +527,7 @@ declare namespace Fudge {
         private graph;
         private tree;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
-        setGraph(_graph: ƒ.Node): void;
+        setGraph(_graph: ƒ.Graph): void;
         getSelection(): ƒ.Node[];
         getDragDropSources(): ƒ.Node[];
         focusNode(_node: ƒ.Node): void;
@@ -544,14 +550,16 @@ declare namespace Fudge {
         private viewport;
         private canvas;
         private graph;
+        private viewGraph;
         constructor(_container: ComponentContainer, _state: JsonValue);
         createUserInterface(): void;
-        setGraph(_node: ƒ.Node): void;
+        setGraph(_node: ƒ.Graph): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
+        private illuminateGraph;
         private hndEvent;
         private hndPick;
         private hndPointer;
@@ -570,11 +578,16 @@ declare namespace Fudge {
         private resource;
         private viewport;
         private cmrOrbit;
+        private previewNode;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         private static createStandardMaterial;
         private static createStandardMesh;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private fillContent;
         private createStandardGraph;
+        private setViewObject;
+        private illuminateGraph;
         private createFilePreview;
         private createTextPreview;
         private createImagePreview;

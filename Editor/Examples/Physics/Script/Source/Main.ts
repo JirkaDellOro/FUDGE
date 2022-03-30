@@ -13,7 +13,7 @@ namespace Script {
   }
 
   function update(_event: Event): void {
-    ƒ.Physics.world.simulate();
+    ƒ.Physics.simulate();
     viewport.draw();
     ƒ.AudioManager.default.update();
   }

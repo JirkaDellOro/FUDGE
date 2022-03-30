@@ -195,12 +195,12 @@ namespace FudgeUserInterface {
     //   // this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
     // }
 
-    private hndDelete = (_event: Event): void => {
+    private hndDelete = async (_event: Event): Promise<void> => {
       let target: TableItem<T> = <TableItem<T>>_event.target;
       _event.stopPropagation();
-      let remove: T[] = this.controller.delete([target.data]);
-      console.log(remove);
-      // this.delete(remove);
+      let deleted: T[] = await this.controller.delete([target.data]);
+      if (deleted.length)
+        this.dispatchEvent(new Event(EVENT.REMOVE_CHILD, { bubbles: true }));
     }
 
     private hndEscape = (_event: Event): void => {

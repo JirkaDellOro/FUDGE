@@ -107,7 +107,7 @@ namespace FudgeCore {
         }
       }
 
-      this.cloud = cloud;
+      this.vertices = cloud;
       this.faces = faces;
     }
   }

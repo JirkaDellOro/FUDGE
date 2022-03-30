@@ -7,7 +7,7 @@ namespace Fudge {
   type Subclass<T> = {
     subclasses: T[]
     name: string
-  }
+  };
 
   export class ContextMenu {
     public static appendCopyPaste(_menu: Electron.Menu): void {

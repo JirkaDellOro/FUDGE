@@ -4,6 +4,7 @@ var FudgePhysics_Communication;
 (function (FudgePhysics_Communication) {
     var f = FudgeCore;
     window.addEventListener("load", init);
+    document.addEventListener("keydown", hndKeyDown);
     const app = document.querySelector("canvas");
     let viewPort;
     let hierarchy;
@@ -11,13 +12,13 @@ var FudgePhysics_Communication;
     const times = [];
     let fpsDisplay = document.querySelector("h2#FPS");
     let cubes = new Array();
-    let hitMaterial = new f.Material("hitMat", f.ShaderFlat, new f.CoatColored(new f.Color(0.3, 0, 0, 1)));
-    let triggeredMaterial = new f.Material("triggerMat", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0.3, 0, 1)));
-    let normalMaterial = new f.Material("NormalMat", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1)));
+    let hitMaterial = new f.Material("hitMat", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.3, 0, 0, 1)));
+    let triggeredMaterial = new f.Material("triggerMat", f.ShaderFlat, new f.CoatRemissive(new f.Color(0, 0.3, 0, 1)));
+    let normalMaterial = new f.Material("NormalMat", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 0, 0, 1)));
     function init(_event) {
         f.Debug.log(app);
         hierarchy = new f.Node("Scene");
-        let ground = createCompleteMeshNode("GroundCollider", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
+        let ground = createCompleteMeshNode("GroundCollider", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
         let cmpGroundMesh = ground.getComponent(f.ComponentTransform);
         cmpGroundMesh.mtxLocal.scale(new f.Vector3(10, 0.3, 10));
         cmpGroundMesh.mtxLocal.translate(new f.Vector3(0, -1.5, 0));
@@ -26,15 +27,15 @@ var FudgePhysics_Communication;
         let cmpCubeTransform = cubes[0].getComponent(f.ComponentTransform);
         hierarchy.appendChild(cubes[0]);
         cmpCubeTransform.mtxLocal.translate(new f.Vector3(0, 7, 0));
-        cubes[1] = createCompleteMeshNode("Cube", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
+        cubes[1] = createCompleteMeshNode("Cube", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
         let cmpCubeTransform2 = cubes[1].getComponent(f.ComponentTransform);
         hierarchy.appendChild(cubes[1]);
         cmpCubeTransform2.mtxLocal.translate(new f.Vector3(0, 3.5, 0.48));
-        cubes[2] = createCompleteMeshNode("Cube", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
+        cubes[2] = createCompleteMeshNode("Cube", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
         let cmpCubeTransform3 = cubes[2].getComponent(f.ComponentTransform);
         hierarchy.appendChild(cubes[2]);
         cmpCubeTransform3.mtxLocal.translate(new f.Vector3(0.6, 7, 0.5));
-        cubes[3] = createCompleteMeshNode("Trigger", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 1, 0, 1))), new f.MeshSphere(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.SPHERE);
+        cubes[3] = createCompleteMeshNode("Trigger", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0, 1, 0, 1))), new f.MeshSphere(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.SPHERE);
         cubes[3].getComponent(f.ComponentRigidbody).isTrigger = true;
         let cmpCubeTransform4 = cubes[3].getComponent(f.ComponentTransform);
         hierarchy.appendChild(cubes[3]);
@@ -56,7 +57,7 @@ var FudgePhysics_Communication;
         viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.CONTACTS;
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         cubes[0].getComponent(f.ComponentRigidbody).restitution = 1.3;
-        f.Time.game.setScale(0.5);
+        f.Time.game.setScale(0);
         f.Physics.adjustTransforms(hierarchy);
         f.Loop.start();
     }
@@ -92,7 +93,7 @@ var FudgePhysics_Communication;
         }
     }
     function update() {
-        f.Physics.world.simulate();
+        f.Physics.simulate();
         viewPort.draw();
         measureFPS();
     }
@@ -118,6 +119,16 @@ var FudgePhysics_Communication;
         node.addComponent(cmpTransform);
         node.addComponent(cmpRigidbody);
         return node;
+    }
+    function hndKeyDown(_event) {
+        if (_event.code == f.KEYBOARD_CODE.W) {
+            if (f.Time.game.getScale() < 1)
+                f.Time.game.setScale(f.Time.game.getScale() + 0.1);
+        }
+        if (_event.code == f.KEYBOARD_CODE.S) {
+            if (f.Time.game.getScale() > 0)
+                f.Time.game.setScale(f.Time.game.getScale() - 0.1);
+        }
     }
 })(FudgePhysics_Communication || (FudgePhysics_Communication = {}));
 //# sourceMappingURL=Main.js.map

@@ -1,6 +1,6 @@
 ///<reference path="../Light/Light.ts"/>
 namespace FudgeCore {
- 
+
   /**
    * Defines identifiers for the various types of light this component can provide.  
    */
@@ -11,10 +11,10 @@ namespace FudgeCore {
     POINT = "LightPoint",
     SPOT = "LightSpot"
   }
- /**
-   * Attaches a {@link Light} to the node
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-   */
+  /**
+    * Attaches a {@link Light} to the node
+    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+    */
   export class ComponentLight extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentLight);
     // private static constructors: { [type: string]: General } = { [LIGHT_TYPE.AMBIENT]: LightAmbient, [LIGHT_TYPE.DIRECTIONAL]: LightDirectional, [LIGHT_TYPE.POINT]: LightPoint, [LIGHT_TYPE.SPOT]: LightSpot };
@@ -67,9 +67,8 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       let type: string = _mutator.type;
-      if (type != this.light.constructor.name)
-      this.setType(Serializer.getConstructor<Light>(type));
-
+      if (typeof (type) !== "undefined" && type != this.light.constructor.name)
+        this.setType(Serializer.getConstructor<Light>(type));
       delete (_mutator.type); // exclude light type from further mutation
       super.mutate(_mutator);
       _mutator.type = type; // reconstruct mutator

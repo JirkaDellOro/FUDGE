@@ -13,12 +13,26 @@ namespace FudgeCore {
     public static readonly baseClass: typeof Component = Component;
     /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Component[] = [];
-    
+
     #node: Node | null = null;
     protected singleton: boolean = true;
     protected active: boolean = true;
 
+    public constructor() {
+      super();
+      this.addEventListener(EVENT.MUTATE, (_event: CustomEvent) => {
+        if (this.#node) {
+          // TODO: find the number of the component in the array if not singleton
+          _event.detail.component = this;
+          //@ts-ignore
+          _event.detail.componentIndex = this.node.getComponents(this.constructor).indexOf(this);
+          this.#node.dispatchEvent(_event);
+        }
+      });
+    }
+
     protected static registerSubclass(_subclass: typeof Component): number { return Component.subclasses.push(_subclass) - 1; }
+
 
     public get isActive(): boolean {
       return this.active;
@@ -43,7 +57,6 @@ namespace FudgeCore {
       this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));
     }
 
-
     /**
      * Tries to attach the component to the given node, removing it from the node it was attached to if applicable
      */
@@ -61,7 +74,7 @@ namespace FudgeCore {
         this.#node = previousContainer;
       }
     }
-    
+
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = {
@@ -72,6 +85,12 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.activate(_serialization.active);
       return this;
+    }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      await super.mutate(_mutator);
+      if (typeof (_mutator.active) !== "undefined")
+        this.activate(_mutator.active);
     }
 
     protected reduceMutator(_mutator: Mutator): void {

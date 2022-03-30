@@ -85,6 +85,13 @@ namespace FudgeUserInterface {
     }
 
     /**
+     * Get the label text shown
+     */
+    public refreshAttributes(): void {
+      this.setAttribute("attributes", this.controller.getAttributes(this.data));
+    }
+
+    /**
      * Tries to expanding the [[TreeList]] of children, by dispatching [[EVENT.EXPAND]].
      * The user of the tree needs to add an event listener to the tree 
      * in order to create that [[TreeList]] and add it as branch to this item
@@ -157,6 +164,8 @@ namespace FudgeUserInterface {
       this.label.value = this.display;
       this.appendChild(this.label);
 
+      this.refreshAttributes();
+      
       this.tabIndex = 0;
     }
 
@@ -276,7 +285,7 @@ namespace FudgeUserInterface {
       // this.controller.hndDragOver(_event);
       if (Reflect.get(_event, "dragoverDone"))
         return;
-      
+
       Reflect.set(_event, "dragoverDone", true);
       // _event.stopPropagation();
       _event.preventDefault();

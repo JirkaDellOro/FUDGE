@@ -33,24 +33,35 @@ namespace FudgeCore {
     private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
     // TODO: examine, if background should be an attribute of Camera or Viewport
 
-    /**
-     * Returns the multiplication of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix
-     * yielding the worldspace to viewspace matrix
-     */
-    public get mtxWorldToView(): Matrix4x4 {
-      //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
+    public get mtxWorld(): Matrix4x4 {
       let mtxCamera: Matrix4x4 = this.mtxPivot.clone;
       try {
         mtxCamera = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
       } catch (_error) {   
         // no container node or no world transformation found -> continue with pivot only
       }
+      return mtxCamera;
+    }
+    /**
+     * Returns the multiplication of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix
+     * yielding the worldspace to viewspace matrix
+     */
+    public get mtxWorldToView(): Matrix4x4 {
+      if (this.#mtxWorldToView )
+        return this.#mtxWorldToView;
+        
+      //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
+      let mtxCamera: Matrix4x4 = this.mtxWorld;
       let mtxInversion: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
       this.#mtxWorldToView = Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxInversion);
       Recycler.store(mtxCamera);
       Recycler.store(mtxInversion);
       
       return this.#mtxWorldToView;
+    }
+
+    public resetWorldToView(): void {
+      this.#mtxWorldToView = null;
     }
 
     public getProjection(): PROJECTION {

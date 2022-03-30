@@ -168,13 +168,13 @@ namespace FudgeCore {
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
-    
+
     public async mutate(_mutator: Mutator): Promise<void> {
       this.#mutate(_mutator);
       this.deleteFromMutator(_mutator, this.#getMutator());
       super.mutate(_mutator);
     }
-    
+
     public getMutator(): Mutator {
       let mutator: Mutator = super.getMutator();
       Object.assign(mutator, this.#getMutator());
@@ -193,16 +193,9 @@ namespace FudgeCore {
       };
       return mutator;
     }
-    
+
     #mutate = (_mutator: Mutator): void => {
-      this.motorForce = _mutator.motorForce;
-      this.rotorTorque = _mutator.rotorTorque;
-      this.rotorSpeed = _mutator.rotorSpeed;
-      this.maxRotor = _mutator.maxRotor;
-      this.minRotor = _mutator.minRotor;
-      this.springDampingRotation = _mutator.springDampingRotation;
-      this.springFrequencyRotation = _mutator.springFrequencyRotation;
-      this.springFrequency = _mutator.springFrequency;
+      this.mutateBase(_mutator, ["motorForce", "rotorTorque", "rotorSpeed", "maxRotor", "minRotor", "springDampingRotation", "springFrequencyRotation", "springFrequency"]);
     }
     //#endregion
 

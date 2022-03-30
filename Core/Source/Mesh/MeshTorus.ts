@@ -49,7 +49,7 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      this.create(_mutator.size, _mutator.longitudes, _mutator.latitudes);
+      this.create(this.size, this.longitudes, this.latitudes);
     }
 
     protected reduceMutator(_mutator: Mutator): void {

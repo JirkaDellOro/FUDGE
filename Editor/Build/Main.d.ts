@@ -1,17 +1,21 @@
 declare namespace Fudge {
     enum CONTEXTMENU {
         ADD_NODE = 0,
-        ADD_COMPONENT = 1,
-        ADD_COMPONENT_SCRIPT = 2,
-        EDIT = 3,
-        CREATE_MESH = 4,
-        CREATE_MATERIAL = 5,
-        CREATE_GRAPH = 6,
-        REMOVE_COMPONENT = 7,
-        ADD_JOINT = 8,
-        TRANSLATE = 9,
-        ROTATE = 10,
-        SCALE = 11
+        ACTIVATE_NODE = 1,
+        DELETE_NODE = 2,
+        ADD_COMPONENT = 3,
+        DELETE_COMPONENT = 4,
+        ADD_COMPONENT_SCRIPT = 5,
+        EDIT = 6,
+        CREATE_MESH = 7,
+        CREATE_MATERIAL = 8,
+        CREATE_GRAPH = 9,
+        REMOVE_COMPONENT = 10,
+        ADD_JOINT = 11,
+        TRANSLATE = 12,
+        ROTATE = 13,
+        SCALE = 14,
+        DELETE_RESOURCE = 15
     }
     enum MENU {
         QUIT = "quit",

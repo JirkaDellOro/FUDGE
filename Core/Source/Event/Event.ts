@@ -18,6 +18,10 @@ namespace FudgeCore {
     COMPONENT_ACTIVATE = "componentActivate",
     /** dispatched to a {@link Component} when its being deactivated */
     COMPONENT_DEACTIVATE = "componentDeactivate",
+    /** dispatched to a {@link Node}, it's successors and ancestors when its being activated */
+    NODE_ACTIVATE = "nodeActivate",
+    /** dispatched to a {@link Node}, it's successors and ancestors when its being deactivated */
+    NODE_DEACTIVATE = "nodeDeactivate",
     /** dispatched to a child {@link Node} and its ancestors after it was appended to a parent */
     CHILD_APPEND = "childAppend",
     /** dispatched to a child {@link Node} and its ancestors just before its being removed from its parent */
@@ -43,7 +47,9 @@ namespace FudgeCore {
     /** dispatched to {@link Node} when recalculating transforms for render */
     RENDER_PREPARE = "renderPrepare",
     RENDER_PREPARE_START = "renderPrepareStart",
-    RENDER_PREPARE_END = "renderPrepareEnd"
+    RENDER_PREPARE_END = "renderPrepareEnd",
+    /** dispatched to Joint-Components in order to disconnect */
+    DISCONNECT_JOINT = "disconnectJoint"
   }
 
 

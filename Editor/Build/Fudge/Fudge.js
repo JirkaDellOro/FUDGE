@@ -28,17 +28,19 @@ var Fudge;
     (function (CONTEXTMENU) {
         // SKETCH = ViewSketch,
         CONTEXTMENU[CONTEXTMENU["ADD_NODE"] = 0] = "ADD_NODE";
-        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 2] = "ADD_COMPONENT_SCRIPT";
-        CONTEXTMENU[CONTEXTMENU["EDIT"] = 3] = "EDIT";
-        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 4] = "CREATE_MESH";
-        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 5] = "CREATE_MATERIAL";
-        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 6] = "CREATE_GRAPH";
-        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 7] = "REMOVE_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 8] = "ADD_JOINT";
-        CONTEXTMENU[CONTEXTMENU["TRANSLATE"] = 9] = "TRANSLATE";
-        CONTEXTMENU[CONTEXTMENU["ROTATE"] = 10] = "ROTATE";
-        CONTEXTMENU[CONTEXTMENU["SCALE"] = 11] = "SCALE";
+        CONTEXTMENU[CONTEXTMENU["ACTIVATE_NODE"] = 1] = "ACTIVATE_NODE";
+        CONTEXTMENU[CONTEXTMENU["DELETE_NODE"] = 2] = "DELETE_NODE";
+        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 3] = "ADD_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["DELETE_COMPONENT"] = 4] = "DELETE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 5] = "ADD_COMPONENT_SCRIPT";
+        CONTEXTMENU[CONTEXTMENU["EDIT"] = 6] = "EDIT";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 7] = "CREATE_MESH";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 8] = "CREATE_MATERIAL";
+        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 9] = "CREATE_GRAPH";
+        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 10] = "REMOVE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 11] = "ADD_JOINT";
+        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 12] = "DELETE_RESOURCE";
+        CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 13] = "ILLUMINATE";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -63,6 +65,7 @@ var Fudge;
         EVENT_EDITOR["DESTROY"] = "destroy";
         EVENT_EDITOR["CLEAR_PROJECT"] = "clearProject";
         EVENT_EDITOR["TRANSFORM"] = "transform";
+        EVENT_EDITOR["SELECT_NODE"] = "selectNode";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
@@ -298,7 +301,6 @@ var Fudge;
             this.name = _base.toString().split("/").slice(-2, -1)[0];
             this.fileIndex = _base.toString().split("/").pop() || this.fileIndex;
             ƒ.Project.clear();
-            ƒ.Physics.initializePhysics();
         }
         async openDialog() {
             let promise = ƒui.Dialog.prompt(Fudge.project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
@@ -316,6 +318,7 @@ var Fudge;
             console.log(mutator, this);
         };
         async load(htmlContent) {
+            ƒ.Physics.activeInstance = new ƒ.Physics();
             const parser = new DOMParser();
             this.#document = parser.parseFromString(htmlContent, "text/html");
             const head = this.#document.querySelector("head");
@@ -345,6 +348,7 @@ var Fudge;
             let panelInfo = settings?.getAttribute("panels");
             panelInfo = panelInfo?.replace(/'/g, "\"");
             Fudge.Page.setPanelInfo(panelInfo || "[]");
+            ƒ.Physics.cleanup(); // remove potential rigidbodies
         }
         getProjectJSON() {
             let serialization = ƒ.Project.serialize();
@@ -524,13 +528,11 @@ var Fudge;
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
-// /<reference types="../../GoldenLayout/golden-layout" />
 ///<reference path="Project.ts"/>
 var Fudge;
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
-// /<reference types="../../GoldenLayout/golden-layout" />
 ///<reference path="Project.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
@@ -546,6 +548,7 @@ var Fudge;
         static idCounter = 0;
         static goldenLayout;
         static panels = [];
+        static physics = {};
         static setDefaultProject() {
             if (Fudge.project)
                 localStorage.setItem("project", Fudge.project.base.toString());
@@ -566,6 +569,9 @@ var Fudge;
         static setTransform(_mode) {
             Page.modeTransform = _mode;
             ƒ.Debug.fudge(`Transform mode: ${_mode}`);
+        }
+        static getPhysics(_graph) {
+            return Page.physics[_graph.idResource] || (Page.physics[_graph.idResource] = new ƒ.Physics());
         }
         // called by windows load-listener
         static async start() {
@@ -637,6 +643,7 @@ var Fudge;
             document.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, Page.hndEvent);
             document.addEventListener("mutate" /* MUTATE */, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.REFRESH, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.DESTROY, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
         }
@@ -979,6 +986,7 @@ var Fudge;
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
+            this.dom.addEventListener("removeChild" /* REMOVE_CHILD */, this.hndEvent);
         }
         listResources() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -1017,6 +1025,8 @@ var Fudge;
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Create Graph", id: String(Fudge.CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Delete Resource", id: String(Fudge.CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
+            menu.append(item);
             // ContextMenu.appendCopyPaste(menu);
             return menu;
         }
@@ -1024,7 +1034,7 @@ var Fudge;
             let choice = Number(_item.id);
             ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
             let iSubclass = _item["iSubclass"];
-            if (choice != Fudge.CONTEXTMENU.CREATE_GRAPH && !iSubclass) {
+            if (!iSubclass && (choice == Fudge.CONTEXTMENU.CREATE_MESH || choice == Fudge.CONTEXTMENU.CREATE_MATERIAL)) {
                 alert("Funky Electron-Error... please try again");
                 return;
             }
@@ -1047,10 +1057,10 @@ var Fudge;
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     this.table.selectInterval(graph, graph);
                     break;
-                // case CONTEXTMENU.EDIT:
-                //   let resource: ƒ.SerializableResource = this.table.getFocussed();
-                //   this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
-                //   break;
+                case Fudge.CONTEXTMENU.DELETE_RESOURCE:
+                    await this.table.controller.delete([this.table.getFocussed()]);
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    break;
             }
         }
         //#endregion
@@ -1099,12 +1109,12 @@ var Fudge;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SET_PROJECT:
                 case Fudge.EVENT_EDITOR.UPDATE:
-                case "mutate" /* MUTATE */:
+                    // case ƒui.EVENT.MUTATE:
                     this.listResources();
                     break;
-                // case ƒui.EVENT.SELECT:
-                //   console.log(_event.detail.data);
-                //   break;
+                case "removeChild" /* REMOVE_CHILD */:
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    break;
             }
         };
     }
@@ -1124,9 +1134,9 @@ var Fudge;
         UrlOnTexture: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         UrlOnMeshObj: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "MeshObj", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         UrlOnAudio: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
-        MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
+        MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
         MeshOnComponentMesh: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
-        MeshOnMeshLabel: { fromViews: [Fudge.ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
+        // MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
         TextureOnMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
         TextureOnMeshRelief: { fromViews: [Fudge.ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
     };
@@ -1138,19 +1148,24 @@ var Fudge;
             this.domElement.addEventListener("drop" /* DROP */, this.hndDrop);
             this.domElement.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
         }
-        //#region hack getMutator in order to specifically exclude parts of it (e.g. recreate mesh everytime mtxPivot changes...)
-        getMutatorStripped = (_mutator, _types) => {
-            let mutator = super.getMutator(_mutator, _types);
-            delete (mutator.mesh);
-            return mutator;
-        };
         mutateOnInput = async (_event) => {
+            // TODO: move this to Ui.Controller as a general optimization to only mutate what has been changed...!
             this.getMutator = super.getMutator;
-            if (this.mutable instanceof ƒ.ComponentMesh) {
-                let found = _event.composedPath().find((_dom) => _dom == this.domElement || _dom.getAttribute("key") == "mesh");
-                if (found == this.domElement)
-                    this.getMutator = this.getMutatorStripped;
+            let path = [];
+            for (let target of _event.composedPath()) {
+                if (target == document)
+                    break;
+                let key = target.getAttribute("key");
+                if (key)
+                    path.push(key);
             }
+            path.pop();
+            path.reverse();
+            let mutator = ƒ.Mutable.getMutatorFromPath(this.getMutator(), path);
+            this.getMutator = (_mutator, _types) => {
+                this.getMutator = super.getMutator; // reset
+                return mutator;
+            };
         };
         //#endregion
         hndKey = (_event) => {
@@ -1175,14 +1190,14 @@ var Fudge;
             if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial))
                 return;
             // Mesh on ComponentMesh
-            if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, (_sources) => {
-                let key = this.getAncestorWithType(_event.target).getAttribute("key");
-                return (key == "mesh");
-            }))
+            // if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, (_sources: Object[]) => {
+            //   let key: string = this.getAncestorWithType(_event.target).getAttribute("key");
+            //   return (key == "mesh");
+            // })) return;
+            if (this.filterDragDrop(_event, filter.MeshOnComponentMesh))
                 return;
             // Mesh on MeshLabel
-            if (this.filterDragDrop(_event, filter.MeshOnMeshLabel))
-                return;
+            // if (this.filterDragDrop(_event, filter.MeshOnMeshLabel)) return;
             // Texture on Material
             if (this.filterDragDrop(_event, filter.TextureOnMaterial))
                 return;
@@ -1209,6 +1224,11 @@ var Fudge;
                 if (!this.mutable[key])
                     return false;
                 this.mutable[key] = _sources[0];
+                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                return true;
+            };
+            let setMaterial = (_sources) => {
+                this.mutable["material"] = _sources[0];
                 this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                 return true;
             };
@@ -1240,14 +1260,13 @@ var Fudge;
             if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink))
                 return;
             // Material on ComponentMaterial
-            if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial, setResource))
+            if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial, setMaterial))
                 return;
             // Mesh on ComponentMesh
-            if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, setResource))
+            if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, setMesh))
                 return;
             // Mesh on MeshLabel
-            if (this.filterDragDrop(_event, filter.MeshOnMeshLabel, setMesh))
-                return;
+            // if (this.filterDragDrop(_event, filter.MeshOnMeshLabel, setMesh)) return;
             // Texture on Material
             if (this.filterDragDrop(_event, filter.TextureOnMaterial, setTexture))
                 return;
@@ -1311,8 +1330,40 @@ var Fudge;
         getLabel(_object) { return ""; }
         rename(_object, _new) { return false; }
         copy(_originals) { return null; }
-        delete(_focussed) {
-            return null;
+        async delete(_focussed) {
+            console.log(_focussed, this.selection);
+            // this.selection = [];
+            let expendables = this.selection.concat([]); //_focussed);
+            let serializations = ƒ.Project.serialize();
+            let serializationStrings = new Map();
+            let usages = {};
+            for (let idResource in serializations)
+                serializationStrings.set(ƒ.Project.resources[idResource], JSON.stringify(serializations[idResource]));
+            for (let expendable of expendables) {
+                usages[expendable.idResource] = [];
+                for (let resource of serializationStrings.keys())
+                    if (resource.idResource != expendable.idResource)
+                        if (serializationStrings.get(resource).indexOf(expendable.idResource) > -1)
+                            usages[expendable.idResource].push(resource.name + " " + resource.type);
+            }
+            if (await openDialog()) {
+                let deleted = [];
+                for (let usage in usages)
+                    if (usages[usage].length == 0) { // delete only unused
+                        deleted.push(ƒ.Project.resources[usage]);
+                        ƒ.Project.deregister(ƒ.Project.resources[usage]);
+                    }
+                return deleted;
+            }
+            async function openDialog() {
+                let promise = ƒui.Dialog.prompt(usages, true, "Review references, delete dependend resources first if applicable", "To delete unused resources, press OK", "OK", "Cancel");
+                if (await promise) {
+                    return true;
+                }
+                else
+                    return false;
+            }
+            return [];
         }
         sort(_data, _key, _direction) {
             function compare(_a, _b) {
@@ -1379,6 +1430,9 @@ var Fudge;
         getLabel(_entry) {
             return _entry.name;
         }
+        getAttributes(_object) {
+            return "";
+        }
         rename(_entry, _new) {
             _entry.name = _new;
             return true;
@@ -1421,6 +1475,10 @@ var Fudge;
     class ControllerTreeHierarchy extends ƒUi.TreeController {
         getLabel(_node) {
             return _node.name;
+        }
+        getAttributes(_node) {
+            let attributes = _node.isActive ? "active" : "inactive";
+            return attributes;
         }
         rename(_node, _new) {
             _node.name = _new;
@@ -1533,43 +1591,36 @@ var Fudge;
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.COMPONENTS, Fudge.ViewComponents);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
             this.setTitle("Graph");
-            const renderConfig = {
+            const config = {
                 type: "column",
-                isClosable: true,
-                content: [
-                    {
+                content: [{
                         type: "component",
                         componentType: Fudge.VIEW.RENDER,
                         componentState: _state,
                         title: "Render"
-                    }
-                ]
+                    }, {
+                        type: "row",
+                        content: [{
+                                type: "component",
+                                componentType: Fudge.VIEW.HIERARCHY,
+                                componentState: _state,
+                                title: "Hierarchy"
+                            }, {
+                                type: "component",
+                                componentType: Fudge.VIEW.COMPONENTS,
+                                componentState: _state,
+                                title: "Components"
+                            }]
+                    }]
             };
-            const hierarchyAndComponents = {
-                type: "column",
-                isClosable: true,
-                content: [
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.HIERARCHY,
-                        componentState: _state,
-                        title: "Hierarchy"
-                    },
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.COMPONENTS,
-                        componentState: _state,
-                        title: "Components"
-                    }
-                ]
-            };
-            this.goldenLayout.addItemAtLocation(renderConfig, [{ typeId: 7 /* Root */ }]);
-            this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: 7 /* Root */ }]);
+            this.goldenLayout.addItemAtLocation(config, [{ typeId: 7 /* Root */ }]);
+            // this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT_NODE, this.hndEvent);
             this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
             if (_state["graph"])
@@ -1600,8 +1651,6 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.SET_GRAPH:
                     this.setGraph(_event.detail);
                     break;
-                case Fudge.EVENT_EDITOR.REFRESH:
-                    console.log("Refresh");
                 case Fudge.EVENT_EDITOR.SET_PROJECT:
                 case Fudge.EVENT_EDITOR.UPDATE:
                     // TODO: meaningful difference between update and setgraph
@@ -1610,6 +1659,7 @@ var Fudge;
                         if (this.graph != newGraph)
                             _event = new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: newGraph });
                     }
+                    break;
             }
             this.broadcastEvent(_event);
             _event.stopPropagation();
@@ -1676,52 +1726,50 @@ var Fudge;
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.PREVIEW, Fudge.ViewPreview);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.SCRIPT, Fudge.ViewScript);
             let inner = this.goldenLayout.rootItem.contentItems[0];
-            const previewAndPropertiesConfig = {
+            const config = {
                 type: "column",
-                content: [
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.PREVIEW,
-                        componentState: _state,
-                        title: "Preview"
-                    },
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.PROPERTIES,
-                        componentState: _state,
-                        title: "Properties"
-                    }
-                ]
+                content: [{
+                        type: "row",
+                        content: [{
+                                type: "component",
+                                componentType: Fudge.VIEW.PROPERTIES,
+                                componentState: _state,
+                                title: "Properties"
+                            }, {
+                                type: "component",
+                                componentType: Fudge.VIEW.PREVIEW,
+                                componentState: _state,
+                                title: "Preview"
+                            }]
+                    }, {
+                        type: "row",
+                        content: [{
+                                type: "column",
+                                content: [{
+                                        type: "component",
+                                        componentType: Fudge.VIEW.EXTERNAL,
+                                        componentState: _state,
+                                        title: "External"
+                                    }, {
+                                        type: "component",
+                                        componentType: Fudge.VIEW.SCRIPT,
+                                        componentState: _state,
+                                        title: "Script"
+                                    }]
+                            }, {
+                                type: "component",
+                                componentType: Fudge.VIEW.INTERNAL,
+                                componentState: _state,
+                                title: "Internal"
+                            }]
+                    }]
             };
-            const internalExternalScriptConfig = {
-                type: "column",
-                content: [
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.INTERNAL,
-                        componentState: _state,
-                        title: "Internal"
-                    },
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.EXTERNAL,
-                        componentState: _state,
-                        title: "External"
-                    },
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.SCRIPT,
-                        componentState: _state,
-                        title: "Script"
-                    }
-                ]
-            };
-            this.goldenLayout.rootItem.layoutManager.addItemAtLocation(previewAndPropertiesConfig, [{ typeId: 7 /* Root */ }]);
-            this.goldenLayout.rootItem.layoutManager.addItemAtLocation(internalExternalScriptConfig, [{ typeId: 7 /* Root */ }]);
+            this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: 7 /* Root */ }]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.REFRESH, this.hndEvent);
             this.setTitle("Project | " + Fudge.project.name);
             this.broadcastEvent(new Event(Fudge.EVENT_EDITOR.SET_PROJECT));
         }
@@ -2410,6 +2458,12 @@ var Fudge;
                 submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.ADD_JOINT, ƒ.Joint, _callback)
             });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({
+                label: "Delete Component",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.ADD_JOINT, ƒ.Joint, _callback)
+            });
+            item = new Fudge.remote.MenuItem({ label: "Delete Component", id: String(Fudge.CONTEXTMENU.DELETE_COMPONENT), click: _callback, accelerator: "D" });
+            menu.append(item);
             // ContextMenu.appendCopyPaste(menu);
             return menu;
         }
@@ -2423,9 +2477,35 @@ var Fudge;
                     break;
                 case Fudge.CONTEXTMENU.ADD_JOINT:
                     component = ƒ.Joint.subclasses[iSubclass];
+                    break;
+                case Fudge.CONTEXTMENU.DELETE_COMPONENT:
+                    let element = document.activeElement;
+                    if (element.tagName == "BODY")
+                        return;
+                    do {
+                        console.log(element.tagName);
+                        let controller = Reflect.get(element, "controller");
+                        if (element.tagName == "DETAILS" && controller) {
+                            this.dom.dispatchEvent(new CustomEvent("delete" /* DELETE */, { detail: { mutable: controller.getMutable() } }));
+                            break;
+                        }
+                        element = element.parentElement;
+                    } while (element);
+                    return;
             }
             //@ts-ignore
             let cmpNew = new component();
+            if (cmpNew instanceof ƒ.ComponentRigidbody)
+                if (!this.node.cmpTransform) {
+                    alert("To attach ComponentRigidbody, first attach ComponentTransform!");
+                    return;
+                }
+            if (cmpNew instanceof ƒ.ComponentGraphFilter)
+                if (!(this.node instanceof ƒ.Graph || this.node instanceof ƒ.GraphInstance)) {
+                    alert("Attach ComponentSyncGraph only to GraphInstances or Graph");
+                    console.log(this.node);
+                    return;
+                }
             ƒ.Debug.info(cmpNew.type, cmpNew);
             this.node.addComponent(cmpNew);
             this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.node } }));
@@ -2561,6 +2641,7 @@ var Fudge;
                 this.transform3(dtl.transform, value, mtxTransform, distance);
             if (mtxTransform instanceof ƒ.Matrix3x3)
                 this.transform2(dtl.transform, value.toVector2(), mtxTransform, 1);
+            component.mutate(component.getMutator());
         };
         transform3(_transform, _value, _mtxTransform, _distance) {
             switch (_transform) {
@@ -2657,6 +2738,7 @@ var Fudge;
             // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.setSelectedNode);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT_NODE, this.hndEvent);
         }
         setGraph(_graph) {
             if (!_graph) {
@@ -2689,7 +2771,6 @@ var Fudge;
             let path = _node.getPath();
             path = path.splice(path.indexOf(this.graph));
             this.tree.show(path);
-            this.tree.displaySelection([_node]);
         }
         hndDragOver(_event, _viewSource) {
             if (_viewSource == this) {
@@ -2723,15 +2804,12 @@ var Fudge;
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let item;
-            item = new Fudge.remote.MenuItem({ label: "Add Node", id: String(Fudge.CONTEXTMENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
+            item = new Fudge.remote.MenuItem({ label: "Add Node", id: String(Fudge.CONTEXTMENU.ADD_NODE), click: _callback, accelerator: "N" });
             menu.append(item);
-            // item = new remote.MenuItem({
-            //   label: "Add Component",
-            //   submenu: ContextMenu.getSubclassMenu<typeof ƒ.Component>(CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
-            // });
-            // menu.append(item);
-            // ContextMenu.appendCopyPaste(menu);
-            // menu.addListener("menu-will-close", (_event: Electron.Event) => { console.log(_event); });
+            item = new Fudge.remote.MenuItem({ label: "De- / Acvtivate", id: String(Fudge.CONTEXTMENU.ACTIVATE_NODE), click: _callback, accelerator: "A" });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Delete", id: String(Fudge.CONTEXTMENU.DELETE_NODE), click: _callback, accelerator: "D" });
+            menu.append(item);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
@@ -2744,22 +2822,20 @@ var Fudge;
                     this.tree.findVisible(focus).expand(true);
                     this.tree.findVisible(child).focus();
                     break;
-                // case CONTEXTMENU.ADD_COMPONENT:
-                //   let iSubclass: number = _item["iSubclass"];
-                //   let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
-                //   //@ts-ignore
-                //   let cmpNew: ƒ.Component = new component();
-                //   ƒ.Debug.info(cmpNew.type, cmpNew);
-                //   focus.addComponent(cmpNew);
-                //   this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: focus } }));
-                //   break;
-                case Fudge.CONTEXTMENU.ADD_COMPONENT_SCRIPT:
-                    // let script: typeof ƒ.ComponentScript = <typeof ƒ.ComponentScript>_item["Script"];
-                    let cmpScript = ƒ.Serializer.reconstruct(_item["Script"]);
-                    // let cmpScript: ƒ.ComponentScript = new script(); //Reflect.construct(script); //
-                    ƒ.Debug.info(cmpScript.type, cmpScript);
-                    focus.addComponent(cmpScript);
-                    this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: focus } }));
+                case Fudge.CONTEXTMENU.ACTIVATE_NODE:
+                    focus.activate(!focus.isActive);
+                    this.tree.findVisible(focus).refreshAttributes();
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.REFRESH, { bubbles: true }));
+                    break;
+                case Fudge.CONTEXTMENU.DELETE_NODE:
+                    // focus.addChild(child);
+                    if (!focus)
+                        return;
+                    this.tree.delete([focus]);
+                    focus.getParent().removeChild(focus);
+                    ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
+                    ƒ.Physics.cleanup();
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     break;
             }
         }
@@ -2770,6 +2846,8 @@ var Fudge;
                 case "delete" /* DELETE */:
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     break;
+                case Fudge.EVENT_EDITOR.SELECT_NODE:
+                    this.tree.displaySelection([_event.detail]);
                 case Fudge.EVENT_EDITOR.FOCUS_NODE:
                     this.focusNode(_event.detail);
                     break;
@@ -2794,6 +2872,7 @@ var Fudge;
         viewport;
         canvas;
         graph;
+        viewGraph;
         constructor(_container, _state) {
             super(_container, _state);
             this.graph = ƒ.Project.resources[_state["graph"]];
@@ -2819,6 +2898,12 @@ var Fudge;
             this.dom.addEventListener("pointerdown", this.hndPointer);
         }
         createUserInterface() {
+            this.viewGraph = new ƒ.Node("ViewGraph");
+            let viewNode = new ƒ.Node("ViewNode");
+            let nodeLight = new ƒ.Node("ViewIllumination");
+            viewNode.addChild(nodeLight);
+            viewNode.addChild(this.viewGraph);
+            ƒAid.addStandardLightComponents(nodeLight);
             let cmpCamera = new ƒ.ComponentCamera();
             // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
             // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
@@ -2829,16 +2914,13 @@ var Fudge;
             document.body.appendChild(this.canvas);
             // this.dom.append(this.canvas);
             this.viewport = new ƒ.Viewport();
-            this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+            this.viewport.initialize("ViewNode_Viewport", viewNode, cmpCamera, this.canvas);
             this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             // this.viewport.draw();
             this.setGraph(null);
-            // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
-            // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
-            //Focus cameracontrols on new viewport
-            // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
-            this.canvas.addEventListener("click" /* CLICK */, this.activeViewport);
+            // this.canvas.addEventListener(ƒUi.EVENT.CLICK, this.activeViewport);
+            this.canvas.addEventListener("pointerdown", this.activeViewport);
             this.canvas.addEventListener("pick", this.hndPick);
         }
         setGraph(_node) {
@@ -2851,8 +2933,18 @@ var Fudge;
                 this.dom.innerHTML = "";
                 this.dom.appendChild(this.canvas);
             }
+            // this.graph.broadcastEvent(new Event(ƒ.EVENT.DISCONNECT_JOINT));
+            // ƒ.Physics.cleanup();
             this.graph = _node;
-            this.viewport.setBranch(this.graph);
+            ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
+            ƒ.Physics.cleanup();
+            this.graph.broadcastEvent(new Event("disconnectJoint" /* DISCONNECT_JOINT */));
+            ƒ.Physics.connectJoints();
+            this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+            // this.viewport.setBranch(this.graph);
+            this.viewGraph.removeAllChildren();
+            this.viewGraph.appendChild(this.graph);
+            this.illuminateGraph();
             this.redraw();
         }
         //#region  ContextMenu
@@ -2876,15 +2968,20 @@ var Fudge;
                 ]
             });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE], checked: false, type: "checkbox", click: _callback });
+            menu.append(item);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
-            ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id] || _item.id}`);
+            ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
             switch (_item.id) {
                 case Fudge.TRANSFORM.TRANSLATE:
                 case Fudge.TRANSFORM.ROTATE:
                 case Fudge.TRANSFORM.SCALE:
                     Fudge.Page.setTransform(_item.id);
+                    break;
+                case Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]:
+                    this.illuminateGraph();
                     break;
                 case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.NONE]:
                 case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.COLLIDERS]:
@@ -2921,8 +3018,14 @@ var Fudge;
             // this.setGraph(<ƒ.Node>source);
             this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
         }
+        illuminateGraph() {
+            let nodeLight = this.viewGraph.getParent().getChildrenByName("ViewIllumination")[0];
+            if (nodeLight) {
+                nodeLight.activate(this.contextMenu.getMenuItemById(Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]).checked);
+                this.redraw();
+            }
+        }
         hndEvent = (_event) => {
-            ƒ.Physics.world.connectJoints();
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.CLEAR_PROJECT:
                     this.setGraph(null);
@@ -2943,7 +3046,7 @@ var Fudge;
         };
         hndPick = (_event) => {
             let picked = _event.detail.node;
-            // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: true, detail: picked }));
+            this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SELECT_NODE, { bubbles: true, detail: picked }));
             this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: picked } }));
         };
         // private animate = (_e: Event) => {
@@ -2975,12 +3078,14 @@ var Fudge;
             this.redraw();
         };
         activeViewport = (_event) => {
-            // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
+            ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
             _event.cancelBubble = true;
         };
         redraw = () => {
             try {
+                ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
                 this.viewport.draw();
+                // ƒ.Physics.connectJoints();
             }
             catch (_error) {
                 //nop
@@ -3003,6 +3108,7 @@ var Fudge;
         resource;
         viewport;
         cmrOrbit;
+        previewNode;
         constructor(_container, _state) {
             super(_container, _state);
             // create viewport for 3D-resources
@@ -3014,50 +3120,42 @@ var Fudge;
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Preview", null, cmpCamera, canvas);
             this.cmrOrbit = ƒAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+            this.previewNode = this.createStandardGraph();
             this.fillContent();
             _container.on("resize", this.redraw);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent, true);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-            // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+            this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
         }
         static createStandardMaterial() {
-            let mtrStandard = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("white")));
+            let mtrStandard = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("white")));
             ƒ.Project.deregister(mtrStandard);
             return mtrStandard;
         }
         static createStandardMesh() {
-            let meshStandard = new ƒ.MeshSphere("Sphere", 6, 5);
+            let meshStandard = new ƒ.MeshSphere("Sphere", 20, 12);
             ƒ.Project.deregister(meshStandard);
             return meshStandard;
         }
         // #region  ContextMenu
-        // protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
-        //   const menu: Electron.Menu = new remote.Menu();
-        //   let item: Electron.MenuItem;
-        //   item = new remote.MenuItem({ label: "Add Component", submenu: [] });
-        //   for (let subItem of ContextMenu.getComponents(_callback))
-        //     item.submenu.append(subItem);
-        //   menu.append(item);
-        //   ContextMenu.appendCopyPaste(menu);
-        //   return menu;
-        // }
-        // protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-        //   ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
-        //   switch (Number(_item.id)) {
-        //     case CONTEXTMENU.ADD_COMPONENT:
-        //       let iSubclass: number = _item["iSubclass"];
-        //       let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
-        //       //@ts-ignore
-        //       let cmpNew: ƒ.Component = new component();
-        //       ƒ.Debug.info(cmpNew.type, cmpNew);
-        //       // this.node.addComponent(cmpNew);
-        //       this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: this.resource } }));
-        //       break;
-        //   }
-        // }
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
+            menu.append(item);
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
+            switch (_item.id) {
+                case Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]:
+                    this.illuminateGraph();
+                    break;
+            }
+        }
         //#endregion
         fillContent() {
             this.dom.innerHTML = "";
@@ -3072,7 +3170,7 @@ var Fudge;
             if (this.resource instanceof ƒ.Mesh)
                 type = "Mesh";
             // console.log(type);
-            let graph;
+            let previewObject = new ƒ.Node("PreviewObject");
             let preview;
             switch (type) {
                 case "Function":
@@ -3086,20 +3184,29 @@ var Fudge;
                         this.dom.appendChild(preview);
                     break;
                 case "Mesh":
-                    graph = this.createStandardGraph();
-                    graph.addComponent(new ƒ.ComponentMesh(this.resource));
-                    graph.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
+                    previewObject.addComponent(new ƒ.ComponentMesh(this.resource));
+                    previewObject.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
+                    this.setViewObject(previewObject);
+                    this.resetCamera();
                     this.redraw();
                     break;
                 case "Material":
-                    graph = this.createStandardGraph();
-                    graph.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
-                    graph.addComponent(new ƒ.ComponentMaterial(this.resource));
+                    previewObject.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
+                    previewObject.addComponent(new ƒ.ComponentMaterial(this.resource));
+                    this.setViewObject(previewObject);
+                    this.resetCamera();
                     this.redraw();
                     break;
                 case "Graph":
-                    this.viewport.setBranch(this.resource);
-                    this.dom.appendChild(this.viewport.getCanvas());
+                    ƒ.Project.createGraphInstance(this.resource).then((_instance) => {
+                        previewObject.appendChild(_instance);
+                        this.redraw();
+                    });
+                    ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);
+                    this.setViewObject(previewObject);
+                    previewObject.addEventListener("mutate" /* MUTATE */, (_event) => {
+                        this.redraw();
+                    });
                     this.redraw();
                     break;
                 case "TextureImage":
@@ -3116,10 +3223,28 @@ var Fudge;
         }
         createStandardGraph() {
             let graph = new ƒ.Node("PreviewScene");
-            ƒAid.addStandardLightComponents(graph);
             this.viewport.setBranch(graph);
+            let nodeLight = new ƒ.Node("PreviewIllumination");
+            graph.addChild(nodeLight);
+            ƒAid.addStandardLightComponents(nodeLight);
             this.dom.appendChild(this.viewport.getCanvas());
-            return graph;
+            let previewNode = new ƒ.Node("PreviewNode");
+            graph.addChild(previewNode);
+            return previewNode;
+        }
+        setViewObject(_node, _graphIllumination = false) {
+            this.previewNode.removeAllChildren();
+            this.previewNode.addChild(_node);
+            if (_graphIllumination) // otherwise, light is always on!
+                this.illuminateGraph();
+            this.dom.appendChild(this.viewport.getCanvas());
+        }
+        illuminateGraph() {
+            let nodeLight = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
+            if (nodeLight) {
+                nodeLight.activate(this.contextMenu.getMenuItemById(Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]).checked);
+                this.redraw();
+            }
         }
         createFilePreview(_entry) {
             let mime = _entry.getMimeType();
@@ -3162,10 +3287,10 @@ var Fudge;
                 //   this.resource = undefined;
                 //   break;
                 case "change" /* CHANGE */:
-                case "mutate" /* MUTATE */:
                 case Fudge.EVENT_EDITOR.UPDATE:
-                    if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
+                    if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture /*  || this.resource instanceof ƒ.Material */)
                         this.fillContent();
+                case "mutate" /* MUTATE */:
                     this.redraw();
                     break;
                 default:
@@ -3192,7 +3317,8 @@ var Fudge;
         }
         redraw = () => {
             try {
-                this.resetCamera();
+                if (this.resource instanceof ƒ.Graph)
+                    ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);
                 this.viewport.draw();
             }
             catch (_error) {

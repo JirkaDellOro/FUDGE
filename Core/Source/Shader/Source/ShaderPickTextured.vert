@@ -3,14 +3,14 @@
 * Renders for Raycasting
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019
 */
-in vec3 a_position;       
-in vec2 a_textureUVs;
-uniform mat4 u_projection;
-uniform mat3 u_pivot;
+in vec3 a_vctPosition;       
+in vec2 a_vctTexture;
+uniform mat4 u_mtxMeshToView;
+uniform mat3 u_mtxPivot;
 
-out vec2 v_textureUVs;
+out vec2 v_vctTexture;
 
 void main() {   
-    gl_Position = u_projection * vec4(a_position, 1.0);
-    v_textureUVs = vec2(u_pivot * vec3(a_textureUVs, 1.0)).xy;
+    gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
+    v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
 }

@@ -282,8 +282,8 @@ namespace FudgeCore {
     /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them. */
     public drawBuffers(): void {
       this.shader.use();
-      let projection: Float32Array = Physics.world.mainCam.mtxWorldToView.get();
-      this.gl.uniformMatrix4fv(this.shader.getUniformLocation("u_projection"), false, projection);
+      let projection: Float32Array = Physics.mainCam.mtxWorldToView.get();
+      this.gl.uniformMatrix4fv(this.shader.getUniformLocation("u_mtxMeshToView"), false, projection);
 
 
       if (this.numPointData > 0) {
@@ -336,8 +336,8 @@ namespace FudgeCore {
       //Override point/line/triangle functions of OimoPhysics which are used to draw wireframes of objects, lines of raycasts or triangles when the objects are rendered by the physics not FUDGE (unused)
 
       OIMO.DebugDraw.prototype.point = function (_v: OIMO.Vec3, _color: OIMO.Vec3): void {
-        let debugWrapper: PhysicsDebugDraw = Physics.world.debugDraw; //Get the custom physics debug class to have access to the data.
-        if (Physics.world.mainCam != null) { //only act when there is a camera that is rendering
+        let debugWrapper: PhysicsDebugDraw = Physics.debugDraw; //Get the custom physics debug class to have access to the data.
+        if (Physics.mainCam != null) { //only act when there is a camera that is rendering
           let data: Array<Number> = debugWrapper.pointData; //get the already written buffer informations
           data.push(_v.x, _v.y, _v.z); //Coordinates of the point
           data.push(0, 0, 0); //Point Normals - Empty since it's not a polygon
@@ -347,8 +347,8 @@ namespace FudgeCore {
       };
 
       OIMO.DebugDraw.prototype.line = function (_v1: OIMO.Vec3, _v2: OIMO.Vec3, _color: OIMO.Vec3): void {
-        let debugWrapper: PhysicsDebugDraw = Physics.world.debugDraw;
-        if (Physics.world.mainCam != null) {
+        let debugWrapper: PhysicsDebugDraw = Physics.debugDraw;
+        if (Physics.mainCam != null) {
           let data: Array<number> = debugWrapper.lineData;
           data.push(_v1.x, _v1.y, _v1.z); //Point 1 Coordinates
           data.push(0, 0, 0); //P1 Normals - Empty since it's not a polygon
@@ -361,8 +361,8 @@ namespace FudgeCore {
       };
 
       OIMO.DebugDraw.prototype.triangle = function (_v1: OIMO.Vec3, _v2: OIMO.Vec3, _v3: OIMO.Vec3, _n1: OIMO.Vec3, _n2: OIMO.Vec3, _n3: OIMO.Vec3, _color: OIMO.Vec3): void {
-        let debugWrapper: PhysicsDebugDraw = Physics.world.debugDraw;
-        if (Physics.world.mainCam != null) {
+        let debugWrapper: PhysicsDebugDraw = Physics.debugDraw;
+        if (Physics.mainCam != null) {
           let data: Array<number> = debugWrapper.triData;
           data.push(_v1.x, _v1.y, _v1.z);
           data.push(_n1.x, _n1.y, _n1.z);
@@ -390,13 +390,13 @@ namespace FudgeCore {
 			varying vec3 vPosition;
 			varying vec3 vNormal;
 			varying vec3 vColor;
-			uniform mat4 u_projection;
+			uniform mat4 u_mtxMeshToView;
 
 			void main() {
 				vPosition = aPosition;
 				vColor = aColor;
 				vNormal = aNormal;
-				gl_Position = u_projection * vec4(aPosition,1.0);
+				gl_Position = u_mtxMeshToView * vec4(aPosition,1.0);
 				gl_PointSize = 6.0;
 			}`;
     }

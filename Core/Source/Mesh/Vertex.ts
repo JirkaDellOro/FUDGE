@@ -1,9 +1,15 @@
 namespace FudgeCore {
+  export interface Bone {
+    index: number;
+    weight: number;
+  }
+
   export class Vertex {
     public position: Vector3;
     public uv: Vector2;
     public normal: Vector3;
     public referTo: number;
+    public bones: Bone[];
 
     /**
      * Represents a vertex of a mesh with extended information such as the uv coordinates and the vertex normal.

@@ -18,41 +18,32 @@ namespace Fudge {
 
       this.setTitle("Graph");
 
-      const renderConfig: RowOrColumnItemConfig = {
+      const config: RowOrColumnItemConfig = {
         type: "column",
-        isClosable: true,
-        content: [
-          {
-            type: "component",
-            componentType: VIEW.RENDER,
-            componentState: _state,
-            title: "Render"
-          }
-        ]
-      };
-
-      const hierarchyAndComponents: RowOrColumnItemConfig = {
-        type: "column",
-        isClosable: true,
-        content: [
-          {
+        content: [{
+          type: "component",
+          componentType: VIEW.RENDER,
+          componentState: _state,
+          title: "Render"
+        }, {
+          type: "row",
+          content: [{
             type: "component",
             componentType: VIEW.HIERARCHY,
             componentState: _state,
             title: "Hierarchy"
-          },
-          {
+          }, {
             type: "component",
             componentType: VIEW.COMPONENTS,
             componentState: _state,
             title: "Components"
-          }
-        ]
+          }]
+        }]
       };
 
 
-      this.goldenLayout.addItemAtLocation(renderConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
-      this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+      this.goldenLayout.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+      // this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
 
 
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
@@ -60,6 +51,7 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT_NODE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
 
@@ -95,8 +87,6 @@ namespace Fudge {
         case EVENT_EDITOR.SET_GRAPH:
           this.setGraph(_event.detail);
           break;
-        case EVENT_EDITOR.REFRESH:
-          console.log("Refresh");
         case EVENT_EDITOR.SET_PROJECT:
         case EVENT_EDITOR.UPDATE:
           // TODO: meaningful difference between update and setgraph
@@ -105,10 +95,13 @@ namespace Fudge {
             if (this.graph != newGraph)
               _event = new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: newGraph });
           }
+          break;
       }
+
       this.broadcastEvent(_event);
       _event.stopPropagation();
     }
+
     private hndFocusNode = (_event: CustomEvent): void => {
       let event: CustomEvent = new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: false, detail: _event.detail.data });
       this.broadcastEvent(event);

@@ -7,40 +7,40 @@
 precision mediump float;
 
   // MINIMAL (no define needed): include base color
-uniform vec4 u_color;
+uniform vec4 u_vctColor;
 
   // FLAT: input vertex colors flat, so the third of a triangle determines the color
   #if defined(FLAT) 
-flat in vec4 v_color;
+flat in vec4 v_vctColor;
   // LIGHT: input vertex colors for each vertex for interpolation over the face
   #elif defined(LIGHT)
-in vec4 v_color;
+in vec4 v_vctColor;
   #endif
 
   // TEXTURE: input UVs and texture
-  #if defined(TEXTURE)
-in vec2 v_textureUVs;
+  #if defined(TEXTURE) || defined(MATCAP)
+in vec2 v_vctTexture;
 uniform sampler2D u_texture;
   #endif
 
-out vec4 frag;
+out vec4 vctFrag;
 
 void main() {
     // MINIMAL: set the base color
-  frag = u_color;
+  vctFrag = u_vctColor;
 
     // VERTEX: multiply with vertex color
     #if defined(FLAT) || defined(LIGHT)
-  frag *= v_color;
+  vctFrag *= v_vctColor;
     #endif
 
     // TEXTURE: multiply with texel color
-    #if defined(TEXTURE)
-  vec4 colorTexture = texture(u_texture, v_textureUVs);
-  frag *= colorTexture;
+    #if defined(TEXTURE) || defined(MATCAP)
+  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+  vctFrag *= vctColorTexture;
     #endif
 
     // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(frag.a < 0.01)
+  if(vctFrag.a < 0.01)
     discard;
 }

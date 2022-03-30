@@ -7,11 +7,15 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentMesh);
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
-    public mesh: Mesh = null;
+    public mesh: Mesh;
 
-    public constructor(_mesh: Mesh = null) {
+    #skeleton: SkeletonInstance;
+
+    public constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance) {
       super();
       this.mesh = _mesh;
+      if (_skeleton)
+        this.bindSkeleton(_skeleton);
     }
 
     public get radius(): number {
@@ -19,6 +23,54 @@ namespace FudgeCore {
       let scale: number = Math.max(Math.abs(scaling.x), Math.abs(scaling.y), Math.abs(scaling.z));
       return this.mesh.radius * scale;
     }
+
+    public get skeleton(): SkeletonInstance {
+      return this.#skeleton;
+    }
+
+    public bindSkeleton(_skeleton: SkeletonInstance): void {
+      this.#skeleton = _skeleton;
+
+      if (!this.skeleton && !this.node)
+        this.addEventListener(EVENT.COMPONENT_ADD, (_event: Event) => {
+          if (_event.target != this) return;
+          this.node.addChild(this.skeleton);
+        });
+      else if (this.node)
+        this.node.addChild(this.skeleton);
+    }
+
+    // /**
+    //  * Calculates the position of a vertex transformed by the skeleton
+    //  * @param _index index of the vertex
+    //  */
+    // public getVertexPosition(_index: number): Vector3 {
+    //   // extract the vertex data (vertices: 3D vectors, bone indices & weights: 4D vectors)
+    //   const iVertex: number = _index * 3;
+    //   const iBoneInfluence: number = _index * 4;
+      
+    //   const vertex: Vector3 = new Vector3(...Reflect.get(this.mesh, "renderMesh").vertices.slice(iVertex, iVertex + 3));
+    //   if (!(this.mesh instanceof MeshSkin)) return vertex;
+
+    //   const iBones: Uint8Array = this.mesh.iBones.slice(iBoneInfluence, iBoneInfluence + 4);
+    //   const weights: Float32Array = this.mesh.weights.slice(iBoneInfluence, iBoneInfluence + 4);
+
+    //   // get bone matrices
+    //   const mtxBones: Array<Matrix4x4> = this.skeleton.mtxBones;
+
+    //   // skin matrix S = sum_i=1^m{w_i * B_i}
+    //   const skinMatrix: Matrix4x4 = new Matrix4x4();
+    //   skinMatrix.set(Array
+    //     .from(iBones)
+    //     .map((iBone, iWeight) => mtxBones[iBone].get().map(value => value * weights[iWeight])) // apply weight on each matrix
+    //     .reduce((mtxSum, mtxBone) => mtxSum.map((value, index) => value + mtxBone[index])) // sum up the matrices
+    //   );
+
+    //   // transform vertex
+    //   vertex.transform(skinMatrix);
+
+    //   return vertex;
+    // }
 
     // TODO: remove or think if the transformed bounding box is of value or can be made to be
     // public get boundingBox(): Box {
@@ -40,6 +92,9 @@ namespace FudgeCore {
       else
         serialization = { mesh: Serializer.serialize(this.mesh) };
 
+      if (this.skeleton)
+        serialization.skeleton = this.skeleton.name;
+
       serialization.pivot = this.mtxPivot.serialize();
       serialization[super.constructor.name] = super.serialize();
       return serialization;
@@ -52,6 +107,15 @@ namespace FudgeCore {
       else
         mesh = <Mesh>await Serializer.deserialize(_serialization.mesh);
       this.mesh = mesh;
+
+      if (_serialization.skeleton)
+        this.addEventListener(EVENT.COMPONENT_ADD, (_event: Event) => {
+          if (_event.target != this) return;
+          this.node.addEventListener(EVENT.CHILD_APPEND, (_event: Event) => {
+            if (_event.target instanceof SkeletonInstance && _event.target.name == _serialization.skeleton)
+              this.#skeleton = _event.target;
+          });
+        });
 
       await this.mtxPivot.deserialize(_serialization.pivot);
       await super.deserialize(_serialization[super.constructor.name]);

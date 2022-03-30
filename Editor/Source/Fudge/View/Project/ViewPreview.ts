@@ -13,6 +13,7 @@ namespace Fudge {
     private resource: ƒ.SerializableResource | DirectoryEntry | Function;
     private viewport: ƒ.Viewport;
     private cmrOrbit: ƒAid.CameraOrbit;
+    private previewNode: ƒ.Node;
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
@@ -26,6 +27,7 @@ namespace Fudge {
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("Preview", null, cmpCamera, canvas);
       this.cmrOrbit = ƒAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+      this.previewNode = this.createStandardGraph();
 
       this.fillContent();
 
@@ -34,52 +36,42 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent, true);
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-      // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
     }
 
     private static createStandardMaterial(): ƒ.Material {
-      let mtrStandard: ƒ.Material = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("white")));
+      let mtrStandard: ƒ.Material = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("white")));
       ƒ.Project.deregister(mtrStandard);
       return mtrStandard;
     }
 
     private static createStandardMesh(): ƒ.Mesh {
-      let meshStandard: ƒ.MeshSphere = new ƒ.MeshSphere("Sphere", 6, 5);
+      let meshStandard: ƒ.MeshSphere = new ƒ.MeshSphere("Sphere", 20, 12);
       ƒ.Project.deregister(meshStandard);
       return meshStandard;
     }
 
     // #region  ContextMenu
-    // protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
-    //   const menu: Electron.Menu = new remote.Menu();
-    //   let item: Electron.MenuItem;
+    protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
+      const menu: Electron.Menu = new remote.Menu();
+      let item: Electron.MenuItem;
 
-    //   item = new remote.MenuItem({ label: "Add Component", submenu: [] });
-    //   for (let subItem of ContextMenu.getComponents(_callback))
-    //     item.submenu.append(subItem);
-    //   menu.append(item);
+      item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU[CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
+      menu.append(item);
+      return menu;
+    }
 
-    //   ContextMenu.appendCopyPaste(menu);
-    //   return menu;
-    // }
+    protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
 
-    // protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-    //   ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
+      switch (_item.id) {
+        case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
+          this.illuminateGraph();
+          break;
+      }
+    }
 
-    //   switch (Number(_item.id)) {
-    //     case CONTEXTMENU.ADD_COMPONENT:
-    //       let iSubclass: number = _item["iSubclass"];
-    //       let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
-    //       //@ts-ignore
-    //       let cmpNew: ƒ.Component = new component();
-    //       ƒ.Debug.info(cmpNew.type, cmpNew);
-
-    //       // this.node.addComponent(cmpNew);
-    //       this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: this.resource } }));
-    //       break;
-    //   }
-    // }
     //#endregion
 
     private fillContent(): void {
@@ -89,7 +81,7 @@ namespace Fudge {
         this.setTitle("Preview");
         return;
       }
-      
+
       this.setTitle("Preview | " + this.resource.name);
       //@ts-ignore
       let type: string = this.resource.type || "Function";
@@ -97,7 +89,7 @@ namespace Fudge {
         type = "Mesh";
 
       // console.log(type);
-      let graph: ƒ.Node;
+      let previewObject: ƒ.Node = new ƒ.Node("PreviewObject");
       let preview: HTMLElement;
       switch (type) {
         case "Function":
@@ -111,20 +103,31 @@ namespace Fudge {
             this.dom.appendChild(preview);
           break;
         case "Mesh":
-          graph = this.createStandardGraph();
-          graph.addComponent(new ƒ.ComponentMesh(<ƒ.Mesh>this.resource));
-          graph.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
+          previewObject.addComponent(new ƒ.ComponentMesh(<ƒ.Mesh>this.resource));
+          previewObject.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
+          this.setViewObject(previewObject);
+          this.resetCamera();
           this.redraw();
           break;
         case "Material":
-          graph = this.createStandardGraph();
-          graph.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
-          graph.addComponent(new ƒ.ComponentMaterial(<ƒ.Material>this.resource));
+          previewObject.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
+          previewObject.addComponent(new ƒ.ComponentMaterial(<ƒ.Material>this.resource));
+          this.setViewObject(previewObject);
+          this.resetCamera();
           this.redraw();
           break;
         case "Graph":
-          this.viewport.setBranch(<ƒ.Graph>this.resource);
-          this.dom.appendChild(this.viewport.getCanvas());
+          ƒ.Project.createGraphInstance(<ƒ.Graph>this.resource).then(
+            (_instance: ƒ.GraphInstance) => {
+              previewObject.appendChild(_instance);
+              this.redraw();
+            }
+          );
+          ƒ.Physics.activeInstance = Page.getPhysics(<ƒ.Graph>this.resource);
+          this.setViewObject(previewObject);
+          previewObject.addEventListener(ƒ.EVENT.MUTATE, (_event: Event) => {
+            this.redraw();
+          });
           this.redraw();
           break;
         case "TextureImage":
@@ -142,10 +145,33 @@ namespace Fudge {
 
     private createStandardGraph(): ƒ.Node {
       let graph: ƒ.Node = new ƒ.Node("PreviewScene");
-      ƒAid.addStandardLightComponents(graph);
       this.viewport.setBranch(graph);
+
+      let nodeLight: ƒ.Node = new ƒ.Node("PreviewIllumination");
+      graph.addChild(nodeLight);
+      ƒAid.addStandardLightComponents(nodeLight);
+
       this.dom.appendChild(this.viewport.getCanvas());
-      return graph;
+
+      let previewNode: ƒ.Node = new ƒ.Node("PreviewNode");
+      graph.addChild(previewNode);
+      return previewNode;
+    }
+
+    private setViewObject(_node: ƒ.Node, _graphIllumination: boolean = false): void {
+      this.previewNode.removeAllChildren();
+      this.previewNode.addChild(_node);
+      if (_graphIllumination) // otherwise, light is always on!
+        this.illuminateGraph();
+      this.dom.appendChild(this.viewport.getCanvas());
+    }
+
+    private illuminateGraph(): void {
+      let nodeLight: ƒ.Node = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
+      if (nodeLight) {
+        nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU[CONTEXTMENU.ILLUMINATE]).checked);
+        this.redraw();
+      }
     }
 
     private createFilePreview(_entry: DirectoryEntry): HTMLElement {
@@ -191,10 +217,10 @@ namespace Fudge {
         //   this.resource = undefined;
         //   break;
         case ƒUi.EVENT.CHANGE:
-        case ƒUi.EVENT.MUTATE:
         case EVENT_EDITOR.UPDATE:
-          if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
+          if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture /*  || this.resource instanceof ƒ.Material */)
             this.fillContent();
+        case ƒUi.EVENT.MUTATE:
           this.redraw();
           break;
         default:
@@ -225,7 +251,8 @@ namespace Fudge {
 
     private redraw = () => {
       try {
-        this.resetCamera();
+        if (this.resource instanceof ƒ.Graph)
+          ƒ.Physics.activeInstance = Page.getPhysics(this.resource);
         this.viewport.draw();
       } catch (_error: unknown) {
         //nop

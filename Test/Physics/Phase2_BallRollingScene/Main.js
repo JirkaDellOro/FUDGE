@@ -19,38 +19,39 @@ var FudgePhysics_Communication;
         hierarchy = new f.Node("Scene");
         document.addEventListener("keypress", hndKey);
         document.addEventListener("keydown", hndKeyDown);
-        let ground = createCompleteMeshNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), "Cube", 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
+        let ground = createCompleteMeshNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), "Cube", 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
         let cmpGroundMesh = ground.getComponent(f.ComponentTransform);
         cmpGroundMesh.mtxLocal.scale(new f.Vector3(10, 0.3, 10));
         cmpGroundMesh.mtxLocal.translate(new f.Vector3(0, -1.5, 0));
         hierarchy.appendChild(ground);
-        bodies[0] = createCompleteMeshNode("Ball", new f.Material("Ball", f.ShaderFlat, new f.CoatColored(new f.Color(0.5, 0.5, 0.5, 1))), "Sphere", 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
+        bodies[0] = createCompleteMeshNode("Ball", new f.Material("Ball", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.5, 0.5, 0.5, 1))), "Sphere", 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
         let cmpCubeTransform = bodies[0].getComponent(f.ComponentTransform);
         hierarchy.appendChild(bodies[0]);
         cmpCubeTransform.mtxLocal.translate(new f.Vector3(7, 4, 0));
         ballRB = bodies[0].getComponent(f.ComponentRigidbody);
         ballRB.dampTranslation = 0.1;
         ballRB.dampRotation = 0.1;
-        bodies[1] = createCompleteMeshNode("Cube_-10GradZ", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), "Cube", 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
+        ballRB.restitution = 0.75;
+        bodies[1] = createCompleteMeshNode("Cube_-10GradZ", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 1, 0, 1))), "Cube", 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
         hierarchy.appendChild(bodies[1]);
         bodies[1].mtxLocal.translate(new f.Vector3(-7, -1.5, 0));
         bodies[1].mtxLocal.scale(new f.Vector3(10, 0.3, 10));
         bodies[1].mtxLocal.rotateZ(-10, true);
-        bodies[2] = createCompleteMeshNode("Cube_-20GradZ", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), "Cube", 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
+        bodies[2] = createCompleteMeshNode("Cube_-20GradZ", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 1, 0, 1))), "Cube", 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
         hierarchy.appendChild(bodies[2]);
         bodies[2].mtxLocal.translate(new f.Vector3(8, -1, 0));
         bodies[2].mtxLocal.scale(new f.Vector3(10, 0.1, 10));
         bodies[2].mtxLocal.rotateZ(20, true);
-        bodies[4] = createCompleteMeshNode("Cube_15,0,10Grad", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), "Cube", 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
+        bodies[4] = createCompleteMeshNode("Cube_15,0,10Grad", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 1, 0, 1))), "Cube", 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
         bodies[4].mtxLocal.translate(new f.Vector3(0, -1.3, -9.5));
         bodies[4].mtxLocal.scale(new f.Vector3(10, 0.3, 10));
         bodies[4].mtxLocal.rotate(new f.Vector3(15, 0, 10), true);
         hierarchy.appendChild(bodies[4]);
-        bodies[3] = createCompleteMeshNode("ResetTrigger", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), "Cube", 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT);
+        bodies[3] = createCompleteMeshNode("ResetTrigger", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 1, 0, 1))), "Cube", 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT);
         bodies[3].removeComponent(bodies[3].getComponent(f.ComponentMesh));
         hierarchy.appendChild(bodies[3]);
         bodies[3].mtxLocal.translate(new f.Vector3(0, -3, 0));
-        bodies[3].mtxLocal.scale(new f.Vector3(40, 0.3, 40));
+        bodies[3].mtxLocal.scale(new f.Vector3(60, 1, 60));
         bodies[3].getComponent(f.ComponentRigidbody).isTrigger = true;
         bodies[3].getComponent(f.ComponentRigidbody).addEventListener("TriggerEnteredCollision" /* TRIGGER_ENTER */, resetBall);
         let cmpLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
@@ -68,7 +69,7 @@ var FudgePhysics_Communication;
         f.Loop.start();
     }
     function update() {
-        f.Physics.world.simulate();
+        f.Physics.simulate();
         viewPort.draw();
         measureFPS();
     }
@@ -141,6 +142,12 @@ var FudgePhysics_Communication;
         //toggle between force applied and impulse applied
         if (_event.code == f.KEYBOARD_CODE.T) {
             isForce = !isForce;
+        }
+        if (_event.code == f.KEYBOARD_CODE.SPACE) {
+            if (isForce)
+                ballRB.applyForce(new f.Vector3(0, 600, 0));
+            else
+                ballRB.applyImpulseAtPoint(new f.Vector3(0, 10, 0));
         }
     }
 })(FudgePhysics_Communication || (FudgePhysics_Communication = {}));

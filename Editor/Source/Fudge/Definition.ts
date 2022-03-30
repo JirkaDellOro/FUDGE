@@ -2,7 +2,10 @@ namespace Fudge {
   export enum CONTEXTMENU {
     // SKETCH = ViewSketch,
     ADD_NODE,
+    ACTIVATE_NODE,
+    DELETE_NODE,
     ADD_COMPONENT,
+    DELETE_COMPONENT,
     ADD_COMPONENT_SCRIPT,
     EDIT,
     CREATE_MESH,
@@ -10,9 +13,8 @@ namespace Fudge {
     CREATE_GRAPH,
     REMOVE_COMPONENT,
     ADD_JOINT,
-    TRANSLATE,
-    ROTATE,
-    SCALE
+    DELETE_RESOURCE, 
+    ILLUMINATE
   }
 
 
@@ -30,6 +32,8 @@ namespace Fudge {
   }
 
 
+
+
   export enum EVENT_EDITOR {
     SET_GRAPH = "setGraph",
     FOCUS_NODE = "focusNode",
@@ -38,7 +42,8 @@ namespace Fudge {
     REFRESH = "refresh",
     DESTROY = "destroy",
     CLEAR_PROJECT = "clearProject",
-    TRANSFORM = "transform"
+    TRANSFORM = "transform",
+    SELECT_NODE = "selectNode"
   }
 
 

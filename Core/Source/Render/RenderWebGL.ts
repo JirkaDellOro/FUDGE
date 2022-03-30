@@ -253,12 +253,12 @@ namespace FudgeCore {
         shader.useProgram();
         coat.useRenderData(shader, cmpMaterial);
 
-        let sizeUniformLocation: WebGLUniformLocation = shader.uniforms["u_size"];
+        let sizeUniformLocation: WebGLUniformLocation = shader.uniforms["u_vctSize"];
         RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, [RenderWebGL.sizePick, RenderWebGL.sizePick]);
 
         let mesh: Mesh = cmpMesh.mesh;
-        let nIndices: number = mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView, Render.ƒpicked.length);
-        RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+        let renderBuffers: RenderBuffers = mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView, Render.ƒpicked.length);
+        RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
 
         let pick: Pick = new Pick(_node);
         Render.ƒpicked.push(pick);
@@ -277,7 +277,7 @@ namespace FudgeCore {
       let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
 
       // Ambient
-      let ambient: WebGLUniformLocation = uni["u_ambient.color"];
+      let ambient: WebGLUniformLocation = uni["u_ambient.vctColor"];
       if (ambient) {
         RenderWebGL.crc3.uniform4fv(ambient, [0, 0, 0, 0]);
         let cmpLights: ComponentLight[] = _lights.get(LightAmbient);
@@ -300,12 +300,12 @@ namespace FudgeCore {
           RenderWebGL.crc3.uniform1ui(nDirectional, n);
           for (let i: number = 0; i < n; i++) {
             let cmpLight: ComponentLight = cmpLights[i];
-            RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].color`], cmpLight.light.color.getArray());
+            RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].vctColor`], cmpLight.light.color.getArray());
             let direction: Vector3 = Vector3.Z();
             direction.transform(cmpLight.mtxPivot, false);
             direction.transform(cmpLight.node.mtxWorld, false);
             direction.normalize();
-            RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
+            RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].vctDirection`], direction.get());
           }
         }
       }
@@ -315,18 +315,25 @@ namespace FudgeCore {
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
      */
-    protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4): void {
+    protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _cmpCamera: ComponentCamera): void {
       let shader: typeof Shader = cmpMaterial.material.getShader();
       let coat: Coat = cmpMaterial.material.coat;
+      let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, _cmpMesh.mtxWorld);
       shader.useProgram();
-      let nIndices: number = _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxMeshToView);
+      let renderBuffers: RenderBuffers;
+      if (_cmpMesh.mesh instanceof MeshSkin)
+        renderBuffers = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
+      else
+        renderBuffers = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView);
+
       coat.useRenderData(shader, cmpMaterial);
-      RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+      let uCamera: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
+      if (uCamera)
+        RenderWebGL.crc3.uniform3fv(uCamera, _cmpCamera.mtxWorld.translation.get());
+      let uWorldToView: WebGLUniformLocation = shader.uniforms["u_mtxWorldToView"];
+      if (uWorldToView)
+        RenderWebGL.crc3.uniformMatrix4fv(uWorldToView, false, _cmpCamera.mtxWorldToView.get());
+      RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }
-
-
-    /**
-     * Drawing a physics debug buffer
-     */
   }
 }

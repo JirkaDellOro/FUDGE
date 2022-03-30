@@ -12,11 +12,13 @@ namespace Fudge {
     private cmrOrbit: ƒAid.CameraOrbit;
     private viewport: ƒ.Viewport;
     private canvas: HTMLCanvasElement;
-    private graph: ƒ.Node;
+    private graph: ƒ.Graph;
+    private viewGraph: ƒ.Node;
 
     constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
       this.graph = <ƒ.Graph>ƒ.Project.resources[_state["graph"]];
+
       this.createUserInterface();
 
       let title: string = `● Drop a graph from "Internal" here.\n`;
@@ -42,6 +44,13 @@ namespace Fudge {
     }
 
     createUserInterface(): void {
+      this.viewGraph = new ƒ.Node("ViewGraph");
+      let viewNode: ƒ.Node = new ƒ.Node("ViewNode");
+      let nodeLight: ƒ.Node = new ƒ.Node("ViewIllumination");
+      viewNode.addChild(nodeLight);
+      viewNode.addChild(this.viewGraph);
+      ƒAid.addStandardLightComponents(nodeLight);
+
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
       // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
       // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
@@ -53,24 +62,19 @@ namespace Fudge {
       // this.dom.append(this.canvas);
 
       this.viewport = new ƒ.Viewport();
-      this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+      this.viewport.initialize("ViewNode_Viewport", viewNode, cmpCamera, this.canvas);
       this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       // this.viewport.draw();
 
       this.setGraph(null);
 
-      // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
-      // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
-
-      //Focus cameracontrols on new viewport
-      // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
-
-      this.canvas.addEventListener(ƒUi.EVENT.CLICK, this.activeViewport);
+      // this.canvas.addEventListener(ƒUi.EVENT.CLICK, this.activeViewport);
+      this.canvas.addEventListener("pointerdown", this.activeViewport);
       this.canvas.addEventListener("pick", this.hndPick);
     }
 
-    public setGraph(_node: ƒ.Node): void {
+    public setGraph(_node: ƒ.Graph): void {
       if (!_node) {
         this.graph = undefined;
         this.dom.innerHTML = "Drop a graph here to edit";
@@ -80,10 +84,21 @@ namespace Fudge {
         this.dom.innerHTML = "";
         this.dom.appendChild(this.canvas);
       }
+      // this.graph.broadcastEvent(new Event(ƒ.EVENT.DISCONNECT_JOINT));
+      // ƒ.Physics.cleanup();
       this.graph = _node;
-      this.viewport.setBranch(this.graph);
+      ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
+      ƒ.Physics.cleanup();
+      this.graph.broadcastEvent(new Event(ƒ.EVENT.DISCONNECT_JOINT));
+      ƒ.Physics.connectJoints();
+      this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+      // this.viewport.setBranch(this.graph);
+      this.viewGraph.removeAllChildren();
+      this.viewGraph.appendChild(this.graph);
+      this.illuminateGraph();
       this.redraw();
     }
+    
 
     //#region  ContextMenu
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
@@ -107,17 +122,24 @@ namespace Fudge {
         ]
       });
       menu.append(item);
+
+      item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU[CONTEXTMENU.ILLUMINATE], checked: false, type: "checkbox", click: _callback });
+      menu.append(item);
+
       return menu;
     }
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id] || _item.id}`);
+      ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
 
       switch (_item.id) {
         case TRANSFORM.TRANSLATE:
         case TRANSFORM.ROTATE:
         case TRANSFORM.SCALE:
           Page.setTransform(_item.id);
+          break;
+        case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
+          this.illuminateGraph();
           break;
         case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.NONE]:
         case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.COLLIDERS]:
@@ -161,8 +183,15 @@ namespace Fudge {
       this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
     }
 
+    private illuminateGraph(): void {
+      let nodeLight: ƒ.Node = this.viewGraph.getParent().getChildrenByName("ViewIllumination")[0];
+      if (nodeLight) {
+        nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU[CONTEXTMENU.ILLUMINATE]).checked);
+        this.redraw();
+      }
+    }
+
     private hndEvent = (_event: CustomEvent): void => {
-      ƒ.Physics.world.connectJoints();
       switch (_event.type) {
         case EVENT_EDITOR.CLEAR_PROJECT:
           this.setGraph(null);
@@ -185,7 +214,7 @@ namespace Fudge {
     private hndPick = (_event: CustomEvent): void => {
       let picked: ƒ.Node = _event.detail.node;
 
-      // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: true, detail: picked }));
+      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SELECT_NODE, { bubbles: true, detail: picked }));
       this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: picked } }));
     }
 
@@ -202,7 +231,7 @@ namespace Fudge {
       }
       this.#pointerMoved ||= (_event.movementX != 0 || _event.movementY != 0);
 
-      this.dom.focus({preventScroll: true});
+      this.dom.focus({ preventScroll: true });
       let restriction: string;
       if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.X]))
         restriction = "x";
@@ -223,13 +252,15 @@ namespace Fudge {
     }
 
     private activeViewport = (_event: MouseEvent): void => {
-      // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
+      ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
       _event.cancelBubble = true;
     }
 
     private redraw = () => {
       try {
+        ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
         this.viewport.draw();
+        // ƒ.Physics.connectJoints();
       } catch (_error: unknown) {
         //nop
       }

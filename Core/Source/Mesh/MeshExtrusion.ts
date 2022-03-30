@@ -57,16 +57,16 @@ namespace FudgeCore {
     private extrude(_mtxTransforms: Matrix4x4[] = MeshExtrusion.mtxDefaults): void {
       this.mtxTransforms = <MutableArray<Matrix4x4>>MutableArray.from(<MutableArray<Matrix4x4>>_mtxTransforms);
       let nTransforms: number = _mtxTransforms.length;
-      let nVerticesShape: number = this.cloud.length;
+      let nVerticesShape: number = this.vertices.length;
 
       // create new vertex cloud, current cloud holds MeshPolygon
       let vertices: Vertices = new Vertices();
 
       // create base by transformation of polygon with first transform
-      let base: Vertex[] = this.cloud.map((_v: Vertex) => new Vertex(Vector3.TRANSFORMATION(_v.position, _mtxTransforms[0], true), _v.uv));
+      let base: Vertex[] = this.vertices.map((_v: Vertex) => new Vertex(Vector3.TRANSFORMATION(_v.position, _mtxTransforms[0], true), _v.uv));
       vertices.push(...base);
       // create lid by transformation of polygon with last transform
-      let lid: Vertex[] = this.cloud.map((_v: Vertex) => new Vertex(Vector3.TRANSFORMATION(_v.position, _mtxTransforms[nTransforms - 1], true), _v.uv));
+      let lid: Vertex[] = this.vertices.map((_v: Vertex) => new Vertex(Vector3.TRANSFORMATION(_v.position, _mtxTransforms[nTransforms - 1], true), _v.uv));
       vertices.push(...lid);
 
       // recreate base faces to recalculate normals
@@ -79,7 +79,7 @@ namespace FudgeCore {
       for (let t: number = 0; t < nTransforms; t++) {
         let mtxTransform: Matrix4x4 = _mtxTransforms[t];
         let referToClose: number = vertices.length;
-        let wrap: Vertex[] = this.cloud.map((_v: Vertex, _i: number) =>
+        let wrap: Vertex[] = this.vertices.map((_v: Vertex, _i: number) =>
           new Vertex(Vector3.TRANSFORMATION(_v.position, mtxTransform, true), new Vector2(_i / nVerticesShape, t / nTransforms))
         );
         vertices.push(...wrap);
@@ -99,7 +99,7 @@ namespace FudgeCore {
           this.faces.push(...quad.faces);
         }
 
-      this.cloud = vertices;
+      this.vertices = vertices;
       return;
     }
 

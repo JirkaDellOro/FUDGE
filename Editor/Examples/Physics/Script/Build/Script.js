@@ -21,7 +21,7 @@ var Script;
         hndEvent = (_event) => {
             switch (_event.type) {
                 case "componentAdd" /* COMPONENT_ADD */:
-                    ƒ.Debug.log(this.message, this.getContainer());
+                    ƒ.Debug.log(this.message, this.node);
                     break;
                 case "componentRemove" /* COMPONENT_REMOVE */:
                     this.removeEventListener("componentAdd" /* COMPONENT_ADD */, this.hndEvent);
@@ -44,7 +44,7 @@ var Script;
         ƒ.Loop.start(); // start the game loop to continously draw the viewport and update the audiosystem
     }
     function update(_event) {
-        ƒ.Physics.world.simulate();
+        ƒ.Physics.simulate();
         viewport.draw();
         ƒ.AudioManager.default.update();
     }
