@@ -125,7 +125,7 @@ namespace Fudge {
               lightsPresent = false;
               ƒ.Render.lights.forEach((_array: ƒ.RecycableArray<ƒ.ComponentLight>) => lightsPresent ||= _array.length > 0);
               this.illuminate(!lightsPresent);
-              this.setTitle(`${lightsPresent ? "Preview" : "PREVIEW"} | ${this.resource.name}`);
+              this.setTitle(`${lightsPresent ? "PREVIEW" : "Preview"} | ${this.resource.name}`);
               //@ts-ignore
               this.container.tab.titleElement.setAttribute("Lit", "true");
               this.redraw();

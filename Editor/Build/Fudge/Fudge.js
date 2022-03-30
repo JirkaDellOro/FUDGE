@@ -2949,7 +2949,7 @@ var Fudge;
             let lightsPresent = false;
             ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
             this.illuminateGraph(!lightsPresent);
-            this.setTitle(`${lightsPresent ? "Render" : "RENDER"} | ${this.graph.name}`);
+            this.setTitle(`${lightsPresent ? "RENDER" : "Render"} | ${this.graph.name}`);
             this.redraw();
         }
         //#region  ContextMenu
@@ -3202,7 +3202,7 @@ var Fudge;
                         lightsPresent = false;
                         ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
                         this.illuminate(!lightsPresent);
-                        this.setTitle(`${lightsPresent ? "Preview" : "PREVIEW"} | ${this.resource.name}`);
+                        this.setTitle(`${lightsPresent ? "PREVIEW" : "Preview"} | ${this.resource.name}`);
                         //@ts-ignore
                         this.container.tab.titleElement.setAttribute("Lit", "true");
                         this.redraw();

@@ -98,7 +98,7 @@ namespace Fudge {
       let lightsPresent: boolean = false;
       ƒ.Render.lights.forEach((_array: ƒ.RecycableArray<ƒ.ComponentLight>) => lightsPresent ||= _array.length > 0);
       this.illuminateGraph(!lightsPresent);
-      this.setTitle(`${lightsPresent ? "Render" : "RENDER"} | ${this.graph.name}`);
+      this.setTitle(`${lightsPresent ? "RENDER" : "Render"} | ${this.graph.name}`);
       this.redraw();
     }
 
