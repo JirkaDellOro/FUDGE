@@ -95,10 +95,7 @@ namespace Fudge {
       // this.viewport.setBranch(this.graph);
       this.viewGraph.removeAllChildren();
       this.viewGraph.appendChild(this.graph);
-      let lightsPresent: boolean = false;
-      ƒ.Render.lights.forEach((_array: ƒ.RecycableArray<ƒ.ComponentLight>) => lightsPresent ||= _array.length > 0);
-      this.illuminateGraph(!lightsPresent);
-      this.setTitle(`${lightsPresent ? "RENDER" : "Render"} | ${this.graph.name}`);
+      this.checkIllumination();
       this.redraw();
     }
 
@@ -180,6 +177,13 @@ namespace Fudge {
       this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
     }
 
+    private checkIllumination(): void {
+      let lightsPresent: boolean = false;
+      ƒ.Render.lights.forEach((_array: ƒ.RecycableArray<ƒ.ComponentLight>) => lightsPresent ||= _array.length > 0);
+      this.illuminateGraph(!lightsPresent);
+      this.setTitle(`${lightsPresent ? "RENDER" : "Render"} | ${this.graph.name}`);
+    }
+
     private illuminateGraph(_on: boolean): void {
       let nodeLight: ƒ.Node = this.viewGraph.getParent().getChildrenByName("ViewIllumination")[0];
       nodeLight.activate(_on);
@@ -202,6 +206,7 @@ namespace Fudge {
         case ƒUi.EVENT.DELETE:
         case EVENT_EDITOR.UPDATE:
         case EVENT_EDITOR.REFRESH:
+          this.checkIllumination();
           this.redraw();
       }
     }

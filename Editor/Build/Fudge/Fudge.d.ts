@@ -559,6 +559,7 @@ declare namespace Fudge {
         protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
+        private checkIllumination;
         private illuminateGraph;
         private hndEvent;
         private hndPick;

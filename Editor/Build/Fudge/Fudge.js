@@ -2510,6 +2510,7 @@ var Fudge;
                 }
             ƒ.Debug.info(cmpNew.type, cmpNew);
             this.node.addComponent(cmpNew);
+            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.node } }));
         }
         //#endregion
@@ -2946,10 +2947,7 @@ var Fudge;
             // this.viewport.setBranch(this.graph);
             this.viewGraph.removeAllChildren();
             this.viewGraph.appendChild(this.graph);
-            let lightsPresent = false;
-            ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
-            this.illuminateGraph(!lightsPresent);
-            this.setTitle(`${lightsPresent ? "RENDER" : "Render"} | ${this.graph.name}`);
+            this.checkIllumination();
             this.redraw();
         }
         //#region  ContextMenu
@@ -3018,6 +3016,12 @@ var Fudge;
             // this.setGraph(<ƒ.Node>source);
             this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
         }
+        checkIllumination() {
+            let lightsPresent = false;
+            ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
+            this.illuminateGraph(!lightsPresent);
+            this.setTitle(`${lightsPresent ? "RENDER" : "Render"} | ${this.graph.name}`);
+        }
         illuminateGraph(_on) {
             let nodeLight = this.viewGraph.getParent().getChildrenByName("ViewIllumination")[0];
             nodeLight.activate(_on);
@@ -3039,6 +3043,7 @@ var Fudge;
                 case "delete" /* DELETE */:
                 case Fudge.EVENT_EDITOR.UPDATE:
                 case Fudge.EVENT_EDITOR.REFRESH:
+                    this.checkIllumination();
                     this.redraw();
             }
         };
