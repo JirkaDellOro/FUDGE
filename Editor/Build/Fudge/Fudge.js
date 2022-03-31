@@ -3026,6 +3026,7 @@ var Fudge;
         }
         checkIllumination() {
             let lightsPresent = false;
+            ƒ.Render.prepare(this.graph);
             ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
             this.illuminateGraph(!lightsPresent);
             this.setTitle(`${lightsPresent ? "RENDER" : "Render"} | ${this.graph.name}`);
@@ -3211,6 +3212,11 @@ var Fudge;
                 case "Graph":
                     ƒ.Project.createGraphInstance(this.resource).then((_instance) => {
                         previewObject.appendChild(_instance);
+                        ƒ.Render.prepare(_instance);
+                        lightsPresent = false;
+                        ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
+                        this.illuminate(!lightsPresent);
+                        this.setTitle(`${lightsPresent ? "PREVIEW" : "Preview"} | ${this.resource.name}`);
                         this.redraw();
                     });
                     ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);

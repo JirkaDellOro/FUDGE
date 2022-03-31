@@ -121,6 +121,11 @@ namespace Fudge {
           ƒ.Project.createGraphInstance(<ƒ.Graph>this.resource).then(
             (_instance: ƒ.GraphInstance) => {
               previewObject.appendChild(_instance);
+              ƒ.Render.prepare(_instance);
+              lightsPresent = false;
+              ƒ.Render.lights.forEach((_array: ƒ.RecycableArray<ƒ.ComponentLight>) => lightsPresent ||= _array.length > 0);
+              this.illuminate(!lightsPresent);
+              this.setTitle(`${lightsPresent ? "PREVIEW" : "Preview"} | ${this.resource.name}`);
               this.redraw();
             }
           );

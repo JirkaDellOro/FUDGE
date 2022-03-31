@@ -179,6 +179,7 @@ namespace Fudge {
 
     private checkIllumination(): void {
       let lightsPresent: boolean = false;
+      ƒ.Render.prepare(this.graph);
       ƒ.Render.lights.forEach((_array: ƒ.RecycableArray<ƒ.ComponentLight>) => lightsPresent ||= _array.length > 0);
       this.illuminateGraph(!lightsPresent);
       this.setTitle(`${lightsPresent ? "RENDER" : "Render"} | ${this.graph.name}`);
