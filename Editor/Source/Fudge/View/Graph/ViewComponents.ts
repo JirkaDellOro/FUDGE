@@ -227,9 +227,9 @@ namespace Fudge {
           break;
         case ƒUi.EVENT.MUTATE:
           let cmpRigidbody: ƒ.ComponentRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
-          if (cmpRigidbody){
+          if (cmpRigidbody) {
             cmpRigidbody.initialize();
-            this.dom.dispatchEvent(new Event(EVENT_EDITOR.REFRESH, {bubbles: true}));
+            this.dom.dispatchEvent(new Event(EVENT_EDITOR.REFRESH, { bubbles: true }));
           }
         default:
           break;
