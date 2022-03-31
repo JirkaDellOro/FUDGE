@@ -345,7 +345,7 @@ var FudgeCore;
                 }
             }
             catch (_error) {
-                throw new Error(`Deserialization of ${path} failed: ` + _error);
+                throw new Error(`Deserialization of ${path}, ${Reflect.get(reconstruct, "idResource")} failed: ` + _error);
             }
             return null;
         }
@@ -1359,14 +1359,15 @@ var FudgeCore;
                 if (cmpLights) {
                     let n = cmpLights.length;
                     RenderWebGL.crc3.uniform1ui(nDirectional, n);
-                    for (let i = 0; i < n; i++) {
-                        let cmpLight = cmpLights[i];
+                    let i = 0;
+                    for (let cmpLight of cmpLights) {
                         RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].vctColor`], cmpLight.light.color.getArray());
                         let direction = FudgeCore.Vector3.Z();
                         direction.transform(cmpLight.mtxPivot, false);
                         direction.transform(cmpLight.node.mtxWorld, false);
                         direction.normalize();
                         RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].vctDirection`], direction.get());
+                        i++;
                     }
                 }
             }
@@ -1641,7 +1642,7 @@ var FudgeCore;
             if (cmpList === undefined)
                 this.components[_component.type] = [_component];
             else if (cmpList.length && _component.isSingleton)
-                throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
+                throw new Error(`Component ${_component.type} is marked singleton and can't be attached, no more than one allowed`);
             else
                 cmpList.push(_component);
             _component.attachToNode(this);
@@ -1695,10 +1696,11 @@ var FudgeCore;
                     this.addComponent(deserializedComponent);
                 }
             }
-            for (let serializedChild of _serialization.children) {
-                let deserializedChild = await FudgeCore.Serializer.deserialize(serializedChild);
-                this.appendChild(deserializedChild);
-            }
+            if (_serialization.children)
+                for (let serializedChild of _serialization.children) {
+                    let deserializedChild = await FudgeCore.Serializer.deserialize(serializedChild);
+                    this.appendChild(deserializedChild);
+                }
             this.dispatchEvent(new Event("nodeDeserialized"));
             for (let component of this.getAllComponents())
                 component.dispatchEvent(new Event("nodeDeserialized"));
@@ -4405,10 +4407,16 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Graph extends FudgeCore.Node {
-        constructor() {
-            super(...arguments);
+        constructor(_name = "Graph") {
+            super(_name);
             this.idResource = undefined;
             this.type = "Graph";
+            this.hndMutate = async (_event) => {
+                _event.detail.path = Reflect.get(_event, "path");
+                this.dispatchEvent(new CustomEvent("mutateGraph", { detail: _event.detail }));
+                this.dispatchEvent(new Event("mutateGraphDone"));
+            };
+            this.addEventListener("mutate", this.hndMutate);
         }
         serialize() {
             let serialization = super.serialize();
@@ -4419,7 +4427,7 @@ var FudgeCore;
         async deserialize(_serialization) {
             await super.deserialize(_serialization);
             FudgeCore.Project.register(this, _serialization.idResource);
-            FudgeCore.Project.resyncGraphInstances(this);
+            await FudgeCore.Project.resyncGraphInstances(this);
             return this;
         }
     }
@@ -4427,28 +4435,41 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    let SYNC;
+    (function (SYNC) {
+        SYNC[SYNC["READY"] = 0] = "READY";
+        SYNC[SYNC["GRAPH_SYNCED"] = 1] = "GRAPH_SYNCED";
+        SYNC[SYNC["GRAPH_DONE"] = 2] = "GRAPH_DONE";
+        SYNC[SYNC["INSTANCE"] = 3] = "INSTANCE";
+    })(SYNC || (SYNC = {}));
     class GraphInstance extends FudgeCore.Node {
         constructor(_graph) {
             super("GraphInstance");
             this.#idSource = undefined;
-            this.#sync = true;
+            this.#sync = SYNC.READY;
+            this.#deserializeFromSource = true;
             this.hndMutationGraph = async (_event) => {
-                if (!this.#sync) {
-                    this.#sync = true;
+                if (this.#sync != SYNC.READY) {
+                    this.#sync = SYNC.READY;
                     return;
                 }
                 if (this.isFiltered())
                     return;
-                this.#sync = false;
-                await this.reflectMutation(_event, _event.currentTarget, this);
-                this.#sync = true;
+                this.#sync = SYNC.GRAPH_SYNCED;
+                await this.reflectMutation(_event, _event.currentTarget, this, _event.detail.path);
             };
             this.hndMutationInstance = async (_event) => {
-                if (!this.#sync)
+                if (this.#sync != SYNC.READY) {
+                    this.#sync = SYNC.READY;
                     return;
+                }
+                if (_event.target instanceof GraphInstance && _event.target != this) {
+                    return;
+                }
                 if (this.isFiltered())
                     return;
-                await this.reflectMutation(_event, this, this.get());
+                this.#sync = SYNC.INSTANCE;
+                await this.reflectMutation(_event, this, this.get(), Reflect.get(_event, "path"));
             };
             this.addEventListener("mutate", this.hndMutationInstance, true);
             if (!_graph)
@@ -4457,6 +4478,7 @@ var FudgeCore;
         }
         #idSource;
         #sync;
+        #deserializeFromSource;
         get idSource() {
             return this.#idSource;
         }
@@ -4465,22 +4487,35 @@ var FudgeCore;
             await this.set(resource);
         }
         serialize() {
-            let serialization = super.serialize();
+            let filter = this.getComponent(FudgeCore.ComponentGraphFilter);
+            let serialization = {};
+            if (filter && filter.isActive)
+                serialization = super.serialize();
+            else
+                serialization.deserializeFromSource = true;
+            serialization.name = this.name;
             serialization.idSource = this.#idSource;
             return serialization;
         }
         async deserialize(_serialization) {
             this.#idSource = _serialization.idSource;
-            await super.deserialize(_serialization);
-            if (this.get())
-                this.connectToGraph();
-            else
+            if (!_serialization.deserializeFromSource) {
+                await super.deserialize(_serialization);
+                this.#deserializeFromSource = false;
+            }
+            let graph = this.get();
+            if (graph)
+                await this.connectToGraph();
+            else {
                 FudgeCore.Project.registerGraphInstanceForResync(this);
+            }
             return this;
         }
-        connectToGraph() {
+        async connectToGraph() {
             let graph = this.get();
-            graph.addEventListener("mutate", this.hndMutationGraph, true);
+            if (this.#deserializeFromSource)
+                await this.set(graph);
+            graph.addEventListener("mutateGraph", this.hndMutationGraph);
         }
         async set(_graph) {
             let serialization = FudgeCore.Serializer.serialize(_graph);
@@ -4494,11 +4529,20 @@ var FudgeCore;
         get() {
             return FudgeCore.Project.resources[this.#idSource];
         }
-        async reflectMutation(_event, _source, _destination) {
-            let path = Reflect.get(_event, "path");
-            let index = path.indexOf(_source);
-            for (let i = index - 1; i >= 0; i--)
-                _destination = _destination.getChildrenByName(path[i].name)[0];
+        async reflectMutation(_event, _source, _destination, _path) {
+            for (let node of _path)
+                if (node instanceof GraphInstance)
+                    if (node == this)
+                        break;
+                    else {
+                        console.log("Sync aborted, target already synced");
+                        return;
+                    }
+            let index = _path.indexOf(_source);
+            for (let i = index - 1; i >= 0; i--) {
+                let childIndex = _path[i].getParent().findChild(_path[i]);
+                _destination = _destination.getChild(childIndex);
+            }
             let cmpMutate = _destination.getComponent(_event.detail.component.constructor);
             if (cmpMutate)
                 await cmpMutate.mutate(_event.detail.mutator);
@@ -9735,7 +9779,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Render extends FudgeCore.RenderWebGL {
-        static prepare(_branch, _options = {}, _mtxWorld = FudgeCore.Matrix4x4.IDENTITY(), _lights = new Map(), _shadersUsed = null) {
+        static prepare(_branch, _options = {}, _mtxWorld = FudgeCore.Matrix4x4.IDENTITY(), _shadersUsed = null) {
             let firstLevel = (_shadersUsed == null);
             if (firstLevel) {
                 _shadersUsed = [];
@@ -9745,6 +9789,7 @@ var FudgeCore;
                 Render.nodesPhysics.reset();
                 Render.componentsPick.reset();
                 Render.dispatchEvent(new Event("renderPrepareStart"));
+                Render.lights.forEach(_array => _array.reset());
             }
             if (!_branch.isActive)
                 return;
@@ -9774,10 +9819,10 @@ var FudgeCore;
                 if (!cmpLight.isActive)
                     continue;
                 let type = cmpLight.light.getType();
-                let lightsOfType = _lights.get(type);
+                let lightsOfType = Render.lights.get(type);
                 if (!lightsOfType) {
-                    lightsOfType = [];
-                    _lights.set(type, lightsOfType);
+                    lightsOfType = new FudgeCore.RecycableArray();
+                    Render.lights.set(type, lightsOfType);
                 }
                 lightsOfType.push(cmpLight);
             }
@@ -9797,7 +9842,7 @@ var FudgeCore;
                     Render.nodesSimple.push(_branch);
             }
             for (let child of _branch.getChildren()) {
-                Render.prepare(child, _options, _branch.mtxWorld, _lights, _shadersUsed);
+                Render.prepare(child, _options, _branch.mtxWorld, _shadersUsed);
                 _branch.nNodesInBranch += child.nNodesInBranch;
                 let cmpMeshChild = child.getComponent(FudgeCore.ComponentMesh);
                 let position = cmpMeshChild ? cmpMeshChild.mtxWorld.translation : child.mtxWorld.translation;
@@ -9808,7 +9853,7 @@ var FudgeCore;
             if (firstLevel) {
                 Render.dispatchEvent(new Event("renderPrepareEnd"));
                 for (let shader of _shadersUsed)
-                    Render.setLightsInShader(shader, _lights);
+                    Render.setLightsInShader(shader, Render.lights);
             }
         }
         static pickBranch(_nodes, _cmpCamera) {
@@ -9880,6 +9925,7 @@ var FudgeCore;
     Render.rectClip = new FudgeCore.Rectangle(-1, 1, 2, -2);
     Render.nodesPhysics = new FudgeCore.RecycableArray();
     Render.componentsPick = new FudgeCore.RecycableArray();
+    Render.lights = new Map();
     Render.nodesSimple = new FudgeCore.RecycableArray();
     Render.nodesAlpha = new FudgeCore.RecycableArray();
     FudgeCore.Render = Render;
@@ -10447,8 +10493,8 @@ var FudgeCore;
             return graph;
         }
         static async createGraphInstance(_graph) {
-            let instance = new FudgeCore.GraphInstance();
-            await instance.set(_graph);
+            let instance = new FudgeCore.GraphInstance(_graph);
+            await instance.connectToGraph();
             return instance;
         }
         static registerGraphInstanceForResync(_instance) {
@@ -10456,12 +10502,12 @@ var FudgeCore;
             instances.push(_instance);
             Project.graphInstancesToResync[_instance.idSource] = instances;
         }
-        static resyncGraphInstances(_graph) {
+        static async resyncGraphInstances(_graph) {
             let instances = Project.graphInstancesToResync[_graph.idResource];
             if (!instances)
                 return;
             for (let instance of instances)
-                instance.connectToGraph();
+                await instance.connectToGraph();
             delete (Project.graphInstancesToResync[_graph.idResource]);
         }
         static registerScriptNamespace(_namespace) {
