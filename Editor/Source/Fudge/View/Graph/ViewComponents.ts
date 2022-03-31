@@ -37,6 +37,7 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndTransform);
       this.dom.addEventListener(ƒUi.EVENT.CLICK, this.hndEvent, true);
       this.dom.addEventListener(ƒUi.EVENT.KEY_DOWN, this.hndEvent, true);
+      this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent, true);
     }
 
     //#region  ContextMenu
@@ -108,6 +109,7 @@ namespace Fudge {
       ƒ.Debug.info(cmpNew.type, cmpNew);
 
       this.node.addComponent(cmpNew);
+      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
       this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: this.node } }));
     }
     //#endregion
@@ -222,6 +224,13 @@ namespace Fudge {
         case ƒUi.EVENT.EXPAND:
         case ƒUi.EVENT.COLLAPSE:
           this.expanded[(<ƒUi.Details>_event.target).getAttribute("type")] = (_event.type == ƒUi.EVENT.EXPAND);
+          break;
+        case ƒUi.EVENT.MUTATE:
+          let cmpRigidbody: ƒ.ComponentRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
+          if (cmpRigidbody) {
+            cmpRigidbody.initialize();
+            this.dom.dispatchEvent(new Event(EVENT_EDITOR.REFRESH, { bubbles: true }));
+          }
         default:
           break;
       }

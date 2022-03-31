@@ -139,9 +139,13 @@ namespace FudgeCore {
       return graph;
     }
 
+    /**
+     * Creates and returns a {@link GraphInstance} of the given {@link Graph} 
+     * and connects it to the graph for synchronisation of mutation.
+     */
     public static async createGraphInstance(_graph: Graph): Promise<GraphInstance> {
-      let instance: GraphInstance = new GraphInstance(); // TODO: cleanup since creation moved here
-      await instance.set(_graph);
+      let instance: GraphInstance = new GraphInstance(_graph); // TODO: cleanup since creation moved here
+      await instance.connectToGraph();
       return instance;
     }
 
@@ -151,13 +155,13 @@ namespace FudgeCore {
       Project.graphInstancesToResync[_instance.idSource] = instances;
     }
 
-    public static resyncGraphInstances(_graph: Graph): void {
+    public static async resyncGraphInstances(_graph: Graph): Promise<void> {
       let instances: GraphInstance[] = Project.graphInstancesToResync[_graph.idResource];
       if (!instances)
         return;
       for (let instance of instances)
-        instance.connectToGraph();
-      delete(Project.graphInstancesToResync[_graph.idResource]);
+        await instance.connectToGraph();
+      delete (Project.graphInstancesToResync[_graph.idResource]);
     }
 
     public static registerScriptNamespace(_namespace: Object): void {

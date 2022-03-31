@@ -1,5 +1,5 @@
 namespace FudgeCore {
-  export type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
+  export type MapLightTypeToLightList = Map<TypeOfLight, RecycableArray<ComponentLight>>;
 
   export interface RenderPrepareOptions {
     ignorePhysics?: boolean;
@@ -13,6 +13,7 @@ namespace FudgeCore {
     public static pickBuffer: Int32Array;
     public static nodesPhysics: RecycableArray<Node> = new RecycableArray();
     public static componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
+    public static lights: MapLightTypeToLightList = new Map();
     private static nodesSimple: RecycableArray<Node> = new RecycableArray();
     private static nodesAlpha: RecycableArray<Node> = new RecycableArray();
     private static timestampUpdate: number;
@@ -25,7 +26,7 @@ namespace FudgeCore {
      * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
      * render passes.
      */
-    public static prepare(_branch: Node, _options: RenderPrepareOptions = {}, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
+    public static prepare(_branch: Node, _options: RenderPrepareOptions = {}, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _shadersUsed: (typeof Shader)[] = null): void {
       let firstLevel: boolean = (_shadersUsed == null);
       if (firstLevel) {
         _shadersUsed = [];
@@ -35,6 +36,7 @@ namespace FudgeCore {
         Render.nodesPhysics.reset();
         Render.componentsPick.reset();
         Render.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
+        Render.lights.forEach(_array => _array.reset());
       }
 
       if (!_branch.isActive)
@@ -74,10 +76,10 @@ namespace FudgeCore {
         if (!cmpLight.isActive)
           continue;
         let type: TypeOfLight = cmpLight.light.getType();
-        let lightsOfType: ComponentLight[] = _lights.get(type);
+        let lightsOfType: RecycableArray<ComponentLight> = Render.lights.get(type);
         if (!lightsOfType) {
-          lightsOfType = [];
-          _lights.set(type, lightsOfType);
+          lightsOfType = new RecycableArray<ComponentLight>();
+          Render.lights.set(type, lightsOfType);
         }
         lightsOfType.push(cmpLight);
       }
@@ -101,7 +103,7 @@ namespace FudgeCore {
       }
 
       for (let child of _branch.getChildren()) {
-        Render.prepare(child, _options, _branch.mtxWorld, _lights, _shadersUsed);
+        Render.prepare(child, _options, _branch.mtxWorld, _shadersUsed);
 
         _branch.nNodesInBranch += child.nNodesInBranch;
         let cmpMeshChild: ComponentMesh = child.getComponent(ComponentMesh);
@@ -114,7 +116,7 @@ namespace FudgeCore {
       if (firstLevel) {
         Render.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
         for (let shader of _shadersUsed)
-          Render.setLightsInShader(shader, _lights);
+          Render.setLightsInShader(shader, Render.lights);
       }
 
       //Calculate Physics based on all previous calculations    

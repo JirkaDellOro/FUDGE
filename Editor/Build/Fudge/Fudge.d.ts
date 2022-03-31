@@ -372,8 +372,8 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-    * Shows a graph and offers means for manipulation
-    * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+    * Shows a help and documentation
+    * @authors Jirka Dell'Oro-Friedl, HFU, 2021
     */
     class PanelHelp extends Panel {
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
@@ -559,6 +559,7 @@ declare namespace Fudge {
         protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
+        private checkIllumination;
         private illuminateGraph;
         private hndEvent;
         private hndPick;
@@ -587,7 +588,7 @@ declare namespace Fudge {
         private fillContent;
         private createStandardGraph;
         private setViewObject;
-        private illuminateGraph;
+        private illuminate;
         private createFilePreview;
         private createTextPreview;
         private createImagePreview;

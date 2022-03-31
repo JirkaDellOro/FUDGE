@@ -147,8 +147,12 @@ declare namespace FudgeCore {
         CHILD_APPEND = "childAppend",
         /** dispatched to a child {@link Node} and its ancestors just before its being removed from its parent */
         CHILD_REMOVE = "childRemove",
-        /** dispatched to a {@link Mutable} when its being mutated */
+        /** dispatched to a {@link Mutable} when it mutates */
         MUTATE = "mutate",
+        /** dispatched to a {@link GraphInstance} when the graph it connects to mutates */
+        MUTATE_GRAPH = "mutateGraph",
+        /** dispatched to a {@link GraphInstance} after {@link MUTATE_GRAPH} to signal that all instances were informed*/
+        MUTATE_GRAPH_DONE = "mutateGraphDone",
         /** dispatched to {@link Viewport} when it gets the focus to receive keyboard input */
         FOCUS_IN = "focusin",
         /** dispatched to {@link Viewport} when it loses the focus to receive keyboard input */
@@ -1934,7 +1938,8 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Synchronizes the graph instance this component is attached to with the graph and vice versa
+     * Filters synchronization between a graph instance and the graph it is connected to. If active, no synchronization occurs.
+     * Maybe more finegrained in the future...
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
      */
@@ -2614,17 +2619,13 @@ declare namespace FudgeCore {
     class Graph extends Node implements SerializableResource {
         idResource: string;
         type: string;
+        constructor(_name?: string);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        private hndMutate;
     }
 }
 declare namespace FudgeCore {
-    /**
-     * An instance of a {@link Graph}.
-     * This node keeps a reference to its resource an can thus optimize serialization
-     * @author Jirka Dell'Oro-Friedl, HFU, 2019
-     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
-     */
     class GraphInstance extends Node {
         #private;
         /**
@@ -2640,7 +2641,7 @@ declare namespace FudgeCore {
         reset(): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        connectToGraph(): void;
+        connectToGraph(): Promise<void>;
         /**
          * Set this node to be a recreation of the {@link Graph} given
          */
@@ -5090,7 +5091,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
+    type MapLightTypeToLightList = Map<TypeOfLight, RecycableArray<ComponentLight>>;
     interface RenderPrepareOptions {
         ignorePhysics?: boolean;
     }
@@ -5102,6 +5103,7 @@ declare namespace FudgeCore {
         static pickBuffer: Int32Array;
         static nodesPhysics: RecycableArray<Node>;
         static componentsPick: RecycableArray<ComponentPick>;
+        static lights: MapLightTypeToLightList;
         private static nodesSimple;
         private static nodesAlpha;
         private static timestampUpdate;
@@ -5110,7 +5112,7 @@ declare namespace FudgeCore {
          * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
          * render passes.
          */
-        static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
+        static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _shadersUsed?: (typeof Shader)[]): void;
         /**
          * Used with a {@link Picker}-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted {@link Pick}-array
@@ -5449,9 +5451,13 @@ declare namespace FudgeCore {
          * @param _replaceWithInstance if true (default), the node used as origin is replaced by a {@link GraphInstance} of the {@link Graph} created
          */
         static registerAsGraph(_node: Node, _replaceWithInstance?: boolean): Promise<Graph>;
+        /**
+         * Creates and returns a {@link GraphInstance} of the given {@link Graph}
+         * and connects it to the graph for synchronisation of mutation.
+         */
         static createGraphInstance(_graph: Graph): Promise<GraphInstance>;
         static registerGraphInstanceForResync(_instance: GraphInstance): void;
-        static resyncGraphInstances(_graph: Graph): void;
+        static resyncGraphInstances(_graph: Graph): Promise<void>;
         static registerScriptNamespace(_namespace: Object): void;
         static getComponentScripts(): ComponentScripts;
         static loadScript(_url: RequestInfo): Promise<void>;
@@ -6591,7 +6597,7 @@ declare namespace FudgeCore {
         private idTimerAddedLast;
         constructor();
         /**
-         * Returns the game-time-object which starts automatically and serves as base for various internal operations.
+         * Returns representions of the time given in milliseconds in various formats defined in {@link TimeUnits}
          */
         static getUnits(_milliseconds: number): TimeUnits;
         /**

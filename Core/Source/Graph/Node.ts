@@ -330,7 +330,7 @@ namespace FudgeCore {
         this.components[_component.type] = [_component];
       else
         if (cmpList.length && _component.isSingleton)
-          throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
+          throw new Error(`Component ${_component.type} is marked singleton and can't be attached, no more than one allowed`);
         else
           cmpList.push(_component);
 
@@ -403,10 +403,11 @@ namespace FudgeCore {
         }
       }
 
-      for (let serializedChild of _serialization.children) {
-        let deserializedChild: Node = <Node>await Serializer.deserialize(serializedChild);
-        this.appendChild(deserializedChild);
-      }
+      if (_serialization.children)
+        for (let serializedChild of _serialization.children) {
+          let deserializedChild: Node = <Node>await Serializer.deserialize(serializedChild);
+          this.appendChild(deserializedChild);
+        }
 
       this.dispatchEvent(new Event(EVENT.NODE_DESERIALIZED));
       for (let component of this.getAllComponents())

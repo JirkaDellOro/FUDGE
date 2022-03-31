@@ -124,6 +124,11 @@ div.lm_tab[title^="Preview"]::before, div.lm_tab[title^="Render"]::before {
   -webkit-mask: url(../Html/Icon/Camera.svg);
 }
 
+div.lm_tab[title^="PREVIEW"]::before, div.lm_tab[title^="RENDER"]::before {
+  mask: url(../Html/Icon/Light.svg);
+  -webkit-mask: url(../Html/Icon/Light.svg);
+}
+
 div.lm_tab[title^="Properties"]::before {
   mask: url(../Html/Icon/Document.svg);
   -webkit-mask: url(../Html/Icon/Document.svg);
