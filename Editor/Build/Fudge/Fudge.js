@@ -2445,6 +2445,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndTransform);
             this.dom.addEventListener("click" /* CLICK */, this.hndEvent, true);
             this.dom.addEventListener("keydown" /* KEY_DOWN */, this.hndEvent, true);
+            this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent, true);
         }
         //#region  ContextMenu
         getContextMenu(_callback) {
@@ -2617,6 +2618,13 @@ var Fudge;
                 case "expand" /* EXPAND */:
                 case "collapse" /* COLLAPSE */:
                     this.expanded[_event.target.getAttribute("type")] = (_event.type == "expand" /* EXPAND */);
+                    break;
+                case "mutate" /* MUTATE */:
+                    let cmpRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
+                    if (cmpRigidbody) {
+                        cmpRigidbody.initialize();
+                        this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.REFRESH, { bubbles: true }));
+                    }
                 default:
                     break;
             }

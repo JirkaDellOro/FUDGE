@@ -29,7 +29,16 @@
     "ƒ.Graph": {
       "name": "Scene",
       "active": true,
-      "components": {},
+      "components": {
+        "CustomComponentScript": [
+          {
+            "Script.CustomComponentScript": {
+              "active": true,
+              "message": "CustomComponentScript added to "
+            }
+          }
+        ]
+      },
       "children": [
         {
           "ƒ.Node": {
@@ -162,7 +171,7 @@
                           "local": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[-45, 0, 0]",
-                            "scaling": "[1, 1, 1]"
+                            "scaling": "[1.100000023841858, 1, 1]"
                           },
                           "Component": {
                             "active": true
@@ -346,6 +355,7 @@
               {
                 "ƒ.GraphInstance": {
                   "deserializeFromSource": true,
+                  "name": "Pyramid",
                   "idSource": "Graph|2022-03-05T18:27:09.459Z|47242"
                 }
               }
