@@ -28,7 +28,11 @@ namespace FudgeCore {
    * Holds all the information which defines the particle effect. Can load the said information out of a json file.
    * @authors Jonas Plotzky, HFU, 2020
    */
-  export class ParticleEffect {
+  export class ParticleEffect extends Mutable implements SerializableResource {
+    public name: string = "ParticleEffect";
+    public idResource: string = undefined;
+    public url: RequestInfo;
+
     public storageSystem: ParticleEffectData;
     public storageUpdate: ParticleEffectData;
     public storageParticle: ParticleEffectData;
@@ -39,13 +43,43 @@ namespace FudgeCore {
     public cachedMutators: { [key: string]: Mutator };
     private definedVariables: string[]; // these are used to throw errors only
 
+    constructor(_url?: RequestInfo) {
+      super();
+      if (_url) {
+        this.load(_url);
+        this.name = _url.toString().split("/").pop();
+      }
+
+      Project.register(this);
+    }
+
     /**
      * Asynchronously loads the json from the given url and parses it initializing this particle effect.
      */
-    public async load(_request: RequestInfo): Promise<void> {
-      let data: ParticleEffectData = await window.fetch(_request)
+    public async load(_url: RequestInfo): Promise<void> {
+      this.url = _url;
+      let data: ParticleEffectData = await window.fetch(_url)
         .then(_response => _response.json());
       this.parse(data);
+    }
+
+    public serialize(): Serialization {
+      let serialization: Serialization =  {
+        idResource: this.idResource,
+        name: this.name,
+        type: this.type,
+        url: this.url
+      };
+      return serialization;
+    }
+    
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await this.load(_serialization.url);
+      return this;
+    }
+
+    protected reduceMutator(_mutator: Mutator): void {
+      delete _mutator.idResource;
     }
 
     /**

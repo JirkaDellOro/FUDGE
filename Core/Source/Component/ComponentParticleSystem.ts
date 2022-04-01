@@ -18,7 +18,7 @@ namespace FudgeCore {
     private effect: ParticleEffect;
     // TODO: add color for the whole system
 
-    constructor(_particleEffect: ParticleEffect = null, _size: number = null) {
+    constructor(_particleEffect: ParticleEffect = null, _size: number = 0) {
       super();
       this.effect = _particleEffect;
       this.variables[PARTICLE_VARIBALE_NAMES.TIME] = 0;
@@ -27,7 +27,7 @@ namespace FudgeCore {
       this.initRandomNumbers(_size);
 
       // evaluate system storage
-      this.evaluateStorage(this.effect.storageSystem);
+      this.evaluateStorage(this.effect?.storageSystem);
     }
 
     public get particleEffect(): ParticleEffect {
@@ -36,7 +36,7 @@ namespace FudgeCore {
 
     public set particleEffect(_newParticleEffect: ParticleEffect) {
       this.effect = _newParticleEffect;
-      this.evaluateStorage(this.effect.storageSystem);
+      this.evaluateStorage(this.effect?.storageSystem);
     }
 
     public get size(): number {
