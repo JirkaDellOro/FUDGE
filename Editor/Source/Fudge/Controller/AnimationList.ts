@@ -22,7 +22,7 @@ namespace Fudge {
 
     public setMutator(_mutator: ƒ.Mutator): void {
       this.mutator = _mutator;
-      let hule: HTMLUListElement = this.buildFromMutator(this.mutator);
+      let hule: HTMLDivElement = this.buildFromMutator(this.mutator);
       this.listRoot.replaceWith(hule);
       this.listRoot = hule;
     }
@@ -39,7 +39,7 @@ namespace Fudge {
     public getElementIndex(): ƒ.Mutator {
       return this.index;
     }
-    
+
     public updateMutator(_update: ƒ.Mutator): void {
       this.mutator = this.updateMutatorEntry(_update, this.mutator);
       this.updateEntry(this.mutator, this.index);
@@ -73,13 +73,16 @@ namespace Fudge {
       }
       return updatedMutator;
     }
-    private buildFromMutator(_mutator: ƒ.Mutator): HTMLUListElement {
-      let listRoot: HTMLUListElement = document.createElement("ul");
+    private buildFromMutator(_mutator: ƒ.Mutator): HTMLDivElement /* HTMLUListElement */ {
+      // let listRoot: HTMLUListElement = document.createElement("ul");
+      let listRoot: HTMLDivElement = ƒui.Generator.createInterfaceFromMutator(_mutator);
+      // this.index["component"] = 0;
+      this.index = _mutator;
       // for (let key in _mutator) {
-      //   let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
+      // let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
       //   listRoot.append(listElement);
-      //   this.index[key] = listElement.getElementIndex();
-      //   console.log(this.index);
+      // this.index[key] = listElement.getElementIndex();
+      //   console.log(key);
       // }
       return listRoot;
     }

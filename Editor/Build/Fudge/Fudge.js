@@ -755,6 +755,7 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒui = FudgeUserInterface;
     class AnimationList {
         listRoot;
         mutator;
@@ -821,12 +822,15 @@ var Fudge;
             return updatedMutator;
         }
         buildFromMutator(_mutator) {
-            let listRoot = document.createElement("ul");
+            // let listRoot: HTMLUListElement = document.createElement("ul");
+            let listRoot = ƒui.Generator.createInterfaceFromMutator(_mutator);
+            // this.index["component"] = 0;
+            this.index = _mutator;
             // for (let key in _mutator) {
-            //   let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
+            // let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
             //   listRoot.append(listElement);
-            //   this.index[key] = listElement.getElementIndex();
-            //   console.log(this.index);
+            // this.index[key] = listElement.getElementIndex();
+            //   console.log(key);
             // }
             return listRoot;
         }
@@ -1915,22 +1919,22 @@ var Fudge;
             seq2.addKey(new FudgeCore.AnimationKey(1500, 0, -0.02));
             this.animation = new FudgeCore.Animation("TestAnimation", {
                 components: {
-                // ComponentTransform: [
-                //   {
-                //     "ƒ.ComponentTransform": {
-                //       position: {
-                //         x: new FudgeCore.AnimationSequence(),
-                //         y: seq2,
-                //         z: new FudgeCore.AnimationSequence()
-                //       },
-                //       rotation: {
-                //         x: new FudgeCore.AnimationSequence(),
-                //         y: seq1,
-                //         z: new FudgeCore.AnimationSequence()
-                //       }
-                //     }
-                //   }
-                // ]
+                    ComponentTransform: [
+                        {
+                            "ƒ.ComponentTransform": {
+                                translation: {
+                                    x: new FudgeCore.AnimationSequence(),
+                                    y: seq2,
+                                    z: new FudgeCore.AnimationSequence()
+                                },
+                                rotation: {
+                                    x: new FudgeCore.AnimationSequence(),
+                                    y: seq1,
+                                    z: new FudgeCore.AnimationSequence()
+                                }
+                            }
+                        }
+                    ]
                 }
             }, 60);
             this.animation.labels["One"] = 200;
