@@ -60,22 +60,22 @@ namespace Fudge {
       seq2.addKey(new FudgeCore.AnimationKey(1500, 0, -0.02));
       this.animation = new FudgeCore.Animation("TestAnimation", {
         components: {
-          // ComponentTransform: [
-          //   {
-          //     "ƒ.ComponentTransform": {
-          //       position: {
-          //         x: new FudgeCore.AnimationSequence(),
-          //         y: seq2,
-          //         z: new FudgeCore.AnimationSequence()
-          //       },
-          //       rotation: {
-          //         x: new FudgeCore.AnimationSequence(),
-          //         y: seq1,
-          //         z: new FudgeCore.AnimationSequence()
-          //       }
-          //     }
-          //   }
-          // ]
+          ComponentTransform: [
+            {
+              "ƒ.ComponentTransform": {
+                translation: {
+                  x: new FudgeCore.AnimationSequence(),
+                  y: seq2,
+                  z: new FudgeCore.AnimationSequence()
+                },
+                rotation: {
+                  x: new FudgeCore.AnimationSequence(),
+                  y: seq1,
+                  z: new FudgeCore.AnimationSequence()
+                }
+              }
+            }
+          ]
         }
       },                                       60);
       this.animation.labels["One"] = 200;
