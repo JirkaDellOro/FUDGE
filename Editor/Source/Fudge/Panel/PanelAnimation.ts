@@ -47,7 +47,6 @@ namespace Fudge {
       //           ]
       //         };
 
-      let inner: ContentItem = this.goldenLayout.rootItem.contentItems[0];
       const config: RowOrColumnItemConfig = {
         type: "column",
         content: [

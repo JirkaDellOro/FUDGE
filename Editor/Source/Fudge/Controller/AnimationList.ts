@@ -73,19 +73,43 @@ namespace Fudge {
       }
       return updatedMutator;
     }
-    private buildFromMutator(_mutator: ƒ.Mutator): HTMLDivElement /* HTMLUListElement */ {
+    private buildFromMutator(_mutator: ƒ.Mutator): HTMLDivElement {
       // let listRoot: HTMLUListElement = document.createElement("ul");
-      let listRoot: HTMLDivElement = ƒui.Generator.createInterfaceFromMutator(_mutator);
-      // this.index["component"] = 0;
-      this.index = _mutator;
+      
       // for (let key in _mutator) {
-      // let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
-      //   listRoot.append(listElement);
-      // this.index[key] = listElement.getElementIndex();
-      //   console.log(key);
+        //   let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
+        //   listRoot.append(listElement);
+        //   this.index[key] = listElement.getElementIndex();
+        //   console.log(this.index);
+        // }
+      let listRoot: HTMLDivElement = ƒui.Generator.createInterfaceFromMutator(_mutator);
+      console.log(_mutator);
+      console.log(listRoot);
+      // for (let key in _mutator) {
+        // this.index[key] = document.createElement("input");
+        // let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
+        // listRoot.append(listElement);
+        // console.log(this.index);
       // }
       return listRoot;
     }
+
+    // private buildContent(_mutator: ƒ.Mutator, listRoot: HTMLDivElement): ƒ.Mutator {
+    //   for (let key in _mutator) {
+    //     if (typeof _mutator[key] == "object") {
+    //         // let newList: CollapsableAnimationListElement = new CollapsableAnimationListElement(<ƒ.Mutator>_mutator[key], key);
+    //         // this.content.append(newList);
+    //         this.index[key] = buildContent(_mutator[key], listRoot.getElementsByClassName());
+    //     }
+    //     else {
+    //         let listEntry: HTMLLIElement = document.createElement("li");
+    //         UIGenerator.createLabelElement(key, listEntry);
+    //         let inputEntry: HTMLSpanElement = UIGenerator.createStepperElement(key, listEntry, { _value: (<number>_mutator[key]) });
+    //         this.content.append(listEntry);
+    //         this.index[key] = inputEntry;
+    //     }
+    //   }
+    // }
 
     private toggleCollapse = (_event: Event): void => {
       _event.preventDefault();
