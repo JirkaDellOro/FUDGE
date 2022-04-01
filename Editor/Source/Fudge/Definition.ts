@@ -30,6 +30,7 @@ namespace Fudge {
     PANEL_ANIMATION_OPEN = "panelAnimationOpen",
     PANEL_PROJECT_OPEN = "panelProjectOpen",
     PANEL_HELP_OPEN = "panelHelpOpen",
+    PANEL_PARTICLE_SYSTEM_OPEN = "panelParticleSystemOpen",
     FULLSCREEN = "fullscreen"
   }
 
@@ -50,7 +51,9 @@ namespace Fudge {
     GRAPH = "PanelGraph",
     PROJECT = "PanelProject",
     HELP = "PanelHelp",
-    ANIMATION = "PanelAnimation"
+    ANIMATION = "PanelAnimation",
+    PARTICLE_SYSTEM = "PanelParticleSystem"
+
   }
 
 
@@ -64,8 +67,8 @@ namespace Fudge {
     EXTERNAL = "ViewExternal",
     PROPERTIES = "ViewProperties",
     PREVIEW = "ViewPreview",
-    SCRIPT = "ViewScript"
-    
+    SCRIPT = "ViewScript",
+    PARTICLE_SYSTEM = "ViewParticleSystem"
     // SKETCH = ViewSketch,
     // MESH = ViewMesh,
   }

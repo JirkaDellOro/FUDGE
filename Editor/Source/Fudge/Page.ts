@@ -96,6 +96,7 @@ namespace Fudge {
       Page.goldenLayout.registerComponentConstructor(PANEL.GRAPH, PanelGraph);
       Page.goldenLayout.registerComponentConstructor(PANEL.HELP, PanelHelp);
       Page.goldenLayout.registerComponentConstructor(PANEL.ANIMATION, PanelAnimation);
+      Page.goldenLayout.registerComponentConstructor(PANEL.PARTICLE_SYSTEM, PanelParticleSystem);
 
       Page.loadLayout();
     }
@@ -214,6 +215,7 @@ namespace Fudge {
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_ANIMATION_OPEN, on: true });
+      ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PARTICLE_SYSTEM_OPEN, on: true });
       Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_PROJECT));
     }
 
@@ -226,6 +228,7 @@ namespace Fudge {
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_ANIMATION_OPEN, on: true });
+        ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PARTICLE_SYSTEM_OPEN, on: true });
         Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_PROJECT));
       });
 
@@ -260,6 +263,12 @@ namespace Fudge {
 
       ipcRenderer.on(MENU.PANEL_ANIMATION_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         Page.add(PanelAnimation, null);  
+        // let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
+        // PanelManager.instance.addPanel(panel);
+      });
+
+      ipcRenderer.on(MENU.PANEL_PARTICLE_SYSTEM_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+        Page.add(PanelParticleSystem, null);  
         // let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
         // PanelManager.instance.addPanel(panel);
       });
