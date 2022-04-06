@@ -42,8 +42,10 @@
         "Generates a node with an orange pyramid and a child node with a small blue cube.",
         "A script component attached to the blue cube rotates it around the parent and itself.",
         "Registers the node as graph and creates a set of instances of that graph distributed equally in space.",
-        "The instance in the back low left corner changes its color, which gets synchronized via the original graph to all instances.",
-        "The instance in the center has a ComponentGraphFilter attached which disables synchronization."
+        "The properties of the instance in the front low left corner are manipulated",
+        "- the rotation via mutation which gets synchronized via the original graph to all instances.",
+        "- the color directly, not via mutation, which does not trigger mutation events and thus won't synchronize.",
+        "The instance to the right of it has a ComponentGraphFilter attached which disables synchronization."
       ],
       // Act: [
       //   "there are no actions"
@@ -57,8 +59,9 @@
       Expect: [
         "25 identical instances of the graph appear in a 5x5x5 constellation.",
         "Each cube has its own rotation and translation.",
-        "All instances of the graph look the same, except the one in the center which does not change color.",
-        "The pyramid in the lower left back corner changes color first."
+        "Most instances of the graph behave the same, with individual state of the satellite cube.",
+        "The pyramid in the lower left back corner changes color.",
+        "The pyramid next to it does not rotate.",
       ]
     });
   </script>
