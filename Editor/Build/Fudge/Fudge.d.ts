@@ -1,8 +1,8 @@
 /// <reference types="../../../node_modules/electron/electron" />
 /// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../../aid/build/fudgeaid" />
-/// <reference types="../../GoldenLayout/golden-layout" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
+/// <reference types="../../GoldenLayout/golden-layout" />
 declare namespace Fudge {
     export type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     type Subclass<T> = {
@@ -44,6 +44,7 @@ declare namespace Fudge {
         PANEL_ANIMATION_OPEN = "panelAnimationOpen",
         PANEL_PROJECT_OPEN = "panelProjectOpen",
         PANEL_HELP_OPEN = "panelHelpOpen",
+        PANEL_PARTICLE_SYSTEM_OPEN = "panelParticleSystemOpen",
         FULLSCREEN = "fullscreen"
     }
     enum EVENT_EDITOR {
@@ -60,7 +61,8 @@ declare namespace Fudge {
         GRAPH = "PanelGraph",
         PROJECT = "PanelProject",
         HELP = "PanelHelp",
-        ANIMATION = "PanelAnimation"
+        ANIMATION = "PanelAnimation",
+        PARTICLE_SYSTEM = "PanelParticleSystem"
     }
     enum VIEW {
         HIERARCHY = "ViewHierarchy",
@@ -72,7 +74,8 @@ declare namespace Fudge {
         EXTERNAL = "ViewExternal",
         PROPERTIES = "ViewProperties",
         PREVIEW = "ViewPreview",
-        SCRIPT = "ViewScript"
+        SCRIPT = "ViewScript",
+        PARTICLE_SYSTEM = "ViewParticleSystem"
     }
     enum TRANSFORM {
         TRANSLATE = "translate",
@@ -200,6 +203,13 @@ declare namespace Fudge {
         private updateMutatorEntry;
         private buildFromMutator;
         private toggleCollapse;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    import ƒUi = FudgeUserInterface;
+    class ControllerAnimation extends ƒUi.Controller {
+        constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
     }
 }
 declare namespace Fudge {
@@ -398,6 +408,18 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
+     * TODO: add
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    class PanelParticleSystem extends Panel {
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        getState(): {
+            [key: string]: string;
+        };
+    }
+}
+declare namespace Fudge {
+    /**
      * Display the project structure and offer functions for creation, deletion and adjustment of resources
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020
      */
@@ -410,6 +432,11 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    class ViewParticleSystem extends View {
+        constructor(_container: ComponentContainer, _state: Object);
+    }
+}
+declare namespace Fudge {
     interface ViewAnimationKey {
         key: FudgeCore.AnimationKey;
         path2D: Path2D;
@@ -417,7 +444,6 @@ declare namespace Fudge {
     }
     interface ViewAnimationSequence {
         color: string;
-        element: HTMLElement;
         sequence: FudgeCore.AnimationSequence;
     }
     interface ViewAnimationEvent {
@@ -433,7 +459,7 @@ declare namespace Fudge {
         animation: FudgeCore.Animation;
         cmpAnimator: FudgeCore.ComponentAnimator;
         playbackTime: number;
-        controller: AnimationList;
+        controller: ControllerAnimation;
         private canvas;
         private attributeList;
         private crc;
@@ -481,8 +507,8 @@ declare namespace Fudge {
         drawCursor(_time: number): void;
         drawKeys(): void;
         getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent;
-        protected traverseStructures(_animation: FudgeCore.AnimationStructure, _inputs: FudgeCore.Mutator): void;
-        protected abstract drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void;
+        protected newTraverseStructures(_animation: FudgeCore.AnimationStructure): void;
+        protected abstract newDrawSequence(_sequence: FudgeCore.AnimationSequence): void;
         protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
         private drawEventsAndLabels;
         private calculateDisplay;
@@ -491,7 +517,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     class ViewAnimationSheetCurve extends ViewAnimationSheet {
         drawKeys(): void;
-        protected drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void;
+        protected newDrawSequence(_sequence: ƒ.AnimationSequence): void;
         protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
         private drawYScale;
         private calcScaleSize;
@@ -501,7 +527,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     class ViewAnimationSheetDope extends ViewAnimationSheet {
         drawKeys(): Promise<void>;
-        protected drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void;
+        protected newDrawSequence(_sequence: FudgeCore.AnimationSequence): void;
     }
 }
 declare namespace Fudge {

@@ -67,6 +67,7 @@ namespace Fudge {
       // console.log(pixelPerSecond, pixelPerStep);
       this.crc2.strokeStyle = "black";
       this.crc2.fillStyle = "black";
+      this.crc2.textBaseline = "bottom";
       for (let i: number = 0; i < maxDistance; i += pixelPerStep) {
         timeline.moveTo(i, timelineHeight);
         if (steps % stepsPerDisplayText == 0) {
@@ -97,13 +98,18 @@ namespace Fudge {
     }
 
     public drawKeys(): void {
-      let inputMutator: FudgeCore.Mutator = this.view.controller.getElementIndex();
+      // let inputMutator: FudgeCore.Mutator = this.view.controller.getElementIndex();
+      // let inputMutator: FudgeCore.Mutator = this.view.controller.getMutator();
+      // console.log(inputMutator);
+
+      // this.drawKey(10, 10, 10, 10, "green");
 
       //TODO: stop recreating the sequence elements all the time
       this.sequences = [];
       this.keys = [];
-      this.traverseStructures(this.view.animation.animationStructure, inputMutator);
-    }
+      // this.traverseStructures(this.view.animation.animationStructure, inputMutator);
+      this.newTraverseStructures(this.view.animation.animationStructure);
+      }
 
     public getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
       for (let l of this.labels) {
@@ -126,20 +132,32 @@ namespace Fudge {
       return null;
     }
 
-    protected traverseStructures(_animation: FudgeCore.AnimationStructure, _inputs: FudgeCore.Mutator): void {
+    protected newTraverseStructures(_animation: FudgeCore.AnimationStructure): void {
       for (let i in _animation) {
         if (_animation[i] instanceof FudgeCore.AnimationSequence) {
-          this.drawSequence(<FudgeCore.AnimationSequence>_animation[i], <HTMLInputElement>_inputs[i]);
+          this.newDrawSequence(<FudgeCore.AnimationSequence>_animation[i]);
         } else {
-          this.traverseStructures(<FudgeCore.AnimationStructure>_animation[i], <FudgeCore.Mutator>_inputs[i]);
+          this.newTraverseStructures(<FudgeCore.AnimationStructure>_animation[i]);
         }
       }
     }
 
-    protected abstract drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void;
+    // protected traverseStructures(_animation: FudgeCore.AnimationStructure, _inputs: FudgeCore.Mutator): void {
+    //   for (let i in _animation) {
+    //     if (_animation[i] instanceof FudgeCore.AnimationSequence) {
+    //       this.drawSequence(<FudgeCore.AnimationSequence>_animation[i], <HTMLInputElement>_inputs[i]);
+    //     } else {
+    //       this.traverseStructures(<FudgeCore.AnimationStructure>_animation[i], <FudgeCore.Mutator>_inputs[i]);
+    //     }
+    //   }
+    // }
+
+    protected abstract newDrawSequence(_sequence: FudgeCore.AnimationSequence): void;
+    // protected abstract drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void;
 
 
     protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D {
+      // console.log(`x: ${_x} y: ${_y} h: ${_h} w: ${_w} c: ${_c}`);
       let key: Path2D = new Path2D();
       key.moveTo(_x - _w, _y);
       key.lineTo(_x, _y + _h);
@@ -148,7 +166,7 @@ namespace Fudge {
       key.closePath();
 
       this.crc2.fillStyle = _c;
-      this.crc2.strokeStyle = "black";
+      this.crc2.strokeStyle = "white";
       this.crc2.lineWidth = 1;
       this.crc2.fill(key);
       this.crc2.stroke(key);

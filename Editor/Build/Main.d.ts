@@ -27,6 +27,7 @@ declare namespace Fudge {
         PANEL_ANIMATION_OPEN = "panelAnimationOpen",
         PANEL_PROJECT_OPEN = "panelProjectOpen",
         PANEL_HELP_OPEN = "panelHelpOpen",
+        PANEL_PARTICLE_SYSTEM_OPEN = "panelParticleSystemOpen",
         FULLSCREEN = "fullscreen"
     }
     enum EVENT_EDITOR {
@@ -42,7 +43,9 @@ declare namespace Fudge {
     enum PANEL {
         GRAPH = "PanelGraph",
         PROJECT = "PanelProject",
-        HELP = "PanelHelp"
+        HELP = "PanelHelp",
+        ANIMATION = "PanelAnimation",
+        PARTICLE_SYSTEM = "PanelParticleSystem"
     }
     enum VIEW {
         HIERARCHY = "ViewHierarchy",
@@ -54,7 +57,8 @@ declare namespace Fudge {
         EXTERNAL = "ViewExternal",
         PROPERTIES = "ViewProperties",
         PREVIEW = "ViewPreview",
-        SCRIPT = "ViewScript"
+        SCRIPT = "ViewScript",
+        PARTICLE_SYSTEM = "ViewParticleSystem"
     }
     enum TRANSFORM {
         TRANSLATE = "translate",

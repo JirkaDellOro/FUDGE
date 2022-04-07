@@ -1,4 +1,7 @@
 namespace Fudge {
+  import ƒ = FudgeCore;
+  import ƒUi = FudgeUserInterface;
+
   export interface ViewAnimationKey {
     key: FudgeCore.AnimationKey;
     path2D: Path2D;
@@ -7,7 +10,7 @@ namespace Fudge {
 
   export interface ViewAnimationSequence {
     color: string;
-    element: HTMLElement;
+    // element: HTMLElement;
     sequence: FudgeCore.AnimationSequence;
   }
 
@@ -15,18 +18,19 @@ namespace Fudge {
     event: string;
     path2D: Path2D;
   }
+
   export interface ViewAnimationLabel {
     label: string;
     path2D: Path2D;
   }
-
 
   export class ViewAnimation extends View {
     node: FudgeCore.Node;
     animation: FudgeCore.Animation;
     cmpAnimator: FudgeCore.ComponentAnimator;
     playbackTime: number;
-    controller: AnimationList;
+    // controller: AnimationList;
+    controller: ControllerAnimation;
     private canvas: HTMLCanvasElement;
     private attributeList: HTMLDivElement;
     private crc: CanvasRenderingContext2D;
@@ -50,8 +54,8 @@ namespace Fudge {
 
       let seq1: FudgeCore.AnimationSequence = new FudgeCore.AnimationSequence();
       seq1.addKey(new FudgeCore.AnimationKey(0, 0));
-      seq1.addKey(new FudgeCore.AnimationKey(500, 45));
-      seq1.addKey(new FudgeCore.AnimationKey(1500, -45));
+      seq1.addKey(new FudgeCore.AnimationKey(500, 50));
+      seq1.addKey(new FudgeCore.AnimationKey(1500, -50));
       seq1.addKey(new FudgeCore.AnimationKey(2000, 0));
       let seq2: FudgeCore.AnimationSequence = new FudgeCore.AnimationSequence();
       // seq2.addKey(new FudgeCore.AnimationKey(0, 0));
@@ -84,6 +88,7 @@ namespace Fudge {
       this.animation.setEvent("EventTwo", 1000);
 
       this.node = new FudgeCore.Node("Testnode");
+      console.log(this.node);
       this.cmpAnimator = new FudgeCore.ComponentAnimator(this.animation);
     }
 
@@ -98,13 +103,20 @@ namespace Fudge {
       this.fillToolbar(this.toolbar);
 
 
-      this.attributeList = document.createElement("div");
-      this.attributeList.id = "attributeList";
-      this.attributeList.style.width = "300px";
+      // this.attributeList = document.createElement("div");
+      // this.attributeList.id = "attributeList";
+      // this.attributeList.style.width = "300px";
       // this.attributeList.addEventListener(FudgeUserInterface.EVENT.UPDATE, this.changeAttribute.bind(this));
-      this.attributeList.addEventListener(FudgeUserInterface.EVENT.CHANGE, this.changeAttribute.bind(this));
+      // this.attributeList.addEventListener(FudgeUserInterface.EVENT.CHANGE, this.changeAttribute.bind(this));
       //TODO: Add Moni's custom Element here
-      this.controller = new AnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
+      // this.controller = new AnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
+      
+      let animationMutator: ƒ.Mutator = this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
+      console.log(animationMutator);
+      this.attributeList = ƒUi.Generator.createInterfaceFromMutator(animationMutator);
+      // this.attributeList = ƒUi.Generator.createDetailsFromMutable(this.animation);
+      this.controller = new ControllerAnimation(this.animation, this.attributeList);
+      console.log(this.controller);
 
 
       this.canvas = document.createElement("canvas");
@@ -128,7 +140,7 @@ namespace Fudge {
       this.dom.appendChild(this.hover);
 
       // this.sheet = new ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(.5, 0.5), new FudgeCore.Vector2(0, 0));
-      this.sheet = new ViewAnimationSheetCurve(this, this.crc, null, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200));
+      this.sheet = new ViewAnimationSheetCurve(this, this.crc, null, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200)); // TODO: stop using fixed values?
       this.sheet.redraw(this.playbackTime);
       // sheet.translate();
     }
@@ -359,7 +371,14 @@ namespace Fudge {
       this.sheet.redraw(this.playbackTime);
       if (!_m)
         _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
-      this.controller.updateMutator(_m);
+
+      // this.controller.updateMutator(_m);
+      // ƒUi.Controller.updateUserInterface(this.animation, this.controller.domElement, _m);
+      // console.log(_m);
+      let newAttributeList: HTMLDivElement = ƒUi.Generator.createInterfaceFromMutator(_m);
+      this.dom.replaceChild(newAttributeList, this.attributeList);
+      this.attributeList = newAttributeList;
+      // this.controller.updateUserInterface();
     }
 
     private setTime(_time: number, updateDisplay: boolean = true): void {

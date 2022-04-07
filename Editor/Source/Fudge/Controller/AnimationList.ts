@@ -83,8 +83,10 @@ namespace Fudge {
         //   console.log(this.index);
         // }
       let listRoot: HTMLDivElement = ƒui.Generator.createInterfaceFromMutator(_mutator);
+      // let controller = ƒui.Controller
       console.log(_mutator);
       console.log(listRoot);
+      this.index = _mutator;
       // for (let key in _mutator) {
         // this.index[key] = document.createElement("input");
         // let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
