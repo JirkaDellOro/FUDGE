@@ -320,7 +320,10 @@ namespace FudgeCore {
     protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _cmpCamera: ComponentCamera): void {
       let shader: typeof Shader = cmpMaterial.material.getShader();
       let coat: Coat = cmpMaterial.material.coat;
-      let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, _cmpMesh.mtxWorld);
+      // let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, _cmpMesh.mtxWorld);
+      let mtxMeshToView: Matrix4x4 = _cmpMesh.mtxWorld.clone;
+      mtxMeshToView.lookAt(_cmpCamera.mtxWorld.translation, undefined, true, true);
+      mtxMeshToView = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, mtxMeshToView);
       shader.useProgram();
       let renderBuffers: RenderBuffers;
       if (_cmpMesh.mesh instanceof MeshSkin)
