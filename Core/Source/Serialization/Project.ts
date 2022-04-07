@@ -176,22 +176,13 @@ namespace FudgeCore {
         compoments[namespace] = [];
         for (let name in Project.scriptNamespaces[namespace]) {
           let script: ComponentScript = Reflect.get(Project.scriptNamespaces[namespace], name);
-
-          // is script a subclass of ComponentScript? instanceof doesn't work, since no instance is created
-
-          // let superclass: Object = script;
-          // while (superclass) {
-          //   superclass = Reflect.getPrototypeOf(superclass);
-          //   if (superclass == ComponentScript) {
-          //     scripts.push(script);
-          //     break;
-          //   }
-          // }
-
           // Using Object.create doesn't call the constructor, but instanceof can be used. More elegant than the loop above, though maybe not as performant. 
-          let o: General = Object.create(script);
-          if (o.prototype instanceof ComponentScript)
-            compoments[namespace].push(script);
+
+          try {
+            let o: General = Object.create(script);
+            if (o.prototype instanceof ComponentScript)
+              compoments[namespace].push(script);
+          } catch (_e) { /* */ }
         }
       }
       return compoments;
