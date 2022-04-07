@@ -22,11 +22,10 @@ var Graph;
                 for (let x = -dim.x; x < dim.x + 1; x++) {
                     let instance = await ƒ.Project.createGraphInstance(resource);
                     root.addChild(instance);
-                    instance.mtxLocal.translate(new ƒ.Vector3(2 * x, 2 * y, 2 * z));
+                    instance.mtxLocal.translate(new ƒ.Vector3(2 * x, 2 * y, -2 * z));
                     instance.getComponent(ƒ.ComponentMesh).mtxPivot.scale(ƒ.Vector3.ONE(1));
-                    if (x == 0 && y == 0 && z == 0)
-                        instance.addComponent(new ƒ.ComponentGraphFilter());
                 }
+        root.getChild(1).addComponent(new ƒ.ComponentGraphFilter());
         root.broadcastEvent(new Event("startSatellite"));
         let srlResources = ƒ.Project.serialize();
         let srlInstance = ƒ.Serializer.serialize(new ƒ.GraphInstance(resource));
@@ -52,9 +51,12 @@ var Graph;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         // debugger;
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 10);
-        function update(_event) {
+        async function update(_event) {
             let time = ƒ.Time.game.get() % 1000 / 1000;
-            root.getChild(0).getComponent(ƒ.ComponentMaterial).mutate({ clrPrimary: { r: time } });
+            // await root.getChild(0).getComponent(ƒ.ComponentMaterial).mutate({ clrPrimary: { r: time } });
+            await root.getChild(0).getComponent(ƒ.ComponentMesh).mutate({ mtxPivot: { rotation: { y: time * 100 } } });
+            root.getChild(0).getComponent(ƒ.ComponentMaterial).clrPrimary.r = time;
+            // root.getChild(0).getComponent(ƒ.ComponentMesh).mtxPivot.rotateZ(10);
             viewport.draw();
         }
     }

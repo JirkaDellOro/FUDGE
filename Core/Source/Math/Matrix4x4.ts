@@ -118,7 +118,7 @@ namespace FudgeCore {
         ]);
       return mtxResult;
     }
-    
+
     /**
      * Computes and returns the transpose of a passed matrix.
      */
@@ -219,12 +219,13 @@ namespace FudgeCore {
      * Computes and returns a matrix with the given translation, its z-axis pointing directly at the given target,
      * and a minimal angle between its y-axis and the given up-{@link Vector3}, respetively calculating yaw and pitch.
      */
-    public static LOOK_AT(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
+    public static LOOK_AT(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y(), _restrict: boolean = false): Matrix4x4 {
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
       let zAxis: Vector3 = Vector3.DIFFERENCE(_target, _translation);
       zAxis.normalize();
       let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
-      let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
+      let yAxis: Vector3 = _restrict ? _up : Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
+      zAxis = _restrict ? Vector3.NORMALIZATION(Vector3.CROSS(xAxis, _up)) : zAxis;
       mtxResult.data.set(
         [
           xAxis.x, xAxis.y, xAxis.z, 0,
@@ -242,25 +243,25 @@ namespace FudgeCore {
      * Computes and returns a matrix with the given translation, its y-axis matching the given up-{@link Vector3}
      * and its z-axis facing towards the given target at a minimal angle, respetively calculating yaw only.
      */
-    public static SHOW_TO(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
-      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
-      let zAxis: Vector3 = Vector3.DIFFERENCE(_target, _translation);
-      zAxis.normalize();
-      let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
-      // let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
-      zAxis = Vector3.NORMALIZATION(Vector3.CROSS(xAxis, _up));
-      mtxResult.data.set(
-        [
-          xAxis.x, xAxis.y, xAxis.z, 0,
-          _up.x, _up.y, _up.z, 0,
-          zAxis.x, zAxis.y, zAxis.z, 0,
-          _translation.x,
-          _translation.y,
-          _translation.z,
-          1
-        ]);
-      return mtxResult;
-    }
+    // public static SHOW_TO(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
+    //   const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+    //   let zAxis: Vector3 = Vector3.DIFFERENCE(_target, _translation);
+    //   zAxis.normalize();
+    //   let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
+    //   // let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
+    //   zAxis = Vector3.NORMALIZATION(Vector3.CROSS(xAxis, _up));
+    //   mtxResult.data.set(
+    //     [
+    //       xAxis.x, xAxis.y, xAxis.z, 0,
+    //       _up.x, _up.y, _up.z, 0,
+    //       zAxis.x, zAxis.y, zAxis.z, 0,
+    //       _translation.x,
+    //       _translation.y,
+    //       _translation.z,
+    //       1
+    //     ]);
+    //   return mtxResult;
+    // }
 
     /**
      * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given {@link Vector3}.
@@ -369,7 +370,7 @@ namespace FudgeCore {
      */
     public static RELATIVE(_mtx: Matrix4x4, _mtxBase: Matrix4x4, _mtxInverse?: Matrix4x4): Matrix4x4 {
       if (_mtxInverse)
-       return Matrix4x4.MULTIPLICATION(_mtxInverse, _mtx);
+        return Matrix4x4.MULTIPLICATION(_mtxInverse, _mtx);
 
       let mtxInverse: Matrix4x4 = Matrix4x4.INVERSION(_mtxBase);
       let mtxResult: Matrix4x4 = Matrix4x4.MULTIPLICATION(mtxInverse, _mtx);
@@ -516,7 +517,7 @@ namespace FudgeCore {
         0, 0, 1, 0,
         0, 0, 0, 1
       ]);
-      this.resetCache(); 
+      this.resetCache();
     }
 
     //#region Rotation
@@ -536,8 +537,8 @@ namespace FudgeCore {
     public transpose(): Matrix4x4 {
       let matrix: Float32Array = this.data;
       this.data.set([
-        matrix[0], matrix[4], matrix[8],  matrix[12],
-        matrix[1], matrix[5], matrix[9],  matrix[13],
+        matrix[0], matrix[4], matrix[8], matrix[12],
+        matrix[1], matrix[5], matrix[9], matrix[13],
         matrix[2], matrix[6], matrix[10], matrix[14],
         matrix[3], matrix[7], matrix[11], matrix[15]
       ]);
@@ -654,67 +655,68 @@ namespace FudgeCore {
      * respectively calculating yaw and pitch. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used. 
      * When _preserveScaling is false, a rotated identity matrix is the result. 
      */
-    public lookAt(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
-      if (!_up)
-        _up = this.getY();
+    public lookAt(_target: Vector3, _up?: Vector3, _restrict: boolean = false, _preserveScaling: boolean = true): void {
+      _up = _up ? Vector3.NORMALIZATION(_up) : Vector3.NORMALIZATION(this.getY());
 
-      const mtxResult: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up);
+      const mtxResult: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up, _restrict);
       if (_preserveScaling)
         mtxResult.scale(this.scaling);
       this.set(mtxResult);
       Recycler.store(mtxResult);
     }
+
     /**
      * Same as {@link Matrix4x4.lookAt}, but optimized and needs testing
      */
     // TODO: testing lookat that really just rotates the matrix rather than creating a new one
-    public lookAtRotate(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
-      if (!_up)
-        _up = this.getY();
+    // public lookAtRotate(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
+    //   if (!_up)
+    //     _up = this.getY();
 
-      let scaling: Vector3 = this.scaling;
-      let difference: Vector3 = Vector3.DIFFERENCE(_target, this.translation);
-      difference.normalize();
-      let cos: number = Vector3.DOT(Vector3.NORMALIZATION(this.getZ()), difference);
-      let sin: number = Vector3.DOT(Vector3.NORMALIZATION(this.getX()), difference);
-      // console.log(sin, cos);
-      let mtxRotation: Matrix4x4 = Recycler.borrow(Matrix4x4);
-      mtxRotation.data.set([
-        cos, 0, -sin, 0,
-        0, 1, 0, 0,
-        sin, 0, cos, 0,
-        0, 0, 0, 1
-      ]);
-      this.multiply(mtxRotation, false);
+    //   let scaling: Vector3 = this.scaling;
+    //   let difference: Vector3 = Vector3.DIFFERENCE(_target, this.translation);
+    //   difference.normalize();
+    //   let cos: number = Vector3.DOT(Vector3.NORMALIZATION(this.getZ()), difference);
+    //   let sin: number = Vector3.DOT(Vector3.NORMALIZATION(this.getX()), difference);
+    //   // console.log(sin, cos);
+    //   let mtxRotation: Matrix4x4 = Recycler.get(Matrix4x4);
+    //   mtxRotation.data.set([
+    //     cos, 0, -sin, 0,
+    //     0, 1, 0, 0,
+    //     sin, 0, cos, 0,
+    //     0, 0, 0, 1
+    //   ]);
+    //   this.multiply(mtxRotation, false);
 
-      cos = Vector3.DOT(Vector3.NORMALIZATION(this.getZ()), difference);
-      sin = -Vector3.DOT(Vector3.NORMALIZATION(this.getY()), difference);
-      // console.log(sin, cos);
-      mtxRotation.data.set([
-        1, 0, 0, 0,
-        0, cos, sin, 0,
-        0, -sin, cos, 0,
-        0, 0, 0, 1
-      ]);
-      this.multiply(mtxRotation, false);
-      this.scaling = scaling;
-    }
+    //   cos = Vector3.DOT(Vector3.NORMALIZATION(this.getZ()), difference);
+    //   sin = -Vector3.DOT(Vector3.NORMALIZATION(this.getY()), difference);
+    //   // console.log(sin, cos);
+    //   mtxRotation.data.set([
+    //     1, 0, 0, 0,
+    //     0, cos, sin, 0,
+    //     0, -sin, cos, 0,
+    //     0, 0, 0, 1
+    //   ]);
+    //   this.multiply(mtxRotation, false);
+    //   this.scaling = scaling;
+    //   Recycler.store(mtxRotation);
+    // }
 
     /**
      * Adjusts the rotation of this matrix to match its y-axis with the given up-{@link Vector3} and facing its z-axis toward the given target at minimal angle,
      * respectively calculating yaw only. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used. 
      * When _preserveScaling is false, a rotated identity matrix is the result. 
      */
-    public showTo(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
-      if (!_up)
-        _up = this.getY();
+    // public showTo(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
+    //   if (!_up)
+    //     _up = Vector3.NORMALIZATION(this.getY());
 
-      const mtxResult: Matrix4x4 = Matrix4x4.SHOW_TO(this.translation, _target, _up);
-      if (_preserveScaling)
-        mtxResult.scale(this.scaling);
-      this.set(mtxResult);
-      Recycler.store(mtxResult);
-    }
+    //   const mtxResult: Matrix4x4 = Matrix4x4.SHOW_TO(this.translation, _target, _up);
+    //   if (_preserveScaling)
+    //     mtxResult.scale(this.scaling);
+    //   this.set(mtxResult);
+    //   Recycler.store(mtxResult);
+    // }
     //#endregion
 
     //#region Translation

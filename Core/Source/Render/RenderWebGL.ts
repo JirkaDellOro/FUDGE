@@ -317,16 +317,29 @@ namespace FudgeCore {
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
      */
-    protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _cmpCamera: ComponentCamera): void {
+    protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void {
+      let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
+      let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
+      let cmpFaceCamera: ComponentFaceCamera = _node.getComponent(ComponentFaceCamera);
+
       let shader: typeof Shader = cmpMaterial.material.getShader();
       let coat: Coat = cmpMaterial.material.coat;
-      let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, _cmpMesh.mtxWorld);
+
+      let mtxMeshToView: Matrix4x4;
+      if (cmpFaceCamera && cmpFaceCamera.isActive) {
+        mtxMeshToView = cmpMesh.mtxWorld.clone;
+        mtxMeshToView.lookAt(_cmpCamera.mtxWorld.translation, cmpFaceCamera.up, cmpFaceCamera.restrict, cmpFaceCamera.preserveScale);
+        mtxMeshToView = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, mtxMeshToView);
+      }
+      else
+        mtxMeshToView = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
+
       shader.useProgram();
       let renderBuffers: RenderBuffers;
-      if (_cmpMesh.mesh instanceof MeshSkin)
-        renderBuffers = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
+      if (cmpMesh.mesh instanceof MeshSkin)
+        renderBuffers = cmpMesh.mesh.useRenderBuffers(shader, cmpMesh.mtxWorld, mtxMeshToView, null, cmpMesh.skeleton.mtxBones);
       else
-        renderBuffers = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView);
+        renderBuffers = cmpMesh.mesh.useRenderBuffers(shader, cmpMesh.mtxWorld, mtxMeshToView);
 
       coat.useRenderData(shader, cmpMaterial);
       let uCamera: WebGLUniformLocation = shader.uniforms["u_vctCamera"];

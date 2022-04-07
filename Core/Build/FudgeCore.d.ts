@@ -854,7 +854,7 @@ declare namespace FudgeCore {
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
-        protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _cmpCamera: ComponentCamera): void;
+        protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
     }
 }
 declare namespace FudgeCore {
@@ -1934,6 +1934,20 @@ declare namespace FudgeCore {
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Makes the node face the camera when rendering, respecting restrictions for rotation around specific axis
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
+     */
+    class ComponentFaceCamera extends Component {
+        static readonly iSubclass: number;
+        up: Vector3;
+        restrict: boolean;
+        preserveScale: boolean;
+        constructor();
     }
 }
 declare namespace FudgeCore {
@@ -3077,12 +3091,11 @@ declare namespace FudgeCore {
          * Computes and returns a matrix with the given translation, its z-axis pointing directly at the given target,
          * and a minimal angle between its y-axis and the given up-{@link Vector3}, respetively calculating yaw and pitch.
          */
-        static LOOK_AT(_translation: Vector3, _target: Vector3, _up?: Vector3): Matrix4x4;
+        static LOOK_AT(_translation: Vector3, _target: Vector3, _up?: Vector3, _restrict?: boolean): Matrix4x4;
         /**
          * Computes and returns a matrix with the given translation, its y-axis matching the given up-{@link Vector3}
          * and its z-axis facing towards the given target at a minimal angle, respetively calculating yaw only.
          */
-        static SHOW_TO(_translation: Vector3, _target: Vector3, _up?: Vector3): Matrix4x4;
         /**
          * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given {@link Vector3}.
          */
@@ -3182,17 +3195,15 @@ declare namespace FudgeCore {
          * respectively calculating yaw and pitch. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used.
          * When _preserveScaling is false, a rotated identity matrix is the result.
          */
-        lookAt(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
+        lookAt(_target: Vector3, _up?: Vector3, _restrict?: boolean, _preserveScaling?: boolean): void;
         /**
          * Same as {@link Matrix4x4.lookAt}, but optimized and needs testing
          */
-        lookAtRotate(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
         /**
          * Adjusts the rotation of this matrix to match its y-axis with the given up-{@link Vector3} and facing its z-axis toward the given target at minimal angle,
          * respectively calculating yaw only. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used.
          * When _preserveScaling is false, a rotated identity matrix is the result.
          */
-        showTo(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
         /**
          * Add a translation by the given {@link Vector3} to this matrix.
          * If _local is true, translation occurs according to the current rotation and scaling of this matrix,
