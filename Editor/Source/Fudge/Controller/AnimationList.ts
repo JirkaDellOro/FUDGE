@@ -39,7 +39,7 @@ namespace Fudge {
     public getElementIndex(): ƒ.Mutator {
       return this.index;
     }
-    
+
     public updateMutator(_update: ƒ.Mutator): void {
       this.mutator = this.updateMutatorEntry(_update, this.mutator);
       this.updateEntry(this.mutator, this.index);
