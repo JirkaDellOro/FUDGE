@@ -854,7 +854,7 @@ declare namespace FudgeCore {
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
-        protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _cmpCamera: ComponentCamera): void;
+        protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
     }
 }
 declare namespace FudgeCore {
@@ -1944,6 +1944,9 @@ declare namespace FudgeCore {
      */
     class ComponentFaceCamera extends Component {
         static readonly iSubclass: number;
+        up: Vector3;
+        restrict: boolean;
+        preserveScale: boolean;
         constructor();
     }
 }

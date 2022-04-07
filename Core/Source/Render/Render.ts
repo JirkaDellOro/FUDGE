@@ -174,9 +174,7 @@ namespace FudgeCore {
 
     private static drawList(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>): void {
       for (let node of _list) {
-        let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
-        let cmpMaterial: ComponentMaterial = node.getComponent(ComponentMaterial);
-        Render.drawMesh(cmpMesh, cmpMaterial, _cmpCamera);
+        Render.drawNode(node, _cmpCamera);
       }
     }
 

@@ -656,8 +656,7 @@ namespace FudgeCore {
      * When _preserveScaling is false, a rotated identity matrix is the result. 
      */
     public lookAt(_target: Vector3, _up?: Vector3, _restrict: boolean = false, _preserveScaling: boolean = true): void {
-      if (!_up)
-        _up = Vector3.NORMALIZATION(this.getY());
+      _up = _up ? Vector3.NORMALIZATION(_up) : Vector3.NORMALIZATION(this.getY());
 
       const mtxResult: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up, _restrict);
       if (_preserveScaling)
