@@ -9,7 +9,6 @@ namespace FudgeCore {
 
     public up: Vector3 = Vector3.Y(1);
     public restrict: boolean = false;
-    public preserveScale: boolean = true;
 
     constructor() {
       super();

@@ -59,7 +59,7 @@ namespace FudgeCore {
       return this.ƒradius;
     }
 
-    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): RenderBuffers { return null; /* injected by RenderInjector*/ }
+    public useRenderBuffers(_shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers { return null; /* injected by RenderInjector*/ }
     public getRenderBuffers(_shader: typeof Shader): RenderBuffers { return null; /* injected by RenderInjector*/ }
     public deleteRenderBuffers(_shader: typeof Shader): void {/* injected by RenderInjector*/ }
 

@@ -846,7 +846,7 @@ declare namespace FudgeCore {
         * A cameraprojection with extremely narrow focus is used, so each pixel of the buffer would hold the same information from the node,
         * but the fragment shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
         */
-        protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void;
+        protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _cmpCamera: ComponentCamera): void;
         /**
          * Set light data in shaders
          */
@@ -855,6 +855,8 @@ declare namespace FudgeCore {
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
+        private static calcMeshToView;
+        private static getRenderBuffers;
     }
 }
 declare namespace FudgeCore {
@@ -1946,7 +1948,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         up: Vector3;
         restrict: boolean;
-        preserveScale: boolean;
         constructor();
     }
 }
@@ -3195,7 +3196,7 @@ declare namespace FudgeCore {
          * respectively calculating yaw and pitch. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used.
          * When _preserveScaling is false, a rotated identity matrix is the result.
          */
-        lookAt(_target: Vector3, _up?: Vector3, _restrict?: boolean, _preserveScaling?: boolean): void;
+        lookAt(_target: Vector3, _up?: Vector3, _restrict?: boolean): void;
         /**
          * Same as {@link Matrix4x4.lookAt}, but optimized and needs testing
          */
@@ -3672,7 +3673,7 @@ declare namespace FudgeCore {
         get type(): string;
         get boundingBox(): Box;
         get radius(): number;
-        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): RenderBuffers;
+        useRenderBuffers(_shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers;
         getRenderBuffers(_shader: typeof Shader): RenderBuffers;
         deleteRenderBuffers(_shader: typeof Shader): void;
         clear(): void;

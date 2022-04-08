@@ -139,10 +139,10 @@ namespace FudgeCore {
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
         let cmpMaterial: ComponentMaterial = node.getComponent(ComponentMaterial);
         if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
-          let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
-          Render.pick(node, node.mtxWorld, mtxMeshToView);
+          // let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
+          Render.pick(node, node.mtxWorld, _cmpCamera);
           // RenderParticles.drawParticles();
-          Recycler.store(mtxMeshToView);
+          // Recycler.store(mtxMeshToView);
         }
       }
 
