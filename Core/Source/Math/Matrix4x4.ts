@@ -655,12 +655,11 @@ namespace FudgeCore {
      * respectively calculating yaw and pitch. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used. 
      * When _preserveScaling is false, a rotated identity matrix is the result. 
      */
-    public lookAt(_target: Vector3, _up?: Vector3, _restrict: boolean = false, _preserveScaling: boolean = true): void {
+    public lookAt(_target: Vector3, _up?: Vector3, _restrict: boolean = false): void {
       _up = _up ? Vector3.NORMALIZATION(_up) : Vector3.NORMALIZATION(this.getY());
 
       const mtxResult: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up, _restrict);
-      if (_preserveScaling)
-        mtxResult.scale(this.scaling);
+      mtxResult.scale(this.scaling);
       this.set(mtxResult);
       Recycler.store(mtxResult);
     }
