@@ -488,9 +488,9 @@ namespace FudgeCore {
       if (!this.vectors.scaling) {
         this.vectors.scaling = this.#vectors.scaling;
         this.vectors.scaling.set(
-          Math.hypot(this.data[0], this.data[1], this.data[2]),
-          Math.hypot(this.data[4], this.data[5], this.data[6]),
-          Math.hypot(this.data[8], this.data[9], this.data[10])
+          Math.hypot(this.data[0], this.data[1], this.data[2]) * (this.data[0] < 0 ? -1 : 1),
+          Math.hypot(this.data[4], this.data[5], this.data[6]) * (this.data[5] < 0 ? -1 : 1),
+          Math.hypot(this.data[8], this.data[9], this.data[10] * (this.data[10] < 0 ? -1 : 1))
         );
       }
       return this.vectors.scaling; // .clone;
@@ -510,6 +510,9 @@ namespace FudgeCore {
     }
     //#endregion
 
+    /**
+     * Resets the matrix to the identity-matrix and clears cache. Used by the recycler to reset.
+     */
     public recycle(): void {
       this.data.set([
         1, 0, 0, 0,
@@ -518,6 +521,13 @@ namespace FudgeCore {
         0, 0, 0, 1
       ]);
       this.resetCache();
+    }
+
+    /**
+     * Resets the matrix to the identity-matrix and clears cache.
+     */
+    public reset(): void {
+      this.recycle();
     }
 
     //#region Rotation
@@ -822,11 +832,39 @@ namespace FudgeCore {
     //#endregion
 
     //#region Transfer
+    public getEulerAngles(): Vector3 {
+      let scaling: Vector3 = this.scaling;
+
+      let thetaX: number, thetaY: number, thetaZ: number;
+      let r02: number = this.data[2] / scaling.z;
+      let r11: number = this.data[5] / scaling.y;
+
+      if (r02 < 1) {
+        if (r02 > -1) {
+          thetaY = Math.asin(-r02);
+          thetaZ = Math.atan2(this.data[1] / scaling.y, this.data[0] / scaling.x);
+          thetaX = Math.atan2(this.data[9] / scaling.z, this.data[10] / scaling.z);
+        }
+        else {
+          thetaY = Math.PI / 2;
+          thetaZ = -Math.atan2(this.data[6] / scaling.y, r11);
+          thetaX = 0;
+        }
+      }
+      else {
+        thetaY = -Math.PI / 2;
+        thetaZ = Math.atan2(-this.data[6] / scaling.y, r11);
+        thetaX = 0;
+      }
+      this.#eulerAngles.set(-thetaX, thetaY, thetaZ);
+      this.#eulerAngles.scale(180 / Math.PI);
+
+      return this.#eulerAngles;
+    }
     /**
      * Calculates and returns the euler-angles representing the current rotation of this matrix.  
-     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
      */
-    public getEulerAngles(): Vector3 {
+    public getEulerAnglesX(): Vector3 {
       let scaling: Vector3 = this.scaling;
 
       let s0: number = this.data[0] / scaling.x;
@@ -863,7 +901,6 @@ namespace FudgeCore {
         z1 = 0;
       }
 
-      // let rotation: Vector3 = Recycler.borrow(Vector3);
       this.#eulerAngles.set(x1, y1, z1);
       this.#eulerAngles.scale(180 / Math.PI);
 

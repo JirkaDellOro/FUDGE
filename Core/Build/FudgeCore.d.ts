@@ -2135,16 +2135,6 @@ declare namespace FudgeCore {
         mtxLocal: Matrix4x4;
         constructor(_mtxInit?: Matrix4x4);
         /**
-         * Adjusts the rotation to point the z-axis directly at the given target point in world space and tilts it to accord with the given up vector,
-         * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used.
-         */
-        lookAt(_targetWorld: Vector3, _up?: Vector3): void;
-        /**
-         * Adjusts the rotation to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
-         * respectively calculating yaw only. If no up vector is given, the previous up-vector is used.
-         */
-        showTo(_targetWorld: Vector3, _up?: Vector3): void;
-        /**
          * recalculates this local matrix to yield the identical world matrix based on the given node.
          * Use rebase before appending the container of this component to another node while preserving its transformation in the world.
          */
@@ -2983,7 +2973,14 @@ declare namespace FudgeCore {
          * Return a copy of this
          */
         get clone(): Matrix3x3;
+        /**
+         * Resets the matrix to the identity-matrix and clears cache. Used by the recycler to reset.
+         */
         recycle(): void;
+        /**
+         * Resets the matrix to the identity-matrix and clears cache.
+         */
+        reset(): void;
         /**
          * Add a translation by the given {@link Vector2} to this matrix
          */
@@ -3171,7 +3168,14 @@ declare namespace FudgeCore {
          * Return a copy of this
          */
         get clone(): Matrix4x4;
+        /**
+         * Resets the matrix to the identity-matrix and clears cache. Used by the recycler to reset.
+         */
         recycle(): void;
+        /**
+         * Resets the matrix to the identity-matrix and clears cache.
+         */
+        reset(): void;
         /**
          * Rotate this matrix by given {@link Vector3} in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
          * The rotation is appended to already applied transforms, thus multiplied from the right. Set _fromLeft to true to switch and put it in front.
@@ -3243,11 +3247,11 @@ declare namespace FudgeCore {
          * Multiply this matrix with the given matrix
          */
         multiply(_matrix: Matrix4x4, _fromLeft?: boolean): void;
+        getEulerAngles(): Vector3;
         /**
          * Calculates and returns the euler-angles representing the current rotation of this matrix.
-         * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate.
          */
-        getEulerAngles(): Vector3;
+        getEulerAnglesX(): Vector3;
         /**
          * Sets the elements of this matrix to the values of the given matrix
          */
