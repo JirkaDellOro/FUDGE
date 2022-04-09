@@ -5,17 +5,17 @@ var Test_sprites;
     window.addEventListener("load", hndLoad);
     const clrWhite = ƒ.Color.CSS("white");
     let viewport;
-    let root;
-    let animations;
     let spriteNode;
     async function hndLoad(_event) {
-        // setup sprites
-        await loadSprites();
-        // setup scene
-        root = new ƒ.Node("root");
+        let root = new ƒ.Node("root");
+        let imgSpriteSheet = new ƒ.TextureImage();
+        await imgSpriteSheet.load("Assets/bounceball.png");
+        let coat = new ƒ.CoatTextured(undefined, imgSpriteSheet);
+        let animation = new ƒAid.SpriteSheetAnimation("Bounce", coat);
+        animation.generateByGrid(ƒ.Rectangle.GET(1, 0, 17, 60), 8, 22, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(20));
         spriteNode = new ƒAid.NodeSprite("Sprite");
         spriteNode.addComponent(new ƒ.ComponentTransform(new ƒ.Matrix4x4()));
-        spriteNode.setAnimation(animations["bounce"]);
+        spriteNode.setAnimation(animation);
         spriteNode.setFrameDirection(1);
         spriteNode.mtxLocal.translateY(-1);
         spriteNode.framerate = parseInt(document.querySelector("[name=fps]").value);
@@ -38,20 +38,6 @@ var Test_sprites;
         let avg = document.querySelector("[name=currentframe]");
         avg.value = spriteNode.getCurrentFrame.toString();
         viewport.draw();
-    }
-    async function loadSprites() {
-        let imgSpriteSheet = new ƒ.TextureImage();
-        await imgSpriteSheet.load("Assets/bounceball.png");
-        let spriteSheet = new ƒ.CoatTextured(clrWhite, imgSpriteSheet);
-        generateSprites(spriteSheet);
-    }
-    function generateSprites(_spritesheet) {
-        animations = {};
-        this.animations = {};
-        let name = "bounce";
-        let sprite = new ƒAid.SpriteSheetAnimation(name, _spritesheet);
-        sprite.generateByGrid(ƒ.Rectangle.GET(1, 0, 17, 60), 8, 22, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(20));
-        animations[name] = sprite;
     }
     function handleChange(_event) {
         let value = parseInt(_event.target.value);
