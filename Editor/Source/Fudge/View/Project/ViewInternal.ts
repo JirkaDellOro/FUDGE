@@ -48,6 +48,14 @@ namespace Fudge {
       return this.table.controller.dragDrop.sources;
     }
 
+    // TODO: this is a preparation for syncing a graph with its instances after structural changes
+    // protected openContextMenu = (_event: Event): void => {
+    //   let row: HTMLTableRowElement = <HTMLTableRowElement>_event.composedPath().find((_element) => (<HTMLElement>_element).tagName == "TR");
+    //   if (row)
+    //     this.contextMenu.getMenuItemById(String(CONTEXTMENU.SYNC_INSTANCES)).enabled = (row.getAttribute("icon") == "Graph");
+    //   this.contextMenu.popup();
+    // }
+
     // #region  ContextMenu
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
@@ -72,6 +80,10 @@ namespace Fudge {
       item = new remote.MenuItem({ label: "Delete Resource", id: String(CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
       menu.append(item);
 
+      // item = new remote.MenuItem({ label: "Sync Instances", id: String(CONTEXTMENU.SYNC_INSTANCES), click: _callback, accelerator: "S" });
+      // menu.append(item);
+
+
       // ContextMenu.appendCopyPaste(menu);
       return menu;
     }
@@ -80,7 +92,7 @@ namespace Fudge {
       let choice: CONTEXTMENU = Number(_item.id);
       ƒ.Debug.fudge(`MenuSelect | id: ${CONTEXTMENU[_item.id]} | event: ${_event}`);
       let iSubclass: number = _item["iSubclass"];
-      if (!iSubclass && (choice == CONTEXTMENU.CREATE_MESH || choice == CONTEXTMENU.CREATE_MATERIAL) ) {
+      if (!iSubclass && (choice == CONTEXTMENU.CREATE_MESH || choice == CONTEXTMENU.CREATE_MATERIAL)) {
         alert("Funky Electron-Error... please try again");
         return;
       }

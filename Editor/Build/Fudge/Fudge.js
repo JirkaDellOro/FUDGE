@@ -37,10 +37,11 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 7] = "CREATE_MESH";
         CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 8] = "CREATE_MATERIAL";
         CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 9] = "CREATE_GRAPH";
-        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 10] = "REMOVE_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 11] = "ADD_JOINT";
-        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 12] = "DELETE_RESOURCE";
-        CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 13] = "ILLUMINATE";
+        CONTEXTMENU[CONTEXTMENU["SYNC_INSTANCES"] = 10] = "SYNC_INSTANCES";
+        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 11] = "REMOVE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 12] = "ADD_JOINT";
+        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 13] = "DELETE_RESOURCE";
+        CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 14] = "ILLUMINATE";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -1009,6 +1010,13 @@ var Fudge;
         getDragDropSources() {
             return this.table.controller.dragDrop.sources;
         }
+        // TODO: this is a preparation for syncing a graph with its instances after structural changes
+        // protected openContextMenu = (_event: Event): void => {
+        //   let row: HTMLTableRowElement = <HTMLTableRowElement>_event.composedPath().find((_element) => (<HTMLElement>_element).tagName == "TR");
+        //   if (row)
+        //     this.contextMenu.getMenuItemById(String(CONTEXTMENU.SYNC_INSTANCES)).enabled = (row.getAttribute("icon") == "Graph");
+        //   this.contextMenu.popup();
+        // }
         // #region  ContextMenu
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
@@ -1027,6 +1035,8 @@ var Fudge;
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Delete Resource", id: String(Fudge.CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
             menu.append(item);
+            // item = new remote.MenuItem({ label: "Sync Instances", id: String(CONTEXTMENU.SYNC_INSTANCES), click: _callback, accelerator: "S" });
+            // menu.append(item);
             // ContextMenu.appendCopyPaste(menu);
             return menu;
         }
@@ -1327,8 +1337,12 @@ var Fudge;
         getHead() {
             return ControllerTableResource.head;
         }
-        getLabel(_object) { return ""; }
-        rename(_object, _new) { return false; }
+        getLabel(_object) {
+            return "";
+        }
+        rename(_object, _new) {
+            return false;
+        }
         copy(_originals) { return null; }
         async delete(_focussed) {
             console.log(_focussed, this.selection);

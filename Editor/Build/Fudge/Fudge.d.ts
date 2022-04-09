@@ -27,10 +27,11 @@ declare namespace Fudge {
         CREATE_MESH = 7,
         CREATE_MATERIAL = 8,
         CREATE_GRAPH = 9,
-        REMOVE_COMPONENT = 10,
-        ADD_JOINT = 11,
-        DELETE_RESOURCE = 12,
-        ILLUMINATE = 13
+        SYNC_INSTANCES = 10,
+        REMOVE_COMPONENT = 11,
+        ADD_JOINT = 12,
+        DELETE_RESOURCE = 13,
+        ILLUMINATE = 14
     }
     enum MENU {
         QUIT = "quit",
