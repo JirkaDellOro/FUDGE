@@ -252,7 +252,7 @@ namespace FudgeCore {
         shader.useProgram();
         coat.useRenderData(shader, cmpMaterial);
         let mtxMeshToView: Matrix4x4 = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
-  
+
         let sizeUniformLocation: WebGLUniformLocation = shader.uniforms["u_vctSize"];
         RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, [RenderWebGL.sizePick, RenderWebGL.sizePick]);
 
@@ -307,6 +307,26 @@ namespace FudgeCore {
             direction.transform(cmpLight.node.mtxWorld, false);
             direction.normalize();
             RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].vctDirection`], direction.get());
+            i++;
+          }
+        }
+      }
+      // Directional
+      let nSpot: WebGLUniformLocation = uni["u_nLightsSpot"];
+      if (nSpot) {
+        RenderWebGL.crc3.uniform1ui(nSpot, 0);
+        let cmpLights: RecycableArray<ComponentLight> = _lights.get(LightSpot);
+        if (cmpLights) {
+          let n: number = cmpLights.length;
+          RenderWebGL.crc3.uniform1ui(nSpot, n);
+          let i: number = 0;
+          for (let cmpLight of cmpLights) {
+            // let cmpLight: ComponentLight = cmpLights[i];
+            RenderWebGL.crc3.uniform4fv(uni[`u_spot[${i}].vctColor`], cmpLight.light.color.getArray());
+            // console.log(cmpLight.light.color.getArray());
+            RenderWebGL.crc3.uniformMatrix4fv(
+              uni[`u_spot[${i}].mtxLight`], false, Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot).get()
+            );
             i++;
           }
         }

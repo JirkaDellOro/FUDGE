@@ -2010,7 +2010,6 @@ declare namespace FudgeCore {
      * ```
      */
     class LightPoint extends Light {
-        range: number;
     }
     /**
      * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color

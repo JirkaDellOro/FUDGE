@@ -64,7 +64,7 @@ namespace FudgeCore {
    * ```
    */
   export class LightPoint extends Light {
-    public range: number = 10;
+    // public range: number = 10;
   }
   /**
    * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color  
