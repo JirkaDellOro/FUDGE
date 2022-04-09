@@ -312,20 +312,20 @@ namespace FudgeCore {
         }
       }
       // Directional
-      let nSpot: WebGLUniformLocation = uni["u_nLightsSpot"];
-      if (nSpot) {
-        RenderWebGL.crc3.uniform1ui(nSpot, 0);
-        let cmpLights: RecycableArray<ComponentLight> = _lights.get(LightSpot);
+      let nPoint: WebGLUniformLocation = uni["u_nLightsPoint"];
+      if (nPoint) {
+        RenderWebGL.crc3.uniform1ui(nPoint, 0);
+        let cmpLights: RecycableArray<ComponentLight> = _lights.get(LightPoint);
         if (cmpLights) {
           let n: number = cmpLights.length;
-          RenderWebGL.crc3.uniform1ui(nSpot, n);
+          RenderWebGL.crc3.uniform1ui(nPoint, n);
           let i: number = 0;
           for (let cmpLight of cmpLights) {
             // let cmpLight: ComponentLight = cmpLights[i];
-            RenderWebGL.crc3.uniform4fv(uni[`u_spot[${i}].vctColor`], cmpLight.light.color.getArray());
+            RenderWebGL.crc3.uniform4fv(uni[`u_point[${i}].vctColor`], cmpLight.light.color.getArray());
             // console.log(cmpLight.light.color.getArray());
             RenderWebGL.crc3.uniformMatrix4fv(
-              uni[`u_spot[${i}].mtxLight`], false, Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot).get()
+              uni[`u_point[${i}].mtxLight`], false, Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot).get()
             );
             i++;
           }
