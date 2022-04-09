@@ -148,15 +148,19 @@ void main() {
   for(uint i = 0u; i < u_nLightsSpot; i++) {
     vec3 vctPositionLight = vec3(u_spot[i].mtxLight * vec4(0.0, 0.0, 0.0, 1.0));
     vec3 vctDirection = vec3(u_mtxMeshToWorld * vctPosition) - vctPositionLight;
+    mat3 mtxInverse = inverse(mat3(u_spot[i].mtxLight));
+    float fIntensity = 1.0 - length(mtxInverse * vctDirection);
+    if(fIntensity < 0.0)
+      continue;
     vctDirection = normalize(vctDirection);
     float fIllumination = -dot(vctNormal, vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_spot[i].vctColor;
+    if(fIllumination < 0.0)
+      continue;
+    v_vctColor += fIntensity * u_fDiffuse * fIllumination * u_spot[i].vctColor;
         #if defined(CAMERA)
-      // float fReflection = calculateReflection(vctDirection, vctView, vctNormal, u_fSpecular);
-      // v_vctColor += fReflection * u_spot[i].vctColor;
+    float fReflection = calculateReflection(vctDirection, vctView, vctNormal, u_fSpecular);
+    v_vctColor += fReflection * u_spot[i].vctColor;
         #endif
-    }
   }
     #endif
 
