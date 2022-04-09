@@ -342,7 +342,7 @@ namespace FudgeCore {
       if (cmpFaceCamera && cmpFaceCamera.isActive) {
         let mtxMeshToView: Matrix4x4;
         mtxMeshToView = _cmpMesh.mtxWorld.clone;
-        mtxMeshToView.lookAt(_target, cmpFaceCamera.up, cmpFaceCamera.restrict);
+        mtxMeshToView.lookAt(_target, cmpFaceCamera.upLocal ? null : cmpFaceCamera.up, cmpFaceCamera.restrict);
         return Matrix4x4.MULTIPLICATION(_mtxWorldToView, mtxMeshToView);
       }
 

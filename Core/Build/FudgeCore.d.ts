@@ -1946,6 +1946,7 @@ declare namespace FudgeCore {
      */
     class ComponentFaceCamera extends Component {
         static readonly iSubclass: number;
+        upLocal: boolean;
         up: Vector3;
         restrict: boolean;
         constructor();

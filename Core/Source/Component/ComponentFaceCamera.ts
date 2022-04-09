@@ -7,6 +7,7 @@ namespace FudgeCore {
   export class ComponentFaceCamera extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentFaceCamera);
 
+    public upLocal: boolean = true;
     public up: Vector3 = Vector3.Y(1);
     public restrict: boolean = false;
 

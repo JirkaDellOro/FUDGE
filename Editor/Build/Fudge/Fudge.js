@@ -2577,6 +2577,16 @@ var Fudge;
                         pivot.style.opacity = initialization == ƒ.BODY_INIT.TO_PIVOT ? opacity : "0.3";
                     }
                 }
+                if (component instanceof ƒ.ComponentFaceCamera) {
+                    let up = controller.domElement.querySelector("[key=up");
+                    let opacity = up.style.opacity;
+                    setUpOpacity(null);
+                    controller.domElement.addEventListener("mutate" /* MUTATE */, setUpOpacity);
+                    function setUpOpacity(_event) {
+                        let upLocal = controller.getMutator({ upLocal: true }).upLocal;
+                        up.style.opacity = !upLocal ? opacity : "0.3";
+                    }
+                }
                 if (details.getAttribute("key") == this.selected)
                     this.select(details, false);
             }

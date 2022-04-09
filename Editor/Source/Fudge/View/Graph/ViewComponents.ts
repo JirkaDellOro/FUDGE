@@ -183,6 +183,16 @@ namespace Fudge {
             pivot.style.opacity = initialization == ƒ.BODY_INIT.TO_PIVOT ? opacity : "0.3";
           }
         }
+        if (component instanceof ƒ.ComponentFaceCamera) {
+          let up: HTMLElement = controller.domElement.querySelector("[key=up");
+          let opacity: string = up.style.opacity;
+          setUpOpacity(null);
+          controller.domElement.addEventListener(ƒUi.EVENT.MUTATE, setUpOpacity);
+          function setUpOpacity(_event: Event): void {
+            let upLocal: boolean = controller.getMutator({ upLocal: true }).upLocal;
+            up.style.opacity = !upLocal ? opacity : "0.3";
+          }
+        }
         if (details.getAttribute("key") == this.selected)
           this.select(details, false);
       }
