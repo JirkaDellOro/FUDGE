@@ -13,6 +13,7 @@ namespace FudgeCore {
   }
   /**
     * Attaches a {@link Light} to the node
+    * The pivot matrix has different effects depending on the type of the {@link Light}. See there for details.
     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
     */
   export class ComponentLight extends Component {

@@ -1062,12 +1062,9 @@ namespace FudgeCore {
       let mtxResult: Matrix4x4 = Matrix4x4.IDENTITY();
       if (vectors.translation)
         mtxResult.translate(vectors.translation);
-      if (vectors.rotation) {
-        // mtxResult.rotateZ(vectors.rotation.z);
-        // mtxResult.rotateY(vectors.rotation.y);
-        // mtxResult.rotateX(vectors.rotation.x);
+      // problem: previous rotation might have been calculated back as a scaling and vice versa. Applying again might double the effect...
+      if (vectors.rotation)
         mtxResult.rotate(vectors.rotation);
-      }
       if (vectors.scaling)
         mtxResult.scale(vectors.scaling);
 
