@@ -308,8 +308,12 @@ namespace FudgeCore {
               //TODO: could be optimized, no need to calculate for each shader
               let mtxTotal: Matrix4x4 = Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
               RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShape`], false, mtxTotal.get());
-              if (_type != LightDirectional)
-                RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShapeInverse`], false, mtxTotal.inverse().get());
+              if (_type != LightDirectional) {
+                let mtxInverse: Matrix4x4 = mtxTotal.inverse();
+                RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShapeInverse`], false, mtxInverse.get());
+                Recycler.store(mtxInverse);
+              }
+              Recycler.store(mtxTotal);
               i++;
             }
           }

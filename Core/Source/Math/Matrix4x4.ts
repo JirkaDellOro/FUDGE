@@ -926,6 +926,7 @@ namespace FudgeCore {
      * Return the elements of this matrix as a Float32Array
      */
     public get(): Float32Array {
+      // TODO: optimization, it shouldn't always return a copy, since this bloats memory
       return new Float32Array(this.data);
     }
 
