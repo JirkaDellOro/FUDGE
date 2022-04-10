@@ -290,47 +290,28 @@ namespace FudgeCore {
         }
       }
 
-      // Directional
-      let nDirectional: WebGLUniformLocation = uni["u_nLightsDirectional"];
-      if (nDirectional) {
-        RenderWebGL.crc3.uniform1ui(nDirectional, 0);
-        let cmpLights: RecycableArray<ComponentLight> = _lights.get(LightDirectional);
-        if (cmpLights) {
-          let n: number = cmpLights.length;
-          RenderWebGL.crc3.uniform1ui(nDirectional, n);
-          let i: number = 0;
-          for (let cmpLight of cmpLights) {
-            // let cmpLight: ComponentLight = cmpLights[i];
-            RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].vctColor`], cmpLight.light.color.getArray());
-            RenderWebGL.crc3.uniformMatrix4fv(
-              uni[`u_directional[${i}].mtxLight`], false, Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot).get()
-            );
-            // let direction: Vector3 = Vector3.Z();
-            // direction.transform(cmpLight.mtxPivot, false);
-            // direction.transform(cmpLight.node.mtxWorld, false);
-            // direction.normalize();
-            // RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].vctDirection`], direction.get());
-            i++;
-          }
-        }
-      }
-      // Directional
-      let nPoint: WebGLUniformLocation = uni["u_nLightsPoint"];
-      if (nPoint) {
-        RenderWebGL.crc3.uniform1ui(nPoint, 0);
-        let cmpLights: RecycableArray<ComponentLight> = _lights.get(LightPoint);
-        if (cmpLights) {
-          let n: number = cmpLights.length;
-          RenderWebGL.crc3.uniform1ui(nPoint, n);
-          let i: number = 0;
-          for (let cmpLight of cmpLights) {
-            // let cmpLight: ComponentLight = cmpLights[i];
-            RenderWebGL.crc3.uniform4fv(uni[`u_point[${i}].vctColor`], cmpLight.light.color.getArray());
-            // console.log(cmpLight.light.color.getArray());
-            RenderWebGL.crc3.uniformMatrix4fv(
-              uni[`u_point[${i}].mtxLight`], false, Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot).get()
-            );
-            i++;
+      fillLightBuffers(LightDirectional, "u_nLightsDirectional", "u_directional");
+      fillLightBuffers(LightPoint, "u_nLightsPoint", "u_point");
+      fillLightBuffers(LightSpot, "u_nLightsSpot", "u_spot");
+
+      function fillLightBuffers(_type: TypeOfLight, _uniNumber: string, _uniStruct: string): void {
+        let uniLights: WebGLUniformLocation = uni[_uniNumber];
+        if (uniLights) {
+          RenderWebGL.crc3.uniform1ui(uniLights, 0);
+          let cmpLights: RecycableArray<ComponentLight> = _lights.get(_type);
+          if (cmpLights) {
+            let n: number = cmpLights.length;
+            RenderWebGL.crc3.uniform1ui(uniLights, n);
+            let i: number = 0;
+            for (let cmpLight of cmpLights) {
+              RenderWebGL.crc3.uniform4fv(uni[`${_uniStruct}[${i}].vctColor`], cmpLight.light.color.getArray());
+              //TODO: could be optimized, no need to calculate for each shader
+              let mtxTotal: Matrix4x4 = Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
+              RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShape`], false, mtxTotal.get());
+              if (_type != LightDirectional)
+                RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShapeInverse`], false, mtxTotal.inverse().get());
+              i++;
+            }
           }
         }
       }

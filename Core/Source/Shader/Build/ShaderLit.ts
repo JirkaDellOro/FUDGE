@@ -19,47 +19,6 @@ return `#version 300 es
 uniform mat4 u_mtxMeshToView;
 in vec3 a_vctPosition;
 
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-// struct LightAmbient {
-//   vec4 vctColor;
-// };
-// struct LightDirectional {
-//   vec4 vctColor;
-//   vec3 vctDirection;
-// };
-struct Light {
-  vec4 vctColor;
-  mat4 mtxLight;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-const uint MAX_LIGHTS_POINT = 100u;
-
-uniform Light u_ambient;
-uniform uint u_nLightsDirectional;
-uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
-uniform uint u_nLightsPoint;
-uniform Light u_point[MAX_LIGHTS_POINT];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
   #if defined(CAMERA)
 uniform float u_fSpecular;
@@ -74,6 +33,58 @@ float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float 
   float fHitCamera = dot(vctReflection, _vctView);
   return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
 }
+  #endif
+
+  // LIGHT: offer buffers for lighting vertices with different light types
+  #if defined(LIGHT)
+uniform mat4 u_mtxNormalMeshToWorld;
+in vec3 a_vctNormal;
+uniform float u_fDiffuse;
+
+struct Light {
+  vec4 vctColor;
+  mat4 mtxShape;
+  mat4 mtxShapeInverse;
+};
+
+const uint MAX_LIGHTS_DIRECTIONAL = 100u;
+const uint MAX_LIGHTS_POINT = 100u;
+const uint MAX_LIGHTS_SPOT = 100u;
+
+uniform Light u_ambient;
+uniform uint u_nLightsDirectional;
+uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+uniform uint u_nLightsPoint;
+uniform Light u_point[MAX_LIGHTS_POINT];
+uniform uint u_nLightsSpot;
+uniform Light u_spot[MAX_LIGHTS_SPOT];
+
+vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _vctView, float _fSpecular) {
+  vec4 vctResult = vec4(0, 0, 0, 1);
+  vec3 vctDirection = normalize(_vctDirection);
+  float fIllumination = -dot(_vctNormal, vctDirection);
+  if(fIllumination > 0.0f) {
+    vctResult += u_fDiffuse * fIllumination * _vctColor;
+        #if defined(CAMERA)
+    float fReflection = calculateReflection(vctDirection, _vctView, _vctNormal, _fSpecular);
+    vctResult += fReflection * _vctColor;
+        #endif
+  }
+  return vctResult;
+}
+  #endif 
+
+  // TEXTURE: offer buffers for UVs and pivot matrix
+  #if defined(TEXTURE)
+uniform mat3 u_mtxPivot;
+in vec2 a_vctTexture;
+out vec2 v_vctTexture;
+  #endif
+
+  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
+in vec3 a_vctNormal;
+uniform mat4 u_mtxNormalMeshToWorld;
+out vec2 v_vctTexture;
   #endif
 
   #if defined(SKIN)
@@ -135,34 +146,27 @@ void main() {
   vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    vec3 vctDirection = vec3(u_directional[i].mtxLight * vec4(0.0, 0.0, 1.0, 1.0));
-    vctDirection = normalize(vctDirection);
-    float fIllumination = -dot(vctNormal, vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
+    vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
+    v_vctColor += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
   }
-  // calculate spot light effect
+  // calculate point light effect
   for(uint i = 0u; i < u_nLightsPoint; i++) {
-    vec3 vctPositionLight = vec3(u_point[i].mtxLight * vec4(0.0, 0.0, 0.0, 1.0));
+    vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
     vec3 vctDirection = vec3(u_mtxMeshToWorld * vctPosition) - vctPositionLight;
-    mat3 mtxInverse = inverse(mat3(u_point[i].mtxLight));
-    float fIntensity = 1.0 - length(mtxInverse * vctDirection);
+    float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
     if(fIntensity < 0.0)
       continue;
-    vctDirection = normalize(vctDirection);
-    float fIllumination = -dot(vctNormal, vctDirection);
-    if(fIllumination < 0.0)
+    v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
+  }
+  // calculate spot light effect
+  for(uint i = 0u; i < u_nLightsSpot; i++) {
+    vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
+    vec3 vctDirection = vec3(u_mtxMeshToWorld * vctPosition) - vctPositionLight;
+    vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
+    float fIntensity = 1.0 - length(vctDirectionInverted) - abs(vctDirectionInverted.x) - abs(vctDirectionInverted.y);
+    if(fIntensity < 0.0 || vctDirectionInverted.z < 0.0)
       continue;
-    v_vctColor += fIntensity * u_fDiffuse * fIllumination * u_point[i].vctColor;
-        #if defined(CAMERA)
-    float fReflection = calculateReflection(vctDirection, vctView, vctNormal, u_fSpecular);
-    v_vctColor += fReflection * u_point[i].vctColor;
-        #endif
+    v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
     #endif
 
