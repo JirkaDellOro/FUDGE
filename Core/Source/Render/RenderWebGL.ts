@@ -302,11 +302,14 @@ namespace FudgeCore {
           for (let cmpLight of cmpLights) {
             // let cmpLight: ComponentLight = cmpLights[i];
             RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].vctColor`], cmpLight.light.color.getArray());
-            let direction: Vector3 = Vector3.Z();
-            direction.transform(cmpLight.mtxPivot, false);
-            direction.transform(cmpLight.node.mtxWorld, false);
-            direction.normalize();
-            RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].vctDirection`], direction.get());
+            RenderWebGL.crc3.uniformMatrix4fv(
+              uni[`u_directional[${i}].mtxLight`], false, Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot).get()
+            );
+            // let direction: Vector3 = Vector3.Z();
+            // direction.transform(cmpLight.mtxPivot, false);
+            // direction.transform(cmpLight.node.mtxWorld, false);
+            // direction.normalize();
+            // RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].vctDirection`], direction.get());
             i++;
           }
         }

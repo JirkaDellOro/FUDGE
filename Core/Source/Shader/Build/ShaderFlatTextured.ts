@@ -35,14 +35,14 @@ uniform mat4 u_mtxNormalMeshToWorld;
 in vec3 a_vctNormal;
 uniform float u_fDiffuse;
 
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-struct LightPoint {
+// struct LightAmbient {
+//   vec4 vctColor;
+// };
+// struct LightDirectional {
+//   vec4 vctColor;
+//   vec3 vctDirection;
+// };
+struct Light {
   vec4 vctColor;
   mat4 mtxLight;
 };
@@ -50,11 +50,11 @@ struct LightPoint {
 const uint MAX_LIGHTS_DIRECTIONAL = 100u;
 const uint MAX_LIGHTS_POINT = 100u;
 
-uniform LightAmbient u_ambient;
+uniform Light u_ambient;
 uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
+uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
 uniform uint u_nLightsPoint;
-uniform LightPoint u_point[MAX_LIGHTS_POINT];
+uniform Light u_point[MAX_LIGHTS_POINT];
   #endif 
 
   // TEXTURE: offer buffers for UVs and pivot matrix
@@ -145,11 +145,13 @@ void main() {
   vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
+    vec3 vctDirection = vec3(u_directional[i].mtxLight * vec4(0.0, 0.0, 1.0, 1.0));
+    vctDirection = normalize(vctDirection);
+    float fIllumination = -dot(vctNormal, vctDirection);
     if(fIllumination > 0.0f) {
       v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
         #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
+      float fReflection = calculateReflection(vctDirection, vctView, vctNormal, u_fSpecular);
       v_vctColor += fReflection * u_directional[i].vctColor;
         #endif
     }
