@@ -4,7 +4,7 @@
     "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatColored",
     "namespace": "FudgeCore",
-    "outdir": "Build/",
+    "outdir": "Build",
     "register": "true"
   },
   "ShaderLitTextured": {
@@ -12,7 +12,7 @@
     "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatTextured",
     "namespace": "FudgeCore",
-    "outdir": "Build/",
+    "outdir": "Build",
     "register": "true",
     "define": [
       "TEXTURE"
@@ -23,7 +23,7 @@
     "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatRemissive",
     "namespace": "FudgeCore",
-    "outdir": "Build/",
+    "outdir": "Build",
     "register": "true",
     "define": [
       "LIGHT",
@@ -36,7 +36,7 @@
     "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatRemissiveTextured",
     "namespace": "FudgeCore",
-    "outdir": "Build/",
+    "outdir": "Build",
     "register": "true",
     "define": [
       "LIGHT",
@@ -50,7 +50,7 @@
     "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatRemissive",
     "namespace": "FudgeCore",
-    "outdir": "Build/",
+    "outdir": "Build",
     "register": "true",
     "define": [
       "LIGHT",
@@ -62,7 +62,7 @@
     "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatRemissiveTextured",
     "namespace": "FudgeCore",
-    "outdir": "Build/",
+    "outdir": "Build",
     "register": "true",
     "define": [
       "LIGHT",
@@ -75,7 +75,7 @@
     "fragment": "Source/ShaderPhong.frag",
     "coat": "CoatColored",
     "namespace": "FudgeCore",
-    "outdir": "Build/",
+    "outdir": "Build",
     "register": "true"
   },
   "ShaderMatCap": {
@@ -83,7 +83,7 @@
     "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatTextured",
     "namespace": "FudgeCore",
-    "outdir": "Build/",
+    "outdir": "Build",
     "register": "true",
     "define": [
       "CAMERA",
@@ -94,14 +94,14 @@
     "vertex": "Source/ShaderPick.vert",
     "fragment": "Source/ShaderPick.frag",
     "namespace": "FudgeCore",
-    "outdir": "Build/",
+    "outdir": "Build",
     "register": "false"
   },
   "ShaderPickTextured": {
     "vertex": "Source/ShaderPickTextured.vert",
     "fragment": "Source/ShaderPickTextured.frag",
     "namespace": "FudgeCore",
-    "outdir": "Build/",
+    "outdir": "Build",
     "register": "false"
   },
   "ShaderFlatSkin": {

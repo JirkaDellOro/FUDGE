@@ -1319,18 +1319,19 @@ var FudgeCore;
                 return color;
             }
         }
-        static pick(_node, _mtxMeshToWorld, _mtxWorldToView) {
+        static pick(_node, _mtxMeshToWorld, _cmpCamera) {
             try {
-                let cmpMaterial = _node.getComponent(FudgeCore.ComponentMaterial);
                 let cmpMesh = _node.getComponent(FudgeCore.ComponentMesh);
+                let cmpMaterial = _node.getComponent(FudgeCore.ComponentMaterial);
                 let coat = cmpMaterial.material.coat;
                 let shader = coat instanceof FudgeCore.CoatTextured ? FudgeCore.ShaderPickTextured : FudgeCore.ShaderPick;
                 shader.useProgram();
                 coat.useRenderData(shader, cmpMaterial);
+                let mtxMeshToView = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
                 let sizeUniformLocation = shader.uniforms["u_vctSize"];
                 RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, [RenderWebGL.sizePick, RenderWebGL.sizePick]);
                 let mesh = cmpMesh.mesh;
-                let renderBuffers = mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView, FudgeCore.Render.ƒpicked.length);
+                let renderBuffers = mesh.useRenderBuffers(shader, _mtxMeshToWorld, mtxMeshToView, FudgeCore.Render.ƒpicked.length);
                 RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
                 let pick = new FudgeCore.Pick(_node);
                 FudgeCore.Render.ƒpicked.push(pick);
@@ -1352,37 +1353,43 @@ var FudgeCore;
                     RenderWebGL.crc3.uniform4fv(ambient, result.getArray());
                 }
             }
-            let nDirectional = uni["u_nLightsDirectional"];
-            if (nDirectional) {
-                RenderWebGL.crc3.uniform1ui(nDirectional, 0);
-                let cmpLights = _lights.get(FudgeCore.LightDirectional);
-                if (cmpLights) {
-                    let n = cmpLights.length;
-                    RenderWebGL.crc3.uniform1ui(nDirectional, n);
-                    let i = 0;
-                    for (let cmpLight of cmpLights) {
-                        RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].vctColor`], cmpLight.light.color.getArray());
-                        let direction = FudgeCore.Vector3.Z();
-                        direction.transform(cmpLight.mtxPivot, false);
-                        direction.transform(cmpLight.node.mtxWorld, false);
-                        direction.normalize();
-                        RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].vctDirection`], direction.get());
-                        i++;
+            fillLightBuffers(FudgeCore.LightDirectional, "u_nLightsDirectional", "u_directional");
+            fillLightBuffers(FudgeCore.LightPoint, "u_nLightsPoint", "u_point");
+            fillLightBuffers(FudgeCore.LightSpot, "u_nLightsSpot", "u_spot");
+            function fillLightBuffers(_type, _uniNumber, _uniStruct) {
+                let uniLights = uni[_uniNumber];
+                if (uniLights) {
+                    RenderWebGL.crc3.uniform1ui(uniLights, 0);
+                    let cmpLights = _lights.get(_type);
+                    if (cmpLights) {
+                        let n = cmpLights.length;
+                        RenderWebGL.crc3.uniform1ui(uniLights, n);
+                        let i = 0;
+                        for (let cmpLight of cmpLights) {
+                            RenderWebGL.crc3.uniform4fv(uni[`${_uniStruct}[${i}].vctColor`], cmpLight.light.color.getArray());
+                            let mtxTotal = FudgeCore.Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
+                            RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShape`], false, mtxTotal.get());
+                            if (_type != FudgeCore.LightDirectional) {
+                                let mtxInverse = mtxTotal.inverse();
+                                RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShapeInverse`], false, mtxInverse.get());
+                                FudgeCore.Recycler.store(mtxInverse);
+                            }
+                            FudgeCore.Recycler.store(mtxTotal);
+                            i++;
+                        }
                     }
                 }
             }
         }
-        static drawMesh(_cmpMesh, cmpMaterial, _cmpCamera) {
-            let shader = cmpMaterial.material.getShader();
+        static drawNode(_node, _cmpCamera) {
+            let cmpMesh = _node.getComponent(FudgeCore.ComponentMesh);
+            let cmpMaterial = _node.getComponent(FudgeCore.ComponentMaterial);
             let coat = cmpMaterial.material.coat;
-            let mtxMeshToView = FudgeCore.Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, _cmpMesh.mtxWorld);
+            let shader = cmpMaterial.material.getShader();
             shader.useProgram();
-            let renderBuffers;
-            if (_cmpMesh.mesh instanceof FudgeCore.MeshSkin)
-                renderBuffers = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
-            else
-                renderBuffers = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView);
             coat.useRenderData(shader, cmpMaterial);
+            let mtxMeshToView = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
+            let renderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
             let uCamera = shader.uniforms["u_vctCamera"];
             if (uCamera)
                 RenderWebGL.crc3.uniform3fv(uCamera, _cmpCamera.mtxWorld.translation.get());
@@ -1390,6 +1397,22 @@ var FudgeCore;
             if (uWorldToView)
                 RenderWebGL.crc3.uniformMatrix4fv(uWorldToView, false, _cmpCamera.mtxWorldToView.get());
             RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+        }
+        static calcMeshToView(_node, _cmpMesh, _mtxWorldToView, _target) {
+            let cmpFaceCamera = _node.getComponent(FudgeCore.ComponentFaceCamera);
+            if (cmpFaceCamera && cmpFaceCamera.isActive) {
+                let mtxMeshToView;
+                mtxMeshToView = _cmpMesh.mtxWorld.clone;
+                mtxMeshToView.lookAt(_target, cmpFaceCamera.upLocal ? null : cmpFaceCamera.up, cmpFaceCamera.restrict);
+                return FudgeCore.Matrix4x4.MULTIPLICATION(_mtxWorldToView, mtxMeshToView);
+            }
+            return FudgeCore.Matrix4x4.MULTIPLICATION(_mtxWorldToView, _cmpMesh.mtxWorld);
+        }
+        static getRenderBuffers(_cmpMesh, _shader, _mtxMeshToView) {
+            if (_cmpMesh.mesh instanceof FudgeCore.MeshSkin)
+                return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
+            else
+                return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView);
         }
     }
     RenderWebGL.crc3 = RenderWebGL.initialize();
@@ -3479,6 +3502,20 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    class ComponentFaceCamera extends FudgeCore.Component {
+        constructor() {
+            super();
+            this.upLocal = true;
+            this.up = FudgeCore.Vector3.Y(1);
+            this.restrict = false;
+            this.singleton = true;
+        }
+    }
+    ComponentFaceCamera.iSubclass = FudgeCore.Component.registerSubclass(ComponentFaceCamera);
+    FudgeCore.ComponentFaceCamera = ComponentFaceCamera;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
     class ComponentGraphFilter extends FudgeCore.Component {
         constructor() {
             super();
@@ -3519,22 +3556,12 @@ var FudgeCore;
     }
     FudgeCore.Light = Light;
     class LightAmbient extends Light {
-        constructor(_color = new FudgeCore.Color(1, 1, 1, 1)) {
-            super(_color);
-        }
     }
     FudgeCore.LightAmbient = LightAmbient;
     class LightDirectional extends Light {
-        constructor(_color = new FudgeCore.Color(1, 1, 1, 1)) {
-            super(_color);
-        }
     }
     FudgeCore.LightDirectional = LightDirectional;
     class LightPoint extends Light {
-        constructor() {
-            super(...arguments);
-            this.range = 10;
-        }
     }
     FudgeCore.LightPoint = LightPoint;
     class LightSpot extends Light {
@@ -3786,24 +3813,6 @@ var FudgeCore;
         constructor(_mtxInit = FudgeCore.Matrix4x4.IDENTITY()) {
             super();
             this.mtxLocal = _mtxInit;
-        }
-        lookAt(_targetWorld, _up) {
-            let container = this.node;
-            if (!container && !container.getParent())
-                return this.mtxLocal.lookAt(_targetWorld, _up);
-            let mtxWorld = container.mtxWorld.clone;
-            mtxWorld.lookAt(_targetWorld, _up, true);
-            let mtxLocal = FudgeCore.Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
-            this.mtxLocal = mtxLocal;
-        }
-        showTo(_targetWorld, _up) {
-            let container = this.node;
-            if (!container && !container.getParent())
-                return this.mtxLocal.showTo(_targetWorld, _up);
-            let mtxWorld = container.mtxWorld.clone;
-            mtxWorld.showTo(_targetWorld, _up, true);
-            let mtxLocal = FudgeCore.Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
-            this.mtxLocal = mtxLocal;
         }
         rebase(_node = null) {
             let mtxResult = this.mtxLocal;
@@ -5133,7 +5142,7 @@ var FudgeCore;
         }
         get scaling() {
             if (!this.vectors.scaling)
-                this.vectors.scaling = new FudgeCore.Vector2(Math.hypot(this.data[0], this.data[1]), Math.hypot(this.data[3], this.data[4]));
+                this.vectors.scaling = new FudgeCore.Vector2(Math.hypot(this.data[0], this.data[1]) * (this.data[0] < 0 ? -1 : 1), Math.hypot(this.data[3], this.data[4]) * (this.data[4] < 0 ? -1 : 1));
             return this.vectors.scaling;
         }
         set scaling(_scaling) {
@@ -5152,6 +5161,9 @@ var FudgeCore;
                 0, 0, 1
             ]);
             this.resetCache();
+        }
+        reset() {
+            this.recycle();
         }
         translate(_by) {
             const mtxResult = Matrix3x3.MULTIPLICATION(this, Matrix3x3.TRANSLATION(_by));
@@ -5458,32 +5470,16 @@ var FudgeCore;
             ]);
             return mtxResult;
         }
-        static LOOK_AT(_translation, _target, _up = FudgeCore.Vector3.Y()) {
+        static LOOK_AT(_translation, _target, _up = FudgeCore.Vector3.Y(), _restrict = false) {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
             let zAxis = FudgeCore.Vector3.DIFFERENCE(_target, _translation);
             zAxis.normalize();
             let xAxis = FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(_up, zAxis));
-            let yAxis = FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(zAxis, xAxis));
+            let yAxis = _restrict ? _up : FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(zAxis, xAxis));
+            zAxis = _restrict ? FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(xAxis, _up)) : zAxis;
             mtxResult.data.set([
                 xAxis.x, xAxis.y, xAxis.z, 0,
                 yAxis.x, yAxis.y, yAxis.z, 0,
-                zAxis.x, zAxis.y, zAxis.z, 0,
-                _translation.x,
-                _translation.y,
-                _translation.z,
-                1
-            ]);
-            return mtxResult;
-        }
-        static SHOW_TO(_translation, _target, _up = FudgeCore.Vector3.Y()) {
-            const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let zAxis = FudgeCore.Vector3.DIFFERENCE(_target, _translation);
-            zAxis.normalize();
-            let xAxis = FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(_up, zAxis));
-            zAxis = FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(xAxis, _up));
-            mtxResult.data.set([
-                xAxis.x, xAxis.y, xAxis.z, 0,
-                _up.x, _up.y, _up.z, 0,
                 zAxis.x, zAxis.y, zAxis.z, 0,
                 _translation.x,
                 _translation.y,
@@ -5639,7 +5635,7 @@ var FudgeCore;
         get scaling() {
             if (!this.vectors.scaling) {
                 this.vectors.scaling = this.#vectors.scaling;
-                this.vectors.scaling.set(Math.hypot(this.data[0], this.data[1], this.data[2]), Math.hypot(this.data[4], this.data[5], this.data[6]), Math.hypot(this.data[8], this.data[9], this.data[10]));
+                this.vectors.scaling.set(Math.hypot(this.data[0], this.data[1], this.data[2]) * (this.data[0] < 0 ? -1 : 1), Math.hypot(this.data[4], this.data[5], this.data[6]) * (this.data[5] < 0 ? -1 : 1), Math.hypot(this.data[8], this.data[9], this.data[10] * (this.data[10] < 0 ? -1 : 1)));
             }
             return this.vectors.scaling;
         }
@@ -5660,6 +5656,9 @@ var FudgeCore;
                 0, 0, 0, 1
             ]);
             this.resetCache();
+        }
+        reset() {
+            this.recycle();
         }
         rotate(_by, _fromLeft = false) {
             let mtxRotation = Matrix4x4.ROTATION(_by);
@@ -5763,48 +5762,10 @@ var FudgeCore;
             this.multiply(mtxRotation, _fromLeft);
             FudgeCore.Recycler.store(mtxRotation);
         }
-        lookAt(_target, _up, _preserveScaling = true) {
-            if (!_up)
-                _up = this.getY();
-            const mtxResult = Matrix4x4.LOOK_AT(this.translation, _target, _up);
-            if (_preserveScaling)
-                mtxResult.scale(this.scaling);
-            this.set(mtxResult);
-            FudgeCore.Recycler.store(mtxResult);
-        }
-        lookAtRotate(_target, _up, _preserveScaling = true) {
-            if (!_up)
-                _up = this.getY();
-            let scaling = this.scaling;
-            let difference = FudgeCore.Vector3.DIFFERENCE(_target, this.translation);
-            difference.normalize();
-            let cos = FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getZ()), difference);
-            let sin = FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getX()), difference);
-            let mtxRotation = FudgeCore.Recycler.borrow(Matrix4x4);
-            mtxRotation.data.set([
-                cos, 0, -sin, 0,
-                0, 1, 0, 0,
-                sin, 0, cos, 0,
-                0, 0, 0, 1
-            ]);
-            this.multiply(mtxRotation, false);
-            cos = FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getZ()), difference);
-            sin = -FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getY()), difference);
-            mtxRotation.data.set([
-                1, 0, 0, 0,
-                0, cos, sin, 0,
-                0, -sin, cos, 0,
-                0, 0, 0, 1
-            ]);
-            this.multiply(mtxRotation, false);
-            this.scaling = scaling;
-        }
-        showTo(_target, _up, _preserveScaling = true) {
-            if (!_up)
-                _up = this.getY();
-            const mtxResult = Matrix4x4.SHOW_TO(this.translation, _target, _up);
-            if (_preserveScaling)
-                mtxResult.scale(this.scaling);
+        lookAt(_target, _up, _restrict = false) {
+            _up = _up ? FudgeCore.Vector3.NORMALIZATION(_up) : FudgeCore.Vector3.NORMALIZATION(this.getY());
+            const mtxResult = Matrix4x4.LOOK_AT(this.translation, _target, _up, _restrict);
+            mtxResult.scale(this.scaling);
             this.set(mtxResult);
             FudgeCore.Recycler.store(mtxResult);
         }
@@ -5868,6 +5829,32 @@ var FudgeCore;
             FudgeCore.Recycler.store(mtxResult);
         }
         getEulerAngles() {
+            let scaling = this.scaling;
+            let thetaX, thetaY, thetaZ;
+            let r02 = this.data[2] / scaling.z;
+            let r11 = this.data[5] / scaling.y;
+            if (r02 < 1) {
+                if (r02 > -1) {
+                    thetaY = Math.asin(-r02);
+                    thetaZ = Math.atan2(this.data[1] / scaling.y, this.data[0] / scaling.x);
+                    thetaX = Math.atan2(this.data[9] / scaling.z, this.data[10] / scaling.z);
+                }
+                else {
+                    thetaY = Math.PI / 2;
+                    thetaZ = -Math.atan2(this.data[6] / scaling.y, r11);
+                    thetaX = 0;
+                }
+            }
+            else {
+                thetaY = -Math.PI / 2;
+                thetaZ = Math.atan2(-this.data[6] / scaling.y, r11);
+                thetaX = 0;
+            }
+            this.#eulerAngles.set(-thetaX, thetaY, thetaZ);
+            this.#eulerAngles.scale(180 / Math.PI);
+            return this.#eulerAngles;
+        }
+        getEulerAnglesX() {
             let scaling = this.scaling;
             let s0 = this.data[0] / scaling.x;
             let s1 = this.data[1] / scaling.x;
@@ -6002,9 +5989,8 @@ var FudgeCore;
             let mtxResult = Matrix4x4.IDENTITY();
             if (vectors.translation)
                 mtxResult.translate(vectors.translation);
-            if (vectors.rotation) {
+            if (vectors.rotation)
                 mtxResult.rotate(vectors.rotation);
-            }
             if (vectors.scaling)
                 mtxResult.scale(vectors.scaling);
             this.set(mtxResult);
@@ -6687,7 +6673,7 @@ var FudgeCore;
                 this.ƒradius = this.createRadius();
             return this.ƒradius;
         }
-        useRenderBuffers(_shader, _mtxWorld, _mtxProjection, _id) { return null; }
+        useRenderBuffers(_shader, _mtxMeshToWorld, _mtxMeshToView, _id) { return null; }
         getRenderBuffers(_shader) { return null; }
         deleteRenderBuffers(_shader) { }
         clear() {
@@ -9865,9 +9851,7 @@ var FudgeCore;
                 let cmpMesh = node.getComponent(FudgeCore.ComponentMesh);
                 let cmpMaterial = node.getComponent(FudgeCore.ComponentMaterial);
                 if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
-                    let mtxMeshToView = FudgeCore.Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
-                    Render.pick(node, node.mtxWorld, mtxMeshToView);
-                    FudgeCore.Recycler.store(mtxMeshToView);
+                    Render.pick(node, node.mtxWorld, _cmpCamera);
                 }
             }
             Render.setBlendMode(FudgeCore.BLEND.TRANSPARENT);
@@ -9891,9 +9875,7 @@ var FudgeCore;
         }
         static drawList(_cmpCamera, _list) {
             for (let node of _list) {
-                let cmpMesh = node.getComponent(FudgeCore.ComponentMesh);
-                let cmpMaterial = node.getComponent(FudgeCore.ComponentMaterial);
-                Render.drawMesh(cmpMesh, cmpMaterial, _cmpCamera);
+                Render.drawNode(node, _cmpCamera);
             }
         }
         static transformByPhysics(_node, _cmpRigidbody) {
@@ -10521,9 +10503,12 @@ var FudgeCore;
                 compoments[namespace] = [];
                 for (let name in Project.scriptNamespaces[namespace]) {
                     let script = Reflect.get(Project.scriptNamespaces[namespace], name);
-                    let o = Object.create(script);
-                    if (o.prototype instanceof FudgeCore.ComponentScript)
-                        compoments[namespace].push(script);
+                    try {
+                        let o = Object.create(script);
+                        if (o.prototype instanceof FudgeCore.ComponentScript)
+                            compoments[namespace].push(script);
+                    }
+                    catch (_e) { }
                 }
             }
             return compoments;
@@ -10916,6 +10901,14 @@ var FudgeCore;
         static useProgram() { }
         static createProgram() { }
         static registerSubclass(_subclass) { return Shader_1.subclasses.push(_subclass) - 1; }
+        static insertDefines(_shader, _defines) {
+            if (!_defines)
+                return _shader;
+            let code = `#version 300 es\n`;
+            for (let define of _defines)
+                code += `#define ${define}\n`;
+            return _shader.replace("#version 300 es", code);
+        }
     };
     Shader.baseClass = Shader_1;
     Shader.subclasses = [];
@@ -10929,209 +10922,10 @@ var FudgeCore;
     class ShaderFlat extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissive; }
         static getVertexShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define FLAT
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.vert"], this.define);
         }
         static getFragmentShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define FLAT
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.frag"], this.define);
         }
     }
     ShaderFlat.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlat);
@@ -11147,209 +10941,10 @@ var FudgeCore;
     class ShaderFlatSkin extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissive; }
         static getVertexShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define FLAT
-#define SKIN
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.vert"], this.define);
         }
         static getFragmentShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define FLAT
-#define SKIN
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.frag"], this.define);
         }
     }
     ShaderFlatSkin.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlatSkin);
@@ -11365,211 +10960,10 @@ var FudgeCore;
     class ShaderFlatTextured extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissiveTextured; }
         static getVertexShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define FLAT
-#define TEXTURE
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.vert"], this.define);
         }
         static getFragmentShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define FLAT
-#define TEXTURE
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.frag"], this.define);
         }
     }
     ShaderFlatTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlatTextured);
@@ -11586,207 +10980,10 @@ var FudgeCore;
     class ShaderGouraud extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissive; }
         static getVertexShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.vert"], this.define);
         }
         static getFragmentShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.frag"], this.define);
         }
     }
     ShaderGouraud.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraud);
@@ -11801,207 +10998,10 @@ var FudgeCore;
     class ShaderGouraudSkin extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissive; }
         static getVertexShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define SKIN
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.vert"], this.define);
         }
         static getFragmentShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define SKIN
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.frag"], this.define);
         }
     }
     ShaderGouraudSkin.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudSkin);
@@ -12016,209 +11016,10 @@ var FudgeCore;
     class ShaderGouraudTextured extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissiveTextured; }
         static getVertexShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define TEXTURE
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.vert"], this.define);
         }
         static getFragmentShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define TEXTURE
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.frag"], this.define);
         }
     }
     ShaderGouraudTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudTextured);
@@ -12234,201 +11035,10 @@ var FudgeCore;
     class ShaderLit extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatColored; }
         static getVertexShaderSource() {
-            return `#version 300 es
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.vert"], this.define);
         }
         static getFragmentShaderSource() {
-            return `#version 300 es
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.frag"], this.define);
         }
     }
     ShaderLit.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLit);
@@ -12440,205 +11050,10 @@ var FudgeCore;
     class ShaderLitTextured extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatTextured; }
         static getVertexShaderSource() {
-            return `#version 300 es
-#define TEXTURE
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.vert"], this.define);
         }
         static getFragmentShaderSource() {
-            return `#version 300 es
-#define TEXTURE
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.frag"], this.define);
         }
     }
     ShaderLitTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLitTextured);
@@ -12652,207 +11067,10 @@ var FudgeCore;
     class ShaderMatCap extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatTextured; }
         static getVertexShaderSource() {
-            return `#version 300 es
-#define CAMERA
-#define MATCAP
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.vert"], this.define);
         }
         static getFragmentShaderSource() {
-            return `#version 300 es
-#define CAMERA
-#define MATCAP
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderUniversal.frag"], this.define);
         }
     }
     ShaderMatCap.iSubclass = FudgeCore.Shader.registerSubclass(ShaderMatCap);
@@ -12867,7 +11085,269 @@ var FudgeCore;
     class ShaderPhong extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatColored; }
         static getVertexShaderSource() {
-            return `#version 300 es
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderPhong.vert"], this.define);
+        }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderPhong.frag"], this.define);
+        }
+    }
+    ShaderPhong.iSubclass = FudgeCore.Shader.registerSubclass(ShaderPhong);
+    ShaderPhong.define = [];
+    FudgeCore.ShaderPhong = ShaderPhong;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderPick extends FudgeCore.Shader {
+        static getVertexShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderPick.vert"], this.define);
+        }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderPick.frag"], this.define);
+        }
+    }
+    ShaderPick.define = [];
+    FudgeCore.ShaderPick = ShaderPick;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderPickTextured extends FudgeCore.Shader {
+        static getVertexShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderPickTextured.vert"], this.define);
+        }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderPickTextured.frag"], this.define);
+        }
+    }
+    ShaderPickTextured.define = [];
+    FudgeCore.ShaderPickTextured = ShaderPickTextured;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    FudgeCore.shaderSources = {};
+    FudgeCore.shaderSources["Source/ShaderUniversal.vert"] = `#version 300 es
+/**
+* Universal Shader as base for many others. Controlled by compiler directives
+* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
+*/
+
+  // MINIMAL (no define needed): buffers for transformation
+uniform mat4 u_mtxMeshToView;
+in vec3 a_vctPosition;
+
+  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
+  #if defined(CAMERA)
+uniform float u_fSpecular;
+uniform mat4 u_mtxMeshToWorld;
+uniform mat4 u_mtxWorldToView;
+uniform vec3 u_vctCamera;
+
+float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
+  if(_fSpecular <= 0.0)
+    return 0.0;
+  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
+  float fHitCamera = dot(vctReflection, _vctView);
+  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
+}
+  #endif
+
+  // LIGHT: offer buffers for lighting vertices with different light types
+  #if defined(LIGHT)
+uniform mat4 u_mtxNormalMeshToWorld;
+in vec3 a_vctNormal;
+uniform float u_fDiffuse;
+
+struct Light {
+  vec4 vctColor;
+  mat4 mtxShape;
+  mat4 mtxShapeInverse;
+};
+
+const uint MAX_LIGHTS_DIRECTIONAL = 100u;
+const uint MAX_LIGHTS_POINT = 100u;
+const uint MAX_LIGHTS_SPOT = 100u;
+
+uniform Light u_ambient;
+uniform uint u_nLightsDirectional;
+uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+uniform uint u_nLightsPoint;
+uniform Light u_point[MAX_LIGHTS_POINT];
+uniform uint u_nLightsSpot;
+uniform Light u_spot[MAX_LIGHTS_SPOT];
+
+vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _vctView, float _fSpecular) {
+  vec4 vctResult = vec4(0, 0, 0, 1);
+  vec3 vctDirection = normalize(_vctDirection);
+  float fIllumination = -dot(_vctNormal, vctDirection);
+  if(fIllumination > 0.0f) {
+    vctResult += u_fDiffuse * fIllumination * _vctColor;
+        #if defined(CAMERA)
+    float fReflection = calculateReflection(vctDirection, _vctView, _vctNormal, _fSpecular);
+    vctResult += fReflection * _vctColor;
+        #endif
+  }
+  return vctResult;
+}
+  #endif 
+
+  // TEXTURE: offer buffers for UVs and pivot matrix
+  #if defined(TEXTURE)
+uniform mat3 u_mtxPivot;
+in vec2 a_vctTexture;
+out vec2 v_vctTexture;
+  #endif
+
+  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
+in vec3 a_vctNormal;
+uniform mat4 u_mtxNormalMeshToWorld;
+out vec2 v_vctTexture;
+  #endif
+
+  #if defined(SKIN)
+uniform mat4 u_mtxMeshToWorld;
+// Bones
+struct Bone {
+  mat4 matrix;
+};
+
+const uint MAX_BONES = 10u;
+
+in uvec4 a_iBone;
+in vec4 a_fWeight;
+
+uniform Bone u_bones[MAX_BONES];
+  #endif
+
+  // FLAT: outbuffer is flat
+  #if defined(FLAT)
+flat out vec4 v_vctColor;
+  #else
+  // regular if not FLAT
+out vec4 v_vctColor;
+  #endif
+
+void main() {
+  vec4 vctPosition = vec4(a_vctPosition, 1.0);
+  mat4 mtxMeshToView = u_mtxMeshToView;
+
+    #if defined(LIGHT) || defined(MATCAP)
+  vec3 vctNormal = a_vctNormal;
+  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
+      #if defined(LIGHT)
+  v_vctColor = u_fDiffuse * u_ambient.vctColor;
+      #endif
+    #endif
+
+    #if defined(SKIN)
+  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
+    a_fWeight.y * u_bones[a_iBone.y].matrix +
+    a_fWeight.z * u_bones[a_iBone.z].matrix +
+    a_fWeight.w * u_bones[a_iBone.w].matrix;
+
+  mtxMeshToView *= mtxSkin;
+  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
+    #endif
+
+    // calculate position and normal according to input and defines
+  gl_Position = mtxMeshToView * vctPosition;
+
+    #if defined(CAMERA)
+  // view vector needed
+  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
+  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
+  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
+    #endif
+
+    #if defined(LIGHT)
+  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
+  // calculate directional light effect
+  for(uint i = 0u; i < u_nLightsDirectional; i++) {
+    vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
+    v_vctColor += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
+  }
+  // calculate point light effect
+  for(uint i = 0u; i < u_nLightsPoint; i++) {
+    vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
+    vec3 vctDirection = vec3(u_mtxMeshToWorld * vctPosition) - vctPositionLight;
+    float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
+    if(fIntensity < 0.0)
+      continue;
+    v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
+  }
+  // calculate spot light effect
+  for(uint i = 0u; i < u_nLightsSpot; i++) {
+    vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
+    vec3 vctDirection = vec3(u_mtxMeshToWorld * vctPosition) - vctPositionLight;
+    vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
+    vec3 vctNormalized = normalize(vctDirectionInverted);
+    float fIntensity = 1.0 - length(vctDirectionInverted) - abs(vctDirectionInverted.x) - abs(vctDirectionInverted.y);
+    if(fIntensity < 0.0 || vctDirectionInverted.z < 0.0)
+      continue;
+    v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
+  }
+    #endif
+
+    // TEXTURE: transform UVs
+    #if defined(TEXTURE)
+  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+    #endif
+
+    #if defined(MATCAP)
+  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
+  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
+  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
+  v_vctTexture.y *= -1.0;
+    #endif
+
+    // always full opacity for now...
+  v_vctColor.a = 1.0;
+}`;
+    FudgeCore.shaderSources["Source/ShaderUniversal.frag"] = `#version 300 es
+/**
+* Universal Shader as base for many others. Controlled by compiler directives
+* @authors Jirka Dell'Oro-Friedl, HFU, 2021
+*/
+
+precision mediump float;
+
+  // MINIMAL (no define needed): include base color
+uniform vec4 u_vctColor;
+
+  // FLAT: input vertex colors flat, so the third of a triangle determines the color
+  #if defined(FLAT) 
+flat in vec4 v_vctColor;
+  // LIGHT: input vertex colors for each vertex for interpolation over the face
+  #elif defined(LIGHT)
+in vec4 v_vctColor;
+  #endif
+
+  // TEXTURE: input UVs and texture
+  #if defined(TEXTURE) || defined(MATCAP)
+in vec2 v_vctTexture;
+uniform sampler2D u_texture;
+  #endif
+
+out vec4 vctFrag;
+
+void main() {
+    // MINIMAL: set the base color
+  vctFrag = u_vctColor;
+
+    // VERTEX: multiply with vertex color
+    #if defined(FLAT) || defined(LIGHT)
+  vctFrag *= v_vctColor;
+    #endif
+
+    // TEXTURE: multiply with texel color
+    #if defined(TEXTURE) || defined(MATCAP)
+  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+  vctFrag *= vctColorTexture;
+    #endif
+
+    // discard pixel alltogether when transparent: don't show in Z-Buffer
+  if(vctFrag.a < 0.01)
+    discard;
+}`;
+    FudgeCore.shaderSources["Source/ShaderPhong.vert"] = `#version 300 es
 /**
 * Phong shading
 * Implementation based on https://www.gsn-lib.org/docs/nodes/ShaderPluginNode.php
@@ -12890,11 +11370,8 @@ void main() {
   v_position = vec3(v_position4) / v_position4.w;
   gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
 }
-        
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
+        `;
+    FudgeCore.shaderSources["Source/ShaderPhong.frag"] = `#version 300 es
 /**
 * Phong shading
 * Implementation based on https://www.gsn-lib.org/docs/nodes/ShaderPluginNode.php
@@ -12944,19 +11421,8 @@ void main() {
     }
     vctFrag *= u_vctColor;
     vctFrag.a = 1.0;
-}       
-`;
-        }
-    }
-    ShaderPhong.iSubclass = FudgeCore.Shader.registerSubclass(ShaderPhong);
-    ShaderPhong.define = [];
-    FudgeCore.ShaderPhong = ShaderPhong;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderPick extends FudgeCore.Shader {
-        static getVertexShaderSource() {
-            return `#version 300 es
+}       `;
+    FudgeCore.shaderSources["Source/ShaderPick.vert"] = `#version 300 es
 /**
 * Renders for Raycasting
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -12966,11 +11432,8 @@ uniform mat4 u_mtxMeshToView;
 
 void main() {   
     gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
-}
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
+}`;
+    FudgeCore.shaderSources["Source/ShaderPick.frag"] = `#version 300 es
 /**
 * Renders for Raycasting
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -12993,18 +11456,8 @@ void main() {
     uint icolor = uint(u_vctColor.r * 255.0) << 24 | uint(u_vctColor.g * 255.0) << 16 | uint(u_vctColor.b * 255.0) << 8 | uint(u_vctColor.a * 255.0);
                 
     vctFrag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, 0, 0);
-}
-`;
-        }
-    }
-    ShaderPick.define = [];
-    FudgeCore.ShaderPick = ShaderPick;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderPickTextured extends FudgeCore.Shader {
-        static getVertexShaderSource() {
-            return `#version 300 es
+}`;
+    FudgeCore.shaderSources["Source/ShaderPickTextured.vert"] = `#version 300 es
 /**
 * Renders for Raycasting
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -13019,11 +11472,8 @@ out vec2 v_vctTexture;
 void main() {   
     gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
     v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-}
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
+}`;
+    FudgeCore.shaderSources["Source/ShaderPickTextured.frag"] = `#version 300 es
 /**
 * Renders for Raycasting
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -13050,12 +11500,7 @@ void main() {
     uint icolor = uint(vctColor.r * 255.0) << 24 | uint(vctColor.g * 255.0) << 16 | uint(vctColor.b * 255.0) << 8 | uint(vctColor.a * 255.0);
   
   vctFrag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, floatBitsToInt(v_vctTexture.x), floatBitsToInt(v_vctTexture.y));
-}
-`;
-        }
-    }
-    ShaderPickTextured.define = [];
-    FudgeCore.ShaderPickTextured = ShaderPickTextured;
+}`;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {

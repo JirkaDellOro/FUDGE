@@ -22,7 +22,7 @@
     {
       "label": "CompileShaders",
       "type": "shell",
-      "command": "node CompileShaders.mjs CompileShaders.json",
+      "command": "node CompileShaders.mjs CompileShaders.json FudgeCore",
       "group": "build",
       "options": {
         "cwd": "Shader/"

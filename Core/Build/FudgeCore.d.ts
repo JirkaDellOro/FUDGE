@@ -6245,6 +6245,7 @@ declare namespace FudgeCore {
         static useProgram(this: typeof Shader): void;
         static createProgram(this: typeof Shader): void;
         protected static registerSubclass(_subclass: typeof Shader): number;
+        protected static insertDefines(_shader: string, _defines: string[]): string;
     }
 }
 declare namespace FudgeCore {
@@ -6362,6 +6363,11 @@ declare namespace FudgeCore {
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
+}
+declare namespace FudgeCore {
+    let shaderSources: {
+        [source: string]: string;
+    };
 }
 declare namespace FudgeCore {
     interface BoneList {
