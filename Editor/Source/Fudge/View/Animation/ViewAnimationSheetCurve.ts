@@ -26,12 +26,12 @@ namespace Fudge {
       this.sequences.push(seq);
 
       for (let i: number = 0; i < _sequence.length; i++) {
-        let k: ƒ.AnimationKey = _sequence.getKey(i);
+        let key: ƒ.AnimationKey = _sequence.getKey(i);
         this.keys.push({
-          key: k,
+          key: key,
           path2D: this.drawKey(
-            k.Time,
-            -k.Value,
+            key.Time,
+            -key.Value,
             height / 2,
             width / 2,
             seq.color
@@ -39,17 +39,12 @@ namespace Fudge {
           sequence: seq
         });
         if (i < _sequence.length - 1) {
-          let bezierPoints: { x: number; y: number }[] = this.getBezierPoints(
-            k.functionOut
-          );
-          this.crc2.moveTo(bezierPoints[0].x + k.Time, -bezierPoints[0].y);
+          let bezierPoints: { x: number; y: number }[] = this.getBezierPoints(key.functionOut, key, _sequence.getKey(i + 1));
+          this.crc2.moveTo(bezierPoints[0].x, -bezierPoints[0].y);
           this.crc2.bezierCurveTo(
-            bezierPoints[1].x + k.Time,
-            -bezierPoints[1].y,
-            bezierPoints[2].x + k.Time,
-            -bezierPoints[2].y,
-            bezierPoints[3].x + k.Time,
-            -bezierPoints[3].y
+            bezierPoints[1].x, -bezierPoints[1].y,
+            bezierPoints[2].x, -bezierPoints[2].y,
+            bezierPoints[3].x, -bezierPoints[3].y
           );
         }
         // line.lineTo(k.Time, -k.Value);
@@ -122,9 +117,7 @@ namespace Fudge {
       return "hsl(" + Math.random() * 360 + ", 80%, 80%)";
     }
 
-    private getBezierPoints(
-      _animationFunction: ƒ.AnimationFunction
-    ): { x: number; y: number }[] {
+    private getBezierPoints(_animationFunction: ƒ.AnimationFunction, keyIn: ƒ.AnimationKey, keyOut: ƒ.AnimationKey): { x: number; y: number }[] {
       let parameters: { a: number; b: number; c: number; d: number } =
         _animationFunction.getParameters();
       let polarForm: (u: number, v: number, w: number) => number = (u, v, w) => {
@@ -135,27 +128,14 @@ namespace Fudge {
           parameters.d
         );
       };
-      let time0: number = _animationFunction.getKeyIn().Time;
-      let time1: number = _animationFunction.getKeyOut().Time;
-      let offsetTime0: number = 0;
-      let offsetTime1: number = time1 - time0;
+      let timeStart: number = keyIn.Time;
+      let timeEnd: number = keyOut.Time;
+      let offsetTimeEnd: number = timeEnd - timeStart;
       return [
-        { 
-          x: offsetTime0, 
-          y: polarForm(offsetTime0, offsetTime0, offsetTime0) 
-        },
-        {
-          x: offsetTime0 + offsetTime1 * 1 / 3,
-          y: polarForm(offsetTime0, offsetTime0, offsetTime1)
-        },
-        {
-          x: offsetTime0 + offsetTime1 * 2 / 3,
-          y: polarForm(offsetTime0, offsetTime1, offsetTime1)
-        },
-        {
-          x: offsetTime0 + offsetTime1,
-          y: polarForm(offsetTime1, offsetTime1, offsetTime1)
-        }
+        {x: timeStart, y: polarForm(0, 0, 0)},
+        {x: timeStart + offsetTimeEnd * 1 / 3, y: polarForm(0, 0, offsetTimeEnd)},
+        {x: timeStart + offsetTimeEnd * 2 / 3, y: polarForm(0, offsetTimeEnd, offsetTimeEnd)},
+        {x: timeStart + offsetTimeEnd, y: polarForm(offsetTimeEnd, offsetTimeEnd, offsetTimeEnd)}
       ];
     }
   }

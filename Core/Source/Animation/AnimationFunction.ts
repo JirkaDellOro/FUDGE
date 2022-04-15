@@ -27,14 +27,6 @@ namespace FudgeCore {
       return {a: this.a, b: this.b, c: this.c, d: this.d};
     }
 
-    public getKeyIn(): AnimationKey  {
-      return this.keyIn;
-    }
-
-    public getKeyOut(): AnimationKey  {
-      return this.keyOut;
-    }
-
     /**
      * Calculates the value of the function at the given time.
      * @param _time the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.

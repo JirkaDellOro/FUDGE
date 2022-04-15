@@ -2063,7 +2063,7 @@ var Fudge;
             let seq1 = new ƒ.AnimationSequence();
             seq1.addKey(new ƒ.AnimationKey(0, 0));
             seq1.addKey(new ƒ.AnimationKey(500, 50));
-            seq1.addKey(new ƒ.AnimationKey(1500, -50, 0.1));
+            seq1.addKey(new ƒ.AnimationKey(1500, -50));
             seq1.addKey(new ƒ.AnimationKey(2000, 50));
             let seq2 = new ƒ.AnimationSequence();
             // seq2.addKey(new ƒ.AnimationKey(0, 0));
@@ -2635,16 +2635,16 @@ var Fudge;
             };
             this.sequences.push(seq);
             for (let i = 0; i < _sequence.length; i++) {
-                let k = _sequence.getKey(i);
+                let key = _sequence.getKey(i);
                 this.keys.push({
-                    key: k,
-                    path2D: this.drawKey(k.Time, -k.Value, height / 2, width / 2, seq.color),
+                    key: key,
+                    path2D: this.drawKey(key.Time, -key.Value, height / 2, width / 2, seq.color),
                     sequence: seq
                 });
                 if (i < _sequence.length - 1) {
-                    let bezierPoints = this.getBezierPoints(k.functionOut);
-                    this.crc2.moveTo(bezierPoints[0].x + k.Time, -bezierPoints[0].y);
-                    this.crc2.bezierCurveTo(bezierPoints[1].x + k.Time, -bezierPoints[1].y, bezierPoints[2].x + k.Time, -bezierPoints[2].y, bezierPoints[3].x + k.Time, -bezierPoints[3].y);
+                    let bezierPoints = this.getBezierPoints(key.functionOut, key, _sequence.getKey(i + 1));
+                    this.crc2.moveTo(bezierPoints[0].x, -bezierPoints[0].y);
+                    this.crc2.bezierCurveTo(bezierPoints[1].x, -bezierPoints[1].y, bezierPoints[2].x, -bezierPoints[2].y, bezierPoints[3].x, -bezierPoints[3].y);
                 }
                 // line.lineTo(k.Time, -k.Value);
             }
@@ -2700,7 +2700,7 @@ var Fudge;
         randomColor() {
             return "hsl(" + Math.random() * 360 + ", 80%, 80%)";
         }
-        getBezierPoints(_animationFunction) {
+        getBezierPoints(_animationFunction, keyIn, keyOut) {
             let parameters = _animationFunction.getParameters();
             let polarForm = (u, v, w) => {
                 return (parameters.a * u * v * w +
@@ -2708,27 +2708,14 @@ var Fudge;
                     parameters.c * ((u + v + w) / 3) +
                     parameters.d);
             };
-            let time0 = _animationFunction.getKeyIn().Time;
-            let time1 = _animationFunction.getKeyOut().Time;
-            let offsetTime0 = 0;
-            let offsetTime1 = time1 - time0;
+            let timeStart = keyIn.Time;
+            let timeEnd = keyOut.Time;
+            let offsetTimeEnd = timeEnd - timeStart;
             return [
-                {
-                    x: offsetTime0,
-                    y: polarForm(offsetTime0, offsetTime0, offsetTime0)
-                },
-                {
-                    x: offsetTime0 + offsetTime1 * 1 / 3,
-                    y: polarForm(offsetTime0, offsetTime0, offsetTime1)
-                },
-                {
-                    x: offsetTime0 + offsetTime1 * 2 / 3,
-                    y: polarForm(offsetTime0, offsetTime1, offsetTime1)
-                },
-                {
-                    x: offsetTime0 + offsetTime1,
-                    y: polarForm(offsetTime1, offsetTime1, offsetTime1)
-                }
+                { x: timeStart, y: polarForm(0, 0, 0) },
+                { x: timeStart + offsetTimeEnd * 1 / 3, y: polarForm(0, 0, offsetTimeEnd) },
+                { x: timeStart + offsetTimeEnd * 2 / 3, y: polarForm(0, offsetTimeEnd, offsetTimeEnd) },
+                { x: timeStart + offsetTimeEnd, y: polarForm(offsetTimeEnd, offsetTimeEnd, offsetTimeEnd) }
             ];
         }
     }

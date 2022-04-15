@@ -1513,8 +1513,6 @@ declare namespace FudgeCore {
             c: number;
             d: number;
         };
-        getKeyIn(): AnimationKey;
-        getKeyOut(): AnimationKey;
         /**
          * Calculates the value of the function at the given time.
          * @param _time the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.

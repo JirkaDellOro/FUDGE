@@ -56,7 +56,7 @@ namespace Fudge {
       let seq1: ƒ.AnimationSequence = new ƒ.AnimationSequence();
       seq1.addKey(new ƒ.AnimationKey(0, 0));
       seq1.addKey(new ƒ.AnimationKey(500, 50));
-      seq1.addKey(new ƒ.AnimationKey(1500, -50, 0.1));
+      seq1.addKey(new ƒ.AnimationKey(1500, -50));
       seq1.addKey(new ƒ.AnimationKey(2000, 50));
       let seq2: ƒ.AnimationSequence = new ƒ.AnimationSequence();
       // seq2.addKey(new ƒ.AnimationKey(0, 0));
