@@ -24,9 +24,11 @@ namespace Fudge {
         sequence: _sequence
       };
       this.sequences.push(seq);
-
+      this.crc2.beginPath();
+      this.crc2.strokeStyle = seq.color;
       for (let i: number = 0; i < _sequence.length; i++) {
         let key: ƒ.AnimationKey = _sequence.getKey(i);
+        console.log(key);
         this.keys.push({
           key: key,
           path2D: this.drawKey(
@@ -53,9 +55,6 @@ namespace Fudge {
       //   this.view.animation.totalTime,
       //   _sequence.getKey(_sequence.length - 1).Value
       // );
-
-      this.crc2.strokeStyle = seq.color;
-
       this.crc2.stroke();
     }
 

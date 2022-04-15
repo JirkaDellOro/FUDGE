@@ -2634,8 +2634,11 @@ var Fudge;
                 sequence: _sequence
             };
             this.sequences.push(seq);
+            this.crc2.beginPath();
+            this.crc2.strokeStyle = seq.color;
             for (let i = 0; i < _sequence.length; i++) {
                 let key = _sequence.getKey(i);
+                console.log(key);
                 this.keys.push({
                     key: key,
                     path2D: this.drawKey(key.Time, -key.Value, height / 2, width / 2, seq.color),
@@ -2652,7 +2655,6 @@ var Fudge;
             //   this.view.animation.totalTime,
             //   _sequence.getKey(_sequence.length - 1).Value
             // );
-            this.crc2.strokeStyle = seq.color;
             this.crc2.stroke();
         }
         drawKey(_x, _y, _h, _w, _c) {
