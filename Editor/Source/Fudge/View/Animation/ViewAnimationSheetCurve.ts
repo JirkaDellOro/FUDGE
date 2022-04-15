@@ -1,18 +1,20 @@
 namespace Fudge {
+  import ƒ = FudgeCore;
+
   export class ViewAnimationSheetCurve extends ViewAnimationSheet {
     drawKeys(): void {
       this.drawYScale();
       super.drawKeys();
     }
 
-    protected newDrawSequence(_sequence: ƒ.AnimationSequence): void {
+    protected drawSequence(_sequence: ƒ.AnimationSequence): void {
       if (_sequence.length <= 0) return;
 
       let rect: DOMRect | ClientRect = new DOMRect(1, 1, 20, 20); //_input.getBoundingClientRect();
       let height: number = rect.height / this.scale.y;
       let width: number = rect.height / this.scale.x;
-      let line: Path2D = new Path2D();
-      line.moveTo(0, _sequence.getKey(0).Value);
+      // let line: Path2D = new Path2D();
+      // line.moveTo(0, _sequence.getKey(0).Value);
 
       //TODO: stop recreating the sequence element all the time
       //TODO: get color from input element or former sequence element.
@@ -24,7 +26,7 @@ namespace Fudge {
       this.sequences.push(seq);
 
       for (let i: number = 0; i < _sequence.length; i++) {
-        let k: FudgeCore.AnimationKey = _sequence.getKey(i);
+        let k: ƒ.AnimationKey = _sequence.getKey(i);
         this.keys.push({
           key: k,
           path2D: this.drawKey(
@@ -36,59 +38,31 @@ namespace Fudge {
           ),
           sequence: seq
         });
-        line.lineTo(k.Time, -k.Value);
+        if (i < _sequence.length - 1) {
+          let bezierPoints: { x: number; y: number }[] = this.getBezierPoints(
+            k.functionOut
+          );
+          this.crc2.moveTo(bezierPoints[0].x + k.Time, -bezierPoints[0].y);
+          this.crc2.bezierCurveTo(
+            bezierPoints[1].x + k.Time,
+            -bezierPoints[1].y,
+            bezierPoints[2].x + k.Time,
+            -bezierPoints[2].y,
+            bezierPoints[3].x + k.Time,
+            -bezierPoints[3].y
+          );
+        }
+        // line.lineTo(k.Time, -k.Value);
       }
-      line.lineTo(
-        this.view.animation.totalTime,
-        _sequence.getKey(_sequence.length - 1).Value
-      );
+      // line.lineTo(
+      //   this.view.animation.totalTime,
+      //   _sequence.getKey(_sequence.length - 1).Value
+      // );
 
       this.crc2.strokeStyle = seq.color;
-      this.crc2.stroke(line);
+
+      this.crc2.stroke();
     }
-
-    // protected drawSequence(
-    //   _sequence: FudgeCore.AnimationSequence,
-    //   _input: HTMLInputElement
-    // ): void {
-    //   if (_sequence.length <= 0) return;
-    //   let rect: DOMRect | ClientRect = new DOMRect(0, 0, 1, 1); //_input.getBoundingClientRect();
-    //   let height: number = rect.height / this.scale.y;
-    //   let width: number = rect.height / this.scale.x;
-    //   let line: Path2D = new Path2D();
-    //   line.moveTo(0, _sequence.getKey(0).Value);
-
-    //   //TODO: stop recreating the sequence element all the time
-    //   //TODO: get color from input element or former sequence element.
-    //   let seq: ViewAnimationSequence = {
-    //     color: this.randomColor(),
-    //     sequence: _sequence
-    //   };
-    //   this.sequences.push(seq);
-
-    //   for (let i: number = 0; i < _sequence.length; i++) {
-    //     let k: FudgeCore.AnimationKey = _sequence.getKey(i);
-    //     this.keys.push({
-    //       key: k,
-    //       path2D: this.drawKey(
-    //         k.Time,
-    //         k.Value,
-    //         height / 2,
-    //         width / 2,
-    //         seq.color
-    //       ),
-    //       sequence: seq
-    //     });
-    //     line.lineTo(k.Time, k.Value);
-    //   }
-    //   line.lineTo(
-    //     this.view.animation.totalTime,
-    //     _sequence.getKey(_sequence.length - 1).Value
-    //   );
-
-    //   this.crc2.strokeStyle = seq.color;
-    //   this.crc2.stroke(line);
-    // }
 
     protected drawKey(
       _x: number,
@@ -103,8 +77,6 @@ namespace Fudge {
     private drawYScale(): void {
       let pixelPerValue: number = this.calcScaleSize();
       let valuePerPixel: number = 1 / pixelPerValue;
-
-
 
       this.crc2.strokeStyle = "green";
       this.crc2.lineWidth = 1 / this.scale.y;
@@ -121,13 +93,13 @@ namespace Fudge {
       line.lineTo(this.crc2.lineWidth, 400);
       this.crc2.stroke(line);
 
-      this.crc2.lineWidth = 1;
+      this.crc2.lineWidth = 0.5;
       this.crc2.textBaseline = "middle";
       for (let i: number = 0; i < 11; i++) {
-        let y: number =  - 50 + i * 10;
+        let y: number = -50 + i * 10;
         line = new Path2D();
         line.moveTo(this.crc2.lineWidth, y);
-        line.lineTo(this.crc2.lineWidth + 10, y);
+        line.lineTo(this.crc2.lineWidth + 2000, y);
         this.crc2.stroke(line);
         this.crc2.fillText((-y).toString(), this.crc2.lineWidth + 15, y);
       }
@@ -148,6 +120,43 @@ namespace Fudge {
 
     private randomColor(): string {
       return "hsl(" + Math.random() * 360 + ", 80%, 80%)";
+    }
+
+    private getBezierPoints(
+      _animationFunction: ƒ.AnimationFunction
+    ): { x: number; y: number }[] {
+      let parameters: { a: number; b: number; c: number; d: number } =
+        _animationFunction.getParameters();
+      let polarForm: (u: number, v: number, w: number) => number = (u, v, w) => {
+        return (
+          parameters.a * u * v * w +
+          parameters.b * ((v * w + w * u + u * v) / 3) +
+          parameters.c * ((u + v + w) / 3) +
+          parameters.d
+        );
+      };
+      let time0: number = _animationFunction.getKeyIn().Time;
+      let time1: number = _animationFunction.getKeyOut().Time;
+      let offsetTime0: number = 0;
+      let offsetTime1: number = time1 - time0;
+      return [
+        { 
+          x: offsetTime0, 
+          y: polarForm(offsetTime0, offsetTime0, offsetTime0) 
+        },
+        {
+          x: offsetTime0 + offsetTime1 * 1 / 3,
+          y: polarForm(offsetTime0, offsetTime0, offsetTime1)
+        },
+        {
+          x: offsetTime0 + offsetTime1 * 2 / 3,
+          y: polarForm(offsetTime0, offsetTime1, offsetTime1)
+        },
+        {
+          x: offsetTime0 + offsetTime1,
+          y: polarForm(offsetTime1, offsetTime1, offsetTime1)
+        }
+      ];
     }
   }
 }
