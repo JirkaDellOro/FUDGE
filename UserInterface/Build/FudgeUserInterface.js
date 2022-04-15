@@ -1087,7 +1087,10 @@ var FudgeUserInterface;
         content;
         constructor(_legend = "", _type) {
             super();
-            this.setAttribute("key", _legend);
+            this.setAttribute("key", _legend.replaceAll(".", ""));
+            if (!isNaN(Number(_legend)))
+                // if key is a number, as with arrays, prefix with "ƒ", since numbers are not allowed as attributes for querySelector
+                this.setAttribute("key", "ƒ" + _legend);
             this.setAttribute("type", _type);
             this.open = true;
             let lblSummary = document.createElement("summary");

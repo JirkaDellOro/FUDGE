@@ -1507,6 +1507,14 @@ declare namespace FudgeCore {
         private keyIn;
         private keyOut;
         constructor(_keyIn: AnimationKey, _keyOut?: AnimationKey);
+        getParameters(): {
+            a: number;
+            b: number;
+            c: number;
+            d: number;
+        };
+        getKeyIn(): AnimationKey;
+        getKeyOut(): AnimationKey;
         /**
          * Calculates the value of the function at the given time.
          * @param _time the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.
@@ -4172,7 +4180,10 @@ declare namespace FudgeCore {
      * Holds all the information which defines the particle effect. Can load the said information out of a json file.
      * @authors Jonas Plotzky, HFU, 2020
      */
-    class ParticleEffect {
+    class ParticleEffect extends Mutable implements SerializableResource {
+        name: string;
+        idResource: string;
+        url: RequestInfo;
         storageSystem: ParticleEffectData;
         storageUpdate: ParticleEffectData;
         storageParticle: ParticleEffectData;
@@ -4183,10 +4194,14 @@ declare namespace FudgeCore {
             [key: string]: Mutator;
         };
         private definedVariables;
+        constructor(_url?: RequestInfo);
         /**
          * Asynchronously loads the json from the given url and parses it initializing this particle effect.
          */
-        load(_request: RequestInfo): Promise<void>;
+        load(_url: RequestInfo): Promise<void>;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected reduceMutator(_mutator: Mutator): void;
         /**
          * Parses the data initializing this particle effect with the corresponding closures
          * @param _data The paticle effect data to parse.

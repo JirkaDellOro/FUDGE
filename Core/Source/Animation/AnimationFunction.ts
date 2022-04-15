@@ -23,6 +23,18 @@ namespace FudgeCore {
       this.calculate();
     }
 
+    public getParameters(): {a: number, b: number, c: number , d: number}  {
+      return {a: this.a, b: this.b, c: this.c, d: this.d};
+    }
+
+    public getKeyIn(): AnimationKey  {
+      return this.keyIn;
+    }
+
+    public getKeyOut(): AnimationKey  {
+      return this.keyOut;
+    }
+
     /**
      * Calculates the value of the function at the given time.
      * @param _time the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.
@@ -69,6 +81,7 @@ namespace FudgeCore {
       this.a = (-x1 * (this.keyIn.SlopeOut + this.keyOut.SlopeIn) - 2 * this.keyIn.Value + 2 * this.keyOut.Value) / -Math.pow(x1, 3);
       this.b = (this.keyOut.SlopeIn - this.keyIn.SlopeOut - 3 * this.a * Math.pow(x1, 2)) / (2 * x1);
     }
+    
   }
 
 }

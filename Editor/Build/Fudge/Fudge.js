@@ -882,10 +882,57 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
-    class ControllerAnimation extends ƒUi.Controller {
-        constructor(_mutable, _domElement) {
-            super(_mutable, _domElement);
+    class ControllerAnimation {
+        animation;
+        domElement;
+        mutatorForNode;
+        constructor(_animation, _domElement, _mutatorForNode) {
+            this.animation = _animation;
+            this.domElement = _domElement;
+            this.mutatorForNode = _mutatorForNode;
+        }
+        static updateAnimationStructure(_domElement, _animationStructure, _time, _mutatorForNode) {
+            for (let key in _animationStructure) {
+                let element = ƒUi.Controller.findChildElementByKey(_domElement, key.replaceAll(".", ""));
+                if (element == null)
+                    continue;
+                if (element instanceof ƒUi.CustomElement) {
+                    let value = element.getMutatorValue();
+                    let previousValue = _mutatorForNode[key];
+                    if (typeof value == "number" && value !== previousValue) {
+                        _animationStructure[key].addKey(new ƒ.AnimationKey(_time, element.getMutatorValue()));
+                    }
+                }
+                else
+                    _animationStructure[key] = this.updateAnimationStructure(element, _animationStructure[key], _time, _mutatorForNode[key]);
+            }
+            return _animationStructure;
+        }
+        static updateUserInterfaceWithMutator(_domElement, _mutator) {
+            for (let key in _mutator) {
+                let element = ƒUi.Controller.findChildElementByKey(_domElement, key.replaceAll(".", ""));
+                if (!element)
+                    continue;
+                let value = _mutator[key];
+                if (element instanceof ƒUi.CustomElement && element != document.activeElement)
+                    element.setMutatorValue(value);
+                else {
+                    this.updateUserInterfaceWithMutator(element, _mutator[key]);
+                }
+            }
+        }
+        updateAnimationStructure(_time) {
+            ControllerAnimation.updateAnimationStructure(this.domElement, this.animation.animationStructure, _time, this.mutatorForNode);
+        }
+        updateAnimationUserInterface(_mutator) {
+            this.mutatorForNode = _mutator;
+            ControllerAnimation.updateUserInterfaceWithMutator(this.domElement, _mutator);
+        }
+        removeAnimationKey(_key) {
+            let animationSequence = _key.sequence.sequence;
+            animationSequence.removeKey(_key.key);
         }
     }
     Fudge.ControllerAnimation = ControllerAnimation;
@@ -1986,6 +2033,7 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
     class ViewAnimation extends Fudge.View {
         node;
@@ -1994,13 +2042,14 @@ var Fudge;
         playbackTime;
         // controller: AnimationList;
         controller;
+        selectedKey;
         canvas;
         attributeList;
         crc;
         sheet;
         toolbar;
         hover;
-        time = new FudgeCore.Time();
+        time = new ƒ.Time();
         playing = false;
         constructor(_container, _state) {
             super(_container, _state);
@@ -2011,30 +2060,30 @@ var Fudge;
         }
         openAnimation() {
             //TODO replace with file opening dialoge
-            let seq1 = new FudgeCore.AnimationSequence();
-            seq1.addKey(new FudgeCore.AnimationKey(0, 0));
-            seq1.addKey(new FudgeCore.AnimationKey(500, 50));
-            seq1.addKey(new FudgeCore.AnimationKey(1500, -50));
-            seq1.addKey(new FudgeCore.AnimationKey(2000, 0));
-            let seq2 = new FudgeCore.AnimationSequence();
-            // seq2.addKey(new FudgeCore.AnimationKey(0, 0));
-            seq2.addKey(new FudgeCore.AnimationKey(500, 0, 0, 0.02));
-            seq2.addKey(new FudgeCore.AnimationKey(1000, 5));
-            seq2.addKey(new FudgeCore.AnimationKey(1500, 0, -0.02));
-            this.animation = new FudgeCore.Animation("TestAnimation", {
+            let seq1 = new ƒ.AnimationSequence();
+            seq1.addKey(new ƒ.AnimationKey(0, 0));
+            seq1.addKey(new ƒ.AnimationKey(500, 50));
+            seq1.addKey(new ƒ.AnimationKey(1500, -50, 0.1));
+            seq1.addKey(new ƒ.AnimationKey(2000, 50));
+            let seq2 = new ƒ.AnimationSequence();
+            // seq2.addKey(new ƒ.AnimationKey(0, 0));
+            seq2.addKey(new ƒ.AnimationKey(500, 0, 0, 0.02));
+            seq2.addKey(new ƒ.AnimationKey(1000, 10));
+            seq2.addKey(new ƒ.AnimationKey(1500, 0, -0.02));
+            this.animation = new ƒ.Animation("TestAnimation", {
                 components: {
                     ComponentTransform: [
                         {
                             "ƒ.ComponentTransform": {
-                                translation: {
-                                    x: new FudgeCore.AnimationSequence(),
-                                    y: seq2,
-                                    z: new FudgeCore.AnimationSequence()
-                                },
+                                // translation: {
+                                //   x: new ƒ.AnimationSequence(),
+                                //   y: seq2,
+                                //   z: new ƒ.AnimationSequence()
+                                // },
                                 rotation: {
-                                    x: new FudgeCore.AnimationSequence(),
+                                    x: new ƒ.AnimationSequence(),
                                     y: seq1,
-                                    z: new FudgeCore.AnimationSequence()
+                                    z: new ƒ.AnimationSequence()
                                 }
                             }
                         }
@@ -2045,9 +2094,9 @@ var Fudge;
             this.animation.labels["Two"] = 750;
             this.animation.setEvent("EventOne", 500);
             this.animation.setEvent("EventTwo", 1000);
-            this.node = new FudgeCore.Node("Testnode");
+            this.node = new ƒ.Node("Testnode");
             console.log(this.node);
-            this.cmpAnimator = new FudgeCore.ComponentAnimator(this.animation);
+            this.cmpAnimator = new ƒ.ComponentAnimator(this.animation);
         }
         fillContent() {
             // this.content = document.createElement("span");
@@ -2064,12 +2113,12 @@ var Fudge;
             // this.attributeList.addEventListener(FudgeUserInterface.EVENT.UPDATE, this.changeAttribute.bind(this));
             // this.attributeList.addEventListener(FudgeUserInterface.EVENT.CHANGE, this.changeAttribute.bind(this));
             //TODO: Add Moni's custom Element here
-            // this.controller = new AnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
-            let animationMutator = this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
+            // this.controller = new AnimationList(this.animation.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
+            let animationMutator = this.animation.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
             console.log(animationMutator);
             this.attributeList = ƒUi.Generator.createInterfaceFromMutator(animationMutator);
             // this.attributeList = ƒUi.Generator.createDetailsFromMutable(this.animation);
-            this.controller = new Fudge.ControllerAnimation(this.animation, this.attributeList);
+            this.controller = new Fudge.ControllerAnimation(this.animation, this.attributeList, this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback));
             console.log(this.controller);
             this.canvas = document.createElement("canvas");
             this.canvas.width = 1500;
@@ -2089,9 +2138,11 @@ var Fudge;
             // this.content.appendChild(this.canvasSheet);
             this.dom.appendChild(this.canvas);
             this.dom.appendChild(this.hover);
-            // this.sheet = new ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(.5, 0.5), new FudgeCore.Vector2(0, 0));
-            this.sheet = new Fudge.ViewAnimationSheetCurve(this, this.crc, null, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200)); // TODO: stop using fixed values?
+            // this.sheet = new ViewAnimationSheetDope(this, this.crc, null, new ƒ.Vector2(.5, 0.5), new ƒ.Vector2(0, 0));
+            this.sheet = new Fudge.ViewAnimationSheetCurve(this, this.crc, null, new ƒ.Vector2(0.5, 2), new ƒ.Vector2(0, 200)); // TODO: stop using fixed values?
             this.sheet.redraw(this.playbackTime);
+            document.addEventListener("DOMContentLoaded", () => this.updateDisplay());
+            // this.updateDisplay();
             // sheet.translate();
         }
         installListeners() {
@@ -2101,20 +2152,23 @@ var Fudge;
             this.canvas.addEventListener("mouseup", this.mouseUp.bind(this));
             this.toolbar.addEventListener("click", this.toolbarClick.bind(this));
             this.toolbar.addEventListener("change", this.toolbarChange.bind(this));
+            this.dom.addEventListener("itemselect" /* SELECT */, this.hndSelect);
             requestAnimationFrame(this.playAnimation.bind(this));
         }
         mouseClick(_e) {
             // console.log(_e);
         }
         mouseDown(_e) {
-            if (_e.offsetY < 50) {
-                this.setTime(_e.offsetX / this.sheet.scale.x);
-                return;
-            }
+            this.setTime(_e.offsetX / this.sheet.scale.x);
+            // if (_e.offsetY < 50) {
+            //   this.setTime(_e.offsetX / this.sheet.scale.x);
+            //   return;
+            // }
             let obj = this.sheet.getObjectAtPoint(_e.offsetX, _e.offsetY);
             if (!obj)
                 return;
             // TODO: events should bubble to panel
+            console.log(obj);
             if (obj["label"]) {
                 console.log(obj["label"]);
                 this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
@@ -2125,7 +2179,7 @@ var Fudge;
             }
             else if (obj["key"]) {
                 console.log(obj["key"]);
-                this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { detail: obj["key"] }));
+                this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { detail: obj }));
             }
             console.log(obj);
         }
@@ -2142,10 +2196,15 @@ var Fudge;
             // console.log(_e);
             //
         }
+        hndSelect = (_event) => {
+            if ("key" in _event.detail) {
+                this.selectedKey = _event.detail;
+            }
+        };
         fillToolbar(_tb) {
             let playmode = document.createElement("select");
             playmode.id = "playmode";
-            for (let m in FudgeCore.ANIMATION_PLAYMODE) {
+            for (let m in ƒ.ANIMATION_PLAYMODE) {
                 if (isNaN(+m)) {
                     let op = document.createElement("option");
                     op.value = m;
@@ -2192,6 +2251,7 @@ var Fudge;
             buttons.push(document.createElement("button"));
             buttons.push(document.createElement("button"));
             buttons.push(document.createElement("button"));
+            buttons.push(document.createElement("button"));
             buttons[0].classList.add("fa", "fa-fast-backward", "start");
             buttons[1].classList.add("fa", "fa-backward", "back");
             buttons[2].classList.add("fa", "fa-play", "play");
@@ -2201,6 +2261,7 @@ var Fudge;
             buttons[6].classList.add("fa", "fa-file", "add-label");
             buttons[7].classList.add("fa", "fa-bookmark", "add-event");
             buttons[8].classList.add("fa", "fa-plus-square", "add-key");
+            buttons[9].classList.add("fa", "fa-plus-square", "remove-key");
             buttons[0].id = "start";
             buttons[1].id = "back";
             buttons[2].id = "play";
@@ -2210,6 +2271,7 @@ var Fudge;
             buttons[6].id = "add-label";
             buttons[7].id = "add-event";
             buttons[8].id = "add-key";
+            buttons[9].id = "remove-key";
             buttons[0].innerText = "start";
             buttons[1].innerText = "back";
             buttons[2].innerText = "play";
@@ -2219,6 +2281,7 @@ var Fudge;
             buttons[6].innerText = "add-label";
             buttons[7].innerText = "add-event";
             buttons[8].innerText = "add-key";
+            buttons[9].innerText = "remove-key";
             for (let b of buttons) {
                 _tb.appendChild(b);
             }
@@ -2236,6 +2299,12 @@ var Fudge;
                     this.sheet.redraw(this.playbackTime);
                     break;
                 case "add-key":
+                    this.controller.updateAnimationStructure(this.playbackTime);
+                    this.sheet.redraw(this.playbackTime);
+                    break;
+                case "remove-key":
+                    this.controller.removeAnimationKey(this.selectedKey);
+                    this.sheet.redraw(this.playbackTime);
                     break;
                 case "start":
                     this.playbackTime = 0;
@@ -2271,8 +2340,8 @@ var Fudge;
             let target = _e.target;
             switch (target.id) {
                 case "playmode":
-                    this.cmpAnimator.playmode = FudgeCore.ANIMATION_PLAYMODE[target.value];
-                    // console.log(FudgeCore.ANIMATION_PLAYMODE[target.value]);
+                    this.cmpAnimator.playmode = ƒ.ANIMATION_PLAYMODE[target.value];
+                    // console.log(ƒ.ANIMATION_PLAYMODE[target.value]);
                     break;
                 case "fps":
                     // console.log("fps changed to", target.value);
@@ -2293,25 +2362,21 @@ var Fudge;
         }
         changeAttribute(_e) {
             console.log(_e);
-            console.log(this.controller.getMutator());
+            // console.log(this.controller.getMutator());
             // console.log("1", this.controller.getMutator());
             // console.log("2", this.controller.collectMutator());
-            // this.controller.BuildFromMutator(this.animation.getMutated(this.playbackTime, 1, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS));
+            // this.controller.BuildFromMutator(this.animation.getMutated(this.playbackTime, 1, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS));
         }
         updateDisplay(_m = null) {
             this.sheet.redraw(this.playbackTime);
             if (!_m)
                 _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
-            // this.controller.updateMutator(_m);
-            // ƒUi.Controller.updateUserInterface(this.animation, this.controller.domElement, _m);
-            // console.log(_m);
-            let newAttributeList = ƒUi.Generator.createInterfaceFromMutator(_m);
-            this.dom.replaceChild(newAttributeList, this.attributeList);
-            this.attributeList = newAttributeList;
-            // this.controller.updateUserInterface();
+            this.controller.updateAnimationUserInterface(_m);
         }
         setTime(_time, updateDisplay = true) {
             this.playbackTime = Math.min(this.animation.totalTime, Math.max(0, _time));
+            // console.log(Math.round(this.playbackTime / (1000 / this.animation.fps)));
+            this.playbackTime = Math.round(this.playbackTime / (1000 / this.animation.fps)) * (1000 / this.animation.fps);
             if (updateDisplay)
                 this.updateDisplay();
         }
@@ -2335,6 +2400,7 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
     class ViewAnimationSheet {
         view;
         seq;
@@ -2347,7 +2413,7 @@ var Fudge;
         labels = [];
         events = [];
         //TODO stop using hardcoded colors
-        constructor(_view, _crc, _seq, _scale = new FudgeCore.Vector2(1, 1), _pos = new FudgeCore.Vector2()) {
+        constructor(_view, _crc, _seq, _scale = new ƒ.Vector2(1, 1), _pos = new ƒ.Vector2()) {
             this.view = _view;
             this.crc2 = _crc;
             this.seq = _seq;
@@ -2426,15 +2492,15 @@ var Fudge;
             this.crc2.fill(cursor);
         }
         drawKeys() {
-            // let inputMutator: FudgeCore.Mutator = this.view.controller.getElementIndex();
-            // let inputMutator: FudgeCore.Mutator = this.view.controller.getMutator();
+            // let inputMutator: ƒ.Mutator = this.view.controller.getElementIndex();
+            // let inputMutator: ƒ.Mutator = this.view.controller.getMutator();
             // console.log(inputMutator);
             // this.drawKey(10, 10, 10, 10, "green");
             //TODO: stop recreating the sequence elements all the time
             this.sequences = [];
             this.keys = [];
             // this.traverseStructures(this.view.animation.animationStructure, inputMutator);
-            this.newTraverseStructures(this.view.animation.animationStructure);
+            this.traverseStructures(this.view.animation.animationStructure);
         }
         getObjectAtPoint(_x, _y) {
             for (let l of this.labels) {
@@ -2456,17 +2522,17 @@ var Fudge;
             }
             return null;
         }
-        newTraverseStructures(_animation) {
+        traverseStructures(_animation) {
             for (let i in _animation) {
-                if (_animation[i] instanceof FudgeCore.AnimationSequence) {
-                    this.newDrawSequence(_animation[i]);
+                if (_animation[i] instanceof ƒ.AnimationSequence) {
+                    this.drawSequence(_animation[i]);
                 }
                 else {
-                    this.newTraverseStructures(_animation[i]);
+                    this.traverseStructures(_animation[i]);
                 }
             }
         }
-        // protected abstract drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void;
+        // protected abstract drawSequence(_sequence: ƒ.AnimationSequence, _input: HTMLInputElement): void;
         drawKey(_x, _y, _h, _w, _c) {
             // console.log(`x: ${_x} y: ${_y} h: ${_h} w: ${_w} c: ${_c}`);
             let key = new Path2D();
@@ -2552,14 +2618,14 @@ var Fudge;
             this.drawYScale();
             super.drawKeys();
         }
-        newDrawSequence(_sequence) {
+        drawSequence(_sequence) {
             if (_sequence.length <= 0)
                 return;
             let rect = new DOMRect(1, 1, 20, 20); //_input.getBoundingClientRect();
             let height = rect.height / this.scale.y;
             let width = rect.height / this.scale.x;
-            let line = new Path2D();
-            line.moveTo(0, _sequence.getKey(0).Value);
+            // let line: Path2D = new Path2D();
+            // line.moveTo(0, _sequence.getKey(0).Value);
             //TODO: stop recreating the sequence element all the time
             //TODO: get color from input element or former sequence element.
             // let seq: ViewAnimationSequence = { color: this.randomColor(), element: _input, sequence: _sequence };
@@ -2575,51 +2641,20 @@ var Fudge;
                     path2D: this.drawKey(k.Time, -k.Value, height / 2, width / 2, seq.color),
                     sequence: seq
                 });
-                line.lineTo(k.Time, -k.Value);
+                if (i < _sequence.length - 1) {
+                    let bezierPoints = this.getBezierPoints(k.functionOut);
+                    this.crc2.moveTo(bezierPoints[0].x + k.Time, -bezierPoints[0].y);
+                    this.crc2.bezierCurveTo(bezierPoints[1].x + k.Time, -bezierPoints[1].y, bezierPoints[2].x + k.Time, -bezierPoints[2].y, bezierPoints[3].x + k.Time, -bezierPoints[3].y);
+                }
+                // line.lineTo(k.Time, -k.Value);
             }
-            line.lineTo(this.view.animation.totalTime, _sequence.getKey(_sequence.length - 1).Value);
+            // line.lineTo(
+            //   this.view.animation.totalTime,
+            //   _sequence.getKey(_sequence.length - 1).Value
+            // );
             this.crc2.strokeStyle = seq.color;
-            this.crc2.stroke(line);
+            this.crc2.stroke();
         }
-        // protected drawSequence(
-        //   _sequence: FudgeCore.AnimationSequence,
-        //   _input: HTMLInputElement
-        // ): void {
-        //   if (_sequence.length <= 0) return;
-        //   let rect: DOMRect | ClientRect = new DOMRect(0, 0, 1, 1); //_input.getBoundingClientRect();
-        //   let height: number = rect.height / this.scale.y;
-        //   let width: number = rect.height / this.scale.x;
-        //   let line: Path2D = new Path2D();
-        //   line.moveTo(0, _sequence.getKey(0).Value);
-        //   //TODO: stop recreating the sequence element all the time
-        //   //TODO: get color from input element or former sequence element.
-        //   let seq: ViewAnimationSequence = {
-        //     color: this.randomColor(),
-        //     sequence: _sequence
-        //   };
-        //   this.sequences.push(seq);
-        //   for (let i: number = 0; i < _sequence.length; i++) {
-        //     let k: FudgeCore.AnimationKey = _sequence.getKey(i);
-        //     this.keys.push({
-        //       key: k,
-        //       path2D: this.drawKey(
-        //         k.Time,
-        //         k.Value,
-        //         height / 2,
-        //         width / 2,
-        //         seq.color
-        //       ),
-        //       sequence: seq
-        //     });
-        //     line.lineTo(k.Time, k.Value);
-        //   }
-        //   line.lineTo(
-        //     this.view.animation.totalTime,
-        //     _sequence.getKey(_sequence.length - 1).Value
-        //   );
-        //   this.crc2.strokeStyle = seq.color;
-        //   this.crc2.stroke(line);
-        // }
         drawKey(_x, _y, _h, _w, _c) {
             return super.drawKey(_x, _y, _h, _w, _c);
         }
@@ -2639,13 +2674,13 @@ var Fudge;
             line.moveTo(0, -200);
             line.lineTo(this.crc2.lineWidth, 400);
             this.crc2.stroke(line);
-            this.crc2.lineWidth = 1;
+            this.crc2.lineWidth = 0.5;
             this.crc2.textBaseline = "middle";
             for (let i = 0; i < 11; i++) {
                 let y = -50 + i * 10;
                 line = new Path2D();
                 line.moveTo(this.crc2.lineWidth, y);
-                line.lineTo(this.crc2.lineWidth + 10, y);
+                line.lineTo(this.crc2.lineWidth + 2000, y);
                 this.crc2.stroke(line);
                 this.crc2.fillText((-y).toString(), this.crc2.lineWidth + 15, y);
             }
@@ -2665,6 +2700,37 @@ var Fudge;
         randomColor() {
             return "hsl(" + Math.random() * 360 + ", 80%, 80%)";
         }
+        getBezierPoints(_animationFunction) {
+            let parameters = _animationFunction.getParameters();
+            let polarForm = (u, v, w) => {
+                return (parameters.a * u * v * w +
+                    parameters.b * ((v * w + w * u + u * v) / 3) +
+                    parameters.c * ((u + v + w) / 3) +
+                    parameters.d);
+            };
+            let time0 = _animationFunction.getKeyIn().Time;
+            let time1 = _animationFunction.getKeyOut().Time;
+            let offsetTime0 = 0;
+            let offsetTime1 = time1 - time0;
+            return [
+                {
+                    x: offsetTime0,
+                    y: polarForm(offsetTime0, offsetTime0, offsetTime0)
+                },
+                {
+                    x: offsetTime0 + offsetTime1 * 1 / 3,
+                    y: polarForm(offsetTime0, offsetTime0, offsetTime1)
+                },
+                {
+                    x: offsetTime0 + offsetTime1 * 2 / 3,
+                    y: polarForm(offsetTime0, offsetTime1, offsetTime1)
+                },
+                {
+                    x: offsetTime0 + offsetTime1,
+                    y: polarForm(offsetTime1, offsetTime1, offsetTime1)
+                }
+            ];
+        }
     }
     Fudge.ViewAnimationSheetCurve = ViewAnimationSheetCurve;
 })(Fudge || (Fudge = {}));
@@ -2675,16 +2741,16 @@ var Fudge;
             //TODO: Fix that for some reason the first time this is called the rects return all 0s.
             //TODO: possible optimisation: only regenerate if necessary, otherwise load a saved image. (might lead to problems with the keys not being clickable anymore though)
             // const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-            // let inputMutator: FudgeCore.Mutator = this.view.controller.getElementIndex();
+            // let inputMutator: ƒ.Mutator = this.view.controller.getElementIndex();
             // console.log(inputMutator);
             // await delay(1);
             // console.log(inputMutator.components["ComponentTransform"][0]["ƒ.ComponentTransform"]["rotation"]["y"].getBoundingClientRect());
             // }, 1000);
             // this.traverseStructures(this.view.animation.animationStructure, inputMutator);
             this.drawKey(100, 100, 10, 10, "green");
-            this.newTraverseStructures(this.view.animation.animationStructure);
+            this.traverseStructures(this.view.animation.animationStructure);
         }
-        newDrawSequence(_sequence) {
+        drawSequence(_sequence) {
             let rect = new DOMRect(100, 100, 10, 10); //_input.getBoundingClientRect();
             let y = rect.top - this.view.dom.getBoundingClientRect().top + rect.height / 2;
             let height = rect.height;

@@ -1,10 +1,12 @@
 namespace Fudge {
+  import ƒ = FudgeCore;
+  
   export abstract class ViewAnimationSheet {
     view: ViewAnimation;
-    seq: FudgeCore.AnimationSequence[];
+    seq: ƒ.AnimationSequence[];
     crc2: CanvasRenderingContext2D;
-    scale: FudgeCore.Vector2;
-    protected position: FudgeCore.Vector2;
+    scale: ƒ.Vector2;
+    protected position: ƒ.Vector2;
     protected savedImage: ImageData;
     protected keys: ViewAnimationKey[] = [];
     protected sequences: ViewAnimationSequence[] = [];
@@ -13,7 +15,7 @@ namespace Fudge {
 
     //TODO stop using hardcoded colors
 
-    constructor(_view: ViewAnimation, _crc: CanvasRenderingContext2D, _seq: FudgeCore.AnimationSequence[], _scale: FudgeCore.Vector2 = new FudgeCore.Vector2(1, 1), _pos: FudgeCore.Vector2 = new FudgeCore.Vector2()) {
+    constructor(_view: ViewAnimation, _crc: CanvasRenderingContext2D, _seq: ƒ.AnimationSequence[], _scale: ƒ.Vector2 = new ƒ.Vector2(1, 1), _pos: ƒ.Vector2 = new ƒ.Vector2()) {
       this.view = _view;
       this.crc2 = _crc;
       this.seq = _seq;
@@ -98,8 +100,8 @@ namespace Fudge {
     }
 
     public drawKeys(): void {
-      // let inputMutator: FudgeCore.Mutator = this.view.controller.getElementIndex();
-      // let inputMutator: FudgeCore.Mutator = this.view.controller.getMutator();
+      // let inputMutator: ƒ.Mutator = this.view.controller.getElementIndex();
+      // let inputMutator: ƒ.Mutator = this.view.controller.getMutator();
       // console.log(inputMutator);
 
       // this.drawKey(10, 10, 10, 10, "green");
@@ -108,7 +110,7 @@ namespace Fudge {
       this.sequences = [];
       this.keys = [];
       // this.traverseStructures(this.view.animation.animationStructure, inputMutator);
-      this.newTraverseStructures(this.view.animation.animationStructure);
+      this.traverseStructures(this.view.animation.animationStructure);
       }
 
     public getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
@@ -132,28 +134,28 @@ namespace Fudge {
       return null;
     }
 
-    protected newTraverseStructures(_animation: FudgeCore.AnimationStructure): void {
+    protected traverseStructures(_animation: ƒ.AnimationStructure): void {
       for (let i in _animation) {
-        if (_animation[i] instanceof FudgeCore.AnimationSequence) {
-          this.newDrawSequence(<FudgeCore.AnimationSequence>_animation[i]);
+        if (_animation[i] instanceof ƒ.AnimationSequence) {
+          this.drawSequence(<ƒ.AnimationSequence>_animation[i]);
         } else {
-          this.newTraverseStructures(<FudgeCore.AnimationStructure>_animation[i]);
+          this.traverseStructures(<ƒ.AnimationStructure>_animation[i]);
         }
       }
     }
 
-    // protected traverseStructures(_animation: FudgeCore.AnimationStructure, _inputs: FudgeCore.Mutator): void {
+    // protected traverseStructures(_animation: ƒ.AnimationStructure, _inputs: ƒ.Mutator): void {
     //   for (let i in _animation) {
-    //     if (_animation[i] instanceof FudgeCore.AnimationSequence) {
-    //       this.drawSequence(<FudgeCore.AnimationSequence>_animation[i], <HTMLInputElement>_inputs[i]);
+    //     if (_animation[i] instanceof ƒ.AnimationSequence) {
+    //       this.drawSequence(<ƒ.AnimationSequence>_animation[i], <HTMLInputElement>_inputs[i]);
     //     } else {
-    //       this.traverseStructures(<FudgeCore.AnimationStructure>_animation[i], <FudgeCore.Mutator>_inputs[i]);
+    //       this.traverseStructures(<ƒ.AnimationStructure>_animation[i], <ƒ.Mutator>_inputs[i]);
     //     }
     //   }
     // }
 
-    protected abstract newDrawSequence(_sequence: FudgeCore.AnimationSequence): void;
-    // protected abstract drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void;
+    protected abstract drawSequence(_sequence: ƒ.AnimationSequence): void;
+    // protected abstract drawSequence(_sequence: ƒ.AnimationSequence, _input: HTMLInputElement): void;
 
 
     protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D {
