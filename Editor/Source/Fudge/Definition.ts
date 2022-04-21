@@ -14,7 +14,7 @@ namespace Fudge {
     SYNC_INSTANCES,
     REMOVE_COMPONENT,
     ADD_JOINT,
-    DELETE_RESOURCE, 
+    DELETE_RESOURCE,
     ILLUMINATE
   }
 
@@ -35,16 +35,31 @@ namespace Fudge {
 
 
 
+
+
+
+
   export enum EVENT_EDITOR {
-    SET_GRAPH = "setGraph",
-    FOCUS_NODE = "focusNode",
-    SET_PROJECT = "setProject",
-    UPDATE = "update",
-    REFRESH = "refresh",
-    DESTROY = "destroy",
-    CLEAR_PROJECT = "clearProject",
-    TRANSFORM = "transform",
-    SELECT_NODE = "selectNode"
+    CREATE = "CREATE",
+    SELECT = "SELECT",
+    MODIFY = "MODIFY",
+    DELETE = "DELETE",
+    CLOSE = "CLOSE"
+    // SET_GRAPH = "setGraph",
+    // FOCUS_NODE = "focusNode",
+    // SET_PROJECT = "setProject",
+    // UPDATE = "update",
+    // REFRESH = "refresh",
+    // DESTROY = "destroy",
+    // CLEAR_PROJECT = "clearProject",
+    // TRANSFORM = "transform",
+    // SELECT_NODE = "selectNode"
+  }
+
+  export interface EventDetail {
+    node?: ƒ.Node;
+    graph?: ƒ.Graph;
+    view?: View;
   }
 
 
@@ -66,7 +81,7 @@ namespace Fudge {
     PROPERTIES = "ViewProperties",
     PREVIEW = "ViewPreview",
     SCRIPT = "ViewScript"
-    
+
     // SKETCH = ViewSketch,
     // MESH = ViewMesh,
   }

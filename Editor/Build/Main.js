@@ -34,15 +34,20 @@ var Fudge;
     })(MENU = Fudge.MENU || (Fudge.MENU = {}));
     let EVENT_EDITOR;
     (function (EVENT_EDITOR) {
-        EVENT_EDITOR["SET_GRAPH"] = "setGraph";
-        EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
-        EVENT_EDITOR["SET_PROJECT"] = "setProject";
-        EVENT_EDITOR["UPDATE"] = "update";
-        EVENT_EDITOR["REFRESH"] = "refresh";
-        EVENT_EDITOR["DESTROY"] = "destroy";
-        EVENT_EDITOR["CLEAR_PROJECT"] = "clearProject";
-        EVENT_EDITOR["TRANSFORM"] = "transform";
-        EVENT_EDITOR["SELECT_NODE"] = "selectNode";
+        EVENT_EDITOR["CREATE"] = "CREATE";
+        EVENT_EDITOR["SELECT"] = "SELECT";
+        EVENT_EDITOR["MODIFY"] = "MODIFY";
+        EVENT_EDITOR["DELETE"] = "DELETE";
+        EVENT_EDITOR["CLOSE"] = "CLOSE";
+        // SET_GRAPH = "setGraph",
+        // FOCUS_NODE = "focusNode",
+        // SET_PROJECT = "setProject",
+        // UPDATE = "update",
+        // REFRESH = "refresh",
+        // DESTROY = "destroy",
+        // CLEAR_PROJECT = "clearProject",
+        // TRANSFORM = "transform",
+        // SELECT_NODE = "selectNode"
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {

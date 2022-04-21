@@ -148,7 +148,7 @@ namespace Fudge {
       document.addEventListener(ƒui.EVENT.MUTATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.UPDATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.REFRESH, Page.hndEvent);
-      document.addEventListener(EVENT_EDITOR.DESTROY, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.CLOSE, Page.hndEvent);
       document.addEventListener("keyup", Page.hndKey);
     }
 
@@ -181,7 +181,7 @@ namespace Fudge {
       // ƒ.Debug.fudge("Page received", _event.type, _event);
 
       switch (_event.type) {
-        case EVENT_EDITOR.DESTROY:
+        case EVENT_EDITOR.CLOSE:
           let view: View = _event.detail;
           if (view instanceof Panel)
             Page.panels.splice(Page.panels.indexOf(view), 1);

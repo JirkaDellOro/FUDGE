@@ -58,15 +58,20 @@ var Fudge;
     })(MENU = Fudge.MENU || (Fudge.MENU = {}));
     let EVENT_EDITOR;
     (function (EVENT_EDITOR) {
-        EVENT_EDITOR["SET_GRAPH"] = "setGraph";
-        EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
-        EVENT_EDITOR["SET_PROJECT"] = "setProject";
-        EVENT_EDITOR["UPDATE"] = "update";
-        EVENT_EDITOR["REFRESH"] = "refresh";
-        EVENT_EDITOR["DESTROY"] = "destroy";
-        EVENT_EDITOR["CLEAR_PROJECT"] = "clearProject";
-        EVENT_EDITOR["TRANSFORM"] = "transform";
-        EVENT_EDITOR["SELECT_NODE"] = "selectNode";
+        EVENT_EDITOR["CREATE"] = "CREATE";
+        EVENT_EDITOR["SELECT"] = "SELECT";
+        EVENT_EDITOR["MODIFY"] = "MODIFY";
+        EVENT_EDITOR["DELETE"] = "DELETE";
+        EVENT_EDITOR["CLOSE"] = "CLOSE";
+        // SET_GRAPH = "setGraph",
+        // FOCUS_NODE = "focusNode",
+        // SET_PROJECT = "setProject",
+        // UPDATE = "update",
+        // REFRESH = "refresh",
+        // DESTROY = "destroy",
+        // CLEAR_PROJECT = "clearProject",
+        // TRANSFORM = "transform",
+        // SELECT_NODE = "selectNode"
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
@@ -645,7 +650,7 @@ var Fudge;
             document.addEventListener("mutate" /* MUTATE */, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.REFRESH, Page.hndEvent);
-            document.addEventListener(Fudge.EVENT_EDITOR.DESTROY, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
         }
         /** Send custom copies of the given event to the views */
@@ -673,7 +678,7 @@ var Fudge;
         static hndEvent(_event) {
             // ƒ.Debug.fudge("Page received", _event.type, _event);
             switch (_event.type) {
-                case Fudge.EVENT_EDITOR.DESTROY:
+                case Fudge.EVENT_EDITOR.CLOSE:
                     let view = _event.detail;
                     if (view instanceof Fudge.Panel)
                         Page.panels.splice(Page.panels.indexOf(view), 1);
@@ -858,7 +863,7 @@ var Fudge;
             //_container.getElement().append(this.dom); //old
             _container.element.appendChild(this.dom);
             this.container = _container;
-            this.container.on("destroy", () => this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.DESTROY, { bubbles: true, detail: this })));
+            this.container.on("destroy", () => this.dispatch(Fudge.EVENT_EDITOR.CLOSE, { bubbles: true }));
             // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
@@ -916,6 +921,12 @@ var Fudge;
         }
         hndDragOver(_event, _source) {
             // _event.dataTransfer.dropEffect = "link";
+        }
+        dispatch(_type, _init) {
+            if (!_init)
+                _init = { detail: undefined };
+            _init.detail.view = this;
+            this.dom.dispatchEvent(new CustomEvent(_type, _init));
         }
         hndEventCommon = (_event) => {
             switch (_event.type) {

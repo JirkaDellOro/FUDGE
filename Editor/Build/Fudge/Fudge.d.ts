@@ -46,15 +46,16 @@ declare namespace Fudge {
         FULLSCREEN = "fullscreen"
     }
     enum EVENT_EDITOR {
-        SET_GRAPH = "setGraph",
-        FOCUS_NODE = "focusNode",
-        SET_PROJECT = "setProject",
-        UPDATE = "update",
-        REFRESH = "refresh",
-        DESTROY = "destroy",
-        CLEAR_PROJECT = "clearProject",
-        TRANSFORM = "transform",
-        SELECT_NODE = "selectNode"
+        CREATE = "CREATE",
+        SELECT = "SELECT",
+        MODIFY = "MODIFY",
+        DELETE = "DELETE",
+        CLOSE = "CLOSE"
+    }
+    interface EventDetail {
+        node?: ƒ.Node;
+        graph?: ƒ.Graph;
+        view?: View;
     }
     enum PANEL {
         GRAPH = "PanelGraph",
@@ -223,6 +224,7 @@ declare namespace Fudge {
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected hndDrop(_event: DragEvent, _source: View): void;
         protected hndDragOver(_event: DragEvent, _source: View): void;
+        protected dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
         private hndEventCommon;
     }
 }
