@@ -63,7 +63,7 @@ namespace FudgeCore {
         this.node.addEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
       }
       else {
-        Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale);
+        Time.game.removeEventListener(EVENT.TIME_SCALED, this.updateScale);
         this.node.removeEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
       }
     }
@@ -132,7 +132,7 @@ namespace FudgeCore {
     private updateAnimationLoop = (_e: Event, _time?: number): [Mutator, number] => {
       if (this.animation.totalTime == 0)
         return [null, 0];
-      let time: number = _time || this.#timeLocal.get();
+      let time: number = _time || _time === 0 ? _time : this.#timeLocal.get();
       if (this.playback == ANIMATION_PLAYBACK.FRAMEBASED) {
         time = this.#previous + (1000 / this.animation.fps);
       }
