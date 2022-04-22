@@ -1700,6 +1700,7 @@ declare namespace FudgeCore {
          * Returns the current sample time of the animation
          */
         get time(): number;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         activate(_on: boolean): void;
         /**
          * Jumps to a certain time in the animation to play from there.

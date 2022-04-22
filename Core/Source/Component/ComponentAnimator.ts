@@ -21,9 +21,9 @@ namespace FudgeCore {
 
     constructor(_animation: Animation = new Animation(""), _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _playback: ANIMATION_PLAYBACK = ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
       super();
-      this.animation = _animation;
       this.playmode = _playmode;
       this.playback = _playback;
+      this.animation = _animation;
 
       this.#timeLocal = new Time();
 
@@ -51,6 +51,15 @@ namespace FudgeCore {
      */
      public get time(): number {
       return this.#timeLocal.get() % this.animation.totalTime;
+    }
+
+    public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
+      let types: MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
+      if (types.playmode)
+        types.playmode = ANIMATION_PLAYMODE;
+      if (types.playback)
+        types.playback = ANIMATION_PLAYBACK;
+      return types;
     }
 
     public activate(_on: boolean): void {
