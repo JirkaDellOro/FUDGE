@@ -1,8 +1,8 @@
 /// <reference types="../../../node_modules/electron/electron" />
 /// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../../aid/build/fudgeaid" />
-/// <reference types="../../../userinterface/build/fudgeuserinterface" />
 /// <reference types="../../GoldenLayout/golden-layout" />
+/// <reference types="../../../userinterface/build/fudgeuserinterface" />
 declare namespace Fudge {
     export type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     type Subclass<T> = {
@@ -207,9 +207,16 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    import ƒUi = FudgeUserInterface;
-    class ControllerAnimation extends ƒUi.Controller {
-        constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
+    class ControllerAnimation {
+        private animation;
+        private domElement;
+        private mutatorForNode;
+        constructor(_animation: ƒ.Animation, _domElement: HTMLElement, _mutatorForNode: ƒ.Mutator);
+        static updateAnimationStructure(_domElement: HTMLElement, _animationStructure: ƒ.Serialization | ƒ.AnimationSequence, _time: number, _mutatorForNode: ƒ.Mutator): ƒ.Mutator;
+        static updateUserInterfaceWithMutator(_domElement: HTMLElement, _mutator: ƒ.Mutator): void;
+        updateAnimationStructure(_time: number): void;
+        updateAnimationUserInterface(_mutator: ƒ.Mutator): void;
+        removeAnimationKey(_key: ViewAnimationKey): void;
     }
 }
 declare namespace Fudge {
@@ -375,6 +382,8 @@ declare namespace Fudge {
         getState(): {
             [key: string]: string;
         };
+        private hndEvent;
+        private hndFocusNode;
     }
 }
 declare namespace Fudge {
@@ -437,14 +446,15 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     interface ViewAnimationKey {
-        key: FudgeCore.AnimationKey;
+        key: ƒ.AnimationKey;
         path2D: Path2D;
         sequence: ViewAnimationSequence;
     }
     interface ViewAnimationSequence {
         color: string;
-        sequence: FudgeCore.AnimationSequence;
+        sequence: ƒ.AnimationSequence;
     }
     interface ViewAnimationEvent {
         event: string;
@@ -454,51 +464,57 @@ declare namespace Fudge {
         label: string;
         path2D: Path2D;
     }
+    /**
+     * TODO: add
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+     */
     class ViewAnimation extends View {
-        node: FudgeCore.Node;
-        animation: FudgeCore.Animation;
-        cmpAnimator: FudgeCore.ComponentAnimator;
+        node: ƒ.Node;
+        animation: ƒ.Animation;
+        cmpAnimator: ƒ.ComponentAnimator;
         playbackTime: number;
         controller: ControllerAnimation;
+        crc2: CanvasRenderingContext2D;
         private canvas;
+        private selectedKey;
         private attributeList;
-        private crc;
         private sheet;
         private toolbar;
         private hover;
         private time;
-        private playing;
+        private idInterval;
         constructor(_container: ComponentContainer, _state: Object);
         openAnimation(): void;
-        fillContent(): void;
-        installListeners(): void;
-        mouseClick(_e: MouseEvent): void;
-        mouseDown(_e: MouseEvent): void;
-        mouseMove(_e: MouseEvent): void;
-        mouseUp(_e: MouseEvent): void;
+        private createUserInterface;
+        private hndPointerDown;
+        private hndPointerMove;
+        private hndEvent;
+        private focusNode;
+        private setAnimation;
+        private hndSelect;
         private fillToolbar;
-        private toolbarClick;
-        private toolbarChange;
-        private changeAttribute;
-        private updateDisplay;
+        private hndToolbarClick;
+        private hndToolbarChange;
+        private updateUserInterface;
         private setTime;
         private playAnimation;
         private randomNameGenerator;
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     abstract class ViewAnimationSheet {
-        view: ViewAnimation;
-        seq: FudgeCore.AnimationSequence[];
-        crc2: CanvasRenderingContext2D;
-        scale: FudgeCore.Vector2;
-        protected position: FudgeCore.Vector2;
-        protected savedImage: ImageData;
+        scale: ƒ.Vector2;
         protected keys: ViewAnimationKey[];
         protected sequences: ViewAnimationSequence[];
-        protected labels: ViewAnimationLabel[];
-        protected events: ViewAnimationEvent[];
-        constructor(_view: ViewAnimation, _crc: CanvasRenderingContext2D, _seq: FudgeCore.AnimationSequence[], _scale?: FudgeCore.Vector2, _pos?: FudgeCore.Vector2);
+        private view;
+        private position;
+        private labels;
+        private events;
+        constructor(_view: ViewAnimation, _crc2: CanvasRenderingContext2D, _scale?: ƒ.Vector2, _pos?: ƒ.Vector2);
+        get animation(): ƒ.Animation;
+        get dom(): HTMLElement;
+        get crc2(): CanvasRenderingContext2D;
         moveTo(_time: number, _value?: number): void;
         translate(): void;
         redraw(_time: number): void;
@@ -507,27 +523,30 @@ declare namespace Fudge {
         drawCursor(_time: number): void;
         drawKeys(): void;
         getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent;
-        protected newTraverseStructures(_animation: FudgeCore.AnimationStructure): void;
-        protected abstract newDrawSequence(_sequence: FudgeCore.AnimationSequence): void;
+        protected traverseStructures(_animation: ƒ.AnimationStructure): void;
+        protected abstract drawSequence(_sequence: ƒ.AnimationSequence): void;
         protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
         private drawEventsAndLabels;
         private calculateDisplay;
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     class ViewAnimationSheetCurve extends ViewAnimationSheet {
         drawKeys(): void;
-        protected newDrawSequence(_sequence: ƒ.AnimationSequence): void;
+        protected drawSequence(_sequence: ƒ.AnimationSequence): void;
         protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
         private drawYScale;
         private calcScaleSize;
         private randomColor;
+        private getBezierPoints;
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     class ViewAnimationSheetDope extends ViewAnimationSheet {
         drawKeys(): Promise<void>;
-        protected newDrawSequence(_sequence: FudgeCore.AnimationSequence): void;
+        protected drawSequence(_sequence: ƒ.AnimationSequence): void;
     }
 }
 declare namespace Fudge {

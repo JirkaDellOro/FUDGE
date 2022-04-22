@@ -6,7 +6,11 @@ namespace FudgeUserInterface {
 
     public constructor(_legend: string = "", _type: string) {
       super();
-      this.setAttribute("key", _legend);
+      // TODO: check if this should be removed after changing animation structure to look more like a mutator
+      this.setAttribute("key", _legend.replaceAll(".", "")); // remove "." from key, since "." are not allowed as attributes for querySelector
+      if (!isNaN(Number(_legend)))
+        // if key is a number, as with arrays, prefix with "ƒ", since numbers are not allowed as attributes for querySelector
+        this.setAttribute("key", "ƒ" + _legend);
       this.setAttribute("type", _type);
       this.open = true;
       let lblSummary: HTMLElement = document.createElement("summary");
@@ -22,6 +26,8 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT.FOCUS_PREVIOUS, this.hndFocus);
       this.addEventListener(EVENT.FOCUS_SET, this.hndFocus);
       this.addEventListener(EVENT.TOGGLE, this.hndToggle);
+
+
     }
 
 

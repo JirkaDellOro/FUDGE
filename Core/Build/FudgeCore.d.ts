@@ -1507,6 +1507,12 @@ declare namespace FudgeCore {
         private keyIn;
         private keyOut;
         constructor(_keyIn: AnimationKey, _keyOut?: AnimationKey);
+        getParameters(): {
+            a: number;
+            b: number;
+            c: number;
+            d: number;
+        };
         /**
          * Calculates the value of the function at the given time.
          * @param _time the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.
