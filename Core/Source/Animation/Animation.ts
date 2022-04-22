@@ -76,7 +76,7 @@ namespace FudgeCore {
    * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class Animation extends Mutable implements SerializableResource {
-    idResource: string;
+    idResource: string = undefined;
     name: string;
     totalTime: number = 0;
     labels: AnimationLabel = {};
@@ -258,7 +258,7 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.idResource = _serialization.idResource;
+      Project.register(this, _serialization.idResource);
       this.name = _serialization.name;
       this.framesPerSecond = _serialization.fps;
       // this.stepsPerSecond = _serialization.sps;
