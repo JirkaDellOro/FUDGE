@@ -382,6 +382,8 @@ declare namespace Fudge {
         getState(): {
             [key: string]: string;
         };
+        private hndEvent;
+        private hndFocusNode;
     }
 }
 declare namespace Fudge {
@@ -462,35 +464,38 @@ declare namespace Fudge {
         label: string;
         path2D: Path2D;
     }
+    /**
+     * TODO: add
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+     */
     class ViewAnimation extends View {
         node: ƒ.Node;
         animation: ƒ.Animation;
         cmpAnimator: ƒ.ComponentAnimator;
         playbackTime: number;
         controller: ControllerAnimation;
-        private selectedKey;
+        crc2: CanvasRenderingContext2D;
         private canvas;
+        private selectedKey;
         private attributeList;
-        private crc;
         private sheet;
         private toolbar;
         private hover;
         private time;
-        private playing;
+        private idInterval;
         constructor(_container: ComponentContainer, _state: Object);
         openAnimation(): void;
-        fillContent(): void;
-        installListeners(): void;
-        mouseClick(_e: MouseEvent): void;
-        mouseDown(_e: MouseEvent): void;
-        mouseMove(_e: MouseEvent): void;
-        mouseUp(_e: MouseEvent): void;
+        private createUserInterface;
+        private hndPointerDown;
+        private hndPointerMove;
+        private hndEvent;
+        private focusNode;
+        private setAnimation;
         private hndSelect;
         private fillToolbar;
-        private toolbarClick;
-        private toolbarChange;
-        private changeAttribute;
-        private updateDisplay;
+        private hndToolbarClick;
+        private hndToolbarChange;
+        private updateUserInterface;
         private setTime;
         private playAnimation;
         private randomNameGenerator;
@@ -499,17 +504,17 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     abstract class ViewAnimationSheet {
-        view: ViewAnimation;
-        seq: ƒ.AnimationSequence[];
-        crc2: CanvasRenderingContext2D;
         scale: ƒ.Vector2;
-        protected position: ƒ.Vector2;
-        protected savedImage: ImageData;
         protected keys: ViewAnimationKey[];
         protected sequences: ViewAnimationSequence[];
-        protected labels: ViewAnimationLabel[];
-        protected events: ViewAnimationEvent[];
-        constructor(_view: ViewAnimation, _crc: CanvasRenderingContext2D, _seq: ƒ.AnimationSequence[], _scale?: ƒ.Vector2, _pos?: ƒ.Vector2);
+        private view;
+        private position;
+        private labels;
+        private events;
+        constructor(_view: ViewAnimation, _crc2: CanvasRenderingContext2D, _scale?: ƒ.Vector2, _pos?: ƒ.Vector2);
+        get animation(): ƒ.Animation;
+        get dom(): HTMLElement;
+        get crc2(): CanvasRenderingContext2D;
         moveTo(_time: number, _value?: number): void;
         translate(): void;
         redraw(_time: number): void;

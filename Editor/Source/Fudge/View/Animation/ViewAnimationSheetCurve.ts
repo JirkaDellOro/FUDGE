@@ -28,7 +28,7 @@ namespace Fudge {
       this.crc2.strokeStyle = seq.color;
       for (let i: number = 0; i < _sequence.length; i++) {
         let key: ƒ.AnimationKey = _sequence.getKey(i);
-        console.log(key);
+        // console.log(key);
         this.keys.push({
           key: key,
           path2D: this.drawKey(

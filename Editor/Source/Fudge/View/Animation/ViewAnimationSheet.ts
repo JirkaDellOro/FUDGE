@@ -2,25 +2,32 @@ namespace Fudge {
   import ƒ = FudgeCore;
   
   export abstract class ViewAnimationSheet {
-    view: ViewAnimation;
-    seq: ƒ.AnimationSequence[];
-    crc2: CanvasRenderingContext2D;
-    scale: ƒ.Vector2;
-    protected position: ƒ.Vector2;
-    protected savedImage: ImageData;
+    public scale: ƒ.Vector2;
     protected keys: ViewAnimationKey[] = [];
     protected sequences: ViewAnimationSequence[] = [];
-    protected labels: ViewAnimationLabel[] = [];
-    protected events: ViewAnimationEvent[] = [];
+    private view: ViewAnimation;
+    private position: ƒ.Vector2; // TODO: is this necessary?
+    private labels: ViewAnimationLabel[] = [];
+    private events: ViewAnimationEvent[] = [];
 
     //TODO stop using hardcoded colors
 
-    constructor(_view: ViewAnimation, _crc: CanvasRenderingContext2D, _seq: ƒ.AnimationSequence[], _scale: ƒ.Vector2 = new ƒ.Vector2(1, 1), _pos: ƒ.Vector2 = new ƒ.Vector2()) {
+    constructor(_view: ViewAnimation, _crc2: CanvasRenderingContext2D, _scale: ƒ.Vector2 = new ƒ.Vector2(1, 1), _pos: ƒ.Vector2 = new ƒ.Vector2()) {
       this.view = _view;
-      this.crc2 = _crc;
-      this.seq = _seq;
       this.scale = _scale;
       this.position = _pos;
+    }
+
+    public get animation(): ƒ.Animation {
+      return this.view.animation;
+    }
+
+    public get dom(): HTMLElement {
+      return this.view.dom;
+    }
+
+    public get crc2(): CanvasRenderingContext2D {
+      return this.view.crc2;
     }
 
     public moveTo(_time: number, _value: number = this.position.y): void {
@@ -34,6 +41,7 @@ namespace Fudge {
     }
 
     public redraw(_time: number): void {
+      if (!this.animation) return;
       this.clear();
       this.translate();
       this.drawKeys();

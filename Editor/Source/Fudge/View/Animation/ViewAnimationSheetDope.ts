@@ -14,12 +14,12 @@ namespace Fudge {
       // this.traverseStructures(this.view.animation.animationStructure, inputMutator);
 
       this.drawKey(100, 100, 10, 10, "green");
-      this.traverseStructures(this.view.animation.animationStructure);
+      this.traverseStructures(this.animation.animationStructure);
     }
 
     protected drawSequence(_sequence: ƒ.AnimationSequence): void {
       let rect: DOMRect | ClientRect = new DOMRect(100, 100, 10, 10); //_input.getBoundingClientRect();
-      let y: number = rect.top - this.view.dom.getBoundingClientRect().top + rect.height / 2;
+      let y: number = rect.top - this.dom.getBoundingClientRect().top + rect.height / 2;
       let height: number = rect.height;
       let width: number = rect.height;
       let line: Path2D = new Path2D();
