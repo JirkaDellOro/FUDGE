@@ -5,7 +5,7 @@ namespace FudgeCore {
 
   /**
    * Holds a reference to an {@link Animation} and controls it. Controls playback and playmode as well as speed.
-   * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
+   * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2022
    */
   export class ComponentAnimator extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentAnimator);
@@ -14,6 +14,7 @@ namespace FudgeCore {
     playmode: ANIMATION_PLAYMODE;
     playback: ANIMATION_PLAYBACK;
     scaleWithGameTime: boolean = true;
+    animateInEditor: boolean = false;
 
     #scale: number = 1;
     #timeLocal: Time;
@@ -53,28 +54,12 @@ namespace FudgeCore {
       return this.#timeLocal.get() % this.animation.totalTime;
     }
 
-    public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
-      let types: MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
-      if (types.playmode)
-        types.playmode = ANIMATION_PLAYMODE;
-      if (types.playback)
-        types.playback = ANIMATION_PLAYBACK;
-      return types;
-    }
-
     public activate(_on: boolean): void {
       super.activate(_on);
       if (!this.node)
         return;
 
-      if (_on) {
-        Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale);
-        this.node.addEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
-      }
-      else {
-        Time.game.removeEventListener(EVENT.TIME_SCALED, this.updateScale);
-        this.node.removeEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
-      }
+      this.activateListeners(_on);
     }
 
     /**
@@ -129,7 +114,34 @@ namespace FudgeCore {
 
       return this;
     }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      await super.mutate(_mutator);
+      if (typeof (_mutator.animateInEditor) !== "undefined") {
+        this.activateListeners(this.active);
+      }
+    }
+
+    public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
+      let types: MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
+      if (types.playmode)
+        types.playmode = ANIMATION_PLAYMODE;
+      if (types.playback)
+        types.playback = ANIMATION_PLAYBACK;
+      return types;
+    }
     //#endregion
+
+    private activateListeners(_on: boolean): void {
+      if (_on && (Project.mode != MODE.EDITOR || Project.mode == MODE.EDITOR && this.animateInEditor)) {
+        Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale);
+        this.node.addEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
+      }
+      else {
+        Time.game.removeEventListener(EVENT.TIME_SCALED, this.updateScale);
+        this.node.removeEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
+      }
+    }
 
     //#region updateAnimation
     /**
@@ -139,8 +151,8 @@ namespace FudgeCore {
      * May also be called from updateAnimation().
      */
     private updateAnimationLoop = (_e: Event, _time?: number): [Mutator, number] => {
-      if (this.animation.totalTime == 0)
-        return [null, 0];
+      if (this.animation.totalTime == 0) return [null, 0];
+
       let time: number = _time || _time === 0 ? _time : this.#timeLocal.get();
       if (this.playback == ANIMATION_PLAYBACK.FRAMEBASED) {
         time = this.#previous + (1000 / this.animation.fps);

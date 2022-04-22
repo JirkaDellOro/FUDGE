@@ -1685,12 +1685,10 @@ var Fudge;
      * @authors Jonas Plotzky, HFU, 2022
      */
     class PanelAnimation extends Fudge.Panel {
-        // private animation: ƒ.Animation;
         constructor(_container, _state) {
             super(_container, _state);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.RENDER, Fudge.ViewRender);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.COMPONENTS, Fudge.ViewComponents);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.ANIMATION, Fudge.ViewAnimation);
             const config = {
                 type: "column",
@@ -1709,13 +1707,7 @@ var Fudge;
                                 componentType: Fudge.VIEW.HIERARCHY,
                                 componentState: _state,
                                 title: "HIERARCHY"
-                            },
-                            // {
-                            //   type: "component",
-                            //   componentType: VIEW.COMPONENTS,
-                            //   componentState: _state,
-                            //   title: "COMPONENTS"
-                            // }
+                            }
                         ]
                     },
                     {
@@ -1732,26 +1724,15 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
-            console.log(_state);
             this.setTitle("Animation | ");
-            // this.broadcastEvent(new Event(EVENT_EDITOR.SET_PROJECT));
         }
-        // public setAnimation(_animation: ƒ.Animation): void {
-        //   if (_animation) {
-        //     this.animation = _animation;
-        //     return;
-        //   }
         getState() {
             // TODO: iterate over views and collect their states for reconstruction
             return {};
         }
         hndEvent = async (_event) => {
-            switch (_event.type) {
-                // case EVENT_EDITOR.SET_ANIMATION:
-                //   this.setAnimation(_event.detail);
-                //   // return;
-                //   break;
-            }
+            // switch (_event.type) {
+            // }
             this.broadcastEvent(_event);
             _event.stopPropagation();
         };
@@ -2117,31 +2098,11 @@ var Fudge;
             this.sheet.redraw(this.playbackTime);
             document.addEventListener("DOMContentLoaded", () => this.updateUserInterface());
         }
-        // protected hndDragOver(_event: DragEvent, _viewSource: View): void {
-        //   _event.dataTransfer.dropEffect = "none";
-        //   // if (this.dom != _event.target)
-        //   //   return;
-        //   if (!(_viewSource instanceof ViewHierarchy))
-        //     return;
-        //   let source: Object = _viewSource.getDragDropSources()[0];
-        //   if (!(source instanceof ƒ.Node))
-        //     return;
-        //   _event.dataTransfer.dropEffect = "link";
-        //   _event.preventDefault();
-        //   _event.stopPropagation();
-        // }
-        // protected hndDrop(_event: DragEvent, _viewSource: View): void {
-        //   // let source: Object = _viewSource.getDragDropSources()[0];
-        //   // this.setGraph(<ƒ.Node>source);
-        //   // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_ANIMATION, { detail: source }));
-        // }
         hndPointerDown = (_event) => {
             this.setTime(_event.offsetX / this.sheet.scale.x);
             let obj = this.sheet.getObjectAtPoint(_event.offsetX, _event.offsetY);
             if (!obj)
                 return;
-            // TODO: events should bubble to panel
-            console.log(obj);
             if (obj["label"]) {
                 console.log(obj["label"]);
                 this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
@@ -2154,7 +2115,6 @@ var Fudge;
                 console.log(obj["key"]);
                 this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { detail: obj }));
             }
-            console.log(obj);
         };
         hndPointerMove = (_event) => {
             _event.preventDefault();
@@ -2172,10 +2132,6 @@ var Fudge;
         focusNode(_node) {
             this.node = _node;
             this.cmpAnimator = _node?.getComponent(ƒ.ComponentAnimator);
-            if (this.cmpAnimator) {
-                this.cmpAnimator.scaleWithGameTime = false;
-                this.cmpAnimator.activate(false);
-            }
             this.setAnimation(this.cmpAnimator?.animation);
         }
         setAnimation(_animation) {

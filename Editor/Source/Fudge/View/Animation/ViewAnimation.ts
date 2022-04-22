@@ -160,10 +160,6 @@ namespace Fudge {
     private focusNode(_node: ƒ.Node): void {
       this.node = _node;
       this.cmpAnimator = _node?.getComponent(ƒ.ComponentAnimator);
-      if (this.cmpAnimator) {
-        this.cmpAnimator.scaleWithGameTime = false;
-        this.cmpAnimator.activate(false);
-      }
       this.setAnimation(this.cmpAnimator?.animation);
     }
 
