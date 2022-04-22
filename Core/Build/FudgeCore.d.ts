@@ -1684,7 +1684,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Holds a reference to an {@link Animation} and controls it. Controls playback and playmode as well as speed.
-     * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
+     * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2022
      */
     class ComponentAnimator extends Component {
         #private;
@@ -1693,6 +1693,7 @@ declare namespace FudgeCore {
         playmode: ANIMATION_PLAYMODE;
         playback: ANIMATION_PLAYBACK;
         scaleWithGameTime: boolean;
+        animateInEditor: boolean;
         constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_PLAYBACK);
         set scale(_scale: number);
         get scale(): number;
@@ -1700,7 +1701,6 @@ declare namespace FudgeCore {
          * Returns the current sample time of the animation
          */
         get time(): number;
-        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         activate(_on: boolean): void;
         /**
          * Jumps to a certain time in the animation to play from there.
@@ -1718,6 +1718,9 @@ declare namespace FudgeCore {
         updateAnimation(_time: number): [Mutator, number];
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        private activateListeners;
         /**
          * Updates the Animation.
          * Gets called every time the Loop fires the LOOP_FRAME Event.
