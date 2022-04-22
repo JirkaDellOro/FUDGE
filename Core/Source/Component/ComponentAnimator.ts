@@ -20,7 +20,7 @@ namespace FudgeCore {
     #timeLocal: Time;
     #previous: number = 0;
 
-    constructor(_animation: Animation = new Animation(""), _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _playback: ANIMATION_PLAYBACK = ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
+    constructor(_animation?: Animation, _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _playback: ANIMATION_PLAYBACK = ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
       super();
       this.playmode = _playmode;
       this.playback = _playback;
@@ -29,7 +29,7 @@ namespace FudgeCore {
       this.#timeLocal = new Time();
 
       //TODO: update animation total time when loading a different animation?
-      this.animation.calculateTotalTime();
+      this.animation?.calculateTotalTime();
 
       this.addEventListener(EVENT.COMPONENT_REMOVE, () => this.activate(false));
       this.addEventListener(EVENT.COMPONENT_ADD, () => {
@@ -99,6 +99,7 @@ namespace FudgeCore {
       serialization.playback = this.playback;
       serialization.scale = this.scale;
       serialization.scaleWithGameTime = this.scaleWithGameTime;
+      // serialization.animateInEditor = this.animateInEditor;
       serialization[super.constructor.name] = super.serialize();
 
       return serialization;
@@ -111,6 +112,7 @@ namespace FudgeCore {
       this.playmode = _serialization.playmode;
       this.scale = _serialization.scale;
       this.scaleWithGameTime = _serialization.scaleWithGameTime;
+      // this.animateInEditor = _serialization.animateInEditor;
 
       return this;
     }
