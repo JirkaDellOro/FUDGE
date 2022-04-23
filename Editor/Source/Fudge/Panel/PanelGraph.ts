@@ -47,17 +47,15 @@ namespace Fudge {
 
 
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
-      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
-      // this.dom.addEventListener(EVENT_EDITOR.SELECT_NODE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
 
       if (_state["graph"])
         ƒ.Project.getResource(_state["graph"]).then((_graph: ƒ.Graph) => {
-          this.dom.dispatchEvent(new FudgeEvent(EVENT_EDITOR.SELECT, { detail: { graph: _graph } }));
+          this.dispatch(EVENT_EDITOR.SELECT, { detail: { graph: _graph } });
           // TODO: trace the node saved. The name is not sufficient, path is necessary...
           // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { detail: _graph.findChild }));
         });

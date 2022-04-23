@@ -35,8 +35,6 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
-      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent, true);
-      // this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
       this.dom.addEventListener("pointerdown", this.hndPointer);
@@ -173,7 +171,7 @@ namespace Fudge {
     protected hndDrop(_event: DragEvent, _viewSource: View): void {
       let source: Object = _viewSource.getDragDropSources()[0];
       // this.setGraph(<ƒ.Node>source);
-      this.dom.dispatchEvent(new FudgeEvent(EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: <ƒ.Graph>source } }));
+      this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: <ƒ.Graph>source } });
     }
 
     private checkIllumination(): void {
@@ -213,7 +211,7 @@ namespace Fudge {
       let picked: ƒ.Node = _event.detail.node;
 
       //TODO: watch out, two selects
-      this.dom.dispatchEvent(new FudgeEvent(EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: picked } }));
+      this.dispatch(EVENT_EDITOR.SELECT, {  bubbles: true, detail: { node: picked } });
       this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: picked } }));
     }
 
@@ -246,7 +244,7 @@ namespace Fudge {
       let data: Object = {
         transform: Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera, inverted: _event.shiftKey
       };
-      this.dom.dispatchEvent(new FudgeEvent(EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: { transform: data } }));
+      this.dispatch(EVENT_EDITOR.TRANSFORM, {  bubbles: true, detail: { transform: data } });
       this.redraw();
     }
 

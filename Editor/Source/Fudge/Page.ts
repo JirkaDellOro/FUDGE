@@ -146,18 +146,14 @@ namespace Fudge {
     private static setupPageListeners(): void {
       document.addEventListener(EVENT_EDITOR.SELECT, Page.hndEvent);
       document.addEventListener(ƒui.EVENT.MUTATE, Page.hndEvent);
-      // document.addEventListener(EVENT_EDITOR.UPDATE, Page.hndEvent);
-      // document.addEventListener(EVENT_EDITOR.REFRESH, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.CLOSE, Page.hndEvent);
       document.addEventListener("keyup", Page.hndKey);
     }
 
     /** Send custom copies of the given event to the views */
-    private static broadcastEvent(_event: CustomEvent): void {
-      for (let panel of Page.panels) {
-        let event: FudgeEvent = new FudgeEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
-        panel.dom.dispatchEvent(event);
-      }
+    private static broadcastEvent(_event: FudgeEvent): void {
+      for (let panel of Page.panels)
+        panel.dispatch(<EVENT_EDITOR>_event.type, { detail: _event.detail });
     }
 
     private static hndKey = (_event: KeyboardEvent): void => {
@@ -178,8 +174,6 @@ namespace Fudge {
     }
 
     private static hndEvent(_event: FudgeEvent): void {
-      // ƒ.Debug.fudge("Page received", _event.type, _event);
-
       switch (_event.type) {
         case EVENT_EDITOR.CLOSE:
           let view: View = _event.detail.view;
@@ -187,11 +181,6 @@ namespace Fudge {
             Page.panels.splice(Page.panels.indexOf(view), 1);
           console.log("Panels", Page.panels);
           break;
-        // case EVENT_EDITOR.SET_GRAPH:
-        //   let panel: Panel[] = Page.find(PanelGraph);
-        //   if (!panel.length)
-        //     Page.add(PanelGraph, null);
-        // break;
         default:
           Page.broadcastEvent(_event);
           break;
@@ -207,12 +196,10 @@ namespace Fudge {
     }
 
     private static async loadProject(_url: URL): Promise<void> {
-      // Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.CLEAR_PROJECT));
       await loadProject(_url);
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-      // Page.broadcastEvent(new FudgeEvent(EVENT_EDITOR.SELECT));
     }
 
     //#region Main-Events from Electron
@@ -223,7 +210,6 @@ namespace Fudge {
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-        // Page.broadcastEvent(new FudgeEvent(EVENT_EDITOR.SELECT));
       });
 
       ipcRenderer.on(MENU.PROJECT_SAVE, async (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -240,7 +226,6 @@ namespace Fudge {
 
       ipcRenderer.on(MENU.PANEL_GRAPH_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         Page.add(PanelGraph, null);
-        // Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.UPDATE, { detail: node }));
       });
 
       ipcRenderer.on(MENU.PANEL_PROJECT_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {

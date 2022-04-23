@@ -26,9 +26,7 @@ namespace Fudge {
       _container.element.appendChild(this.dom);
       this.container = _container;
 
-      this.container.on("destroy", () =>
-        this.dom.dispatchEvent(new FudgeEvent(EVENT_EDITOR.CLOSE, { bubbles: true, detail: { view: this } }))
-      );
+      this.container.on("destroy", () => this.dispatch(EVENT_EDITOR.CLOSE, { detail: { view: this } }));
 
       // console.log(this.contextMenuCallback);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
@@ -79,6 +77,14 @@ namespace Fudge {
 
     public getDragDropSources(): Object[] {
       return [];
+    }
+
+    public dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void {
+      _init.detail = _init.detail || {};
+      _init.bubbles = _init.bubbles || false;
+      _init.cancelable = _init.cancelable || true;
+      _init.detail.view = this;
+      this.dom.dispatchEvent(new FudgeEvent(_type, _init));
     }
 
     //#region  ContextMenu

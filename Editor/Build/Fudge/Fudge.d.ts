@@ -109,10 +109,13 @@ declare namespace Fudge {
     interface EventDetail {
         node?: ƒ.Node;
         graph?: ƒ.Graph;
-        view?: View;
         resource?: ƒ.SerializableResource;
         transform?: Object;
+        view?: View;
     }
+    /**
+     * Extension of CustomEvent that supports a detail field with the type EventDetail
+     */
     class FudgeEvent extends CustomEvent<EventDetail> {
     }
 }
@@ -227,6 +230,7 @@ declare namespace Fudge {
         private static registerViewForDragDrop;
         setTitle(_title: string): void;
         getDragDropSources(): Object[];
+        dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;

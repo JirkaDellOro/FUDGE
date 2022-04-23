@@ -181,16 +181,10 @@ var Fudge;
         EVENT_EDITOR["CLOSE"] = "EDITOR_CLOSE";
         EVENT_EDITOR["TRANSFORM"] = "EDITOR_TRANSFORM";
         EVENT_EDITOR["FOCUS"] = "EDITOR_FOCUS";
-        // SET_GRAPH = "setGraph",
-        // FOCUS_NODE = "focusNode",
-        // SET_PROJECT = "setProject",
-        // UPDATE = "update",
-        // REFRESH = "refresh",
-        // DESTROY = "destroy",
-        // CLEAR_PROJECT = "clearProject",
-        // TRANSFORM = "transform",
-        // SELECT_NODE = "selectNode"
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
+    /**
+     * Extension of CustomEvent that supports a detail field with the type EventDetail
+     */
     class FudgeEvent extends CustomEvent {
     }
     Fudge.FudgeEvent = FudgeEvent;
@@ -657,17 +651,13 @@ var Fudge;
         static setupPageListeners() {
             document.addEventListener(Fudge.EVENT_EDITOR.SELECT, Page.hndEvent);
             document.addEventListener("mutate" /* MUTATE */, Page.hndEvent);
-            // document.addEventListener(EVENT_EDITOR.UPDATE, Page.hndEvent);
-            // document.addEventListener(EVENT_EDITOR.REFRESH, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
         }
         /** Send custom copies of the given event to the views */
         static broadcastEvent(_event) {
-            for (let panel of Page.panels) {
-                let event = new Fudge.FudgeEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
-                panel.dom.dispatchEvent(event);
-            }
+            for (let panel of Page.panels)
+                panel.dispatch(_event.type, { detail: _event.detail });
         }
         static hndKey = (_event) => {
             document.exitPointerLock();
@@ -685,7 +675,6 @@ var Fudge;
             }
         };
         static hndEvent(_event) {
-            // ƒ.Debug.fudge("Page received", _event.type, _event);
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.CLOSE:
                     let view = _event.detail.view;
@@ -693,11 +682,6 @@ var Fudge;
                         Page.panels.splice(Page.panels.indexOf(view), 1);
                     console.log("Panels", Page.panels);
                     break;
-                // case EVENT_EDITOR.SET_GRAPH:
-                //   let panel: Panel[] = Page.find(PanelGraph);
-                //   if (!panel.length)
-                //     Page.add(PanelGraph, null);
-                // break;
                 default:
                     Page.broadcastEvent(_event);
                     break;
@@ -711,12 +695,10 @@ var Fudge;
             }
         };
         static async loadProject(_url) {
-            // Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.CLEAR_PROJECT));
             await Fudge.loadProject(_url);
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-            // Page.broadcastEvent(new FudgeEvent(EVENT_EDITOR.SELECT));
         }
         //#region Main-Events from Electron
         static setupMainListeners() {
@@ -726,7 +708,6 @@ var Fudge;
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-                // Page.broadcastEvent(new FudgeEvent(EVENT_EDITOR.SELECT));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_SAVE, async (_event, _args) => {
                 if (await Fudge.saveProject())
@@ -740,7 +721,6 @@ var Fudge;
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_GRAPH_OPEN, (_event, _args) => {
                 Page.add(Fudge.PanelGraph, null);
-                // Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.UPDATE, { detail: node }));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PROJECT_OPEN, (_event, _args) => {
                 Page.add(Fudge.PanelProject, null);
@@ -872,7 +852,7 @@ var Fudge;
             //_container.getElement().append(this.dom); //old
             _container.element.appendChild(this.dom);
             this.container = _container;
-            this.container.on("destroy", () => this.dom.dispatchEvent(new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.CLOSE, { bubbles: true, detail: { view: this } })));
+            this.container.on("destroy", () => this.dispatch(Fudge.EVENT_EDITOR.CLOSE, { detail: { view: this } }));
             // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
@@ -910,6 +890,13 @@ var Fudge;
         }
         getDragDropSources() {
             return [];
+        }
+        dispatch(_type, _init) {
+            _init.detail = _init.detail || {};
+            _init.bubbles = _init.bubbles || false;
+            _init.cancelable = _init.cancelable || true;
+            _init.detail.view = this;
+            this.dom.dispatchEvent(new Fudge.FudgeEvent(_type, _init));
         }
         //#region  ContextMenu
         openContextMenu = (_event) => {
@@ -1591,10 +1578,8 @@ var Fudge;
         }
         /** Send custom copies of the given event to the views */
         broadcastEvent = (_event) => {
-            for (let view of this.views) {
-                let event = new Fudge.FudgeEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
-                view.dom.dispatchEvent(event);
-            }
+            for (let view of this.views)
+                view.dispatch(_event.type, { detail: _event.detail });
         };
         addViewComponent = (_event) => {
             // adjustmens for GoldenLayout 2
@@ -1646,16 +1631,14 @@ var Fudge;
             this.goldenLayout.addItemAtLocation(config, [{ typeId: 7 /* Root */ }]);
             // this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
-            // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
-            // this.dom.addEventListener(EVENT_EDITOR.SELECT_NODE, this.hndEvent);
             this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
             if (_state["graph"])
                 ƒ.Project.getResource(_state["graph"]).then((_graph) => {
-                    this.dom.dispatchEvent(new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: _graph } }));
+                    this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: _graph } });
                     // TODO: trace the node saved. The name is not sufficient, path is necessary...
                     // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { detail: _graph.findChild }));
                 });
@@ -2943,8 +2926,6 @@ var Fudge;
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
-            // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent, true);
-            // this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("pointermove", this.hndPointer);
             this.dom.addEventListener("pointerdown", this.hndPointer);
@@ -3063,7 +3044,7 @@ var Fudge;
         hndDrop(_event, _viewSource) {
             let source = _viewSource.getDragDropSources()[0];
             // this.setGraph(<ƒ.Node>source);
-            this.dom.dispatchEvent(new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source } }));
+            this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source } });
         }
         checkIllumination() {
             let lightsPresent = false;
@@ -3099,7 +3080,7 @@ var Fudge;
         hndPick = (_event) => {
             let picked = _event.detail.node;
             //TODO: watch out, two selects
-            this.dom.dispatchEvent(new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: picked } }));
+            this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: picked } });
             this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: picked } }));
         };
         // private animate = (_e: Event) => {
@@ -3127,7 +3108,7 @@ var Fudge;
             let data = {
                 transform: Fudge.Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera, inverted: _event.shiftKey
             };
-            this.dom.dispatchEvent(new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: { transform: data } }));
+            this.dispatch(Fudge.EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: { transform: data } });
             this.redraw();
         };
         activeViewport = (_event) => {
