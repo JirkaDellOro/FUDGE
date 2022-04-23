@@ -254,6 +254,10 @@ fudge-boolean, fudge-color, fudge-textinput, fudge-stepper, fudge-select {
   display: block;
 }
 
+fudge-digit {
+  font-family: monospace;
+}
+
 /* custom elements */
 
 custom-vector2 {
