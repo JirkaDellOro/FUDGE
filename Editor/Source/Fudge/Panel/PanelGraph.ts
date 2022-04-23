@@ -46,18 +46,18 @@ namespace Fudge {
       // this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
 
 
-      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
-      this.dom.addEventListener(EVENT_EDITOR.SELECT_NODE, this.hndEvent);
+      // this.dom.addEventListener(EVENT_EDITOR.SELECT_NODE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
 
       if (_state["graph"])
         ƒ.Project.getResource(_state["graph"]).then((_graph: ƒ.Graph) => {
-          this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: _graph }));
+          this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SELECT, { detail: _graph }));
           // TODO: trace the node saved. The name is not sufficient, path is necessary...
           // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { detail: _graph.findChild }));
         });
@@ -84,16 +84,16 @@ namespace Fudge {
 
     private hndEvent = async (_event: CustomEvent): Promise<void> => {
       switch (_event.type) {
-        case EVENT_EDITOR.SET_GRAPH:
+        case EVENT_EDITOR.SELECT:
           this.setGraph(_event.detail);
           break;
-        case EVENT_EDITOR.SET_PROJECT:
-        case EVENT_EDITOR.UPDATE:
+        case EVENT_EDITOR.SELECT:
+        case EVENT_EDITOR.MODIFY:
           // TODO: meaningful difference between update and setgraph
           if (this.graph) {
             let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
             if (this.graph != newGraph)
-              _event = new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: newGraph });
+              _event = new CustomEvent(EVENT_EDITOR.SELECT, { detail: newGraph });
           }
           break;
       }
@@ -103,7 +103,7 @@ namespace Fudge {
     }
 
     private hndFocusNode = (_event: CustomEvent): void => {
-      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: false, detail: _event.detail.data });
+      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.FOCUS, { bubbles: false, detail: _event.detail.data });
       this.broadcastEvent(event);
     }
   }

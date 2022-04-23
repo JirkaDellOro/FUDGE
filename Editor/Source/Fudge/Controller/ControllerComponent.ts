@@ -109,22 +109,22 @@ namespace Fudge {
         let key: string = ancestor.getAttribute("key");
         if (!this.mutable[key]) return false;
         this.mutable[key] = _sources[0];
-        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };
       let setMaterial: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
         this.mutable["material"] = _sources[0];
-        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };
       let setMesh: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
         this.mutable["mesh"] = _sources[0];
-        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };
       let setTexture: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
         this.mutable["coat"]["texture"] = _sources[0];
-        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };
       let setHeightMap: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
@@ -132,7 +132,7 @@ namespace Fudge {
         let mutator: ƒ.Mutator = this.mutable.getMutator();
         mutator.texture = _sources[0];
         this.mutable.mutate(mutator);
-        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };
 

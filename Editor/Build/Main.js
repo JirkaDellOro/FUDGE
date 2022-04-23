@@ -39,6 +39,8 @@ var Fudge;
         EVENT_EDITOR["MODIFY"] = "MODIFY";
         EVENT_EDITOR["DELETE"] = "DELETE";
         EVENT_EDITOR["CLOSE"] = "CLOSE";
+        EVENT_EDITOR["TRANSFORM"] = "TRANSFORM";
+        EVENT_EDITOR["FOCUS"] = "FOCUS";
         // SET_GRAPH = "setGraph",
         // FOCUS_NODE = "focusNode",
         // SET_PROJECT = "setProject",

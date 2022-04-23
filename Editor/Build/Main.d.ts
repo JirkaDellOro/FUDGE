@@ -33,10 +33,9 @@ declare namespace Fudge {
         SELECT = "SELECT",
         MODIFY = "MODIFY",
         DELETE = "DELETE",
-        CLOSE = "CLOSE"
-    }
-    interface EventDetail {
-        node?: any;
+        CLOSE = "CLOSE",
+        TRANSFORM = "TRANSFORM",
+        FOCUS = "FOCUS"
     }
     enum PANEL {
         GRAPH = "PanelGraph",

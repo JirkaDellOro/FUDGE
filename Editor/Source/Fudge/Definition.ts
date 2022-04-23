@@ -39,12 +39,22 @@ namespace Fudge {
 
 
 
+
+
+
+
+
+
+
+
   export enum EVENT_EDITOR {
     CREATE = "CREATE",
     SELECT = "SELECT",
     MODIFY = "MODIFY",
     DELETE = "DELETE",
-    CLOSE = "CLOSE"
+    CLOSE = "CLOSE",
+    TRANSFORM = "TRANSFORM",
+    FOCUS = "FOCUS"
     // SET_GRAPH = "setGraph",
     // FOCUS_NODE = "focusNode",
     // SET_PROJECT = "setProject",
@@ -54,14 +64,8 @@ namespace Fudge {
     // CLEAR_PROJECT = "clearProject",
     // TRANSFORM = "transform",
     // SELECT_NODE = "selectNode"
-  }
 
-  export interface EventDetail {
-    node?: ƒ.Node;
-    graph?: ƒ.Graph;
-    view?: View;
   }
-
 
   export enum PANEL {
     GRAPH = "PanelGraph",

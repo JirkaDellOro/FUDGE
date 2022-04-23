@@ -50,12 +50,9 @@ declare namespace Fudge {
         SELECT = "SELECT",
         MODIFY = "MODIFY",
         DELETE = "DELETE",
-        CLOSE = "CLOSE"
-    }
-    interface EventDetail {
-        node?: ƒ.Node;
-        graph?: ƒ.Graph;
-        view?: View;
+        CLOSE = "CLOSE",
+        TRANSFORM = "TRANSFORM",
+        FOCUS = "FOCUS"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
@@ -146,6 +143,12 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    interface EventDetail {
+        node?: ƒ.Node;
+        graph?: ƒ.Graph;
+        view?: View;
+        resource?: ƒ.SerializableResource;
+    }
     const ipcRenderer: Electron.IpcRenderer;
     const remote: Electron.Remote;
     let project: Project;

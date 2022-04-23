@@ -30,7 +30,7 @@ namespace Fudge {
 
       // console.log(this.contextMenuCallback);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
+      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
 
       this.id = View.registerViewForDragDrop(this);
     }
@@ -112,11 +112,11 @@ namespace Fudge {
     }
 
     private hndEventCommon = (_event: Event): void => {
-      switch (_event.type) {
-        case EVENT_EDITOR.SET_PROJECT:
-          this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-          break;
-      }
+      // switch (_event.type) {
+      //   case EVENT_EDITOR.SET_PROJECT:
+      //     this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+      //     break;
+      // }
     }
     //#endregion
 

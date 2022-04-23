@@ -34,8 +34,8 @@ namespace Fudge {
       _container.on("resize", this.redraw);
       this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent, true);
-      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent, true);
+      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
     }
@@ -222,7 +222,7 @@ namespace Fudge {
         //   this.resource = undefined;
         //   break;
         case ƒUi.EVENT.CHANGE:
-        case EVENT_EDITOR.UPDATE:
+        case EVENT_EDITOR.MODIFY:
           if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture /*  || this.resource instanceof ƒ.Material */)
             this.fillContent();
         case ƒUi.EVENT.MUTATE:
