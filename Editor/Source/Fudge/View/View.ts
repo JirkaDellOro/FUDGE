@@ -26,7 +26,9 @@ namespace Fudge {
       _container.element.appendChild(this.dom);
       this.container = _container;
 
-      this.container.on("destroy", () => this.dispatch(EVENT_EDITOR.CLOSE, { bubbles: true }));
+      this.container.on("destroy", () =>
+        this.dom.dispatchEvent(new FudgeEvent(EVENT_EDITOR.CLOSE, { bubbles: true, detail: { view: this } }))
+      );
 
       // console.log(this.contextMenuCallback);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
@@ -102,13 +104,6 @@ namespace Fudge {
 
     protected hndDragOver(_event: DragEvent, _source: View): void {
       // _event.dataTransfer.dropEffect = "link";
-    }
-
-    protected dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void {
-      if (!_init)
-        _init = {detail: undefined};
-      _init.detail.view = this;
-      this.dom.dispatchEvent(new FudgeEvent(_type, _init));
     }
 
     private hndEventCommon = (_event: Event): void => {

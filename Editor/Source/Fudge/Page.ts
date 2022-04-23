@@ -153,9 +153,9 @@ namespace Fudge {
     }
 
     /** Send custom copies of the given event to the views */
-    private static broadcastEvent(_event: Event): void {
+    private static broadcastEvent(_event: CustomEvent): void {
       for (let panel of Page.panels) {
-        let event: CustomEvent = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: (<CustomEvent>_event).detail });
+        let event: FudgeEvent = new FudgeEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
         panel.dom.dispatchEvent(event);
       }
     }
@@ -177,12 +177,12 @@ namespace Fudge {
       }
     }
 
-    private static hndEvent(_event: CustomEvent): void {
+    private static hndEvent(_event: FudgeEvent): void {
       // ƒ.Debug.fudge("Page received", _event.type, _event);
 
       switch (_event.type) {
         case EVENT_EDITOR.CLOSE:
-          let view: View = _event.detail;
+          let view: View = _event.detail.view;
           if (view instanceof Panel)
             Page.panels.splice(Page.panels.indexOf(view), 1);
           console.log("Panels", Page.panels);
@@ -212,7 +212,7 @@ namespace Fudge {
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-      // Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_PROJECT));
+      // Page.broadcastEvent(new FudgeEvent(EVENT_EDITOR.SELECT));
     }
 
     //#region Main-Events from Electron
@@ -223,12 +223,12 @@ namespace Fudge {
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-        // Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_PROJECT));
+        // Page.broadcastEvent(new FudgeEvent(EVENT_EDITOR.SELECT));
       });
 
-      ipcRenderer.on(MENU.PROJECT_SAVE, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        saveProject();
-        Page.setDefaultProject();
+      ipcRenderer.on(MENU.PROJECT_SAVE, async (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+        if (await saveProject())
+          Page.setDefaultProject();
       });
 
       ipcRenderer.on(MENU.PROJECT_LOAD, async (_event: Electron.IpcRendererEvent, _args: unknown[]) => {

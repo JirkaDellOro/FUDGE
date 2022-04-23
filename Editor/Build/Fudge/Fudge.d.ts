@@ -119,7 +119,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     let watcher: ƒ.General;
     function newProject(): Promise<void>;
-    function saveProject(_new?: boolean): Promise<void>;
+    function saveProject(_new?: boolean): Promise<boolean>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
 }
@@ -232,7 +232,6 @@ declare namespace Fudge {
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected hndDrop(_event: DragEvent, _source: View): void;
         protected hndDragOver(_event: DragEvent, _source: View): void;
-        protected dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
         private hndEventCommon;
     }
 }

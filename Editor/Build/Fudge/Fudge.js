@@ -236,9 +236,9 @@ var Fudge;
     }
     async function saveProject(_new = false) {
         if (!Fudge.project)
-            return;
+            return false;
         if (!await Fudge.project.openDialog())
-            return;
+            return false;
         if (Fudge.watcher)
             Fudge.watcher.close();
         let base = Fudge.project.base;
@@ -252,6 +252,7 @@ var Fudge;
         let jsonFileName = new URL(Fudge.project.fileInternal, base);
         fs.writeFileSync(jsonFileName, Fudge.project.getProjectJSON());
         watchFolder();
+        return true;
     }
     Fudge.saveProject = saveProject;
     async function promptLoadProject() {
@@ -664,7 +665,7 @@ var Fudge;
         /** Send custom copies of the given event to the views */
         static broadcastEvent(_event) {
             for (let panel of Page.panels) {
-                let event = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
+                let event = new Fudge.FudgeEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
                 panel.dom.dispatchEvent(event);
             }
         }
@@ -687,7 +688,7 @@ var Fudge;
             // ƒ.Debug.fudge("Page received", _event.type, _event);
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.CLOSE:
-                    let view = _event.detail;
+                    let view = _event.detail.view;
                     if (view instanceof Fudge.Panel)
                         Page.panels.splice(Page.panels.indexOf(view), 1);
                     console.log("Panels", Page.panels);
@@ -715,7 +716,7 @@ var Fudge;
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-            // Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_PROJECT));
+            // Page.broadcastEvent(new FudgeEvent(EVENT_EDITOR.SELECT));
         }
         //#region Main-Events from Electron
         static setupMainListeners() {
@@ -725,11 +726,11 @@ var Fudge;
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-                // Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_PROJECT));
+                // Page.broadcastEvent(new FudgeEvent(EVENT_EDITOR.SELECT));
             });
-            Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_SAVE, (_event, _args) => {
-                Fudge.saveProject();
-                Page.setDefaultProject();
+            Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_SAVE, async (_event, _args) => {
+                if (await Fudge.saveProject())
+                    Page.setDefaultProject();
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_LOAD, async (_event, _args) => {
                 let url = await Fudge.promptLoadProject();
@@ -871,7 +872,7 @@ var Fudge;
             //_container.getElement().append(this.dom); //old
             _container.element.appendChild(this.dom);
             this.container = _container;
-            this.container.on("destroy", () => this.dispatch(Fudge.EVENT_EDITOR.CLOSE, { bubbles: true }));
+            this.container.on("destroy", () => this.dom.dispatchEvent(new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.CLOSE, { bubbles: true, detail: { view: this } })));
             // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
@@ -929,12 +930,6 @@ var Fudge;
         }
         hndDragOver(_event, _source) {
             // _event.dataTransfer.dropEffect = "link";
-        }
-        dispatch(_type, _init) {
-            if (!_init)
-                _init = { detail: undefined };
-            _init.detail.view = this;
-            this.dom.dispatchEvent(new Fudge.FudgeEvent(_type, _init));
         }
         hndEventCommon = (_event) => {
             // switch (_event.type) {
@@ -1806,7 +1801,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.REFRES, this.hndEvent);
             this.setTitle("Project | " + Fudge.project.name);
-            this.broadcastEvent(new Event(Fudge.EVENT_EDITOR.SELECT));
+            this.broadcastEvent(new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.SELECT, {}));
         }
         getState() {
             // TODO: iterate over views and collect their states for reconstruction 
