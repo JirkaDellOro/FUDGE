@@ -3253,11 +3253,10 @@ declare namespace FudgeCore {
          * Multiply this matrix with the given matrix
          */
         multiply(_matrix: Matrix4x4, _fromLeft?: boolean): void;
-        getEulerAngles(): Vector3;
         /**
          * Calculates and returns the euler-angles representing the current rotation of this matrix.
          */
-        getEulerAnglesX(): Vector3;
+        getEulerAngles(): Vector3;
         /**
          * Sets the elements of this matrix to the values of the given matrix
          */
