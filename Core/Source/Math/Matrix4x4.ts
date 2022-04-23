@@ -488,9 +488,9 @@ namespace FudgeCore {
       if (!this.vectors.scaling) {
         this.vectors.scaling = this.#vectors.scaling;
         this.vectors.scaling.set(
-          Math.hypot(this.data[0], this.data[1], this.data[2]) * (this.data[0] < 0 ? -1 : 1),
-          Math.hypot(this.data[4], this.data[5], this.data[6]) * (this.data[5] < 0 ? -1 : 1),
-          Math.hypot(this.data[8], this.data[9], this.data[10] * (this.data[10] < 0 ? -1 : 1))
+          Math.hypot(this.data[0], this.data[1], this.data[2]), //* (this.data[0] < 0 ? -1 : 1),
+          Math.hypot(this.data[4], this.data[5], this.data[6]), //* (this.data[5] < 0 ? -1 : 1),
+          Math.hypot(this.data[8], this.data[9], this.data[10]) // * (this.data[10] < 0 ? -1 : 1)
         );
       }
       return this.vectors.scaling; // .clone;
@@ -832,39 +832,39 @@ namespace FudgeCore {
     //#endregion
 
     //#region Transfer
-    public getEulerAngles(): Vector3 {
-      let scaling: Vector3 = this.scaling;
+    // public getEulerAnglesNew(): Vector3 {
+    //   let scaling: Vector3 = this.scaling;
 
-      let thetaX: number, thetaY: number, thetaZ: number;
-      let r02: number = this.data[2] / scaling.z;
-      let r11: number = this.data[5] / scaling.y;
+    //   let thetaX: number, thetaY: number, thetaZ: number;
+    //   let r02: number = this.data[2] / scaling.z;
+    //   let r11: number = this.data[5] / scaling.y;
 
-      if (r02 < 1) {
-        if (r02 > -1) {
-          thetaY = Math.asin(-r02);
-          thetaZ = Math.atan2(this.data[1] / scaling.y, this.data[0] / scaling.x);
-          thetaX = Math.atan2(this.data[9] / scaling.z, this.data[10] / scaling.z);
-        }
-        else {
-          thetaY = Math.PI / 2;
-          thetaZ = -Math.atan2(this.data[6] / scaling.y, r11);
-          thetaX = 0;
-        }
-      }
-      else {
-        thetaY = -Math.PI / 2;
-        thetaZ = Math.atan2(-this.data[6] / scaling.y, r11);
-        thetaX = 0;
-      }
-      this.#eulerAngles.set(-thetaX, thetaY, thetaZ);
-      this.#eulerAngles.scale(180 / Math.PI);
+    //   if (r02 < 1) {
+    //     if (r02 > -1) {
+    //       thetaY = Math.asin(-r02);
+    //       thetaZ = Math.atan2(this.data[1] / scaling.y, this.data[0] / scaling.x);
+    //       thetaX = Math.atan2(this.data[9] / scaling.z, this.data[10] / scaling.z);
+    //     }
+    //     else {
+    //       thetaY = Math.PI / 2;
+    //       thetaZ = -Math.atan2(this.data[6] / scaling.y, r11);
+    //       thetaX = 0;
+    //     }
+    //   }
+    //   else {
+    //     thetaY = -Math.PI / 2;
+    //     thetaZ = Math.atan2(-this.data[6] / scaling.y, r11);
+    //     thetaX = 0;
+    //   }
+    //   this.#eulerAngles.set(-thetaX, thetaY, thetaZ);
+    //   this.#eulerAngles.scale(180 / Math.PI);
 
-      return this.#eulerAngles;
-    }
+    //   return this.#eulerAngles;
+    // }
     /**
      * Calculates and returns the euler-angles representing the current rotation of this matrix.  
      */
-    public getEulerAnglesX(): Vector3 {
+    public getEulerAngles(): Vector3 {
       let scaling: Vector3 = this.scaling;
 
       let s0: number = this.data[0] / scaling.x;
