@@ -108,7 +108,7 @@ namespace Fudge {
       if (!_init)
         _init = {detail: undefined};
       _init.detail.view = this;
-      this.dom.dispatchEvent(new CustomEvent(_type, _init));
+      this.dom.dispatchEvent(new FudgeEvent(_type, _init));
     }
 
     private hndEventCommon = (_event: Event): void => {

@@ -32,47 +32,11 @@ namespace Fudge {
     FULLSCREEN = "fullscreen"
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  export enum EVENT_EDITOR {
-    CREATE = "CREATE",
-    SELECT = "SELECT",
-    MODIFY = "MODIFY",
-    DELETE = "DELETE",
-    CLOSE = "CLOSE",
-    TRANSFORM = "TRANSFORM",
-    FOCUS = "FOCUS"
-    // SET_GRAPH = "setGraph",
-    // FOCUS_NODE = "focusNode",
-    // SET_PROJECT = "setProject",
-    // UPDATE = "update",
-    // REFRESH = "refresh",
-    // DESTROY = "destroy",
-    // CLEAR_PROJECT = "clearProject",
-    // TRANSFORM = "transform",
-    // SELECT_NODE = "selectNode"
-
-  }
-
   export enum PANEL {
     GRAPH = "PanelGraph",
     PROJECT = "PanelProject",
     HELP = "PanelHelp"
   }
-
 
   export enum VIEW {
     HIERARCHY = "ViewHierarchy",

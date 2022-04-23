@@ -143,18 +143,22 @@ namespace Fudge {
     //#endregion
 
     //#region EventHandlers
-    private hndEvent = (_event: CustomEvent): void => {
+    private hndEvent = (_event: FudgeEvent): void => {
       switch (_event.type) {
         case ƒUi.EVENT.DELETE:
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           break;
         case EVENT_EDITOR.SELECT:
-          this.tree.displaySelection([_event.detail]);
+          if (_event.detail.node)
+            this.tree.displaySelection([_event.detail.node]);
+          else {
+            this.setGraph(_event.detail.graph);
+            break;
+          }
         case EVENT_EDITOR.FOCUS:
-          this.focusNode(_event.detail);
+          if (_event.detail.node)
+            this.focusNode(_event.detail.node);
           break;
-        default:
-          this.setGraph(_event.detail);
       }
     }
     //#endregion

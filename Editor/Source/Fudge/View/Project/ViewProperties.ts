@@ -98,8 +98,8 @@ namespace Fudge {
         //   this.resource = undefined;
         //   break;
         case ƒui.EVENT.SELECT:
-          let detail: EventDetail = <EventDetail>_event.detail.data;
-          this.resource = detail.resource;
+          // let detail: EventDetail = <EventDetail>_event.detail;
+          this.resource = <ƒ.SerializableResource>(_event.detail.data);
           break;
         default:
           break;

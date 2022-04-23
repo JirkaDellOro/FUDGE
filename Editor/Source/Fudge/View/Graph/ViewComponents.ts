@@ -246,7 +246,7 @@ namespace Fudge {
       }
     }
 
-    private hndTransform = (_event: CustomEvent): void => {
+    private hndTransform = (_event: FudgeEvent): void => {
       if (!this.getSelected())
         return;
 
@@ -256,7 +256,7 @@ namespace Fudge {
       if (!mtxTransform)
         return;
 
-      let dtl: ƒ.General = _event.detail;
+      let dtl: ƒ.General = _event.detail.transform;
       let mtxCamera: ƒ.Matrix4x4 = (<ƒ.ComponentCamera>dtl.camera).node.mtxWorld;
       let distance: number = mtxCamera.getTranslationTo(this.node.mtxWorld).magnitude;
       if (dtl.transform == TRANSFORM.ROTATE)

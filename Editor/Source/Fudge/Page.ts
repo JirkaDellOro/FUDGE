@@ -7,13 +7,6 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒaid = FudgeAid;
   import ƒui = FudgeUserInterface;
-  
-  export interface EventDetail {
-    node?: ƒ.Node;
-    graph?: ƒ.Graph;
-    view?: View;
-    resource?: ƒ.SerializableResource;
-  }
 
   export const ipcRenderer: Electron.IpcRenderer = require("electron").ipcRenderer; // Replace with:
   export const remote: Electron.Remote = require("electron").remote;

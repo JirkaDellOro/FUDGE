@@ -57,7 +57,7 @@ namespace Fudge {
 
       if (_state["graph"])
         ƒ.Project.getResource(_state["graph"]).then((_graph: ƒ.Graph) => {
-          this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SELECT, { detail: _graph }));
+          this.dom.dispatchEvent(new FudgeEvent(EVENT_EDITOR.SELECT, { detail: { graph: _graph } }));
           // TODO: trace the node saved. The name is not sufficient, path is necessary...
           // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { detail: _graph.findChild }));
         });
@@ -82,10 +82,10 @@ namespace Fudge {
       // TODO: iterate over views and collect their states for reconstruction 
     }
 
-    private hndEvent = async (_event: CustomEvent): Promise<void> => {
+    private hndEvent = async (_event: FudgeEvent): Promise<void> => {
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
-          this.setGraph(_event.detail);
+          this.setGraph(_event.detail.graph);
           break;
         case EVENT_EDITOR.SELECT:
         case EVENT_EDITOR.MODIFY:
@@ -93,7 +93,7 @@ namespace Fudge {
           if (this.graph) {
             let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
             if (this.graph != newGraph)
-              _event = new CustomEvent(EVENT_EDITOR.SELECT, { detail: newGraph });
+              _event = new FudgeEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
           }
           break;
       }

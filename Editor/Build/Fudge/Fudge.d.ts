@@ -45,15 +45,6 @@ declare namespace Fudge {
         PANEL_HELP_OPEN = "panelHelpOpen",
         FULLSCREEN = "fullscreen"
     }
-    enum EVENT_EDITOR {
-        CREATE = "CREATE",
-        SELECT = "SELECT",
-        MODIFY = "MODIFY",
-        DELETE = "DELETE",
-        CLOSE = "CLOSE",
-        TRANSFORM = "TRANSFORM",
-        FOCUS = "FOCUS"
-    }
     enum PANEL {
         GRAPH = "PanelGraph",
         PROJECT = "PanelProject",
@@ -106,6 +97,26 @@ declare namespace Fudge {
     export {};
 }
 declare namespace Fudge {
+    enum EVENT_EDITOR {
+        CREATE = "EDITOR_CREATE",
+        SELECT = "EDITOR_SELECT",
+        MODIFY = "EDITOR_MODIFY",
+        DELETE = "EDITOR_DELETE",
+        CLOSE = "EDITOR_CLOSE",
+        TRANSFORM = "EDITOR_TRANSFORM",
+        FOCUS = "EDITOR_FOCUS"
+    }
+    interface EventDetail {
+        node?: ƒ.Node;
+        graph?: ƒ.Graph;
+        view?: View;
+        resource?: ƒ.SerializableResource;
+        transform?: Object;
+    }
+    class FudgeEvent extends CustomEvent<EventDetail> {
+    }
+}
+declare namespace Fudge {
     let watcher: ƒ.General;
     function newProject(): Promise<void>;
     function saveProject(_new?: boolean): Promise<void>;
@@ -143,12 +154,6 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    interface EventDetail {
-        node?: ƒ.Node;
-        graph?: ƒ.Graph;
-        view?: View;
-        resource?: ƒ.SerializableResource;
-    }
     const ipcRenderer: Electron.IpcRenderer;
     const remote: Electron.Remote;
     let project: Project;
@@ -354,7 +359,7 @@ declare namespace Fudge {
         private views;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         /** Send custom copies of the given event to the views */
-        broadcastEvent: (_event: Event) => void;
+        broadcastEvent: (_event: FudgeEvent) => void;
         abstract getState(): PanelState;
         private addViewComponent;
     }

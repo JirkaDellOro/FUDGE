@@ -32,25 +32,6 @@ var Fudge;
         MENU["PANEL_HELP_OPEN"] = "panelHelpOpen";
         MENU["FULLSCREEN"] = "fullscreen";
     })(MENU = Fudge.MENU || (Fudge.MENU = {}));
-    let EVENT_EDITOR;
-    (function (EVENT_EDITOR) {
-        EVENT_EDITOR["CREATE"] = "CREATE";
-        EVENT_EDITOR["SELECT"] = "SELECT";
-        EVENT_EDITOR["MODIFY"] = "MODIFY";
-        EVENT_EDITOR["DELETE"] = "DELETE";
-        EVENT_EDITOR["CLOSE"] = "CLOSE";
-        EVENT_EDITOR["TRANSFORM"] = "TRANSFORM";
-        EVENT_EDITOR["FOCUS"] = "FOCUS";
-        // SET_GRAPH = "setGraph",
-        // FOCUS_NODE = "focusNode",
-        // SET_PROJECT = "setProject",
-        // UPDATE = "update",
-        // REFRESH = "refresh",
-        // DESTROY = "destroy",
-        // CLEAR_PROJECT = "clearProject",
-        // TRANSFORM = "transform",
-        // SELECT_NODE = "selectNode"
-    })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
         PANEL["GRAPH"] = "PanelGraph";
