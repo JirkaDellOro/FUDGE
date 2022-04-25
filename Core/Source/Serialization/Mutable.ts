@@ -58,7 +58,7 @@ namespace FudgeCore {
     public static getMutatorFromPath(_mutator: Mutator, _path: string[]): Mutator {
       let key: string = _path[0];
       let mutator: Mutator = {};
-      if (!_mutator[key]) // if the path deviates from mutator structure, return the mutator
+      if (_mutator[key] == undefined) // if the path deviates from mutator structure, return the mutator
         return _mutator;
       mutator[key] = _mutator[key];
       if (_path.length > 1)
