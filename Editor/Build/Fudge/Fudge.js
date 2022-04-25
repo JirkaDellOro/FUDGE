@@ -402,11 +402,10 @@ var Fudge;
             delete _mutator.fileStyles;
         }
         getGraphs() {
-            let graphs = ƒ.Project.getResourcesOfType(ƒ.Graph);
+            let graphs = ƒ.Project.getResourcesByType(ƒ.Graph);
             let result = {};
-            for (let id in graphs) {
-                let graph = graphs[id];
-                result[graph.name] = id;
+            for (let graph of graphs) {
+                result[graph.name] = graph.idResource;
             }
             return result;
         }

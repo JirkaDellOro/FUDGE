@@ -25,6 +25,7 @@ namespace FudgeCore {
       await super.deserialize(_serialization);
       Project.register(this, _serialization.idResource);
       await Project.resyncGraphInstances(this);
+      this.dispatchEvent(new Event(EVENT.GRAPH_DESERIALIZED));
       return this;
     }
 

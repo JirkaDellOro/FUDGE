@@ -137,11 +137,10 @@ namespace Fudge {
     }
 
     private getGraphs(): Object {
-      let graphs: ƒ.Resources = ƒ.Project.getResourcesOfType(ƒ.Graph);
+      let graphs: ƒ.SerializableResource[] = ƒ.Project.getResourcesByType(ƒ.Graph);
       let result: Object = {};
-      for (let id in graphs) {
-        let graph: ƒ.Graph = <ƒ.Graph>graphs[id];
-        result[graph.name] = id;
+      for (let graph of graphs) {
+        result[graph.name] = graph.idResource;
       }
       return result;
     }

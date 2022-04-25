@@ -34,7 +34,7 @@ namespace FudgeCore {
    * Keeps a list of the resources and generates ids to retrieve them.  
    * Resources are objects referenced multiple times but supposed to be stored only once
    */
-  export abstract class Project {
+  export abstract class Project extends EventTargetStatic {
     public static resources: Resources = {};
     public static serialization: SerializationOfResources = {};
     public static scriptNamespaces: ScriptNamespaces = {};
@@ -72,12 +72,22 @@ namespace FudgeCore {
     //   return <T[]>(this.components[_class.name] || []).slice(0);
     // }
 
-    public static getResourcesOfType<T>(_type: new (_args: General) => T): Resources {
-      let found: Resources = {};
+    public static getResourcesByType<T>(_type: new (_args: General) => T): SerializableResource[] {
+      let found: SerializableResource[] = [];
       for (let resourceId in Project.resources) {
         let resource: SerializableResource = Project.resources[resourceId];
         if (resource instanceof _type)
-          found[resourceId] = resource;
+          found.push(resource);
+      }
+      return found;
+    }
+
+    public static getResourcesByName(_name: string): SerializableResource[] {
+      let found: SerializableResource[] = [];
+      for (let resourceId in Project.resources) {
+        let resource: SerializableResource = Project.resources[resourceId];
+        if (resource.name == _name)
+          found.push(resource);
       }
       return found;
     }
@@ -214,6 +224,7 @@ namespace FudgeCore {
 
       let serialization: Serialization = Serializer.parse(resourceFileContent);
       let reconstruction: Resources = await Project.deserialize(serialization);
+      Project.dispatchEvent(new CustomEvent(EVENT.RESOURCES_LOADED, {detail: {url: _url, resources: reconstruction}}));
       return reconstruction;
     }
 

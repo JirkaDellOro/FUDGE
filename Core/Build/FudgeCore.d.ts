@@ -163,6 +163,8 @@ declare namespace FudgeCore {
         NODE_DESERIALIZED = "nodeDeserialized",
         /** dispatched to {@link GraphInstance} when it's content is set according to a serialization of a {@link Graph}  */
         GRAPH_INSTANTIATED = "graphInstantiated",
+        /** dispatched to a {@link Graph} when it's finished deserializing  */
+        GRAPH_DESERIALIZED = "graphDeserialized",
         /** dispatched to {@link Time} when it's scaling changed  */
         TIME_SCALED = "timeScaled",
         /** dispatched to {@link FileIoBrowserLocal} when a list of files has been loaded  */
@@ -171,10 +173,16 @@ declare namespace FudgeCore {
         FILE_SAVED = "fileSaved",
         /** dispatched to {@link Node} when recalculating transforms for render */
         RENDER_PREPARE = "renderPrepare",
+        /** dispatched to {@link Render} when recalculation of the branch to render starts */
         RENDER_PREPARE_START = "renderPrepareStart",
+        /** dispatched to {@link Render} when recalculation of the branch to render ends */
         RENDER_PREPARE_END = "renderPrepareEnd",
-        /** dispatched to Joint-Components in order to disconnect */
-        DISCONNECT_JOINT = "disconnectJoint"
+        /** dispatched to {@link Joint}-Components in order to disconnect */
+        DISCONNECT_JOINT = "disconnectJoint",
+        /** dispatched to {@link Node} when it gets attached to a viewport for rendering */
+        ATTACH_BRANCH = "attachBranch",
+        /** dispatched to {@link Project} when it's done loading resources from a url */
+        RESOURCES_LOADED = "resourcesLoaded"
     }
     type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | ((_event: EventPhysics) => void) | ((_event: CustomEvent) => void) | EventListenerOrEventListenerObject;
     type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics | CustomEvent;
@@ -5436,7 +5444,7 @@ declare namespace FudgeCore {
      * Keeps a list of the resources and generates ids to retrieve them.
      * Resources are objects referenced multiple times but supposed to be stored only once
      */
-    export abstract class Project {
+    export abstract class Project extends EventTargetStatic {
         static resources: Resources;
         static serialization: SerializationOfResources;
         static scriptNamespaces: ScriptNamespaces;
@@ -5451,7 +5459,8 @@ declare namespace FudgeCore {
         static register(_resource: SerializableResource, _idResource?: string): void;
         static deregister(_resource: SerializableResource): void;
         static clear(): void;
-        static getResourcesOfType<T>(_type: new (_args: General) => T): Resources;
+        static getResourcesByType<T>(_type: new (_args: General) => T): SerializableResource[];
+        static getResourcesByName(_name: string): SerializableResource[];
         /**
          * Generate a user readable and unique id using the type of the resource, the date and random numbers
          * @param _resource
