@@ -10,7 +10,8 @@ namespace Fudge {
   let resourceToComponent: Map<Function, typeof ƒ.Component> = new Map<Function, typeof ƒ.Component>([
     [ƒ.Audio, ƒ.ComponentAudio],
     [ƒ.Material, ƒ.ComponentMaterial],
-    [ƒ.Mesh, ƒ.ComponentMesh]
+    [ƒ.Mesh, ƒ.ComponentMesh],
+    [ƒ.Animation, ƒ.ComponentAnimator]
   ]);
 
   /**

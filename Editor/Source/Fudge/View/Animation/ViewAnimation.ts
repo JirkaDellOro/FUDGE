@@ -1,6 +1,6 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒUi = FudgeUserInterface;
+  import ƒui = FudgeUserInterface;
 
   export interface ViewAnimationKey {
     key: ƒ.AnimationKey;
@@ -52,7 +52,7 @@ namespace Fudge {
       this.createUserInterface();
       
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
-      this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndSelect);
+      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndSelect);
       this.canvas.addEventListener("pointermove", this.hndPointerMove);
       this.canvas.addEventListener("pointerdown", this.hndPointerDown);
       this.toolbar.addEventListener("click", this.hndToolbarClick);
@@ -133,15 +133,15 @@ namespace Fudge {
       if (obj["label"]) {
         console.log(obj["label"]);
         // TODO: replace with editor events. use dispatch event from view?
-        this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
+        this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
       }
       else if (obj["event"]) {
         console.log(obj["event"]);
-        this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
+        this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
       }
       else if (obj["key"]) {
         console.log(obj["key"]);
-        this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { detail: obj }));
+        this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { detail: obj }));
       }
     }
 
@@ -180,7 +180,7 @@ namespace Fudge {
       // this.openAnimation();
       let animationMutator: ƒ.Mutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
       if (!animationMutator) animationMutator = {};
-      this.attributeList = ƒUi.Generator.createInterfaceFromMutator(animationMutator);
+      this.attributeList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
       this.controller = new ControllerAnimation(this.animation, this.attributeList, animationMutator);
       this.dom.appendChild(this.attributeList);
 
@@ -319,7 +319,6 @@ namespace Fudge {
           break;
         case "play":
           this.time.set(this.playbackTime);
-          // this.cmpAnimator.activate(true);
           if (this.idInterval == undefined)
             this.idInterval = window.setInterval(this.playAnimation, 1000 / this.animation.fps);
           break;
@@ -376,7 +375,7 @@ namespace Fudge {
         _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
 
       this.controller.updateAnimationUserInterface(_m);
-      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
+      this.dispatch(EVENT_EDITOR.MODIFY, { });
     }
 
     private setTime(_time: number, updateDisplay: boolean = true): void {

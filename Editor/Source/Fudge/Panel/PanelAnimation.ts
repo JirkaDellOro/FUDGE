@@ -1,6 +1,6 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒUi = FudgeUserInterface;
+  import ƒui = FudgeUserInterface;
 
   /**
    * TODO: add
@@ -50,7 +50,7 @@ namespace Fudge {
 
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
-      this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndFocusNode);
+      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
 
       this.setTitle("Animation | " );
     }

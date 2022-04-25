@@ -37,11 +37,12 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 7] = "CREATE_MESH";
         CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 8] = "CREATE_MATERIAL";
         CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 9] = "CREATE_GRAPH";
-        CONTEXTMENU[CONTEXTMENU["SYNC_INSTANCES"] = 10] = "SYNC_INSTANCES";
-        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 11] = "REMOVE_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 12] = "ADD_JOINT";
-        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 13] = "DELETE_RESOURCE";
-        CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 14] = "ILLUMINATE";
+        CONTEXTMENU[CONTEXTMENU["CREATE_ANIMATION"] = 10] = "CREATE_ANIMATION";
+        CONTEXTMENU[CONTEXTMENU["SYNC_INSTANCES"] = 11] = "SYNC_INSTANCES";
+        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 12] = "REMOVE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 13] = "ADD_JOINT";
+        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 14] = "DELETE_RESOURCE";
+        CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 15] = "ILLUMINATE";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -1134,6 +1135,8 @@ var Fudge;
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Create Graph", id: String(Fudge.CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Create Animation", id: String(Fudge.CONTEXTMENU.CREATE_ANIMATION), click: _callback });
+            menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Delete Resource", id: String(Fudge.CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
             menu.append(item);
             // item = new remote.MenuItem({ label: "Sync Instances", id: String(CONTEXTMENU.SYNC_INSTANCES), click: _callback, accelerator: "S" });
@@ -1167,6 +1170,11 @@ var Fudge;
                     let graph = await ƒ.Project.registerAsGraph(new ƒ.Node("NewGraph"));
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                     this.table.selectInterval(graph, graph);
+                    break;
+                case Fudge.CONTEXTMENU.CREATE_ANIMATION:
+                    let animationNew = new ƒ.Animation("NewAnimation");
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    this.table.selectInterval(animationNew, animationNew);
                     break;
                 case Fudge.CONTEXTMENU.DELETE_RESOURCE:
                     await this.table.controller.delete([this.table.getFocussed()]);
@@ -1247,6 +1255,7 @@ var Fudge;
         UrlOnAudio: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
         MeshOnComponentMesh: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
+        AnimationOnComponentAnimator: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentAnimator, ofType: ƒ.Animation, dropEffect: "link" },
         // MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
         TextureOnMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
         TextureOnMeshRelief: { fromViews: [Fudge.ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
@@ -1315,6 +1324,9 @@ var Fudge;
             // Texture on MeshRelief
             if (this.filterDragDrop(_event, filter.TextureOnMeshRelief))
                 return;
+            // Animation of ComponentAnimation
+            if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator))
+                return;
             function checkMimeType(_mime) {
                 return (_sources) => {
                     let sources = _sources;
@@ -1361,6 +1373,11 @@ var Fudge;
                 this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
+            let setAnimation = (_sources) => {
+                this.mutable["animation"] = _sources[0];
+                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                return true;
+            };
             // texture
             if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink))
                 return;
@@ -1383,6 +1400,9 @@ var Fudge;
                 return;
             // Texture on MeshRelief
             if (this.filterDragDrop(_event, filter.TextureOnMeshRelief, setHeightMap))
+                return;
+            // Animation on ComponentAnimator
+            if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator, setAnimation))
                 return;
         };
         filterDragDrop(_event, _filter, _callback = () => true) {
@@ -2023,7 +2043,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    var ƒUi = FudgeUserInterface;
+    var ƒui = FudgeUserInterface;
     /**
      * TODO: add
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
@@ -2164,7 +2184,7 @@ var Fudge;
             let animationMutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
             if (!animationMutator)
                 animationMutator = {};
-            this.attributeList = ƒUi.Generator.createInterfaceFromMutator(animationMutator);
+            this.attributeList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
             this.controller = new Fudge.ControllerAnimation(this.animation, this.attributeList, animationMutator);
             this.dom.appendChild(this.attributeList);
             this.sheet.redraw(this.playbackTime);
@@ -2290,7 +2310,6 @@ var Fudge;
                     break;
                 case "play":
                     this.time.set(this.playbackTime);
-                    // this.cmpAnimator.activate(true);
                     if (this.idInterval == undefined)
                         this.idInterval = window.setInterval(this.playAnimation, 1000 / this.animation.fps);
                     break;
@@ -2342,7 +2361,7 @@ var Fudge;
             if (!_m)
                 _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
             this.controller.updateAnimationUserInterface(_m);
-            this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
+            this.dispatch(Fudge.EVENT_EDITOR.MODIFY, {});
         }
         setTime(_time, updateDisplay = true) {
             if (!this.animation)
@@ -2749,7 +2768,8 @@ var Fudge;
     let resourceToComponent = new Map([
         [ƒ.Audio, ƒ.ComponentAudio],
         [ƒ.Material, ƒ.ComponentMaterial],
-        [ƒ.Mesh, ƒ.ComponentMesh]
+        [ƒ.Mesh, ƒ.ComponentMesh],
+        [ƒ.Animation, ƒ.ComponentAnimator]
     ]);
     /**
      * View all components attached to a node

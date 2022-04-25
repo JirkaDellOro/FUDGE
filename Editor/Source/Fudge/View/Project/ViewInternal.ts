@@ -61,7 +61,6 @@ namespace Fudge {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
 
-
       item = new remote.MenuItem({
         label: "Create Mesh",
         submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.CREATE_MESH, ƒ.Mesh, _callback)
@@ -75,6 +74,9 @@ namespace Fudge {
       menu.append(item);
 
       item = new remote.MenuItem({ label: "Create Graph", id: String(CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
+      menu.append(item);
+
+      item = new remote.MenuItem({ label: "Create Animation", id: String(CONTEXTMENU.CREATE_ANIMATION), click: _callback });
       menu.append(item);
 
       item = new remote.MenuItem({ label: "Delete Resource", id: String(CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
@@ -115,6 +117,11 @@ namespace Fudge {
           let graph: ƒ.Graph = await ƒ.Project.registerAsGraph(new ƒ.Node("NewGraph"));
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           this.table.selectInterval(graph, graph);
+          break;
+        case CONTEXTMENU.CREATE_ANIMATION:
+          let animationNew: ƒ.Animation = new ƒ.Animation("NewAnimation");
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.table.selectInterval(animationNew, animationNew);
           break;
         case CONTEXTMENU.DELETE_RESOURCE:
           await this.table.controller.delete([this.table.getFocussed()]);
