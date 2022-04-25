@@ -120,6 +120,7 @@ namespace FudgeCore {
     public async mutate(_mutator: Mutator): Promise<void> {
       await super.mutate(_mutator);
       if (typeof (_mutator.animateInEditor) !== "undefined") {
+        this.updateAnimation(0);
         this.activateListeners(this.active);
       }
     }
