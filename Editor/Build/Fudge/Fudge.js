@@ -704,6 +704,8 @@ var Fudge;
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_ANIMATION_OPEN, on: true });
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PARTICLE_SYSTEM_OPEN, on: true });
         }
         //#region Main-Events from Electron
         static setupMainListeners() {
@@ -713,6 +715,8 @@ var Fudge;
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
+                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_ANIMATION_OPEN, on: true });
+                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PARTICLE_SYSTEM_OPEN, on: true });
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_SAVE, async (_event, _args) => {
                 if (await Fudge.saveProject())
@@ -1730,8 +1734,8 @@ var Fudge;
             this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [
                 { typeId: 7 /* Root */ }
             ]);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
             this.setTitle("Animation | ");
         }
@@ -1746,7 +1750,7 @@ var Fudge;
             _event.stopPropagation();
         };
         hndFocusNode = (_event) => {
-            let event = new CustomEvent(Fudge.EVENT_EDITOR.FOCUS_NODE, { bubbles: false, detail: _event.detail.data });
+            let event = new CustomEvent(Fudge.EVENT_EDITOR.FOCUS, { bubbles: false, detail: _event.detail.data });
             this.broadcastEvent(event);
         };
     }
@@ -2044,7 +2048,7 @@ var Fudge;
             this.playbackTime = 500;
             this.setAnimation(null);
             this.createUserInterface();
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndSelect);
             this.canvas.addEventListener("pointermove", this.hndPointerMove);
             this.canvas.addEventListener("pointerdown", this.hndPointerDown);
@@ -2108,12 +2112,14 @@ var Fudge;
             document.addEventListener("DOMContentLoaded", () => this.updateUserInterface());
         }
         hndPointerDown = (_event) => {
+            //  TODO: rework events
             this.setTime(_event.offsetX / this.sheet.scale.x);
             let obj = this.sheet.getObjectAtPoint(_event.offsetX, _event.offsetY);
             if (!obj)
                 return;
             if (obj["label"]) {
                 console.log(obj["label"]);
+                // TODO: replace with editor events. use dispatch event from view?
                 this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
             }
             else if (obj["event"]) {
@@ -2133,7 +2139,7 @@ var Fudge;
         };
         hndEvent = (_event) => {
             switch (_event.type) {
-                case Fudge.EVENT_EDITOR.FOCUS_NODE:
+                case Fudge.EVENT_EDITOR.FOCUS:
                     this.focusNode(_event.detail);
                     break;
             }
@@ -2336,7 +2342,7 @@ var Fudge;
             if (!_m)
                 _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
             this.controller.updateAnimationUserInterface(_m);
-            this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+            this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
         }
         setTime(_time, updateDisplay = true) {
             if (!this.animation)
