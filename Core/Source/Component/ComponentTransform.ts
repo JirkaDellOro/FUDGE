@@ -18,39 +18,6 @@ namespace FudgeCore {
     }
 
     //#region Transformations respecting the hierarchy
-
-    /**
-     * Adjusts the rotation to point the z-axis directly at the given target point in world space and tilts it to accord with the given up vector,
-     * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used. 
-     */
-    public lookAt(_targetWorld: Vector3, _up?: Vector3): void {
-      let container: Node = this.node;
-      if (!container && !container.getParent())
-        return this.mtxLocal.lookAt(_targetWorld, _up);
-
-      // component is attached to a child node -> transform respecting the hierarchy
-      let mtxWorld: Matrix4x4 = container.mtxWorld.clone;
-      mtxWorld.lookAt(_targetWorld, _up, true);
-      let mtxLocal: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
-      this.mtxLocal = mtxLocal;
-    }
-
-    /**
-     * Adjusts the rotation to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
-     * respectively calculating yaw only. If no up vector is given, the previous up-vector is used. 
-     */
-    public showTo(_targetWorld: Vector3, _up?: Vector3): void {
-      let container: Node = this.node;
-      if (!container && !container.getParent())
-        return this.mtxLocal.showTo(_targetWorld, _up);
-
-      // component is attached to a child node -> transform respecting the hierarchy
-      let mtxWorld: Matrix4x4 = container.mtxWorld.clone;
-      mtxWorld.showTo(_targetWorld, _up, true);
-      let mtxLocal: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
-      this.mtxLocal = mtxLocal;
-    }
-
     /**
      * recalculates this local matrix to yield the identical world matrix based on the given node.
      * Use rebase before appending the container of this component to another node while preserving its transformation in the world.

@@ -1,0 +1,239 @@
+{
+  "MeshCube|2022-03-21T10:06:32.731Z|12043": {
+    "ƒ.MeshCube": {
+      "idResource": "MeshCube|2022-03-21T10:06:32.731Z|12043",
+      "name": "MeshCube",
+      "type": "MeshCube"
+    }
+  },
+  "Material|2022-03-21T10:06:45.579Z|58150": {
+    "ƒ.Material": {
+      "name": "ShaderLit",
+      "idResource": "Material|2022-03-21T10:06:45.579Z|58150",
+      "shader": "ShaderLit",
+      "coat": {
+        "ƒ.CoatColored": {
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
+  "Graph|2022-03-23T07:10:04.239Z|10820": {
+    "ƒ.Graph": {
+      "name": "Bar",
+      "active": true,
+      "components": {},
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "Cube_0",
+            "active": true,
+            "components": {},
+            "children": [
+              {
+                "ƒ.GraphInstance": {
+                  "deserializeFromSource": true,
+                  "name": "Cube",
+                  "idSource": "Graph|2022-03-21T09:59:57.684Z|37738"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Cube_1",
+            "active": true,
+            "components": {
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[2, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": [
+              {
+                "ƒ.GraphInstance": {
+                  "deserializeFromSource": true,
+                  "name": "Cube",
+                  "idSource": "Graph|2022-03-21T09:59:57.684Z|37738"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "idResource": "Graph|2022-03-23T07:10:04.239Z|10820",
+      "type": "Graph"
+    }
+  },
+  "Graph|2022-03-24T09:04:15.422Z|70854": {
+    "ƒ.Graph": {
+      "name": "Grid",
+      "active": true,
+      "components": {},
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "Bar_0",
+            "active": true,
+            "components": {},
+            "children": [
+              {
+                "ƒ.GraphInstance": {
+                  "deserializeFromSource": true,
+                  "name": "Bar",
+                  "idSource": "Graph|2022-03-23T07:10:04.239Z|10820"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Bar_1",
+            "active": true,
+            "components": {
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 2, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": [
+              {
+                "ƒ.GraphInstance": {
+                  "deserializeFromSource": true,
+                  "name": "Bar",
+                  "idSource": "Graph|2022-03-23T07:10:04.239Z|10820"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "idResource": "Graph|2022-03-24T09:04:15.422Z|70854",
+      "type": "Graph"
+    }
+  },
+  "Graph|2022-03-21T09:59:57.684Z|37738": {
+    "ƒ.Graph": {
+      "name": "Cube",
+      "active": true,
+      "components": {
+        "ComponentMesh": [
+          {
+            "ƒ.ComponentMesh": {
+              "idMesh": "MeshCube|2022-03-21T10:06:32.731Z|12043",
+              "pivot": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "Component": {
+                "active": true
+              }
+            }
+          }
+        ],
+        "ComponentMaterial": [
+          {
+            "ƒ.ComponentMaterial": {
+              "sortForAlpha": false,
+              "clrPrimary": "[0.9647058823529412, 0.07450980392156863, 0.07450980392156863, 1]",
+              "clrSecondary": "[1, 1, 1, 1]",
+              "pivot": {
+                "translation": "[0, 0]",
+                "rotation": 0,
+                "scaling": "[1, 1]"
+              },
+              "Component": {
+                "active": true
+              },
+              "idMaterial": "Material|2022-03-21T10:06:45.579Z|58150"
+            }
+          }
+        ]
+      },
+      "children": [],
+      "idResource": "Graph|2022-03-21T09:59:57.684Z|37738",
+      "type": "Graph"
+    }
+  },
+  "Graph|2022-03-25T08:21:20.464Z|71700": {
+    "ƒ.Graph": {
+      "name": "Block",
+      "active": true,
+      "components": {},
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "Grid_0",
+            "active": true,
+            "components": {
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 0, 2]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[0.9999998807907104, 0.9999998807907104, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": [
+              {
+                "ƒ.GraphInstance": {
+                  "deserializeFromSource": true,
+                  "name": "Grid",
+                  "idSource": "Graph|2022-03-24T09:04:15.422Z|70854"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Grid_1",
+            "active": true,
+            "components": {},
+            "children": [
+              {
+                "ƒ.GraphInstance": {
+                  "deserializeFromSource": true,
+                  "name": "Grid",
+                  "idSource": "Graph|2022-03-24T09:04:15.422Z|70854"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "idResource": "Graph|2022-03-25T08:21:20.464Z|71700",
+      "type": "Graph"
+    }
+  }
+}

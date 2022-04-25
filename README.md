@@ -60,20 +60,23 @@ A collection of various other documents and resources, including unmaintained ex
 
 # Call for papers
 ## ToDo
-- Cameratransformation, Axonometry and VR
+- Cameratransformation, Axonometry
 - Diegetic User-Interface
 - Grapheditor/Wiring for Shader and Animation
 - Light and Shadow
-- Primitve 3D-Models and 2D-Shapes 
 - Importer for standard file formats
 - Runtime-Recording for Replay
 - Undo/Rollback
 - Selection-Sets to store temporary Groups
 - Advanced texturing
 - Input-Manager  
-- Particle Editor
 ## In Progress
-- Skeleton System
+- glTF Importer
+- Skeletal Animation
+- Procedural 3D-Assets
+- VR Components
+- Particle Editor
+- Animation Editor
 ## Done  
 
 | Name               | Area                              |
@@ -93,3 +96,5 @@ A collection of various other documents and resources, including unmaintained ex
 | Luis Keck          | Shader-System                     |
 | Marius König       | Integration Golden Layout 2       |
 | Moritz Beaugrand   | Terrain                           |
+| Matthias Roming    | Skeleton System                   |
+

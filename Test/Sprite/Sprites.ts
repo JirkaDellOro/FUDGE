@@ -7,23 +7,26 @@ namespace Test_sprites {
   const clrWhite: ƒ.Color = ƒ.Color.CSS("white");
 
   let viewport: ƒ.Viewport;
-  let root: ƒ.Node;
-  let animations: ƒAid.SpriteSheetAnimations;
+  
   let spriteNode: ƒAid.NodeSprite;
 
   async function hndLoad(_event: Event): Promise<void> {
-    // setup sprites
-    await loadSprites();
+    let root: ƒ.Node = new ƒ.Node("root");
 
-    // setup scene
-    root = new ƒ.Node("root");
+    let imgSpriteSheet: ƒ.TextureImage = new ƒ.TextureImage();
+    await imgSpriteSheet.load("Assets/bounceball.png");
+    let coat: ƒ.CoatTextured = new ƒ.CoatTextured(undefined, imgSpriteSheet);
+
+    let animation: ƒAid.SpriteSheetAnimation = new ƒAid.SpriteSheetAnimation("Bounce", coat);
+    animation.generateByGrid(ƒ.Rectangle.GET(1, 0, 17, 60), 8, 22, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(20));
 
     spriteNode = new ƒAid.NodeSprite("Sprite");
     spriteNode.addComponent(new ƒ.ComponentTransform(new ƒ.Matrix4x4()));
-    spriteNode.setAnimation(<ƒAid.SpriteSheetAnimation>animations["bounce"]);
+    spriteNode.setAnimation(animation);
     spriteNode.setFrameDirection(1);
     spriteNode.mtxLocal.translateY(-1);
     spriteNode.framerate = parseInt((<HTMLInputElement>document.querySelector("[name=fps]")).value);
+
 
     root.addChild(spriteNode);
 
@@ -51,23 +54,6 @@ namespace Test_sprites {
     avg.value = spriteNode.getCurrentFrame.toString();
 
     viewport.draw();
-  }
-
-  async function loadSprites(): Promise<void> {
-    let imgSpriteSheet: ƒ.TextureImage = new ƒ.TextureImage();
-    await imgSpriteSheet.load("Assets/bounceball.png");
-
-    let spriteSheet: ƒ.CoatTextured = new ƒ.CoatTextured(clrWhite, imgSpriteSheet);
-    generateSprites(spriteSheet);
-  }
-
-  function generateSprites(_spritesheet: ƒ.CoatTextured): void {
-    animations = {};
-    this.animations = {};
-    let name: string = "bounce";
-    let sprite: ƒAid.SpriteSheetAnimation = new ƒAid.SpriteSheetAnimation(name, _spritesheet);
-    sprite.generateByGrid(ƒ.Rectangle.GET(1, 0, 17, 60), 8, 22, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(20));
-    animations[name] = sprite;
   }
 
   function handleChange(_event: Event): void {

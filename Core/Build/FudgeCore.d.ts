@@ -147,8 +147,12 @@ declare namespace FudgeCore {
         CHILD_APPEND = "childAppend",
         /** dispatched to a child {@link Node} and its ancestors just before its being removed from its parent */
         CHILD_REMOVE = "childRemove",
-        /** dispatched to a {@link Mutable} when its being mutated */
+        /** dispatched to a {@link Mutable} when it mutates */
         MUTATE = "mutate",
+        /** dispatched to a {@link GraphInstance} when the graph it connects to mutates */
+        MUTATE_GRAPH = "mutateGraph",
+        /** dispatched to a {@link GraphInstance} after {@link MUTATE_GRAPH} to signal that all instances were informed*/
+        MUTATE_GRAPH_DONE = "mutateGraphDone",
         /** dispatched to {@link Viewport} when it gets the focus to receive keyboard input */
         FOCUS_IN = "focusin",
         /** dispatched to {@link Viewport} when it loses the focus to receive keyboard input */
@@ -159,6 +163,8 @@ declare namespace FudgeCore {
         NODE_DESERIALIZED = "nodeDeserialized",
         /** dispatched to {@link GraphInstance} when it's content is set according to a serialization of a {@link Graph}  */
         GRAPH_INSTANTIATED = "graphInstantiated",
+        /** dispatched to a {@link Graph} when it's finished deserializing  */
+        GRAPH_DESERIALIZED = "graphDeserialized",
         /** dispatched to {@link Time} when it's scaling changed  */
         TIME_SCALED = "timeScaled",
         /** dispatched to {@link FileIoBrowserLocal} when a list of files has been loaded  */
@@ -167,10 +173,16 @@ declare namespace FudgeCore {
         FILE_SAVED = "fileSaved",
         /** dispatched to {@link Node} when recalculating transforms for render */
         RENDER_PREPARE = "renderPrepare",
+        /** dispatched to {@link Render} when recalculation of the branch to render starts */
         RENDER_PREPARE_START = "renderPrepareStart",
+        /** dispatched to {@link Render} when recalculation of the branch to render ends */
         RENDER_PREPARE_END = "renderPrepareEnd",
-        /** dispatched to Joint-Components in order to disconnect */
-        DISCONNECT_JOINT = "disconnectJoint"
+        /** dispatched to {@link Joint}-Components in order to disconnect */
+        DISCONNECT_JOINT = "disconnectJoint",
+        /** dispatched to {@link Node} when it gets attached to a viewport for rendering */
+        ATTACH_BRANCH = "attachBranch",
+        /** dispatched to {@link Project} when it's done loading resources from a url */
+        RESOURCES_LOADED = "resourcesLoaded"
     }
     type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | ((_event: EventPhysics) => void) | ((_event: CustomEvent) => void) | EventListenerOrEventListenerObject;
     type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics | CustomEvent;
@@ -842,7 +854,7 @@ declare namespace FudgeCore {
         * A cameraprojection with extremely narrow focus is used, so each pixel of the buffer would hold the same information from the node,
         * but the fragment shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
         */
-        protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void;
+        protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _cmpCamera: ComponentCamera): void;
         /**
          * Set light data in shaders
          */
@@ -850,7 +862,9 @@ declare namespace FudgeCore {
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
-        protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _cmpCamera: ComponentCamera): void;
+        protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
+        private static calcMeshToView;
+        private static getRenderBuffers;
     }
 }
 declare namespace FudgeCore {
@@ -1507,12 +1521,6 @@ declare namespace FudgeCore {
         private keyIn;
         private keyOut;
         constructor(_keyIn: AnimationKey, _keyOut?: AnimationKey);
-        getParameters(): {
-            a: number;
-            b: number;
-            c: number;
-            d: number;
-        };
         /**
          * Calculates the value of the function at the given time.
          * @param _time the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.
@@ -1684,7 +1692,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Holds a reference to an {@link Animation} and controls it. Controls playback and playmode as well as speed.
-     * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2022
+     * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class ComponentAnimator extends Component {
         #private;
@@ -1693,7 +1701,6 @@ declare namespace FudgeCore {
         playmode: ANIMATION_PLAYMODE;
         playback: ANIMATION_PLAYBACK;
         scaleWithGameTime: boolean;
-        animateInEditor: boolean;
         constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_PLAYBACK);
         set scale(_scale: number);
         get scale(): number;
@@ -1718,9 +1725,6 @@ declare namespace FudgeCore {
         updateAnimation(_time: number): [Mutator, number];
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        mutate(_mutator: Mutator): Promise<void>;
-        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
-        private activateListeners;
         /**
          * Updates the Animation.
          * Gets called every time the Loop fires the LOOP_FRAME Event.
@@ -1944,7 +1948,22 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Synchronizes the graph instance this component is attached to with the graph and vice versa
+     * Makes the node face the camera when rendering, respecting restrictions for rotation around specific axis
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
+     */
+    class ComponentFaceCamera extends Component {
+        static readonly iSubclass: number;
+        upLocal: boolean;
+        up: Vector3;
+        restrict: boolean;
+        constructor();
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Filters synchronization between a graph instance and the graph it is connected to. If active, no synchronization occurs.
+     * Maybe more finegrained in the future...
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
      */
@@ -1971,16 +1990,17 @@ declare namespace FudgeCore {
     }
     /**
      * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
+     * Attached to a node by {@link ComponentLight}, the pivot matrix is ignored.
      * ```plaintext
      * ~ ~ ~
      *  ~ ~ ~
      * ```
      */
     class LightAmbient extends Light {
-        constructor(_color?: Color);
     }
     /**
      * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
+     * Attached to a node by {@link ComponentLight}, the pivot matrix specifies the direction of the light only.
      * ```plaintext
      * --->
      * --->
@@ -1988,10 +2008,12 @@ declare namespace FudgeCore {
      * ```
      */
     class LightDirectional extends Light {
-        constructor(_color?: Color);
     }
     /**
      * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
+     * Attached to a node by {@link ComponentLight}, the pivot matrix specifies the position of the light, it's shape and rotation.
+     * So with uneven scaling, other shapes than a perfect sphere, such as an oval or a disc, are possible, which creates a visible effect of the rotation too.
+     * The intensity of the light drops linearly from 1 in the center to 0 at the perimeter of the shape.
      * ```plaintext
      *         .\|/.
      *        -- o --
@@ -1999,10 +2021,11 @@ declare namespace FudgeCore {
      * ```
      */
     class LightPoint extends Light {
-        range: number;
     }
     /**
      * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
+     * Attached to a node by {@link ComponentLight}, the pivot matrix specifies the position of the light, the direction and the size and angles of the cone.
+     * The intensity of the light drops linearly from 1 in the center to 0 at the outer limits of the cone.
      * ```plaintext
      *          o
      *         /|\
@@ -2024,6 +2047,7 @@ declare namespace FudgeCore {
     }
     /**
       * Attaches a {@link Light} to the node
+      * The pivot matrix has different effects depending on the type of the {@link Light}. See there for details.
       * @authors Jirka Dell'Oro-Friedl, HFU, 2019
       */
     class ComponentLight extends Component {
@@ -2067,41 +2091,13 @@ declare namespace FudgeCore {
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
         mesh: Mesh;
-        showToCamera: boolean;
-        constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance, _showToCamera?: boolean);
+        constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance);
         get radius(): number;
         get skeleton(): SkeletonInstance;
         bindSkeleton(_skeleton: SkeletonInstance): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, size and all the defined values of the storage partition of the effect will cached here while evaluating the effect.
-     */
-    interface ParticleVariables {
-        [key: string]: number | number[];
-    }
-    /**
-     * Attaches a {@link ParticleEffect} to the node.
-     * @author Jonas Plotzky, HFU, 2020
-     */
-    class ComponentParticleSystem extends Component {
-        static readonly iSubclass: number;
-        variables: ParticleVariables;
-        private effect;
-        constructor(_particleEffect?: ParticleEffect, _size?: number);
-        get particleEffect(): ParticleEffect;
-        set particleEffect(_newParticleEffect: ParticleEffect);
-        get size(): number;
-        /**
-         * Sets the size of the particle effect. Caution: Setting this will result in the reevaluation of the system storage of the effect and the reinitialization of the randomNumbers array.
-         */
-        set size(_newSize: number);
-        evaluateStorage(_storageData: ParticleEffectData): void;
-        private initRandomNumbers;
     }
 }
 declare namespace FudgeCore {
@@ -2152,16 +2148,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         mtxLocal: Matrix4x4;
         constructor(_mtxInit?: Matrix4x4);
-        /**
-         * Adjusts the rotation to point the z-axis directly at the given target point in world space and tilts it to accord with the given up vector,
-         * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used.
-         */
-        lookAt(_targetWorld: Vector3, _up?: Vector3): void;
-        /**
-         * Adjusts the rotation to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
-         * respectively calculating yaw only. If no up vector is given, the previous up-vector is used.
-         */
-        showTo(_targetWorld: Vector3, _up?: Vector3): void;
         /**
          * recalculates this local matrix to yield the identical world matrix based on the given node.
          * Use rebase before appending the container of this component to another node while preserving its transformation in the world.
@@ -2215,7 +2201,7 @@ declare namespace FudgeCore {
         protected timeValueDelay: number;
         protected timeOutputTargetSet: number;
         protected idTimer: number;
-        constructor(_name: string, _factor?: number, _type?: CONTROL_TYPE, _active?: boolean);
+        constructor(_name: string, _factor?: number, _type?: CONTROL_TYPE, _delay?: number);
         /**
          * Set the time-object to be used when calculating the output in {@link CONTROL_TYPE.INTEGRAL}
          */
@@ -2652,17 +2638,13 @@ declare namespace FudgeCore {
     class Graph extends Node implements SerializableResource {
         idResource: string;
         type: string;
+        constructor(_name?: string);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        private hndMutate;
     }
 }
 declare namespace FudgeCore {
-    /**
-     * An instance of a {@link Graph}.
-     * This node keeps a reference to its resource an can thus optimize serialization
-     * @author Jirka Dell'Oro-Friedl, HFU, 2019
-     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
-     */
     class GraphInstance extends Node {
         #private;
         /**
@@ -2678,7 +2660,7 @@ declare namespace FudgeCore {
         reset(): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        connectToGraph(): void;
+        connectToGraph(): Promise<void>;
         /**
          * Set this node to be a recreation of the {@link Graph} given
          */
@@ -3005,7 +2987,14 @@ declare namespace FudgeCore {
          * Return a copy of this
          */
         get clone(): Matrix3x3;
+        /**
+         * Resets the matrix to the identity-matrix and clears cache. Used by the recycler to reset.
+         */
         recycle(): void;
+        /**
+         * Resets the matrix to the identity-matrix and clears cache.
+         */
+        reset(): void;
         /**
          * Add a translation by the given {@link Vector2} to this matrix
          */
@@ -3114,12 +3103,11 @@ declare namespace FudgeCore {
          * Computes and returns a matrix with the given translation, its z-axis pointing directly at the given target,
          * and a minimal angle between its y-axis and the given up-{@link Vector3}, respetively calculating yaw and pitch.
          */
-        static LOOK_AT(_translation: Vector3, _target: Vector3, _up?: Vector3): Matrix4x4;
+        static LOOK_AT(_translation: Vector3, _target: Vector3, _up?: Vector3, _restrict?: boolean): Matrix4x4;
         /**
          * Computes and returns a matrix with the given translation, its y-axis matching the given up-{@link Vector3}
          * and its z-axis facing towards the given target at a minimal angle, respetively calculating yaw only.
          */
-        static SHOW_TO(_translation: Vector3, _target: Vector3, _up?: Vector3): Matrix4x4;
         /**
          * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given {@link Vector3}.
          */
@@ -3194,7 +3182,14 @@ declare namespace FudgeCore {
          * Return a copy of this
          */
         get clone(): Matrix4x4;
+        /**
+         * Resets the matrix to the identity-matrix and clears cache. Used by the recycler to reset.
+         */
         recycle(): void;
+        /**
+         * Resets the matrix to the identity-matrix and clears cache.
+         */
+        reset(): void;
         /**
          * Rotate this matrix by given {@link Vector3} in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
          * The rotation is appended to already applied transforms, thus multiplied from the right. Set _fromLeft to true to switch and put it in front.
@@ -3219,17 +3214,15 @@ declare namespace FudgeCore {
          * respectively calculating yaw and pitch. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used.
          * When _preserveScaling is false, a rotated identity matrix is the result.
          */
-        lookAt(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
+        lookAt(_target: Vector3, _up?: Vector3, _restrict?: boolean): void;
         /**
          * Same as {@link Matrix4x4.lookAt}, but optimized and needs testing
          */
-        lookAtRotate(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
         /**
          * Adjusts the rotation of this matrix to match its y-axis with the given up-{@link Vector3} and facing its z-axis toward the given target at minimal angle,
          * respectively calculating yaw only. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used.
          * When _preserveScaling is false, a rotated identity matrix is the result.
          */
-        showTo(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
         /**
          * Add a translation by the given {@link Vector3} to this matrix.
          * If _local is true, translation occurs according to the current rotation and scaling of this matrix,
@@ -3270,7 +3263,6 @@ declare namespace FudgeCore {
         multiply(_matrix: Matrix4x4, _fromLeft?: boolean): void;
         /**
          * Calculates and returns the euler-angles representing the current rotation of this matrix.
-         * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate.
          */
         getEulerAngles(): Vector3;
         /**
@@ -3698,7 +3690,7 @@ declare namespace FudgeCore {
         get type(): string;
         get boundingBox(): Box;
         get radius(): number;
-        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): RenderBuffers;
+        useRenderBuffers(_shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers;
         getRenderBuffers(_shader: typeof Shader): RenderBuffers;
         deleteRenderBuffers(_shader: typeof Shader): void;
         clear(): void;
@@ -4089,149 +4081,6 @@ declare namespace FudgeCore {
          * returns the position associated with the vertex addressed, resolving references between vertices
          */
         bones(_index: number): Bone[];
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * A function taking input factors (time, index, size and self defined ones) as the argument. Returning a number.
-    */
-    interface ParticleClosure {
-        (_variables: ParticleVariables): number;
-    }
-    /**
-     * Factory class to create closures.
-     * @author Jonas Plotzky, HFU, 2020
-     */
-    class ParticleClosureFactory {
-        private static closures;
-        /**
-         * Creates a closure of the given function type and passes the parameters to it.
-         * @param _function The function type of the closure you want to create.
-         * @param _parameters The parameters, which should be functions themselves, passed to the created closure.
-         */
-        static createClosure(_function: string, _parameters: Function[]): ParticleClosure;
-        /**
-         * Creates a closure which will return the sum of the given parameters,
-         *  i.e. ```_parameters[0] + ... + _parameters[n]```.
-         */
-        private static createAddition;
-        /**
-         * Creates a closure which will return the subtraction of the given parameters,
-         *  i.e. ```_parameters[0] - _parameters[1]```.
-         */
-        private static createSubtraction;
-        /**
-          * Creates a closure which will return the product of the given parameters,
-          *  i.e. ```_parameters[0] * ... * _parameters[n]```.
-          */
-        private static createMultiplication;
-        /**
-         * Creates a closure which will return the division of the given parameters,
-         *  i.e. ```_parameters[0] / _parameters[1]```.
-         */
-        private static createDivision;
-        /**
-         * Creates a closure which will return the modulo of the given parameters,
-         *  i.e. ```_parameters[0] % _parameters[1]```.
-         */
-        private static createModulo;
-        /**
-         * Interpolates a linear function between two given points.
-         * - ```_parameters[0]``` will be the input value for the function.
-         * - ```_parameters[1]``` x start value.
-         * - ```_parameters[2]``` y start value.
-         * - ```_parameters[3]``` x end value.
-         * - ```_parameters[4]``` y end value.
-         */
-        private static createLinear;
-        /**
-         * Creates a polynomial function of third degree. A,b,c and d will be evaluated while parsing.
-         * - ```_parameters[0]``` will be the input value for the function.
-         * - ```_parameters[1]``` a value.
-         * - ```_parameters[2]``` b value.
-         * - ```_parameters[3]``` c value.
-         * - ```_parameters[4]``` d value.
-         */
-        private static createPolynomial3;
-        /**
-         * Creates a closure which will return the square root of the given parameter,
-         * ```parameters[0]``` will be the input value for the function.
-         */
-        private static createSquareRoot;
-        /**
-         * Creates a closure which will return a number chosen from the randomNumbers array in _variables.
-         * - ```_parameters[0]``` representing the index of the number which will be chosen.
-         */
-        private static createRandom;
-    }
-}
-declare namespace FudgeCore {
-    enum PARTICLE_VARIBALE_NAMES {
-        TIME = "time",
-        INDEX = "index",
-        SIZE = "size",
-        RANDOM_NUMBERS = "randomNumbers"
-    }
-    /**
-     * The data format used to parse and store the paticle effect
-     */
-    interface ParticleEffectData {
-        [identifier: string]: General;
-    }
-    /**
-     * Holds all the information which defines the particle effect. Can load the said information out of a json file.
-     * @authors Jonas Plotzky, HFU, 2020
-     */
-    class ParticleEffect extends Mutable implements SerializableResource {
-        name: string;
-        idResource: string;
-        url: RequestInfo;
-        storageSystem: ParticleEffectData;
-        storageUpdate: ParticleEffectData;
-        storageParticle: ParticleEffectData;
-        transformLocal: ParticleEffectData;
-        transformWorld: ParticleEffectData;
-        componentMutations: ParticleEffectData;
-        cachedMutators: {
-            [key: string]: Mutator;
-        };
-        private definedVariables;
-        constructor(_url?: RequestInfo);
-        /**
-         * Asynchronously loads the json from the given url and parses it initializing this particle effect.
-         */
-        load(_url: RequestInfo): Promise<void>;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        protected reduceMutator(_mutator: Mutator): void;
-        /**
-         * Parses the data initializing this particle effect with the corresponding closures
-         * @param _data The paticle effect data to parse.
-         */
-        private parse;
-        /**
-         * Creates entries in {@link definedVariables} for each defined closure in _data. Predefined variables (time, index...) and previously defined ones (in json) can not be overwritten.
-         * @param _data The paticle effect data to parse.
-         */
-        private preParseStorage;
-        /**
-         * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
-         * @param _data The particle effect data to parse recursivley.
-         */
-        private parseRecursively;
-        /**
-         * Parse the given closure data recursivley. Returns a function depending on the closure data.
-         * @param _data The closure data to parse recursively.
-         */
-        private parseClosure;
-        /**
-         * Create mutators from the given _data and cache them.
-         */
-        private cacheMutators;
-        /**
-         * Create an empty mutator from _data.
-         */
-        private createEmptyMutatorFrom;
     }
 }
 declare namespace FudgeCore {
@@ -5271,7 +5120,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
+    type MapLightTypeToLightList = Map<TypeOfLight, RecycableArray<ComponentLight>>;
     interface RenderPrepareOptions {
         ignorePhysics?: boolean;
     }
@@ -5283,23 +5132,22 @@ declare namespace FudgeCore {
         static pickBuffer: Int32Array;
         static nodesPhysics: RecycableArray<Node>;
         static componentsPick: RecycableArray<ComponentPick>;
+        static lights: MapLightTypeToLightList;
         private static nodesSimple;
         private static nodesAlpha;
-        private static nodesParticleSystem;
         private static timestampUpdate;
         /**
          * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
          * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
          * render passes.
          */
-        static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
+        static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _shadersUsed?: (typeof Shader)[]): void;
         /**
          * Used with a {@link Picker}-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted {@link Pick}-array
          */
         static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera): Pick[];
         static draw(_cmpCamera: ComponentCamera): void;
-        private static drawListParticleSystem;
         private static drawListAlpha;
         private static drawList;
         private static transformByPhysics;
@@ -5364,17 +5212,8 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Class that is used inside of {@link Render} to draw the particle effects of nodes which have a {@link ComponentParticleSystem} attached.
-     * @author Jonas Plotzky, HFU, 2020
-     */
     abstract class RenderParticles extends Render {
-        /**
-         * The render function for drawing a node which has a {@link ComponentParticleSystem} attached to it. The node represents a single particle of the particle system. Based on the attached ComponentParticleSystem the whole particle system will be drawn in its determined state.
-         */
-        static drawParticles(_node: Node, _nodeTransform: Matrix4x4, _cmpParticleSystem: ComponentParticleSystem, _cmpMesh: ComponentMesh, _cmpMaterial: ComponentMaterial, _cmpCamera: ComponentCamera): void;
-        private static applyTransform;
-        private static evaluateMutatorWith;
+        static drawParticles(): void;
     }
 }
 declare namespace FudgeCore {
@@ -5605,7 +5444,7 @@ declare namespace FudgeCore {
      * Keeps a list of the resources and generates ids to retrieve them.
      * Resources are objects referenced multiple times but supposed to be stored only once
      */
-    export abstract class Project {
+    export abstract class Project extends EventTargetStatic {
         static resources: Resources;
         static serialization: SerializationOfResources;
         static scriptNamespaces: ScriptNamespaces;
@@ -5620,7 +5459,8 @@ declare namespace FudgeCore {
         static register(_resource: SerializableResource, _idResource?: string): void;
         static deregister(_resource: SerializableResource): void;
         static clear(): void;
-        static getResourcesOfType<T>(_type: new (_args: General) => T): Resources;
+        static getResourcesByType<T>(_type: new (_args: General) => T): SerializableResource[];
+        static getResourcesByName(_name: string): SerializableResource[];
         /**
          * Generate a user readable and unique id using the type of the resource, the date and random numbers
          * @param _resource
@@ -5641,9 +5481,13 @@ declare namespace FudgeCore {
          * @param _replaceWithInstance if true (default), the node used as origin is replaced by a {@link GraphInstance} of the {@link Graph} created
          */
         static registerAsGraph(_node: Node, _replaceWithInstance?: boolean): Promise<Graph>;
+        /**
+         * Creates and returns a {@link GraphInstance} of the given {@link Graph}
+         * and connects it to the graph for synchronisation of mutation.
+         */
         static createGraphInstance(_graph: Graph): Promise<GraphInstance>;
         static registerGraphInstanceForResync(_instance: GraphInstance): void;
-        static resyncGraphInstances(_graph: Graph): void;
+        static resyncGraphInstances(_graph: Graph): Promise<void>;
         static registerScriptNamespace(_namespace: Object): void;
         static getComponentScripts(): ComponentScripts;
         static loadScript(_url: RequestInfo): Promise<void>;
@@ -6409,6 +6253,7 @@ declare namespace FudgeCore {
         static useProgram(this: typeof Shader): void;
         static createProgram(this: typeof Shader): void;
         protected static registerSubclass(_subclass: typeof Shader): number;
+        protected static insertDefines(_shader: string, _defines: string[]): string;
     }
 }
 declare namespace FudgeCore {
@@ -6526,6 +6371,11 @@ declare namespace FudgeCore {
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
+}
+declare namespace FudgeCore {
+    let shaderSources: {
+        [source: string]: string;
+    };
 }
 declare namespace FudgeCore {
     interface BoneList {
@@ -6783,7 +6633,7 @@ declare namespace FudgeCore {
         private idTimerAddedLast;
         constructor();
         /**
-         * Returns the game-time-object which starts automatically and serves as base for various internal operations.
+         * Returns representions of the time given in milliseconds in various formats defined in {@link TimeUnits}
          */
         static getUnits(_milliseconds: number): TimeUnits;
         /**

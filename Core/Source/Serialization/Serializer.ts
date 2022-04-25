@@ -105,7 +105,7 @@ namespace FudgeCore {
           return reconstruct;
         }
       } catch (_error) {
-        throw new Error(`Deserialization of ${path} failed: ` + _error);
+        throw new Error(`Deserialization of ${path}, ${Reflect.get(reconstruct, "idResource")} failed: ` + _error);
       }
       return null;
     }

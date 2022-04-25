@@ -1749,6 +1749,8 @@ var FudgeUserInterface;
         };
         hndKey = (_event) => {
             _event.stopPropagation();
+            if (_event.target != this)
+                return;
             // if (!this.label.disabled)
             //   return;
             // let content: TreeList<T> = <TreeList<T>>this.querySelector("ul");

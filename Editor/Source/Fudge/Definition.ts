@@ -11,12 +11,11 @@ namespace Fudge {
     CREATE_MESH,
     CREATE_MATERIAL,
     CREATE_GRAPH,
+    SYNC_INSTANCES,
     REMOVE_COMPONENT,
     ADD_JOINT,
-    TRANSLATE,
-    ROTATE,
-    SCALE,
-    DELETE_RESOURCE
+    DELETE_RESOURCE,
+    ILLUMINATE
   }
 
 
@@ -34,19 +33,6 @@ namespace Fudge {
     FULLSCREEN = "fullscreen"
   }
 
-
-  export enum EVENT_EDITOR {
-    SET_GRAPH = "setGraph",
-    FOCUS_NODE = "focusNode",
-    SET_PROJECT = "setProject",
-    UPDATE = "update",
-    REFRESH = "refresh",
-    DESTROY = "destroy",
-    CLEAR_PROJECT = "clearProject",
-    TRANSFORM = "transform"
-  }
-
-
   export enum PANEL {
     GRAPH = "PanelGraph",
     PROJECT = "PanelProject",
@@ -55,7 +41,6 @@ namespace Fudge {
     PARTICLE_SYSTEM = "PanelParticleSystem"
 
   }
-
 
   export enum VIEW {
     HIERARCHY = "ViewHierarchy",

@@ -14,11 +14,8 @@ namespace Fudge {
       this.fillContent();
 
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent, true);
-      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-      // this.dom.addEventListener(EVENT_EDITOR.FOCUS_RESOURCE, this.hndEvent);
-      // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
-      // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent, true);
+      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
     }
 
     //#region  ContextMenu
@@ -97,11 +94,12 @@ namespace Fudge {
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
-        case EVENT_EDITOR.SET_PROJECT:
-          this.resource = undefined;
-          break;
+        // case EVENT_EDITOR.SET_PROJECT:
+        //   this.resource = undefined;
+        //   break;
         case ƒui.EVENT.SELECT:
-          this.resource = _event.detail.data;
+          // let detail: EventDetail = <EventDetail>_event.detail;
+          this.resource = <ƒ.SerializableResource>(_event.detail.data);
           break;
         default:
           break;

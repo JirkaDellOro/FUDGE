@@ -13,10 +13,12 @@ namespace Fudge {
     private viewport: ƒ.Viewport;
     private canvas: HTMLCanvasElement;
     private graph: ƒ.Graph;
+    private viewGraph: ƒ.Node;
 
     constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
       this.graph = <ƒ.Graph>ƒ.Project.resources[_state["graph"]];
+
       this.createUserInterface();
 
       let title: string = `● Drop a graph from "Internal" here.\n`;
@@ -28,20 +30,24 @@ namespace Fudge {
       this.dom.tabIndex = 0;
 
       _container.on("resize", this.redraw);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.REFRESH, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent, true);
-      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
       this.dom.addEventListener("pointerdown", this.hndPointer);
     }
 
     createUserInterface(): void {
+      this.viewGraph = new ƒ.Node("ViewGraph");
+      let viewNode: ƒ.Node = new ƒ.Node("ViewNode");
+      let nodeLight: ƒ.Node = new ƒ.Node("ViewIllumination");
+      viewNode.addChild(nodeLight);
+      viewNode.addChild(this.viewGraph);
+      ƒAid.addStandardLightComponents(nodeLight);
+
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
       // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
       // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
@@ -53,7 +59,7 @@ namespace Fudge {
       // this.dom.append(this.canvas);
 
       this.viewport = new ƒ.Viewport();
-      this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+      this.viewport.initialize("ViewNode_Viewport", viewNode, cmpCamera, this.canvas);
       this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       // this.viewport.draw();
@@ -83,9 +89,13 @@ namespace Fudge {
       this.graph.broadcastEvent(new Event(ƒ.EVENT.DISCONNECT_JOINT));
       ƒ.Physics.connectJoints();
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-      this.viewport.setBranch(this.graph);
+      // this.viewport.setBranch(this.graph);
+      this.viewGraph.removeAllChildren();
+      this.viewGraph.appendChild(this.graph);
+      this.checkIllumination();
       this.redraw();
     }
+
 
     //#region  ContextMenu
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
@@ -109,11 +119,12 @@ namespace Fudge {
         ]
       });
       menu.append(item);
+
       return menu;
     }
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id] || _item.id}`);
+      ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
 
       switch (_item.id) {
         case TRANSFORM.TRANSLATE:
@@ -160,33 +171,47 @@ namespace Fudge {
     protected hndDrop(_event: DragEvent, _viewSource: View): void {
       let source: Object = _viewSource.getDragDropSources()[0];
       // this.setGraph(<ƒ.Node>source);
-      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
+      this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: <ƒ.Graph>source } });
+    }
+
+    private checkIllumination(): void {
+      let lightsPresent: boolean = false;
+      ƒ.Render.prepare(this.graph);
+      ƒ.Render.lights.forEach((_array: ƒ.RecycableArray<ƒ.ComponentLight>) => lightsPresent ||= _array.length > 0);
+      this.illuminateGraph(!lightsPresent);
+      this.setTitle(`${lightsPresent ? "RENDER" : "Render"} | ${this.graph.name}`);
+    }
+
+    private illuminateGraph(_on: boolean): void {
+      let nodeLight: ƒ.Node = this.viewGraph.getParent().getChildrenByName("ViewIllumination")[0];
+      nodeLight.activate(_on);
+      this.redraw();
     }
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
-        case EVENT_EDITOR.CLEAR_PROJECT:
-          this.setGraph(null);
+        case EVENT_EDITOR.SELECT:
+          let detail: EventDetail = <EventDetail>_event.detail;
+          if (detail.node) {
+            this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
+            ƒ.Render.prepare(this.cmrOrbit);
+          } else
+            this.setGraph(_event.detail.graph);
           break;
-        case EVENT_EDITOR.SET_GRAPH:
-          this.setGraph(_event.detail);
-          break;
-        case EVENT_EDITOR.FOCUS_NODE:
-          this.cmrOrbit.mtxLocal.translation = _event.detail.mtxWorld.translation;
-          ƒ.Render.prepare(this.cmrOrbit);
         // break;
         case ƒUi.EVENT.MUTATE:
         case ƒUi.EVENT.DELETE:
-        case EVENT_EDITOR.UPDATE:
-        case EVENT_EDITOR.REFRESH:
+        case EVENT_EDITOR.MODIFY:
+          this.checkIllumination();
           this.redraw();
       }
     }
 
-    private hndPick = (_event: CustomEvent): void => {
+    private hndPick = (_event: FudgeEvent): void => {
       let picked: ƒ.Node = _event.detail.node;
 
-      // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: true, detail: picked }));
+      //TODO: watch out, two selects
+      this.dispatch(EVENT_EDITOR.SELECT, {  bubbles: true, detail: { node: picked } });
       this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: picked } }));
     }
 
@@ -216,10 +241,10 @@ namespace Fudge {
         return;
 
       this.canvas.requestPointerLock();
-      let detail: Object = {
+      let data: Object = {
         transform: Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera, inverted: _event.shiftKey
       };
-      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: detail }));
+      this.dispatch(EVENT_EDITOR.TRANSFORM, {  bubbles: true, detail: { transform: data } });
       this.redraw();
     }
 

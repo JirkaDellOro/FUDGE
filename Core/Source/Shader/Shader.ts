@@ -16,7 +16,7 @@ namespace FudgeCore {
     public static define: string[];
     public static vertexShaderSource: string;
     public static fragmentShaderSource: string;
-    
+
     public static program: WebGLProgram;
     public static attributes: { [name: string]: number };
     public static uniforms: { [name: string]: WebGLUniformLocation };
@@ -28,8 +28,20 @@ namespace FudgeCore {
 
     public static deleteProgram(this: typeof Shader): void {/* injected by decorator */ }
     public static useProgram(this: typeof Shader): void {/* injected by decorator */ }
-    public static createProgram(this: typeof Shader): void {/* injected by decorator */ } 
-    
+    public static createProgram(this: typeof Shader): void {/* injected by decorator */ }
+
     protected static registerSubclass(_subclass: typeof Shader): number { return Shader.subclasses.push(_subclass) - 1; }
+
+    // replace the mandatory header of the shader with itself plus the definitions given
+    protected static insertDefines(_shader: string, _defines: string[]): string {
+      if (!_defines)
+        return _shader;
+
+      let code: string = `#version 300 es\n`;
+      for (let define of _defines)
+        code += `#define ${define}\n`;
+
+      return _shader.replace("#version 300 es", code);
+    }
   }
 }

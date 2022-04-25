@@ -10,12 +10,11 @@ declare namespace Fudge {
         CREATE_MESH = 7,
         CREATE_MATERIAL = 8,
         CREATE_GRAPH = 9,
-        REMOVE_COMPONENT = 10,
-        ADD_JOINT = 11,
-        TRANSLATE = 12,
-        ROTATE = 13,
-        SCALE = 14,
-        DELETE_RESOURCE = 15
+        SYNC_INSTANCES = 10,
+        REMOVE_COMPONENT = 11,
+        ADD_JOINT = 12,
+        DELETE_RESOURCE = 13,
+        ILLUMINATE = 14
     }
     enum MENU {
         QUIT = "quit",
@@ -29,16 +28,6 @@ declare namespace Fudge {
         PANEL_HELP_OPEN = "panelHelpOpen",
         PANEL_PARTICLE_SYSTEM_OPEN = "panelParticleSystemOpen",
         FULLSCREEN = "fullscreen"
-    }
-    enum EVENT_EDITOR {
-        SET_GRAPH = "setGraph",
-        FOCUS_NODE = "focusNode",
-        SET_PROJECT = "setProject",
-        UPDATE = "update",
-        REFRESH = "refresh",
-        DESTROY = "destroy",
-        CLEAR_PROJECT = "clearProject",
-        TRANSFORM = "transform"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
