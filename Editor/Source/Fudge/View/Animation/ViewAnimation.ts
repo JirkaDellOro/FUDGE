@@ -51,7 +51,7 @@ namespace Fudge {
       this.setAnimation(null);
       this.createUserInterface();
       
-      this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndSelect);
       this.canvas.addEventListener("pointermove", this.hndPointerMove);
       this.canvas.addEventListener("pointerdown", this.hndPointerDown);
@@ -124,6 +124,7 @@ namespace Fudge {
     }
 
     private hndPointerDown = (_event: PointerEvent): void => {
+      //  TODO: rework events
       this.setTime(_event.offsetX / this.sheet.scale.x);
 
       let obj: ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent = this.sheet.getObjectAtPoint(_event.offsetX, _event.offsetY);
@@ -131,6 +132,7 @@ namespace Fudge {
 
       if (obj["label"]) {
         console.log(obj["label"]);
+        // TODO: replace with editor events. use dispatch event from view?
         this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
       }
       else if (obj["event"]) {
@@ -151,7 +153,7 @@ namespace Fudge {
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
-        case EVENT_EDITOR.FOCUS_NODE:
+        case EVENT_EDITOR.FOCUS:
           this.focusNode(_event.detail);
           break;
       }
@@ -374,7 +376,7 @@ namespace Fudge {
         _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
 
       this.controller.updateAnimationUserInterface(_m);
-      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.UPDATE, { bubbles: true }));
+      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
     }
 
     private setTime(_time: number, updateDisplay: boolean = true): void {

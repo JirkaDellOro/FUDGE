@@ -48,8 +48,8 @@ namespace Fudge {
         { typeId: LayoutManager.LocationSelector.TypeId.Root }
       ]);
 
-      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndFocusNode);
 
       this.setTitle("Animation | " );
@@ -70,7 +70,7 @@ namespace Fudge {
     }
 
     private hndFocusNode = (_event: CustomEvent): void => {
-      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: false, detail: _event.detail.data });
+      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.FOCUS, { bubbles: false, detail: _event.detail.data });
       this.broadcastEvent(event);
     }
   }
