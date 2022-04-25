@@ -15,12 +15,13 @@ namespace FudgeCore {
       shader.useProgram();
 
       //TODO: getting translationCamera is similiar to what happens in _cmpCamera.ViewProjectionMatrix. Further clean up is needed
-      let translationCamera: Vector3 = _cmpCamera.mtxPivot.translation;
-      try {
-        translationCamera = Matrix4x4.MULTIPLICATION(_cmpCamera.node.mtxWorld, _cmpCamera.mtxPivot).translation;
-      } catch (_error) {
-        // no container node or no world transformation found -> continue with pivot only
-      }
+      // TODO: use extra component for billboard effect
+      // let translationCamera: Vector3 = _cmpCamera.mtxPivot.translation;
+      // try {
+      //   translationCamera = Matrix4x4.MULTIPLICATION(_cmpCamera.node.mtxWorld, _cmpCamera.mtxPivot).translation;
+      // } catch (_error) {
+      //   // no container node or no world transformation found -> continue with pivot only
+      // }
       let mtxWorldToView: Matrix4x4 = _cmpCamera.mtxWorldToView;
 
       let effect: ParticleEffect = _cmpParticleSystem.particleEffect;
@@ -59,8 +60,8 @@ namespace FudgeCore {
         let mtxFinal: Matrix4x4 = Matrix4x4.IDENTITY();
         mtxFinal.multiply(_nodeTransform);
         this.applyTransform(mtxFinal, dataTransformLocal, cachedMutators, variables);
-        if (_cmpMesh.showToCamera)
-          mtxFinal.showTo(translationCamera);
+        // if (_cmpMesh.showToCamera)
+          // mtxFinal.showTo(translationCamera); // TODO: use extra component for billboard effect
         mtxFinal.multiply(_cmpMesh.mtxPivot);
         if (dataTransformWorld) {
           let transformWorld: Matrix4x4 = Matrix4x4.IDENTITY();
