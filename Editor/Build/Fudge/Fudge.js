@@ -2180,7 +2180,8 @@ var Fudge;
             this.dom.appendChild(this.canvas);
             this.dom.appendChild(this.hover);
             this.animation = _animation;
-            // this.openAnimation();
+            if (!("components" in this.animation.animationStructure))
+                this.openAnimation(); //TODO: remove this line late on
             let animationMutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
             if (!animationMutator)
                 animationMutator = {};
@@ -2361,7 +2362,7 @@ var Fudge;
             if (!_m)
                 _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
             this.controller.updateAnimationUserInterface(_m);
-            this.dispatch(Fudge.EVENT_EDITOR.MODIFY, {});
+            this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
         }
         setTime(_time, updateDisplay = true) {
             if (!this.animation)

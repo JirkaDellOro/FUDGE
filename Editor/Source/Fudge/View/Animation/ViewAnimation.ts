@@ -177,7 +177,7 @@ namespace Fudge {
       this.dom.appendChild(this.hover);
 
       this.animation = _animation;
-      // this.openAnimation();
+      if (!("components" in this.animation.animationStructure)) this.openAnimation(); //TODO: remove this line late on
       let animationMutator: ƒ.Mutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
       if (!animationMutator) animationMutator = {};
       this.attributeList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
@@ -375,7 +375,7 @@ namespace Fudge {
         _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
 
       this.controller.updateAnimationUserInterface(_m);
-      this.dispatch(EVENT_EDITOR.MODIFY, { });
+      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
     }
 
     private setTime(_time: number, updateDisplay: boolean = true): void {
