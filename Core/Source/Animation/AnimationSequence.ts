@@ -93,6 +93,7 @@ namespace FudgeCore {
       }
       return s;
     }
+    
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       for (let i: number = 0; i < _serialization.keys.length; i++) {
         // this.keys.push(<AnimationKey>Serializer.deserialize(_serialization.keys[i]));

@@ -6,7 +6,7 @@ namespace FudgeCore {
    * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
    */
   export interface AnimationStructure {
-    [attribute: string]: Serialization | AnimationSequence;
+    [attribute: string]: AnimationStructure | AnimationSequence | Serialization; //TODO: remove serialization from here
   }
 
   /**
@@ -76,14 +76,14 @@ namespace FudgeCore {
    * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class Animation extends Mutable implements SerializableResource {
-    idResource: string = undefined;
-    name: string;
-    totalTime: number = 0;
-    labels: AnimationLabel = {};
+    public idResource: string = undefined;
+    public name: string;
+    public totalTime: number = 0;
+    public labels: AnimationLabel = {};
     // stepsPerSecond: number = 10;
-    animationStructure: AnimationStructure;
-    events: AnimationEventTrigger = {};
-    private framesPerSecond: number = 60;
+    public animationStructure: AnimationStructure;
+    public events: AnimationEventTrigger = {};
+    private framesPerSecond: number = 60; // TODO: change this and its accessors to #framesPerSecond?
 
     // processed eventlist and animation strucutres for playback.
     private eventsProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
@@ -293,10 +293,11 @@ namespace FudgeCore {
     private traverseStructureForSerialisation(_structure: AnimationStructure): Serialization {
       let newSerialization: Serialization = {};
       for (let n in _structure) {
-        if (_structure[n] instanceof AnimationSequence) {
-          newSerialization[n] = _structure[n].serialize();
+        let structureOrSequence: AnimationStructure | AnimationSequence = _structure[n];
+        if (structureOrSequence instanceof AnimationSequence) {
+          newSerialization[n] = structureOrSequence.serialize();
         } else {
-          newSerialization[n] = this.traverseStructureForSerialisation(<AnimationStructure>_structure[n]);
+          newSerialization[n] = this.traverseStructureForSerialisation(structureOrSequence);
         }
       }
       return newSerialization;
@@ -311,7 +312,7 @@ namespace FudgeCore {
       for (let n in _serialization) {
         if (_serialization[n].animationSequence) {
           let animSeq: AnimationSequence = new AnimationSequence();
-          newStructure[n] = await animSeq.deserialize(_serialization[n]);
+          newStructure[n] = <AnimationSequence>(await animSeq.deserialize(_serialization[n]));
         } else {
           newStructure[n] = await this.traverseStructureForDeserialisation(_serialization[n]);
         }
