@@ -255,30 +255,21 @@ namespace FudgeCore {
      * Applies a Mutator from {@link Animation} to all its components and transfers it to its children.
      */
     public applyAnimation(_mutator: Mutator): void {
-      if (_mutator.components) {
-        for (let componentName in _mutator.components) {
-          if (this.components[componentName]) {
-            let mutatorOfComponent: Mutator = <Mutator>_mutator.components;
-            for (let i in mutatorOfComponent[componentName]) {
-              if (this.components[componentName][+i]) {
-                let componentToMutate: Component = this.components[componentName][+i];
-                let mutatorArray: Mutator[] = (<Array<Mutator>>mutatorOfComponent[componentName]);
-                let mutatorWithComponentName: Mutator = <Mutator>mutatorArray[+i];
-                for (let cname in mutatorWithComponentName) {   // trick used to get the only entry in the list
-                  let mutatorToGive: Mutator = <Mutator>mutatorWithComponentName[cname];
-                  componentToMutate.mutate(mutatorToGive);
-                }
-              }
+      if ("components" in _mutator) {
+        for (const componentType in _mutator.components) {
+          let componentsOfType: Component[] = this.components[componentType]; // TODO: add errors if node doesn't contain property
+          let mutatorsForType: Mutator[] = _mutator.components[componentType];
+          if (componentsOfType != undefined && mutatorsForType != undefined) {
+            for (const i in mutatorsForType) {
+              componentsOfType[i].mutate(mutatorsForType[i]);
             }
           }
         }
       }
-      if (_mutator.children) {
-        for (let i: number = 0; i < (<Array<Object>>_mutator.children).length; i++) {
-          let name: string = (<Node>(<Array<Mutator>>_mutator.children)[i]["ƒ.Node"]).name;
-          let childNodes: Node[] = this.getChildrenByName(name);
-          for (let childNode of childNodes) {
-            childNode.applyAnimation(<Mutator>(<Array<Mutator>>_mutator.children)[i]["ƒ.Node"]);
+      if ("children" in _mutator) {
+        for (const childName in _mutator.children) {
+          for (const childNode of this.getChildrenByName(childName)) {
+            childNode.applyAnimation(_mutator.children[childName]);
           }
         }
       }
