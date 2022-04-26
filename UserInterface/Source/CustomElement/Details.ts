@@ -7,7 +7,7 @@ namespace FudgeUserInterface {
     public constructor(_legend: string = "", _type: string) {
       super();
       // TODO: check if this should be removed after changing animation structure to look more like a mutator
-      this.setAttribute("key", _legend.replaceAll(".", "")); // remove "." from key, since "." are not allowed as attributes for querySelector
+      this.setAttribute("key", _legend);
       if (!isNaN(Number(_legend)))
         // if key is a number, as with arrays, prefix with "ƒ", since numbers are not allowed as attributes for querySelector
         this.setAttribute("key", "ƒ" + _legend);

@@ -889,7 +889,7 @@ var Fudge;
         }
         static updateAnimationStructure(_domElement, _animationStructure, _time, _mutatorForNode) {
             for (let key in _animationStructure) {
-                let element = ƒUi.Controller.findChildElementByKey(_domElement, key.replaceAll(".", ""));
+                let element = ƒUi.Controller.findChildElementByKey(_domElement, key);
                 if (element == null)
                     continue;
                 if (element instanceof ƒUi.CustomElement) {

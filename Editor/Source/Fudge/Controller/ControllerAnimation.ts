@@ -15,7 +15,7 @@ namespace Fudge {
 
       public static updateAnimationStructure(_domElement: HTMLElement, _animationStructure: ƒ.Serialization | ƒ.AnimationSequence, _time: number, _mutatorForNode: ƒ.Mutator): ƒ.Mutator {
         for (let key in _animationStructure) {
-          let element: HTMLInputElement = <HTMLInputElement>ƒUi.Controller.findChildElementByKey(_domElement, key.replaceAll(".", ""));
+          let element: HTMLInputElement = <HTMLInputElement>ƒUi.Controller.findChildElementByKey(_domElement, key);
           if (element == null)
             continue;
 
