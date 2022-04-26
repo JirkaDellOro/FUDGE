@@ -70,6 +70,8 @@ A collection of various other documents and resources, including unmaintained ex
 - Selection-Sets to store temporary Groups
 - Advanced texturing
 - Input-Manager  
+- Pathfinding System
+
 ## In Progress
 - glTF Importer
 - Skeletal Animation
@@ -77,6 +79,7 @@ A collection of various other documents and resources, including unmaintained ex
 - VR Components
 - Particle Editor
 - Animation Editor
+
 ## Done  
 
 | Name               | Area                              |

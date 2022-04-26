@@ -160,8 +160,8 @@ namespace FudgeCore {
     public get scaling(): Vector2 {
       if (!this.vectors.scaling)
         this.vectors.scaling = new Vector2(
-          Math.hypot(this.data[0], this.data[1]) * (this.data[0] < 0 ? -1 : 1),
-          Math.hypot(this.data[3], this.data[4]) * (this.data[4] < 0 ? -1 : 1)
+          Math.hypot(this.data[0], this.data[1]), // * (this.data[0] < 0 ? -1 : 1),
+          Math.hypot(this.data[3], this.data[4]) // * (this.data[4] < 0 ? -1 : 1)
         );
       return this.vectors.scaling; // .clone;
     }
