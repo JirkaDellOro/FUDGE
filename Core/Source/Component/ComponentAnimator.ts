@@ -10,11 +10,11 @@ namespace FudgeCore {
   export class ComponentAnimator extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentAnimator);
     //TODO: add functionality to blend from one animation to another.
-    animation: Animation;
-    playmode: ANIMATION_PLAYMODE;
-    playback: ANIMATION_PLAYBACK;
-    scaleWithGameTime: boolean = true;
-    animateInEditor: boolean = false;
+    public animation: Animation;
+    public playmode: ANIMATION_PLAYMODE;
+    public playback: ANIMATION_PLAYBACK;
+    public scaleWithGameTime: boolean = true;
+    public animateInEditor: boolean = false;
 
     #scale: number = 1;
     #timeLocal: Time;
@@ -99,7 +99,7 @@ namespace FudgeCore {
       serialization.playback = this.playback;
       serialization.scale = this.scale;
       serialization.scaleWithGameTime = this.scaleWithGameTime;
-      // serialization.animateInEditor = this.animateInEditor;
+      serialization.animateInEditor = this.animateInEditor;
       serialization[super.constructor.name] = super.serialize();
 
       return serialization;
@@ -112,7 +112,7 @@ namespace FudgeCore {
       this.playmode = _serialization.playmode;
       this.scale = _serialization.scale;
       this.scaleWithGameTime = _serialization.scaleWithGameTime;
-      // this.animateInEditor = _serialization.animateInEditor;
+      this.animateInEditor = _serialization.animateInEditor;
 
       return this;
     }
