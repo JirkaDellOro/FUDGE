@@ -66,7 +66,7 @@ namespace Fudge {
           let viewSource: View = View.getViewSource(_event);
           _this.hndDrop(_event, viewSource);
         },
-        true);
+        false);
 
       return View.idCount++;
     }

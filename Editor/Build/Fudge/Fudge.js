@@ -983,7 +983,7 @@ var Fudge;
                 // _event.stopPropagation();
                 let viewSource = View.getViewSource(_event);
                 _this.hndDrop(_event, viewSource);
-            }, true);
+            }, false);
             return View.idCount++;
         }
         setTitle(_title) {
