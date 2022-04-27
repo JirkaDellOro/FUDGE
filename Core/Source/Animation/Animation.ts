@@ -253,7 +253,7 @@ namespace FudgeCore {
       for (let name in this.events) {
         s.events[name] = this.events[name];
       }
-      s.animationStructure = this.traverseStructureForSerialisation(this.animationStructure);
+      s.animationStructure = this.traverseStructureForSerialization(this.animationStructure);
       return s;
     }
 
@@ -272,7 +272,7 @@ namespace FudgeCore {
       }
       this.eventsProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
 
-      this.animationStructure = await this.traverseStructureForDeserialisation(_serialization.animationStructure);
+      this.animationStructure = await this.traverseStructureForDeserialization(_serialization.animationStructure);
 
       this.animationStructuresProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
 
@@ -290,34 +290,41 @@ namespace FudgeCore {
      * @param _structure The Animation Structure at the current level to transform into the Serialization.
      * @returns the filled Serialization.
      */
-    private traverseStructureForSerialisation(_structure: AnimationStructure): Serialization {
-      let newSerialization: Serialization = {};
+    private traverseStructureForSerialization(_structure: AnimationStructure): Serialization {
+      let serialization: Serialization = {};
       for (let n in _structure) {
         let structureOrSequence: AnimationStructure | AnimationSequence = _structure[n];
         if (structureOrSequence instanceof AnimationSequence) {
-          newSerialization[n] = structureOrSequence.serialize();
+          serialization[n] = structureOrSequence.serialize();
         } else {
-          newSerialization[n] = this.traverseStructureForSerialisation(structureOrSequence);
+          if (Component.subclasses.map(type => type.name).includes(n)) { //TODO: check if this mapping should rather be done before recursing, this information is acutually static
+            serialization[n] = [];
+            for (const i in structureOrSequence) {
+              (<Serialization[]>serialization[n]).push(this.traverseStructureForSerialization(<AnimationStructure>structureOrSequence[i]));
+            }
+          } else {
+            serialization[n] = this.traverseStructureForSerialization(structureOrSequence);
+          }
         }
       }
-      return newSerialization;
+      return serialization;
     }
     /**
      * Traverses a Serialization to create a new AnimationStructure.
      * @param _serialization The serialization to transfer into an AnimationStructure
      * @returns the newly created AnimationStructure.
      */
-    private async traverseStructureForDeserialisation(_serialization: Serialization): Promise<AnimationStructure> {
-      let newStructure: AnimationStructure = {};
+    private async traverseStructureForDeserialization(_serialization: Serialization): Promise<AnimationStructure> {
+      let structure: AnimationStructure = {};
       for (let n in _serialization) {
         if (_serialization[n].animationSequence) {
           let animSeq: AnimationSequence = new AnimationSequence();
-          newStructure[n] = <AnimationSequence>(await animSeq.deserialize(_serialization[n]));
+          structure[n] = <AnimationSequence>(await animSeq.deserialize(_serialization[n]));
         } else {
-          newStructure[n] = await this.traverseStructureForDeserialisation(_serialization[n]);
+          structure[n] = await this.traverseStructureForDeserialization(_serialization[n]);
         }
       }
-      return newStructure;
+      return structure;
     }
     //#endregion
 

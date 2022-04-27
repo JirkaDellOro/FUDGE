@@ -1427,13 +1427,13 @@ declare namespace FudgeCore {
          * @param _structure The Animation Structure at the current level to transform into the Serialization.
          * @returns the filled Serialization.
          */
-        private traverseStructureForSerialisation;
+        private traverseStructureForSerialization;
         /**
          * Traverses a Serialization to create a new AnimationStructure.
          * @param _serialization The serialization to transfer into an AnimationStructure
          * @returns the newly created AnimationStructure.
          */
-        private traverseStructureForDeserialisation;
+        private traverseStructureForDeserialization;
         /**
          * Finds the list of events to be used with these settings.
          * @param _direction The direction the animation is playing in.
