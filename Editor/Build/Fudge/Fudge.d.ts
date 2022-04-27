@@ -32,7 +32,8 @@ declare namespace Fudge {
         REMOVE_COMPONENT = 12,
         ADD_JOINT = 13,
         DELETE_RESOURCE = 14,
-        ILLUMINATE = 15
+        ILLUMINATE = 15,
+        ADD_PROPERTY = 16
     }
     enum MENU {
         QUIT = "quit",
@@ -499,6 +500,11 @@ declare namespace Fudge {
         private idInterval;
         constructor(_container: ComponentContainer, _state: Object);
         openAnimation(): void;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private addPropertyFromPath;
+        private getNodeSubmenu;
+        private getMutatorSubmenu;
         private createUserInterface;
         private hndPointerDown;
         private hndPointerMove;

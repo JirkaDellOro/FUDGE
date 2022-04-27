@@ -43,6 +43,7 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 13] = "ADD_JOINT";
         CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 14] = "DELETE_RESOURCE";
         CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 15] = "ILLUMINATE";
+        CONTEXTMENU[CONTEXTMENU["ADD_PROPERTY"] = 16] = "ADD_PROPERTY";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -1722,6 +1723,7 @@ var Fudge;
             super(_container, _state);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.RENDER, Fudge.ViewRender);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
+            // this.goldenLayout.registerComponentConstructor(VIEW.COMPONENTS, ViewComponents);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.ANIMATION, Fudge.ViewAnimation);
             const config = {
                 type: "column",
@@ -1741,13 +1743,19 @@ var Fudge;
                                 componentState: _state,
                                 title: "HIERARCHY"
                             }
+                            // {
+                            //   type: "component",
+                            //   componentType: VIEW.COMPONENTS,
+                            //   componentState: _state,
+                            //   title: "COMPONENTS"
+                            // }
                         ]
                     },
                     {
                         type: "component",
                         componentType: Fudge.VIEW.ANIMATION,
                         componentState: _state,
-                        title: "Animator"
+                        title: "ANIMATION"
                     }
                 ]
             };
@@ -1757,6 +1765,8 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
+            // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
+            // this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
             this.setTitle("Animation | ");
         }
         getState() {
@@ -2070,6 +2080,7 @@ var Fudge;
             this.createUserInterface();
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndSelect);
+            this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.canvas.addEventListener("pointermove", this.hndPointerMove);
             this.canvas.addEventListener("pointerdown", this.hndPointerDown);
             this.toolbar.addEventListener("click", this.hndToolbarClick);
@@ -2107,6 +2118,94 @@ var Fudge;
             // console.log(this.node);
             // this.cmpAnimator = new ƒ.ComponentAnimator(this.animation);
         }
+        //#region  ContextMenu
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let path = [];
+            if (this.node != undefined) {
+                let item;
+                item = new Fudge.remote.MenuItem({
+                    label: "Add Property",
+                    submenu: this.getNodeSubmenu(this.node, path, _callback)
+                });
+                menu.append(item);
+            }
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            let choice = Number(_item.id);
+            ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
+            // if (!property && (choice == CONTEXTMENU.CREATE_MESH || choice == CONTEXTMENU.CREATE_MATERIAL)) {
+            //   alert("Funky Electron-Error... please try again");
+            //   return;
+            // }
+            switch (choice) {
+                case Fudge.CONTEXTMENU.ADD_PROPERTY:
+                    let path = _item["path"];
+                    this.addPropertyFromPath(this.animation.animationStructure, path);
+                    this.dispatch(Fudge.EVENT_EDITOR.MODIFY, {});
+                    this.setAnimation(this.animation); // TODO: use modify event for this
+                    break;
+            }
+        }
+        addPropertyFromPath(_animationStructureOrSequence, _path) {
+            if (!(_animationStructureOrSequence instanceof ƒ.AnimationSequence)) {
+                let property = _path[0];
+                if (_path[1] == undefined) {
+                    if (_animationStructureOrSequence[property] == undefined)
+                        _animationStructureOrSequence[property] = new ƒ.AnimationSequence();
+                    return;
+                }
+                else {
+                    if (_animationStructureOrSequence[property] == undefined)
+                        _animationStructureOrSequence[property] = {};
+                    this.addPropertyFromPath(_animationStructureOrSequence[property], _path.slice(1));
+                }
+            }
+        }
+        getNodeSubmenu(_node, _path, _callback) {
+            const menu = new Fudge.remote.Menu();
+            for (const anyComponent of ƒ.Component.subclasses) {
+                //@ts-ignore
+                _node.getComponents(anyComponent).forEach((component, index) => {
+                    let path = Object.assign([], _path);
+                    path.push("components");
+                    path.push(component.type);
+                    path.push(index.toString());
+                    let item;
+                    item = new Fudge.remote.MenuItem({ label: component.type, submenu: this.getMutatorSubmenu(component.getMutator(), path, _callback) });
+                    menu.append(item);
+                });
+            }
+            for (const child of _node.getChildren()) {
+                let path = Object.assign([], _path);
+                path.push("children");
+                path.push(child.name);
+                let item;
+                item = new Fudge.remote.MenuItem({ label: child.name, submenu: this.getNodeSubmenu(child, path, _callback) });
+                menu.append(item);
+            }
+            return menu;
+        }
+        getMutatorSubmenu(_mutator, _path, _callback) {
+            const menu = new Fudge.remote.Menu();
+            for (const property in _mutator) {
+                let item;
+                let path = Object.assign([], _path);
+                path.push(property);
+                if (typeof _mutator[property] === "object") {
+                    item = new Fudge.remote.MenuItem({ label: property, submenu: this.getMutatorSubmenu(_mutator[property], path, _callback) });
+                }
+                else {
+                    item = new Fudge.remote.MenuItem({ label: property, id: String(Fudge.CONTEXTMENU.ADD_PROPERTY), click: _callback });
+                    //@ts-ignore
+                    item.overrideProperty("path", path);
+                }
+                menu.append(item);
+            }
+            return menu;
+        }
+        //#endregion
         createUserInterface() {
             this.toolbar = document.createElement("div");
             this.toolbar.id = "toolbar";
@@ -2167,6 +2266,7 @@ var Fudge;
         focusNode(_node) {
             this.node = _node;
             this.cmpAnimator = _node?.getComponent(ƒ.ComponentAnimator);
+            this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             this.setAnimation(this.cmpAnimator?.animation);
         }
         setAnimation(_animation) {

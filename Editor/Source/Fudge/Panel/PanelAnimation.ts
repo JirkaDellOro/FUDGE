@@ -13,6 +13,7 @@ namespace Fudge {
 
       this.goldenLayout.registerComponentConstructor(VIEW.RENDER, ViewRender);
       this.goldenLayout.registerComponentConstructor(VIEW.HIERARCHY, ViewHierarchy);
+      // this.goldenLayout.registerComponentConstructor(VIEW.COMPONENTS, ViewComponents);
       this.goldenLayout.registerComponentConstructor(VIEW.ANIMATION, ViewAnimation);
 
       const config: RowOrColumnItemConfig = {
@@ -33,13 +34,19 @@ namespace Fudge {
                 componentState: _state,
                 title: "HIERARCHY"
               }
+              // {
+              //   type: "component",
+              //   componentType: VIEW.COMPONENTS,
+              //   componentState: _state,
+              //   title: "COMPONENTS"
+              // }
             ]
           },
           {
             type: "component",
             componentType: VIEW.ANIMATION,
             componentState: _state,
-            title: "Animator"
+            title: "ANIMATION"
           }
         ]
       };
@@ -51,6 +58,9 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
+
+      // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
+      // this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
 
       this.setTitle("Animation | " );
     }

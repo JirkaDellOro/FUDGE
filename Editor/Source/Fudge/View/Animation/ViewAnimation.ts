@@ -53,6 +53,7 @@ namespace Fudge {
       
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndSelect);
+      this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.canvas.addEventListener("pointermove", this.hndPointerMove);
       this.canvas.addEventListener("pointerdown", this.hndPointerDown);
       this.toolbar.addEventListener("click", this.hndToolbarClick);
@@ -94,6 +95,114 @@ namespace Fudge {
       // console.log(this.node);
       // this.cmpAnimator = new ƒ.ComponentAnimator(this.animation);
     }
+
+    //#region  ContextMenu
+    protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
+      const menu: Electron.Menu = new remote.Menu();
+      let path: string[] = [];
+
+      if (this.node != undefined) {
+        let item: Electron.MenuItem;
+        item = new remote.MenuItem({
+          label: "Add Property",
+          submenu: this.getNodeSubmenu(this.node, path, _callback)
+        });
+        menu.append(item);
+      }
+
+      return menu;
+    }
+
+    protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      let choice: CONTEXTMENU = Number(_item.id);
+      ƒ.Debug.fudge(`MenuSelect | id: ${CONTEXTMENU[_item.id]} | event: ${_event}`);
+      // if (!property && (choice == CONTEXTMENU.CREATE_MESH || choice == CONTEXTMENU.CREATE_MATERIAL)) {
+        //   alert("Funky Electron-Error... please try again");
+        //   return;
+        // }
+        
+        
+      switch (choice) {
+        case CONTEXTMENU.ADD_PROPERTY:
+          let path: string[] = _item["path"];
+          this.addPropertyFromPath(this.animation.animationStructure, path);
+
+          this.dispatch(EVENT_EDITOR.MODIFY, { });
+          this.setAnimation(this.animation); // TODO: use modify event for this
+          break;
+      }
+    }
+
+    private addPropertyFromPath(_animationStructureOrSequence: ƒ.AnimationStructure | ƒ.AnimationSequence, _path: string[]): void {
+      if (!(_animationStructureOrSequence instanceof ƒ.AnimationSequence)) {
+        let property: string = _path[0];
+        if (_path[1] == undefined) {
+          if (_animationStructureOrSequence[property] == undefined) _animationStructureOrSequence[property] = new ƒ.AnimationSequence();
+          return;
+        } else {
+          if (_animationStructureOrSequence[property] == undefined)
+            _animationStructureOrSequence[property] = {};
+          this.addPropertyFromPath(_animationStructureOrSequence[property], _path.slice(1));
+        }
+      }
+    }
+
+    private getNodeSubmenu(_node: ƒ.Node, _path: string[], _callback: ContextMenuCallback): Electron.Menu {
+      const menu: Electron.Menu = new remote.Menu();
+      for (const anyComponent of ƒ.Component.subclasses) {
+        //@ts-ignore
+        _node.getComponents(anyComponent).forEach((component, index) => { // we need to get the attached componnents as array so we can reconstuct their path
+          let path: string[] = Object.assign([], _path);
+          path.push("components");
+          path.push(component.type);
+          path.push(index.toString());
+          let item: Electron.MenuItem;
+          item = new remote.MenuItem(
+            { label: component.type, submenu: this.getMutatorSubmenu(component.getMutator(), path, _callback)}
+          );
+          menu.append(item);  
+        });
+      }
+
+      for (const child of _node.getChildren()) {
+        let path: string[] = Object.assign([], _path);
+        path.push("children");
+        path.push(child.name);
+        let item: Electron.MenuItem;
+        item = new remote.MenuItem(
+          { label: child.name, submenu: this.getNodeSubmenu(child, path, _callback)}
+        );
+        menu.append(item);
+      }
+
+      return menu;
+    }
+
+    private getMutatorSubmenu(_mutator: ƒ.Mutator, _path: string[], _callback: ContextMenuCallback): Electron.Menu {
+      const menu: Electron.Menu = new remote.Menu();
+      for (const property in _mutator) {
+        let item: Electron.MenuItem;
+        let path: string[] = Object.assign([], _path);
+        path.push(property);
+        if (typeof _mutator[property] === "object") {
+          item = new remote.MenuItem(
+            { label: property, submenu: this.getMutatorSubmenu(_mutator[property], path, _callback) }
+          );
+        } else {
+          item = new remote.MenuItem(
+            { label: property, id: String(CONTEXTMENU.ADD_PROPERTY), click: _callback }
+          );
+          //@ts-ignore
+          item.overrideProperty("path", path);
+          
+          }
+        menu.append(item);
+        }
+
+      
+      return menu;
+    }
+    //#endregion
 
     private createUserInterface(): void {
       this.toolbar = document.createElement("div");
@@ -162,6 +271,7 @@ namespace Fudge {
     private focusNode(_node: ƒ.Node): void {
       this.node = _node;
       this.cmpAnimator = _node?.getComponent(ƒ.ComponentAnimator);
+      this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
       this.setAnimation(this.cmpAnimator?.animation);
     }
 
