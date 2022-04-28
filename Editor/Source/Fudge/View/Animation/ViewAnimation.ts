@@ -125,7 +125,7 @@ namespace Fudge {
       switch (choice) {
         case CONTEXTMENU.ADD_PROPERTY:
           let path: string[] = _item["path"];
-          this.addPropertyFromPath(this.animation.animationStructure, path);
+          this.addPathToAnimationStructure(this.animation.animationStructure, path);
 
           this.dispatch(EVENT_EDITOR.MODIFY, { });
           this.setAnimation(this.animation); // TODO: use modify event for this
@@ -133,18 +133,16 @@ namespace Fudge {
       }
     }
 
-    private addPropertyFromPath(_animationStructureOrSequence: ƒ.AnimationStructure | ƒ.AnimationSequence, _path: string[]): void {
-      if (!(_animationStructureOrSequence instanceof ƒ.AnimationSequence)) {
-        let property: string = _path[0];
-        if (_path[1] == undefined) {
-          if (_animationStructureOrSequence[property] == undefined) _animationStructureOrSequence[property] = new ƒ.AnimationSequence();
-          return;
-        } else {
-          if (_animationStructureOrSequence[property] == undefined)
-            _animationStructureOrSequence[property] = {};
-          this.addPropertyFromPath(_animationStructureOrSequence[property], _path.slice(1));
-        }
+    private addPathToAnimationStructure(_animationStructure: ƒ.AnimationStructure, _path: string[]): ƒ.AnimationStructure {
+      let property: string = _path[0];
+      if (_animationStructure[property] instanceof ƒ.AnimationSequence) return _animationStructure;
+      if (_path.length > 1) {
+        if (_animationStructure[property] == undefined) _animationStructure[property] = {};
+        _animationStructure[property] = this.addPathToAnimationStructure(<ƒ.AnimationStructure>_animationStructure[property], _path.slice(1));
+      } else {
+        _animationStructure[property] = new ƒ.AnimationSequence();
       }
+      return _animationStructure;
     }
 
     private getNodeSubmenu(_node: ƒ.Node, _path: string[], _callback: ContextMenuCallback): Electron.Menu {
@@ -194,7 +192,6 @@ namespace Fudge {
           );
           //@ts-ignore
           item.overrideProperty("path", path);
-          
           }
         menu.append(item);
         }

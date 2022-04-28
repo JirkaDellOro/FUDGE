@@ -2142,26 +2142,25 @@ var Fudge;
             switch (choice) {
                 case Fudge.CONTEXTMENU.ADD_PROPERTY:
                     let path = _item["path"];
-                    this.addPropertyFromPath(this.animation.animationStructure, path);
+                    this.addPathToAnimationStructure(this.animation.animationStructure, path);
                     this.dispatch(Fudge.EVENT_EDITOR.MODIFY, {});
                     this.setAnimation(this.animation); // TODO: use modify event for this
                     break;
             }
         }
-        addPropertyFromPath(_animationStructureOrSequence, _path) {
-            if (!(_animationStructureOrSequence instanceof ƒ.AnimationSequence)) {
-                let property = _path[0];
-                if (_path[1] == undefined) {
-                    if (_animationStructureOrSequence[property] == undefined)
-                        _animationStructureOrSequence[property] = new ƒ.AnimationSequence();
-                    return;
-                }
-                else {
-                    if (_animationStructureOrSequence[property] == undefined)
-                        _animationStructureOrSequence[property] = {};
-                    this.addPropertyFromPath(_animationStructureOrSequence[property], _path.slice(1));
-                }
+        addPathToAnimationStructure(_animationStructure, _path) {
+            let property = _path[0];
+            if (_animationStructure[property] instanceof ƒ.AnimationSequence)
+                return _animationStructure;
+            if (_path.length > 1) {
+                if (_animationStructure[property] == undefined)
+                    _animationStructure[property] = {};
+                _animationStructure[property] = this.addPathToAnimationStructure(_animationStructure[property], _path.slice(1));
             }
+            else {
+                _animationStructure[property] = new ƒ.AnimationSequence();
+            }
+            return _animationStructure;
         }
         getNodeSubmenu(_node, _path, _callback) {
             const menu = new Fudge.remote.Menu();

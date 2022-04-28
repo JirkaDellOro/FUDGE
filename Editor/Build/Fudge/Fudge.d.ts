@@ -502,7 +502,7 @@ declare namespace Fudge {
         openAnimation(): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        private addPropertyFromPath;
+        private addPathToAnimationStructure;
         private getNodeSubmenu;
         private getMutatorSubmenu;
         private createUserInterface;
