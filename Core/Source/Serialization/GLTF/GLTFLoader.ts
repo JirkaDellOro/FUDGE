@@ -15,18 +15,6 @@ namespace FudgeCore {
     [uri: string]: GLTFLoader;
   }
 
-  interface AnimationStructureVector3 {
-    x: AnimationSequence;
-    y: AnimationSequence;
-    z: AnimationSequence;
-  }
-
-  interface AnimationStructureMatrix4x4 {
-    rotation?: AnimationStructureVector3;
-    scale?: AnimationStructureVector3;
-    translation?: AnimationStructureVector3;
-  }
-
   type TransformationType = "rotation" | "scale" | "translation";
 
   export class GLTFLoader {

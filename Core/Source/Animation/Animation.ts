@@ -6,7 +6,19 @@ namespace FudgeCore {
    * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
    */
   export interface AnimationStructure {
-    [attribute: string]: AnimationStructure | AnimationSequence | Serialization; //TODO: remove serialization from here
+    [attribute: string]: AnimationStructure | AnimationSequence;
+  }
+
+  export interface AnimationStructureVector3 extends AnimationStructure {
+    x: AnimationSequence;
+    y: AnimationSequence;
+    z: AnimationSequence;
+  }
+
+  export interface AnimationStructureMatrix4x4 extends AnimationStructure {
+    rotation?: AnimationStructureVector3;
+    scale?: AnimationStructureVector3;
+    translation?: AnimationStructureVector3;
   }
 
   /**
@@ -292,18 +304,18 @@ namespace FudgeCore {
      */
     private traverseStructureForSerialization(_structure: AnimationStructure): Serialization {
       let serialization: Serialization = {};
-      for (let n in _structure) {
-        let structureOrSequence: AnimationStructure | AnimationSequence = _structure[n];
+      for (const property in _structure) {
+        let structureOrSequence: AnimationStructure | AnimationSequence = _structure[property];
         if (structureOrSequence instanceof AnimationSequence) {
-          serialization[n] = structureOrSequence.serialize();
+          serialization[property] = structureOrSequence.serialize();
         } else {
-          if (Component.subclasses.map(type => type.name).includes(n)) { //TODO: check if this mapping should rather be done before recursing, this information is acutually static
-            serialization[n] = [];
+          if (Component.subclasses.some(type => type.name == property)) {
+            serialization[property] = [];
             for (const i in structureOrSequence) {
-              (<Serialization[]>serialization[n]).push(this.traverseStructureForSerialization(<AnimationStructure>structureOrSequence[i]));
+              (<Serialization[]>serialization[property]).push(this.traverseStructureForSerialization(<AnimationStructure>structureOrSequence[i]));
             }
           } else {
-            serialization[n] = this.traverseStructureForSerialization(structureOrSequence);
+            serialization[property] = this.traverseStructureForSerialization(structureOrSequence);
           }
         }
       }

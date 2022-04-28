@@ -1315,7 +1315,17 @@ declare namespace FudgeCore {
      * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
      */
     interface AnimationStructure {
-        [attribute: string]: AnimationStructure | AnimationSequence | Serialization;
+        [attribute: string]: AnimationStructure | AnimationSequence;
+    }
+    interface AnimationStructureVector3 extends AnimationStructure {
+        x: AnimationSequence;
+        y: AnimationSequence;
+        z: AnimationSequence;
+    }
+    interface AnimationStructureMatrix4x4 extends AnimationStructure {
+        rotation?: AnimationStructureVector3;
+        scale?: AnimationStructureVector3;
+        translation?: AnimationStructureVector3;
     }
     /**
     * An associative array mapping names of lables to timestamps.
