@@ -188,6 +188,7 @@ var Fudge;
         EVENT_EDITOR["CLOSE"] = "EDITOR_CLOSE";
         EVENT_EDITOR["TRANSFORM"] = "EDITOR_TRANSFORM";
         EVENT_EDITOR["FOCUS"] = "EDITOR_FOCUS";
+        EVENT_EDITOR["ANIMATE"] = "EDITOR_ANIMATE";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     /**
      * Extension of CustomEvent that supports a detail field with the type EventDetail
@@ -660,6 +661,8 @@ var Fudge;
             document.addEventListener(Fudge.EVENT_EDITOR.SELECT, Page.hndEvent);
             document.addEventListener("mutate" /* MUTATE */, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.FOCUS, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
         }
         /** Send custom copies of the given event to the views */
@@ -1779,36 +1782,10 @@ var Fudge;
     class PanelAnimation extends Fudge.Panel {
         constructor(_container, _state) {
             super(_container, _state);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.RENDER, Fudge.ViewRender);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
-            // this.goldenLayout.registerComponentConstructor(VIEW.COMPONENTS, ViewComponents);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.ANIMATION, Fudge.ViewAnimation);
             const config = {
-                type: "column",
+                type: "row",
                 content: [
-                    {
-                        type: "row",
-                        content: [
-                            {
-                                type: "component",
-                                componentType: Fudge.VIEW.RENDER,
-                                componentState: _state,
-                                title: "RENDER"
-                            },
-                            {
-                                type: "component",
-                                componentType: Fudge.VIEW.HIERARCHY,
-                                componentState: _state,
-                                title: "HIERARCHY"
-                            }
-                            // {
-                            //   type: "component",
-                            //   componentType: VIEW.COMPONENTS,
-                            //   componentState: _state,
-                            //   title: "COMPONENTS"
-                            // }
-                        ]
-                    },
                     {
                         type: "component",
                         componentType: Fudge.VIEW.ANIMATION,
@@ -1822,9 +1799,7 @@ var Fudge;
             ]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
-            this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
-            // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
-            // this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.setTitle("Animation | ");
         }
         getState() {
@@ -1836,10 +1811,6 @@ var Fudge;
             // }
             this.broadcastEvent(_event);
             _event.stopPropagation();
-        };
-        hndFocusNode = (_event) => {
-            let event = new CustomEvent(Fudge.EVENT_EDITOR.FOCUS, { bubbles: false, detail: _event.detail.data });
-            this.broadcastEvent(event);
         };
     }
     Fudge.PanelAnimation = PanelAnimation;
@@ -1889,6 +1860,7 @@ var Fudge;
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
             this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndEvent);
             if (_state["graph"])
                 ƒ.Project.getResource(_state["graph"]).then((_graph) => {
                     this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: _graph } });
@@ -1931,7 +1903,8 @@ var Fudge;
             _event.stopPropagation();
         };
         hndFocusNode = (_event) => {
-            let event = new CustomEvent(Fudge.EVENT_EDITOR.FOCUS, { bubbles: false, detail: _event.detail.data });
+            let event = new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.FOCUS, { detail: { graph: this.graph, node: _event.detail.data } });
+            document.dispatchEvent(event);
             this.broadcastEvent(event);
         };
     }
@@ -2123,6 +2096,7 @@ var Fudge;
         playbackTime;
         controller;
         crc2;
+        graph;
         canvas;
         selectedKey;
         selectedProperty;
@@ -2139,9 +2113,7 @@ var Fudge;
             this.createUserInterface();
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndSelect);
-            this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
-            // this.dom.addEventListener(ƒui.EVENT.KEY_DOWN, this.hndEvent, true);
             this.canvas.addEventListener("pointermove", this.hndPointerMove);
             this.canvas.addEventListener("pointerdown", this.hndPointerDown);
             this.toolbar.addEventListener("click", this.hndToolbarClick);
@@ -2295,9 +2267,8 @@ var Fudge;
         hndEvent = (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.FOCUS:
-                    this.focusNode(_event.detail);
-                    break;
-                case "delete" /* DELETE */:
+                    this.graph = _event.detail.graph;
+                    this.focusNode(_event.detail.node);
                     break;
             }
         };
@@ -2501,7 +2472,7 @@ var Fudge;
             if (!_m)
                 _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
             this.controller.updateAnimationUserInterface(_m);
-            this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
+            this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph } });
         }
         setTime(_time, updateDisplay = true) {
             if (!this.animation)
@@ -3084,7 +3055,8 @@ var Fudge;
                 // case ƒui.EVENT.RENAME: break;
                 case Fudge.EVENT_EDITOR.SELECT:
                 case Fudge.EVENT_EDITOR.FOCUS:
-                    this.node = _event.detail;
+                    if (_event instanceof Fudge.FudgeEvent)
+                        this.node = _event.detail.node;
                 case Fudge.EVENT_EDITOR.MODIFY:
                     this.fillContent();
                     break;
@@ -3400,6 +3372,7 @@ var Fudge;
             _container.on("resize", this.redraw);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
@@ -3547,6 +3520,9 @@ var Fudge;
                         this.setGraph(_event.detail.graph);
                     break;
                 // break;
+                case Fudge.EVENT_EDITOR.ANIMATE:
+                    if (_event instanceof Fudge.FudgeEvent && _event.detail.graph != this.graph)
+                        break;
                 case "mutate" /* MUTATE */:
                 case "delete" /* DELETE */:
                 case Fudge.EVENT_EDITOR.MODIFY:

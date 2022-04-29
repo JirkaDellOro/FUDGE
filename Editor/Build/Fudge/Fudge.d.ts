@@ -111,7 +111,8 @@ declare namespace Fudge {
         DELETE = "EDITOR_DELETE",
         CLOSE = "EDITOR_CLOSE",
         TRANSFORM = "EDITOR_TRANSFORM",
-        FOCUS = "EDITOR_FOCUS"
+        FOCUS = "EDITOR_FOCUS",
+        ANIMATE = "EDITOR_ANIMATE"
     }
     interface EventDetail {
         node?: ƒ.Node;
@@ -405,7 +406,6 @@ declare namespace Fudge {
             [key: string]: string;
         };
         private hndEvent;
-        private hndFocusNode;
     }
 }
 declare namespace Fudge {
@@ -497,6 +497,7 @@ declare namespace Fudge {
         playbackTime: number;
         controller: ControllerAnimation;
         crc2: CanvasRenderingContext2D;
+        private graph;
         private canvas;
         private selectedKey;
         private selectedProperty;

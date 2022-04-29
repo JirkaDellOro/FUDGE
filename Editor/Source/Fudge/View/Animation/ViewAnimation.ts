@@ -36,6 +36,7 @@ namespace Fudge {
     public controller: ControllerAnimation;
     public crc2: CanvasRenderingContext2D;
 
+    private graph: ƒ.Graph;
     private canvas: HTMLCanvasElement;
     private selectedKey: ViewAnimationKey;
     private selectedProperty: string;
@@ -54,9 +55,7 @@ namespace Fudge {
       
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndSelect);
-      this.dom.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
-      // this.dom.addEventListener(ƒui.EVENT.KEY_DOWN, this.hndEvent, true);
       this.canvas.addEventListener("pointermove", this.hndPointerMove);
       this.canvas.addEventListener("pointerdown", this.hndPointerDown);
       this.toolbar.addEventListener("click", this.hndToolbarClick);
@@ -240,13 +239,11 @@ namespace Fudge {
       this.setTime(_event.offsetX / this.sheet.scale.x);
     }
 
-    private hndEvent = (_event: CustomEvent): void => {
+    private hndEvent = (_event: FudgeEvent): void => {
       switch (_event.type) {
         case EVENT_EDITOR.FOCUS:
-          this.focusNode(_event.detail);
-          break;
-        case ƒui.EVENT.DELETE:
-          
+          this.graph = _event.detail.graph;
+          this.focusNode(_event.detail.node);
           break;
       }
     }
@@ -470,7 +467,7 @@ namespace Fudge {
         _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
 
       this.controller.updateAnimationUserInterface(_m);
-      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
+      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph} });
     }
 
     private setTime(_time: number, updateDisplay: boolean = true): void {

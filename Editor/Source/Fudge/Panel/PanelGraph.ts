@@ -52,6 +52,7 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndEvent);
 
       if (_state["graph"])
         ƒ.Project.getResource(_state["graph"]).then((_graph: ƒ.Graph) => {
@@ -101,7 +102,8 @@ namespace Fudge {
     }
 
     private hndFocusNode = (_event: CustomEvent): void => {
-      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.FOCUS, { bubbles: false, detail: _event.detail.data });
+      let event: FudgeEvent = new FudgeEvent(EVENT_EDITOR.FOCUS, { detail: { graph: this.graph, node: _event.detail.data} });
+      document.dispatchEvent(event);
       this.broadcastEvent(event);
     }
   }
