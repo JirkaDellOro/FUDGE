@@ -16,7 +16,8 @@ declare namespace Fudge {
         ADD_JOINT = 13,
         DELETE_RESOURCE = 14,
         ILLUMINATE = 15,
-        ADD_PROPERTY = 16
+        ADD_PROPERTY = 16,
+        DELETE_PROPERTY = 17
     }
     enum MENU {
         QUIT = "quit",

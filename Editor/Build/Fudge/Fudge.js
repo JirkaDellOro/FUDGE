@@ -44,6 +44,7 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 14] = "DELETE_RESOURCE";
         CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 15] = "ILLUMINATE";
         CONTEXTMENU[CONTEXTMENU["ADD_PROPERTY"] = 16] = "ADD_PROPERTY";
+        CONTEXTMENU[CONTEXTMENU["DELETE_PROPERTY"] = 17] = "DELETE_PROPERTY";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -878,7 +879,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    var ƒUi = FudgeUserInterface;
+    var ƒui = FudgeUserInterface;
     class ControllerAnimation {
         animation;
         domElement;
@@ -887,48 +888,105 @@ var Fudge;
             this.animation = _animation;
             this.domElement = _domElement;
             this.mutatorForNode = _mutatorForNode;
+            // this.domElement.addEventListener(ƒui.EVENT.KEY_DOWN, this.hndKey);
+            // console.log(this.domElement);
         }
-        static updateAnimationStructure(_domElement, _animationStructure, _time, _mutatorForNode) {
-            for (let key in _animationStructure) {
-                let element = ƒUi.Controller.findChildElementByKey(_domElement, key);
+        static addKeyToAnimationStructure(_domElement, _animationStructure, _time, _mutatorForNode) {
+            for (const property in _animationStructure) {
+                let element = ƒui.Controller.findChildElementByKey(_domElement, property);
                 if (element == null)
                     continue;
-                if (element instanceof ƒUi.CustomElement) {
+                if (element instanceof ƒui.CustomElement) {
                     let value = element.getMutatorValue();
-                    let previousValue = _mutatorForNode[key];
+                    let previousValue = _mutatorForNode[property];
                     if (typeof value == "number" && value !== previousValue) {
-                        _animationStructure[key].addKey(new ƒ.AnimationKey(_time, element.getMutatorValue()));
+                        _animationStructure[property].addKey(new ƒ.AnimationKey(_time, element.getMutatorValue()));
                     }
                 }
                 else
-                    _animationStructure[key] = this.updateAnimationStructure(element, _animationStructure[key], _time, _mutatorForNode[key]);
+                    _animationStructure[property] = this.addKeyToAnimationStructure(element, _animationStructure[property], _time, _mutatorForNode[property]);
             }
             return _animationStructure;
         }
         static updateUserInterfaceWithMutator(_domElement, _mutator) {
-            for (let key in _mutator) {
-                let element = ƒUi.Controller.findChildElementByKey(_domElement, key.replaceAll(".", ""));
+            for (const property in _mutator) {
+                let element = ƒui.Controller.findChildElementByKey(_domElement, property);
                 if (!element)
                     continue;
-                let value = _mutator[key];
-                if (element instanceof ƒUi.CustomElement && element != document.activeElement)
+                let value = _mutator[property];
+                if (element instanceof ƒui.CustomElement && element != document.activeElement)
                     element.setMutatorValue(value);
                 else {
-                    this.updateUserInterfaceWithMutator(element, _mutator[key]);
+                    this.updateUserInterfaceWithMutator(element, _mutator[property]);
                 }
             }
         }
-        updateAnimationStructure(_time) {
-            ControllerAnimation.updateAnimationStructure(this.domElement, this.animation.animationStructure, _time, this.mutatorForNode);
+        static addPathToAnimationStructure(_animationStructure, _path) {
+            let property = _path[0];
+            if (_animationStructure[property] instanceof ƒ.AnimationSequence)
+                return _animationStructure;
+            if (_path.length > 1) {
+                if (_animationStructure[property] == undefined)
+                    _animationStructure[property] = {};
+                _animationStructure[property] = this.addPathToAnimationStructure(_animationStructure[property], _path.slice(1));
+            }
+            else {
+                _animationStructure[property] = new ƒ.AnimationSequence();
+            }
+            return _animationStructure;
+        }
+        static deletePathFromAnimationStructure(_animationStructure, _path) {
+            let property = _path[0];
+            if (_path.length > 1) {
+                _animationStructure[property] = this.deletePathFromAnimationStructure(_animationStructure[property], _path.slice(1));
+            }
+            else {
+                delete _animationStructure[property];
+            }
+            return _animationStructure;
+        }
+        static deleteEmptyPathsFromAnimationStructure(_structure) {
+            for (const property in _structure) {
+                if (_structure[property] instanceof ƒ.AnimationSequence)
+                    continue;
+                let subStructure = this.deleteEmptyPathsFromAnimationStructure(_structure[property]);
+                if (Object.keys(subStructure).length == 0) {
+                    delete _structure[property];
+                }
+                else {
+                    _structure[property] = subStructure;
+                }
+            }
+            return _structure;
         }
         updateAnimationUserInterface(_mutator) {
             this.mutatorForNode = _mutator;
             ControllerAnimation.updateUserInterfaceWithMutator(this.domElement, _mutator);
         }
-        removeAnimationKey(_key) {
+        addKeyToAnimationStructure(_time) {
+            ControllerAnimation.addKeyToAnimationStructure(this.domElement, this.animation.animationStructure, _time, this.mutatorForNode);
+            if (_time > this.animation.totalTime)
+                this.animation.calculateTotalTime();
+        }
+        deleteKeyFromAnimationStructure(_key) {
             let animationSequence = _key.sequence.sequence;
             animationSequence.removeKey(_key.key);
         }
+        addPathToAnimationStructure(_path) {
+            ControllerAnimation.addPathToAnimationStructure(this.animation.animationStructure, _path);
+        }
+        deletePathFromAnimationStructure(_path) {
+            ControllerAnimation.deletePathFromAnimationStructure(this.animation.animationStructure, _path);
+            ControllerAnimation.deleteEmptyPathsFromAnimationStructure(this.animation.animationStructure);
+        }
+        hndKey = (_event) => {
+            _event.stopPropagation();
+            switch (_event.code) {
+                case ƒ.KEYBOARD_CODE.DELETE:
+                    this.domElement.dispatchEvent(new CustomEvent("delete" /* DELETE */, { bubbles: true, detail: this }));
+                    break;
+            }
+        };
     }
     Fudge.ControllerAnimation = ControllerAnimation;
 })(Fudge || (Fudge = {}));
@@ -2067,6 +2125,7 @@ var Fudge;
         crc2;
         canvas;
         selectedKey;
+        selectedProperty;
         attributeList;
         sheet;
         toolbar;
@@ -2080,43 +2139,13 @@ var Fudge;
             this.createUserInterface();
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndSelect);
+            this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
+            // this.dom.addEventListener(ƒui.EVENT.KEY_DOWN, this.hndEvent, true);
             this.canvas.addEventListener("pointermove", this.hndPointerMove);
             this.canvas.addEventListener("pointerdown", this.hndPointerDown);
             this.toolbar.addEventListener("click", this.hndToolbarClick);
             this.toolbar.addEventListener("change", this.hndToolbarChange);
-        }
-        openAnimation() {
-            //TODO replace with file opening dialoge
-            let seq1 = new ƒ.AnimationSequence();
-            seq1.addKey(new ƒ.AnimationKey(0, 0));
-            seq1.addKey(new ƒ.AnimationKey(500, 50));
-            seq1.addKey(new ƒ.AnimationKey(1500, -50));
-            seq1.addKey(new ƒ.AnimationKey(2000, 50));
-            this.animation.animationStructure = {
-                components: {
-                    ComponentTransform: [
-                        {
-                            "ƒ.ComponentTransform": {
-                                mtxLocal: {
-                                    rotation: {
-                                        x: new ƒ.AnimationSequence(),
-                                        y: seq1,
-                                        z: new ƒ.AnimationSequence()
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                }
-            };
-            // this.animation.labels["One"] = 200;
-            // this.animation.labels["Two"] = 750;
-            // this.animation.setEvent("EventOne", 500);
-            // this.animation.setEvent("EventTwo", 1000);
-            // this.node = new ƒ.Node("Testnode");
-            // console.log(this.node);
-            // this.cmpAnimator = new ƒ.ComponentAnimator(this.animation);
         }
         //#region  ContextMenu
         getContextMenu(_callback) {
@@ -2129,6 +2158,8 @@ var Fudge;
                     submenu: this.getNodeSubmenu(this.node, path, _callback)
                 });
                 menu.append(item);
+                item = new Fudge.remote.MenuItem({ label: "Delete Property", id: String(Fudge.CONTEXTMENU.DELETE_PROPERTY), click: _callback, accelerator: "D" });
+                menu.append(item);
             }
             return menu;
         }
@@ -2139,28 +2170,34 @@ var Fudge;
             //   alert("Funky Electron-Error... please try again");
             //   return;
             // }
+            let path;
             switch (choice) {
                 case Fudge.CONTEXTMENU.ADD_PROPERTY:
-                    let path = _item["path"];
-                    this.addPathToAnimationStructure(this.animation.animationStructure, path);
+                    path = _item["path"];
+                    this.controller.addPathToAnimationStructure(path);
                     this.dispatch(Fudge.EVENT_EDITOR.MODIFY, {});
                     this.setAnimation(this.animation); // TODO: use modify event for this
                     break;
+                case Fudge.CONTEXTMENU.DELETE_PROPERTY:
+                    let element = document.activeElement;
+                    if (element.tagName == "BODY")
+                        return;
+                    path = [];
+                    while (element !== this.attributeList) {
+                        if (element instanceof ƒui.Details) {
+                            let summaryElement = element.getElementsByTagName("SUMMARY")[0];
+                            path.unshift(summaryElement.innerHTML);
+                        }
+                        if (element instanceof ƒui.CustomElement) {
+                            let labelElement = element.getElementsByTagName("LABEL")[0];
+                            path.unshift(labelElement.innerHTML);
+                        }
+                        element = element.parentElement;
+                    }
+                    this.controller.deletePathFromAnimationStructure(path);
+                    this.setAnimation(this.animation); // TODO: use modify event for this
+                    return;
             }
-        }
-        addPathToAnimationStructure(_animationStructure, _path) {
-            let property = _path[0];
-            if (_animationStructure[property] instanceof ƒ.AnimationSequence)
-                return _animationStructure;
-            if (_path.length > 1) {
-                if (_animationStructure[property] == undefined)
-                    _animationStructure[property] = {};
-                _animationStructure[property] = this.addPathToAnimationStructure(_animationStructure[property], _path.slice(1));
-            }
-            else {
-                _animationStructure[property] = new ƒ.AnimationSequence();
-            }
-            return _animationStructure;
         }
         getNodeSubmenu(_node, _path, _callback) {
             const menu = new Fudge.remote.Menu();
@@ -2172,7 +2209,7 @@ var Fudge;
                     path.push(component.type);
                     path.push(index.toString());
                     let item;
-                    item = new Fudge.remote.MenuItem({ label: component.type, submenu: this.getMutatorSubmenu(component.getMutator(), path, _callback) });
+                    item = new Fudge.remote.MenuItem({ label: component.type, submenu: this.getMutatorSubmenu(component.getMutatorForAnimation(), path, _callback) });
                     menu.append(item);
                 });
             }
@@ -2260,6 +2297,8 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.FOCUS:
                     this.focusNode(_event.detail);
                     break;
+                case "delete" /* DELETE */:
+                    break;
             }
         };
         focusNode(_node) {
@@ -2279,8 +2318,6 @@ var Fudge;
             this.dom.appendChild(this.canvas);
             this.dom.appendChild(this.hover);
             this.animation = _animation;
-            if (!("components" in this.animation.animationStructure))
-                this.openAnimation(); //TODO: remove this line late on
             let animationMutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
             if (!animationMutator)
                 animationMutator = {};
@@ -2290,6 +2327,9 @@ var Fudge;
             this.sheet.redraw(this.playbackTime);
         }
         hndSelect = (_event) => {
+            if (typeof _event.detail == "string") {
+                this.selectedProperty = _event.detail;
+            }
             if ("key" in _event.detail) {
                 this.selectedKey = _event.detail;
             }
@@ -2392,11 +2432,11 @@ var Fudge;
                     this.sheet.redraw(this.playbackTime);
                     break;
                 case "add-key":
-                    this.controller.updateAnimationStructure(this.playbackTime);
+                    this.controller.addKeyToAnimationStructure(this.playbackTime);
                     this.sheet.redraw(this.playbackTime);
                     break;
                 case "remove-key":
-                    this.controller.removeAnimationKey(this.selectedKey);
+                    this.controller.deleteKeyFromAnimationStructure(this.selectedKey);
                     this.sheet.redraw(this.playbackTime);
                     break;
                 case "start":

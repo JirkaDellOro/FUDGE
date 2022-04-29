@@ -17,7 +17,8 @@ namespace Fudge {
     ADD_JOINT,
     DELETE_RESOURCE,
     ILLUMINATE,
-    ADD_PROPERTY
+    ADD_PROPERTY,
+    DELETE_PROPERTY
   }
 
 

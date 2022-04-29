@@ -37,7 +37,8 @@ namespace Fudge {
     public crc2: CanvasRenderingContext2D;
 
     private canvas: HTMLCanvasElement;
-    private selectedKey: ViewAnimationKey; 
+    private selectedKey: ViewAnimationKey;
+    private selectedProperty: string;
     private attributeList: HTMLDivElement;
     private sheet: ViewAnimationSheet;
     private toolbar: HTMLDivElement;
@@ -53,47 +54,14 @@ namespace Fudge {
       
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndSelect);
+      this.dom.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      // this.dom.addEventListener(ƒui.EVENT.KEY_DOWN, this.hndEvent, true);
       this.canvas.addEventListener("pointermove", this.hndPointerMove);
       this.canvas.addEventListener("pointerdown", this.hndPointerDown);
       this.toolbar.addEventListener("click", this.hndToolbarClick);
       this.toolbar.addEventListener("change", this.hndToolbarChange);
 
-    }
-
-    openAnimation(): void {
-      //TODO replace with file opening dialoge
-
-      let seq1: ƒ.AnimationSequence = new ƒ.AnimationSequence();
-      seq1.addKey(new ƒ.AnimationKey(0, 0));
-      seq1.addKey(new ƒ.AnimationKey(500, 50));
-      seq1.addKey(new ƒ.AnimationKey(1500, -50));
-      seq1.addKey(new ƒ.AnimationKey(2000, 50));
-      this.animation.animationStructure = {
-        components: {
-          ComponentTransform: [
-            {
-              "ƒ.ComponentTransform": {
-                mtxLocal: {
-                  rotation: {
-                    x: new ƒ.AnimationSequence(),
-                    y: seq1,
-                    z: new ƒ.AnimationSequence()
-                  }
-                }
-              }
-            }
-          ]
-        }
-      };
-      // this.animation.labels["One"] = 200;
-      // this.animation.labels["Two"] = 750;
-      // this.animation.setEvent("EventOne", 500);
-      // this.animation.setEvent("EventTwo", 1000);
-
-      // this.node = new ƒ.Node("Testnode");
-      // console.log(this.node);
-      // this.cmpAnimator = new ƒ.ComponentAnimator(this.animation);
     }
 
     //#region  ContextMenu
@@ -108,7 +76,11 @@ namespace Fudge {
           submenu: this.getNodeSubmenu(this.node, path, _callback)
         });
         menu.append(item);
+
+        item = new remote.MenuItem({ label: "Delete Property", id: String(CONTEXTMENU.DELETE_PROPERTY), click: _callback, accelerator: "D" });
+        menu.append(item);
       }
+      
 
       return menu;
     }
@@ -121,29 +93,40 @@ namespace Fudge {
         //   return;
         // }
         
-        
+      let path: string[];
       switch (choice) {
         case CONTEXTMENU.ADD_PROPERTY:
-          let path: string[] = _item["path"];
-          this.addPathToAnimationStructure(this.animation.animationStructure, path);
+          path = _item["path"];
+          this.controller.addPathToAnimationStructure(path);
 
           this.dispatch(EVENT_EDITOR.MODIFY, { });
           this.setAnimation(this.animation); // TODO: use modify event for this
           break;
+        case CONTEXTMENU.DELETE_PROPERTY:
+          let element: Element = document.activeElement;
+          if (element.tagName == "BODY")
+            return;
+          
+          path = [];
+          while (element !== this.attributeList) {
+            if (element instanceof ƒui.Details) {
+              let summaryElement: Element = element.getElementsByTagName("SUMMARY")[0];
+              path.unshift(summaryElement.innerHTML);
+            }
+
+            if (element instanceof ƒui.CustomElement) {
+              let labelElement: Element = element.getElementsByTagName("LABEL")[0];
+              path.unshift(labelElement.innerHTML);
+            }
+
+            element = element.parentElement;
+          }
+          this.controller.deletePathFromAnimationStructure(path);
+          this.setAnimation(this.animation); // TODO: use modify event for this
+          return;
       }
     }
 
-    private addPathToAnimationStructure(_animationStructure: ƒ.AnimationStructure, _path: string[]): ƒ.AnimationStructure {
-      let property: string = _path[0];
-      if (_animationStructure[property] instanceof ƒ.AnimationSequence) return _animationStructure;
-      if (_path.length > 1) {
-        if (_animationStructure[property] == undefined) _animationStructure[property] = {};
-        _animationStructure[property] = this.addPathToAnimationStructure(<ƒ.AnimationStructure>_animationStructure[property], _path.slice(1));
-      } else {
-        _animationStructure[property] = new ƒ.AnimationSequence();
-      }
-      return _animationStructure;
-    }
 
     private getNodeSubmenu(_node: ƒ.Node, _path: string[], _callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
@@ -156,7 +139,7 @@ namespace Fudge {
           path.push(index.toString());
           let item: Electron.MenuItem;
           item = new remote.MenuItem(
-            { label: component.type, submenu: this.getMutatorSubmenu(component.getMutator(), path, _callback)}
+            { label: component.type, submenu: this.getMutatorSubmenu(component.getMutatorForAnimation(), path, _callback)}
           );
           menu.append(item);  
         });
@@ -262,6 +245,9 @@ namespace Fudge {
         case EVENT_EDITOR.FOCUS:
           this.focusNode(_event.detail);
           break;
+        case ƒui.EVENT.DELETE:
+          
+          break;
       }
     }
     
@@ -284,7 +270,6 @@ namespace Fudge {
       this.dom.appendChild(this.hover);
 
       this.animation = _animation;
-      if (!("components" in this.animation.animationStructure)) this.openAnimation(); //TODO: remove this line late on
       let animationMutator: ƒ.Mutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
       if (!animationMutator) animationMutator = {};
       this.attributeList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
@@ -295,6 +280,9 @@ namespace Fudge {
     }
 
     private hndSelect = (_event: CustomEvent): void => {
+      if (typeof _event.detail == "string") {
+        this.selectedProperty = _event.detail;
+      }
       if ("key" in _event.detail) {
         this.selectedKey = _event.detail;
       }
@@ -408,11 +396,11 @@ namespace Fudge {
           this.sheet.redraw(this.playbackTime);
           break;
         case "add-key":
-          this.controller.updateAnimationStructure(this.playbackTime);          
+          this.controller.addKeyToAnimationStructure(this.playbackTime);          
           this.sheet.redraw(this.playbackTime);
           break;
         case "remove-key":
-          this.controller.removeAnimationKey(this.selectedKey);          
+          this.controller.deleteKeyFromAnimationStructure(this.selectedKey);          
           this.sheet.redraw(this.playbackTime);
           break;
         case "start":

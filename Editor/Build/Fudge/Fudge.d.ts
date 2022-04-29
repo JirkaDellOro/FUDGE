@@ -33,7 +33,8 @@ declare namespace Fudge {
         ADD_JOINT = 13,
         DELETE_RESOURCE = 14,
         ILLUMINATE = 15,
-        ADD_PROPERTY = 16
+        ADD_PROPERTY = 16,
+        DELETE_PROPERTY = 17
     }
     enum MENU {
         QUIT = "quit",
@@ -226,11 +227,17 @@ declare namespace Fudge {
         private domElement;
         private mutatorForNode;
         constructor(_animation: ƒ.Animation, _domElement: HTMLElement, _mutatorForNode: ƒ.Mutator);
-        static updateAnimationStructure(_domElement: HTMLElement, _animationStructure: ƒ.Serialization | ƒ.AnimationSequence, _time: number, _mutatorForNode: ƒ.Mutator): ƒ.Mutator;
-        static updateUserInterfaceWithMutator(_domElement: HTMLElement, _mutator: ƒ.Mutator): void;
-        updateAnimationStructure(_time: number): void;
+        private static addKeyToAnimationStructure;
+        private static updateUserInterfaceWithMutator;
+        private static addPathToAnimationStructure;
+        private static deletePathFromAnimationStructure;
+        private static deleteEmptyPathsFromAnimationStructure;
         updateAnimationUserInterface(_mutator: ƒ.Mutator): void;
-        removeAnimationKey(_key: ViewAnimationKey): void;
+        addKeyToAnimationStructure(_time: number): void;
+        deleteKeyFromAnimationStructure(_key: ViewAnimationKey): void;
+        addPathToAnimationStructure(_path: string[]): void;
+        deletePathFromAnimationStructure(_path: string[]): void;
+        private hndKey;
     }
 }
 declare namespace Fudge {
@@ -492,6 +499,7 @@ declare namespace Fudge {
         crc2: CanvasRenderingContext2D;
         private canvas;
         private selectedKey;
+        private selectedProperty;
         private attributeList;
         private sheet;
         private toolbar;
@@ -499,10 +507,8 @@ declare namespace Fudge {
         private time;
         private idInterval;
         constructor(_container: ComponentContainer, _state: Object);
-        openAnimation(): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        private addPathToAnimationStructure;
         private getNodeSubmenu;
         private getMutatorSubmenu;
         private createUserInterface;
