@@ -28,17 +28,6 @@ declare namespace Fudge {
         PANEL_HELP_OPEN = "panelHelpOpen",
         FULLSCREEN = "fullscreen"
     }
-    enum EVENT_EDITOR {
-        SET_GRAPH = "setGraph",
-        FOCUS_NODE = "focusNode",
-        SET_PROJECT = "setProject",
-        UPDATE = "update",
-        REFRESH = "refresh",
-        DESTROY = "destroy",
-        CLEAR_PROJECT = "clearProject",
-        TRANSFORM = "transform",
-        SELECT_NODE = "selectNode"
-    }
     enum PANEL {
         GRAPH = "PanelGraph",
         PROJECT = "PanelProject",

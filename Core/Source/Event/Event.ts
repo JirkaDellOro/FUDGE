@@ -42,6 +42,8 @@ namespace FudgeCore {
     NODE_DESERIALIZED = "nodeDeserialized",
     /** dispatched to {@link GraphInstance} when it's content is set according to a serialization of a {@link Graph}  */
     GRAPH_INSTANTIATED = "graphInstantiated",
+    /** dispatched to a {@link Graph} when it's finished deserializing  */
+    GRAPH_DESERIALIZED = "graphDeserialized",
     /** dispatched to {@link Time} when it's scaling changed  */
     TIME_SCALED = "timeScaled",
     /** dispatched to {@link FileIoBrowserLocal} when a list of files has been loaded  */
@@ -50,10 +52,16 @@ namespace FudgeCore {
     FILE_SAVED = "fileSaved",
     /** dispatched to {@link Node} when recalculating transforms for render */
     RENDER_PREPARE = "renderPrepare",
+    /** dispatched to {@link Render} when recalculation of the branch to render starts */
     RENDER_PREPARE_START = "renderPrepareStart",
+    /** dispatched to {@link Render} when recalculation of the branch to render ends */
     RENDER_PREPARE_END = "renderPrepareEnd",
-    /** dispatched to Joint-Components in order to disconnect */
-    DISCONNECT_JOINT = "disconnectJoint"
+    /** dispatched to {@link Joint}-Components in order to disconnect */
+    DISCONNECT_JOINT = "disconnectJoint",
+    /** dispatched to {@link Node} when it gets attached to a viewport for rendering */
+    ATTACH_BRANCH = "attachBranch",
+    /** dispatched to {@link Project} when it's done loading resources from a url */
+    RESOURCES_LOADED = "resourcesLoaded"
   }
 
 

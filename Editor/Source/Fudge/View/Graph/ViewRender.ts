@@ -30,14 +30,11 @@ namespace Fudge {
       this.dom.tabIndex = 0;
 
       _container.on("resize", this.redraw);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.REFRESH, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent, true);
-      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
       this.dom.addEventListener("pointerdown", this.hndPointer);
@@ -174,7 +171,7 @@ namespace Fudge {
     protected hndDrop(_event: DragEvent, _viewSource: View): void {
       let source: Object = _viewSource.getDragDropSources()[0];
       // this.setGraph(<ƒ.Node>source);
-      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
+      this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: <ƒ.Graph>source } });
     }
 
     private checkIllumination(): void {
@@ -193,29 +190,28 @@ namespace Fudge {
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
-        case EVENT_EDITOR.CLEAR_PROJECT:
-          this.setGraph(null);
+        case EVENT_EDITOR.SELECT:
+          let detail: EventDetail = <EventDetail>_event.detail;
+          if (detail.node) {
+            this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
+            ƒ.Render.prepare(this.cmrOrbit);
+          } else
+            this.setGraph(_event.detail.graph);
           break;
-        case EVENT_EDITOR.SET_GRAPH:
-          this.setGraph(_event.detail);
-          break;
-        case EVENT_EDITOR.FOCUS_NODE:
-          this.cmrOrbit.mtxLocal.translation = _event.detail.mtxWorld.translation;
-          ƒ.Render.prepare(this.cmrOrbit);
         // break;
         case ƒUi.EVENT.MUTATE:
         case ƒUi.EVENT.DELETE:
-        case EVENT_EDITOR.UPDATE:
-        case EVENT_EDITOR.REFRESH:
+        case EVENT_EDITOR.MODIFY:
           this.checkIllumination();
           this.redraw();
       }
     }
 
-    private hndPick = (_event: CustomEvent): void => {
+    private hndPick = (_event: FudgeEvent): void => {
       let picked: ƒ.Node = _event.detail.node;
 
-      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SELECT_NODE, { bubbles: true, detail: picked }));
+      //TODO: watch out, two selects
+      this.dispatch(EVENT_EDITOR.SELECT, {  bubbles: true, detail: { node: picked } });
       this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: picked } }));
     }
 
@@ -245,10 +241,10 @@ namespace Fudge {
         return;
 
       this.canvas.requestPointerLock();
-      let detail: Object = {
+      let data: Object = {
         transform: Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera, inverted: _event.shiftKey
       };
-      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: detail }));
+      this.dispatch(EVENT_EDITOR.TRANSFORM, {  bubbles: true, detail: { transform: data } });
       this.redraw();
     }
 

@@ -18,9 +18,9 @@ namespace Fudge {
       this.setGraph((<ƒ.General>_state).node);
 
       // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.setSelectedNode);
-      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.SELECT_NODE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
+      // this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
     }
 
     public setGraph(_graph: ƒ.Graph): void {
@@ -95,7 +95,7 @@ namespace Fudge {
       target.appendChild(instance);
       this.tree.findVisible(target).expand(true);
 
-      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+      this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
     }
 
     //#region  ContextMenu
@@ -126,7 +126,7 @@ namespace Fudge {
         case CONTEXTMENU.ACTIVATE_NODE:
           focus.activate(!focus.isActive);
           this.tree.findVisible(focus).refreshAttributes();
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.REFRESH, { bubbles: true }));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           break;
         case CONTEXTMENU.DELETE_NODE:
           // focus.addChild(child);
@@ -136,25 +136,29 @@ namespace Fudge {
           focus.getParent().removeChild(focus);
           ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
           ƒ.Physics.cleanup();
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           break;
       }
     }
     //#endregion
 
     //#region EventHandlers
-    private hndEvent = (_event: CustomEvent): void => {
+    private hndEvent = (_event: FudgeEvent): void => {
       switch (_event.type) {
         case ƒUi.EVENT.DELETE:
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           break;
-        case EVENT_EDITOR.SELECT_NODE:
-          this.tree.displaySelection([_event.detail]);
-        case EVENT_EDITOR.FOCUS_NODE:
-          this.focusNode(_event.detail);
+        case EVENT_EDITOR.SELECT:
+          if (_event.detail.node)
+            this.tree.displaySelection([_event.detail.node]);
+          else {
+            this.setGraph(_event.detail.graph);
+            break;
+          }
+        case EVENT_EDITOR.FOCUS:
+          if (_event.detail.node)
+            this.focusNode(_event.detail.node);
           break;
-        default:
-          this.setGraph(_event.detail);
       }
     }
     //#endregion

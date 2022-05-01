@@ -16,8 +16,8 @@ namespace Fudge {
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
-      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
@@ -102,23 +102,23 @@ namespace Fudge {
           let typeMesh: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
           //@ts-ignore
           let meshNew: ƒ.Mesh = new typeMesh();
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           this.table.selectInterval(meshNew, meshNew);
           break;
         case CONTEXTMENU.CREATE_MATERIAL:
           let typeShader: typeof ƒ.Shader = ƒ.Shader.subclasses[iSubclass];
           let mtrNew: ƒ.Material = new ƒ.Material(typeShader.name, typeShader);
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           this.table.selectInterval(mtrNew, mtrNew);
           break;
         case CONTEXTMENU.CREATE_GRAPH:
           let graph: ƒ.Graph = await ƒ.Project.registerAsGraph(new ƒ.Node("NewGraph"));
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           this.table.selectInterval(graph, graph);
           break;
         case CONTEXTMENU.DELETE_RESOURCE:
           await this.table.controller.delete([this.table.getFocussed()]);
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           break;
       }
     }
@@ -167,18 +167,18 @@ namespace Fudge {
         }
       }
 
-      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+      this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
     }
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
-        case EVENT_EDITOR.SET_PROJECT:
-        case EVENT_EDITOR.UPDATE:
+        case EVENT_EDITOR.SELECT:
+        case EVENT_EDITOR.MODIFY:
           // case ƒui.EVENT.MUTATE:
           this.listResources();
           break;
         case ƒui.EVENT.REMOVE_CHILD:
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           break;
       }
     }

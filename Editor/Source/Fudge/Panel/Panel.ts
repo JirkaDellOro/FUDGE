@@ -45,11 +45,9 @@ namespace Fudge {
     }
 
     /** Send custom copies of the given event to the views */
-    public broadcastEvent = (_event: Event): void => {
-      for (let view of this.views) {
-        let event: CustomEvent = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: (<CustomEvent>_event).detail });
-        view.dom.dispatchEvent(event);
-      }
+    public broadcastEvent = (_event: FudgeEvent): void => {
+      for (let view of this.views)
+        view.dispatch(<EVENT_EDITOR>_event.type, { detail: _event.detail });
     }
 
     public abstract getState(): PanelState;

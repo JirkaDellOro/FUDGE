@@ -88,7 +88,10 @@ namespace FudgeCore {
      * Set the branch to be drawn in the viewport.
      */
     public setBranch(_branch: Node): void {
-      // TODO: figure out what the event handling was created for. Doesn't have another effect than information on the console (deactivated)
+      if (_branch)
+        _branch.dispatchEvent(new Event(EVENT.ATTACH_BRANCH));
+        
+      // TODO: figure out what the following event handling was created for. Doesn't have another effect than information on the console (deactivated)
       if (this.#branch) {
         this.#branch.removeEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
         this.#branch.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);

@@ -52,12 +52,12 @@ namespace Fudge {
     }
   }
 
-  export async function saveProject(_new: boolean = false): Promise<void> {
+  export async function saveProject(_new: boolean = false): Promise<boolean> {
     if (!project)
-      return;
+      return false;
 
     if (!await project.openDialog())
-      return;
+      return false;
 
     if (watcher)
       watcher.close();
@@ -77,6 +77,7 @@ namespace Fudge {
     fs.writeFileSync(jsonFileName, project.getProjectJSON());
 
     watchFolder();
+    return true;
   }
 
   export async function promptLoadProject(): Promise<URL> {
@@ -118,7 +119,7 @@ namespace Fudge {
           await loadProject(project.base);
         } else
           watcher = fs.watch(dir, { recursive: true }, hndFileChange);
-        document.dispatchEvent(new Event(EVENT_EDITOR.UPDATE));
+        document.dispatchEvent(new Event(EVENT_EDITOR.MODIFY));
       }
     }
   }

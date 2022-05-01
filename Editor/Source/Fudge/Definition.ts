@@ -14,7 +14,7 @@ namespace Fudge {
     SYNC_INSTANCES,
     REMOVE_COMPONENT,
     ADD_JOINT,
-    DELETE_RESOURCE, 
+    DELETE_RESOURCE,
     ILLUMINATE
   }
 
@@ -32,28 +32,11 @@ namespace Fudge {
     FULLSCREEN = "fullscreen"
   }
 
-
-
-
-  export enum EVENT_EDITOR {
-    SET_GRAPH = "setGraph",
-    FOCUS_NODE = "focusNode",
-    SET_PROJECT = "setProject",
-    UPDATE = "update",
-    REFRESH = "refresh",
-    DESTROY = "destroy",
-    CLEAR_PROJECT = "clearProject",
-    TRANSFORM = "transform",
-    SELECT_NODE = "selectNode"
-  }
-
-
   export enum PANEL {
     GRAPH = "PanelGraph",
     PROJECT = "PanelProject",
     HELP = "PanelHelp"
   }
-
 
   export enum VIEW {
     HIERARCHY = "ViewHierarchy",
@@ -66,7 +49,7 @@ namespace Fudge {
     PROPERTIES = "ViewProperties",
     PREVIEW = "ViewPreview",
     SCRIPT = "ViewScript"
-    
+
     // SKETCH = ViewSketch,
     // MESH = ViewMesh,
   }

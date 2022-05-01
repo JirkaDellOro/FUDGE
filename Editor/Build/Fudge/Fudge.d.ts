@@ -45,17 +45,6 @@ declare namespace Fudge {
         PANEL_HELP_OPEN = "panelHelpOpen",
         FULLSCREEN = "fullscreen"
     }
-    enum EVENT_EDITOR {
-        SET_GRAPH = "setGraph",
-        FOCUS_NODE = "focusNode",
-        SET_PROJECT = "setProject",
-        UPDATE = "update",
-        REFRESH = "refresh",
-        DESTROY = "destroy",
-        CLEAR_PROJECT = "clearProject",
-        TRANSFORM = "transform",
-        SELECT_NODE = "selectNode"
-    }
     enum PANEL {
         GRAPH = "PanelGraph",
         PROJECT = "PanelProject",
@@ -108,9 +97,32 @@ declare namespace Fudge {
     export {};
 }
 declare namespace Fudge {
+    enum EVENT_EDITOR {
+        CREATE = "EDITOR_CREATE",
+        SELECT = "EDITOR_SELECT",
+        MODIFY = "EDITOR_MODIFY",
+        DELETE = "EDITOR_DELETE",
+        CLOSE = "EDITOR_CLOSE",
+        TRANSFORM = "EDITOR_TRANSFORM",
+        FOCUS = "EDITOR_FOCUS"
+    }
+    interface EventDetail {
+        node?: ƒ.Node;
+        graph?: ƒ.Graph;
+        resource?: ƒ.SerializableResource;
+        transform?: Object;
+        view?: View;
+    }
+    /**
+     * Extension of CustomEvent that supports a detail field with the type EventDetail
+     */
+    class FudgeEvent extends CustomEvent<EventDetail> {
+    }
+}
+declare namespace Fudge {
     let watcher: ƒ.General;
     function newProject(): Promise<void>;
-    function saveProject(_new?: boolean): Promise<void>;
+    function saveProject(_new?: boolean): Promise<boolean>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
 }
@@ -218,6 +230,7 @@ declare namespace Fudge {
         private static registerViewForDragDrop;
         setTitle(_title: string): void;
         getDragDropSources(): Object[];
+        dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
@@ -349,7 +362,7 @@ declare namespace Fudge {
         private views;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         /** Send custom copies of the given event to the views */
-        broadcastEvent: (_event: Event) => void;
+        broadcastEvent: (_event: FudgeEvent) => void;
         abstract getState(): PanelState;
         private addViewComponent;
     }
