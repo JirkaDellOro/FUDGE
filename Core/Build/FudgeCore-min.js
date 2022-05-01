@@ -215,7 +215,7 @@ var FudgeCore;
         static getMutatorFromPath(_mutator, _path) {
             let key = _path[0];
             let mutator = {};
-            if (!_mutator[key])
+            if (_mutator[key] == undefined)
                 return _mutator;
             mutator[key] = _mutator[key];
             if (_path.length > 1)
@@ -3879,7 +3879,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Control extends EventTarget {
-        constructor(_name, _factor = 1, _type = 0, _active = true) {
+        constructor(_name, _factor = 1, _type = 0, _delay = 0) {
             super();
             this.rateDispatchOutput = 0;
             this.valuePrevious = 0;
@@ -3917,8 +3917,9 @@ var FudgeCore;
             };
             this.factor = _factor;
             this.type = _type;
-            this.active = _active;
+            this.active = true;
             this.name = _name;
+            this.setDelay(_delay);
         }
         setTimebase(_time) {
             this.time = _time;
@@ -4437,6 +4438,7 @@ var FudgeCore;
             await super.deserialize(_serialization);
             FudgeCore.Project.register(this, _serialization.idResource);
             await FudgeCore.Project.resyncGraphInstances(this);
+            this.dispatchEvent(new Event("graphDeserialized"));
             return this;
         }
     }
@@ -5142,7 +5144,7 @@ var FudgeCore;
         }
         get scaling() {
             if (!this.vectors.scaling)
-                this.vectors.scaling = new FudgeCore.Vector2(Math.hypot(this.data[0], this.data[1]) * (this.data[0] < 0 ? -1 : 1), Math.hypot(this.data[3], this.data[4]) * (this.data[4] < 0 ? -1 : 1));
+                this.vectors.scaling = new FudgeCore.Vector2(Math.hypot(this.data[0], this.data[1]), Math.hypot(this.data[3], this.data[4]));
             return this.vectors.scaling;
         }
         set scaling(_scaling) {
@@ -5635,7 +5637,7 @@ var FudgeCore;
         get scaling() {
             if (!this.vectors.scaling) {
                 this.vectors.scaling = this.#vectors.scaling;
-                this.vectors.scaling.set(Math.hypot(this.data[0], this.data[1], this.data[2]) * (this.data[0] < 0 ? -1 : 1), Math.hypot(this.data[4], this.data[5], this.data[6]) * (this.data[5] < 0 ? -1 : 1), Math.hypot(this.data[8], this.data[9], this.data[10] * (this.data[10] < 0 ? -1 : 1)));
+                this.vectors.scaling.set(Math.hypot(this.data[0], this.data[1], this.data[2]), Math.hypot(this.data[4], this.data[5], this.data[6]), Math.hypot(this.data[8], this.data[9], this.data[10]));
             }
             return this.vectors.scaling;
         }
@@ -5829,32 +5831,6 @@ var FudgeCore;
             FudgeCore.Recycler.store(mtxResult);
         }
         getEulerAngles() {
-            let scaling = this.scaling;
-            let thetaX, thetaY, thetaZ;
-            let r02 = this.data[2] / scaling.z;
-            let r11 = this.data[5] / scaling.y;
-            if (r02 < 1) {
-                if (r02 > -1) {
-                    thetaY = Math.asin(-r02);
-                    thetaZ = Math.atan2(this.data[1] / scaling.y, this.data[0] / scaling.x);
-                    thetaX = Math.atan2(this.data[9] / scaling.z, this.data[10] / scaling.z);
-                }
-                else {
-                    thetaY = Math.PI / 2;
-                    thetaZ = -Math.atan2(this.data[6] / scaling.y, r11);
-                    thetaX = 0;
-                }
-            }
-            else {
-                thetaY = -Math.PI / 2;
-                thetaZ = Math.atan2(-this.data[6] / scaling.y, r11);
-                thetaX = 0;
-            }
-            this.#eulerAngles.set(-thetaX, thetaY, thetaZ);
-            this.#eulerAngles.scale(180 / Math.PI);
-            return this.#eulerAngles;
-        }
-        getEulerAnglesX() {
             let scaling = this.scaling;
             let s0 = this.data[0] / scaling.x;
             let s1 = this.data[1] / scaling.x;
@@ -10121,6 +10097,8 @@ var FudgeCore;
             return FudgeCore.Rectangle.GET(0, 0, this.#canvas.clientWidth, this.#canvas.clientHeight);
         }
         setBranch(_branch) {
+            if (_branch)
+                _branch.dispatchEvent(new Event("attachBranch"));
             if (this.#branch) {
                 this.#branch.removeEventListener("componentAdd", this.hndComponentEvent);
                 this.#branch.removeEventListener("componentRemove", this.hndComponentEvent);
@@ -10413,7 +10391,7 @@ var FudgeCore;
         MODE[MODE["EDITOR"] = 0] = "EDITOR";
         MODE[MODE["RUNTIME"] = 1] = "RUNTIME";
     })(MODE = FudgeCore.MODE || (FudgeCore.MODE = {}));
-    class Project {
+    class Project extends FudgeCore.EventTargetStatic {
         static register(_resource, _idResource) {
             if (_resource.idResource)
                 if (_resource.idResource == _idResource)
@@ -10432,12 +10410,21 @@ var FudgeCore;
             Project.serialization = {};
             Project.scriptNamespaces = {};
         }
-        static getResourcesOfType(_type) {
-            let found = {};
+        static getResourcesByType(_type) {
+            let found = [];
             for (let resourceId in Project.resources) {
                 let resource = Project.resources[resourceId];
                 if (resource instanceof _type)
-                    found[resourceId] = resource;
+                    found.push(resource);
+            }
+            return found;
+        }
+        static getResourcesByName(_name) {
+            let found = [];
+            for (let resourceId in Project.resources) {
+                let resource = Project.resources[resourceId];
+                if (resource.name == _name)
+                    found.push(resource);
             }
             return found;
         }
@@ -10534,6 +10521,7 @@ var FudgeCore;
             const resourceFileContent = await response.text();
             let serialization = FudgeCore.Serializer.parse(resourceFileContent);
             let reconstruction = await Project.deserialize(serialization);
+            Project.dispatchEvent(new CustomEvent("resourcesLoaded", { detail: { url: _url, resources: reconstruction } }));
             return reconstruction;
         }
         static async loadResourcesFromHTML() {

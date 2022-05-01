@@ -2,9 +2,9 @@ namespace FudgeAid {
   import ƒ = FudgeCore;
 
   export class CameraOrbitMovingFocus extends CameraOrbit {
-    public readonly axisTranslateX: ƒ.Axis = new ƒ.Axis("TranslateX", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
-    public readonly axisTranslateY: ƒ.Axis = new ƒ.Axis("TranslateY", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
-    public readonly axisTranslateZ: ƒ.Axis = new ƒ.Axis("TranslateZ", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
+    public readonly axisTranslateX: ƒ.Axis = new ƒ.Axis("TranslateX", 1, ƒ.CONTROL_TYPE.PROPORTIONAL);
+    public readonly axisTranslateY: ƒ.Axis = new ƒ.Axis("TranslateY", 1, ƒ.CONTROL_TYPE.PROPORTIONAL);
+    public readonly axisTranslateZ: ƒ.Axis = new ƒ.Axis("TranslateZ", 1, ƒ.CONTROL_TYPE.PROPORTIONAL);
 
     public constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart: number = 5, _maxRotX: number = 85, _minDistance: number = 0, _maxDistance: number = Infinity) {
       super(_cmpCamera, _distanceStart, _maxRotX, _minDistance, _maxDistance);

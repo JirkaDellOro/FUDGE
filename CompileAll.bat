@@ -3,7 +3,7 @@
 :Core
 echo --- Compile Shaders
 cd Core/Source/Shader/
-call node CompileShaders.mjs CompileShaders.json
+call node CompileShaders.mjs CompileShaders.json FudgeCore
 cd ..
 echo --- Compile Core
 call tsc -p tsconfig.json

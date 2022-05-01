@@ -2,9 +2,9 @@ namespace FudgeAid {
   import ƒ = FudgeCore;
 
   export class CameraOrbit extends ƒ.Node {
-    public readonly axisRotateX: ƒ.Axis = new ƒ.Axis("RotateX", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
-    public readonly axisRotateY: ƒ.Axis = new ƒ.Axis("RotateY", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
-    public readonly axisDistance: ƒ.Axis = new ƒ.Axis("Distance", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
+    public readonly axisRotateX: ƒ.Axis = new ƒ.Axis("RotateX", 1, ƒ.CONTROL_TYPE.PROPORTIONAL);
+    public readonly axisRotateY: ƒ.Axis = new ƒ.Axis("RotateY", 1, ƒ.CONTROL_TYPE.PROPORTIONAL);
+    public readonly axisDistance: ƒ.Axis = new ƒ.Axis("Distance", 1, ƒ.CONTROL_TYPE.PROPORTIONAL);
 
     protected translator: ƒ.Node;
     protected rotatorX: ƒ.Node;
@@ -90,7 +90,7 @@ namespace FudgeAid {
       this.rotationX = -geo.latitude;
       this.distance = geo.magnitude;
     }
-    
+
 
     public hndAxisOutput: EventListener = (_event: Event): void => {
       let output: number = (<CustomEvent>_event).detail.output;
