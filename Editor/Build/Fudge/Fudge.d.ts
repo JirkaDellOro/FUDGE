@@ -564,7 +564,7 @@ declare namespace Fudge {
         private viewport;
         private canvas;
         private graph;
-        private viewGraph;
+        private nodeLight;
         constructor(_container: ComponentContainer, _state: JsonValue);
         createUserInterface(): void;
         setGraph(_node: ƒ.Graph): void;
@@ -573,8 +573,7 @@ declare namespace Fudge {
         protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
-        private checkIllumination;
-        private illuminateGraph;
+        private hndPrepare;
         private hndEvent;
         private hndPick;
         private hndPointer;
