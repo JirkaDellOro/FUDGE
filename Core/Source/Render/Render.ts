@@ -37,8 +37,8 @@ namespace FudgeCore {
         Render.nodesParticleSystem.reset();
         Render.nodesPhysics.reset();
         Render.componentsPick.reset();
-        Render.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
         Render.lights.forEach(_array => _array.reset());
+        _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
       }
 
       if (!_branch.isActive)
@@ -66,25 +66,15 @@ namespace FudgeCore {
           this.transformByPhysics(_branch, cmpRigidbody);
       }
 
-      
+
       let cmpPick: ComponentPick = _branch.getComponent(ComponentPick);
-      if (cmpPick && cmpPick.isActive) { 
+      if (cmpPick && cmpPick.isActive) {
         Render.componentsPick.push(cmpPick); // add this component to pick list
       }
 
 
       let cmpLights: ComponentLight[] = _branch.getComponents(ComponentLight);
-      for (let cmpLight of cmpLights) {
-        if (!cmpLight.isActive)
-          continue;
-        let type: TypeOfLight = cmpLight.light.getType();
-        let lightsOfType: RecycableArray<ComponentLight> = Render.lights.get(type);
-        if (!lightsOfType) {
-          lightsOfType = new RecycableArray<ComponentLight>();
-          Render.lights.set(type, lightsOfType);
-        }
-        lightsOfType.push(cmpLight);
-      }
+      Render.addLights(cmpLights);
 
       let cmpMesh: ComponentMesh = _branch.getComponent(ComponentMesh);
       let cmpMaterial: ComponentMaterial = _branch.getComponent(ComponentMaterial);
@@ -121,13 +111,24 @@ namespace FudgeCore {
       }
 
       if (firstLevel) {
-        Render.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
+        _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
         for (let shader of _shadersUsed)
           Render.setLightsInShader(shader, Render.lights);
       }
+    }
 
-      //Calculate Physics based on all previous calculations    
-      // Render.setupPhysicalTransform(_branch);
+    public static addLights(cmpLights: ComponentLight[]): void {
+      for (let cmpLight of cmpLights) {
+        if (!cmpLight.isActive)
+          continue;
+        let type: TypeOfLight = cmpLight.light.getType();
+        let lightsOfType: RecycableArray<ComponentLight> = Render.lights.get(type);
+        if (!lightsOfType) {
+          lightsOfType = new RecycableArray<ComponentLight>();
+          Render.lights.set(type, lightsOfType);
+        }
+        lightsOfType.push(cmpLight);
+      }
     }
     //#endregion
 

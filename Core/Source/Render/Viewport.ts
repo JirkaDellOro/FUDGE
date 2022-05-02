@@ -90,7 +90,7 @@ namespace FudgeCore {
     public setBranch(_branch: Node): void {
       if (_branch)
         _branch.dispatchEvent(new Event(EVENT.ATTACH_BRANCH));
-        
+
       // TODO: figure out what the following event handling was created for. Doesn't have another effect than information on the console (deactivated)
       if (this.#branch) {
         this.#branch.removeEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
@@ -160,7 +160,9 @@ namespace FudgeCore {
       let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
+      this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
       Render.prepare(this.#branch, null, mtxRoot);
+      this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
       this.componentsPick = Render.componentsPick;
     }
 
