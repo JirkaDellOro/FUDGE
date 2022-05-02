@@ -25,7 +25,7 @@ namespace Fudge {
         ]
       };
 
-      this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [
+      this.goldenLayout.addItemAtLocation(config, [
         { typeId: LayoutManager.LocationSelector.TypeId.Root }
       ]);
 

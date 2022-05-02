@@ -500,7 +500,6 @@ declare namespace Fudge {
         private graph;
         private canvas;
         private selectedKey;
-        private selectedProperty;
         private attributeList;
         private sheet;
         private toolbar;
@@ -524,7 +523,7 @@ declare namespace Fudge {
         private hndToolbarChange;
         private updateUserInterface;
         private setTime;
-        private playAnimation;
+        private updateAnimation;
         private randomNameGenerator;
     }
 }

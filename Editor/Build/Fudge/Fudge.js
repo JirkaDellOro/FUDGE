@@ -1794,7 +1794,7 @@ var Fudge;
                     }
                 ]
             };
-            this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [
+            this.goldenLayout.addItemAtLocation(config, [
                 { typeId: 7 /* Root */ }
             ]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
@@ -2099,7 +2099,6 @@ var Fudge;
         graph;
         canvas;
         selectedKey;
-        selectedProperty;
         attributeList;
         sheet;
         toolbar;
@@ -2112,6 +2111,7 @@ var Fudge;
             this.setAnimation(null);
             this.createUserInterface();
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndSelect);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.canvas.addEventListener("pointermove", this.hndPointerMove);
@@ -2148,7 +2148,6 @@ var Fudge;
                     path = _item["path"];
                     this.controller.addPathToAnimationStructure(path);
                     this.dispatch(Fudge.EVENT_EDITOR.MODIFY, {});
-                    this.setAnimation(this.animation); // TODO: use modify event for this
                     break;
                 case Fudge.CONTEXTMENU.DELETE_PROPERTY:
                     let element = document.activeElement;
@@ -2167,7 +2166,7 @@ var Fudge;
                         element = element.parentElement;
                     }
                     this.controller.deletePathFromAnimationStructure(path);
-                    this.setAnimation(this.animation); // TODO: use modify event for this
+                    this.dispatch(Fudge.EVENT_EDITOR.MODIFY, {});
                     return;
             }
         }
@@ -2239,7 +2238,8 @@ var Fudge;
             document.addEventListener("DOMContentLoaded", () => this.updateUserInterface());
         }
         hndPointerDown = (_event) => {
-            //  TODO: rework events
+            if (this.idInterval != undefined)
+                return;
             this.setTime(_event.offsetX / this.sheet.scale.x);
             let obj = this.sheet.getObjectAtPoint(_event.offsetX, _event.offsetY);
             if (!obj)
@@ -2260,6 +2260,8 @@ var Fudge;
         };
         hndPointerMove = (_event) => {
             _event.preventDefault();
+            if (this.idInterval != undefined)
+                return;
             if (_event.buttons != 1)
                 return;
             this.setTime(_event.offsetX / this.sheet.scale.x);
@@ -2269,6 +2271,16 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.FOCUS:
                     this.graph = _event.detail.graph;
                     this.focusNode(_event.detail.node);
+                    break;
+                case Fudge.EVENT_EDITOR.MODIFY:
+                    //TODO: rework this
+                    let animationMutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
+                    if (!animationMutator)
+                        animationMutator = {};
+                    let newAttributeList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
+                    this.controller = new Fudge.ControllerAnimation(this.animation, this.attributeList, animationMutator);
+                    this.dom.replaceChild(newAttributeList, this.attributeList);
+                    this.attributeList = newAttributeList;
                     break;
             }
         };
@@ -2298,9 +2310,6 @@ var Fudge;
             this.sheet.redraw(this.playbackTime);
         }
         hndSelect = (_event) => {
-            if (typeof _event.detail == "string") {
-                this.selectedProperty = _event.detail;
-            }
             if ("key" in _event.detail) {
                 this.selectedKey = _event.detail;
             }
@@ -2422,10 +2431,9 @@ var Fudge;
                 case "play":
                     this.time.set(this.playbackTime);
                     if (this.idInterval == undefined)
-                        this.idInterval = window.setInterval(this.playAnimation, 1000 / this.animation.fps);
+                        this.idInterval = window.setInterval(this.updateAnimation, 1000 / this.animation.fps);
                     break;
                 case "pause":
-                    // this.cmpAnimator.activate(false);
                     window.clearInterval(this.idInterval);
                     this.idInterval = undefined;
                     break;
@@ -2484,7 +2492,7 @@ var Fudge;
             if (updateDisplay)
                 this.updateUserInterface(this.cmpAnimator.updateAnimation(this.playbackTime)[0]);
         }
-        playAnimation = () => {
+        updateAnimation = () => {
             // requestAnimationFrame(this.playAnimation.bind(this));
             let t = this.time.get();
             let m = {};

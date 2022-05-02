@@ -39,7 +39,6 @@ namespace Fudge {
     private graph: ƒ.Graph;
     private canvas: HTMLCanvasElement;
     private selectedKey: ViewAnimationKey;
-    private selectedProperty: string;
     private attributeList: HTMLDivElement;
     private sheet: ViewAnimationSheet;
     private toolbar: HTMLDivElement;
@@ -54,6 +53,7 @@ namespace Fudge {
       this.createUserInterface();
       
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndSelect);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.canvas.addEventListener("pointermove", this.hndPointerMove);
@@ -98,8 +98,7 @@ namespace Fudge {
           path = _item["path"];
           this.controller.addPathToAnimationStructure(path);
 
-          this.dispatch(EVENT_EDITOR.MODIFY, { });
-          this.setAnimation(this.animation); // TODO: use modify event for this
+          this.dispatch(EVENT_EDITOR.MODIFY, {});
           break;
         case CONTEXTMENU.DELETE_PROPERTY:
           let element: Element = document.activeElement;
@@ -121,7 +120,7 @@ namespace Fudge {
             element = element.parentElement;
           }
           this.controller.deletePathFromAnimationStructure(path);
-          this.setAnimation(this.animation); // TODO: use modify event for this
+          this.dispatch(EVENT_EDITOR.MODIFY, {});
           return;
       }
     }
@@ -212,7 +211,8 @@ namespace Fudge {
     }
 
     private hndPointerDown = (_event: PointerEvent): void => {
-      //  TODO: rework events
+      if (this.idInterval != undefined) return;
+
       this.setTime(_event.offsetX / this.sheet.scale.x);
 
       let obj: ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent = this.sheet.getObjectAtPoint(_event.offsetX, _event.offsetY);
@@ -235,6 +235,7 @@ namespace Fudge {
 
     private hndPointerMove = (_event: PointerEvent): void => {
       _event.preventDefault();
+      if (this.idInterval != undefined) return;
       if (_event.buttons != 1) return;
       this.setTime(_event.offsetX / this.sheet.scale.x);
     }
@@ -244,6 +245,15 @@ namespace Fudge {
         case EVENT_EDITOR.FOCUS:
           this.graph = _event.detail.graph;
           this.focusNode(_event.detail.node);
+          break;
+        case EVENT_EDITOR.MODIFY:
+          //TODO: rework this
+          let animationMutator: ƒ.Mutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
+          if (!animationMutator) animationMutator = {};
+          let newAttributeList: HTMLDivElement = ƒui.Generator.createInterfaceFromMutator(animationMutator);
+          this.controller = new ControllerAnimation(this.animation, this.attributeList, animationMutator);
+          this.dom.replaceChild(newAttributeList, this.attributeList);
+          this.attributeList = newAttributeList;
           break;
       }
     }
@@ -277,9 +287,6 @@ namespace Fudge {
     }
 
     private hndSelect = (_event: CustomEvent): void => {
-      if (typeof _event.detail == "string") {
-        this.selectedProperty = _event.detail;
-      }
       if ("key" in _event.detail) {
         this.selectedKey = _event.detail;
       }
@@ -412,10 +419,9 @@ namespace Fudge {
         case "play":
           this.time.set(this.playbackTime);
           if (this.idInterval == undefined)
-            this.idInterval = window.setInterval(this.playAnimation, 1000 / this.animation.fps);
+            this.idInterval = window.setInterval(this.updateAnimation, 1000 / this.animation.fps);
           break;
         case "pause":
-          // this.cmpAnimator.activate(false);
           window.clearInterval(this.idInterval);
           this.idInterval = undefined;
           break;
@@ -479,7 +485,7 @@ namespace Fudge {
       if (updateDisplay) this.updateUserInterface(this.cmpAnimator.updateAnimation(this.playbackTime)[0]);
     }
 
-    private playAnimation = () => {
+    private updateAnimation = () => {
       // requestAnimationFrame(this.playAnimation.bind(this));
       let t: number = this.time.get();
       let m: ƒ.Mutator = {};
