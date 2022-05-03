@@ -2090,18 +2090,16 @@ var Fudge;
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimation extends Fudge.View {
-        node;
         animation;
+        toolbar;
         cmpAnimator;
+        node;
         playbackTime;
         controller;
-        crc2;
         graph;
-        canvas;
         selectedKey;
         attributeList;
         sheet;
-        toolbar;
         hover;
         time = new ƒ.Time();
         idInterval;
@@ -2110,14 +2108,11 @@ var Fudge;
             this.playbackTime = 500;
             this.setAnimation(null);
             this.createUserInterface();
+            _container.on("resize", this.redraw);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndSelect);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
-            this.canvas.addEventListener("pointermove", this.hndPointerMove);
-            this.canvas.addEventListener("pointerdown", this.hndPointerDown);
-            this.toolbar.addEventListener("click", this.hndToolbarClick);
-            this.toolbar.addEventListener("change", this.hndToolbarChange);
         }
         //#region  ContextMenu
         getContextMenu(_callback) {
@@ -2220,27 +2215,25 @@ var Fudge;
             this.toolbar.style.height = "80px";
             this.toolbar.style.borderBottom = "1px solid black";
             this.fillToolbar(this.toolbar);
-            this.canvas = document.createElement("canvas");
-            this.canvas.width = 1500;
-            this.canvas.height = 500;
-            this.canvas.style.position = "absolute";
-            this.canvas.style.left = "300px";
-            this.canvas.style.top = "0px";
-            this.canvas.style.borderLeft = "1px solid black";
-            this.crc2 = this.canvas.getContext("2d");
+            this.toolbar.addEventListener("click", this.hndToolbarClick);
+            this.toolbar.addEventListener("change", this.hndToolbarChange);
+            this.sheet = new Fudge.ViewAnimationSheetCurve(this); // TODO: stop using fixed values?
+            this.sheet.canvas.addEventListener("pointerdown", this.hndPointerDown);
+            this.sheet.canvas.addEventListener("pointermove", this.hndPointerMove);
+            this.redraw();
             this.hover = document.createElement("span");
             this.hover.style.background = "black";
             this.hover.style.color = "white";
             this.hover.style.position = "absolute";
             this.hover.style.display = "none";
-            this.sheet = new Fudge.ViewAnimationSheetCurve(this, this.crc2, new ƒ.Vector2(0.5, 2), new ƒ.Vector2(0, 200)); // TODO: stop using fixed values?
-            this.sheet.redraw(this.playbackTime);
             document.addEventListener("DOMContentLoaded", () => this.updateUserInterface());
         }
         hndPointerDown = (_event) => {
             if (this.idInterval != undefined)
                 return;
-            this.setTime(_event.offsetX / this.sheet.scale.x);
+            if (_event.buttons != 1)
+                return;
+            this.setTime(_event.offsetX);
             let obj = this.sheet.getObjectAtPoint(_event.offsetX, _event.offsetY);
             if (!obj)
                 return;
@@ -2264,7 +2257,7 @@ var Fudge;
                 return;
             if (_event.buttons != 1)
                 return;
-            this.setTime(_event.offsetX / this.sheet.scale.x);
+            this.setTime(_event.offsetX);
         };
         hndEvent = (_event) => {
             switch (_event.type) {
@@ -2298,7 +2291,7 @@ var Fudge;
             }
             this.dom.innerHTML = "";
             this.dom.appendChild(this.toolbar);
-            this.dom.appendChild(this.canvas);
+            this.dom.appendChild(this.sheet.canvas);
             this.dom.appendChild(this.hover);
             this.animation = _animation;
             let animationMutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
@@ -2307,7 +2300,7 @@ var Fudge;
             this.attributeList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
             this.controller = new Fudge.ControllerAnimation(this.animation, this.attributeList, animationMutator);
             this.dom.appendChild(this.attributeList);
-            this.sheet.redraw(this.playbackTime);
+            this.redraw();
         }
         hndSelect = (_event) => {
             if ("key" in _event.detail) {
@@ -2405,19 +2398,19 @@ var Fudge;
             switch (target.id) {
                 case "add-label":
                     this.animation.labels[this.randomNameGenerator()] = this.playbackTime;
-                    this.sheet.redraw(this.playbackTime);
+                    this.redraw();
                     break;
                 case "add-event":
                     this.animation.setEvent(this.randomNameGenerator(), this.playbackTime);
-                    this.sheet.redraw(this.playbackTime);
+                    this.redraw();
                     break;
                 case "add-key":
                     this.controller.addKeyToAnimationStructure(this.playbackTime);
-                    this.sheet.redraw(this.playbackTime);
+                    this.redraw();
                     break;
                 case "remove-key":
                     this.controller.deleteKeyFromAnimationStructure(this.selectedKey);
-                    this.sheet.redraw(this.playbackTime);
+                    this.redraw();
                     break;
                 case "start":
                     this.playbackTime = 0;
@@ -2444,7 +2437,7 @@ var Fudge;
                     break;
                 case "end":
                     this.playbackTime = this.animation.totalTime;
-                    this.sheet.redraw(this.playbackTime);
+                    this.redraw();
                     this.updateUserInterface();
                     break;
                 default:
@@ -2467,7 +2460,7 @@ var Fudge;
                     // console.log("sps changed to", target.value);
                     if (!isNaN(+target.value)) {
                         this.animation.fps /* stepsPerSecond */ = +target.value;
-                        this.sheet.redraw(this.playbackTime);
+                        this.redraw();
                     }
                     break;
                 default:
@@ -2476,7 +2469,7 @@ var Fudge;
             }
         };
         updateUserInterface(_m = null) {
-            this.sheet.redraw(this.playbackTime);
+            this.redraw();
             if (!_m)
                 _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
             this.controller.updateAnimationUserInterface(_m);
@@ -2485,13 +2478,15 @@ var Fudge;
         setTime(_time, updateDisplay = true) {
             if (!this.animation)
                 return;
-            // this.playbackTime = Math.min(this.animation.totalTime, Math.max(0, _time));
-            this.playbackTime = Math.max(0, _time);
-            this.playbackTime = Math.round(this.playbackTime / (1000 / this.animation.fps)) * (1000 / this.animation.fps);
-            // console.log(this.playbackTime);
+            // TODO: maybe rework this an move it into the sheet?
+            this.playbackTime = Math.max(0, (_time / this.sheet.scale.x) + this.sheet.cameraOffset.x);
+            this.playbackTime = Math.round(this.playbackTime / ((1000 / this.animation.fps))) * ((1000 / this.animation.fps));
             if (updateDisplay)
                 this.updateUserInterface(this.cmpAnimator.updateAnimation(this.playbackTime)[0]);
         }
+        redraw = () => {
+            this.sheet.redraw(this.playbackTime);
+        };
         updateAnimation = () => {
             // requestAnimationFrame(this.playAnimation.bind(this));
             let t = this.time.get();
@@ -2512,18 +2507,37 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     class ViewAnimationSheet {
+        canvas;
         scale;
+        cameraOffset = new ƒ.Vector2();
         keys = [];
         sequences = [];
+        crc2;
         view;
-        position; // TODO: is this necessary?
+        // private position: ƒ.Vector2; // TODO: is this necessary?
         labels = [];
         events = [];
+        time = 0;
+        // public scale = 1;
+        MAX_ZOOM = 5;
+        MIN_ZOOM = 0.000001;
+        SCROLL_SENSITIVITY = 0.0005;
+        isDragging = false;
+        dragStart = new ƒ.Vector2();
         //TODO stop using hardcoded colors
-        constructor(_view, _crc2, _scale = new ƒ.Vector2(1, 1), _pos = new ƒ.Vector2()) {
+        constructor(_view, _scale = new ƒ.Vector2(1, 1), _pos = new ƒ.Vector2()) {
             this.view = _view;
             this.scale = _scale;
-            this.position = _pos;
+            // this.position = _pos;
+            this.canvas = document.createElement("canvas");
+            this.crc2 = this.canvas.getContext("2d");
+            this.canvas.style.position = "absolute";
+            this.canvas.style.left = "300px";
+            this.canvas.style.top = "0px";
+            this.canvas.style.borderLeft = "1px solid black";
+            this.canvas.addEventListener("pointerdown", this.hndPointerDown);
+            this.canvas.addEventListener("pointermove", this.hndPointerMove);
+            this.canvas.addEventListener("wheel", this.hdnWheel);
         }
         get animation() {
             return this.view.animation;
@@ -2531,26 +2545,40 @@ var Fudge;
         get dom() {
             return this.view.dom;
         }
-        get crc2() {
-            return this.view.crc2;
+        get toolbar() {
+            return this.view.toolbar;
         }
-        moveTo(_time, _value = this.position.y) {
-            this.position.x = _time;
-            this.position.y = _value;
-        }
-        translate() {
-            this.crc2.translate(this.position.x, this.position.y);
-            this.crc2.scale(this.scale.x, this.scale.y);
-        }
+        // public moveTo(_time: number, _value: number = this.position.y): void {
+        //   this.position.x = _time;
+        //   this.position.y = _value;
+        // }
+        // public translate(): void {
+        //   this.crc2.translate(this.position.x, this.position.y);
+        //   this.crc2.scale(this.cameraZoom, this.cameraZoom);
+        // }
         redraw(_time) {
             if (!this.animation)
                 return;
-            this.clear();
-            this.translate();
+            if (_time != undefined)
+                this.time = _time;
+            this.canvas.width = this.dom.clientWidth - this.toolbar.clientWidth;
+            this.canvas.height = this.dom.clientHeight;
+            // this.crc2.translate( window.innerWidth / 2, window.innerHeight / 2 );
+            // this.crc2.scale(this.cameraZoom, this.cameraZoom);
+            // this.crc2.translate( -window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y );
+            // this.crc2.clearRect(0,0, window.innerWidth, window.innerHeight);
+            // this.clear();
+            // this.translate();
+            // this.crc2.translate(this.canvas.height / 2, this.canvas.height / 2);
+            // this.crc2.translate(this.position.x, this.position.y);
+            // console.log(this.scale.x);
+            this.crc2.scale(this.scale.x, this.scale.y);
+            this.crc2.translate(-this.cameraOffset.x, this.cameraOffset.y + 200);
+            this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
             this.drawKeys();
             this.drawTimeline();
             this.drawEventsAndLabels();
-            this.drawCursor(_time);
+            this.drawCursor(this.time);
         }
         clear() {
             this.crc2.resetTransform();
@@ -2560,48 +2588,71 @@ var Fudge;
         drawTimeline() {
             this.crc2.resetTransform();
             let timelineHeight = 50;
-            let maxDistance = 10000;
-            let timeline = new Path2D();
             this.crc2.fillStyle = "#7a7a7a";
-            this.crc2.fillRect(0, 0, maxDistance, timelineHeight + 30);
+            this.crc2.fillRect(0, 0, this.canvas.width, timelineHeight + 30);
+            let timeline = new Path2D();
             timeline.moveTo(0, timelineHeight);
-            //TODO make this use some actually sensible numbers, maybe 2x the animation length
-            timeline.lineTo(maxDistance, timelineHeight);
-            //TODO: make this scale nicely/use the animations SPS
-            let baseWidth = 1000;
-            let pixelPerSecond = Math.floor(baseWidth * this.scale.x);
-            let stepsPerSecond = this.view.animation.fps; // was stepsPerSecond TODO: find out why... see masterthesis Lukas Scheuerle;
-            let stepsPerDisplayText = 1;
-            // [stepsPerSecond, stepsPerDisplayText] = this.calculateDisplay(pixelPerSecond);
-            let pixelPerStep = pixelPerSecond / stepsPerSecond;
-            let steps = 0;
-            // console.log(pixelPerSecond, pixelPerStep);
+            timeline.lineTo(this.canvas.width, timelineHeight);
+            // let baseWidth: number = 1000;
+            // let pixelPerSecond: number = Math.round(baseWidth * this.scale.x);
+            // // console.log(pixelPerSecond);
+            // let stepsPerSecond: number = this.animation.fps; // was stepsPerSecond TODO: find out why... see masterthesis Lukas Scheuerle;
+            // // let stepsPerSecond: number = 
+            // let stepsPerDisplayText: number = 1;
+            // let pixelPerStep: number = pixelPerSecond / this.animation.fps;
+            // let steps: number = 0;
+            // [pixelPerStep, stepsPerDisplayText] = this.calculateDisplay(pixelPerStep);
             this.crc2.strokeStyle = "black";
             this.crc2.fillStyle = "black";
             this.crc2.textBaseline = "bottom";
-            for (let i = 0; i < maxDistance; i += pixelPerStep) {
-                timeline.moveTo(i, timelineHeight);
-                if (steps % stepsPerDisplayText == 0) {
-                    //TODO: stop using hardcoded heights
-                    timeline.lineTo(i, timelineHeight - 25);
-                    this.crc2.fillText(steps.toString(), i - 3, timelineHeight - 28);
-                    if (Math.round(i) % Math.round(1000 * this.scale.x) == 0)
-                        //TODO: make the time display independent of the SPS display. Trying to tie the two together was a stupid idea.
-                        this.crc2.fillText((Math.round(100 * (i / 1000 / this.scale.x)) / 100).toString() + "s", i - 3, 10);
+            this.crc2.textAlign = "center";
+            // for (let i: number = this.cameraOffset.x; i < this.canvas.width; i += pixelPerStep) {
+            //   timeline.moveTo(i, timelineHeight);
+            //   if (steps % stepsPerDisplayText == 0) {
+            //     //TODO: stop using hardcoded heights
+            //   timeline.lineTo(i, timelineHeight - 25);
+            //   this.crc2.fillText(steps.toString(), i - 3, timelineHeight - 28);
+            //   if (Math.round(i) % Math.round(baseWidth * this.scale.x) == 0)
+            //     //TODO: make the time display independent of the SPS display. Trying to tie the two together was a stupid idea.
+            //     this.crc2.fillText((Math.round(100 * (i / 1000 / this.scale.x)) / 100).toString() + "s", i - 3, 10);
+            // } 
+            // else {
+            //   timeline.lineTo(i, timelineHeight - 20);
+            //   }
+            //   steps++;
+            // }
+            let stepWidth = (1000 / this.animation.fps) * this.scale.x;
+            let stepSize = 1; // in frame number
+            while (stepWidth < 10) {
+                stepWidth *= 2;
+                stepSize *= 2;
+            }
+            let ssteps = 1 + this.canvas.width / stepWidth;
+            let stepOffset = Math.floor((this.cameraOffset.x * this.scale.x) / stepWidth);
+            let stepCounter = 0;
+            for (let i = stepOffset; i < ssteps + stepOffset; i++) {
+                let x = (i * stepWidth - (this.cameraOffset.x * this.scale.x));
+                timeline.moveTo(x, timelineHeight);
+                // TODO: refine the display
+                if (i % 5 == 0) {
+                    timeline.lineTo(x, timelineHeight - 25);
+                    let second = Math.floor((i * stepSize) / this.animation.fps);
+                    let frame = (i * stepSize) % this.animation.fps;
+                    this.crc2.fillText(`${second}:${frame < 10 ? "0" : ""}${frame}`, x, timelineHeight - 28);
                 }
                 else {
-                    timeline.lineTo(i, timelineHeight - 20);
+                    timeline.lineTo(x, timelineHeight - 20);
                 }
-                steps++;
+                stepCounter++;
             }
             this.crc2.stroke(timeline);
         }
         drawCursor(_time) {
-            _time *= this.scale.x;
+            let time = (_time - this.cameraOffset.x) * this.scale.x;
             let cursor = new Path2D();
-            cursor.rect(_time - 3, 0, 6, 50);
-            cursor.moveTo(_time, 50);
-            cursor.lineTo(_time, this.crc2.canvas.height);
+            cursor.rect(time - 3, 0, 6, 50);
+            cursor.moveTo(time, 50);
+            cursor.lineTo(time, this.canvas.height);
             this.crc2.strokeStyle = "red";
             this.crc2.fillStyle = "red";
             this.crc2.stroke(cursor);
@@ -2616,9 +2667,10 @@ var Fudge;
             this.sequences = [];
             this.keys = [];
             // this.traverseStructures(this.view.animation.animationStructure, inputMutator);
-            this.traverseStructures(this.view.animation.animationStructure);
+            this.traverseStructures(this.animation.animationStructure);
         }
         getObjectAtPoint(_x, _y) {
+            // TODO: repair selection
             for (let l of this.labels) {
                 if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
                     return l;
@@ -2629,13 +2681,13 @@ var Fudge;
                     return e;
                 }
             }
-            _x = _x / this.scale.x - this.position.x;
-            _y = _y / this.scale.y - this.position.y / this.scale.y;
-            for (let k of this.keys) {
-                if (this.crc2.isPointInPath(k.path2D, _x, _y)) {
-                    return k;
-                }
-            }
+            // _x = _x / this.scale.x - this.position.x;
+            // _y = _y / this.scale.y - this.position.y / this.scale.y;
+            // for (let k of this.keys) {
+            //   if (this.crc2.isPointInPath(k.path2D, _x, _y)) {
+            //     return k;
+            //   }
+            // }
             return null;
         }
         traverseStructures(_animation) {
@@ -2648,7 +2700,6 @@ var Fudge;
                 }
             }
         }
-        // protected abstract drawSequence(_sequence: ƒ.AnimationSequence, _input: HTMLInputElement): void;
         drawKey(_x, _y, _h, _w, _c) {
             // console.log(`x: ${_x} y: ${_y} h: ${_h} w: ${_w} c: ${_c}`);
             let key = new Path2D();
@@ -2675,13 +2726,13 @@ var Fudge;
             this.crc2.stroke(line);
             this.labels = [];
             this.events = [];
-            if (!this.view.animation)
+            if (!this.animation)
                 return;
-            for (let l in this.view.animation.labels) {
+            for (let l in this.animation.labels) {
                 //TODO stop using hardcoded values
                 let p = new Path2D;
                 this.labels.push({ label: l, path2D: p });
-                let position = this.view.animation.labels[l] * this.scale.x;
+                let position = this.animation.labels[l] * this.scale.x;
                 p.moveTo(position - 3, labelDisplayHeight - 28);
                 p.lineTo(position - 3, labelDisplayHeight - 2);
                 p.lineTo(position + 3, labelDisplayHeight - 2);
@@ -2698,10 +2749,10 @@ var Fudge;
                 this.crc2.stroke(p2);
                 this.crc2.strokeStyle = "black";
             }
-            for (let e in this.view.animation.events) {
+            for (let e in this.animation.events) {
                 let p = new Path2D;
                 this.events.push({ event: e, path2D: p });
-                let position = this.view.animation.events[e] * this.scale.x;
+                let position = this.animation.events[e] * this.scale.x;
                 p.moveTo(position - 3, labelDisplayHeight - 28);
                 p.lineTo(position - 3, labelDisplayHeight - 5);
                 p.lineTo(position, labelDisplayHeight - 2);
@@ -2713,17 +2764,44 @@ var Fudge;
             }
         }
         calculateDisplay(_ppS) {
-            // let minPixelPerStep: number = 10;
+            let minPixelPerStep = 10;
             // let maxPixelPerStep: number = 50;
-            // //TODO: use animation SPS
-            // let currentPPS: number = _ppS;
-            // while (currentPPS < minPixelPerStep || maxPixelPerStep < currentPPS) {
-            //   if(currentPPS < minPixelPerStep) {
-            //     currentPPS /= 1.5;
-            //   }
-            // }
-            return [60, 10];
+            //TODO: use animation SPS
+            let currentPPS = _ppS;
+            while (currentPPS < minPixelPerStep) { //|| currentPPS > maxPixelPerStep
+                // if (currentPPS < minPixelPerStep) {
+                currentPPS *= 1.5;
+                // } else {
+                //   currentPPS /= 1.5;
+                // }
+            }
+            return [currentPPS, 10];
         }
+        hndPointerDown = (_event) => {
+            if (_event.buttons != 4)
+                return;
+            this.dragStart.x = _event.offsetX / this.scale.x + this.cameraOffset.x;
+            // this.dragStart.y = _event.offsetY / this.scale.y - this.cameraOffset.y;
+        };
+        hndPointerMove = (_event) => {
+            _event.preventDefault();
+            if (_event.buttons != 4)
+                return;
+            this.cameraOffset.x = Math.max(this.dragStart.x - _event.offsetX / this.scale.x, 0);
+            // this.cameraOffset.y = Math.min(_event.offsetY / this.scale.x - this.dragStart.y, 0);
+            this.redraw();
+        };
+        hdnWheel = (_event) => {
+            let zoomAmount = _event.deltaY * this.SCROLL_SENSITIVITY * this.scale.x;
+            if (!this.isDragging) {
+                if (zoomAmount) {
+                    this.scale.x -= zoomAmount;
+                }
+                this.scale.x = Math.min(this.scale.x, this.MAX_ZOOM);
+                this.scale.x = Math.max(this.scale.x, this.MIN_ZOOM);
+                this.redraw();
+            }
+        };
     }
     Fudge.ViewAnimationSheet = ViewAnimationSheet;
 })(Fudge || (Fudge = {}));
@@ -2780,14 +2858,14 @@ var Fudge;
             let pixelPerValue = this.calcScaleSize();
             let valuePerPixel = 1 / pixelPerValue;
             this.crc2.strokeStyle = "green";
-            this.crc2.lineWidth = 1 / this.scale.y;
+            this.crc2.lineWidth = 1;
             let line = new Path2D();
             line.moveTo(0, 0);
             line.lineTo(100000, 0);
             this.crc2.stroke(line);
             this.crc2.fillStyle = "yellow";
             this.crc2.strokeStyle = "yellow";
-            this.crc2.lineWidth = 1 / this.scale.x;
+            // this.crc2.lineWidth = 1;
             line = new Path2D();
             line.moveTo(0, -200);
             line.lineTo(this.crc2.lineWidth, 400);

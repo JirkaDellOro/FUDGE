@@ -73,7 +73,7 @@ namespace Fudge {
       let valuePerPixel: number = 1 / pixelPerValue;
 
       this.crc2.strokeStyle = "green";
-      this.crc2.lineWidth = 1 / this.scale.y;
+      this.crc2.lineWidth = 1;
       let line: Path2D = new Path2D();
       line.moveTo(0, 0);
       line.lineTo(100000, 0);
@@ -81,7 +81,7 @@ namespace Fudge {
 
       this.crc2.fillStyle = "yellow";
       this.crc2.strokeStyle = "yellow";
-      this.crc2.lineWidth = 1 / this.scale.x;
+      // this.crc2.lineWidth = 1;
       line = new Path2D();
       line.moveTo(0, -200);
       line.lineTo(this.crc2.lineWidth, 400);

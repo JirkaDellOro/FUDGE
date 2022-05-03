@@ -29,19 +29,17 @@ namespace Fudge {
    * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
   export class ViewAnimation extends View {
-    public node: ƒ.Node;
     public animation: ƒ.Animation;
-    public cmpAnimator: ƒ.ComponentAnimator;
-    public playbackTime: number;
-    public controller: ControllerAnimation;
-    public crc2: CanvasRenderingContext2D;
-
+    public toolbar: HTMLDivElement;
+    
+    private cmpAnimator: ƒ.ComponentAnimator;
+    private node: ƒ.Node;
+    private playbackTime: number;
+    private controller: ControllerAnimation;
     private graph: ƒ.Graph;
-    private canvas: HTMLCanvasElement;
     private selectedKey: ViewAnimationKey;
     private attributeList: HTMLDivElement;
     private sheet: ViewAnimationSheet;
-    private toolbar: HTMLDivElement;
     private hover: HTMLSpanElement;
     private time: ƒ.Time = new ƒ.Time();
     private idInterval: number;
@@ -52,15 +50,11 @@ namespace Fudge {
       this.setAnimation(null);
       this.createUserInterface();
       
+      _container.on("resize", this.redraw);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndSelect);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
-      this.canvas.addEventListener("pointermove", this.hndPointerMove);
-      this.canvas.addEventListener("pointerdown", this.hndPointerDown);
-      this.toolbar.addEventListener("click", this.hndToolbarClick);
-      this.toolbar.addEventListener("change", this.hndToolbarChange);
-
     }
 
     //#region  ContextMenu
@@ -189,15 +183,14 @@ namespace Fudge {
       this.toolbar.style.height = "80px";
       this.toolbar.style.borderBottom = "1px solid black";
       this.fillToolbar(this.toolbar);
+      this.toolbar.addEventListener("click", this.hndToolbarClick);
+      this.toolbar.addEventListener("change", this.hndToolbarChange);
+      
+      this.sheet = new ViewAnimationSheetCurve(this); // TODO: stop using fixed values?
+      this.sheet.canvas.addEventListener("pointerdown", this.hndPointerDown);
+      this.sheet.canvas.addEventListener("pointermove", this.hndPointerMove);
+      this.redraw();
 
-      this.canvas = document.createElement("canvas");
-      this.canvas.width = 1500;
-      this.canvas.height = 500;
-      this.canvas.style.position = "absolute";
-      this.canvas.style.left = "300px";
-      this.canvas.style.top = "0px";
-      this.canvas.style.borderLeft = "1px solid black";
-      this.crc2 = this.canvas.getContext("2d");
 
       this.hover = document.createElement("span");
       this.hover.style.background = "black";
@@ -205,15 +198,14 @@ namespace Fudge {
       this.hover.style.position = "absolute";
       this.hover.style.display = "none";
 
-      this.sheet = new ViewAnimationSheetCurve(this, this.crc2, new ƒ.Vector2(0.5, 2), new ƒ.Vector2(0, 200)); // TODO: stop using fixed values?
-      this.sheet.redraw(this.playbackTime);
       document.addEventListener("DOMContentLoaded", () => this.updateUserInterface());
     }
 
     private hndPointerDown = (_event: PointerEvent): void => {
       if (this.idInterval != undefined) return;
+      if (_event.buttons != 1) return;
 
-      this.setTime(_event.offsetX / this.sheet.scale.x);
+      this.setTime(_event.offsetX);
 
       let obj: ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent = this.sheet.getObjectAtPoint(_event.offsetX, _event.offsetY);
       if (!obj) return;
@@ -237,7 +229,7 @@ namespace Fudge {
       _event.preventDefault();
       if (this.idInterval != undefined) return;
       if (_event.buttons != 1) return;
-      this.setTime(_event.offsetX / this.sheet.scale.x);
+      this.setTime(_event.offsetX);
     }
 
     private hndEvent = (_event: FudgeEvent): void => {
@@ -273,7 +265,7 @@ namespace Fudge {
       }
       this.dom.innerHTML = "";
       this.dom.appendChild(this.toolbar);
-      this.dom.appendChild(this.canvas);
+      this.dom.appendChild(this.sheet.canvas);
       this.dom.appendChild(this.hover);
 
       this.animation = _animation;
@@ -283,7 +275,7 @@ namespace Fudge {
       this.controller = new ControllerAnimation(this.animation, this.attributeList, animationMutator);
       this.dom.appendChild(this.attributeList);
 
-      this.sheet.redraw(this.playbackTime);
+      this.redraw();
     }
 
     private hndSelect = (_event: CustomEvent): void => {
@@ -393,19 +385,19 @@ namespace Fudge {
       switch (target.id) {
         case "add-label":
           this.animation.labels[this.randomNameGenerator()] = this.playbackTime;
-          this.sheet.redraw(this.playbackTime);
+          this.redraw();
           break;
         case "add-event":
           this.animation.setEvent(this.randomNameGenerator(), this.playbackTime);
-          this.sheet.redraw(this.playbackTime);
+          this.redraw();
           break;
         case "add-key":
           this.controller.addKeyToAnimationStructure(this.playbackTime);          
-          this.sheet.redraw(this.playbackTime);
+          this.redraw();
           break;
         case "remove-key":
           this.controller.deleteKeyFromAnimationStructure(this.selectedKey);          
-          this.sheet.redraw(this.playbackTime);
+          this.redraw();
           break;
         case "start":
           this.playbackTime = 0;
@@ -432,7 +424,7 @@ namespace Fudge {
           break;
         case "end":
           this.playbackTime = this.animation.totalTime;
-          this.sheet.redraw(this.playbackTime);
+          this.redraw();
           this.updateUserInterface();
           break;
         default:
@@ -458,7 +450,7 @@ namespace Fudge {
           // console.log("sps changed to", target.value);
           if (!isNaN(+target.value)) {
             this.animation.fps /* stepsPerSecond */ = +target.value;
-            this.sheet.redraw(this.playbackTime);
+            this.redraw()
           }
           break;
         default:
@@ -468,7 +460,7 @@ namespace Fudge {
     }
 
     private updateUserInterface(_m: ƒ.Mutator = null): void {
-      this.sheet.redraw(this.playbackTime);
+      this.redraw();
       if (!_m)
         _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
 
@@ -478,11 +470,15 @@ namespace Fudge {
 
     private setTime(_time: number, updateDisplay: boolean = true): void {
       if (!this.animation) return;
-      // this.playbackTime = Math.min(this.animation.totalTime, Math.max(0, _time));
-      this.playbackTime = Math.max(0, _time);
-      this.playbackTime = Math.round(this.playbackTime / (1000 / this.animation.fps)) * (1000 / this.animation.fps);
-      // console.log(this.playbackTime);
+
+      // TODO: maybe rework this an move it into the sheet?
+      this.playbackTime = Math.max(0, (_time / this.sheet.scale.x) + this.sheet.cameraOffset.x);
+      this.playbackTime = Math.round(this.playbackTime / ((1000 / this.animation.fps))) * ((1000 / this.animation.fps));
       if (updateDisplay) this.updateUserInterface(this.cmpAnimator.updateAnimation(this.playbackTime)[0]);
+    }
+
+    private redraw = () => {
+      this.sheet.redraw(this.playbackTime);
     }
 
     private updateAnimation = () => {

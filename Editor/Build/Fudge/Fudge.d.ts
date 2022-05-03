@@ -491,18 +491,16 @@ declare namespace Fudge {
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimation extends View {
-        node: ƒ.Node;
         animation: ƒ.Animation;
-        cmpAnimator: ƒ.ComponentAnimator;
-        playbackTime: number;
-        controller: ControllerAnimation;
-        crc2: CanvasRenderingContext2D;
+        toolbar: HTMLDivElement;
+        private cmpAnimator;
+        private node;
+        private playbackTime;
+        private controller;
         private graph;
-        private canvas;
         private selectedKey;
         private attributeList;
         private sheet;
-        private toolbar;
         private hover;
         private time;
         private idInterval;
@@ -523,6 +521,7 @@ declare namespace Fudge {
         private hndToolbarChange;
         private updateUserInterface;
         private setTime;
+        private redraw;
         private updateAnimation;
         private randomNameGenerator;
     }
@@ -530,20 +529,26 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     abstract class ViewAnimationSheet {
+        canvas: HTMLCanvasElement;
         scale: ƒ.Vector2;
+        cameraOffset: ƒ.Vector2;
         protected keys: ViewAnimationKey[];
         protected sequences: ViewAnimationSequence[];
+        protected crc2: CanvasRenderingContext2D;
         private view;
-        private position;
         private labels;
         private events;
-        constructor(_view: ViewAnimation, _crc2: CanvasRenderingContext2D, _scale?: ƒ.Vector2, _pos?: ƒ.Vector2);
-        get animation(): ƒ.Animation;
-        get dom(): HTMLElement;
-        get crc2(): CanvasRenderingContext2D;
-        moveTo(_time: number, _value?: number): void;
-        translate(): void;
-        redraw(_time: number): void;
+        private time;
+        private MAX_ZOOM;
+        private MIN_ZOOM;
+        private SCROLL_SENSITIVITY;
+        private isDragging;
+        private dragStart;
+        constructor(_view: ViewAnimation, _scale?: ƒ.Vector2, _pos?: ƒ.Vector2);
+        protected get animation(): ƒ.Animation;
+        protected get dom(): HTMLElement;
+        protected get toolbar(): HTMLDivElement;
+        redraw(_time?: number): void;
         clear(): void;
         drawTimeline(): void;
         drawCursor(_time: number): void;
@@ -554,6 +559,9 @@ declare namespace Fudge {
         protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
         private drawEventsAndLabels;
         private calculateDisplay;
+        private hndPointerDown;
+        private hndPointerMove;
+        private hdnWheel;
     }
 }
 declare namespace Fudge {
