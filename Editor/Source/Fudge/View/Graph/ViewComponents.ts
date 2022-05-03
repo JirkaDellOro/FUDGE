@@ -198,17 +198,17 @@ namespace Fudge {
       }
     }
 
-    private hndEvent = (_event: CustomEvent): void => {
+    private hndEvent = (_event: FudgeEvent): void => {
       switch (_event.type) {
         // case ƒui.EVENT.RENAME: break;
         case EVENT_EDITOR.SELECT:
         case EVENT_EDITOR.FOCUS:
-          this.node = _event.detail;
+          this.node = _event.detail.graph || _event.detail.node;
         case EVENT_EDITOR.MODIFY:
           this.fillContent();
           break;
         case ƒUi.EVENT.DELETE:
-          let component: ƒ.Component = _event.detail.mutable;
+          let component: ƒ.Component = <ƒ.Component>_event.detail.mutable;
           this.node.removeComponent(component);
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           break;
@@ -239,7 +239,7 @@ namespace Fudge {
           let cmpRigidbody: ƒ.ComponentRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
           if (cmpRigidbody) {
             cmpRigidbody.initialize();
-            this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+            // this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: this.node } });
           }
         default:
           break;

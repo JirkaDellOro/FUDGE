@@ -1677,7 +1677,7 @@ var Fudge;
             _event.stopPropagation();
         };
         hndFocusNode = (_event) => {
-            let event = new CustomEvent(Fudge.EVENT_EDITOR.FOCUS, { bubbles: false, detail: _event.detail.data });
+            let event = new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: _event.detail.data } });
             this.broadcastEvent(event);
         };
     }
@@ -2606,7 +2606,7 @@ var Fudge;
                 // case ƒui.EVENT.RENAME: break;
                 case Fudge.EVENT_EDITOR.SELECT:
                 case Fudge.EVENT_EDITOR.FOCUS:
-                    this.node = _event.detail;
+                    this.node = _event.detail.graph || _event.detail.node;
                 case Fudge.EVENT_EDITOR.MODIFY:
                     this.fillContent();
                     break;
@@ -2643,7 +2643,7 @@ var Fudge;
                     let cmpRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
                     if (cmpRigidbody) {
                         cmpRigidbody.initialize();
-                        this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                        // this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: this.node } });
                     }
                 default:
                     break;
@@ -2856,7 +2856,7 @@ var Fudge;
                 case Fudge.CONTEXTMENU.ACTIVATE_NODE:
                     focus.activate(!focus.isActive);
                     this.tree.findVisible(focus).refreshAttributes();
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
                     break;
                 case Fudge.CONTEXTMENU.DELETE_NODE:
                     // focus.addChild(child);
@@ -2866,7 +2866,7 @@ var Fudge;
                     focus.getParent().removeChild(focus);
                     ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
                     ƒ.Physics.cleanup();
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
                     break;
             }
         }
@@ -2875,7 +2875,7 @@ var Fudge;
         hndEvent = (_event) => {
             switch (_event.type) {
                 case "delete" /* DELETE */:
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
                     break;
                 case Fudge.EVENT_EDITOR.SELECT:
                     if (_event.detail.node)

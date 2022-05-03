@@ -13,6 +13,7 @@ namespace Fudge {
     node?: ƒ.Node;
     graph?: ƒ.Graph;
     resource?: ƒ.SerializableResource;
+    mutable?: ƒ.Mutable;
     transform?: Object;
     view?: View;
   }

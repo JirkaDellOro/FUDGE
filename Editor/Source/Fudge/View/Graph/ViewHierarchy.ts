@@ -126,7 +126,7 @@ namespace Fudge {
         case CONTEXTMENU.ACTIVATE_NODE:
           focus.activate(!focus.isActive);
           this.tree.findVisible(focus).refreshAttributes();
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
           break;
         case CONTEXTMENU.DELETE_NODE:
           // focus.addChild(child);
@@ -136,7 +136,7 @@ namespace Fudge {
           focus.getParent().removeChild(focus);
           ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
           ƒ.Physics.cleanup();
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
           break;
       }
     }
@@ -146,7 +146,7 @@ namespace Fudge {
     private hndEvent = (_event: FudgeEvent): void => {
       switch (_event.type) {
         case ƒUi.EVENT.DELETE:
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
           break;
         case EVENT_EDITOR.SELECT:
           if (_event.detail.node)

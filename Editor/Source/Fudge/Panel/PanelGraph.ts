@@ -101,7 +101,7 @@ namespace Fudge {
     }
 
     private hndFocusNode = (_event: CustomEvent): void => {
-      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.FOCUS, { bubbles: false, detail: _event.detail.data });
+      let event: FudgeEvent = new FudgeEvent(EVENT_EDITOR.FOCUS, { bubbles: false, detail: {node: _event.detail.data} });
       this.broadcastEvent(event);
     }
   }
