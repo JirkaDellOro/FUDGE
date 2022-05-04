@@ -14,15 +14,13 @@ namespace Fudge {
     private events: ViewAnimationEvent[] = [];
     private time: number = 0;
 
-    // public scale = 1;
-    private MAX_ZOOM: number = 5;
-    private MIN_ZOOM: number = 0.000001;
-    private SCROLL_SENSITIVITY: number = 0.0005;
+    private readonly MAX_SCALE: number = 5;
+    private readonly MIN_SCALE: number = 0.00001;
+    private readonly SCROLL_SENSITIVITY: number = 0.0005;
 
-    private isDragging: boolean = false;
     private dragStart: ƒ.Vector2 = new ƒ.Vector2();
 
-    //TODO stop using hardcoded colors
+    //TODO: stop using hardcoded colors
 
     constructor(_view: ViewAnimation, _scale: ƒ.Vector2 = new ƒ.Vector2(1, 1), _pos: ƒ.Vector2 = new ƒ.Vector2()) {
       this.view = _view;
@@ -105,57 +103,32 @@ namespace Fudge {
       let timeline: Path2D = new Path2D();
       timeline.moveTo(0, timelineHeight);
       timeline.lineTo(this.canvas.width, timelineHeight);
-      
-      // let baseWidth: number = 1000;
-
-
-      // let pixelPerSecond: number = Math.round(baseWidth * this.scale.x);
-      // // console.log(pixelPerSecond);
-      // let stepsPerSecond: number = this.animation.fps; // was stepsPerSecond TODO: find out why... see masterthesis Lukas Scheuerle;
-      // // let stepsPerSecond: number = 
-      // let stepsPerDisplayText: number = 1;
-      // let pixelPerStep: number = pixelPerSecond / this.animation.fps;
-      // let steps: number = 0;
-      // [pixelPerStep, stepsPerDisplayText] = this.calculateDisplay(pixelPerStep);
 
       this.crc2.strokeStyle = "black";
       this.crc2.fillStyle = "black";
       this.crc2.textBaseline = "bottom";
       this.crc2.textAlign = "center";
-      
-      // for (let i: number = this.cameraOffset.x; i < this.canvas.width; i += pixelPerStep) {
-      //   timeline.moveTo(i, timelineHeight);
-      //   if (steps % stepsPerDisplayText == 0) {
-      //     //TODO: stop using hardcoded heights
-      //   timeline.lineTo(i, timelineHeight - 25);
-      //   this.crc2.fillText(steps.toString(), i - 3, timelineHeight - 28);
-      //   if (Math.round(i) % Math.round(baseWidth * this.scale.x) == 0)
-      //     //TODO: make the time display independent of the SPS display. Trying to tie the two together was a stupid idea.
-      //     this.crc2.fillText((Math.round(100 * (i / 1000 / this.scale.x)) / 100).toString() + "s", i - 3, 10);
-      // } 
-      // else {
-      //   timeline.lineTo(i, timelineHeight - 20);
-      //   }
-      //   steps++;
-      // }
 
-      let stepWidth: number = (1000 / this.animation.fps) * this.scale.x;
-      let stepSize: number = 1; // in frame number
-      while (stepWidth < 10) {
-        stepWidth *= 2;
-        stepSize *= 2;
-      }
-      let ssteps: number = 1 + this.canvas.width / stepWidth;
-      let stepOffset: number = Math.floor((this.cameraOffset.x * this.scale.x) / stepWidth);
-      let stepCounter: number = 0;
-      for (let i: number = stepOffset; i < ssteps + stepOffset; i++) {
-        let x: number = (i * stepWidth - (this.cameraOffset.x * this.scale.x));
+      const minimumPixelPerStep: number = 10;
+      let pixelPerStep: number = (1000 / this.animation.fps) * this.scale.x;
+      let framesPerStep: number = 1;
+      let stepScaleFactor: number = Math.max(
+        Math.pow(2, Math.ceil(Math.log2(minimumPixelPerStep / pixelPerStep))), 
+        1);
+      // console.log(`mult: ${stepScaleFactor} | div: ${minimumPixelPerStep / pixelPerStep} | scale: ${this.scale.x}`);
+      pixelPerStep *= stepScaleFactor;
+      framesPerStep *= stepScaleFactor;
+
+      let steps: number = 1 + this.canvas.width / pixelPerStep;
+      let stepOffset: number = Math.floor((this.cameraOffset.x * this.scale.x) / pixelPerStep);
+      for (let i: number = stepOffset; i < steps + stepOffset; i++) {
+        let x: number = (i * pixelPerStep - (this.cameraOffset.x * this.scale.x));
         timeline.moveTo(x, timelineHeight);
         // TODO: refine the display
         if (i % 5 == 0) {
           timeline.lineTo(x, timelineHeight - 25);
-          let second: number = Math.floor((i * stepSize) / this.animation.fps);
-          let frame: number = (i * stepSize) % this.animation.fps;
+          let second: number = Math.floor((i * framesPerStep) / this.animation.fps);
+          let frame: number = (i * framesPerStep) % this.animation.fps;
           this.crc2.fillText(
             `${second}:${frame < 10 ? "0" : ""}${frame}`, 
             x, 
@@ -163,9 +136,7 @@ namespace Fudge {
         } else {
           timeline.lineTo(x, timelineHeight - 20);
         }
-        stepCounter++;
       }
-
 
       this.crc2.stroke(timeline);
     }
@@ -298,21 +269,6 @@ namespace Fudge {
       }
     }
 
-    private calculateDisplay(_ppS: number): [number, number] {
-      let minPixelPerStep: number = 10;
-      // let maxPixelPerStep: number = 50;
-      //TODO: use animation SPS
-      let currentPPS: number = _ppS;
-      while (currentPPS < minPixelPerStep ) { //|| currentPPS > maxPixelPerStep
-        // if (currentPPS < minPixelPerStep) {
-        currentPPS *= 1.5;
-        // } else {
-        //   currentPPS /= 1.5;
-        // }
-      }
-      return [currentPPS, 10];
-    }
-
     private hndPointerDown = (_event: PointerEvent): void => {
       if (_event.buttons != 4) return;
       this.dragStart.x = _event.offsetX / this.scale.x + this.cameraOffset.x;
@@ -328,18 +284,14 @@ namespace Fudge {
     }
 
     private hdnWheel = (_event: WheelEvent) => {
-      let zoomAmount: number = _event.deltaY * this.SCROLL_SENSITIVITY * this.scale.x;
+      if (_event.buttons != 0) return;
 
-      if (!this.isDragging) {
-        if (zoomAmount) {
-          this.scale.x -= zoomAmount;
-        }
-
-        this.scale.x = Math.min( this.scale.x, this.MAX_ZOOM );
-        this.scale.x = Math.max( this.scale.x, this.MIN_ZOOM );
-        
-        this.redraw();
-      }
+      let scaleDelta: number = _event.deltaY * this.SCROLL_SENSITIVITY * this.scale.x;
+      this.scale.x -= scaleDelta;
+      this.scale.x = Math.min( this.scale.x, this.MAX_SCALE );
+      this.scale.x = Math.max( this.scale.x, this.MIN_SCALE );
+      
+      this.redraw();
     }
   }
 }

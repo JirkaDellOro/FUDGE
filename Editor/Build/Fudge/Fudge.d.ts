@@ -539,10 +539,9 @@ declare namespace Fudge {
         private labels;
         private events;
         private time;
-        private MAX_ZOOM;
-        private MIN_ZOOM;
-        private SCROLL_SENSITIVITY;
-        private isDragging;
+        private readonly MAX_SCALE;
+        private readonly MIN_SCALE;
+        private readonly SCROLL_SENSITIVITY;
         private dragStart;
         constructor(_view: ViewAnimation, _scale?: ƒ.Vector2, _pos?: ƒ.Vector2);
         protected get animation(): ƒ.Animation;
@@ -558,7 +557,6 @@ declare namespace Fudge {
         protected abstract drawSequence(_sequence: ƒ.AnimationSequence): void;
         protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
         private drawEventsAndLabels;
-        private calculateDisplay;
         private hndPointerDown;
         private hndPointerMove;
         private hdnWheel;
