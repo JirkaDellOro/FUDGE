@@ -2220,20 +2220,19 @@ var Fudge;
             this.sheet = new Fudge.ViewAnimationSheetCurve(this); // TODO: stop using fixed values?
             this.sheet.canvas.addEventListener("pointerdown", this.hndPointerDown);
             this.sheet.canvas.addEventListener("pointermove", this.hndPointerMove);
-            this.redraw();
             this.hover = document.createElement("span");
             this.hover.style.background = "black";
             this.hover.style.color = "white";
             this.hover.style.position = "absolute";
             this.hover.style.display = "none";
-            document.addEventListener("DOMContentLoaded", () => this.updateUserInterface());
+            // document.addEventListener("DOMContentLoaded", () => this.updateUserInterface());
+            // this.updateUserInterface();
         }
         hndPointerDown = (_event) => {
-            if (this.idInterval != undefined)
+            if (_event.buttons != 1 || this.idInterval != undefined)
                 return;
-            if (_event.buttons != 1)
-                return;
-            this.setTime(_event.offsetX);
+            if (_event.offsetY < 50)
+                this.setTime(_event.offsetX);
             let obj = this.sheet.getObjectAtPoint(_event.offsetX, _event.offsetY);
             if (!obj)
                 return;
@@ -2252,11 +2251,9 @@ var Fudge;
             }
         };
         hndPointerMove = (_event) => {
+            if (_event.buttons != 1 || this.idInterval != undefined || _event.offsetY > 50)
+                return;
             _event.preventDefault();
-            if (this.idInterval != undefined)
-                return;
-            if (_event.buttons != 1)
-                return;
             this.setTime(_event.offsetX);
         };
         hndEvent = (_event) => {
@@ -2271,9 +2268,10 @@ var Fudge;
                     if (!animationMutator)
                         animationMutator = {};
                     let newAttributeList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
-                    this.controller = new Fudge.ControllerAnimation(this.animation, this.attributeList, animationMutator);
+                    this.controller = new Fudge.ControllerAnimation(this.animation, newAttributeList, animationMutator);
                     this.dom.replaceChild(newAttributeList, this.attributeList);
                     this.attributeList = newAttributeList;
+                    this.updateUserInterface();
                     break;
             }
         };
@@ -2509,12 +2507,11 @@ var Fudge;
     class ViewAnimationSheet {
         canvas;
         scale;
-        cameraOffset = new ƒ.Vector2();
+        cameraOffset = new ƒ.Vector2(0, -500); // TODO: find out way to do this after dom loaded with height of canvas
         keys = [];
         sequences = [];
         crc2;
         view;
-        // private position: ƒ.Vector2; // TODO: is this necessary?
         labels = [];
         events = [];
         time = 0;
@@ -2524,10 +2521,9 @@ var Fudge;
         dragStart = new ƒ.Vector2();
         // private scrollPosition: ƒ.Vector2 = new ƒ.Vector2();
         //TODO: stop using hardcoded colors
-        constructor(_view, _scale = new ƒ.Vector2(1, 1), _pos = new ƒ.Vector2()) {
+        constructor(_view, _scale = new ƒ.Vector2(1, 1)) {
             this.view = _view;
             this.scale = _scale;
-            // this.position = _pos;
             this.canvas = document.createElement("canvas");
             this.crc2 = this.canvas.getContext("2d");
             this.canvas.style.position = "absolute";
@@ -2562,10 +2558,6 @@ var Fudge;
                 this.time = _time;
             this.canvas.width = this.dom.clientWidth - this.toolbar.clientWidth;
             this.canvas.height = this.dom.clientHeight;
-            // this.crc2.translate( window.innerWidth / 2, window.innerHeight / 2 );
-            // this.crc2.scale(this.cameraZoom, this.cameraZoom);
-            // this.crc2.translate( -window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y );
-            // this.crc2.clearRect(0,0, window.innerWidth, window.innerHeight);
             // this.clear();
             // this.translate();
             // this.crc2.translate(this.position.x, this.position.y);
@@ -2603,10 +2595,8 @@ var Fudge;
             let pixelPerStep = (pixelPerSecond / this.animation.fps) * this.scale.x;
             let framesPerStep = 1;
             let stepScaleFactor = Math.max(Math.pow(2, Math.ceil(Math.log2(minimumPixelPerStep / pixelPerStep))), 1);
-            // console.log(`mult: ${stepScaleFactor} | div: ${minimumPixelPerStep / pixelPerStep} | scale: ${this.scale.x}`);
             pixelPerStep *= stepScaleFactor;
             framesPerStep *= stepScaleFactor;
-            // this.crc2.translate(this.scrollPosition.x, this.scrollPosition.y);
             let steps = 1 + this.canvas.width / pixelPerStep;
             let scaledOffset = this.cameraOffset.x * this.scale.x;
             let stepOffset = Math.floor(scaledOffset / pixelPerStep);
@@ -2630,8 +2620,8 @@ var Fudge;
         drawCursor(_time) {
             let time = (_time - this.cameraOffset.x) * this.scale.x;
             let cursor = new Path2D();
-            cursor.rect(time - 3, 0, 6, 50);
-            cursor.moveTo(time, 50);
+            // cursor.rect(time - 3, 0, 6, 50);
+            cursor.moveTo(time, 0);
             cursor.lineTo(time, this.canvas.height);
             this.crc2.strokeStyle = "red";
             this.crc2.fillStyle = "red";
@@ -2652,8 +2642,6 @@ var Fudge;
         getObjectAtPoint(_x, _y) {
             let x = _x / this.scale.x + this.cameraOffset.x;
             let y = _y / this.scale.y + this.cameraOffset.y;
-            // console.log(`x: ${x} | y: ${y}`);
-            // TODO: repair selection
             for (let l of this.labels) {
                 if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
                     return l;
@@ -2664,11 +2652,7 @@ var Fudge;
                     return e;
                 }
             }
-            // _x = _x / this.scale.x - this.position.x;
-            // _y = _y / this.scale.y - this.position.y / this.scale.y;
-            y -= 200;
             for (let k of this.keys) {
-                // console.log(k.path2D);
                 if (this.crc2.isPointInPath(k.path2D, x, y)) {
                     return k;
                 }

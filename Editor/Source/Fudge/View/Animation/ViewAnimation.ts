@@ -189,7 +189,6 @@ namespace Fudge {
       this.sheet = new ViewAnimationSheetCurve(this); // TODO: stop using fixed values?
       this.sheet.canvas.addEventListener("pointerdown", this.hndPointerDown);
       this.sheet.canvas.addEventListener("pointermove", this.hndPointerMove);
-      this.redraw();
 
 
       this.hover = document.createElement("span");
@@ -198,14 +197,14 @@ namespace Fudge {
       this.hover.style.position = "absolute";
       this.hover.style.display = "none";
 
-      document.addEventListener("DOMContentLoaded", () => this.updateUserInterface());
+      // document.addEventListener("DOMContentLoaded", () => this.updateUserInterface());
+      // this.updateUserInterface();
     }
 
     private hndPointerDown = (_event: PointerEvent): void => {
-      if (this.idInterval != undefined) return;
-      if (_event.buttons != 1) return;
+      if (_event.buttons != 1 || this.idInterval != undefined) return;
 
-      this.setTime(_event.offsetX);
+      if (_event.offsetY < 50) this.setTime(_event.offsetX);
 
       let obj: ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent = this.sheet.getObjectAtPoint(_event.offsetX, _event.offsetY);
       if (!obj) return;
@@ -226,9 +225,9 @@ namespace Fudge {
     }
 
     private hndPointerMove = (_event: PointerEvent): void => {
+      if (_event.buttons != 1 || this.idInterval != undefined || _event.offsetY > 50) return;
       _event.preventDefault();
-      if (this.idInterval != undefined) return;
-      if (_event.buttons != 1) return;
+
       this.setTime(_event.offsetX);
     }
 
@@ -243,9 +242,10 @@ namespace Fudge {
           let animationMutator: ƒ.Mutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
           if (!animationMutator) animationMutator = {};
           let newAttributeList: HTMLDivElement = ƒui.Generator.createInterfaceFromMutator(animationMutator);
-          this.controller = new ControllerAnimation(this.animation, this.attributeList, animationMutator);
+          this.controller = new ControllerAnimation(this.animation, newAttributeList, animationMutator);
           this.dom.replaceChild(newAttributeList, this.attributeList);
           this.attributeList = newAttributeList;
+          this.updateUserInterface();
           break;
       }
     }

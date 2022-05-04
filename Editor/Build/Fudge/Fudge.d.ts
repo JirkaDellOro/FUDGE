@@ -543,7 +543,7 @@ declare namespace Fudge {
         private readonly MIN_SCALE;
         private readonly SCROLL_SENSITIVITY;
         private dragStart;
-        constructor(_view: ViewAnimation, _scale?: ƒ.Vector2, _pos?: ƒ.Vector2);
+        constructor(_view: ViewAnimation, _scale?: ƒ.Vector2);
         protected get animation(): ƒ.Animation;
         protected get dom(): HTMLElement;
         protected get toolbar(): HTMLDivElement;

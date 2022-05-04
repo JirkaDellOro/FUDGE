@@ -4,12 +4,11 @@ namespace Fudge {
   export abstract class ViewAnimationSheet {
     public canvas: HTMLCanvasElement;
     public scale: ƒ.Vector2;
-    public cameraOffset: ƒ.Vector2 = new ƒ.Vector2();
+    public cameraOffset: ƒ.Vector2 = new ƒ.Vector2(0, -500); // TODO: find out way to do this after dom loaded with height of canvas
     protected keys: ViewAnimationKey[] = [];
     protected sequences: ViewAnimationSequence[] = [];
     protected crc2: CanvasRenderingContext2D;
     private view: ViewAnimation;
-    // private position: ƒ.Vector2; // TODO: is this necessary?
     private labels: ViewAnimationLabel[] = [];
     private events: ViewAnimationEvent[] = [];
     private time: number = 0;
@@ -24,10 +23,9 @@ namespace Fudge {
 
     //TODO: stop using hardcoded colors
 
-    constructor(_view: ViewAnimation, _scale: ƒ.Vector2 = new ƒ.Vector2(1, 1), _pos: ƒ.Vector2 = new ƒ.Vector2()) {
+    constructor(_view: ViewAnimation, _scale: ƒ.Vector2 = new ƒ.Vector2(1, 1)) {
       this.view = _view;
       this.scale = _scale;
-      // this.position = _pos;
       this.canvas = document.createElement("canvas");
       this.crc2 = this.canvas.getContext("2d");
 
@@ -35,7 +33,7 @@ namespace Fudge {
       this.canvas.style.left = "300px";
       this.canvas.style.top = "0px";
       this.canvas.style.borderLeft = "1px solid black";
-
+      
       this.canvas.addEventListener("pointerdown", this.hndPointerDown);
       this.canvas.addEventListener("pointermove", this.hndPointerMove);
       this.canvas.addEventListener("wheel", this.hdnWheel);
@@ -68,13 +66,7 @@ namespace Fudge {
       if (_time != undefined) this.time = _time;
       this.canvas.width = this.dom.clientWidth - this.toolbar.clientWidth;
       this.canvas.height = this.dom.clientHeight;
-
-      // this.crc2.translate( window.innerWidth / 2, window.innerHeight / 2 );
-      // this.crc2.scale(this.cameraZoom, this.cameraZoom);
-      // this.crc2.translate( -window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y );
-      // this.crc2.clearRect(0,0, window.innerWidth, window.innerHeight);
-
-      
+    
       // this.clear();
       // this.translate();
       // this.crc2.translate(this.position.x, this.position.y);
@@ -120,11 +112,9 @@ namespace Fudge {
       let stepScaleFactor: number = Math.max(
         Math.pow(2, Math.ceil(Math.log2(minimumPixelPerStep / pixelPerStep))), 
         1);
-      // console.log(`mult: ${stepScaleFactor} | div: ${minimumPixelPerStep / pixelPerStep} | scale: ${this.scale.x}`);
       pixelPerStep *= stepScaleFactor;
       framesPerStep *= stepScaleFactor;
 
-      // this.crc2.translate(this.scrollPosition.x, this.scrollPosition.y);
       let steps: number = 1 + this.canvas.width / pixelPerStep;
       let scaledOffset: number = this.cameraOffset.x * this.scale.x;
       let stepOffset: number = Math.floor(scaledOffset / pixelPerStep);
@@ -152,8 +142,8 @@ namespace Fudge {
     public drawCursor(_time: number): void {
       let time: number = (_time - this.cameraOffset.x) * this.scale.x;
       let cursor: Path2D = new Path2D();
-      cursor.rect(time - 3, 0, 6, 50);
-      cursor.moveTo(time, 50);
+      // cursor.rect(time - 3, 0, 6, 50);
+      cursor.moveTo(time, 0);
       cursor.lineTo(time, this.canvas.height);
       this.crc2.strokeStyle = "red";
       this.crc2.fillStyle = "red";
@@ -176,11 +166,8 @@ namespace Fudge {
     }
 
     public getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
-
       let x: number = _x / this.scale.x + this.cameraOffset.x;
       let y: number = _y / this.scale.y + this.cameraOffset.y;
-      // console.log(`x: ${x} | y: ${y}`);
-      // TODO: repair selection
       for (let l of this.labels) {
         if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
           return l;
@@ -192,11 +179,7 @@ namespace Fudge {
         }
       }
 
-      // _x = _x / this.scale.x - this.position.x;
-      // _y = _y / this.scale.y - this.position.y / this.scale.y;
-      y -= 200;
       for (let k of this.keys) {
-        // console.log(k.path2D);
         if (this.crc2.isPointInPath(k.path2D, x, y)) {
           return k;
         }
