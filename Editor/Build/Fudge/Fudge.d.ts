@@ -548,7 +548,6 @@ declare namespace Fudge {
         protected get dom(): HTMLElement;
         protected get toolbar(): HTMLDivElement;
         redraw(_time?: number): void;
-        clear(): void;
         drawTimeline(): void;
         drawCursor(_time: number): void;
         drawKeys(): void;
@@ -565,7 +564,8 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     class ViewAnimationSheetCurve extends ViewAnimationSheet {
-        drawKeys(): void;
+        private readonly pixelPerValue;
+        drawTimeline(): void;
         protected drawSequence(_sequence: ƒ.AnimationSequence): void;
         protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
         private drawYScale;

@@ -18,7 +18,9 @@ namespace Fudge {
     private readonly MIN_SCALE: number = 0.00001;
     private readonly SCROLL_SENSITIVITY: number = 0.0005;
 
+
     private dragStart: ƒ.Vector2 = new ƒ.Vector2();
+    // private scrollPosition: ƒ.Vector2 = new ƒ.Vector2();
 
     //TODO: stop using hardcoded colors
 
@@ -75,11 +77,12 @@ namespace Fudge {
       
       // this.clear();
       // this.translate();
-      // this.crc2.translate(this.canvas.height / 2, this.canvas.height / 2);
       // this.crc2.translate(this.position.x, this.position.y);
       // console.log(this.scale.x);
+      // this.crc2.translate(this.scrollPosition.x, this.scrollPosition.y);
       this.crc2.scale(this.scale.x, this.scale.y);
-      this.crc2.translate(-this.cameraOffset.x, this.cameraOffset.y + 200);
+      // this.crc2.translate(-this.scrollPosition.x, -this.scrollPosition.y);
+      this.crc2.translate(-this.cameraOffset.x, -this.cameraOffset.y);
       this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
       this.drawKeys();
       this.drawTimeline();
@@ -87,14 +90,15 @@ namespace Fudge {
       this.drawCursor(this.time);
     }
 
-    public clear(): void {
-      this.crc2.resetTransform();
-      let maxDistance: number = 10000;
-      this.crc2.clearRect(0, 0, maxDistance, this.crc2.canvas.height);
-    }
+    // public clear(): void {
+    //   this.crc2.resetTransform();
+    //   let maxDistance: number = 10000;
+    //   this.crc2.clearRect(0, 0, maxDistance, this.crc2.canvas.height);
+    // }
 
     public drawTimeline(): void {
       this.crc2.resetTransform();
+      this.crc2.lineWidth = 1;
       
       let timelineHeight: number = 50;
       this.crc2.fillStyle = "#7a7a7a";
@@ -109,8 +113,9 @@ namespace Fudge {
       this.crc2.textBaseline = "bottom";
       this.crc2.textAlign = "center";
 
+      const pixelPerSecond: number = 1000;
       const minimumPixelPerStep: number = 10;
-      let pixelPerStep: number = (1000 / this.animation.fps) * this.scale.x;
+      let pixelPerStep: number = (pixelPerSecond / this.animation.fps) * this.scale.x;
       let framesPerStep: number = 1;
       let stepScaleFactor: number = Math.max(
         Math.pow(2, Math.ceil(Math.log2(minimumPixelPerStep / pixelPerStep))), 
@@ -119,10 +124,12 @@ namespace Fudge {
       pixelPerStep *= stepScaleFactor;
       framesPerStep *= stepScaleFactor;
 
+      // this.crc2.translate(this.scrollPosition.x, this.scrollPosition.y);
       let steps: number = 1 + this.canvas.width / pixelPerStep;
-      let stepOffset: number = Math.floor((this.cameraOffset.x * this.scale.x) / pixelPerStep);
+      let scaledOffset: number = this.cameraOffset.x * this.scale.x;
+      let stepOffset: number = Math.floor(scaledOffset / pixelPerStep);
       for (let i: number = stepOffset; i < steps + stepOffset; i++) {
-        let x: number = (i * pixelPerStep - (this.cameraOffset.x * this.scale.x));
+        let x: number = (i * pixelPerStep - this.cameraOffset.x * this.scale.x);
         timeline.moveTo(x, timelineHeight);
         // TODO: refine the display
         if (i % 5 == 0) {
@@ -139,6 +146,7 @@ namespace Fudge {
       }
 
       this.crc2.stroke(timeline);
+      // this.crc2.translate(-this.scrollPosition.x, -this.scrollPosition.y);
     }
 
     public drawCursor(_time: number): void {
@@ -168,6 +176,10 @@ namespace Fudge {
     }
 
     public getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
+
+      let x: number = _x / this.scale.x + this.cameraOffset.x;
+      let y: number = _y / this.scale.y + this.cameraOffset.y;
+      // console.log(`x: ${x} | y: ${y}`);
       // TODO: repair selection
       for (let l of this.labels) {
         if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
@@ -182,11 +194,13 @@ namespace Fudge {
 
       // _x = _x / this.scale.x - this.position.x;
       // _y = _y / this.scale.y - this.position.y / this.scale.y;
-      // for (let k of this.keys) {
-      //   if (this.crc2.isPointInPath(k.path2D, _x, _y)) {
-      //     return k;
-      //   }
-      // }
+      y -= 200;
+      for (let k of this.keys) {
+        // console.log(k.path2D);
+        if (this.crc2.isPointInPath(k.path2D, x, y)) {
+          return k;
+        }
+      }
       return null;
     }
 
@@ -272,24 +286,31 @@ namespace Fudge {
     private hndPointerDown = (_event: PointerEvent): void => {
       if (_event.buttons != 4) return;
       this.dragStart.x = _event.offsetX / this.scale.x + this.cameraOffset.x;
-      // this.dragStart.y = _event.offsetY / this.scale.y - this.cameraOffset.y;
+      this.dragStart.y = _event.offsetY / this.scale.y + this.cameraOffset.y;
     }
 
     private hndPointerMove = (_event: PointerEvent): void => {
       _event.preventDefault();
       if (_event.buttons != 4) return;
       this.cameraOffset.x = Math.max(this.dragStart.x - _event.offsetX / this.scale.x, 0);
-      // this.cameraOffset.y = Math.min(_event.offsetY / this.scale.x - this.dragStart.y, 0);
+      this.cameraOffset.y = this.dragStart.y - _event.offsetY / this.scale.y;
       this.redraw();
     }
 
     private hdnWheel = (_event: WheelEvent) => {
       if (_event.buttons != 0) return;
 
-      let scaleDelta: number = _event.deltaY * this.SCROLL_SENSITIVITY * this.scale.x;
-      this.scale.x -= scaleDelta;
+      // this.scrollPosition.x = this.canvas.width / 2 // _event.offsetX;
+      // this.scrollPosition.y = this.canvas.height / 2//_event.offsetY;
+
+      let scaleDelta: number = _event.deltaY * this.SCROLL_SENSITIVITY;
+      this.scale.x -= scaleDelta * this.scale.x;
       this.scale.x = Math.min( this.scale.x, this.MAX_SCALE );
       this.scale.x = Math.max( this.scale.x, this.MIN_SCALE );
+
+      this.scale.y -= scaleDelta * this.scale.y;
+      this.scale.y = Math.min( this.scale.y, this.MAX_SCALE );
+      this.scale.y = Math.max( this.scale.y, this.MIN_SCALE );
       
       this.redraw();
     }

@@ -2,9 +2,11 @@ namespace Fudge {
   import ƒ = FudgeCore;
 
   export class ViewAnimationSheetCurve extends ViewAnimationSheet {
-    drawKeys(): void {
+    private readonly pixelPerValue: number = 100;
+
+    public drawTimeline(): void {
       this.drawYScale();
-      super.drawKeys();
+      super.drawTimeline();
     }
 
     protected drawSequence(_sequence: ƒ.AnimationSequence): void {
@@ -28,12 +30,11 @@ namespace Fudge {
       this.crc2.strokeStyle = seq.color;
       for (let i: number = 0; i < _sequence.length; i++) {
         let key: ƒ.AnimationKey = _sequence.getKey(i);
-        // console.log(key);
         this.keys.push({
           key: key,
           path2D: this.drawKey(
             key.Time,
-            -key.Value,
+            -key.Value * this.pixelPerValue,
             height / 2,
             width / 2,
             seq.color
@@ -42,11 +43,11 @@ namespace Fudge {
         });
         if (i < _sequence.length - 1) {
           let bezierPoints: { x: number; y: number }[] = this.getBezierPoints(key.functionOut, key, _sequence.getKey(i + 1));
-          this.crc2.moveTo(bezierPoints[0].x, -bezierPoints[0].y);
+          this.crc2.moveTo(bezierPoints[0].x, -bezierPoints[0].y * this.pixelPerValue);
           this.crc2.bezierCurveTo(
-            bezierPoints[1].x, -bezierPoints[1].y,
-            bezierPoints[2].x, -bezierPoints[2].y,
-            bezierPoints[3].x, -bezierPoints[3].y
+            bezierPoints[1].x, -bezierPoints[1].y * this.pixelPerValue,
+            bezierPoints[2].x, -bezierPoints[2].y * this.pixelPerValue,
+            bezierPoints[3].x, -bezierPoints[3].y * this.pixelPerValue
           );
         }
         // line.lineTo(k.Time, -k.Value);
@@ -69,33 +70,51 @@ namespace Fudge {
     }
 
     private drawYScale(): void {
-      let pixelPerValue: number = this.calcScaleSize();
-      let valuePerPixel: number = 1 / pixelPerValue;
-
-      this.crc2.strokeStyle = "green";
+      this.crc2.resetTransform();
+      
+      this.crc2.strokeStyle = "blue";
       this.crc2.lineWidth = 1;
-      let line: Path2D = new Path2D();
-      line.moveTo(0, 0);
-      line.lineTo(100000, 0);
-      this.crc2.stroke(line);
 
-      this.crc2.fillStyle = "yellow";
-      this.crc2.strokeStyle = "yellow";
-      // this.crc2.lineWidth = 1;
-      line = new Path2D();
-      line.moveTo(0, -200);
-      line.lineTo(this.crc2.lineWidth, 400);
-      this.crc2.stroke(line);
+      let centerY: number = -this.cameraOffset.y * this.scale.y;
+      let centerLine: Path2D = new Path2D();
+      centerLine.moveTo(0, centerY);
+      centerLine.lineTo(this.canvas.width, centerY);
+      this.crc2.stroke(centerLine);
 
-      this.crc2.lineWidth = 0.5;
-      this.crc2.textBaseline = "middle";
-      for (let i: number = 0; i < 11; i++) {
-        let y: number = -50 + i * 10;
-        line = new Path2D();
-        line.moveTo(this.crc2.lineWidth, y);
-        line.lineTo(this.crc2.lineWidth + 2000, y);
-        this.crc2.stroke(line);
-        this.crc2.fillText((-y).toString(), this.crc2.lineWidth + 15, y);
+      this.crc2.fillStyle = "grey";
+      this.crc2.strokeStyle = "grey";
+      this.crc2.textBaseline = "bottom";
+      this.crc2.textAlign = "right";
+
+      const minimumPixelPerStep: number = 30;
+      let pixelPerStep: number = this.pixelPerValue * this.scale.y;
+      let valuePerStep: number = 1;
+      let stepScaleFactor: number = Math.max(
+        Math.pow(2, Math.ceil(Math.log2(minimumPixelPerStep / pixelPerStep))), 
+        1);
+      pixelPerStep *= stepScaleFactor;
+      valuePerStep *= stepScaleFactor;
+
+      let steps: number = 1 + this.canvas.height / pixelPerStep;
+      let stepOffset: number = Math.floor((this.cameraOffset.y * this.scale.y) / pixelPerStep);
+      for (let i: number = stepOffset; i < steps + stepOffset; i++) {
+        let stepLine: Path2D = new Path2D();
+        let y: number = (i * pixelPerStep - (this.cameraOffset.y * this.scale.y));
+        stepLine.moveTo(0, y);
+        // TODO: refine the display
+        if (valuePerStep > 1 && i % 5 == 0 || valuePerStep == 1) {
+          this.crc2.lineWidth = 0.6;
+          stepLine.lineTo(35, y);
+          let value: number = -i * valuePerStep;
+          this.crc2.fillText(
+            valuePerStep >= 1 ? value.toFixed(0) : value.toFixed(1), 
+            33, 
+            y);
+        } else {
+          this.crc2.lineWidth = 0.3;
+          stepLine.lineTo(30, y);
+        }
+        this.crc2.stroke(stepLine);
       }
     }
 
