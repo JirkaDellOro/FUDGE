@@ -13,8 +13,8 @@ namespace Fudge {
       if (_sequence.length <= 0) return;
 
       let rect: DOMRect | ClientRect = new DOMRect(1, 1, 20, 20); //_input.getBoundingClientRect();
-      let height: number = rect.height / this.scale.y;
-      let width: number = rect.height / this.scale.x;
+      let height: number = rect.height / this.transform.scaling.y;
+      let width: number = rect.height / this.transform.scaling.x;
       // let line: Path2D = new Path2D();
       // line.moveTo(0, _sequence.getKey(0).Value);
 
@@ -75,10 +75,9 @@ namespace Fudge {
       this.crc2.strokeStyle = "blue";
       this.crc2.lineWidth = 1;
 
-      let centerY: number = -this.cameraOffset.y * this.scale.y;
       let centerLine: Path2D = new Path2D();
-      centerLine.moveTo(0, centerY);
-      centerLine.lineTo(this.canvas.width, centerY);
+      centerLine.moveTo(0, this.transform.translation.y);
+      centerLine.lineTo(this.canvas.width, this.transform.translation.y);
       this.crc2.stroke(centerLine);
 
       this.crc2.fillStyle = "grey";
@@ -87,7 +86,7 @@ namespace Fudge {
       this.crc2.textAlign = "right";
 
       const minimumPixelPerStep: number = 30;
-      let pixelPerStep: number = this.pixelPerValue * this.scale.y;
+      let pixelPerStep: number = this.pixelPerValue * this.transform.scaling.y;
       let valuePerStep: number = 1;
       let stepScaleFactor: number = Math.max(
         Math.pow(2, Math.ceil(Math.log2(minimumPixelPerStep / pixelPerStep))), 
@@ -96,10 +95,10 @@ namespace Fudge {
       valuePerStep *= stepScaleFactor;
 
       let steps: number = 1 + this.canvas.height / pixelPerStep;
-      let stepOffset: number = Math.floor((this.cameraOffset.y * this.scale.y) / pixelPerStep);
+      let stepOffset: number = Math.floor(-this.transform.translation.y / pixelPerStep);
       for (let i: number = stepOffset; i < steps + stepOffset; i++) {
         let stepLine: Path2D = new Path2D();
-        let y: number = (i * pixelPerStep - (this.cameraOffset.y * this.scale.y));
+        let y: number = (i * pixelPerStep + this.transform.translation.y);
         stepLine.moveTo(0, y);
         // TODO: refine the display
         if (valuePerStep > 1 && i % 5 == 0 || valuePerStep == 1) {
@@ -116,19 +115,6 @@ namespace Fudge {
         }
         this.crc2.stroke(stepLine);
       }
-    }
-
-    private calcScaleSize(): number {
-      let min: number = 10;
-      let max: number = 50;
-      let pixelPerValue: number = this.scale.y;
-      while (pixelPerValue < min) {
-        pixelPerValue *= 10;
-      }
-      while (pixelPerValue > max) {
-        pixelPerValue /= 2;
-      }
-      return pixelPerValue;
     }
 
     private randomColor(): string {

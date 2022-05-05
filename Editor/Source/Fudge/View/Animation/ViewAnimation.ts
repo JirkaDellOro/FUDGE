@@ -468,13 +468,12 @@ namespace Fudge {
       this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph} });
     }
 
-    private setTime(_time: number, updateDisplay: boolean = true): void {
+    private setTime(_x: number, _updateDisplay: boolean = true): void {
       if (!this.animation) return;
 
-      // TODO: maybe rework this an move it into the sheet?
-      this.playbackTime = Math.max(0, (_time / this.sheet.scale.x) + this.sheet.cameraOffset.x);
+      this.playbackTime = Math.max(0, this.sheet.getTransformedPosition(_x, 0).x);
       this.playbackTime = Math.round(this.playbackTime / ((1000 / this.animation.fps))) * ((1000 / this.animation.fps));
-      if (updateDisplay) this.updateUserInterface(this.cmpAnimator.updateAnimation(this.playbackTime)[0]);
+      if (_updateDisplay) this.updateUserInterface(this.cmpAnimator.updateAnimation(this.playbackTime)[0]);
     }
 
     private redraw = () => {

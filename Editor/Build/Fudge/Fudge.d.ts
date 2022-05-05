@@ -530,8 +530,7 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     abstract class ViewAnimationSheet {
         canvas: HTMLCanvasElement;
-        scale: ƒ.Vector2;
-        cameraOffset: ƒ.Vector2;
+        transform: ƒ.Matrix3x3;
         protected keys: ViewAnimationKey[];
         protected sequences: ViewAnimationSequence[];
         protected crc2: CanvasRenderingContext2D;
@@ -539,11 +538,9 @@ declare namespace Fudge {
         private labels;
         private events;
         private time;
-        private readonly MAX_SCALE;
-        private readonly MIN_SCALE;
-        private readonly SCROLL_SENSITIVITY;
-        private dragStart;
-        constructor(_view: ViewAnimation, _scale?: ƒ.Vector2);
+        private posDragStart;
+        private posCursorTransformed;
+        constructor(_view: ViewAnimation);
         protected get animation(): ƒ.Animation;
         protected get dom(): HTMLElement;
         protected get toolbar(): HTMLDivElement;
@@ -552,6 +549,7 @@ declare namespace Fudge {
         drawCursor(_time: number): void;
         drawKeys(): void;
         getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent;
+        getTransformedPosition(_x: number, _y: number): ƒ.Vector2;
         protected traverseStructures(_animation: ƒ.AnimationStructure): void;
         protected abstract drawSequence(_sequence: ƒ.AnimationSequence): void;
         protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
@@ -569,7 +567,6 @@ declare namespace Fudge {
         protected drawSequence(_sequence: ƒ.AnimationSequence): void;
         protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
         private drawYScale;
-        private calcScaleSize;
         private randomColor;
         private getBezierPoints;
     }

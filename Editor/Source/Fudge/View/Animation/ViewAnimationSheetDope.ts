@@ -32,7 +32,7 @@ namespace Fudge {
 
       for (let i: number = 0; i < _sequence.length; i++) {
         let k: ƒ.AnimationKey = _sequence.getKey(i);
-        this.keys.push({ key: k, path2D: this.drawKey(k.Time * this.scale.x, y, height / 2, width / 2, seq.color), sequence: seq });
+        this.keys.push({ key: k, path2D: this.drawKey(k.Time * this.transform.scaling.x, y, height / 2, width / 2, seq.color), sequence: seq });
       }
     }
   }
