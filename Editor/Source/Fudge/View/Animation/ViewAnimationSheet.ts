@@ -1,9 +1,14 @@
 namespace Fudge {
   import ƒ = FudgeCore;
   
+  /**
+   * TODO: add
+   * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+   */
   export abstract class ViewAnimationSheet {
     public canvas: HTMLCanvasElement;
-    public transform: ƒ.Matrix3x3 = new ƒ.Matrix3x3();
+    // TODO: move transform to ViewAnimation so it can be shared bewtween Dope and Curve
+    public transform: ƒ.Matrix3x3;
 
     protected keys: ViewAnimationKey[] = [];
     protected sequences: ViewAnimationSequence[] = [];
@@ -14,7 +19,6 @@ namespace Fudge {
     private time: number = 0;
 
     private posDragStart: ƒ.Vector2 = new ƒ.Vector2();
-    private posCursorTransformed: ƒ.Vector2 = new ƒ.Vector2();
 
     //TODO: stop using hardcoded colors
 
@@ -22,6 +26,8 @@ namespace Fudge {
       this.view = _view;
       this.canvas = document.createElement("canvas");
       this.crc2 = this.canvas.getContext("2d");
+      this.transform = new ƒ.Matrix3x3();
+      this.transform.translateY(500);
 
       this.canvas.style.position = "absolute";
       this.canvas.style.left = "300px";
@@ -51,6 +57,7 @@ namespace Fudge {
       this.canvas.width = this.dom.clientWidth - this.toolbar.clientWidth;
       this.canvas.height = this.dom.clientHeight;
     
+      // TODO: check if these 2 lines are necessary
       this.crc2.resetTransform();
       this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
 
@@ -129,7 +136,7 @@ namespace Fudge {
       //TODO: stop recreating the sequence elements all the time
       this.sequences = [];
       this.keys = [];
-      this.traverseStructures(this.animation.animationStructure);
+      this.drawStructure(this.animation.animationStructure);
     }
 
     public getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
@@ -144,7 +151,7 @@ namespace Fudge {
         }
       }
 
-      let point: ƒ.Vector2 = this.getTransformedPosition(_x, _y);
+      let point: ƒ.Vector2 = this.getTransformedPoint(_x, _y);
       for (let k of this.keys) {
         if (this.crc2.isPointInPath(k.path2D, point.x, point.y)) {
           return k;
@@ -153,20 +160,23 @@ namespace Fudge {
       return null;
     }
 
-    public getTransformedPosition(_x: number, _y: number): ƒ.Vector2 {
+    public getTransformedPoint(_x: number, _y: number): ƒ.Vector2 {
+      // TODO: use inverse matrix?
+      // ƒ.Matrix4x4.INVERSION
       let vector: ƒ.Vector2 = new ƒ.Vector2(_x, _y);
-      vector.x =  _x / this.transform.scaling.x - this.transform.translation.x / this.transform.scaling.x;
-      vector.y =  _y / this.transform.scaling.y - this.transform.translation.y / this.transform.scaling.y;
+      vector.x = _x / this.transform.scaling.x - this.transform.translation.x / this.transform.scaling.x;
+      vector.y = _y / this.transform.scaling.y - this.transform.translation.y / this.transform.scaling.y;
 
       return vector;
     }
 
-    protected traverseStructures(_animation: ƒ.AnimationStructure): void {
-      for (let i in _animation) {
-        if (_animation[i] instanceof ƒ.AnimationSequence) {
-          this.drawSequence(<ƒ.AnimationSequence>_animation[i]);
+    protected drawStructure(_animationStructure: ƒ.AnimationStructure): void {
+      for (const property in _animationStructure) {
+        let structureOrSequence: ƒ.AnimationStructure | ƒ.AnimationSequence = _animationStructure[property];
+        if (structureOrSequence instanceof ƒ.AnimationSequence) {
+          this.drawSequence(structureOrSequence);
         } else {
-          this.traverseStructures(<ƒ.AnimationStructure>_animation[i]);
+          this.drawStructure(structureOrSequence);
         }
       }
     }
@@ -242,29 +252,25 @@ namespace Fudge {
 
     private hndPointerDown = (_event: PointerEvent): void => {
       if (_event.buttons != 4) return;
-      this.posDragStart = this.getTransformedPosition(_event.offsetX, _event.offsetY);
+      this.posDragStart = this.getTransformedPoint(_event.offsetX, _event.offsetY);
     }
 
     private hndPointerMove = (_event: PointerEvent): void => {
-      _event.preventDefault();
-      this.posCursorTransformed = this.getTransformedPosition(_event.offsetX, _event.offsetY);
-
       if (_event.buttons != 4) return;
 
-      this.transform.translate(ƒ.Vector2.DIFFERENCE(this.posCursorTransformed, this.posDragStart));
+      _event.preventDefault();
+      this.transform.translate(ƒ.Vector2.DIFFERENCE(this.getTransformedPoint(_event.offsetX, _event.offsetY), this.posDragStart));
       this.redraw();
     }
 
     private hdnWheel = (_event: WheelEvent) => {
       if (_event.buttons != 0) return;
       let zoomFactor: number = _event.deltaY < 0 ? 1.05 : 0.95;
+      let posCursorTransformed: ƒ.Vector2 = this.getTransformedPoint(_event.offsetX, _event.offsetY);
       
-      //TODO: add an option to scroll only horizontally while holding shift
-      // let translation: ƒ.Vector2 = this.posCursorTransformed;
-      // translation.x = Math.max(0, translation.x);
-      this.transform.translate(this.posCursorTransformed);
-      this.transform.scale(new ƒ.Vector2(zoomFactor, zoomFactor));
-      this.transform.translate(ƒ.Vector2.SCALE(this.posCursorTransformed, -1));
+      this.transform.translate(posCursorTransformed);
+      this.transform.scale(new ƒ.Vector2(zoomFactor, _event.ctrlKey ? 1 : zoomFactor));
+      this.transform.translate(ƒ.Vector2.SCALE(posCursorTransformed, -1));
 
       this.redraw();
     }

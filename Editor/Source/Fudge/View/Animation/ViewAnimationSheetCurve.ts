@@ -1,6 +1,10 @@
 namespace Fudge {
   import ƒ = FudgeCore;
 
+  /**
+   * TODO: add
+   * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+   */
   export class ViewAnimationSheetCurve extends ViewAnimationSheet {
     private readonly pixelPerValue: number = 100;
 

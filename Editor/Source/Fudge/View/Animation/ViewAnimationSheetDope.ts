@@ -1,6 +1,10 @@
 namespace Fudge {
   import ƒ = FudgeCore;
 
+  /**
+   * TODO: add
+   * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+   */
   export class ViewAnimationSheetDope extends ViewAnimationSheet {
     async drawKeys(): Promise<void> {
       //TODO: Fix that for some reason the first time this is called the rects return all 0s.
@@ -14,7 +18,7 @@ namespace Fudge {
       // this.traverseStructures(this.view.animation.animationStructure, inputMutator);
 
       this.drawKey(100, 100, 10, 10, "green");
-      this.traverseStructures(this.animation.animationStructure);
+      this.drawStructure(this.animation.animationStructure);
     }
 
     protected drawSequence(_sequence: ƒ.AnimationSequence): void {

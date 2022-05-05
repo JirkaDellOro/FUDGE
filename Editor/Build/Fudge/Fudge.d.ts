@@ -528,6 +528,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    /**
+     * TODO: add
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+     */
     abstract class ViewAnimationSheet {
         canvas: HTMLCanvasElement;
         transform: ƒ.Matrix3x3;
@@ -539,7 +543,6 @@ declare namespace Fudge {
         private events;
         private time;
         private posDragStart;
-        private posCursorTransformed;
         constructor(_view: ViewAnimation);
         protected get animation(): ƒ.Animation;
         protected get dom(): HTMLElement;
@@ -549,8 +552,8 @@ declare namespace Fudge {
         drawCursor(_time: number): void;
         drawKeys(): void;
         getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent;
-        getTransformedPosition(_x: number, _y: number): ƒ.Vector2;
-        protected traverseStructures(_animation: ƒ.AnimationStructure): void;
+        getTransformedPoint(_x: number, _y: number): ƒ.Vector2;
+        protected drawStructure(_animationStructure: ƒ.AnimationStructure): void;
         protected abstract drawSequence(_sequence: ƒ.AnimationSequence): void;
         protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
         private drawEventsAndLabels;
@@ -561,6 +564,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    /**
+     * TODO: add
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+     */
     class ViewAnimationSheetCurve extends ViewAnimationSheet {
         private readonly pixelPerValue;
         drawTimeline(): void;
@@ -573,6 +580,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    /**
+     * TODO: add
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+     */
     class ViewAnimationSheetDope extends ViewAnimationSheet {
         drawKeys(): Promise<void>;
         protected drawSequence(_sequence: ƒ.AnimationSequence): void;

@@ -471,7 +471,7 @@ namespace Fudge {
     private setTime(_x: number, _updateDisplay: boolean = true): void {
       if (!this.animation) return;
 
-      this.playbackTime = Math.max(0, this.sheet.getTransformedPosition(_x, 0).x);
+      this.playbackTime = Math.max(0, this.sheet.getTransformedPoint(_x, 0).x);
       this.playbackTime = Math.round(this.playbackTime / ((1000 / this.animation.fps))) * ((1000 / this.animation.fps));
       if (_updateDisplay) this.updateUserInterface(this.cmpAnimator.updateAnimation(this.playbackTime)[0]);
     }

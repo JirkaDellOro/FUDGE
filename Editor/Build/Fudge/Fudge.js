@@ -2476,7 +2476,7 @@ var Fudge;
         setTime(_x, _updateDisplay = true) {
             if (!this.animation)
                 return;
-            this.playbackTime = Math.max(0, this.sheet.getTransformedPosition(_x, 0).x);
+            this.playbackTime = Math.max(0, this.sheet.getTransformedPoint(_x, 0).x);
             this.playbackTime = Math.round(this.playbackTime / ((1000 / this.animation.fps))) * ((1000 / this.animation.fps));
             if (_updateDisplay)
                 this.updateUserInterface(this.cmpAnimator.updateAnimation(this.playbackTime)[0]);
@@ -2503,9 +2503,14 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
+    /**
+     * TODO: add
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+     */
     class ViewAnimationSheet {
         canvas;
-        transform = new ƒ.Matrix3x3();
+        // TODO: move transform to ViewAnimation so it can be shared bewtween Dope and Curve
+        transform;
         keys = [];
         sequences = [];
         crc2;
@@ -2514,12 +2519,13 @@ var Fudge;
         events = [];
         time = 0;
         posDragStart = new ƒ.Vector2();
-        posCursorTransformed = new ƒ.Vector2();
         //TODO: stop using hardcoded colors
         constructor(_view) {
             this.view = _view;
             this.canvas = document.createElement("canvas");
             this.crc2 = this.canvas.getContext("2d");
+            this.transform = new ƒ.Matrix3x3();
+            this.transform.translateY(500);
             this.canvas.style.position = "absolute";
             this.canvas.style.left = "300px";
             this.canvas.style.top = "0px";
@@ -2544,6 +2550,7 @@ var Fudge;
                 this.time = _time;
             this.canvas.width = this.dom.clientWidth - this.toolbar.clientWidth;
             this.canvas.height = this.dom.clientHeight;
+            // TODO: check if these 2 lines are necessary
             this.crc2.resetTransform();
             this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
             let translation = this.transform.translation;
@@ -2607,7 +2614,7 @@ var Fudge;
             //TODO: stop recreating the sequence elements all the time
             this.sequences = [];
             this.keys = [];
-            this.traverseStructures(this.animation.animationStructure);
+            this.drawStructure(this.animation.animationStructure);
         }
         getObjectAtPoint(_x, _y) {
             for (let l of this.labels) {
@@ -2620,7 +2627,7 @@ var Fudge;
                     return e;
                 }
             }
-            let point = this.getTransformedPosition(_x, _y);
+            let point = this.getTransformedPoint(_x, _y);
             for (let k of this.keys) {
                 if (this.crc2.isPointInPath(k.path2D, point.x, point.y)) {
                     return k;
@@ -2628,19 +2635,22 @@ var Fudge;
             }
             return null;
         }
-        getTransformedPosition(_x, _y) {
+        getTransformedPoint(_x, _y) {
+            // TODO: use inverse matrix?
+            // ƒ.Matrix4x4.INVERSION
             let vector = new ƒ.Vector2(_x, _y);
             vector.x = _x / this.transform.scaling.x - this.transform.translation.x / this.transform.scaling.x;
             vector.y = _y / this.transform.scaling.y - this.transform.translation.y / this.transform.scaling.y;
             return vector;
         }
-        traverseStructures(_animation) {
-            for (let i in _animation) {
-                if (_animation[i] instanceof ƒ.AnimationSequence) {
-                    this.drawSequence(_animation[i]);
+        drawStructure(_animationStructure) {
+            for (const property in _animationStructure) {
+                let structureOrSequence = _animationStructure[property];
+                if (structureOrSequence instanceof ƒ.AnimationSequence) {
+                    this.drawSequence(structureOrSequence);
                 }
                 else {
-                    this.traverseStructures(_animation[i]);
+                    this.drawStructure(structureOrSequence);
                 }
             }
         }
@@ -2710,26 +2720,23 @@ var Fudge;
         hndPointerDown = (_event) => {
             if (_event.buttons != 4)
                 return;
-            this.posDragStart = this.getTransformedPosition(_event.offsetX, _event.offsetY);
+            this.posDragStart = this.getTransformedPoint(_event.offsetX, _event.offsetY);
         };
         hndPointerMove = (_event) => {
-            _event.preventDefault();
-            this.posCursorTransformed = this.getTransformedPosition(_event.offsetX, _event.offsetY);
             if (_event.buttons != 4)
                 return;
-            this.transform.translate(ƒ.Vector2.DIFFERENCE(this.posCursorTransformed, this.posDragStart));
+            _event.preventDefault();
+            this.transform.translate(ƒ.Vector2.DIFFERENCE(this.getTransformedPoint(_event.offsetX, _event.offsetY), this.posDragStart));
             this.redraw();
         };
         hdnWheel = (_event) => {
             if (_event.buttons != 0)
                 return;
             let zoomFactor = _event.deltaY < 0 ? 1.05 : 0.95;
-            //TODO: add an option to scroll only horizontally while holding shift
-            // let translation: ƒ.Vector2 = this.posCursorTransformed;
-            // translation.x = Math.max(0, translation.x);
-            this.transform.translate(this.posCursorTransformed);
-            this.transform.scale(new ƒ.Vector2(zoomFactor, zoomFactor));
-            this.transform.translate(ƒ.Vector2.SCALE(this.posCursorTransformed, -1));
+            let posCursorTransformed = this.getTransformedPoint(_event.offsetX, _event.offsetY);
+            this.transform.translate(posCursorTransformed);
+            this.transform.scale(new ƒ.Vector2(zoomFactor, _event.ctrlKey ? 1 : zoomFactor));
+            this.transform.translate(ƒ.Vector2.SCALE(posCursorTransformed, -1));
             this.redraw();
         };
     }
@@ -2737,6 +2744,10 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * TODO: add
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+     */
     class ViewAnimationSheetCurve extends Fudge.ViewAnimationSheet {
         pixelPerValue = 100;
         drawTimeline() {
@@ -2848,6 +2859,10 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * TODO: add
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+     */
     class ViewAnimationSheetDope extends Fudge.ViewAnimationSheet {
         async drawKeys() {
             //TODO: Fix that for some reason the first time this is called the rects return all 0s.
@@ -2860,7 +2875,7 @@ var Fudge;
             // }, 1000);
             // this.traverseStructures(this.view.animation.animationStructure, inputMutator);
             this.drawKey(100, 100, 10, 10, "green");
-            this.traverseStructures(this.animation.animationStructure);
+            this.drawStructure(this.animation.animationStructure);
         }
         drawSequence(_sequence) {
             let rect = new DOMRect(100, 100, 10, 10); //_input.getBoundingClientRect();
