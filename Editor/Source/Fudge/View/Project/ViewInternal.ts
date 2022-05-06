@@ -79,6 +79,9 @@ namespace Fudge {
       item = new remote.MenuItem({ label: "Create Animation", id: String(CONTEXTMENU.CREATE_ANIMATION), click: _callback });
       menu.append(item);
 
+      item = new remote.MenuItem({ label: "Create Particle Effect", id: String(CONTEXTMENU.CREATE_PARTICLE_EFFECT), click: _callback });
+      menu.append(item);
+
       item = new remote.MenuItem({ label: "Delete Resource", id: String(CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
       menu.append(item);
 
@@ -122,6 +125,11 @@ namespace Fudge {
           let animationNew: ƒ.Animation = new ƒ.Animation("NewAnimation");
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           this.table.selectInterval(animationNew, animationNew);
+          break;
+        case CONTEXTMENU.CREATE_PARTICLE_EFFECT:
+          let particleEffectNew: ƒ.ParticleEffect = new ƒ.ParticleEffect("NewParticleEffect");
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.table.selectInterval(particleEffectNew, particleEffectNew);
           break;
         case CONTEXTMENU.DELETE_RESOURCE:
           await this.table.controller.delete([this.table.getFocussed()]);
