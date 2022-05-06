@@ -71,6 +71,7 @@ A collection of various other documents and resources, including unmaintained ex
 - Advanced texturing
 - Input-Manager  
 - Pathfinding System
+- Graphic Feedback/Feedforward in RenderView
 
 ## In Progress
 - glTF Importer
