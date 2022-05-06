@@ -2133,9 +2133,9 @@ declare namespace FudgeCore {
      * @author Jonas Plotzky, HFU, 2020
      */
     class ComponentParticleSystem extends Component {
+        #private;
         static readonly iSubclass: number;
         variables: ParticleVariables;
-        private effect;
         constructor(_particleEffect?: ParticleEffect, _size?: number);
         get particleEffect(): ParticleEffect;
         set particleEffect(_newParticleEffect: ParticleEffect);
@@ -2145,6 +2145,9 @@ declare namespace FudgeCore {
          */
         set size(_newSize: number);
         evaluateStorage(_storageData: ParticleEffectData): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutatorForUserInterface(): MutatorForUserInterface;
         private initRandomNumbers;
     }
 }
@@ -4236,7 +4239,7 @@ declare namespace FudgeCore {
             [key: string]: Mutator;
         };
         private definedVariables;
-        constructor(_url?: RequestInfo);
+        constructor(_name?: string, _url?: RequestInfo);
         /**
          * Asynchronously loads the json from the given url and parses it initializing this particle effect.
          */

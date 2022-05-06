@@ -28,13 +28,14 @@ declare namespace Fudge {
         CREATE_MATERIAL = 8,
         CREATE_GRAPH = 9,
         CREATE_ANIMATION = 10,
-        SYNC_INSTANCES = 11,
-        REMOVE_COMPONENT = 12,
-        ADD_JOINT = 13,
-        DELETE_RESOURCE = 14,
-        ILLUMINATE = 15,
-        ADD_PROPERTY = 16,
-        DELETE_PROPERTY = 17
+        CREATE_PARTICLE_EFFECT = 11,
+        SYNC_INSTANCES = 12,
+        REMOVE_COMPONENT = 13,
+        ADD_JOINT = 14,
+        DELETE_RESOURCE = 15,
+        ILLUMINATE = 16,
+        ADD_PROPERTY = 17,
+        DELETE_PROPERTY = 18
     }
     enum MENU {
         QUIT = "quit",

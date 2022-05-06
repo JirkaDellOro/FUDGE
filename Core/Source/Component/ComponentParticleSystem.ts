@@ -15,28 +15,28 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
     public variables: ParticleVariables = {};
 
-    private effect: ParticleEffect;
+    #particleEffect: ParticleEffect;
     // TODO: add color for the whole system
 
     constructor(_particleEffect: ParticleEffect = null, _size: number = 0) {
       super();
-      this.effect = _particleEffect;
+      this.#particleEffect = _particleEffect;
       this.variables[PARTICLE_VARIBALE_NAMES.TIME] = 0;
       this.variables[PARTICLE_VARIBALE_NAMES.INDEX] = 0;
       this.variables[PARTICLE_VARIBALE_NAMES.SIZE] = _size;
       this.initRandomNumbers(_size);
 
       // evaluate system storage
-      this.evaluateStorage(this.effect?.storageSystem);
+      this.evaluateStorage(this.#particleEffect?.storageSystem);
     }
 
     public get particleEffect(): ParticleEffect {
-      return this.effect;
+      return this.#particleEffect;
     }
 
     public set particleEffect(_newParticleEffect: ParticleEffect) {
-      this.effect = _newParticleEffect;
-      this.evaluateStorage(this.effect?.storageSystem);
+      this.#particleEffect = _newParticleEffect;
+      this.evaluateStorage(this.#particleEffect?.storageSystem);
     }
 
     public get size(): number {
@@ -49,7 +49,7 @@ namespace FudgeCore {
     public set size(_newSize: number) {
       this.variables[PARTICLE_VARIBALE_NAMES.SIZE] = _newSize;
       this.initRandomNumbers(_newSize);
-      this.evaluateStorage(this.effect.storageSystem);
+      this.evaluateStorage(this.#particleEffect.storageSystem);
     }
 
     public evaluateStorage(_storageData: ParticleEffectData): void {
@@ -57,6 +57,30 @@ namespace FudgeCore {
         this.variables[key] = (<ParticleClosure>_storageData[key])(this.variables);
       }
     }
+
+    //#region transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = {
+        [super.constructor.name]: super.serialize(),
+        idParticleEffect: this.particleEffect.idResource
+      };
+
+      return serialization;
+    }
+
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization[super.constructor.name]);
+      this.particleEffect = <ParticleEffect>await Project.getResource(_serialization.idParticleEffect);
+
+      return this;
+    }
+
+    public getMutatorForUserInterface(): MutatorForUserInterface {
+      let mutator: MutatorForUserInterface = <MutatorForUserInterface>this.getMutator(true);
+      mutator.particleEffect = this.particleEffect;
+      return mutator;
+    }
+    //#endregion
 
     private initRandomNumbers(_size: number): void {
       let randomNumbers: number[] = [];

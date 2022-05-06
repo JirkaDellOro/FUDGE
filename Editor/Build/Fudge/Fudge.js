@@ -38,13 +38,14 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 8] = "CREATE_MATERIAL";
         CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 9] = "CREATE_GRAPH";
         CONTEXTMENU[CONTEXTMENU["CREATE_ANIMATION"] = 10] = "CREATE_ANIMATION";
-        CONTEXTMENU[CONTEXTMENU["SYNC_INSTANCES"] = 11] = "SYNC_INSTANCES";
-        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 12] = "REMOVE_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 13] = "ADD_JOINT";
-        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 14] = "DELETE_RESOURCE";
-        CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 15] = "ILLUMINATE";
-        CONTEXTMENU[CONTEXTMENU["ADD_PROPERTY"] = 16] = "ADD_PROPERTY";
-        CONTEXTMENU[CONTEXTMENU["DELETE_PROPERTY"] = 17] = "DELETE_PROPERTY";
+        CONTEXTMENU[CONTEXTMENU["CREATE_PARTICLE_EFFECT"] = 11] = "CREATE_PARTICLE_EFFECT";
+        CONTEXTMENU[CONTEXTMENU["SYNC_INSTANCES"] = 12] = "SYNC_INSTANCES";
+        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 13] = "REMOVE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 14] = "ADD_JOINT";
+        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 15] = "DELETE_RESOURCE";
+        CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 16] = "ILLUMINATE";
+        CONTEXTMENU[CONTEXTMENU["ADD_PROPERTY"] = 17] = "ADD_PROPERTY";
+        CONTEXTMENU[CONTEXTMENU["DELETE_PROPERTY"] = 18] = "DELETE_PROPERTY";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -1199,6 +1200,8 @@ var Fudge;
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Create Animation", id: String(Fudge.CONTEXTMENU.CREATE_ANIMATION), click: _callback });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Create Particle Effect", id: String(Fudge.CONTEXTMENU.CREATE_PARTICLE_EFFECT), click: _callback });
+            menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Delete Resource", id: String(Fudge.CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
             menu.append(item);
             // item = new remote.MenuItem({ label: "Sync Instances", id: String(CONTEXTMENU.SYNC_INSTANCES), click: _callback, accelerator: "S" });
@@ -1237,6 +1240,11 @@ var Fudge;
                     let animationNew = new ƒ.Animation("NewAnimation");
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                     this.table.selectInterval(animationNew, animationNew);
+                    break;
+                case Fudge.CONTEXTMENU.CREATE_PARTICLE_EFFECT:
+                    let particleEffectNew = new ƒ.ParticleEffect("NewParticleEffect");
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    this.table.selectInterval(particleEffectNew, particleEffectNew);
                     break;
                 case Fudge.CONTEXTMENU.DELETE_RESOURCE:
                     await this.table.controller.delete([this.table.getFocussed()]);
@@ -1318,6 +1326,7 @@ var Fudge;
         MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
         MeshOnComponentMesh: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
         AnimationOnComponentAnimator: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentAnimator, ofType: ƒ.Animation, dropEffect: "link" },
+        ParticleEffectOnComponentParticleSystem: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentParticleSystem, ofType: ƒ.ParticleEffect, dropEffect: "link" },
         // MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
         TextureOnMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
         TextureOnMeshRelief: { fromViews: [Fudge.ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
@@ -1389,6 +1398,9 @@ var Fudge;
             // Animation of ComponentAnimation
             if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator))
                 return;
+            // ParticleEffect of ComponentParticleSystem
+            if (this.filterDragDrop(_event, filter.ParticleEffectOnComponentParticleSystem))
+                return;
             function checkMimeType(_mime) {
                 return (_sources) => {
                     let sources = _sources;
@@ -1440,6 +1452,11 @@ var Fudge;
                 this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
+            let setParticleEffect = (_sources) => {
+                this.mutable["particleEffect"] = _sources[0];
+                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                return true;
+            };
             // texture
             if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink))
                 return;
@@ -1465,6 +1482,9 @@ var Fudge;
                 return;
             // Animation on ComponentAnimator
             if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator, setAnimation))
+                return;
+            // ParticleEffect on ComponentParticleSystem
+            if (this.filterDragDrop(_event, filter.ParticleEffectOnComponentParticleSystem, setParticleEffect))
                 return;
         };
         filterDragDrop(_event, _filter, _callback = () => true) {
@@ -2910,7 +2930,8 @@ var Fudge;
         [ƒ.Audio, ƒ.ComponentAudio],
         [ƒ.Material, ƒ.ComponentMaterial],
         [ƒ.Mesh, ƒ.ComponentMesh],
-        [ƒ.Animation, ƒ.ComponentAnimator]
+        [ƒ.Animation, ƒ.ComponentAnimator],
+        [ƒ.ParticleEffect, ƒ.ComponentParticleSystem]
     ]);
     /**
      * View all components attached to a node
