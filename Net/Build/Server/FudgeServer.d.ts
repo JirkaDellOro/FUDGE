@@ -9,6 +9,16 @@ export interface Client {
     socket?: WebSocket;
     peers: string[];
 }
+interface Room {
+    id: string;
+    clients: {
+        [id: string]: Client;
+    };
+    idHost: string | undefined;
+}
+declare type Rooms = {
+    [id: string]: Room;
+};
 /**
  * Manages the websocket connections to FudgeClients, their ids and login names
  * and keeps track of the peer to peer connections between them. Processes messages
@@ -21,10 +31,8 @@ export interface Client {
  */
 export declare class FudgeServer {
     socket: WebSocket.Server;
-    clients: {
-        [id: string]: Client;
-    };
-    idHost: string | undefined;
+    rooms: Rooms;
+    private idLobby;
     /**
      * Starts the server on the given port, installs the appropriate event-listeners and starts the heartbeat
      */
@@ -48,9 +56,12 @@ export declare class FudgeServer {
     /**
      * Log the list of known clients
      */
-    logClients(): void;
+    logClients(_room: Room): void;
     private addEventListeners;
     private handleMessage;
+    private enterRoom;
+    private createRoom;
+    private getRoomIds;
     private createMesh;
     private connectHost;
     private addUserOnValidLoginRequest;
@@ -60,3 +71,4 @@ export declare class FudgeServer {
     private createID;
     private heartbeat;
 }
+export {};

@@ -31,7 +31,13 @@ declare namespace FudgeNet {
         CONNECT_PEERS = "connectPeers",
         /** dissolve peer-to-peer-connection between the client identified with `idTarget` and all the peers
          * identified by the array giwen with `content.peers` or to all peers the client is connected to, if content.peers is undefined */
-        DISCONNECT_PEERS = "disconnectPeers"
+        DISCONNECT_PEERS = "disconnectPeers",
+        /** sent to the server to create a new room and return its id */
+        ROOM_CREATE = "roomCreate",
+        /** sent to the server and back to the calling client to retrieve an array of available room ids */
+        ROOM_GET_IDS = "roomGetIds",
+        /** sent to the server to join the calling client to the room given with the id, sent back to all clients in the room after */
+        ROOM_ENTER = "roomEnter"
     }
     /**
      * Defines the route the message should take.
@@ -49,6 +55,8 @@ declare namespace FudgeNet {
         VIA_SERVER_HOST = "viaServerToHost"
     }
     interface Message {
+        /** the command the message is supposed to trigger */
+        idRoom?: string;
         /** the command the message is supposed to trigger */
         command?: COMMAND;
         /** the route the message is supposed to take, undefined for peers */
@@ -101,7 +109,7 @@ declare namespace FudgeNet {
      * Manages a websocket connection to a FudgeServer and multiple rtc-connections to other FudgeClients.
      * Processes messages from in the format {@link FudgeNet.Message} according to the controlling
      * fields {@link FudgeNet.ROUTE} and {@link FudgeNet.COMMAND}.
-     * @author Falco Böhnke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
+     * @author Falco Böhnke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021-2022
      */
     class FudgeClient extends EventTarget {
         id: string;
@@ -118,6 +126,7 @@ declare namespace FudgeNet {
             };
         };
         idHost: string;
+        idRoom: string;
         constructor();
         /**
          * Tries to connect to the server at the given url and installs the appropriate listeners

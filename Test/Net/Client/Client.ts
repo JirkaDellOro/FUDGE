@@ -3,6 +3,7 @@ namespace ClientTest {
   import ƒ = FudgeCore;
   import ƒClient = FudgeNet.FudgeClient;
   ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL);
+  let idRoom: string;
 
   // Create a FudgeClient for this browser tab
   let client: ƒClient = new ƒClient();
@@ -17,9 +18,30 @@ namespace ClientTest {
     document.forms[0].querySelector("button#mesh").addEventListener("click", structurePeers);
     document.forms[0].querySelector("button#host").addEventListener("click", structurePeers);
     document.forms[0].querySelector("button#disconnect").addEventListener("click", structurePeers);
+    document.forms[0].querySelector("fieldset#rooms").addEventListener("click", hndRoom);
     document.forms[0].querySelector("button#reset").addEventListener("click", structurePeers);
     document.forms[1].querySelector("fieldset").addEventListener("click", sendMessage);
     createTable();
+  }
+
+  function hndRoom(_event: Event): void {
+    if (!(_event.target instanceof HTMLButtonElement))
+      return;
+    let command: string = _event.target.textContent;
+    switch (command) {
+      case "Get":
+        client.dispatch({ command: FudgeNet.COMMAND.ROOM_GET_IDS, route: FudgeNet.ROUTE.SERVER });
+        break;
+      case "Create":
+        client.dispatch({ command: FudgeNet.COMMAND.ROOM_CREATE, route: FudgeNet.ROUTE.SERVER });
+        break;
+      case "Join":
+        let idRoom: string = (<HTMLInputElement>document.forms[0].querySelector("fieldset#rooms>input")).value;
+        console.log("Enter", idRoom);
+        client.dispatch({ command: FudgeNet.COMMAND.ROOM_ENTER, route: FudgeNet.ROUTE.SERVER, content: { room: idRoom } });
+        break;
+        break;
+    }
   }
 
   async function connectToServer(_event: Event): Promise<void> {
@@ -59,7 +81,7 @@ namespace ClientTest {
             proposeName();
           updateTable();
           // on each server heartbeat, dispatch this clients heartbeat
-          client.dispatch({ command: FudgeNet.COMMAND.CLIENT_HEARTBEAT });
+          client.dispatch({ idRoom: idRoom, command: FudgeNet.COMMAND.CLIENT_HEARTBEAT });
           break;
         case FudgeNet.COMMAND.CLIENT_HEARTBEAT:
           let span: HTMLSpanElement = document.querySelector(`#${message.idSource} span`);
@@ -68,6 +90,13 @@ namespace ClientTest {
           break;
         case FudgeNet.COMMAND.DISCONNECT_PEERS:
           client.disconnectPeers();
+          break;
+        case FudgeNet.COMMAND.ROOM_GET_IDS:
+          (<HTMLTextAreaElement>document.forms[0].querySelector("fieldset#rooms>textarea")).value = message.content.rooms.toString();
+          break;
+        case FudgeNet.COMMAND.ROOM_CREATE:
+        case FudgeNet.COMMAND.ROOM_ENTER:
+          client.dispatch({ command: FudgeNet.COMMAND.ROOM_GET_IDS, route: FudgeNet.ROUTE.SERVER });
           break;
         default:
           break;
@@ -170,7 +199,7 @@ namespace ClientTest {
         break;
       default:
         // send a command to dismiss all RTC-connections
-        client.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS, route: FudgeNet.ROUTE.VIA_SERVER });
+        client.dispatch({ idRoom: idRoom, command: FudgeNet.COMMAND.DISCONNECT_PEERS, route: FudgeNet.ROUTE.VIA_SERVER });
     }
   }
 
@@ -182,21 +211,22 @@ namespace ClientTest {
     let receiver: string = formdata.get("receiver").toString();
 
     switch ((<HTMLElement>_event.target).id) {
+      //TODO insert idRoom in dispatch
       case "sendServer":
         // send the message to the server only
-        client.dispatch({ route: FudgeNet.ROUTE.SERVER, content: { text: message } });
+        client.dispatch({ idRoom: idRoom, route: FudgeNet.ROUTE.SERVER, content: { text: message } });
         break;
       case "sendHost":
         // send the message to the host via RTC or TCP
-        client.dispatch({ route: ws ? FudgeNet.ROUTE.VIA_SERVER_HOST : FudgeNet.ROUTE.HOST, content: { text: message } });
+        client.dispatch({ idRoom: idRoom, route: ws ? FudgeNet.ROUTE.VIA_SERVER_HOST : FudgeNet.ROUTE.HOST, content: { text: message } });
         break;
       case "sendAll":
         // send the message to all clients (no target specified) via RTC (no route specified) or TCP (route = via server)
-        client.dispatch({ route: ws ? FudgeNet.ROUTE.VIA_SERVER : undefined, content: { text: message } });
+        client.dispatch({ idRoom: idRoom, route: ws ? FudgeNet.ROUTE.VIA_SERVER : undefined, content: { text: message } });
         break;
       case "sendClient":
         // send the message to a specific client (target specified) via RTC (no route specified) or TCP (route = via server)
-        client.dispatch({ route: ws ? FudgeNet.ROUTE.VIA_SERVER : undefined, idTarget: receiver, content: { text: message } });
+        client.dispatch({ idRoom: idRoom, route: ws ? FudgeNet.ROUTE.VIA_SERVER : undefined, idTarget: receiver, content: { text: message } });
         break;
     }
   }
