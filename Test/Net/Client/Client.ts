@@ -95,6 +95,7 @@ namespace ClientTest {
           (<HTMLTextAreaElement>document.forms[0].querySelector("fieldset#rooms>textarea")).value = message.content.rooms.toString();
           break;
         case FudgeNet.COMMAND.ROOM_CREATE:
+          console.log("Created room", message.content.room);
         case FudgeNet.COMMAND.ROOM_ENTER:
           client.dispatch({ command: FudgeNet.COMMAND.ROOM_GET_IDS, route: FudgeNet.ROUTE.SERVER });
           break;
