@@ -79,6 +79,25 @@ namespace Fudge {
       if (!(source instanceof ƒ.Graph))
         return;
 
+      let idSources: string[] = [];
+      for (let node of source.getIterator())
+        if (node instanceof ƒ.GraphInstance)
+          idSources.push(node.idSource);
+        else if (node instanceof ƒ.Graph)
+          idSources.push(node.idResource);
+
+      let target: ƒ.Node = this.tree.controller.dragDrop.target;
+      do {
+        if (target instanceof ƒ.Graph)
+          if (idSources.indexOf(target.idResource) > -1)
+            return;
+        if (target instanceof ƒ.GraphInstance)
+          if (idSources.indexOf(target.idSource) > -1)
+            return;
+
+        target = target.getParent();
+      } while (target);
+
       _event.dataTransfer.dropEffect = "copy";
       _event.preventDefault();
       _event.stopPropagation();
