@@ -57,8 +57,8 @@ export declare class FudgeServer {
      * Log the list of known clients
      */
     logClients(_room: Room): void;
+    protected handleMessage(_message: string, _wsConnection: WebSocket): Promise<void>;
     private addEventListeners;
-    private handleMessage;
     private enterRoom;
     private createRoom;
     private getRoomIds;

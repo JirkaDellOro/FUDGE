@@ -71,43 +71,10 @@ class FudgeServer {
         // TODO: also display known peer-connections?
         console.log("Connected clients", ids);
     }
-    addEventListeners = () => {
-        this.socket.on("connection", (_socket) => {
-            console.log("Connection attempt");
-            try {
-                const id = this.createID();
-                const client = { socket: _socket, id: id, peers: [] };
-                // TODO: client connects -> send a list of available roomss
-                console.log(this.rooms[this.idLobby]);
-                this.rooms[this.idLobby].clients[id] = client;
-                this.logClients(this.rooms[this.idLobby]);
-                let netMessage = { idRoom: this.idLobby, idTarget: id, command: Message_js_1.FudgeNet.COMMAND.ASSIGN_ID };
-                this.dispatch(netMessage);
-            }
-            catch (error) {
-                console.error("Unhandled Exception", error);
-            }
-            _socket.on("message", (_message) => {
-                this.handleMessage(_message, _socket);
-            });
-            _socket.addEventListener("close", () => {
-                console.log("Connection closed");
-                for (let idRoom in this.rooms) {
-                    let clients = this.rooms[idRoom].clients;
-                    for (let id in clients) {
-                        if (clients[id].socket == _socket) {
-                            console.log("Deleting from known clients: ", id);
-                            delete clients[id];
-                            this.logClients(this.rooms[idRoom]);
-                        }
-                    }
-                }
-            });
-        });
-    };
     async handleMessage(_message, _wsConnection) {
         let message = JSON.parse(_message);
         this.logMessage("Received", message);
+        // this.dispatchEvent(new MessageEvent( EVENT.MESSAGE_RECEIVED message); TODO: send event to whoever listens
         switch (message.command) {
             case Message_js_1.FudgeNet.COMMAND.LOGIN_REQUEST:
                 this.addUserOnValidLoginRequest(_wsConnection, message);
@@ -158,6 +125,40 @@ class FudgeServer {
                 break;
         }
     }
+    addEventListeners = () => {
+        this.socket.on("connection", (_socket) => {
+            console.log("Connection attempt");
+            try {
+                const id = this.createID();
+                const client = { socket: _socket, id: id, peers: [] };
+                // TODO: client connects -> send a list of available roomss
+                console.log(this.rooms[this.idLobby]);
+                this.rooms[this.idLobby].clients[id] = client;
+                this.logClients(this.rooms[this.idLobby]);
+                let netMessage = { idRoom: this.idLobby, idTarget: id, command: Message_js_1.FudgeNet.COMMAND.ASSIGN_ID };
+                this.dispatch(netMessage);
+            }
+            catch (error) {
+                console.error("Unhandled Exception", error);
+            }
+            _socket.on("message", (_message) => {
+                this.handleMessage(_message, _socket);
+            });
+            _socket.addEventListener("close", () => {
+                console.log("Connection closed");
+                for (let idRoom in this.rooms) {
+                    let clients = this.rooms[idRoom].clients;
+                    for (let id in clients) {
+                        if (clients[id].socket == _socket) {
+                            console.log("Deleting from known clients: ", id);
+                            delete clients[id];
+                            this.logClients(this.rooms[idRoom]);
+                        }
+                    }
+                }
+            });
+        });
+    };
     enterRoom(_message) {
         if (!_message.idRoom || !_message.idSource || !_message.content)
             throw (new Error("Message lacks idSource, idRoom or content."));

@@ -94,46 +94,10 @@ export class FudgeServer {
     console.log("Connected clients", ids);
   }
 
-  private addEventListeners = (): void => {
-    this.socket.on("connection", (_socket: WebSocket) => {
-      console.log("Connection attempt");
-
-      try {
-        const id: string = this.createID();
-        const client: Client = { socket: _socket, id: id, peers: [] };
-        // TODO: client connects -> send a list of available roomss
-        console.log(this.rooms[this.idLobby]);
-        this.rooms[this.idLobby].clients[id] = client;
-        this.logClients(this.rooms[this.idLobby]);
-        let netMessage: FudgeNet.Message = { idRoom: this.idLobby, idTarget: id, command: FudgeNet.COMMAND.ASSIGN_ID };
-        this.dispatch(netMessage);
-      } catch (error) {
-        console.error("Unhandled Exception", error);
-      }
-
-      _socket.on("message", (_message: string) => {
-        this.handleMessage(_message, _socket);
-      });
-
-      _socket.addEventListener("close", () => {
-        console.log("Connection closed");
-        for (let idRoom in this.rooms) {
-          let clients: Clients = this.rooms[idRoom].clients;
-          for (let id in clients) {
-            if (clients[id].socket == _socket) {
-              console.log("Deleting from known clients: ", id);
-              delete clients[id];
-              this.logClients(this.rooms[idRoom]);
-            }
-          }
-        }
-      });
-    });
-  }
-
-  private async handleMessage(_message: string, _wsConnection: WebSocket): Promise<void> {
+  protected async handleMessage(_message: string, _wsConnection: WebSocket): Promise<void> {
     let message: FudgeNet.Message = JSON.parse(_message);
     this.logMessage("Received", message);
+    // this.dispatchEvent(new MessageEvent( EVENT.MESSAGE_RECEIVED message); TODO: send event to whoever listens
 
     switch (message.command) {
       case FudgeNet.COMMAND.LOGIN_REQUEST:
@@ -191,6 +155,44 @@ export class FudgeServer {
         break;
     }
   }
+
+  private addEventListeners = (): void => {
+    this.socket.on("connection", (_socket: WebSocket) => {
+      console.log("Connection attempt");
+
+      try {
+        const id: string = this.createID();
+        const client: Client = { socket: _socket, id: id, peers: [] };
+        // TODO: client connects -> send a list of available roomss
+        console.log(this.rooms[this.idLobby]);
+        this.rooms[this.idLobby].clients[id] = client;
+        this.logClients(this.rooms[this.idLobby]);
+        let netMessage: FudgeNet.Message = { idRoom: this.idLobby, idTarget: id, command: FudgeNet.COMMAND.ASSIGN_ID };
+        this.dispatch(netMessage);
+      } catch (error) {
+        console.error("Unhandled Exception", error);
+      }
+
+      _socket.on("message", (_message: string) => {
+        this.handleMessage(_message, _socket);
+      });
+
+      _socket.addEventListener("close", () => {
+        console.log("Connection closed");
+        for (let idRoom in this.rooms) {
+          let clients: Clients = this.rooms[idRoom].clients;
+          for (let id in clients) {
+            if (clients[id].socket == _socket) {
+              console.log("Deleting from known clients: ", id);
+              delete clients[id];
+              this.logClients(this.rooms[idRoom]);
+            }
+          }
+        }
+      });
+    });
+  }
+
 
   private enterRoom(_message: FudgeNet.Message): void {
     if (!_message.idRoom || !_message.idSource || !_message.content)
