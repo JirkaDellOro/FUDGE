@@ -2937,7 +2937,7 @@ var Fudge;
         viewport;
         canvas;
         graph;
-        viewGraph;
+        nodeLight = new ƒ.Node("Illumination"); // keeps light components for dark graphs 
         constructor(_container, _state) {
             super(_container, _state);
             this.graph = ƒ.Project.resources[_state["graph"]];
@@ -2960,28 +2960,19 @@ var Fudge;
             this.dom.addEventListener("pointerdown", this.hndPointer);
         }
         createUserInterface() {
-            this.viewGraph = new ƒ.Node("ViewGraph");
-            let viewNode = new ƒ.Node("ViewNode");
-            let nodeLight = new ƒ.Node("ViewIllumination");
-            viewNode.addChild(nodeLight);
-            viewNode.addChild(this.viewGraph);
-            ƒAid.addStandardLightComponents(nodeLight);
+            ƒAid.addStandardLightComponents(this.nodeLight);
             let cmpCamera = new ƒ.ComponentCamera();
-            // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
-            // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
             cmpCamera.projectCentral(1, 45);
             this.canvas = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
             let container = document.createElement("div");
             container.style.borderWidth = "0px";
             document.body.appendChild(this.canvas);
-            // this.dom.append(this.canvas);
             this.viewport = new ƒ.Viewport();
-            this.viewport.initialize("ViewNode_Viewport", viewNode, cmpCamera, this.canvas);
+            this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
             this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-            // this.viewport.draw();
+            this.viewport.addEventListener("renderPrepareStart" /* RENDER_PREPARE_START */, this.hndPrepare);
             this.setGraph(null);
-            // this.canvas.addEventListener(ƒUi.EVENT.CLICK, this.activeViewport);
             this.canvas.addEventListener("pointerdown", this.activeViewport);
             this.canvas.addEventListener("pick", this.hndPick);
         }
@@ -2995,18 +2986,13 @@ var Fudge;
                 this.dom.innerHTML = "";
                 this.dom.appendChild(this.canvas);
             }
-            // this.graph.broadcastEvent(new Event(ƒ.EVENT.DISCONNECT_JOINT));
-            // ƒ.Physics.cleanup();
             this.graph = _node;
             ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
             ƒ.Physics.cleanup();
             this.graph.broadcastEvent(new Event("disconnectJoint" /* DISCONNECT_JOINT */));
             ƒ.Physics.connectJoints();
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-            // this.viewport.setBranch(this.graph);
-            this.viewGraph.removeAllChildren();
-            this.viewGraph.appendChild(this.graph);
-            this.checkIllumination();
+            this.viewport.setBranch(this.graph);
             this.redraw();
         }
         //#region  ContextMenu
@@ -3059,8 +3045,6 @@ var Fudge;
         //#endregion
         hndDragOver(_event, _viewSource) {
             _event.dataTransfer.dropEffect = "none";
-            // if (this.dom != _event.target)
-            //   return;
             if (!(_viewSource instanceof Fudge.ViewInternal))
                 return;
             let source = _viewSource.getDragDropSources()[0];
@@ -3072,21 +3056,19 @@ var Fudge;
         }
         hndDrop(_event, _viewSource) {
             let source = _viewSource.getDragDropSources()[0];
-            // this.setGraph(<ƒ.Node>source);
             this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source } });
         }
-        checkIllumination() {
-            let lightsPresent = false;
-            ƒ.Render.prepare(this.graph);
-            ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
-            this.illuminateGraph(!lightsPresent);
-            this.setTitle(`${lightsPresent ? "RENDER" : "Render"} | ${this.graph.name}`);
-        }
-        illuminateGraph(_on) {
-            let nodeLight = this.viewGraph.getParent().getChildrenByName("ViewIllumination")[0];
-            nodeLight.activate(_on);
-            this.redraw();
-        }
+        hndPrepare = (_event) => {
+            let switchLight = (_event) => {
+                let lightsPresent = false;
+                ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
+                this.setTitle(`${lightsPresent ? "RENDER" : "Render"} | ${this.graph.name}`);
+                if (!lightsPresent)
+                    ƒ.Render.addLights(this.nodeLight.getComponents(ƒ.ComponentLight));
+                this.graph.removeEventListener("renderPrepareEnd" /* RENDER_PREPARE_END */, switchLight);
+            };
+            this.graph.addEventListener("renderPrepareEnd" /* RENDER_PREPARE_END */, switchLight);
+        };
         hndEvent = (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
@@ -3102,7 +3084,6 @@ var Fudge;
                 case "mutate" /* MUTATE */:
                 case "delete" /* DELETE */:
                 case Fudge.EVENT_EDITOR.MODIFY:
-                    this.checkIllumination();
                     this.redraw();
             }
         };

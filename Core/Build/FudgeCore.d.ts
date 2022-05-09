@@ -173,9 +173,9 @@ declare namespace FudgeCore {
         FILE_SAVED = "fileSaved",
         /** dispatched to {@link Node} when recalculating transforms for render */
         RENDER_PREPARE = "renderPrepare",
-        /** dispatched to {@link Render} when recalculation of the branch to render starts */
+        /** dispatched to {@link Viewport} and {@link Node} when recalculation of the branch to render starts. */
         RENDER_PREPARE_START = "renderPrepareStart",
-        /** dispatched to {@link Render} when recalculation of the branch to render ends */
+        /** dispatched to {@link Viewport} and {@link Node} when recalculation of the branch to render ends. The branch dispatches before the lights are transmitted to the shaders  */
         RENDER_PREPARE_END = "renderPrepareEnd",
         /** dispatched to {@link Joint}-Components in order to disconnect */
         DISCONNECT_JOINT = "disconnectJoint",
@@ -5142,6 +5142,7 @@ declare namespace FudgeCore {
          * render passes.
          */
         static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _shadersUsed?: (typeof Shader)[]): void;
+        static addLights(cmpLights: ComponentLight[]): void;
         /**
          * Used with a {@link Picker}-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted {@link Pick}-array
