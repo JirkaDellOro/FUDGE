@@ -264,8 +264,10 @@ var Fudge;
         ƒ.Debug.groupCollapsed("File content");
         ƒ.Debug.info(htmlContent);
         ƒ.Debug.groupEnd();
-        if (Fudge.watcher)
+        if (Fudge.watcher) {
+            Fudge.watcher.unref();
             Fudge.watcher.close();
+        }
         Fudge.project = new Fudge.Project(_url);
         await Fudge.project.load(htmlContent);
         watchFolder();
@@ -277,6 +279,7 @@ var Fudge;
         async function hndFileChange(_event, _url) {
             let filename = _url.toString();
             if (filename == Fudge.project.fileIndex || filename == Fudge.project.fileInternal || filename == Fudge.project.fileScript) {
+                Fudge.watcher.unref();
                 Fudge.watcher.close();
                 let promise = ƒui.Dialog.prompt(null, false, "Important file change", "Reload project?", "Reload", "Cancel");
                 if (await promise) {
@@ -2804,34 +2807,26 @@ var Fudge;
             this.tree.show(path);
         }
         hndDragOver(_event, _viewSource) {
+            _event.dataTransfer.dropEffect = "none";
+            let target = this.tree.controller.dragDrop.target;
             if (_viewSource == this) {
+                for (let source of _viewSource.getDragDropSources())
+                    if (!this.checkGraphDrop(source, target))
+                        return;
+                _event.dataTransfer.dropEffect = "copy";
                 _event.stopPropagation();
                 return; // continue with standard tree behaviour
             }
-            _event.dataTransfer.dropEffect = "none";
             if (_event.target == this.dom)
                 return;
             if (!(_viewSource instanceof Fudge.ViewInternal))
                 return;
             let source = _viewSource.getDragDropSources()[0];
-            if (!(source instanceof ƒ.Graph))
+            if (!(source instanceof ƒ.Graph) && !(source instanceof ƒ.GraphInstance))
                 return;
-            let idSources = [];
-            for (let node of source.getIterator())
-                if (node instanceof ƒ.GraphInstance)
-                    idSources.push(node.idSource);
-                else if (node instanceof ƒ.Graph)
-                    idSources.push(node.idResource);
-            let target = this.tree.controller.dragDrop.target;
-            do {
-                if (target instanceof ƒ.Graph)
-                    if (idSources.indexOf(target.idResource) > -1)
-                        return;
-                if (target instanceof ƒ.GraphInstance)
-                    if (idSources.indexOf(target.idSource) > -1)
-                        return;
-                target = target.getParent();
-            } while (target);
+            if (!this.checkGraphDrop(source, target))
+                return;
+            // gpt to this point -> allow drop
             _event.dataTransfer.dropEffect = "copy";
             _event.preventDefault();
             _event.stopPropagation();
@@ -2906,6 +2901,25 @@ var Fudge;
                     break;
             }
         };
+        //#endregion
+        checkGraphDrop(_source, _target) {
+            let idSources = [];
+            for (let node of _source.getIterator())
+                if (node instanceof ƒ.GraphInstance)
+                    idSources.push(node.idSource);
+                else if (node instanceof ƒ.Graph)
+                    idSources.push(node.idResource);
+            do {
+                if (_target instanceof ƒ.Graph)
+                    if (idSources.indexOf(_target.idResource) > -1)
+                        return false;
+                if (_target instanceof ƒ.GraphInstance)
+                    if (idSources.indexOf(_target.idSource) > -1)
+                        return false;
+                _target = _target.getParent();
+            } while (_target);
+            return true;
+        }
     }
     Fudge.ViewHierarchy = ViewHierarchy;
 })(Fudge || (Fudge = {}));

@@ -63,12 +63,19 @@ namespace Fudge {
     }
 
     protected hndDragOver(_event: DragEvent, _viewSource: View): void {
+      _event.dataTransfer.dropEffect = "none";
+      let target: ƒ.Node = this.tree.controller.dragDrop.target;
+
       if (_viewSource == this) {
+        for (let source of _viewSource.getDragDropSources())
+          if (!this.checkGraphDrop(<ƒ.Node>source, target))
+            return;
+
+        _event.dataTransfer.dropEffect = "copy";
         _event.stopPropagation();
         return; // continue with standard tree behaviour
       }
 
-      _event.dataTransfer.dropEffect = "none";
       if (_event.target == this.dom)
         return;
 
@@ -76,28 +83,13 @@ namespace Fudge {
         return;
 
       let source: Object = _viewSource.getDragDropSources()[0];
-      if (!(source instanceof ƒ.Graph))
+      if (!(source instanceof ƒ.Graph) && !(source instanceof ƒ.GraphInstance))
         return;
 
-      let idSources: string[] = [];
-      for (let node of source.getIterator())
-        if (node instanceof ƒ.GraphInstance)
-          idSources.push(node.idSource);
-        else if (node instanceof ƒ.Graph)
-          idSources.push(node.idResource);
+      if (!this.checkGraphDrop(source, target))
+        return;
 
-      let target: ƒ.Node = this.tree.controller.dragDrop.target;
-      do {
-        if (target instanceof ƒ.Graph)
-          if (idSources.indexOf(target.idResource) > -1)
-            return;
-        if (target instanceof ƒ.GraphInstance)
-          if (idSources.indexOf(target.idSource) > -1)
-            return;
-
-        target = target.getParent();
-      } while (target);
-
+      // gpt to this point -> allow drop
       _event.dataTransfer.dropEffect = "copy";
       _event.preventDefault();
       _event.stopPropagation();
@@ -181,5 +173,27 @@ namespace Fudge {
       }
     }
     //#endregion
+
+    private checkGraphDrop(_source: ƒ.Node, _target: ƒ.Node): boolean {
+      let idSources: string[] = [];
+      for (let node of _source.getIterator())
+        if (node instanceof ƒ.GraphInstance)
+          idSources.push(node.idSource);
+        else if (node instanceof ƒ.Graph)
+          idSources.push(node.idResource);
+
+      do {
+        if (_target instanceof ƒ.Graph)
+          if (idSources.indexOf(_target.idResource) > -1)
+            return false;
+        if (_target instanceof ƒ.GraphInstance)
+          if (idSources.indexOf(_target.idSource) > -1)
+            return false;
+
+        _target = _target.getParent();
+      } while (_target);
+
+      return true;
+    }
   }
 }
