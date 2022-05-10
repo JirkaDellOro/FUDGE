@@ -28,14 +28,14 @@ namespace FudgeCore {
       let variables: ParticleVariables = _cmpParticleSystem.variables;
       variables[PARTICLE_VARIBALE_NAMES.TIME] = Time.game.get() / 1000;
       // TODO: unify transform and other components
-      let dataTransformLocal: ParticleEffectData = effect.transformLocal;
-      let dataTransformWorld: ParticleEffectData = effect.transformWorld;
-      let dataComponentMutations: ParticleEffectData = effect.componentMutations;
+      let structureTransformLocal: ParticleEffectStructure = effect.transformLocal;
+      let structureTransformWorld: ParticleEffectStructure = effect.transformWorld;
+      let structureComponentMutations: ParticleEffectStructure = effect.componentMutations;
       let cachedMutators: {[key: string]: Mutator} = effect.cachedMutators;
 
       // get relevant components
       let components: Component[] = [];
-      for (const componentClass in dataComponentMutations) {
+      for (const componentClass in structureComponentMutations) {
         components.push(_node.getComponent((<General>globalThis["FudgeCore"])[componentClass]));
       }
       let componentsLength: number = components.length;
@@ -48,7 +48,7 @@ namespace FudgeCore {
       // evaluate update storage
       _cmpParticleSystem.evaluateStorage(effect.storageUpdate);
 
-      let storageParticle: ParticleEffectData = effect.storageParticle;
+      let storageParticle: ParticleEffectStructure = effect.storageParticle;
 
       for (let i: number = 0, length: number = <number>variables[PARTICLE_VARIBALE_NAMES.SIZE]; i < length; i++) {
         variables[PARTICLE_VARIBALE_NAMES.INDEX] = i;
@@ -59,20 +59,20 @@ namespace FudgeCore {
         // apply transformations
         let mtxFinal: Matrix4x4 = Matrix4x4.IDENTITY();
         mtxFinal.multiply(_nodeTransform);
-        this.applyTransform(mtxFinal, dataTransformLocal, cachedMutators, variables);
+        this.applyTransform(mtxFinal, structureTransformLocal, cachedMutators, variables);
         // if (_cmpMesh.showToCamera)
           // mtxFinal.showTo(translationCamera); // TODO: use extra component for billboard effect
         mtxFinal.multiply(_cmpMesh.mtxPivot);
-        if (dataTransformWorld) {
+        if (structureTransformWorld) {
           let transformWorld: Matrix4x4 = Matrix4x4.IDENTITY();
-          this.applyTransform(transformWorld, dataTransformWorld, cachedMutators, variables);
+          this.applyTransform(transformWorld, structureTransformWorld, cachedMutators, variables);
           mtxFinal.multiply(transformWorld, true);
           Recycler.store(transformWorld);
         }
 
         // mutate components
         for (const component of components) {
-          component.mutate(this.evaluateMutatorWith(cachedMutators[component.type], dataComponentMutations[component.type], variables));
+          component.mutate(this.evaluateMutatorWith(cachedMutators[component.type], <ParticleEffectStructure>structureComponentMutations[component.type], variables));
         }
 
         // render
@@ -91,22 +91,22 @@ namespace FudgeCore {
       }
     }
 
-    private static applyTransform(_transform: Matrix4x4, _dataTransform: ParticleEffectData, _mutatorCache: {[key: string]: Mutator}, _variables: ParticleVariables): void {
-      for (const key in _dataTransform) {
+    private static applyTransform(_transform: Matrix4x4, _structureTransform: ParticleEffectStructure, _mutatorCache: {[key: string]: Mutator}, _variables: ParticleVariables): void {
+      for (const key in _structureTransform) {
         let transformVector: Vector3 = key == "scale" ? Vector3.ONE() : Vector3.ZERO();
-        transformVector.mutate(this.evaluateMutatorWith(_mutatorCache[key], _dataTransform[key], _variables));
+        transformVector.mutate(this.evaluateMutatorWith(_mutatorCache[key], <ParticleEffectStructure>_structureTransform[key], _variables));
         (<General>_transform)[key](transformVector);
         Recycler.store(transformVector);
       }
     }
 
-    private static evaluateMutatorWith(_mutator: Mutator, _effectData: ParticleEffectData, _variables: ParticleVariables): Mutator {
-      for (const attribute in _effectData) {
-        let value: Object = _effectData[attribute];
-        if (typeof value === "function") {
-          _mutator[attribute] = (<ParticleClosure>value)(_variables);
+    private static evaluateMutatorWith(_mutator: Mutator, _effectStructure: ParticleEffectStructure, _variables: ParticleVariables): Mutator {
+      for (const attribute in _effectStructure) {
+        let effectStructureOrFunction: ParticleEffectStructure | Function = _effectStructure[attribute];
+        if (effectStructureOrFunction instanceof Function) {
+          _mutator[attribute] = (<ParticleClosure>effectStructureOrFunction)(_variables);
         } else {
-          this.evaluateMutatorWith(<Mutator>_mutator[attribute], value, _variables);
+          this.evaluateMutatorWith(<Mutator>_mutator[attribute], effectStructureOrFunction, _variables);
         }
       }
       return _mutator;

@@ -2144,7 +2144,7 @@ declare namespace FudgeCore {
          * Sets the size of the particle effect. Caution: Setting this will result in the reevaluation of the system storage of the effect and the reinitialization of the randomNumbers array.
          */
         set size(_newSize: number);
-        evaluateStorage(_storageData: ParticleEffectData): void;
+        evaluateStorage(_storageData: ParticleEffectStructure): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
@@ -4217,10 +4217,10 @@ declare namespace FudgeCore {
         RANDOM_NUMBERS = "randomNumbers"
     }
     /**
-     * The data format used to parse and store the paticle effect
+     * The data format used to store the parsed paticle effect
      */
-    interface ParticleEffectData {
-        [identifier: string]: General;
+    interface ParticleEffectStructure {
+        [attribute: string]: ParticleEffectStructure | Function;
     }
     /**
      * Holds all the information which defines the particle effect. Can load the said information out of a json file.
@@ -4230,12 +4230,12 @@ declare namespace FudgeCore {
         name: string;
         idResource: string;
         url: RequestInfo;
-        storageSystem: ParticleEffectData;
-        storageUpdate: ParticleEffectData;
-        storageParticle: ParticleEffectData;
-        transformLocal: ParticleEffectData;
-        transformWorld: ParticleEffectData;
-        componentMutations: ParticleEffectData;
+        storageSystem: ParticleEffectStructure;
+        storageUpdate: ParticleEffectStructure;
+        storageParticle: ParticleEffectStructure;
+        transformLocal: ParticleEffectStructure;
+        transformWorld: ParticleEffectStructure;
+        componentMutations: ParticleEffectStructure;
         cachedMutators: {
             [key: string]: Mutator;
         };
@@ -4270,11 +4270,11 @@ declare namespace FudgeCore {
          */
         private parseClosure;
         /**
-         * Create mutators from the given _data and cache them.
+         * Create mutators from the given _effectStructure and cache them.
          */
         private cacheMutators;
         /**
-         * Create an empty mutator from _data.
+         * Create an empty mutator from _effectStructure.
          */
         private createEmptyMutatorFrom;
     }

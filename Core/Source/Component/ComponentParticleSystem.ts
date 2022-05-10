@@ -52,7 +52,7 @@ namespace FudgeCore {
       this.evaluateStorage(this.#particleEffect.storageSystem);
     }
 
-    public evaluateStorage(_storageData: ParticleEffectData): void {
+    public evaluateStorage(_storageData: ParticleEffectStructure): void {
       for (const key in _storageData) {
         this.variables[key] = (<ParticleClosure>_storageData[key])(this.variables);
       }

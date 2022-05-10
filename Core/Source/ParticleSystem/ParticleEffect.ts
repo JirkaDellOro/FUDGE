@@ -8,10 +8,17 @@ namespace FudgeCore {
   }
 
   /**
-   * The data format used to parse and store the paticle effect
+   * The data format used to store the parsed paticle effect
    */
-  export interface ParticleEffectData {
-    [identifier: string]: General;
+  export interface ParticleEffectStructure {
+    [attribute: string]: ParticleEffectStructure | Function;
+  }
+
+  /**
+   * The data format used to parse the paticle effect
+   */
+  interface ParticleEffectData {
+    [attribute: string]: ParticleEffectData | ClosureData;
   }
 
   /**
@@ -33,13 +40,13 @@ namespace FudgeCore {
     public idResource: string = undefined;
     public url: RequestInfo = "";
 
-    public storageSystem: ParticleEffectData;
-    public storageUpdate: ParticleEffectData;
-    public storageParticle: ParticleEffectData;
+    public storageSystem: ParticleEffectStructure;
+    public storageUpdate: ParticleEffectStructure;
+    public storageParticle: ParticleEffectStructure;
     // ParticleEffectData could be replaced with Functions that take Mtx4/Components as arguments and know what to do with it.
-    public transformLocal: ParticleEffectData;
-    public transformWorld: ParticleEffectData;
-    public componentMutations: ParticleEffectData;
+    public transformLocal: ParticleEffectStructure;
+    public transformWorld: ParticleEffectStructure;
+    public componentMutations: ParticleEffectStructure;
     public cachedMutators: { [key: string]: Mutator };
     private definedVariables: string[]; // these are used to throw errors only
 
@@ -113,21 +120,21 @@ namespace FudgeCore {
      */
     private parse(_data: ParticleEffectData): void {
       this.definedVariables = Object.values(PARTICLE_VARIBALE_NAMES);
-      let dataStorage: ParticleEffectData = _data["storage"];
+      let dataStorage: ParticleEffectData = <ParticleEffectData>_data["storage"];
       if (dataStorage) {
         this.preParseStorage(dataStorage);
-        this.storageSystem = this.parseRecursively(dataStorage["system"]);
-        this.storageUpdate = this.parseRecursively(dataStorage["update"]);
-        this.storageParticle = this.parseRecursively(dataStorage["particle"]);
+        this.storageSystem = this.parseRecursively(<ParticleEffectData>dataStorage["system"]);
+        this.storageUpdate = this.parseRecursively(<ParticleEffectData>dataStorage["update"]);
+        this.storageParticle = this.parseRecursively(<ParticleEffectData>dataStorage["particle"]);
       }
 
-      let dataTransform: ParticleEffectData = _data["transformations"];
+      let dataTransform: ParticleEffectData = <ParticleEffectData>_data["transformations"];
       if (dataTransform) {
-        this.transformLocal = this.parseRecursively(dataTransform["local"]);
-        this.transformWorld = this.parseRecursively(dataTransform["world"]);
+        this.transformLocal = this.parseRecursively(<ParticleEffectData>dataTransform["local"]);
+        this.transformWorld = this.parseRecursively(<ParticleEffectData>dataTransform["world"]);
       }
       
-      this.componentMutations = this.parseRecursively(_data["components"]);
+      this.componentMutations = this.parseRecursively(<ParticleEffectData>_data["components"]);
 
       this.cachedMutators = {};
       this.cacheMutators(this.transformLocal);
@@ -141,7 +148,7 @@ namespace FudgeCore {
      */
     private preParseStorage(_data: ParticleEffectData): void {
       for (const storagePartition in _data) {
-        let storage: ParticleEffectData = _data[storagePartition];
+        let storage: ParticleEffectData = <ParticleEffectData>_data[storagePartition];
         for (const storageValue in storage) {
           if (this.definedVariables.includes(storageValue)) {
             throw `"${storageValue}" is already defined`;
@@ -156,16 +163,17 @@ namespace FudgeCore {
      * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
      * @param _data The particle effect data to parse recursivley.
      */
-    private parseRecursively(_data: ParticleEffectData): ParticleEffectData {
+    private parseRecursively(_data: ParticleEffectData): ParticleEffectStructure {
+      let effectStructure: ParticleEffectStructure = {};
       for (const key in _data) {
-        let value: Object = _data[key];
-        if (typeof value === "string" || typeof value === "number" || "function" in <ParticleEffectData>value)
-          _data[key] = this.parseClosure(<ClosureData>value);
+        let value: ParticleEffectData | ClosureData = _data[key];
+        if (typeof value === "string" || typeof value === "number" || "function" in value)
+          effectStructure[key] = this.parseClosure(<ClosureData>value);
         else {
-          _data[key] = this.parseRecursively(<ParticleEffectData>value);
+          effectStructure[key] = this.parseRecursively(<ParticleEffectData>value);
         }
       }
-      return _data;
+      return effectStructure;
     }
 
     /**
@@ -199,26 +207,28 @@ namespace FudgeCore {
     }
 
     /**
-     * Create mutators from the given _data and cache them.
+     * Create mutators from the given _effectStructure and cache them.
      */
-    private cacheMutators(_data: ParticleEffectData): void {
-      for (const key in _data) {
-        let effectData: ParticleEffectData = _data[key];
-        this.cachedMutators[key] = this.createEmptyMutatorFrom(effectData);
+    private cacheMutators(_effectStructure: ParticleEffectStructure): void {
+      for (const attribute in _effectStructure) {
+        let effectStructureOrFunction: ParticleEffectStructure | Function = _effectStructure[attribute];
+        if (effectStructureOrFunction instanceof Function) continue;
+
+        this.cachedMutators[attribute] = this.createEmptyMutatorFrom(effectStructureOrFunction);
       }
     }
 
     /**
-     * Create an empty mutator from _data.
+     * Create an empty mutator from _effectStructure.
      */
-    private createEmptyMutatorFrom(_data: ParticleEffectData): Mutator {
+    private createEmptyMutatorFrom(_effectStructure: ParticleEffectStructure): Mutator {
       let mutator: Mutator = {};
-      for (const attribute in _data) {
-        let value: Object = _data[attribute];
-        if (typeof value === "function") {
+      for (const attribute in _effectStructure) {
+        let effectStructureOrFunction: ParticleEffectStructure | Function = _effectStructure[attribute];
+        if (effectStructureOrFunction instanceof Function) {
           mutator[attribute] = null;
         } else {
-          mutator[attribute] = this.createEmptyMutatorFrom(value);
+          mutator[attribute] = this.createEmptyMutatorFrom(effectStructureOrFunction);
         }
       }
       return mutator;
