@@ -2808,7 +2808,7 @@ var Fudge;
         }
         hndDragOver(_event, _viewSource) {
             _event.dataTransfer.dropEffect = "none";
-            let target = this.tree.controller.dragDrop.target;
+            let target = this.tree?.controller.dragDrop.target;
             if (_viewSource == this) {
                 for (let source of _viewSource.getDragDropSources())
                     if (!this.checkGraphDrop(source, target))

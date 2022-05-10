@@ -64,7 +64,7 @@ namespace Fudge {
 
     protected hndDragOver(_event: DragEvent, _viewSource: View): void {
       _event.dataTransfer.dropEffect = "none";
-      let target: ƒ.Node = this.tree.controller.dragDrop.target;
+      let target: ƒ.Node = this.tree?.controller.dragDrop.target;
 
       if (_viewSource == this) {
         for (let source of _viewSource.getDragDropSources())
