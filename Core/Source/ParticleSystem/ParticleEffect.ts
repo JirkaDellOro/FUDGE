@@ -31,7 +31,7 @@ namespace FudgeCore {
   export class ParticleEffect extends Mutable implements SerializableResource {
     public name: string;
     public idResource: string = undefined;
-    public url: RequestInfo;
+    public url: RequestInfo = "";
 
     public storageSystem: ParticleEffectData;
     public storageUpdate: ParticleEffectData;
@@ -66,6 +66,7 @@ namespace FudgeCore {
       this.parse(data);
     }
 
+    //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization =  {
         idResource: this.idResource,
@@ -82,10 +83,20 @@ namespace FudgeCore {
       await this.load(_serialization.url);
       return this;
     }
-
+    
+    public async mutate(_mutator: Mutator): Promise<void> {
+      if (_mutator.url != this.url.toString())
+        await this.load(_mutator.url);
+      // except url from mutator for further processing
+      delete (_mutator.url);
+      super.mutate(_mutator);
+      // TODO: examine necessity to reconstruct, if mutator is kept by caller
+    }
+    
     protected reduceMutator(_mutator: Mutator): void {
       // delete _mutator.idResource;
     }
+    //#endregion
 
     /**
      * Parses the data initializing this particle effect with the corresponding closures
@@ -164,7 +175,7 @@ namespace FudgeCore {
         case "string":
           if (this.definedVariables.includes(_data))
             return function (_variables: ParticleVariables): number {
-              Debug.log("Variable", `"${_data}"`, _variables[<string>_data]);
+              // Debug.log("Variable", `"${_data}"`, _variables[<string>_data]);
               return <number>_variables[<string>_data];
             };
           else
@@ -172,7 +183,7 @@ namespace FudgeCore {
 
         case "number":
           return function (_variables: ParticleVariables): number {
-            Debug.log("Constant", _data);
+            // Debug.log("Constant", _data);
             return <number>_data;
           };
       }

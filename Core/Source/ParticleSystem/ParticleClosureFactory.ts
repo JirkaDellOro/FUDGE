@@ -42,12 +42,12 @@ namespace FudgeCore {
      */
     private static createAddition(_parameters: Function[]): Function {
       return function (_variables: ParticleVariables): number {
-        Debug.group("ClosureAddition");
+        // Debug.group("ClosureAddition");
         let result: number = 0;
         for (const param of _parameters) {
           result += param(_variables);
         }
-        Debug.groupEnd();
+        // Debug.groupEnd();
         return result;
       };
     }
@@ -58,9 +58,9 @@ namespace FudgeCore {
      */
     private static createSubtraction(_parameters: Function[]): Function {
       return function (_variables: ParticleVariables): number {
-        Debug.group("ClosureSubtraction");
+        // Debug.group("ClosureSubtraction");
         let result: number = _parameters[0](_variables) - _parameters[1](_variables);
-        Debug.groupEnd();
+        // Debug.groupEnd();
         return result;
       };
     }
@@ -71,12 +71,12 @@ namespace FudgeCore {
       */
     private static createMultiplication(_parameters: Function[]): Function {
       return function (_variables: ParticleVariables): number {
-        Debug.log("ClosureMultiplication");
+        // Debug.log("ClosureMultiplication");
         let result: number = 1;
         for (const param of _parameters) {
           result *= param(_variables);
         }
-        Debug.groupEnd();
+        // Debug.groupEnd();
         return result;
       };
     }
@@ -87,9 +87,9 @@ namespace FudgeCore {
      */
     private static createDivision(_parameters: Function[]): Function {
       return function (_variables: ParticleVariables): number {
-        Debug.group("ClosureDivision");
+        // Debug.group("ClosureDivision");
         let result: number = _parameters[0](_variables) / _parameters[1](_variables);
-        Debug.groupEnd();
+        // Debug.groupEnd();
         return result;
       };
     }
@@ -100,9 +100,9 @@ namespace FudgeCore {
      */
     private static createModulo(_parameters: Function[]): Function {
       return function (_variables: ParticleVariables): number {
-        Debug.group("ClosureModulo");
+        // Debug.group("ClosureModulo");
         let result: number = _parameters[0](_variables) % _parameters[1](_variables);
-        Debug.groupEnd();
+        // Debug.groupEnd();
         return result;
       };
     }
@@ -121,11 +121,11 @@ namespace FudgeCore {
       let xEnd: number = _parameters[3]();
       let yEnd: number = _parameters[4]();
       return function (_variables: ParticleVariables): number {
-        Debug.group("ClosureLinear");
+        // Debug.group("ClosureLinear");
         let x: number = _parameters[0](_variables);
         let y: number = yStart + (x - xStart) * (yEnd - yStart) / (xEnd - xStart);
-        Debug.log(xEnd);
-        Debug.groupEnd();
+        // Debug.log(xEnd);
+        // Debug.groupEnd();
         return y;
       };
     }
@@ -144,10 +144,10 @@ namespace FudgeCore {
       let c: number = _parameters[3]();
       let d: number = _parameters[4]();
       return function (_variables: ParticleVariables): number {
-        Debug.group("ClosurePolynomial3");
+        // Debug.group("ClosurePolynomial3");
         let x: number = _parameters[0](_variables);
         let y: number = a * Math.pow(x, 3) + b * Math.pow(x, 2) + c * x + d;
-        Debug.groupEnd();
+        // Debug.groupEnd();
         return y;
       };
     }
@@ -158,10 +158,10 @@ namespace FudgeCore {
      */
     private static createSquareRoot(_parameters: Function[]): Function {
       return function (_variables: ParticleVariables): number {
-        Debug.group("ClosureSquareRoot");
+        // Debug.group("ClosureSquareRoot");
         let x: number = _parameters[0](_variables);
         let y: number = Math.sqrt(x);
-        Debug.groupEnd();
+        // Debug.groupEnd();
         return y;
       };
     }
@@ -172,9 +172,9 @@ namespace FudgeCore {
      */
     private static createRandom(_parameters: Function[]): Function {
       return function (_variables: ParticleVariables): number {
-        Debug.group("ClosureRandom");
+        // Debug.group("ClosureRandom");
         let result: number = (<number[]>_variables[PARTICLE_VARIBALE_NAMES.RANDOM_NUMBERS])[_parameters[0](_variables)];
-        Debug.groupEnd();
+        // Debug.groupEnd();
         return result;
       };
     }

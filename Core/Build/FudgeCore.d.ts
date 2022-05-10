@@ -4246,6 +4246,7 @@ declare namespace FudgeCore {
         load(_url: RequestInfo): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
         /**
          * Parses the data initializing this particle effect with the corresponding closures

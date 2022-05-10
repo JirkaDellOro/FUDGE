@@ -18,7 +18,7 @@ namespace FudgeCore {
     #particleEffect: ParticleEffect;
     // TODO: add color for the whole system
 
-    constructor(_particleEffect: ParticleEffect = null, _size: number = 0) {
+    constructor(_particleEffect: ParticleEffect = null, _size: number = 10) {
       super();
       this.#particleEffect = _particleEffect;
       this.variables[PARTICLE_VARIBALE_NAMES.TIME] = 0;
