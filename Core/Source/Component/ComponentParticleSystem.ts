@@ -77,8 +77,12 @@ namespace FudgeCore {
 
     public getMutatorForUserInterface(): MutatorForUserInterface {
       let mutator: MutatorForUserInterface = <MutatorForUserInterface>this.getMutator(true);
-      mutator.particleEffect = this.particleEffect;
+      mutator.particleEffect = this.particleEffect.getMutatorForUserInterface();
       return mutator;
+    }
+
+    protected reduceMutator(_mutator: Mutator): void {
+      delete _mutator.variables;
     }
     //#endregion
 

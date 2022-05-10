@@ -95,6 +95,15 @@ namespace FudgeCore {
     
     protected reduceMutator(_mutator: Mutator): void {
       // delete _mutator.idResource;
+      // TODO: maybe move this logic into getMutatorForuserinterface override
+      delete _mutator.storageSystem;
+      delete _mutator.storageUpdate;
+      delete _mutator.storageParticle;
+      delete _mutator.transformLocal;
+      delete _mutator.transformWorld;
+      delete _mutator.componentMutations;
+      delete _mutator.cachedMutators;
+      delete _mutator.definedVariables;
     }
     //#endregion
 

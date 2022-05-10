@@ -2148,6 +2148,7 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
+        protected reduceMutator(_mutator: Mutator): void;
         private initRandomNumbers;
     }
 }
