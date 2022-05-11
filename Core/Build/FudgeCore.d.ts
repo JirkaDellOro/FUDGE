@@ -4210,7 +4210,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    enum PARTICLE_VARIBALE_NAMES {
+    export enum PARTICLE_VARIBALE_NAMES {
         TIME = "time",
         INDEX = "index",
         SIZE = "size",
@@ -4219,23 +4219,37 @@ declare namespace FudgeCore {
     /**
      * The data format used to store the parsed paticle effect
      */
-    interface ParticleEffectStructure {
+    export interface ParticleEffectStructure {
         [attribute: string]: ParticleEffectStructure | Function;
+    }
+    /**
+     * The data format used to parse the paticle effect
+     */
+    export interface ParticleEffectData {
+        [attribute: string]: ParticleEffectData | ParticleEffectClosureData;
+    }
+    /**
+     * The parsing expression grammar.
+     */
+    export type ParticleEffectClosureData = FunctionData | string | number;
+    interface FunctionData {
+        function: string;
+        parameters: ParticleEffectClosureData[];
     }
     /**
      * Holds all the information which defines the particle effect. Can load the said information out of a json file.
      * @authors Jonas Plotzky, HFU, 2020
      */
-    class ParticleEffect extends Mutable implements SerializableResource {
+    export class ParticleEffect extends Mutable implements SerializableResource {
         name: string;
         idResource: string;
         url: RequestInfo;
         storageSystem: ParticleEffectStructure;
         storageUpdate: ParticleEffectStructure;
         storageParticle: ParticleEffectStructure;
-        transformLocal: ParticleEffectStructure;
-        transformWorld: ParticleEffectStructure;
-        componentMutations: ParticleEffectStructure;
+        mtxLocal: ParticleEffectStructure;
+        mtxWorld: ParticleEffectStructure;
+        componentMutators: ParticleEffectStructure;
         cachedMutators: {
             [key: string]: Mutator;
         };
@@ -4278,6 +4292,7 @@ declare namespace FudgeCore {
          */
         private createEmptyMutatorFrom;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**

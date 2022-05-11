@@ -17,18 +17,18 @@ namespace FudgeCore {
   /**
    * The data format used to parse the paticle effect
    */
-  interface ParticleEffectData {
-    [attribute: string]: ParticleEffectData | ClosureData;
+  export interface ParticleEffectData {
+    [attribute: string]: ParticleEffectData | ParticleEffectClosureData;
   }
 
   /**
    * The parsing expression grammar.
    */
-  type ClosureData = ClosureDataFunction | string | number;
+  export type ParticleEffectClosureData = FunctionData | string | number;
 
-  interface ClosureDataFunction {
+  interface FunctionData {
     function: string;
-    parameters: ClosureData[];
+    parameters: ParticleEffectClosureData[];
   }
 
   /**
@@ -44,9 +44,9 @@ namespace FudgeCore {
     public storageUpdate: ParticleEffectStructure;
     public storageParticle: ParticleEffectStructure;
     // ParticleEffectData could be replaced with Functions that take Mtx4/Components as arguments and know what to do with it.
-    public transformLocal: ParticleEffectStructure;
-    public transformWorld: ParticleEffectStructure;
-    public componentMutations: ParticleEffectStructure;
+    public mtxLocal: ParticleEffectStructure;
+    public mtxWorld: ParticleEffectStructure;
+    public componentMutators: ParticleEffectStructure;
     public cachedMutators: { [key: string]: Mutator };
     private definedVariables: string[]; // these are used to throw errors only
 
@@ -130,16 +130,16 @@ namespace FudgeCore {
 
       let dataTransform: ParticleEffectData = <ParticleEffectData>_data["transformations"];
       if (dataTransform) {
-        this.transformLocal = this.parseRecursively(<ParticleEffectData>dataTransform["local"]);
-        this.transformWorld = this.parseRecursively(<ParticleEffectData>dataTransform["world"]);
+        this.mtxLocal = this.parseRecursively(<ParticleEffectData>dataTransform["local"]);
+        this.mtxWorld = this.parseRecursively(<ParticleEffectData>dataTransform["world"]);
       }
       
-      this.componentMutations = this.parseRecursively(<ParticleEffectData>_data["components"]);
+      this.componentMutators = this.parseRecursively(<ParticleEffectData>_data["components"]);
 
       this.cachedMutators = {};
-      this.cacheMutators(this.transformLocal);
-      this.cacheMutators(this.transformWorld);
-      this.cacheMutators(this.componentMutations);
+      this.cacheMutators(this.mtxLocal);
+      this.cacheMutators(this.mtxWorld);
+      this.cacheMutators(this.componentMutators);
     }
 
     /**
@@ -166,9 +166,9 @@ namespace FudgeCore {
     private parseRecursively(_data: ParticleEffectData): ParticleEffectStructure {
       let effectStructure: ParticleEffectStructure = {};
       for (const key in _data) {
-        let value: ParticleEffectData | ClosureData = _data[key];
+        let value: ParticleEffectData | ParticleEffectClosureData = _data[key];
         if (typeof value === "string" || typeof value === "number" || "function" in value)
-          effectStructure[key] = this.parseClosure(<ClosureData>value);
+          effectStructure[key] = this.parseClosure(<ParticleEffectClosureData>value);
         else {
           effectStructure[key] = this.parseRecursively(<ParticleEffectData>value);
         }
@@ -180,7 +180,7 @@ namespace FudgeCore {
      * Parse the given closure data recursivley. Returns a function depending on the closure data.
      * @param _data The closure data to parse recursively.
      */
-    private parseClosure(_data: ClosureData): Function {
+    private parseClosure(_data: ParticleEffectClosureData): Function {
       switch (typeof _data) {
         case "object":
           let parameters: Function[] = [];
@@ -196,7 +196,7 @@ namespace FudgeCore {
               return <number>_variables[<string>_data];
             };
           else
-            throw `"${_data}" is not defined`;
+            throw `"${_data}" is not a defined variable in ${this.constructor.name} "${this.name}"`;
 
         case "number":
           return function (_variables: ParticleVariables): number {

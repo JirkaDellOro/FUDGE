@@ -28,9 +28,9 @@ namespace FudgeCore {
       let variables: ParticleVariables = _cmpParticleSystem.variables;
       variables[PARTICLE_VARIBALE_NAMES.TIME] = Time.game.get() / 1000;
       // TODO: unify transform and other components
-      let structureTransformLocal: ParticleEffectStructure = effect.transformLocal;
-      let structureTransformWorld: ParticleEffectStructure = effect.transformWorld;
-      let structureComponentMutations: ParticleEffectStructure = effect.componentMutations;
+      let structureTransformLocal: ParticleEffectStructure = effect.mtxLocal;
+      let structureTransformWorld: ParticleEffectStructure = effect.mtxWorld;
+      let structureComponentMutations: ParticleEffectStructure = effect.componentMutators;
       let cachedMutators: {[key: string]: Mutator} = effect.cachedMutators;
 
       // get relevant components
