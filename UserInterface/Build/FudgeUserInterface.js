@@ -806,6 +806,7 @@ var FudgeUserInterface;
             this.addEventListener("blur" /* BLUR */, this.hndFocus);
             this.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
             this.addEventListener("wheel" /* WHEEL */, this.hndWheel);
+            this.display();
         }
         /**
          * De-/Activates tabbing for the inner digits
