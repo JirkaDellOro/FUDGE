@@ -1528,6 +1528,35 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒui = FudgeUserInterface;
+    class ControllerParticleSystem {
+        particleEffectData;
+        domElement;
+        constructor(_particleEffectData, _domElement) {
+            this.particleEffectData = _particleEffectData;
+            this.domElement = _domElement;
+        }
+        static updateParticleEffectData(_domElement, _particleEffectData) {
+            for (const property in _particleEffectData) {
+                let element = ƒui.Controller.findChildElementByKey(_domElement, property);
+                if (element == null)
+                    continue;
+                if (element instanceof ƒui.CustomElement) {
+                    _particleEffectData[property] = element.getMutatorValue();
+                }
+                else
+                    _particleEffectData[property] = this.updateParticleEffectData(element, _particleEffectData[property]);
+            }
+            return _particleEffectData;
+        }
+        updateParticleEffectData() {
+            ControllerParticleSystem.updateParticleEffectData(this.domElement, this.particleEffectData);
+        }
+    }
+    Fudge.ControllerParticleSystem = ControllerParticleSystem;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒui = FudgeUserInterface;
     class ControllerTableResource extends ƒui.TableController {
         static head = ControllerTableResource.getHead();
         static getHead() {
@@ -1986,12 +2015,19 @@ var Fudge;
             this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [
                 { typeId: 7 /* Root */ }
             ]);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.setTitle("Particle System | ");
         }
         getState() {
             // TODO: iterate over views and collect their states for reconstruction
             return {};
         }
+        hndEvent = async (_event) => {
+            // switch (_event.type) {
+            // }
+            this.broadcastEvent(_event);
+            _event.stopPropagation();
+        };
     }
     Fudge.PanelParticleSystem = PanelParticleSystem;
 })(Fudge || (Fudge = {}));
@@ -2074,29 +2110,90 @@ var Fudge;
     }
     Fudge.PanelProject = PanelProject;
 })(Fudge || (Fudge = {}));
-// import fs from "fs";
 var Fudge;
-// import fs from "fs";
 (function (Fudge) {
-    const fs = require("fs");
+    var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
+    // const fs: ƒ.General = require("fs");
     class ViewParticleSystem extends Fudge.View {
+        graph;
+        node;
+        cmpParticleSystem;
+        particleEffect;
+        particleEffectData;
+        controller;
+        propertyList;
         constructor(_container, _state) {
             super(_container, _state);
-            let filename = Fudge.remote.dialog.showOpenDialogSync(null, {
-                properties: ["openFile", "promptToCreate"], title: "Select/Create a new particle system json", buttonLabel: "Save Particle System", filters: [{ name: "json", extensions: ["json"] }]
-            });
-            if (!filename)
+            // let filename: string | string[] = remote.dialog.showOpenDialogSync(null, {
+            //     properties: ["openFile", "promptToCreate"], title: "Select/Create a new particle system json", buttonLabel: "Save Particle System", filters: [{name: "json", extensions: ["json"]}]
+            // });
+            // if (!filename)
+            // return;
+            // let base: URL = new URL(new URL("file://" + filename[0]).toString() + "/");
+            // // console.log("Path", base.toString());
+            // this.setTitle(base.toString().match("/[A-Za-z._]*/$")[0]?.replaceAll("/", ""));
+            // fs.readFile(base, "utf-8", (error, data) => {
+            //     if (error?.code === "ENOENT")
+            //         fs.writeFileSync(base, "{}");
+            //     let div: HTMLDivElement = document.createElement("div");
+            //     div.innerText = data;
+            //     this.dom.appendChild(div);
+            // });
+            this.setParticleEffect(null);
+            this.createUserInterface();
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
+            this.dom.addEventListener("input" /* INPUT */, this.hndEvent);
+        }
+        hndEvent = async (_event) => {
+            switch (_event.type) {
+                case Fudge.EVENT_EDITOR.FOCUS:
+                    this.graph = _event.detail.graph;
+                    this.node = _event.detail.node;
+                    this.cmpParticleSystem = this.node?.getComponent(ƒ.ComponentParticleSystem);
+                    await this.setParticleEffect(this.cmpParticleSystem?.particleEffect);
+                    break;
+                case "input" /* INPUT */:
+                    this.controller.updateParticleEffectData();
+                    // this.particleEffect.parse(this.particleEffectData);
+                    this.cmpParticleSystem.particleEffect = this.particleEffect;
+                    break;
+            }
+        };
+        async setParticleEffect(_particleEffect) {
+            if (!_particleEffect) {
+                this.particleEffect = undefined;
+                this.dom.innerHTML = "select a node with an attached component particle system";
                 return;
-            let base = new URL(new URL("file://" + filename[0]).toString() + "/");
-            // console.log("Path", base.toString());
-            this.setTitle(base.toString().match("/[A-Za-z._]*/$")[0]?.replaceAll("/", ""));
-            fs.readFile(base, "utf-8", (error, data) => {
-                if (error?.code === "ENOENT")
-                    fs.writeFileSync(base, "{}");
-                let div = document.createElement("div");
-                div.innerText = data;
-                this.dom.appendChild(div);
-            });
+            }
+            this.particleEffect = _particleEffect;
+            this.particleEffectData = await this.load(this.particleEffect.url);
+            this.dom.innerHTML = "";
+            this.dom.appendChild(this.propertyList);
+            this.recreatePropertyList(this.particleEffectData);
+            this.updateUserInterface();
+        }
+        createUserInterface() {
+            this.propertyList = document.createElement("div");
+        }
+        updateUserInterface() {
+            // this.propertyList = document.createElement("div");
+        }
+        recreatePropertyList(_particleEffectData) {
+            // let animationMutator: ƒ.Mutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
+            // if (!animationMutator) animationMutator = {};
+            let newPropertyListList = ƒui.Generator.createInterfaceFromMutator(_particleEffectData);
+            this.controller = new Fudge.ControllerParticleSystem(_particleEffectData, newPropertyListList);
+            this.dom.replaceChild(newPropertyListList, this.propertyList);
+            this.propertyList = newPropertyListList;
+        }
+        /**
+         * Asynchronously loads the json from the given url.
+         */
+        async load(_url) {
+            if (!_url)
+                return;
+            return await window.fetch(_url).then(_response => _response.json());
         }
     }
     Fudge.ViewParticleSystem = ViewParticleSystem;
@@ -2120,7 +2217,7 @@ var Fudge;
         selectedKey;
         attributeList;
         sheet;
-        hover;
+        hover; // TODO: remove this?
         time = new ƒ.Time();
         idInterval;
         constructor(_container, _state) {
@@ -3729,7 +3826,8 @@ var Fudge;
                     ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);
                     this.setViewObject(previewObject);
                     previewObject.addEventListener("mutate" /* MUTATE */, (_event) => {
-                        this.redraw();
+                        // this causes an endles loop when things get mutated while drawing. i.e while drawing animations or particle system
+                        // this.redraw();
                     });
                     this.redraw();
                     break;

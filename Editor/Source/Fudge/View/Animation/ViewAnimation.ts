@@ -40,7 +40,7 @@ namespace Fudge {
     private selectedKey: ViewAnimationKey;
     private attributeList: HTMLDivElement;
     private sheet: ViewAnimationSheet;
-    private hover: HTMLSpanElement;
+    private hover: HTMLSpanElement; // TODO: remove this?
     private time: ƒ.Time = new ƒ.Time();
     private idInterval: number;
 

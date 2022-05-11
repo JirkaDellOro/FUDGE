@@ -316,6 +316,16 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class ControllerParticleSystem {
+        private particleEffectData;
+        private domElement;
+        constructor(_particleEffectData: ƒ.ParticleEffectData, _domElement: HTMLElement);
+        private static updateParticleEffectData;
+        updateParticleEffectData(): void;
+    }
+}
+declare namespace Fudge {
     import ƒui = FudgeUserInterface;
     class ControllerTableResource extends ƒui.TableController<ƒ.SerializableResource> {
         private static head;
@@ -448,6 +458,7 @@ declare namespace Fudge {
         getState(): {
             [key: string]: string;
         };
+        private hndEvent;
     }
 }
 declare namespace Fudge {
@@ -465,7 +476,23 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class ViewParticleSystem extends View {
+        private graph;
+        private node;
+        private cmpParticleSystem;
+        private particleEffect;
+        private particleEffectData;
+        private controller;
+        private propertyList;
         constructor(_container: ComponentContainer, _state: Object);
+        private hndEvent;
+        private setParticleEffect;
+        private createUserInterface;
+        private updateUserInterface;
+        private recreatePropertyList;
+        /**
+         * Asynchronously loads the json from the given url.
+         */
+        private load;
     }
 }
 declare namespace Fudge {
