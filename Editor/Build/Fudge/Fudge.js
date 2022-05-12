@@ -3826,8 +3826,7 @@ var Fudge;
                     ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);
                     this.setViewObject(previewObject);
                     previewObject.addEventListener("mutate" /* MUTATE */, (_event) => {
-                        // this causes an endles loop when things get mutated while drawing. i.e while drawing animations or particle system
-                        // this.redraw();
+                        this.redraw();
                     });
                     this.redraw();
                     break;

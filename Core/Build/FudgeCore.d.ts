@@ -2123,7 +2123,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, size and all the defined values of the storage partition of the effect will cached here while evaluating the effect.
+     * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, size and all the defined values of the storage partition of the effect will be cached here while evaluating the effect.
      */
     interface ParticleVariables {
         [key: string]: number | number[];

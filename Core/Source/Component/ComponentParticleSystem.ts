@@ -1,7 +1,7 @@
 namespace FudgeCore {
 
   /**
-   * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, size and all the defined values of the storage partition of the effect will cached here while evaluating the effect. 
+   * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, size and all the defined values of the storage partition of the effect will be cached here while evaluating the effect. 
    */
   export interface ParticleVariables {
     [key: string]: number | number[];
@@ -20,14 +20,12 @@ namespace FudgeCore {
 
     constructor(_particleEffect: ParticleEffect = null, _size: number = 10) {
       super();
-      this.#particleEffect = _particleEffect;
       this.variables[PARTICLE_VARIBALE_NAMES.TIME] = 0;
       this.variables[PARTICLE_VARIBALE_NAMES.INDEX] = 0;
       this.variables[PARTICLE_VARIBALE_NAMES.SIZE] = _size;
       this.initRandomNumbers(_size);
-
-      // evaluate system storage
-      this.evaluateStorage(this.#particleEffect?.storageSystem);
+      
+      this.particleEffect = _particleEffect;
     }
 
     public get particleEffect(): ParticleEffect {
@@ -47,9 +45,9 @@ namespace FudgeCore {
      * Sets the size of the particle effect. Caution: Setting this will result in the reevaluation of the system storage of the effect and the reinitialization of the randomNumbers array.
      */
     public set size(_newSize: number) {
+      if (this.size !== _newSize) this.initRandomNumbers(_newSize);
       this.variables[PARTICLE_VARIBALE_NAMES.SIZE] = _newSize;
-      this.initRandomNumbers(_newSize);
-      this.evaluateStorage(this.#particleEffect.storageSystem);
+      this.evaluateStorage(this.#particleEffect?.storageSystem);
     }
 
     public evaluateStorage(_storageData: ParticleEffectStructure): void {
@@ -62,7 +60,8 @@ namespace FudgeCore {
     public serialize(): Serialization {
       let serialization: Serialization = {
         [super.constructor.name]: super.serialize(),
-        idParticleEffect: this.particleEffect.idResource
+        idParticleEffect: this.particleEffect?.idResource,
+        size: this.size
       };
 
       return serialization;
@@ -71,17 +70,21 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization[super.constructor.name]);
       this.particleEffect = <ParticleEffect>await Project.getResource(_serialization.idParticleEffect);
+      this.size = _serialization.size;
 
       return this;
     }
 
     public getMutatorForUserInterface(): MutatorForUserInterface {
       let mutator: MutatorForUserInterface = <MutatorForUserInterface>this.getMutator(true);
-      mutator.particleEffect = this.particleEffect.getMutatorForUserInterface();
+      mutator.size = this.size;
+      mutator.particleEffect = this.particleEffect?.getMutatorForUserInterface();
+      
       return mutator;
     }
 
     protected reduceMutator(_mutator: Mutator): void {
+      super.reduceMutator(_mutator);
       delete _mutator.variables;
     }
     //#endregion
