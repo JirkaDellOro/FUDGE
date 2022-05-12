@@ -93,14 +93,14 @@ namespace FudgeCore {
 
     //#region transfer
     public serialize(): Serialization {
-      let serialization: Serialization = super.serialize();
+      let serialization: Serialization = {};
+      serialization[super.constructor.name] = super.serialize();
       serialization.idAnimation = this.animation.idResource;
       serialization.playmode = this.playmode;
       serialization.playback = this.playback;
       serialization.scale = this.scale;
       serialization.scaleWithGameTime = this.scaleWithGameTime;
       serialization.animateInEditor = this.animateInEditor;
-      serialization[super.constructor.name] = super.serialize();
 
       return serialization;
     }
@@ -108,8 +108,8 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization[super.constructor.name]);
       this.animation = <Animation>await Project.getResource(_serialization.idAnimation);
-      this.playback = _serialization.playback;
       this.playmode = _serialization.playmode;
+      this.playback = _serialization.playback;
       this.scale = _serialization.scale;
       this.scaleWithGameTime = _serialization.scaleWithGameTime;
       this.animateInEditor = _serialization.animateInEditor;
