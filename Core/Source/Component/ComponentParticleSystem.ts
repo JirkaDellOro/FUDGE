@@ -69,7 +69,7 @@ namespace FudgeCore {
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization[super.constructor.name]);
-      this.particleEffect = <ParticleEffect>await Project.getResource(_serialization.idParticleEffect);
+      if (_serialization.idParticleEffect) this.particleEffect = <ParticleEffect>await Project.getResource(_serialization.idParticleEffect);
       this.size = _serialization.size;
 
       return this;
@@ -79,7 +79,7 @@ namespace FudgeCore {
       let mutator: MutatorForUserInterface = <MutatorForUserInterface>this.getMutator(true);
       mutator.size = this.size;
       mutator.particleEffect = this.particleEffect?.getMutatorForUserInterface();
-      
+
       return mutator;
     }
 
