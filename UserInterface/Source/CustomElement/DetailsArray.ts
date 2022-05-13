@@ -43,7 +43,7 @@ namespace FudgeUserInterface {
       let count: number = 0;
       for (let child of this.content.children as HTMLCollectionOf<CustomElement>) {
         child.setAttribute("label", count.toString());
-        child.setAttribute("key", "ƒ" + count);
+        child.setAttribute("key", count.toString());
         child.setLabel(count.toString());
         console.log(child.tabIndex);
         count++;

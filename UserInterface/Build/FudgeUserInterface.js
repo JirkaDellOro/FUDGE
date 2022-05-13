@@ -104,14 +104,7 @@ var FudgeUserInterface;
             }
         }
         static findChildElementByKey(_domElement, key) {
-            let result;
-            try {
-                result = _domElement.querySelector(`[key = ${key}]`);
-            }
-            catch (_error) {
-                result = _domElement.querySelector(`[key = ${"ƒ" + key}]`);
-            }
-            return result;
+            return _domElement.querySelector(`[key = "${key}"]`);
         }
         getMutator(_mutator, _types) {
             // TODO: should get Mutator for UI or work with this.mutator (examine)
@@ -311,9 +304,6 @@ var FudgeUserInterface;
             if (_attributes)
                 for (let name in _attributes) {
                     this.setAttribute(name, _attributes[name]);
-                    if (name == "key" && !isNaN(Number(_attributes[name])))
-                        // if key is a number, as with arrays, prefix with "ƒ", since numbers are not allowed as attributes for querySelector
-                        this.setAttribute(name, "ƒ" + _attributes[name]);
                 }
         }
         /**
@@ -1090,9 +1080,6 @@ var FudgeUserInterface;
             super();
             // TODO: check if this should be removed after changing animation structure to look more like a mutator
             this.setAttribute("key", _legend);
-            if (!isNaN(Number(_legend)))
-                // if key is a number, as with arrays, prefix with "ƒ", since numbers are not allowed as attributes for querySelector
-                this.setAttribute("key", "ƒ" + _legend);
             this.setAttribute("type", _type);
             this.open = true;
             let lblSummary = document.createElement("summary");
@@ -1242,7 +1229,7 @@ var FudgeUserInterface;
             let count = 0;
             for (let child of this.content.children) {
                 child.setAttribute("label", count.toString());
-                child.setAttribute("key", "ƒ" + count);
+                child.setAttribute("key", count.toString());
                 child.setLabel(count.toString());
                 console.log(child.tabIndex);
                 count++;
