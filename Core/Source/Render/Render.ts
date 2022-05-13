@@ -90,7 +90,7 @@ namespace FudgeCore {
 
         _branch.radius = cmpMesh.radius;
         let cmpParticleSystem: ComponentParticleSystem = _branch.getComponent(ComponentParticleSystem);
-        if (cmpParticleSystem)
+        if (cmpParticleSystem && cmpParticleSystem.isActive)
           // TODO: check if paticle systems should be sorted aswell?
           Render.nodesParticleSystem.push(_branch); // add this node to render list
         else if (cmpMaterial.sortForAlpha)
