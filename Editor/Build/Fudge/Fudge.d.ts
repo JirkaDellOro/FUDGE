@@ -483,16 +483,22 @@ declare namespace Fudge {
         private particleEffectData;
         private controller;
         private propertyList;
+        private canvas;
+        private crc2;
         constructor(_container: ComponentContainer, _state: Object);
         private hndEvent;
         private setParticleEffect;
-        private createUserInterface;
-        private updateUserInterface;
-        private recreatePropertyList;
         /**
          * Asynchronously loads the json from the given url.
          */
         private load;
+        private createUserInterface;
+        private updateUserInterface;
+        private recreatePropertyList;
+        private redraw;
+        private drawStructure;
+        private drawClosure;
+        private randomColor;
     }
 }
 declare namespace Fudge {

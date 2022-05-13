@@ -2121,8 +2121,11 @@ var Fudge;
         cmpParticleSystem;
         particleEffect;
         particleEffectData;
+        // private particleEffectStructure: ƒ.ParticleEffectStructure;
         controller;
         propertyList;
+        canvas;
+        crc2;
         constructor(_container, _state) {
             super(_container, _state);
             // let filename: string | string[] = remote.dialog.showOpenDialogSync(null, {
@@ -2140,8 +2143,11 @@ var Fudge;
             //     div.innerText = data;
             //     this.dom.appendChild(div);
             // });
-            this.setParticleEffect(null);
+            ƒ.Render.setBlendMode(ƒ.BLEND.PARTICLE);
+            ƒ.Render.setDepthTest(false);
             this.createUserInterface();
+            this.setParticleEffect(null);
+            _container.on("resize", this.redraw);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener("input" /* INPUT */, this.hndEvent);
         }
@@ -2170,11 +2176,26 @@ var Fudge;
             this.particleEffectData = await this.load(this.particleEffect.url);
             this.dom.innerHTML = "";
             this.dom.appendChild(this.propertyList);
+            this.dom.appendChild(this.canvas);
             this.recreatePropertyList(this.particleEffectData);
             this.updateUserInterface();
+            this.redraw();
+        }
+        /**
+         * Asynchronously loads the json from the given url.
+         */
+        async load(_url) {
+            if (!_url)
+                return;
+            return await window.fetch(_url).then(_response => _response.json());
         }
         createUserInterface() {
             this.propertyList = document.createElement("div");
+            this.canvas = document.createElement("canvas");
+            this.crc2 = this.canvas.getContext("2d");
+            this.canvas.style.position = "absolute";
+            this.canvas.style.left = "300px";
+            this.canvas.style.top = "0px";
         }
         updateUserInterface() {
             // this.propertyList = document.createElement("div");
@@ -2186,14 +2207,57 @@ var Fudge;
             this.controller = new Fudge.ControllerParticleSystem(_particleEffectData, newPropertyListList);
             this.dom.replaceChild(newPropertyListList, this.propertyList);
             this.propertyList = newPropertyListList;
+            this.propertyList.style.width = "300px";
+            this.propertyList.style.height = "100%";
+            this.propertyList.style.overflow = "auto";
         }
-        /**
-         * Asynchronously loads the json from the given url.
-         */
-        async load(_url) {
-            if (!_url)
+        //#region drawing
+        redraw = () => {
+            if (!this.particleEffect)
                 return;
-            return await window.fetch(_url).then(_response => _response.json());
+            this.canvas.width = this.dom.clientWidth - this.propertyList.clientWidth;
+            this.canvas.height = this.dom.clientHeight;
+            this.crc2.resetTransform();
+            this.crc2.translate(0, 500);
+            this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
+            // this.drawStructure(this.particleEffect.mtxLocal);
+        };
+        drawStructure(_structureOrFunction) {
+            if (_structureOrFunction instanceof Function) {
+                this.drawClosure(_structureOrFunction);
+            }
+            else {
+                for (const property in _structureOrFunction) {
+                    this.drawStructure(_structureOrFunction[property]);
+                }
+            }
+        }
+        drawClosure(_closure) {
+            let variables = this.cmpParticleSystem.variables;
+            for (let iParticle = 0; iParticle < variables[ƒ.PARTICLE_VARIBALE_NAMES.SIZE]; iParticle += 1) {
+                // console.log(iParticle);
+                this.crc2.strokeStyle = this.randomColor();
+                this.crc2.lineWidth = 2;
+                this.crc2.beginPath();
+                for (let time = 0; time < 20; time++) {
+                    variables[ƒ.PARTICLE_VARIBALE_NAMES.TIME] = 0;
+                    // this.cmpParticleSystem.evaluateStorage(this.particleEffect.storageUpdate);
+                    variables[ƒ.PARTICLE_VARIBALE_NAMES.INDEX] = iParticle;
+                    // this.cmpParticleSystem.evaluateStorage(this.particleEffect.storageParticle);
+                    variables["1-particleTime"] = time / 10;
+                    let x = time * 100;
+                    let y = -_closure(variables) * 1000;
+                    // console.log(y);
+                    if (x == 0)
+                        this.crc2.moveTo(x, y);
+                    else
+                        this.crc2.lineTo(x, y);
+                }
+                this.crc2.stroke();
+            }
+        }
+        randomColor() {
+            return "hsl(" + Math.random() * 360 + ", 80%, 80%)";
         }
     }
     Fudge.ViewParticleSystem = ViewParticleSystem;
