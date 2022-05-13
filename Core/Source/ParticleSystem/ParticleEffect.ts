@@ -38,39 +38,108 @@ namespace FudgeCore {
   export class ParticleEffect extends Mutable implements SerializableResource {
     public name: string;
     public idResource: string = undefined;
-    public url: RequestInfo = "";
 
     public storageSystem: ParticleEffectStructure;
     public storageUpdate: ParticleEffectStructure;
     public storageParticle: ParticleEffectStructure;
-    // ParticleEffectData could be replaced with Functions that take Mtx4/Components as arguments and know what to do with it.
     public mtxLocal: ParticleEffectStructure;
     public mtxWorld: ParticleEffectStructure;
     public componentMutators: ParticleEffectStructure;
     public cachedMutators: { [key: string]: Mutator };
-    private definedVariables: string[]; // these are used to throw errors only
+    #data: ParticleEffectData;
 
-    constructor(_name: string = "ParticleEffect", _url?: RequestInfo) {
+    constructor(_name: string = "ParticleEffect", _particleEffectData: ParticleEffectData = {}) {
       super();
       this.name = _name;
-      if (_url) {
-        this.load(_url);
-        this.name = _url.toString().split("/").pop();
-      }
+      this.data = _particleEffectData;
 
       Project.register(this);
     }
 
+    /**
+     * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
+     * @param _data The particle effect data to parse recursivley.
+     */
+     private static parseData(_data: ParticleEffectData, _variableNames: string[]): ParticleEffectStructure {
+      let effectStructure: ParticleEffectStructure = {};
+      for (const key in _data) {
+        let value: ParticleEffectData | ParticleEffectClosureData = _data[key];
+        if (typeof value === "string" || typeof value === "number" || "function" in value)
+          effectStructure[key] = this.parseClosure(<ParticleEffectClosureData>value, _variableNames);
+        else {
+          effectStructure[key] = this.parseData(<ParticleEffectData>value, _variableNames);
+        }
+      }
+      return effectStructure;
+    }   
+
+    /**
+     * Parse the given closure data recursivley. Returns a function depending on the closure data.
+     * @param _data The closure data to parse recursively.
+     */
+     private static parseClosure(_data: ParticleEffectClosureData, _variableNames: string[]): Function {
+      switch (typeof _data) {
+        case "object":
+          let parameters: Function[] = [];
+          for (let param of _data.parameters) {
+            parameters.push(this.parseClosure(param, _variableNames));
+          }
+          return ParticleClosureFactory.createClosure(_data.function, parameters);
+
+        case "string":
+          if (_variableNames.includes(_data))
+            return function (_variables: ParticleVariables): number {
+              // Debug.log("Variable", `"${_data}"`, _variables[<string>_data]);
+              return <number>_variables[<string>_data];
+            };
+          else
+            throw `"${_data}" is not a defined variable in ${this.constructor.name} "${this.name}"`;
+
+        case "number":
+          return function (_variables: ParticleVariables): number {
+            // Debug.log("Constant", _data);
+            return <number>_data;
+          };
+      }
+    }
+
+    /**
+     * Creates entries in {@link variableNames} for each defined closure in _data. Predefined variables (time, index...) and previously defined ones (in json) can not be overwritten.
+     * @param _data The paticle effect data to parse.
+     */
+     private static preParseStorage(_data: ParticleEffectData, _variableNames: string[]): string[] {
+      for (const storagePartition in _data) {
+        let storage: ParticleEffectData = <ParticleEffectData>_data[storagePartition];
+        for (const variableName in storage) {
+          if (_variableNames.includes(variableName)) {
+            throw `"${variableName}" is already defined`;
+          }
+          else
+            _variableNames.push(variableName);
+        }
+      }
+
+      return _variableNames;
+    }
+    
+    public get data(): ParticleEffectData {
+      return this.#data;
+    }
+
+    public set data(_particleEffectData: ParticleEffectData) {
+      this.#data = _particleEffectData;
+      this.parse(_particleEffectData);
+    }
+ 
     /**
      * Asynchronously loads the json from the given url and parses it initializing this particle effect.
      */
     public async load(_url: RequestInfo): Promise<void> {
       if (!_url) return;
 
-      this.url = _url;
       let data: ParticleEffectData = await window.fetch(_url)
         .then(_response => _response.json());
-      this.parse(data);
+      this.data = data;
     }
 
     //#region Transfer
@@ -78,8 +147,7 @@ namespace FudgeCore {
       let serialization: Serialization =  {
         idResource: this.idResource,
         name: this.name,
-        // type: this.type,
-        url: this.url
+        data: this.data
       };
       return serialization;
     }
@@ -87,22 +155,21 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       Project.register(this, _serialization.idResource);
       this.name = _serialization.name;
-      await this.load(_serialization.url);
+      this.data = _serialization.data;
       return this;
     }
-    
-    public async mutate(_mutator: Mutator): Promise<void> {
-      if (_mutator.url != this.url.toString())
-        await this.load(_mutator.url);
-      // except url from mutator for further processing
-      delete (_mutator.url);
-      super.mutate(_mutator);
-      // TODO: examine necessity to reconstruct, if mutator is kept by caller
+
+    public getMutatorForUserInterface(): MutatorForUserInterface {
+      return <MutatorForUserInterface>super.getMutator();
+    }
+
+    public getMutator(): Mutator {
+      let mutator: Mutator = super.getMutator(true);
+      mutator.data = this.data;
+      return mutator;
     }
     
     protected reduceMutator(_mutator: Mutator): void {
-      // delete _mutator.idResource;
-      // TODO: maybe move this logic into getMutatorForuserinterface override
       delete _mutator.storageSystem;
       delete _mutator.storageUpdate;
       delete _mutator.storageParticle;
@@ -119,91 +186,27 @@ namespace FudgeCore {
      * @param _data The paticle effect data to parse.
      */
     private parse(_data: ParticleEffectData): void {
-      this.definedVariables = Object.values(PARTICLE_VARIBALE_NAMES);
+      let variableNames: string[] = Object.values(PARTICLE_VARIBALE_NAMES);
       let dataStorage: ParticleEffectData = <ParticleEffectData>_data["storage"];
       if (dataStorage) {
-        this.preParseStorage(dataStorage);
-        this.storageSystem = this.parseRecursively(<ParticleEffectData>dataStorage["system"]);
-        this.storageUpdate = this.parseRecursively(<ParticleEffectData>dataStorage["update"]);
-        this.storageParticle = this.parseRecursively(<ParticleEffectData>dataStorage["particle"]);
+        variableNames = ParticleEffect.preParseStorage(dataStorage, variableNames);
+        this.storageSystem = ParticleEffect.parseData(<ParticleEffectData>dataStorage["system"], variableNames);
+        this.storageUpdate = ParticleEffect.parseData(<ParticleEffectData>dataStorage["update"], variableNames);
+        this.storageParticle = ParticleEffect.parseData(<ParticleEffectData>dataStorage["particle"], variableNames);
       }
 
       let dataTransform: ParticleEffectData = <ParticleEffectData>_data["transformations"];
       if (dataTransform) {
-        this.mtxLocal = this.parseRecursively(<ParticleEffectData>dataTransform["local"]);
-        this.mtxWorld = this.parseRecursively(<ParticleEffectData>dataTransform["world"]);
+        this.mtxLocal = ParticleEffect.parseData(<ParticleEffectData>dataTransform["local"], variableNames);
+        this.mtxWorld = ParticleEffect.parseData(<ParticleEffectData>dataTransform["world"], variableNames);
       }
       
-      this.componentMutators = this.parseRecursively(<ParticleEffectData>_data["components"]);
+      this.componentMutators = ParticleEffect.parseData(<ParticleEffectData>_data["components"], variableNames);
 
       this.cachedMutators = {};
       this.cacheMutators(this.mtxLocal);
       this.cacheMutators(this.mtxWorld);
       this.cacheMutators(this.componentMutators);
-    }
-
-    /**
-     * Creates entries in {@link definedVariables} for each defined closure in _data. Predefined variables (time, index...) and previously defined ones (in json) can not be overwritten.
-     * @param _data The paticle effect data to parse.
-     */
-    private preParseStorage(_data: ParticleEffectData): void {
-      for (const storagePartition in _data) {
-        let storage: ParticleEffectData = <ParticleEffectData>_data[storagePartition];
-        for (const storageValue in storage) {
-          if (this.definedVariables.includes(storageValue)) {
-            throw `"${storageValue}" is already defined`;
-          }
-          else
-            this.definedVariables.push(storageValue);
-        }
-      }
-    }
-
-    /**
-     * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
-     * @param _data The particle effect data to parse recursivley.
-     */
-    private parseRecursively(_data: ParticleEffectData): ParticleEffectStructure {
-      let effectStructure: ParticleEffectStructure = {};
-      for (const key in _data) {
-        let value: ParticleEffectData | ParticleEffectClosureData = _data[key];
-        if (typeof value === "string" || typeof value === "number" || "function" in value)
-          effectStructure[key] = this.parseClosure(<ParticleEffectClosureData>value);
-        else {
-          effectStructure[key] = this.parseRecursively(<ParticleEffectData>value);
-        }
-      }
-      return effectStructure;
-    }
-
-    /**
-     * Parse the given closure data recursivley. Returns a function depending on the closure data.
-     * @param _data The closure data to parse recursively.
-     */
-    private parseClosure(_data: ParticleEffectClosureData): Function {
-      switch (typeof _data) {
-        case "object":
-          let parameters: Function[] = [];
-          for (let param of _data.parameters) {
-            parameters.push(this.parseClosure(param));
-          }
-          return ParticleClosureFactory.createClosure(_data.function, parameters);
-
-        case "string":
-          if (this.definedVariables.includes(_data))
-            return function (_variables: ParticleVariables): number {
-              // Debug.log("Variable", `"${_data}"`, _variables[<string>_data]);
-              return <number>_variables[<string>_data];
-            };
-          else
-            throw `"${_data}" is not a defined variable in ${this.constructor.name} "${this.name}"`;
-
-        case "number":
-          return function (_variables: ParticleVariables): number {
-            // Debug.log("Constant", _data);
-            return <number>_data;
-          };
-      }
     }
 
     /**

@@ -488,10 +488,6 @@ declare namespace Fudge {
         constructor(_container: ComponentContainer, _state: Object);
         private hndEvent;
         private setParticleEffect;
-        /**
-         * Asynchronously loads the json from the given url.
-         */
-        private load;
         private createUserInterface;
         private updateUserInterface;
         private recreatePropertyList;

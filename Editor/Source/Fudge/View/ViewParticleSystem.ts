@@ -60,8 +60,8 @@ namespace Fudge {
           break;
         case ƒui.EVENT.INPUT:
           this.controller.updateParticleEffectData();
-          // this.particleEffect.parse(this.particleEffectData);
-          this.cmpParticleSystem.particleEffect = this.particleEffect;
+          this.particleEffect.data = this.particleEffectData;
+          // this.cmpParticleSystem.particleEffect = this.particleEffect;
           break;
       }
     }
@@ -74,7 +74,7 @@ namespace Fudge {
       }
 
       this.particleEffect = _particleEffect;
-      this.particleEffectData = await this.load(this.particleEffect.url);
+      this.particleEffectData = _particleEffect.data;
       this.dom.innerHTML = "";
       this.dom.appendChild(this.propertyList);
       this.dom.appendChild(this.canvas);
@@ -84,13 +84,6 @@ namespace Fudge {
 
     }
 
-    /**
-     * Asynchronously loads the json from the given url.
-     */
-     private async load(_url: RequestInfo): Promise<ƒ.ParticleEffectData> {
-      if (!_url) return;
-      return await window.fetch(_url).then(_response => _response.json());
-    }    
 
     private createUserInterface(): void {
       this.propertyList = document.createElement("div");

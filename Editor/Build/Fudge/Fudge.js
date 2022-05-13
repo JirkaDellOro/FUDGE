@@ -2161,8 +2161,8 @@ var Fudge;
                     break;
                 case "input" /* INPUT */:
                     this.controller.updateParticleEffectData();
-                    // this.particleEffect.parse(this.particleEffectData);
-                    this.cmpParticleSystem.particleEffect = this.particleEffect;
+                    this.particleEffect.data = this.particleEffectData;
+                    // this.cmpParticleSystem.particleEffect = this.particleEffect;
                     break;
             }
         };
@@ -2173,21 +2173,13 @@ var Fudge;
                 return;
             }
             this.particleEffect = _particleEffect;
-            this.particleEffectData = await this.load(this.particleEffect.url);
+            this.particleEffectData = _particleEffect.data;
             this.dom.innerHTML = "";
             this.dom.appendChild(this.propertyList);
             this.dom.appendChild(this.canvas);
             this.recreatePropertyList(this.particleEffectData);
             this.updateUserInterface();
             this.redraw();
-        }
-        /**
-         * Asynchronously loads the json from the given url.
-         */
-        async load(_url) {
-            if (!_url)
-                return;
-            return await window.fetch(_url).then(_response => _response.json());
         }
         createUserInterface() {
             this.propertyList = document.createElement("div");

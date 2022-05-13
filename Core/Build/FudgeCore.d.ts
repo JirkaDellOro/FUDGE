@@ -4241,9 +4241,9 @@ declare namespace FudgeCore {
      * @authors Jonas Plotzky, HFU, 2020
      */
     export class ParticleEffect extends Mutable implements SerializableResource {
+        #private;
         name: string;
         idResource: string;
-        url: RequestInfo;
         storageSystem: ParticleEffectStructure;
         storageUpdate: ParticleEffectStructure;
         storageParticle: ParticleEffectStructure;
@@ -4253,36 +4253,38 @@ declare namespace FudgeCore {
         cachedMutators: {
             [key: string]: Mutator;
         };
-        private definedVariables;
-        constructor(_name?: string, _url?: RequestInfo);
+        constructor(_name?: string, _particleEffectData?: ParticleEffectData);
+        /**
+         * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
+         * @param _data The particle effect data to parse recursivley.
+         */
+        private static parseData;
+        /**
+         * Parse the given closure data recursivley. Returns a function depending on the closure data.
+         * @param _data The closure data to parse recursively.
+         */
+        private static parseClosure;
+        /**
+         * Creates entries in {@link variableNames} for each defined closure in _data. Predefined variables (time, index...) and previously defined ones (in json) can not be overwritten.
+         * @param _data The paticle effect data to parse.
+         */
+        private static preParseStorage;
+        get data(): ParticleEffectData;
+        set data(_particleEffectData: ParticleEffectData);
         /**
          * Asynchronously loads the json from the given url and parses it initializing this particle effect.
          */
         load(_url: RequestInfo): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        mutate(_mutator: Mutator): Promise<void>;
+        getMutatorForUserInterface(): MutatorForUserInterface;
+        getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
         /**
          * Parses the data initializing this particle effect with the corresponding closures
          * @param _data The paticle effect data to parse.
          */
         private parse;
-        /**
-         * Creates entries in {@link definedVariables} for each defined closure in _data. Predefined variables (time, index...) and previously defined ones (in json) can not be overwritten.
-         * @param _data The paticle effect data to parse.
-         */
-        private preParseStorage;
-        /**
-         * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
-         * @param _data The particle effect data to parse recursivley.
-         */
-        private parseRecursively;
-        /**
-         * Parse the given closure data recursivley. Returns a function depending on the closure data.
-         * @param _data The closure data to parse recursively.
-         */
-        private parseClosure;
         /**
          * Create mutators from the given _effectStructure and cache them.
          */
