@@ -261,7 +261,7 @@ namespace FudgeCore {
           let mutatorsForType: Mutator[] = _mutator.components[componentType];
           if (componentsOfType != undefined && mutatorsForType != undefined) {
             for (const i in mutatorsForType) {
-              componentsOfType[i].mutate(mutatorsForType[i]);
+              componentsOfType[i].mutate(mutatorsForType[i], null, false);
             }
           }
         }

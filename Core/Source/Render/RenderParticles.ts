@@ -72,7 +72,7 @@ namespace FudgeCore {
 
         // mutate components
         for (const component of components) {
-          component.mutate(this.evaluateMutatorWith(cachedMutators[component.type], <ParticleEffectStructure>structureComponentMutations[component.type], variables));
+          component.mutate(this.evaluateMutatorWith(cachedMutators[component.type], <ParticleEffectStructure>structureComponentMutations[component.type], variables), null, false);
         }
 
         // render
@@ -87,14 +87,14 @@ namespace FudgeCore {
 
       // restore saved component state
       for (let i: number = 0; i < componentsLength; i++) {
-        components[i].mutate(componentMutators[i]);
+        components[i].mutate(componentMutators[i], null, false);
       }
     }
 
     private static applyTransform(_transform: Matrix4x4, _structureTransform: ParticleEffectStructure, _mutatorCache: {[key: string]: Mutator}, _variables: ParticleVariables): void {
       for (const key in _structureTransform) {
         let transformVector: Vector3 = key == "scale" ? Vector3.ONE() : Vector3.ZERO();
-        transformVector.mutate(this.evaluateMutatorWith(_mutatorCache[key], <ParticleEffectStructure>_structureTransform[key], _variables));
+        transformVector.mutate(this.evaluateMutatorWith(_mutatorCache[key], <ParticleEffectStructure>_structureTransform[key], _variables), null, false);
         (<General>_transform)[key](transformVector);
         Recycler.store(transformVector);
       }

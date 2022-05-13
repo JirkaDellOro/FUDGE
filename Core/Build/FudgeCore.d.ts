@@ -425,7 +425,7 @@ declare namespace FudgeCore {
         attachToNode(_container: Node | null): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        mutate(_mutator: Mutator): Promise<void>;
+        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
