@@ -114,7 +114,8 @@
     "define": [
       "LIGHT",
       "FLAT",
-      "SKIN"
+      "SKIN",
+      "CAMERA"
     ]
   },
   "ShaderGouraudSkin": {
@@ -126,7 +127,8 @@
     "register": "true",
     "define": [
       "LIGHT",
-      "SKIN"
+      "SKIN",
+      "CAMERA"
     ]
   }
 }

@@ -6,7 +6,8 @@ export abstract class ShaderGouraudSkin extends Shader {
 
   public static define: string[] = [
     "LIGHT",
-    "SKIN"
+    "SKIN",
+    "CAMERA"
 ];
 
   public static getCoat(): typeof Coat { return CoatRemissive; }

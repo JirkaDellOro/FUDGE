@@ -77,7 +77,7 @@ out vec2 v_vctTexture;
   #endif
 
   #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
+// uniform mat4 u_mtxMeshToWorld;
 // Bones
 struct Bone {
   mat4 matrix;

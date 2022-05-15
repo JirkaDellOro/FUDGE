@@ -7,7 +7,8 @@ export abstract class ShaderFlatSkin extends Shader {
   public static define: string[] = [
     "LIGHT",
     "FLAT",
-    "SKIN"
+    "SKIN",
+    "CAMERA"
 ];
 
   public static getCoat(): typeof Coat { return CoatRemissive; }
