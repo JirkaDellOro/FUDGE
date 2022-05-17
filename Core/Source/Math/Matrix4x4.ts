@@ -218,6 +218,7 @@ namespace FudgeCore {
     /**
      * Computes and returns a matrix with the given translation, its z-axis pointing directly at the given target,
      * and a minimal angle between its y-axis and the given up-{@link Vector3}, respetively calculating yaw and pitch.
+     * The pitch may be restricted to the up-vector to only calculate yaw.
      */
     public static LOOK_AT(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y(), _restrict: boolean = false): Matrix4x4 {
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
@@ -663,7 +664,7 @@ namespace FudgeCore {
     /**
      * Adjusts the rotation of this matrix to point the z-axis directly at the given target and tilts it to accord with the given up-{@link Vector3},
      * respectively calculating yaw and pitch. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used. 
-     * When _preserveScaling is false, a rotated identity matrix is the result. 
+     * The pitch may be restricted to the up-vector to only calculate yaw.
      */
     public lookAt(_target: Vector3, _up?: Vector3, _restrict: boolean = false): void {
       _up = _up ? Vector3.NORMALIZATION(_up) : Vector3.NORMALIZATION(this.getY());
@@ -709,22 +710,6 @@ namespace FudgeCore {
     //   this.multiply(mtxRotation, false);
     //   this.scaling = scaling;
     //   Recycler.store(mtxRotation);
-    // }
-
-    /**
-     * Adjusts the rotation of this matrix to match its y-axis with the given up-{@link Vector3} and facing its z-axis toward the given target at minimal angle,
-     * respectively calculating yaw only. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used. 
-     * When _preserveScaling is false, a rotated identity matrix is the result. 
-     */
-    // public showTo(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
-    //   if (!_up)
-    //     _up = Vector3.NORMALIZATION(this.getY());
-
-    //   const mtxResult: Matrix4x4 = Matrix4x4.SHOW_TO(this.translation, _target, _up);
-    //   if (_preserveScaling)
-    //     mtxResult.scale(this.scaling);
-    //   this.set(mtxResult);
-    //   Recycler.store(mtxResult);
     // }
     //#endregion
 

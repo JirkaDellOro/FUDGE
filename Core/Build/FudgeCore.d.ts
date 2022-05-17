@@ -3102,6 +3102,7 @@ declare namespace FudgeCore {
         /**
          * Computes and returns a matrix with the given translation, its z-axis pointing directly at the given target,
          * and a minimal angle between its y-axis and the given up-{@link Vector3}, respetively calculating yaw and pitch.
+         * The pitch may be restricted to the up-vector to only calculate yaw.
          */
         static LOOK_AT(_translation: Vector3, _target: Vector3, _up?: Vector3, _restrict?: boolean): Matrix4x4;
         /**
@@ -3212,16 +3213,11 @@ declare namespace FudgeCore {
         /**
          * Adjusts the rotation of this matrix to point the z-axis directly at the given target and tilts it to accord with the given up-{@link Vector3},
          * respectively calculating yaw and pitch. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used.
-         * When _preserveScaling is false, a rotated identity matrix is the result.
+         * The pitch may be restricted to the up-vector to only calculate yaw.
          */
         lookAt(_target: Vector3, _up?: Vector3, _restrict?: boolean): void;
         /**
          * Same as {@link Matrix4x4.lookAt}, but optimized and needs testing
-         */
-        /**
-         * Adjusts the rotation of this matrix to match its y-axis with the given up-{@link Vector3} and facing its z-axis toward the given target at minimal angle,
-         * respectively calculating yaw only. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used.
-         * When _preserveScaling is false, a rotated identity matrix is the result.
          */
         /**
          * Add a translation by the given {@link Vector3} to this matrix.
