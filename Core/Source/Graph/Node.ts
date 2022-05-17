@@ -90,7 +90,6 @@ namespace FudgeCore {
 
     public activate(_on: boolean): void {
       this.active = _on;
-      // TODO: check if COMPONENT_ACTIVATE/DEACTIVATE is the correct event to dispatch. Shouldn't it be something like NODE_ACTIVATE/DEACTIVATE?
       this.dispatchEvent(new Event(_on ? EVENT.NODE_ACTIVATE : EVENT.NODE_DEACTIVATE, { bubbles: true }));
       this.broadcastEvent(new Event(_on ? EVENT.NODE_ACTIVATE : EVENT.NODE_DEACTIVATE));
     }
@@ -195,6 +194,7 @@ namespace FudgeCore {
         return;
 
       _child.dispatchEvent(new Event(EVENT.CHILD_REMOVE, { bubbles: true }));
+      _child.broadcastEvent(new Event(EVENT.NODE_DEACTIVATE));
       if (this.isDescendantOf(AudioManager.default.getGraphListeningTo()))
         _child.broadcastEvent(new Event(EVENT_AUDIO.CHILD_REMOVE));
       this.children.splice(found, 1);
