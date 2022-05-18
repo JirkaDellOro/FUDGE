@@ -8,11 +8,11 @@ namespace Fudge {
     private node: ƒ.Node;
     private cmpParticleSystem: ƒ.ComponentParticleSystem;
     private particleEffect: ƒ.ParticleEffect;
-    private particleEffectData: ƒ.ParticleEffectData;
+    private particleEffectData: ƒ.ParticleEffectNode;
     // private particleEffectStructure: ƒ.ParticleEffectStructure;
 
-    private controller: ControllerParticleSystem;
-    private propertyList: HTMLDivElement;
+    // private controller: ControllerTreeParticleSystem;
+    // private propertyTree: TreeParticleSystem<ƒ.ParticleEffectNode>;
     private canvas: HTMLCanvasElement;
     private crc2: CanvasRenderingContext2D;
 
@@ -46,7 +46,6 @@ namespace Fudge {
 
         _container.on("resize", this.redraw);
         this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
-        this.dom.addEventListener(ƒui.EVENT.INPUT, this.hndEvent);
     }
 
 
@@ -58,11 +57,8 @@ namespace Fudge {
           this.cmpParticleSystem = this.node?.getComponent(ƒ.ComponentParticleSystem);
           await this.setParticleEffect(this.cmpParticleSystem?.particleEffect);
           break;
-        case ƒui.EVENT.INPUT:
-          this.controller.updateParticleEffectData();
+        case ƒui.EVENT.RENAME:
           this.particleEffect.data = this.particleEffectData;
-          // this.cmpParticleSystem.particleEffect = this.particleEffect;
-          break;
       }
     }
 
@@ -76,7 +72,6 @@ namespace Fudge {
       this.particleEffect = _particleEffect;
       this.particleEffectData = _particleEffect.data;
       this.dom.innerHTML = "";
-      this.dom.appendChild(this.propertyList);
       this.dom.appendChild(this.canvas);
       this.recreatePropertyList(this.particleEffectData);
       this.updateUserInterface();
@@ -86,7 +81,7 @@ namespace Fudge {
 
 
     private createUserInterface(): void {
-      this.propertyList = document.createElement("div");
+
       this.canvas = document.createElement("canvas");
       this.crc2 = this.canvas.getContext("2d");
 
@@ -101,22 +96,25 @@ namespace Fudge {
 
     }
 
-    private recreatePropertyList(_particleEffectData: ƒ.ParticleEffectData): void {
-      // let animationMutator: ƒ.Mutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
-      // if (!animationMutator) animationMutator = {};
-      let newPropertyListList: HTMLDivElement = ƒui.Generator.createInterfaceFromMutator(_particleEffectData);
-      this.controller = new ControllerParticleSystem(_particleEffectData, newPropertyListList);
-      this.dom.replaceChild(newPropertyListList, this.propertyList);
-      this.propertyList = newPropertyListList;
-      this.propertyList.style.width = "300px";
-      this.propertyList.style.height = "100%";
-      this.propertyList.style.overflow = "auto";
+    private recreatePropertyList(_particleEffectData: ƒ.ParticleEffectNode): void {
+      // let newPropertyListList: TreeParticleSystem<ƒ.ParticleEffectNode> = 
+      //   new TreeParticleSystem<ƒ.ParticleEffectNode>( new ControllerTreeParticleSystem(), this.particleEffectData );
+
+      // newPropertyListList.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
+      // if (this.propertyTree == undefined) {
+      //   this.propertyTree = newPropertyListList;
+      //   this.dom.appendChild(newPropertyListList);
+      //   return;
+      // } else {
+      //   this.dom.replaceChild(newPropertyListList, this.propertyTree);
+      //   this.propertyTree = newPropertyListList;
+      // }
     }
 
     //#region drawing
     private redraw = () => {
       if (!this.particleEffect) return;
-      this.canvas.width = this.dom.clientWidth - this.propertyList.clientWidth;
+      // this.canvas.width = this.dom.clientWidth - this.propertyTree.clientWidth;
       this.canvas.height = this.dom.clientHeight;
 
       this.crc2.resetTransform();

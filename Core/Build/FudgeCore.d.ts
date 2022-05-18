@@ -4210,7 +4210,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    export enum PARTICLE_VARIBALE_NAMES {
+    enum PARTICLE_VARIBALE_NAMES {
         TIME = "time",
         INDEX = "index",
         SIZE = "size",
@@ -4219,28 +4219,14 @@ declare namespace FudgeCore {
     /**
      * The data format used to store the parsed paticle effect
      */
-    export interface ParticleEffectStructure {
+    interface ParticleEffectStructure {
         [attribute: string]: ParticleEffectStructure | Function;
-    }
-    /**
-     * The data format used to parse the paticle effect
-     */
-    export interface ParticleEffectData {
-        [attribute: string]: ParticleEffectData | ParticleEffectClosureData;
-    }
-    /**
-     * The parsing expression grammar.
-     */
-    export type ParticleEffectClosureData = FunctionData | string | number;
-    interface FunctionData {
-        function: string;
-        parameters: ParticleEffectClosureData[];
     }
     /**
      * Holds all the information which defines the particle effect. Can load the said information out of a json file.
      * @authors Jonas Plotzky, HFU, 2020
      */
-    export class ParticleEffect extends Mutable implements SerializableResource {
+    class ParticleEffect extends Mutable implements SerializableResource {
         #private;
         name: string;
         idResource: string;
@@ -4253,7 +4239,7 @@ declare namespace FudgeCore {
         cachedMutators: {
             [key: string]: Mutator;
         };
-        constructor(_name?: string, _particleEffectData?: ParticleEffectData);
+        constructor(_name?: string, _particleEffectNode?: ParticleEffectNode);
         /**
          * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
          * @param _data The particle effect data to parse recursivley.
@@ -4269,8 +4255,8 @@ declare namespace FudgeCore {
          * @param _data The paticle effect data to parse.
          */
         private static preParseStorage;
-        get data(): ParticleEffectData;
-        set data(_particleEffectData: ParticleEffectData);
+        get data(): ParticleEffectNode;
+        set data(_data: ParticleEffectNode);
         /**
          * Asynchronously loads the json from the given url and parses it initializing this particle effect.
          */
@@ -4280,6 +4266,8 @@ declare namespace FudgeCore {
         getMutatorForUserInterface(): MutatorForUserInterface;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
+        private serializeData;
+        private desirializeData;
         /**
          * Parses the data initializing this particle effect with the corresponding closures
          * @param _data The paticle effect data to parse.
@@ -4294,7 +4282,45 @@ declare namespace FudgeCore {
          */
         private createEmptyMutatorFrom;
     }
-    export {};
+}
+declare namespace FudgeCore {
+    /**
+     * The tree data structure that contains the information which properties of a particle get mutated and how to build the closures to mutate said property.
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    abstract class ParticleEffectNode {
+        key: string;
+        parent: ParticleEffectNode;
+        children: ParticleEffectNode[];
+        constructor(_key: string);
+        addChild(_child: ParticleEffectNode): void;
+        isDescendantOf(_ancestor: ParticleEffectNode): boolean;
+        removeChild(_child: ParticleEffectNode): void;
+        findChild(_search: ParticleEffectNode): number;
+        findChildByKey(_key: string): ParticleEffectNode;
+    }
+    /**
+     * Part of the data structure that defines the particle effect (see {@link ParticleEffectNode}). Resembles a path to a property which will get mutated.
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    class ParticleEffectNodePath extends ParticleEffectNode {
+    }
+    /**
+     * Part of the data structure that defines the particle effect (see {@link ParticleEffectNode}). Resembles a definition of a closure used to mutate a property.
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    class ParticleEffectNodeFunction extends ParticleEffectNode {
+        function: string;
+        constructor(_key: string, _function: string);
+    }
+    /**
+     * Part of the data structure that defines the particle effect (see {@link ParticleEffectNode}). Resembles a variable or constant used as an input for a closure.
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    class ParticleEffectNodeVariable extends ParticleEffectNode {
+        value: string | number;
+        constructor(_key: string, _value: string | number);
+    }
 }
 declare namespace FudgeCore {
     /**
