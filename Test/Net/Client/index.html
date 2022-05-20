@@ -18,11 +18,12 @@
     <fieldset>
       <legend>WS (WebSocket)</legend>
       <!-- <input type="text" name="server" value="wss://fudge-server.herokuapp.com" list="urls"> -->
-      <input type="text" name="server" value="ws://localhost:8080" list="urls">
-      <!-- <input type="text" name="server" value="" list="urls"> -->
+      <!-- <input type="text" name="server" value="ws://localhost:8080" list="urls"> -->
+      <input type="text" name="server" value="" list="urls">
       <datalist id="urls">
         <option value="ws://localhost:8080">
-        <option value="wss://fudge-server.herokuapp.com">
+        <option value="wss://fudge-server.herokuapp.com"></option>
+        <option value="wss://jirka.uber.space/FudgeServer">
       </datalist>
       <button type="button" id="connect">Connect</button><br />
       <input type="text" id="id" value="" disabled> id <br />
