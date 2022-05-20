@@ -4239,7 +4239,7 @@ declare namespace FudgeCore {
         cachedMutators: {
             [key: string]: Mutator;
         };
-        constructor(_name?: string, _particleEffectNode?: ParticleEffectNode);
+        constructor(_name?: string, _particleEffectNode?: ParticleEffectNodePath);
         /**
          * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
          * @param _data The particle effect data to parse recursivley.
@@ -4255,8 +4255,8 @@ declare namespace FudgeCore {
          * @param _data The paticle effect data to parse.
          */
         private static preParseStorage;
-        get data(): ParticleEffectNode;
-        set data(_data: ParticleEffectNode);
+        get data(): ParticleEffectNodePath;
+        set data(_data: ParticleEffectNodePath);
         /**
          * Asynchronously loads the json from the given url and parses it initializing this particle effect.
          */
@@ -4289,21 +4289,24 @@ declare namespace FudgeCore {
      * @authors Jonas Plotzky, HFU, 2022
      */
     abstract class ParticleEffectNode {
-        key: string;
-        parent: ParticleEffectNode;
-        children: ParticleEffectNode[];
-        constructor(_key: string);
-        addChild(_child: ParticleEffectNode): void;
+        parent: ParticleEffectNodePath | ParticleEffectNodeFunction;
+        abstract children: ParticleEffectNode[];
+        get key(): string | number;
         isDescendantOf(_ancestor: ParticleEffectNode): boolean;
-        removeChild(_child: ParticleEffectNode): void;
-        findChild(_search: ParticleEffectNode): number;
-        findChildByKey(_key: string): ParticleEffectNode;
     }
     /**
      * Part of the data structure that defines the particle effect (see {@link ParticleEffectNode}). Resembles a path to a property which will get mutated.
      * @authors Jonas Plotzky, HFU, 2022
      */
     class ParticleEffectNodePath extends ParticleEffectNode {
+        parent: ParticleEffectNodePath;
+        properties: {
+            [key: string]: ParticleEffectNode;
+        };
+        get children(): ParticleEffectNode[];
+        addChild(_child: ParticleEffectNode, _key: string): void;
+        removeChild(_child: ParticleEffectNode): void;
+        findChild(_search: ParticleEffectNode): string;
     }
     /**
      * Part of the data structure that defines the particle effect (see {@link ParticleEffectNode}). Resembles a definition of a closure used to mutate a property.
@@ -4311,7 +4314,11 @@ declare namespace FudgeCore {
      */
     class ParticleEffectNodeFunction extends ParticleEffectNode {
         function: string;
-        constructor(_key: string, _function: string);
+        children: ParticleEffectNode[];
+        constructor(_function: string);
+        addChild(_child: ParticleEffectNode): void;
+        removeChild(_child: ParticleEffectNode): void;
+        findChild(_search: ParticleEffectNode): number;
     }
     /**
      * Part of the data structure that defines the particle effect (see {@link ParticleEffectNode}). Resembles a variable or constant used as an input for a closure.
@@ -4319,7 +4326,8 @@ declare namespace FudgeCore {
      */
     class ParticleEffectNodeVariable extends ParticleEffectNode {
         value: string | number;
-        constructor(_key: string, _value: string | number);
+        constructor(_value: string | number);
+        get children(): ParticleEffectNode[];
     }
 }
 declare namespace FudgeCore {

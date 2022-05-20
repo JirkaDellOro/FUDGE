@@ -8,11 +8,11 @@ namespace Fudge {
     private node: ƒ.Node;
     private cmpParticleSystem: ƒ.ComponentParticleSystem;
     private particleEffect: ƒ.ParticleEffect;
-    private particleEffectData: ƒ.ParticleEffectNode;
-    // private particleEffectStructure: ƒ.ParticleEffectStructure;
+    private particleEffectData: ƒ.ParticleEffectNodePath;
+    private particleEffectStructure: ƒ.ParticleEffectStructure;
 
     // private controller: ControllerTreeParticleSystem;
-    // private propertyTree: TreeParticleSystem<ƒ.ParticleEffectNode>;
+    private tree: TreeParticleSystem<ƒ.ParticleEffectNode>;
     private canvas: HTMLCanvasElement;
     private crc2: CanvasRenderingContext2D;
 
@@ -57,14 +57,18 @@ namespace Fudge {
           this.cmpParticleSystem = this.node?.getComponent(ƒ.ComponentParticleSystem);
           await this.setParticleEffect(this.cmpParticleSystem?.particleEffect);
           break;
+        case ƒui.EVENT.DELETE:
+        case ƒui.EVENT.DROP:
         case ƒui.EVENT.RENAME:
           this.particleEffect.data = this.particleEffectData;
+          break;
       }
     }
 
     private async setParticleEffect(_particleEffect: ƒ.ParticleEffect): Promise<void> {
       if (!_particleEffect) {
         this.particleEffect = undefined;
+        this.tree = undefined;
         this.dom.innerHTML = "select a node with an attached component particle system";
         return;
       }
@@ -73,7 +77,7 @@ namespace Fudge {
       this.particleEffectData = _particleEffect.data;
       this.dom.innerHTML = "";
       this.dom.appendChild(this.canvas);
-      this.recreatePropertyList(this.particleEffectData);
+      this.recreateTree(this.particleEffectData);
       this.updateUserInterface();
       this.redraw();
 
@@ -96,31 +100,33 @@ namespace Fudge {
 
     }
 
-    private recreatePropertyList(_particleEffectData: ƒ.ParticleEffectNode): void {
-      // let newPropertyListList: TreeParticleSystem<ƒ.ParticleEffectNode> = 
-      //   new TreeParticleSystem<ƒ.ParticleEffectNode>( new ControllerTreeParticleSystem(), this.particleEffectData );
+    private recreateTree(_particleEffectData: ƒ.ParticleEffectNode): void {
+      let newTree: TreeParticleSystem<ƒ.ParticleEffectNode> = 
+        new TreeParticleSystem<ƒ.ParticleEffectNode>( new ControllerTreeParticleSystem(), this.particleEffectData );
 
-      // newPropertyListList.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
-      // if (this.propertyTree == undefined) {
-      //   this.propertyTree = newPropertyListList;
-      //   this.dom.appendChild(newPropertyListList);
-      //   return;
-      // } else {
-      //   this.dom.replaceChild(newPropertyListList, this.propertyTree);
-      //   this.propertyTree = newPropertyListList;
-      // }
+      newTree.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
+      newTree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);
+      newTree.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
+      if (this.tree == undefined) {
+        this.tree = newTree;
+        this.dom.appendChild(newTree);
+        return;
+      } else {
+        this.dom.replaceChild(newTree, this.tree);
+        this.tree = newTree;
+      }
     }
 
     //#region drawing
     private redraw = () => {
       if (!this.particleEffect) return;
-      // this.canvas.width = this.dom.clientWidth - this.propertyTree.clientWidth;
+      this.canvas.width = this.dom.clientWidth - 300;
       this.canvas.height = this.dom.clientHeight;
 
       this.crc2.resetTransform();
       this.crc2.translate(0, 500);
       this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
-      // this.drawStructure(this.particleEffect.mtxLocal);
+      this.drawStructure(this.particleEffect.mtxLocal);
     }
 
     private drawStructure(_structureOrFunction: ƒ.ParticleEffectStructure | Function): void {

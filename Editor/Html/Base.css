@@ -79,7 +79,12 @@ ul.tree li {
 ul.tree li[attributes~="inactive"]>input {
   text-decoration: line-through;
 }
+
 ul.tree li[attributes~="GraphInstance"]>input {
+  font-style: italic;
+}
+
+ul.tree li[attributes~="string"]>input, ul.tree li[attributes~="closure"]>label {
   font-style: italic;
 }
 
@@ -106,6 +111,7 @@ ul.tree input[type="checkbox"]:checked~ul {
 ul.tree input[type="checkbox"]~ul {
   display: none;
 }
+
 
 /* Table */
 

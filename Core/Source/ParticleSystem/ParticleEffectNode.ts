@@ -5,26 +5,82 @@ namespace FudgeCore {
    * @authors Jonas Plotzky, HFU, 2022
    */
   export abstract class ParticleEffectNode {
-    public key: string;
-    public parent: ParticleEffectNode;
-    public children: ParticleEffectNode[] = [];
+    public parent: ParticleEffectNodePath | ParticleEffectNodeFunction = null;
+    public abstract children: ParticleEffectNode[];
 
-    public constructor(_key: string) {
-      this.key = _key;
-    }
-
-    public addChild(_child: ParticleEffectNode): void {
-      if (!this.isDescendantOf(_child)) {
-        this.children.push(_child);
-        _child.parent = this;
-      }
+    public get key(): string | number  {
+      if (!this.parent) return "root";
+      return this.parent.findChild(this);
     }
 
     public isDescendantOf(_ancestor: ParticleEffectNode): boolean {
       let node: ParticleEffectNode = this;
       while (node && node != _ancestor)
-        node = node == node.parent ? null : node.parent;
+        node = node.parent;
       return (node != null);
+    }
+  }
+
+  /**
+   * Part of the data structure that defines the particle effect (see {@link ParticleEffectNode}). Resembles a path to a property which will get mutated.
+   * @authors Jonas Plotzky, HFU, 2022
+   */
+  export class ParticleEffectNodePath extends ParticleEffectNode {
+    public override parent: ParticleEffectNodePath;
+    public properties: {[key: string]: ParticleEffectNode} = {};
+    
+    public get children(): ParticleEffectNode[] {
+      return Object.values(this.properties);
+    }
+    
+    public addChild(_child: ParticleEffectNode, _key: string): void {
+      let previousParent: ParticleEffectNodePath | ParticleEffectNodeFunction = _child.parent;
+      if (previousParent) {
+        previousParent.removeChild(_child);
+      }
+
+      if (!this.isDescendantOf(_child)) {
+        this.properties[_key] = _child;
+        _child.parent = this;
+      }
+    }
+
+    public removeChild(_child: ParticleEffectNode): void {
+      let found: string = this.findChild(_child);
+      if (!found)
+        return;
+
+      delete this.properties[found];
+      _child.parent = null;
+    }
+
+    public findChild(_search: ParticleEffectNode): string {
+      return Object.entries(this.properties).find(pair => pair[1] == _search)[0];
+    }
+  }
+
+  /**
+   * Part of the data structure that defines the particle effect (see {@link ParticleEffectNode}). Resembles a definition of a closure used to mutate a property.
+   * @authors Jonas Plotzky, HFU, 2022
+   */  
+  export class ParticleEffectNodeFunction extends ParticleEffectNode {
+    public function: string;
+    public children: ParticleEffectNode[] = [];
+
+    public constructor(_function: string) {
+      super();
+      this.function = _function;
+    }
+
+    public addChild(_child: ParticleEffectNode): void {
+      let previousParent: ParticleEffectNodePath | ParticleEffectNodeFunction = _child.parent;
+      if (previousParent)
+        previousParent.removeChild(_child);
+
+      if (!this.isDescendantOf(_child) && !this.children.includes(_child)) {
+        this.children.push(_child);
+        _child.parent = this;
+      }
     }
 
     public removeChild(_child: ParticleEffectNode): void {
@@ -39,33 +95,6 @@ namespace FudgeCore {
     public findChild(_search: ParticleEffectNode): number {
       return this.children.indexOf(_search);
     }
-
-    public findChildByKey(_key: string): ParticleEffectNode {
-      return this.children.find((child) => child.key == _key);
-    }
-  }
-
-  /**
-   * Part of the data structure that defines the particle effect (see {@link ParticleEffectNode}). Resembles a path to a property which will get mutated.
-   * @authors Jonas Plotzky, HFU, 2022
-   */
-  export class ParticleEffectNodePath extends ParticleEffectNode {
-    // public children: ParticleEffectNode[] = [];
-
-  }
-
-  /**
-   * Part of the data structure that defines the particle effect (see {@link ParticleEffectNode}). Resembles a definition of a closure used to mutate a property.
-   * @authors Jonas Plotzky, HFU, 2022
-   */  
-  export class ParticleEffectNodeFunction extends ParticleEffectNode {
-    public function: string;
-    // public children: (ParticleEffectFunctionNode | ParticleEffectVariableNode)[] = [];
-
-    public constructor(_key: string, _function: string) {
-      super(_key);
-      this.function = _function;
-    }
   }
 
 
@@ -76,9 +105,13 @@ namespace FudgeCore {
   export class ParticleEffectNodeVariable extends ParticleEffectNode {
     public value: string | number;
 
-    public constructor(_key: string, _value: string | number) {
-      super(_key);
+    public constructor(_value: string | number) {
+      super();
       this.value = _value;
+    }
+
+    public get children(): ParticleEffectNode[] {
+      return [];
     }
   }
 }

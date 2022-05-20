@@ -1528,35 +1528,6 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒui = FudgeUserInterface;
-    class ControllerParticleSystem {
-        particleEffectData;
-        domElement;
-        constructor(_particleEffectData, _domElement) {
-            this.particleEffectData = _particleEffectData;
-            this.domElement = _domElement;
-        }
-        static updateParticleEffectData(_domElement, _particleEffectData) {
-            for (const property in _particleEffectData) {
-                let element = ƒui.Controller.findChildElementByKey(_domElement, property);
-                if (element == null)
-                    continue;
-                if (element instanceof ƒui.CustomElement) {
-                    _particleEffectData[property] = element.getMutatorValue();
-                }
-                else
-                    _particleEffectData[property] = this.updateParticleEffectData(element, _particleEffectData[property]);
-            }
-            return _particleEffectData;
-        }
-        updateParticleEffectData() {
-            ControllerParticleSystem.updateParticleEffectData(this.domElement, this.particleEffectData);
-        }
-    }
-    Fudge.ControllerParticleSystem = ControllerParticleSystem;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    var ƒui = FudgeUserInterface;
     class ControllerTableResource extends ƒui.TableController {
         static head = ControllerTableResource.getHead();
         static getHead() {
@@ -1772,6 +1743,112 @@ var Fudge;
         }
     }
     Fudge.ControllerTreeHierarchy = ControllerTreeHierarchy;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
+    class TreeParticleSystem extends ƒui.Tree {
+        // public constructor(_controller: ƒui.TreeController<T>, _root: T) {
+        //   super(_controller, _root);
+        //   let root: TreeItemParticleSystem<T> = new TreeItemParticleSystem<T>(this.controller, _root);
+        //   this.replaceChild(root , this.firstChild);
+        // }
+        createBranch(_data) {
+            let branch = new ƒui.TreeList([]);
+            for (let child of _data) {
+                branch.addItems([new TreeItemParticleSystem(this.controller, child)]);
+            }
+            return branch;
+        }
+    }
+    Fudge.TreeParticleSystem = TreeParticleSystem;
+    customElements.define("ul-tree-ps", TreeParticleSystem, { extends: "ul" });
+    class TreeItemParticleSystem extends ƒui.TreeItem {
+        create() {
+            super.create();
+            let prefix = document.createElement("label");
+            if (this.data instanceof ƒ.ParticleEffectNodeVariable || this.data instanceof ƒ.ParticleEffectNodeFunction) {
+                prefix.textContent = this.data.key + ":";
+                this.insertBefore(prefix, this.label);
+            }
+        }
+    }
+    Fudge.TreeItemParticleSystem = TreeItemParticleSystem;
+    customElements.define("li-tree-item-ps", TreeItemParticleSystem, { extends: "li" });
+    class ControllerTreeParticleSystem extends ƒui.TreeController {
+        getLabel(_node) {
+            if (_node instanceof ƒ.ParticleEffectNodeVariable)
+                return _node.value.toString();
+            if (_node instanceof ƒ.ParticleEffectNodeFunction)
+                return _node.function;
+            return _node.key.toString();
+        }
+        getAttributes(_node) {
+            let attributes = [];
+            if (_node instanceof ƒ.ParticleEffectNodeFunction)
+                attributes.push("closure");
+            if (_node instanceof ƒ.ParticleEffectNodeVariable && typeof _node.value == "string")
+                attributes.push(typeof _node.value);
+            return attributes.join(" ");
+        }
+        rename(_node, _new) {
+            let inputAsNumber = Number.parseFloat(_new);
+            if (_node instanceof ƒ.ParticleEffectNodeVariable) {
+                let input = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
+                _node.value = input;
+            }
+            if (_node instanceof ƒ.ParticleEffectNodeFunction) {
+                if (Number.isNaN(inputAsNumber)) {
+                    _node.function = _new;
+                }
+                else {
+                    return false;
+                }
+            }
+            return true;
+        }
+        hasChildren(_node) {
+            return _node.children.length > 0;
+        }
+        getChildren(_node) {
+            return _node.children;
+        }
+        delete(_focused) {
+            // delete selection independend of focussed item
+            let deleted = [];
+            let expend = this.selection.length > 0 ? this.selection : _focused;
+            for (let node of expend)
+                if (node.parent) {
+                    node.parent.removeChild(node);
+                    deleted.push(node);
+                }
+            this.selection.splice(0);
+            return deleted;
+        }
+        addChildren(_children, _target) {
+            let move = [];
+            if (_target instanceof ƒ.ParticleEffectNodeFunction) {
+                for (let child of _children)
+                    if (!_target.isDescendantOf(child))
+                        move.push(child);
+                for (let node of move)
+                    _target.addChild(node);
+            }
+            return move;
+        }
+        async copy(_originals) {
+            // try to create copies and return them for paste operation
+            let copies = [];
+            // for (let original of _originals) {
+            //   let serialization: ƒ.Serialization = ƒ.Serializer.serialize(original);
+            //   let copy: ParticleEffectNode = <ParticleEffectNode>await ƒ.Serializer.deserialize(serialization);
+            //   copies.push(copy);
+            // }
+            return copies;
+        }
+    }
+    Fudge.ControllerTreeParticleSystem = ControllerTreeParticleSystem;
 })(Fudge || (Fudge = {}));
 ///<reference path="../View/View.ts"/>
 var Fudge;
@@ -2113,7 +2190,6 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    var ƒui = FudgeUserInterface;
     // const fs: ƒ.General = require("fs");
     class ViewParticleSystem extends Fudge.View {
         graph;
@@ -2121,9 +2197,9 @@ var Fudge;
         cmpParticleSystem;
         particleEffect;
         particleEffectData;
-        // private particleEffectStructure: ƒ.ParticleEffectStructure;
-        controller;
-        propertyList;
+        particleEffectStructure;
+        // private controller: ControllerTreeParticleSystem;
+        tree;
         canvas;
         crc2;
         constructor(_container, _state) {
@@ -2149,7 +2225,6 @@ var Fudge;
             this.setParticleEffect(null);
             _container.on("resize", this.redraw);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
-            this.dom.addEventListener("input" /* INPUT */, this.hndEvent);
         }
         hndEvent = async (_event) => {
             switch (_event.type) {
@@ -2159,30 +2234,29 @@ var Fudge;
                     this.cmpParticleSystem = this.node?.getComponent(ƒ.ComponentParticleSystem);
                     await this.setParticleEffect(this.cmpParticleSystem?.particleEffect);
                     break;
-                case "input" /* INPUT */:
-                    this.controller.updateParticleEffectData();
+                case "delete" /* DELETE */:
+                case "drop" /* DROP */:
+                case "rename" /* RENAME */:
                     this.particleEffect.data = this.particleEffectData;
-                    // this.cmpParticleSystem.particleEffect = this.particleEffect;
                     break;
             }
         };
         async setParticleEffect(_particleEffect) {
             if (!_particleEffect) {
                 this.particleEffect = undefined;
+                this.tree = undefined;
                 this.dom.innerHTML = "select a node with an attached component particle system";
                 return;
             }
             this.particleEffect = _particleEffect;
             this.particleEffectData = _particleEffect.data;
             this.dom.innerHTML = "";
-            this.dom.appendChild(this.propertyList);
             this.dom.appendChild(this.canvas);
-            this.recreatePropertyList(this.particleEffectData);
+            this.recreateTree(this.particleEffectData);
             this.updateUserInterface();
             this.redraw();
         }
         createUserInterface() {
-            this.propertyList = document.createElement("div");
             this.canvas = document.createElement("canvas");
             this.crc2 = this.canvas.getContext("2d");
             this.canvas.style.position = "absolute";
@@ -2192,27 +2266,31 @@ var Fudge;
         updateUserInterface() {
             // this.propertyList = document.createElement("div");
         }
-        recreatePropertyList(_particleEffectData) {
-            // let animationMutator: ƒ.Mutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
-            // if (!animationMutator) animationMutator = {};
-            let newPropertyListList = ƒui.Generator.createInterfaceFromMutator(_particleEffectData);
-            this.controller = new Fudge.ControllerParticleSystem(_particleEffectData, newPropertyListList);
-            this.dom.replaceChild(newPropertyListList, this.propertyList);
-            this.propertyList = newPropertyListList;
-            this.propertyList.style.width = "300px";
-            this.propertyList.style.height = "100%";
-            this.propertyList.style.overflow = "auto";
+        recreateTree(_particleEffectData) {
+            let newTree = new Fudge.TreeParticleSystem(new Fudge.ControllerTreeParticleSystem(), this.particleEffectData);
+            newTree.addEventListener("rename" /* RENAME */, this.hndEvent);
+            newTree.addEventListener("drop" /* DROP */, this.hndEvent);
+            newTree.addEventListener("delete" /* DELETE */, this.hndEvent);
+            if (this.tree == undefined) {
+                this.tree = newTree;
+                this.dom.appendChild(newTree);
+                return;
+            }
+            else {
+                this.dom.replaceChild(newTree, this.tree);
+                this.tree = newTree;
+            }
         }
         //#region drawing
         redraw = () => {
             if (!this.particleEffect)
                 return;
-            this.canvas.width = this.dom.clientWidth - this.propertyList.clientWidth;
+            this.canvas.width = this.dom.clientWidth - 300;
             this.canvas.height = this.dom.clientHeight;
             this.crc2.resetTransform();
             this.crc2.translate(0, 500);
             this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
-            // this.drawStructure(this.particleEffect.mtxLocal);
+            this.drawStructure(this.particleEffect.mtxLocal);
         };
         drawStructure(_structureOrFunction) {
             if (_structureOrFunction instanceof Function) {

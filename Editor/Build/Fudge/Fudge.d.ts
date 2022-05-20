@@ -316,16 +316,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class ControllerParticleSystem {
-        private particleEffectData;
-        private domElement;
-        constructor(_particleEffectData: ƒ.ParticleEffectData, _domElement: HTMLElement);
-        private static updateParticleEffectData;
-        updateParticleEffectData(): void;
-    }
-}
-declare namespace Fudge {
     import ƒui = FudgeUserInterface;
     class ControllerTableResource extends ƒui.TableController<ƒ.SerializableResource> {
         private static head;
@@ -385,6 +375,26 @@ declare namespace Fudge {
         delete(_focussed: ƒ.Node[]): ƒ.Node[];
         addChildren(_children: ƒ.Node[], _target: ƒ.Node): ƒ.Node[];
         copy(_originals: ƒ.Node[]): Promise<ƒ.Node[]>;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
+    class TreeParticleSystem<T extends ƒ.ParticleEffectNode> extends ƒui.Tree<T> {
+        protected createBranch(_data: T[]): ƒui.TreeList<T>;
+    }
+    class TreeItemParticleSystem<T extends ƒ.ParticleEffectNode> extends ƒui.TreeItem<T> {
+        protected create(): void;
+    }
+    class ControllerTreeParticleSystem extends ƒui.TreeController<ƒ.ParticleEffectNode> {
+        getLabel(_node: ƒ.ParticleEffectNode): string;
+        getAttributes(_node: ƒ.ParticleEffectNode): string;
+        rename(_node: ƒ.ParticleEffectNode, _new: string): boolean;
+        hasChildren(_node: ƒ.ParticleEffectNode): boolean;
+        getChildren(_node: ƒ.ParticleEffectNode): ƒ.ParticleEffectNode[];
+        delete(_focused: ƒ.ParticleEffectNode[]): ƒ.ParticleEffectNode[];
+        addChildren(_children: ƒ.ParticleEffectNode[], _target: ƒ.ParticleEffectNode): ƒ.ParticleEffectNode[];
+        copy(_originals: ƒ.ParticleEffectNode[]): Promise<ƒ.ParticleEffectNode[]>;
     }
 }
 declare namespace Fudge {
@@ -481,8 +491,8 @@ declare namespace Fudge {
         private cmpParticleSystem;
         private particleEffect;
         private particleEffectData;
-        private controller;
-        private propertyList;
+        private particleEffectStructure;
+        private tree;
         private canvas;
         private crc2;
         constructor(_container: ComponentContainer, _state: Object);
@@ -490,7 +500,7 @@ declare namespace Fudge {
         private setParticleEffect;
         private createUserInterface;
         private updateUserInterface;
-        private recreatePropertyList;
+        private recreateTree;
         private redraw;
         private drawStructure;
         private drawClosure;
