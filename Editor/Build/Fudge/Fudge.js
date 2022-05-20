@@ -1665,8 +1665,6 @@ var Fudge;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
                     this.setGraph(_event.detail.graph);
-                    break;
-                case Fudge.EVENT_EDITOR.SELECT:
                 case Fudge.EVENT_EDITOR.MODIFY:
                     // TODO: meaningful difference between update and setgraph
                     if (this.graph) {
@@ -2788,7 +2786,7 @@ var Fudge;
             this.tree = new ƒUi.Tree(new Fudge.ControllerTreeHierarchy(), this.graph);
             // this.listController.listRoot.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
             //TODO: examine if tree should fire common UI-EVENT for selection instead
-            // this.tree.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
+            // this.tree.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
             this.tree.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.append(this.tree);
@@ -2952,6 +2950,7 @@ var Fudge;
             _container.on("resize", this.redraw);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
@@ -3072,6 +3071,7 @@ var Fudge;
         hndEvent = (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
+                case Fudge.EVENT_EDITOR.FOCUS:
                     let detail = _event.detail;
                     if (detail.node) {
                         this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;

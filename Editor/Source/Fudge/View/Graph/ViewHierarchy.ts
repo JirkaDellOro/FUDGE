@@ -40,7 +40,7 @@ namespace Fudge {
       this.tree = new ƒUi.Tree<ƒ.Node>(new ControllerTreeHierarchy(), this.graph);
       // this.listController.listRoot.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
       //TODO: examine if tree should fire common UI-EVENT for selection instead
-      // this.tree.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
+      // this.tree.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.append(this.tree);

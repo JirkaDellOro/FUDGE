@@ -84,8 +84,6 @@ namespace Fudge {
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
           this.setGraph(_event.detail.graph);
-          break;
-        case EVENT_EDITOR.SELECT:
         case EVENT_EDITOR.MODIFY:
           // TODO: meaningful difference between update and setgraph
           if (this.graph) {
@@ -101,7 +99,7 @@ namespace Fudge {
     }
 
     private hndFocusNode = (_event: CustomEvent): void => {
-      let event: FudgeEvent = new FudgeEvent(EVENT_EDITOR.FOCUS, { bubbles: false, detail: {node: _event.detail.data} });
+      let event: FudgeEvent = new FudgeEvent(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: _event.detail.data } });
       this.broadcastEvent(event);
     }
   }
