@@ -78,7 +78,7 @@ namespace FudgeUserInterface {
       let drop: HTMLElement = <HTMLElement>_event.currentTarget;
       let keyDrop: string = drop.getAttribute("key");
       let keyDrag: string = _event.dataTransfer.getData("index");
-      let drag: HTMLElement = this.querySelector(`[key=${keyDrag}]`);
+      let drag: HTMLElement = this.querySelector(`[key="${keyDrag}"]`);
 
       let position: InsertPosition = keyDrag > keyDrop ? "beforebegin" : "afterend";
       if (_event.ctrlKey)
