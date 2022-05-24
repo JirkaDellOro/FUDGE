@@ -1755,17 +1755,17 @@ var Fudge;
             labelKey.type = "text";
             labelKey.disabled = true;
             labelKey.value = _node.key.toString();
-            labelKey.setAttribute("key", "key");
+            labelKey.setAttribute("key", "key" /* KEY */);
             content.appendChild(labelKey);
             let labelValue = document.createElement("input");
             labelValue.type = "text";
             labelValue.disabled = true;
             if (_node instanceof ƒ.ParticleEffectNodeVariable) {
-                labelValue.setAttribute("key", "value");
+                labelValue.setAttribute("key", "value" /* VALUE */);
                 labelValue.value = _node.value.toString();
             }
             if (_node instanceof ƒ.ParticleEffectNodeFunction) {
-                labelValue.setAttribute("key", "function");
+                labelValue.setAttribute("key", "function" /* FUNCTION */);
                 labelValue.value = _node.function;
             }
             content.appendChild(labelValue);
@@ -1776,27 +1776,36 @@ var Fudge;
         }
         getAttributes(_node) {
             let attributes = [];
-            if (_node instanceof ƒ.ParticleEffectNodeFunction)
-                attributes.push("closure");
+            if (_node instanceof ƒ.ParticleEffectNodeFunction && _node.parent?.parent.key == "storage")
+                attributes.push("function");
             if (_node instanceof ƒ.ParticleEffectNodeVariable && typeof _node.value == "string")
                 attributes.push(typeof _node.value);
             return attributes.join(" ");
         }
         rename(_node, _key, _new) {
             let inputAsNumber = Number.parseFloat(_new);
-            if (_node instanceof ƒ.ParticleEffectNodeVariable) {
+            if (_key == "key" /* KEY */ && !(_node instanceof ƒ.ParticleEffectNodePath) && Number.isNaN(inputAsNumber)) {
+                let parent = _node.parent;
+                if (parent instanceof ƒ.ParticleEffectNodePath) {
+                    if (parent.properties[_new]) {
+                        parent.properties[_node.key] = parent.properties[_new];
+                    }
+                    else {
+                        delete parent.properties[_node.key];
+                    }
+                    parent.properties[_new] = _node;
+                }
+                return;
+            }
+            if (_key == "value" /* VALUE */ && _node instanceof ƒ.ParticleEffectNodeVariable) {
                 let input = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
                 _node.value = input;
+                return;
             }
-            if (_node instanceof ƒ.ParticleEffectNodeFunction) {
-                if (Number.isNaN(inputAsNumber)) {
-                    _node.function = _new;
-                }
-                else {
-                    return false;
-                }
+            if (_key == "function" /* FUNCTION */ && _node instanceof ƒ.ParticleEffectNodeFunction && Number.isNaN(inputAsNumber)) {
+                _node.function = _new;
+                return;
             }
-            return true;
         }
         hasChildren(_node) {
             return _node.children.length > 0;

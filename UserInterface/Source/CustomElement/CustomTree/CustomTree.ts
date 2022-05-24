@@ -86,9 +86,18 @@ namespace FudgeUserInterface {
       }
       let key: string = inputElement.getAttribute("key");
       let value: string = item.getLabel(key);
-      
+
       this.controller.rename(item.data, key, value);
-      item.setLabel(key, this.controller.getLabel(key, item.data));
+      item.refreshAttributes();
+      
+      let parentItem: HTMLElement = item.parentElement; // TODO: maybe find a more efficient way to find parent
+      while (!(parentItem instanceof CustomTreeItem) && parentItem) {
+        parentItem = parentItem.parentElement;
+      }
+      if (parentItem instanceof CustomTreeItem)
+        parentItem.expand(true);
+      else 
+        item.setLabel(key, this.controller.getLabel(key, item.data));
     }
 
     // Callback / Eventhandler in Tree

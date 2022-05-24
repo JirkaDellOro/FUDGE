@@ -384,7 +384,7 @@ declare namespace Fudge {
         createContent(_node: ƒ.ParticleEffectNode): HTMLElement;
         getLabel(_key: string, _node: ƒ.ParticleEffectNode): string;
         getAttributes(_node: ƒ.ParticleEffectNode): string;
-        rename(_node: ƒ.ParticleEffectNode, _key: string, _new: string): boolean;
+        rename(_node: ƒ.ParticleEffectNode, _key: string, _new: string): void;
         hasChildren(_node: ƒ.ParticleEffectNode): boolean;
         getChildren(_node: ƒ.ParticleEffectNode): ƒ.ParticleEffectNode[];
         delete(_focused: ƒ.ParticleEffectNode[]): ƒ.ParticleEffectNode[];

@@ -84,7 +84,8 @@ ul.tree li[attributes~="GraphInstance"]>input {
   font-style: italic;
 }
 
-ul.tree li[attributes~="string"]>input, ul.tree li[attributes~="closure"]>label {
+ul.tree li[attributes~="string"]>span>input:nth-child(2), 
+ul.tree li[attributes~="function"]>span>input:first-child {
   font-style: italic;
 }
 
@@ -168,6 +169,11 @@ table.sortable td>input:disabled {
 /* Text input */
 
 ul.tree .selected>input {
+  color: var(--color-highlight);
+  font-weight: bold;
+}
+
+ul.tree .selected>:not(ul.tree) * {
   color: var(--color-highlight);
   font-weight: bold;
 }
