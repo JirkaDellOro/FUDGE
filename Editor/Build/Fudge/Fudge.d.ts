@@ -380,16 +380,11 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
-    class TreeParticleSystem<T extends ƒ.ParticleEffectNode> extends ƒui.Tree<T> {
-        protected createBranch(_data: T[]): ƒui.TreeList<T>;
-    }
-    class TreeItemParticleSystem<T extends ƒ.ParticleEffectNode> extends ƒui.TreeItem<T> {
-        protected create(): void;
-    }
-    class ControllerTreeParticleSystem extends ƒui.TreeController<ƒ.ParticleEffectNode> {
-        getLabel(_node: ƒ.ParticleEffectNode): string;
+    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleEffectNode> {
+        createContent(_node: ƒ.ParticleEffectNode): HTMLElement;
+        getLabel(_key: string, _node: ƒ.ParticleEffectNode): string;
         getAttributes(_node: ƒ.ParticleEffectNode): string;
-        rename(_node: ƒ.ParticleEffectNode, _new: string): boolean;
+        rename(_node: ƒ.ParticleEffectNode, _key: string, _new: string): boolean;
         hasChildren(_node: ƒ.ParticleEffectNode): boolean;
         getChildren(_node: ƒ.ParticleEffectNode): ƒ.ParticleEffectNode[];
         delete(_focused: ƒ.ParticleEffectNode[]): ƒ.ParticleEffectNode[];

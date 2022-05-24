@@ -2,45 +2,35 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
-  export class TreeParticleSystem<T extends ƒ.ParticleEffectNode> extends ƒui.Tree<T> {
-    // public constructor(_controller: ƒui.TreeController<T>, _root: T) {
-    //   super(_controller, _root);
-    //   let root: TreeItemParticleSystem<T> = new TreeItemParticleSystem<T>(this.controller, _root);
-    //   this.replaceChild(root , this.firstChild);
-    // }
+  export class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleEffectNode> {
 
-    protected override createBranch(_data: T[]): ƒui.TreeList<T> {
-      let branch: ƒui.TreeList<T> = new ƒui.TreeList<T>([]);
-      for (let child of _data) {
-        branch.addItems([new TreeItemParticleSystem(this.controller, child)]);
+    public createContent(_node: ƒ.ParticleEffectNode): HTMLElement {
+      let content: HTMLElement = document.createElement("span");
+      let labelKey: HTMLInputElement = document.createElement("input");
+      labelKey.type = "text";
+      labelKey.disabled = true;
+      labelKey.value = _node.key.toString();
+      labelKey.setAttribute("key", "key");
+      content.appendChild(labelKey);
+
+      let labelValue: HTMLInputElement = document.createElement("input");
+      labelValue.type = "text";
+      labelValue.disabled = true;
+      if (_node instanceof ƒ.ParticleEffectNodeVariable) {
+        labelValue.setAttribute("key", "value");
+        labelValue.value = _node.value.toString();
       }
-      return branch;
-    }
-  }
-
-  customElements.define("ul-tree-ps", <CustomElementConstructor><unknown>TreeParticleSystem, { extends: "ul" });
-
-  export class TreeItemParticleSystem<T extends ƒ.ParticleEffectNode> extends ƒui.TreeItem<T> {
-    protected override create(): void {
-      super.create();
-
-      let prefix: HTMLLabelElement = document.createElement("label");
-
-      if (this.data instanceof ƒ.ParticleEffectNodeVariable || this.data instanceof ƒ.ParticleEffectNodeFunction) {
-        prefix.textContent = this.data.key + ":";
-
-        this.insertBefore(prefix, this.label);
+      if (_node instanceof ƒ.ParticleEffectNodeFunction) {
+        labelValue.setAttribute("key", "function");
+        labelValue.value = _node.function;
       }
+      content.appendChild(labelValue);
+
+      return content;
     }
-  }
 
-  customElements.define("li-tree-item-ps", <CustomElementConstructor><unknown>TreeItemParticleSystem, { extends: "li" });
-
-  export class ControllerTreeParticleSystem extends ƒui.TreeController<ƒ.ParticleEffectNode> {
-    public getLabel(_node: ƒ.ParticleEffectNode): string {
-      if (_node instanceof ƒ.ParticleEffectNodeVariable) return _node.value.toString();
-      if (_node instanceof ƒ.ParticleEffectNodeFunction) return _node.function;
-      return _node.key.toString();
+    public getLabel(_key: string, _node: ƒ.ParticleEffectNode): string {
+      return _node[_key];
     }
 
     public getAttributes(_node: ƒ.ParticleEffectNode): string {
@@ -53,7 +43,7 @@ namespace Fudge {
       return attributes.join(" ");
     }
     
-    public rename(_node: ƒ.ParticleEffectNode, _new: string): boolean {
+    public rename(_node: ƒ.ParticleEffectNode, _key: string, _new: string): boolean {
       let inputAsNumber: number = Number.parseFloat(_new);
 
       if (_node instanceof ƒ.ParticleEffectNodeVariable) {

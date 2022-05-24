@@ -12,7 +12,7 @@ namespace Fudge {
     private particleEffectStructure: ƒ.ParticleEffectStructure;
 
     // private controller: ControllerTreeParticleSystem;
-    private tree: TreeParticleSystem<ƒ.ParticleEffectNode>;
+    private tree: ƒui.CustomTree<ƒ.ParticleEffectNode>;
     private canvas: HTMLCanvasElement;
     private crc2: CanvasRenderingContext2D;
 
@@ -101,20 +101,17 @@ namespace Fudge {
     }
 
     private recreateTree(_particleEffectData: ƒ.ParticleEffectNode): void {
-      let newTree: TreeParticleSystem<ƒ.ParticleEffectNode> = 
-        new TreeParticleSystem<ƒ.ParticleEffectNode>( new ControllerTreeParticleSystem(), this.particleEffectData );
+      let newTree: ƒui.CustomTree<ƒ.ParticleEffectNode> = 
+        new ƒui.CustomTree<ƒ.ParticleEffectNode>( new ControllerTreeParticleSystem(), this.particleEffectData );
 
       newTree.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
       newTree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);
       newTree.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
-      if (this.tree == undefined) {
-        this.tree = newTree;
-        this.dom.appendChild(newTree);
-        return;
-      } else {
+      if (this.tree && this.dom.contains(this.tree)) 
         this.dom.replaceChild(newTree, this.tree);
-        this.tree = newTree;
-      }
+      else 
+        this.dom.appendChild(newTree);
+      this.tree = newTree;
     }
 
     //#region drawing

@@ -1748,41 +1748,31 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
-    class TreeParticleSystem extends ƒui.Tree {
-        // public constructor(_controller: ƒui.TreeController<T>, _root: T) {
-        //   super(_controller, _root);
-        //   let root: TreeItemParticleSystem<T> = new TreeItemParticleSystem<T>(this.controller, _root);
-        //   this.replaceChild(root , this.firstChild);
-        // }
-        createBranch(_data) {
-            let branch = new ƒui.TreeList([]);
-            for (let child of _data) {
-                branch.addItems([new TreeItemParticleSystem(this.controller, child)]);
+    class ControllerTreeParticleSystem extends ƒui.CustomTreeController {
+        createContent(_node) {
+            let content = document.createElement("span");
+            let labelKey = document.createElement("input");
+            labelKey.type = "text";
+            labelKey.disabled = true;
+            labelKey.value = _node.key.toString();
+            labelKey.setAttribute("key", "key");
+            content.appendChild(labelKey);
+            let labelValue = document.createElement("input");
+            labelValue.type = "text";
+            labelValue.disabled = true;
+            if (_node instanceof ƒ.ParticleEffectNodeVariable) {
+                labelValue.setAttribute("key", "value");
+                labelValue.value = _node.value.toString();
             }
-            return branch;
-        }
-    }
-    Fudge.TreeParticleSystem = TreeParticleSystem;
-    customElements.define("ul-tree-ps", TreeParticleSystem, { extends: "ul" });
-    class TreeItemParticleSystem extends ƒui.TreeItem {
-        create() {
-            super.create();
-            let prefix = document.createElement("label");
-            if (this.data instanceof ƒ.ParticleEffectNodeVariable || this.data instanceof ƒ.ParticleEffectNodeFunction) {
-                prefix.textContent = this.data.key + ":";
-                this.insertBefore(prefix, this.label);
+            if (_node instanceof ƒ.ParticleEffectNodeFunction) {
+                labelValue.setAttribute("key", "function");
+                labelValue.value = _node.function;
             }
+            content.appendChild(labelValue);
+            return content;
         }
-    }
-    Fudge.TreeItemParticleSystem = TreeItemParticleSystem;
-    customElements.define("li-tree-item-ps", TreeItemParticleSystem, { extends: "li" });
-    class ControllerTreeParticleSystem extends ƒui.TreeController {
-        getLabel(_node) {
-            if (_node instanceof ƒ.ParticleEffectNodeVariable)
-                return _node.value.toString();
-            if (_node instanceof ƒ.ParticleEffectNodeFunction)
-                return _node.function;
-            return _node.key.toString();
+        getLabel(_key, _node) {
+            return _node[_key];
         }
         getAttributes(_node) {
             let attributes = [];
@@ -1792,7 +1782,7 @@ var Fudge;
                 attributes.push(typeof _node.value);
             return attributes.join(" ");
         }
-        rename(_node, _new) {
+        rename(_node, _key, _new) {
             let inputAsNumber = Number.parseFloat(_new);
             if (_node instanceof ƒ.ParticleEffectNodeVariable) {
                 let input = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
@@ -2190,6 +2180,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
     // const fs: ƒ.General = require("fs");
     class ViewParticleSystem extends Fudge.View {
         graph;
@@ -2267,19 +2258,15 @@ var Fudge;
             // this.propertyList = document.createElement("div");
         }
         recreateTree(_particleEffectData) {
-            let newTree = new Fudge.TreeParticleSystem(new Fudge.ControllerTreeParticleSystem(), this.particleEffectData);
+            let newTree = new ƒui.CustomTree(new Fudge.ControllerTreeParticleSystem(), this.particleEffectData);
             newTree.addEventListener("rename" /* RENAME */, this.hndEvent);
             newTree.addEventListener("drop" /* DROP */, this.hndEvent);
             newTree.addEventListener("delete" /* DELETE */, this.hndEvent);
-            if (this.tree == undefined) {
-                this.tree = newTree;
-                this.dom.appendChild(newTree);
-                return;
-            }
-            else {
+            if (this.tree && this.dom.contains(this.tree))
                 this.dom.replaceChild(newTree, this.tree);
-                this.tree = newTree;
-            }
+            else
+                this.dom.appendChild(newTree);
+            this.tree = newTree;
         }
         //#region drawing
         redraw = () => {
@@ -3309,7 +3296,7 @@ var Fudge;
                 details.expand(this.expanded[component.type]);
                 this.dom.append(details);
                 if (component instanceof ƒ.ComponentRigidbody) {
-                    let pivot = controller.domElement.querySelector("[key=mtxPivot");
+                    let pivot = controller.domElement.querySelector("[key='mtxPivot'");
                     let opacity = pivot.style.opacity;
                     setPivotOpacity(null);
                     controller.domElement.addEventListener("mutate" /* MUTATE */, setPivotOpacity);
@@ -3319,7 +3306,7 @@ var Fudge;
                     }
                 }
                 if (component instanceof ƒ.ComponentFaceCamera) {
-                    let up = controller.domElement.querySelector("[key=up");
+                    let up = controller.domElement.querySelector("[key='up'");
                     let opacity = up.style.opacity;
                     setUpOpacity(null);
                     controller.domElement.addEventListener("mutate" /* MUTATE */, setUpOpacity);
