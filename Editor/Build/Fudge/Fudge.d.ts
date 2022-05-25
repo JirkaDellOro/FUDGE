@@ -380,16 +380,19 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
-    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleEffectNode> {
-        createContent(_node: ƒ.ParticleEffectNode): HTMLElement;
-        getLabel(_key: string, _node: ƒ.ParticleEffectNode): string;
-        getAttributes(_node: ƒ.ParticleEffectNode): string;
-        rename(_node: ƒ.ParticleEffectNode, _key: string, _new: string): void;
-        hasChildren(_node: ƒ.ParticleEffectNode): boolean;
-        getChildren(_node: ƒ.ParticleEffectNode): ƒ.ParticleEffectNode[];
-        delete(_focused: ƒ.ParticleEffectNode[]): ƒ.ParticleEffectNode[];
-        addChildren(_children: ƒ.ParticleEffectNode[], _target: ƒ.ParticleEffectNode): ƒ.ParticleEffectNode[];
-        copy(_originals: ƒ.ParticleEffectNode[]): Promise<ƒ.ParticleEffectNode[]>;
+    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<string[]> {
+        private particleEffectData;
+        constructor(_particleEffectData: ƒ.Serialization);
+        createContent(_path: string[]): HTMLElement;
+        getLabel(_key: string, _path: string[]): string;
+        getAttributes(_path: string[]): string;
+        rename(_path: string[], _key: string, _new: string): void;
+        hasChildren(_path: string[]): boolean;
+        getChildren(_path: string[]): string[][];
+        delete(_focused: string[][]): string[][];
+        addChildren(_childPaths: string[][], _targetPath: string[]): string[][];
+        copy(_originals: string[][]): Promise<string[][]>;
+        private getDataAtPath;
     }
 }
 declare namespace Fudge {

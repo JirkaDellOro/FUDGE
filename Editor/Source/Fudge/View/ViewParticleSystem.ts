@@ -8,11 +8,11 @@ namespace Fudge {
     private node: ƒ.Node;
     private cmpParticleSystem: ƒ.ComponentParticleSystem;
     private particleEffect: ƒ.ParticleEffect;
-    private particleEffectData: ƒ.ParticleEffectNodePath;
+    private particleEffectData: ƒ.Serialization;
     private particleEffectStructure: ƒ.ParticleEffectStructure;
 
     // private controller: ControllerTreeParticleSystem;
-    private tree: ƒui.CustomTree<ƒ.ParticleEffectNode>;
+    private tree: ƒui.CustomTree<string[]>;
     private canvas: HTMLCanvasElement;
     private crc2: CanvasRenderingContext2D;
 
@@ -100,9 +100,9 @@ namespace Fudge {
 
     }
 
-    private recreateTree(_particleEffectData: ƒ.ParticleEffectNode): void {
-      let newTree: ƒui.CustomTree<ƒ.ParticleEffectNode> = 
-        new ƒui.CustomTree<ƒ.ParticleEffectNode>( new ControllerTreeParticleSystem(), this.particleEffectData );
+    private recreateTree(_particleEffectData: ƒ.Serialization): void {
+      let newTree: ƒui.CustomTree<string[]> = 
+        new ƒui.CustomTree<string[]>( new ControllerTreeParticleSystem(_particleEffectData), [] );
 
       newTree.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
       newTree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);

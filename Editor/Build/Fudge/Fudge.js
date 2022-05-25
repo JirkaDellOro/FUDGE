@@ -1749,102 +1749,156 @@ var Fudge;
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
     class ControllerTreeParticleSystem extends ƒui.CustomTreeController {
-        createContent(_node) {
+        particleEffectData;
+        constructor(_particleEffectData) {
+            super();
+            this.particleEffectData = _particleEffectData;
+        }
+        createContent(_path) {
+            let data = this.getDataAtPath(_path);
             let content = document.createElement("span");
             let labelKey = document.createElement("input");
             labelKey.type = "text";
             labelKey.disabled = true;
-            labelKey.value = _node.key.toString();
+            labelKey.value = _path[_path.length - 1];
             labelKey.setAttribute("key", "key" /* KEY */);
             content.appendChild(labelKey);
-            let labelValue = document.createElement("input");
-            labelValue.type = "text";
-            labelValue.disabled = true;
-            if (_node instanceof ƒ.ParticleEffectNodeVariable) {
-                labelValue.setAttribute("key", "value" /* VALUE */);
-                labelValue.value = _node.value.toString();
+            if (ƒ.ParticleEffect.isFunctionData(data) || typeof data == "string" || typeof data == "number") {
+                let labelValue = document.createElement("input");
+                labelValue.type = "text";
+                labelValue.disabled = true;
+                if (ƒ.ParticleEffect.isFunctionData(data)) {
+                    labelValue.setAttribute("key", "function" /* FUNCTION */);
+                    labelValue.value = data.function;
+                }
+                else {
+                    labelValue.setAttribute("key", "value" /* VALUE */);
+                    labelValue.value = data.toString();
+                }
+                content.appendChild(labelValue);
             }
-            if (_node instanceof ƒ.ParticleEffectNodeFunction) {
-                labelValue.setAttribute("key", "function" /* FUNCTION */);
-                labelValue.value = _node.function;
-            }
-            content.appendChild(labelValue);
             return content;
         }
-        getLabel(_key, _node) {
-            return _node[_key];
+        getLabel(_key, _path) {
+            return _path[_key];
         }
-        getAttributes(_node) {
+        getAttributes(_path) {
             let attributes = [];
-            if (_node instanceof ƒ.ParticleEffectNodeFunction && _node.parent?.parent.key == "storage")
+            let data = this.getDataAtPath(_path);
+            if (_path.includes("storage") && ƒ.ParticleEffect.isFunctionData(data))
                 attributes.push("function");
-            if (_node instanceof ƒ.ParticleEffectNodeVariable && typeof _node.value == "string")
-                attributes.push(typeof _node.value);
+            if (typeof data == "string")
+                attributes.push(typeof data);
             return attributes.join(" ");
         }
-        rename(_node, _key, _new) {
+        rename(_path, _key, _new) {
             let inputAsNumber = Number.parseFloat(_new);
-            if (_key == "key" /* KEY */ && !(_node instanceof ƒ.ParticleEffectNodePath) && Number.isNaN(inputAsNumber)) {
-                let parent = _node.parent;
-                if (parent instanceof ƒ.ParticleEffectNodePath) {
-                    if (parent.properties[_new]) {
-                        parent.properties[_node.key] = parent.properties[_new];
+            let data = this.getDataAtPath(_path);
+            if (_key == "key" /* KEY */ && Number.isNaN(inputAsNumber) && ƒ.ParticleEffect.isFunctionData(data) || typeof data == "string" || typeof data == "number") {
+                let parentData = this.getDataAtPath(_path.slice(0, _path.length - 1));
+                if (!ƒ.ParticleEffect.isFunctionData(parentData)) {
+                    let key = _path[_path.length - 1];
+                    if (parentData[_new]) {
+                        parentData[key] = parentData[_new];
                     }
                     else {
-                        delete parent.properties[_node.key];
+                        delete parentData[key];
                     }
-                    parent.properties[_new] = _node;
+                    parentData[_new] = data;
                 }
+                _path[_path.length - 1] = _new;
                 return;
             }
-            if (_key == "value" /* VALUE */ && _node instanceof ƒ.ParticleEffectNodeVariable) {
+            if (_key == "value" /* VALUE */) {
+                let parentData = this.getDataAtPath(_path.slice(0, _path.length - 1));
                 let input = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
-                _node.value = input;
+                parentData = ƒ.ParticleEffect.isFunctionData(parentData) ? parentData.parameters : parentData;
+                parentData[_path[_path.length - 1]] = input;
                 return;
             }
-            if (_key == "function" /* FUNCTION */ && _node instanceof ƒ.ParticleEffectNodeFunction && Number.isNaN(inputAsNumber)) {
-                _node.function = _new;
+            if (_key == "function" /* FUNCTION */ && ƒ.ParticleEffect.isFunctionData(data) && Number.isNaN(inputAsNumber)) {
+                data.function = _new;
                 return;
             }
         }
-        hasChildren(_node) {
-            return _node.children.length > 0;
+        hasChildren(_path) {
+            let data = this.getDataAtPath(_path);
+            let length = 0;
+            if (typeof data != "string" && typeof data != "number")
+                length = ƒ.ParticleEffect.isFunctionData(data) ? data.parameters.length : Object.keys(data).length;
+            return length > 0;
         }
-        getChildren(_node) {
-            return _node.children;
+        getChildren(_path) {
+            let data = this.getDataAtPath(_path);
+            let childPaths = [];
+            if (typeof data != "string" && typeof data != "number") {
+                let children = ƒ.ParticleEffect.isFunctionData(data) ? data.parameters : data;
+                for (const key in children) {
+                    childPaths.push(_path.concat(key));
+                }
+            }
+            return childPaths;
         }
         delete(_focused) {
             // delete selection independend of focussed item
             let deleted = [];
             let expend = this.selection.length > 0 ? this.selection : _focused;
-            for (let node of expend)
-                if (node.parent) {
-                    node.parent.removeChild(node);
-                    deleted.push(node);
+            for (let path of expend) {
+                let key = path[path.length - 1];
+                let parentData = this.getDataAtPath(path.slice(0, path.length - 1));
+                if (parentData) {
+                    ƒ.ParticleEffect.isFunctionData(parentData) ? delete parentData.parameters[key] : delete parentData[key]; // TODO: use splice here see below todo, find a way to fix paths after splice
+                    deleted.push(path);
                 }
+            }
             this.selection.splice(0);
             return deleted;
         }
-        addChildren(_children, _target) {
+        addChildren(_childPaths, _targetPath) {
             let move = [];
-            if (_target instanceof ƒ.ParticleEffectNodeFunction) {
-                for (let child of _children)
-                    if (!_target.isDescendantOf(child))
-                        move.push(child);
-                for (let node of move)
-                    _target.addChild(node);
+            let targetData = this.getDataAtPath(_targetPath);
+            if (!_childPaths.map(path => this.getDataAtPath(path)).every(data => ƒ.ParticleEffect.isFunctionData(data) || typeof data == "string" || typeof data == "number"))
+                return;
+            if (ƒ.ParticleEffect.isFunctionData(targetData)) {
+                for (let path of _childPaths) {
+                    if (!path.every(key => _targetPath.includes(key))) // !_targetPath.isDescendantOf(path)
+                        move.push(path);
+                }
+                for (let path of move) {
+                    let moveData = this.getDataAtPath(path);
+                    // let moveData: Object | ƒ.FunctionData | string | number = this.getDataAtPath(path);
+                    if (ƒ.ParticleEffect.isFunctionData(moveData) || typeof moveData == "string" || typeof moveData == "number") {
+                        let parentMoveData = this.getDataAtPath(path.slice(0, path.length - 1));
+                        if (ƒ.ParticleEffect.isFunctionData(parentMoveData)) {
+                            let index = parentMoveData.parameters.findIndex(data => data == moveData); // TODO: find a way to fix paths after splice, code is duplicated with delete
+                            parentMoveData.parameters.splice(index, index + 1);
+                        }
+                        else {
+                            delete parentMoveData[path[path.length - 1]];
+                        }
+                        targetData.parameters.push(moveData);
+                    }
+                    // _targetPath.addChild(path);
+                }
             }
             return move;
         }
         async copy(_originals) {
             // try to create copies and return them for paste operation
-            let copies = [];
+            let copies;
             // for (let original of _originals) {
             //   let serialization: ƒ.Serialization = ƒ.Serializer.serialize(original);
             //   let copy: ParticleEffectNode = <ParticleEffectNode>await ƒ.Serializer.deserialize(serialization);
             //   copies.push(copy);
             // }
             return copies;
+        }
+        getDataAtPath(_path) {
+            let found = this.particleEffectData;
+            for (let i = 0; i < _path.length; i++) {
+                found = ƒ.ParticleEffect.isFunctionData(found) ? found.parameters[_path[i]] : found[_path[i]];
+            }
+            return found;
         }
     }
     Fudge.ControllerTreeParticleSystem = ControllerTreeParticleSystem;
@@ -2267,7 +2321,7 @@ var Fudge;
             // this.propertyList = document.createElement("div");
         }
         recreateTree(_particleEffectData) {
-            let newTree = new ƒui.CustomTree(new Fudge.ControllerTreeParticleSystem(), this.particleEffectData);
+            let newTree = new ƒui.CustomTree(new Fudge.ControllerTreeParticleSystem(_particleEffectData), []);
             newTree.addEventListener("rename" /* RENAME */, this.hndEvent);
             newTree.addEventListener("drop" /* DROP */, this.hndEvent);
             newTree.addEventListener("delete" /* DELETE */, this.hndEvent);

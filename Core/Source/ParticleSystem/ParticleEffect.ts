@@ -14,6 +14,12 @@ namespace FudgeCore {
     [attribute: string]: ParticleEffectStructure | Function;
   }
 
+  export interface FunctionData {
+    function: string;
+    parameters: (FunctionData | string | number)[];
+    readonly type: "function";
+  }
+
   /**
    * Holds all the information which defines the particle effect. Can load the said information out of a json file.
    * @authors Jonas Plotzky, HFU, 2020
@@ -29,30 +35,35 @@ namespace FudgeCore {
     public mtxWorld: ParticleEffectStructure;
     public componentMutators: ParticleEffectStructure;
     public cachedMutators: { [key: string]: Mutator };
-    #data: ParticleEffectNodePath;
+    #data: Serialization;
 
-    constructor(_name: string = "ParticleEffect", _particleEffectNode: ParticleEffectNodePath = new ParticleEffectNodePath()) {
+    constructor(_name: string = "ParticleEffect", _particleEffectData: Serialization = {}) {
       super();
       this.name = _name;
-      this.data = _particleEffectNode;
+      this.data = _particleEffectData;
 
       Project.register(this);
+    }
+
+    public static isFunctionData(_data: General): _data is FunctionData {
+      return (_data as FunctionData).type == "function";
     }
 
     /**
      * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
      * @param _data The particle effect data to parse recursivley.
      */
-    private static parseData(_data: ParticleEffectNode, _variableNames: string[]): ParticleEffectStructure {
+    private static parseData(_data: Serialization, _variableNames: string[]): ParticleEffectStructure {
       if (!_data || !_variableNames) return {};
 
       let effectStructure: ParticleEffectStructure = {};
 
-      for (const child of _data.children) {
-        if (child instanceof ParticleEffectNodeFunction || child instanceof ParticleEffectNodeVariable)
-          effectStructure[child.key] = this.parseClosure(child, _variableNames);
+      for (const key in _data) {
+        let subData: General = _data[key];
+        if (this.isFunctionData(subData) || typeof subData == "string" || typeof subData == "number") 
+          effectStructure[key] = this.parseClosure(subData, _variableNames);
         else
-          effectStructure[child.key] = this.parseData(child, _variableNames);
+          effectStructure[key] = this.parseData(subData, _variableNames);
       }
 
       return effectStructure;
@@ -62,33 +73,31 @@ namespace FudgeCore {
      * Parse the given closure data recursivley. Returns a function depending on the closure data.
      * @param _data The closure data to parse recursively.
      */
-    private static parseClosure(_data: ParticleEffectNode, _variableNames: string[]): Function {
-      if (_data instanceof ParticleEffectNodeFunction) {
+    private static parseClosure(_data: FunctionData | string | number, _variableNames: string[]): Function {
+      if (this.isFunctionData(_data)) {
         let parameters: Function[] = [];
-        for (let param of _data.children) {
+        for (let param of _data.parameters) {
           parameters.push(this.parseClosure(param, _variableNames));
         }
         return ParticleClosureFactory.createClosure(_data.function, parameters);
       }
 
-      if (_data instanceof ParticleEffectNodeVariable) {
-        if (typeof _data.value == "string") {
-          if (_variableNames.includes(_data.value)) {
-            return function (_variables: ParticleVariables): number {
-              // Debug.log("Variable", `"${_data}"`, _variables[<string>_data]);
-              return <number>_variables[_data.value];
-            };
-          } else {
-            throw `"${_data.value}" in "${_data.parent.key}" is not a defined variable in the ${this.name}`;
-          }
-        } 
-
-        if (typeof _data.value == "number") {
+      if (typeof _data == "string") {
+        if (_variableNames.includes(_data)) {
           return function (_variables: ParticleVariables): number {
-            // Debug.log("Constant", _data);
-            return <number>_data.value;
+            // Debug.log("Variable", `"${_data}"`, _variables[<string>_data]);
+            return <number>_variables[_data];
           };
+        } else {
+          throw `"${_data}" is not a defined variable in the ${this.name}`;
         }
+      } 
+
+      if (typeof _data == "number") {
+        return function (_variables: ParticleVariables): number {
+          // Debug.log("Constant", _data);
+          return <number>_data;
+        };
       }
 
       throw `invalid node structure`;
@@ -98,12 +107,12 @@ namespace FudgeCore {
      * Creates entries in {@link variableNames} for each defined closure in _data. Predefined variables (time, index...) and previously defined ones (in json) can not be overwritten.
      * @param _data The paticle effect data to parse.
      */
-    private static preParseStorage(_data: ParticleEffectNodePath, _variableNames: string[]): string[] {
-      for (const storageName in _data.properties) {
-        let storage: ParticleEffectNodePath  = <ParticleEffectNodePath>_data.properties[storageName];
-        for (const variableName in storage.properties) {
+    private static preParseStorage(_data: Serialization, _variableNames: string[]): string[] {
+      for (const storageName in _data) {
+        let storage: Serialization  = _data[storageName];
+        for (const variableName in storage) {
           if (_variableNames.includes(variableName)) {
-            throw `"${variableName}" is already defined`;
+            throw `"${variableName}" is already defined in the ${this.name} or predefined`;
           }
           else
             _variableNames.push(variableName);
@@ -113,11 +122,11 @@ namespace FudgeCore {
       return _variableNames;
     }
     
-    public get data(): ParticleEffectNodePath {
+    public get data(): Serialization {
       return this.#data;
     }
 
-    public set data(_data: ParticleEffectNodePath) {
+    public set data(_data: Serialization) {
       this.#data = _data;
       this.parse(_data);
     }
@@ -128,10 +137,10 @@ namespace FudgeCore {
     public async load(_url: RequestInfo): Promise<void> {
       if (!_url) return;
 
-      let data: ParticleEffectNode = await window.fetch(_url)
-        .then(_response => _response.json())
-        .then(data => this.desirializeData(data));
-      this.data = <ParticleEffectNodePath>data;
+      let data: Serialization = await window.fetch(_url)
+        .then(_response => _response.json());
+        // .then(data => this.desirializeData(data));
+      this.data = data;
     }
 
     //#region Transfer
@@ -139,7 +148,7 @@ namespace FudgeCore {
       let serialization: Serialization =  {
         idResource: this.idResource,
         name: this.name,
-        data: this.serializeData(this.data)
+        data: this.data
       };
       return serialization;
     }
@@ -147,7 +156,7 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       Project.register(this, _serialization.idResource);
       this.name = _serialization.name;
-      this.data = <ParticleEffectNodePath>this.desirializeData(_serialization.data);
+      this.data = _serialization.data;
       return this;
     }
 
@@ -171,66 +180,29 @@ namespace FudgeCore {
       delete _mutator.cachedMutators;
       delete _mutator.definedVariables;
     }
-
-    private serializeData(_data: ParticleEffectNode): Serialization {
-      let serialization: Serialization = {};
-
-      if (_data instanceof ParticleEffectNodeFunction) {
-        serialization.function = _data.function;
-        serialization.parameters = [];
-      }
-
-      let childrenSerialization: Serialization = _data instanceof ParticleEffectNodeFunction ? serialization.parameters : serialization;
-      for (const child of _data.children) {
-        if (child instanceof ParticleEffectNodeVariable)
-          childrenSerialization[child.key] = child.value;
-        else
-          childrenSerialization[child.key] = this.serializeData(child);
-      }
-
-      return serialization;
-    }
-
-    private desirializeData(_serialization: Serialization): ParticleEffectNode {
-      let node: ParticleEffectNodePath | ParticleEffectNodeFunction;
-      let isFunctionSerialization: boolean = "function" in _serialization || "parameters" in _serialization;
-
-      node = isFunctionSerialization ? new ParticleEffectNodeFunction(_serialization.function) : new ParticleEffectNodePath();
-      let childrenSerialization: Serialization = isFunctionSerialization ? _serialization.parameters : _serialization;
-      for (const key in childrenSerialization) {
-        node.addChild(
-          typeof childrenSerialization[key] == "string" || typeof childrenSerialization[key] == "number" ? 
-            new ParticleEffectNodeVariable(childrenSerialization[key]) : 
-            this.desirializeData(childrenSerialization[key]),
-          key
-        );
-      }
-
-      return node;
-    }
     //#endregion
 
     /**
      * Parses the data initializing this particle effect with the corresponding closures
      * @param _data The paticle effect data to parse.
      */
-    private parse(_data: ParticleEffectNodePath): void {
+    private parse(_data: Serialization): void {
       let variableNames: string[] = Object.values(PARTICLE_VARIBALE_NAMES);
-      let dataStorage: ParticleEffectNodePath = <ParticleEffectNodePath>_data.properties.storage;
+      let dataStorage: Serialization = _data.storage;
       if (dataStorage) {
         variableNames = ParticleEffect.preParseStorage(dataStorage, variableNames);
-        this.storageSystem = ParticleEffect.parseData(dataStorage.properties.system, variableNames);
-        this.storageUpdate = ParticleEffect.parseData(dataStorage.properties.update, variableNames);
-        this.storageParticle = ParticleEffect.parseData(dataStorage.properties.particle, variableNames);
+        this.storageSystem = ParticleEffect.parseData(dataStorage.system, variableNames);
+        this.storageUpdate = ParticleEffect.parseData(dataStorage.update, variableNames);
+        this.storageParticle = ParticleEffect.parseData(dataStorage.particle, variableNames);
       }
 
-      let dataTransform: ParticleEffectNodePath = <ParticleEffectNodePath>_data.properties.transformations;
+      let dataTransform: Serialization = _data.transformations;
       if (dataTransform) {
-        this.mtxLocal = ParticleEffect.parseData(dataTransform.properties.local, variableNames);
-        this.mtxWorld = ParticleEffect.parseData(dataTransform.properties.world, variableNames);
+        this.mtxLocal = ParticleEffect.parseData(dataTransform.local, variableNames);
+        this.mtxWorld = ParticleEffect.parseData(dataTransform.world, variableNames);
       }
       
-      let dataComponents: ParticleEffectNode = _data.properties.components;
+      let dataComponents: Serialization = _data.components;
       if (dataComponents) {
         this.componentMutators = ParticleEffect.parseData(dataComponents, variableNames);
       }
