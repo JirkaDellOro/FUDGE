@@ -17,10 +17,9 @@ namespace Fudge {
 
       this.setGraph((<ƒ.General>_state).node);
 
-      // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.setSelectedNode);
+      // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
-      // this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
     }
 
     public setGraph(_graph: ƒ.Graph): void {
@@ -40,7 +39,7 @@ namespace Fudge {
       this.tree = new ƒUi.Tree<ƒ.Node>(new ControllerTreeHierarchy(), this.graph);
       // this.listController.listRoot.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
       //TODO: examine if tree should fire common UI-EVENT for selection instead
-      // this.tree.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
+      this.tree.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.append(this.tree);

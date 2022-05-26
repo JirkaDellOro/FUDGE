@@ -83,7 +83,7 @@ namespace Fudge {
       _init.detail = _init.detail || {};
       _init.bubbles = _init.bubbles || false;
       _init.cancelable = _init.cancelable || true;
-      _init.detail.view = this;
+      _init.detail.view = _init.detail.view || this;
       this.dom.dispatchEvent(new FudgeEvent(_type, _init));
     }
 

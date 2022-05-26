@@ -897,7 +897,7 @@ var Fudge;
             _init.detail = _init.detail || {};
             _init.bubbles = _init.bubbles || false;
             _init.cancelable = _init.cancelable || true;
-            _init.detail.view = this;
+            _init.detail.view = _init.detail.view || this;
             this.dom.dispatchEvent(new Fudge.FudgeEvent(_type, _init));
         }
         //#region  ContextMenu
@@ -1678,7 +1678,7 @@ var Fudge;
             _event.stopPropagation();
         };
         hndFocusNode = (_event) => {
-            let event = new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: _event.detail.data } });
+            let event = new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: _event.detail.data, view: this } });
             this.broadcastEvent(event);
         };
     }
@@ -2767,10 +2767,9 @@ var Fudge;
             super(_container, _state);
             // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
             this.setGraph(_state.node);
-            // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.setSelectedNode);
+            // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
-            // this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
         }
         setGraph(_graph) {
             if (!_graph) {
@@ -2786,7 +2785,7 @@ var Fudge;
             this.tree = new ƒUi.Tree(new Fudge.ControllerTreeHierarchy(), this.graph);
             // this.listController.listRoot.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
             //TODO: examine if tree should fire common UI-EVENT for selection instead
-            // this.tree.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
+            this.tree.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.tree.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.append(this.tree);
@@ -3074,6 +3073,8 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.FOCUS:
                     let detail = _event.detail;
                     if (detail.node) {
+                        if (detail.view == this)
+                            return;
                         this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
                         ƒ.Render.prepare(this.cmrOrbit);
                     }
@@ -3084,8 +3085,9 @@ var Fudge;
                 case "mutate" /* MUTATE */:
                 case "delete" /* DELETE */:
                 case Fudge.EVENT_EDITOR.MODIFY:
-                    this.redraw();
+                    break;
             }
+            this.redraw();
         };
         hndPick = (_event) => {
             let picked = _event.detail.node;

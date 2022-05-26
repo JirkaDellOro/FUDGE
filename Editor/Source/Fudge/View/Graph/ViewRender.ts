@@ -171,12 +171,14 @@ namespace Fudge {
       this.graph.addEventListener(ƒ.EVENT.RENDER_PREPARE_END, switchLight);
     }
 
-    private hndEvent = (_event: CustomEvent): void => {
+    private hndEvent = (_event: FudgeEvent): void => {
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
         case EVENT_EDITOR.FOCUS:
           let detail: EventDetail = <EventDetail>_event.detail;
           if (detail.node) {
+            if (detail.view == this)
+              return;
             this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
             ƒ.Render.prepare(this.cmrOrbit);
           } else
@@ -186,8 +188,9 @@ namespace Fudge {
         case ƒUi.EVENT.MUTATE:
         case ƒUi.EVENT.DELETE:
         case EVENT_EDITOR.MODIFY:
-          this.redraw();
+          break;
       }
+      this.redraw();
     }
 
     private hndPick = (_event: FudgeEvent): void => {
