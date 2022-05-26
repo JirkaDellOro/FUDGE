@@ -34,8 +34,8 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
-      this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
-      this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
+      // this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
+      // this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
       this.dom.addEventListener("pointerdown", this.hndPointer);
@@ -184,11 +184,6 @@ namespace Fudge {
           } else
             this.setGraph(_event.detail.graph);
           break;
-        // break;
-        case ƒUi.EVENT.MUTATE:
-        case ƒUi.EVENT.DELETE:
-        case EVENT_EDITOR.MODIFY:
-          break;
       }
       this.redraw();
     }
@@ -198,7 +193,7 @@ namespace Fudge {
 
       //TODO: watch out, two selects
       this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: picked } });
-      this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: picked } }));
+      // this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: picked } }));
     }
 
     // private animate = (_e: Event) => {

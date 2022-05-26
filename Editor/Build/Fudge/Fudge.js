@@ -2951,8 +2951,8 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
-            this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
-            this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
+            // this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
+            // this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("pointermove", this.hndPointer);
             this.dom.addEventListener("pointerdown", this.hndPointer);
@@ -3081,11 +3081,6 @@ var Fudge;
                     else
                         this.setGraph(_event.detail.graph);
                     break;
-                // break;
-                case "mutate" /* MUTATE */:
-                case "delete" /* DELETE */:
-                case Fudge.EVENT_EDITOR.MODIFY:
-                    break;
             }
             this.redraw();
         };
@@ -3093,7 +3088,7 @@ var Fudge;
             let picked = _event.detail.node;
             //TODO: watch out, two selects
             this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: picked } });
-            this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: picked } }));
+            // this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: picked } }));
         };
         // private animate = (_e: Event) => {
         //   this.viewport.setGraph(this.graph);
