@@ -391,8 +391,10 @@ declare namespace Fudge {
         getChildren(_path: string[]): string[][];
         delete(_focused: string[][]): string[][];
         addChildren(_childPaths: string[][], _targetPath: string[]): string[][];
-        copy(_originals: string[][]): Promise<string[][]>;
+        copy(_originalPaths: string[][]): Promise<string[][]>;
         private getDataAtPath;
+        private deleteDataAtPath;
+        private isClosureData;
     }
 }
 declare namespace Fudge {

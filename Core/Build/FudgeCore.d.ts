@@ -4245,6 +4245,7 @@ declare namespace FudgeCore {
             [key: string]: Mutator;
         };
         constructor(_name?: string, _particleEffectData?: Serialization);
+        static isClosureData(_data: General): _data is FunctionData | string | number;
         static isFunctionData(_data: General): _data is FunctionData;
         /**
          * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.

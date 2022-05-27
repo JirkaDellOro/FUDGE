@@ -45,6 +45,10 @@ namespace FudgeCore {
       Project.register(this);
     }
 
+    public static isClosureData(_data: General): _data is FunctionData | string | number {
+      return ParticleEffect.isFunctionData(_data) || typeof _data == "string" || typeof _data == "number";
+    }
+
     public static isFunctionData(_data: General): _data is FunctionData {
       return (_data as FunctionData).type == "function";
     }
@@ -60,10 +64,10 @@ namespace FudgeCore {
 
       for (const key in _data) {
         let subData: General = _data[key];
-        if (this.isFunctionData(subData) || typeof subData == "string" || typeof subData == "number") 
-          effectStructure[key] = this.parseClosure(subData, _variableNames);
+        if (ParticleEffect.isClosureData(subData)) 
+          effectStructure[key] = ParticleEffect.parseClosure(subData, _variableNames);
         else
-          effectStructure[key] = this.parseData(subData, _variableNames);
+          effectStructure[key] = ParticleEffect.parseData(subData, _variableNames);
       }
 
       return effectStructure;
@@ -74,10 +78,10 @@ namespace FudgeCore {
      * @param _data The closure data to parse recursively.
      */
     private static parseClosure(_data: FunctionData | string | number, _variableNames: string[]): Function {
-      if (this.isFunctionData(_data)) {
+      if (ParticleEffect.isFunctionData(_data)) {
         let parameters: Function[] = [];
         for (let param of _data.parameters) {
-          parameters.push(this.parseClosure(param, _variableNames));
+          parameters.push(ParticleEffect.parseClosure(param, _variableNames));
         }
         return ParticleClosureFactory.createClosure(_data.function, parameters);
       }

@@ -2,6 +2,11 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
+  // interface PathAndData {
+  //   path: string;
+  //   data: Object | ƒ.FunctionData | string | number;
+  // }
+
   const enum KEYS {
     KEY = "key",
     VALUE = "value",
@@ -27,7 +32,7 @@ namespace Fudge {
       labelKey.setAttribute("key", KEYS.KEY);
       content.appendChild(labelKey);
 
-      if (ƒ.ParticleEffect.isFunctionData(data) || typeof data == "string" || typeof data == "number") {
+      if (ƒ.ParticleEffect.isClosureData(data)) {
         let labelValue: HTMLInputElement = document.createElement("input");
         labelValue.type = "text";
         labelValue.disabled = true;
@@ -63,7 +68,7 @@ namespace Fudge {
       let inputAsNumber: number = Number.parseFloat(_new);
       let data: Object | ƒ.FunctionData | string | number = this.getDataAtPath(_path);
 
-      if (_key == KEYS.KEY && Number.isNaN(inputAsNumber) && ƒ.ParticleEffect.isFunctionData(data) || typeof data == "string" || typeof data == "number") {
+      if (_key == KEYS.KEY && Number.isNaN(inputAsNumber) && ƒ.ParticleEffect.isClosureData(data)) {
         let parentData: Object | ƒ.FunctionData = this.getDataAtPath(_path.slice(0, _path.length - 1));
         if (!ƒ.ParticleEffect.isFunctionData(parentData)) {
           let key: string = _path[_path.length - 1];
@@ -119,12 +124,8 @@ namespace Fudge {
       let deleted: string[][] = [];
       let expend: string[][] = this.selection.length > 0 ? this.selection : _focused;
       for (let path of expend) {
-        let key: string = path[path.length - 1];
-        let parentData: Object | ƒ.FunctionData = this.getDataAtPath(path.slice(0, path.length - 1));
-        if (parentData) {
-          ƒ.ParticleEffect.isFunctionData(parentData) ? delete parentData.parameters[key] : delete parentData[key]; // TODO: use splice here see below todo, find a way to fix paths after splice
-          deleted.push(path);
-        }
+        this.deleteDataAtPath(path);
+        deleted.push(path);
       }
       this.selection.splice(0);
       return deleted;
@@ -134,43 +135,34 @@ namespace Fudge {
       let move: string[][] = [];
       let targetData: Object | ƒ.FunctionData | string | number = this.getDataAtPath(_targetPath);
 
-      if (!_childPaths.map(path => this.getDataAtPath(path)).every(data => ƒ.ParticleEffect.isFunctionData(data) || typeof data == "string" || typeof data == "number")) return;
+      if (!_childPaths.map(_path => this.getDataAtPath(_path)).every(_data => _data)) return;
 
       if (ƒ.ParticleEffect.isFunctionData(targetData)) {
         for (let path of _childPaths) {
-          if (!path.every(key => _targetPath.includes(key))) // !_targetPath.isDescendantOf(path)
+          if (!path.every(_key => _targetPath.includes(_key)))
             move.push(path);
-
         }
         
         for (let path of move) {
           let moveData: ƒ.FunctionData | string | number = this.getDataAtPath(path) as ƒ.FunctionData | string | number;
-          // let moveData: Object | ƒ.FunctionData | string | number = this.getDataAtPath(path);
-          if (ƒ.ParticleEffect.isFunctionData(moveData) || typeof moveData == "string" || typeof moveData == "number") {
-            let parentMoveData: Object | ƒ.FunctionData = this.getDataAtPath(path.slice(0, path.length - 1));
-            if (ƒ.ParticleEffect.isFunctionData(parentMoveData)) {
-              let index: number = parentMoveData.parameters.findIndex(data => data == moveData); // TODO: find a way to fix paths after splice, code is duplicated with delete
-              parentMoveData.parameters.splice(index, index + 1);
-            } else {
-              delete parentMoveData[path[path.length - 1]];
-            }
+          if (ƒ.ParticleEffect.isClosureData(moveData)) {
+            this.deleteDataAtPath(path);
             targetData.parameters.push(moveData);
           }
-          // _targetPath.addChild(path);
         }
       }
       
       return move;
     }
 
-    public async copy(_originals: string[][]): Promise<string[][]> {
+    public async copy(_originalPaths: string[][]): Promise<string[][]> {
       // try to create copies and return them for paste operation
       let copies: string[][];
-      // for (let original of _originals) {
-      //   let serialization: ƒ.Serialization = ƒ.Serializer.serialize(original);
-      //   let copy: ParticleEffectNode = <ParticleEffectNode>await ƒ.Serializer.deserialize(serialization);
-      //   copies.push(copy);
-      // }
+      for (let originalPath of _originalPaths) {
+        // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(original);
+        // let copy: ParticleEffectNode = <ParticleEffectNode>await ƒ.Serializer.deserialize(serialization);
+        // copies.push(copy);
+      }
       return copies;
     }
 
@@ -182,6 +174,22 @@ namespace Fudge {
       }
 
       return found;
+    }
+
+    private deleteDataAtPath(_path: string[]): void {
+      let parentData: Object | ƒ.FunctionData = this.getDataAtPath(_path.slice(0, _path.length - 1));
+      let key: string = _path[_path.length - 1];
+      if (ƒ.ParticleEffect.isFunctionData(parentData)) {
+// TODO: find a way to fix paths after splice, code is duplicated with delete
+        let index: number = Number.parseInt(key);
+        parentData.parameters.splice(index, index + 1);
+      } else {
+        delete parentData[key];
+      }
+    }
+
+    private isClosureData(_data: Object | ƒ.FunctionData | string | number): boolean {
+      return ƒ.ParticleEffect.isFunctionData(_data) || typeof _data == "string" || typeof _data == "number";
     }
   }
 }
