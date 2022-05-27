@@ -118,8 +118,9 @@ namespace FudgeUserInterface {
       for (let item of items)
         if (_data.indexOf(item.data) > -1) {
           // item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
-          item.dispatchEvent(new Event(EVENT.REMOVE_CHILD, { bubbles: true }));
-          deleted.push(item.parentNode.removeChild(item));
+          let parentNode: ParentNode = item.parentNode;
+          deleted.push(parentNode.removeChild(item));
+          parentNode.dispatchEvent(new Event(EVENT.REMOVE_CHILD, { bubbles: true }));
         }
 
       return deleted;
@@ -133,7 +134,6 @@ namespace FudgeUserInterface {
       return null;
     }
   }
-
 
   customElements.define("ul-custom-tree-list", CustomTreeList, { extends: "ul" });
 }

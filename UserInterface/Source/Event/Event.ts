@@ -26,6 +26,7 @@ namespace FudgeUserInterface {
     CONTEXTMENU = "contextmenu",
     MUTATE = "mutate",
     REMOVE_CHILD = "removeChild",
+    RENAME_CHILD = "renameChild",
     COLLAPSE = "collapse",
     EXPAND = "expand",
     INPUT = "input",

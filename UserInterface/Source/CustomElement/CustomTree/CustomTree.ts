@@ -89,15 +89,7 @@ namespace FudgeUserInterface {
 
       this.controller.rename(item.data, key, value);
       item.refreshAttributes();
-      
-      let parentItem: HTMLElement = item.parentElement; // TODO: maybe find a more efficient way to find parent
-      while (!(parentItem instanceof CustomTreeItem) && parentItem) {
-        parentItem = parentItem.parentElement;
-      }
-      if (parentItem instanceof CustomTreeItem)
-        parentItem.expand(true);
-      else 
-        item.setLabel(key, this.controller.getLabel(key, item.data));
+      item.dispatchEvent(new Event(EVENT.RENAME_CHILD, { bubbles: true })); // parent should reevaluate all child names
     }
 
     // Callback / Eventhandler in Tree

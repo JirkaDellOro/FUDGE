@@ -587,6 +587,7 @@ declare namespace FudgeUserInterface {
         private hndDragStart;
         private hndDragOver;
         private hndPointerUp;
+        private hndRename;
         private hndRemove;
     }
 }
@@ -933,6 +934,7 @@ declare namespace FudgeUserInterface {
         CONTEXTMENU = "contextmenu",
         MUTATE = "mutate",
         REMOVE_CHILD = "removeChild",
+        RENAME_CHILD = "renameChild",
         COLLAPSE = "collapse",
         EXPAND = "expand",
         INPUT = "input",

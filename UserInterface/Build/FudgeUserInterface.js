@@ -1521,8 +1521,9 @@ var FudgeUserInterface;
             for (let item of items)
                 if (_data.indexOf(item.data) > -1) {
                     // item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
-                    item.dispatchEvent(new Event("removeChild" /* REMOVE_CHILD */, { bubbles: true }));
-                    deleted.push(item.parentNode.removeChild(item));
+                    let parentNode = item.parentNode;
+                    deleted.push(parentNode.removeChild(item));
+                    parentNode.dispatchEvent(new Event("removeChild" /* REMOVE_CHILD */, { bubbles: true }));
                 }
             return deleted;
         }
@@ -1619,14 +1620,7 @@ var FudgeUserInterface;
             let value = item.getLabel(key);
             this.controller.rename(item.data, key, value);
             item.refreshAttributes();
-            let parentItem = item.parentElement; // TODO: maybe find a more efficient way to find parent
-            while (!(parentItem instanceof FudgeUserInterface.CustomTreeItem) && parentItem) {
-                parentItem = parentItem.parentElement;
-            }
-            if (parentItem instanceof FudgeUserInterface.CustomTreeItem)
-                parentItem.expand(true);
-            else
-                item.setLabel(key, this.controller.getLabel(key, item.data));
+            item.dispatchEvent(new Event("renameChild" /* RENAME_CHILD */, { bubbles: true })); // parent should reevaluate all child names
         }
         // Callback / Eventhandler in Tree
         hndSelect(_event) {
@@ -1782,6 +1776,7 @@ var FudgeUserInterface;
             this.addEventListener("dragstart" /* DRAG_START */, this.hndDragStart);
             this.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             this.addEventListener("pointerup" /* POINTER_UP */, this.hndPointerUp);
+            this.addEventListener("renameChild" /* RENAME_CHILD */, this.hndRename);
             this.addEventListener("removeChild" /* REMOVE_CHILD */, this.hndRemove);
         }
         /**
@@ -2033,11 +2028,18 @@ var FudgeUserInterface;
                 return;
             this.select(_event.ctrlKey, _event.shiftKey);
         };
+        hndRename = (_event) => {
+            if (_event.currentTarget == _event.target)
+                return;
+            _event.stopPropagation();
+            this.expand(true);
+        };
         hndRemove = (_event) => {
             if (_event.currentTarget == _event.target)
                 return;
             _event.stopPropagation();
             this.hasChildren = this.controller.hasChildren(this.data);
+            this.expand(true);
         };
     }
     FudgeUserInterface.CustomTreeItem = CustomTreeItem;
