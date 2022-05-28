@@ -37,7 +37,7 @@ namespace FudgeCore {
       let mtxCamera: Matrix4x4 = this.mtxPivot.clone;
       try {
         mtxCamera = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
-      } catch (_error) {   
+      } catch (_error) {
         // no container node or no world transformation found -> continue with pivot only
       }
       return mtxCamera;
@@ -47,16 +47,16 @@ namespace FudgeCore {
      * yielding the worldspace to viewspace matrix
      */
     public get mtxWorldToView(): Matrix4x4 {
-      if (this.#mtxWorldToView )
+      if (this.#mtxWorldToView)
         return this.#mtxWorldToView;
-        
+
       //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
       let mtxCamera: Matrix4x4 = this.mtxWorld;
       let mtxInversion: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
       this.#mtxWorldToView = Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxInversion);
       Recycler.store(mtxCamera);
       Recycler.store(mtxInversion);
-      
+
       return this.#mtxWorldToView;
     }
 
@@ -113,7 +113,7 @@ namespace FudgeCore {
      * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
      * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
      */
-    public projectOrthographic(_left: number = 0, _right: number = Render.getCanvas().clientWidth, _bottom: number = Render.getCanvas().clientHeight, _top: number = 0): void {
+    public projectOrthographic(_left: number = -Render.getCanvas().clientWidth / 2, _right: number = Render.getCanvas().clientWidth / 2, _bottom: number = Render.getCanvas().clientHeight / 2, _top: number = -Render.getCanvas().clientHeight / 2): void {
       this.projection = PROJECTION.ORTHOGRAPHIC;
       this.mtxProjection = Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
     }
@@ -153,7 +153,7 @@ namespace FudgeCore {
       return result;
     }
 
-    public pointClipToWorld(_pointInClipSpace: Vector3): Vector3 {      
+    public pointClipToWorld(_pointInClipSpace: Vector3): Vector3 {
       let mtxViewToWorld: Matrix4x4 = Matrix4x4.INVERSION(this.mtxWorldToView);
       let m: Float32Array = mtxViewToWorld.get();
       let rayWorld: Vector3 = Vector3.TRANSFORMATION(_pointInClipSpace, mtxViewToWorld, true);

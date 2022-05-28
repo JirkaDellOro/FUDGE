@@ -42,6 +42,7 @@ namespace FudgeAid {
       // camera setup
       let camera: CameraOrbitMovingFocus;
       camera = new CameraOrbitMovingFocus(_viewport.camera, 5, 85, 0.01, 1000);
+      //TODO: remove the following line, camera must not be manipulated but should already be set up when calling this method
       _viewport.camera.projectCentral(_viewport.camera.getAspect(), _viewport.camera.getFieldOfView(), _viewport.camera.getDirection(), 0.01, 1000);
 
       // yset up axis to control

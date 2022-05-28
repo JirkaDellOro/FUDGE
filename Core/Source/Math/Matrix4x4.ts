@@ -431,8 +431,8 @@ namespace FudgeCore {
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
       mtxResult.data.set([
         2 / (_right - _left), 0, 0, 0,
-        0, 2 / (_top - _bottom), 0, 0,
-        0, 0, 2 / (_near - _far), 0,
+        0, -2 / (_top - _bottom), 0, 0,
+        0, 0, 2 / (_far - _near), 0,
         (_left + _right) / (_left - _right),
         (_bottom + _top) / (_bottom - _top),
         (_near + _far) / (_near - _far),

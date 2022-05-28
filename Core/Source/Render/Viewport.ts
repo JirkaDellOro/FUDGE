@@ -224,8 +224,12 @@ namespace FudgeCore {
      */
     public adjustCamera(): void {
       let rect: Rectangle = Render.getRenderRectangle();
+      // if (this.camera.getProjection() == PROJECTION.ORTHOGRAPHIC)
+      //   this.camera.projectOrthographic(-rect.width / 20, rect.width / 20, rect.height / 20, -rect.height / 20);
+      // else
       this.camera.projectCentral(
-        rect.width / rect.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar());
+        rect.width / rect.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar()
+      );
     }
     // #endregion
 

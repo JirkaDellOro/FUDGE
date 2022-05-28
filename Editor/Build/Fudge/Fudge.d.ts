@@ -31,7 +31,7 @@ declare namespace Fudge {
         REMOVE_COMPONENT = 11,
         ADD_JOINT = 12,
         DELETE_RESOURCE = 13,
-        ILLUMINATE = 14
+        ORTHGRAPHIC_CAMERA = 14
     }
     enum MENU {
         QUIT = "quit",
@@ -575,6 +575,7 @@ declare namespace Fudge {
         protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
+        private setCameraOrthographic;
         private hndPrepare;
         private hndEvent;
         private hndPick;

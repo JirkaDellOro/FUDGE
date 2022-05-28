@@ -41,7 +41,7 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 11] = "REMOVE_COMPONENT";
         CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 12] = "ADD_JOINT";
         CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 13] = "DELETE_RESOURCE";
-        CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 14] = "ILLUMINATE";
+        CONTEXTMENU[CONTEXTMENU["ORTHGRAPHIC_CAMERA"] = 14] = "ORTHGRAPHIC_CAMERA";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -2960,7 +2960,6 @@ var Fudge;
         createUserInterface() {
             ƒAid.addStandardLightComponents(this.nodeLight);
             let cmpCamera = new ƒ.ComponentCamera();
-            cmpCamera.projectCentral(1, 45);
             this.canvas = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
             let container = document.createElement("div");
             container.style.borderWidth = "0px";
@@ -3014,6 +3013,8 @@ var Fudge;
                 ]
             });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Orthographic Camera", id: String(Fudge.CONTEXTMENU.ORTHGRAPHIC_CAMERA), type: "checkbox", click: _callback, accelerator: process.platform == "darwin" ? "O" : "O" });
+            menu.append(item);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
@@ -3032,6 +3033,10 @@ var Fudge;
                 case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY]:
                     this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE[_item.id];
                     this.redraw();
+                    break;
+                case String(Fudge.CONTEXTMENU.ORTHGRAPHIC_CAMERA):
+                    let on = this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ORTHGRAPHIC_CAMERA)).checked;
+                    this.setCameraOrthographic(on);
                     break;
             }
         }
@@ -3055,6 +3060,20 @@ var Fudge;
         hndDrop(_event, _viewSource) {
             let source = _viewSource.getDragDropSources()[0];
             this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source } });
+        }
+        setCameraOrthographic(_on = false) {
+            if (_on) {
+                this.cmrOrbit.cmpCamera.projectCentral(2, 1, ƒ.FIELD_OF_VIEW.DIAGONAL, 10, 20000);
+                this.cmrOrbit.maxDistance = 10000;
+                this.cmrOrbit.distance *= 50;
+            }
+            else {
+                this.cmrOrbit.cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL, 0.01, 1000);
+                this.cmrOrbit.maxDistance = 1000;
+                this.cmrOrbit.distance /= 50;
+            }
+            ƒ.Render.prepare(this.cmrOrbit);
+            this.redraw();
         }
         hndPrepare = (_event) => {
             let switchLight = (_event) => {
@@ -3129,6 +3148,7 @@ var Fudge;
                 // ƒ.Physics.connectJoints();
             }
             catch (_error) {
+                // console.error(_error);
                 //nop
             }
         };

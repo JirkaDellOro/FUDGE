@@ -15,7 +15,7 @@ namespace Fudge {
     REMOVE_COMPONENT,
     ADD_JOINT,
     DELETE_RESOURCE,
-    ILLUMINATE
+    ORTHGRAPHIC_CAMERA
   }
 
 
