@@ -1772,7 +1772,7 @@ var FudgeUserInterface;
             this.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
             // this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
             // this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
-            this.draggable = true;
+            this.draggable = true; // TODO: add is draggable to custom controller
             this.addEventListener("dragstart" /* DRAG_START */, this.hndDragStart);
             this.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             this.addEventListener("pointerup" /* POINTER_UP */, this.hndPointerUp);

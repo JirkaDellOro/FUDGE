@@ -380,21 +380,24 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
-    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<string[]> {
-        private particleEffectData;
+    interface ParticleEffectDataAndPath {
+        data: Object | ƒ.FunctionData | string | number;
+        path: string[];
+    }
+    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ParticleEffectDataAndPath> {
+        private particleEffectRoot;
         constructor(_particleEffectData: ƒ.Serialization);
-        createContent(_path: string[]): HTMLElement;
-        getLabel(_key: string, _path: string[]): string;
-        getAttributes(_path: string[]): string;
-        rename(_path: string[], _key: string, _new: string): void;
-        hasChildren(_path: string[]): boolean;
-        getChildren(_path: string[]): string[][];
-        delete(_focused: string[][]): string[][];
-        addChildren(_childPaths: string[][], _targetPath: string[]): string[][];
-        copy(_originalPaths: string[][]): Promise<string[][]>;
+        createContent(_dataAndPath: ParticleEffectDataAndPath): HTMLElement;
+        getLabel(_key: string, _dataAndPath: ParticleEffectDataAndPath): string;
+        getAttributes(_dataAndPath: ParticleEffectDataAndPath): string;
+        rename(_dataAndPath: ParticleEffectDataAndPath, _key: string, _new: string): void;
+        hasChildren(_dataAndPath: ParticleEffectDataAndPath): boolean;
+        getChildren(_dataAndPath: ParticleEffectDataAndPath): ParticleEffectDataAndPath[];
+        delete(_focused: ParticleEffectDataAndPath[]): ParticleEffectDataAndPath[];
+        addChildren(_children: ParticleEffectDataAndPath[], _target: ParticleEffectDataAndPath): ParticleEffectDataAndPath[];
+        copy(_originalData: ParticleEffectDataAndPath[]): Promise<ParticleEffectDataAndPath[]>;
         private getDataAtPath;
         private deleteDataAtPath;
-        private isClosureData;
     }
 }
 declare namespace Fudge {

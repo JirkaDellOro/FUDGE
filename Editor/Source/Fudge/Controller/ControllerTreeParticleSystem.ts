@@ -2,10 +2,10 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
-  // interface PathAndData {
-  //   path: string;
-  //   data: Object | ƒ.FunctionData | string | number;
-  // }
+  export interface ParticleEffectDataAndPath {
+    data: Object | ƒ.FunctionData | string | number;
+    path: string[];
+  }
 
   const enum KEYS {
     KEY = "key",
@@ -13,22 +13,23 @@ namespace Fudge {
     FUNCTION = "function"
   }
 
-  export class ControllerTreeParticleSystem extends ƒui.CustomTreeController<string[]> {
-    private particleEffectData: ƒ.Serialization;
+  export class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ParticleEffectDataAndPath> {
+    private particleEffectRoot: ƒ.Serialization;
 
     constructor(_particleEffectData: ƒ.Serialization) {
       super();
-      this.particleEffectData = _particleEffectData;
+      this.particleEffectRoot = _particleEffectData;
     }
 
-    public createContent(_path: string[]): HTMLElement {
-      let data: Object | ƒ.FunctionData | string | number = this.getDataAtPath(_path);
+    public createContent(_dataAndPath: ParticleEffectDataAndPath): HTMLElement {
+      let path: string[] = _dataAndPath.path;
+      let data: Object | ƒ.FunctionData | string | number = _dataAndPath.data;
 
       let content: HTMLElement = document.createElement("span");
       let labelKey: HTMLInputElement = document.createElement("input");
       labelKey.type = "text";
       labelKey.disabled = true;
-      labelKey.value = _path[_path.length - 1];
+      labelKey.value = path[path.length - 1];
       labelKey.setAttribute("key", KEYS.KEY);
       content.appendChild(labelKey);
 
@@ -49,14 +50,14 @@ namespace Fudge {
       return content;
     }
 
-    public getLabel(_key: string, _path: string[]): string {
-      return _path[_key];
+    public getLabel(_key: string, _dataAndPath: ParticleEffectDataAndPath): string {
+      return _dataAndPath[_key];
     }
 
-    public getAttributes(_path: string[]): string {
+    public getAttributes(_dataAndPath: ParticleEffectDataAndPath): string {
       let attributes: string[] = [];
-      let data: Object | ƒ.FunctionData | string | number = this.getDataAtPath(_path);
-      if (_path.includes("storage") && ƒ.ParticleEffect.isFunctionData(data)) 
+      let data: Object | ƒ.FunctionData | string | number = _dataAndPath.data;
+      if (_dataAndPath.path.includes("storage") && ƒ.ParticleEffect.isFunctionData(data)) 
         attributes.push("function");
       if (typeof data == "string") 
         attributes.push(typeof data);
@@ -64,14 +65,15 @@ namespace Fudge {
       return attributes.join(" ");
     }
     
-    public rename(_path: string[], _key: string, _new: string): void {
+    public rename(_dataAndPath: ParticleEffectDataAndPath, _key: string, _new: string): void {
       let inputAsNumber: number = Number.parseFloat(_new);
-      let data: Object | ƒ.FunctionData | string | number = this.getDataAtPath(_path);
+      let path: string[] = _dataAndPath.path;
+      let data: Object | ƒ.FunctionData | string | number = _dataAndPath.data;
 
       if (_key == KEYS.KEY && Number.isNaN(inputAsNumber) && ƒ.ParticleEffect.isClosureData(data)) {
-        let parentData: Object | ƒ.FunctionData = this.getDataAtPath(_path.slice(0, _path.length - 1));
+        let parentData: Object | ƒ.FunctionData = this.getDataAtPath(path.slice(0, path.length - 1));
         if (!ƒ.ParticleEffect.isFunctionData(parentData)) {
-          let key: string = _path[_path.length - 1];
+          let key: string = path[path.length - 1];
           if (parentData[_new]) {
             parentData[key] = parentData[_new];
           } else {
@@ -80,15 +82,15 @@ namespace Fudge {
           parentData[_new] = data;
         }
 
-        _path[_path.length - 1] = _new;
+        path[path.length - 1] = _new;
         return;
       }
 
       if (_key == KEYS.VALUE) {
-        let parentData: Object | ƒ.FunctionData = this.getDataAtPath(_path.slice(0, _path.length - 1));
+        let parentData: Object | ƒ.FunctionData = this.getDataAtPath(path.slice(0, path.length - 1));
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
         parentData = ƒ.ParticleEffect.isFunctionData(parentData) ? parentData.parameters : parentData;
-        parentData[_path[_path.length - 1]] = input;
+        parentData[path[path.length - 1]] = input;
         return;
       }
 
@@ -98,55 +100,56 @@ namespace Fudge {
       }
     }
 
-    public hasChildren(_path: string[]): boolean {
-      let data: Object | ƒ.FunctionData | string | number = this.getDataAtPath(_path);
+    public hasChildren(_dataAndPath: ParticleEffectDataAndPath): boolean {
+      let data: Object | ƒ.FunctionData | string | number = _dataAndPath.data;
       let length: number = 0;
       if (typeof data != "string" && typeof data != "number")
         length = ƒ.ParticleEffect.isFunctionData(data) ? data.parameters.length : Object.keys(data).length;
       return length > 0;
     }
 
-    public getChildren(_path: string[]): string[][] {
-      let data: Object | ƒ.FunctionData | string | number = this.getDataAtPath(_path);
-      let childPaths: string[][] = [];
+    public getChildren(_dataAndPath: ParticleEffectDataAndPath): ParticleEffectDataAndPath[] {
+      let data: Object | ƒ.FunctionData | string | number = _dataAndPath.data;
+      let children: ParticleEffectDataAndPath[] = [];
 
       if (typeof data != "string" && typeof data != "number") {
-        let children: Object = ƒ.ParticleEffect.isFunctionData(data) ? data.parameters : data;
-        for (const key in children) {
-          childPaths.push(_path.concat(key));
+        let subData: Object = ƒ.ParticleEffect.isFunctionData(data) ? data.parameters : data;
+        for (const key in subData) {
+          children.push({ data: subData[key], path: _dataAndPath.path.concat(key) });
         }
       }
-      return childPaths;
+
+      return children;
     }
 
-    public delete(_focused: string[][]): string[][] {
+    public delete(_focused: ParticleEffectDataAndPath[]): ParticleEffectDataAndPath[] {
       // delete selection independend of focussed item
-      let deleted: string[][] = [];
-      let expend: string[][] = this.selection.length > 0 ? this.selection : _focused;
-      for (let path of expend) {
-        this.deleteDataAtPath(path);
-        deleted.push(path);
+      let deleted: ParticleEffectDataAndPath[] = [];
+      let expend: ParticleEffectDataAndPath[] = this.selection.length > 0 ? this.selection : _focused;
+      for (let pathAndData of expend) {
+        this.deleteDataAtPath(pathAndData.path);
+        deleted.push(pathAndData);
       }
       this.selection.splice(0);
       return deleted;
     }
 
-    public addChildren(_childPaths: string[][], _targetPath: string[]): string[][] {
-      let move: string[][] = [];
-      let targetData: Object | ƒ.FunctionData | string | number = this.getDataAtPath(_targetPath);
+    public addChildren(_children: ParticleEffectDataAndPath[], _target: ParticleEffectDataAndPath): ParticleEffectDataAndPath[] {
+      let move: ParticleEffectDataAndPath[] = [];
+      let targetData: Object | ƒ.FunctionData | string | number = _target.data;
 
-      if (!_childPaths.map(_path => this.getDataAtPath(_path)).every(_data => _data)) return;
+      if (!_children.every(_dataAndPath => ƒ.ParticleEffect.isClosureData(_dataAndPath.data))) return;
 
       if (ƒ.ParticleEffect.isFunctionData(targetData)) {
-        for (let path of _childPaths) {
-          if (!path.every(_key => _targetPath.includes(_key)))
-            move.push(path);
+        for (let pathAndData of _children) {
+          if (!pathAndData.path.every(_key => _target.path.includes(_key)))
+            move.push(pathAndData);
         }
         
-        for (let path of move) {
-          let moveData: ƒ.FunctionData | string | number = this.getDataAtPath(path) as ƒ.FunctionData | string | number;
+        for (let pathAndData of move) {
+          let moveData: ƒ.FunctionData | string | number = pathAndData.data as ƒ.FunctionData | string | number;
           if (ƒ.ParticleEffect.isClosureData(moveData)) {
-            this.deleteDataAtPath(path);
+            this.deleteDataAtPath(pathAndData.path);
             targetData.parameters.push(moveData);
           }
         }
@@ -155,19 +158,18 @@ namespace Fudge {
       return move;
     }
 
-    public async copy(_originalPaths: string[][]): Promise<string[][]> {
-      // try to create copies and return them for paste operation
-      let copies: string[][];
-      for (let originalPath of _originalPaths) {
-        // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(original);
-        // let copy: ParticleEffectNode = <ParticleEffectNode>await ƒ.Serializer.deserialize(serialization);
-        // copies.push(copy);
+    public async copy(_originalData: ParticleEffectDataAndPath[]): Promise<ParticleEffectDataAndPath[]> {
+      let copies: ParticleEffectDataAndPath[] = [];
+      for (let pathAndData of _originalData) {
+        let data: string | number | Object | ƒ.FunctionData = JSON.parse(JSON.stringify(pathAndData.data));
+        copies.push({ data: data, path: [""] });
       }
+
       return copies;
     }
 
     private getDataAtPath(_path: string[]): Object | ƒ.FunctionData | string | number {
-      let found: ƒ.General = this.particleEffectData;
+      let found: ƒ.General = this.particleEffectRoot;
       
       for (let i: number = 0; i < _path.length; i++) {
         found = ƒ.ParticleEffect.isFunctionData(found) ? found.parameters[_path[i]] : found[_path[i]];
@@ -180,16 +182,11 @@ namespace Fudge {
       let parentData: Object | ƒ.FunctionData = this.getDataAtPath(_path.slice(0, _path.length - 1));
       let key: string = _path[_path.length - 1];
       if (ƒ.ParticleEffect.isFunctionData(parentData)) {
-// TODO: find a way to fix paths after splice, code is duplicated with delete
         let index: number = Number.parseInt(key);
-        parentData.parameters.splice(index, index + 1);
+        parentData.parameters.splice(index, 1);
       } else {
         delete parentData[key];
       }
-    }
-
-    private isClosureData(_data: Object | ƒ.FunctionData | string | number): boolean {
-      return ƒ.ParticleEffect.isFunctionData(_data) || typeof _data == "string" || typeof _data == "number";
     }
   }
 }
