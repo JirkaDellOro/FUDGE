@@ -12,7 +12,7 @@ namespace FudgeCore {
    * @author Jonas Plotzky, HFU, 2020
    */
   export class ParticleClosureFactory {
-    private static closures: { [key: string]: Function } = {
+    public static closures: { [key: string]: Function } = {
       "addition": ParticleClosureFactory.createAddition,
       "subtraction": ParticleClosureFactory.createSubtraction,
       "multiplication": ParticleClosureFactory.createMultiplication,

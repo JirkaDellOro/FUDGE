@@ -12,7 +12,7 @@ namespace FudgeUserInterface {
     public copyPaste: { sources: T[], target: T } = { sources: [], target: null };
 
     /** Create an HTMLElement for the tree item representing the object  */
-    public abstract createContent(_object: T): HTMLElement;
+    public abstract createContent(_object: T): HTMLFormElement;
 
     /** Retrieve a string to create a label for the tree item representing one of the objects properties  */
     public abstract getLabel(_key: string, _object: T): string;
@@ -49,12 +49,6 @@ namespace FudgeUserInterface {
      */
     public abstract /* async */ copy(_originals: T[]): Promise<T[]>;
 
-    // public abstract hndDragOver = (_event: DragEvent): void => {
-    //   _event.stopPropagation();
-    //   _event.preventDefault();
-    //   this.dragDrop.target = (<TreeItem<T>>_event.currentTarget).data;
-    //   console.log(_event.currentTarget);
-    //   _event.dataTransfer.dropEffect = "move";
-    // }
+    public abstract equals(_a: T, _b: T): boolean;
   }
 }

@@ -7,7 +7,7 @@ namespace Fudge {
     path: string[];
   }
 
-  const enum KEYS {
+  const enum IDS {
     KEY = "key",
     VALUE = "value",
     FUNCTION = "function"
@@ -21,30 +21,38 @@ namespace Fudge {
       this.particleEffectRoot = _particleEffectData;
     }
 
-    public createContent(_dataAndPath: ParticleEffectDataAndPath): HTMLElement {
+    public createContent(_dataAndPath: ParticleEffectDataAndPath): HTMLFormElement {
       let path: string[] = _dataAndPath.path;
       let data: Object | ƒ.FunctionData | string | number = _dataAndPath.data;
 
-      let content: HTMLElement = document.createElement("span");
+      let content: HTMLFormElement = document.createElement("form");
       let labelKey: HTMLInputElement = document.createElement("input");
       labelKey.type = "text";
       labelKey.disabled = true;
       labelKey.value = path[path.length - 1];
-      labelKey.setAttribute("key", KEYS.KEY);
+      labelKey.id = IDS.KEY;
       content.appendChild(labelKey);
 
       if (ƒ.ParticleEffect.isClosureData(data)) {
-        let labelValue: HTMLInputElement = document.createElement("input");
-        labelValue.type = "text";
-        labelValue.disabled = true;
         if (ƒ.ParticleEffect.isFunctionData(data)) {
-          labelValue.setAttribute("key", KEYS.FUNCTION);
-          labelValue.value = data.function;
+          let select: HTMLSelectElement = document.createElement("select");
+          select.id = IDS.FUNCTION;
+          for (let key in ƒ.ParticleClosureFactory.closures) {
+            let entry: HTMLOptionElement = document.createElement("option");
+            entry.text = key;
+            entry.value = key;
+            select.add(entry);
+          }
+          select.value = data.function;
+          content.appendChild(select);
         } else {
-          labelValue.setAttribute("key", KEYS.VALUE);
-          labelValue.value = data.toString();
+          let input: HTMLInputElement = document.createElement("input");
+          input.type = "sel";
+          input.disabled = true;
+          input.id = IDS.VALUE;
+          input.value = data.toString();
+          content.appendChild(input);
         }
-        content.appendChild(labelValue);
       }
 
       return content;
@@ -70,7 +78,7 @@ namespace Fudge {
       let path: string[] = _dataAndPath.path;
       let data: Object | ƒ.FunctionData | string | number = _dataAndPath.data;
 
-      if (_key == KEYS.KEY && Number.isNaN(inputAsNumber) && ƒ.ParticleEffect.isClosureData(data)) {
+      if (_key == IDS.KEY && Number.isNaN(inputAsNumber) && ƒ.ParticleEffect.isClosureData(data)) {
         let parentData: Object | ƒ.FunctionData = this.getDataAtPath(path.slice(0, path.length - 1));
         if (!ƒ.ParticleEffect.isFunctionData(parentData)) {
           let key: string = path[path.length - 1];
@@ -86,7 +94,7 @@ namespace Fudge {
         return;
       }
 
-      if (_key == KEYS.VALUE) {
+      if (_key == IDS.VALUE) {
         let parentData: Object | ƒ.FunctionData = this.getDataAtPath(path.slice(0, path.length - 1));
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
         parentData = ƒ.ParticleEffect.isFunctionData(parentData) ? parentData.parameters : parentData;
@@ -94,7 +102,7 @@ namespace Fudge {
         return;
       }
 
-      if (_key == KEYS.FUNCTION && ƒ.ParticleEffect.isFunctionData(data) && Number.isNaN(inputAsNumber)) {
+      if (_key == IDS.FUNCTION && ƒ.ParticleEffect.isFunctionData(data) && Number.isNaN(inputAsNumber)) {
         data.function = _new;
         return;
       }
@@ -166,6 +174,10 @@ namespace Fudge {
       }
 
       return copies;
+    }
+
+    public equals(_a: ParticleEffectDataAndPath, _b: ParticleEffectDataAndPath): boolean {
+      return _a.data == _b.data;
     }
 
     private getDataAtPath(_path: string[]): Object | ƒ.FunctionData | string | number {

@@ -380,7 +380,8 @@ declare namespace FudgeUserInterface {
      * Extension of ul-element that keeps a list of {@link CustomTreeItem}s to represent a branch in a tree
      */
     class CustomTreeList<T> extends HTMLUListElement {
-        constructor(_items?: CustomTreeItem<T>[]);
+        controller: CustomTreeController<T>;
+        constructor(_controller: CustomTreeController<T>, _items?: CustomTreeItem<T>[]);
         /**
          * Expands the tree along the given path to show the objects the path includes
          * @param _path An array of objects starting with one being contained in this treelist and following the correct hierarchy of successors
@@ -425,7 +426,6 @@ declare namespace FudgeUserInterface {
      * ```
      */
     class CustomTree<T> extends CustomTreeList<T> {
-        controller: CustomTreeController<T>;
         constructor(_controller: CustomTreeController<T>, _root: T);
         /**
          * Clear the current selection
@@ -466,7 +466,7 @@ declare namespace FudgeUserInterface {
             target: T;
         };
         /** Create an HTMLElement for the tree item representing the object  */
-        abstract createContent(_object: T): HTMLElement;
+        abstract createContent(_object: T): HTMLFormElement;
         /** Retrieve a string to create a label for the tree item representing one of the objects properties  */
         abstract getLabel(_key: string, _object: T): string;
         /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
@@ -495,6 +495,7 @@ declare namespace FudgeUserInterface {
          * @param _focussed The object currently having focus
          */
         abstract copy(_originals: T[]): Promise<T[]>;
+        abstract equals(_a: T, _b: T): boolean;
     }
 }
 declare namespace FudgeUserInterface {
@@ -508,7 +509,6 @@ declare namespace FudgeUserInterface {
         data: T;
         controller: CustomTreeController<T>;
         private checkbox;
-        private inputMap;
         constructor(_controller: CustomTreeController<T>, _data: T);
         /**
          * Returns true, when this item has a visible checkbox in front to expand the subsequent branch
@@ -526,26 +526,16 @@ declare namespace FudgeUserInterface {
          * Returns attaches or detaches the {@link CSS_CLASS.SELECTED} to this item
          */
         set selected(_on: boolean);
-        /**
-         * Get the content shown
-         */
-        get content(): HTMLElement;
-        /**
-         * Set the content to show, reinitializing {@link inputMap}
-         */
-        set content(_element: HTMLElement);
-        /**
-         * Returns the input elements contained in {@link inputMap}
-         */
-        private get inputs();
+        get content(): HTMLFormElement;
+        set content(_content: HTMLFormElement);
         /**
          * Set the label text to show
          */
-        setLabel(_key: string, _text: string): void;
+        setValue(_id: string, _text: string): void;
         /**
          * Get the label text shown
          */
-        getLabel(_key: string): string;
+        getValue(_id: string): string;
         /**
          * Get the label text shown
          */

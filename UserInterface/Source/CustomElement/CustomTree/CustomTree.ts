@@ -14,11 +14,9 @@ namespace FudgeUserInterface {
    * ```
    */  
   export class CustomTree<T> extends CustomTreeList<T> {
-    public controller: CustomTreeController<T>;
 
     constructor(_controller: CustomTreeController<T>, _root: T) {
-      super([]);
-      this.controller = _controller;
+      super(_controller, []);
       let root: CustomTreeItem<T> = new CustomTreeItem<T>(this.controller, _root);
       this.appendChild(root);
 
@@ -64,30 +62,34 @@ namespace FudgeUserInterface {
         return;
 
       let branch: CustomTreeList<T> = this.createBranch(children);
-      item.setBranch(branch);
+      let old: CustomTreeList<T> = item.getBranch();
+      item.hasChildren = true;
+      if (old)
+        old.restructure(branch);
+      else
+        item.setBranch(branch); 
+
       this.displaySelection(<T[]>this.controller.selection);
-    }
+    }  
 
     private createBranch(_data: T[]): CustomTreeList<T> {
-      let branch: CustomTreeList<T> = new CustomTreeList<T>([]);
+      let branch: CustomTreeList<T> = new CustomTreeList<T>(this.controller, []);
       for (let child of _data) {
         branch.addItems([new CustomTreeItem(this.controller, child)]);
       }
       return branch;
-    }
+    } 
 
     private hndRename(_event: Event): void {
-      if (!(_event.target instanceof HTMLInputElement)) return;
-
-      let inputElement: HTMLInputElement = _event.target;
-      let item: HTMLElement = inputElement.parentElement;
+      let element: HTMLElement = <HTMLElement>_event.target;
+      let item: HTMLElement = element.parentElement;
       while (!(item instanceof CustomTreeItem)) {
         item = item.parentElement;
       }
-      let key: string = inputElement.getAttribute("key");
-      let value: string = item.getLabel(key);
+      let id: string = element.id;
+      let value: string = item.getValue(id);
 
-      this.controller.rename(item.data, key, value);
+      this.controller.rename(item.data, id, value);
       item.refreshAttributes();
       item.dispatchEvent(new Event(EVENT.RENAME_CHILD, { bubbles: true })); // parent should reevaluate all child names
     }

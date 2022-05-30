@@ -11,9 +11,8 @@ namespace FudgeUserInterface {
     public data: T = null;
     public controller: CustomTreeController<T>;
     
-    #content: HTMLElement;
+    #content: HTMLFormElement;
     private checkbox: HTMLInputElement;
-    private inputMap: { [key: string]: HTMLInputElement} = {};
     
     public constructor(_controller: CustomTreeController<T>, _data: T) {
       super();
@@ -69,43 +68,37 @@ namespace FudgeUserInterface {
       else
         this.classList.remove(CSS_CLASS.SELECTED);
     }
-    
-    /**
-     * Get the content shown
-     */
-    public get content(): HTMLElement {
+
+    public get content(): HTMLFormElement {
       return this.#content;
     }
 
-    /**
-     * Set the content to show, reinitializing {@link inputMap}
-     */
-    public set content(_element: HTMLElement) {
-      this.#content = _element;
-      for (const input of this.#content.getElementsByTagName("input")) {
-        this.inputMap[input.getAttribute("key")] = input;
-      }
-    }
-
-    /**
-     * Returns the input elements contained in {@link inputMap}
-     */
-    private get inputs(): HTMLInputElement[] {
-      return Object.values(this.inputMap);
+    public set content(_content: HTMLFormElement) {
+      if (this.contains(this.content))
+        this.replaceChild(_content, this.content);
+      else
+        this.appendChild(_content);
+      this.#content = _content;
     }
 
     /**
      * Set the label text to show
      */
-    public setLabel(_key: string, _text: string): void {
-      this.inputMap[_key].value = _text;
+    public setValue(_id: string, _text: string): void {
+      let element: Element | RadioNodeList = this.content.elements.namedItem(_id);
+      if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement)
+        element.value = _text;
     }
 
     /**
      * Get the label text shown
      */
-    public getLabel(_key: string): string {
-      return this.inputMap[_key].value;
+    public getValue(_id: string): string {
+      let label: string = "";
+      let element: Element | RadioNodeList = this.content.elements.namedItem(_id);
+      if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement)
+        label = element.value;
+      return label;
     }
 
     /**
@@ -121,13 +114,13 @@ namespace FudgeUserInterface {
      * in order to create that {@link CustomTreeList} and add it as branch to this item
      */
     public expand(_expand: boolean): void {
-      this.removeBranch();
+      // this.removeBranch();
 
       if (_expand)
         this.dispatchEvent(new Event(EVENT.EXPAND, { bubbles: true }));
 
       (<HTMLInputElement>this.querySelector("input[type='checkbox']")).checked = _expand;
-    }
+    }   
 
     /**
      * Returns a list of all data referenced by the items succeeding this
@@ -183,7 +176,7 @@ namespace FudgeUserInterface {
       this.appendChild(this.checkbox);
 
       this.content = this.controller.createContent(this.data);
-      this.appendChild(this.content);
+      // this.appendChild(this.content);
 
       this.refreshAttributes();
       
@@ -192,14 +185,17 @@ namespace FudgeUserInterface {
 
 
     private hndFocus = (_event: Event): void => {
-      if (!(_event.target instanceof HTMLInputElement) || !this.inputs.includes(_event.target)) return;
+      _event.stopPropagation();
+      if (!(_event.target instanceof HTMLInputElement) || _event.target == this.checkbox) return;
 
       _event.target.disabled = true;
     }
 
     private hndKey = (_event: KeyboardEvent): void => {
       _event.stopPropagation();
-      if (this.inputs.some(input => !input.disabled)) return;
+      for (const iterator of this.content.elements) {
+        if (iterator instanceof HTMLInputElement && !iterator.disabled) return;
+      }
 
       let content: CustomTreeList<T> = <CustomTreeList<T>>this.querySelector("ul");
 
@@ -255,37 +251,46 @@ namespace FudgeUserInterface {
       }
     }
 
-    private startTypingLabel(_inputElement?: HTMLInputElement): void {
-      if (!_inputElement) _inputElement = this.inputs[0];
-      _inputElement.disabled = false;
-      _inputElement.focus();
+    private startTypingLabel(_inputElement?: HTMLElement): void {
+      if (!_inputElement) _inputElement = <HTMLElement>this.content.elements.item(0);
+      if (_inputElement instanceof HTMLInputElement) {
+        _inputElement.disabled = false;
+        _inputElement.focus();  
+      } 
     }
 
     private hndDblClick = (_event: Event): void => {
       _event.stopPropagation();
-      if (!(_event.target instanceof HTMLInputElement) || _event.target == this.checkbox) return;
+      if (_event.target == this.checkbox) return;
       
-      this.startTypingLabel(_event.target);
+      this.startTypingLabel(<HTMLElement>_event.target);
     }
 
     private hndChange = (_event: Event): void => {
-      let target: HTMLInputElement = <HTMLInputElement>_event.target;
+      let target: HTMLElement = <HTMLElement>_event.target;
       let item: HTMLLIElement = <HTMLLIElement>target.parentElement;
       _event.stopPropagation();
 
-      switch (target.type) {
-        case "checkbox":
-          this.expand(target.checked);
-          break;
-        case "text":
-          target.disabled = true;
-          item.focus();
-          target.dispatchEvent(new Event(EVENT.RENAME, { bubbles: true }));
-          break;
-        case "default":
-          // console.log(target);
-          break;
+      if (target instanceof HTMLInputElement) {
+        switch (target.type) {
+          case "checkbox":
+            this.expand(target.checked);
+            break;
+          case "text":
+            target.disabled = true;
+            item.focus();
+            target.dispatchEvent(new Event(EVENT.RENAME, { bubbles: true }));
+            break;
+          case "default":
+            // console.log(target);
+            break;
+        }
       }
+      
+      if (target instanceof HTMLSelectElement) {
+        target.dispatchEvent(new Event(EVENT.RENAME, { bubbles: true }));
+      }
+        
     }
 
     private hndDragStart = (_event: DragEvent): void => {

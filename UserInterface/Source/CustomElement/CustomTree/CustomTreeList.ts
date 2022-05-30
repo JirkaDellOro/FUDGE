@@ -5,9 +5,11 @@ namespace FudgeUserInterface {
    * Extension of ul-element that keeps a list of {@link CustomTreeItem}s to represent a branch in a tree
    */
   export class CustomTreeList<T> extends HTMLUListElement {
+    public controller: CustomTreeController<T>;
 
-    constructor(_items: CustomTreeItem<T>[] = []) {
+    constructor(_controller: CustomTreeController<T>, _items: CustomTreeItem<T>[] = []) {
       super();
+      this.controller = _controller;
       this.addItems(_items);
       this.className = "tree";
     }
@@ -61,7 +63,7 @@ namespace FudgeUserInterface {
      */
     public findItem(_data: T): CustomTreeItem<T> {
       for (let item of this.children)
-        if ((<CustomTreeItem<T>>item).data == _data)
+        if (this.controller.equals((<CustomTreeItem<T>>item).data, _data))
           return <CustomTreeItem<T>>item;
 
       return null;
@@ -85,8 +87,8 @@ namespace FudgeUserInterface {
 
     public displaySelection(_data: T[]): void {
       let items: NodeListOf<CustomTreeItem<T>> = <NodeListOf<CustomTreeItem<T>>>this.querySelectorAll("li");
-      for (let item of items)
-        item.selected = (_data != null && _data.indexOf(item.data) > -1);
+      for (let item of items) 
+        item.selected = (_data != null && _data.some(data => this.controller.equals(data, item.data)));
     }
 
     public selectInterval(_dataStart: T, _dataEnd: T): void {
@@ -129,7 +131,7 @@ namespace FudgeUserInterface {
     public findVisible(_data: T): CustomTreeItem<T> {
       let items: NodeListOf<CustomTreeItem<T>> = <NodeListOf<CustomTreeItem<T>>>this.querySelectorAll("li");
       for (let item of items)
-        if (_data == item.data)
+        if (this.controller.equals(_data, item.data))
           return item;
       return null;
     }

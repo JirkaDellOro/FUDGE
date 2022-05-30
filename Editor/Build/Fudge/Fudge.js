@@ -1757,26 +1757,34 @@ var Fudge;
         createContent(_dataAndPath) {
             let path = _dataAndPath.path;
             let data = _dataAndPath.data;
-            let content = document.createElement("span");
+            let content = document.createElement("form");
             let labelKey = document.createElement("input");
             labelKey.type = "text";
             labelKey.disabled = true;
             labelKey.value = path[path.length - 1];
-            labelKey.setAttribute("key", "key" /* KEY */);
+            labelKey.id = "key" /* KEY */;
             content.appendChild(labelKey);
             if (ƒ.ParticleEffect.isClosureData(data)) {
-                let labelValue = document.createElement("input");
-                labelValue.type = "text";
-                labelValue.disabled = true;
                 if (ƒ.ParticleEffect.isFunctionData(data)) {
-                    labelValue.setAttribute("key", "function" /* FUNCTION */);
-                    labelValue.value = data.function;
+                    let select = document.createElement("select");
+                    select.id = "function" /* FUNCTION */;
+                    for (let key in ƒ.ParticleClosureFactory.closures) {
+                        let entry = document.createElement("option");
+                        entry.text = key;
+                        entry.value = key;
+                        select.add(entry);
+                    }
+                    select.value = data.function;
+                    content.appendChild(select);
                 }
                 else {
-                    labelValue.setAttribute("key", "value" /* VALUE */);
-                    labelValue.value = data.toString();
+                    let input = document.createElement("input");
+                    input.type = "sel";
+                    input.disabled = true;
+                    input.id = "value" /* VALUE */;
+                    input.value = data.toString();
+                    content.appendChild(input);
                 }
-                content.appendChild(labelValue);
             }
             return content;
         }
@@ -1879,6 +1887,9 @@ var Fudge;
                 copies.push({ data: data, path: [""] });
             }
             return copies;
+        }
+        equals(_a, _b) {
+            return _a.data == _b.data;
         }
         getDataAtPath(_path) {
             let found = this.particleEffectRoot;

@@ -4147,7 +4147,9 @@ declare namespace FudgeCore {
      * @author Jonas Plotzky, HFU, 2020
      */
     class ParticleClosureFactory {
-        private static closures;
+        static closures: {
+            [key: string]: Function;
+        };
         /**
          * Creates a closure of the given function type and passes the parameters to it.
          * @param _function The function type of the closure you want to create.

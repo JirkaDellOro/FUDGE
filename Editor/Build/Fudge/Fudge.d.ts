@@ -387,7 +387,7 @@ declare namespace Fudge {
     class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ParticleEffectDataAndPath> {
         private particleEffectRoot;
         constructor(_particleEffectData: ƒ.Serialization);
-        createContent(_dataAndPath: ParticleEffectDataAndPath): HTMLElement;
+        createContent(_dataAndPath: ParticleEffectDataAndPath): HTMLFormElement;
         getLabel(_key: string, _dataAndPath: ParticleEffectDataAndPath): string;
         getAttributes(_dataAndPath: ParticleEffectDataAndPath): string;
         rename(_dataAndPath: ParticleEffectDataAndPath, _key: string, _new: string): void;
@@ -396,6 +396,7 @@ declare namespace Fudge {
         delete(_focused: ParticleEffectDataAndPath[]): ParticleEffectDataAndPath[];
         addChildren(_children: ParticleEffectDataAndPath[], _target: ParticleEffectDataAndPath): ParticleEffectDataAndPath[];
         copy(_originalData: ParticleEffectDataAndPath[]): Promise<ParticleEffectDataAndPath[]>;
+        equals(_a: ParticleEffectDataAndPath, _b: ParticleEffectDataAndPath): boolean;
         private getDataAtPath;
         private deleteDataAtPath;
     }

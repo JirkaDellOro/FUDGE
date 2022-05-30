@@ -72,6 +72,10 @@ ul.tree {
   list-style: none;
 }
 
+ul.tree form {
+  display: inline;
+}
+
 ul.tree li {
   white-space: nowrap;
 }
@@ -84,8 +88,8 @@ ul.tree li[attributes~="GraphInstance"]>input {
   font-style: italic;
 }
 
-ul.tree li[attributes~="string"]>span>input:nth-child(2), 
-ul.tree li[attributes~="function"]>span>input:first-child {
+ul.tree li[attributes~="string"]>form>input:nth-child(2), 
+ul.tree li[attributes~="function"]>form>input:first-child {
   font-style: italic;
 }
 
