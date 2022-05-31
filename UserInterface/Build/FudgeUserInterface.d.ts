@@ -468,7 +468,6 @@ declare namespace FudgeUserInterface {
         /** Create an HTMLElement for the tree item representing the object  */
         abstract createContent(_object: T): HTMLFormElement;
         /** Retrieve a string to create a label for the tree item representing one of the objects properties  */
-        abstract getLabel(_key: string, _object: T): string;
         /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
         abstract getAttributes(_object: T): string;
         /** Process the proposed new label */
@@ -495,7 +494,6 @@ declare namespace FudgeUserInterface {
          * @param _focussed The object currently having focus
          */
         abstract copy(_originals: T[]): Promise<T[]>;
-        abstract equals(_a: T, _b: T): boolean;
     }
 }
 declare namespace FudgeUserInterface {

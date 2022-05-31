@@ -1473,7 +1473,7 @@ var FudgeUserInterface;
          */
         findItem(_data) {
             for (let item of this.children)
-                if (this.controller.equals(item.data, _data))
+                if (item.data == _data)
                     return item;
             return null;
         }
@@ -1494,7 +1494,7 @@ var FudgeUserInterface;
         displaySelection(_data) {
             let items = this.querySelectorAll("li");
             for (let item of items)
-                item.selected = (_data != null && _data.some(data => this.controller.equals(data, item.data)));
+                item.selected = (_data != null && _data.indexOf(item.data) > -1);
         }
         selectInterval(_dataStart, _dataEnd) {
             let items = this.querySelectorAll("li");
@@ -1532,7 +1532,7 @@ var FudgeUserInterface;
         findVisible(_data) {
             let items = this.querySelectorAll("li");
             for (let item of items)
-                if (this.controller.equals(_data, item.data))
+                if (_data == item.data)
                     return item;
             return null;
         }

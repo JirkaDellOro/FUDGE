@@ -63,7 +63,7 @@ namespace FudgeUserInterface {
      */
     public findItem(_data: T): CustomTreeItem<T> {
       for (let item of this.children)
-        if (this.controller.equals((<CustomTreeItem<T>>item).data, _data))
+      if ((<CustomTreeItem<T>>item).data == _data)
           return <CustomTreeItem<T>>item;
 
       return null;
@@ -87,8 +87,8 @@ namespace FudgeUserInterface {
 
     public displaySelection(_data: T[]): void {
       let items: NodeListOf<CustomTreeItem<T>> = <NodeListOf<CustomTreeItem<T>>>this.querySelectorAll("li");
-      for (let item of items) 
-        item.selected = (_data != null && _data.some(data => this.controller.equals(data, item.data)));
+      for (let item of items)
+        item.selected = (_data != null && _data.indexOf(item.data) > -1);
     }
 
     public selectInterval(_dataStart: T, _dataEnd: T): void {
@@ -131,7 +131,7 @@ namespace FudgeUserInterface {
     public findVisible(_data: T): CustomTreeItem<T> {
       let items: NodeListOf<CustomTreeItem<T>> = <NodeListOf<CustomTreeItem<T>>>this.querySelectorAll("li");
       for (let item of items)
-        if (this.controller.equals(_data, item.data))
+        if (_data == item.data)
           return item;
       return null;
     }

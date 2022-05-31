@@ -139,13 +139,13 @@ namespace FudgeCore {
      * - ```_parameters[4]``` d value.
      */
     private static createPolynomial3(_parameters: Function[]): Function {
-      let a: number = _parameters[1]();
-      let b: number = _parameters[2]();
-      let c: number = _parameters[3]();
-      let d: number = _parameters[4]();
       return function (_variables: ParticleVariables): number {
         // Debug.group("ClosurePolynomial3");
         let x: number = _parameters[0](_variables);
+        let a: number = _parameters[1](_variables);
+        let b: number = _parameters[2](_variables);
+        let c: number = _parameters[3](_variables);
+        let d: number = _parameters[4](_variables);
         let y: number = a * Math.pow(x, 3) + b * Math.pow(x, 2) + c * x + d;
         // Debug.groupEnd();
         return y;

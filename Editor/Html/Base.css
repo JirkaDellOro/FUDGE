@@ -88,7 +88,7 @@ ul.tree li[attributes~="GraphInstance"]>input {
   font-style: italic;
 }
 
-ul.tree li[attributes~="string"]>form>input:nth-child(2), 
+ul.tree li[attributes~="variable"]>form>input:nth-child(2), 
 ul.tree li[attributes~="function"]>form>input:first-child {
   font-style: italic;
 }

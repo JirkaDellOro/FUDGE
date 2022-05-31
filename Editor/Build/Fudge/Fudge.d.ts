@@ -380,25 +380,20 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
-    interface ParticleEffectDataAndPath {
-        data: Object | ƒ.FunctionData | string | number;
-        path: string[];
-    }
-    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ParticleEffectDataAndPath> {
-        private particleEffectRoot;
+    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<Object | ƒ.ClosureData> {
+        private parentMap;
         constructor(_particleEffectData: ƒ.Serialization);
-        createContent(_dataAndPath: ParticleEffectDataAndPath): HTMLFormElement;
-        getLabel(_key: string, _dataAndPath: ParticleEffectDataAndPath): string;
-        getAttributes(_dataAndPath: ParticleEffectDataAndPath): string;
-        rename(_dataAndPath: ParticleEffectDataAndPath, _key: string, _new: string): void;
-        hasChildren(_dataAndPath: ParticleEffectDataAndPath): boolean;
-        getChildren(_dataAndPath: ParticleEffectDataAndPath): ParticleEffectDataAndPath[];
-        delete(_focused: ParticleEffectDataAndPath[]): ParticleEffectDataAndPath[];
-        addChildren(_children: ParticleEffectDataAndPath[], _target: ParticleEffectDataAndPath): ParticleEffectDataAndPath[];
-        copy(_originalData: ParticleEffectDataAndPath[]): Promise<ParticleEffectDataAndPath[]>;
-        equals(_a: ParticleEffectDataAndPath, _b: ParticleEffectDataAndPath): boolean;
-        private getDataAtPath;
-        private deleteDataAtPath;
+        createContent(_data: Object | ƒ.ClosureData): HTMLFormElement;
+        getAttributes(_data: Object | ƒ.ClosureData): string;
+        rename(_data: Object | ƒ.ClosureData, _id: string, _new: string): void;
+        hasChildren(_data: Object | ƒ.ClosureData): boolean;
+        getChildren(_data: Object | ƒ.ClosureData): (Object | ƒ.ClosureData)[];
+        delete(_focused: (Object | ƒ.ClosureData)[]): (Object | ƒ.ClosureData)[];
+        addChildren(_children: (Object | ƒ.ClosureData)[], _target: Object | ƒ.ClosureData): (Object | ƒ.ClosureData)[];
+        copy(_originalData: (Object | ƒ.ClosureData)[]): Promise<(Object | ƒ.ClosureData)[]>;
+        private getKey;
+        private deleteData;
+        private getPath;
     }
 }
 declare namespace Fudge {
@@ -496,6 +491,7 @@ declare namespace Fudge {
         private particleEffect;
         private particleEffectData;
         private particleEffectStructure;
+        private idInterval;
         private tree;
         private canvas;
         private crc2;

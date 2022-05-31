@@ -14,10 +14,22 @@ namespace FudgeCore {
     [attribute: string]: ParticleEffectStructure | Function;
   }
 
+  export type ClosureData = FunctionData | VariableData | ConstantData;
+
   export interface FunctionData {
     function: string;
-    parameters: (FunctionData | string | number)[];
+    parameters: ClosureData[];
     readonly type: "function";
+  }
+
+  export interface VariableData {
+    value: string;
+    type: "variable";
+  }
+
+  export interface ConstantData {
+    value: number;
+    type: "constant";
   }
 
   /**
@@ -45,12 +57,20 @@ namespace FudgeCore {
       Project.register(this);
     }
 
-    public static isClosureData(_data: General): _data is FunctionData | string | number {
-      return ParticleEffect.isFunctionData(_data) || typeof _data == "string" || typeof _data == "number";
+    public static isClosureData(_data: General): _data is ClosureData {
+      return ParticleEffect.isFunctionData(_data) || ParticleEffect.isVariableData(_data) || ParticleEffect.isConstantData(_data);
     }
 
     public static isFunctionData(_data: General): _data is FunctionData {
       return (_data as FunctionData).type == "function";
+    }
+
+    public static isVariableData(_data: General): _data is VariableData {
+      return (_data as VariableData).type == "variable";
+    }
+
+    public static isConstantData(_data: General): _data is ConstantData {
+      return (_data as ConstantData).type == "constant";
     }
 
     /**
@@ -77,7 +97,7 @@ namespace FudgeCore {
      * Parse the given closure data recursivley. Returns a function depending on the closure data.
      * @param _data The closure data to parse recursively.
      */
-    private static parseClosure(_data: FunctionData | string | number, _variableNames: string[]): Function {
+    private static parseClosure(_data: ClosureData, _variableNames: string[]): Function {
       if (ParticleEffect.isFunctionData(_data)) {
         let parameters: Function[] = [];
         for (let param of _data.parameters) {
@@ -86,21 +106,21 @@ namespace FudgeCore {
         return ParticleClosureFactory.createClosure(_data.function, parameters);
       }
 
-      if (typeof _data == "string") {
-        if (_variableNames.includes(_data)) {
+      if (ParticleEffect.isVariableData(_data)) {
+        if (_variableNames.includes(_data.value)) {
           return function (_variables: ParticleVariables): number {
             // Debug.log("Variable", `"${_data}"`, _variables[<string>_data]);
-            return <number>_variables[_data];
+            return <number>_variables[_data.value];
           };
         } else {
           throw `"${_data}" is not a defined variable in the ${this.name}`;
         }
       } 
 
-      if (typeof _data == "number") {
+      if (ParticleEffect.isConstantData(_data)) {
         return function (_variables: ParticleVariables): number {
           // Debug.log("Constant", _data);
-          return <number>_data;
+          return <number>_data.value;
         };
       }
 

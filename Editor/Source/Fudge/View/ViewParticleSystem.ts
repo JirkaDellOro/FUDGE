@@ -10,9 +10,10 @@ namespace Fudge {
     private particleEffect: ƒ.ParticleEffect;
     private particleEffectData: ƒ.Serialization;
     private particleEffectStructure: ƒ.ParticleEffectStructure;
+    private idInterval: number;
 
     // private controller: ControllerTreeParticleSystem;
-    private tree: ƒui.CustomTree<ParticleEffectDataAndPath>;
+    private tree: ƒui.CustomTree<Object | ƒ.ClosureData>;
     private canvas: HTMLCanvasElement;
     private crc2: CanvasRenderingContext2D;
 
@@ -69,6 +70,8 @@ namespace Fudge {
       if (!_particleEffect) {
         this.particleEffect = undefined;
         this.tree = undefined;
+        window.clearInterval(this.idInterval);
+        this.idInterval = undefined;
         this.dom.innerHTML = "select a node with an attached component particle system";
         return;
       }
@@ -80,7 +83,8 @@ namespace Fudge {
       this.recreateTree(this.particleEffectData);
       this.updateUserInterface();
       this.redraw();
-
+      if (this.idInterval == undefined)
+        this.idInterval = window.setInterval(() => { this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph} }); }, 1000 / 30);
     }
 
 
@@ -101,8 +105,8 @@ namespace Fudge {
     }
 
     private recreateTree(_particleEffectData: ƒ.Serialization): void {
-      let newTree: ƒui.CustomTree<ParticleEffectDataAndPath> = 
-        new ƒui.CustomTree<ParticleEffectDataAndPath>( new ControllerTreeParticleSystem(_particleEffectData), {path: [], data: _particleEffectData} );
+      let newTree: ƒui.CustomTree<Object | ƒ.ClosureData> = 
+        new ƒui.CustomTree<Object | ƒ.ClosureData>( new ControllerTreeParticleSystem(_particleEffectData), _particleEffectData );
 
       newTree.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
       newTree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);

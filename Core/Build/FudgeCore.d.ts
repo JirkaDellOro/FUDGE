@@ -4224,10 +4224,19 @@ declare namespace FudgeCore {
     interface ParticleEffectStructure {
         [attribute: string]: ParticleEffectStructure | Function;
     }
+    type ClosureData = FunctionData | VariableData | ConstantData;
     interface FunctionData {
         function: string;
-        parameters: (FunctionData | string | number)[];
+        parameters: ClosureData[];
         readonly type: "function";
+    }
+    interface VariableData {
+        value: string;
+        type: "variable";
+    }
+    interface ConstantData {
+        value: number;
+        type: "constant";
     }
     /**
      * Holds all the information which defines the particle effect. Can load the said information out of a json file.
@@ -4247,8 +4256,10 @@ declare namespace FudgeCore {
             [key: string]: Mutator;
         };
         constructor(_name?: string, _particleEffectData?: Serialization);
-        static isClosureData(_data: General): _data is FunctionData | string | number;
+        static isClosureData(_data: General): _data is ClosureData;
         static isFunctionData(_data: General): _data is FunctionData;
+        static isVariableData(_data: General): _data is VariableData;
+        static isConstantData(_data: General): _data is ConstantData;
         /**
          * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
          * @param _data The particle effect data to parse recursivley.
