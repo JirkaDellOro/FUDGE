@@ -1574,6 +1574,7 @@ var FudgeCore;
             if (found < 0)
                 return;
             _child.dispatchEvent(new Event("childRemove", { bubbles: true }));
+            _child.broadcastEvent(new Event("nodeDeactivate"));
             if (this.isDescendantOf(FudgeCore.AudioManager.default.getGraphListeningTo()))
                 _child.broadcastEvent(new Event("childRemoveFromAudioGraph"));
             this.children.splice(found, 1);
@@ -3405,7 +3406,7 @@ var FudgeCore;
             this.far = _far;
             this.mtxProjection = FudgeCore.Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction);
         }
-        projectOrthographic(_left = 0, _right = FudgeCore.Render.getCanvas().clientWidth, _bottom = FudgeCore.Render.getCanvas().clientHeight, _top = 0) {
+        projectOrthographic(_left = -FudgeCore.Render.getCanvas().clientWidth / 2, _right = FudgeCore.Render.getCanvas().clientWidth / 2, _bottom = FudgeCore.Render.getCanvas().clientHeight / 2, _top = -FudgeCore.Render.getCanvas().clientHeight / 2) {
             this.projection = PROJECTION.ORTHOGRAPHIC;
             this.mtxProjection = FudgeCore.Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400);
         }
@@ -5601,8 +5602,8 @@ var FudgeCore;
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
             mtxResult.data.set([
                 2 / (_right - _left), 0, 0, 0,
-                0, 2 / (_top - _bottom), 0, 0,
-                0, 0, 2 / (_near - _far), 0,
+                0, -2 / (_top - _bottom), 0, 0,
+                0, 0, 2 / (_far - _near), 0,
                 (_left + _right) / (_left - _right),
                 (_bottom + _top) / (_bottom - _top),
                 (_near + _far) / (_near - _far),
@@ -9750,8 +9751,8 @@ var FudgeCore;
                 Render.nodesAlpha.reset();
                 Render.nodesPhysics.reset();
                 Render.componentsPick.reset();
-                Render.dispatchEvent(new Event("renderPrepareStart"));
                 Render.lights.forEach(_array => _array.reset());
+                _branch.dispatchEvent(new Event("renderPrepareStart"));
             }
             if (!_branch.isActive)
                 return;
@@ -9777,17 +9778,7 @@ var FudgeCore;
                 Render.componentsPick.push(cmpPick);
             }
             let cmpLights = _branch.getComponents(FudgeCore.ComponentLight);
-            for (let cmpLight of cmpLights) {
-                if (!cmpLight.isActive)
-                    continue;
-                let type = cmpLight.light.getType();
-                let lightsOfType = Render.lights.get(type);
-                if (!lightsOfType) {
-                    lightsOfType = new FudgeCore.RecycableArray();
-                    Render.lights.set(type, lightsOfType);
-                }
-                lightsOfType.push(cmpLight);
-            }
+            Render.addLights(cmpLights);
             let cmpMesh = _branch.getComponent(FudgeCore.ComponentMesh);
             let cmpMaterial = _branch.getComponent(FudgeCore.ComponentMaterial);
             if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
@@ -9813,9 +9804,22 @@ var FudgeCore;
                 FudgeCore.Recycler.store(position);
             }
             if (firstLevel) {
-                Render.dispatchEvent(new Event("renderPrepareEnd"));
+                _branch.dispatchEvent(new Event("renderPrepareEnd"));
                 for (let shader of _shadersUsed)
                     Render.setLightsInShader(shader, Render.lights);
+            }
+        }
+        static addLights(cmpLights) {
+            for (let cmpLight of cmpLights) {
+                if (!cmpLight.isActive)
+                    continue;
+                let type = cmpLight.light.getType();
+                let lightsOfType = Render.lights.get(type);
+                if (!lightsOfType) {
+                    lightsOfType = new FudgeCore.RecycableArray();
+                    Render.lights.set(type, lightsOfType);
+                }
+                lightsOfType.push(cmpLight);
             }
         }
         static pickBranch(_nodes, _cmpCamera) {
@@ -10140,7 +10144,9 @@ var FudgeCore;
             let mtxRoot = FudgeCore.Matrix4x4.IDENTITY();
             if (this.#branch.getParent())
                 mtxRoot = this.#branch.getParent().mtxWorld;
+            this.dispatchEvent(new Event("renderPrepareStart"));
             FudgeCore.Render.prepare(this.#branch, null, mtxRoot);
+            this.dispatchEvent(new Event("renderPrepareEnd"));
             this.componentsPick = FudgeCore.Render.componentsPick;
         }
         dispatchPointerEvent(_event) {
@@ -10939,7 +10945,8 @@ var FudgeCore;
     ShaderFlatSkin.define = [
         "LIGHT",
         "FLAT",
-        "SKIN"
+        "SKIN",
+        "CAMERA"
     ];
     FudgeCore.ShaderFlatSkin = ShaderFlatSkin;
 })(FudgeCore || (FudgeCore = {}));
@@ -10995,7 +11002,8 @@ var FudgeCore;
     ShaderGouraudSkin.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudSkin);
     ShaderGouraudSkin.define = [
         "LIGHT",
-        "SKIN"
+        "SKIN",
+        "CAMERA"
     ];
     FudgeCore.ShaderGouraudSkin = ShaderGouraudSkin;
 })(FudgeCore || (FudgeCore = {}));
@@ -11191,7 +11199,7 @@ out vec2 v_vctTexture;
   #endif
 
   #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
+// uniform mat4 u_mtxMeshToWorld;
 // Bones
 struct Bone {
   mat4 matrix;
