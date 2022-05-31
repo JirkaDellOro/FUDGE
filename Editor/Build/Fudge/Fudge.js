@@ -2304,6 +2304,7 @@ var Fudge;
                 case "drop" /* DROP */:
                 case "rename" /* RENAME */:
                     this.particleEffect.data = this.particleEffectData;
+                    this.cmpParticleSystem.particleEffect = this.particleEffect;
                     break;
             }
         };
@@ -2380,7 +2381,7 @@ var Fudge;
                     // this.cmpParticleSystem.evaluateStorage(this.particleEffect.storageUpdate);
                     variables[ƒ.PARTICLE_VARIBALE_NAMES.INDEX] = iParticle;
                     // this.cmpParticleSystem.evaluateStorage(this.particleEffect.storageParticle);
-                    variables["1-particleTime"] = time / 10;
+                    variables["reversedParticleTime"] = time / 10;
                     let x = time * 100;
                     let y = -_closure(variables) * 1000;
                     // console.log(y);
