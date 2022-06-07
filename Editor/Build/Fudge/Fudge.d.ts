@@ -35,7 +35,10 @@ declare namespace Fudge {
         DELETE_RESOURCE = 15,
         ILLUMINATE = 16,
         ADD_PROPERTY = 17,
-        DELETE_PROPERTY = 18
+        DELETE_PROPERTY = 18,
+        ADD_PARTICLE_PATH = 19,
+        ADD_PARTICLE_FUNCTION = 20,
+        ADD_PARTICLE_CONSTANT = 21
     }
     enum MENU {
         QUIT = "quit",
@@ -391,9 +394,9 @@ declare namespace Fudge {
         delete(_focused: (Object | ƒ.ClosureData)[]): (Object | ƒ.ClosureData)[];
         addChildren(_children: (Object | ƒ.ClosureData)[], _target: Object | ƒ.ClosureData): (Object | ƒ.ClosureData)[];
         copy(_originalData: (Object | ƒ.ClosureData)[]): Promise<(Object | ƒ.ClosureData)[]>;
+        getPath(_data: Object | ƒ.ClosureData): string[];
         private getKey;
         private deleteData;
-        private getPath;
     }
 }
 declare namespace Fudge {
@@ -493,9 +496,14 @@ declare namespace Fudge {
         private particleEffectStructure;
         private idInterval;
         private tree;
+        private controller;
         private canvas;
         private crc2;
         constructor(_container: ComponentContainer, _state: Object);
+        protected openContextMenu: (_event: Event) => void;
+        protected getCustomContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private getMenuItemFromPath;
         private hndEvent;
         private setParticleEffect;
         private createUserInterface;

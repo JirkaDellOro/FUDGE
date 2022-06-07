@@ -46,6 +46,9 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 16] = "ILLUMINATE";
         CONTEXTMENU[CONTEXTMENU["ADD_PROPERTY"] = 17] = "ADD_PROPERTY";
         CONTEXTMENU[CONTEXTMENU["DELETE_PROPERTY"] = 18] = "DELETE_PROPERTY";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_PATH"] = 19] = "ADD_PARTICLE_PATH";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION"] = 20] = "ADD_PARTICLE_FUNCTION";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT"] = 21] = "ADD_PARTICLE_CONSTANT";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -1880,6 +1883,16 @@ var Fudge;
             }
             return copies;
         }
+        getPath(_data) {
+            let path = [];
+            let parent;
+            while (this.parentMap.has(_data)) {
+                parent = this.parentMap.get(_data);
+                path.unshift(this.getKey(_data, parent));
+                _data = parent;
+            }
+            return path;
+        }
         getKey(_data, _parentData) {
             let key;
             if (ƒ.ParticleEffect.isClosureData(_data) && ƒ.ParticleEffect.isFunctionData(_parentData)) {
@@ -1900,16 +1913,6 @@ var Fudge;
                 delete parentData[key];
             }
             this.parentMap.delete(_data);
-        }
-        getPath(_data) {
-            let path = [];
-            let parent;
-            while (this.parentMap.has(_data)) {
-                parent = this.parentMap.get(_data);
-                path.unshift(this.getKey(_data, parent));
-                _data = parent;
-            }
-            return path;
         }
     }
     Fudge.ControllerTreeParticleSystem = ControllerTreeParticleSystem;
@@ -2266,32 +2269,152 @@ var Fudge;
         idInterval;
         // private controller: ControllerTreeParticleSystem;
         tree;
+        controller;
         canvas;
         crc2;
         constructor(_container, _state) {
             super(_container, _state);
-            // let filename: string | string[] = remote.dialog.showOpenDialogSync(null, {
-            //     properties: ["openFile", "promptToCreate"], title: "Select/Create a new particle system json", buttonLabel: "Save Particle System", filters: [{name: "json", extensions: ["json"]}]
-            // });
-            // if (!filename)
-            // return;
-            // let base: URL = new URL(new URL("file://" + filename[0]).toString() + "/");
-            // // console.log("Path", base.toString());
-            // this.setTitle(base.toString().match("/[A-Za-z._]*/$")[0]?.replaceAll("/", ""));
-            // fs.readFile(base, "utf-8", (error, data) => {
-            //     if (error?.code === "ENOENT")
-            //         fs.writeFileSync(base, "{}");
-            //     let div: HTMLDivElement = document.createElement("div");
-            //     div.innerText = data;
-            //     this.dom.appendChild(div);
-            // });
             ƒ.Render.setBlendMode(ƒ.BLEND.PARTICLE);
             ƒ.Render.setDepthTest(false);
             this.createUserInterface();
             this.setParticleEffect(null);
             _container.on("resize", this.redraw);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
         }
+        //#region  ContextMenu
+        openContextMenu = (_event) => {
+            this.contextMenu = this.getCustomContextMenu(this.contextMenuCallback.bind(this));
+            this.contextMenu.popup();
+        };
+        getCustomContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            let focus = this.tree.getFocussed();
+            if (ƒ.ParticleEffect.isFunctionData(focus)) {
+                item = new Fudge.remote.MenuItem({ label: "Add Variable/Constant", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT), click: _callback });
+                menu.append(item);
+                item = new Fudge.remote.MenuItem({ label: "Add Function", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION), click: _callback });
+                menu.append(item);
+            }
+            else {
+                menu.append(this.getMenuItemFromPath(this.controller.getPath(focus), _callback));
+            }
+            item = new Fudge.remote.MenuItem({ label: "Delete", id: String(Fudge.CONTEXTMENU.DELETE_NODE), click: _callback, accelerator: "D" });
+            menu.append(item);
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
+            let focus = this.tree.getFocussed();
+            let child;
+            switch (Number(_item.id)) {
+                case Fudge.CONTEXTMENU.ADD_PARTICLE_PATH:
+                    child = {};
+                    focus[_item.label] = child;
+                    this.tree.findVisible(focus).expand(true);
+                    this.tree.findVisible(child).focus();
+                    break;
+                case Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT:
+                    child = { type: "constant", value: 0 };
+                    let parentLabel = _item["parentLabel"];
+                    if (parentLabel)
+                        focus[parentLabel] = child;
+                    this.tree.findVisible(focus).expand(true);
+                    this.tree.findVisible(child).focus();
+                    break;
+                case Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION:
+                    child = { type: "constant", value: 0 };
+                    let parentLabell = _item["parentLabel"];
+                    if (parentLabell)
+                        focus[parentLabell] = child;
+                    this.tree.findVisible(focus).expand(true);
+                    this.tree.findVisible(child).focus();
+                    break;
+                case Fudge.CONTEXTMENU.DELETE_NODE:
+                    if (!focus)
+                        return;
+                    let remove = this.controller.delete([focus]);
+                    this.tree.delete(remove);
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    break;
+            }
+        }
+        getMenuItemFromPath(_path, _callback) {
+            let focus = this.tree.getFocussed();
+            let label;
+            let options;
+            let numberOptions = [];
+            const submenu = new Fudge.remote.Menu();
+            switch (_path[0]) {
+                case "storage":
+                    if (_path.length == 1) {
+                        label = "Add Storage";
+                        options = ["system", "update", "particle"];
+                    }
+                    else {
+                        // TODO: add variable or function
+                    }
+                    break;
+                case "transformations":
+                    if (_path.length == 1) {
+                        label = "Add Transformation";
+                        options = ["local", "world"];
+                    }
+                    else {
+                        // TODO: i dont know
+                    }
+                    break;
+                case "components":
+                    if (_path.length == 1) {
+                        label = "Add Component";
+                        options = [];
+                        for (const anyComponent of ƒ.Component.subclasses) {
+                            //@ts-ignore
+                            this.node.getComponents(anyComponent).forEach((component, index) => {
+                                options.push(component.type);
+                            });
+                        }
+                    }
+                    else {
+                        label = "Add Property";
+                        //@ts-ignore
+                        let mutator = this.node.getComponent(ƒ.Component.subclasses.find(componentType => componentType.name == _path[1])).getMutatorForAnimation();
+                        _path.splice(0, 2);
+                        while (_path.length > 0) {
+                            mutator = mutator[_path.shift()];
+                        }
+                        options = Object.keys(mutator).filter(optionLabel => mutator[optionLabel] instanceof Object || typeof mutator[optionLabel] == "number"); // only Object and number are valid
+                        numberOptions = options.filter(optionLabel => typeof mutator[optionLabel] == "number");
+                    }
+                    break;
+            }
+            options = options.filter(option => !Object.keys(focus).includes(option)); // remove options that are already added
+            let item;
+            for (const optionLabel of options) {
+                if (numberOptions.includes(optionLabel)) {
+                    let subsubmenu = new Fudge.remote.Menu();
+                    item = new Fudge.remote.MenuItem({ label: "Add Variable/Constant", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT), click: _callback });
+                    subsubmenu.append(item);
+                    //@ts-ignore
+                    item.overrideProperty("parentLabel", optionLabel);
+                    item = new Fudge.remote.MenuItem({ label: "Add Function", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION), click: _callback });
+                    subsubmenu.append(item);
+                    //@ts-ignore
+                    item.overrideProperty("parentLabel", optionLabel);
+                    item = new Fudge.remote.MenuItem({ label: optionLabel, submenu: subsubmenu });
+                }
+                else {
+                    item = new Fudge.remote.MenuItem({ label: optionLabel, id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_PATH), click: _callback });
+                }
+                submenu.append(item);
+            }
+            return new Fudge.remote.MenuItem({
+                label: label,
+                submenu: submenu
+            });
+        }
+        //#endregion
         hndEvent = async (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.FOCUS:
@@ -2300,6 +2423,7 @@ var Fudge;
                     this.cmpParticleSystem = this.node?.getComponent(ƒ.ComponentParticleSystem);
                     await this.setParticleEffect(this.cmpParticleSystem?.particleEffect);
                     break;
+                case Fudge.EVENT_EDITOR.MODIFY:
                 case "delete" /* DELETE */:
                 case "drop" /* DROP */:
                 case "rename" /* RENAME */:
@@ -2338,15 +2462,17 @@ var Fudge;
             // this.propertyList = document.createElement("div");
         }
         recreateTree(_particleEffectData) {
-            let newTree = new ƒui.CustomTree(new Fudge.ControllerTreeParticleSystem(_particleEffectData), _particleEffectData);
-            newTree.addEventListener("rename" /* RENAME */, this.hndEvent);
-            newTree.addEventListener("drop" /* DROP */, this.hndEvent);
-            newTree.addEventListener("delete" /* DELETE */, this.hndEvent);
+            this.controller = new Fudge.ControllerTreeParticleSystem(_particleEffectData);
+            let newTree = new ƒui.CustomTree(this.controller, _particleEffectData);
             if (this.tree && this.dom.contains(this.tree))
                 this.dom.replaceChild(newTree, this.tree);
             else
                 this.dom.appendChild(newTree);
             this.tree = newTree;
+            this.tree.addEventListener("rename" /* RENAME */, this.hndEvent);
+            this.tree.addEventListener("drop" /* DROP */, this.hndEvent);
+            this.tree.addEventListener("delete" /* DELETE */, this.hndEvent);
+            this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
         }
         //#region drawing
         redraw = () => {

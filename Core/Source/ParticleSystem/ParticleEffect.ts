@@ -62,15 +62,15 @@ namespace FudgeCore {
     }
 
     public static isFunctionData(_data: General): _data is FunctionData {
-      return (_data as FunctionData).type == "function";
+      return (_data as FunctionData)?.type == "function";
     }
 
     public static isVariableData(_data: General): _data is VariableData {
-      return (_data as VariableData).type == "variable";
+      return (_data as VariableData)?.type == "variable";
     }
 
     public static isConstantData(_data: General): _data is ConstantData {
-      return (_data as ConstantData).type == "constant";
+      return (_data as ConstantData)?.type == "constant";
     }
 
     /**
@@ -113,7 +113,7 @@ namespace FudgeCore {
             return <number>_variables[_data.value];
           };
         } else {
-          throw `"${_data}" is not a defined variable in the ${this.name}`;
+          throw `"${_data.value}" is not a defined variable in the ${this.name}`;
         }
       } 
 

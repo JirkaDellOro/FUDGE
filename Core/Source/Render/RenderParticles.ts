@@ -95,7 +95,7 @@ namespace FudgeCore {
       for (const key in _structureTransform) {
         let transformVector: Vector3 = key == "scale" ? Vector3.ONE() : Vector3.ZERO();
         transformVector.mutate(this.evaluateMutatorWith(_mutatorCache[key], <ParticleEffectStructure>_structureTransform[key], _variables), null, false);
-        (<General>_transform)[key](transformVector);
+        (<General>_transform)[key] = transformVector;
         Recycler.store(transformVector);
       }
     }

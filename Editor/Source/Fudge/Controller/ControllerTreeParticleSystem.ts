@@ -162,6 +162,17 @@ namespace Fudge {
       return copies;
     }
 
+    public getPath(_data:  Object | ƒ.ClosureData): string[] {
+      let path: string[] = [];
+      let parent: Object | ƒ.ClosureData;
+      while (this.parentMap.has(_data)) {
+        parent = this.parentMap.get(_data);
+        path.unshift(this.getKey(_data, parent));
+        _data = parent;
+      }
+      return path;
+    }
+
     private getKey(_data: Object | ƒ.ClosureData, _parentData: Object | ƒ.ClosureData): string {
       let key: string;
       if (ƒ.ParticleEffect.isClosureData(_data) && ƒ.ParticleEffect.isFunctionData(_parentData)) {
@@ -181,17 +192,6 @@ namespace Fudge {
         delete parentData[key];
       }
       this.parentMap.delete(_data);
-    }
-
-    private getPath(_data:  Object | ƒ.ClosureData): string[] {
-      let path: string[] = [];
-      let parent: Object | ƒ.ClosureData;
-      while (this.parentMap.has(_data)) {
-        parent = this.parentMap.get(_data);
-        path.unshift(this.getKey(_data, parent));
-        _data = parent;
-      }
-      return path;
     }
 
     // TODO: maybe remove path methods these if path becomes unnecessary
