@@ -148,12 +148,14 @@ namespace Fudge {
     protected hndDragOver(_event: DragEvent, _viewSource: View): void {
       _event.dataTransfer.dropEffect = "none";
 
-      if (!(_viewSource instanceof ViewInternal))
-        return;
+      if (!(_viewSource instanceof ViewComponents)) { // allow dropping cameracomponent to see through that camera (at this time, the only draggable)
+        if (!(_viewSource instanceof ViewInternal)) // allow dropping a graph
+          return;
 
-      let source: Object = _viewSource.getDragDropSources()[0];
-      if (!(source instanceof ƒ.Graph))
-        return;
+        let source: Object = _viewSource.getDragDropSources()[0];
+        if (!(source instanceof ƒ.Graph))
+          return;
+      }
 
       _event.dataTransfer.dropEffect = "link";
       _event.preventDefault();
@@ -162,7 +164,11 @@ namespace Fudge {
 
     protected hndDrop(_event: DragEvent, _viewSource: View): void {
       let source: Object = _viewSource.getDragDropSources()[0];
-      this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: <ƒ.Graph>source } });
+      if (source instanceof ƒ.ComponentCamera)
+        // console.log("CameraDrop");
+        this.viewport.camera = source;
+      else
+        this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: <ƒ.Graph>source } });
     }
 
     private setCameraOrthographic(_on: boolean = false): void {

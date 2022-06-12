@@ -508,6 +508,7 @@ declare namespace Fudge {
 declare namespace Fudge {
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     /**
      * View all components attached to a node
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -516,7 +517,9 @@ declare namespace Fudge {
         private node;
         private expanded;
         private selected;
+        private drag;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        getDragDropSources(): ƒ.ComponentCamera[];
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;

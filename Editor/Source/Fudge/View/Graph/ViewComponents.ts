@@ -21,6 +21,7 @@ namespace Fudge {
     private node: ƒ.Node;
     private expanded: { [type: string]: boolean } = { ComponentTransform: true };
     private selected: string = "ComponentTransform";
+    private drag: ƒ.ComponentCamera;
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
@@ -38,6 +39,10 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.CLICK, this.hndEvent, true);
       this.dom.addEventListener(ƒUi.EVENT.KEY_DOWN, this.hndEvent, true);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent, true);
+    }
+
+    public getDragDropSources(): ƒ.ComponentCamera[] {
+      return [this.drag];
     }
 
     //#region  ContextMenu
@@ -173,6 +178,10 @@ namespace Fudge {
         Reflect.set(details, "controller", controller); // insert a link back to the controller
         details.expand(this.expanded[component.type]);
         this.dom.append(details);
+        if (component instanceof ƒ.ComponentCamera) {
+          details.draggable = true;
+          details.addEventListener("dragstart", (_event: Event) => { this.drag = <ƒ.ComponentCamera>component; });
+        }
         if (component instanceof ƒ.ComponentRigidbody) {
           let pivot: HTMLElement = controller.domElement.querySelector("[key=mtxPivot");
           let opacity: string = pivot.style.opacity;

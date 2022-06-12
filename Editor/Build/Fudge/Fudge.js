@@ -2443,6 +2443,7 @@ var Fudge;
         node;
         expanded = { ComponentTransform: true };
         selected = "ComponentTransform";
+        drag;
         constructor(_container, _state) {
             super(_container, _state);
             this.fillContent();
@@ -2458,6 +2459,9 @@ var Fudge;
             this.dom.addEventListener("click" /* CLICK */, this.hndEvent, true);
             this.dom.addEventListener("keydown" /* KEY_DOWN */, this.hndEvent, true);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent, true);
+        }
+        getDragDropSources() {
+            return [this.drag];
         }
         //#region  ContextMenu
         getContextMenu(_callback) {
@@ -2579,6 +2583,10 @@ var Fudge;
                 Reflect.set(details, "controller", controller); // insert a link back to the controller
                 details.expand(this.expanded[component.type]);
                 this.dom.append(details);
+                if (component instanceof ƒ.ComponentCamera) {
+                    details.draggable = true;
+                    details.addEventListener("dragstart", (_event) => { this.drag = component; });
+                }
                 if (component instanceof ƒ.ComponentRigidbody) {
                     let pivot = controller.domElement.querySelector("[key=mtxPivot");
                     let opacity = pivot.style.opacity;
@@ -3049,18 +3057,24 @@ var Fudge;
         //#endregion
         hndDragOver(_event, _viewSource) {
             _event.dataTransfer.dropEffect = "none";
-            if (!(_viewSource instanceof Fudge.ViewInternal))
-                return;
-            let source = _viewSource.getDragDropSources()[0];
-            if (!(source instanceof ƒ.Graph))
-                return;
+            if (!(_viewSource instanceof Fudge.ViewComponents)) { // allow dropping cameracomponent to see through that camera (at this time, the only draggable)
+                if (!(_viewSource instanceof Fudge.ViewInternal)) // allow dropping a graph
+                    return;
+                let source = _viewSource.getDragDropSources()[0];
+                if (!(source instanceof ƒ.Graph))
+                    return;
+            }
             _event.dataTransfer.dropEffect = "link";
             _event.preventDefault();
             _event.stopPropagation();
         }
         hndDrop(_event, _viewSource) {
             let source = _viewSource.getDragDropSources()[0];
-            this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source } });
+            if (source instanceof ƒ.ComponentCamera)
+                // console.log("CameraDrop");
+                this.viewport.camera = source;
+            else
+                this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source } });
         }
         setCameraOrthographic(_on = false) {
             if (_on) {
