@@ -14,7 +14,7 @@ declare namespace Fudge {
         REMOVE_COMPONENT = 11,
         ADD_JOINT = 12,
         DELETE_RESOURCE = 13,
-        ILLUMINATE = 14
+        ORTHGRAPHIC_CAMERA = 14
     }
     enum MENU {
         QUIT = "quit",

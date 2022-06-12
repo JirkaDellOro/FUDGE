@@ -233,8 +233,7 @@ var Fudge;
             return false;
         if (!await Fudge.project.openDialog())
             return false;
-        if (Fudge.watcher)
-            Fudge.watcher.close();
+        unwatchFolder();
         let base = Fudge.project.base;
         if (_new) {
             let cssFileName = new URL(Fudge.project.fileStyles, base);
@@ -264,10 +263,7 @@ var Fudge;
         ƒ.Debug.groupCollapsed("File content");
         ƒ.Debug.info(htmlContent);
         ƒ.Debug.groupEnd();
-        if (Fudge.watcher) {
-            Fudge.watcher.unref();
-            Fudge.watcher.close();
-        }
+        unwatchFolder();
         Fudge.project = new Fudge.Project(_url);
         await Fudge.project.load(htmlContent);
         watchFolder();
@@ -279,8 +275,7 @@ var Fudge;
         async function hndFileChange(_event, _url) {
             let filename = _url.toString();
             if (filename == Fudge.project.fileIndex || filename == Fudge.project.fileInternal || filename == Fudge.project.fileScript) {
-                Fudge.watcher.unref();
-                Fudge.watcher.close();
+                unwatchFolder();
                 let promise = ƒui.Dialog.prompt(null, false, "Important file change", "Reload project?", "Reload", "Cancel");
                 if (await promise) {
                     await loadProject(Fudge.project.base);
@@ -290,6 +285,12 @@ var Fudge;
                 document.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY));
             }
         }
+    }
+    function unwatchFolder() {
+        if (!Fudge.watcher)
+            return;
+        Fudge.watcher.unref();
+        Fudge.watcher.close();
     }
 })(Fudge || (Fudge = {}));
 var Fudge;
