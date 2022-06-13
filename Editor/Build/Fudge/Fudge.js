@@ -3070,9 +3070,10 @@ var Fudge;
         }
         hndDrop(_event, _viewSource) {
             let source = _viewSource.getDragDropSources()[0];
-            if (source instanceof ƒ.ComponentCamera)
-                // console.log("CameraDrop");
+            if (source instanceof ƒ.ComponentCamera) {
                 this.viewport.camera = source;
+                this.redraw();
+            }
             else
                 this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source } });
         }

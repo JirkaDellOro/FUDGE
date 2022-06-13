@@ -164,9 +164,10 @@ namespace Fudge {
 
     protected hndDrop(_event: DragEvent, _viewSource: View): void {
       let source: Object = _viewSource.getDragDropSources()[0];
-      if (source instanceof ƒ.ComponentCamera)
-        // console.log("CameraDrop");
+      if (source instanceof ƒ.ComponentCamera) {
         this.viewport.camera = source;
+        this.redraw();
+      }
       else
         this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: <ƒ.Graph>source } });
     }
