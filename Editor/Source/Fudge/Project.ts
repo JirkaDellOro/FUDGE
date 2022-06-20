@@ -250,7 +250,7 @@ namespace Fudge {
           canvas.addEventListener("mouseup", function (): void { document.exitPointerLock(); });
 
           // make the camera interactive (complex method in FudgeAid)
-          FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
+          let cameraOrbit: FudgeAid.CameraOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
 
           // setup audio
           let cmpListener: ƒ.ComponentAudioListener = new ƒ.ComponentAudioListener();
@@ -260,6 +260,7 @@ namespace Fudge {
           FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);
 
           // draw viewport once for immediate feedback
+          FudgeCore.Render.prepare(cameraOrbit);
           viewport.draw();
           canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));
         }

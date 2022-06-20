@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Physics</title>
+<title>Bowlard</title>
 <meta charset="utf-8" />
 <link rel="stylesheet" href="styles.css" />
 
 <!--Editor settings of this project-->
-<meta type="settings" autoview="Graph|2021-09-16T16:18:45.095Z|30710" project="{'name':'Physics','includeAutoViewScript':true,'graphAutoView':'Graph|2021-09-16T16:18:45.095Z|30710'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2021-09-16T16:18:45.095Z|30710'}}]" />
+<meta type="settings" autoview="Graph|2022-06-13T10:27:09.191Z|13832" project="{'name':'Bowlard','includeAutoViewScript':true,'graphAutoView':'Graph|2022-06-13T10:27:09.191Z|13832'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2022-06-13T10:27:09.191Z|13832'}}]" />
 
 <!--Activate the following line to include the FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!-->
-<script type="text/javascript" src="../../../Physics/OimoPhysics.js"></script>
+<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js"></script>
 
 <!--Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks-->
 <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
-<script type="text/javascript" src="../../../Aid/Build/FudgeAid.js"></script>
+<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Aid/Build/FudgeAid.js"></script>
 
 <!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
 <link type="resources" src="Internal.json" />
@@ -63,15 +63,18 @@
                     canvas.addEventListener("mousedown", canvas.requestPointerLock);
                     canvas.addEventListener("mouseup", function () { document.exitPointerLock(); });
                     // make the camera interactive (complex method in FudgeAid)
-                    FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
+                    let camera = FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
+                    camera.rotateY(180);
+                    camera.rotateX(-30);
+
                     // setup audio
                     let cmpListener = new ƒ.ComponentAudioListener();
                     cmpCamera.node.addComponent(cmpListener);
                     FudgeCore.AudioManager.default.listenWith(cmpListener);
                     FudgeCore.AudioManager.default.listenTo(graph);
                     FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);
-                    viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
                     // draw viewport once for immediate feedback
+                    FudgeCore.Render.prepare(camera);
                     viewport.draw();
                     canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));
                 }
@@ -87,6 +90,36 @@
 <!--Canvas for FUDGE to render to-->
 <canvas class="fullscreen">
 </canvas>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
