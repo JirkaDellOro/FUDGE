@@ -36,7 +36,7 @@ var ShaderParticleTest;
         float particleTime = mod(particleIndex * particleOffset + uTime * 0.001, 8.0);
 
         gl_Position = uProjectionMatrix * uModelViewMatrix * (a_vctPosition + vec4(particleTime, 0.0, 0.0, 0.0));
-        v_vctColor = a_vctColor + vec4(0.0, particleIndex * 0.5, 0.0, particleTime);
+        v_vctColor = a_vctColor + vec4(0.0, particleIndex * 0.5, 0.0, -particleTime / 8.0);
       }
     `;
         // Fragment shader program
@@ -188,6 +188,8 @@ var ShaderParticleTest;
         _webgl.clearDepth(1.0); // Clear everything
         _webgl.enable(_webgl.DEPTH_TEST); // Enable depth testing
         _webgl.depthFunc(_webgl.LEQUAL); // Near things obscure far things
+        _webgl.enable(_webgl.BLEND); // Enable depth testing
+        _webgl.blendFunc(_webgl.SRC_ALPHA, _webgl.DST_ALPHA);
         // Clear the canvas before we start drawing on it.
         _webgl.clear(_webgl.COLOR_BUFFER_BIT | _webgl.DEPTH_BUFFER_BIT);
         // Create a perspective matrix, a special matrix that is
