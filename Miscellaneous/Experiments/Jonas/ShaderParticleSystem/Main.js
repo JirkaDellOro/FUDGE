@@ -213,7 +213,7 @@ var ShaderParticleTest;
         // start drawing the square.
         modelViewMatrix.translate(new ƒ.Vector3(0, 0, 20));
         modelViewMatrix.rotateZ(cubeRotation * 0.7);
-        modelViewMatrix.rotateX(cubeRotation);
+        // modelViewMatrix.rotateX(cubeRotation);
         // Tell WebGL how to pull out the positions from the position
         // buffer into the vertexPosition attribute
         {
@@ -378,10 +378,33 @@ var ShaderParticleTest;
                 let transformation = transformationsLocal[key];
                 switch (key) {
                     case "translate":
-                        code += `mat4 translationMatrix = mat4(1.0, 0.0, 0.0, 0.0,
+                        code += `mat4 translationMatrix = mat4(
+            1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,
             0.0, 0.0, 1.0, 0.0,
             ${transformation.x ? transformation.x : "0.0"}, ${transformation.y ? transformation.y : "0.0"}, ${transformation.z ? transformation.z : "0.0"}, 1.0);\n`;
+                        break;
+                    case "scale":
+                        code += `mat4 scalingMatrix = mat4(
+            ${transformation.x ? transformation.x : "1.0"}, 0.0, 0.0, 0.0,
+            0.0, ${transformation.y ? transformation.y : "1.0"}, 0.0, 0.0,
+            0.0, 0.0, ${transformation.z ? transformation.z : "1.0"}, 0.0,
+            0.0, 0.0, 0.0, 1.0
+            );\n`;
+                        break;
+                    case "rotate":
+                        let sinX = `sin(${transformation.x ? transformation.x : "0.0"})`;
+                        let cosX = `cos(${transformation.x ? transformation.x : "0.0"})`;
+                        let sinY = `sin(${transformation.y ? transformation.y : "0.0"})`;
+                        let cosY = `cos(${transformation.y ? transformation.y : "0.0"})`;
+                        let sinZ = `sin(${transformation.z ? transformation.z : "0.0"})`;
+                        let cosZ = `cos(${transformation.z ? transformation.z : "0.0"})`;
+                        code += `mat4 rotationMatrix = mat4(
+            ${cosZ} * ${cosY}, ${sinZ} * ${cosY}, -${sinY}, 0.0,
+            ${cosZ} * ${sinY} * ${sinX} - ${sinZ} * ${cosX}, ${sinZ} * ${sinY} * ${sinX} + ${cosZ} * ${cosX}, ${cosY} * ${sinX}, 0.0,
+            ${cosZ} * ${sinY} * ${cosX} + ${sinZ} * ${sinX}, ${sinZ} * ${sinY} * ${cosX} - ${cosZ} * ${sinX}, ${cosY} * ${cosX}, 0.0,
+            0.0, 0.0, 0.0, 1.0
+            );\n`;
                         break;
                 }
             }
@@ -390,6 +413,8 @@ var ShaderParticleTest;
     }
     let positionCodeMap = {
         translate: "translationMatrix",
+        scale: "scalingMatrix",
+        rotate: "rotationMatrix"
     };
     function createPositionShaderCode(_structure) {
         let code = "";

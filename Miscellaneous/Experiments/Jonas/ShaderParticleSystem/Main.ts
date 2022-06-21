@@ -260,7 +260,7 @@ namespace ShaderParticleTest {
   
     modelViewMatrix.translate(new ƒ.Vector3(0, 0, 20));
     modelViewMatrix.rotateZ(cubeRotation * 0.7);
-    modelViewMatrix.rotateX(cubeRotation);
+    // modelViewMatrix.rotateX(cubeRotation);
   
     // Tell WebGL how to pull out the positions from the position
     // buffer into the vertexPosition attribute
@@ -408,7 +408,7 @@ namespace ShaderParticleTest {
     index: "particleIndex",
     time: "uTime",
     size: "uNumberOfParticles"
-  }
+  };
 
   function parseClosure(_data: ƒ.ClosureData, _variableNames: string[]): string {
     if (ƒ.ParticleEffect.isFunctionData(_data)) {
@@ -489,10 +489,33 @@ namespace ShaderParticleTest {
         let transformation: ParticleEffectStructure = transformationsLocal[key] as ParticleEffectStructure;
         switch (key) {
           case "translate":
-            code += `mat4 translationMatrix = mat4(1.0, 0.0, 0.0, 0.0,
+            code += `mat4 translationMatrix = mat4(
+            1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,
             0.0, 0.0, 1.0, 0.0,
             ${transformation.x ? transformation.x : "0.0"}, ${transformation.y ? transformation.y : "0.0"}, ${transformation.z ? transformation.z : "0.0"}, 1.0);\n`;
+            break;
+          case "scale":
+            code += `mat4 scalingMatrix = mat4(
+            ${transformation.x ? transformation.x : "1.0"}, 0.0, 0.0, 0.0,
+            0.0, ${transformation.y ? transformation.y : "1.0"}, 0.0, 0.0,
+            0.0, 0.0, ${transformation.z ? transformation.z : "1.0"}, 0.0,
+            0.0, 0.0, 0.0, 1.0
+            );\n`;
+            break;
+          case "rotate":
+            let sinX: string = `sin(${transformation.x ? transformation.x : "0.0"})`;
+            let cosX: string = `cos(${transformation.x ? transformation.x : "0.0"})`;
+            let sinY: string = `sin(${transformation.y ? transformation.y : "0.0"})`;
+            let cosY: string = `cos(${transformation.y ? transformation.y : "0.0"})`;
+            let sinZ: string = `sin(${transformation.z ? transformation.z : "0.0"})`;
+            let cosZ: string = `cos(${transformation.z ? transformation.z : "0.0"})`;
+            code += `mat4 rotationMatrix = mat4(
+            ${cosZ} * ${cosY}, ${sinZ} * ${cosY}, -${sinY}, 0.0,
+            ${cosZ} * ${sinY} * ${sinX} - ${sinZ} * ${cosX}, ${sinZ} * ${sinY} * ${sinX} + ${cosZ} * ${cosX}, ${cosY} * ${sinX}, 0.0,
+            ${cosZ} * ${sinY} * ${cosX} + ${sinZ} * ${sinX}, ${sinZ} * ${sinY} * ${cosX} - ${cosZ} * ${sinX}, ${cosY} * ${cosX}, 0.0,
+            0.0, 0.0, 0.0, 1.0
+            );\n`;
             break;
         }
       }
@@ -502,6 +525,8 @@ namespace ShaderParticleTest {
 
   let positionCodeMap: {[key: string]: string} = {
     translate: "translationMatrix",
+    scale: "scalingMatrix",
+    rotate: "rotationMatrix"
   };
 
   function createPositionShaderCode(_structure: ParticleEffectStructure): string {
