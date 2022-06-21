@@ -1,87 +1,167 @@
 {
   "storage": {
     "system": {
-      "1/size": {
+      "particleOffset": {
+        "type": "function",
         "function": "division",
         "parameters": [
-          1,
-          "size"
+          {
+            "type": "constant",
+            "value": 1
+          },
+          {
+            "type": "variable",
+            "value": "size"
+          }
+        ]
+      }
+    },
+    "update": {
+      "scaledTime":  {
+        "type": "function",
+        "function": "division",
+        "parameters": [
+          {
+            "type": "variable",
+            "value": "time"
+          },
+          {
+            "type": "constant",
+            "value": 1000
+          }
         ]
       }
     },
     "particle": {
       "particleTime": {
+        "type": "function",
         "function": "modulo",
         "parameters": [
           {
+            "type": "function",
             "function": "addition",
             "parameters": [
               {
+                "type": "function",
                 "function": "multiplication",
                 "parameters": [
-                  "index",
-                  "1/size"
+                  {
+                    "type": "variable",
+                    "value": "index"
+                  },
+                  {
+                    "type": "variable",
+                    "value": "particleOffset"
+                  }
                 ]
               },
-              "time"
+              {
+                "type": "variable",
+                "value": "scaledTime"
+              }
             ]
           },
-          1
+          {
+            "type": "constant",
+            "value": 1
+          }
         ]
       },
-      "1-particleTime": {
+      "inverseParticleTime": {
+        "type": "function",
         "function": "subtraction",
         "parameters": [
-          1,
-          "particleTime"
+          {
+            "type": "constant",
+            "value": 1
+          },
+          {
+            "type": "variable",
+            "value": "particleTime"
+          }
         ]
       }
     }
   },
   "transformations": {
     "local": {
-      "translate": {
+      "translation": {
         "x": {
+          "type": "function",
           "function": "multiplication",
           "parameters": [
             {
+              "type": "function",
               "function": "polynomial",
               "parameters": [
-                "1-particleTime",
-                -2,
-                2,
-                0,
-                0
+                {
+                  "type": "variable",
+                  "value": "inverseParticleTime"
+                },
+                {
+                  "type": "constant",
+                  "value": -2
+                },
+                {
+                  "type": "constant",
+                  "value": 2
+                },
+                {
+                  "type": "constant",
+                  "value": 0
+                },
+                {
+                  "type": "constant",
+                  "value": 0
+                }
               ]
             },
             {
+              "type": "function",
               "function": "subtraction",
               "parameters": [
                 {
+                  "type": "function",
                   "function": "multiplication",
                   "parameters": [
-                    2,
                     {
+                      "type": "constant",
+                      "value": 2
+                    },
+                    {
+                      "type": "function",
                       "function": "random",
                       "parameters": [
-                        "index"
+                        {
+                          "type": "variable",
+                          "value": "index"
+                        }
                       ]
                     }
                   ]
                 },
-                1
+                {
+                  "type": "constant",
+                  "value": 1
+                }
               ]
             }
           ]
         },
-        "y": "particleTime"
+        "y": {
+          "type": "variable",
+          "value": "particleTime"
+        }
       }
     }
   },
   "components": {
     "ComponentMaterial": {
       "clrPrimary": {
-        "a": "1-particleTime"
+        "a": {
+          "type": "variable",
+          "value": "inverseParticleTime"
+        }
       }
     }
   }
