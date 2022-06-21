@@ -27,7 +27,6 @@ namespace ShaderParticleTest {
     const vsSource: string = `#version 300 es
       in vec4 a_vctPosition;
       in vec4 a_vctColor;
-      in float a_particleIndex;
   
       uniform mat4 uModelViewMatrix;
       uniform mat4 uProjectionMatrix;
@@ -37,17 +36,17 @@ namespace ShaderParticleTest {
       out vec4 v_vctColor;
   
       void main(void) {
+        float particleIndex = float(gl_InstanceID);
         float particleOffset = 8.0 / uNumberOfParticles;
 
-        float particleTime = mod(a_particleIndex * particleOffset + uTime * 0.001, 8.0);
+        float particleTime = mod(particleIndex * particleOffset + uTime * 0.001, 8.0);
 
         gl_Position = uProjectionMatrix * uModelViewMatrix * (a_vctPosition + vec4(particleTime, 0.0, 0.0, 0.0));
-        v_vctColor = a_vctColor + vec4(0.0, a_particleIndex * 0.5, 0.0, particleTime);
+        v_vctColor = a_vctColor + vec4(0.0, particleIndex * 0.5, 0.0, particleTime);
       }
     `;
   
     // Fragment shader program
-  
     const fsSource: string = `#version 300 es
       precision mediump float;
       
@@ -73,7 +72,6 @@ namespace ShaderParticleTest {
       attribLocations: {
         vertexPosition: webgl.getAttribLocation(shaderProgram, "a_vctPosition"),
         vertexColor: webgl.getAttribLocation(shaderProgram, "a_vctColor"),
-        particleIndex: webgl.getAttribLocation(shaderProgram, "a_particleIndex")
       },
       uniformLocations: {
         projectionMatrix: webgl.getUniformLocation(shaderProgram, "uProjectionMatrix"),
@@ -108,7 +106,7 @@ namespace ShaderParticleTest {
   // have one object -- a simple two-dimensional square.
   //
   function initBuffers(_webgl: WebGLRenderingContext): ƒ.General {
-    let particles: number[] = [...Array(numberOfParticles).keys()];
+    // let particles: number[] = [...Array(numberOfParticles).keys()];
 
     // Create a buffer for the square"s positions.
     const positionBuffer: WebGLBuffer = _webgl.createBuffer();
@@ -116,7 +114,7 @@ namespace ShaderParticleTest {
     // operations to from here out.
     _webgl.bindBuffer(_webgl.ARRAY_BUFFER, positionBuffer);
     // Now create an array of positions for the square.
-    const positions: number[] = particles.flatMap( () => [
+    const positions: number[] = [
       // Front face
       -1.0, -1.0,  1.0,
        1.0, -1.0,  1.0,
@@ -152,7 +150,7 @@ namespace ShaderParticleTest {
       -1.0, -1.0,  1.0,
       -1.0,  1.0,  1.0,
       -1.0,  1.0, -1.0
-    ]);
+    ];
     // for (let index = 0; index < numberOfParticles; index++) {
     //   positions.push(...);
     // }
@@ -174,27 +172,17 @@ namespace ShaderParticleTest {
       [1.0,  0.0,  1.0,  1.0]     // Left face: purple
     ];
     // Convert the array of colors into a table for all the vertices.
-    let colors: number[] = particles.flatMap(() => {
-      let colors: number[] = [];
-      for (var j: number = 0; j < faceColors.length; ++j) {
-        const c: number[] = faceColors[j];
-  
-        // Repeat each color four times for the four vertices of the face
-        colors = colors.concat(c, c, c, c);
-      }
-      return colors;
-    });
+    let colors: number[] = [];
+    for (var j: number = 0; j < faceColors.length; ++j) {
+      const c: number[] = faceColors[j];
 
+      // Repeat each color four times for the four vertices of the face
+      colors = colors.concat(c, c, c, c);
+    }
 
     const colorBuffer: WebGLBuffer = _webgl.createBuffer();
     _webgl.bindBuffer(_webgl.ARRAY_BUFFER, colorBuffer);
     _webgl.bufferData(_webgl.ARRAY_BUFFER, new Float32Array(colors), _webgl.STATIC_DRAW);
-
-    const particleIndexBuffer: WebGLBuffer = _webgl.createBuffer();
-    _webgl.bindBuffer(_webgl.ARRAY_BUFFER, particleIndexBuffer);
-    const particleIndices: number[] = particles.flatMap(index => Array(24).fill(index));
-    _webgl.bufferData(_webgl.ARRAY_BUFFER, new Float32Array(particleIndices), _webgl.STATIC_DRAW);
-
 
     // Build the element array buffer; this specifies the indices
     // into the vertex arrays for each face's vertices.
@@ -206,16 +194,14 @@ namespace ShaderParticleTest {
     // indices into the vertex array to specify each triangle's
     // position.
 
-    const indices: number[] = particles.flatMap(iParticle => {
-      return [
+    const indices: number[] = [
         0,  1,  2,      0,  2,  3,    // front
         4,  5,  6,      4,  6,  7,    // back
         8,  9,  10,     8,  10, 11,   // top
         12, 13, 14,     12, 14, 15,   // bottom
         16, 17, 18,     16, 18, 19,   // right
         20, 21, 22,     20, 22, 23    // left
-      ].map(index => index + 24 * iParticle);
-    });
+    ];
 
     // Now send the element array to GL
     _webgl.bufferData(_webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), _webgl.STATIC_DRAW);
@@ -223,7 +209,6 @@ namespace ShaderParticleTest {
     return {
       position: positionBuffer,
       color: colorBuffer,
-      particleIndices: particleIndexBuffer,
       indices: indexBuffer,
     };
   }
@@ -255,13 +240,6 @@ namespace ShaderParticleTest {
     const projectionMatrix: ƒ.Matrix4x4 = ƒ.Matrix4x4.PROJECTION_CENTRAL(
       aspect, fieldOfView, zNear, zFar, ƒ.FIELD_OF_VIEW.DIAGONAL
     );
-    // note: glmatrix.js always has the first argument
-    // // as the destination to receive the result.
-    // mat4.perspective(projectionMatrix,
-    //                  fieldOfView,
-    //                  aspect,
-    //                  zNear,
-    //                  zFar);
   
     // Set the drawing position to the "identity" point, which is
     // the center of the scene.
@@ -315,32 +293,13 @@ namespace ShaderParticleTest {
           _programInfo.attribLocations.vertexColor);
     }
 
-    {
-      const numComponents: number = 1;
-      const type: number = _webgl.FLOAT;
-      const normalize: boolean = false;
-      const stride: number = 0;
-      const offset: number = 0;
-      _webgl.bindBuffer(_webgl.ARRAY_BUFFER, _buffers.particleIndices);
-      _webgl.vertexAttribPointer(
-          _programInfo.attribLocations.particleIndex,
-          numComponents,
-          type,
-          normalize,
-          stride,
-          offset);
-      _webgl.enableVertexAttribArray(
-          _programInfo.attribLocations.particleIndex);
-    }
-
     // Tell WebGL which indices to use to index the vertices
     _webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _buffers.indices);
   
     // Tell WebGL to use our program when drawing
     _webgl.useProgram(_programInfo.program);
   
-    // Set the shader uniforms
-  
+    // Set the shader uniforms  
     _webgl.uniformMatrix4fv(
         _programInfo.uniformLocations.projectionMatrix,
         false,
@@ -361,10 +320,10 @@ namespace ShaderParticleTest {
     )
   
     {
-      const vertexCount: number = 36 * numberOfParticles;
+      const vertexCount: number = 36;
       const type: number = _webgl.UNSIGNED_SHORT;
       const offset: number = 0;
-      _webgl.drawElements(_webgl.TRIANGLES, vertexCount, type, offset);
+      _webgl.drawElementsInstanced(_webgl.TRIANGLES, vertexCount, type, offset, numberOfParticles);
     }
   
     // Update the rotation for the next draw
@@ -380,7 +339,6 @@ namespace ShaderParticleTest {
     const fragmentShader: WebGLShader = loadShader(_webgl, _webgl.FRAGMENT_SHADER, _fsSource);
   
     // Create the shader program
-  
     const shaderProgram: WebGLProgram = _webgl.createProgram();
 
     _webgl.attachShader(shaderProgram, vertexShader);
@@ -388,7 +346,6 @@ namespace ShaderParticleTest {
     _webgl.linkProgram(shaderProgram);
   
     // If creating the shader program failed, alert
-  
     if (!_webgl.getProgramParameter(shaderProgram, _webgl.LINK_STATUS)) {
       alert("Unable to initialize the shader program: " + _webgl.getProgramInfoLog(shaderProgram));
       return null;
@@ -405,15 +362,12 @@ namespace ShaderParticleTest {
     const shader: WebGLShader = _webgl.createShader(_type);
   
     // Send the source to the shader object
-  
     _webgl.shaderSource(shader, _source);
   
     // Compile the shader program
-  
     _webgl.compileShader(shader);
   
     // See if it compiled successfully
-  
     if (!_webgl.getShaderParameter(shader, _webgl.COMPILE_STATUS)) {
       alert("An error occurred compiling the shaders: " + _webgl.getShaderInfoLog(shader));
       _webgl.deleteShader(shader);
