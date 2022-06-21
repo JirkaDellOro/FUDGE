@@ -85,7 +85,7 @@
   },
   "transformations": {
     "local": {
-      "translation": {
+      "translate": {
         "x": {
           "type": "function",
           "function": "multiplication",
