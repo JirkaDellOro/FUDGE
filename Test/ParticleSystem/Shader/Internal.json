@@ -1,0 +1,352 @@
+{
+  "ParticleEffect|2022-05-06T11:42:57.884Z|95497": {
+    "ƒ.ParticleEffect": {
+      "idResource": "ParticleEffect|2022-05-06T11:42:57.884Z|95497",
+      "name": "TestEffect",
+      "data": {
+        "storage": {
+          "system": {
+            "particleDistance": {
+              "type": "function",
+              "function": "division",
+              "parameters": [
+                {
+                  "type": "constant",
+                  "value": 1
+                },
+                {
+                  "type": "variable",
+                  "value": "size"
+                }
+              ]
+            }
+          },
+          "update": {
+            "systemTime": {
+              "type": "function",
+              "function": "division",
+              "parameters": [
+                {
+                  "type": "variable",
+                  "value": "time"
+                },
+                {
+                  "type": "constant",
+                  "value": 1000
+                }
+              ]
+            }
+          },
+          "particle": {
+            "particleTime": {
+              "type": "function",
+              "function": "modulo",
+              "parameters": [
+                {
+                  "type": "function",
+                  "function": "addition",
+                  "parameters": [
+                    {
+                      "type": "function",
+                      "function": "multiplication",
+                      "parameters": [
+                        {
+                          "type": "variable",
+                          "value": "index"
+                        },
+                        {
+                          "type": "variable",
+                          "value": "particleDistance"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "variable",
+                      "value": "systemTime"
+                    }
+                  ]
+                },
+                {
+                  "type": "constant",
+                  "value": 1
+                }
+              ]
+            },
+            "reversedParticleTime": {
+              "type": "function",
+              "function": "subtraction",
+              "parameters": [
+                {
+                  "type": "constant",
+                  "value": 1
+                },
+                {
+                  "type": "variable",
+                  "value": "particleTime"
+                }
+              ]
+            }
+          }
+        },
+        "transformations": {
+          "local": {
+            "translate": {
+              "x": {
+                "type": "function",
+                "function": "multiplication",
+                "parameters": [
+                  {
+                    "type": "function",
+                    "function": "polynomial",
+                    "parameters": [
+                      {
+                        "type": "variable",
+                        "value": "reversedParticleTime"
+                      },
+                      {
+                        "type": "constant",
+                        "value": -2
+                      },
+                      {
+                        "type": "constant",
+                        "value": 2
+                      },
+                      {
+                        "type": "constant",
+                        "value": 0
+                      },
+                      {
+                        "type": "constant",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function",
+                    "function": "subtraction",
+                    "parameters": [
+                      {
+                        "type": "function",
+                        "function": "multiplication",
+                        "parameters": [
+                          {
+                            "type": "constant",
+                            "value": 2
+                          },
+                          {
+                            "type": "function",
+                            "function": "random",
+                            "parameters": [
+                              {
+                                "type": "variable",
+                                "value": "index"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "constant",
+                        "value": 1
+                      }
+                    ]
+                  }
+                ]
+              },
+              "y": {
+                "type": "variable",
+                "value": "particleTime"
+              }
+            }
+          }
+        },
+        "components": {
+          "ComponentMaterial": {
+            "clrPrimary": {
+              "a": {
+                "type": "variable",
+                "value": "reversedParticleTime"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "MeshQuad|2022-05-09T11:08:49.390Z|38849": {
+    "ƒ.MeshQuad": {
+      "idResource": "MeshQuad|2022-05-09T11:08:49.390Z|38849",
+      "name": "MeshQuad"
+    }
+  },
+  "TextureImage|2022-05-09T11:28:27.095Z|18280": {
+    "ƒ.TextureImage": {
+      "url": "particle.png", 
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2022-05-09T11:28:27.095Z|18280",
+        "name": "particle.png",
+        "mipmap": "CRISP"
+      }
+    }
+  },
+  "Graph|2022-04-19T10:13:58.210Z|44368": {
+    "ƒ.Graph": {
+      "name": "Graph",
+      "active": true,
+      "components": {},
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "Light",
+            "active": true,
+            "components": {
+              "ComponentLight": [
+                {
+                  "ƒ.ComponentLight": {
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "light": {
+                      "ƒ.LightAmbient": {
+                        "color": "[1, 1, 1, 1]"
+                      }
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                },
+                {
+                  "ƒ.ComponentLight": {
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "light": {
+                      "ƒ.LightDirectional": {
+                        "color": "[1, 1, 1, 1]"
+                      }
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 76.20000457763672, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentParticleSystem": [
+                {
+                  "ƒ.ComponentParticleSystem": {
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "New Node",
+            "active": true,
+            "components": {
+              "ComponentParticleSystem": [
+                {
+                  "ƒ.ComponentParticleSystem": {
+                    "Component": {
+                      "active": true
+                    },
+                    "idParticleEffect": "ParticleEffect|2022-05-06T11:42:57.884Z|95497",
+                    "size": 50
+                  }
+                }
+              ],
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshQuad|2022-05-09T11:08:49.390Z|38849",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[0.2500000298023224, 0.2500000298023224, 1.0000001192092896]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": true,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2022-06-22T12:32:55.046Z|77384"
+                  }
+                }
+              ],
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        }
+      ],
+      "idResource": "Graph|2022-04-19T10:13:58.210Z|44368",
+      "type": "Graph"
+    }
+  },
+  "Material|2022-06-22T12:32:55.046Z|77384": {
+    "ƒ.Material": {
+      "name": "ShaderParticle",
+      "idResource": "Material|2022-06-22T12:32:55.046Z|77384",
+      "shader": "ShaderParticle",
+      "coat": {
+        "ƒ.CoatTextured": {
+          "color": "[0.7333333333333333, 1, 0, 1]",
+          "idTexture": "TextureImage|2022-05-09T11:28:27.095Z|18280"
+        }
+      }
+    }
+  }
+}

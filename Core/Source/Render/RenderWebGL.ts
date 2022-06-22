@@ -342,7 +342,18 @@ namespace FudgeCore {
       let uWorldToView: WebGLUniformLocation = shader.uniforms["u_mtxWorldToView"];
       if (uWorldToView)
         RenderWebGL.crc3.uniformMatrix4fv(uWorldToView, false, _cmpCamera.mtxWorldToView.get());
-      RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+
+      let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
+      if (cmpParticleSystem) {
+        RenderWebGL.drawParticles(cmpParticleSystem, shader, renderBuffers);
+      } else {
+        RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+      }
+    }
+
+    protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: typeof Shader, _renderBuffers: RenderBuffers): void {
+      this.crc3.uniform1f(_shader.uniforms["u_fTime"], Time.game.get());
+      RenderWebGL.crc3.drawElementsInstanced(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0, 3);
     }
 
     private static calcMeshToView(_node: Node, _cmpMesh: ComponentMesh, _mtxWorldToView: Matrix4x4, _target?: Vector3): Matrix4x4 {
@@ -364,5 +375,7 @@ namespace FudgeCore {
       else
         return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView);
     }
+
+
   }
 }
