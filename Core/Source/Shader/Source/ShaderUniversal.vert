@@ -36,9 +36,9 @@ struct Light {
   mat4 mtxShapeInverse;
 };
 
-const uint MAX_LIGHTS_DIRECTIONAL = 20u;
-const uint MAX_LIGHTS_POINT = 80u;
-const uint MAX_LIGHTS_SPOT = 80u;
+const uint MAX_LIGHTS_DIRECTIONAL = 10u;
+const uint MAX_LIGHTS_POINT = 50u;
+const uint MAX_LIGHTS_SPOT = 50u;
 
 uniform Light u_ambient;
 uniform uint u_nLightsDirectional;
