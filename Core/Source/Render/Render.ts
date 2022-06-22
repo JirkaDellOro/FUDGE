@@ -16,7 +16,6 @@ namespace FudgeCore {
     public static lights: MapLightTypeToLightList = new Map();
     private static nodesSimple: RecycableArray<Node> = new RecycableArray();
     private static nodesAlpha: RecycableArray<Node> = new RecycableArray();
-    private static nodesParticleSystem: RecycableArray<Node> = new RecycableArray();
     private static timestampUpdate: number;
 
     // TODO: research if picking should be optimized using radius picking to filter
@@ -34,7 +33,6 @@ namespace FudgeCore {
         Render.timestampUpdate = performance.now();
         Render.nodesSimple.reset();
         Render.nodesAlpha.reset();
-        Render.nodesParticleSystem.reset();
         Render.nodesPhysics.reset();
         Render.componentsPick.reset();
         Render.lights.forEach(_array => _array.reset());
@@ -89,11 +87,7 @@ namespace FudgeCore {
           _shadersUsed.push(shader);
 
         _branch.radius = cmpMesh.radius;
-        let cmpParticleSystem: ComponentParticleSystem = _branch.getComponent(ComponentParticleSystem);
-        if (cmpParticleSystem && cmpParticleSystem.isActive)
-          // TODO: check if paticle systems should be sorted aswell?
-          Render.nodesParticleSystem.push(_branch); // add this node to render list
-        else if (cmpMaterial.sortForAlpha)
+        if (cmpMaterial.sortForAlpha)
           Render.nodesAlpha.push(_branch); // add this node to render list
         else
           Render.nodesSimple.push(_branch); // add this node to render list
@@ -167,16 +161,6 @@ namespace FudgeCore {
       _cmpCamera.resetWorldToView();
       Render.drawList(_cmpCamera, this.nodesSimple);
       Render.drawListAlpha(_cmpCamera);
-      Render.drawListParticleSystem(_cmpCamera);
-    }
-
-    private static drawListParticleSystem(_cmpCamera: ComponentCamera): void {
-      for (let node of Render.nodesParticleSystem) {
-        let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
-        let cmpMaterial: ComponentMaterial = node.getComponent(ComponentMaterial);
-        let cmpParticleSystem: ComponentParticleSystem = node.getComponent(ComponentParticleSystem);
-        RenderParticles.drawParticles(node, node.mtxWorld, cmpParticleSystem, cmpMesh, cmpMaterial, _cmpCamera);
-      }
     }
 
     private static drawListAlpha(_cmpCamera: ComponentCamera): void {
