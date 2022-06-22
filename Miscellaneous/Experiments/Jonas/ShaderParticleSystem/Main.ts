@@ -77,13 +77,13 @@ namespace ShaderParticleTest {
       program: shaderProgram,
       attribLocations: {
         vertexPosition: webgl.getAttribLocation(shaderProgram, "a_vctPosition"),
-        vertexColor: webgl.getAttribLocation(shaderProgram, "a_vctColor"),
+        vertexColor: webgl.getAttribLocation(shaderProgram, "a_vctColor")
       },
       uniformLocations: {
         projectionMatrix: webgl.getUniformLocation(shaderProgram, "uProjectionMatrix"),
         modelViewMatrix: webgl.getUniformLocation(shaderProgram, "uModelViewMatrix"),
         numberOfParticles: webgl.getUniformLocation(shaderProgram, "uNumberOfParticles"),
-        time: webgl.getUniformLocation(shaderProgram, "uTime"),
+        time: webgl.getUniformLocation(shaderProgram, "uTime")
       }
     };
   
@@ -215,7 +215,7 @@ namespace ShaderParticleTest {
     return {
       position: positionBuffer,
       color: colorBuffer,
-      indices: indexBuffer,
+      indices: indexBuffer
     };
   }
   

@@ -65,13 +65,13 @@ var ShaderParticleTest;
             program: shaderProgram,
             attribLocations: {
                 vertexPosition: webgl.getAttribLocation(shaderProgram, "a_vctPosition"),
-                vertexColor: webgl.getAttribLocation(shaderProgram, "a_vctColor"),
+                vertexColor: webgl.getAttribLocation(shaderProgram, "a_vctColor")
             },
             uniformLocations: {
                 projectionMatrix: webgl.getUniformLocation(shaderProgram, "uProjectionMatrix"),
                 modelViewMatrix: webgl.getUniformLocation(shaderProgram, "uModelViewMatrix"),
                 numberOfParticles: webgl.getUniformLocation(shaderProgram, "uNumberOfParticles"),
-                time: webgl.getUniformLocation(shaderProgram, "uTime"),
+                time: webgl.getUniformLocation(shaderProgram, "uTime")
             }
         };
         // Here"s where we call the routine that builds all the
@@ -180,7 +180,7 @@ var ShaderParticleTest;
         return {
             position: positionBuffer,
             color: colorBuffer,
-            indices: indexBuffer,
+            indices: indexBuffer
         };
     }
     //

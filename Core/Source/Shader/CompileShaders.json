@@ -128,5 +128,14 @@
       "LIGHT",
       "SKIN"
     ]
+  },
+  "ShaderParticle": {
+    "vertex": "Source/ShaderParticle.vert",
+    "fragment": "Source/ShaderParticle.frag",
+    "coat": "CoatTextured",
+    "namespace": "FudgeCore",
+    "outdir": "Build",
+    "register": "true",
+    "define": []
   }
 }
