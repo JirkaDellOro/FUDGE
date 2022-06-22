@@ -2124,7 +2124,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, size and all the defined values of the storage partition of the effect will be cached here while evaluating the effect.
+     * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, numberOfParticles and all the defined values of the storage partition of the effect will be cached here while evaluating the effect.
      */
     interface ParticleVariables {
         [key: string]: number | number[];
@@ -2137,14 +2137,14 @@ declare namespace FudgeCore {
         #private;
         static readonly iSubclass: number;
         variables: ParticleVariables;
-        constructor(_particleEffect?: ParticleEffect, _size?: number);
+        constructor(_particleEffect?: ParticleEffect, _numberOfParticles?: number);
         get particleEffect(): ParticleEffect;
         set particleEffect(_newParticleEffect: ParticleEffect);
-        get size(): number;
+        get numberOfParticles(): number;
         /**
-         * Sets the size of the particle effect. Caution: Setting this will result in the reevaluation of the system storage of the effect and the reinitialization of the randomNumbers array.
+         * Sets the numberOfParticles of the particle effect. Caution: Setting this will result in the reevaluation of the system storage of the effect and the reinitialization of the randomNumbers array.
          */
-        set size(_newSize: number);
+        set numberOfParticles(_numberOfParticles: number);
         evaluateStorage(_storageData: ParticleEffectStructure): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -4216,7 +4216,7 @@ declare namespace FudgeCore {
     enum PARTICLE_VARIBALE_NAMES {
         TIME = "time",
         INDEX = "index",
-        SIZE = "size",
+        NUMBER_OF_PARTICLES = "numberOfParticles",
         RANDOM_NUMBERS = "randomNumbers"
     }
     /**
@@ -4256,11 +4256,23 @@ declare namespace FudgeCore {
         cachedMutators: {
             [key: string]: Mutator;
         };
+        program: WebGLProgram;
+        attributes: {
+            [name: string]: number;
+        };
+        uniforms: {
+            [name: string]: WebGLUniformLocation;
+        };
         constructor(_name?: string, _particleEffectData?: Serialization);
         static isClosureData(_data: General): _data is ClosureData;
         static isFunctionData(_data: General): _data is FunctionData;
         static isVariableData(_data: General): _data is VariableData;
         static isConstantData(_data: General): _data is ConstantData;
+        private static generateCodeStructure;
+        private static generateCode;
+        private static createShaderCode;
+        private static createLocalTransformationsShaderCode;
+        private static createPositionShaderCode;
         /**
          * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
          * @param _data The particle effect data to parse recursivley.
@@ -4276,12 +4288,18 @@ declare namespace FudgeCore {
          * @param _data The paticle effect data to parse.
          */
         private static preParseStorage;
+        private static createStorageShaderCode;
         get data(): Serialization;
         set data(_data: Serialization);
         /**
          * Asynchronously loads the json from the given url and parses it initializing this particle effect.
          */
         load(_url: RequestInfo): Promise<void>;
+        getVertexShaderSource(): string;
+        getFragmentShaderSource(): string;
+        useProgram(): void;
+        deleteProgram(): void;
+        createProgram(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;

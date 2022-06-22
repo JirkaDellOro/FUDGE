@@ -329,10 +329,20 @@ namespace FudgeCore {
       let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
       let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
       let coat: Coat = cmpMaterial.material.coat;
+      let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       let shader: typeof Shader = cmpMaterial.material.getShader();
 
-      shader.useProgram();
+      if (cmpParticleSystem) {
+        let particleEffect: ParticleEffect = cmpParticleSystem.particleEffect;
+        particleEffect.useProgram();
+        shader.attributes = particleEffect.attributes;
+        shader.uniforms = particleEffect.uniforms;
+      } else {
+        shader.useProgram();
+      }
+
       coat.useRenderData(shader, cmpMaterial);
+      
       let mtxMeshToView: Matrix4x4 = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
       let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
 
@@ -343,7 +353,6 @@ namespace FudgeCore {
       if (uWorldToView)
         RenderWebGL.crc3.uniformMatrix4fv(uWorldToView, false, _cmpCamera.mtxWorldToView.get());
 
-      let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       if (cmpParticleSystem) {
         RenderWebGL.drawParticles(cmpParticleSystem, shader, renderBuffers);
       } else {
@@ -351,9 +360,12 @@ namespace FudgeCore {
       }
     }
 
+    // TODO: check if this should happen somewhere else e.g. some Render injector stuff?
     protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: typeof Shader, _renderBuffers: RenderBuffers): void {
+      let numberOfParticles: number = _cmpParticleSystem.numberOfParticles;
       this.crc3.uniform1f(_shader.uniforms["u_fTime"], Time.game.get());
-      RenderWebGL.crc3.drawElementsInstanced(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0, 3);
+      this.crc3.uniform1f(_shader.uniforms["u_fNumberOfParticles"], numberOfParticles);
+      RenderWebGL.crc3.drawElementsInstanced(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0, numberOfParticles);
     }
 
     private static calcMeshToView(_node: Node, _cmpMesh: ComponentMesh, _mtxWorldToView: Matrix4x4, _target?: Vector3): Matrix4x4 {

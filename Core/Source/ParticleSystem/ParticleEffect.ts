@@ -1,10 +1,13 @@
 namespace FudgeCore {
-
   export enum PARTICLE_VARIBALE_NAMES {
     TIME = "time",
     INDEX = "index",
-    SIZE = "size",
+    NUMBER_OF_PARTICLES = "numberOfParticles",
     RANDOM_NUMBERS = "randomNumbers"
+  }
+
+  interface ShaderCodeStructure {
+    [attribute: string]: ShaderCodeStructure | string;
   }
 
   /**
@@ -49,6 +52,10 @@ namespace FudgeCore {
     public cachedMutators: { [key: string]: Mutator };
     #data: Serialization;
 
+    public program: WebGLProgram;
+    public attributes: { [name: string]: number };
+    public uniforms: { [name: string]: WebGLUniformLocation };
+
     constructor(_name: string = "ParticleEffect", _particleEffectData: Serialization = {}) {
       super();
       this.name = _name;
@@ -71,6 +78,125 @@ namespace FudgeCore {
 
     public static isConstantData(_data: General): _data is ConstantData {
       return (_data as ConstantData)?.type == "constant";
+    }
+
+    private static generateCodeStructure(_data: Serialization): ShaderCodeStructure {
+      if (!_data) return {};
+  
+      let effectStructure: ShaderCodeStructure = {};
+  
+      for (const key in _data) {
+        let subData: General = _data[key];
+        if (ParticleEffect.isClosureData(subData)) 
+          effectStructure[key] = ParticleEffect.generateCode(subData);
+        else
+          effectStructure[key] = ParticleEffect.generateCodeStructure(subData);
+      }
+  
+      return effectStructure;
+    }   
+  
+    private static generateCode(_data: ClosureData): string {
+      let predefinedVariableMap: {[key: string]: string} = {
+        index: "particleIndex",
+        numberOfParticles: "u_fNumberOfParticles",
+        time: "u_fTime"
+      };
+      if (ParticleEffect.isFunctionData(_data)) {
+        let parameters: string[] = [];
+        for (let param of _data.parameters) {
+          parameters.push(this.generateCode(param));
+        }
+        return ParticleEffect.createShaderCode(_data.function, parameters);
+      }
+  
+      if (ParticleEffect.isVariableData(_data)) {
+        let predefined: string = predefinedVariableMap[_data.value];
+        return predefined ? predefined : _data.value;
+      } 
+  
+      if (ParticleEffect.isConstantData(_data)) {
+        let value: string = _data.value.toString();
+        return `${value}${value.includes(".") ? "" : ".0"}` + "f";
+      }
+  
+      throw `invalid node structure`;
+    }
+  
+    private static createShaderCode(_function: string, _parameters: string[]): string {
+      let closures: { [key: string]: Function } = {
+        "addition": (_parameters: string[]) => _parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} + ${_value}`),
+        "subtraction": (_parameters: string[]) => _parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} - ${_value}`),
+        "multiplication": (_parameters: string[]) => _parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} * ${_value}`),
+        "division": (_parameters: string[]) => _parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} / ${_value}`),
+        "modulo": (_parameters: string[]) => _parameters.reduce((_accumulator: string, _value: string) => `mod(${_accumulator}, ${_value})`),
+        "linear": (_parameters: string[]) => "TODO",
+        "polynomial": (_parameters: string[]) => "TODO",
+        "squareRoot": (_parameters: string[]) => "TODO",
+        "random": (_parameters: string[]) => "TODO"
+      };
+
+      if (_function in closures)
+        return closures[_function](_parameters);
+      else
+        throw `"${_function}" is not an operation`;
+    }
+
+    private static createLocalTransformationsShaderCode(_transformations: ShaderCodeStructure): string {
+      let code: string = "";
+      if (_transformations) {
+        for (const key in _transformations) {
+          let transformation: ParticleEffectStructure = _transformations[key] as ParticleEffectStructure;
+          switch (key) {
+            case "translate":
+              code += `mat4 translationMatrix = mat4(
+              1.0, 0.0, 0.0, 0.0,
+              0.0, 1.0, 0.0, 0.0,
+              0.0, 0.0, 1.0, 0.0,
+              ${transformation.x ? transformation.x : "0.0"}, ${transformation.y ? transformation.y : "0.0"}, ${transformation.z ? transformation.z : "0.0"}, 1.0);\n`;
+              break;
+            case "scale":
+              code += `mat4 scalingMatrix = mat4(
+              ${transformation.x ? transformation.x : "1.0"}, 0.0, 0.0, 0.0,
+              0.0, ${transformation.y ? transformation.y : "1.0"}, 0.0, 0.0,
+              0.0, 0.0, ${transformation.z ? transformation.z : "1.0"}, 0.0,
+              0.0, 0.0, 0.0, 1.0
+              );\n`;
+              break;
+            case "rotate":
+              let sinX: string = `sin(${transformation.x ? transformation.x : "0.0"})`;
+              let cosX: string = `cos(${transformation.x ? transformation.x : "0.0"})`;
+              let sinY: string = `sin(${transformation.y ? transformation.y : "0.0"})`;
+              let cosY: string = `cos(${transformation.y ? transformation.y : "0.0"})`;
+              let sinZ: string = `sin(${transformation.z ? transformation.z : "0.0"})`;
+              let cosZ: string = `cos(${transformation.z ? transformation.z : "0.0"})`;
+              code += `mat4 rotationMatrix = mat4(
+              ${cosZ} * ${cosY}, ${sinZ} * ${cosY}, -${sinY}, 0.0,
+              ${cosZ} * ${sinY} * ${sinX} - ${sinZ} * ${cosX}, ${sinZ} * ${sinY} * ${sinX} + ${cosZ} * ${cosX}, ${cosY} * ${sinX}, 0.0,
+              ${cosZ} * ${sinY} * ${cosX} + ${sinZ} * ${sinX}, ${sinZ} * ${sinY} * ${cosX} - ${cosZ} * ${sinX}, ${cosY} * ${cosX}, 0.0,
+              0.0, 0.0, 0.0, 1.0
+              );\n`;
+              break;
+          }
+        }
+      }
+      return code;
+    }
+
+    private static createPositionShaderCode(_structure: ShaderCodeStructure): string {
+      let positionCodeMap: {[key: string]: string} = {
+        translate: "translationMatrix",
+        scale: "scalingMatrix",
+        rotate: "rotationMatrix"
+      };
+      
+      let code: string = "";
+      if (_structure) {
+        for (const key in _structure) {
+          code += `${positionCodeMap[key]} * `;
+        }
+      }
+      return code;
     }
 
     /**
@@ -145,6 +271,19 @@ namespace FudgeCore {
 
       return _variableNames;
     }
+
+    private static createStorageShaderCode(_storage: ShaderCodeStructure): string {
+      let code: string = "";
+      if (_storage) {
+        for (const partitionName in _storage) {
+          let partition: ParticleEffectStructure = _storage[partitionName] as ParticleEffectStructure;
+          for (const variableName in partition) {
+            code += `float ${variableName} = ${partition[variableName]};\n`;
+          }
+        }
+      }
+      return code;
+    }
     
     public get data(): Serialization {
       return this.#data;
@@ -165,6 +304,100 @@ namespace FudgeCore {
         .then(_response => _response.json());
         // .then(data => this.desirializeData(data));
       this.data = data;
+    }
+
+    public getVertexShaderSource(): string { 
+      let shaderCodeStructure: ShaderCodeStructure = ParticleEffect.generateCodeStructure(this.data);
+      let source: string = ShaderParticle.getVertexShaderSource()
+        .replace("/*$selfDefinedVariables*/", ParticleEffect.createStorageShaderCode(shaderCodeStructure["storage"] as ShaderCodeStructure))
+        .replace("/*$localTransformationMatrices*/", ParticleEffect.createLocalTransformationsShaderCode((shaderCodeStructure["transformations"] as ShaderCodeStructure).local as ShaderCodeStructure))
+        .replace("/*$localTransformations*/", ParticleEffect.createPositionShaderCode((shaderCodeStructure["transformations"] as ShaderCodeStructure).local as ShaderCodeStructure));
+      
+      return source; 
+    }
+
+    public getFragmentShaderSource(): string { return ShaderParticle.getFragmentShaderSource(); }
+  
+    public useProgram(): void {      
+      if (!this.program)
+        this.createProgram();
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+      crc3.useProgram(this.program);
+    }
+  
+    public deleteProgram(): void {
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+      if (this.program) {
+        crc3.deleteProgram(this.program);
+        delete this.attributes;
+        delete this.uniforms;
+      }
+    }
+  
+    public createProgram(): void {
+      Debug.fudge("Create shader program", ShaderParticle.name);
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+      let program: WebGLProgram = crc3.createProgram();
+      try {
+        let shdVertex: WebGLShader = compileShader(this.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER);
+        let shdFragment: WebGLShader = compileShader(this.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER);
+        crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(shdVertex));
+        crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(shdFragment));
+        crc3.linkProgram(program);
+        let error: string = RenderWebGL.assert<string>(crc3.getProgramInfoLog(program));
+        if (error !== "") {
+          throw new Error("Error linking Shader: " + error);
+        }
+  
+        this.program = program;
+        this.attributes = detectAttributes();
+        this.uniforms = detectUniforms();
+  
+      } catch (_error) {
+        Debug.error(_error);
+        debugger;
+      }
+  
+  
+      function compileShader(_shaderCode: string, _shaderType: GLenum): WebGLShader | null {
+        let webGLShader: WebGLShader = crc3.createShader(_shaderType);
+        crc3.shaderSource(webGLShader, _shaderCode);
+        crc3.compileShader(webGLShader);
+        let error: string = RenderWebGL.assert<string>(crc3.getShaderInfoLog(webGLShader));
+        if (error !== "") {
+          throw new Error("Error compiling shader: " + error);
+        }
+        // Check for any compilation errors.
+        if (!crc3.getShaderParameter(webGLShader, WebGL2RenderingContext.COMPILE_STATUS)) {
+          alert(crc3.getShaderInfoLog(webGLShader));
+          return null;
+        }
+        return webGLShader;
+      }
+      function detectAttributes(): { [name: string]: number } {
+        let detectedAttributes: { [name: string]: number } = {};
+        let attributeCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_ATTRIBUTES);
+        for (let i: number = 0; i < attributeCount; i++) {
+          let attributeInfo: WebGLActiveInfo = RenderWebGL.assert<WebGLActiveInfo>(crc3.getActiveAttrib(program, i));
+          if (!attributeInfo) {
+            break;
+          }
+          detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(program, attributeInfo.name);
+        }
+        return detectedAttributes;
+      }
+      function detectUniforms(): { [name: string]: WebGLUniformLocation } {
+        let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
+        let uniformCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
+        for (let i: number = 0; i < uniformCount; i++) {
+          let info: WebGLActiveInfo = RenderWebGL.assert<WebGLActiveInfo>(crc3.getActiveUniform(program, i));
+          if (!info) {
+            break;
+          }
+          detectedUniforms[info.name] = RenderWebGL.assert<WebGLUniformLocation>(crc3.getUniformLocation(program, info.name));
+        }
+        return detectedUniforms;
+      }
     }
 
     //#region Transfer
@@ -264,5 +497,8 @@ namespace FudgeCore {
       }
       return mutator;
     }
+
+    
+    
   }
 }

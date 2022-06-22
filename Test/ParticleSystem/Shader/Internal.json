@@ -6,7 +6,7 @@
       "data": {
         "storage": {
           "system": {
-            "particleDistance": {
+            "particleOffset": {
               "type": "function",
               "function": "division",
               "parameters": [
@@ -16,13 +16,13 @@
                 },
                 {
                   "type": "variable",
-                  "value": "size"
+                  "value": "numberOfParticles"
                 }
               ]
             }
           },
           "update": {
-            "systemTime": {
+            "scaledTime":  {
               "type": "function",
               "function": "division",
               "parameters": [
@@ -56,13 +56,13 @@
                         },
                         {
                           "type": "variable",
-                          "value": "particleDistance"
+                          "value": "particleOffset"
                         }
                       ]
                     },
                     {
                       "type": "variable",
-                      "value": "systemTime"
+                      "value": "scaledTime"
                     }
                   ]
                 },
@@ -72,7 +72,7 @@
                 }
               ]
             },
-            "reversedParticleTime": {
+            "inverseParticleTime": {
               "type": "function",
               "function": "subtraction",
               "parameters": [
@@ -96,66 +96,36 @@
                 "function": "multiplication",
                 "parameters": [
                   {
-                    "type": "function",
-                    "function": "polynomial",
-                    "parameters": [
-                      {
-                        "type": "variable",
-                        "value": "reversedParticleTime"
-                      },
-                      {
-                        "type": "constant",
-                        "value": -2
-                      },
-                      {
-                        "type": "constant",
-                        "value": 2
-                      },
-                      {
-                        "type": "constant",
-                        "value": 0
-                      },
-                      {
-                        "type": "constant",
-                        "value": 0
-                      }
-                    ]
+                    "type": "constant",
+                    "value": 8
                   },
                   {
-                    "type": "function",
-                    "function": "subtraction",
-                    "parameters": [
-                      {
-                        "type": "function",
-                        "function": "multiplication",
-                        "parameters": [
-                          {
-                            "type": "constant",
-                            "value": 2
-                          },
-                          {
-                            "type": "function",
-                            "function": "random",
-                            "parameters": [
-                              {
-                                "type": "variable",
-                                "value": "index"
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "constant",
-                        "value": 1
-                      }
-                    ]
+                    "type": "variable",
+                    "value": "particleTime"
                   }
                 ]
-              },
+              }
+            },
+            "rotate": {
+              "x": {
+                "type": "function",
+                "function": "multiplication",
+                "parameters": [
+                  {
+                    "type": "constant",
+                    "value": 2
+                  },
+                  {
+                    "type": "variable",
+                    "value": "particleTime"
+                  }
+                ]
+              }
+            },
+            "scale": {
               "y": {
-                "type": "variable",
-                "value": "particleTime"
+                "type": "constant",
+                "value": 2
               }
             }
           }
@@ -165,7 +135,7 @@
             "clrPrimary": {
               "a": {
                 "type": "variable",
-                "value": "reversedParticleTime"
+                "value": "inverseParticleTime"
               }
             }
           }
@@ -181,12 +151,25 @@
   },
   "TextureImage|2022-05-09T11:28:27.095Z|18280": {
     "ƒ.TextureImage": {
-      "url": "particle.png", 
+      "url": "particle.png",
       "type": "TextureImage",
       "Texture": {
         "idResource": "TextureImage|2022-05-09T11:28:27.095Z|18280",
         "name": "particle.png",
         "mipmap": "CRISP"
+      }
+    }
+  },
+  "Material|2022-06-22T12:32:55.046Z|77384": {
+    "ƒ.Material": {
+      "name": "ShaderParticle",
+      "idResource": "Material|2022-06-22T12:32:55.046Z|77384",
+      "shader": "ShaderParticle",
+      "coat": {
+        "ƒ.CoatTextured": {
+          "color": "[0.7333333333333333, 1, 0, 1]",
+          "idTexture": "TextureImage|2022-05-09T11:28:27.095Z|18280"
+        }
       }
     }
   },
@@ -276,7 +259,7 @@
                       "active": true
                     },
                     "idParticleEffect": "ParticleEffect|2022-05-06T11:42:57.884Z|95497",
-                    "size": 50
+                    "numberOfParticles": 1
                   }
                 }
               ],
@@ -334,19 +317,6 @@
       ],
       "idResource": "Graph|2022-04-19T10:13:58.210Z|44368",
       "type": "Graph"
-    }
-  },
-  "Material|2022-06-22T12:32:55.046Z|77384": {
-    "ƒ.Material": {
-      "name": "ShaderParticle",
-      "idResource": "Material|2022-06-22T12:32:55.046Z|77384",
-      "shader": "ShaderParticle",
-      "coat": {
-        "ƒ.CoatTextured": {
-          "color": "[0.7333333333333333, 1, 0, 1]",
-          "idTexture": "TextureImage|2022-05-09T11:28:27.095Z|18280"
-        }
-      }
     }
   }
 }

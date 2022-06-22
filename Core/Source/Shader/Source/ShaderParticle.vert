@@ -19,13 +19,13 @@ uniform float u_fTime;
 void main() {
   vec4 vctPosition = vec4(a_vctPosition, 1.0);
   mat4 mtxMeshToView = u_mtxMeshToView;
+  float particleIndex = float(gl_InstanceID);
 
-  // #if defined(PARTICLE)
-  //   $variables
-  // #endif
+  /*$selfDefinedVariables*/
+  /*$localTransformationMatrices*/
 
   // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
+  gl_Position = mtxMeshToView * /*$localTransformations*/vctPosition;
   v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
 
   // always full opacity for now...
