@@ -2950,10 +2950,12 @@ var Fudge;
             this.graph = ƒ.Project.resources[_state["graph"]];
             this.createUserInterface();
             let title = `● Drop a graph from "Internal" here.\n`;
-            title += "● Use mousebuttons and ctrl-, shift- or alt-key to navigate view.\n";
-            title += "● Click to select node, rightclick to select transformations.\n";
-            title += "● Hold X, Y or Z to transform. Add shift-key to invert restriction.\n";
-            title += "● Transformation affects selected component.";
+            title += "● Use mousebuttons and ctrl-, shift- or alt-key to navigate editor camera.\n";
+            title += "● Drop camera component here to see through that camera.\n";
+            title += "● Manipulate transformations in this view:\n";
+            title += "  - Click to select node, rightclick to select transformations.\n";
+            title += "  - Select component to manipulate in view Components.\n";
+            title += "  - Hold X, Y or Z and move mouse to transform. Add shift-key to invert restriction.\n";
             this.dom.title = title;
             this.dom.tabIndex = 0;
             _container.on("resize", this.redraw);
@@ -3072,6 +3074,7 @@ var Fudge;
         hndDrop(_event, _viewSource) {
             let source = _viewSource.getDragDropSources()[0];
             if (source instanceof ƒ.ComponentCamera) {
+                this.setCameraOrthographic(false);
                 this.viewport.camera = source;
                 this.redraw();
             }
@@ -3079,6 +3082,7 @@ var Fudge;
                 this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source } });
         }
         setCameraOrthographic(_on = false) {
+            this.viewport.camera = this.cmrOrbit.cmpCamera;
             if (_on) {
                 this.cmrOrbit.cmpCamera.projectCentral(2, 1, ƒ.FIELD_OF_VIEW.DIAGONAL, 10, 20000);
                 this.cmrOrbit.maxDistance = 10000;
@@ -3089,6 +3093,7 @@ var Fudge;
                 this.cmrOrbit.maxDistance = 1000;
                 this.cmrOrbit.distance /= 50;
             }
+            this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ORTHGRAPHIC_CAMERA)).checked = _on;
             ƒ.Render.prepare(this.cmrOrbit);
             this.redraw();
         }
