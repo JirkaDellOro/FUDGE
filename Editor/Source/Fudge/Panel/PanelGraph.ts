@@ -81,6 +81,7 @@ namespace Fudge {
     }
 
     private hndEvent = async (_event: FudgeEvent): Promise<void> => {
+      _event.stopPropagation();
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
           this.setGraph(_event.detail.graph);
@@ -95,7 +96,6 @@ namespace Fudge {
       }
 
       this.broadcastEvent(_event);
-      _event.stopPropagation();
     }
 
     private hndFocusNode = (_event: CustomEvent): void => {

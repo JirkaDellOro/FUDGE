@@ -1664,6 +1664,7 @@ var Fudge;
             // TODO: iterate over views and collect their states for reconstruction 
         }
         hndEvent = async (_event) => {
+            _event.stopPropagation();
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
                     this.setGraph(_event.detail.graph);
@@ -1677,7 +1678,6 @@ var Fudge;
                     break;
             }
             this.broadcastEvent(_event);
-            _event.stopPropagation();
         };
         hndFocusNode = (_event) => {
             let event = new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: _event.detail.data, view: this } });
