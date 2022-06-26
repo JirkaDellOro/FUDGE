@@ -2107,9 +2107,8 @@ declare namespace FudgeCore {
         PHYSICS = "physics"
     }
     /**
-     * Base class for scripts the user writes
+     * Attaches picking functionality to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
-     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
      */
     class ComponentPick extends Component {
         static readonly iSubclass: number;
@@ -2141,7 +2140,7 @@ declare namespace FudgeCore {
         NODE = 3
     }
     /**
-     * Attaches a transform-[[Matrix4x4} to the node, moving, scaling and rotating it in space relative to its parent.
+     * Attaches a transform-{@link Matrix4x4} to the node, moving, scaling and rotating it in space relative to its parent.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends Component {
