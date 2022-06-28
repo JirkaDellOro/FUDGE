@@ -96,36 +96,66 @@
                 "function": "multiplication",
                 "parameters": [
                   {
-                    "type": "constant",
-                    "value": 8
+                    "type": "function",
+                    "function": "polynomial",
+                    "parameters": [
+                      {
+                        "type": "variable",
+                        "value": "inverseParticleTime"
+                      },
+                      {
+                        "type": "constant",
+                        "value": -2
+                      },
+                      {
+                        "type": "constant",
+                        "value": 2
+                      },
+                      {
+                        "type": "constant",
+                        "value": 0
+                      },
+                      {
+                        "type": "constant",
+                        "value": 0
+                      }
+                    ]
                   },
                   {
-                    "type": "variable",
-                    "value": "particleTime"
+                    "type": "function",
+                    "function": "subtraction",
+                    "parameters": [
+                      {
+                        "type": "function",
+                        "function": "multiplication",
+                        "parameters": [
+                          {
+                            "type": "constant",
+                            "value": 2
+                          },
+                          {
+                            "type": "function",
+                            "function": "random",
+                            "parameters": [
+                              {
+                                "type": "variable",
+                                "value": "index"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "constant",
+                        "value": 1
+                      }
+                    ]
                   }
                 ]
-              }
-            },
-            "rotate": {
-              "x": {
-                "type": "function",
-                "function": "multiplication",
-                "parameters": [
-                  {
-                    "type": "constant",
-                    "value": 2
-                  },
-                  {
-                    "type": "variable",
-                    "value": "particleTime"
-                  }
-                ]
-              }
-            },
-            "scale": {
+              },
               "y": {
-                "type": "constant",
-                "value": 2
+                "type": "variable",
+                "value": "particleTime"
               }
             }
           }
@@ -259,7 +289,7 @@
                       "active": true
                     },
                     "idParticleEffect": "ParticleEffect|2022-05-06T11:42:57.884Z|95497",
-                    "numberOfParticles": 1
+                    "numberOfParticles": 5
                   }
                 }
               ],
@@ -270,7 +300,7 @@
                     "pivot": {
                       "translation": "[0, 0, 0]",
                       "rotation": "[0, 0, 0]",
-                      "scaling": "[0.2500000298023224, 0.2500000298023224, 1.0000001192092896]"
+                      "scaling": "[1.0000001192092896, 1, 1.0000001192092896]"
                     },
                     "Component": {
                       "active": true

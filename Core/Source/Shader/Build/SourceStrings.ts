@@ -394,11 +394,13 @@ out vec4 v_vctColor;
 
 uniform float u_fNumberOfParticles;
 uniform float u_fTime;
+uniform sampler2D u_fRandomNumbers;
 
 void main() {
   vec4 vctPosition = vec4(a_vctPosition, 1.0);
   mat4 mtxMeshToView = u_mtxMeshToView;
   float particleIndex = float(gl_InstanceID);
+  // float a = texture(u_fRandomNumbers, vec2(particleIndex, 10.0)).r;
 
   /*$selfDefinedVariables*/
   /*$localTransformationMatrices*/

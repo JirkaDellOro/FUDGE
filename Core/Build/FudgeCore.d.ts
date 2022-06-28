@@ -2137,6 +2137,7 @@ declare namespace FudgeCore {
         #private;
         static readonly iSubclass: number;
         variables: ParticleVariables;
+        randomNumbersData: WebGLTexture;
         constructor(_particleEffect?: ParticleEffect, _numberOfParticles?: number);
         get particleEffect(): ParticleEffect;
         set particleEffect(_newParticleEffect: ParticleEffect);
@@ -2149,6 +2150,7 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
+        useRenderData(): void;
         protected reduceMutator(_mutator: Mutator): void;
         private initRandomNumbers;
     }
@@ -4268,11 +4270,6 @@ declare namespace FudgeCore {
         static isFunctionData(_data: General): _data is FunctionData;
         static isVariableData(_data: General): _data is VariableData;
         static isConstantData(_data: General): _data is ConstantData;
-        private static generateCodeStructure;
-        private static generateCode;
-        private static createShaderCode;
-        private static createLocalTransformationsShaderCode;
-        private static createPositionShaderCode;
         /**
          * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
          * @param _data The particle effect data to parse recursivley.
@@ -4288,7 +4285,6 @@ declare namespace FudgeCore {
          * @param _data The paticle effect data to parse.
          */
         private static preParseStorage;
-        private static createStorageShaderCode;
         get data(): Serialization;
         set data(_data: Serialization);
         /**
@@ -4318,6 +4314,20 @@ declare namespace FudgeCore {
          * Create an empty mutator from _effectStructure.
          */
         private createEmptyMutatorFrom;
+    }
+}
+declare namespace FudgeCore {
+    interface ShaderCodeStructure {
+        [attribute: string]: ShaderCodeStructure | string;
+    }
+    class ParticleShaderCodeGenerator {
+        private static predefinedVariableMap;
+        static generateShaderCodeStructure(_data: Serialization): ShaderCodeStructure;
+        static generateCode(_data: ClosureData): string;
+        static generateShaderCodeFunction(_function: string, _parameters: string[]): string;
+        static createStorageShaderCode(_storage: ShaderCodeStructure): string;
+        static createLocalTransformationsShaderCode(_transformations: ShaderCodeStructure): string;
+        static createPositionShaderCode(_structure: ShaderCodeStructure): string;
     }
 }
 declare namespace FudgeCore {

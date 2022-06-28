@@ -362,6 +362,7 @@ namespace FudgeCore {
 
     // TODO: check if this should happen somewhere else e.g. some Render injector stuff?
     protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: typeof Shader, _renderBuffers: RenderBuffers): void {
+      _cmpParticleSystem.useRenderData();
       let numberOfParticles: number = _cmpParticleSystem.numberOfParticles;
       this.crc3.uniform1f(_shader.uniforms["u_fTime"], Time.game.get());
       this.crc3.uniform1f(_shader.uniforms["u_fNumberOfParticles"], numberOfParticles);

@@ -14,6 +14,7 @@ namespace FudgeCore {
   export class ComponentParticleSystem extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
     public variables: ParticleVariables = {};
+    public randomNumbersData: WebGLTexture;
 
     #particleEffect: ParticleEffect;
     // TODO: add color for the whole system
@@ -81,6 +82,42 @@ namespace FudgeCore {
       mutator.particleEffect = this.particleEffect?.getMutatorForUserInterface();
 
       return mutator;
+    }
+
+    public useRenderData(): void {
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+      if (this.randomNumbersData) {
+        // buffers exist
+        crc3.activeTexture(WebGL2RenderingContext.TEXTURE10);
+        crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.randomNumbersData);
+        crc3.uniform1i(this.particleEffect.uniforms["u_fRandomNumbers"], 10);
+      }
+      else {
+        this.randomNumbersData = {};
+        // TODO: check if all WebGL-Creations are asserted
+        const texture: WebGLTexture = Render.assert<WebGLTexture>(crc3.createTexture());
+        crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
+        let random = Array.from(Array(100 * 100)).map (_ => Math.random());
+        try {
+          crc3.texImage2D(
+            WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.R32F, 100, 100, 0, WebGL2RenderingContext.RED, WebGL2RenderingContext.FLOAT,
+            Float32Array.from(random) //this.variables[PARTICLE_VARIBALE_NAMES.RANDOM_NUMBERS] as number[]
+          );
+        } catch (_error) {
+          Debug.error(_error);
+        }
+
+        crc3.texParameteri(crc3.TEXTURE_2D, crc3.TEXTURE_MIN_FILTER, crc3.NEAREST);
+        crc3.texParameteri(crc3.TEXTURE_2D, crc3.TEXTURE_MAG_FILTER, crc3.NEAREST);
+        // crc3.texParameteri(crc3.TEXTURE_2D, crc3.TEXTURE_WRAP_S, crc3.CLAMP_TO_EDGE);
+        // crc3.texParameteri(crc3.TEXTURE_2D, crc3.TEXTURE_WRAP_T, crc3.CLAMP_TO_EDGE);
+
+        this.randomNumbersData = texture;
+
+        crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
+
+        this.useRenderData();
+      }
     }
 
     protected reduceMutator(_mutator: Mutator): void {
