@@ -286,11 +286,11 @@
                     },
                     {
                       "type": "constant",
-                      "value": 1
+                      "value": 2
                     },
                     {
                       "type": "constant",
-                      "value": 3
+                      "value": 4
                     }
                   ]
                 }
@@ -375,7 +375,7 @@
                   },
                   {
                     "type": "constant",
-                    "value": -2.5
+                    "value": -1
                   },
                   {
                     "type": "constant",

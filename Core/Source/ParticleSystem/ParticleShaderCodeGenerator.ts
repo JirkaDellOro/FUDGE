@@ -67,12 +67,6 @@ namespace FudgeCore {
       time: "u_fTime"
     };
 
-    private static transformationCodeMap: {[key: string]: string} = {
-      translate: "mtxTranslation",
-      rotate: "mtxRotation",
-      scale: "mtxScaling"
-    };
-
     public static generateShaderCodeStructure(_data: Serialization): ShaderCodeStructure {
       if (!_data) return {};
 
@@ -133,60 +127,49 @@ namespace FudgeCore {
       return code;
     }
 
-    public static createLocalTransformationsShaderCode(_structure: ShaderCodeStructure): string {
-      let transformationsLocal: ShaderCodeStructure = _structure?.transformations?.local;
+    public static createLocalTransformationsShaderCode(_transformations: ShaderCodeStructure, _isLocal: boolean): string {
+      if (!_transformations) return "";
+
       let code: string = "";
-      if (transformationsLocal) {
-        for (const key in transformationsLocal) {
-          let transformation: ShaderCodeMap = transformationsLocal[key] as ShaderCodeMap;
-          let keys: string[] = Object.keys(ParticleShaderCodeGenerator.transformationCodeMap);
-          switch (key) {
-            case keys[0]:
-              code += `mat4 ${ParticleShaderCodeGenerator.transformationCodeMap[keys[0]]} = mat4(
-              1.0, 0.0, 0.0, 0.0,
-              0.0, 1.0, 0.0, 0.0,
-              0.0, 0.0, 1.0, 0.0,
-              ${transformation.x ? transformation.x : "0.0"}, ${transformation.y ? transformation.y : "0.0"}, ${transformation.z ? transformation.z : "0.0"}, 1.0);\n`;
-              break;
-            case keys[1]:
-              // TODO: move these into shader?
-              let sinX: string = `sin(${transformation.x ? transformation.x : "0.0"})`;
-              let cosX: string = `cos(${transformation.x ? transformation.x : "0.0"})`;
-              let sinY: string = `sin(${transformation.y ? transformation.y : "0.0"})`;
-              let cosY: string = `cos(${transformation.y ? transformation.y : "0.0"})`;
-              let sinZ: string = `sin(${transformation.z ? transformation.z : "0.0"})`;
-              let cosZ: string = `cos(${transformation.z ? transformation.z : "0.0"})`;
-              code += `mat4 ${ParticleShaderCodeGenerator.transformationCodeMap[keys[2]]} = mat4(
-              ${cosZ} * ${cosY}, ${sinZ} * ${cosY}, -${sinY}, 0.0,
-              ${cosZ} * ${sinY} * ${sinX} - ${sinZ} * ${cosX}, ${sinZ} * ${sinY} * ${sinX} + ${cosZ} * ${cosX}, ${cosY} * ${sinX}, 0.0,
-              ${cosZ} * ${sinY} * ${cosX} + ${sinZ} * ${sinX}, ${sinZ} * ${sinY} * ${cosX} - ${cosZ} * ${sinX}, ${cosY} * ${cosX}, 0.0,
-              0.0, 0.0, 0.0, 1.0
-              );\n`;
-              break;
-            case keys[2]:
-              code += `mat4 ${ParticleShaderCodeGenerator.transformationCodeMap[keys[1]]} = mat4(
-              ${transformation.x ? transformation.x : "1.0"}, 0.0, 0.0, 0.0,
-              0.0, ${transformation.y ? transformation.y : "1.0"}, 0.0, 0.0,
-              0.0, 0.0, ${transformation.z ? transformation.z : "1.0"}, 0.0,
-              0.0, 0.0, 0.0, 1.0
-              );\n`;
-              break;
+      code += `mat4 mtx${_isLocal ? "Local" : "World"} = \n`;
+      code += Object.keys(_transformations)
+      .map( (_key: string) => {
+        let transformation: ShaderCodeMap = _transformations[_key] as ShaderCodeMap;
+        switch (_key) {
+          case "translate":
+            return `mat4(
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            ${transformation.x ? transformation.x : "0.0"}, ${transformation.y ? transformation.y : "0.0"}, ${transformation.z ? transformation.z : "0.0"}, 1.0)`;
+          case "rotate":
+            // TODO: move these into shader?
+            let sinX: string = `sin(${transformation.x ? transformation.x : "0.0"})`;
+            let cosX: string = `cos(${transformation.x ? transformation.x : "0.0"})`;
+            let sinY: string = `sin(${transformation.y ? transformation.y : "0.0"})`;
+            let cosY: string = `cos(${transformation.y ? transformation.y : "0.0"})`;
+            let sinZ: string = `sin(${transformation.z ? transformation.z : "0.0"})`;
+            let cosZ: string = `cos(${transformation.z ? transformation.z : "0.0"})`;
+            return `mat4(
+            ${cosZ} * ${cosY}, ${sinZ} * ${cosY}, -${sinY}, 0.0,
+            ${cosZ} * ${sinY} * ${sinX} - ${sinZ} * ${cosX}, ${sinZ} * ${sinY} * ${sinX} + ${cosZ} * ${cosX}, ${cosY} * ${sinX}, 0.0,
+            ${cosZ} * ${sinY} * ${cosX} + ${sinZ} * ${sinX}, ${sinZ} * ${sinY} * ${cosX} - ${cosZ} * ${sinX}, ${cosY} * ${cosX}, 0.0,
+            0.0, 0.0, 0.0, 1.0
+            )`;
+          case "scale":
+            return `mat4(
+            ${transformation.x ? transformation.x : "1.0"}, 0.0, 0.0, 0.0,
+            0.0, ${transformation.y ? transformation.y : "1.0"}, 0.0, 0.0,
+            0.0, 0.0, ${transformation.z ? transformation.z : "1.0"}, 0.0,
+            0.0, 0.0, 0.0, 1.0
+            )`;
+          default:
+            return "";    
           }
         }
-      }
-
-      return code;
-    }
-
-    public static createPositionShaderCode(_structure: ShaderCodeStructure): string {
-      let transformationsLocal: ShaderCodeStructure = _structure?.transformations?.local;
-      let code: string = "";
-      if (transformationsLocal) {
-        for (const key in transformationsLocal) {
-          code = `${ParticleShaderCodeGenerator.transformationCodeMap[key]} * `.concat(code);
-        }
-      }
-
+      )
+      .reduce((_accumulator: string, _code: string) => `${_accumulator}\n * \n ${_code}`);
+      code += ";";
       return code;
     }
 

@@ -23,10 +23,13 @@ void main() {
   float particleIndex = float(gl_InstanceID);
 
   /*$selfDefinedVariables*/
-  /*$localTransformationMatrices*/
+
+  /*$mtxLocal*/
+
+  /*$mtxWorld*/
 
   // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * /*$localTransformations*/ vctPosition;
+  gl_Position = /*$mtxWorld*/ mtxMeshToView * /*$mtxLocal*/ vctPosition;
   v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
   /*$color*/
 }

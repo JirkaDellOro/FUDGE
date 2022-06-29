@@ -176,8 +176,10 @@ namespace FudgeCore {
       let shaderCodeStructure: ShaderCodeStructure = ParticleShaderCodeGenerator.generateShaderCodeStructure(this.data);
       let source: string = ShaderParticle.getVertexShaderSource()
         .replace("/*$selfDefinedVariables*/", ParticleShaderCodeGenerator.createStorageShaderCode(shaderCodeStructure))
-        .replace("/*$localTransformationMatrices*/", ParticleShaderCodeGenerator.createLocalTransformationsShaderCode(shaderCodeStructure))
-        .replace("/*$localTransformations*/", ParticleShaderCodeGenerator.createPositionShaderCode(shaderCodeStructure))
+        .replace("/*$mtxLocal*/", ParticleShaderCodeGenerator.createLocalTransformationsShaderCode(shaderCodeStructure?.transformations?.local, true))
+        .replace("/*$mtxLocal*/", "mtxLocal *")
+        .replace("/*$mtxWorld*/", ParticleShaderCodeGenerator.createLocalTransformationsShaderCode(shaderCodeStructure?.transformations?.world, false))
+        .replace("/*$mtxWorld*/", "mtxWorld *")
         .replace("/*$color*/", ParticleShaderCodeGenerator.createColorShaderCode(shaderCodeStructure));
       
       return source; 
