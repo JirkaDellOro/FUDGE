@@ -88,20 +88,19 @@ namespace FudgeCore {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       if (this.randomNumbersData) {
         // buffers exist
-        crc3.activeTexture(WebGL2RenderingContext.TEXTURE10);
+        crc3.activeTexture(WebGL2RenderingContext.TEXTURE1); // TODO: which id to use?
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.randomNumbersData);
-        crc3.uniform1i(this.particleEffect.uniforms["u_fRandomNumbers"], 10);
+        crc3.uniform1i(this.particleEffect.uniforms["u_fRandomNumbers"], 1);
       }
       else {
         this.randomNumbersData = {};
         // TODO: check if all WebGL-Creations are asserted
         const texture: WebGLTexture = Render.assert<WebGLTexture>(crc3.createTexture());
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
-        let random = Array.from(Array(100 * 100)).map (_ => Math.random());
         try {
           crc3.texImage2D(
-            WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.R32F, 100, 100, 0, WebGL2RenderingContext.RED, WebGL2RenderingContext.FLOAT,
-            Float32Array.from(random) //this.variables[PARTICLE_VARIBALE_NAMES.RANDOM_NUMBERS] as number[]
+            WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.R32F, this.numberOfParticles, 1, 0, WebGL2RenderingContext.RED, WebGL2RenderingContext.FLOAT,
+            Float32Array.from(this.variables[PARTICLE_VARIBALE_NAMES.RANDOM_NUMBERS] as number[])
           );
         } catch (_error) {
           Debug.error(_error);
