@@ -11,7 +11,7 @@
           },
           {
             "type": "variable",
-            "value": "size"
+            "value": "numberOfParticles"
           }
         ]
       }

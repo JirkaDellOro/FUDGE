@@ -87,7 +87,7 @@ namespace FudgeCore {
           return `sqrt(${x})`;
         },
         "random": (_parameters: string[]) => {
-          return `texture(u_fRandomNumbers, vec2(${_parameters[0]} / u_fNumberOfParticles, 0.0)).r * 2.0`;
+          return `texture(u_fRandomNumbers, vec2(${_parameters[0]} / u_fNumberOfParticles, 0.0)).r`;
         }
       };
 
