@@ -2,7 +2,7 @@
   "ParticleEffect|2022-05-06T11:42:57.884Z|95497": {
     "ƒ.ParticleEffect": {
       "idResource": "ParticleEffect|2022-05-06T11:42:57.884Z|95497",
-      "name": "TestEffect",
+      "name": "Flame",
       "data": {
         "storage": {
           "system": {
@@ -207,6 +207,212 @@
       }
     }
   },
+  "ParticleEffect|2022-06-29T14:11:41.647Z|86620": {
+    "ƒ.ParticleEffect": {
+      "idResource": "ParticleEffect|2022-06-29T14:11:41.647Z|86620",
+      "name": "Firework",
+      "data": {
+        "storage": {
+          "update": {
+            "inNormTime": {
+              "type": "function",
+              "function": "modulo",
+              "parameters": [
+                {
+                  "type": "function",
+                  "function": "division",
+                  "parameters": [
+                    {
+                      "type": "variable",
+                      "value": "time"
+                    },
+                    {
+                      "type": "constant",
+                      "value": 1000
+                    }
+                  ]
+                },
+                {
+                  "type": "constant",
+                  "value": 1
+                }
+              ]
+            },
+            "reverseInNormTime": {
+              "type": "function",
+              "function": "subtraction",
+              "parameters": [
+                {
+                  "type": "constant",
+                  "value": 1.5
+                },
+                {
+                  "type": "variable",
+                  "value": "inNormTime"
+                }
+              ]
+            }
+          },
+          "particle": {
+            "particleAcceleration": {
+              "type": "constant",
+              "value": -0.3
+            },
+            "particleVelocity": {
+              "type": "function",
+              "function": "addition",
+              "parameters": [
+                {
+                  "type": "function",
+                  "function": "multiplication",
+                  "parameters": [
+                    {
+                      "type": "variable",
+                      "value": "particleAcceleration"
+                    },
+                    {
+                      "type": "variable",
+                      "value": "inNormTime"
+                    }
+                  ]
+                },
+                {
+                  "type": "function",
+                  "function": "randomRange",
+                  "parameters": [
+                    {
+                      "type": "variable",
+                      "value": "index"
+                    },
+                    {
+                      "type": "constant",
+                      "value": 1
+                    },
+                    {
+                      "type": "constant",
+                      "value": 3
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "transformations": {
+          "local": {
+            "rotate": {
+              "z": {
+                "type": "function",
+                "function": "multiplication",
+                "parameters": [
+                  {
+                    "type": "function",
+                    "function": "random",
+                    "parameters": [
+                      {
+                        "type": "function",
+                        "function": "addition",
+                        "parameters": [
+                          {
+                            "type": "variable",
+                            "value": "index"
+                          },
+                          {
+                            "type": "constant",
+                            "value": 1
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "constant",
+                    "value": 360
+                  }
+                ]
+              }
+            },
+            "translate": {
+              "y": {
+                "type": "function",
+                "function": "multiplication",
+                "parameters": [
+                  {
+                    "type": "variable",
+                    "value": "particleVelocity"
+                  },
+                  {
+                    "type": "variable",
+                    "value": "inNormTime"
+                  }
+                ]
+              }
+            },
+            "scale": {
+              "x": {
+                "type": "variable",
+                "value": "reverseInNormTime"
+              },
+              "y": {
+                "type": "variable",
+                "value": "reverseInNormTime"
+              }
+            }
+          },
+          "world": {
+            "translate": {
+              "y": {
+                "type": "function",
+                "function": "polynomial",
+                "parameters": [
+                  {
+                    "type": "variable",
+                    "value": "inNormTime"
+                  },
+                  {
+                    "type": "constant",
+                    "value": 0
+                  },
+                  {
+                    "type": "constant",
+                    "value": -2.5
+                  },
+                  {
+                    "type": "constant",
+                    "value": 0
+                  },
+                  {
+                    "type": "constant",
+                    "value": 0
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "components": {
+          "ComponentMaterial": {
+            "clrPrimary": {
+              "a": {
+                "type": "function",
+                "function": "subtraction",
+                "parameters": [
+                  {
+                    "type": "constant",
+                    "value": 1
+                  },
+                  {
+                    "type": "variable",
+                    "value": "inNormTime"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   "Graph|2022-04-19T10:13:58.210Z|44368": {
     "ƒ.Graph": {
       "name": "Graph",
@@ -283,8 +489,8 @@
         },
         {
           "ƒ.Node": {
-            "name": "New Node",
-            "active": true,
+            "name": "Flame",
+            "active": false,
             "components": {
               "ComponentParticleSystem": [
                 {
@@ -350,24 +556,17 @@
         },
         {
           "ƒ.Node": {
-            "name": "New Node",
-            "active": false,
+            "name": "Firework",
+            "active": true,
             "components": {
-              "ComponentMaterial": [
+              "ComponentParticleSystem": [
                 {
-                  "ƒ.ComponentMaterial": {
-                    "sortForAlpha": false,
-                    "clrPrimary": "[1, 1, 1, 1]",
-                    "clrSecondary": "[1, 1, 1, 1]",
-                    "pivot": {
-                      "translation": "[0, 0]",
-                      "rotation": 0,
-                      "scaling": "[1, 1]"
-                    },
+                  "ƒ.ComponentParticleSystem": {
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2022-06-22T12:32:55.046Z|77384"
+                    "idParticleEffect": "ParticleEffect|2022-06-29T14:11:41.647Z|86620",
+                    "numberOfParticles": 10
                   }
                 }
               ],
@@ -386,17 +585,21 @@
                   }
                 }
               ],
-              "ComponentTransform": [
+              "ComponentMaterial": [
                 {
-                  "ƒ.ComponentTransform": {
-                    "local": {
-                      "translation": "[0, 0, 0]",
-                      "rotation": "[0, 0, 0]",
-                      "scaling": "[1, 1, 1]"
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
                     },
                     "Component": {
                       "active": true
-                    }
+                    },
+                    "idMaterial": "Material|2022-06-22T12:32:55.046Z|77384"
                   }
                 }
               ]
