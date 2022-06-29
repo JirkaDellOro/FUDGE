@@ -166,6 +166,10 @@
               "a": {
                 "type": "variable",
                 "value": "inverseParticleTime"
+              },
+              "r": {
+                "type": "variable",
+                "value": "particleTime"
               }
             }
           }

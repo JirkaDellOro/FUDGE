@@ -4317,10 +4317,25 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    interface ShaderCodeStructure {
+    interface ShaderCodeMap {
+        [key: string]: string;
+    }
+    export interface ShaderCodeStructure {
+        storage?: {
+            system?: ShaderCodeMap;
+            update?: ShaderCodeMap;
+            particle?: ShaderCodeMap;
+        };
+        transformations?: {
+            local?: ShaderCodeMap;
+            world?: ShaderCodeMap;
+        };
+        components?: {
+            [componentType: string]: ShaderCodeStructure;
+        };
         [attribute: string]: ShaderCodeStructure | string;
     }
-    class ParticleShaderCodeGenerator {
+    export class ParticleShaderCodeGenerator {
         private static predefinedVariableMap;
         static generateShaderCodeStructure(_data: Serialization): ShaderCodeStructure;
         static generateCode(_data: ClosureData): string;
@@ -4328,7 +4343,9 @@ declare namespace FudgeCore {
         static createStorageShaderCode(_storage: ShaderCodeStructure): string;
         static createLocalTransformationsShaderCode(_transformations: ShaderCodeStructure): string;
         static createPositionShaderCode(_structure: ShaderCodeStructure): string;
+        static createColorShaderCode(_structure: ShaderCodeStructure): string;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**

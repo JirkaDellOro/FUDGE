@@ -407,9 +407,7 @@ void main() {
   // calculate position and normal according to input and defines
   gl_Position = mtxMeshToView * /*$localTransformations*/ vctPosition;
   v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-
-  // always full opacity for now...
-  v_vctColor.a = 1.0;
+  /*$color*/
 }`;
   shaderSources["Source/ShaderParticle.frag"] = `#version 300 es
 /**
@@ -420,6 +418,7 @@ void main() {
 precision mediump float;
 
 uniform vec4 u_vctColor;
+in vec4 v_vctColor;
 
 in vec2 v_vctTexture;
 uniform sampler2D u_texture;
@@ -427,13 +426,11 @@ uniform sampler2D u_texture;
 out vec4 vctFrag;
 
 void main() {
-  vctFrag = u_vctColor;
-
-    // TEXTURE: multiply with texel color
+  // TEXTURE: multiply with texel color
   vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
+  vctFrag = u_vctColor * v_vctColor * vctColorTexture;
 
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
+  // discard pixel alltogether when transparent: don't show in Z-Buffer
   if(vctFrag.a < 0.01)
     discard;
 }`;

@@ -28,7 +28,5 @@ void main() {
   // calculate position and normal according to input and defines
   gl_Position = mtxMeshToView * /*$localTransformations*/ vctPosition;
   v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-
-  // always full opacity for now...
-  v_vctColor.a = 1.0;
+  /*$color*/
 }

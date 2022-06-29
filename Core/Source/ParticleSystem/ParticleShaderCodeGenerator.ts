@@ -1,6 +1,18 @@
 namespace FudgeCore {
 
+  interface ShaderCodeMap { [key: string]: string; }
+
   export interface ShaderCodeStructure {
+    storage?: {
+      system?: ShaderCodeMap;
+      update?: ShaderCodeMap;
+      particle?: ShaderCodeMap;
+    };
+    transformations?: {
+      local?: ShaderCodeMap;
+      world?: ShaderCodeMap;
+    };
+    components?: { [componentType: string]: ShaderCodeStructure};
     [attribute: string]: ShaderCodeStructure | string;
   }
 
@@ -14,17 +26,17 @@ namespace FudgeCore {
     public static generateShaderCodeStructure(_data: Serialization): ShaderCodeStructure {
       if (!_data) return {};
 
-      let effectStructure: ShaderCodeStructure = {};
+      let codeStructure: ShaderCodeStructure = {};
   
       for (const key in _data) {
         let subData: General = _data[key];
         if (ParticleEffect.isClosureData(subData)) 
-          effectStructure[key] = ParticleShaderCodeGenerator.generateCode(subData);
+          codeStructure[key] = ParticleShaderCodeGenerator.generateCode(subData);
         else
-          effectStructure[key] = ParticleShaderCodeGenerator.generateShaderCodeStructure(subData);
+          codeStructure[key] = ParticleShaderCodeGenerator.generateShaderCodeStructure(subData);
       }
   
-      return effectStructure;
+      return codeStructure;
     }   
   
     public static generateCode(_data: ClosureData): string {
@@ -101,7 +113,7 @@ namespace FudgeCore {
       let code: string = "";
       if (_storage) {
         for (const partitionName in _storage) {
-          let partition: ParticleEffectStructure = _storage[partitionName] as ParticleEffectStructure;
+          let partition: ShaderCodeMap = _storage[partitionName] as ShaderCodeMap;
           for (const variableName in partition) {
             code += `float ${variableName} = ${partition[variableName]};\n`;
           }
@@ -114,7 +126,7 @@ namespace FudgeCore {
       let code: string = "";
       if (_transformations) {
         for (const key in _transformations) {
-          let transformation: ParticleEffectStructure = _transformations[key] as ParticleEffectStructure;
+          let transformation: ShaderCodeMap = _transformations[key] as ShaderCodeMap;
           switch (key) {
             case "translate":
               code += `mat4 translationMatrix = mat4(
@@ -164,6 +176,14 @@ namespace FudgeCore {
           code += `${positionCodeMap[key]} * `;
         }
       }
+      return code;
+    }
+
+    public static createColorShaderCode(_structure: ShaderCodeStructure): string {      
+      let clrPrimary: ShaderCodeMap = _structure?.components?.ComponentMaterial?.clrPrimary as ShaderCodeMap;
+      if (!clrPrimary) return "";
+
+      let code: string = `v_vctColor = vec4(${clrPrimary.r ? clrPrimary.r : "1.0"}, ${clrPrimary.g ? clrPrimary.g : "1.0"}, ${clrPrimary.b ? clrPrimary.b : "1.0"}, ${clrPrimary.a ? clrPrimary.a : "1.0"});`;
       return code;
     }
   }

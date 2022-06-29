@@ -177,12 +177,18 @@ namespace FudgeCore {
       let source: string = ShaderParticle.getVertexShaderSource()
         .replace("/*$selfDefinedVariables*/", ParticleShaderCodeGenerator.createStorageShaderCode(shaderCodeStructure["storage"] as ShaderCodeStructure))
         .replace("/*$localTransformationMatrices*/", ParticleShaderCodeGenerator.createLocalTransformationsShaderCode((shaderCodeStructure["transformations"] as ShaderCodeStructure).local as ShaderCodeStructure))
-        .replace("/*$localTransformations*/", ParticleShaderCodeGenerator.createPositionShaderCode((shaderCodeStructure["transformations"] as ShaderCodeStructure).local as ShaderCodeStructure));
+        .replace("/*$localTransformations*/", ParticleShaderCodeGenerator.createPositionShaderCode((shaderCodeStructure["transformations"] as ShaderCodeStructure).local as ShaderCodeStructure))
+        .replace("/*$color*/", ParticleShaderCodeGenerator.createColorShaderCode(shaderCodeStructure));
       
       return source; 
     }
 
-    public getFragmentShaderSource(): string { return ShaderParticle.getFragmentShaderSource(); }
+    public getFragmentShaderSource(): string {
+      // let shaderCodeStructure: ShaderCodeStructure = ParticleShaderCodeGenerator.generateShaderCodeStructure(this.data); // TODO: do this ones only
+      let source: string = ShaderParticle.getFragmentShaderSource();
+        // .replace("/*$color*/", ParticleShaderCodeGenerator.createColorShaderCode(shaderCodeStructure));
+      return source; 
+    }
   
     public useProgram(): void {      
       if (!this.program)
