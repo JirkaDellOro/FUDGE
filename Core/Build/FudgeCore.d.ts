@@ -4212,6 +4212,7 @@ declare namespace FudgeCore {
          * - ```_parameters[0]``` representing the index of the number which will be chosen.
          */
         private static createRandom;
+        private static createRandomRange;
     }
 }
 declare namespace FudgeCore {

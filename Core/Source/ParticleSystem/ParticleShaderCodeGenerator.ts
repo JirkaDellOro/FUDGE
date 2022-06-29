@@ -55,6 +55,9 @@ namespace FudgeCore {
       },
       "random": (_parameters: string[]) => {
         return `texture(u_fRandomNumbers, vec2(${_parameters[0]} / u_fNumberOfParticles, 0.0)).r`;
+      },
+      "randomRange": (_parameters: string[]) => {
+        return `texture(u_fRandomNumbers, vec2(${_parameters[0]} / u_fNumberOfParticles, 0.0)).r  * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]}`;
       }
     };
 
@@ -180,7 +183,7 @@ namespace FudgeCore {
       let code: string = "";
       if (transformationsLocal) {
         for (const key in transformationsLocal) {
-          code += `${ParticleShaderCodeGenerator.transformationCodeMap[key]} * `;
+          code = `${ParticleShaderCodeGenerator.transformationCodeMap[key]} * `.concat(code);
         }
       }
 

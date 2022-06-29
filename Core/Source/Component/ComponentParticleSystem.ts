@@ -49,6 +49,7 @@ namespace FudgeCore {
       if (this.numberOfParticles !== _numberOfParticles) this.initRandomNumbers(_numberOfParticles);
       this.variables[PARTICLE_VARIBALE_NAMES.NUMBER_OF_PARTICLES] = _numberOfParticles;
       this.evaluateStorage(this.#particleEffect?.storageSystem);
+      this.randomNumbersData = undefined;
     }
 
     public evaluateStorage(_storageData: ParticleEffectStructure): void {

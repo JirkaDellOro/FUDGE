@@ -21,7 +21,8 @@ namespace FudgeCore {
       "linear": ParticleClosureFactory.createLinear,
       "polynomial": ParticleClosureFactory.createPolynomial3,
       "squareRoot": ParticleClosureFactory.createSquareRoot,
-      "random": ParticleClosureFactory.createRandom
+      "random": ParticleClosureFactory.createRandom,
+      "randomRange": ParticleClosureFactory.createRandomRange
     };
 
     /**
@@ -178,5 +179,16 @@ namespace FudgeCore {
         return result;
       };
     }
+
+    private static createRandomRange(_parameters: Function[]): Function {
+      return function (_variables: ParticleVariables): number {
+        // Debug.group("ClosureRandom");
+        let min: number = _parameters[1](_variables);
+        let max: number = _parameters[2](_variables);
+        let result: number = (<number[]>_variables[PARTICLE_VARIBALE_NAMES.RANDOM_NUMBERS])[_parameters[0](_variables)] * (max - min) + min;
+        // Debug.groupEnd();
+        return result;
+      };
+    }    
   }
 }
