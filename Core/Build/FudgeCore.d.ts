@@ -4336,12 +4336,14 @@ declare namespace FudgeCore {
         [attribute: string]: ShaderCodeStructure | string;
     }
     export class ParticleShaderCodeGenerator {
+        private static functions;
         private static predefinedVariableMap;
+        private static transformationCodeMap;
         static generateShaderCodeStructure(_data: Serialization): ShaderCodeStructure;
         static generateCode(_data: ClosureData): string;
         static generateShaderCodeFunction(_function: string, _parameters: string[]): string;
-        static createStorageShaderCode(_storage: ShaderCodeStructure): string;
-        static createLocalTransformationsShaderCode(_transformations: ShaderCodeStructure): string;
+        static createStorageShaderCode(_structure: ShaderCodeStructure): string;
+        static createLocalTransformationsShaderCode(_structure: ShaderCodeStructure): string;
         static createPositionShaderCode(_structure: ShaderCodeStructure): string;
         static createColorShaderCode(_structure: ShaderCodeStructure): string;
     }
