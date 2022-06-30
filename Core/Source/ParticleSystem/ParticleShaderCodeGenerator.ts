@@ -17,6 +17,7 @@ namespace FudgeCore {
   }
 
   export class ParticleShaderCodeGenerator {
+    public static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number = 1000;
     private static functions: { [key: string]: Function } = {
       "addition": (_parameters: string[]) => {
         return `(${_parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} + ${_value}`)})`;
@@ -54,7 +55,8 @@ namespace FudgeCore {
         return `sqrt(${x})`;
       },
       "random": (_parameters: string[]) => {
-        return `texelFetch(u_fRandomNumbers, ivec2(${_parameters[0]}, 0), 0).r`;
+        const maxWidth: string = ParticleShaderCodeGenerator.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH.toString() + ".0";
+        return `texelFetch(u_fRandomNumbers, ivec2(mod(${_parameters[0]}, ${maxWidth}), ${_parameters[0]} / ${maxWidth}), 0).r`;
       },
       "randomRange": (_parameters: string[]) => {
         return `${ParticleShaderCodeGenerator.functions["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]}`;
@@ -99,7 +101,7 @@ namespace FudgeCore {
   
       if (ParticleEffect.isConstantData(_data)) {
         let value: string = _data.value.toString();
-        return `${value}${value.includes(".") ? "" : ".0"}` + "f";
+        return `${value}${value.includes(".") ? "" : ".0"}`;
       }
   
       throw `invalid node structure`;

@@ -4337,6 +4337,7 @@ declare namespace FudgeCore {
         [attribute: string]: ShaderCodeStructure | string;
     }
     export class ParticleShaderCodeGenerator {
+        static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number;
         private static functions;
         private static predefinedVariableMap;
         static generateShaderCodeStructure(_data: Serialization): ShaderCodeStructure;
