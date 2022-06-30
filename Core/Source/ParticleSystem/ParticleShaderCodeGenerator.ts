@@ -54,10 +54,10 @@ namespace FudgeCore {
         return `sqrt(${x})`;
       },
       "random": (_parameters: string[]) => {
-        return `texture(u_fRandomNumbers, vec2(${_parameters[0]} / u_fNumberOfParticles, 0.0)).r`;
+        return `texelFetch(u_fRandomNumbers, ivec2(${_parameters[0]}, 0), 0).r`;
       },
       "randomRange": (_parameters: string[]) => {
-        return `texture(u_fRandomNumbers, vec2(${_parameters[0]} / u_fNumberOfParticles, 0.0)).r  * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]}`;
+        return `${ParticleShaderCodeGenerator.functions["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]}`;
       }
     };
 
