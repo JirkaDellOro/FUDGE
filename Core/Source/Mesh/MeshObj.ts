@@ -65,15 +65,16 @@ namespace FudgeCore {
         parts.shift();
 
         //Vertex - example: v 0.70 -0.45 -0.52
-        if (!line || line.startsWith("v "))
-          positions.push(new Vector3(...parts.map(x => +x)));
+        if (line.startsWith("v "))
+          positions.push(new Vector3(...parts.map(_value => +_value)));
 
         //Texcoord - example: vt 0.545454 0.472382
-        else if (!line || line.startsWith("vt ")) uvs.push(new Vector2(...parts.map(x => +x)));
+        else if (line.startsWith("vt "))
+          uvs.push(new Vector2(...parts.map((_value, _index) => +_value * (_index == 1 ? -1 : 1))));
 
         /*Face Indices - example: f 1/1/1 2/2/1 3/3/1 -->
         vertex1/texcoord1/normal1 vertex2/texcoord2/normal2 vertex3/texcoord3/normal3*/
-        else if (!line || line.startsWith("f "))
+        else if (line.startsWith("f "))
           for (let i: number = 0; i < 3; i++) {
             faceInfo.push({
               iPosition: +parts[i].split("/")[0] - 1,
