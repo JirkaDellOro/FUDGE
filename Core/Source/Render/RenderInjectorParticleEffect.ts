@@ -1,8 +1,7 @@
 namespace FudgeCore {
-
   interface ShaderCodeMap { [key: string]: string; }
 
-  export interface ShaderCodeStructure {
+  export interface ShaderCodeData {
     storage?: {
       system?: ShaderCodeMap;
       update?: ShaderCodeMap;
@@ -12,13 +11,13 @@ namespace FudgeCore {
       local?: ShaderCodeMap;
       world?: ShaderCodeMap;
     };
-    components?: { [componentType: string]: ShaderCodeStructure};
-    [attribute: string]: ShaderCodeStructure | string;
+    components?: { [componentType: string]: ShaderCodeData};
+    [attribute: string]: ShaderCodeData | string;
   }
 
-  export class ParticleShaderCodeGenerator {
+  export class RenderInjectorParticleEffect extends RenderInjectorShader {
     public static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number = 1000;
-    private static functions: { [key: string]: Function } = {
+    private static readonly FUNCTIONS: { [key: string]: Function } = {
       "addition": (_parameters: string[]) => {
         return `(${_parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} + ${_value}`)})`;
       },
@@ -55,47 +54,81 @@ namespace FudgeCore {
         return `sqrt(${x})`;
       },
       "random": (_parameters: string[]) => {
-        const maxWidth: string = ParticleShaderCodeGenerator.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH.toString() + ".0";
+        const maxWidth: string = RenderInjectorParticleEffect.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH.toString() + ".0";
         return `texelFetch(u_fRandomNumbers, ivec2(mod(${_parameters[0]}, ${maxWidth}), ${_parameters[0]} / ${maxWidth}), 0).r`;
       },
       "randomRange": (_parameters: string[]) => {
-        return `${ParticleShaderCodeGenerator.functions["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]}`;
+        return `${RenderInjectorParticleEffect.FUNCTIONS["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]}`;
       }
     };
-
-    private static predefinedVariableMap: {[key: string]: string} = {
+    private static readonly PREDEFINED_VARIABLES: { [key: string]: string } = {
       index: "particleIndex",
       numberOfParticles: "u_fNumberOfParticles",
       time: "u_fTime"
     };
 
-    public static generateShaderCodeStructure(_data: Serialization): ShaderCodeStructure {
+    public static override decorate(_constructor: Function): void {
+      Object.defineProperty(_constructor.prototype, "useProgram", {
+        value: RenderInjectorShader.useProgram
+      });
+      Object.defineProperty(_constructor.prototype, "deleteProgram", {
+        value: RenderInjectorShader.deleteProgram
+      });
+      Object.defineProperty(_constructor.prototype, "createProgram", {
+        value: RenderInjectorShader.createProgram
+      });
+      Object.defineProperty(_constructor.prototype, "getVertexShaderSource", {
+        value: RenderInjectorParticleEffect.getVertexShaderSource
+      });
+      Object.defineProperty(_constructor.prototype, "getFragmentShaderSource", {
+        value: RenderInjectorParticleEffect.getFragmentShaderSource
+      });
+    }
+
+    public static getVertexShaderSource(this: ParticleEffect): string { 
+      let shaderCodeStructure: ShaderCodeData = RenderInjectorParticleEffect.generateShaderCodeData(this.data);
+      let source: string = ShaderParticle.getVertexShaderSource()
+        .replace("/*$variables*/", RenderInjectorParticleEffect.createStorageShaderCode(shaderCodeStructure))
+        .replace("/*$mtxLocal*/", RenderInjectorParticleEffect.createTransformationsShaderCode(shaderCodeStructure?.transformations?.local, true))
+        .replace("/*$mtxLocal*/", "mtxLocal *")
+        .replace("/*$mtxWorld*/", RenderInjectorParticleEffect.createTransformationsShaderCode(shaderCodeStructure?.transformations?.world, false))
+        .replace("/*$mtxWorld*/", "mtxWorld *")
+        .replace("/*$color*/", RenderInjectorParticleEffect.createColorShaderCode(shaderCodeStructure));
+      
+      return source; 
+    }
+
+    public static getFragmentShaderSource(this: ParticleEffect): string {
+      return ShaderParticle.getFragmentShaderSource();
+    }
+
+    private static generateShaderCodeData(_data: Serialization): ShaderCodeData {
       if (!_data) return {};
 
-      let codeStructure: ShaderCodeStructure = {};
+      let codeStructure: ShaderCodeData = {};
   
       for (const key in _data) {
         let subData: General = _data[key];
         if (ParticleEffect.isClosureData(subData)) 
-          codeStructure[key] = ParticleShaderCodeGenerator.generateCode(subData);
+          codeStructure[key] = RenderInjectorParticleEffect.generateCode(subData);
         else
-          codeStructure[key] = ParticleShaderCodeGenerator.generateShaderCodeStructure(subData);
+          codeStructure[key] = RenderInjectorParticleEffect.generateShaderCodeData(subData);
       }
   
       return codeStructure;
     }   
   
-    public static generateCode(_data: ClosureData): string {
+    private static generateCode(_data: ClosureData): string {
       if (ParticleEffect.isFunctionData(_data)) {
         let parameters: string[] = [];
         for (let param of _data.parameters) {
           parameters.push(this.generateCode(param));
         }
-        return ParticleShaderCodeGenerator.generateShaderCodeFunction(_data.function, parameters);
+        return RenderInjectorParticleEffect.generateShaderCodeFunction(_data.function, parameters);
       }
   
       if (ParticleEffect.isVariableData(_data)) {
-        let predefined: string = ParticleShaderCodeGenerator.predefinedVariableMap[_data.value];
+        let predefined: string = RenderInjectorParticleEffect.PREDEFINED_VARIABLES[_data.value];
         return predefined ? predefined : _data.value;
       } 
   
@@ -107,15 +140,15 @@ namespace FudgeCore {
       throw `invalid node structure`;
     }
   
-    public static generateShaderCodeFunction(_function: string, _parameters: string[]): string {
-      if (_function in ParticleShaderCodeGenerator.functions)
-        return ParticleShaderCodeGenerator.functions[_function](_parameters);
+    private static generateShaderCodeFunction(_function: string, _parameters: string[]): string {
+      if (_function in RenderInjectorParticleEffect.FUNCTIONS)
+        return RenderInjectorParticleEffect.FUNCTIONS[_function](_parameters);
       else
         throw `"${_function}" is not an operation`;
     }
 
-    public static createStorageShaderCode(_structure: ShaderCodeStructure): string {
-      let storage: ShaderCodeStructure = _structure?.storage;
+    private static createStorageShaderCode(_structure: ShaderCodeData): string {
+      let storage: ShaderCodeData = _structure?.storage;
       let code: string = "";
       if (storage) {
         for (const partitionName in storage) {
@@ -129,7 +162,7 @@ namespace FudgeCore {
       return code;
     }
 
-    public static createLocalTransformationsShaderCode(_transformations: ShaderCodeStructure, _isLocal: boolean): string {
+    private static createTransformationsShaderCode(_transformations: ShaderCodeData, _isLocal: boolean): string {
       if (!_transformations) return "";
 
       let code: string = "";
@@ -175,7 +208,7 @@ namespace FudgeCore {
       return code;
     }
 
-    public static createColorShaderCode(_structure: ShaderCodeStructure): string {      
+    private static createColorShaderCode(_structure: ShaderCodeData): string {      
       let clrPrimary: ShaderCodeMap = _structure?.components?.ComponentMaterial?.clrPrimary as ShaderCodeMap;
       let code: string = "";
       if (clrPrimary) {

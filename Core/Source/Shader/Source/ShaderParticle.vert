@@ -22,7 +22,7 @@ void main() {
   mat4 mtxMeshToView = u_mtxMeshToView;
   float particleIndex = float(gl_InstanceID);
 
-  /*$selfDefinedVariables*/
+  /*$variables*/
 
   /*$mtxLocal*/
 

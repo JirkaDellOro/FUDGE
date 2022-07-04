@@ -99,7 +99,7 @@ namespace FudgeCore {
         const texture: WebGLTexture = Render.assert<WebGLTexture>(crc3.createTexture());
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
         let randomNumbers: number[] = this.variables[PARTICLE_VARIBALE_NAMES.RANDOM_NUMBERS] as number[];
-        const maxWidth: number = ParticleShaderCodeGenerator.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH;
+        const maxWidth: number = RenderInjectorParticleEffect.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH;
         let width: number = Math.min(randomNumbers.length, maxWidth);
         let height: number = Math.ceil(randomNumbers.length / maxWidth);
         if (randomNumbers.length < width * height) {

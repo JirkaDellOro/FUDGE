@@ -2,6 +2,7 @@
 ///<reference path="RenderInjectorShader.ts"/>
 ///<reference path="RenderInjectorCoat.ts"/>
 ///<reference path="RenderInjectorMesh.ts"/>
+///<reference path="RenderInjectorParticleEffect.ts"/>
 ///<reference path="../Math/Rectangle.ts"/>
 
 namespace FudgeCore {

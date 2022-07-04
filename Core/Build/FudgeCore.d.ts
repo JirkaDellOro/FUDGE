@@ -484,6 +484,41 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    interface ShaderCodeMap {
+        [key: string]: string;
+    }
+    export interface ShaderCodeData {
+        storage?: {
+            system?: ShaderCodeMap;
+            update?: ShaderCodeMap;
+            particle?: ShaderCodeMap;
+        };
+        transformations?: {
+            local?: ShaderCodeMap;
+            world?: ShaderCodeMap;
+        };
+        components?: {
+            [componentType: string]: ShaderCodeData;
+        };
+        [attribute: string]: ShaderCodeData | string;
+    }
+    export class RenderInjectorParticleEffect extends RenderInjectorShader {
+        static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number;
+        private static readonly FUNCTIONS;
+        private static readonly PREDEFINED_VARIABLES;
+        static decorate(_constructor: Function): void;
+        static getVertexShaderSource(this: ParticleEffect): string;
+        static getFragmentShaderSource(this: ParticleEffect): string;
+        private static generateShaderCodeData;
+        private static generateCode;
+        private static generateShaderCodeFunction;
+        private static createStorageShaderCode;
+        private static createTransformationsShaderCode;
+        private static createColorShaderCode;
+    }
+    export {};
+}
+declare namespace FudgeCore {
     interface Recycable {
         recycle(): void;
     }
@@ -4292,11 +4327,11 @@ declare namespace FudgeCore {
          * Asynchronously loads the json from the given url and parses it initializing this particle effect.
          */
         load(_url: RequestInfo): Promise<void>;
-        getVertexShaderSource(): string;
-        getFragmentShaderSource(): string;
-        useProgram(): void;
-        deleteProgram(): void;
-        createProgram(): void;
+        getVertexShaderSource(this: ParticleEffect): string;
+        getFragmentShaderSource(this: ParticleEffect): string;
+        deleteProgram(this: ParticleEffect): void;
+        useProgram(this: ParticleEffect): void;
+        createProgram(this: ParticleEffect): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
@@ -4316,38 +4351,6 @@ declare namespace FudgeCore {
          */
         private createEmptyMutatorFrom;
     }
-}
-declare namespace FudgeCore {
-    interface ShaderCodeMap {
-        [key: string]: string;
-    }
-    export interface ShaderCodeStructure {
-        storage?: {
-            system?: ShaderCodeMap;
-            update?: ShaderCodeMap;
-            particle?: ShaderCodeMap;
-        };
-        transformations?: {
-            local?: ShaderCodeMap;
-            world?: ShaderCodeMap;
-        };
-        components?: {
-            [componentType: string]: ShaderCodeStructure;
-        };
-        [attribute: string]: ShaderCodeStructure | string;
-    }
-    export class ParticleShaderCodeGenerator {
-        static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number;
-        private static functions;
-        private static predefinedVariableMap;
-        static generateShaderCodeStructure(_data: Serialization): ShaderCodeStructure;
-        static generateCode(_data: ClosureData): string;
-        static generateShaderCodeFunction(_function: string, _parameters: string[]): string;
-        static createStorageShaderCode(_structure: ShaderCodeStructure): string;
-        static createLocalTransformationsShaderCode(_transformations: ShaderCodeStructure, _isLocal: boolean): string;
-        static createColorShaderCode(_structure: ShaderCodeStructure): string;
-    }
-    export {};
 }
 declare namespace FudgeCore {
     /**

@@ -37,6 +37,7 @@ namespace FudgeCore {
    * Holds all the information which defines the particle effect. Can load the said information out of a json file.
    * @authors Jonas Plotzky, HFU, 2020
    */
+  @RenderInjectorParticleEffect.decorate
   export class ParticleEffect extends Mutable implements SerializableResource {
     public name: string;
     public idResource: string = undefined;
@@ -172,104 +173,11 @@ namespace FudgeCore {
       this.data = data;
     }
 
-    public getVertexShaderSource(): string { 
-      let shaderCodeStructure: ShaderCodeStructure = ParticleShaderCodeGenerator.generateShaderCodeStructure(this.data);
-      let source: string = ShaderParticle.getVertexShaderSource()
-        .replace("/*$selfDefinedVariables*/", ParticleShaderCodeGenerator.createStorageShaderCode(shaderCodeStructure))
-        .replace("/*$mtxLocal*/", ParticleShaderCodeGenerator.createLocalTransformationsShaderCode(shaderCodeStructure?.transformations?.local, true))
-        .replace("/*$mtxLocal*/", "mtxLocal *")
-        .replace("/*$mtxWorld*/", ParticleShaderCodeGenerator.createLocalTransformationsShaderCode(shaderCodeStructure?.transformations?.world, false))
-        .replace("/*$mtxWorld*/", "mtxWorld *")
-        .replace("/*$color*/", ParticleShaderCodeGenerator.createColorShaderCode(shaderCodeStructure));
-      
-      return source; 
-    }
-
-    public getFragmentShaderSource(): string {
-      return ShaderParticle.getFragmentShaderSource();
-    }
-  
-    public useProgram(): void {      
-      if (!this.program)
-        this.createProgram();
-      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      crc3.useProgram(this.program);
-    }
-  
-    public deleteProgram(): void {
-      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      if (this.program) {
-        crc3.deleteProgram(this.program);
-        delete this.attributes;
-        delete this.uniforms;
-      }
-    }
-  
-    public createProgram(): void {
-      Debug.fudge("Create shader program", ShaderParticle.name);
-      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      let program: WebGLProgram = crc3.createProgram();
-      try {
-        let shdVertex: WebGLShader = compileShader(this.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER);
-        let shdFragment: WebGLShader = compileShader(this.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER);
-        crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(shdVertex));
-        crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(shdFragment));
-        crc3.linkProgram(program);
-        let error: string = RenderWebGL.assert<string>(crc3.getProgramInfoLog(program));
-        if (error !== "") {
-          throw new Error("Error linking Shader: " + error);
-        }
-  
-        this.program = program;
-        this.attributes = detectAttributes();
-        this.uniforms = detectUniforms();
-  
-      } catch (_error) {
-        Debug.error(_error);
-        debugger;
-      }
-  
-  
-      function compileShader(_shaderCode: string, _shaderType: GLenum): WebGLShader | null {
-        let webGLShader: WebGLShader = crc3.createShader(_shaderType);
-        crc3.shaderSource(webGLShader, _shaderCode);
-        crc3.compileShader(webGLShader);
-        let error: string = RenderWebGL.assert<string>(crc3.getShaderInfoLog(webGLShader));
-        if (error !== "") {
-          throw new Error("Error compiling shader: " + error);
-        }
-        // Check for any compilation errors.
-        if (!crc3.getShaderParameter(webGLShader, WebGL2RenderingContext.COMPILE_STATUS)) {
-          alert(crc3.getShaderInfoLog(webGLShader));
-          return null;
-        }
-        return webGLShader;
-      }
-      function detectAttributes(): { [name: string]: number } {
-        let detectedAttributes: { [name: string]: number } = {};
-        let attributeCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_ATTRIBUTES);
-        for (let i: number = 0; i < attributeCount; i++) {
-          let attributeInfo: WebGLActiveInfo = RenderWebGL.assert<WebGLActiveInfo>(crc3.getActiveAttrib(program, i));
-          if (!attributeInfo) {
-            break;
-          }
-          detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(program, attributeInfo.name);
-        }
-        return detectedAttributes;
-      }
-      function detectUniforms(): { [name: string]: WebGLUniformLocation } {
-        let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
-        let uniformCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
-        for (let i: number = 0; i < uniformCount; i++) {
-          let info: WebGLActiveInfo = RenderWebGL.assert<WebGLActiveInfo>(crc3.getActiveUniform(program, i));
-          if (!info) {
-            break;
-          }
-          detectedUniforms[info.name] = RenderWebGL.assert<WebGLUniformLocation>(crc3.getUniformLocation(program, info.name));
-        }
-        return detectedUniforms;
-      }
-    }
+    public getVertexShaderSource(this: ParticleEffect): string { return ""; /* injected by decorator */ }
+    public getFragmentShaderSource(this: ParticleEffect): string { return ""; /* injected by decorator */ }
+    public deleteProgram(this: ParticleEffect): void {/* injected by decorator */ }
+    public useProgram(this: ParticleEffect): void {/* injected by decorator */ }
+    public createProgram(this: ParticleEffect): void {/* injected by decorator */ }
 
     //#region Transfer
     public serialize(): Serialization {
