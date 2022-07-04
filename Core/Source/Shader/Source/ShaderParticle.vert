@@ -1,7 +1,7 @@
 #version 300 es
 /**
 * TODO: write this
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2022
+* @authors Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2022
 */
 
 uniform mat4 u_mtxMeshToView;
@@ -20,7 +20,7 @@ uniform sampler2D u_fRandomNumbers;
 void main() {
   vec4 vctPosition = vec4(a_vctPosition, 1.0);
   mat4 mtxMeshToView = u_mtxMeshToView;
-  float particleIndex = float(gl_InstanceID);
+  float fParticleIndex = float(gl_InstanceID);
 
   /*$variables*/
 
@@ -28,7 +28,7 @@ void main() {
 
   /*$mtxWorld*/
 
-  // calculate position and normal according to input and defines
+  // calculate position
   gl_Position = /*$mtxWorld*/ mtxMeshToView * /*$mtxLocal*/ vctPosition;
   v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
   /*$color*/

@@ -484,25 +484,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    interface ShaderCodeMap {
-        [key: string]: string;
-    }
-    export interface ShaderCodeData {
-        storage?: {
-            system?: ShaderCodeMap;
-            update?: ShaderCodeMap;
-            particle?: ShaderCodeMap;
-        };
-        transformations?: {
-            local?: ShaderCodeMap;
-            world?: ShaderCodeMap;
-        };
-        components?: {
-            [componentType: string]: ShaderCodeData;
-        };
-        [attribute: string]: ShaderCodeData | string;
-    }
-    export class RenderInjectorParticleEffect extends RenderInjectorShader {
+    class RenderInjectorParticleEffect extends RenderInjectorShader {
         static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number;
         private static readonly FUNCTIONS;
         private static readonly PREDEFINED_VARIABLES;
@@ -516,7 +498,6 @@ declare namespace FudgeCore {
         private static createTransformationsShaderCode;
         private static createColorShaderCode;
     }
-    export {};
 }
 declare namespace FudgeCore {
     class RenderInjectorComponentParticleSystem extends RenderInjector {

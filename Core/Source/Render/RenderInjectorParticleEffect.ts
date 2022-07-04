@@ -1,7 +1,7 @@
 namespace FudgeCore {
   interface ShaderCodeMap { [key: string]: string; }
 
-  export interface ShaderCodeData {
+  interface ShaderCodeData {
     storage?: {
       system?: ShaderCodeMap;
       update?: ShaderCodeMap;
@@ -62,7 +62,7 @@ namespace FudgeCore {
       }
     };
     private static readonly PREDEFINED_VARIABLES: { [key: string]: string } = {
-      index: "particleIndex",
+      index: "fParticleIndex",
       numberOfParticles: "u_fNumberOfParticles",
       time: "u_fTime"
     };
@@ -102,6 +102,7 @@ namespace FudgeCore {
       return ShaderParticle.getFragmentShaderSource();
     }
 
+    //#region Code generation
     private static generateShaderCodeData(_data: Serialization): ShaderCodeData {
       if (!_data) return {};
 
@@ -137,7 +138,7 @@ namespace FudgeCore {
         return `${value}${value.includes(".") ? "" : ".0"}`;
       }
   
-      throw `invalid node structure`;
+      throw `invalid node structure in particle effect serialization`;
     }
   
     private static generateShaderCodeFunction(_function: string, _parameters: string[]): string {
@@ -217,5 +218,6 @@ namespace FudgeCore {
 
       return code;
     }
+    //#endregion
   }
 }

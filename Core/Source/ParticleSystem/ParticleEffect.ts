@@ -6,8 +6,6 @@ namespace FudgeCore {
     RANDOM_NUMBERS = "randomNumbers"
   }
 
-
-
   /**
    * The data format used to store the parsed paticle effect
    */
@@ -276,8 +274,5 @@ namespace FudgeCore {
       }
       return mutator;
     }
-
-    
-    
   }
 }
