@@ -2274,8 +2274,6 @@ var Fudge;
         crc2;
         constructor(_container, _state) {
             super(_container, _state);
-            ƒ.Render.setBlendMode(ƒ.BLEND.PARTICLE);
-            ƒ.Render.setDepthTest(false);
             this.createUserInterface();
             this.setParticleEffect(null);
             _container.on("resize", this.redraw);

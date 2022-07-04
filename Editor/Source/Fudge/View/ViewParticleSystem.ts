@@ -21,9 +21,6 @@ namespace Fudge {
     constructor(_container: ComponentContainer, _state: Object) {
         super(_container, _state);
 
-        ƒ.Render.setBlendMode(ƒ.BLEND.PARTICLE);
-        ƒ.Render.setDepthTest(false);
-
         this.createUserInterface();
         this.setParticleEffect(null);
 
