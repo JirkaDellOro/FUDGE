@@ -173,11 +173,11 @@ namespace FudgeCore {
       this.data = data;
     }
 
-    public getVertexShaderSource(this: ParticleEffect): string { return ""; /* injected by decorator */ }
-    public getFragmentShaderSource(this: ParticleEffect): string { return ""; /* injected by decorator */ }
-    public deleteProgram(this: ParticleEffect): void {/* injected by decorator */ }
-    public useProgram(this: ParticleEffect): void {/* injected by decorator */ }
-    public createProgram(this: ParticleEffect): void {/* injected by decorator */ }
+    public getVertexShaderSource(): string { return ""; /* injected by decorator */ }
+    public getFragmentShaderSource(): string { return ""; /* injected by decorator */ }
+    public deleteProgram(): void {/* injected by decorator */ }
+    public useProgram(): void {/* injected by decorator */ }
+    public createProgram(): void {/* injected by decorator */ }
 
     //#region Transfer
     public serialize(): Serialization {

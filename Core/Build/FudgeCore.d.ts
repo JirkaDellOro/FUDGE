@@ -519,6 +519,12 @@ declare namespace FudgeCore {
     export {};
 }
 declare namespace FudgeCore {
+    class RenderInjectorComponentParticleSystem extends RenderInjector {
+        static decorate(_constructor: Function): void;
+        protected static injectComponentParticleSystem(this: ComponentParticleSystem): void;
+    }
+}
+declare namespace FudgeCore {
     interface Recycable {
         recycle(): void;
     }
@@ -2181,11 +2187,11 @@ declare namespace FudgeCore {
          * Sets the numberOfParticles of the particle effect. Caution: Setting this will result in the reevaluation of the system storage of the effect and the reinitialization of the randomNumbers array.
          */
         set numberOfParticles(_numberOfParticles: number);
+        useRenderData(): void;
         evaluateStorage(_storageData: ParticleEffectStructure): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
-        useRenderData(): void;
         protected reduceMutator(_mutator: Mutator): void;
         private initRandomNumbers;
     }
@@ -4327,11 +4333,11 @@ declare namespace FudgeCore {
          * Asynchronously loads the json from the given url and parses it initializing this particle effect.
          */
         load(_url: RequestInfo): Promise<void>;
-        getVertexShaderSource(this: ParticleEffect): string;
-        getFragmentShaderSource(this: ParticleEffect): string;
-        deleteProgram(this: ParticleEffect): void;
-        useProgram(this: ParticleEffect): void;
-        createProgram(this: ParticleEffect): void;
+        getVertexShaderSource(): string;
+        getFragmentShaderSource(): string;
+        deleteProgram(): void;
+        useProgram(): void;
+        createProgram(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
