@@ -15,7 +15,7 @@ namespace FudgeCore {
   export class ComponentParticleSystem extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
     public variables: ParticleVariables = {};
-    public randomNumbersData: WebGLTexture;
+    public randomNumbersRenderData: unknown;
 
     #particleEffect: ParticleEffect;
     // TODO: add color for the whole system
@@ -50,7 +50,7 @@ namespace FudgeCore {
       if (this.numberOfParticles !== _numberOfParticles) this.initRandomNumbers(_numberOfParticles);
       this.variables[PARTICLE_VARIBALE_NAMES.NUMBER_OF_PARTICLES] = _numberOfParticles;
       this.evaluateStorage(this.#particleEffect?.storageSystem);
-      this.randomNumbersData = undefined;
+      this.randomNumbersRenderData = undefined;
     }
 
     public useRenderData(): void {/* injected by RenderInjector*/ }

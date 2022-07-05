@@ -2159,7 +2159,7 @@ declare namespace FudgeCore {
         #private;
         static readonly iSubclass: number;
         variables: ParticleVariables;
-        randomNumbersData: WebGLTexture;
+        randomNumbersRenderData: unknown;
         constructor(_particleEffect?: ParticleEffect, _numberOfParticles?: number);
         get particleEffect(): ParticleEffect;
         set particleEffect(_newParticleEffect: ParticleEffect);

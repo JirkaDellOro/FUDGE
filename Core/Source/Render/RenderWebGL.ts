@@ -342,7 +342,7 @@ namespace FudgeCore {
       } else {
         shader.useProgram();
       }
-
+      
       coat.useRenderData(shader, cmpMaterial);
       
       let mtxMeshToView: Matrix4x4 = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
