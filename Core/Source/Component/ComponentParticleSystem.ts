@@ -50,10 +50,11 @@ namespace FudgeCore {
       if (this.numberOfParticles !== _numberOfParticles) this.initRandomNumbers(_numberOfParticles);
       this.variables[PARTICLE_VARIBALE_NAMES.NUMBER_OF_PARTICLES] = _numberOfParticles;
       this.evaluateStorage(this.#particleEffect?.storageSystem);
-      this.randomNumbersRenderData = undefined;
+      this.deleteRenderData();
     }
 
     public useRenderData(): void {/* injected by RenderInjector*/ }
+    public deleteRenderData(): void {/* injected by RenderInjector*/ }
 
     public evaluateStorage(_storageData: ParticleEffectStructure): void {
       for (const key in _storageData) {

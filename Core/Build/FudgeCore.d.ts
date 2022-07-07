@@ -500,9 +500,10 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    class RenderInjectorComponentParticleSystem extends RenderInjector {
+    class RenderInjectorComponentParticleSystem {
         static decorate(_constructor: Function): void;
-        protected static injectComponentParticleSystem(this: ComponentParticleSystem): void;
+        protected static useRenderData(this: ComponentParticleSystem): void;
+        protected static deleteRenderData(this: ComponentParticleSystem): void;
     }
 }
 declare namespace FudgeCore {
@@ -2169,6 +2170,7 @@ declare namespace FudgeCore {
          */
         set numberOfParticles(_numberOfParticles: number);
         useRenderData(): void;
+        deleteRenderData(): void;
         evaluateStorage(_storageData: ParticleEffectStructure): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;

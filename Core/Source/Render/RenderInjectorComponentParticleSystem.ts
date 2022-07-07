@@ -1,11 +1,16 @@
 namespace FudgeCore {
 
-  export class RenderInjectorComponentParticleSystem extends RenderInjector {
+  export class RenderInjectorComponentParticleSystem {
     public static decorate(_constructor: Function): void {
-      RenderInjector.inject(_constructor, RenderInjectorComponentParticleSystem);
+      Object.defineProperty(_constructor.prototype, "useRenderData", {
+        value: RenderInjectorComponentParticleSystem.useRenderData
+      });
+      Object.defineProperty(_constructor.prototype, "deleteRenderData", {
+        value: RenderInjectorComponentParticleSystem.deleteRenderData
+      });
     }
 
-    protected static injectComponentParticleSystem(this: ComponentParticleSystem): void {
+    protected static useRenderData(this: ComponentParticleSystem): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       if (this.randomNumbersRenderData) {
         // buffers exist
@@ -44,6 +49,15 @@ namespace FudgeCore {
 
         this.useRenderData();
       }
+    }
+
+    protected static deleteRenderData(this: ComponentParticleSystem): void {
+      if (!this.randomNumbersRenderData) return;
+      
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+      crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
+      crc3.deleteTexture(this.randomNumbersRenderData);
+      this.randomNumbersRenderData = undefined;
     }
   }
 }
