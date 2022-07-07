@@ -90,7 +90,7 @@ namespace FudgeCore {
       let source: string = ShaderParticle.getVertexShaderSource()
         .replace("/*$variables*/", RenderInjectorParticleEffect.createStorageShaderCode(shaderCodeStructure))
         .replace("/*$mtxLocal*/", RenderInjectorParticleEffect.createTransformationsShaderCode(shaderCodeStructure?.transformations?.local, true))
-        .replace("/*$mtxLocal*/", "mtxLocal *")
+        .replace("/*$mtxLocal*/", " * mtxLocal")
         .replace("/*$mtxWorld*/", RenderInjectorParticleEffect.createTransformationsShaderCode(shaderCodeStructure?.transformations?.world, false))
         .replace("/*$mtxWorld*/", "mtxWorld *")
         .replace("/*$color*/", RenderInjectorParticleEffect.createColorShaderCode(shaderCodeStructure));
