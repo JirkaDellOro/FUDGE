@@ -365,19 +365,14 @@ namespace FudgeCore {
     // TODO: check if this should happen somewhere else e.g. some Render injector stuff?
     protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: typeof Shader, _renderBuffers: RenderBuffers): void {
       RenderWebGL.setBlendMode(BLEND.PARTICLE);
-      // RenderWebGL.crc3.depthFunc(RenderWebGL.crc3.LEQUAL);
-      RenderWebGL.setDepthTest(true);
       RenderWebGL.crc3.depthMask(false);
-      // RenderWebGL.crc3.enable(RenderWebGL.crc3.BLEND); 
       _cmpParticleSystem.useRenderData();
       let numberOfParticles: number = _cmpParticleSystem.numberOfParticles;
       this.crc3.uniform1f(_shader.uniforms["u_fTime"], Time.game.get());
       this.crc3.uniform1f(_shader.uniforms["u_fNumberOfParticles"], numberOfParticles);
       RenderWebGL.crc3.drawElementsInstanced(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0, numberOfParticles);
-      
       RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
       RenderWebGL.crc3.depthMask(true);
-      // RenderWebGL.setDepthTest(true);
     }
 
     private static calcMeshToView(_node: Node, _cmpMesh: ComponentMesh, _mtxWorldToView: Matrix4x4, _target?: Vector3): Matrix4x4 {
