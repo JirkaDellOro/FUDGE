@@ -26,6 +26,7 @@ namespace FudgeCore {
         crc3.deleteProgram(this.program);
         delete this.attributes;
         delete this.uniforms;
+        delete this.program;
       }
     }
 
