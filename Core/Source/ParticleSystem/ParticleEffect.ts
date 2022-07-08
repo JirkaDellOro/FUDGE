@@ -157,6 +157,7 @@ namespace FudgeCore {
     public set data(_data: Serialization) {
       this.#data = _data;
       this.parse(_data);
+      this.deleteProgram();
     }
  
     /**

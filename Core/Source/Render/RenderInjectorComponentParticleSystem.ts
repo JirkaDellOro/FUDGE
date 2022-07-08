@@ -57,7 +57,7 @@ namespace FudgeCore {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
       crc3.deleteTexture(this.randomNumbersRenderData);
-      this.randomNumbersRenderData = undefined;
+      delete this.randomNumbersRenderData;
     }
   }
 }
