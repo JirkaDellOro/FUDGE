@@ -332,9 +332,10 @@ namespace FudgeCore {
       let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
       let coat: Coat = cmpMaterial.material.coat;
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
+      let renderParticles: boolean = cmpParticleSystem && cmpParticleSystem.isActive;
       let shader: typeof Shader = cmpMaterial.material.getShader();
 
-      if (cmpParticleSystem) {
+      if (renderParticles) {
         let particleEffect: ParticleEffect = cmpParticleSystem.particleEffect;
         particleEffect.useProgram();
         shader.attributes = particleEffect.attributes;
@@ -355,21 +356,28 @@ namespace FudgeCore {
       if (uWorldToView)
         RenderWebGL.crc3.uniformMatrix4fv(uWorldToView, false, _cmpCamera.mtxWorldToView.get());
 
-      if (cmpParticleSystem) {
-        RenderWebGL.drawParticles(cmpParticleSystem, shader, renderBuffers);
+      if (renderParticles) {
+        RenderWebGL.drawParticles(cmpParticleSystem, shader, renderBuffers, _node.getComponent(ComponentFaceCamera));
       } else {
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       }
     }
 
     // TODO: check if this should happen somewhere else e.g. some Render injector stuff?
-    protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: typeof Shader, _renderBuffers: RenderBuffers): void {
+    protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: typeof Shader, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera): void {
       RenderWebGL.setBlendMode(BLEND.PARTICLE);
       RenderWebGL.crc3.depthMask(false);
       _cmpParticleSystem.useRenderData();
-      let numberOfParticles: number = _cmpParticleSystem.numberOfParticles;
+
       this.crc3.uniform1f(_shader.uniforms["u_fTime"], Time.game.get());
+
+      let numberOfParticles: number = _cmpParticleSystem.numberOfParticles;
       this.crc3.uniform1f(_shader.uniforms["u_fNumberOfParticles"], numberOfParticles);
+
+      let faceCamera: boolean = _cmpFaceCamera && _cmpFaceCamera.isActive;
+      this.crc3.uniform1i(_shader.uniforms["u_bFaceCamera"], faceCamera ? 1 : 0);
+      this.crc3.uniform1i(_shader.uniforms["u_bRestrict"], faceCamera && _cmpFaceCamera.restrict ? 1 : 0);
+
       RenderWebGL.crc3.drawElementsInstanced(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0, numberOfParticles);
       RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
       RenderWebGL.crc3.depthMask(true);

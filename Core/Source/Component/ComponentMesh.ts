@@ -8,14 +8,12 @@ namespace FudgeCore {
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public mesh: Mesh;
-    public showToCamera: boolean = false;
 
     #skeleton: SkeletonInstance;
 
-    public constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance, _showToCamera: boolean = false) {
+    public constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance) {
       super();
       this.mesh = _mesh;
-      this.showToCamera = _showToCamera;
       if (_skeleton)
         this.bindSkeleton(_skeleton);
     }

@@ -886,7 +886,7 @@ declare namespace FudgeCore {
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
-        protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: typeof Shader, _renderBuffers: RenderBuffers): void;
+        protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: typeof Shader, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera): void;
         private static calcMeshToView;
         private static getRenderBuffers;
     }
@@ -2135,8 +2135,7 @@ declare namespace FudgeCore {
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
         mesh: Mesh;
-        showToCamera: boolean;
-        constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance, _showToCamera?: boolean);
+        constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance);
         get radius(): number;
         get skeleton(): SkeletonInstance;
         bindSkeleton(_skeleton: SkeletonInstance): void;
