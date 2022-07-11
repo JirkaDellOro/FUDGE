@@ -167,6 +167,15 @@ namespace FudgeCore {
       if (!_transformations) return "";
 
       let code: string = "";
+      let rotation: ShaderCodeMap = _transformations["rotate"] as ShaderCodeMap;
+      if (rotation) {
+        code += `float fSinX = sin(${rotation.x ? rotation.x : "0.0"});
+        float fCosX = cos(${rotation.x ? rotation.x : "0.0"});
+        float fSinY = sin(${rotation.y ? rotation.y : "0.0"});
+        float fCosY = cos(${rotation.y ? rotation.y : "0.0"});
+        float fSinZ = sin(${rotation.z ? rotation.z : "0.0"});
+        float fCosZ = cos(${rotation.z ? rotation.z : "0.0"});\n`;
+      }
       code += `mat4 mtx${_isLocal ? "Local" : "World"} = \n`;
       code += Object.keys(_transformations)
       .map( (_key: string) => {
@@ -179,17 +188,10 @@ namespace FudgeCore {
             0.0, 0.0, 1.0, 0.0,
             ${transformation.x ? transformation.x : "0.0"}, ${transformation.y ? transformation.y : "0.0"}, ${transformation.z ? transformation.z : "0.0"}, 1.0)`;
           case "rotate":
-            // TODO: move these into shader?
-            let sinX: string = `sin(${transformation.x ? transformation.x : "0.0"})`;
-            let cosX: string = `cos(${transformation.x ? transformation.x : "0.0"})`;
-            let sinY: string = `sin(${transformation.y ? transformation.y : "0.0"})`;
-            let cosY: string = `cos(${transformation.y ? transformation.y : "0.0"})`;
-            let sinZ: string = `sin(${transformation.z ? transformation.z : "0.0"})`;
-            let cosZ: string = `cos(${transformation.z ? transformation.z : "0.0"})`;
             return `mat4(
-            ${cosZ} * ${cosY}, ${sinZ} * ${cosY}, -${sinY}, 0.0,
-            ${cosZ} * ${sinY} * ${sinX} - ${sinZ} * ${cosX}, ${sinZ} * ${sinY} * ${sinX} + ${cosZ} * ${cosX}, ${cosY} * ${sinX}, 0.0,
-            ${cosZ} * ${sinY} * ${cosX} + ${sinZ} * ${sinX}, ${sinZ} * ${sinY} * ${cosX} - ${cosZ} * ${sinX}, ${cosY} * ${cosX}, 0.0,
+            fCosZ * fCosY, fSinZ * fCosY, -fSinY, 0.0,
+            fCosZ * fSinY * fSinX - fSinZ * fCosX, fSinZ * fSinY * fSinX + fCosZ * fCosX, fCosY * fSinX, 0.0,
+            fCosZ * fSinY * fCosX + fSinZ * fSinX, fSinZ * fSinY * fCosX - fCosZ * fSinX, fCosY * fCosX, 0.0,
             0.0, 0.0, 0.0, 1.0
             )`;
           case "scale":
@@ -205,7 +207,7 @@ namespace FudgeCore {
         }
       )
       .reduce((_accumulator: string, _code: string) => `${_accumulator}\n * \n ${_code}`);
-      code += ";";
+      code += ";\n";
       return code;
     }
 
