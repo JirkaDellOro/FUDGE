@@ -47,8 +47,16 @@ void main() {
   /*$mtxLocal*/
   /*$mtxWorld*/
 
-  mat4 mtxMeshToWorld = /*$mtxWorld*/ u_mtxMeshToWorld /*$mtxLocal*/ ;
-  if (u_bFaceCamera) mtxMeshToWorld = lookAt(vec3(mtxMeshToWorld[3][0], mtxMeshToWorld[3][1], mtxMeshToWorld[3][2]), u_vctCamera);
+  mat4 mtxMeshToWorld = /*$mtxWorld*/ u_mtxMeshToWorld /*$mtxLocal*/;
+  if (u_bFaceCamera) mtxMeshToWorld = 
+    lookAt(vec3(mtxMeshToWorld[3][0], mtxMeshToWorld[3][1], mtxMeshToWorld[3][2]), u_vctCamera) * 
+    mat4(
+      length(vec3(mtxMeshToWorld[0][0], mtxMeshToWorld[1][0], mtxMeshToWorld[2][0])), 0.0, 0.0, 0.0,
+      0.0, length(vec3(mtxMeshToWorld[0][1], mtxMeshToWorld[1][1], mtxMeshToWorld[2][1])), 0.0, 0.0,
+      0.0, 0.0, length(vec3(mtxMeshToWorld[0][2], mtxMeshToWorld[1][2], mtxMeshToWorld[2][2])), 0.0,
+      0.0, 0.0, 0.0, 1.0
+    );
+
   // calculate position
   gl_Position = u_mtxWorldToView * mtxMeshToWorld * vctPosition;
   v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;

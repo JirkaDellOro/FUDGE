@@ -90,11 +90,10 @@ namespace FudgeCore {
       let source: string = ShaderParticle.getVertexShaderSource()
         .replace("/*$variables*/", RenderInjectorParticleEffect.createStorageShaderCode(shaderCodeStructure))
         .replace("/*$mtxLocal*/", RenderInjectorParticleEffect.createTransformationsShaderCode(shaderCodeStructure?.transformations?.local, true))
-        .replace("/*$mtxLocal*/", " * mtxLocal")
+        .replace("/*$mtxLocal*/", "* mtxLocal")
         .replace("/*$mtxWorld*/", RenderInjectorParticleEffect.createTransformationsShaderCode(shaderCodeStructure?.transformations?.world, false))
         .replace("/*$mtxWorld*/", "mtxWorld *")
         .replace("/*$color*/", RenderInjectorParticleEffect.createColorShaderCode(shaderCodeStructure));
-      
       return source; 
     }
 
@@ -176,37 +175,39 @@ namespace FudgeCore {
         float fSinZ = sin(${rotation.z ? rotation.z : "0.0"});
         float fCosZ = cos(${rotation.z ? rotation.z : "0.0"});\n`;
       }
-      code += `mat4 mtx${_isLocal ? "Local" : "World"} = \n`;
+
+      
+      code += `mat4 mtx${_isLocal ? "Local" : "World"} = `;
       code += Object.keys(_transformations)
-      .map( (_key: string) => {
-        let transformation: ShaderCodeMap = _transformations[_key] as ShaderCodeMap;
-        switch (_key) {
-          case "translate":
-            return `mat4(
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            ${transformation.x ? transformation.x : "0.0"}, ${transformation.y ? transformation.y : "0.0"}, ${transformation.z ? transformation.z : "0.0"}, 1.0)`;
-          case "rotate":
-            return `mat4(
-            fCosZ * fCosY, fSinZ * fCosY, -fSinY, 0.0,
-            fCosZ * fSinY * fSinX - fSinZ * fCosX, fSinZ * fSinY * fSinX + fCosZ * fCosX, fCosY * fSinX, 0.0,
-            fCosZ * fSinY * fCosX + fSinZ * fSinX, fSinZ * fSinY * fCosX - fCosZ * fSinX, fCosY * fCosX, 0.0,
-            0.0, 0.0, 0.0, 1.0
-            )`;
-          case "scale":
-            return `mat4(
-            ${transformation.x ? transformation.x : "1.0"}, 0.0, 0.0, 0.0,
-            0.0, ${transformation.y ? transformation.y : "1.0"}, 0.0, 0.0,
-            0.0, 0.0, ${transformation.z ? transformation.z : "1.0"}, 0.0,
-            0.0, 0.0, 0.0, 1.0
-            )`;
-          default:
-            return "";    
+        .map( (_key: string) => {
+          let transformation: ShaderCodeMap = _transformations[_key] as ShaderCodeMap;
+          switch (_key) {
+            case "translate":
+              return `mat4(
+              1.0, 0.0, 0.0, 0.0,
+              0.0, 1.0, 0.0, 0.0,
+              0.0, 0.0, 1.0, 0.0,
+              ${transformation.x ? transformation.x : "0.0"}, ${transformation.y ? transformation.y : "0.0"}, ${transformation.z ? transformation.z : "0.0"}, 1.0)`;
+            case "rotate":
+              return `mat4(
+              fCosZ * fCosY, fSinZ * fCosY, -fSinY, 0.0,
+              fCosZ * fSinY * fSinX - fSinZ * fCosX, fSinZ * fSinY * fSinX + fCosZ * fCosX, fCosY * fSinX, 0.0,
+              fCosZ * fSinY * fCosX + fSinZ * fSinX, fSinZ * fSinY * fCosX - fCosZ * fSinX, fCosY * fCosX, 0.0,
+              0.0, 0.0, 0.0, 1.0
+              )`;
+            case "scale":
+              return `mat4(
+              ${transformation.x ? transformation.x : "1.0"}, 0.0, 0.0, 0.0,
+              0.0, ${transformation.y ? transformation.y : "1.0"}, 0.0, 0.0,
+              0.0, 0.0, ${transformation.z ? transformation.z : "1.0"}, 0.0,
+              0.0, 0.0, 0.0, 1.0
+              )`;
+            default:
+              return "";    
+            }
           }
-        }
-      )
-      .reduce((_accumulator: string, _code: string) => `${_accumulator}\n * \n ${_code}`);
+        )
+        .reduce((_accumulator: string, _code: string) => `${_accumulator} * \n${_code}`);
       code += ";\n";
       return code;
     }
