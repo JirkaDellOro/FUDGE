@@ -349,16 +349,18 @@ namespace FudgeCore {
         RenderWebGL.crc3.uniformMatrix4fv(uWorldToView, false, _cmpCamera.mtxWorldToView.get());
 
       if (drawParticles) {
-        RenderWebGL.drawParticles(cmpParticleSystem, shader, renderBuffers, _node.getComponent(ComponentFaceCamera));
+        RenderWebGL.drawParticles(cmpParticleSystem, shader, renderBuffers, _node.getComponent(ComponentFaceCamera), cmpMaterial.sortForAlpha);
       } else {
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       }
     }
 
     // TODO: check if this should happen somewhere else e.g. some Render injector stuff?
-    protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderLike, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera): void {
-      RenderWebGL.setBlendMode(BLEND.PARTICLE);
-      RenderWebGL.crc3.depthMask(false);
+    protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderLike, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void {
+      if (_sortForAlpha) {
+        RenderWebGL.setBlendMode(BLEND.PARTICLE);
+        RenderWebGL.crc3.depthMask(false);
+      }
       _cmpParticleSystem.useRenderData();
 
       this.crc3.uniform1f(_shader.uniforms["u_fTime"], Time.game.get());
@@ -371,8 +373,10 @@ namespace FudgeCore {
       this.crc3.uniform1i(_shader.uniforms["u_bRestrict"], faceCamera && _cmpFaceCamera.restrict ? 1 : 0);
 
       RenderWebGL.crc3.drawElementsInstanced(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0, numberOfParticles);
-      RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
-      RenderWebGL.crc3.depthMask(true);
+      if (_sortForAlpha) {
+        RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
+        RenderWebGL.crc3.depthMask(true);
+      }
     }
 
     private static calcMeshToView(_node: Node, _cmpMesh: ComponentMesh, _mtxWorldToView: Matrix4x4, _target?: Vector3): Matrix4x4 {

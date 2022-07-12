@@ -886,7 +886,7 @@ declare namespace FudgeCore {
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
-        protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderLike, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera): void;
+        protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderLike, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
         private static calcMeshToView;
         private static getRenderBuffers;
     }
