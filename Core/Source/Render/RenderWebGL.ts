@@ -249,7 +249,7 @@ namespace FudgeCore {
         let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let coat: Coat = cmpMaterial.material.coat;
-        let shader: typeof Shader = coat instanceof CoatTextured ? ShaderPickTextured : ShaderPick;
+        let shader: ShaderLike = coat instanceof CoatTextured ? ShaderPickTextured : ShaderPick;
 
         shader.useProgram();
         coat.useRenderData(shader, cmpMaterial);
@@ -332,18 +332,10 @@ namespace FudgeCore {
       let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
       let coat: Coat = cmpMaterial.material.coat;
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
-      let renderParticles: boolean = cmpParticleSystem && cmpParticleSystem.isActive;
-      let shader: typeof Shader = cmpMaterial.material.getShader();
+      let drawParticles: boolean = cmpParticleSystem && cmpParticleSystem.isActive;
+      let shader: ShaderLike = drawParticles ? cmpParticleSystem.particleEffect : cmpMaterial.material.getShader();
 
-      if (renderParticles) {
-        let particleEffect: ParticleEffect = cmpParticleSystem.particleEffect;
-        particleEffect.useProgram();
-        shader.attributes = particleEffect.attributes;
-        shader.uniforms = particleEffect.uniforms;
-      } else {
-        shader.useProgram();
-      }
-      
+      shader.useProgram();   
       coat.useRenderData(shader, cmpMaterial);
       
       let mtxMeshToView: Matrix4x4 = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
@@ -356,7 +348,7 @@ namespace FudgeCore {
       if (uWorldToView)
         RenderWebGL.crc3.uniformMatrix4fv(uWorldToView, false, _cmpCamera.mtxWorldToView.get());
 
-      if (renderParticles) {
+      if (drawParticles) {
         RenderWebGL.drawParticles(cmpParticleSystem, shader, renderBuffers, _node.getComponent(ComponentFaceCamera));
       } else {
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
@@ -364,7 +356,7 @@ namespace FudgeCore {
     }
 
     // TODO: check if this should happen somewhere else e.g. some Render injector stuff?
-    protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: typeof Shader, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera): void {
+    protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderLike, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera): void {
       RenderWebGL.setBlendMode(BLEND.PARTICLE);
       RenderWebGL.crc3.depthMask(false);
       _cmpParticleSystem.useRenderData();
@@ -395,7 +387,7 @@ namespace FudgeCore {
       return Matrix4x4.MULTIPLICATION(_mtxWorldToView, _cmpMesh.mtxWorld);
     }
 
-    private static getRenderBuffers(_cmpMesh: ComponentMesh, _shader: typeof Shader, _mtxMeshToView: Matrix4x4): RenderBuffers {
+    private static getRenderBuffers(_cmpMesh: ComponentMesh, _shader: ShaderLike, _mtxMeshToView: Matrix4x4): RenderBuffers {
       if (_cmpMesh.mesh instanceof MeshSkin)
         // TODO: make mesh skin pickable
         return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
