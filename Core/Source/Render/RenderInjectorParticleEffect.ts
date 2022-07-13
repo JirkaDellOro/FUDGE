@@ -87,13 +87,18 @@ namespace FudgeCore {
 
     public static getVertexShaderSource(this: ParticleEffect): string { 
       let shaderCodeStructure: ShaderCodeData = RenderInjectorParticleEffect.generateShaderCodeData(this.data);
+      let storage: ShaderCodeData = shaderCodeStructure?.storage;
+      let transformationsLocal: ShaderCodeMap = shaderCodeStructure?.transformations?.local;
+      let transformationsWorld: ShaderCodeMap = shaderCodeStructure?.transformations?.world;
+      let color: ShaderCodeMap = shaderCodeStructure?.components?.ComponentMaterial?.clrPrimary as ShaderCodeMap;
+
       let source: string = ShaderParticle.getVertexShaderSource()
-        .replace("/*$variables*/", RenderInjectorParticleEffect.createStorageShaderCode(shaderCodeStructure))
-        .replace("/*$mtxLocal*/", RenderInjectorParticleEffect.createTransformationsShaderCode(shaderCodeStructure?.transformations?.local, true))
-        .replace("/*$mtxLocal*/", "* mtxLocal")
-        .replace("/*$mtxWorld*/", RenderInjectorParticleEffect.createTransformationsShaderCode(shaderCodeStructure?.transformations?.world, false))
-        .replace("/*$mtxWorld*/", "mtxWorld *")
-        .replace("/*$color*/", RenderInjectorParticleEffect.createColorShaderCode(shaderCodeStructure));
+        .replace("/*$variables*/", RenderInjectorParticleEffect.createStorageShaderCode(storage))
+        .replace("/*$mtxLocal*/", RenderInjectorParticleEffect.createTransformationsShaderCode(transformationsLocal, true))
+        .replace("/*$mtxLocal*/", transformationsLocal ? "* mtxLocal" : "")
+        .replace("/*$mtxWorld*/", RenderInjectorParticleEffect.createTransformationsShaderCode(transformationsWorld, false))
+        .replace("/*$mtxWorld*/", transformationsWorld ? "mtxWorld *" : "")
+        .replace("/*$color*/", RenderInjectorParticleEffect.createColorShaderCode(color));
       return source; 
     }
 
@@ -147,12 +152,11 @@ namespace FudgeCore {
         throw `"${_function}" is not an operation`;
     }
 
-    private static createStorageShaderCode(_structure: ShaderCodeData): string {
-      let storage: ShaderCodeData = _structure?.storage;
+    private static createStorageShaderCode(_storage: ShaderCodeData): string {
       let code: string = "";
-      if (storage) {
-        for (const partitionName in storage) {
-          let partition: ShaderCodeMap = storage[partitionName] as ShaderCodeMap;
+      if (_storage) {
+        for (const partitionName in _storage) {
+          let partition: ShaderCodeMap = _storage[partitionName] as ShaderCodeMap;
           for (const variableName in partition) {
             code += `float ${variableName} = ${partition[variableName]};\n`;
           }
@@ -212,11 +216,10 @@ namespace FudgeCore {
       return code;
     }
 
-    private static createColorShaderCode(_structure: ShaderCodeData): string {      
-      let clrPrimary: ShaderCodeMap = _structure?.components?.ComponentMaterial?.clrPrimary as ShaderCodeMap;
+    private static createColorShaderCode(_color: ShaderCodeMap): string {
       let code: string = "";
-      if (clrPrimary) {
-        code += `v_vctColor = vec4(${clrPrimary.r ? clrPrimary.r : "1.0"}, ${clrPrimary.g ? clrPrimary.g : "1.0"}, ${clrPrimary.b ? clrPrimary.b : "1.0"}, ${clrPrimary.a ? clrPrimary.a : "1.0"});`;
+      if (_color) {
+        code += `v_vctColor = vec4(${_color.r ? _color.r : "1.0"}, ${_color.g ? _color.g : "1.0"}, ${_color.b ? _color.b : "1.0"}, ${_color.a ? _color.a : "1.0"});`;
       }
 
       return code;
