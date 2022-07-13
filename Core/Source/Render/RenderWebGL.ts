@@ -249,7 +249,7 @@ namespace FudgeCore {
         let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let coat: Coat = cmpMaterial.material.coat;
-        let shader: ShaderLike = coat instanceof CoatTextured ? ShaderPickTextured : ShaderPick;
+        let shader: ShaderInterface = coat instanceof CoatTextured ? ShaderPickTextured : ShaderPick;
 
         shader.useProgram();
         coat.useRenderData(shader, cmpMaterial);
@@ -333,7 +333,7 @@ namespace FudgeCore {
       let coat: Coat = cmpMaterial.material.coat;
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       let drawParticles: boolean = cmpParticleSystem && cmpParticleSystem.isActive;
-      let shader: ShaderLike = drawParticles ? cmpParticleSystem.particleEffect : cmpMaterial.material.getShader();
+      let shader: ShaderInterface = drawParticles ? cmpParticleSystem.particleEffect : cmpMaterial.material.getShader();
 
       shader.useProgram();   
       coat.useRenderData(shader, cmpMaterial);
@@ -356,7 +356,7 @@ namespace FudgeCore {
     }
 
     // TODO: check if this should happen somewhere else e.g. some Render injector stuff?
-    protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderLike, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void {
+    protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void {
       if (_sortForAlpha) {
         RenderWebGL.setBlendMode(BLEND.PARTICLE);
         RenderWebGL.crc3.depthMask(false);
@@ -391,7 +391,7 @@ namespace FudgeCore {
       return Matrix4x4.MULTIPLICATION(_mtxWorldToView, _cmpMesh.mtxWorld);
     }
 
-    private static getRenderBuffers(_cmpMesh: ComponentMesh, _shader: ShaderLike, _mtxMeshToView: Matrix4x4): RenderBuffers {
+    private static getRenderBuffers(_cmpMesh: ComponentMesh, _shader: ShaderInterface, _mtxMeshToView: Matrix4x4): RenderBuffers {
       if (_cmpMesh.mesh instanceof MeshSkin)
         // TODO: make mesh skin pickable
         return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);

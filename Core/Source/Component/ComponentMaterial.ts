@@ -9,7 +9,7 @@ namespace FudgeCore {
     public clrSecondary: Color = Color.CSS("white");
     public mtxPivot: Matrix3x3 = Matrix3x3.IDENTITY();
     public material: Material;
-    //** support sorting of objects with transparency when rendering, render objects in the back first */
+    //** support sorting of objects with transparency when rendering, render objects in the back first. Disables depth mask for particle systems */
     public sortForAlpha: boolean = false;
     // public mutatorCoat: MutatorForComponent;
 

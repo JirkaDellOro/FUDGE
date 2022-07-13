@@ -36,7 +36,7 @@ namespace FudgeCore {
    * @authors Jonas Plotzky, HFU, 2020
    */
   @RenderInjectorParticleEffect.decorate
-  export class ParticleEffect extends Mutable implements SerializableResource, ShaderLike {
+  export class ParticleEffect extends Mutable implements SerializableResource, ShaderInterface {
     public name: string;
     public idResource: string = undefined;
 

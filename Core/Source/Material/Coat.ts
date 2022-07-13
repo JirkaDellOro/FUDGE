@@ -8,7 +8,7 @@ namespace FudgeCore {
     // public name: string = "Coat";
     protected renderData: { [key: string]: unknown };
 
-    public useRenderData(_shader: ShaderLike, _cmpMaterial: ComponentMaterial): void {/* injected by RenderInjector*/ }
+    public useRenderData(_shader: ShaderInterface, _cmpMaterial: ComponentMaterial): void {/* injected by RenderInjector*/ }
 
     //#region Transfer
     public serialize(): Serialization {

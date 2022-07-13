@@ -1,15 +1,15 @@
 // / <reference path="../Coat/Coat.ts"/>
 namespace FudgeCore {
-  export interface ShaderLike {
+  export interface ShaderInterface {
     define: string[];
     program: WebGLProgram;
     attributes: { [name: string]: number };
     uniforms: { [name: string]: WebGLUniformLocation };
     getVertexShaderSource(): string;
     getFragmentShaderSource(): string;
-    deleteProgram(this: ShaderLike): void;
-    useProgram(this: ShaderLike): void;
-    createProgram(this: ShaderLike): void;
+    deleteProgram(this: ShaderInterface): void;
+    useProgram(this: ShaderInterface): void;
+    createProgram(this: ShaderInterface): void;
   }
 
   /**

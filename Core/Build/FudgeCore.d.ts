@@ -886,7 +886,7 @@ declare namespace FudgeCore {
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
-        protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderLike, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
+        protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
         private static calcMeshToView;
         private static getRenderBuffers;
     }
@@ -2769,7 +2769,7 @@ declare namespace FudgeCore {
         protected renderData: {
             [key: string]: unknown;
         };
-        useRenderData(_shader: ShaderLike, _cmpMaterial: ComponentMaterial): void;
+        useRenderData(_shader: ShaderInterface, _cmpMaterial: ComponentMaterial): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
@@ -3768,9 +3768,9 @@ declare namespace FudgeCore {
         get type(): string;
         get boundingBox(): Box;
         get radius(): number;
-        useRenderBuffers(_shader: ShaderLike, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers;
-        getRenderBuffers(_shader: ShaderLike): RenderBuffers;
-        deleteRenderBuffers(_shader: ShaderLike): void;
+        useRenderBuffers(_shader: ShaderInterface, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers;
+        getRenderBuffers(_shader: ShaderInterface): RenderBuffers;
+        deleteRenderBuffers(_shader: ShaderInterface): void;
         clear(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -4031,7 +4031,7 @@ declare namespace FudgeCore {
      */
     class MeshSkin extends MeshGLTF {
         load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
-        useRenderBuffers(_shader: ShaderLike, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
+        useRenderBuffers(_shader: ShaderInterface, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -4269,7 +4269,7 @@ declare namespace FudgeCore {
      * Holds all the information which defines the particle effect. Can load the said information out of a json file.
      * @authors Jonas Plotzky, HFU, 2020
      */
-    class ParticleEffect extends Mutable implements SerializableResource, ShaderLike {
+    class ParticleEffect extends Mutable implements SerializableResource, ShaderInterface {
         #private;
         name: string;
         idResource: string;
@@ -6480,7 +6480,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    interface ShaderLike {
+    interface ShaderInterface {
         define: string[];
         program: WebGLProgram;
         attributes: {
@@ -6491,9 +6491,9 @@ declare namespace FudgeCore {
         };
         getVertexShaderSource(): string;
         getFragmentShaderSource(): string;
-        deleteProgram(this: ShaderLike): void;
-        useProgram(this: ShaderLike): void;
-        createProgram(this: ShaderLike): void;
+        deleteProgram(this: ShaderInterface): void;
+        useProgram(this: ShaderInterface): void;
+        createProgram(this: ShaderInterface): void;
     }
     /**
      * Static superclass for the representation of WebGl shaderprograms.
