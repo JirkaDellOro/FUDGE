@@ -1,11 +1,12 @@
 namespace FudgeCore {
-  interface CodeData {
+  interface CodeStructure {
     variables?: CodeMap;
     transformations?: {
       local?: CodeTransformation[];
       world?: CodeTransformation[];
     };
     color?: CodeMap;
+    [key: string]: string | CodeMap | CodeTransformation[] | CodeStructure;
   }
 
   interface CodeTransformation { 
@@ -86,7 +87,7 @@ namespace FudgeCore {
     }
 
     public static getVertexShaderSource(this: ParticleEffect): string { 
-      let shaderCodeStructure: CodeData = RenderInjectorParticleEffect.generateCodeData(this.data);
+      let shaderCodeStructure: CodeStructure = RenderInjectorParticleEffect.generateCodeStructure(this.data);
       let variables: CodeMap = shaderCodeStructure?.variables;
       let transformationsLocal: CodeTransformation[] = shaderCodeStructure?.transformations?.local;
       let transformationsWorld: CodeTransformation[] = shaderCodeStructure?.transformations?.world;
@@ -107,32 +108,32 @@ namespace FudgeCore {
     }
 
     //#region code generation
-    private static generateCodeData(_data: Serialization): CodeData {
+    private static generateCodeStructure(_data: Serialization): CodeStructure {
       if (!_data) return {};
 
-      let codeData: General = {};
+      let codeStructure: CodeStructure = {};
   
       for (const key in _data) {
         let subData: General = _data[key];
+
         if (key == "local" || key == "world") {
           let transformations: CodeTransformation[] = [];
           for (const transformation of subData) {
             transformations.push({
               transformation: transformation.transformation,
-              values: RenderInjectorParticleEffect.generateCodeData(transformation.values) as CodeMap
+              values: RenderInjectorParticleEffect.generateCodeStructure(transformation.values) as CodeMap
             });
           }
-          codeData[key] = transformations;
-          continue;
-        }
-
-        if (ParticleEffect.isClosureData(subData)) 
-          codeData[key] = RenderInjectorParticleEffect.generateCode(subData);
+          codeStructure[key] = transformations;
+        } else if (ParticleEffect.isClosureData(subData)) 
+          codeStructure[key] = RenderInjectorParticleEffect.generateCode(subData);
+        else if (Object.keys(subData).length == 0)
+          codeStructure[key] = "";
         else
-          codeData[key] = RenderInjectorParticleEffect.generateCodeData(subData);
+          codeStructure[key] = RenderInjectorParticleEffect.generateCodeStructure(subData);
       }
   
-      return codeData as CodeData;
+      return codeStructure;
     }   
   
     private static generateCode(_data: ClosureData): string {
