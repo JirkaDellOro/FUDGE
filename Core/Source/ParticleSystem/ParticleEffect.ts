@@ -31,11 +31,11 @@ namespace FudgeCore {
     type: "constant";
   }
 
-  export interface TransformationData {
-    values: Mutator;
-    transformation: "translate" | "rotate" | "scale";
-    type: "transformation";
-  }
+  // export interface TransformationData {
+  //   values: Mutator;
+  //   transformation: "translate" | "rotate" | "scale";
+  //   type: "transformation";
+  // }
 
   /**
    * Holds all the information which defines the particle effect. Can load the said information out of a json file.
@@ -84,9 +84,9 @@ namespace FudgeCore {
       return (_data as ConstantData)?.type == "constant";
     }
 
-    public static isTransformationData(_data: General): _data is TransformationData {
-      return (_data as TransformationData)?.type == "transformation";
-    }
+    // public static isTransformationData(_data: General): _data is TransformationData {
+    //   return (_data as TransformationData)?.type == "transformation";
+    // }
 
     /**
      * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
