@@ -491,6 +491,7 @@ declare namespace FudgeCore {
         static decorate(_constructor: Function): void;
         static getVertexShaderSource(this: ParticleEffect): string;
         static getFragmentShaderSource(this: ParticleEffect): string;
+        private static createVariableMap;
         private static generateCodeStructure;
         private static generateCode;
         private static generateFunction;

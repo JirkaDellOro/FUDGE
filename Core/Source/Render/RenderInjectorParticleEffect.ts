@@ -86,8 +86,8 @@ namespace FudgeCore {
       });
     }
 
-    public static getVertexShaderSource(this: ParticleEffect): string { 
-      let shaderCodeStructure: CodeStructure = RenderInjectorParticleEffect.generateCodeStructure(this.data);
+    public static getVertexShaderSource(this: ParticleEffect): string {
+      let shaderCodeStructure: CodeStructure = RenderInjectorParticleEffect.generateCodeStructure(this.data, RenderInjectorParticleEffect.createVariableMap(this.data));
       let variables: CodeMap = shaderCodeStructure?.variables;
       let transformationsLocal: CodeTransformation[] = shaderCodeStructure?.transformations?.local;
       let transformationsWorld: CodeTransformation[] = shaderCodeStructure?.transformations?.world;
@@ -107,8 +107,19 @@ namespace FudgeCore {
       return ShaderParticle.getFragmentShaderSource();
     }
 
+    private static createVariableMap(_data: Serialization): {[key: string]: string} {
+      let variableMap: {[key: string]: string} = {};
+      Object.keys(_data.variables).forEach( (_variableName, _index) => {
+        if (RenderInjectorParticleEffect.PREDEFINED_VARIABLES[_variableName])
+          throw `Error in ${ParticleEffect.name}: "${_variableName}" is a predefined variable and can not be redeclared`;
+        else
+          return variableMap[_variableName] = `fVariable${_index}`; 
+      });
+      return variableMap;
+    } 
+
     //#region code generation
-    private static generateCodeStructure(_data: Serialization): CodeStructure {
+    private static generateCodeStructure(_data: Serialization, _variableMap: {[key: string]: string}): CodeStructure {
       if (!_data) return {};
 
       let codeStructure: CodeStructure = {};
@@ -121,33 +132,38 @@ namespace FudgeCore {
           for (const transformation of subData) {
             transformations.push({
               transformation: transformation.transformation,
-              values: RenderInjectorParticleEffect.generateCodeStructure(transformation.values) as CodeMap
+              values: RenderInjectorParticleEffect.generateCodeStructure(transformation.values, _variableMap) as CodeMap
             });
           }
           codeStructure[key] = transformations;
-        } else if (ParticleEffect.isClosureData(subData)) 
-          codeStructure[key] = RenderInjectorParticleEffect.generateCode(subData);
+        } else if (ParticleEffect.isClosureData(subData)) {
+          let variableNameOrKey: string = _variableMap[key] || key;
+          codeStructure[variableNameOrKey] = RenderInjectorParticleEffect.generateCode(subData, _variableMap);
+        }
         else if (Object.keys(subData).length == 0)
           codeStructure[key] = "";
         else
-          codeStructure[key] = RenderInjectorParticleEffect.generateCodeStructure(subData);
+          codeStructure[key] = RenderInjectorParticleEffect.generateCodeStructure(subData, _variableMap);
       }
   
       return codeStructure;
     }   
   
-    private static generateCode(_data: ClosureData): string {
+    private static generateCode(_data: ClosureData, _variableMap: {[key: string]: string}): string {
       if (ParticleEffect.isFunctionData(_data)) {
         let parameters: string[] = [];
         for (let param of _data.parameters) {
-          parameters.push(this.generateCode(param));
+          parameters.push(this.generateCode(param, _variableMap));
         }
         return RenderInjectorParticleEffect.generateFunction(_data.function, parameters);
       }
   
       if (ParticleEffect.isVariableData(_data)) {
-        let predefined: string = RenderInjectorParticleEffect.PREDEFINED_VARIABLES[_data.value];
-        return predefined ? predefined : _data.value;
+        let variableName: string = RenderInjectorParticleEffect.PREDEFINED_VARIABLES[_data.value] || _variableMap[_data.value];
+        if (variableName)
+          return variableName;
+        else
+          throw `Error in ${ParticleEffect.name}: "${_data.value}" is not a defined variable`;
       } 
   
       if (ParticleEffect.isConstantData(_data)) {
@@ -155,14 +171,14 @@ namespace FudgeCore {
         return `${value}${value.includes(".") ? "" : ".0"}`;
       }
   
-      throw `invalid node structure in particle effect serialization`;
+      throw `Error in ${ParticleEffect.name}: invalid node structure in particle effect serialization`;
     }
   
     private static generateFunction(_function: string, _parameters: string[]): string {
       if (_function in RenderInjectorParticleEffect.FUNCTIONS)
         return RenderInjectorParticleEffect.FUNCTIONS[_function](_parameters);
       else
-        throw `"${_function}" is not an operation`;
+        throw `Error in ${ParticleEffect.name}: "${_function}" is not an operation`;
     }
 
     private static generateVariables(_variables: CodeMap): string {
