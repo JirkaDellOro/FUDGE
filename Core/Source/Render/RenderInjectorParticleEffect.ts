@@ -2,14 +2,18 @@ namespace FudgeCore {
   interface CodeData {
     variables?: CodeMap;
     transformations?: {
-      local?: CodeTransformations;
-      world?: CodeTransformations;
+      local?: CodeTransformation[];
+      world?: CodeTransformation[];
     };
     color?: CodeMap;
   }
 
+  interface CodeTransformation { 
+    transformation: "translate" | "rotate" | "scale";
+    values: CodeMap; 
+  }
+
   interface CodeMap { [key: string]: string; }
-  interface CodeTransformations { [key: string]: CodeMap; }
 
   export class RenderInjectorParticleEffect extends RenderInjectorShader {
     public static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number = 1000;
@@ -84,16 +88,16 @@ namespace FudgeCore {
     public static getVertexShaderSource(this: ParticleEffect): string { 
       let shaderCodeStructure: CodeData = RenderInjectorParticleEffect.generateCodeData(this.data);
       let variables: CodeMap = shaderCodeStructure?.variables;
-      let transformationsLocal: CodeTransformations = shaderCodeStructure?.transformations?.local;
-      let transformationsWorld: CodeTransformations = shaderCodeStructure?.transformations?.world;
+      let transformationsLocal: CodeTransformation[] = shaderCodeStructure?.transformations?.local;
+      let transformationsWorld: CodeTransformation[] = shaderCodeStructure?.transformations?.world;
       let color: CodeMap = shaderCodeStructure?.color;
 
       let source: string = ShaderParticle.getVertexShaderSource()
         .replace("/*$variables*/", RenderInjectorParticleEffect.generateVariables(variables))
         .replace("/*$mtxLocal*/", RenderInjectorParticleEffect.generateTransformations(transformationsLocal, true))
-        .replace("/*$mtxLocal*/", transformationsLocal ? "* mtxLocal" : "")
+        .replace("/*$mtxLocal*/", transformationsLocal && transformationsLocal.length > 0 ? "* mtxLocal" : "")
         .replace("/*$mtxWorld*/", RenderInjectorParticleEffect.generateTransformations(transformationsWorld, false))
-        .replace("/*$mtxWorld*/", transformationsWorld ? "mtxWorld *" : "")
+        .replace("/*$mtxWorld*/", transformationsWorld && transformationsWorld.length > 0 ? "mtxWorld *" : "")
         .replace("/*$color*/", RenderInjectorParticleEffect.generateColor(color));
       return source; 
     }
@@ -110,6 +114,18 @@ namespace FudgeCore {
   
       for (const key in _data) {
         let subData: General = _data[key];
+        if (key == "local" || key == "world") {
+          let transformations: CodeTransformation[] = [];
+          for (const transformation of subData) {
+            transformations.push({
+              transformation: transformation.transformation,
+              values: RenderInjectorParticleEffect.generateCodeData(transformation.values) as CodeMap
+            });
+          }
+          codeData[key] = transformations;
+          continue;
+        }
+
         if (ParticleEffect.isClosureData(subData)) 
           codeData[key] = RenderInjectorParticleEffect.generateCode(subData);
         else
@@ -149,61 +165,65 @@ namespace FudgeCore {
     }
 
     private static generateVariables(_variables: CodeMap): string {
-      let code: string = "";
-      for (const variableName in _variables) {
-        code += `float ${variableName} = ${_variables[variableName]};\n`;
-      }
-
-      return code;
+      return Object.keys(_variables)
+        .map( (_variableName) => `float ${_variableName} = ${_variables[_variableName]};`)
+        .reduce( (_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "" ); 
     }
 
-    private static generateTransformations(_transformations: CodeTransformations, _isLocal: boolean): string {
-      if (!_transformations) return "";
+    private static generateTransformations(_transformations: CodeTransformation[], _isLocal: boolean): string {
+      if (!_transformations || _transformations.length == 0) return "";
 
       let code: string = "";
-      let rotation: CodeMap = _transformations["rotate"];
-      if (rotation) {
-        code += `float fSinX = sin(${rotation.x ? rotation.x : "0.0"});
-        float fCosX = cos(${rotation.x ? rotation.x : "0.0"});
-        float fSinY = sin(${rotation.y ? rotation.y : "0.0"});
-        float fCosY = cos(${rotation.y ? rotation.y : "0.0"});
-        float fSinZ = sin(${rotation.z ? rotation.z : "0.0"});
-        float fCosZ = cos(${rotation.z ? rotation.z : "0.0"});\n`;
-      }
 
+      code += _transformations
+        .map( (_transformation: CodeTransformation, _index: number) => {
+          if (_transformation.transformation == "rotate") {
+            let by: CodeMap = _transformation.values;
+            return `float fSinX${_index} = sin(${by.x ? by.x : "0.0"});
+              float fCosX${_index} = cos(${by.x ? by.x : "0.0"});
+              float fSinY${_index} = sin(${by.y ? by.y : "0.0"});
+              float fCosY${_index} = cos(${by.y ? by.y : "0.0"});
+              float fSinZ${_index} = sin(${by.z ? by.z : "0.0"});
+              float fCosZ${_index} = cos(${by.z ? by.z : "0.0"});\n`;
+          } else
+            return "";
+        })
+        .filter( (_transformation: string) => _transformation != "")
+        .reduce( (_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "" );
+      code += "\n";
       
       code += `mat4 mtx${_isLocal ? "Local" : "World"} = `;
-      code += Object.keys(_transformations)
-        .map( (_key: string) => {
-          let transformation: CodeMap = _transformations[_key] as CodeMap;
-          switch (_key) {
+      code += _transformations
+        .map( (_transformation: CodeTransformation, _index: number) => {
+          let by: CodeMap = _transformation.values;
+          switch (_transformation.transformation) {
             case "translate":
               return `mat4(
               1.0, 0.0, 0.0, 0.0,
               0.0, 1.0, 0.0, 0.0,
               0.0, 0.0, 1.0, 0.0,
-              ${transformation.x ? transformation.x : "0.0"}, ${transformation.y ? transformation.y : "0.0"}, ${transformation.z ? transformation.z : "0.0"}, 1.0)`;
+              ${by.x ? by.x : "0.0"}, ${by.y ? by.y : "0.0"}, ${by.z ? by.z : "0.0"}, 1.0)`;
             case "rotate":
               return `mat4(
-              fCosZ * fCosY, fSinZ * fCosY, -fSinY, 0.0,
-              fCosZ * fSinY * fSinX - fSinZ * fCosX, fSinZ * fSinY * fSinX + fCosZ * fCosX, fCosY * fSinX, 0.0,
-              fCosZ * fSinY * fCosX + fSinZ * fSinX, fSinZ * fSinY * fCosX - fCosZ * fSinX, fCosY * fCosX, 0.0,
+              fCosZ${_index} * fCosY${_index}, fSinZ${_index} * fCosY${_index}, -fSinY${_index}, 0.0,
+              fCosZ${_index} * fSinY${_index} * fSinX${_index} - fSinZ${_index} * fCosX${_index}, fSinZ${_index} * fSinY${_index} * fSinX${_index} + fCosZ${_index} * fCosX${_index}, fCosY${_index} * fSinX${_index}, 0.0,
+              fCosZ${_index} * fSinY${_index} * fCosX${_index} + fSinZ${_index} * fSinX${_index}, fSinZ${_index} * fSinY${_index} * fCosX${_index} - fCosZ${_index} * fSinX${_index}, fCosY${_index} * fCosX${_index}, 0.0,
               0.0, 0.0, 0.0, 1.0
               )`;
             case "scale":
               return `mat4(
-              ${transformation.x ? transformation.x : "1.0"}, 0.0, 0.0, 0.0,
-              0.0, ${transformation.y ? transformation.y : "1.0"}, 0.0, 0.0,
-              0.0, 0.0, ${transformation.z ? transformation.z : "1.0"}, 0.0,
+              ${by.x ? by.x : "1.0"}, 0.0, 0.0, 0.0,
+              0.0, ${by.y ? by.y : "1.0"}, 0.0, 0.0,
+              0.0, 0.0, ${by.z ? by.z : "1.0"}, 0.0,
               0.0, 0.0, 0.0, 1.0
               )`;
             default:
               return "";    
-            }
           }
-        )
-        .reduce((_accumulator: string, _code: string) => `${_accumulator} * \n${_code}`);
+        })
+        .reduce( (_accumulator: string, _code: string) => `${_accumulator} * \n${_code}`);
       code += ";\n";
+
       return code;
     }
 

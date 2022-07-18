@@ -4265,6 +4265,11 @@ declare namespace FudgeCore {
         value: number;
         type: "constant";
     }
+    interface TransformationData {
+        values: Mutator;
+        transformation: "translate" | "rotate" | "scale";
+        type: "transformation";
+    }
     /**
      * Holds all the information which defines the particle effect. Can load the said information out of a json file.
      * @authors Jonas Plotzky, HFU, 2020
@@ -4295,6 +4300,7 @@ declare namespace FudgeCore {
         static isFunctionData(_data: General): _data is FunctionData;
         static isVariableData(_data: General): _data is VariableData;
         static isConstantData(_data: General): _data is ConstantData;
+        static isTransformationData(_data: General): _data is TransformationData;
         /**
          * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
          * @param _data The particle effect data to parse recursivley.

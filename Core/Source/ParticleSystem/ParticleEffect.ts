@@ -31,6 +31,12 @@ namespace FudgeCore {
     type: "constant";
   }
 
+  export interface TransformationData {
+    values: Mutator;
+    transformation: "translate" | "rotate" | "scale";
+    type: "transformation";
+  }
+
   /**
    * Holds all the information which defines the particle effect. Can load the said information out of a json file.
    * @authors Jonas Plotzky, HFU, 2020
@@ -76,6 +82,10 @@ namespace FudgeCore {
 
     public static isConstantData(_data: General): _data is ConstantData {
       return (_data as ConstantData)?.type == "constant";
+    }
+
+    public static isTransformationData(_data: General): _data is TransformationData {
+      return (_data as TransformationData)?.type == "transformation";
     }
 
     /**
