@@ -13,11 +13,11 @@ namespace FudgeCore {
     [attribute: string]: ParticleEffectStructure | Function;
   }
 
-  export type ClosureData = FunctionData | VariableData | ConstantData;
+  export type ExpressionData = FunctionData | VariableData | ConstantData;
 
   export interface FunctionData {
     function: string;
-    parameters: ClosureData[];
+    parameters: ExpressionData[];
     readonly type: "function";
   }
 
@@ -31,11 +31,11 @@ namespace FudgeCore {
     type: "constant";
   }
 
-  // export interface TransformationData {
-  //   values: Mutator;
-  //   transformation: "translate" | "rotate" | "scale";
-  //   type: "transformation";
-  // }
+  export interface TransformationData {
+    values: Mutator;
+    transformation: "translate" | "rotate" | "scale";
+    type: "transformation";
+  }
 
   /**
    * Holds all the information which defines the particle effect. Can load the said information out of a json file.
@@ -68,7 +68,7 @@ namespace FudgeCore {
       Project.register(this);
     }
 
-    public static isClosureData(_data: General): _data is ClosureData {
+    public static isExpressionData(_data: General): _data is ExpressionData {
       return ParticleEffect.isFunctionData(_data) || ParticleEffect.isVariableData(_data) || ParticleEffect.isConstantData(_data);
     }
 
@@ -84,9 +84,9 @@ namespace FudgeCore {
       return (_data as ConstantData)?.type == "constant";
     }
 
-    // public static isTransformationData(_data: General): _data is TransformationData {
-    //   return (_data as TransformationData)?.type == "transformation";
-    // }
+    public static isTransformationData(_data: General): _data is TransformationData {
+      return (_data as TransformationData)?.type == "transformation";
+    }
 
     /**
      * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
@@ -99,7 +99,7 @@ namespace FudgeCore {
 
       for (const key in _data) {
         let subData: General = _data[key];
-        if (ParticleEffect.isClosureData(subData)) 
+        if (ParticleEffect.isExpressionData(subData)) 
           effectStructure[key] = ParticleEffect.parseClosure(subData, _variableNames);
         else
           effectStructure[key] = ParticleEffect.parseData(subData, _variableNames);
@@ -112,7 +112,7 @@ namespace FudgeCore {
      * Parse the given closure data recursivley. Returns a function depending on the closure data.
      * @param _data The closure data to parse recursively.
      */
-    private static parseClosure(_data: ClosureData, _variableNames: string[]): Function {
+    private static parseClosure(_data: ExpressionData, _variableNames: string[]): Function {
       if (ParticleEffect.isFunctionData(_data)) {
         let parameters: Function[] = [];
         for (let param of _data.parameters) {

@@ -492,9 +492,12 @@ declare namespace FudgeCore {
         static getVertexShaderSource(this: ParticleEffect): string;
         static getFragmentShaderSource(this: ParticleEffect): string;
         private static createVariableMap;
-        private static generateCodeStructure;
-        private static generateCode;
-        private static generateFunction;
+        private static parseData;
+        private static parseTransformations;
+        private static parseMutator;
+        private static renameVariables;
+        private static parseExpression;
+        private static parseFunction;
         private static generateVariables;
         private static generateTransformations;
         private static generateColor;
@@ -4252,10 +4255,10 @@ declare namespace FudgeCore {
     interface ParticleEffectStructure {
         [attribute: string]: ParticleEffectStructure | Function;
     }
-    type ClosureData = FunctionData | VariableData | ConstantData;
+    type ExpressionData = FunctionData | VariableData | ConstantData;
     interface FunctionData {
         function: string;
-        parameters: ClosureData[];
+        parameters: ExpressionData[];
         readonly type: "function";
     }
     interface VariableData {
@@ -4265,6 +4268,11 @@ declare namespace FudgeCore {
     interface ConstantData {
         value: number;
         type: "constant";
+    }
+    interface TransformationData {
+        values: Mutator;
+        transformation: "translate" | "rotate" | "scale";
+        type: "transformation";
     }
     /**
      * Holds all the information which defines the particle effect. Can load the said information out of a json file.
@@ -4292,10 +4300,11 @@ declare namespace FudgeCore {
             [name: string]: WebGLUniformLocation;
         };
         constructor(_name?: string, _particleEffectData?: Serialization);
-        static isClosureData(_data: General): _data is ClosureData;
+        static isExpressionData(_data: General): _data is ExpressionData;
         static isFunctionData(_data: General): _data is FunctionData;
         static isVariableData(_data: General): _data is VariableData;
         static isConstantData(_data: General): _data is ConstantData;
+        static isTransformationData(_data: General): _data is TransformationData;
         /**
          * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
          * @param _data The particle effect data to parse recursivley.

@@ -1767,7 +1767,7 @@ var Fudge;
             labelKey.value = this.parentMap.has(_data) ? this.getKey(_data, this.parentMap.get(_data)) : "root";
             labelKey.id = "key" /* KEY */;
             content.appendChild(labelKey);
-            if (ƒ.ParticleEffect.isClosureData(_data)) {
+            if (ƒ.ParticleEffect.isExpressionData(_data)) {
                 if (ƒ.ParticleEffect.isFunctionData(_data)) {
                     let select = document.createElement("select");
                     select.id = "function" /* FUNCTION */;
@@ -1801,7 +1801,7 @@ var Fudge;
         }
         rename(_data, _id, _new) {
             let inputAsNumber = Number.parseFloat(_new);
-            if (_id == "key" /* KEY */ && Number.isNaN(inputAsNumber) && ƒ.ParticleEffect.isClosureData(_data)) {
+            if (_id == "key" /* KEY */ && Number.isNaN(inputAsNumber) && ƒ.ParticleEffect.isExpressionData(_data)) {
                 let parentData = this.parentMap.get(_data);
                 if (!ƒ.ParticleEffect.isFunctionData(parentData)) {
                     let key = this.getKey(_data, parentData); // Object.entries(parentData).find(entry => entry[1] == data)[0];
@@ -1858,7 +1858,7 @@ var Fudge;
         addChildren(_children, _target) {
             let move = [];
             let tagetPath = this.getPath(_target);
-            if (!_children.every(_data => ƒ.ParticleEffect.isClosureData(_data)))
+            if (!_children.every(_data => ƒ.ParticleEffect.isExpressionData(_data)))
                 return;
             if (ƒ.ParticleEffect.isFunctionData(_target)) {
                 for (let data of _children) {
@@ -1867,7 +1867,7 @@ var Fudge;
                 }
                 for (let data of move) {
                     let moveData = data;
-                    if (ƒ.ParticleEffect.isClosureData(moveData)) {
+                    if (ƒ.ParticleEffect.isExpressionData(moveData)) {
                         this.deleteData(data);
                         _target.parameters.push(moveData);
                     }
@@ -1895,7 +1895,7 @@ var Fudge;
         }
         getKey(_data, _parentData) {
             let key;
-            if (ƒ.ParticleEffect.isClosureData(_data) && ƒ.ParticleEffect.isFunctionData(_parentData)) {
+            if (ƒ.ParticleEffect.isExpressionData(_data) && ƒ.ParticleEffect.isFunctionData(_parentData)) {
                 key = _parentData.parameters.indexOf(_data).toString();
             }
             else {

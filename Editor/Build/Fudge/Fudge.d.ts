@@ -383,18 +383,18 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
-    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<Object | ƒ.ClosureData> {
+    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<Object | ƒ.ExpressionData> {
         private parentMap;
         constructor(_particleEffectData: ƒ.Serialization);
-        createContent(_data: Object | ƒ.ClosureData): HTMLFormElement;
-        getAttributes(_data: Object | ƒ.ClosureData): string;
-        rename(_data: Object | ƒ.ClosureData, _id: string, _new: string): void;
-        hasChildren(_data: Object | ƒ.ClosureData): boolean;
-        getChildren(_data: Object | ƒ.ClosureData): (Object | ƒ.ClosureData)[];
-        delete(_focused: (Object | ƒ.ClosureData)[]): (Object | ƒ.ClosureData)[];
-        addChildren(_children: (Object | ƒ.ClosureData)[], _target: Object | ƒ.ClosureData): (Object | ƒ.ClosureData)[];
-        copy(_originalData: (Object | ƒ.ClosureData)[]): Promise<(Object | ƒ.ClosureData)[]>;
-        getPath(_data: Object | ƒ.ClosureData): string[];
+        createContent(_data: Object | ƒ.ExpressionData): HTMLFormElement;
+        getAttributes(_data: Object | ƒ.ExpressionData): string;
+        rename(_data: Object | ƒ.ExpressionData, _id: string, _new: string): void;
+        hasChildren(_data: Object | ƒ.ExpressionData): boolean;
+        getChildren(_data: Object | ƒ.ExpressionData): (Object | ƒ.ExpressionData)[];
+        delete(_focused: (Object | ƒ.ExpressionData)[]): (Object | ƒ.ExpressionData)[];
+        addChildren(_children: (Object | ƒ.ExpressionData)[], _target: Object | ƒ.ExpressionData): (Object | ƒ.ExpressionData)[];
+        copy(_originalData: (Object | ƒ.ExpressionData)[]): Promise<(Object | ƒ.ExpressionData)[]>;
+        getPath(_data: Object | ƒ.ExpressionData): string[];
         private getKey;
         private deleteData;
     }

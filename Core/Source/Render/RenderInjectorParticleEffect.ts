@@ -1,20 +1,17 @@
 namespace FudgeCore {
   interface CodeStructure {
-    variables?: CodeMap;
-    transformations?: {
-      local?: CodeTransformation[];
-      world?: CodeTransformation[];
-    };
-    color?: CodeMap;
-    [key: string]: string | CodeMap | CodeTransformation[] | CodeStructure;
+    variables?: CodeMutator;
+    mtxLocal?: CodeTransformation[];
+    mtxWorld?: CodeTransformation[];
+    color?: CodeMutator;
   }
 
   interface CodeTransformation { 
     transformation: "translate" | "rotate" | "scale";
-    values: CodeMap; 
+    mutator: CodeMutator; 
   }
 
-  interface CodeMap { [key: string]: string; }
+  interface CodeMutator { [key: string]: string; }
 
   export class RenderInjectorParticleEffect extends RenderInjectorShader {
     public static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number = 1000;
@@ -87,19 +84,17 @@ namespace FudgeCore {
     }
 
     public static getVertexShaderSource(this: ParticleEffect): string {
-      let shaderCodeStructure: CodeStructure = RenderInjectorParticleEffect.generateCodeStructure(this.data, RenderInjectorParticleEffect.createVariableMap(this.data));
-      let variables: CodeMap = shaderCodeStructure?.variables;
-      let transformationsLocal: CodeTransformation[] = shaderCodeStructure?.transformations?.local;
-      let transformationsWorld: CodeTransformation[] = shaderCodeStructure?.transformations?.world;
-      let color: CodeMap = shaderCodeStructure?.color;
+      let codeStructure: CodeStructure = RenderInjectorParticleEffect.parseData(this.data, RenderInjectorParticleEffect.createVariableMap(this.data));
+      let mtxLocal: CodeTransformation[] = codeStructure.mtxLocal;
+      let mtxWorld: CodeTransformation[] = codeStructure.mtxWorld;
 
       let source: string = ShaderParticle.getVertexShaderSource()
-        .replace("/*$variables*/", RenderInjectorParticleEffect.generateVariables(variables))
-        .replace("/*$mtxLocal*/", RenderInjectorParticleEffect.generateTransformations(transformationsLocal, true))
-        .replace("/*$mtxLocal*/", transformationsLocal && transformationsLocal.length > 0 ? "* mtxLocal" : "")
-        .replace("/*$mtxWorld*/", RenderInjectorParticleEffect.generateTransformations(transformationsWorld, false))
-        .replace("/*$mtxWorld*/", transformationsWorld && transformationsWorld.length > 0 ? "mtxWorld *" : "")
-        .replace("/*$color*/", RenderInjectorParticleEffect.generateColor(color));
+        .replace("/*$variables*/", RenderInjectorParticleEffect.generateVariables(codeStructure.variables))
+        .replace("/*$mtxLocal*/", RenderInjectorParticleEffect.generateTransformations(mtxLocal, true))
+        .replace("/*$mtxLocal*/", mtxLocal && mtxLocal.length > 0 ? "* mtxLocal" : "")
+        .replace("/*$mtxWorld*/", RenderInjectorParticleEffect.generateTransformations(mtxWorld, false))
+        .replace("/*$mtxWorld*/", mtxWorld && mtxWorld.length > 0 ? "mtxWorld *" : "")
+        .replace("/*$color*/", RenderInjectorParticleEffect.generateColor(codeStructure.color));
       return source; 
     }
 
@@ -107,6 +102,8 @@ namespace FudgeCore {
       return ShaderParticle.getFragmentShaderSource();
     }
 
+    
+    //#region code generation
     private static createVariableMap(_data: Serialization): {[key: string]: string} {
       let variableMap: {[key: string]: string} = {};
       Object.keys(_data.variables).forEach( (_variableName, _index) => {
@@ -118,70 +115,79 @@ namespace FudgeCore {
       return variableMap;
     } 
 
-    //#region code generation
-    private static generateCodeStructure(_data: Serialization, _variableMap: {[key: string]: string}): CodeStructure {
-      if (!_data) return {};
-
+    private static parseData(_data: Serialization, _variableMap: {[key: string]: string}): CodeStructure {
       let codeStructure: CodeStructure = {};
-  
-      for (const key in _data) {
-        let subData: General = _data[key];
-
-        if (key == "local" || key == "world") {
-          let transformations: CodeTransformation[] = [];
-          for (const transformation of subData) {
-            transformations.push({
-              transformation: transformation.transformation,
-              values: RenderInjectorParticleEffect.generateCodeStructure(transformation.values, _variableMap) as CodeMap
-            });
-          }
-          codeStructure[key] = transformations;
-        } else if (ParticleEffect.isClosureData(subData)) {
-          let variableNameOrKey: string = _variableMap[key] || key;
-          codeStructure[variableNameOrKey] = RenderInjectorParticleEffect.generateCode(subData, _variableMap);
-        }
-        else if (Object.keys(subData).length == 0)
-          codeStructure[key] = "";
-        else
-          codeStructure[key] = RenderInjectorParticleEffect.generateCodeStructure(subData, _variableMap);
-      }
-  
+      codeStructure.variables = RenderInjectorParticleEffect.parseMutator(_data?.variables, _variableMap);
+      codeStructure.variables = RenderInjectorParticleEffect.renameVariables(codeStructure.variables, _variableMap);
+      codeStructure.color = RenderInjectorParticleEffect.parseMutator(_data?.color, _variableMap);
+      codeStructure.mtxLocal = RenderInjectorParticleEffect.parseTransformations(_data?.mtxLocal, _variableMap);
+      codeStructure.mtxWorld = RenderInjectorParticleEffect.parseTransformations(_data?.mtxWorld, _variableMap);
       return codeStructure;
-    }   
-  
-    private static generateCode(_data: ClosureData, _variableMap: {[key: string]: string}): string {
-      if (ParticleEffect.isFunctionData(_data)) {
-        let parameters: string[] = [];
-        for (let param of _data.parameters) {
-          parameters.push(this.generateCode(param, _variableMap));
+    }
+    
+    private static parseTransformations(_data: Serialization, _variableMap: {[key: string]: string}): CodeTransformation[] {
+      let transformations: CodeTransformation[] = [];
+      for (const key in _data) {
+        let transformation: General = _data[key];
+        if (ParticleEffect.isTransformationData(transformation)) {
+          transformations.push({
+            transformation: transformation.transformation,
+            mutator: RenderInjectorParticleEffect.parseMutator(transformation.values, _variableMap)
+          });
         }
-        return RenderInjectorParticleEffect.generateFunction(_data.function, parameters);
+      }
+      return transformations;
+    }
+
+    private static parseMutator(_mutator: Serialization, _variableMap: {[key: string]: string}): CodeMutator {
+      let mutator: CodeMutator = {};
+      for (const key in _mutator) {
+        mutator[key] = RenderInjectorParticleEffect.parseExpression(_mutator[key], _variableMap);
+      }
+      return mutator;
+    }
+
+    private static renameVariables(_variables: CodeMutator, _variableMap: {[key: string]: string}): CodeMutator {
+      let variables: CodeMutator = {};
+      for (const key in _variables) {
+        variables[_variableMap[key]] = _variables[key];
+      }
+      return variables;
+    }
+
+    private static parseExpression(_expression: ExpressionData, _variableMap: {[key: string]: string}): string {
+      if (ParticleEffect.isFunctionData(_expression)) {
+        let parameters: string[] = [];
+        for (let param of _expression.parameters) {
+          parameters.push(RenderInjectorParticleEffect.parseExpression(param, _variableMap));
+        }
+        return RenderInjectorParticleEffect.parseFunction(_expression.function, parameters);
       }
   
-      if (ParticleEffect.isVariableData(_data)) {
-        let variableName: string = RenderInjectorParticleEffect.PREDEFINED_VARIABLES[_data.value] || _variableMap[_data.value];
+      if (ParticleEffect.isVariableData(_expression)) {
+        let variableName: string = RenderInjectorParticleEffect.PREDEFINED_VARIABLES[_expression.value] || _variableMap[_expression.value];
         if (variableName)
           return variableName;
         else
-          throw `Error in ${ParticleEffect.name}: "${_data.value}" is not a defined variable`;
+          throw `Error in ${ParticleEffect.name}: "${_expression.value}" is not a defined variable`;
       } 
   
-      if (ParticleEffect.isConstantData(_data)) {
-        let value: string = _data.value.toString();
+      if (ParticleEffect.isConstantData(_expression)) {
+        let value: string = _expression.value.toString();
         return `${value}${value.includes(".") ? "" : ".0"}`;
       }
   
       throw `Error in ${ParticleEffect.name}: invalid node structure in particle effect serialization`;
     }
   
-    private static generateFunction(_function: string, _parameters: string[]): string {
+    private static parseFunction(_function: string, _parameters: string[]): string {
       if (_function in RenderInjectorParticleEffect.FUNCTIONS)
         return RenderInjectorParticleEffect.FUNCTIONS[_function](_parameters);
       else
         throw `Error in ${ParticleEffect.name}: "${_function}" is not an operation`;
     }
 
-    private static generateVariables(_variables: CodeMap): string {
+    private static generateVariables(_variables: CodeMutator): string {
       return Object.keys(_variables)
         .map( (_variableName) => `float ${_variableName} = ${_variables[_variableName]};`)
         .reduce( (_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "" ); 
@@ -195,7 +201,7 @@ namespace FudgeCore {
       code += _transformations
         .map( (_transformation: CodeTransformation, _index: number) => {
           if (_transformation.transformation == "rotate") {
-            let by: CodeMap = _transformation.values;
+            let by: CodeMutator = _transformation.mutator;
             return `float fSinX${_index} = sin(${by.x ? by.x : "0.0"});
               float fCosX${_index} = cos(${by.x ? by.x : "0.0"});
               float fSinY${_index} = sin(${by.y ? by.y : "0.0"});
@@ -212,7 +218,7 @@ namespace FudgeCore {
       code += `mat4 mtx${_isLocal ? "Local" : "World"} = `;
       code += _transformations
         .map( (_transformation: CodeTransformation, _index: number) => {
-          let by: CodeMap = _transformation.values;
+          let by: CodeMutator = _transformation.mutator;
           switch (_transformation.transformation) {
             case "translate":
               return `mat4(
@@ -244,7 +250,7 @@ namespace FudgeCore {
       return code;
     }
 
-    private static generateColor(_color: CodeMap): string {
+    private static generateColor(_color: CodeMutator): string {
       let code: string = "";
       if (_color) {
         code += `v_vctColor = vec4(${_color.r ? _color.r : "1.0"}, ${_color.g ? _color.g : "1.0"}, ${_color.b ? _color.b : "1.0"}, ${_color.a ? _color.a : "1.0"});`;
