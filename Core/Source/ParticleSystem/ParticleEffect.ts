@@ -6,6 +6,13 @@ namespace FudgeCore {
     RANDOM_NUMBERS = "randomNumbers"
   }
 
+  export interface ParticleEffectData extends Serialization {
+    variables?: Serialization;
+    mtxLocal?: Serialization;
+    mtxWorld?: Serialization;
+    color?: Serialization;
+  }
+
   /**
    * The data format used to store the parsed paticle effect
    */
@@ -32,9 +39,9 @@ namespace FudgeCore {
   }
 
   export interface TransformationData {
-    values: Mutator;
+    vector: Mutator;
     transformation: "translate" | "rotate" | "scale";
-    type: "transformation";
+    readonly type: "transformation";
   }
 
   /**
@@ -53,14 +60,14 @@ namespace FudgeCore {
     public mtxWorld: ParticleEffectStructure;
     public componentMutators: ParticleEffectStructure;
     public cachedMutators: { [key: string]: Mutator };
-    #data: Serialization;
+    #data: ParticleEffectData;
 
     public define: string[] = [];
     public program: WebGLProgram;
     public attributes: { [name: string]: number };
     public uniforms: { [name: string]: WebGLUniformLocation };
 
-    constructor(_name: string = "ParticleEffect", _particleEffectData: Serialization = {}) {
+    constructor(_name: string = "ParticleEffect", _particleEffectData: ParticleEffectData = {}) {
       super();
       this.name = _name;
       this.data = _particleEffectData;
@@ -92,7 +99,7 @@ namespace FudgeCore {
      * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
      * @param _data The particle effect data to parse recursivley.
      */
-    private static parseData(_data: Serialization, _variableNames: string[]): ParticleEffectStructure {
+    private static parseData(_data: ParticleEffectData, _variableNames: string[]): ParticleEffectStructure {
       if (!_data || !_variableNames) return {};
 
       let effectStructure: ParticleEffectStructure = {};
@@ -161,11 +168,11 @@ namespace FudgeCore {
       return _variableNames;
     }
     
-    public get data(): Serialization {
+    public get data(): ParticleEffectData {
       return this.#data;
     }
 
-    public set data(_data: Serialization) {
+    public set data(_data: ParticleEffectData) {
       this.#data = _data;
       // this.parse(_data);
       this.deleteProgram();

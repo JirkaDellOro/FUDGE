@@ -491,16 +491,12 @@ declare namespace FudgeCore {
         static decorate(_constructor: Function): void;
         static getVertexShaderSource(this: ParticleEffect): string;
         static getFragmentShaderSource(this: ParticleEffect): string;
-        private static createVariableMap;
-        private static parseData;
-        private static parseTransformations;
-        private static parseMutator;
-        private static renameVariables;
-        private static parseExpression;
-        private static parseFunction;
+        private static buildVariableMap;
         private static generateVariables;
         private static generateTransformations;
         private static generateColor;
+        private static generateExpression;
+        private static generateFunction;
     }
 }
 declare namespace FudgeCore {
@@ -4249,6 +4245,12 @@ declare namespace FudgeCore {
         NUMBER_OF_PARTICLES = "numberOfParticles",
         RANDOM_NUMBERS = "randomNumbers"
     }
+    interface ParticleEffectData extends Serialization {
+        variables?: Serialization;
+        mtxLocal?: Serialization;
+        mtxWorld?: Serialization;
+        color?: Serialization;
+    }
     /**
      * The data format used to store the parsed paticle effect
      */
@@ -4270,9 +4272,9 @@ declare namespace FudgeCore {
         type: "constant";
     }
     interface TransformationData {
-        values: Mutator;
+        vector: Mutator;
         transformation: "translate" | "rotate" | "scale";
-        type: "transformation";
+        readonly type: "transformation";
     }
     /**
      * Holds all the information which defines the particle effect. Can load the said information out of a json file.
@@ -4299,7 +4301,7 @@ declare namespace FudgeCore {
         uniforms: {
             [name: string]: WebGLUniformLocation;
         };
-        constructor(_name?: string, _particleEffectData?: Serialization);
+        constructor(_name?: string, _particleEffectData?: ParticleEffectData);
         static isExpressionData(_data: General): _data is ExpressionData;
         static isFunctionData(_data: General): _data is FunctionData;
         static isVariableData(_data: General): _data is VariableData;
@@ -4320,8 +4322,8 @@ declare namespace FudgeCore {
          * @param _data The paticle effect data to parse.
          */
         private static preParseStorage;
-        get data(): Serialization;
-        set data(_data: Serialization);
+        get data(): ParticleEffectData;
+        set data(_data: ParticleEffectData);
         /**
          * Asynchronously loads the json from the given url and parses it initializing this particle effect.
          */

@@ -86,7 +86,7 @@
           {
             "type": "transformation",
             "transformation": "translate",
-            "values": {
+            "vector": {
               "x": {
                 "type": "function",
                 "function": "multiplication",
@@ -314,7 +314,7 @@
           {
             "type": "transformation",
             "transformation": "rotate",
-            "values": {
+            "vector": {
               "z": {
                 "type": "function",
                 "function": "multiplication",
@@ -350,7 +350,7 @@
           {
             "type": "transformation",
             "transformation": "translate",
-            "values": {
+            "vector": {
               "y": {
                 "type": "function",
                 "function": "multiplication",
@@ -370,7 +370,7 @@
           {
             "type": "transformation",
             "transformation": "scale",
-            "values": {
+            "vector": {
               "x": {
                 "type": "variable",
                 "value": "reverseInNormTime"
@@ -384,7 +384,7 @@
           {
             "type": "transformation",
             "transformation": "rotate",
-            "values": {
+            "vector": {
               "y": {
                 "type": "variable",
                 "value": "inNormTime"
@@ -394,7 +394,7 @@
           {
             "type": "transformation",
             "transformation": "translate",
-            "values": {
+            "vector": {
               "x": {
                 "type": "variable",
                 "value": "reverseInNormTime"
@@ -404,7 +404,7 @@
           {
             "type": "transformation",
             "transformation": "scale",
-            "values": {
+            "vector": {
               "x": {
                 "type": "variable",
                 "value": "inNormTime"
@@ -416,7 +416,7 @@
           {
             "type": "transformation",
             "transformation": "translate",
-            "values": {
+            "vector": {
               "y": {
                 "type": "function",
                 "function": "polynomial",
