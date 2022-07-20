@@ -7,10 +7,10 @@ namespace FudgeCore {
   }
 
   export interface ParticleEffectData extends Serialization {
-    variables?: Serialization;
-    mtxLocal?: Serialization;
-    mtxWorld?: Serialization;
-    color?: Serialization;
+    variables?: {[name: string]: ExpressionData};
+    color?: {r?: ExpressionData, g?: ExpressionData, b?: ExpressionData, a?: ExpressionData};
+    mtxLocal?: TransformationData[];
+    mtxWorld?: TransformationData[];
   }
 
   /**
@@ -29,7 +29,7 @@ namespace FudgeCore {
   }
 
   export interface VariableData {
-    value: string;
+    name: string;
     type: "variable";
   }
 
@@ -39,8 +39,10 @@ namespace FudgeCore {
   }
 
   export interface TransformationData {
-    vector: Mutator;
     transformation: "translate" | "rotate" | "scale";
+    x?: ExpressionData;
+    y?: ExpressionData;
+    z?: ExpressionData;
     readonly type: "transformation";
   }
 
@@ -129,13 +131,13 @@ namespace FudgeCore {
       }
 
       if (ParticleEffect.isVariableData(_data)) {
-        if (_variableNames.includes(_data.value)) {
+        if (_variableNames.includes(_data.name)) {
           return function (_variables: ParticleVariables): number {
             // Debug.log("Variable", `"${_data}"`, _variables[<string>_data]);
-            return <number>_variables[_data.value];
+            return <number>_variables[_data.name];
           };
         } else {
-          throw `"${_data.value}" is not a defined variable in the ${this.name}`;
+          throw `"${_data.name}" is not a defined variable in the ${this.name}`;
         }
       } 
 

@@ -491,7 +491,7 @@ declare namespace FudgeCore {
         static decorate(_constructor: Function): void;
         static getVertexShaderSource(this: ParticleEffect): string;
         static getFragmentShaderSource(this: ParticleEffect): string;
-        private static buildVariableMap;
+        private static renameVariables;
         private static generateVariables;
         private static generateTransformations;
         private static generateColor;
@@ -4246,10 +4246,17 @@ declare namespace FudgeCore {
         RANDOM_NUMBERS = "randomNumbers"
     }
     interface ParticleEffectData extends Serialization {
-        variables?: Serialization;
-        mtxLocal?: Serialization;
-        mtxWorld?: Serialization;
-        color?: Serialization;
+        variables?: {
+            [name: string]: ExpressionData;
+        };
+        color?: {
+            r?: ExpressionData;
+            g?: ExpressionData;
+            b?: ExpressionData;
+            a?: ExpressionData;
+        };
+        mtxLocal?: TransformationData[];
+        mtxWorld?: TransformationData[];
     }
     /**
      * The data format used to store the parsed paticle effect
@@ -4264,7 +4271,7 @@ declare namespace FudgeCore {
         readonly type: "function";
     }
     interface VariableData {
-        value: string;
+        name: string;
         type: "variable";
     }
     interface ConstantData {
@@ -4272,8 +4279,10 @@ declare namespace FudgeCore {
         type: "constant";
     }
     interface TransformationData {
-        vector: Mutator;
         transformation: "translate" | "rotate" | "scale";
+        x?: ExpressionData;
+        y?: ExpressionData;
+        z?: ExpressionData;
         readonly type: "transformation";
     }
     /**

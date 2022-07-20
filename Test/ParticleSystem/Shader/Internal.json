@@ -15,7 +15,7 @@
               },
               {
                 "type": "variable",
-                "value": "numberOfParticles"
+                "name": "numberOfParticles"
               }
             ]
           },
@@ -25,7 +25,7 @@
             "parameters": [
               {
                 "type": "variable",
-                "value": "time"
+                "name": "time"
               },
               {
                 "type": "constant",
@@ -47,17 +47,17 @@
                     "parameters": [
                       {
                         "type": "variable",
-                        "value": "index"
+                        "name": "index"
                       },
                       {
                         "type": "variable",
-                        "value": "particleOffset"
+                        "name": "particleOffset"
                       }
                     ]
                   },
                   {
                     "type": "variable",
-                    "value": "scaledTime"
+                    "name": "scaledTime"
                   }
                 ]
               },
@@ -77,7 +77,7 @@
               },
               {
                 "type": "variable",
-                "value": "particleTime"
+                "name": "particleTime"
               }
             ]
           }
@@ -86,84 +86,82 @@
           {
             "type": "transformation",
             "transformation": "translate",
-            "vector": {
-              "x": {
-                "type": "function",
-                "function": "multiplication",
-                "parameters": [
-                  {
-                    "type": "function",
-                    "function": "polynomial",
-                    "parameters": [
-                      {
-                        "type": "variable",
-                        "value": "inverseParticleTime"
-                      },
-                      {
-                        "type": "constant",
-                        "value": -2
-                      },
-                      {
-                        "type": "constant",
-                        "value": 2
-                      },
-                      {
-                        "type": "constant",
-                        "value": 0
-                      },
-                      {
-                        "type": "constant",
-                        "value": 0
-                      }
-                    ]
-                  },
-                  {
-                    "type": "function",
-                    "function": "subtraction",
-                    "parameters": [
-                      {
-                        "type": "function",
-                        "function": "multiplication",
-                        "parameters": [
-                          {
-                            "type": "constant",
-                            "value": 2
-                          },
-                          {
-                            "type": "function",
-                            "function": "random",
-                            "parameters": [
-                              {
-                                "type": "variable",
-                                "value": "index"
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "constant",
-                        "value": 1
-                      }
-                    ]
-                  }
-                ]
-              },
-              "y": {
-                "type": "variable",
-                "value": "particleTime"
-              }
+            "x": {
+              "type": "function",
+              "function": "multiplication",
+              "parameters": [
+                {
+                  "type": "function",
+                  "function": "polynomial",
+                  "parameters": [
+                    {
+                      "type": "variable",
+                      "name": "inverseParticleTime"
+                    },
+                    {
+                      "type": "constant",
+                      "value": -2
+                    },
+                    {
+                      "type": "constant",
+                      "value": 2
+                    },
+                    {
+                      "type": "constant",
+                      "value": 0
+                    },
+                    {
+                      "type": "constant",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "type": "function",
+                  "function": "subtraction",
+                  "parameters": [
+                    {
+                      "type": "function",
+                      "function": "multiplication",
+                      "parameters": [
+                        {
+                          "type": "constant",
+                          "value": 2
+                        },
+                        {
+                          "type": "function",
+                          "function": "random",
+                          "parameters": [
+                            {
+                              "type": "variable",
+                              "name": "index"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "constant",
+                      "value": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            "y": {
+              "type": "variable",
+              "name": "particleTime"
             }
           }
         ],
         "color": {
           "a": {
             "type": "variable",
-            "value": "inverseParticleTime"
+            "name": "inverseParticleTime"
           },
           "r": {
             "type": "variable",
-            "value": "particleTime"
+            "name": "particleTime"
           }
         }
       }
@@ -215,7 +213,7 @@
                 "parameters": [
                   {
                     "type": "variable",
-                    "value": "time"
+                    "name": "time"
                   },
                   {
                     "type": "constant",
@@ -239,7 +237,7 @@
                 "parameters": [
                   {
                     "type": "variable",
-                    "value": "time"
+                    "name": "time"
                   },
                   {
                     "type": "constant",
@@ -263,7 +261,7 @@
               },
               {
                 "type": "variable",
-                "value": "inNormTime"
+                "name": "inNormTime"
               }
             ]
           },
@@ -281,11 +279,11 @@
                 "parameters": [
                   {
                     "type": "variable",
-                    "value": "particleAcceleration"
+                    "name": "particleAcceleration"
                   },
                   {
                     "type": "variable",
-                    "value": "inNormTime"
+                    "name": "inNormTime"
                   }
                 ]
               },
@@ -295,7 +293,7 @@
                 "parameters": [
                   {
                     "type": "variable",
-                    "value": "index"
+                    "name": "index"
                   },
                   {
                     "type": "constant",
@@ -314,101 +312,89 @@
           {
             "type": "transformation",
             "transformation": "rotate",
-            "vector": {
-              "z": {
-                "type": "function",
-                "function": "multiplication",
-                "parameters": [
-                  {
-                    "type": "function",
-                    "function": "random",
-                    "parameters": [
-                      {
-                        "type": "function",
-                        "function": "addition",
-                        "parameters": [
-                          {
-                            "type": "variable",
-                            "value": "index"
-                          },
-                          {
-                            "type": "constant",
-                            "value": 1
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "type": "constant",
-                    "value": 360
-                  }
-                ]
-              }
+            "z": {
+              "type": "function",
+              "function": "multiplication",
+              "parameters": [
+                {
+                  "type": "function",
+                  "function": "random",
+                  "parameters": [
+                    {
+                      "type": "function",
+                      "function": "addition",
+                      "parameters": [
+                        {
+                          "type": "variable",
+                          "name": "index"
+                        },
+                        {
+                          "type": "constant",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "constant",
+                  "value": 360
+                }
+              ]
             }
           },
           {
             "type": "transformation",
             "transformation": "translate",
-            "vector": {
-              "y": {
-                "type": "function",
-                "function": "multiplication",
-                "parameters": [
-                  {
-                    "type": "variable",
-                    "value": "particleVelocity"
-                  },
-                  {
-                    "type": "variable",
-                    "value": "inNormTime"
-                  }
-                ]
-              }
+            "y": {
+              "type": "function",
+              "function": "multiplication",
+              "parameters": [
+                {
+                  "type": "variable",
+                  "name": "particleVelocity"
+                },
+                {
+                  "type": "variable",
+                  "name": "inNormTime"
+                }
+              ]
             }
           },
           {
             "type": "transformation",
             "transformation": "scale",
-            "vector": {
-              "x": {
-                "type": "variable",
-                "value": "reverseInNormTime"
-              },
-              "y": {
-                "type": "variable",
-                "value": "reverseInNormTime"
-              }
+            "x": {
+              "type": "variable",
+              "name": "reverseInNormTime"
+            },
+            "y": {
+              "type": "variable",
+              "name": "reverseInNormTime"
             }
           },
           {
             "type": "transformation",
             "transformation": "rotate",
-            "vector": {
-              "y": {
-                "type": "variable",
-                "value": "inNormTime"
-              }
+            "y": {
+              "type": "variable",
+              "name": "inNormTime"
             }
           },
           {
             "type": "transformation",
             "transformation": "translate",
-            "vector": {
-              "x": {
-                "type": "variable",
-                "value": "reverseInNormTime"
-              }
+            "x": {
+              "type": "variable",
+              "name": "reverseInNormTime"
             }
           },
           {
             "type": "transformation",
             "transformation": "scale",
-            "vector": {
-              "x": {
-                "type": "variable",
-                "value": "inNormTime"
-              }
+            "x": {
+              "type": "variable",
+              "name": "inNormTime"
             }
           }
         ],
@@ -416,33 +402,31 @@
           {
             "type": "transformation",
             "transformation": "translate",
-            "vector": {
-              "y": {
-                "type": "function",
-                "function": "polynomial",
-                "parameters": [
-                  {
-                    "type": "variable",
-                    "value": "inNormTime"
-                  },
-                  {
-                    "type": "constant",
-                    "value": 0
-                  },
-                  {
-                    "type": "constant",
-                    "value": -2
-                  },
-                  {
-                    "type": "constant",
-                    "value": 0
-                  },
-                  {
-                    "type": "constant",
-                    "value": 0
-                  }
-                ]
-              }
+            "y": {
+              "type": "function",
+              "function": "polynomial",
+              "parameters": [
+                {
+                  "type": "variable",
+                  "name": "inNormTime"
+                },
+                {
+                  "type": "constant",
+                  "value": 0
+                },
+                {
+                  "type": "constant",
+                  "value": -2
+                },
+                {
+                  "type": "constant",
+                  "value": 0
+                },
+                {
+                  "type": "constant",
+                  "value": 0
+                }
+              ]
             }
           }
         ],
@@ -457,7 +441,7 @@
               },
               {
                 "type": "variable",
-                "value": "inNormTime"
+                "name": "inNormTime"
               }
             ]
           }

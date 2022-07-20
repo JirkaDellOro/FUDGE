@@ -70,17 +70,17 @@ namespace FudgeCore {
     }
 
     public static getVertexShaderSource(this: ParticleEffect): string {
-      let variableMap: {[key: string]: string} = RenderInjectorParticleEffect.buildVariableMap(this.data);
-      let mtxLocal: Serialization = this.data?.mtxLocal;
-      let mtxWorld: Serialization = this.data?.mtxWorld;
+      let data: ParticleEffectData = RenderInjectorParticleEffect.renameVariables(this.data);
+      let mtxLocal: TransformationData[] = data?.mtxLocal;
+      let mtxWorld: TransformationData[] = data?.mtxWorld;
 
       let source: string = ShaderParticle.getVertexShaderSource()
-        .replace("/*$variables*/", RenderInjectorParticleEffect.generateVariables(this.data?.variables, variableMap))
-        .replace("/*$mtxLocal*/", RenderInjectorParticleEffect.generateTransformations(mtxLocal, variableMap, "Local"))
-        .replace("/*$mtxLocal*/", mtxLocal && Object.keys(mtxLocal).length > 0 ? "* mtxLocal" : "")
-        .replace("/*$mtxWorld*/", RenderInjectorParticleEffect.generateTransformations(mtxWorld, variableMap, "World"))
-        .replace("/*$mtxWorld*/", mtxWorld && Object.keys(mtxWorld).length > 0 ? "mtxWorld *" : "")
-        .replace("/*$color*/", RenderInjectorParticleEffect.generateColor(this.data?.color, variableMap));
+        .replace("/*$variables*/", RenderInjectorParticleEffect.generateVariables(data?.variables))
+        .replace("/*$mtxLocal*/", RenderInjectorParticleEffect.generateTransformations(mtxLocal, "Local"))
+        .replace("/*$mtxLocal*/", mtxLocal && mtxLocal.length > 0 ? "* mtxLocal" : "")
+        .replace("/*$mtxWorld*/", RenderInjectorParticleEffect.generateTransformations(mtxWorld, "World"))
+        .replace("/*$mtxWorld*/", mtxWorld && mtxWorld.length > 0 ? "mtxWorld *" : "")
+        .replace("/*$color*/", RenderInjectorParticleEffect.generateColor(data?.color));
       return source; 
     }
 
@@ -89,7 +89,7 @@ namespace FudgeCore {
     }
     
     //#region code generation
-    private static buildVariableMap(_data: ParticleEffectData): {[key: string]: string} {
+    private static renameVariables(_data: ParticleEffectData): ParticleEffectData {
       let variableMap: {[key: string]: string} = {};
       Object.keys(_data.variables).forEach( (_variableName, _index) => {
         if (RenderInjectorParticleEffect.PREDEFINED_VARIABLES[_variableName])
@@ -97,31 +97,50 @@ namespace FudgeCore {
         else
           return variableMap[_variableName] = `fVariable${_index}`; 
       });
-      return variableMap;
+
+      let dataRenamed: ParticleEffectData = JSON.parse(JSON.stringify(_data));
+      dataRenamed.variables = Object.fromEntries(Object.entries(dataRenamed.variables).map( ([_name, _exrpession]) => [variableMap[_name], _exrpession] ));
+      renameRecursive(dataRenamed);
+      return dataRenamed;
+
+      function renameRecursive(_data: ParticleEffectData): void {
+        if (ParticleEffect.isVariableData(_data)) {
+          let newName: string = RenderInjectorParticleEffect.PREDEFINED_VARIABLES[_data.name] || variableMap[_data.name];
+          if (newName)
+            _data.name = newName;
+          else
+            throw `Error in ${ParticleEffect.name}: "${newName}" is not a defined variable`;
+        } else {
+          for (const key in _data) {
+            if (typeof _data[key] == "string")
+              continue;
+            else
+              renameRecursive(_data[key]);
+          }
+        }
+      }
     } 
 
-    private static generateVariables(_variables: Serialization, _variableMap: {[key: string]: string}): string {
+    private static generateVariables(_variables: {[name: string]: ExpressionData}): string {
       return Object.entries(_variables)
-        .map( ([_variableName, _expressionTree]): [string, string] => [_variableMap[_variableName], RenderInjectorParticleEffect.generateExpression(_expressionTree, _variableMap)] )
-        .map( ([_variableName, _expression]): string => `float ${_variableName} = ${_expression};` )
+        .map( ([_variableName, _expressionTree]): [string, string] => [_variableName, RenderInjectorParticleEffect.generateExpression(_expressionTree)] )
+        .map( ([_variableName, _code]): string => `float ${_variableName} = ${_code};` )
         .reduce( (_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "" );
     }
 
-    private static generateTransformations(_transformations: Serialization, _variableMap: {[key: string]: string}, _localOrWorld: "Local" | "World"): string {
-      if (!_transformations || Object.keys(_transformations).length == 0) return "";
+    private static generateTransformations(_transformations: TransformationData[], _localOrWorld: "Local" | "World"): string {
+      if (!_transformations || _transformations.length == 0) return "";
 
       type Transformation = "translate" | "rotate" | "scale"; // TODO: maybe extract this from TransformationData eg. Pick<TransformationData, "transformation">;
       type CodeTransformation = [Transformation, string, string, string];
 
-      let transformations: CodeTransformation[] = Object.values(_transformations)
-        .filter( (_value) => ParticleEffect.isTransformationData(_value) )
-        .map( (_transformation: TransformationData): [Transformation, General, General, General] => [_transformation.transformation, _transformation.vector.x, _transformation.vector.y, _transformation.vector.z] )
-        .map( ([_transformation, _x, _y, _z]): CodeTransformation => {
-          let isScale: boolean = _transformation === "scale";
-          let [x, y, z] = [_x, _y, _z]
-            .map( (_value) => _value ? RenderInjectorParticleEffect.generateExpression(_value, _variableMap) : (isScale ? "1.0" : "0.0") ) as [string, string, string];
+      let transformations: CodeTransformation[] = _transformations
+        .map( (_data: TransformationData): CodeTransformation => {
+          let isScale: boolean = _data.transformation === "scale";
+          let [x, y, z] = [_data.x, _data.y, _data.z]
+            .map( (_value) => _value ? RenderInjectorParticleEffect.generateExpression(_value) : (isScale ? "1.0" : "0.0") ) as [string, string, string];
 
-          return [_transformation, x, y, z];
+          return [_data.transformation, x, y, z];
         });
 
       let code: string = "";
@@ -178,28 +197,24 @@ namespace FudgeCore {
       return code;
     }
 
-    private static generateColor(_color: Serialization, _variableMap: {[key: string]: string}): string {
+    private static generateColor(_color: {r?: ExpressionData, g?: ExpressionData, b?: ExpressionData, a?: ExpressionData}): string {
       let [r, g, b, a]: [string, string, string, string] = [_color.r, _color.g, _color.b, _color.a]
-        .map( (_value): string => _value ? RenderInjectorParticleEffect.generateExpression(_value, _variableMap) : "1.0" ) as [string, string, string, string];
+        .map( (_value): string => _value ? RenderInjectorParticleEffect.generateExpression(_value) : "1.0" ) as [string, string, string, string];
         
       return `v_vctColor = vec4(${r}, ${g}, ${b}, ${a});`;
     }
 
-    private static generateExpression(_expression: ExpressionData, _variableMap: {[key: string]: string}): string {
+    private static generateExpression(_expression: ExpressionData): string {
       if (ParticleEffect.isFunctionData(_expression)) {
         let parameters: string[] = [];
         for (let param of _expression.parameters) {
-          parameters.push(RenderInjectorParticleEffect.generateExpression(param, _variableMap));
+          parameters.push(RenderInjectorParticleEffect.generateExpression(param));
         }
         return RenderInjectorParticleEffect.generateFunction(_expression.function, parameters);
       }
   
       if (ParticleEffect.isVariableData(_expression)) {
-        let variableName: string = RenderInjectorParticleEffect.PREDEFINED_VARIABLES[_expression.value] || _variableMap[_expression.value];
-        if (variableName)
-          return variableName;
-        else
-          throw `Error in ${ParticleEffect.name}: "${_expression.value}" is not a defined variable`;
+        return _expression.name;
       } 
   
       if (ParticleEffect.isConstantData(_expression)) {
