@@ -5,7 +5,6 @@
 */
 
 uniform mat4 u_mtxMeshToWorld;
-// uniform mat4 u_mtxMeshToView;
 uniform mat4 u_mtxWorldToView;
 uniform vec3 u_vctCamera;
 in vec3 a_vctPosition;

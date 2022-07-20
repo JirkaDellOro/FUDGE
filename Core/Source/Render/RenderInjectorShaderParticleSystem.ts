@@ -1,5 +1,5 @@
 namespace FudgeCore {
-  export class RenderInjectorParticleEffect extends RenderInjectorShader {
+  export class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
     public static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number = 1000;
     private static readonly FUNCTIONS: { [key: string]: Function } = {
       "addition": (_parameters: string[]) => {
@@ -38,11 +38,11 @@ namespace FudgeCore {
         return `sqrt(${x})`;
       },
       "random": (_parameters: string[]) => {
-        const maxWidth: string = RenderInjectorParticleEffect.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH.toString() + ".0";
+        const maxWidth: string = RenderInjectorShaderParticleSystem.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH.toString() + ".0";
         return `texelFetch(u_fRandomNumbers, ivec2(mod(${_parameters[0]}, ${maxWidth}), ${_parameters[0]} / ${maxWidth}), 0).r`;
       },
       "randomRange": (_parameters: string[]) => {
-        return `${RenderInjectorParticleEffect.FUNCTIONS["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]}`;
+        return `${RenderInjectorShaderParticleSystem.FUNCTIONS["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]}`;
       }
     };
     private static readonly PREDEFINED_VARIABLES: { [key: string]: string } = {
@@ -62,37 +62,49 @@ namespace FudgeCore {
         value: RenderInjectorShader.createProgram
       });
       Object.defineProperty(_constructor.prototype, "getVertexShaderSource", {
-        value: RenderInjectorParticleEffect.getVertexShaderSource
+        value: RenderInjectorShaderParticleSystem.getVertexShaderSource
       });
       Object.defineProperty(_constructor.prototype, "getFragmentShaderSource", {
-        value: RenderInjectorParticleEffect.getFragmentShaderSource
+        value: RenderInjectorShaderParticleSystem.getFragmentShaderSource
       });
     }
 
-    public static getVertexShaderSource(this: ParticleEffect): string {
-      let data: ParticleEffectData = RenderInjectorParticleEffect.renameVariables(this.data);
+    public static getVertexShaderSource(this: ShaderParticleSystem): string {
+      let data: ParticleEffectData = RenderInjectorShaderParticleSystem.renameVariables(this.particleEffect.data);
       let mtxLocal: TransformationData[] = data?.mtxLocal;
       let mtxWorld: TransformationData[] = data?.mtxWorld;
 
-      let source: string = ShaderParticle.getVertexShaderSource()
-        .replace("/*$variables*/", RenderInjectorParticleEffect.generateVariables(data?.variables))
-        .replace("/*$mtxLocal*/", RenderInjectorParticleEffect.generateTransformations(mtxLocal, "Local"))
+      let source: string = this.vertexShaderSource
+        .replace("#version 300 es", `#version 300 es\n#define ${this.define[0]}${data.color ? "\n#define PARTICLE_COLOR" : ""}`)
+        .replace("/*$variables*/", RenderInjectorShaderParticleSystem.generateVariables(data?.variables))
+        .replace("/*$mtxLocal*/", RenderInjectorShaderParticleSystem.generateTransformations(mtxLocal, "Local"))
         .replace("/*$mtxLocal*/", mtxLocal && mtxLocal.length > 0 ? "* mtxLocal" : "")
-        .replace("/*$mtxWorld*/", RenderInjectorParticleEffect.generateTransformations(mtxWorld, "World"))
+        .replace("/*$mtxWorld*/", RenderInjectorShaderParticleSystem.generateTransformations(mtxWorld, "World"))
         .replace("/*$mtxWorld*/", mtxWorld && mtxWorld.length > 0 ? "mtxWorld *" : "")
-        .replace("/*$color*/", RenderInjectorParticleEffect.generateColor(data?.color));
+        .replaceAll("/*$color*/", RenderInjectorShaderParticleSystem.generateColor(data?.color));
       return source; 
     }
 
-    public static getFragmentShaderSource(this: ParticleEffect): string {
-      return ShaderParticle.getFragmentShaderSource();
+    public static getFragmentShaderSource(this: ShaderParticleSystem): string {
+      return this.fragmentShaderSource.replace("#version 300 es", `#version 300 es${this.particleEffect.data.color ? "\n#define PARTICLE_COLOR" : ""}`);
     }
     
     //#region code generation
+    protected static appendDefines(_shader: string, _defines: string[]): string {
+      if (!_defines)
+        return _shader;
+
+      let code: string = `#version 300 es\n`;
+      for (let define of _defines)
+        code += `#define ${define}\n`;
+
+      return _shader.replace("#version 300 es", code);
+    }
+
     private static renameVariables(_data: ParticleEffectData): ParticleEffectData {
       let variableMap: {[key: string]: string} = {};
       Object.keys(_data.variables).forEach( (_variableName, _index) => {
-        if (RenderInjectorParticleEffect.PREDEFINED_VARIABLES[_variableName])
+        if (RenderInjectorShaderParticleSystem.PREDEFINED_VARIABLES[_variableName])
           throw `Error in ${ParticleEffect.name}: "${_variableName}" is a predefined variable and can not be redeclared`;
         else
           return variableMap[_variableName] = `fVariable${_index}`; 
@@ -105,7 +117,7 @@ namespace FudgeCore {
 
       function renameRecursive(_data: ParticleEffectData): void {
         if (ParticleEffect.isVariableData(_data)) {
-          let newName: string = RenderInjectorParticleEffect.PREDEFINED_VARIABLES[_data.name] || variableMap[_data.name];
+          let newName: string = RenderInjectorShaderParticleSystem.PREDEFINED_VARIABLES[_data.name] || variableMap[_data.name];
           if (newName)
             _data.name = newName;
           else
@@ -123,7 +135,7 @@ namespace FudgeCore {
 
     private static generateVariables(_variables: {[name: string]: ExpressionData}): string {
       return Object.entries(_variables)
-        .map( ([_variableName, _expressionTree]): [string, string] => [_variableName, RenderInjectorParticleEffect.generateExpression(_expressionTree)] )
+        .map( ([_variableName, _expressionTree]): [string, string] => [_variableName, RenderInjectorShaderParticleSystem.generateExpression(_expressionTree)] )
         .map( ([_variableName, _code]): string => `float ${_variableName} = ${_code};` )
         .reduce( (_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "" );
     }
@@ -138,7 +150,7 @@ namespace FudgeCore {
         .map( (_data: TransformationData): CodeTransformation => {
           let isScale: boolean = _data.transformation === "scale";
           let [x, y, z] = [_data.x, _data.y, _data.z]
-            .map( (_value) => _value ? RenderInjectorParticleEffect.generateExpression(_value) : (isScale ? "1.0" : "0.0") ) as [string, string, string];
+            .map( (_value) => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : (isScale ? "1.0" : "0.0") ) as [string, string, string];
 
           return [_data.transformation, x, y, z];
         });
@@ -198,19 +210,21 @@ namespace FudgeCore {
     }
 
     private static generateColor(_color: {r?: ExpressionData, g?: ExpressionData, b?: ExpressionData, a?: ExpressionData}): string {
+      if (!_color) return "";
+      
       let [r, g, b, a]: [string, string, string, string] = [_color.r, _color.g, _color.b, _color.a]
-        .map( (_value): string => _value ? RenderInjectorParticleEffect.generateExpression(_value) : "1.0" ) as [string, string, string, string];
-        
-      return `v_vctColor = vec4(${r}, ${g}, ${b}, ${a});`;
+        .map( (_value): string => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : "1.0" ) as [string, string, string, string];
+
+      return `vec4(${r}, ${g}, ${b}, ${a});`;
     }
 
     private static generateExpression(_expression: ExpressionData): string {
       if (ParticleEffect.isFunctionData(_expression)) {
         let parameters: string[] = [];
         for (let param of _expression.parameters) {
-          parameters.push(RenderInjectorParticleEffect.generateExpression(param));
+          parameters.push(RenderInjectorShaderParticleSystem.generateExpression(param));
         }
-        return RenderInjectorParticleEffect.generateFunction(_expression.function, parameters);
+        return RenderInjectorShaderParticleSystem.generateFunction(_expression.function, parameters);
       }
   
       if (ParticleEffect.isVariableData(_expression)) {
@@ -226,8 +240,8 @@ namespace FudgeCore {
     }
   
     private static generateFunction(_function: string, _parameters: string[]): string {
-      if (_function in RenderInjectorParticleEffect.FUNCTIONS)
-        return RenderInjectorParticleEffect.FUNCTIONS[_function](_parameters);
+      if (_function in RenderInjectorShaderParticleSystem.FUNCTIONS)
+        return RenderInjectorShaderParticleSystem.FUNCTIONS[_function](_parameters);
       else
         throw `Error in ${ParticleEffect.name}: "${_function}" is not an operation`;
     }

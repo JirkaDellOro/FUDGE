@@ -484,13 +484,14 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    class RenderInjectorParticleEffect extends RenderInjectorShader {
+    class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
         static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number;
         private static readonly FUNCTIONS;
         private static readonly PREDEFINED_VARIABLES;
         static decorate(_constructor: Function): void;
-        static getVertexShaderSource(this: ParticleEffect): string;
-        static getFragmentShaderSource(this: ParticleEffect): string;
+        static getVertexShaderSource(this: ShaderParticleSystem): string;
+        static getFragmentShaderSource(this: ShaderParticleSystem): string;
+        protected static appendDefines(_shader: string, _defines: string[]): string;
         private static renameVariables;
         private static generateVariables;
         private static generateTransformations;
@@ -881,7 +882,7 @@ declare namespace FudgeCore {
         /**
          * Set light data in shaders
          */
-        protected static setLightsInShader(_shader: typeof Shader, _lights: MapLightTypeToLightList): void;
+        protected static setLightsInShader(_shader: ShaderInterface, _lights: MapLightTypeToLightList): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
@@ -4289,7 +4290,7 @@ declare namespace FudgeCore {
      * Holds all the information which defines the particle effect. Can load the said information out of a json file.
      * @authors Jonas Plotzky, HFU, 2020
      */
-    class ParticleEffect extends Mutable implements SerializableResource, ShaderInterface {
+    class ParticleEffect extends Mutable implements SerializableResource {
         #private;
         name: string;
         idResource: string;
@@ -4302,14 +4303,7 @@ declare namespace FudgeCore {
         cachedMutators: {
             [key: string]: Mutator;
         };
-        define: string[];
-        program: WebGLProgram;
-        attributes: {
-            [name: string]: number;
-        };
-        uniforms: {
-            [name: string]: WebGLUniformLocation;
-        };
+        private shaderMap;
         constructor(_name?: string, _particleEffectData?: ParticleEffectData);
         static isExpressionData(_data: General): _data is ExpressionData;
         static isFunctionData(_data: General): _data is FunctionData;
@@ -4333,15 +4327,11 @@ declare namespace FudgeCore {
         private static preParseStorage;
         get data(): ParticleEffectData;
         set data(_data: ParticleEffectData);
+        getShaderFrom(_source: ShaderInterface): ShaderParticleSystem;
         /**
          * Asynchronously loads the json from the given url and parses it initializing this particle effect.
          */
         load(_url: RequestInfo): Promise<void>;
-        getVertexShaderSource(): string;
-        getFragmentShaderSource(): string;
-        deleteProgram(): void;
-        useProgram(): void;
-        createProgram(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
@@ -4360,6 +4350,26 @@ declare namespace FudgeCore {
          * Create an empty mutator from _effectStructure.
          */
         private createEmptyMutatorFrom;
+    }
+}
+declare namespace FudgeCore {
+    class ShaderParticleSystem implements ShaderInterface {
+        particleEffect: ParticleEffect;
+        define: string[];
+        vertexShaderSource: string;
+        fragmentShaderSource: string;
+        program: WebGLProgram;
+        attributes: {
+            [name: string]: number;
+        };
+        uniforms: {
+            [name: string]: WebGLUniformLocation;
+        };
+        getVertexShaderSource(): string;
+        getFragmentShaderSource(): string;
+        deleteProgram(): void;
+        useProgram(): void;
+        createProgram(): void;
     }
 }
 declare namespace FudgeCore {
@@ -5420,7 +5430,7 @@ declare namespace FudgeCore {
          * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
          * render passes.
          */
-        static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _shadersUsed?: (typeof Shader)[]): void;
+        static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _shadersUsed?: (ShaderInterface)[]): void;
         static addLights(cmpLights: ComponentLight[]): void;
         /**
          * Used with a {@link Picker}-camera, this method renders one pixel with picking information

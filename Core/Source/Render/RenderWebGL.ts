@@ -2,7 +2,7 @@
 ///<reference path="RenderInjectorShader.ts"/>
 ///<reference path="RenderInjectorCoat.ts"/>
 ///<reference path="RenderInjectorMesh.ts"/>
-///<reference path="RenderInjectorParticleEffect.ts"/>
+///<reference path="RenderInjectorShaderParticleSystem.ts"/>
 ///<reference path="RenderInjectorComponentParticleSystem.ts"/>
 ///<reference path="../Math/Rectangle.ts"/>
 
@@ -274,7 +274,7 @@ namespace FudgeCore {
     /**
      * Set light data in shaders
      */
-    protected static setLightsInShader(_shader: typeof Shader, _lights: MapLightTypeToLightList): void {
+    protected static setLightsInShader(_shader: ShaderInterface, _lights: MapLightTypeToLightList): void {
       _shader.useProgram();
       let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
 
@@ -333,7 +333,8 @@ namespace FudgeCore {
       let coat: Coat = cmpMaterial.material.coat;
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       let drawParticles: boolean = cmpParticleSystem && cmpParticleSystem.isActive;
-      let shader: ShaderInterface = drawParticles ? cmpParticleSystem.particleEffect : cmpMaterial.material.getShader();
+      let shader: ShaderInterface = cmpMaterial.material.getShader();
+      if (drawParticles) shader = cmpParticleSystem.particleEffect.getShaderFrom(shader);
 
       shader.useProgram();   
       coat.useRenderData(shader, cmpMaterial);
@@ -367,6 +368,7 @@ namespace FudgeCore {
 
       let numberOfParticles: number = _cmpParticleSystem.numberOfParticles;
       this.crc3.uniform1f(_shader.uniforms["u_fNumberOfParticles"], numberOfParticles);
+      this.crc3.uniform1i(_shader.uniforms["u_fRandomNumbers"], 1);
 
       let faceCamera: boolean = _cmpFaceCamera && _cmpFaceCamera.isActive;
       this.crc3.uniform1i(_shader.uniforms["u_bFaceCamera"], faceCamera ? 1 : 0);

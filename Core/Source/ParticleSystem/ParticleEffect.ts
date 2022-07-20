@@ -50,8 +50,7 @@ namespace FudgeCore {
    * Holds all the information which defines the particle effect. Can load the said information out of a json file.
    * @authors Jonas Plotzky, HFU, 2020
    */
-  @RenderInjectorParticleEffect.decorate
-  export class ParticleEffect extends Mutable implements SerializableResource, ShaderInterface {
+  export class ParticleEffect extends Mutable implements SerializableResource {
     public name: string;
     public idResource: string = undefined;
 
@@ -62,12 +61,9 @@ namespace FudgeCore {
     public mtxWorld: ParticleEffectStructure;
     public componentMutators: ParticleEffectStructure;
     public cachedMutators: { [key: string]: Mutator };
+    
     #data: ParticleEffectData;
-
-    public define: string[] = [];
-    public program: WebGLProgram;
-    public attributes: { [name: string]: number };
-    public uniforms: { [name: string]: WebGLUniformLocation };
+    private shaderMap: Map<ShaderInterface, ShaderParticleSystem> = new Map();
 
     constructor(_name: string = "ParticleEffect", _particleEffectData: ParticleEffectData = {}) {
       super();
@@ -169,6 +165,10 @@ namespace FudgeCore {
 
       return _variableNames;
     }
+
+    // public get shaderMap(): Map<typeof Shader, ShaderParticleSystem> {
+    //   return this.#shaderMap;
+    // }
     
     public get data(): ParticleEffectData {
       return this.#data;
@@ -176,8 +176,21 @@ namespace FudgeCore {
 
     public set data(_data: ParticleEffectData) {
       this.#data = _data;
-      // this.parse(_data);
-      this.deleteProgram();
+      this.shaderMap.forEach( shader => shader.deleteProgram() );
+      this.shaderMap.clear();
+    }
+
+    public getShaderFrom(_source: ShaderInterface): ShaderParticleSystem {
+      if (!this.shaderMap.has(_source)) {
+        let particleShader: ShaderParticleSystem = new ShaderParticleSystem();
+        particleShader.particleEffect = this;
+        particleShader.define.push(..._source.define);
+        particleShader.vertexShaderSource = _source.getVertexShaderSource();
+        particleShader.fragmentShaderSource = _source.getFragmentShaderSource();
+        this.shaderMap.set(_source, particleShader);
+      }
+      
+      return this.shaderMap.get(_source);
     }
  
     /**
@@ -191,12 +204,6 @@ namespace FudgeCore {
         // .then(data => this.desirializeData(data));
       this.data = data;
     }
-
-    public getVertexShaderSource(): string { return ""; /* injected by decorator */ }
-    public getFragmentShaderSource(): string { return ""; /* injected by decorator */ }
-    public deleteProgram(): void {/* injected by decorator */ }
-    public useProgram(): void {/* injected by decorator */ }
-    public createProgram(): void {/* injected by decorator */ }
 
     //#region Transfer
     public serialize(): Serialization {
@@ -216,7 +223,7 @@ namespace FudgeCore {
     }
 
     public getMutatorForUserInterface(): MutatorForUserInterface {
-      return <MutatorForUserInterface>super.getMutator();
+      return <MutatorForUserInterface>super.getMutator(); // remove data from mutator
     }
 
     public getMutator(): Mutator {

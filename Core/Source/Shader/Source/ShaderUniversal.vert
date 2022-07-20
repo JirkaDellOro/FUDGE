@@ -8,12 +8,16 @@
 uniform mat4 u_mtxMeshToView;
 in vec3 a_vctPosition;
 
+  // PARTICLE: offer buffer and functionality for in shader position calculation
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
+  #if defined(CAMERA) || defined(PARTICLE)
 uniform mat4 u_mtxMeshToWorld;
 uniform mat4 u_mtxWorldToView;
 uniform vec3 u_vctCamera;
+  #endif
+
+  #if defined(CAMERA)
+uniform float u_fSpecular;
 
 float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
   if(_fSpecular <= 0.0)
@@ -99,17 +103,68 @@ flat out vec4 v_vctColor;
 out vec4 v_vctColor;
   #endif
 
+  #if defined(PARTICLE)
+uniform float u_fNumberOfParticles;
+uniform float u_fTime;
+uniform sampler2D u_fRandomNumbers;
+uniform bool u_bFaceCamera;
+uniform bool u_bRestrict;
+
+mat4 lookAt(vec3 _vctTranslation, vec3 _vctTarget) {
+  vec3 vctUp = vec3(0.0, 1.0, 0.0);
+  vec3 zAxis = normalize(_vctTarget - _vctTranslation);
+  vec3 xAxis = normalize(cross(vctUp, zAxis));
+  vec3 yAxis = u_bRestrict ? vctUp : normalize(cross(zAxis, xAxis));
+  zAxis = u_bRestrict ? normalize(cross(xAxis, vctUp)) : zAxis;
+
+  return mat4(
+    xAxis.x, xAxis.y, xAxis.z, 0.0,
+    yAxis.x, yAxis.y, yAxis.z, 0.0,
+    zAxis.x, zAxis.y, zAxis.z, 0.0,
+    _vctTranslation.x,  _vctTranslation.y,  _vctTranslation.z, 1.0
+  );
+}
+  #endif
+
 void main() {
   vec4 vctPosition = vec4(a_vctPosition, 1.0);
+
+    #if defined(CAMERA) || defined(PARTICLE)
+  mat4 mtxMeshToWorld = u_mtxMeshToWorld;
+    #endif
+
+    #if defined(PARTICLE)
+  float fParticleIndex = float(gl_InstanceID);
+  /*$variables*/
+  /*$mtxLocal*/
+  /*$mtxWorld*/
+  mtxMeshToWorld = /*$mtxWorld*/ mtxMeshToWorld /*$mtxLocal*/;
+  if (u_bFaceCamera) 
+    mtxMeshToWorld = 
+      lookAt(vec3(mtxMeshToWorld[3][0], mtxMeshToWorld[3][1], mtxMeshToWorld[3][2]), u_vctCamera) * 
+      mat4(
+        length(vec3(mtxMeshToWorld[0][0], mtxMeshToWorld[1][0], mtxMeshToWorld[2][0])), 0.0, 0.0, 0.0,
+        0.0, length(vec3(mtxMeshToWorld[0][1], mtxMeshToWorld[1][1], mtxMeshToWorld[2][1])), 0.0, 0.0,
+        0.0, 0.0, length(vec3(mtxMeshToWorld[0][2], mtxMeshToWorld[1][2], mtxMeshToWorld[2][2])), 0.0,
+        0.0, 0.0, 0.0, 1.0
+      );
+  mat4 mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
+    #else
   mat4 mtxMeshToView = u_mtxMeshToView;
+    #endif
 
     #if defined(LIGHT) || defined(MATCAP)
   vec3 vctNormal = a_vctNormal;
+      #if defined(PARTICLE)
+  mat4 mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
+      #else
   mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
+      #endif
       #if defined(LIGHT)
   v_vctColor = u_fDiffuse * u_ambient.vctColor;
       #endif
     #endif
+
 
     #if defined(SKIN)
   mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
@@ -118,7 +173,7 @@ void main() {
     a_fWeight.w * u_bones[a_iBone.w].matrix;
 
   mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
+  mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld * mtxSkin));
     #endif
 
     // calculate position and normal according to input and defines
@@ -126,9 +181,9 @@ void main() {
 
     #if defined(CAMERA)
   // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
+  // vec4 posWorld4 = mtxMeshToWorld * vctPosition;
   // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
+  vec3 vctView = normalize(vec3(mtxMeshToWorld * vctPosition) - u_vctCamera);
     #endif
 
     #if defined(LIGHT)
@@ -141,7 +196,7 @@ void main() {
   // calculate point light effect
   for(uint i = 0u; i < u_nLightsPoint; i++) {
     vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-    vec3 vctDirection = vec3(u_mtxMeshToWorld * vctPosition) - vctPositionLight;
+    vec3 vctDirection = vec3(mtxMeshToWorld * vctPosition) - vctPositionLight;
     float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
     if(fIntensity < 0.0)
       continue;
@@ -150,7 +205,7 @@ void main() {
   // calculate spot light effect
   for(uint i = 0u; i < u_nLightsSpot; i++) {
     vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-    vec3 vctDirection = vec3(u_mtxMeshToWorld * vctPosition) - vctPositionLight;
+    vec3 vctDirection = vec3(mtxMeshToWorld * vctPosition) - vctPositionLight;
     vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
     vec3 vctNormalized = normalize(vctDirectionInverted);
     float fIntensity = 1.0 - length(vctDirectionInverted) - abs(vctDirectionInverted.x) - abs(vctDirectionInverted.y);
@@ -172,6 +227,14 @@ void main() {
   v_vctTexture.y *= -1.0;
     #endif
 
+    #if defined(PARTICLE_COLOR)
+      #if defined(LIGHT)
+  v_vctColor *= /*$color*/;
+      #else
+  v_vctColor = /*$color*/;
+      #endif
+    #else
     // always full opacity for now...
   v_vctColor.a = 1.0;
+    #endif
 }

@@ -16,14 +16,13 @@ namespace FudgeCore {
         // buffers exist
         crc3.activeTexture(WebGL2RenderingContext.TEXTURE1); // TODO: which id to use?
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.randomNumbersRenderData);
-        crc3.uniform1i(this.particleEffect.uniforms["u_fRandomNumbers"], 1);
       }
       else {
         this.randomNumbersRenderData = {};
         const texture: WebGLTexture = Render.assert<WebGLTexture>(crc3.createTexture());
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
         let randomNumbers: number[] = this.variables[PARTICLE_VARIBALE_NAMES.RANDOM_NUMBERS] as number[];
-        const maxWidth: number = RenderInjectorParticleEffect.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH;
+        const maxWidth: number = RenderInjectorShaderParticleSystem.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH;
         let width: number = Math.min(randomNumbers.length, maxWidth);
         let height: number = Math.ceil(randomNumbers.length / maxWidth);
         if (randomNumbers.length < width * height) {
