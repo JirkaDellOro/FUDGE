@@ -228,20 +228,26 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     class ControllerAnimation {
+        private static propertyColors;
         private animation;
         private domElement;
         private mutatorForNode;
+        colorIndex: number;
         constructor(_animation: ƒ.Animation, _domElement: HTMLElement, _mutatorForNode: ƒ.Mutator);
         private static addKeyToAnimationStructure;
         private static updateUserInterfaceWithMutator;
         private static addPathToAnimationStructure;
         private static deletePathFromAnimationStructure;
         private static deleteEmptyPathsFromAnimationStructure;
+        private static getOpenSequences;
         updateAnimationUserInterface(_mutator: ƒ.Mutator): void;
         addKeyToAnimationStructure(_time: number): void;
         deleteKeyFromAnimationStructure(_key: ViewAnimationKey): void;
         addPathToAnimationStructure(_path: string[]): void;
         deletePathFromAnimationStructure(_path: string[]): void;
+        getOpenSequences(): ƒ.AnimationSequence[];
+        private updatePropertyColors;
+        getNextColor(): string;
         private hndKey;
     }
 }
@@ -540,11 +546,11 @@ declare namespace Fudge {
      */
     class ViewAnimation extends View {
         animation: ƒ.Animation;
+        controller: ControllerAnimation;
         toolbar: HTMLDivElement;
         private cmpAnimator;
         private node;
         private playbackTime;
-        private controller;
         private graph;
         private selectedKey;
         private attributeList;
@@ -595,15 +601,15 @@ declare namespace Fudge {
         protected get animation(): ƒ.Animation;
         protected get dom(): HTMLElement;
         protected get toolbar(): HTMLDivElement;
+        protected get controller(): ControllerAnimation;
         redraw(_time?: number): void;
         drawTimeline(): void;
         drawCursor(_time: number): void;
-        drawKeys(): void;
         getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent;
         getTransformedPoint(_x: number, _y: number): ƒ.Vector2;
-        protected drawStructure(_animationStructure: ƒ.AnimationStructure): void;
-        protected abstract drawSequence(_sequence: ƒ.AnimationSequence): void;
+        protected abstract drawSequence(_sequence: ƒ.AnimationSequence, _color: string): void;
         protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
+        private drawSequences;
         private drawEventsAndLabels;
         private hndPointerDown;
         private hndPointerMove;
@@ -619,7 +625,7 @@ declare namespace Fudge {
     class ViewAnimationSheetCurve extends ViewAnimationSheet {
         private readonly pixelPerValue;
         drawTimeline(): void;
-        protected drawSequence(_sequence: ƒ.AnimationSequence): void;
+        protected drawSequence(_sequence: ƒ.AnimationSequence, _color: string): void;
         protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
         private drawYScale;
         private randomColor;

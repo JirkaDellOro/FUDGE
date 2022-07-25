@@ -13,7 +13,7 @@ namespace Fudge {
       super.drawTimeline();
     }
 
-    protected drawSequence(_sequence: ƒ.AnimationSequence): void {
+    protected drawSequence(_sequence: ƒ.AnimationSequence, _color: string): void {
       if (_sequence.length <= 0) return;
 
       let rect: DOMRect | ClientRect = new DOMRect(1, 1, 20, 20); //_input.getBoundingClientRect();
@@ -26,7 +26,7 @@ namespace Fudge {
       //TODO: get color from input element or former sequence element.
       // let seq: ViewAnimationSequence = { color: this.randomColor(), element: _input, sequence: _sequence };
       let seq: ViewAnimationSequence = {
-        color: this.randomColor(),
+        color: _color,
         sequence: _sequence
       };
       this.sequences.push(seq);

@@ -13,7 +13,7 @@ namespace Fudge {
     private idInterval: number;
 
     // private controller: ControllerTreeParticleSystem;
-    private tree: ƒui.CustomTree<Object | ƒ.ClosureData>;
+    private tree: ƒui.CustomTree<Object | ƒ.ExpressionData>;
     private controller: ControllerTreeParticleSystem;
     private canvas: HTMLCanvasElement;
     private crc2: CanvasRenderingContext2D;
@@ -38,7 +38,7 @@ namespace Fudge {
     protected getCustomContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
-      let focus: Object | ƒ.ClosureData = this.tree.getFocussed();
+      let focus: Object | ƒ.ExpressionData = this.tree.getFocussed();
 
       if (ƒ.ParticleEffect.isFunctionData(focus)) {
         item = new remote.MenuItem({ label: "Add Variable/Constant", id: String(CONTEXTMENU.ADD_PARTICLE_CONSTANT), click: _callback });
@@ -56,9 +56,9 @@ namespace Fudge {
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
-      let focus: Object | ƒ.ClosureData = this.tree.getFocussed();
+      let focus: Object | ƒ.ExpressionData = this.tree.getFocussed();
 
-      let child: Object | ƒ.ClosureData;
+      let child: Object | ƒ.ExpressionData;
       switch (Number(_item.id)) {
         case CONTEXTMENU.ADD_PARTICLE_PATH:
           child = {};
@@ -87,7 +87,7 @@ namespace Fudge {
         case CONTEXTMENU.DELETE_NODE:
           if (!focus)
             return;
-          let remove: (Object | ƒ.ClosureData)[] = this.controller.delete([focus]);
+          let remove: (Object | ƒ.ExpressionData)[] = this.controller.delete([focus]);
           this.tree.delete(remove);
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           break;
@@ -95,7 +95,7 @@ namespace Fudge {
     }
 
     private getMenuItemFromPath(_path: string[], _callback: ContextMenuCallback): Electron.MenuItem {
-      let focus: Object | ƒ.ClosureData = this.tree.getFocussed();
+      let focus: Object | ƒ.ExpressionData = this.tree.getFocussed();
       let label: string;
       let options: string[];
       let numberOptions: string[] = [];
@@ -231,8 +231,8 @@ namespace Fudge {
 
     private recreateTree(_particleEffectData: ƒ.Serialization): void {
       this.controller = new ControllerTreeParticleSystem(_particleEffectData);
-      let newTree: ƒui.CustomTree<Object | ƒ.ClosureData> = 
-        new ƒui.CustomTree<Object | ƒ.ClosureData>( this.controller, _particleEffectData );
+      let newTree: ƒui.CustomTree<Object | ƒ.ExpressionData> = 
+        new ƒui.CustomTree<Object | ƒ.ExpressionData>( this.controller, _particleEffectData );
 
       if (this.tree && this.dom.contains(this.tree)) 
         this.dom.replaceChild(newTree, this.tree);
@@ -269,7 +269,7 @@ namespace Fudge {
 
     private drawClosure(_closure: Function): void {
       let variables: ƒ.ParticleVariables = this.cmpParticleSystem.variables;
-      for (let iParticle: number = 0; iParticle < variables[ƒ.PARTICLE_VARIBALE_NAMES.SIZE]; iParticle += 1) {
+      for (let iParticle: number = 0; iParticle < variables[ƒ.PARTICLE_VARIBALE_NAMES.NUMBER_OF_PARTICLES]; iParticle += 1) {
         // console.log(iParticle);
         this.crc2.strokeStyle = this.randomColor();
         this.crc2.lineWidth = 2;

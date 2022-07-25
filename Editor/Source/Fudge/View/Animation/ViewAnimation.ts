@@ -30,12 +30,12 @@ namespace Fudge {
    */
   export class ViewAnimation extends View {
     public animation: ƒ.Animation;
+    public controller: ControllerAnimation;
     public toolbar: HTMLDivElement;
     
     private cmpAnimator: ƒ.ComponentAnimator;
     private node: ƒ.Node;
     private playbackTime: number;
-    private controller: ControllerAnimation;
     private graph: ƒ.Graph;
     private selectedKey: ViewAnimationKey;
     private attributeList: HTMLDivElement;
@@ -81,10 +81,6 @@ namespace Fudge {
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       let choice: CONTEXTMENU = Number(_item.id);
       ƒ.Debug.fudge(`MenuSelect | id: ${CONTEXTMENU[_item.id]} | event: ${_event}`);
-      // if (!property && (choice == CONTEXTMENU.CREATE_MESH || choice == CONTEXTMENU.CREATE_MATERIAL)) {
-        //   alert("Funky Electron-Error... please try again");
-        //   return;
-        // }
         
       let path: string[];
       switch (choice) {
@@ -450,7 +446,7 @@ namespace Fudge {
           // console.log("sps changed to", target.value);
           if (!isNaN(+target.value)) {
             this.animation.fps /* stepsPerSecond */ = +target.value;
-            this.redraw()
+            this.redraw();
           }
           break;
         default:

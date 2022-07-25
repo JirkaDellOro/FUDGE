@@ -18,7 +18,7 @@ namespace Fudge {
       // this.traverseStructures(this.view.animation.animationStructure, inputMutator);
 
       this.drawKey(100, 100, 10, 10, "green");
-      this.drawStructure(this.animation.animationStructure);
+      // this.drawStructure(this.animation.animationStructure);
     }
 
     protected drawSequence(_sequence: ƒ.AnimationSequence): void {

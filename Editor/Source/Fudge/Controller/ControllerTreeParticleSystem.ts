@@ -4,8 +4,8 @@ namespace Fudge {
 
   const enum IDS {
     KEY = "key",
-    VALUE = "value",
-    FUNCTION = "function"
+    FUNCTION = "function",
+    VALUE = "value"
   }
 
   export class ControllerTreeParticleSystem extends ƒui.CustomTreeController<Object | ƒ.ExpressionData> {
@@ -45,7 +45,11 @@ namespace Fudge {
           input.type = "text";
           input.disabled = true;
           input.id = IDS.VALUE;
-          input.value = _data.value.toString();
+          if (ƒ.ParticleEffect.isVariableData(_data)) {  
+            input.value = _data.name;
+          } else if (ƒ.ParticleEffect.isConstantData(_data)) {
+            input.value = _data.value.toString();
+          }
           content.appendChild(input);
         }
       }
@@ -80,16 +84,19 @@ namespace Fudge {
 
         return;
       }
+      
+      if (_id == IDS.FUNCTION && ƒ.ParticleEffect.isFunctionData(_data) && Number.isNaN(inputAsNumber)) {
+        _data.function = _new;
+        return;
+      }
 
       if (_id == IDS.VALUE && ƒ.ParticleEffect.isVariableData(_data) || ƒ.ParticleEffect.isConstantData(_data)) {
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
         _data.type = typeof input == "string" ? "variable" : "constant";
-        _data.value = input;
-        return;
-      }
-
-      if (_id == IDS.FUNCTION && ƒ.ParticleEffect.isFunctionData(_data) && Number.isNaN(inputAsNumber)) {
-        _data.function = _new;
+        if (ƒ.ParticleEffect.isVariableData(_data))
+          _data.name = input as string;
+        else if (ƒ.ParticleEffect.isConstantData(_data))
+          _data.value = input as number;
         return;
       }
     }

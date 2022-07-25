@@ -5,6 +5,7 @@ details>summary::after,
 .lm_controls .lm_close::before,
 .lm_controls .lm_maximise::before,
 .lm_maximised .lm_controls .lm_maximise::before,
+div[view^=ViewAnimation] fudge-stepper::after,
 fudge-boolean input[type="checkbox"]::before {
   width: 16px;
   height: 16px;
@@ -214,4 +215,18 @@ details[key^=ComponentCamera]>summary::after {
 details[key^=shape]>summary::after {
   mask: url(../Html/Icon/Shape.svg);
   -webkit-mask: url(../Html/Icon/Shape.svg);
+}
+
+/* Animation Property */
+div[view^=ViewAnimation] fudge-stepper {
+  --color-animation-property: var(--color-background-content); /* will be overriten by ControllerAnimation code */
+}
+
+div[view^=ViewAnimation] fudge-stepper::after {
+  margin-right: 0px;
+  margin-left: 5px;
+  background: var(--color-animation-property);
+  vertical-align: middle;
+  mask: url(../Html/Icon/AnimationProperty.svg);
+  -webkit-mask: url(../Html/Icon/AnimationProperty.svg);
 }

@@ -20,8 +20,6 @@ namespace Fudge {
 
     private posDragStart: ƒ.Vector2 = new ƒ.Vector2();
 
-    //TODO: stop using hardcoded colors
-
     constructor(_view: ViewAnimation) {
       this.view = _view;
       this.canvas = document.createElement("canvas");
@@ -51,6 +49,10 @@ namespace Fudge {
       return this.view.toolbar;
     }
 
+    protected get controller(): ControllerAnimation {
+      return this.view.controller;
+    }
+
     public redraw(_time?: number): void {
       if (!this.animation) return;
       if (_time != undefined) this.time = _time;
@@ -66,7 +68,7 @@ namespace Fudge {
       this.transform.translation = translation;
       this.crc2.setTransform(this.transform.scaling.x, 0, 0, this.transform.scaling.y, this.transform.translation.x, this.transform.translation.y);
       
-      this.drawKeys();
+      this.drawSequences();
       this.drawTimeline();
       this.drawEventsAndLabels();
       this.drawCursor(this.time);
@@ -132,12 +134,12 @@ namespace Fudge {
       this.crc2.fill(cursor);
     }
 
-    public drawKeys(): void {
-      //TODO: stop recreating the sequence elements all the time
-      this.sequences = [];
-      this.keys = [];
-      this.drawStructure(this.animation.animationStructure);
-    }
+    // public drawKeys(): void {
+    //   //TODO: stop recreating the sequence elements all the time
+    //   this.sequences = [];
+    //   this.keys = [];
+    //   this.drawStructure(this.animation.animationStructure);
+    // }
 
     public getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
       for (let l of this.labels) {
@@ -170,18 +172,20 @@ namespace Fudge {
       return vector;
     }
 
-    protected drawStructure(_animationStructure: ƒ.AnimationStructure): void {
-      for (const property in _animationStructure) {
-        let structureOrSequence: ƒ.AnimationStructure | ƒ.AnimationSequence = _animationStructure[property];
-        if (structureOrSequence instanceof ƒ.AnimationSequence) {
-          this.drawSequence(structureOrSequence);
-        } else {
-          this.drawStructure(structureOrSequence);
-        }
-      }
-    }
+    
 
-    protected abstract drawSequence(_sequence: ƒ.AnimationSequence): void;
+    // protected drawStructure(_animationStructure: ƒ.AnimationStructure): void {
+    //   for (const property in _animationStructure) {
+    //     let structureOrSequence: ƒ.AnimationStructure | ƒ.AnimationSequence = _animationStructure[property];
+    //     if (structureOrSequence instanceof ƒ.AnimationSequence) {
+    //       this.drawSequence(structureOrSequence);
+    //     } else {
+    //       this.drawStructure(structureOrSequence);
+    //     }
+    //   }
+    // }
+
+    protected abstract drawSequence(_sequence: ƒ.AnimationSequence, _color: string): void;
 
     protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D {
       // console.log(`x: ${_x} y: ${_y} h: ${_h} w: ${_w} c: ${_c}`);
@@ -198,6 +202,13 @@ namespace Fudge {
       this.crc2.fill(key);
       this.crc2.stroke(key);
       return key;
+    }
+
+    private drawSequences(): void {
+      this.controller.colorIndex = 0;
+      for (const sequence of this.controller.getOpenSequences()) {
+        this.drawSequence(sequence, this.controller.getNextColor());
+      }
     }
 
     private drawEventsAndLabels(): void {

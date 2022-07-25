@@ -888,9 +888,18 @@ var Fudge;
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
     class ControllerAnimation {
+        static propertyColors = [
+            "red",
+            "green",
+            "blue",
+            "cyan",
+            "yellow",
+            "magenta"
+        ];
         animation;
         domElement;
         mutatorForNode;
+        colorIndex = 0;
         constructor(_animation, _domElement, _mutatorForNode) {
             this.animation = _animation;
             this.domElement = _domElement;
@@ -921,8 +930,11 @@ var Fudge;
                 if (!element)
                     continue;
                 let value = _mutator[property];
-                if (element instanceof ƒui.CustomElement && element != document.activeElement)
+                if (element instanceof ƒui.CustomElement && element != document.activeElement) {
                     element.setMutatorValue(value);
+                    // // @ts-ignore
+                    // element.overrideProperty("animationSequence", path);
+                }
                 else {
                     this.updateUserInterfaceWithMutator(element, _mutator[property]);
                 }
@@ -966,9 +978,25 @@ var Fudge;
             }
             return _structure;
         }
+        static getOpenSequences(_domElement, _animationStructure, _sequences) {
+            for (const property in _animationStructure) {
+                let element = ƒui.Controller.findChildElementByKey(_domElement, property);
+                if (element == null || (element instanceof ƒui.Details && !element.open))
+                    continue;
+                let sequence = _animationStructure[property];
+                if (sequence instanceof ƒ.AnimationSequence) {
+                    _sequences.push(sequence);
+                }
+                else {
+                    ControllerAnimation.getOpenSequences(element, _animationStructure[property], _sequences);
+                }
+            }
+        }
         updateAnimationUserInterface(_mutator) {
             this.mutatorForNode = _mutator;
             ControllerAnimation.updateUserInterfaceWithMutator(this.domElement, _mutator);
+            this.colorIndex = 0;
+            this.updatePropertyColors(this.domElement, _mutator);
         }
         addKeyToAnimationStructure(_time) {
             ControllerAnimation.addKeyToAnimationStructure(this.domElement, this.animation.animationStructure, _time, this.mutatorForNode);
@@ -985,6 +1013,29 @@ var Fudge;
         deletePathFromAnimationStructure(_path) {
             ControllerAnimation.deletePathFromAnimationStructure(this.animation.animationStructure, _path);
             ControllerAnimation.deleteEmptyPathsFromAnimationStructure(this.animation.animationStructure);
+        }
+        getOpenSequences() {
+            let sequences = [];
+            ControllerAnimation.getOpenSequences(this.domElement, this.animation.animationStructure, sequences);
+            return sequences;
+        }
+        updatePropertyColors(_domElement, _mutator) {
+            for (const property in _mutator) {
+                let element = ƒui.Controller.findChildElementByKey(_domElement, property);
+                if (!element || (element instanceof ƒui.Details && !element.open))
+                    continue;
+                if (element instanceof ƒui.CustomElement && element != document.activeElement) {
+                    element.style.setProperty("--color-animation-property", this.getNextColor());
+                }
+                else {
+                    this.updatePropertyColors(element, _mutator[property]);
+                }
+            }
+        }
+        getNextColor() {
+            let color = ControllerAnimation.propertyColors[this.colorIndex];
+            this.colorIndex = (this.colorIndex + 1) % ControllerAnimation.propertyColors.length;
+            return color;
         }
         hndKey = (_event) => {
             _event.stopPropagation();
@@ -1785,7 +1836,12 @@ var Fudge;
                     input.type = "text";
                     input.disabled = true;
                     input.id = "value" /* VALUE */;
-                    input.value = _data.value.toString();
+                    if (ƒ.ParticleEffect.isVariableData(_data)) {
+                        input.value = _data.name;
+                    }
+                    else if (ƒ.ParticleEffect.isConstantData(_data)) {
+                        input.value = _data.value.toString();
+                    }
                     content.appendChild(input);
                 }
             }
@@ -1815,14 +1871,17 @@ var Fudge;
                 }
                 return;
             }
+            if (_id == "function" /* FUNCTION */ && ƒ.ParticleEffect.isFunctionData(_data) && Number.isNaN(inputAsNumber)) {
+                _data.function = _new;
+                return;
+            }
             if (_id == "value" /* VALUE */ && ƒ.ParticleEffect.isVariableData(_data) || ƒ.ParticleEffect.isConstantData(_data)) {
                 let input = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
                 _data.type = typeof input == "string" ? "variable" : "constant";
-                _data.value = input;
-                return;
-            }
-            if (_id == "function" /* FUNCTION */ && ƒ.ParticleEffect.isFunctionData(_data) && Number.isNaN(inputAsNumber)) {
-                _data.function = _new;
+                if (ƒ.ParticleEffect.isVariableData(_data))
+                    _data.name = input;
+                else if (ƒ.ParticleEffect.isConstantData(_data))
+                    _data.value = input;
                 return;
             }
         }
@@ -2495,7 +2554,7 @@ var Fudge;
         }
         drawClosure(_closure) {
             let variables = this.cmpParticleSystem.variables;
-            for (let iParticle = 0; iParticle < variables[ƒ.PARTICLE_VARIBALE_NAMES.SIZE]; iParticle += 1) {
+            for (let iParticle = 0; iParticle < variables[ƒ.PARTICLE_VARIBALE_NAMES.NUMBER_OF_PARTICLES]; iParticle += 1) {
                 // console.log(iParticle);
                 this.crc2.strokeStyle = this.randomColor();
                 this.crc2.lineWidth = 2;
@@ -2533,11 +2592,11 @@ var Fudge;
      */
     class ViewAnimation extends Fudge.View {
         animation;
+        controller;
         toolbar;
         cmpAnimator;
         node;
         playbackTime;
-        controller;
         graph;
         selectedKey;
         attributeList;
@@ -2575,10 +2634,6 @@ var Fudge;
         contextMenuCallback(_item, _window, _event) {
             let choice = Number(_item.id);
             ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
-            // if (!property && (choice == CONTEXTMENU.CREATE_MESH || choice == CONTEXTMENU.CREATE_MATERIAL)) {
-            //   alert("Funky Electron-Error... please try again");
-            //   return;
-            // }
             let path;
             switch (choice) {
                 case Fudge.CONTEXTMENU.ADD_PROPERTY:
@@ -2961,7 +3016,6 @@ var Fudge;
         events = [];
         time = 0;
         posDragStart = new ƒ.Vector2();
-        //TODO: stop using hardcoded colors
         constructor(_view) {
             this.view = _view;
             this.canvas = document.createElement("canvas");
@@ -2985,6 +3039,9 @@ var Fudge;
         get toolbar() {
             return this.view.toolbar;
         }
+        get controller() {
+            return this.view.controller;
+        }
         redraw(_time) {
             if (!this.animation)
                 return;
@@ -2999,7 +3056,7 @@ var Fudge;
             translation.x = Math.min(0, translation.x);
             this.transform.translation = translation;
             this.crc2.setTransform(this.transform.scaling.x, 0, 0, this.transform.scaling.y, this.transform.translation.x, this.transform.translation.y);
-            this.drawKeys();
+            this.drawSequences();
             this.drawTimeline();
             this.drawEventsAndLabels();
             this.drawCursor(this.time);
@@ -3052,12 +3109,12 @@ var Fudge;
             this.crc2.stroke(cursor);
             this.crc2.fill(cursor);
         }
-        drawKeys() {
-            //TODO: stop recreating the sequence elements all the time
-            this.sequences = [];
-            this.keys = [];
-            this.drawStructure(this.animation.animationStructure);
-        }
+        // public drawKeys(): void {
+        //   //TODO: stop recreating the sequence elements all the time
+        //   this.sequences = [];
+        //   this.keys = [];
+        //   this.drawStructure(this.animation.animationStructure);
+        // }
         getObjectAtPoint(_x, _y) {
             for (let l of this.labels) {
                 if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
@@ -3085,17 +3142,6 @@ var Fudge;
             vector.y = _y / this.transform.scaling.y - this.transform.translation.y / this.transform.scaling.y;
             return vector;
         }
-        drawStructure(_animationStructure) {
-            for (const property in _animationStructure) {
-                let structureOrSequence = _animationStructure[property];
-                if (structureOrSequence instanceof ƒ.AnimationSequence) {
-                    this.drawSequence(structureOrSequence);
-                }
-                else {
-                    this.drawStructure(structureOrSequence);
-                }
-            }
-        }
         drawKey(_x, _y, _h, _w, _c) {
             // console.log(`x: ${_x} y: ${_y} h: ${_h} w: ${_w} c: ${_c}`);
             let key = new Path2D();
@@ -3110,6 +3156,12 @@ var Fudge;
             this.crc2.fill(key);
             this.crc2.stroke(key);
             return key;
+        }
+        drawSequences() {
+            this.controller.colorIndex = 0;
+            for (const sequence of this.controller.getOpenSequences()) {
+                this.drawSequence(sequence, this.controller.getNextColor());
+            }
         }
         drawEventsAndLabels() {
             let maxDistance = 10000;
@@ -3196,7 +3248,7 @@ var Fudge;
             this.drawYScale();
             super.drawTimeline();
         }
-        drawSequence(_sequence) {
+        drawSequence(_sequence, _color) {
             if (_sequence.length <= 0)
                 return;
             let rect = new DOMRect(1, 1, 20, 20); //_input.getBoundingClientRect();
@@ -3208,7 +3260,7 @@ var Fudge;
             //TODO: get color from input element or former sequence element.
             // let seq: ViewAnimationSequence = { color: this.randomColor(), element: _input, sequence: _sequence };
             let seq = {
-                color: this.randomColor(),
+                color: _color,
                 sequence: _sequence
             };
             this.sequences.push(seq);
@@ -3317,7 +3369,7 @@ var Fudge;
             // }, 1000);
             // this.traverseStructures(this.view.animation.animationStructure, inputMutator);
             this.drawKey(100, 100, 10, 10, "green");
-            this.drawStructure(this.animation.animationStructure);
+            // this.drawStructure(this.animation.animationStructure);
         }
         drawSequence(_sequence) {
             let rect = new DOMRect(100, 100, 10, 10); //_input.getBoundingClientRect();
