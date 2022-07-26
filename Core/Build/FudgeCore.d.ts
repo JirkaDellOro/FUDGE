@@ -3043,6 +3043,11 @@ declare namespace FudgeCore {
         static SCALING(_scalar: Vector2): Matrix3x3;
         static MULTIPLICATION(_mtxLeft: Matrix3x3, _mtxRight: Matrix3x3): Matrix3x3;
         /**
+         * Computes and returns the inverse of a passed matrix.
+         * @param _mtx The matrix to compute the inverse of.
+         */
+        static INVERSION(_mtx: Matrix3x3): Matrix3x3;
+        /**
          * - get: return a vector representation of the translation {@link Vector2}.
          * **Caution!** Use immediately, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate.
          * - set: effect the matrix ignoring its rotation and scaling

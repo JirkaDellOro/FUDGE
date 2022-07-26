@@ -121,6 +121,42 @@ namespace FudgeCore {
       return mtxResult;
     }
 
+    /**
+     * Computes and returns the inverse of a passed matrix.
+     * @param _mtx The matrix to compute the inverse of.
+     */
+    public static INVERSION(_mtx: Matrix3x3): Matrix3x3 {
+      let m: Float32Array = _mtx.data;
+      let m00: number = m[0 * 3 + 0];
+      let m01: number = m[0 * 3 + 1];
+      let m02: number = m[0 * 3 + 2];
+      let m10: number = m[1 * 3 + 0];
+      let m11: number = m[1 * 3 + 1];
+      let m12: number = m[1 * 3 + 2];
+      let m20: number = m[2 * 3 + 0];
+      let m21: number = m[2 * 3 + 1];
+      let m22: number = m[2 * 3 + 2];
+
+      let d: number = 1 /
+        (m00 * (m11 * m22 - m21 * m12) -
+        m01 * (m10 * m22 - m12 * m20) +
+        m02 * (m10 * m21 - m11 * m20));
+
+      const mtxResult: Matrix3x3 = Recycler.get(Matrix3x3);
+      mtxResult.data.set([
+        d * (m11 * m22 - m21 * m12), // [0]
+        d * (m02 * m21 - m01 * m22), // [1]
+        d * (m01 * m12 - m02 * m11), // [2]
+        d * (m12 * m20 - m10 * m22), // [3]
+        d * (m00 * m22 - m02 * m20), // [4]
+        d * (m10 * m02 - m00 * m12), // [5]
+        d * (m10 * m21 - m20 * m11), // [6]
+        d * (m20 * m01 - m00 * m21), // [7]
+        d * (m00 * m11 - m10 * m01) // [8]
+      ]);
+      return mtxResult;
+    }
+
     /** 
      * - get: return a vector representation of the translation {@link Vector2}.  
      * **Caution!** Use immediately, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
