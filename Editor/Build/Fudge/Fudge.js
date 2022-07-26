@@ -888,7 +888,7 @@ var Fudge;
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
     class ControllerAnimation {
-        static propertyColors = [
+        static PROPERTY_COLORS = [
             "Red",
             "Lime",
             "Blue",
@@ -900,154 +900,114 @@ var Fudge;
             "CornflowerBlue"
         ];
         animation;
-        domElement;
-        mutatorForNode;
-        colorIndex = 0;
-        constructor(_animation, _domElement, _mutatorForNode) {
+        propertyList;
+        constructor(_animation, _domElement) {
             this.animation = _animation;
-            this.domElement = _domElement;
-            this.mutatorForNode = _mutatorForNode;
-            // this.domElement.addEventListener(ƒui.EVENT.KEY_DOWN, this.hndKey);
-            // console.log(this.domElement);
+            this.propertyList = _domElement;
         }
-        static addKeyToAnimationStructure(_domElement, _animationStructure, _time, _mutatorForNode) {
-            for (const property in _animationStructure) {
-                let element = ƒui.Controller.findChildElementByKey(_domElement, property);
-                if (element == null)
-                    continue;
-                if (element instanceof ƒui.CustomElement) {
-                    let value = element.getMutatorValue();
-                    let previousValue = _mutatorForNode[property];
-                    if (typeof value == "number" && value !== previousValue) {
-                        _animationStructure[property].addKey(new ƒ.AnimationKey(_time, element.getMutatorValue()));
+        updatePropertyList(_mutator) {
+            let colorIndex = 0;
+            updatePropertyListRecursive(this.propertyList, _mutator, this.animation.animationStructure);
+            function updatePropertyListRecursive(_propertyList, _mutator, _animationStructure) {
+                for (const key in _mutator) {
+                    let element = ƒui.Controller.findChildElementByKey(_propertyList, key);
+                    if (!element)
+                        continue;
+                    let value = _mutator[key];
+                    let structureOrSequence = _animationStructure[key];
+                    if (element instanceof ƒui.CustomElement && element != document.activeElement) {
+                        element.style.setProperty("--color-animation-property", getNextColor());
+                        element.setMutatorValue(value);
+                        Object.defineProperty(element, "animationSequence", { value: structureOrSequence });
+                    }
+                    else {
+                        updatePropertyListRecursive(element, value, structureOrSequence);
                     }
                 }
-                else
-                    _animationStructure[property] = this.addKeyToAnimationStructure(element, _animationStructure[property], _time, _mutatorForNode[property]);
             }
-            return _animationStructure;
-        }
-        static updateUserInterfaceWithMutator(_domElement, _mutator) {
-            for (const property in _mutator) {
-                let element = ƒui.Controller.findChildElementByKey(_domElement, property);
-                if (!element)
-                    continue;
-                let value = _mutator[property];
-                if (element instanceof ƒui.CustomElement && element != document.activeElement) {
-                    element.setMutatorValue(value);
-                    // // @ts-ignore
-                    // element.overrideProperty("animationSequence", path);
-                }
-                else {
-                    this.updateUserInterfaceWithMutator(element, _mutator[property]);
-                }
+            function getNextColor() {
+                let color = ControllerAnimation.PROPERTY_COLORS[colorIndex];
+                colorIndex = (colorIndex + 1) % ControllerAnimation.PROPERTY_COLORS.length;
+                return color;
             }
         }
-        static addPathToAnimationStructure(_animationStructure, _path) {
-            let property = _path[0];
-            if (_animationStructure[property] instanceof ƒ.AnimationSequence)
-                return _animationStructure;
-            if (_path.length > 1) {
-                if (_animationStructure[property] == undefined)
-                    _animationStructure[property] = {};
-                _animationStructure[property] = this.addPathToAnimationStructure(_animationStructure[property], _path.slice(1));
+        // modify or add
+        modifyKey(_time, _element) {
+            let sequence = _element["animationSequence"];
+            if (!sequence)
+                return;
+            let key;
+            for (let i = 0; i < sequence.length; i++) {
+                if (sequence.getKey(i).Time == _time)
+                    key = sequence.getKey(i);
             }
-            else {
-                _animationStructure[property] = new ƒ.AnimationSequence();
-            }
-            return _animationStructure;
+            if (!key)
+                sequence.addKey(new ƒ.AnimationKey(_time, _element.getMutatorValue()));
+            else
+                key.Value = _element.getMutatorValue();
         }
-        static deletePathFromAnimationStructure(_animationStructure, _path) {
-            let property = _path[0];
-            if (_path.length > 1) {
-                _animationStructure[property] = this.deletePathFromAnimationStructure(_animationStructure[property], _path.slice(1));
-            }
-            else {
-                delete _animationStructure[property];
-            }
-            return _animationStructure;
-        }
-        static deleteEmptyPathsFromAnimationStructure(_structure) {
-            for (const property in _structure) {
-                if (_structure[property] instanceof ƒ.AnimationSequence)
-                    continue;
-                let subStructure = this.deleteEmptyPathsFromAnimationStructure(_structure[property]);
-                if (Object.keys(subStructure).length == 0) {
-                    delete _structure[property];
-                }
-                else {
-                    _structure[property] = subStructure;
-                }
-            }
-            return _structure;
-        }
-        static getOpenSequences(_domElement, _animationStructure, _sequences) {
-            for (const property in _animationStructure) {
-                let element = ƒui.Controller.findChildElementByKey(_domElement, property);
-                if (element == null || (element instanceof ƒui.Details && !element.open))
-                    continue;
-                let sequence = _animationStructure[property];
-                if (sequence instanceof ƒ.AnimationSequence) {
-                    _sequences.push({
-                        color: element.style.getPropertyValue("--color-animation-property"),
-                        sequence: sequence
-                    });
-                }
-                else {
-                    ControllerAnimation.getOpenSequences(element, _animationStructure[property], _sequences);
-                }
-            }
-        }
-        updateAnimationUserInterface(_mutator) {
-            this.mutatorForNode = _mutator;
-            ControllerAnimation.updateUserInterfaceWithMutator(this.domElement, _mutator);
-            this.colorIndex = 0;
-            this.updatePropertyColors(this.domElement, this.animation.animationStructure);
-        }
-        addKeyToAnimationStructure(_time) {
-            ControllerAnimation.addKeyToAnimationStructure(this.domElement, this.animation.animationStructure, _time, this.mutatorForNode);
-            if (_time > this.animation.totalTime)
-                this.animation.calculateTotalTime();
-        }
-        deleteKeyFromAnimationStructure(_key) {
+        deleteKey(_key) {
             let animationSequence = _key.sequence.sequence;
             animationSequence.removeKey(_key.key);
         }
-        addPathToAnimationStructure(_path) {
-            ControllerAnimation.addPathToAnimationStructure(this.animation.animationStructure, _path);
+        addPath(_path) {
+            let value = this.animation.animationStructure;
+            for (let i = 0; i < _path.length - 1; i++) {
+                let key = _path[i];
+                if (!(key in value))
+                    value[key] = {};
+                value = value[_path[i]];
+            }
+            value[_path[_path.length - 1]] = new ƒ.AnimationSequence();
         }
-        deletePathFromAnimationStructure(_path) {
-            ControllerAnimation.deletePathFromAnimationStructure(this.animation.animationStructure, _path);
-            ControllerAnimation.deleteEmptyPathsFromAnimationStructure(this.animation.animationStructure);
+        deletePath(_path) {
+            let value = this.animation.animationStructure;
+            for (let i = 0; i < _path.length - 1; i++)
+                value = value[_path[i]];
+            delete value[_path[_path.length - 1]];
+            deleteEmptyPathsRecursive(this.animation.animationStructure);
+            function deleteEmptyPathsRecursive(_object) {
+                for (const key in _object) {
+                    if (_object[key] instanceof ƒ.AnimationSequence)
+                        continue;
+                    let value = deleteEmptyPathsRecursive(_object[key]);
+                    if (Object.keys(value).length == 0) {
+                        delete _object[key];
+                    }
+                    else {
+                        _object[key] = value;
+                    }
+                }
+                return _object;
+            }
         }
         getOpenSequences() {
             let sequences = [];
-            ControllerAnimation.getOpenSequences(this.domElement, this.animation.animationStructure, sequences);
+            collectOpenSequencesRecursive(this.propertyList, this.animation.animationStructure, sequences);
             return sequences;
-        }
-        updatePropertyColors(_domElement, _animationStructure) {
-            for (const property in _animationStructure) {
-                let element = ƒui.Controller.findChildElementByKey(_domElement, property);
-                if (!element || (element instanceof ƒui.Details && !element.isExpanded))
-                    continue;
-                if (element instanceof ƒui.CustomElement && element != document.activeElement) {
-                    element.style.setProperty("--color-animation-property", this.getNextColor());
-                }
-                else {
-                    this.updatePropertyColors(element, _animationStructure[property]);
+            function collectOpenSequencesRecursive(_propertyList, _animationStructure, _sequences) {
+                for (const key in _animationStructure) {
+                    let element = ƒui.Controller.findChildElementByKey(_propertyList, key);
+                    if (element == null || (element instanceof ƒui.Details && !element.open))
+                        continue;
+                    let sequence = _animationStructure[key];
+                    if (sequence instanceof ƒ.AnimationSequence) {
+                        _sequences.push({
+                            color: element.style.getPropertyValue("--color-animation-property"),
+                            sequence: sequence
+                        });
+                    }
+                    else {
+                        collectOpenSequencesRecursive(element, _animationStructure[key], _sequences);
+                    }
                 }
             }
-        }
-        getNextColor() {
-            let color = ControllerAnimation.propertyColors[this.colorIndex];
-            this.colorIndex = (this.colorIndex + 1) % ControllerAnimation.propertyColors.length;
-            return color;
         }
         hndKey = (_event) => {
             _event.stopPropagation();
             switch (_event.code) {
                 case ƒ.KEYBOARD_CODE.DELETE:
-                    this.domElement.dispatchEvent(new CustomEvent("delete" /* DELETE */, { bubbles: true, detail: this }));
+                    this.propertyList.dispatchEvent(new CustomEvent("delete" /* DELETE */, { bubbles: true, detail: this }));
                     break;
             }
         };
@@ -2605,7 +2565,7 @@ var Fudge;
         playbackTime;
         graph;
         selectedKey;
-        attributeList;
+        propertyList;
         sheet;
         hover; // TODO: remove this?
         time = new ƒ.Time();
@@ -2622,6 +2582,7 @@ var Fudge;
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("expand" /* EXPAND */, this.hndEvent);
             this.dom.addEventListener("collapse" /* COLLAPSE */, this.hndEvent);
+            this.dom.addEventListener("input" /* INPUT */, this.hndEvent);
         }
         //#region  ContextMenu
         getContextMenu(_callback) {
@@ -2646,7 +2607,7 @@ var Fudge;
             switch (choice) {
                 case Fudge.CONTEXTMENU.ADD_PROPERTY:
                     path = _item["path"];
-                    this.controller.addPathToAnimationStructure(path);
+                    this.controller.addPath(path);
                     this.dispatch(Fudge.EVENT_EDITOR.MODIFY, {});
                     break;
                 case Fudge.CONTEXTMENU.DELETE_PROPERTY:
@@ -2654,7 +2615,7 @@ var Fudge;
                     if (element.tagName == "BODY")
                         return;
                     path = [];
-                    while (element !== this.attributeList) {
+                    while (element !== this.propertyList) {
                         if (element instanceof ƒui.Details) {
                             let summaryElement = element.getElementsByTagName("SUMMARY")[0];
                             path.unshift(summaryElement.innerHTML);
@@ -2665,7 +2626,7 @@ var Fudge;
                         }
                         element = element.parentElement;
                     }
-                    this.controller.deletePathFromAnimationStructure(path);
+                    this.controller.deletePath(path);
                     this.dispatch(Fudge.EVENT_EDITOR.MODIFY, {});
                     return;
             }
@@ -2730,8 +2691,6 @@ var Fudge;
             this.hover.style.color = "white";
             this.hover.style.position = "absolute";
             this.hover.style.display = "none";
-            // document.addEventListener("DOMContentLoaded", () => this.updateUserInterface());
-            // this.updateUserInterface();
         }
         hndPointerDown = (_event) => {
             if (_event.buttons != 1 || this.idInterval != undefined)
@@ -2772,16 +2731,23 @@ var Fudge;
                     let animationMutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
                     if (!animationMutator)
                         animationMutator = {};
-                    let newAttributeList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
-                    this.controller = new Fudge.ControllerAnimation(this.animation, newAttributeList, animationMutator);
-                    this.dom.replaceChild(newAttributeList, this.attributeList);
-                    this.attributeList = newAttributeList;
-                    this.updateUserInterface();
+                    let newPropertyList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
+                    this.controller = new Fudge.ControllerAnimation(this.animation, newPropertyList);
+                    this.dom.replaceChild(newPropertyList, this.propertyList);
+                    this.propertyList = newPropertyList;
+                    this.updatePropertyList();
                     break;
                 case "expand" /* EXPAND */:
                 case "collapse" /* COLLAPSE */:
                     this.sheet.setSequences(this.controller.getOpenSequences());
                     this.redraw();
+                    break;
+                case "input" /* INPUT */:
+                    if (_event.target instanceof ƒui.CustomElement) {
+                        this.controller.modifyKey(this.playbackTime, _event.target);
+                        this.sheet.setSequences(this.controller.getOpenSequences());
+                        this.redraw();
+                    }
                     break;
             }
         };
@@ -2805,10 +2771,10 @@ var Fudge;
             let animationMutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
             if (!animationMutator)
                 animationMutator = {};
-            this.attributeList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
-            this.controller = new Fudge.ControllerAnimation(this.animation, this.attributeList, animationMutator);
-            this.dom.appendChild(this.attributeList);
-            this.updateUserInterface();
+            this.propertyList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
+            this.controller = new Fudge.ControllerAnimation(this.animation, this.propertyList);
+            this.dom.appendChild(this.propertyList);
+            this.updatePropertyList();
             this.sheet.setSequences(this.controller.getOpenSequences());
             this.redraw();
         }
@@ -2915,23 +2881,24 @@ var Fudge;
                     this.redraw();
                     break;
                 case "add-key":
-                    this.controller.addKeyToAnimationStructure(this.playbackTime);
-                    this.sheet.setSequences(this.controller.getOpenSequences());
-                    this.redraw();
+                    // TODO: readd this look how it works in unity?
+                    // this.controller.addKeyToAnimationStructure(this.playbackTime);
+                    // this.sheet.setSequences(this.controller.getOpenSequences());       
+                    // this.redraw();
                     break;
                 case "remove-key":
-                    this.controller.deleteKeyFromAnimationStructure(this.selectedKey);
+                    this.controller.deleteKey(this.selectedKey);
                     this.sheet.setSequences(this.controller.getOpenSequences());
                     this.redraw();
                     break;
                 case "start":
                     this.playbackTime = 0;
-                    this.updateUserInterface();
+                    this.updatePropertyList();
                     break;
                 case "back":
                     this.playbackTime = this.playbackTime -= 1000 / this.animation.fps; // stepsPerSecond;
                     this.playbackTime = Math.max(this.playbackTime, 0);
-                    this.updateUserInterface();
+                    this.updatePropertyList();
                     break;
                 case "play":
                     this.time.set(this.playbackTime);
@@ -2945,12 +2912,12 @@ var Fudge;
                 case "forward":
                     this.playbackTime = this.playbackTime += 1000 / this.animation.fps; // stepsPerSecond;
                     this.playbackTime = Math.min(this.playbackTime, this.animation.totalTime);
-                    this.updateUserInterface();
+                    this.updatePropertyList();
                     break;
                 case "end":
                     this.playbackTime = this.animation.totalTime;
                     this.redraw();
-                    this.updateUserInterface();
+                    this.updatePropertyList();
                     break;
                 default:
                     break;
@@ -2980,11 +2947,11 @@ var Fudge;
                     break;
             }
         };
-        updateUserInterface(_m = null) {
+        updatePropertyList(_m = null) {
             this.redraw();
             if (!_m)
                 _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
-            this.controller.updateAnimationUserInterface(_m);
+            this.controller.updatePropertyList(_m);
             this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph } });
         }
         setTime(_x, _updateDisplay = true) {
@@ -2993,7 +2960,7 @@ var Fudge;
             this.playbackTime = Math.max(0, this.sheet.getTransformedPoint(_x, 0).x);
             this.playbackTime = Math.round(this.playbackTime / ((1000 / this.animation.fps))) * ((1000 / this.animation.fps));
             if (_updateDisplay)
-                this.updateUserInterface(this.cmpAnimator.updateAnimation(this.playbackTime)[0]);
+                this.updatePropertyList(this.cmpAnimator.updateAnimation(this.playbackTime)[0]);
         }
         redraw = () => {
             this.sheet.redraw(this.playbackTime);
@@ -3004,7 +2971,7 @@ var Fudge;
             let m = {};
             [m, t] = this.cmpAnimator.updateAnimation(t);
             this.playbackTime = t;
-            this.updateUserInterface(m);
+            this.updatePropertyList(m);
         };
         randomNameGenerator() {
             let attr = ["red", "blue", "green", "pink", "yellow", "purple", "orange", "fast", "slow", "quick", "boring", "questionable", "king", "queen", "smart", "gold"];
@@ -3028,7 +2995,6 @@ var Fudge;
         canvas;
         mtxTransform;
         mtxTransformInverse;
-        // protected readonly pixelPerValue: number = 100;
         keys = [];
         sequences = [];
         crc2;
@@ -3193,7 +3159,7 @@ var Fudge;
                 //TODO stop using hardcoded values
                 let p = new Path2D;
                 this.labels.push({ label: l, path2D: p });
-                let position = this.animation.labels[l] * this.mtxTransform.scaling.x;
+                let position = this.animation.labels[l] * this.mtxTransform.scaling.x + this.mtxTransform.translation.x;
                 p.moveTo(position - 3, labelDisplayHeight - 28);
                 p.lineTo(position - 3, labelDisplayHeight - 2);
                 p.lineTo(position + 3, labelDisplayHeight - 2);
@@ -3213,7 +3179,7 @@ var Fudge;
             for (let e in this.animation.events) {
                 let p = new Path2D;
                 this.events.push({ event: e, path2D: p });
-                let position = this.animation.events[e] * this.mtxTransform.scaling.x;
+                let position = this.animation.events[e] * this.mtxTransform.scaling.x + this.mtxTransform.translation.x;
                 p.moveTo(position - 3, labelDisplayHeight - 28);
                 p.lineTo(position - 3, labelDisplayHeight - 5);
                 p.lineTo(position, labelDisplayHeight - 2);

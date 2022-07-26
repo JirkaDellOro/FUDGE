@@ -45,8 +45,12 @@
     "ƒ.Animation": {
       "idResource": "Animation|2022-07-26T11:23:41.662Z|33257",
       "name": "NewAnimation",
-      "labels": {},
-      "events": {},
+      "labels": {
+        "questionable-dog": 3483.3333333333335
+      },
+      "events": {
+        "green-cat": 7100.000000000001
+      },
       "fps": 60,
       "animationStructure": {
         "components": {
@@ -232,7 +236,7 @@
                   "ƒ.ComponentTransform": {
                     "local": {
                       "translation": "[0, 0, 0]",
-                      "rotation": "[0, 77.68942260742188, 0]",
+                      "rotation": "[0, 192.4838104248047, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -320,7 +324,7 @@
                         "ƒ.ComponentTransform": {
                           "local": {
                             "translation": "[5, 0, 0]",
-                            "rotation": "[0, 7.643306732177734, 0]",
+                            "rotation": "[0, 673.2797241210938, 0]",
                             "scaling": "[1, 1, 1]"
                           },
                           "Component": {
@@ -340,7 +344,7 @@
                             {
                               "ƒ.ComponentMaterial": {
                                 "sortForAlpha": false,
-                                "clrPrimary": "[1, 1, 1, 1]",
+                                "clrPrimary": "[0, 0, 0, 1]",
                                 "clrSecondary": "[1, 1, 1, 1]",
                                 "pivot": {
                                   "translation": "[0, 0]",
@@ -375,7 +379,7 @@
                                 "local": {
                                   "translation": "[1, 0, 0]",
                                   "rotation": "[0, 0, 0]",
-                                  "scaling": "[1, 1, 1]"
+                                  "scaling": "[0, 0, 0]"
                                 },
                                 "Component": {
                                   "active": true

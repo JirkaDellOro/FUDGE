@@ -38,7 +38,7 @@ namespace Fudge {
     private playbackTime: number;
     private graph: ƒ.Graph;
     private selectedKey: ViewAnimationKey;
-    private attributeList: HTMLDivElement;
+    private propertyList: HTMLDivElement;
     private sheet: ViewAnimationSheet;
     private hover: HTMLSpanElement; // TODO: remove this?
     private time: ƒ.Time = new ƒ.Time();
@@ -57,6 +57,7 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.EXPAND, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.COLLAPSE, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.INPUT, this.hndEvent);
     }
 
     //#region  ContextMenu
@@ -88,7 +89,7 @@ namespace Fudge {
       switch (choice) {
         case CONTEXTMENU.ADD_PROPERTY:
           path = _item["path"];
-          this.controller.addPathToAnimationStructure(path);
+          this.controller.addPath(path);
 
           this.dispatch(EVENT_EDITOR.MODIFY, {});
           break;
@@ -98,7 +99,7 @@ namespace Fudge {
             return;
           
           path = [];
-          while (element !== this.attributeList) {
+          while (element !== this.propertyList) {
             if (element instanceof ƒui.Details) {
               let summaryElement: Element = element.getElementsByTagName("SUMMARY")[0];
               path.unshift(summaryElement.innerHTML);
@@ -111,7 +112,7 @@ namespace Fudge {
 
             element = element.parentElement;
           }
-          this.controller.deletePathFromAnimationStructure(path);
+          this.controller.deletePath(path);
           this.dispatch(EVENT_EDITOR.MODIFY, {});
           return;
       }
@@ -194,9 +195,6 @@ namespace Fudge {
       this.hover.style.color = "white";
       this.hover.style.position = "absolute";
       this.hover.style.display = "none";
-
-      // document.addEventListener("DOMContentLoaded", () => this.updateUserInterface());
-      // this.updateUserInterface();
     }
 
     private hndPointerDown = (_event: PointerEvent): void => {
@@ -239,16 +237,23 @@ namespace Fudge {
           //TODO: rework this
           let animationMutator: ƒ.Mutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
           if (!animationMutator) animationMutator = {};
-          let newAttributeList: HTMLDivElement = ƒui.Generator.createInterfaceFromMutator(animationMutator);
-          this.controller = new ControllerAnimation(this.animation, newAttributeList, animationMutator);
-          this.dom.replaceChild(newAttributeList, this.attributeList);
-          this.attributeList = newAttributeList;
-          this.updateUserInterface();
+          let newPropertyList: HTMLDivElement = ƒui.Generator.createInterfaceFromMutator(animationMutator);
+          this.controller = new ControllerAnimation(this.animation, newPropertyList);
+          this.dom.replaceChild(newPropertyList, this.propertyList);
+          this.propertyList = newPropertyList;
+          this.updatePropertyList();
           break;
         case ƒui.EVENT.EXPAND:
         case ƒui.EVENT.COLLAPSE:
           this.sheet.setSequences(this.controller.getOpenSequences());
           this.redraw();
+          break;
+        case ƒui.EVENT.INPUT:
+          if (_event.target instanceof ƒui.CustomElement) {
+            this.controller.modifyKey(this.playbackTime, _event.target);
+            this.sheet.setSequences(this.controller.getOpenSequences());       
+            this.redraw();
+          }
           break;
       }
     }
@@ -274,10 +279,10 @@ namespace Fudge {
       this.animation = _animation;
       let animationMutator: ƒ.Mutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
       if (!animationMutator) animationMutator = {};
-      this.attributeList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
-      this.controller = new ControllerAnimation(this.animation, this.attributeList, animationMutator);
-      this.dom.appendChild(this.attributeList);
-      this.updateUserInterface();
+      this.propertyList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
+      this.controller = new ControllerAnimation(this.animation, this.propertyList);
+      this.dom.appendChild(this.propertyList);
+      this.updatePropertyList();
       this.sheet.setSequences(this.controller.getOpenSequences());
 
       this.redraw();
@@ -397,23 +402,24 @@ namespace Fudge {
           this.redraw();
           break;
         case "add-key":
-          this.controller.addKeyToAnimationStructure(this.playbackTime);
-          this.sheet.setSequences(this.controller.getOpenSequences());       
-          this.redraw();
+          // TODO: readd this look how it works in unity?
+          // this.controller.addKeyToAnimationStructure(this.playbackTime);
+          // this.sheet.setSequences(this.controller.getOpenSequences());       
+          // this.redraw();
           break;
         case "remove-key":
-          this.controller.deleteKeyFromAnimationStructure(this.selectedKey);
+          this.controller.deleteKey(this.selectedKey);
           this.sheet.setSequences(this.controller.getOpenSequences());       
           this.redraw();
           break;
         case "start":
           this.playbackTime = 0;
-          this.updateUserInterface();
+          this.updatePropertyList();
           break;
         case "back":
           this.playbackTime = this.playbackTime -= 1000 / this.animation.fps; // stepsPerSecond;
           this.playbackTime = Math.max(this.playbackTime, 0);
-          this.updateUserInterface();
+          this.updatePropertyList();
           break;
         case "play":
           this.time.set(this.playbackTime);
@@ -427,12 +433,12 @@ namespace Fudge {
         case "forward":
           this.playbackTime = this.playbackTime += 1000 / this.animation.fps; // stepsPerSecond;
           this.playbackTime = Math.min(this.playbackTime, this.animation.totalTime);
-          this.updateUserInterface();
+          this.updatePropertyList();
           break;
         case "end":
           this.playbackTime = this.animation.totalTime;
           this.redraw();
-          this.updateUserInterface();
+          this.updatePropertyList();
           break;
         default:
 
@@ -466,12 +472,12 @@ namespace Fudge {
       }
     }
 
-    private updateUserInterface(_m: ƒ.Mutator = null): void {
+    private updatePropertyList(_m: ƒ.Mutator = null): void {
       this.redraw();
       if (!_m)
         _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
 
-      this.controller.updateAnimationUserInterface(_m);
+      this.controller.updatePropertyList(_m);
       this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph} });
     }
 
@@ -480,7 +486,7 @@ namespace Fudge {
 
       this.playbackTime = Math.max(0, this.sheet.getTransformedPoint(_x, 0).x);
       this.playbackTime = Math.round(this.playbackTime / ((1000 / this.animation.fps))) * ((1000 / this.animation.fps));
-      if (_updateDisplay) this.updateUserInterface(this.cmpAnimator.updateAnimation(this.playbackTime)[0]);
+      if (_updateDisplay) this.updatePropertyList(this.cmpAnimator.updateAnimation(this.playbackTime)[0]);
     }
 
     private redraw = () => {
@@ -493,7 +499,7 @@ namespace Fudge {
       let m: ƒ.Mutator = {};
       [m, t] = this.cmpAnimator.updateAnimation(t);
       this.playbackTime = t;
-      this.updateUserInterface(m);
+      this.updatePropertyList(m);
     }
 
     private randomNameGenerator(): string {

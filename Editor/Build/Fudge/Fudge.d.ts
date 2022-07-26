@@ -1,8 +1,8 @@
 /// <reference types="../../../node_modules/electron/electron" />
 /// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../../aid/build/fudgeaid" />
-/// <reference types="../../GoldenLayout/golden-layout" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
+/// <reference types="../../GoldenLayout/golden-layout" />
 declare namespace Fudge {
     export type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     type Subclass<T> = {
@@ -227,27 +227,18 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
     class ControllerAnimation {
-        private static propertyColors;
+        private static readonly PROPERTY_COLORS;
         private animation;
-        private domElement;
-        private mutatorForNode;
-        private colorIndex;
-        constructor(_animation: ƒ.Animation, _domElement: HTMLElement, _mutatorForNode: ƒ.Mutator);
-        private static addKeyToAnimationStructure;
-        private static updateUserInterfaceWithMutator;
-        private static addPathToAnimationStructure;
-        private static deletePathFromAnimationStructure;
-        private static deleteEmptyPathsFromAnimationStructure;
-        private static getOpenSequences;
-        updateAnimationUserInterface(_mutator: ƒ.Mutator): void;
-        addKeyToAnimationStructure(_time: number): void;
-        deleteKeyFromAnimationStructure(_key: ViewAnimationKey): void;
-        addPathToAnimationStructure(_path: string[]): void;
-        deletePathFromAnimationStructure(_path: string[]): void;
+        private propertyList;
+        constructor(_animation: ƒ.Animation, _domElement: HTMLElement);
+        updatePropertyList(_mutator: ƒ.Mutator): void;
+        modifyKey(_time: number, _element: ƒui.CustomElement): void;
+        deleteKey(_key: ViewAnimationKey): void;
+        addPath(_path: string[]): void;
+        deletePath(_path: string[]): void;
         getOpenSequences(): ViewAnimationSequence[];
-        private updatePropertyColors;
-        private getNextColor;
         private hndKey;
     }
 }
@@ -553,7 +544,7 @@ declare namespace Fudge {
         private playbackTime;
         private graph;
         private selectedKey;
-        private attributeList;
+        private propertyList;
         private sheet;
         private hover;
         private time;
@@ -573,7 +564,7 @@ declare namespace Fudge {
         private fillToolbar;
         private hndToolbarClick;
         private hndToolbarChange;
-        private updateUserInterface;
+        private updatePropertyList;
         private setTime;
         private redraw;
         private updateAnimation;

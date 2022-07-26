@@ -14,8 +14,6 @@ namespace Fudge {
     public canvas: HTMLCanvasElement;
     protected mtxTransform: ƒ.Matrix3x3;
     protected mtxTransformInverse: ƒ.Matrix3x3;
-    
-    // protected readonly pixelPerValue: number = 100;
     protected keys: ViewAnimationKey[] = [];
     protected sequences: ViewAnimationSequence[] = [];
     protected crc2: CanvasRenderingContext2D;
@@ -197,7 +195,6 @@ namespace Fudge {
       this.crc2.stroke(cursor);
     }
 
-
     private drawEventsAndLabels(): void {
       let maxDistance: number = 10000;
       let labelDisplayHeight: number = 30 + 50;
@@ -216,7 +213,7 @@ namespace Fudge {
         //TODO stop using hardcoded values
         let p: Path2D = new Path2D;
         this.labels.push({ label: l, path2D: p });
-        let position: number = this.animation.labels[l] * this.mtxTransform.scaling.x;
+        let position: number = this.animation.labels[l] * this.mtxTransform.scaling.x + this.mtxTransform.translation.x;
         p.moveTo(position - 3, labelDisplayHeight - 28);
         p.lineTo(position - 3, labelDisplayHeight - 2);
         p.lineTo(position + 3, labelDisplayHeight - 2);
@@ -236,7 +233,7 @@ namespace Fudge {
       for (let e in this.animation.events) {
         let p: Path2D = new Path2D;
         this.events.push({ event: e, path2D: p });
-        let position: number = this.animation.events[e] * this.mtxTransform.scaling.x;
+        let position: number = this.animation.events[e] * this.mtxTransform.scaling.x + this.mtxTransform.translation.x;
         p.moveTo(position - 3, labelDisplayHeight - 28);
         p.lineTo(position - 3, labelDisplayHeight - 5);
         p.lineTo(position, labelDisplayHeight - 2);
