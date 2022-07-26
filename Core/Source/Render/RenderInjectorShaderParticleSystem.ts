@@ -102,6 +102,8 @@ namespace FudgeCore {
     }
 
     private static renameVariables(_data: ParticleEffectData): ParticleEffectData {
+      if (!_data.variables) return _data;
+
       let variableMap: {[key: string]: string} = {};
       Object.keys(_data.variables).forEach( (_variableName, _index) => {
         if (RenderInjectorShaderParticleSystem.PREDEFINED_VARIABLES[_variableName])
@@ -134,6 +136,8 @@ namespace FudgeCore {
     } 
 
     private static generateVariables(_variables: {[name: string]: ExpressionData}): string {
+      if (!_variables) return "";
+      
       return Object.entries(_variables)
         .map( ([_variableName, _expressionTree]): [string, string] => [_variableName, RenderInjectorShaderParticleSystem.generateExpression(_expressionTree)] )
         .map( ([_variableName, _code]): string => `float ${_variableName} = ${_code};` )
