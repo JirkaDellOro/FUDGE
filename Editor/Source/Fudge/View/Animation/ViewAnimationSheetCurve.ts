@@ -6,71 +6,72 @@ namespace Fudge {
    * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
   export class ViewAnimationSheetCurve extends ViewAnimationSheet {
-    private readonly pixelPerValue: number = 100;
+    // private readonly pixelPerValue: number = 100;
 
     public drawTimeline(): void {
       this.drawYScale();
       super.drawTimeline();
     }
 
-    protected drawSequence(_sequence: ƒ.AnimationSequence, _color: string): void {
-      if (_sequence.length <= 0) return;
+    public drawCurves(_sequences: ViewAnimationSequence[]): void {
+      if (_sequences.length == 0) return;
+      
+      for (const sequence of _sequences) {
+        let data: ƒ.AnimationSequence = sequence.sequence;
+        this.crc2.beginPath();
+        this.crc2.strokeStyle = sequence.color;
 
-      let rect: DOMRect | ClientRect = new DOMRect(1, 1, 20, 20); //_input.getBoundingClientRect();
-      let height: number = rect.height / this.transform.scaling.y;
-      let width: number = rect.height / this.transform.scaling.x;
-      // let line: Path2D = new Path2D();
-      // line.moveTo(0, _sequence.getKey(0).Value);
+        for (let i: number = 0; i < data.length; i++) {
+          const key: ƒ.AnimationKey = data.getKey(i);
+          const nextKey: ƒ.AnimationKey = data.getKey(i + 1);
 
-      //TODO: stop recreating the sequence element all the time
-      //TODO: get color from input element or former sequence element.
-      // let seq: ViewAnimationSequence = { color: this.randomColor(), element: _input, sequence: _sequence };
-      let seq: ViewAnimationSequence = {
-        color: _color,
-        sequence: _sequence
-      };
-      this.sequences.push(seq);
-      this.crc2.beginPath();
-      this.crc2.strokeStyle = seq.color;
-      for (let i: number = 0; i < _sequence.length; i++) {
-        let key: ƒ.AnimationKey = _sequence.getKey(i);
-        this.keys.push({
-          key: key,
-          path2D: this.drawKey(
-            key.Time,
-            -key.Value * this.pixelPerValue,
-            height / 2,
-            width / 2,
-            seq.color
-          ),
-          sequence: seq
-        });
-        if (i < _sequence.length - 1) {
-          let bezierPoints: { x: number; y: number }[] = this.getBezierPoints(key.functionOut, key, _sequence.getKey(i + 1));
-          this.crc2.moveTo(bezierPoints[0].x, -bezierPoints[0].y * this.pixelPerValue);
-          this.crc2.bezierCurveTo(
-            bezierPoints[1].x, -bezierPoints[1].y * this.pixelPerValue,
-            bezierPoints[2].x, -bezierPoints[2].y * this.pixelPerValue,
-            bezierPoints[3].x, -bezierPoints[3].y * this.pixelPerValue
-          );
+          if (nextKey != null) {
+            let bezierPoints: { x: number; y: number }[] = this.getBezierPoints(key.functionOut, key, nextKey);
+            this.crc2.moveTo(bezierPoints[0].x, -bezierPoints[0].y * this.pixelPerValue);
+            this.crc2.bezierCurveTo(
+              bezierPoints[1].x, -bezierPoints[1].y * this.pixelPerValue,
+              bezierPoints[2].x, -bezierPoints[2].y * this.pixelPerValue,
+              bezierPoints[3].x, -bezierPoints[3].y * this.pixelPerValue
+            );
+          }
         }
-        // line.lineTo(k.Time, -k.Value);
+
+        this.crc2.stroke()
       }
-      // line.lineTo(
-      //   this.view.animation.totalTime,
-      //   _sequence.getKey(_sequence.length - 1).Value
-      // );
-      this.crc2.stroke();
     }
 
-    protected drawKey(
-      _x: number,
-      _y: number,
-      _h: number,
-      _w: number,
-      _c: string
-    ): Path2D {
-      return super.drawKey(_x, _y, _h, _w, _c);
+    protected drawSequence(_sequence: ƒ.AnimationSequence, _color: string): void {
+      // if (_sequence.length <= 0) return;
+
+      // let height: number = 20 / this.transform.scaling.y;
+      // let width: number = 20 / this.transform.scaling.x;
+
+      // this.crc2.beginPath();
+      // this.crc2.strokeStyle = seq.color;
+      // for (let i: number = 0; i < _sequence.length; i++) {
+      //   let key: ƒ.AnimationKey = _sequence.getKey(i);
+      //   this.keys.push({
+      //     key: key,
+      //     path2D: this.drawKey(
+      //       key.Time,
+      //       -key.Value * this.pixelPerValue,
+      //       height / 2,
+      //       width / 2,
+      //       seq.color
+      //     ),
+      //     sequence: seq
+      //   });
+      //   if (i < _sequence.length - 1) {
+      //     let bezierPoints: { x: number; y: number }[] = this.getBezierPoints(key.functionOut, key, _sequence.getKey(i + 1));
+      //     this.crc2.moveTo(bezierPoints[0].x, -bezierPoints[0].y * this.pixelPerValue);
+      //     this.crc2.bezierCurveTo(
+      //       bezierPoints[1].x, -bezierPoints[1].y * this.pixelPerValue,
+      //       bezierPoints[2].x, -bezierPoints[2].y * this.pixelPerValue,
+      //       bezierPoints[3].x, -bezierPoints[3].y * this.pixelPerValue
+      //     );
+      //   }
+      // }
+      // this.crc2.stroke();
     }
 
     private drawYScale(): void {

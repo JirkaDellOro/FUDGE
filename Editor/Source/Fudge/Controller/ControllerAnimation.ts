@@ -15,7 +15,7 @@ namespace Fudge {
     private domElement: HTMLElement;
     private mutatorForNode: ƒ.Mutator;
 
-    public colorIndex: number = 0;
+    private colorIndex: number = 0;
 
     public constructor(_animation: ƒ.Animation, _domElement: HTMLElement, _mutatorForNode: ƒ.Mutator) {
       this.animation = _animation;
@@ -102,7 +102,7 @@ namespace Fudge {
       return _structure;
     }
 
-    private static getOpenSequences(_domElement: HTMLElement, _animationStructure: ƒ.AnimationStructure, _sequences: ƒ.AnimationSequence[]): void {
+    private static getOpenSequences(_domElement: HTMLElement, _animationStructure: ƒ.AnimationStructure, _sequences: ViewAnimationSequence[]): void {
       for (const property in _animationStructure) {
         let element: HTMLElement = ƒui.Controller.findChildElementByKey(_domElement, property);
         if (element == null || (element instanceof ƒui.Details && !element.open))
@@ -110,7 +110,10 @@ namespace Fudge {
 
         let sequence: ƒ.AnimationStructure | ƒ.AnimationSequence = _animationStructure[property];
         if (sequence instanceof ƒ.AnimationSequence) {
-          _sequences.push(sequence);
+          _sequences.push({
+            color: element.style.getPropertyValue("--color-animation-property"),
+            sequence: sequence
+          });
 
         } else {
           ControllerAnimation.getOpenSequences(element, <ƒ.AnimationStructure>_animationStructure[property], _sequences);
@@ -122,7 +125,7 @@ namespace Fudge {
       this.mutatorForNode = _mutator;
       ControllerAnimation.updateUserInterfaceWithMutator(this.domElement, _mutator);
       this.colorIndex = 0;
-      this.updatePropertyColors(this.domElement, _mutator);
+      this.updatePropertyColors(this.domElement, this.animation.animationStructure);
     }
 
     public addKeyToAnimationStructure(_time: number): void {
@@ -145,27 +148,27 @@ namespace Fudge {
       ControllerAnimation.deleteEmptyPathsFromAnimationStructure(this.animation.animationStructure);
     }
 
-    public getOpenSequences(): ƒ.AnimationSequence[] {
-      let sequences: ƒ.AnimationSequence[] = [];
+    public getOpenSequences(): ViewAnimationSequence[] {
+      let sequences: ViewAnimationSequence[] = [];
       ControllerAnimation.getOpenSequences(this.domElement, this.animation.animationStructure, sequences);
       return sequences;
     }
 
-    private updatePropertyColors(_domElement: HTMLElement, _mutator: ƒ.Mutator): void {
-      for (const property in _mutator) {
+    private updatePropertyColors(_domElement: HTMLElement, _animationStructure: ƒ.AnimationStructure): void {
+      for (const property in _animationStructure) {
         let element: ƒui.CustomElement = <ƒui.CustomElement>ƒui.Controller.findChildElementByKey(_domElement, property);
-        if (!element || (element instanceof ƒui.Details && !element.open))
+        if (!element || (element instanceof ƒui.Details && !element.isExpanded))
           continue;
         
         if (element instanceof ƒui.CustomElement && element != document.activeElement) {
           element.style.setProperty("--color-animation-property", this.getNextColor());
         } else {
-          this.updatePropertyColors(element, _mutator[property]);
+          this.updatePropertyColors(element, <ƒ.AnimationStructure>_animationStructure[property]);
         }
       }
     }
 
-    public getNextColor(): string {
+    private getNextColor(): string {
       let color: string = ControllerAnimation.propertyColors[this.colorIndex];
       this.colorIndex = (this.colorIndex + 1) % ControllerAnimation.propertyColors.length;
       return color;

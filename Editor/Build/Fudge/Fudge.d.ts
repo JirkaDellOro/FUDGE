@@ -232,7 +232,7 @@ declare namespace Fudge {
         private animation;
         private domElement;
         private mutatorForNode;
-        colorIndex: number;
+        private colorIndex;
         constructor(_animation: ƒ.Animation, _domElement: HTMLElement, _mutatorForNode: ƒ.Mutator);
         private static addKeyToAnimationStructure;
         private static updateUserInterfaceWithMutator;
@@ -245,9 +245,9 @@ declare namespace Fudge {
         deleteKeyFromAnimationStructure(_key: ViewAnimationKey): void;
         addPathToAnimationStructure(_path: string[]): void;
         deletePathFromAnimationStructure(_path: string[]): void;
-        getOpenSequences(): ƒ.AnimationSequence[];
+        getOpenSequences(): ViewAnimationSequence[];
         private updatePropertyColors;
-        getNextColor(): string;
+        private getNextColor;
         private hndKey;
     }
 }
@@ -589,6 +589,7 @@ declare namespace Fudge {
     abstract class ViewAnimationSheet {
         canvas: HTMLCanvasElement;
         transform: ƒ.Matrix3x3;
+        protected readonly pixelPerValue: number;
         protected keys: ViewAnimationKey[];
         protected sequences: ViewAnimationSequence[];
         protected crc2: CanvasRenderingContext2D;
@@ -602,14 +603,16 @@ declare namespace Fudge {
         protected get dom(): HTMLElement;
         protected get toolbar(): HTMLDivElement;
         protected get controller(): ControllerAnimation;
+        setSequences(_sequences: ViewAnimationSequence[]): void;
         redraw(_time?: number): void;
         drawTimeline(): void;
         drawCursor(_time: number): void;
+        drawKeys(_keys: ViewAnimationKey[]): void;
         getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent;
         getTransformedPoint(_x: number, _y: number): ƒ.Vector2;
         protected abstract drawSequence(_sequence: ƒ.AnimationSequence, _color: string): void;
-        protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
-        private drawSequences;
+        protected drawKey(_key: ViewAnimationKey): void;
+        private generateKeyPath;
         private drawEventsAndLabels;
         private hndPointerDown;
         private hndPointerMove;
@@ -623,10 +626,9 @@ declare namespace Fudge {
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimationSheetCurve extends ViewAnimationSheet {
-        private readonly pixelPerValue;
         drawTimeline(): void;
+        drawCurves(_sequences: ViewAnimationSequence[]): void;
         protected drawSequence(_sequence: ƒ.AnimationSequence, _color: string): void;
-        protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
         private drawYScale;
         private randomColor;
         private getBezierPoints;

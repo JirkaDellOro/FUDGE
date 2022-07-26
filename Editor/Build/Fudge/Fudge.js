@@ -985,7 +985,10 @@ var Fudge;
                     continue;
                 let sequence = _animationStructure[property];
                 if (sequence instanceof ƒ.AnimationSequence) {
-                    _sequences.push(sequence);
+                    _sequences.push({
+                        color: element.style.getPropertyValue("--color-animation-property"),
+                        sequence: sequence
+                    });
                 }
                 else {
                     ControllerAnimation.getOpenSequences(element, _animationStructure[property], _sequences);
@@ -1019,16 +1022,16 @@ var Fudge;
             ControllerAnimation.getOpenSequences(this.domElement, this.animation.animationStructure, sequences);
             return sequences;
         }
-        updatePropertyColors(_domElement, _mutator) {
-            for (const property in _mutator) {
+        updatePropertyColors(_domElement, _animationStructure) {
+            for (const property in _animationStructure) {
                 let element = ƒui.Controller.findChildElementByKey(_domElement, property);
-                if (!element || (element instanceof ƒui.Details && !element.open))
+                if (!element || (element instanceof ƒui.Details && !element.isExpanded))
                     continue;
                 if (element instanceof ƒui.CustomElement && element != document.activeElement) {
                     element.style.setProperty("--color-animation-property", this.getNextColor());
                 }
                 else {
-                    this.updatePropertyColors(element, _mutator[property]);
+                    this.updatePropertyColors(element, _animationStructure[property]);
                 }
             }
         }
@@ -2795,6 +2798,8 @@ var Fudge;
             this.attributeList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
             this.controller = new Fudge.ControllerAnimation(this.animation, this.attributeList, animationMutator);
             this.dom.appendChild(this.attributeList);
+            this.updateUserInterface();
+            this.sheet.setSequences(this.controller.getOpenSequences());
             this.redraw();
         }
         hndSelect = (_event) => {
@@ -3008,6 +3013,7 @@ var Fudge;
         canvas;
         // TODO: move transform to ViewAnimation so it can be shared bewtween Dope and Curve
         transform;
+        pixelPerValue = 100;
         keys = [];
         sequences = [];
         crc2;
@@ -3042,6 +3048,23 @@ var Fudge;
         get controller() {
             return this.view.controller;
         }
+        setSequences(_sequences) {
+            this.sequences = _sequences;
+            let keyHeight = 20 / this.transform.scaling.y;
+            let keyWidth = 20 / this.transform.scaling.x;
+            this.keys = _sequences.flatMap((_sequence) => {
+                let keys = [];
+                for (let i = 0; i < _sequence.sequence.length; i++) {
+                    let key = _sequence.sequence.getKey(i);
+                    keys.push({
+                        key: key,
+                        path2D: this.generateKeyPath(key.Time, -key.Value * this.pixelPerValue, keyHeight / 2, keyWidth / 2),
+                        sequence: _sequence
+                    });
+                }
+                return keys;
+            });
+        }
         redraw(_time) {
             if (!this.animation)
                 return;
@@ -3056,7 +3079,9 @@ var Fudge;
             translation.x = Math.min(0, translation.x);
             this.transform.translation = translation;
             this.crc2.setTransform(this.transform.scaling.x, 0, 0, this.transform.scaling.y, this.transform.translation.x, this.transform.translation.y);
-            this.drawSequences();
+            this.drawKeys(this.keys);
+            if (this instanceof Fudge.ViewAnimationSheetCurve)
+                this.drawCurves(this.sequences);
             this.drawTimeline();
             this.drawEventsAndLabels();
             this.drawCursor(this.time);
@@ -3109,12 +3134,13 @@ var Fudge;
             this.crc2.stroke(cursor);
             this.crc2.fill(cursor);
         }
-        // public drawKeys(): void {
-        //   //TODO: stop recreating the sequence elements all the time
-        //   this.sequences = [];
-        //   this.keys = [];
-        //   this.drawStructure(this.animation.animationStructure);
-        // }
+        drawKeys(_keys) {
+            if (_keys.length == 0)
+                return;
+            for (const key of _keys) {
+                this.drawKey(key);
+            }
+        }
         getObjectAtPoint(_x, _y) {
             for (let l of this.labels) {
                 if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
@@ -3142,26 +3168,23 @@ var Fudge;
             vector.y = _y / this.transform.scaling.y - this.transform.translation.y / this.transform.scaling.y;
             return vector;
         }
-        drawKey(_x, _y, _h, _w, _c) {
-            // console.log(`x: ${_x} y: ${_y} h: ${_h} w: ${_w} c: ${_c}`);
+        drawKey(_key) {
+            let color = _key.sequence.color;
+            let path = _key.path2D;
+            this.crc2.fillStyle = color;
+            this.crc2.strokeStyle = color;
+            this.crc2.lineWidth = 1;
+            this.crc2.fill(path);
+            this.crc2.stroke(path);
+        }
+        generateKeyPath(_x, _y, _h, _w) {
             let key = new Path2D();
             key.moveTo(_x - _w, _y);
             key.lineTo(_x, _y + _h);
             key.lineTo(_x + _w, _y);
             key.lineTo(_x, _y - _h);
             key.closePath();
-            this.crc2.fillStyle = _c;
-            this.crc2.strokeStyle = "white";
-            this.crc2.lineWidth = 1;
-            this.crc2.fill(key);
-            this.crc2.stroke(key);
             return key;
-        }
-        drawSequences() {
-            this.controller.colorIndex = 0;
-            for (const sequence of this.controller.getOpenSequences()) {
-                this.drawSequence(sequence, this.controller.getNextColor());
-            }
         }
         drawEventsAndLabels() {
             let maxDistance = 10000;
@@ -3243,51 +3266,60 @@ var Fudge;
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimationSheetCurve extends Fudge.ViewAnimationSheet {
-        pixelPerValue = 100;
+        // private readonly pixelPerValue: number = 100;
         drawTimeline() {
             this.drawYScale();
             super.drawTimeline();
         }
-        drawSequence(_sequence, _color) {
-            if (_sequence.length <= 0)
+        drawCurves(_sequences) {
+            if (_sequences.length == 0)
                 return;
-            let rect = new DOMRect(1, 1, 20, 20); //_input.getBoundingClientRect();
-            let height = rect.height / this.transform.scaling.y;
-            let width = rect.height / this.transform.scaling.x;
-            // let line: Path2D = new Path2D();
-            // line.moveTo(0, _sequence.getKey(0).Value);
-            //TODO: stop recreating the sequence element all the time
-            //TODO: get color from input element or former sequence element.
-            // let seq: ViewAnimationSequence = { color: this.randomColor(), element: _input, sequence: _sequence };
-            let seq = {
-                color: _color,
-                sequence: _sequence
-            };
-            this.sequences.push(seq);
-            this.crc2.beginPath();
-            this.crc2.strokeStyle = seq.color;
-            for (let i = 0; i < _sequence.length; i++) {
-                let key = _sequence.getKey(i);
-                this.keys.push({
-                    key: key,
-                    path2D: this.drawKey(key.Time, -key.Value * this.pixelPerValue, height / 2, width / 2, seq.color),
-                    sequence: seq
-                });
-                if (i < _sequence.length - 1) {
-                    let bezierPoints = this.getBezierPoints(key.functionOut, key, _sequence.getKey(i + 1));
-                    this.crc2.moveTo(bezierPoints[0].x, -bezierPoints[0].y * this.pixelPerValue);
-                    this.crc2.bezierCurveTo(bezierPoints[1].x, -bezierPoints[1].y * this.pixelPerValue, bezierPoints[2].x, -bezierPoints[2].y * this.pixelPerValue, bezierPoints[3].x, -bezierPoints[3].y * this.pixelPerValue);
+            for (const sequence of _sequences) {
+                let data = sequence.sequence;
+                this.crc2.beginPath();
+                this.crc2.strokeStyle = sequence.color;
+                for (let i = 0; i < data.length; i++) {
+                    const key = data.getKey(i);
+                    const nextKey = data.getKey(i + 1);
+                    if (nextKey != null) {
+                        let bezierPoints = this.getBezierPoints(key.functionOut, key, nextKey);
+                        this.crc2.moveTo(bezierPoints[0].x, -bezierPoints[0].y * this.pixelPerValue);
+                        this.crc2.bezierCurveTo(bezierPoints[1].x, -bezierPoints[1].y * this.pixelPerValue, bezierPoints[2].x, -bezierPoints[2].y * this.pixelPerValue, bezierPoints[3].x, -bezierPoints[3].y * this.pixelPerValue);
+                    }
                 }
-                // line.lineTo(k.Time, -k.Value);
+                this.crc2.stroke();
             }
-            // line.lineTo(
-            //   this.view.animation.totalTime,
-            //   _sequence.getKey(_sequence.length - 1).Value
-            // );
-            this.crc2.stroke();
         }
-        drawKey(_x, _y, _h, _w, _c) {
-            return super.drawKey(_x, _y, _h, _w, _c);
+        drawSequence(_sequence, _color) {
+            // if (_sequence.length <= 0) return;
+            // let height: number = 20 / this.transform.scaling.y;
+            // let width: number = 20 / this.transform.scaling.x;
+            // this.crc2.beginPath();
+            // this.crc2.strokeStyle = seq.color;
+            // for (let i: number = 0; i < _sequence.length; i++) {
+            //   let key: ƒ.AnimationKey = _sequence.getKey(i);
+            //   this.keys.push({
+            //     key: key,
+            //     path2D: this.drawKey(
+            //       key.Time,
+            //       -key.Value * this.pixelPerValue,
+            //       height / 2,
+            //       width / 2,
+            //       seq.color
+            //     ),
+            //     sequence: seq
+            //   });
+            //   if (i < _sequence.length - 1) {
+            //     let bezierPoints: { x: number; y: number }[] = this.getBezierPoints(key.functionOut, key, _sequence.getKey(i + 1));
+            //     this.crc2.moveTo(bezierPoints[0].x, -bezierPoints[0].y * this.pixelPerValue);
+            //     this.crc2.bezierCurveTo(
+            //       bezierPoints[1].x, -bezierPoints[1].y * this.pixelPerValue,
+            //       bezierPoints[2].x, -bezierPoints[2].y * this.pixelPerValue,
+            //       bezierPoints[3].x, -bezierPoints[3].y * this.pixelPerValue
+            //     );
+            //   }
+            // }
+            // this.crc2.stroke();
         }
         drawYScale() {
             this.crc2.resetTransform();

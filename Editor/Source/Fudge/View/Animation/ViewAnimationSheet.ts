@@ -9,7 +9,8 @@ namespace Fudge {
     public canvas: HTMLCanvasElement;
     // TODO: move transform to ViewAnimation so it can be shared bewtween Dope and Curve
     public transform: ƒ.Matrix3x3;
-
+    
+    protected readonly pixelPerValue: number = 100;
     protected keys: ViewAnimationKey[] = [];
     protected sequences: ViewAnimationSequence[] = [];
     protected crc2: CanvasRenderingContext2D;
@@ -53,6 +54,29 @@ namespace Fudge {
       return this.view.controller;
     }
 
+    public setSequences(_sequences: ViewAnimationSequence[]): void {
+      this.sequences = _sequences;
+      let keyHeight: number = 20 / this.transform.scaling.y;
+      let keyWidth: number = 20 / this.transform.scaling.x;
+      this.keys = _sequences.flatMap( (_sequence) => {
+        let keys: ViewAnimationKey[] = [];
+        for (let i: number = 0; i < _sequence.sequence.length; i++) {
+          let key: ƒ.AnimationKey = _sequence.sequence.getKey(i);
+          keys.push({
+            key: key,
+            path2D: this.generateKeyPath(
+              key.Time,
+              -key.Value * this.pixelPerValue,
+              keyHeight / 2,
+              keyWidth / 2
+            ),
+            sequence: _sequence
+          });
+        }
+        return keys;
+      });
+    }
+
     public redraw(_time?: number): void {
       if (!this.animation) return;
       if (_time != undefined) this.time = _time;
@@ -68,7 +92,9 @@ namespace Fudge {
       this.transform.translation = translation;
       this.crc2.setTransform(this.transform.scaling.x, 0, 0, this.transform.scaling.y, this.transform.translation.x, this.transform.translation.y);
       
-      this.drawSequences();
+      this.drawKeys(this.keys);
+      if (this instanceof ViewAnimationSheetCurve)
+        this.drawCurves(this.sequences);
       this.drawTimeline();
       this.drawEventsAndLabels();
       this.drawCursor(this.time);
@@ -134,12 +160,13 @@ namespace Fudge {
       this.crc2.fill(cursor);
     }
 
-    // public drawKeys(): void {
-    //   //TODO: stop recreating the sequence elements all the time
-    //   this.sequences = [];
-    //   this.keys = [];
-    //   this.drawStructure(this.animation.animationStructure);
-    // }
+    public drawKeys(_keys: ViewAnimationKey[]): void {
+      if (_keys.length == 0) return;
+
+      for (const key of _keys) {
+        this.drawKey(key);
+      }
+    }
 
     public getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
       for (let l of this.labels) {
@@ -172,8 +199,6 @@ namespace Fudge {
       return vector;
     }
 
-    
-
     // protected drawStructure(_animationStructure: ƒ.AnimationStructure): void {
     //   for (const property in _animationStructure) {
     //     let structureOrSequence: ƒ.AnimationStructure | ƒ.AnimationSequence = _animationStructure[property];
@@ -187,28 +212,26 @@ namespace Fudge {
 
     protected abstract drawSequence(_sequence: ƒ.AnimationSequence, _color: string): void;
 
-    protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D {
-      // console.log(`x: ${_x} y: ${_y} h: ${_h} w: ${_w} c: ${_c}`);
+
+
+    protected drawKey(_key: ViewAnimationKey): void {
+      let color: string = _key.sequence.color;
+      let path: Path2D = _key.path2D;
+      this.crc2.fillStyle = color;
+      this.crc2.strokeStyle = color;
+      this.crc2.lineWidth = 1;
+      this.crc2.fill(path);
+      this.crc2.stroke(path);
+    }
+
+    private generateKeyPath(_x: number, _y: number, _h: number, _w: number): Path2D {
       let key: Path2D = new Path2D();
       key.moveTo(_x - _w, _y);
       key.lineTo(_x, _y + _h);
       key.lineTo(_x + _w, _y);
       key.lineTo(_x, _y - _h);
       key.closePath();
-
-      this.crc2.fillStyle = _c;
-      this.crc2.strokeStyle = "white";
-      this.crc2.lineWidth = 1;
-      this.crc2.fill(key);
-      this.crc2.stroke(key);
       return key;
-    }
-
-    private drawSequences(): void {
-      this.controller.colorIndex = 0;
-      for (const sequence of this.controller.getOpenSequences()) {
-        this.drawSequence(sequence, this.controller.getNextColor());
-      }
     }
 
     private drawEventsAndLabels(): void {

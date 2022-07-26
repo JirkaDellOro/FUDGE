@@ -270,6 +270,8 @@ namespace Fudge {
       this.attributeList = ƒui.Generator.createInterfaceFromMutator(animationMutator);
       this.controller = new ControllerAnimation(this.animation, this.attributeList, animationMutator);
       this.dom.appendChild(this.attributeList);
+      this.updateUserInterface();
+      this.sheet.setSequences(this.controller.getOpenSequences());
 
       this.redraw();
     }
