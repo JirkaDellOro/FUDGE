@@ -6,17 +6,11 @@ namespace Fudge {
    * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
   export class ViewAnimationSheetCurve extends ViewAnimationSheet {
-    // private readonly pixelPerValue: number = 100;
-
-    public drawTimeline(): void {
-      this.drawYScale();
-      super.drawTimeline();
-    }
-
-    public drawCurves(_sequences: ViewAnimationSequence[]): void {
-      if (_sequences.length == 0) return;
-      
-      for (const sequence of _sequences) {
+    private static readonly PIXEL_PER_VALUE: number = 100;
+    private static readonly MINIMUM_PIXEL_PER_STEP: number = 30;
+    
+    public drawCurves(): void {
+      for (const sequence of this.sequences) {
         let data: ƒ.AnimationSequence = sequence.sequence;
         this.crc2.beginPath();
         this.crc2.strokeStyle = sequence.color;
@@ -27,62 +21,27 @@ namespace Fudge {
 
           if (nextKey != null) {
             let bezierPoints: { x: number; y: number }[] = this.getBezierPoints(key.functionOut, key, nextKey);
-            this.crc2.moveTo(bezierPoints[0].x, -bezierPoints[0].y * this.pixelPerValue);
+            this.crc2.moveTo(bezierPoints[0].x, -bezierPoints[0].y * ViewAnimationSheetCurve.PIXEL_PER_VALUE);
             this.crc2.bezierCurveTo(
-              bezierPoints[1].x, -bezierPoints[1].y * this.pixelPerValue,
-              bezierPoints[2].x, -bezierPoints[2].y * this.pixelPerValue,
-              bezierPoints[3].x, -bezierPoints[3].y * this.pixelPerValue
+              bezierPoints[1].x, -bezierPoints[1].y * ViewAnimationSheetCurve.PIXEL_PER_VALUE,
+              bezierPoints[2].x, -bezierPoints[2].y * ViewAnimationSheetCurve.PIXEL_PER_VALUE,
+              bezierPoints[3].x, -bezierPoints[3].y * ViewAnimationSheetCurve.PIXEL_PER_VALUE
             );
           }
         }
 
-        this.crc2.stroke()
+        this.crc2.stroke();
       }
     }
 
-    protected drawSequence(_sequence: ƒ.AnimationSequence, _color: string): void {
-      // if (_sequence.length <= 0) return;
-
-      // let height: number = 20 / this.transform.scaling.y;
-      // let width: number = 20 / this.transform.scaling.x;
-
-      // this.crc2.beginPath();
-      // this.crc2.strokeStyle = seq.color;
-      // for (let i: number = 0; i < _sequence.length; i++) {
-      //   let key: ƒ.AnimationKey = _sequence.getKey(i);
-      //   this.keys.push({
-      //     key: key,
-      //     path2D: this.drawKey(
-      //       key.Time,
-      //       -key.Value * this.pixelPerValue,
-      //       height / 2,
-      //       width / 2,
-      //       seq.color
-      //     ),
-      //     sequence: seq
-      //   });
-      //   if (i < _sequence.length - 1) {
-      //     let bezierPoints: { x: number; y: number }[] = this.getBezierPoints(key.functionOut, key, _sequence.getKey(i + 1));
-      //     this.crc2.moveTo(bezierPoints[0].x, -bezierPoints[0].y * this.pixelPerValue);
-      //     this.crc2.bezierCurveTo(
-      //       bezierPoints[1].x, -bezierPoints[1].y * this.pixelPerValue,
-      //       bezierPoints[2].x, -bezierPoints[2].y * this.pixelPerValue,
-      //       bezierPoints[3].x, -bezierPoints[3].y * this.pixelPerValue
-      //     );
-      //   }
-      // }
-      // this.crc2.stroke();
-    }
-
-    private drawYScale(): void {
+    public drawScale(): void {
       this.crc2.resetTransform();
-      
-      this.crc2.strokeStyle = "blue";
+      this.crc2.strokeStyle = "grey";
       this.crc2.lineWidth = 1;
 
       let centerLine: Path2D = new Path2D();
-      centerLine.moveTo(0, this.transform.translation.y);
-      centerLine.lineTo(this.canvas.width, this.transform.translation.y);
+      centerLine.moveTo(0, this.mtxTransform.translation.y);
+      centerLine.lineTo(this.canvas.width, this.mtxTransform.translation.y);
       this.crc2.stroke(centerLine);
 
       this.crc2.fillStyle = "grey";
@@ -90,20 +49,19 @@ namespace Fudge {
       this.crc2.textBaseline = "bottom";
       this.crc2.textAlign = "right";
 
-      const minimumPixelPerStep: number = 30;
-      let pixelPerStep: number = this.pixelPerValue * this.transform.scaling.y;
+      let pixelPerStep: number = ViewAnimationSheetCurve.PIXEL_PER_VALUE * this.mtxTransform.scaling.y;
       let valuePerStep: number = 1;
       let stepScaleFactor: number = Math.max(
-        Math.pow(2, Math.ceil(Math.log2(minimumPixelPerStep / pixelPerStep))), 
+        Math.pow(2, Math.ceil(Math.log2(ViewAnimationSheetCurve.MINIMUM_PIXEL_PER_STEP / pixelPerStep))), 
         1);
       pixelPerStep *= stepScaleFactor;
       valuePerStep *= stepScaleFactor;
 
       let steps: number = 1 + this.canvas.height / pixelPerStep;
-      let stepOffset: number = Math.floor(-this.transform.translation.y / pixelPerStep);
+      let stepOffset: number = Math.floor(-this.mtxTransform.translation.y / pixelPerStep);
       for (let i: number = stepOffset; i < steps + stepOffset; i++) {
         let stepLine: Path2D = new Path2D();
-        let y: number = (i * pixelPerStep + this.transform.translation.y);
+        let y: number = (i * pixelPerStep + this.mtxTransform.translation.y);
         stepLine.moveTo(0, y);
         // TODO: refine the display
         if (valuePerStep > 1 && i % 5 == 0 || valuePerStep == 1) {
@@ -122,8 +80,24 @@ namespace Fudge {
       }
     }
 
-    private randomColor(): string {
-      return "hsl(" + Math.random() * 360 + ", 80%, 80%)";
+    protected generateKeys(): void {
+      this.keys = this.sequences.flatMap( (_sequence) => {
+        let keys: ViewAnimationKey[] = [];
+        for (let i: number = 0; i < _sequence.sequence.length; i++) {
+          let key: ƒ.AnimationKey = _sequence.sequence.getKey(i);
+          keys.push({
+            key: key,
+            path2D: this.generateKey(
+              key.Time,
+              -key.Value * ViewAnimationSheetCurve.PIXEL_PER_VALUE,
+              ViewAnimationSheet.KEY_SIZE * this.mtxTransformInverse.scaling.x,
+              ViewAnimationSheet.KEY_SIZE * this.mtxTransformInverse.scaling.y
+            ),
+            sequence: _sequence
+          });
+        }
+        return keys;
+      });
     }
 
     private getBezierPoints(_animationFunction: ƒ.AnimationFunction, keyIn: ƒ.AnimationKey, keyOut: ƒ.AnimationKey): { x: number; y: number }[] {

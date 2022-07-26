@@ -587,9 +587,12 @@ declare namespace Fudge {
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     abstract class ViewAnimationSheet {
+        protected static readonly KEY_SIZE: number;
+        private static readonly LINE_WIDTH;
+        private static readonly PIXEL_PER_SECOND;
         canvas: HTMLCanvasElement;
-        transform: ƒ.Matrix3x3;
-        protected readonly pixelPerValue: number;
+        protected mtxTransform: ƒ.Matrix3x3;
+        protected mtxTransformInverse: ƒ.Matrix3x3;
         protected keys: ViewAnimationKey[];
         protected sequences: ViewAnimationSequence[];
         protected crc2: CanvasRenderingContext2D;
@@ -605,14 +608,13 @@ declare namespace Fudge {
         protected get controller(): ControllerAnimation;
         setSequences(_sequences: ViewAnimationSequence[]): void;
         redraw(_time?: number): void;
-        drawTimeline(): void;
-        drawCursor(_time: number): void;
-        drawKeys(_keys: ViewAnimationKey[]): void;
         getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent;
         getTransformedPoint(_x: number, _y: number): ƒ.Vector2;
-        protected abstract drawSequence(_sequence: ƒ.AnimationSequence, _color: string): void;
-        protected drawKey(_key: ViewAnimationKey): void;
-        private generateKeyPath;
+        protected drawTimeline(): void;
+        protected drawKeys(): void;
+        protected abstract generateKeys(): void;
+        protected generateKey(_x: number, _y: number, _w: number, _h: number): Path2D;
+        private drawCursor;
         private drawEventsAndLabels;
         private hndPointerDown;
         private hndPointerMove;
@@ -620,17 +622,16 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    import ƒ = FudgeCore;
     /**
      * TODO: add
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimationSheetCurve extends ViewAnimationSheet {
-        drawTimeline(): void;
-        drawCurves(_sequences: ViewAnimationSequence[]): void;
-        protected drawSequence(_sequence: ƒ.AnimationSequence, _color: string): void;
-        private drawYScale;
-        private randomColor;
+        private static readonly PIXEL_PER_VALUE;
+        private static readonly MINIMUM_PIXEL_PER_STEP;
+        drawCurves(): void;
+        drawScale(): void;
+        protected generateKeys(): void;
         private getBezierPoints;
     }
 }

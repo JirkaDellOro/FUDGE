@@ -55,6 +55,8 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndSelect);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      this.dom.addEventListener(ƒui.EVENT.EXPAND, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.COLLAPSE, this.hndEvent);
     }
 
     //#region  ContextMenu
@@ -243,6 +245,11 @@ namespace Fudge {
           this.attributeList = newAttributeList;
           this.updateUserInterface();
           break;
+        case ƒui.EVENT.EXPAND:
+        case ƒui.EVENT.COLLAPSE:
+          this.sheet.setSequences(this.controller.getOpenSequences());
+          this.redraw();
+          break;
       }
     }
     
@@ -390,11 +397,13 @@ namespace Fudge {
           this.redraw();
           break;
         case "add-key":
-          this.controller.addKeyToAnimationStructure(this.playbackTime);          
+          this.controller.addKeyToAnimationStructure(this.playbackTime);
+          this.sheet.setSequences(this.controller.getOpenSequences());       
           this.redraw();
           break;
         case "remove-key":
-          this.controller.deleteKeyFromAnimationStructure(this.selectedKey);          
+          this.controller.deleteKeyFromAnimationStructure(this.selectedKey);
+          this.sheet.setSequences(this.controller.getOpenSequences());       
           this.redraw();
           break;
         case "start":

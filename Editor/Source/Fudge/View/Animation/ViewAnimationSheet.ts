@@ -6,11 +6,16 @@ namespace Fudge {
    * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
   export abstract class ViewAnimationSheet {
+    protected static readonly KEY_SIZE: number = 8; // width and height in px
+    private static readonly LINE_WIDTH: number = 1; // in px
+    private static readonly PIXEL_PER_SECOND: number = 1000;
+
+
     public canvas: HTMLCanvasElement;
-    // TODO: move transform to ViewAnimation so it can be shared bewtween Dope and Curve
-    public transform: ƒ.Matrix3x3;
+    protected mtxTransform: ƒ.Matrix3x3;
+    protected mtxTransformInverse: ƒ.Matrix3x3;
     
-    protected readonly pixelPerValue: number = 100;
+    // protected readonly pixelPerValue: number = 100;
     protected keys: ViewAnimationKey[] = [];
     protected sequences: ViewAnimationSequence[] = [];
     protected crc2: CanvasRenderingContext2D;
@@ -25,8 +30,8 @@ namespace Fudge {
       this.view = _view;
       this.canvas = document.createElement("canvas");
       this.crc2 = this.canvas.getContext("2d");
-      this.transform = new ƒ.Matrix3x3();
-      this.transform.translateY(500);
+      this.mtxTransform = new ƒ.Matrix3x3();
+      this.mtxTransform.translateY(500);
 
       this.canvas.style.position = "absolute";
       this.canvas.style.left = "300px";
@@ -56,25 +61,6 @@ namespace Fudge {
 
     public setSequences(_sequences: ViewAnimationSequence[]): void {
       this.sequences = _sequences;
-      let keyHeight: number = 20 / this.transform.scaling.y;
-      let keyWidth: number = 20 / this.transform.scaling.x;
-      this.keys = _sequences.flatMap( (_sequence) => {
-        let keys: ViewAnimationKey[] = [];
-        for (let i: number = 0; i < _sequence.sequence.length; i++) {
-          let key: ƒ.AnimationKey = _sequence.sequence.getKey(i);
-          keys.push({
-            key: key,
-            path2D: this.generateKeyPath(
-              key.Time,
-              -key.Value * this.pixelPerValue,
-              keyHeight / 2,
-              keyWidth / 2
-            ),
-            sequence: _sequence
-          });
-        }
-        return keys;
-      });
     }
 
     public redraw(_time?: number): void {
@@ -86,23 +72,56 @@ namespace Fudge {
       // TODO: check if these 2 lines are necessary
       this.crc2.resetTransform();
       this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
-
-      let translation: ƒ.Vector2 = this.transform.translation;
-      translation.x = Math.min(0, translation.x);
-      this.transform.translation = translation;
-      this.crc2.setTransform(this.transform.scaling.x, 0, 0, this.transform.scaling.y, this.transform.translation.x, this.transform.translation.y);
       
-      this.drawKeys(this.keys);
-      if (this instanceof ViewAnimationSheetCurve)
-        this.drawCurves(this.sequences);
+      this.mtxTransformInverse = ƒ.Matrix3x3.INVERSION(this.mtxTransform);
+      let translation: ƒ.Vector2 = this.mtxTransform.translation;
+      translation.x = Math.min(0, translation.x);
+      this.mtxTransform.translation = translation;
+      this.crc2.setTransform(this.mtxTransform.scaling.x, 0, 0, this.mtxTransform.scaling.y, this.mtxTransform.translation.x, this.mtxTransform.translation.y);
+      
+      this.drawKeys();
+      if (this instanceof ViewAnimationSheetCurve) {
+        this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH * this.mtxTransformInverse.scaling.x;
+        this.drawCurves();
+        this.drawScale();
+      }
       this.drawTimeline();
       this.drawEventsAndLabels();
       this.drawCursor(this.time);
     }
 
-    public drawTimeline(): void {
+    public getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
+      for (let l of this.labels) {
+        if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
+          return l;
+        }
+      }
+
+      for (let e of this.events) {
+        if (this.crc2.isPointInPath(e.path2D, _x, _y)) {
+          return e;
+        }
+      }
+
+      let point: ƒ.Vector2 = this.getTransformedPoint(_x, _y);
+      for (let k of this.keys) {
+        if (this.crc2.isPointInPath(k.path2D, point.x, point.y)) {
+          return k;
+        }
+      }
+      return null;
+    }
+
+    public getTransformedPoint(_x: number, _y: number): ƒ.Vector2 {
+      let vector: ƒ.Vector2 = new ƒ.Vector2(_x, _y);
+      vector.transform(this.mtxTransformInverse);
+
+      return vector;
+    }
+
+    protected drawTimeline(): void {
       this.crc2.resetTransform();
-      this.crc2.lineWidth = 1;
+      this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
       
       let timelineHeight: number = 50;
       this.crc2.fillStyle = "#7a7a7a";
@@ -117,9 +136,8 @@ namespace Fudge {
       this.crc2.textBaseline = "middle";
       this.crc2.textAlign = "left";
 
-      const pixelPerSecond: number = 1000;
       const minimumPixelPerStep: number = 10;
-      let pixelPerStep: number = (pixelPerSecond / this.animation.fps) * this.transform.scaling.x;
+      let pixelPerStep: number = (ViewAnimationSheet.PIXEL_PER_SECOND / this.animation.fps) * this.mtxTransform.scaling.x;
       let framesPerStep: number = 1;
       let stepScaleFactor: number = Math.max(
         Math.pow(2, Math.ceil(Math.log2(minimumPixelPerStep / pixelPerStep))), 
@@ -128,9 +146,9 @@ namespace Fudge {
       framesPerStep *= stepScaleFactor;
 
       let steps: number = 1 + this.canvas.width / pixelPerStep;
-      let stepOffset: number = Math.floor(-this.transform.translation.x / pixelPerStep);
+      let stepOffset: number = Math.floor(-this.mtxTransform.translation.x / pixelPerStep);
       for (let iStep: number = stepOffset; iStep < steps + stepOffset; iStep++) {
-        let x: number = (iStep * pixelPerStep + this.transform.translation.x);
+        let x: number = (iStep * pixelPerStep + this.mtxTransform.translation.x);
         timeline.moveTo(x, timelineHeight);
         // TODO: refine the display
         if (iStep % 5 == 0) {
@@ -149,82 +167,18 @@ namespace Fudge {
       this.crc2.stroke(timeline);
     }
 
-    public drawCursor(_time: number): void {
-      let x: number = _time * this.transform.scaling.x + this.transform.translation.x;
-      let cursor: Path2D = new Path2D();
-      cursor.moveTo(x, 0);
-      cursor.lineTo(x, this.canvas.height);
-      this.crc2.strokeStyle = "red";
-      this.crc2.fillStyle = "red";
-      this.crc2.stroke(cursor);
-      this.crc2.fill(cursor);
-    }
-
-    public drawKeys(_keys: ViewAnimationKey[]): void {
-      if (_keys.length == 0) return;
-
-      for (const key of _keys) {
-        this.drawKey(key);
+    protected drawKeys(): void {
+      this.generateKeys();
+      
+      for (const key of this.keys) {
+        this.crc2.fillStyle = key.sequence.color;
+        this.crc2.fill(key.path2D);
       }
     }
 
-    public getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
-      for (let l of this.labels) {
-        if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
-          return l;
-        }
-      }
-      for (let e of this.events) {
-        if (this.crc2.isPointInPath(e.path2D, _x, _y)) {
-          return e;
-        }
-      }
+    protected abstract generateKeys(): void;
 
-      let point: ƒ.Vector2 = this.getTransformedPoint(_x, _y);
-      for (let k of this.keys) {
-        if (this.crc2.isPointInPath(k.path2D, point.x, point.y)) {
-          return k;
-        }
-      }
-      return null;
-    }
-
-    public getTransformedPoint(_x: number, _y: number): ƒ.Vector2 {
-      // TODO: use inverse matrix?
-      // ƒ.Matrix4x4.INVERSION
-      let vector: ƒ.Vector2 = new ƒ.Vector2(_x, _y);
-      vector.x = _x / this.transform.scaling.x - this.transform.translation.x / this.transform.scaling.x;
-      vector.y = _y / this.transform.scaling.y - this.transform.translation.y / this.transform.scaling.y;
-
-      return vector;
-    }
-
-    // protected drawStructure(_animationStructure: ƒ.AnimationStructure): void {
-    //   for (const property in _animationStructure) {
-    //     let structureOrSequence: ƒ.AnimationStructure | ƒ.AnimationSequence = _animationStructure[property];
-    //     if (structureOrSequence instanceof ƒ.AnimationSequence) {
-    //       this.drawSequence(structureOrSequence);
-    //     } else {
-    //       this.drawStructure(structureOrSequence);
-    //     }
-    //   }
-    // }
-
-    protected abstract drawSequence(_sequence: ƒ.AnimationSequence, _color: string): void;
-
-
-
-    protected drawKey(_key: ViewAnimationKey): void {
-      let color: string = _key.sequence.color;
-      let path: Path2D = _key.path2D;
-      this.crc2.fillStyle = color;
-      this.crc2.strokeStyle = color;
-      this.crc2.lineWidth = 1;
-      this.crc2.fill(path);
-      this.crc2.stroke(path);
-    }
-
-    private generateKeyPath(_x: number, _y: number, _h: number, _w: number): Path2D {
+    protected generateKey(_x: number, _y: number, _w: number, _h: number): Path2D {
       let key: Path2D = new Path2D();
       key.moveTo(_x - _w, _y);
       key.lineTo(_x, _y + _h);
@@ -233,6 +187,16 @@ namespace Fudge {
       key.closePath();
       return key;
     }
+
+    private drawCursor(_time: number): void {
+      let x: number = _time * this.mtxTransform.scaling.x + this.mtxTransform.translation.x;
+      let cursor: Path2D = new Path2D();
+      cursor.moveTo(x, 0);
+      cursor.lineTo(x, this.canvas.height);
+      this.crc2.strokeStyle = "white";
+      this.crc2.stroke(cursor);
+    }
+
 
     private drawEventsAndLabels(): void {
       let maxDistance: number = 10000;
@@ -252,7 +216,7 @@ namespace Fudge {
         //TODO stop using hardcoded values
         let p: Path2D = new Path2D;
         this.labels.push({ label: l, path2D: p });
-        let position: number = this.animation.labels[l] * this.transform.scaling.x;
+        let position: number = this.animation.labels[l] * this.mtxTransform.scaling.x;
         p.moveTo(position - 3, labelDisplayHeight - 28);
         p.lineTo(position - 3, labelDisplayHeight - 2);
         p.lineTo(position + 3, labelDisplayHeight - 2);
@@ -272,7 +236,7 @@ namespace Fudge {
       for (let e in this.animation.events) {
         let p: Path2D = new Path2D;
         this.events.push({ event: e, path2D: p });
-        let position: number = this.animation.events[e] * this.transform.scaling.x;
+        let position: number = this.animation.events[e] * this.mtxTransform.scaling.x;
         p.moveTo(position - 3, labelDisplayHeight - 28);
         p.lineTo(position - 3, labelDisplayHeight - 5);
         p.lineTo(position, labelDisplayHeight - 2);
@@ -293,7 +257,7 @@ namespace Fudge {
       if (_event.buttons != 4) return;
 
       _event.preventDefault();
-      this.transform.translate(ƒ.Vector2.DIFFERENCE(this.getTransformedPoint(_event.offsetX, _event.offsetY), this.posDragStart));
+      this.mtxTransform.translate(ƒ.Vector2.DIFFERENCE(this.getTransformedPoint(_event.offsetX, _event.offsetY), this.posDragStart));
       this.redraw();
     }
 
@@ -302,9 +266,9 @@ namespace Fudge {
       let zoomFactor: number = _event.deltaY < 0 ? 1.05 : 0.95;
       let posCursorTransformed: ƒ.Vector2 = this.getTransformedPoint(_event.offsetX, _event.offsetY);
       
-      this.transform.translate(posCursorTransformed);
-      this.transform.scale(new ƒ.Vector2(zoomFactor, _event.ctrlKey ? 1 : zoomFactor));
-      this.transform.translate(ƒ.Vector2.SCALE(posCursorTransformed, -1));
+      this.mtxTransform.translate(posCursorTransformed);
+      this.mtxTransform.scale(new ƒ.Vector2(_event.shiftKey ? 1 : zoomFactor, _event.ctrlKey ? 1 : zoomFactor));
+      this.mtxTransform.translate(ƒ.Vector2.SCALE(posCursorTransformed, -1));
 
       this.redraw();
     }
