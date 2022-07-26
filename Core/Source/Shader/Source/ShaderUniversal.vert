@@ -228,10 +228,12 @@ void main() {
     #endif
 
     #if defined(PARTICLE_COLOR)
+  vec4 vctParticleColor = /*$color*/;
       #if defined(LIGHT)
-  v_vctColor *= /*$color*/;
+  v_vctColor *= vctParticleColor;
+  v_vctColor.a = vctParticleColor.a;
       #else
-  v_vctColor = /*$color*/;
+  v_vctColor = vctParticleColor;
       #endif
     #else
     // always full opacity for now...
