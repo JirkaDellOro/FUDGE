@@ -10,7 +10,6 @@ namespace Fudge {
 
   export interface ViewAnimationSequence {
     color: string;
-    // element: HTMLElement;
     sequence: ƒ.AnimationSequence;
   }
 
@@ -180,15 +179,14 @@ namespace Fudge {
       this.toolbar.id = "toolbar";
       this.toolbar.style.width = "300px";
       this.toolbar.style.height = "80px";
-      this.toolbar.style.borderBottom = "1px solid black";
+      this.toolbar.style.overflow = "hidden";
       this.fillToolbar(this.toolbar);
       this.toolbar.addEventListener("click", this.hndToolbarClick);
       this.toolbar.addEventListener("change", this.hndToolbarChange);
       
       this.sheet = new ViewAnimationSheetCurve(this); // TODO: stop using fixed values?
-      this.sheet.canvas.addEventListener("pointerdown", this.hndPointerDown);
-      this.sheet.canvas.addEventListener("pointermove", this.hndPointerMove);
-
+      this.sheet.scrollContainer.addEventListener("pointerdown", this.hndPointerDown);
+      this.sheet.scrollContainer.addEventListener("pointermove", this.hndPointerMove);
 
       this.hover = document.createElement("span");
       this.hover.style.background = "black";
@@ -273,8 +271,8 @@ namespace Fudge {
       }
       this.dom.innerHTML = "";
       this.dom.appendChild(this.toolbar);
-      this.dom.appendChild(this.sheet.canvas);
-      this.dom.appendChild(this.hover);
+
+      // this.dom.appendChild(this.hover);
 
       this.animation = _animation;
       let animationMutator: ƒ.Mutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
@@ -284,6 +282,12 @@ namespace Fudge {
       this.dom.appendChild(this.propertyList);
       this.updatePropertyList();
       this.sheet.setSequences(this.controller.getOpenSequences());
+      this.propertyList.style.overflow = "hidden";
+      this.propertyList.style.width = "300px";
+
+      this.dom.appendChild(this.sheet.canvas);
+      this.dom.appendChild(this.sheet.scrollContainer);
+      this.sheet.scrollContainer.appendChild(this.sheet.scrollBody);
 
       this.redraw();
     }
@@ -490,7 +494,7 @@ namespace Fudge {
     }
 
     private redraw = () => {
-      this.sheet.redraw(this.playbackTime);
+      this.sheet.redraw(true, this.playbackTime);
     }
 
     private updateAnimation = () => {

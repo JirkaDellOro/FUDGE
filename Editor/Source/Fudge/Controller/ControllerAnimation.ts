@@ -17,9 +17,9 @@ namespace Fudge {
     private animation: ƒ.Animation;
     private propertyList: HTMLElement;
 
-    public constructor(_animation: ƒ.Animation, _domElement: HTMLElement) {
+    public constructor(_animation: ƒ.Animation, _propertyList: HTMLElement) {
       this.animation = _animation;
-      this.propertyList = _domElement;
+      this.propertyList = _propertyList;
     }
 
     public updatePropertyList(_mutator: ƒ.Mutator): void {
@@ -77,8 +77,9 @@ namespace Fudge {
       let value: Object = this.animation.animationStructure;
       for (let i: number = 0; i < _path.length - 1; i++) {
         let key: string = _path[i];
-        if (!(key in value)) value[key] = {};
-        value = value[_path[i]];
+        if (!(key in value)) 
+          value[key] = {};
+        value = value[key];
       }
       value[_path[_path.length - 1]] = new ƒ.AnimationSequence();
     }

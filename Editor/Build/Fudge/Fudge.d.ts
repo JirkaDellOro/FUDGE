@@ -232,7 +232,7 @@ declare namespace Fudge {
         private static readonly PROPERTY_COLORS;
         private animation;
         private propertyList;
-        constructor(_animation: ƒ.Animation, _domElement: HTMLElement);
+        constructor(_animation: ƒ.Animation, _propertyList: HTMLElement);
         updatePropertyList(_mutator: ƒ.Mutator): void;
         modifyKey(_time: number, _element: ƒui.CustomElement): void;
         deleteKey(_key: ViewAnimationKey): void;
@@ -582,6 +582,8 @@ declare namespace Fudge {
         private static readonly LINE_WIDTH;
         private static readonly PIXEL_PER_SECOND;
         canvas: HTMLCanvasElement;
+        scrollContainer: HTMLDivElement;
+        scrollBody: HTMLDivElement;
         protected mtxTransform: ƒ.Matrix3x3;
         protected mtxTransformInverse: ƒ.Matrix3x3;
         protected keys: ViewAnimationKey[];
@@ -592,13 +594,14 @@ declare namespace Fudge {
         private events;
         private time;
         private posDragStart;
+        private isScrolling;
         constructor(_view: ViewAnimation);
         protected get animation(): ƒ.Animation;
         protected get dom(): HTMLElement;
         protected get toolbar(): HTMLDivElement;
         protected get controller(): ControllerAnimation;
         setSequences(_sequences: ViewAnimationSequence[]): void;
-        redraw(_time?: number): void;
+        redraw(_scroll?: boolean, _time?: number): void;
         getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent;
         getTransformedPoint(_x: number, _y: number): ƒ.Vector2;
         protected drawTimeline(): void;
@@ -609,7 +612,9 @@ declare namespace Fudge {
         private drawEventsAndLabels;
         private hndPointerDown;
         private hndPointerMove;
-        private hdnWheel;
+        private hndPointerUp;
+        private hndWheel;
+        private hndScroll;
     }
 }
 declare namespace Fudge {

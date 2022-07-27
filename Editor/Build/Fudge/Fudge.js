@@ -901,9 +901,9 @@ var Fudge;
         ];
         animation;
         propertyList;
-        constructor(_animation, _domElement) {
+        constructor(_animation, _propertyList) {
             this.animation = _animation;
-            this.propertyList = _domElement;
+            this.propertyList = _propertyList;
         }
         updatePropertyList(_mutator) {
             let colorIndex = 0;
@@ -956,7 +956,7 @@ var Fudge;
                 let key = _path[i];
                 if (!(key in value))
                     value[key] = {};
-                value = value[_path[i]];
+                value = value[key];
             }
             value[_path[_path.length - 1]] = new ƒ.AnimationSequence();
         }
@@ -2679,13 +2679,13 @@ var Fudge;
             this.toolbar.id = "toolbar";
             this.toolbar.style.width = "300px";
             this.toolbar.style.height = "80px";
-            this.toolbar.style.borderBottom = "1px solid black";
+            this.toolbar.style.overflow = "hidden";
             this.fillToolbar(this.toolbar);
             this.toolbar.addEventListener("click", this.hndToolbarClick);
             this.toolbar.addEventListener("change", this.hndToolbarChange);
             this.sheet = new Fudge.ViewAnimationSheetCurve(this); // TODO: stop using fixed values?
-            this.sheet.canvas.addEventListener("pointerdown", this.hndPointerDown);
-            this.sheet.canvas.addEventListener("pointermove", this.hndPointerMove);
+            this.sheet.scrollContainer.addEventListener("pointerdown", this.hndPointerDown);
+            this.sheet.scrollContainer.addEventListener("pointermove", this.hndPointerMove);
             this.hover = document.createElement("span");
             this.hover.style.background = "black";
             this.hover.style.color = "white";
@@ -2765,8 +2765,7 @@ var Fudge;
             }
             this.dom.innerHTML = "";
             this.dom.appendChild(this.toolbar);
-            this.dom.appendChild(this.sheet.canvas);
-            this.dom.appendChild(this.hover);
+            // this.dom.appendChild(this.hover);
             this.animation = _animation;
             let animationMutator = this.animation?.getMutated(this.playbackTime, 0, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
             if (!animationMutator)
@@ -2776,6 +2775,11 @@ var Fudge;
             this.dom.appendChild(this.propertyList);
             this.updatePropertyList();
             this.sheet.setSequences(this.controller.getOpenSequences());
+            this.propertyList.style.overflow = "hidden";
+            this.propertyList.style.width = "300px";
+            this.dom.appendChild(this.sheet.canvas);
+            this.dom.appendChild(this.sheet.scrollContainer);
+            this.sheet.scrollContainer.appendChild(this.sheet.scrollBody);
             this.redraw();
         }
         hndSelect = (_event) => {
@@ -2963,7 +2967,7 @@ var Fudge;
                 this.updatePropertyList(this.cmpAnimator.updateAnimation(this.playbackTime)[0]);
         }
         redraw = () => {
-            this.sheet.redraw(this.playbackTime);
+            this.sheet.redraw(true, this.playbackTime);
         };
         updateAnimation = () => {
             // requestAnimationFrame(this.playAnimation.bind(this));
@@ -2993,6 +2997,8 @@ var Fudge;
         static LINE_WIDTH = 1; // in px
         static PIXEL_PER_SECOND = 1000;
         canvas;
+        scrollContainer;
+        scrollBody;
         mtxTransform;
         mtxTransformInverse;
         keys = [];
@@ -3003,6 +3009,7 @@ var Fudge;
         events = [];
         time = 0;
         posDragStart = new ƒ.Vector2();
+        isScrolling = false;
         constructor(_view) {
             this.view = _view;
             this.canvas = document.createElement("canvas");
@@ -3012,10 +3019,21 @@ var Fudge;
             this.canvas.style.position = "absolute";
             this.canvas.style.left = "300px";
             this.canvas.style.top = "0px";
-            this.canvas.style.borderLeft = "1px solid black";
-            this.canvas.addEventListener("pointerdown", this.hndPointerDown);
-            this.canvas.addEventListener("pointermove", this.hndPointerMove);
-            this.canvas.addEventListener("wheel", this.hdnWheel);
+            this.canvas.style.pointerEvents = "auto";
+            this.scrollContainer = document.createElement("div");
+            this.scrollContainer.style.position = "absolute";
+            this.scrollContainer.style.left = "300px";
+            this.scrollContainer.style.top = "0px";
+            this.scrollContainer.style.overflowX = "scroll";
+            this.scrollContainer.style.scrollBehavior = "instant";
+            this.scrollContainer.addEventListener("pointerdown", this.hndPointerDown);
+            this.scrollContainer.addEventListener("pointermove", this.hndPointerMove);
+            this.scrollContainer.addEventListener("pointerup", this.hndPointerUp);
+            this.scrollContainer.addEventListener("wheel", this.hndWheel);
+            this.scrollContainer.addEventListener("scroll", this.hndScroll);
+            this.scrollBody = document.createElement("div");
+            this.scrollBody.style.overflow = "hidden";
+            this.scrollBody.style.height = "1px";
         }
         get animation() {
             return this.view.animation;
@@ -3032,21 +3050,27 @@ var Fudge;
         setSequences(_sequences) {
             this.sequences = _sequences;
         }
-        redraw(_time) {
+        redraw(_scroll = true, _time) {
             if (!this.animation)
                 return;
             if (_time != undefined)
                 this.time = _time;
             this.canvas.width = this.dom.clientWidth - this.toolbar.clientWidth;
             this.canvas.height = this.dom.clientHeight;
+            this.scrollContainer.style.width = `${this.canvas.width}px`;
+            this.scrollContainer.style.height = `${this.canvas.height}px`;
             // TODO: check if these 2 lines are necessary
             this.crc2.resetTransform();
             this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
-            this.mtxTransformInverse = ƒ.Matrix3x3.INVERSION(this.mtxTransform);
             let translation = this.mtxTransform.translation;
             translation.x = Math.min(0, translation.x);
             this.mtxTransform.translation = translation;
             this.crc2.setTransform(this.mtxTransform.scaling.x, 0, 0, this.mtxTransform.scaling.y, this.mtxTransform.translation.x, this.mtxTransform.translation.y);
+            this.mtxTransformInverse = ƒ.Matrix3x3.INVERSION(this.mtxTransform);
+            if (_scroll) {
+                this.scrollBody.style.width = `${this.canvas.width + this.mtxTransformInverse.translation.x}px`;
+                this.scrollContainer.scrollLeft = this.mtxTransformInverse.translation.x;
+            }
             this.drawKeys();
             if (this instanceof Fudge.ViewAnimationSheetCurve) {
                 this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH * this.mtxTransformInverse.scaling.x;
@@ -3191,18 +3215,32 @@ var Fudge;
             }
         }
         hndPointerDown = (_event) => {
-            if (_event.buttons != 4)
-                return;
-            this.posDragStart = this.getTransformedPoint(_event.offsetX, _event.offsetY);
+            _event.preventDefault();
+            switch (_event.buttons) {
+                case 1:
+                    this.isScrolling = _event.offsetY > _event.target.clientHeight; // clicked on scroll bar
+                    break;
+                case 4:
+                    this.posDragStart = this.getTransformedPoint(_event.offsetX, _event.offsetY);
+                    break;
+            }
         };
         hndPointerMove = (_event) => {
+            _event.preventDefault();
             if (_event.buttons != 4)
                 return;
-            _event.preventDefault();
             this.mtxTransform.translate(ƒ.Vector2.DIFFERENCE(this.getTransformedPoint(_event.offsetX, _event.offsetY), this.posDragStart));
             this.redraw();
         };
-        hdnWheel = (_event) => {
+        hndPointerUp = (_event) => {
+            _event.preventDefault();
+            if (this.isScrolling) {
+                this.redraw();
+                this.isScrolling = false;
+            }
+        };
+        hndWheel = (_event) => {
+            _event.preventDefault();
             if (_event.buttons != 0)
                 return;
             let zoomFactor = _event.deltaY < 0 ? 1.05 : 0.95;
@@ -3211,6 +3249,13 @@ var Fudge;
             this.mtxTransform.scale(new ƒ.Vector2(_event.shiftKey ? 1 : zoomFactor, _event.ctrlKey ? 1 : zoomFactor));
             this.mtxTransform.translate(ƒ.Vector2.SCALE(posCursorTransformed, -1));
             this.redraw();
+        };
+        hndScroll = (_event) => {
+            _event.preventDefault();
+            if (this.isScrolling) {
+                this.mtxTransform.translation.x = -this.scrollContainer.scrollLeft;
+                this.redraw(false);
+            }
         };
     }
     Fudge.ViewAnimationSheet = ViewAnimationSheet;
