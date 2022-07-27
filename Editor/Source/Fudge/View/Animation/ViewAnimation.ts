@@ -229,7 +229,10 @@ namespace Fudge {
       switch (_event.type) {
         case EVENT_EDITOR.FOCUS:
           this.graph = _event.detail.graph;
-          this.focusNode(_event.detail.node);
+          this.node = _event.detail.node;
+          this.cmpAnimator = this.node?.getComponent(ƒ.ComponentAnimator);
+          this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+          this.setAnimation(this.cmpAnimator?.animation);
           break;
         case EVENT_EDITOR.MODIFY:
           //TODO: rework this
@@ -254,13 +257,6 @@ namespace Fudge {
           }
           break;
       }
-    }
-    
-    private focusNode(_node: ƒ.Node): void {
-      this.node = _node;
-      this.cmpAnimator = _node?.getComponent(ƒ.ComponentAnimator);
-      this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-      this.setAnimation(this.cmpAnimator?.animation);
     }
 
     private setAnimation(_animation: ƒ.Animation): void {

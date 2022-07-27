@@ -2724,7 +2724,10 @@ var Fudge;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.FOCUS:
                     this.graph = _event.detail.graph;
-                    this.focusNode(_event.detail.node);
+                    this.node = _event.detail.node;
+                    this.cmpAnimator = this.node?.getComponent(ƒ.ComponentAnimator);
+                    this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+                    this.setAnimation(this.cmpAnimator?.animation);
                     break;
                 case Fudge.EVENT_EDITOR.MODIFY:
                     //TODO: rework this
@@ -2751,12 +2754,6 @@ var Fudge;
                     break;
             }
         };
-        focusNode(_node) {
-            this.node = _node;
-            this.cmpAnimator = _node?.getComponent(ƒ.ComponentAnimator);
-            this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-            this.setAnimation(this.cmpAnimator?.animation);
-        }
         setAnimation(_animation) {
             if (!_animation) {
                 this.animation = undefined;
@@ -2995,7 +2992,7 @@ var Fudge;
     class ViewAnimationSheet {
         static KEY_SIZE = 8; // width and height in px
         static LINE_WIDTH = 1; // in px
-        static PIXEL_PER_SECOND = 1000;
+        static PIXEL_PER_SECOND = 1000; // at scaling 1
         canvas;
         scrollContainer;
         scrollBody;
@@ -3009,13 +3006,13 @@ var Fudge;
         events = [];
         time = 0;
         posDragStart = new ƒ.Vector2();
-        isScrolling = false;
+        animation;
         constructor(_view) {
             this.view = _view;
             this.canvas = document.createElement("canvas");
             this.crc2 = this.canvas.getContext("2d");
             this.mtxTransform = new ƒ.Matrix3x3();
-            this.mtxTransform.translateY(500);
+            this.mtxTransformInverse = ƒ.Matrix3x3.INVERSION(this.mtxTransform);
             this.canvas.style.position = "absolute";
             this.canvas.style.left = "300px";
             this.canvas.style.top = "0px";
@@ -3030,19 +3027,13 @@ var Fudge;
             this.scrollContainer.addEventListener("pointermove", this.hndPointerMove);
             this.scrollContainer.addEventListener("pointerup", this.hndPointerUp);
             this.scrollContainer.addEventListener("wheel", this.hndWheel);
-            this.scrollContainer.addEventListener("scroll", this.hndScroll);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.scrollBody = document.createElement("div");
             this.scrollBody.style.overflow = "hidden";
             this.scrollBody.style.height = "1px";
         }
-        get animation() {
-            return this.view.animation;
-        }
         get dom() {
             return this.view.dom;
-        }
-        get toolbar() {
-            return this.view.toolbar;
         }
         get controller() {
             return this.view.controller;
@@ -3055,8 +3046,8 @@ var Fudge;
                 return;
             if (_time != undefined)
                 this.time = _time;
-            this.canvas.width = this.dom.clientWidth - this.toolbar.clientWidth;
-            this.canvas.height = this.dom.clientHeight;
+            this.canvas.width = this.dom.clientWidth - 300;
+            this.canvas.height = this.dom.clientHeight - 20;
             this.scrollContainer.style.width = `${this.canvas.width}px`;
             this.scrollContainer.style.height = `${this.canvas.height}px`;
             // TODO: check if these 2 lines are necessary
@@ -3068,8 +3059,14 @@ var Fudge;
             this.crc2.setTransform(this.mtxTransform.scaling.x, 0, 0, this.mtxTransform.scaling.y, this.mtxTransform.translation.x, this.mtxTransform.translation.y);
             this.mtxTransformInverse = ƒ.Matrix3x3.INVERSION(this.mtxTransform);
             if (_scroll) {
-                this.scrollBody.style.width = `${this.canvas.width + this.mtxTransformInverse.translation.x}px`;
-                this.scrollContainer.scrollLeft = this.mtxTransformInverse.translation.x;
+                let timelineLength = this.canvas.width * this.mtxTransformInverse.scaling.x + this.mtxTransformInverse.translation.x; // in miliseconds
+                if (timelineLength - this.animation.totalTime > 0) {
+                    this.scrollBody.style.width = `${this.canvas.width - this.mtxTransform.translation.x}px`;
+                }
+                else {
+                    this.scrollBody.style.width = `${this.animation.totalTime * this.mtxTransform.scaling.x}px`;
+                }
+                this.scrollContainer.scrollLeft = -this.mtxTransform.translation.x;
             }
             this.drawKeys();
             if (this instanceof Fudge.ViewAnimationSheetCurve) {
@@ -3214,11 +3211,28 @@ var Fudge;
                 this.crc2.stroke(p);
             }
         }
+        hndEvent = (_event) => {
+            switch (_event.type) {
+                case Fudge.EVENT_EDITOR.FOCUS:
+                    this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
+                    if (this.animation) {
+                        this.redraw();
+                        let translation = this.mtxTransform.translation;
+                        translation.y = this.canvas.height / 2;
+                        this.mtxTransform.translation = translation;
+                        let scaling = this.mtxTransform.scaling;
+                        scaling.x = this.canvas.width / (this.animation.totalTime * 1.1);
+                        this.mtxTransform.scaling = scaling;
+                    }
+                    break;
+            }
+        };
         hndPointerDown = (_event) => {
             _event.preventDefault();
             switch (_event.buttons) {
                 case 1:
-                    this.isScrolling = _event.offsetY > _event.target.clientHeight; // clicked on scroll bar
+                    if (_event.offsetY > _event.target.clientHeight) // clicked on scroll bar
+                        this.scrollContainer.onscroll = this.hndScroll;
                     break;
                 case 4:
                     this.posDragStart = this.getTransformedPoint(_event.offsetX, _event.offsetY);
@@ -3234,9 +3248,9 @@ var Fudge;
         };
         hndPointerUp = (_event) => {
             _event.preventDefault();
-            if (this.isScrolling) {
+            if (this.scrollContainer.onscroll) {
+                this.scrollContainer.onscroll = undefined;
                 this.redraw();
-                this.isScrolling = false;
             }
         };
         hndWheel = (_event) => {
@@ -3252,10 +3266,10 @@ var Fudge;
         };
         hndScroll = (_event) => {
             _event.preventDefault();
-            if (this.isScrolling) {
-                this.mtxTransform.translation.x = -this.scrollContainer.scrollLeft;
-                this.redraw(false);
-            }
+            let translation = this.mtxTransform.translation;
+            translation.x = -this.scrollContainer.scrollLeft;
+            this.mtxTransform.translation = translation;
+            this.redraw(false);
         };
     }
     Fudge.ViewAnimationSheet = ViewAnimationSheet;

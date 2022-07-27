@@ -558,7 +558,6 @@ declare namespace Fudge {
         private hndPointerDown;
         private hndPointerMove;
         private hndEvent;
-        private focusNode;
         private setAnimation;
         private hndSelect;
         private fillToolbar;
@@ -594,11 +593,9 @@ declare namespace Fudge {
         private events;
         private time;
         private posDragStart;
-        private isScrolling;
+        private animation;
         constructor(_view: ViewAnimation);
-        protected get animation(): ƒ.Animation;
         protected get dom(): HTMLElement;
-        protected get toolbar(): HTMLDivElement;
         protected get controller(): ControllerAnimation;
         setSequences(_sequences: ViewAnimationSequence[]): void;
         redraw(_scroll?: boolean, _time?: number): void;
@@ -610,6 +607,7 @@ declare namespace Fudge {
         protected generateKey(_x: number, _y: number, _w: number, _h: number): Path2D;
         private drawCursor;
         private drawEventsAndLabels;
+        private hndEvent;
         private hndPointerDown;
         private hndPointerMove;
         private hndPointerUp;

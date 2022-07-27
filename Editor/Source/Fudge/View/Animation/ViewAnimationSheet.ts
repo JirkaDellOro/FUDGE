@@ -1,5 +1,6 @@
 namespace Fudge {
   import ƒ = FudgeCore;
+  import ƒui = FudgeUserInterface;
   
   /**
    * TODO: add
@@ -8,7 +9,7 @@ namespace Fudge {
   export abstract class ViewAnimationSheet {
     protected static readonly KEY_SIZE: number = 8; // width and height in px
     private static readonly LINE_WIDTH: number = 1; // in px
-    private static readonly PIXEL_PER_SECOND: number = 1000;
+    private static readonly PIXEL_PER_SECOND: number = 1000; // at scaling 1
 
     public canvas: HTMLCanvasElement;
     public scrollContainer: HTMLDivElement;
@@ -24,14 +25,14 @@ namespace Fudge {
     private time: number = 0;
 
     private posDragStart: ƒ.Vector2 = new ƒ.Vector2();
-    private isScrolling: boolean = false;
+    private animation: ƒ.Animation;
 
     constructor(_view: ViewAnimation) {
       this.view = _view;
       this.canvas = document.createElement("canvas");
       this.crc2 = this.canvas.getContext("2d");
       this.mtxTransform = new ƒ.Matrix3x3();
-      this.mtxTransform.translateY(500);
+      this.mtxTransformInverse = ƒ.Matrix3x3.INVERSION(this.mtxTransform);
 
       this.canvas.style.position = "absolute";
       this.canvas.style.left = "300px";
@@ -49,23 +50,15 @@ namespace Fudge {
       this.scrollContainer.addEventListener("pointermove", this.hndPointerMove);
       this.scrollContainer.addEventListener("pointerup", this.hndPointerUp);
       this.scrollContainer.addEventListener("wheel", this.hndWheel);
-      this.scrollContainer.addEventListener("scroll", this.hndScroll);
+      this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
 
       this.scrollBody = document.createElement("div");
       this.scrollBody.style.overflow = "hidden";
       this.scrollBody.style.height = "1px";
     }
 
-    protected get animation(): ƒ.Animation {
-      return this.view.animation;
-    }
-
     protected get dom(): HTMLElement {
       return this.view.dom;
-    }
-
-    protected get toolbar(): HTMLDivElement {
-      return this.view.toolbar;
     }
 
     protected get controller(): ControllerAnimation {
@@ -79,8 +72,8 @@ namespace Fudge {
     public redraw(_scroll: boolean = true, _time?: number): void {
       if (!this.animation) return;
       if (_time != undefined) this.time = _time;
-      this.canvas.width = this.dom.clientWidth - this.toolbar.clientWidth;
-      this.canvas.height = this.dom.clientHeight;
+      this.canvas.width = this.dom.clientWidth - 300;
+      this.canvas.height = this.dom.clientHeight - 20;
       this.scrollContainer.style.width = `${this.canvas.width}px`;
       this.scrollContainer.style.height = `${this.canvas.height}px`;
       
@@ -95,8 +88,13 @@ namespace Fudge {
       this.mtxTransformInverse = ƒ.Matrix3x3.INVERSION(this.mtxTransform);
 
       if (_scroll) {
-        this.scrollBody.style.width = `${this.canvas.width + this.mtxTransformInverse.translation.x}px`;
-        this.scrollContainer.scrollLeft = this.mtxTransformInverse.translation.x;
+        let timelineLength: number = this.canvas.width * this.mtxTransformInverse.scaling.x + this.mtxTransformInverse.translation.x; // in miliseconds
+        if (timelineLength - this.animation.totalTime > 0) {
+          this.scrollBody.style.width = `${this.canvas.width - this.mtxTransform.translation.x}px`;
+        } else {
+          this.scrollBody.style.width = `${this.animation.totalTime * this.mtxTransform.scaling.x}px`;
+        }
+        this.scrollContainer.scrollLeft = -this.mtxTransform.translation.x;
       }
 
       this.drawKeys();
@@ -267,11 +265,29 @@ namespace Fudge {
       }
     }
 
+    private hndEvent = (_event: FudgeEvent): void => {
+      switch (_event.type) {
+        case EVENT_EDITOR.FOCUS:
+          this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
+          if (this.animation) {
+            this.redraw();
+            let translation: ƒ.Vector2 = this.mtxTransform.translation;
+            translation.y = this.canvas.height / 2;
+            this.mtxTransform.translation = translation;
+            let scaling: ƒ.Vector2 = this.mtxTransform.scaling;
+            scaling.x = this.canvas.width / (this.animation.totalTime * 1.1);
+            this.mtxTransform.scaling = scaling;
+          }
+          break;
+      }
+    }
+
     private hndPointerDown = (_event: PointerEvent): void => {
       _event.preventDefault();
       switch (_event.buttons) {
         case 1:
-          this.isScrolling = _event.offsetY > (<HTMLElement>_event.target).clientHeight; // clicked on scroll bar
+          if (_event.offsetY > (<HTMLElement>_event.target).clientHeight) // clicked on scroll bar
+            this.scrollContainer.onscroll = this.hndScroll;
           break;
         case 4:
           this.posDragStart = this.getTransformedPoint(_event.offsetX, _event.offsetY);
@@ -289,15 +305,15 @@ namespace Fudge {
 
     private hndPointerUp = (_event: PointerEvent): void => {
       _event.preventDefault();
-      if (this.isScrolling) {
+
+      if (this.scrollContainer.onscroll) {
+        this.scrollContainer.onscroll = undefined;
         this.redraw();
-        this.isScrolling = false;
       }
     }
 
     private hndWheel = (_event: WheelEvent) => {
       _event.preventDefault();
-
       if (_event.buttons != 0) return;
       let zoomFactor: number = _event.deltaY < 0 ? 1.05 : 0.95;
       let posCursorTransformed: ƒ.Vector2 = this.getTransformedPoint(_event.offsetX, _event.offsetY);
@@ -311,12 +327,10 @@ namespace Fudge {
 
     private hndScroll = (_event: Event) => {
       _event.preventDefault();
-
-      if (this.isScrolling) {
-        this.mtxTransform.translation.x = -this.scrollContainer.scrollLeft;
-        this.redraw(false);
-      }
+      let translation: ƒ.Vector2 = this.mtxTransform.translation;
+      translation.x = -this.scrollContainer.scrollLeft;
+      this.mtxTransform.translation = translation;
+      this.redraw(false);
     }
-
   }
 }
