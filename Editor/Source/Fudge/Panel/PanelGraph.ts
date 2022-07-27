@@ -46,10 +46,11 @@ namespace Fudge {
       // this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
 
 
+      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
+      this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
 
@@ -80,7 +81,7 @@ namespace Fudge {
       // TODO: iterate over views and collect their states for reconstruction 
     }
 
-    private hndEvent = async (_event: FudgeEvent): Promise<void> => {
+    private hndEvent = async (_event: FudgeEvent | CustomEvent): Promise<void> => {
       _event.stopPropagation();
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
@@ -93,14 +94,17 @@ namespace Fudge {
               _event = new FudgeEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
           }
           break;
+        case ƒui.EVENT.SELECT:
+          _event = new FudgeEvent(EVENT_EDITOR.SELECT, { bubbles: false, detail: { node: _event.detail.data, view: this } });
+          break;
       }
 
       this.broadcastEvent(_event);
     }
 
-    private hndFocusNode = (_event: CustomEvent): void => {
-      let event: FudgeEvent = new FudgeEvent(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: _event.detail.data, view: this } });
-      this.broadcastEvent(event);
-    }
+    // private hndFocusNode = (_event: CustomEvent): void => {
+    //   let event: FudgeEvent = new FudgeEvent(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: _event.detail.data, view: this } });
+    //   this.broadcastEvent(event);
+    // }
   }
 }

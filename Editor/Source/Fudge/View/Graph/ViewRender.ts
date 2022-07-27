@@ -211,7 +211,8 @@ namespace Fudge {
           if (detail.node) {
             if (detail.view == this)
               return;
-            this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
+            if (_event.type == EVENT_EDITOR.FOCUS)
+              this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
             ƒ.Render.prepare(this.cmrOrbit);
           } else
             this.setGraph(_event.detail.graph);

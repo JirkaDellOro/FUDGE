@@ -7,8 +7,8 @@ namespace Fudge {
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
    */
   export class ViewHierarchy extends View {
+    #selectionPrevious: ƒ.Node[] = [];
     private graph: ƒ.Graph;
-    // private selectedNode: ƒ.Node;
     private tree: ƒUi.Tree<ƒ.Node>;
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
@@ -19,7 +19,7 @@ namespace Fudge {
 
       // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
+      // this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
     }
 
     public setGraph(_graph: ƒ.Graph): void {
@@ -55,7 +55,7 @@ namespace Fudge {
       return this.tree.controller.dragDrop.sources;
     }
 
-    public focusNode(_node: ƒ.Node): void {
+    public showNode(_node: ƒ.Node): void {
       let path: ƒ.Node[] = _node.getPath();
       path = path.splice(path.indexOf(this.graph));
       this.tree.show(path);
@@ -158,16 +158,22 @@ namespace Fudge {
         case ƒUi.EVENT.DELETE:
           this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
           break;
+        case ƒUi.EVENT.SELECT:
+          //only dispatch the event to focus the node, if the node is in the current and the previous selection  
+          let node: ƒ.Node = _event.detail["data"];
+          if (this.#selectionPrevious.includes(node) && this.getSelection().includes(node))
+            this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: node, view: this } });
+          this.#selectionPrevious = this.getSelection().slice(0);
+          break;
         case EVENT_EDITOR.SELECT:
-          if (_event.detail.node)
+          if (_event.detail.node) {
+            this.showNode(_event.detail.node);
             this.tree.displaySelection([_event.detail.node]);
+          }
           else {
             this.setGraph(_event.detail.graph);
             break;
           }
-        case EVENT_EDITOR.FOCUS:
-          if (_event.detail.node)
-            this.focusNode(_event.detail.node);
           break;
       }
     }

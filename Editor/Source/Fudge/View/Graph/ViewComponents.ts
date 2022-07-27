@@ -211,7 +211,7 @@ namespace Fudge {
       switch (_event.type) {
         // case ƒui.EVENT.RENAME: break;
         case EVENT_EDITOR.SELECT:
-        case EVENT_EDITOR.FOCUS:
+        // case EVENT_EDITOR.FOCUS:
           this.node = _event.detail.graph || _event.detail.node;
         case EVENT_EDITOR.MODIFY:
           this.fillContent();

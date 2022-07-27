@@ -382,7 +382,6 @@ declare namespace Fudge {
             [key: string]: string;
         };
         private hndEvent;
-        private hndFocusNode;
     }
 }
 declare namespace Fudge {
@@ -542,13 +541,14 @@ declare namespace Fudge {
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewHierarchy extends View {
+        #private;
         private graph;
         private tree;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         setGraph(_graph: ƒ.Graph): void;
         getSelection(): ƒ.Node[];
         getDragDropSources(): ƒ.Node[];
-        focusNode(_node: ƒ.Node): void;
+        showNode(_node: ƒ.Node): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
