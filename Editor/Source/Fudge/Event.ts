@@ -16,6 +16,7 @@ namespace Fudge {
     resource?: ƒ.SerializableResource;
     transform?: Object;
     view?: View;
+    data?: ƒ.General;
   }
 
   /**
