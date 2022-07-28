@@ -85,9 +85,9 @@ namespace FudgeCore {
     /**
      * Forces an update of the animation from outside. Used in the ViewAnimation. Shouldn't be used during the game.
      * @param _time the (unscaled) time to update the animation with.
-     * @returns a Tupel containing the Mutator for Animation and the playmode corrected time. 
+     * @returns the Mutator for Animation. 
      */
-    public updateAnimation(_time: number): [Mutator, number] {
+    public updateAnimation(_time: number): Mutator {
       return this.updateAnimationLoop(null, _time);
     }
 
@@ -153,8 +153,8 @@ namespace FudgeCore {
      * Uses the built-in time unless a different time is specified.
      * May also be called from updateAnimation().
      */
-    private updateAnimationLoop = (_e: Event, _time?: number): [Mutator, number] => {
-      if (this.animation.totalTime == 0) return [null, 0];
+    private updateAnimationLoop = (_e: Event, _time?: number): Mutator => {
+      if (this.animation.totalTime == 0) return null;
 
       let time: number = _time || _time === 0 ? _time : this.#timeLocal.get();
       if (this.playback == ANIMATION_PLAYBACK.FRAMEBASED) {
@@ -171,9 +171,9 @@ namespace FudgeCore {
         if (this.node) {
           this.node.applyAnimation(mutator);
         }
-        return [mutator, time];
+        return mutator;
       }
-      return [null, time];
+      return null;
     }
 
     /**

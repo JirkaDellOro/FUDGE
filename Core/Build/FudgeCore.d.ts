@@ -1762,9 +1762,9 @@ declare namespace FudgeCore {
         /**
          * Forces an update of the animation from outside. Used in the ViewAnimation. Shouldn't be used during the game.
          * @param _time the (unscaled) time to update the animation with.
-         * @returns a Tupel containing the Mutator for Animation and the playmode corrected time.
+         * @returns the Mutator for Animation.
          */
-        updateAnimation(_time: number): [Mutator, number];
+        updateAnimation(_time: number): Mutator;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
