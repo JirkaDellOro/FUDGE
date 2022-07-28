@@ -124,6 +124,7 @@ declare namespace Fudge {
         resource?: ƒ.SerializableResource;
         transform?: Object;
         view?: View;
+        data?: ƒ.General;
     }
     /**
      * Extension of CustomEvent that supports a detail field with the type EventDetail
@@ -539,14 +540,13 @@ declare namespace Fudge {
         animation: ƒ.Animation;
         controller: ControllerAnimation;
         toolbar: HTMLDivElement;
+        graph: ƒ.Graph;
         private cmpAnimator;
         private node;
         private playbackTime;
-        private graph;
         private selectedKey;
         private propertyList;
         private sheet;
-        private hover;
         private time;
         private idInterval;
         constructor(_container: ComponentContainer, _state: Object);
@@ -559,14 +559,13 @@ declare namespace Fudge {
         private hndPointerMove;
         private hndEvent;
         private setAnimation;
+        private recreatePropertyList;
         private hndSelect;
+        private hndAnimate;
+        private animate;
         private fillToolbar;
         private hndToolbarClick;
-        private hndToolbarChange;
-        private updatePropertyList;
-        private setTime;
-        private redraw;
-        private updateAnimation;
+        private pause;
         private randomNameGenerator;
     }
 }
@@ -579,6 +578,7 @@ declare namespace Fudge {
     abstract class ViewAnimationSheet {
         protected static readonly KEY_SIZE: number;
         private static readonly LINE_WIDTH;
+        private static readonly TIMELINE_HEIGHT;
         private static readonly PIXEL_PER_SECOND;
         canvas: HTMLCanvasElement;
         scrollContainer: HTMLDivElement;
@@ -591,7 +591,7 @@ declare namespace Fudge {
         private view;
         private labels;
         private events;
-        private time;
+        private playbackTime;
         private posDragStart;
         private animation;
         constructor(_view: ViewAnimation);
@@ -613,6 +613,8 @@ declare namespace Fudge {
         private hndPointerUp;
         private hndWheel;
         private hndScroll;
+        private hndAnimate;
+        private setTime;
     }
 }
 declare namespace Fudge {

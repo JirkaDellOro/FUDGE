@@ -9,6 +9,7 @@ namespace Fudge {
   export abstract class ViewAnimationSheet {
     protected static readonly KEY_SIZE: number = 8; // width and height in px
     private static readonly LINE_WIDTH: number = 1; // in px
+    private static readonly TIMELINE_HEIGHT: number = 50; // in px
     private static readonly PIXEL_PER_SECOND: number = 1000; // at scaling 1
 
     public canvas: HTMLCanvasElement;
@@ -22,7 +23,7 @@ namespace Fudge {
     private view: ViewAnimation;
     private labels: ViewAnimationLabel[] = [];
     private events: ViewAnimationEvent[] = [];
-    private time: number = 0;
+    private playbackTime: number = 0;
 
     private posDragStart: ƒ.Vector2 = new ƒ.Vector2();
     private animation: ƒ.Animation;
@@ -51,6 +52,7 @@ namespace Fudge {
       this.scrollContainer.addEventListener("pointerup", this.hndPointerUp);
       this.scrollContainer.addEventListener("wheel", this.hndWheel);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
 
       this.scrollBody = document.createElement("div");
       this.scrollBody.style.overflow = "hidden";
@@ -71,7 +73,7 @@ namespace Fudge {
 
     public redraw(_scroll: boolean = true, _time?: number): void {
       if (!this.animation) return;
-      if (_time != undefined) this.time = _time;
+      if (_time != undefined) this.playbackTime = _time;
       this.canvas.width = this.dom.clientWidth - 300;
       this.canvas.height = this.dom.clientHeight - 20;
       this.scrollContainer.style.width = `${this.canvas.width}px`;
@@ -105,7 +107,7 @@ namespace Fudge {
       }
       this.drawTimeline();
       this.drawEventsAndLabels();
-      this.drawCursor(this.time);
+      this.drawCursor(this.playbackTime);
     }
 
     public getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
@@ -141,13 +143,13 @@ namespace Fudge {
       this.crc2.resetTransform();
       this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
       
-      let timelineHeight: number = 50;
+      // let timelineHeight: number = 50;
       this.crc2.fillStyle = "#7a7a7a";
-      this.crc2.fillRect(0, 0, this.canvas.width, timelineHeight + 30);
+      this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT + 30);
   
       let timeline: Path2D = new Path2D();
-      timeline.moveTo(0, timelineHeight);
-      timeline.lineTo(this.canvas.width, timelineHeight);
+      timeline.moveTo(0, ViewAnimationSheet.TIMELINE_HEIGHT);
+      timeline.lineTo(this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
 
       this.crc2.strokeStyle = "black";
       this.crc2.fillStyle = "black";
@@ -167,18 +169,18 @@ namespace Fudge {
       let stepOffset: number = Math.floor(-this.mtxTransform.translation.x / pixelPerStep);
       for (let iStep: number = stepOffset; iStep < steps + stepOffset; iStep++) {
         let x: number = (iStep * pixelPerStep + this.mtxTransform.translation.x);
-        timeline.moveTo(x, timelineHeight);
+        timeline.moveTo(x, ViewAnimationSheet.TIMELINE_HEIGHT);
         // TODO: refine the display
         if (iStep % 5 == 0) {
-          timeline.lineTo(x, timelineHeight - 30);
+          timeline.lineTo(x, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
           let second: number = Math.floor((iStep * framesPerStep) / this.animation.fps);
           let frame: number = (iStep * framesPerStep) % this.animation.fps;
           this.crc2.fillText(
             `${second}:${frame < 10 ? "0" : ""}${frame}`, 
             x + 3, 
-            timelineHeight - 30);
+            ViewAnimationSheet.TIMELINE_HEIGHT - 30);
         } else {
-          timeline.lineTo(x, timelineHeight - 20);
+          timeline.lineTo(x, ViewAnimationSheet.TIMELINE_HEIGHT - 20);
         }
       }
 
@@ -288,6 +290,8 @@ namespace Fudge {
         case 1:
           if (_event.offsetY > (<HTMLElement>_event.target).clientHeight) // clicked on scroll bar
             this.scrollContainer.onscroll = this.hndScroll;
+          else if (_event.offsetY <= ViewAnimationSheet.TIMELINE_HEIGHT)
+            this.setTime(_event.offsetX);
           break;
         case 4:
           this.posDragStart = this.getTransformedPoint(_event.offsetX, _event.offsetY);
@@ -297,10 +301,16 @@ namespace Fudge {
 
     private hndPointerMove = (_event: PointerEvent): void => {
       _event.preventDefault();
-      if (_event.buttons != 4) return;
-
-      this.mtxTransform.translate(ƒ.Vector2.DIFFERENCE(this.getTransformedPoint(_event.offsetX, _event.offsetY), this.posDragStart));
-      this.redraw();
+      switch (_event.buttons) {
+        case 1:
+          if (_event.offsetY <= ViewAnimationSheet.TIMELINE_HEIGHT)
+            this.setTime(_event.offsetX);
+          break;
+        case 4:
+          this.mtxTransform.translate(ƒ.Vector2.DIFFERENCE(this.getTransformedPoint(_event.offsetX, _event.offsetY), this.posDragStart));
+          this.redraw();
+          break;
+      }
     }
 
     private hndPointerUp = (_event: PointerEvent): void => {
@@ -331,6 +341,19 @@ namespace Fudge {
       translation.x = -this.scrollContainer.scrollLeft;
       this.mtxTransform.translation = translation;
       this.redraw(false);
+    }
+
+    private hndAnimate = (_event: FudgeEvent): void => {
+      this.playbackTime = _event.detail.data.playbackTime || 0;
+      this.sequences = _event.detail.data.sequences || this.sequences;
+
+      this.redraw();
+    }
+
+    private setTime(_x: number): void {
+      let playbackTime: number = Math.max(0, this.getTransformedPoint(_x, 0).x);
+      playbackTime = Math.round(playbackTime / ((1000 / this.animation.fps))) * ((1000 / this.animation.fps));
+      this.view.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.view.graph, data: { playbackTime: playbackTime } } });
     }
   }
 }
