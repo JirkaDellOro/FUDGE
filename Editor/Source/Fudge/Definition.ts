@@ -52,6 +52,7 @@ namespace Fudge {
   export enum VIEW {
     HIERARCHY = "ViewHierarchy",
     ANIMATION = "ViewAnimation",
+    ANIMATION_SHEET = "ViewAnimationSheet",
     RENDER = "ViewRender",
     COMPONENTS = "ViewComponents",
     CAMERA = "ViewCamera",

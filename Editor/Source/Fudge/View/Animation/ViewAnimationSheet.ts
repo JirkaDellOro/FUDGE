@@ -6,7 +6,7 @@ namespace Fudge {
    * TODO: add
    * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
-  export abstract class ViewAnimationSheet {
+  export abstract class ViewAnimationSheet extends View {
     protected static readonly KEY_SIZE: number = 8; // width and height in px
     private static readonly LINE_WIDTH: number = 1; // in px
     private static readonly TIMELINE_HEIGHT: number = 50; // in px
@@ -20,68 +20,56 @@ namespace Fudge {
     protected keys: ViewAnimationKey[] = [];
     protected sequences: ViewAnimationSequence[] = [];
     protected crc2: CanvasRenderingContext2D;
-    private view: ViewAnimation;
     private labels: ViewAnimationLabel[] = [];
     private events: ViewAnimationEvent[] = [];
     private playbackTime: number = 0;
+    private graph: ƒ.Graph;
 
     private posDragStart: ƒ.Vector2 = new ƒ.Vector2();
     private animation: ƒ.Animation;
 
-    constructor(_view: ViewAnimation) {
-      this.view = _view;
+    constructor(_container: ComponentContainer, _state: Object) {
+      super(_container, _state);
       this.canvas = document.createElement("canvas");
       this.crc2 = this.canvas.getContext("2d");
       this.mtxTransform = new ƒ.Matrix3x3();
-      this.mtxTransformInverse = ƒ.Matrix3x3.INVERSION(this.mtxTransform);
+      this.mtxTransformInverse = new ƒ.Matrix3x3();
 
       this.canvas.style.position = "absolute";
-      this.canvas.style.left = "300px";
-      this.canvas.style.top = "0px";
-      this.canvas.style.pointerEvents = "auto";
 
       this.scrollContainer = document.createElement("div");
       this.scrollContainer.style.position = "absolute";
-      this.scrollContainer.style.left = "300px";
-      this.scrollContainer.style.top = "0px";
+      this.scrollContainer.style.width = "100%";
+      this.scrollContainer.style.height = "100%";
       this.scrollContainer.style.overflowX = "scroll";
       this.scrollContainer.style.scrollBehavior = "instant";
-
       this.scrollContainer.addEventListener("pointerdown", this.hndPointerDown);
       this.scrollContainer.addEventListener("pointermove", this.hndPointerMove);
       this.scrollContainer.addEventListener("pointerup", this.hndPointerUp);
       this.scrollContainer.addEventListener("wheel", this.hndWheel);
+
+      _container.on("resize", () => this.redraw());
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
 
       this.scrollBody = document.createElement("div");
       this.scrollBody.style.overflow = "hidden";
       this.scrollBody.style.height = "1px";
-    }
 
-    protected get dom(): HTMLElement {
-      return this.view.dom;
-    }
-
-    protected get controller(): ControllerAnimation {
-      return this.view.controller;
-    }
-
-    public setSequences(_sequences: ViewAnimationSequence[]): void {
-      this.sequences = _sequences;
+      this.dom.appendChild(this.canvas);
+      this.dom.appendChild(this.scrollContainer);
+      this.scrollContainer.appendChild(this.scrollBody);
     }
 
     public redraw(_scroll: boolean = true, _time?: number): void {
-      if (!this.animation) return;
-      if (_time != undefined) this.playbackTime = _time;
-      this.canvas.width = this.dom.clientWidth - 300;
-      this.canvas.height = this.dom.clientHeight - 20;
-      this.scrollContainer.style.width = `${this.canvas.width}px`;
-      this.scrollContainer.style.height = `${this.canvas.height}px`;
+      this.canvas.width = this.dom.clientWidth;
+      this.canvas.height = this.dom.clientHeight;
       
-      // TODO: check if these 2 lines are necessary
       this.crc2.resetTransform();
       this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
+      
+      if (!this.animation) return;
+      if (_time != undefined) this.playbackTime = _time;
       
       let translation: ƒ.Vector2 = this.mtxTransform.translation;
       translation.x = Math.min(0, translation.x);
@@ -110,40 +98,10 @@ namespace Fudge {
       this.drawCursor(this.playbackTime);
     }
 
-    public getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
-      for (let l of this.labels) {
-        if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
-          return l;
-        }
-      }
-
-      for (let e of this.events) {
-        if (this.crc2.isPointInPath(e.path2D, _x, _y)) {
-          return e;
-        }
-      }
-
-      let point: ƒ.Vector2 = this.getTransformedPoint(_x, _y);
-      for (let k of this.keys) {
-        if (this.crc2.isPointInPath(k.path2D, point.x, point.y)) {
-          return k;
-        }
-      }
-      return null;
-    }
-
-    public getTransformedPoint(_x: number, _y: number): ƒ.Vector2 {
-      let vector: ƒ.Vector2 = new ƒ.Vector2(_x, _y);
-      vector.transform(this.mtxTransformInverse);
-
-      return vector;
-    }
-
     protected drawTimeline(): void {
       this.crc2.resetTransform();
       this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
       
-      // let timelineHeight: number = 50;
       this.crc2.fillStyle = "#7a7a7a";
       this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT + 30);
   
@@ -267,9 +225,39 @@ namespace Fudge {
       }
     }
 
+    private getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
+      for (let l of this.labels) {
+        if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
+          return l;
+        }
+      }
+
+      for (let e of this.events) {
+        if (this.crc2.isPointInPath(e.path2D, _x, _y)) {
+          return e;
+        }
+      }
+
+      let point: ƒ.Vector2 = this.getTransformedPoint(_x, _y);
+      for (let k of this.keys) {
+        if (this.crc2.isPointInPath(k.path2D, point.x, point.y)) {
+          return k;
+        }
+      }
+      return null;
+    }
+
+    private getTransformedPoint(_x: number, _y: number): ƒ.Vector2 {
+      let vector: ƒ.Vector2 = new ƒ.Vector2(_x, _y);
+      vector.transform(this.mtxTransformInverse);
+
+      return vector;
+    }
+
     private hndEvent = (_event: FudgeEvent): void => {
       switch (_event.type) {
         case EVENT_EDITOR.FOCUS:
+          this.graph = _event.detail.graph;
           this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
           if (this.animation) {
             this.redraw();
@@ -292,6 +280,22 @@ namespace Fudge {
             this.scrollContainer.onscroll = this.hndScroll;
           else if (_event.offsetY <= ViewAnimationSheet.TIMELINE_HEIGHT)
             this.setTime(_event.offsetX);
+          else {
+            let obj: ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent = this.getObjectAtPoint(_event.offsetX, _event.offsetY);
+            if (!obj) return;
+            if (obj["label"]) {
+              console.log(obj["label"]);
+              this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: { name: obj["label"], time: this.animation.labels[obj["label"]] } } });
+            }
+            else if (obj["event"]) {
+              console.log(obj["event"]);
+              this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: { name: obj["event"], time: this.animation.events[obj["event"]] } } });
+            }
+            else if (obj["key"]) {
+              console.log(obj["key"]);
+              this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: obj } });
+            }
+          }
           break;
         case 4:
           this.posDragStart = this.getTransformedPoint(_event.offsetX, _event.offsetY);
@@ -353,7 +357,7 @@ namespace Fudge {
     private setTime(_x: number): void {
       let playbackTime: number = Math.max(0, this.getTransformedPoint(_x, 0).x);
       playbackTime = Math.round(playbackTime / ((1000 / this.animation.fps))) * ((1000 / this.animation.fps));
-      this.view.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.view.graph, data: { playbackTime: playbackTime } } });
+      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: playbackTime } } });
     }
   }
 }

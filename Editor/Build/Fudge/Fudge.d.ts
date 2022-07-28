@@ -63,6 +63,7 @@ declare namespace Fudge {
     enum VIEW {
         HIERARCHY = "ViewHierarchy",
         ANIMATION = "ViewAnimation",
+        ANIMATION_SHEET = "ViewAnimationSheet",
         RENDER = "ViewRender",
         COMPONENTS = "ViewComponents",
         CAMERA = "ViewCamera",
@@ -427,6 +428,7 @@ declare namespace Fudge {
             [key: string]: string;
         };
         private hndEvent;
+        private hndAnimate;
     }
 }
 declare namespace Fudge {
@@ -540,13 +542,12 @@ declare namespace Fudge {
         animation: ƒ.Animation;
         controller: ControllerAnimation;
         toolbar: HTMLDivElement;
-        graph: ƒ.Graph;
+        private graph;
         private cmpAnimator;
         private node;
         private playbackTime;
         private selectedKey;
         private propertyList;
-        private sheet;
         private time;
         private idInterval;
         constructor(_container: ComponentContainer, _state: Object);
@@ -555,8 +556,6 @@ declare namespace Fudge {
         private getNodeSubmenu;
         private getMutatorSubmenu;
         private createUserInterface;
-        private hndPointerDown;
-        private hndPointerMove;
         private hndEvent;
         private setAnimation;
         private recreatePropertyList;
@@ -575,7 +574,7 @@ declare namespace Fudge {
      * TODO: add
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
-    abstract class ViewAnimationSheet {
+    abstract class ViewAnimationSheet extends View {
         protected static readonly KEY_SIZE: number;
         private static readonly LINE_WIDTH;
         private static readonly TIMELINE_HEIGHT;
@@ -588,25 +587,22 @@ declare namespace Fudge {
         protected keys: ViewAnimationKey[];
         protected sequences: ViewAnimationSequence[];
         protected crc2: CanvasRenderingContext2D;
-        private view;
         private labels;
         private events;
         private playbackTime;
+        private graph;
         private posDragStart;
         private animation;
-        constructor(_view: ViewAnimation);
-        protected get dom(): HTMLElement;
-        protected get controller(): ControllerAnimation;
-        setSequences(_sequences: ViewAnimationSequence[]): void;
+        constructor(_container: ComponentContainer, _state: Object);
         redraw(_scroll?: boolean, _time?: number): void;
-        getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent;
-        getTransformedPoint(_x: number, _y: number): ƒ.Vector2;
         protected drawTimeline(): void;
         protected drawKeys(): void;
         protected abstract generateKeys(): void;
         protected generateKey(_x: number, _y: number, _w: number, _h: number): Path2D;
         private drawCursor;
         private drawEventsAndLabels;
+        private getObjectAtPoint;
+        private getTransformedPoint;
         private hndEvent;
         private hndPointerDown;
         private hndPointerMove;

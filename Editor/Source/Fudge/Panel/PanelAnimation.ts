@@ -12,6 +12,7 @@ namespace Fudge {
       super(_container, _state);
 
       this.goldenLayout.registerComponentConstructor(VIEW.ANIMATION, ViewAnimation);
+      this.goldenLayout.registerComponentConstructor(VIEW.ANIMATION_SHEET, ViewAnimationSheetCurve);
 
       const config: RowOrColumnItemConfig = {
         type: "row",
@@ -21,6 +22,12 @@ namespace Fudge {
             componentType: VIEW.ANIMATION,
             componentState: _state,
             title: "ANIMATION"
+          },
+          {
+            type: "component",
+            componentType: VIEW.ANIMATION_SHEET,
+            componentState: _state,
+            title: "Sheet"
           }
         ]
       };
@@ -31,6 +38,7 @@ namespace Fudge {
 
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
 
       this.setTitle("Animation | " );
     }
@@ -41,12 +49,22 @@ namespace Fudge {
     }
 
     private hndEvent = async (_event: FudgeEvent): Promise<void> => {
-      // switch (_event.type) {
+      switch (_event.type) {
 
-      // }
+      }
 
       this.broadcastEvent(_event);
       _event.stopPropagation();
     }
+
+    private hndAnimate = async (_event: FudgeEvent): Promise<void> => {
+      if (_event.eventPhase == _event.AT_TARGET)
+        this.broadcastEvent(_event);
+      if (_event.detail.data.sequences) {
+        this.broadcastEvent(_event);
+        _event.stopPropagation();
+      }
+    }
   }
 }
+

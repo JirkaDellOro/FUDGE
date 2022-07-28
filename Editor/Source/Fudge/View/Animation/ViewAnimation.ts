@@ -31,14 +31,14 @@ namespace Fudge {
     public animation: ƒ.Animation;
     public controller: ControllerAnimation;
     public toolbar: HTMLDivElement;
-    public graph: ƒ.Graph;
+    private graph: ƒ.Graph;
     
     private cmpAnimator: ƒ.ComponentAnimator;
     private node: ƒ.Node;
     private playbackTime: number;
     private selectedKey: ViewAnimationKey;
     private propertyList: HTMLDivElement;
-    private sheet: ViewAnimationSheet;
+    // private sheet: ViewAnimationSheet;
     private time: ƒ.Time = new ƒ.Time();
     private idInterval: number;
 
@@ -48,10 +48,9 @@ namespace Fudge {
       this.setAnimation(null);
       this.createUserInterface();
       
-      _container.on("resize", this.animate);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
-      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndSelect);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndSelect);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.EXPAND, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.COLLAPSE, this.hndEvent);
@@ -183,37 +182,6 @@ namespace Fudge {
       this.toolbar.style.overflow = "hidden";
       this.fillToolbar(this.toolbar);
       this.toolbar.addEventListener("click", this.hndToolbarClick);
-      
-      this.sheet = new ViewAnimationSheetCurve(this); // TODO: stop using fixed values?
-      this.sheet.scrollContainer.addEventListener("pointerdown", this.hndPointerDown);
-      this.sheet.scrollContainer.addEventListener("pointermove", this.hndPointerMove);
-    }
-
-    private hndPointerDown = (_event: PointerEvent): void => {
-      if (_event.buttons != 1 || this.idInterval != undefined) return;
-
-      let obj: ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent = this.sheet.getObjectAtPoint(_event.offsetX, _event.offsetY);
-      if (!obj) return;
-
-      if (obj["label"]) {
-        console.log(obj["label"]);
-        // TODO: replace with editor events. use dispatch event from view?
-        this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
-      }
-      else if (obj["event"]) {
-        console.log(obj["event"]);
-        this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
-      }
-      else if (obj["key"]) {
-        console.log(obj["key"]);
-        this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { detail: obj }));
-      }
-    }
-
-    private hndPointerMove = (_event: PointerEvent): void => {
-      if (_event.buttons != 1 || this.idInterval != undefined || _event.offsetY > 50) return;
-      _event.preventDefault();
-
     }
 
     private hndEvent = (_event: FudgeEvent): void => {
@@ -251,10 +219,6 @@ namespace Fudge {
 
       this.recreatePropertyList();
       
-      this.dom.appendChild(this.sheet.canvas);
-      this.dom.appendChild(this.sheet.scrollContainer);
-      this.sheet.scrollContainer.appendChild(this.sheet.scrollBody);
-
       this.animate(this.controller.getOpenSequences());
     }
 
@@ -272,9 +236,9 @@ namespace Fudge {
       this.controller.updatePropertyList(nodeMutator);
     }
 
-    private hndSelect = (_event: CustomEvent): void => {
-      if ("key" in _event.detail) {
-        this.selectedKey = _event.detail;
+    private hndSelect = (_event: FudgeEvent): void => {
+      if ("key" in _event.detail.data) {
+        this.selectedKey = _event.detail.data;
       }
     }
 
@@ -287,7 +251,7 @@ namespace Fudge {
       this.controller?.updatePropertyList(nodeMutator);
     }
 
-    private animate = (_sequences?: ViewAnimationSequence[]): void => {
+    private animate(_sequences?: ViewAnimationSequence[]): void {
       this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: this.playbackTime, sequences: _sequences } } });
     }
 

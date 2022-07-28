@@ -76,6 +76,7 @@ var Fudge;
     (function (VIEW) {
         VIEW["HIERARCHY"] = "ViewHierarchy";
         VIEW["ANIMATION"] = "ViewAnimation";
+        VIEW["ANIMATION_SHEET"] = "ViewAnimationSheet";
         VIEW["RENDER"] = "ViewRender";
         VIEW["COMPONENTS"] = "ViewComponents";
         VIEW["CAMERA"] = "ViewCamera";
@@ -1079,7 +1080,7 @@ var Fudge;
             _init.detail = _init.detail || {};
             _init.bubbles = _init.bubbles || false;
             _init.cancelable = _init.cancelable || true;
-            _init.detail.view = this;
+            _init.detail.view = _init.detail.view || this;
             this.dom.dispatchEvent(new Fudge.FudgeEvent(_type, _init));
         }
         //#region  ContextMenu
@@ -2001,6 +2002,7 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.ANIMATION, Fudge.ViewAnimation);
+            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.ANIMATION_SHEET, Fudge.ViewAnimationSheetCurve);
             const config = {
                 type: "row",
                 content: [
@@ -2009,6 +2011,12 @@ var Fudge;
                         componentType: Fudge.VIEW.ANIMATION,
                         componentState: _state,
                         title: "ANIMATION"
+                    },
+                    {
+                        type: "component",
+                        componentType: Fudge.VIEW.ANIMATION_SHEET,
+                        componentState: _state,
+                        title: "Sheet"
                     }
                 ]
             };
@@ -2017,6 +2025,7 @@ var Fudge;
             ]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndAnimate);
             this.setTitle("Animation | ");
         }
         getState() {
@@ -2024,10 +2033,18 @@ var Fudge;
             return {};
         }
         hndEvent = async (_event) => {
-            // switch (_event.type) {
-            // }
+            switch (_event.type) {
+            }
             this.broadcastEvent(_event);
             _event.stopPropagation();
+        };
+        hndAnimate = async (_event) => {
+            if (_event.eventPhase == _event.AT_TARGET)
+                this.broadcastEvent(_event);
+            if (_event.detail.data.sequences) {
+                this.broadcastEvent(_event);
+                _event.stopPropagation();
+            }
         };
     }
     Fudge.PanelAnimation = PanelAnimation;
@@ -2565,7 +2582,7 @@ var Fudge;
         playbackTime;
         selectedKey;
         propertyList;
-        sheet;
+        // private sheet: ViewAnimationSheet;
         time = new ƒ.Time();
         idInterval;
         constructor(_container, _state) {
@@ -2573,10 +2590,9 @@ var Fudge;
             this.playbackTime = 0;
             this.setAnimation(null);
             this.createUserInterface();
-            _container.on("resize", this.animate);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndAnimate);
-            this.dom.addEventListener("itemselect" /* SELECT */, this.hndSelect);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndSelect);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("expand" /* EXPAND */, this.hndEvent);
             this.dom.addEventListener("collapse" /* COLLAPSE */, this.hndEvent);
@@ -2682,35 +2698,7 @@ var Fudge;
             this.toolbar.style.overflow = "hidden";
             this.fillToolbar(this.toolbar);
             this.toolbar.addEventListener("click", this.hndToolbarClick);
-            this.sheet = new Fudge.ViewAnimationSheetCurve(this); // TODO: stop using fixed values?
-            this.sheet.scrollContainer.addEventListener("pointerdown", this.hndPointerDown);
-            this.sheet.scrollContainer.addEventListener("pointermove", this.hndPointerMove);
         }
-        hndPointerDown = (_event) => {
-            if (_event.buttons != 1 || this.idInterval != undefined)
-                return;
-            let obj = this.sheet.getObjectAtPoint(_event.offsetX, _event.offsetY);
-            if (!obj)
-                return;
-            if (obj["label"]) {
-                console.log(obj["label"]);
-                // TODO: replace with editor events. use dispatch event from view?
-                this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
-            }
-            else if (obj["event"]) {
-                console.log(obj["event"]);
-                this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
-            }
-            else if (obj["key"]) {
-                console.log(obj["key"]);
-                this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { detail: obj }));
-            }
-        };
-        hndPointerMove = (_event) => {
-            if (_event.buttons != 1 || this.idInterval != undefined || _event.offsetY > 50)
-                return;
-            _event.preventDefault();
-        };
         hndEvent = (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.FOCUS:
@@ -2742,9 +2730,6 @@ var Fudge;
             this.dom.appendChild(this.toolbar);
             this.animation = _animation;
             this.recreatePropertyList();
-            this.dom.appendChild(this.sheet.canvas);
-            this.dom.appendChild(this.sheet.scrollContainer);
-            this.sheet.scrollContainer.appendChild(this.sheet.scrollBody);
             this.animate(this.controller.getOpenSequences());
         }
         recreatePropertyList() {
@@ -2759,8 +2744,8 @@ var Fudge;
             this.controller.updatePropertyList(nodeMutator);
         }
         hndSelect = (_event) => {
-            if ("key" in _event.detail) {
-                this.selectedKey = _event.detail;
+            if ("key" in _event.detail.data) {
+                this.selectedKey = _event.detail.data;
             }
         };
         hndAnimate = (_event) => {
@@ -2770,9 +2755,9 @@ var Fudge;
             let nodeMutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
             this.controller?.updatePropertyList(nodeMutator);
         };
-        animate = (_sequences) => {
+        animate(_sequences) {
             this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: this.playbackTime, sequences: _sequences } } });
-        };
+        }
         fillToolbar(_tb) {
             let buttons = [];
             buttons.push(document.createElement("button"));
@@ -2894,7 +2879,7 @@ var Fudge;
      * TODO: add
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
-    class ViewAnimationSheet {
+    class ViewAnimationSheet extends Fudge.View {
         static KEY_SIZE = 8; // width and height in px
         static LINE_WIDTH = 1; // in px
         static TIMELINE_HEIGHT = 50; // in px
@@ -2907,59 +2892,48 @@ var Fudge;
         keys = [];
         sequences = [];
         crc2;
-        view;
         labels = [];
         events = [];
         playbackTime = 0;
+        graph;
         posDragStart = new ƒ.Vector2();
         animation;
-        constructor(_view) {
-            this.view = _view;
+        constructor(_container, _state) {
+            super(_container, _state);
             this.canvas = document.createElement("canvas");
             this.crc2 = this.canvas.getContext("2d");
             this.mtxTransform = new ƒ.Matrix3x3();
-            this.mtxTransformInverse = ƒ.Matrix3x3.INVERSION(this.mtxTransform);
+            this.mtxTransformInverse = new ƒ.Matrix3x3();
             this.canvas.style.position = "absolute";
-            this.canvas.style.left = "300px";
-            this.canvas.style.top = "0px";
-            this.canvas.style.pointerEvents = "auto";
             this.scrollContainer = document.createElement("div");
             this.scrollContainer.style.position = "absolute";
-            this.scrollContainer.style.left = "300px";
-            this.scrollContainer.style.top = "0px";
+            this.scrollContainer.style.width = "100%";
+            this.scrollContainer.style.height = "100%";
             this.scrollContainer.style.overflowX = "scroll";
             this.scrollContainer.style.scrollBehavior = "instant";
             this.scrollContainer.addEventListener("pointerdown", this.hndPointerDown);
             this.scrollContainer.addEventListener("pointermove", this.hndPointerMove);
             this.scrollContainer.addEventListener("pointerup", this.hndPointerUp);
             this.scrollContainer.addEventListener("wheel", this.hndWheel);
+            _container.on("resize", () => this.redraw());
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndAnimate);
             this.scrollBody = document.createElement("div");
             this.scrollBody.style.overflow = "hidden";
             this.scrollBody.style.height = "1px";
-        }
-        get dom() {
-            return this.view.dom;
-        }
-        get controller() {
-            return this.view.controller;
-        }
-        setSequences(_sequences) {
-            this.sequences = _sequences;
+            this.dom.appendChild(this.canvas);
+            this.dom.appendChild(this.scrollContainer);
+            this.scrollContainer.appendChild(this.scrollBody);
         }
         redraw(_scroll = true, _time) {
+            this.canvas.width = this.dom.clientWidth;
+            this.canvas.height = this.dom.clientHeight;
+            this.crc2.resetTransform();
+            this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
             if (!this.animation)
                 return;
             if (_time != undefined)
                 this.playbackTime = _time;
-            this.canvas.width = this.dom.clientWidth - 300;
-            this.canvas.height = this.dom.clientHeight - 20;
-            this.scrollContainer.style.width = `${this.canvas.width}px`;
-            this.scrollContainer.style.height = `${this.canvas.height}px`;
-            // TODO: check if these 2 lines are necessary
-            this.crc2.resetTransform();
-            this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
             let translation = this.mtxTransform.translation;
             translation.x = Math.min(0, translation.x);
             this.mtxTransform.translation = translation;
@@ -2985,34 +2959,9 @@ var Fudge;
             this.drawEventsAndLabels();
             this.drawCursor(this.playbackTime);
         }
-        getObjectAtPoint(_x, _y) {
-            for (let l of this.labels) {
-                if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
-                    return l;
-                }
-            }
-            for (let e of this.events) {
-                if (this.crc2.isPointInPath(e.path2D, _x, _y)) {
-                    return e;
-                }
-            }
-            let point = this.getTransformedPoint(_x, _y);
-            for (let k of this.keys) {
-                if (this.crc2.isPointInPath(k.path2D, point.x, point.y)) {
-                    return k;
-                }
-            }
-            return null;
-        }
-        getTransformedPoint(_x, _y) {
-            let vector = new ƒ.Vector2(_x, _y);
-            vector.transform(this.mtxTransformInverse);
-            return vector;
-        }
         drawTimeline() {
             this.crc2.resetTransform();
             this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
-            // let timelineHeight: number = 50;
             this.crc2.fillStyle = "#7a7a7a";
             this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT + 30);
             let timeline = new Path2D();
@@ -3118,9 +3067,34 @@ var Fudge;
                 this.crc2.stroke(p);
             }
         }
+        getObjectAtPoint(_x, _y) {
+            for (let l of this.labels) {
+                if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
+                    return l;
+                }
+            }
+            for (let e of this.events) {
+                if (this.crc2.isPointInPath(e.path2D, _x, _y)) {
+                    return e;
+                }
+            }
+            let point = this.getTransformedPoint(_x, _y);
+            for (let k of this.keys) {
+                if (this.crc2.isPointInPath(k.path2D, point.x, point.y)) {
+                    return k;
+                }
+            }
+            return null;
+        }
+        getTransformedPoint(_x, _y) {
+            let vector = new ƒ.Vector2(_x, _y);
+            vector.transform(this.mtxTransformInverse);
+            return vector;
+        }
         hndEvent = (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.FOCUS:
+                    this.graph = _event.detail.graph;
                     this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
                     if (this.animation) {
                         this.redraw();
@@ -3142,6 +3116,23 @@ var Fudge;
                         this.scrollContainer.onscroll = this.hndScroll;
                     else if (_event.offsetY <= ViewAnimationSheet.TIMELINE_HEIGHT)
                         this.setTime(_event.offsetX);
+                    else {
+                        let obj = this.getObjectAtPoint(_event.offsetX, _event.offsetY);
+                        if (!obj)
+                            return;
+                        if (obj["label"]) {
+                            console.log(obj["label"]);
+                            this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: { name: obj["label"], time: this.animation.labels[obj["label"]] } } });
+                        }
+                        else if (obj["event"]) {
+                            console.log(obj["event"]);
+                            this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: { name: obj["event"], time: this.animation.events[obj["event"]] } } });
+                        }
+                        else if (obj["key"]) {
+                            console.log(obj["key"]);
+                            this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: obj } });
+                        }
+                    }
                     break;
                 case 4:
                     this.posDragStart = this.getTransformedPoint(_event.offsetX, _event.offsetY);
@@ -3194,7 +3185,7 @@ var Fudge;
         setTime(_x) {
             let playbackTime = Math.max(0, this.getTransformedPoint(_x, 0).x);
             playbackTime = Math.round(playbackTime / ((1000 / this.animation.fps))) * ((1000 / this.animation.fps));
-            this.view.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.view.graph, data: { playbackTime: playbackTime } } });
+            this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: playbackTime } } });
         }
     }
     Fudge.ViewAnimationSheet = ViewAnimationSheet;
