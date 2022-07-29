@@ -578,13 +578,14 @@ declare namespace Fudge {
         protected static readonly KEY_SIZE: number;
         private static readonly LINE_WIDTH;
         private static readonly TIMELINE_HEIGHT;
-        private static readonly PIXEL_PER_SECOND;
-        private static readonly INITIAL_TOTAL_TIME;
+        private static readonly PIXEL_PER_MILLISECOND;
+        private static readonly PIXEL_PER_VALUE;
+        private static readonly STANDARD_ANIMATION_LENGTH;
         canvas: HTMLCanvasElement;
         scrollContainer: HTMLDivElement;
         scrollBody: HTMLDivElement;
-        protected mtxTransform: ƒ.Matrix3x3;
-        protected mtxTransformInverse: ƒ.Matrix3x3;
+        protected mtxWorldToView: ƒ.Matrix3x3;
+        protected mtxViewToWorld: ƒ.Matrix3x3;
         protected keys: ViewAnimationKey[];
         protected sequences: ViewAnimationSequence[];
         protected crc2: CanvasRenderingContext2D;
@@ -602,8 +603,7 @@ declare namespace Fudge {
         protected generateKey(_x: number, _y: number, _w: number, _h: number): Path2D;
         private drawCursor;
         private drawEventsAndLabels;
-        private getObjectAtPoint;
-        private getTransformedPoint;
+        private getTransformedPos;
         private hndEvent;
         private hndPointerDown;
         private hndPointerMove;
@@ -620,7 +620,6 @@ declare namespace Fudge {
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimationSheetCurve extends ViewAnimationSheet {
-        private static readonly PIXEL_PER_VALUE;
         private static readonly MINIMUM_PIXEL_PER_STEP;
         drawCurves(): void;
         drawScale(): void;

@@ -1657,6 +1657,7 @@ declare namespace FudgeCore {
          * @returns the AnimationKey at the index if it exists, null otherwise.
          */
         getKey(_index: number): AnimationKey;
+        getKeys(): AnimationKey[];
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;

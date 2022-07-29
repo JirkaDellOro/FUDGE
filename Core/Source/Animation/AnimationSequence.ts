@@ -81,6 +81,9 @@ namespace FudgeCore {
       return this.keys[_index];
     }
 
+    getKeys(): AnimationKey[] {
+      return this.keys;
+    }
 
     //#region transfer
     serialize(): Serialization {
