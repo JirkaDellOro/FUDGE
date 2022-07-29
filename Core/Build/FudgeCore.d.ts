@@ -5485,6 +5485,7 @@ declare namespace FudgeCore {
         static registerGraphInstanceForResync(_instance: GraphInstance): void;
         static resyncGraphInstances(_graph: Graph): Promise<void>;
         static registerScriptNamespace(_namespace: Object): void;
+        static clearScriptNamespaces(): void;
         static getComponentScripts(): ComponentScripts;
         static loadScript(_url: RequestInfo): Promise<void>;
         static loadResources(_url: RequestInfo): Promise<Resources>;

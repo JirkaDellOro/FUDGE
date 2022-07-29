@@ -335,7 +335,6 @@ var Fudge;
             const parser = new DOMParser();
             this.#document = parser.parseFromString(htmlContent, "text/html");
             const head = this.#document.querySelector("head");
-            //TODO: should old scripts be removed from memory first? How?
             const scripts = head.querySelectorAll("script");
             for (let script of scripts) {
                 if (script.getAttribute("editor") == "true") {

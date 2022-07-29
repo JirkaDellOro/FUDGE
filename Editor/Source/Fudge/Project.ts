@@ -50,7 +50,6 @@ namespace Fudge {
       this.#document = parser.parseFromString(htmlContent, "text/html");
       const head: HTMLHeadElement = this.#document.querySelector("head");
 
-      //TODO: should old scripts be removed from memory first? How?
       const scripts: NodeListOf<HTMLScriptElement> = head.querySelectorAll("script");
       for (let script of scripts) {
         if (script.getAttribute("editor") == "true") {
