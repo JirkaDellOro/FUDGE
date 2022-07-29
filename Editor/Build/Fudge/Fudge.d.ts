@@ -584,8 +584,8 @@ declare namespace Fudge {
         canvas: HTMLCanvasElement;
         scrollContainer: HTMLDivElement;
         scrollBody: HTMLDivElement;
-        protected mtxWorldToView: ƒ.Matrix3x3;
-        protected mtxViewToWorld: ƒ.Matrix3x3;
+        protected mtxWorldToScreen: ƒ.Matrix3x3;
+        protected mtxScreenToWorld: ƒ.Matrix3x3;
         protected keys: ViewAnimationKey[];
         protected sequences: ViewAnimationSequence[];
         protected crc2: CanvasRenderingContext2D;
@@ -603,7 +603,7 @@ declare namespace Fudge {
         protected generateKey(_x: number, _y: number, _w: number, _h: number): Path2D;
         private drawCursor;
         private drawEventsAndLabels;
-        private getTransformedPos;
+        private getScreenToWorldPoint;
         private hndEvent;
         private hndPointerDown;
         private hndPointerMove;

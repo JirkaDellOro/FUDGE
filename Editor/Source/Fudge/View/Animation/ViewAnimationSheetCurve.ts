@@ -6,7 +6,6 @@ namespace Fudge {
    * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
   export class ViewAnimationSheetCurve extends ViewAnimationSheet {
-
     private static readonly MINIMUM_PIXEL_PER_STEP: number = 30;
     
     public drawCurves(): void {
@@ -17,7 +16,7 @@ namespace Fudge {
           .filter( ([_keyStart, _keyEnd]) => _keyStart && _keyEnd )
           .map ( ([_keyStart, _keyEnd]) => this.getBezierPoints(_keyStart.functionOut, _keyStart, _keyEnd) )
           .forEach( (_bezierPoints) => {
-            _bezierPoints.forEach( _point => _point.transform(this.mtxWorldToView));
+            _bezierPoints.forEach( _point => _point.transform(this.mtxWorldToScreen));
             let curve: Path2D = new Path2D();
             curve.moveTo(_bezierPoints[0].x, _bezierPoints[0].y);
             curve.bezierCurveTo(
@@ -32,20 +31,18 @@ namespace Fudge {
     }
 
     public drawScale(): void {
-      this.crc2.strokeStyle = "grey";
-      this.crc2.lineWidth = 1;
+      this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
+      this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
 
       let centerLine: Path2D = new Path2D();
-      centerLine.moveTo(0, this.mtxWorldToView.translation.y);
-      centerLine.lineTo(this.canvas.width, this.mtxWorldToView.translation.y);
+      centerLine.moveTo(0, this.mtxWorldToScreen.translation.y);
+      centerLine.lineTo(this.canvas.width, this.mtxWorldToScreen.translation.y);
       this.crc2.stroke(centerLine);
 
-      this.crc2.fillStyle = "grey";
-      this.crc2.strokeStyle = "grey";
       this.crc2.textBaseline = "bottom";
       this.crc2.textAlign = "right";
 
-      let pixelPerStep: number = -this.mtxWorldToView.scaling.y;
+      let pixelPerStep: number = -this.mtxWorldToScreen.scaling.y;
       let valuePerStep: number = 1;
       let stepScaleFactor: number = Math.max(
         Math.pow(2, Math.ceil(Math.log2(ViewAnimationSheetCurve.MINIMUM_PIXEL_PER_STEP / pixelPerStep))), 
@@ -54,14 +51,13 @@ namespace Fudge {
       valuePerStep *= stepScaleFactor;
 
       let steps: number = 1 + this.canvas.height / pixelPerStep;
-      let stepOffset: number = Math.floor(-this.mtxWorldToView.translation.y / pixelPerStep);
+      let stepOffset: number = Math.floor(-this.mtxWorldToScreen.translation.y / pixelPerStep);
       for (let i: number = stepOffset; i < steps + stepOffset; i++) {
         let stepLine: Path2D = new Path2D();
-        let y: number = (i * pixelPerStep + this.mtxWorldToView.translation.y);
+        let y: number = (i * pixelPerStep + this.mtxWorldToScreen.translation.y);
         stepLine.moveTo(0, y);
         // TODO: refine the display
         if (valuePerStep > 1 && i % 5 == 0 || valuePerStep == 1) {
-          this.crc2.lineWidth = 0.6;
           stepLine.lineTo(35, y);
           let value: number = -i * valuePerStep;
           this.crc2.fillText(
@@ -69,7 +65,6 @@ namespace Fudge {
             33, 
             y);
         } else {
-          this.crc2.lineWidth = 0.3;
           stepLine.lineTo(30, y);
         }
         this.crc2.stroke(stepLine);
@@ -81,7 +76,7 @@ namespace Fudge {
         _sequence.sequence.getKeys().map( _key => {
           let pos: ƒ.Vector2 = ƒ.Recycler.get(ƒ.Vector2);
           pos.set(_key.Time, _key.Value);
-          pos.transform(this.mtxWorldToView);
+          pos.transform(this.mtxWorldToScreen);
 
           let viewKey: ViewAnimationKey = {
             key: _key,

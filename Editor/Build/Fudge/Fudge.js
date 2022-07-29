@@ -2889,8 +2889,8 @@ var Fudge;
         canvas;
         scrollContainer;
         scrollBody;
-        mtxWorldToView;
-        mtxViewToWorld;
+        mtxWorldToScreen;
+        mtxScreenToWorld;
         keys = [];
         sequences = [];
         crc2;
@@ -2904,8 +2904,8 @@ var Fudge;
             super(_container, _state);
             this.canvas = document.createElement("canvas");
             this.crc2 = this.canvas.getContext("2d");
-            this.mtxWorldToView = new ƒ.Matrix3x3();
-            this.mtxViewToWorld = new ƒ.Matrix3x3();
+            this.mtxWorldToScreen = new ƒ.Matrix3x3();
+            this.mtxScreenToWorld = new ƒ.Matrix3x3();
             this.canvas.style.position = "absolute";
             this.scrollContainer = document.createElement("div");
             this.scrollContainer.style.position = "absolute";
@@ -2932,55 +2932,57 @@ var Fudge;
             this.canvas.height = this.dom.clientHeight;
             if (_time != undefined)
                 this.playbackTime = _time;
-            let translation = this.mtxWorldToView.translation;
+            let translation = this.mtxWorldToScreen.translation;
             translation.x = Math.min(0, translation.x);
-            this.mtxWorldToView.translation = translation;
-            this.mtxViewToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToView);
+            this.mtxWorldToScreen.translation = translation;
+            this.mtxScreenToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen);
             if (_scroll) {
-                let timelineLength = this.canvas.width * this.mtxViewToWorld.scaling.x + this.mtxViewToWorld.translation.x; // in miliseconds
+                let timelineLength = this.canvas.width * this.mtxScreenToWorld.scaling.x + this.mtxScreenToWorld.translation.x; // in miliseconds
                 let animationLength = this.animation?.totalTime || 0;
                 if (timelineLength - animationLength > 0) {
-                    this.scrollBody.style.width = `${this.canvas.width - this.mtxWorldToView.translation.x}px`;
+                    this.scrollBody.style.width = `${this.canvas.width - this.mtxWorldToScreen.translation.x}px`;
                 }
                 else {
-                    this.scrollBody.style.width = `${animationLength * 1.2 * this.mtxWorldToView.scaling.x}px`;
+                    this.scrollBody.style.width = `${animationLength * 1.2 * this.mtxWorldToScreen.scaling.x}px`;
                 }
-                this.scrollContainer.scrollLeft = -this.mtxWorldToView.translation.x;
+                this.scrollContainer.scrollLeft = -this.mtxWorldToScreen.translation.x;
             }
             if (this.animation) {
+                this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
                 this.drawKeys();
                 if (this instanceof Fudge.ViewAnimationSheetCurve) {
-                    this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH; // * this.mtxTransformInverse.scaling.x;
                     this.drawCurves();
                     this.drawScale();
                 }
                 this.drawTimeline();
                 this.drawEventsAndLabels();
-                this.drawCursor(this.playbackTime);
+                this.drawCursor();
             }
         }
         drawTimeline() {
-            this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
-            this.crc2.fillStyle = "#7a7a7a";
+            this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-background-content");
             this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT + 30);
+            this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-background-main");
+            let animationWidth = this.animation.totalTime * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+            this.crc2.fillRect(0, 0, animationWidth, ViewAnimationSheet.TIMELINE_HEIGHT + 30);
             let timeline = new Path2D();
             timeline.moveTo(0, ViewAnimationSheet.TIMELINE_HEIGHT);
             timeline.lineTo(this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
-            this.crc2.strokeStyle = "black";
-            this.crc2.fillStyle = "black";
+            this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
+            this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
             this.crc2.textBaseline = "middle";
             this.crc2.textAlign = "left";
             const minimumPixelPerStep = 10;
             let pixelPerFrame = 1000 / this.animation.fps;
-            let pixelPerStep = pixelPerFrame * this.mtxWorldToView.scaling.x;
+            let pixelPerStep = pixelPerFrame * this.mtxWorldToScreen.scaling.x;
             let framesPerStep = 1;
             let stepScaleFactor = Math.max(Math.pow(2, Math.ceil(Math.log2(minimumPixelPerStep / pixelPerStep))), 1);
             pixelPerStep *= stepScaleFactor;
             framesPerStep *= stepScaleFactor;
             let steps = 1 + this.canvas.width / pixelPerStep;
-            let stepOffset = Math.floor(-this.mtxWorldToView.translation.x / pixelPerStep);
+            let stepOffset = Math.floor(-this.mtxWorldToScreen.translation.x / pixelPerStep);
             for (let iStep = stepOffset; iStep < steps + stepOffset; iStep++) {
-                let x = (iStep * pixelPerStep + this.mtxWorldToView.translation.x);
+                let x = (iStep * pixelPerStep + this.mtxWorldToScreen.translation.x);
                 timeline.moveTo(x, ViewAnimationSheet.TIMELINE_HEIGHT);
                 // TODO: refine the display
                 if (iStep % 5 == 0) {
@@ -3011,8 +3013,9 @@ var Fudge;
             key.closePath();
             return key;
         }
-        drawCursor(_time) {
-            let x = _time * this.mtxWorldToView.scaling.x + this.mtxWorldToView.translation.x;
+        drawCursor() {
+            this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-signal");
+            let x = this.playbackTime * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
             let cursor = new Path2D();
             cursor.moveTo(x, 0);
             cursor.lineTo(x, this.canvas.height);
@@ -3025,8 +3028,8 @@ var Fudge;
             let line = new Path2D();
             line.moveTo(0, labelDisplayHeight);
             line.lineTo(maxDistance, labelDisplayHeight);
-            this.crc2.strokeStyle = "black";
-            this.crc2.fillStyle = "black";
+            this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
+            this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
             this.crc2.stroke(line);
             this.labels = [];
             this.events = [];
@@ -3036,40 +3039,38 @@ var Fudge;
                 //TODO stop using hardcoded values
                 let p = new Path2D;
                 this.labels.push({ label: l, path2D: p });
-                let position = this.animation.labels[l] * this.mtxWorldToView.scaling.x + this.mtxWorldToView.translation.x;
-                p.moveTo(position - 3, labelDisplayHeight - 28);
-                p.lineTo(position - 3, labelDisplayHeight - 2);
-                p.lineTo(position + 3, labelDisplayHeight - 2);
-                p.lineTo(position + 3, labelDisplayHeight - 25);
-                p.lineTo(position, labelDisplayHeight - 28);
-                p.lineTo(position - 3, labelDisplayHeight - 28);
+                let position = this.animation.labels[l] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+                p.moveTo(position - 3, labelDisplayHeight - 26);
+                p.lineTo(position - 3, labelDisplayHeight - 4);
+                p.lineTo(position + 3, labelDisplayHeight - 4);
+                p.lineTo(position + 3, labelDisplayHeight - 23);
+                p.lineTo(position, labelDisplayHeight - 26);
+                p.lineTo(position - 3, labelDisplayHeight - 26);
                 this.crc2.fill(p);
                 this.crc2.stroke(p);
                 let p2 = new Path2D();
-                p2.moveTo(position, labelDisplayHeight - 28);
-                p2.lineTo(position, labelDisplayHeight - 25);
-                p2.lineTo(position + 3, labelDisplayHeight - 25);
-                this.crc2.strokeStyle = "white";
+                p2.moveTo(position, labelDisplayHeight - 26);
+                p2.lineTo(position, labelDisplayHeight - 23);
+                p2.lineTo(position + 3, labelDisplayHeight - 23);
                 this.crc2.stroke(p2);
-                this.crc2.strokeStyle = "black";
             }
             for (let e in this.animation.events) {
                 let p = new Path2D;
                 this.events.push({ event: e, path2D: p });
-                let position = this.animation.events[e] * this.mtxWorldToView.scaling.x + this.mtxWorldToView.translation.x;
-                p.moveTo(position - 3, labelDisplayHeight - 28);
-                p.lineTo(position - 3, labelDisplayHeight - 5);
-                p.lineTo(position, labelDisplayHeight - 2);
-                p.lineTo(position + 3, labelDisplayHeight - 5);
-                p.lineTo(position + 3, labelDisplayHeight - 28);
-                p.lineTo(position - 3, labelDisplayHeight - 28);
+                let position = this.animation.events[e] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+                p.moveTo(position - 3, labelDisplayHeight - 26);
+                p.lineTo(position - 3, labelDisplayHeight - 7);
+                p.lineTo(position, labelDisplayHeight - 4);
+                p.lineTo(position + 3, labelDisplayHeight - 7);
+                p.lineTo(position + 3, labelDisplayHeight - 26);
+                p.lineTo(position - 3, labelDisplayHeight - 26);
                 // this.crc2.fill(p);
                 this.crc2.stroke(p);
             }
         }
-        getTransformedPos(_x, _y) {
+        getScreenToWorldPoint(_x, _y) {
             let vector = new ƒ.Vector2(_x, _y);
-            vector.transform(this.mtxViewToWorld);
+            vector.transform(this.mtxScreenToWorld);
             return vector;
         }
         hndEvent = (_event) => {
@@ -3077,20 +3078,20 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.FOCUS:
                     this.graph = _event.detail.graph;
                     this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
-                    this.mtxWorldToView.reset();
+                    this.mtxWorldToScreen.reset();
                     // this.mtxWorldToView.scaleY(-1);
-                    this.mtxWorldToView.scaleY(-ViewAnimationSheet.PIXEL_PER_VALUE); // flip y
-                    this.mtxWorldToView.scaleX(ViewAnimationSheet.PIXEL_PER_MILLISECOND);
-                    this.mtxViewToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToView);
+                    this.mtxWorldToScreen.scaleY(-ViewAnimationSheet.PIXEL_PER_VALUE); // flip y
+                    this.mtxWorldToScreen.scaleX(ViewAnimationSheet.PIXEL_PER_MILLISECOND);
+                    this.mtxScreenToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen);
                     if (this.animation) {
                         this.setTime(0);
                         // TODO: adjust y scaling to fit highest and lowest key
-                        let translation = this.mtxWorldToView.translation;
+                        let translation = this.mtxWorldToScreen.translation;
                         translation.y = this.canvas.height / 2;
-                        this.mtxWorldToView.translation = translation;
-                        let scaling = this.mtxWorldToView.scaling;
+                        this.mtxWorldToScreen.translation = translation;
+                        let scaling = this.mtxWorldToScreen.scaling;
                         scaling.x = this.canvas.width / ((this.animation.totalTime || ViewAnimationSheet.STANDARD_ANIMATION_LENGTH) * 1.2);
-                        this.mtxWorldToView.scaling = scaling;
+                        this.mtxWorldToScreen.scaling = scaling;
                     }
                     this.redraw();
                     break;
@@ -3128,7 +3129,7 @@ var Fudge;
                     }
                     break;
                 case 4:
-                    this.posDragStart = this.getTransformedPos(_event.offsetX, _event.offsetY);
+                    this.posDragStart = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);
                     break;
             }
         };
@@ -3140,7 +3141,7 @@ var Fudge;
                         this.setTime(_event.offsetX);
                     break;
                 case 4:
-                    this.mtxWorldToView.translate(ƒ.Vector2.DIFFERENCE(this.getTransformedPos(_event.offsetX, _event.offsetY), this.posDragStart));
+                    this.mtxWorldToScreen.translate(ƒ.Vector2.DIFFERENCE(this.getScreenToWorldPoint(_event.offsetX, _event.offsetY), this.posDragStart));
                     this.redraw();
                     break;
             }
@@ -3157,17 +3158,17 @@ var Fudge;
             if (_event.buttons != 0)
                 return;
             let zoomFactor = _event.deltaY < 0 ? 1.05 : 0.95;
-            let posCursorTransformed = this.getTransformedPos(_event.offsetX, _event.offsetY);
-            this.mtxWorldToView.translate(posCursorTransformed);
-            this.mtxWorldToView.scale(new ƒ.Vector2(_event.shiftKey ? 1 : zoomFactor, _event.ctrlKey ? 1 : zoomFactor));
-            this.mtxWorldToView.translate(ƒ.Vector2.SCALE(posCursorTransformed, -1));
+            let posCursorTransformed = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);
+            this.mtxWorldToScreen.translate(posCursorTransformed);
+            this.mtxWorldToScreen.scale(new ƒ.Vector2(_event.shiftKey ? 1 : zoomFactor, _event.ctrlKey ? 1 : zoomFactor));
+            this.mtxWorldToScreen.translate(ƒ.Vector2.SCALE(posCursorTransformed, -1));
             this.redraw();
         };
         hndScroll = (_event) => {
             _event.preventDefault();
-            let translation = this.mtxWorldToView.translation;
+            let translation = this.mtxWorldToScreen.translation;
             translation.x = -this.scrollContainer.scrollLeft;
-            this.mtxWorldToView.translation = translation;
+            this.mtxWorldToScreen.translation = translation;
             this.redraw(false);
         };
         hndAnimate = (_event) => {
@@ -3176,7 +3177,7 @@ var Fudge;
             this.redraw();
         };
         setTime(_x) {
-            let playbackTime = Math.max(0, this.getTransformedPos(_x, 0).x);
+            let playbackTime = Math.max(0, this.getScreenToWorldPoint(_x, 0).x);
             let pixelPerFrame = 1000 / this.animation.fps;
             playbackTime = Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
             this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: playbackTime } } });
@@ -3201,7 +3202,7 @@ var Fudge;
                     .filter(([_keyStart, _keyEnd]) => _keyStart && _keyEnd)
                     .map(([_keyStart, _keyEnd]) => this.getBezierPoints(_keyStart.functionOut, _keyStart, _keyEnd))
                     .forEach((_bezierPoints) => {
-                    _bezierPoints.forEach(_point => _point.transform(this.mtxWorldToView));
+                    _bezierPoints.forEach(_point => _point.transform(this.mtxWorldToScreen));
                     let curve = new Path2D();
                     curve.moveTo(_bezierPoints[0].x, _bezierPoints[0].y);
                     curve.bezierCurveTo(_bezierPoints[1].x, _bezierPoints[1].y, _bezierPoints[2].x, _bezierPoints[2].y, _bezierPoints[3].x, _bezierPoints[3].y);
@@ -3211,36 +3212,32 @@ var Fudge;
             }
         }
         drawScale() {
-            this.crc2.strokeStyle = "grey";
-            this.crc2.lineWidth = 1;
+            this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
+            this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
             let centerLine = new Path2D();
-            centerLine.moveTo(0, this.mtxWorldToView.translation.y);
-            centerLine.lineTo(this.canvas.width, this.mtxWorldToView.translation.y);
+            centerLine.moveTo(0, this.mtxWorldToScreen.translation.y);
+            centerLine.lineTo(this.canvas.width, this.mtxWorldToScreen.translation.y);
             this.crc2.stroke(centerLine);
-            this.crc2.fillStyle = "grey";
-            this.crc2.strokeStyle = "grey";
             this.crc2.textBaseline = "bottom";
             this.crc2.textAlign = "right";
-            let pixelPerStep = -this.mtxWorldToView.scaling.y;
+            let pixelPerStep = -this.mtxWorldToScreen.scaling.y;
             let valuePerStep = 1;
             let stepScaleFactor = Math.max(Math.pow(2, Math.ceil(Math.log2(ViewAnimationSheetCurve.MINIMUM_PIXEL_PER_STEP / pixelPerStep))), 1);
             pixelPerStep *= stepScaleFactor;
             valuePerStep *= stepScaleFactor;
             let steps = 1 + this.canvas.height / pixelPerStep;
-            let stepOffset = Math.floor(-this.mtxWorldToView.translation.y / pixelPerStep);
+            let stepOffset = Math.floor(-this.mtxWorldToScreen.translation.y / pixelPerStep);
             for (let i = stepOffset; i < steps + stepOffset; i++) {
                 let stepLine = new Path2D();
-                let y = (i * pixelPerStep + this.mtxWorldToView.translation.y);
+                let y = (i * pixelPerStep + this.mtxWorldToScreen.translation.y);
                 stepLine.moveTo(0, y);
                 // TODO: refine the display
                 if (valuePerStep > 1 && i % 5 == 0 || valuePerStep == 1) {
-                    this.crc2.lineWidth = 0.6;
                     stepLine.lineTo(35, y);
                     let value = -i * valuePerStep;
                     this.crc2.fillText(valuePerStep >= 1 ? value.toFixed(0) : value.toFixed(1), 33, y);
                 }
                 else {
-                    this.crc2.lineWidth = 0.3;
                     stepLine.lineTo(30, y);
                 }
                 this.crc2.stroke(stepLine);
@@ -3250,7 +3247,7 @@ var Fudge;
             this.keys = this.sequences.flatMap((_sequence) => _sequence.sequence.getKeys().map(_key => {
                 let pos = ƒ.Recycler.get(ƒ.Vector2);
                 pos.set(_key.Time, _key.Value);
-                pos.transform(this.mtxWorldToView);
+                pos.transform(this.mtxWorldToScreen);
                 let viewKey = {
                     key: _key,
                     path2D: this.generateKey(pos.x, pos.y, Fudge.ViewAnimationSheet.KEY_SIZE, Fudge.ViewAnimationSheet.KEY_SIZE),
@@ -3315,7 +3312,7 @@ var Fudge;
             this.sequences.push(seq);
             for (let i = 0; i < _sequence.length; i++) {
                 let k = _sequence.getKey(i);
-                this.keys.push({ key: k, path2D: this.drawKey(k.Time * this.mtxWorldToView.scaling.x, y, height / 2, width / 2, seq.color), sequence: seq });
+                this.keys.push({ key: k, path2D: this.drawKey(k.Time * this.mtxWorldToScreen.scaling.x, y, height / 2, width / 2, seq.color), sequence: seq });
             }
         }
     }
