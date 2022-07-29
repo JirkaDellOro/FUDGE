@@ -332,6 +332,21 @@
                           }
                         }
                       }
+                    ],
+                    "ComponentAnimator": [
+                      {
+                        "ƒ.ComponentAnimator": {
+                          "Component": {
+                            "active": true
+                          },
+                          "idAnimation": "Animation|2022-07-29T09:43:13.610Z|49351",
+                          "playmode": 0,
+                          "playback": 0,
+                          "scale": 1,
+                          "scaleWithGameTime": true,
+                          "animateInEditor": false
+                        }
+                      }
                     ]
                   },
                   "children": [
@@ -400,6 +415,16 @@
       ],
       "idResource": "Graph|2022-07-26T11:15:51.957Z|22410",
       "type": "Graph"
+    }
+  },
+  "Animation|2022-07-29T09:43:13.610Z|49351": {
+    "ƒ.Animation": {
+      "idResource": "Animation|2022-07-29T09:43:13.610Z|49351",
+      "name": "NewAnimation",
+      "labels": {},
+      "events": {},
+      "fps": 60,
+      "animationStructure": {}
     }
   }
 }

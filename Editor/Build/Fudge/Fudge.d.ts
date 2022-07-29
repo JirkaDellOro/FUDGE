@@ -579,6 +579,7 @@ declare namespace Fudge {
         private static readonly LINE_WIDTH;
         private static readonly TIMELINE_HEIGHT;
         private static readonly PIXEL_PER_SECOND;
+        private static readonly INITIAL_TOTAL_TIME;
         canvas: HTMLCanvasElement;
         scrollContainer: HTMLDivElement;
         scrollBody: HTMLDivElement;

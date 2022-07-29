@@ -11,6 +11,7 @@ namespace Fudge {
     private static readonly LINE_WIDTH: number = 1; // in px
     private static readonly TIMELINE_HEIGHT: number = 50; // in px
     private static readonly PIXEL_PER_SECOND: number = 1000; // at scaling 1
+    private static readonly INITIAL_TOTAL_TIME: number = 1000; // in miliseconds, used when animation length is falsy
 
     public canvas: HTMLCanvasElement;
     public scrollContainer: HTMLDivElement;
@@ -68,7 +69,6 @@ namespace Fudge {
       this.crc2.resetTransform();
       this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
       
-      if (!this.animation) return;
       if (_time != undefined) this.playbackTime = _time;
       
       let translation: ƒ.Vector2 = this.mtxTransform.translation;
@@ -79,23 +79,26 @@ namespace Fudge {
 
       if (_scroll) {
         let timelineLength: number = this.canvas.width * this.mtxTransformInverse.scaling.x + this.mtxTransformInverse.translation.x; // in miliseconds
-        if (timelineLength - this.animation.totalTime > 0) {
+        let animationLength: number = this.animation?.totalTime || 0;
+        if (timelineLength - animationLength > 0) {
           this.scrollBody.style.width = `${this.canvas.width - this.mtxTransform.translation.x}px`;
         } else {
-          this.scrollBody.style.width = `${this.animation.totalTime * this.mtxTransform.scaling.x}px`;
+          this.scrollBody.style.width = `${animationLength * 1.2 * this.mtxTransform.scaling.x}px`;
         }
         this.scrollContainer.scrollLeft = -this.mtxTransform.translation.x;
       }
 
-      this.drawKeys();
-      if (this instanceof ViewAnimationSheetCurve) {
-        this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH * this.mtxTransformInverse.scaling.x;
-        this.drawCurves();
-        this.drawScale();
+      if (this.animation) {
+        this.drawKeys();
+        if (this instanceof ViewAnimationSheetCurve) {
+          this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH * this.mtxTransformInverse.scaling.x;
+          this.drawCurves();
+          this.drawScale();
+        }
+        this.drawTimeline();
+        this.drawEventsAndLabels();
+        this.drawCursor(this.playbackTime);
       }
-      this.drawTimeline();
-      this.drawEventsAndLabels();
-      this.drawCursor(this.playbackTime);
     }
 
     protected drawTimeline(): void {
@@ -259,15 +262,18 @@ namespace Fudge {
         case EVENT_EDITOR.FOCUS:
           this.graph = _event.detail.graph;
           this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
+          this.mtxTransform.reset();
+          this.mtxTransformInverse.reset();
           if (this.animation) {
-            this.redraw();
+            this.setTime(0);
             let translation: ƒ.Vector2 = this.mtxTransform.translation;
             translation.y = this.canvas.height / 2;
             this.mtxTransform.translation = translation;
             let scaling: ƒ.Vector2 = this.mtxTransform.scaling;
-            scaling.x = this.canvas.width / (this.animation.totalTime * 1.1);
+            scaling.x = this.canvas.width / ((this.animation.totalTime || ViewAnimationSheet.INITIAL_TOTAL_TIME) * 1.2);
             this.mtxTransform.scaling = scaling;
           }
+          this.redraw();
           break;
       }
     }
