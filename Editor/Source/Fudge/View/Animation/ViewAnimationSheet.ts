@@ -10,14 +10,15 @@ namespace Fudge {
     protected static readonly KEY_SIZE: number = 8; // width and height in px
     private static readonly LINE_WIDTH: number = 1; // in px
     private static readonly TIMELINE_HEIGHT: number = 50; // in px
-    private static readonly PIXEL_PER_SECOND: number = 1000; // at scaling 1
-    private static readonly INITIAL_TOTAL_TIME: number = 1000; // in miliseconds, used when animation length is falsy
+    private static readonly PIXEL_PER_MILLISECOND: number = 1; // at scaling 1
+    private static readonly PIXEL_PER_VALUE: number = 100; // at scaling 1
+    private static readonly STANDARD_ANIMATION_LENGTH: number = 1000; // in miliseconds, used when animation length is falsy
 
     public canvas: HTMLCanvasElement;
     public scrollContainer: HTMLDivElement;
     public scrollBody: HTMLDivElement;
-    protected mtxTransform: ƒ.Matrix3x3;
-    protected mtxTransformInverse: ƒ.Matrix3x3;
+    protected mtxWorldToView: ƒ.Matrix3x3;
+    protected mtxViewToWorld: ƒ.Matrix3x3;
     protected keys: ViewAnimationKey[] = [];
     protected sequences: ViewAnimationSequence[] = [];
     protected crc2: CanvasRenderingContext2D;
@@ -33,8 +34,8 @@ namespace Fudge {
       super(_container, _state);
       this.canvas = document.createElement("canvas");
       this.crc2 = this.canvas.getContext("2d");
-      this.mtxTransform = new ƒ.Matrix3x3();
-      this.mtxTransformInverse = new ƒ.Matrix3x3();
+      this.mtxWorldToView = new ƒ.Matrix3x3();
+      this.mtxViewToWorld = new ƒ.Matrix3x3();
 
       this.canvas.style.position = "absolute";
 
@@ -66,32 +67,28 @@ namespace Fudge {
       this.canvas.width = this.dom.clientWidth;
       this.canvas.height = this.dom.clientHeight;
       
-      this.crc2.resetTransform();
-      this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
-      
       if (_time != undefined) this.playbackTime = _time;
       
-      let translation: ƒ.Vector2 = this.mtxTransform.translation;
+      let translation: ƒ.Vector2 = this.mtxWorldToView.translation;
       translation.x = Math.min(0, translation.x);
-      this.mtxTransform.translation = translation;
-      this.crc2.setTransform(this.mtxTransform.scaling.x, 0, 0, this.mtxTransform.scaling.y, this.mtxTransform.translation.x, this.mtxTransform.translation.y);
-      this.mtxTransformInverse = ƒ.Matrix3x3.INVERSION(this.mtxTransform);
+      this.mtxWorldToView.translation = translation;
+      this.mtxViewToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToView);
 
       if (_scroll) {
-        let timelineLength: number = this.canvas.width * this.mtxTransformInverse.scaling.x + this.mtxTransformInverse.translation.x; // in miliseconds
+        let timelineLength: number = this.canvas.width * this.mtxViewToWorld.scaling.x + this.mtxViewToWorld.translation.x; // in miliseconds
         let animationLength: number = this.animation?.totalTime || 0;
         if (timelineLength - animationLength > 0) {
-          this.scrollBody.style.width = `${this.canvas.width - this.mtxTransform.translation.x}px`;
+          this.scrollBody.style.width = `${this.canvas.width - this.mtxWorldToView.translation.x}px`;
         } else {
-          this.scrollBody.style.width = `${animationLength * 1.2 * this.mtxTransform.scaling.x}px`;
+          this.scrollBody.style.width = `${animationLength * 1.2 * this.mtxWorldToView.scaling.x}px`;
         }
-        this.scrollContainer.scrollLeft = -this.mtxTransform.translation.x;
+        this.scrollContainer.scrollLeft = -this.mtxWorldToView.translation.x;
       }
 
       if (this.animation) {
         this.drawKeys();
         if (this instanceof ViewAnimationSheetCurve) {
-          this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH * this.mtxTransformInverse.scaling.x;
+          this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH; // * this.mtxTransformInverse.scaling.x;
           this.drawCurves();
           this.drawScale();
         }
@@ -102,7 +99,6 @@ namespace Fudge {
     }
 
     protected drawTimeline(): void {
-      this.crc2.resetTransform();
       this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
       
       this.crc2.fillStyle = "#7a7a7a";
@@ -118,7 +114,8 @@ namespace Fudge {
       this.crc2.textAlign = "left";
 
       const minimumPixelPerStep: number = 10;
-      let pixelPerStep: number = (ViewAnimationSheet.PIXEL_PER_SECOND / this.animation.fps) * this.mtxTransform.scaling.x;
+      let pixelPerFrame: number = 1000 / this.animation.fps;
+      let pixelPerStep: number = pixelPerFrame * this.mtxWorldToView.scaling.x;
       let framesPerStep: number = 1;
       let stepScaleFactor: number = Math.max(
         Math.pow(2, Math.ceil(Math.log2(minimumPixelPerStep / pixelPerStep))), 
@@ -127,9 +124,9 @@ namespace Fudge {
       framesPerStep *= stepScaleFactor;
 
       let steps: number = 1 + this.canvas.width / pixelPerStep;
-      let stepOffset: number = Math.floor(-this.mtxTransform.translation.x / pixelPerStep);
+      let stepOffset: number = Math.floor(-this.mtxWorldToView.translation.x / pixelPerStep);
       for (let iStep: number = stepOffset; iStep < steps + stepOffset; iStep++) {
-        let x: number = (iStep * pixelPerStep + this.mtxTransform.translation.x);
+        let x: number = (iStep * pixelPerStep + this.mtxWorldToView.translation.x);
         timeline.moveTo(x, ViewAnimationSheet.TIMELINE_HEIGHT);
         // TODO: refine the display
         if (iStep % 5 == 0) {
@@ -170,7 +167,7 @@ namespace Fudge {
     }
 
     private drawCursor(_time: number): void {
-      let x: number = _time * this.mtxTransform.scaling.x + this.mtxTransform.translation.x;
+      let x: number = _time * this.mtxWorldToView.scaling.x + this.mtxWorldToView.translation.x;
       let cursor: Path2D = new Path2D();
       cursor.moveTo(x, 0);
       cursor.lineTo(x, this.canvas.height);
@@ -196,7 +193,7 @@ namespace Fudge {
         //TODO stop using hardcoded values
         let p: Path2D = new Path2D;
         this.labels.push({ label: l, path2D: p });
-        let position: number = this.animation.labels[l] * this.mtxTransform.scaling.x + this.mtxTransform.translation.x;
+        let position: number = this.animation.labels[l] * this.mtxWorldToView.scaling.x + this.mtxWorldToView.translation.x;
         p.moveTo(position - 3, labelDisplayHeight - 28);
         p.lineTo(position - 3, labelDisplayHeight - 2);
         p.lineTo(position + 3, labelDisplayHeight - 2);
@@ -216,7 +213,7 @@ namespace Fudge {
       for (let e in this.animation.events) {
         let p: Path2D = new Path2D;
         this.events.push({ event: e, path2D: p });
-        let position: number = this.animation.events[e] * this.mtxTransform.scaling.x + this.mtxTransform.translation.x;
+        let position: number = this.animation.events[e] * this.mtxWorldToView.scaling.x + this.mtxWorldToView.translation.x;
         p.moveTo(position - 3, labelDisplayHeight - 28);
         p.lineTo(position - 3, labelDisplayHeight - 5);
         p.lineTo(position, labelDisplayHeight - 2);
@@ -228,32 +225,9 @@ namespace Fudge {
       }
     }
 
-    private getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
-      for (let l of this.labels) {
-        if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
-          return l;
-        }
-      }
-
-      for (let e of this.events) {
-        if (this.crc2.isPointInPath(e.path2D, _x, _y)) {
-          return e;
-        }
-      }
-
-      let point: ƒ.Vector2 = this.getTransformedPoint(_x, _y);
-      for (let k of this.keys) {
-        if (this.crc2.isPointInPath(k.path2D, point.x, point.y)) {
-          return k;
-        }
-      }
-      return null;
-    }
-
-    private getTransformedPoint(_x: number, _y: number): ƒ.Vector2 {
+    private getTransformedPos(_x: number, _y: number): ƒ.Vector2 {
       let vector: ƒ.Vector2 = new ƒ.Vector2(_x, _y);
-      vector.transform(this.mtxTransformInverse);
-
+      vector.transform(this.mtxViewToWorld);
       return vector;
     }
 
@@ -262,16 +236,20 @@ namespace Fudge {
         case EVENT_EDITOR.FOCUS:
           this.graph = _event.detail.graph;
           this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
-          this.mtxTransform.reset();
-          this.mtxTransformInverse.reset();
+          this.mtxWorldToView.reset();
+          // this.mtxWorldToView.scaleY(-1);
+          this.mtxWorldToView.scaleY(-ViewAnimationSheet.PIXEL_PER_VALUE); // flip y
+          this.mtxWorldToView.scaleX(ViewAnimationSheet.PIXEL_PER_MILLISECOND);
+          this.mtxViewToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToView);
           if (this.animation) {
             this.setTime(0);
-            let translation: ƒ.Vector2 = this.mtxTransform.translation;
+            // TODO: adjust y scaling to fit highest and lowest key
+            let translation: ƒ.Vector2 = this.mtxWorldToView.translation;
             translation.y = this.canvas.height / 2;
-            this.mtxTransform.translation = translation;
-            let scaling: ƒ.Vector2 = this.mtxTransform.scaling;
-            scaling.x = this.canvas.width / ((this.animation.totalTime || ViewAnimationSheet.INITIAL_TOTAL_TIME) * 1.2);
-            this.mtxTransform.scaling = scaling;
+            this.mtxWorldToView.translation = translation;
+            let scaling: ƒ.Vector2 = this.mtxWorldToView.scaling;
+            scaling.x = this.canvas.width / ((this.animation.totalTime || ViewAnimationSheet.STANDARD_ANIMATION_LENGTH) * 1.2);
+            this.mtxWorldToView.scaling = scaling;
           }
           this.redraw();
           break;
@@ -287,7 +265,14 @@ namespace Fudge {
           else if (_event.offsetY <= ViewAnimationSheet.TIMELINE_HEIGHT)
             this.setTime(_event.offsetX);
           else {
-            let obj: ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent = this.getObjectAtPoint(_event.offsetX, _event.offsetY);
+            let x: number = _event.offsetX;
+            let y: number = _event.offsetY;
+            const findObject: (_object: ViewAnimationKey | ViewAnimationLabel | ViewAnimationEvent) => boolean = _object => this.crc2.isPointInPath(_object.path2D, x, y);
+            let obj: ViewAnimationKey | ViewAnimationLabel | ViewAnimationEvent =
+              this.keys.find(findObject) ||
+              this.labels.find(findObject) ||
+              this.events.find(findObject);
+
             if (!obj) return;
             if (obj["label"]) {
               console.log(obj["label"]);
@@ -304,7 +289,7 @@ namespace Fudge {
           }
           break;
         case 4:
-          this.posDragStart = this.getTransformedPoint(_event.offsetX, _event.offsetY);
+          this.posDragStart = this.getTransformedPos(_event.offsetX, _event.offsetY);
           break;
       }
     }
@@ -317,7 +302,7 @@ namespace Fudge {
             this.setTime(_event.offsetX);
           break;
         case 4:
-          this.mtxTransform.translate(ƒ.Vector2.DIFFERENCE(this.getTransformedPoint(_event.offsetX, _event.offsetY), this.posDragStart));
+          this.mtxWorldToView.translate(ƒ.Vector2.DIFFERENCE(this.getTransformedPos(_event.offsetX, _event.offsetY), this.posDragStart));
           this.redraw();
           break;
       }
@@ -336,20 +321,20 @@ namespace Fudge {
       _event.preventDefault();
       if (_event.buttons != 0) return;
       let zoomFactor: number = _event.deltaY < 0 ? 1.05 : 0.95;
-      let posCursorTransformed: ƒ.Vector2 = this.getTransformedPoint(_event.offsetX, _event.offsetY);
+      let posCursorTransformed: ƒ.Vector2 = this.getTransformedPos(_event.offsetX, _event.offsetY);
       
-      this.mtxTransform.translate(posCursorTransformed);
-      this.mtxTransform.scale(new ƒ.Vector2(_event.shiftKey ? 1 : zoomFactor, _event.ctrlKey ? 1 : zoomFactor));
-      this.mtxTransform.translate(ƒ.Vector2.SCALE(posCursorTransformed, -1));
+      this.mtxWorldToView.translate(posCursorTransformed);
+      this.mtxWorldToView.scale(new ƒ.Vector2(_event.shiftKey ? 1 : zoomFactor, _event.ctrlKey ? 1 : zoomFactor));
+      this.mtxWorldToView.translate(ƒ.Vector2.SCALE(posCursorTransformed, -1));
 
       this.redraw();
     }
 
     private hndScroll = (_event: Event) => {
       _event.preventDefault();
-      let translation: ƒ.Vector2 = this.mtxTransform.translation;
+      let translation: ƒ.Vector2 = this.mtxWorldToView.translation;
       translation.x = -this.scrollContainer.scrollLeft;
-      this.mtxTransform.translation = translation;
+      this.mtxWorldToView.translation = translation;
       this.redraw(false);
     }
 
@@ -361,8 +346,9 @@ namespace Fudge {
     }
 
     private setTime(_x: number): void {
-      let playbackTime: number = Math.max(0, this.getTransformedPoint(_x, 0).x);
-      playbackTime = Math.round(playbackTime / ((1000 / this.animation.fps))) * ((1000 / this.animation.fps));
+      let playbackTime: number = Math.max(0, this.getTransformedPos(_x, 0).x);
+      let pixelPerFrame: number = 1000 / this.animation.fps;
+      playbackTime = Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
       this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: playbackTime } } });
     }
   }
