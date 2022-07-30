@@ -213,7 +213,8 @@ var Fudge;
             "CustomComponentScript.txt": "Source/CustomComponentScript.ts",
             "Main.txt": "Source/Main.ts",
             "tsconfig.txt": "Source/tsconfig.json",
-            "Script.txt": " Build/Script.js"
+            "Script.txt": " Build/Script.js",
+            "Autoview.js": "../Autoview.js"
         };
         copyFiles(copyTemplates, new URL("Editor/Source/Template/", ƒPath), new URL("Script/", base));
         let definition = await fetch("https://JirkaDellOro.github.io/FUDGE/Core/Build/FudgeCore.d.ts");
@@ -306,7 +307,7 @@ var Fudge;
         fileScript = "Script/Build/Script.js";
         fileStyles = "styles.css";
         #document;
-        includeAutoViewScript = true;
+        // private includeAutoViewScript: boolean = true;
         graphAutoView = "";
         constructor(_base) {
             super();
@@ -382,13 +383,14 @@ var Fudge;
             settings.setAttribute("autoview", this.graphAutoView);
             settings.setAttribute("project", this.settingsStringify());
             settings.setAttribute("panels", this.panelsStringify());
-            let autoViewScript = this.#document.querySelector("script[name=autoView]");
-            if (this.includeAutoViewScript) {
-                if (!autoViewScript)
-                    this.#document.head.appendChild(this.getAutoViewScript());
-            }
-            else if (autoViewScript)
-                this.#document.head.removeChild(autoViewScript);
+            // let autoViewScript: HTMLScriptElement = this.#document.querySelector("script[name=autoView]");
+            // if (this.includeAutoViewScript) {
+            //   if (!autoViewScript)
+            //     this.#document.head.appendChild(this.getAutoViewScript());
+            // }
+            // else
+            //   if (autoViewScript)
+            //     this.#document.head.removeChild(autoViewScript);
             return this.stringifyHTML(this.#document);
         }
         getMutatorAttributeTypes(_mutator) {
@@ -435,11 +437,15 @@ var Fudge;
             html.head.appendChild(html.createComment("Load custom scripts"));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: this.fileScript, editor: "true" }));
             html.head.appendChild(html.createComment("CRLF"));
-            if (this.includeAutoViewScript)
-                html.head.appendChild(this.getAutoViewScript());
+            // if (this.includeAutoViewScript)
+            //   html.head.appendChild(this.getAutoViewScript());
+            html.head.appendChild(html.createComment("Load Autoview script"));
+            html.head.appendChild(createTag("script", { type: "text/javascript", src: "Autoview.js" }));
+            html.head.appendChild(html.createComment("CRLF"));
             html.body.appendChild(html.createComment("Dialog shown at startup only"));
             let dialog = createTag("dialog");
-            dialog.appendChild(createTag("h1", {}, "Title (will be replaced by autoView)"));
+            dialog.appendChild(createTag("p", {}, "FUDGE Autoview"));
+            dialog.appendChild(createTag("h1", {}, "Title (will be replaced by Autoview)"));
             dialog.appendChild(createTag("p", {}, "click to start"));
             html.body.appendChild(dialog);
             html.body.appendChild(html.createComment("Canvas for FUDGE to render to"));
@@ -454,69 +460,69 @@ var Fudge;
             }
             return this.stringifyHTML(html);
         }
-        getAutoViewScript() {
-            let code;
-            code = (function (_graphId) {
-                /**
-                 * AutoView-Script
-                 * Loads and displays the selected graph and implements a basic orbit camera
-                 * @author Jirka Dell'Oro-Friedl, HFU, 2021
-                 */
-                window.addEventListener("load", init);
-                // show dialog for startup
-                let dialog;
-                function init(_event) {
-                    dialog = document.querySelector("dialog");
-                    dialog.querySelector("h1").textContent = document.title;
-                    dialog.addEventListener("click", function (_event) {
-                        // @ts-ignore until HTMLDialog is implemented by all browsers and available in dom.d.ts
-                        dialog.close();
-                        startInteractiveViewport();
-                    });
-                    //@ts-ignore
-                    dialog.showModal();
-                }
-                // setup and start interactive viewport
-                async function startInteractiveViewport() {
-                    // load resources referenced in the link-tag
-                    await FudgeCore.Project.loadResourcesFromHTML();
-                    FudgeCore.Debug.log("Project:", FudgeCore.Project.resources);
-                    // pick the graph to show
-                    let graph = FudgeCore.Project.resources[_graphId];
-                    FudgeCore.Debug.log("Graph:", graph);
-                    if (!graph) {
-                        alert("Nothing to render. Create a graph with at least a mesh, material and probably some light");
-                        return;
-                    }
-                    // setup the viewport
-                    let cmpCamera = new FudgeCore.ComponentCamera();
-                    let canvas = document.querySelector("canvas");
-                    let viewport = new FudgeCore.Viewport();
-                    viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
-                    FudgeCore.Debug.log("Viewport:", viewport);
-                    // hide the cursor when interacting, also suppressing right-click menu
-                    canvas.addEventListener("mousedown", canvas.requestPointerLock);
-                    canvas.addEventListener("mouseup", function () { document.exitPointerLock(); });
-                    // make the camera interactive (complex method in FudgeAid)
-                    let cameraOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
-                    // setup audio
-                    let cmpListener = new ƒ.ComponentAudioListener();
-                    cmpCamera.node.addComponent(cmpListener);
-                    FudgeCore.AudioManager.default.listenWith(cmpListener);
-                    FudgeCore.AudioManager.default.listenTo(graph);
-                    FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);
-                    // draw viewport once for immediate feedback
-                    FudgeCore.Render.prepare(cameraOrbit);
-                    viewport.draw();
-                    canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));
-                }
-            }).toString();
-            code = "(" + code + `)(document.head.querySelector("meta[autoView]").getAttribute("autoView"));\n`;
-            let script = document.createElement("script");
-            script.setAttribute("name", "autoView");
-            script.textContent = code;
-            return script;
-        }
+        // private getAutoViewScript(): HTMLScriptElement {
+        //   let code: string;
+        //   code = (function (_graphId: string): void {
+        //     /**
+        //      * AutoView-Script
+        //      * Loads and displays the selected graph and implements a basic orbit camera
+        //      * @author Jirka Dell'Oro-Friedl, HFU, 2021
+        //      */
+        //     window.addEventListener("load", init);
+        //     // show dialog for startup
+        //     let dialog: HTMLDialogElement;
+        //     function init(_event: Event): void {
+        //       dialog = document.querySelector("dialog");
+        //       dialog.querySelector("h1").textContent = document.title;
+        //       dialog.addEventListener("click", function (_event: Event): void {
+        //         // @ts-ign re until HTMLDialog is implemented by all browsers and available in dom.d.ts
+        //         dialog.close();
+        //         startInteractiveViewport();
+        //       });
+        //       //@ts-ignore
+        //       dialog.showModal();
+        //     }
+        //     // setup and start interactive viewport
+        //     async function startInteractiveViewport(): Promise<void> {
+        //       // load resources referenced in the link-tag
+        //       await FudgeCore.Project.loadResourcesFromHTML();
+        //       FudgeCore.Debug.log("Project:", FudgeCore.Project.resources);
+        //       // pick the graph to show
+        //       let graph: ƒ.Graph = <ƒ.Graph>FudgeCore.Project.resources[_graphId];
+        //       FudgeCore.Debug.log("Graph:", graph);
+        //       if (!graph) {
+        //         alert("Nothing to render. Create a graph with at least a mesh, material and probably some light");
+        //         return;
+        //       }
+        //       // setup the viewport
+        //       let cmpCamera: ƒ.ComponentCamera = new FudgeCore.ComponentCamera();
+        //       let canvas: HTMLCanvasElement = document.querySelector("canvas");
+        //       let viewport: ƒ.Viewport = new FudgeCore.Viewport();
+        //       viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
+        //       FudgeCore.Debug.log("Viewport:", viewport);
+        //       // hide the cursor when interacting, also suppressing right-click menu
+        //       canvas.addEventListener("mousedown", canvas.requestPointerLock);
+        //       canvas.addEventListener("mouseup", function (): void { document.exitPointerLock(); });
+        //       // make the camera interactive (complex method in FudgeAid)
+        //       let cameraOrbit: FudgeAid.CameraOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
+        //       // setup audio
+        //       let cmpListener: ƒ.ComponentAudioListener = new ƒ.ComponentAudioListener();
+        //       cmpCamera.node.addComponent(cmpListener);
+        //       FudgeCore.AudioManager.default.listenWith(cmpListener);
+        //       FudgeCore.AudioManager.default.listenTo(graph);
+        //       FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);
+        //       // draw viewport once for immediate feedback
+        //       FudgeCore.Render.prepare(cameraOrbit);
+        //       viewport.draw();
+        //       canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));
+        //     }
+        //   }).toString();
+        //   code = "(" + code + `)(document.head.querySelector("meta[autoView]").getAttribute("autoView"));\n`;
+        //   let script: HTMLScriptElement = document.createElement("script");
+        //   script.setAttribute("name", "autoView");
+        //   script.textContent = code;
+        //   return script;
+        // }
         settingsStringify() {
             let settings = JSON.stringify(Fudge.project.getMutator());
             settings = settings.replace(/"/g, "'");

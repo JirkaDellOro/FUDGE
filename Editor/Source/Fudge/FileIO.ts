@@ -34,7 +34,8 @@ namespace Fudge {
       "CustomComponentScript.txt": "Source/CustomComponentScript.ts",
       "Main.txt": "Source/Main.ts",
       "tsconfig.txt": "Source/tsconfig.json",
-      "Script.txt": " Build/Script.js"
+      "Script.txt": " Build/Script.js",
+      "Autoview.js": "../Autoview.js"
     };
     copyFiles(copyTemplates, new URL("Editor/Source/Template/", ƒPath), new URL("Script/", base));
 

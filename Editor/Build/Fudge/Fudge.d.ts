@@ -137,7 +137,6 @@ declare namespace Fudge {
         fileInternal: string;
         fileScript: string;
         fileStyles: string;
-        private includeAutoViewScript;
         private graphAutoView;
         constructor(_base: URL);
         openDialog(): Promise<boolean>;
@@ -150,7 +149,6 @@ declare namespace Fudge {
         protected reduceMutator(_mutator: ƒ.Mutator): void;
         private getGraphs;
         private createProjectHTML;
-        private getAutoViewScript;
         private settingsStringify;
         private panelsStringify;
         private stringifyHTML;
