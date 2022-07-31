@@ -86,7 +86,6 @@
     "outdir": "Build",
     "register": "true",
     "define": [
-      "CAMERA",
       "MATCAP"
     ]
   },

@@ -5,7 +5,6 @@ export abstract class ShaderMatCap extends Shader {
   public static readonly iSubclass: number = Shader.registerSubclass(ShaderMatCap);
 
   public static define: string[] = [
-    "CAMERA",
     "MATCAP"
 ];
 

@@ -12,7 +12,7 @@ in vec3 a_vctPosition;
   #if defined(CAMERA)
 uniform float u_fSpecular;
 uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
+// uniform mat4 u_mtxWorldToView;
 uniform vec3 u_vctCamera;
 
 float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
@@ -73,7 +73,13 @@ out vec2 v_vctTexture;
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
 in vec3 a_vctNormal;
 uniform mat4 u_mtxNormalMeshToWorld;
+uniform mat4 u_mtxMeshToWorld;
+uniform mat4 u_mtxNormalWorldToView;
+uniform mat4 u_mtxWorldToView;
+uniform vec3 u_vctCamera;
+uniform float u_aspect;
 out vec2 v_vctTexture;
+// out vec3 v_vctNormal;
   #endif
 
   #if defined(SKIN)
@@ -124,10 +130,7 @@ void main() {
     // calculate position and normal according to input and defines
   gl_Position = mtxMeshToView * vctPosition;
 
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
+    #if defined(CAMERA) || defined(MATCAP)
   vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
     #endif
 
@@ -167,9 +170,12 @@ void main() {
 
     #if defined(MATCAP)
   vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
+  // vec3 vctReflection = normalize(reflect(vctView, vctNormal));
+  vec3 vctReflection = mat3(u_mtxNormalWorldToView) * vctNormal;
+  vctReflection.x = vctReflection.x / sqrt(u_aspect);
+  vctReflection.y = vctReflection.y * sqrt(u_aspect);
+  vctReflection.y = -vctReflection.y;
+  v_vctTexture = 1.0 * vctReflection.xy + 0.5;
     #endif
 
     // always full opacity for now...
