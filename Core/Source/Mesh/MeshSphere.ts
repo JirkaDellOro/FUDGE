@@ -45,6 +45,7 @@ namespace FudgeCore {
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
+      delete serialization.shape;
       serialization.latitudes = this.latitudes;
       return serialization;
     }
