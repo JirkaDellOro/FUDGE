@@ -26,7 +26,7 @@ namespace Fudge {
       _container.element.appendChild(this.dom);
       this.container = _container;
 
-      this.container.on("destroy", () => this.dispatch(EVENT_EDITOR.CLOSE, { detail: { view: this } }));
+      this.container.on("destroy", () => this.dispatch(EVENT_EDITOR.CLOSE, { bubbles: true, detail: { view: this } }));
 
       // console.log(this.contextMenuCallback);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));

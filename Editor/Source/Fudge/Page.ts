@@ -33,6 +33,7 @@ namespace Fudge {
     private static physics: { [idGraph: string]: ƒ.Physics } = {};
 
     public static setDefaultProject(): void {
+      console.log("Set default project in local storage", project);
       if (project)
         localStorage.setItem("project", project.base.toString());
     }

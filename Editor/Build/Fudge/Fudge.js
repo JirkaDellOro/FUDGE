@@ -568,6 +568,7 @@ var Fudge;
         static panels = [];
         static physics = {};
         static setDefaultProject() {
+            console.log("Set default project in local storage", Fudge.project);
             if (Fudge.project)
                 localStorage.setItem("project", Fudge.project.base.toString());
         }
@@ -861,7 +862,7 @@ var Fudge;
             //_container.getElement().append(this.dom); //old
             _container.element.appendChild(this.dom);
             this.container = _container;
-            this.container.on("destroy", () => this.dispatch(Fudge.EVENT_EDITOR.CLOSE, { detail: { view: this } }));
+            this.container.on("destroy", () => this.dispatch(Fudge.EVENT_EDITOR.CLOSE, { bubbles: true, detail: { view: this } }));
             // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
