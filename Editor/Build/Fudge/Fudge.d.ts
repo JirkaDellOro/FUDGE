@@ -519,6 +519,7 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     interface ViewAnimationKey {
         key: ƒ.AnimationKey;
+        posScreen: ƒ.Vector2;
         path2D: Path2D;
         sequence: ViewAnimationSequence;
     }
@@ -539,15 +540,15 @@ declare namespace Fudge {
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimation extends View {
-        animation: ƒ.Animation;
-        controller: ControllerAnimation;
-        toolbar: HTMLDivElement;
         private graph;
-        private cmpAnimator;
         private node;
+        private cmpAnimator;
+        private animation;
         private playbackTime;
-        private selectedKey;
         private propertyList;
+        private controller;
+        private toolbar;
+        private selectedKey;
         private time;
         private idInterval;
         constructor(_container: ComponentContainer, _state: Object);
@@ -570,6 +571,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    interface ViewAnimationSlopeHook {
+        position: ƒ.Vector2;
+        path2D: Path2D;
+    }
     /**
      * TODO: add
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
@@ -581,20 +586,23 @@ declare namespace Fudge {
         private static readonly PIXEL_PER_MILLISECOND;
         private static readonly PIXEL_PER_VALUE;
         private static readonly STANDARD_ANIMATION_LENGTH;
-        canvas: HTMLCanvasElement;
-        scrollContainer: HTMLDivElement;
-        scrollBody: HTMLDivElement;
+        protected canvas: HTMLCanvasElement;
+        protected crc2: CanvasRenderingContext2D;
         protected mtxWorldToScreen: ƒ.Matrix3x3;
         protected mtxScreenToWorld: ƒ.Matrix3x3;
+        protected selectedKey: ViewAnimationKey;
         protected keys: ViewAnimationKey[];
         protected sequences: ViewAnimationSequence[];
-        protected crc2: CanvasRenderingContext2D;
+        private graph;
+        private animation;
+        private playbackTime;
+        private scrollContainer;
+        private scrollBody;
         private labels;
         private events;
-        private playbackTime;
-        private graph;
+        private slopeHooks;
         private posDragStart;
-        private animation;
+        private isAdjustingSlope;
         constructor(_container: ComponentContainer, _state: Object);
         redraw(_scroll?: boolean, _time?: number): void;
         protected drawTimeline(): void;
@@ -603,15 +611,16 @@ declare namespace Fudge {
         protected generateKey(_x: number, _y: number, _w: number, _h: number): Path2D;
         private drawCursor;
         private drawEventsAndLabels;
-        private getScreenToWorldPoint;
-        private hndEvent;
+        private hndFocus;
+        private hndAnimate;
+        private hndSelect;
         private hndPointerDown;
         private hndPointerMove;
         private hndPointerUp;
         private hndWheel;
         private hndScroll;
-        private hndAnimate;
         private setTime;
+        private getScreenToWorldPoint;
     }
 }
 declare namespace Fudge {

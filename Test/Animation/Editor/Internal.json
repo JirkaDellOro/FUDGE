@@ -63,15 +63,15 @@
                       {
                         "time": 0,
                         "value": 0,
-                        "slopeIn": 0,
-                        "slopeOut": 0.2,
+                        "slopeIn": 0.03970370688005208,
+                        "slopeOut": 0.03970370688005208,
                         "constant": false
                       },
                       {
                         "time": 10000,
                         "value": 359,
-                        "slopeIn": 0.2,
-                        "slopeOut": 0,
+                        "slopeIn": 0.03168513262793446,
+                        "slopeOut": 0.03168513262793446,
                         "constant": false
                       }
                     ],
@@ -105,15 +105,15 @@
                           {
                             "time": 5000,
                             "value": 360,
-                            "slopeIn": 0,
-                            "slopeOut": 0,
+                            "slopeIn": 0.07651417503775139,
+                            "slopeOut": 0.07651417503775139,
                             "constant": false
                           },
                           {
                             "time": 10000,
                             "value": 719,
-                            "slopeIn": 0,
-                            "slopeOut": 0,
+                            "slopeIn": 0.07111037664886023,
+                            "slopeOut": 0.07111037664886023,
                             "constant": false
                           }
                         ],

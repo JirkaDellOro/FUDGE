@@ -4,6 +4,7 @@ namespace Fudge {
 
   export interface ViewAnimationKey {
     key: ƒ.AnimationKey;
+    posScreen: ƒ.Vector2;
     path2D: Path2D;
     sequence: ViewAnimationSequence;
   }
@@ -28,17 +29,18 @@ namespace Fudge {
    * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
   export class ViewAnimation extends View {
-    public animation: ƒ.Animation;
-    public controller: ControllerAnimation;
-    public toolbar: HTMLDivElement;
     private graph: ƒ.Graph;
-    
-    private cmpAnimator: ƒ.ComponentAnimator;
     private node: ƒ.Node;
+    private cmpAnimator: ƒ.ComponentAnimator;
+    private animation: ƒ.Animation;
     private playbackTime: number;
-    private selectedKey: ViewAnimationKey;
+    
     private propertyList: HTMLDivElement;
-    // private sheet: ViewAnimationSheet;
+    private controller: ControllerAnimation;
+
+    private toolbar: HTMLDivElement;
+    private selectedKey: ViewAnimationKey;
+    
     private time: ƒ.Time = new ƒ.Time();
     private idInterval: number;
 
@@ -57,7 +59,7 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.INPUT, this.hndEvent);
     }
 
-    //#region  ContextMenu
+    //#region context menu
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
       let path: string[] = [];
@@ -237,7 +239,8 @@ namespace Fudge {
     }
 
     private hndSelect = (_event: FudgeEvent): void => {
-      if ("key" in _event.detail.data) {
+      this.selectedKey = null;
+      if (_event.detail.data && "key" in _event.detail.data) {
         this.selectedKey = _event.detail.data;
       }
     }

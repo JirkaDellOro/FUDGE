@@ -2573,16 +2573,15 @@ var Fudge;
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimation extends Fudge.View {
+        graph;
+        node;
+        cmpAnimator;
         animation;
+        playbackTime;
+        propertyList;
         controller;
         toolbar;
-        graph;
-        cmpAnimator;
-        node;
-        playbackTime;
         selectedKey;
-        propertyList;
-        // private sheet: ViewAnimationSheet;
         time = new ƒ.Time();
         idInterval;
         constructor(_container, _state) {
@@ -2598,7 +2597,7 @@ var Fudge;
             this.dom.addEventListener("collapse" /* COLLAPSE */, this.hndEvent);
             this.dom.addEventListener("input" /* INPUT */, this.hndEvent);
         }
-        //#region  ContextMenu
+        //#region context menu
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let path = [];
@@ -2744,7 +2743,8 @@ var Fudge;
             this.controller.updatePropertyList(nodeMutator);
         }
         hndSelect = (_event) => {
-            if ("key" in _event.detail.data) {
+            this.selectedKey = null;
+            if (_event.detail.data && "key" in _event.detail.data) {
                 this.selectedKey = _event.detail.data;
             }
         };
@@ -2880,33 +2880,40 @@ var Fudge;
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimationSheet extends Fudge.View {
-        static KEY_SIZE = 8; // width and height in px
+        static KEY_SIZE = 6; // width and height in px
         static LINE_WIDTH = 1; // in px
         static TIMELINE_HEIGHT = 50; // in px
         static PIXEL_PER_MILLISECOND = 1; // at scaling 1
         static PIXEL_PER_VALUE = 100; // at scaling 1
         static STANDARD_ANIMATION_LENGTH = 1000; // in miliseconds, used when animation length is falsy
         canvas;
-        scrollContainer;
-        scrollBody;
+        crc2;
         mtxWorldToScreen;
         mtxScreenToWorld;
+        selectedKey;
         keys = [];
         sequences = [];
-        crc2;
+        graph;
+        animation;
+        playbackTime = 0;
+        scrollContainer;
+        scrollBody;
         labels = [];
         events = [];
-        playbackTime = 0;
-        graph;
+        slopeHooks;
         posDragStart = new ƒ.Vector2();
-        animation;
+        isAdjustingSlope = false;
         constructor(_container, _state) {
             super(_container, _state);
+            _container.on("resize", () => this.redraw());
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndFocus);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndAnimate);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndSelect);
             this.canvas = document.createElement("canvas");
+            this.canvas.style.position = "absolute";
             this.crc2 = this.canvas.getContext("2d");
             this.mtxWorldToScreen = new ƒ.Matrix3x3();
             this.mtxScreenToWorld = new ƒ.Matrix3x3();
-            this.canvas.style.position = "absolute";
             this.scrollContainer = document.createElement("div");
             this.scrollContainer.style.position = "absolute";
             this.scrollContainer.style.width = "100%";
@@ -2917,9 +2924,6 @@ var Fudge;
             this.scrollContainer.addEventListener("pointermove", this.hndPointerMove);
             this.scrollContainer.addEventListener("pointerup", this.hndPointerUp);
             this.scrollContainer.addEventListener("wheel", this.hndWheel);
-            _container.on("resize", () => this.redraw());
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndAnimate);
             this.scrollBody = document.createElement("div");
             this.scrollBody.style.overflow = "hidden";
             this.scrollBody.style.height = "1px";
@@ -2927,6 +2931,7 @@ var Fudge;
             this.dom.appendChild(this.scrollContainer);
             this.scrollContainer.appendChild(this.scrollBody);
         }
+        //#region drawing
         redraw(_scroll = true, _time) {
             this.canvas.width = this.dom.clientWidth;
             this.canvas.height = this.dom.clientHeight;
@@ -2948,12 +2953,12 @@ var Fudge;
                 this.scrollContainer.scrollLeft = -this.mtxWorldToScreen.translation.x;
             }
             if (this.animation) {
-                this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
-                this.drawKeys();
                 if (this instanceof Fudge.ViewAnimationSheetCurve) {
                     this.drawCurves();
                     this.drawScale();
                 }
+                this.drawKeys();
+                this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
                 this.drawTimeline();
                 this.drawEventsAndLabels();
                 this.drawCursor();
@@ -3000,8 +3005,35 @@ var Fudge;
         drawKeys() {
             this.generateKeys();
             for (const key of this.keys) {
+                this.crc2.lineWidth = 4;
+                this.crc2.strokeStyle = key.key == this.selectedKey?.key ?
+                    window.getComputedStyle(this.dom).getPropertyValue("--color-signal") :
+                    window.getComputedStyle(this.dom).getPropertyValue("--color-medium");
                 this.crc2.fillStyle = key.sequence.color;
+                this.crc2.stroke(key.path2D);
                 this.crc2.fill(key.path2D);
+                if (key.key == this.selectedKey?.key) {
+                    this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
+                    this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-medium");
+                    this.crc2.fillStyle = this.crc2.strokeStyle;
+                    let [left, right] = [ƒ.Recycler.get(ƒ.Vector2), ƒ.Recycler.get(ƒ.Vector2)];
+                    left.set(-50, 0);
+                    right.set(50, 0);
+                    let angle = Math.atan(key.key.SlopeIn * (this.mtxWorldToScreen.scaling.y / this.mtxWorldToScreen.scaling.x)) * (180 / Math.PI);
+                    let mtxTransform = ƒ.Matrix3x3.IDENTITY();
+                    mtxTransform.translate(key.posScreen);
+                    mtxTransform.rotate(angle);
+                    left.transform(mtxTransform);
+                    right.transform(mtxTransform);
+                    let path = new Path2D();
+                    path.moveTo(left.x, left.y);
+                    path.lineTo(right.x, right.y);
+                    this.crc2.stroke(path);
+                    this.slopeHooks = [{ position: left, path2D: this.generateKey(left.x, left.y, 5, 5) }, { position: right, path2D: this.generateKey(right.x, right.y, 5, 5) }];
+                    this.slopeHooks.forEach(_hook => this.crc2.fill(_hook.path2D));
+                    ƒ.Recycler.store(left);
+                    ƒ.Recycler.store(right);
+                }
             }
         }
         generateKey(_x, _y, _w, _h) {
@@ -3068,34 +3100,38 @@ var Fudge;
                 this.crc2.stroke(p);
             }
         }
-        getScreenToWorldPoint(_x, _y) {
-            let vector = new ƒ.Vector2(_x, _y);
-            vector.transform(this.mtxScreenToWorld);
-            return vector;
-        }
-        hndEvent = (_event) => {
-            switch (_event.type) {
-                case Fudge.EVENT_EDITOR.FOCUS:
-                    this.graph = _event.detail.graph;
-                    this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
-                    this.mtxWorldToScreen.reset();
-                    // this.mtxWorldToView.scaleY(-1);
-                    this.mtxWorldToScreen.scaleY(-ViewAnimationSheet.PIXEL_PER_VALUE); // flip y
-                    this.mtxWorldToScreen.scaleX(ViewAnimationSheet.PIXEL_PER_MILLISECOND);
-                    this.mtxScreenToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen);
-                    if (this.animation) {
-                        this.setTime(0);
-                        // TODO: adjust y scaling to fit highest and lowest key
-                        let translation = this.mtxWorldToScreen.translation;
-                        translation.y = this.canvas.height / 2;
-                        this.mtxWorldToScreen.translation = translation;
-                        let scaling = this.mtxWorldToScreen.scaling;
-                        scaling.x = this.canvas.width / ((this.animation.totalTime || ViewAnimationSheet.STANDARD_ANIMATION_LENGTH) * 1.2);
-                        this.mtxWorldToScreen.scaling = scaling;
-                    }
-                    this.redraw();
-                    break;
+        //#endregion
+        //#region events
+        hndFocus = (_event) => {
+            this.graph = _event.detail.graph;
+            this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
+            this.mtxWorldToScreen.reset();
+            this.mtxWorldToScreen.scaleY(-ViewAnimationSheet.PIXEL_PER_VALUE); // flip y, apply scaling
+            this.mtxWorldToScreen.scaleX(ViewAnimationSheet.PIXEL_PER_MILLISECOND);
+            this.mtxScreenToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen);
+            if (this.animation) {
+                this.setTime(0);
+                // TODO: adjust y scaling to fit highest and lowest key
+                let translation = this.mtxWorldToScreen.translation;
+                translation.y = this.canvas.height / 2;
+                this.mtxWorldToScreen.translation = translation;
+                let scaling = this.mtxWorldToScreen.scaling;
+                scaling.x = this.canvas.width / ((this.animation.totalTime || ViewAnimationSheet.STANDARD_ANIMATION_LENGTH) * 1.2);
+                this.mtxWorldToScreen.scaling = scaling;
             }
+            this.redraw();
+        };
+        hndAnimate = (_event) => {
+            this.playbackTime = _event.detail.data.playbackTime || 0;
+            this.sequences = _event.detail.data.sequences || this.sequences;
+            this.redraw();
+        };
+        hndSelect = (_event) => {
+            this.selectedKey = null;
+            if (_event.detail.data && "key" in _event.detail.data) {
+                this.selectedKey = _event.detail.data;
+            }
+            this.redraw(false);
         };
         hndPointerDown = (_event) => {
             _event.preventDefault();
@@ -3105,6 +3141,9 @@ var Fudge;
                         this.scrollContainer.onscroll = this.hndScroll;
                     else if (_event.offsetY <= ViewAnimationSheet.TIMELINE_HEIGHT)
                         this.setTime(_event.offsetX);
+                    else if (this.slopeHooks && this.slopeHooks.some(_hook => this.crc2.isPointInPath(_hook.path2D, _event.offsetX, _event.offsetY))) {
+                        this.isAdjustingSlope = true;
+                    }
                     else {
                         let x = _event.offsetX;
                         let y = _event.offsetY;
@@ -3112,8 +3151,10 @@ var Fudge;
                         let obj = this.keys.find(findObject) ||
                             this.labels.find(findObject) ||
                             this.events.find(findObject);
-                        if (!obj)
+                        if (!obj) {
+                            this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: null } });
                             return;
+                        }
                         if (obj["label"]) {
                             console.log(obj["label"]);
                             this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: { name: obj["label"], time: this.animation.labels[obj["label"]] } } });
@@ -3139,6 +3180,14 @@ var Fudge;
                 case 1:
                     if (_event.offsetY <= ViewAnimationSheet.TIMELINE_HEIGHT)
                         this.setTime(_event.offsetX);
+                    else if (this.isAdjustingSlope) {
+                        let vctDelta = ƒ.Vector2.DIFFERENCE(new ƒ.Vector2(_event.offsetX, _event.offsetY), this.selectedKey.posScreen);
+                        vctDelta.transform(ƒ.Matrix3x3.SCALING(this.mtxScreenToWorld.scaling));
+                        let slope = vctDelta.y / vctDelta.x;
+                        this.selectedKey.key.SlopeIn = slope;
+                        this.selectedKey.key.SlopeOut = slope;
+                        this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: this.playbackTime } } });
+                    }
                     break;
                 case 4:
                     this.mtxWorldToScreen.translate(ƒ.Vector2.DIFFERENCE(this.getScreenToWorldPoint(_event.offsetX, _event.offsetY), this.posDragStart));
@@ -3150,8 +3199,11 @@ var Fudge;
             _event.preventDefault();
             if (this.scrollContainer.onscroll) {
                 this.scrollContainer.onscroll = undefined;
-                this.redraw();
             }
+            if (this.isAdjustingSlope) {
+                this.isAdjustingSlope = false;
+            }
+            this.redraw();
         };
         hndWheel = (_event) => {
             _event.preventDefault();
@@ -3171,16 +3223,17 @@ var Fudge;
             this.mtxWorldToScreen.translation = translation;
             this.redraw(false);
         };
-        hndAnimate = (_event) => {
-            this.playbackTime = _event.detail.data.playbackTime || 0;
-            this.sequences = _event.detail.data.sequences || this.sequences;
-            this.redraw();
-        };
+        //#endregion
         setTime(_x) {
             let playbackTime = Math.max(0, this.getScreenToWorldPoint(_x, 0).x);
             let pixelPerFrame = 1000 / this.animation.fps;
             playbackTime = Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
             this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: playbackTime } } });
+        }
+        getScreenToWorldPoint(_x, _y) {
+            let vector = new ƒ.Vector2(_x, _y);
+            vector.transform(this.mtxScreenToWorld);
+            return vector;
         }
     }
     Fudge.ViewAnimationSheet = ViewAnimationSheet;
@@ -3245,12 +3298,13 @@ var Fudge;
         }
         generateKeys() {
             this.keys = this.sequences.flatMap((_sequence) => _sequence.sequence.getKeys().map(_key => {
-                let pos = ƒ.Recycler.get(ƒ.Vector2);
-                pos.set(_key.Time, _key.Value);
-                pos.transform(this.mtxWorldToScreen);
+                let position = ƒ.Recycler.get(ƒ.Vector2);
+                position.set(_key.Time, _key.Value);
+                position.transform(this.mtxWorldToScreen);
                 let viewKey = {
                     key: _key,
-                    path2D: this.generateKey(pos.x, pos.y, Fudge.ViewAnimationSheet.KEY_SIZE, Fudge.ViewAnimationSheet.KEY_SIZE),
+                    posScreen: position,
+                    path2D: this.generateKey(position.x, position.y, Fudge.ViewAnimationSheet.KEY_SIZE, Fudge.ViewAnimationSheet.KEY_SIZE),
                     sequence: _sequence
                 };
                 ƒ.Recycler.store(ƒ.Vector2);

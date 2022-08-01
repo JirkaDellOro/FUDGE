@@ -74,15 +74,16 @@ namespace Fudge {
     protected generateKeys(): void {
       this.keys = this.sequences.flatMap( (_sequence) => 
         _sequence.sequence.getKeys().map( _key => {
-          let pos: ƒ.Vector2 = ƒ.Recycler.get(ƒ.Vector2);
-          pos.set(_key.Time, _key.Value);
-          pos.transform(this.mtxWorldToScreen);
+          let position: ƒ.Vector2 = ƒ.Recycler.get(ƒ.Vector2);
+          position.set(_key.Time, _key.Value);
+          position.transform(this.mtxWorldToScreen);
 
           let viewKey: ViewAnimationKey = {
             key: _key,
+            posScreen: position,
             path2D: this.generateKey(
-              pos.x,
-              pos.y,
+              position.x,
+              position.y,
               ViewAnimationSheet.KEY_SIZE,
               ViewAnimationSheet.KEY_SIZE
             ),
