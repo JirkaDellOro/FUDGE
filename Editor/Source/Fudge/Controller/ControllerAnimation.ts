@@ -108,25 +108,26 @@ namespace Fudge {
       }
     }
 
-    public getOpenSequences(): ViewAnimationSequence[] {
+    public getSelectedSequences(_selectedProperty: HTMLElement): ViewAnimationSequence[] {
       let sequences: ViewAnimationSequence[] = [];
-      collectOpenSequencesRecursive(this.propertyList, this.animation.animationStructure, sequences);
+      collectSelectedSequencesRecursive(this.propertyList, this.animation.animationStructure, sequences, _selectedProperty == null);
       return sequences;
 
-      function collectOpenSequencesRecursive(_propertyList: HTMLElement, _animationStructure: ƒ.AnimationStructure, _sequences: ViewAnimationSequence[]): void {
+      function collectSelectedSequencesRecursive(_propertyList: HTMLElement, _animationStructure: ƒ.AnimationStructure, _sequences: ViewAnimationSequence[], _isSelectedDescendant: boolean): void {
         for (const key in _animationStructure) {
           let element: HTMLElement = ƒui.Controller.findChildElementByKey(_propertyList, key);
-          if (element == null || (element instanceof ƒui.Details && !element.open))
+          let isSelectedDescendant: boolean = _isSelectedDescendant || element == _selectedProperty;
+          if (element == null)
             continue;
 
           let sequence: Object = _animationStructure[key];
-          if (sequence instanceof ƒ.AnimationSequence) {
+          if (sequence instanceof ƒ.AnimationSequence && isSelectedDescendant) {
             _sequences.push({
               color: element.style.getPropertyValue("--color-animation-property"),
               sequence: sequence
             });
           } else {
-            collectOpenSequencesRecursive(element, <ƒ.AnimationStructure>_animationStructure[key], _sequences);
+            collectSelectedSequencesRecursive(element, <ƒ.AnimationStructure>_animationStructure[key], _sequences, isSelectedDescendant);
           }
         }
       }

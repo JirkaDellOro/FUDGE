@@ -123,50 +123,6 @@
                   }
                 }
               ]
-            },
-            "children": {
-              "Moon": {
-                "components": {
-                  "ComponentTransform": [
-                    {
-                      "mtxLocal": {
-                        "scaling": {
-                          "x": {
-                            "keys": [],
-                            "animationSequence": true
-                          },
-                          "y": {
-                            "keys": [],
-                            "animationSequence": true
-                          },
-                          "z": {
-                            "keys": [],
-                            "animationSequence": true
-                          }
-                        }
-                      }
-                    }
-                  ],
-                  "ComponentMaterial": [
-                    {
-                      "clrPrimary": {
-                        "r": {
-                          "keys": [],
-                          "animationSequence": true
-                        },
-                        "g": {
-                          "keys": [],
-                          "animationSequence": true
-                        },
-                        "b": {
-                          "keys": [],
-                          "animationSequence": true
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
             }
           }
         }
@@ -369,7 +325,7 @@
                             {
                               "ƒ.ComponentMaterial": {
                                 "sortForAlpha": false,
-                                "clrPrimary": "[0, 0, 0, 1]",
+                                "clrPrimary": "[1, 1, 1, 1]",
                                 "clrSecondary": "[1, 1, 1, 1]",
                                 "pivot": {
                                   "translation": "[0, 0]",
@@ -404,7 +360,7 @@
                                 "local": {
                                   "translation": "[1, 0, 0]",
                                   "rotation": "[0, 0, 0]",
-                                  "scaling": "[0, 0, 0]"
+                                  "scaling": "[1, 1, 1]"
                                 },
                                 "Component": {
                                   "active": true

@@ -240,7 +240,7 @@ declare namespace Fudge {
         deleteKey(_key: ViewAnimationKey): void;
         addPath(_path: string[]): void;
         deletePath(_path: string[]): void;
-        getOpenSequences(): ViewAnimationSequence[];
+        getSelectedSequences(_selectedProperty: HTMLElement): ViewAnimationSequence[];
         private hndKey;
     }
 }
@@ -549,6 +549,7 @@ declare namespace Fudge {
         private controller;
         private toolbar;
         private selectedKey;
+        private selectedProperty;
         private time;
         private idInterval;
         constructor(_container: ComponentContainer, _state: Object);
@@ -559,7 +560,7 @@ declare namespace Fudge {
         private createUserInterface;
         private hndEvent;
         private setAnimation;
-        private recreatePropertyList;
+        private createPropertyList;
         private hndSelect;
         private hndAnimate;
         private animate;

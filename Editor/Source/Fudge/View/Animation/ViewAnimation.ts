@@ -40,6 +40,7 @@ namespace Fudge {
 
     private toolbar: HTMLDivElement;
     private selectedKey: ViewAnimationKey;
+    private selectedProperty: HTMLElement;
     
     private time: ƒ.Time = new ƒ.Time();
     private idInterval: number;
@@ -54,9 +55,9 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndSelect);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
-      this.dom.addEventListener(ƒui.EVENT.EXPAND, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.COLLAPSE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.INPUT, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.CLICK, this.hndEvent);
+      // this.dom.addEventListener("pointerup", this.hndEvent);
     }
 
     //#region context menu
@@ -89,7 +90,7 @@ namespace Fudge {
         case CONTEXTMENU.ADD_PROPERTY:
           path = _item["path"];
           this.controller.addPath(path);
-          this.recreatePropertyList();
+          this.createPropertyList();
           this.animate();
 
           break;
@@ -113,8 +114,8 @@ namespace Fudge {
             element = element.parentElement;
           }
           this.controller.deletePath(path);
-          this.recreatePropertyList();
-          this.animate(this.controller.getOpenSequences());
+          this.createPropertyList();
+          this.animate(this.controller.getSelectedSequences(this.selectedProperty));
           return;
       }
     }
@@ -122,9 +123,9 @@ namespace Fudge {
 
     private getNodeSubmenu(_node: ƒ.Node, _path: string[], _callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
-      for (const anyComponent of ƒ.Component.subclasses) {
+      for (const componentClass of ƒ.Component.subclasses) {
         //@ts-ignore
-        _node.getComponents(anyComponent).forEach((component, index) => { // we need to get the attached componnents as array so we can reconstuct their path
+        _node.getComponents(componentClass).forEach((component, index) => { // we need to get the attached componnents as array so we can reconstuct their path
           let path: string[] = Object.assign([], _path);
           path.push("components");
           path.push(component.type);
@@ -180,7 +181,8 @@ namespace Fudge {
       this.toolbar = document.createElement("div");
       this.toolbar.id = "toolbar";
       this.toolbar.style.width = "300px";
-      this.toolbar.style.height = "80px";
+      this.toolbar.style.height = "50px";
+      this.toolbar.style.marginBottom = "30px";
       this.toolbar.style.overflow = "hidden";
       this.fillToolbar(this.toolbar);
       this.toolbar.addEventListener("click", this.hndToolbarClick);
@@ -195,14 +197,22 @@ namespace Fudge {
           this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
           this.setAnimation(this.cmpAnimator?.animation);
           break;
-        case ƒui.EVENT.EXPAND:
-        case ƒui.EVENT.COLLAPSE:
-          this.animate(this.controller.getOpenSequences());
+        case ƒui.EVENT.CLICK:
+          if (!(_event.target instanceof HTMLElement)) break;
+        
+          let target: HTMLElement = _event.target;
+          if (target.tagName == "SUMMARY") 
+            target = target.parentElement;
+          if (target instanceof ƒui.CustomElement || target instanceof ƒui.Details) 
+            this.selectedProperty = target;
+          else if (target == this.dom)
+            this.selectedProperty = null;
+          this.animate(this.controller.getSelectedSequences(this.selectedProperty));
           break;
         case ƒui.EVENT.INPUT:
           if (_event.target instanceof ƒui.CustomElement) {
             this.controller.modifyKey(this.playbackTime, _event.target);
-            this.animate(this.controller.getOpenSequences());
+            this.animate(this.controller.getSelectedSequences(this.selectedProperty));
           }
           break;
       }
@@ -219,12 +229,12 @@ namespace Fudge {
 
       this.animation = _animation;
 
-      this.recreatePropertyList();
+      this.createPropertyList();
       
-      this.animate(this.controller.getOpenSequences());
+      this.animate(this.controller.getSelectedSequences(this.selectedProperty));
     }
 
-    private recreatePropertyList(): void {
+    private createPropertyList(): void {
       let nodeMutator: ƒ.Mutator = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback) || {};
 
       let newPropertyList: HTMLDivElement = ƒui.Generator.createInterfaceFromMutator(nodeMutator);
@@ -328,7 +338,7 @@ namespace Fudge {
           break;
         case "remove-key":
           this.controller.deleteKey(this.selectedKey);
-          this.animate(this.controller.getOpenSequences());
+          this.animate(this.controller.getSelectedSequences(this.selectedProperty));
           break;
         case "start":
           this.playbackTime = 0;

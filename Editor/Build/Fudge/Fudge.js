@@ -982,24 +982,25 @@ var Fudge;
                 return _object;
             }
         }
-        getOpenSequences() {
+        getSelectedSequences(_selectedProperty) {
             let sequences = [];
-            collectOpenSequencesRecursive(this.propertyList, this.animation.animationStructure, sequences);
+            collectSelectedSequencesRecursive(this.propertyList, this.animation.animationStructure, sequences, _selectedProperty == null);
             return sequences;
-            function collectOpenSequencesRecursive(_propertyList, _animationStructure, _sequences) {
+            function collectSelectedSequencesRecursive(_propertyList, _animationStructure, _sequences, _isSelectedDescendant) {
                 for (const key in _animationStructure) {
                     let element = ƒui.Controller.findChildElementByKey(_propertyList, key);
-                    if (element == null || (element instanceof ƒui.Details && !element.open))
+                    let isSelectedDescendant = _isSelectedDescendant || element == _selectedProperty;
+                    if (element == null)
                         continue;
                     let sequence = _animationStructure[key];
-                    if (sequence instanceof ƒ.AnimationSequence) {
+                    if (sequence instanceof ƒ.AnimationSequence && isSelectedDescendant) {
                         _sequences.push({
                             color: element.style.getPropertyValue("--color-animation-property"),
                             sequence: sequence
                         });
                     }
                     else {
-                        collectOpenSequencesRecursive(element, _animationStructure[key], _sequences);
+                        collectSelectedSequencesRecursive(element, _animationStructure[key], _sequences, isSelectedDescendant);
                     }
                 }
             }
@@ -2583,6 +2584,7 @@ var Fudge;
         controller;
         toolbar;
         selectedKey;
+        selectedProperty;
         time = new ƒ.Time();
         idInterval;
         constructor(_container, _state) {
@@ -2594,9 +2596,9 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndAnimate);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndSelect);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
-            this.dom.addEventListener("expand" /* EXPAND */, this.hndEvent);
-            this.dom.addEventListener("collapse" /* COLLAPSE */, this.hndEvent);
             this.dom.addEventListener("input" /* INPUT */, this.hndEvent);
+            this.dom.addEventListener("click" /* CLICK */, this.hndEvent);
+            // this.dom.addEventListener("pointerup", this.hndEvent);
         }
         //#region context menu
         getContextMenu(_callback) {
@@ -2622,7 +2624,7 @@ var Fudge;
                 case Fudge.CONTEXTMENU.ADD_PROPERTY:
                     path = _item["path"];
                     this.controller.addPath(path);
-                    this.recreatePropertyList();
+                    this.createPropertyList();
                     this.animate();
                     break;
                 case Fudge.CONTEXTMENU.DELETE_PROPERTY:
@@ -2642,16 +2644,16 @@ var Fudge;
                         element = element.parentElement;
                     }
                     this.controller.deletePath(path);
-                    this.recreatePropertyList();
-                    this.animate(this.controller.getOpenSequences());
+                    this.createPropertyList();
+                    this.animate(this.controller.getSelectedSequences(this.selectedProperty));
                     return;
             }
         }
         getNodeSubmenu(_node, _path, _callback) {
             const menu = new Fudge.remote.Menu();
-            for (const anyComponent of ƒ.Component.subclasses) {
+            for (const componentClass of ƒ.Component.subclasses) {
                 //@ts-ignore
-                _node.getComponents(anyComponent).forEach((component, index) => {
+                _node.getComponents(componentClass).forEach((component, index) => {
                     let path = Object.assign([], _path);
                     path.push("components");
                     path.push(component.type);
@@ -2694,7 +2696,8 @@ var Fudge;
             this.toolbar = document.createElement("div");
             this.toolbar.id = "toolbar";
             this.toolbar.style.width = "300px";
-            this.toolbar.style.height = "80px";
+            this.toolbar.style.height = "50px";
+            this.toolbar.style.marginBottom = "30px";
             this.toolbar.style.overflow = "hidden";
             this.fillToolbar(this.toolbar);
             this.toolbar.addEventListener("click", this.hndToolbarClick);
@@ -2708,14 +2711,22 @@ var Fudge;
                     this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
                     this.setAnimation(this.cmpAnimator?.animation);
                     break;
-                case "expand" /* EXPAND */:
-                case "collapse" /* COLLAPSE */:
-                    this.animate(this.controller.getOpenSequences());
+                case "click" /* CLICK */:
+                    if (!(_event.target instanceof HTMLElement))
+                        break;
+                    let target = _event.target;
+                    if (target.tagName == "SUMMARY")
+                        target = target.parentElement;
+                    if (target instanceof ƒui.CustomElement || target instanceof ƒui.Details)
+                        this.selectedProperty = target;
+                    else if (target == this.dom)
+                        this.selectedProperty = null;
+                    this.animate(this.controller.getSelectedSequences(this.selectedProperty));
                     break;
                 case "input" /* INPUT */:
                     if (_event.target instanceof ƒui.CustomElement) {
                         this.controller.modifyKey(this.playbackTime, _event.target);
-                        this.animate(this.controller.getOpenSequences());
+                        this.animate(this.controller.getSelectedSequences(this.selectedProperty));
                     }
                     break;
             }
@@ -2729,10 +2740,10 @@ var Fudge;
             this.dom.innerHTML = "";
             this.dom.appendChild(this.toolbar);
             this.animation = _animation;
-            this.recreatePropertyList();
-            this.animate(this.controller.getOpenSequences());
+            this.createPropertyList();
+            this.animate(this.controller.getSelectedSequences(this.selectedProperty));
         }
-        recreatePropertyList() {
+        createPropertyList() {
             let nodeMutator = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback) || {};
             let newPropertyList = ƒui.Generator.createInterfaceFromMutator(nodeMutator);
             if (this.dom.contains(this.propertyList))
@@ -2825,7 +2836,7 @@ var Fudge;
                     break;
                 case "remove-key":
                     this.controller.deleteKey(this.selectedKey);
-                    this.animate(this.controller.getOpenSequences());
+                    this.animate(this.controller.getSelectedSequences(this.selectedProperty));
                     break;
                 case "start":
                     this.playbackTime = 0;
