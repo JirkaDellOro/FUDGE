@@ -517,22 +517,22 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    interface ViewAnimationKey {
-        key: ƒ.AnimationKey;
-        posScreen: ƒ.Vector2;
-        path2D: Path2D;
-        sequence: ViewAnimationSequence;
-    }
     interface ViewAnimationSequence {
+        data: ƒ.AnimationSequence;
         color: string;
-        sequence: ƒ.AnimationSequence;
+    }
+    interface ViewAnimationKey {
+        data: ƒ.AnimationKey;
+        posScreen: ƒ.Vector2;
+        sequence: ViewAnimationSequence;
+        path2D: Path2D;
     }
     interface ViewAnimationEvent {
-        event: string;
+        name: string;
         path2D: Path2D;
     }
     interface ViewAnimationLabel {
-        label: string;
+        name: string;
         path2D: Path2D;
     }
     /**
@@ -571,44 +571,41 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    import ƒ = FudgeCore;
-    interface ViewAnimationSlopeHook {
-        position: ƒ.Vector2;
-        path2D: Path2D;
-    }
     /**
      * TODO: add
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     abstract class ViewAnimationSheet extends View {
-        protected static readonly KEY_SIZE: number;
+        private static readonly KEY_SIZE;
         private static readonly LINE_WIDTH;
         private static readonly TIMELINE_HEIGHT;
         private static readonly PIXEL_PER_MILLISECOND;
         private static readonly PIXEL_PER_VALUE;
+        private static readonly MINIMUM_PIXEL_PER_STEP;
         private static readonly STANDARD_ANIMATION_LENGTH;
-        protected canvas: HTMLCanvasElement;
-        protected crc2: CanvasRenderingContext2D;
-        protected mtxWorldToScreen: ƒ.Matrix3x3;
-        protected mtxScreenToWorld: ƒ.Matrix3x3;
-        protected selectedKey: ViewAnimationKey;
-        protected keys: ViewAnimationKey[];
-        protected sequences: ViewAnimationSequence[];
+        private mode;
         private graph;
         private animation;
         private playbackTime;
+        private canvas;
+        private crc2;
         private scrollContainer;
         private scrollBody;
+        private mtxWorldToScreen;
+        private mtxScreenToWorld;
+        private selectedKey;
+        private keys;
+        private sequences;
         private labels;
         private events;
         private slopeHooks;
         private posDragStart;
         constructor(_container: ComponentContainer, _state: Object);
-        draw(_scroll?: boolean, _time?: number): void;
-        protected drawTimeline(): void;
-        protected drawKeys(): void;
-        protected abstract generateKeys(): void;
-        protected generateKey(_x: number, _y: number, _w: number, _h: number): Path2D;
+        private draw;
+        private drawTimeline;
+        private drawKeys;
+        private drawCurves;
+        private drawScale;
         private drawCursor;
         private drawEventsAndLabels;
         private hndFocus;
@@ -623,33 +620,8 @@ declare namespace Fudge {
         private hndScroll;
         private setTime;
         private getScreenToWorldPoint;
-    }
-}
-declare namespace Fudge {
-    /**
-     * TODO: add
-     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
-     */
-    class ViewAnimationSheetCurve extends ViewAnimationSheet {
-        private static readonly MINIMUM_PIXEL_PER_STEP;
-        drawCurves(): void;
-        drawScale(): void;
-        protected generateKeys(): void;
         private getBezierPoints;
     }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    /**
-     * TODO: add
-     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
-     */
-    class ViewAnimationSheetDope extends ViewAnimationSheet {
-        drawKeys(): Promise<void>;
-        protected drawSequence(_sequence: ƒ.AnimationSequence): void;
-    }
-}
-declare namespace Fudge {
 }
 declare namespace Fudge {
     /**

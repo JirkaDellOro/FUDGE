@@ -2,25 +2,25 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
-  export interface ViewAnimationKey {
-    key: ƒ.AnimationKey;
-    posScreen: ƒ.Vector2;
-    path2D: Path2D;
-    sequence: ViewAnimationSequence;
+  export interface ViewAnimationSequence {
+    data: ƒ.AnimationSequence;
+    color: string;
   }
 
-  export interface ViewAnimationSequence {
-    color: string;
-    sequence: ƒ.AnimationSequence;
+  export interface ViewAnimationKey {
+    data: ƒ.AnimationKey;
+    posScreen: ƒ.Vector2;
+    sequence: ViewAnimationSequence;
+    path2D: Path2D;
   }
 
   export interface ViewAnimationEvent {
-    event: string;
+    name: string;
     path2D: Path2D;
   }
 
   export interface ViewAnimationLabel {
-    label: string;
+    name: string;
     path2D: Path2D;
   }
 

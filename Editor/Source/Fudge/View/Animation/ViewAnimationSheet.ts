@@ -1,44 +1,46 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
-  
-
-  export interface ViewAnimationSlopeHook {
-    position: ƒ.Vector2;
-    path2D: Path2D;
+ 
+  enum SHEET_MODE {
+    DOPE,
+    CURVE
   }
+
   /**
    * TODO: add
    * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
   export abstract class ViewAnimationSheet extends View {
-    protected static readonly KEY_SIZE: number = 6; // width and height in px
+    private static readonly KEY_SIZE: number = 6; // width and height in px
     private static readonly LINE_WIDTH: number = 1; // in px
     private static readonly TIMELINE_HEIGHT: number = 50; // in px
     private static readonly PIXEL_PER_MILLISECOND: number = 1; // at scaling 1
     private static readonly PIXEL_PER_VALUE: number = 100; // at scaling 1
+    private static readonly MINIMUM_PIXEL_PER_STEP: number = 30;
     private static readonly STANDARD_ANIMATION_LENGTH: number = 1000; // in miliseconds, used when animation length is falsy
     
-    protected canvas: HTMLCanvasElement;
-    protected crc2: CanvasRenderingContext2D;
-    protected mtxWorldToScreen: ƒ.Matrix3x3;
-    protected mtxScreenToWorld: ƒ.Matrix3x3;
-    protected selectedKey: ViewAnimationKey;
-
-    protected keys: ViewAnimationKey[] = [];
-    protected sequences: ViewAnimationSequence[] = [];
+    private mode: SHEET_MODE = SHEET_MODE.CURVE;
 
     private graph: ƒ.Graph;
     private animation: ƒ.Animation;
     private playbackTime: number = 0;
-
+    
+    private canvas: HTMLCanvasElement;
+    private crc2: CanvasRenderingContext2D;
     private scrollContainer: HTMLDivElement;
     private scrollBody: HTMLDivElement;
+    private mtxWorldToScreen: ƒ.Matrix3x3;
+    private mtxScreenToWorld: ƒ.Matrix3x3;
+    
+    private selectedKey: ViewAnimationKey;
+    private keys: ViewAnimationKey[] = [];
+    private sequences: ViewAnimationSequence[] = [];
     private labels: ViewAnimationLabel[] = [];
     private events: ViewAnimationEvent[] = [];
-    private slopeHooks: ViewAnimationSlopeHook[];
+    private slopeHooks: Path2D[] = [];
+    
     private posDragStart: ƒ.Vector2 = new ƒ.Vector2();
-
+    
     constructor(_container: ComponentContainer, _state: Object) {
       super(_container, _state);
 
@@ -73,7 +75,7 @@ namespace Fudge {
     }
 
     //#region drawing
-    public draw(_scroll: boolean = true, _time?: number): void {
+    private draw(_scroll: boolean = true, _time?: number): void {
       this.canvas.width = this.dom.clientWidth;
       this.canvas.height = this.dom.clientHeight;
       
@@ -96,7 +98,7 @@ namespace Fudge {
       }
 
       if (this.animation) {
-        if (this instanceof ViewAnimationSheetCurve) {
+        if (this.mode == SHEET_MODE.CURVE) {
           this.drawCurves();
           this.drawScale();
         }
@@ -108,7 +110,7 @@ namespace Fudge {
       }
     }
 
-    protected drawTimeline(): void {
+    private drawTimeline(): void {
       this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-background-content");
       this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT + 30);
 
@@ -157,12 +159,32 @@ namespace Fudge {
       this.crc2.stroke(timeline);
     }
 
-    protected drawKeys(): void {
-      this.generateKeys();
+    private drawKeys(): void {
+      this.keys = this.sequences.flatMap( (_sequence) => 
+        _sequence.data.getKeys().map( _key => {
+          let position: ƒ.Vector2 = ƒ.Recycler.get(ƒ.Vector2);
+          position.set(_key.Time, _key.Value);
+          position.transform(this.mtxWorldToScreen);
+
+          let viewKey: ViewAnimationKey = {
+            data: _key,
+            posScreen: position,
+            path2D: generateKey(
+              position.x,
+              position.y,
+              ViewAnimationSheet.KEY_SIZE,
+              ViewAnimationSheet.KEY_SIZE
+            ),
+            sequence: _sequence
+          };
+          ƒ.Recycler.store(ƒ.Vector2);
+          return viewKey;
+        })
+      );
       
       for (const key of this.keys) {
         this.crc2.lineWidth = 4;
-        this.crc2.strokeStyle = key.key == this.selectedKey?.key ? 
+        this.crc2.strokeStyle = key.data == this.selectedKey?.data ? 
           window.getComputedStyle(this.dom).getPropertyValue("--color-signal") : 
           window.getComputedStyle(this.dom).getPropertyValue("--color-medium");
         this.crc2.fillStyle = key.sequence.color;
@@ -170,7 +192,7 @@ namespace Fudge {
         this.crc2.stroke(key.path2D);
         this.crc2.fill(key.path2D);
 
-        if (key.key == this.selectedKey?.key) {
+        if (key.data == this.selectedKey?.data) {
           this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
           this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-medium");
           this.crc2.fillStyle = this.crc2.strokeStyle;
@@ -179,10 +201,10 @@ namespace Fudge {
           left.set(-50, 0);
           right.set(50, 0);
 
-          let angle: number = Math.atan(key.key.SlopeIn * (this.mtxWorldToScreen.scaling.y / this.mtxWorldToScreen.scaling.x)) * (180 / Math.PI);
+          let angleSlopeScreen: number = Math.atan(key.data.SlopeIn * (this.mtxWorldToScreen.scaling.y / this.mtxWorldToScreen.scaling.x)) * (180 / Math.PI); // in degree
           let mtxTransform: ƒ.Matrix3x3 = ƒ.Matrix3x3.IDENTITY();
           mtxTransform.translate(key.posScreen);
-          mtxTransform.rotate(angle);
+          mtxTransform.rotate(angleSlopeScreen);
           left.transform(mtxTransform);
           right.transform(mtxTransform);
 
@@ -190,25 +212,86 @@ namespace Fudge {
           path.moveTo(left.x, left.y);
           path.lineTo(right.x, right.y);
           this.crc2.stroke(path);
-          this.slopeHooks = [{position: left, path2D: this.generateKey(left.x, left.y, 5, 5)}, {position: right, path2D: this.generateKey(right.x, right.y, 5, 5)}];
-          this.slopeHooks.forEach( _hook => this.crc2.fill(_hook.path2D));
+          this.slopeHooks = [generateKey(left.x, left.y, 5, 5), generateKey(right.x, right.y, 5, 5)];
+          this.slopeHooks.forEach( _hook => this.crc2.fill(_hook) );
 
           ƒ.Recycler.store(left);
           ƒ.Recycler.store(right);
         }
       }
+
+      function generateKey(_x: number, _y: number, _w: number, _h: number): Path2D {
+        let key: Path2D = new Path2D();
+        key.moveTo(_x - _w, _y);
+        key.lineTo(_x, _y + _h);
+        key.lineTo(_x + _w, _y);
+        key.lineTo(_x, _y - _h);
+        key.closePath();
+        return key;
+      }
     }
 
-    protected abstract generateKeys(): void;
+    private drawCurves(): void {
+      for (const sequence of this.sequences) {
+        this.crc2.strokeStyle = sequence.color;
+        sequence.data.getKeys()
+          .map( (_key, _index, _keys) => [_key, _keys[_index + 1]] as [ƒ.AnimationKey, ƒ.AnimationKey] )
+          .filter( ([_keyStart, _keyEnd]) => _keyStart && _keyEnd )
+          .map ( ([_keyStart, _keyEnd]) => this.getBezierPoints(_keyStart.functionOut, _keyStart, _keyEnd) )
+          .forEach( (_bezierPoints) => {
+            _bezierPoints.forEach( _point => _point.transform(this.mtxWorldToScreen));
+            let curve: Path2D = new Path2D();
+            curve.moveTo(_bezierPoints[0].x, _bezierPoints[0].y);
+            curve.bezierCurveTo(
+              _bezierPoints[1].x, _bezierPoints[1].y,
+              _bezierPoints[2].x, _bezierPoints[2].y,
+              _bezierPoints[3].x, _bezierPoints[3].y
+            );
+            this.crc2.stroke(curve);
+            _bezierPoints.forEach( _point => ƒ.Recycler.store(_point) );
+          });
+      }
+    }
 
-    protected generateKey(_x: number, _y: number, _w: number, _h: number): Path2D {
-      let key: Path2D = new Path2D();
-      key.moveTo(_x - _w, _y);
-      key.lineTo(_x, _y + _h);
-      key.lineTo(_x + _w, _y);
-      key.lineTo(_x, _y - _h);
-      key.closePath();
-      return key;
+    private drawScale(): void {
+      this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-bright");
+      this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-bright");
+
+      let centerLine: Path2D = new Path2D();
+      centerLine.moveTo(0, this.mtxWorldToScreen.translation.y);
+      centerLine.lineTo(this.canvas.width, this.mtxWorldToScreen.translation.y);
+      this.crc2.stroke(centerLine);
+
+      this.crc2.textBaseline = "bottom";
+      this.crc2.textAlign = "right";
+
+      let pixelPerStep: number = -this.mtxWorldToScreen.scaling.y;
+      let valuePerStep: number = 1;
+      let stepScaleFactor: number = Math.max(
+        Math.pow(2, Math.ceil(Math.log2(ViewAnimationSheet.MINIMUM_PIXEL_PER_STEP / pixelPerStep))), 
+        1);
+      pixelPerStep *= stepScaleFactor;
+      valuePerStep *= stepScaleFactor;
+
+      let steps: number = 1 + this.canvas.height / pixelPerStep;
+      let stepOffset: number = Math.floor(-this.mtxWorldToScreen.translation.y / pixelPerStep);
+      for (let i: number = stepOffset; i < steps + stepOffset; i++) {
+        let stepLine: Path2D = new Path2D();
+        let y: number = (i * pixelPerStep + this.mtxWorldToScreen.translation.y);
+        stepLine.moveTo(0, y);
+        // TODO: refine the display
+        if (valuePerStep > 1 && i % 5 == 0 || valuePerStep == 1) {
+          stepLine.lineTo(35, y);
+          let value: number = -i * valuePerStep;
+          this.crc2.fillText(
+            valuePerStep >= 1 ? value.toFixed(0) : value.toFixed(1), 
+            33, 
+            y);
+        } else {
+          stepLine.lineTo(30, y);
+        }
+        this.crc2.stroke(stepLine);
+      }
     }
 
     private drawCursor(): void {
@@ -238,7 +321,7 @@ namespace Fudge {
       for (let l in this.animation.labels) {
         //TODO stop using hardcoded values
         let p: Path2D = new Path2D;
-        this.labels.push({ label: l, path2D: p });
+        this.labels.push({ name: l, path2D: p });
         let position: number = this.animation.labels[l] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
         p.moveTo(position - 3, labelDisplayHeight - 26);
         p.lineTo(position - 3, labelDisplayHeight - 4);
@@ -256,7 +339,7 @@ namespace Fudge {
       }
       for (let e in this.animation.events) {
         let p: Path2D = new Path2D;
-        this.events.push({ event: e, path2D: p });
+        this.events.push({ name: e, path2D: p });
         let position: number = this.animation.events[e] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
         p.moveTo(position - 3, labelDisplayHeight - 26);
         p.lineTo(position - 3, labelDisplayHeight - 7);
@@ -316,7 +399,7 @@ namespace Fudge {
             this.scrollContainer.onpointermove = this.hndPointerMoveTimeline;
             this.setTime(_event.offsetX);
           }
-          else if (this.slopeHooks && this.slopeHooks.some(_hook => this.crc2.isPointInPath(_hook.path2D, _event.offsetX, _event.offsetY))) {
+          else if (this.slopeHooks.some(_hook => this.crc2.isPointInPath(_hook, _event.offsetX, _event.offsetY))) {
             this.scrollContainer.onpointermove = this.hndPointerMoveSlope;
           } else {
             let x: number = _event.offsetX;
@@ -363,8 +446,8 @@ namespace Fudge {
       let vctDelta: ƒ.Vector2 = ƒ.Vector2.DIFFERENCE(new ƒ.Vector2(_event.offsetX, _event.offsetY), this.selectedKey.posScreen);
       vctDelta.transform(ƒ.Matrix3x3.SCALING(this.mtxScreenToWorld.scaling));
       let slope: number = vctDelta.y / vctDelta.x;
-      this.selectedKey.key.SlopeIn = slope;
-      this.selectedKey.key.SlopeOut = slope;
+      this.selectedKey.data.SlopeIn = slope;
+      this.selectedKey.data.SlopeOut = slope;
       this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: this.playbackTime } } });
     }
 
@@ -420,6 +503,29 @@ namespace Fudge {
       let vector: ƒ.Vector2 = new ƒ.Vector2(_x, _y);
       vector.transform(this.mtxScreenToWorld);
       return vector;
+    }
+
+    private getBezierPoints(_animationFunction: ƒ.AnimationFunction, _keyStart: ƒ.AnimationKey, _keyEnd: ƒ.AnimationKey): ƒ.Vector2[] {
+      let parameters: { a: number; b: number; c: number; d: number } = _animationFunction.getParameters();
+      let polarForm: (u: number, v: number, w: number) => number = (u, v, w) => {
+        return (
+          parameters.a * u * v * w +
+          parameters.b * ((v * w + w * u + u * v) / 3) +
+          parameters.c * ((u + v + w) / 3) +
+          parameters.d
+        );
+      };
+      let xStart: number = _keyStart.Time;
+      let xEnd: number = _keyEnd.Time;
+      let offsetTimeEnd: number = xEnd - xStart;
+
+      let points: ƒ.Vector2[] = new Array(4).fill(0).map( () => ƒ.Recycler.get(ƒ.Vector2));
+      points[0].set(xStart, polarForm(0, 0, 0));
+      points[1].set(xStart + offsetTimeEnd * 1 / 3, polarForm(0, 0, offsetTimeEnd));
+      points[2].set(xStart + offsetTimeEnd * 2 / 3, polarForm(0, offsetTimeEnd, offsetTimeEnd));
+      points[3].set(xStart + offsetTimeEnd, polarForm(offsetTimeEnd, offsetTimeEnd, offsetTimeEnd));
+
+      return points;
     }
   }
 }
