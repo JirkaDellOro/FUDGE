@@ -603,9 +603,8 @@ declare namespace Fudge {
         private events;
         private slopeHooks;
         private posDragStart;
-        private isAdjustingSlope;
         constructor(_container: ComponentContainer, _state: Object);
-        redraw(_scroll?: boolean, _time?: number): void;
+        draw(_scroll?: boolean, _time?: number): void;
         protected drawTimeline(): void;
         protected drawKeys(): void;
         protected abstract generateKeys(): void;
@@ -616,7 +615,9 @@ declare namespace Fudge {
         private hndAnimate;
         private hndSelect;
         private hndPointerDown;
-        private hndPointerMove;
+        private hndPointerMoveTimeline;
+        private hndPointerMoveSlope;
+        private hndPointerMovePan;
         private hndPointerUp;
         private hndWheel;
         private hndScroll;
