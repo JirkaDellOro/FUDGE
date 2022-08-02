@@ -518,21 +518,21 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     interface ViewAnimationSequence {
-        data: ƒ.AnimationSequence;
+        sequence: ƒ.AnimationSequence;
         color: string;
     }
     interface ViewAnimationKey {
-        data: ƒ.AnimationKey;
+        key: ƒ.AnimationKey;
         posScreen: ƒ.Vector2;
         sequence: ViewAnimationSequence;
         path2D: Path2D;
     }
     interface ViewAnimationEvent {
-        name: string;
+        event: string;
         path2D: Path2D;
     }
     interface ViewAnimationLabel {
-        name: string;
+        label: string;
         path2D: Path2D;
     }
     /**
@@ -575,7 +575,8 @@ declare namespace Fudge {
      * TODO: add
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
-    abstract class ViewAnimationSheet extends View {
+    class ViewAnimationSheet extends View {
+        #private;
         private static readonly KEY_SIZE;
         private static readonly LINE_WIDTH;
         private static readonly TIMELINE_HEIGHT;
@@ -583,7 +584,6 @@ declare namespace Fudge {
         private static readonly PIXEL_PER_VALUE;
         private static readonly MINIMUM_PIXEL_PER_STEP;
         private static readonly STANDARD_ANIMATION_LENGTH;
-        private mode;
         private graph;
         private animation;
         private playbackTime;
@@ -601,6 +601,8 @@ declare namespace Fudge {
         private slopeHooks;
         private posDragStart;
         constructor(_container: ComponentContainer, _state: Object);
+        private get mode();
+        private set mode(value);
         private draw;
         private drawTimeline;
         private drawKeys;
@@ -618,6 +620,7 @@ declare namespace Fudge {
         private hndPointerUp;
         private hndWheel;
         private hndScroll;
+        private resetView;
         private setTime;
         private getScreenToWorldPoint;
         private getBezierPoints;

@@ -3,24 +3,24 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
 
   export interface ViewAnimationSequence {
-    data: ƒ.AnimationSequence;
+    sequence: ƒ.AnimationSequence;
     color: string;
   }
 
   export interface ViewAnimationKey {
-    data: ƒ.AnimationKey;
+    key: ƒ.AnimationKey;
     posScreen: ƒ.Vector2;
     sequence: ViewAnimationSequence;
     path2D: Path2D;
   }
 
   export interface ViewAnimationEvent {
-    name: string;
+    event: string;
     path2D: Path2D;
   }
 
   export interface ViewAnimationLabel {
-    name: string;
+    label: string;
     path2D: Path2D;
   }
 
@@ -57,7 +57,6 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.INPUT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CLICK, this.hndEvent);
-      // this.dom.addEventListener("pointerup", this.hndEvent);
     }
 
     //#region context menu

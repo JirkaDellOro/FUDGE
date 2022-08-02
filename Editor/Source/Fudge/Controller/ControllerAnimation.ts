@@ -69,8 +69,8 @@ namespace Fudge {
     }
 
     public deleteKey(_key: ViewAnimationKey): void {
-      let animationSequence: ƒ.AnimationSequence = _key.sequence.data;
-      animationSequence.removeKey(_key.data);
+      let animationSequence: ƒ.AnimationSequence = _key.sequence.sequence;
+      animationSequence.removeKey(_key.key);
     }
 
     public addPath(_path: string[]): void {
@@ -124,7 +124,7 @@ namespace Fudge {
           if (sequence instanceof ƒ.AnimationSequence && isSelectedDescendant) {
             _sequences.push({
               color: element.style.getPropertyValue("--color-animation-property"),
-              data: sequence
+              sequence: sequence
             });
           } else {
             collectSelectedSequencesRecursive(element, <ƒ.AnimationStructure>_animationStructure[key], _sequences, isSelectedDescendant);

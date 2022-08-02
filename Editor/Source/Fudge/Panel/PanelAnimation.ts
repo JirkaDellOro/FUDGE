@@ -12,7 +12,7 @@ namespace Fudge {
       super(_container, _state);
 
       this.goldenLayout.registerComponentConstructor(VIEW.ANIMATION, ViewAnimation);
-      this.goldenLayout.registerComponentConstructor(VIEW.ANIMATION_SHEET, ViewAnimationSheetCurve);
+      this.goldenLayout.registerComponentConstructor(VIEW.ANIMATION_SHEET, ViewAnimationSheet);
 
       const config: RowOrColumnItemConfig = {
         type: "row",
