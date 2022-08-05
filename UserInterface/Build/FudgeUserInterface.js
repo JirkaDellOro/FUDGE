@@ -229,7 +229,8 @@ var FudgeUserInterface;
                 if (value instanceof Object) {
                     // let details: Details = Generator.createDetails(key, "Details");
                     let details = new FudgeUserInterface.Details(key, "Details");
-                    details.content.appendChild(Generator.createInterfaceFromMutator(value));
+                    details.setContent(Generator.createInterfaceFromMutator(value));
+                    // details.content.appendChild(Generator.createInterfaceFromMutator(value));
                     div.appendChild(details);
                 }
                 else
