@@ -603,6 +603,7 @@ declare namespace Fudge {
         constructor(_container: ComponentContainer, _state: Object);
         private get mode();
         private set mode(value);
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         private draw;
         private drawTimeline;
         private drawKeys;
@@ -610,6 +611,7 @@ declare namespace Fudge {
         private drawScale;
         private drawCursor;
         private drawEventsAndLabels;
+        private hndFocus;
         private hndAnimate;
         private hndSelect;
         private hndPointerDown;

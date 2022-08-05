@@ -2707,10 +2707,10 @@ var Fudge;
                     this.setAnimation(this.cmpAnimator?.animation);
                     break;
                 case "click" /* CLICK */:
-                    if (!(_event.target instanceof HTMLElement) || !this.animation)
+                    if (!(_event.target instanceof HTMLElement) || !this.animation || _event.target instanceof HTMLButtonElement)
                         break;
                     let target = _event.target;
-                    if (target.tagName == "SUMMARY")
+                    if (target.parentElement instanceof ƒui.Details)
                         target = target.parentElement;
                     if (target instanceof ƒui.CustomElement || target instanceof ƒui.Details)
                         this.selectedProperty = target;
@@ -2759,12 +2759,12 @@ var Fudge;
         hndAnimate = (_event) => {
             if (_event.detail.view instanceof Fudge.ViewAnimationSheet)
                 this.pause();
-            this.playbackTime = _event.detail.data.playbackTime || 0;
+            this.playbackTime = _event.detail.data.playbackTime;
             let nodeMutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
             this.controller?.updatePropertyList(nodeMutator);
         };
         dispatchAnimate(_sequences) {
-            this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, node: this.node, data: { playbackTime: this.playbackTime, sequences: _sequences } } });
+            this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: this.playbackTime, sequences: _sequences } } });
         }
         fillToolbar(_tb) {
             let buttons = [];
@@ -2886,7 +2886,7 @@ var Fudge;
     let SHEET_MODE;
     (function (SHEET_MODE) {
         SHEET_MODE["DOPE"] = "Dopesheet";
-        SHEET_MODE["CURVE"] = "Curves";
+        SHEET_MODE["CURVES"] = "Curves";
     })(SHEET_MODE || (SHEET_MODE = {}));
     /**
      * TODO: add
@@ -2919,14 +2919,21 @@ var Fudge;
         posDragStart = new ƒ.Vector2();
         constructor(_container, _state) {
             super(_container, _state);
+            this.dom.style.position = "absolute";
+            this.dom.style.inset = "0";
+            this.dom.style.display = "block";
+            this.dom.style.height = "auto";
+            this.dom.style.padding = "0";
+            this.dom.style.margin = "0.5em";
             this.mode = SHEET_MODE.DOPE;
             _container.on("resize", () => this.draw());
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndFocus);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndAnimate);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndSelect);
+            this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.canvas.style.position = "absolute";
             this.dom.appendChild(this.canvas);
-            this.scrollContainer.style.position = "absolute";
-            this.scrollContainer.style.width = "100%";
+            this.scrollContainer.style.position = "relative";
             this.scrollContainer.style.height = "100%";
             this.scrollContainer.style.overflowX = "scroll";
             this.scrollContainer.style.scrollBehavior = "instant";
@@ -2935,21 +2942,8 @@ var Fudge;
             this.scrollContainer.addEventListener("pointerleave", this.hndPointerUp);
             this.scrollContainer.addEventListener("wheel", this.hndWheel);
             this.dom.appendChild(this.scrollContainer);
-            this.scrollBody.style.overflow = "hidden";
             this.scrollBody.style.height = "1px";
             this.scrollContainer.appendChild(this.scrollBody);
-            let buttons = document.createElement("div");
-            buttons.style.position = "absolute";
-            buttons.style.left = "0";
-            buttons.style.bottom = "0";
-            let btnDope = document.createElement("button");
-            btnDope.innerText = SHEET_MODE.DOPE;
-            btnDope.onclick = () => this.mode = SHEET_MODE.DOPE;
-            let btnCurve = document.createElement("button");
-            btnCurve.innerText = SHEET_MODE.CURVE;
-            btnCurve.onclick = () => this.mode = SHEET_MODE.CURVE;
-            buttons.append(btnDope, btnCurve);
-            this.dom.appendChild(buttons);
         }
         get mode() {
             return this.#mode;
@@ -2957,9 +2951,22 @@ var Fudge;
         set mode(_mode) {
             this.#mode = _mode;
             this.setTitle(_mode);
+            this.contextMenu.items.forEach(_item => _item.enabled = true);
+            this.contextMenu.items.find(_item => _item.label == _mode).enabled = false;
             this.resetView();
             this.draw();
         }
+        //#region context menu
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            item = new Fudge.remote.MenuItem({ label: SHEET_MODE.DOPE, click: () => this.mode = SHEET_MODE.DOPE });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: SHEET_MODE.CURVES, click: () => this.mode = SHEET_MODE.CURVES });
+            menu.append(item);
+            return menu;
+        }
+        //#endregion
         //#region drawing
         draw(_scroll = true, _time) {
             this.canvas.width = this.dom.clientWidth;
@@ -2982,7 +2989,7 @@ var Fudge;
                 this.scrollContainer.scrollLeft = -this.mtxWorldToScreen.translation.x;
             }
             if (this.animation) {
-                if (this.mode == SHEET_MODE.CURVE) {
+                if (this.mode == SHEET_MODE.CURVES) {
                     this.drawCurves();
                     this.drawScale();
                 }
@@ -3034,7 +3041,7 @@ var Fudge;
         drawKeys() {
             this.keys = this.sequences.flatMap((_sequence, _iSeqeunce) => _sequence.sequence.getKeys().map((_key) => {
                 let position = ƒ.Recycler.get(ƒ.Vector2);
-                if (this.mode == SHEET_MODE.CURVE)
+                if (this.mode == SHEET_MODE.CURVES)
                     position.set(_key.Time, _key.Value);
                 else
                     position.set(_key.Time, (_iSeqeunce) * ViewAnimationSheet.KEY_SIZE * 2);
@@ -3056,7 +3063,7 @@ var Fudge;
                 this.crc2.fillStyle = key.sequence.color;
                 this.crc2.stroke(key.path2D);
                 this.crc2.fill(key.path2D);
-                if (this.mode == SHEET_MODE.CURVE && key.key == this.selectedKey?.key) {
+                if (this.mode == SHEET_MODE.CURVES && key.key == this.selectedKey?.key) {
                     this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
                     this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-medium");
                     this.crc2.fillStyle = this.crc2.strokeStyle;
@@ -3195,15 +3202,16 @@ var Fudge;
         }
         //#endregion
         //#region event handling
-        hndAnimate = (_event) => {
+        hndFocus = (_event) => {
             this.graph = _event.detail.graph;
-            this.playbackTime = _event.detail.data.playbackTime || 0;
-            if (_event.detail.data.sequences) // sequences is send by view animation
+            this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
+            this.resetView();
+            this.draw();
+        };
+        hndAnimate = (_event) => {
+            this.playbackTime = _event.detail.data.playbackTime;
+            if (_event.detail.data.sequences)
                 this.sequences = _event.detail.data.sequences;
-            if (_event.detail.node) { // node is send by view animation
-                this.animation = _event.detail.node.getComponent(ƒ.ComponentAnimator)?.animation;
-                this.resetView();
-            }
             this.draw();
         };
         hndSelect = (_event) => {
@@ -3312,14 +3320,14 @@ var Fudge;
         resetView() {
             this.mtxWorldToScreen.reset();
             this.mtxWorldToScreen.scaleX(ViewAnimationSheet.PIXEL_PER_MILLISECOND); // apply scaling
-            if (this.mode == SHEET_MODE.CURVE) {
+            if (this.mode == SHEET_MODE.CURVES) {
                 this.mtxWorldToScreen.scaleY(-1); // flip y
                 this.mtxWorldToScreen.scaleY(ViewAnimationSheet.PIXEL_PER_VALUE); // apply scaling
             }
             this.mtxScreenToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen);
             // TODO: adjust y scaling to fit highest and lowest key
             let translation = this.mtxWorldToScreen.translation;
-            if (this.mode == SHEET_MODE.CURVE)
+            if (this.mode == SHEET_MODE.CURVES)
                 translation.y = this.canvas.height / 2;
             else
                 translation.y = ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.KEY_SIZE * 2;

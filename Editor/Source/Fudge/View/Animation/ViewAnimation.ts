@@ -118,7 +118,6 @@ namespace Fudge {
       }
     }
 
-
     private getNodeSubmenu(_node: ƒ.Node, _path: string[], _callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
       for (const componentClass of ƒ.Component.subclasses) {
@@ -196,10 +195,10 @@ namespace Fudge {
           this.setAnimation(this.cmpAnimator?.animation);
           break;
         case ƒui.EVENT.CLICK:
-          if (!(_event.target instanceof HTMLElement) || !this.animation) break;
+          if (!(_event.target instanceof HTMLElement) || !this.animation || _event.target instanceof HTMLButtonElement) break;
         
           let target: HTMLElement = _event.target;
-          if (target.tagName == "SUMMARY") 
+          if (target.parentElement instanceof ƒui.Details) 
             target = target.parentElement;
           if (target instanceof ƒui.CustomElement || target instanceof ƒui.Details) 
             this.selectedProperty = target;
@@ -254,14 +253,14 @@ namespace Fudge {
     private hndAnimate = (_event: FudgeEvent): void => {
       if (_event.detail.view instanceof ViewAnimationSheet)
         this.pause();
-      this.playbackTime = _event.detail.data.playbackTime || 0;
+      this.playbackTime = _event.detail.data.playbackTime;
 
       let nodeMutator: ƒ.Mutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
       this.controller?.updatePropertyList(nodeMutator);
     }
 
     private dispatchAnimate(_sequences?: ViewAnimationSequence[]): void {
-      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, node: this.node, data: { playbackTime: this.playbackTime, sequences: _sequences } } });
+      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: this.playbackTime, sequences: _sequences } } });
     }
 
     private fillToolbar(_tb: HTMLElement): void { 
