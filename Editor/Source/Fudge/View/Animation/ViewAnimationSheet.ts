@@ -2,8 +2,8 @@ namespace Fudge {
   import ƒ = FudgeCore;
  
   enum SHEET_MODE {
-    DOPE,
-    CURVE
+    DOPE = "Dopesheet",
+    CURVE = "Curves"
   }
 
   /**
@@ -19,18 +19,18 @@ namespace Fudge {
     private static readonly MINIMUM_PIXEL_PER_STEP: number = 30;
     private static readonly STANDARD_ANIMATION_LENGTH: number = 1000; // in miliseconds, used when animation length is falsy
     
-    #mode: SHEET_MODE = SHEET_MODE.DOPE;
+    #mode: SHEET_MODE;
 
     private graph: ƒ.Graph;
     private animation: ƒ.Animation;
     private playbackTime: number = 0;
     
-    private canvas: HTMLCanvasElement;
-    private crc2: CanvasRenderingContext2D;
-    private scrollContainer: HTMLDivElement;
-    private scrollBody: HTMLDivElement;
-    private mtxWorldToScreen: ƒ.Matrix3x3;
-    private mtxScreenToWorld: ƒ.Matrix3x3;
+    private canvas: HTMLCanvasElement = document.createElement("canvas");
+    private crc2: CanvasRenderingContext2D = this.canvas.getContext("2d");
+    private scrollContainer: HTMLDivElement = document.createElement("div");
+    private scrollBody: HTMLDivElement = document.createElement("div");
+    private mtxWorldToScreen: ƒ.Matrix3x3 = new ƒ.Matrix3x3();
+    private mtxScreenToWorld: ƒ.Matrix3x3 = new ƒ.Matrix3x3();
     
     private selectedKey: ViewAnimationKey;
     private keys: ViewAnimationKey[] = [];
@@ -44,18 +44,15 @@ namespace Fudge {
     constructor(_container: ComponentContainer, _state: Object) {
       super(_container, _state);
 
+      this.mode = SHEET_MODE.DOPE;
+
       _container.on("resize", () => this.draw());
-      this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndFocus);
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndSelect);
 
-      this.canvas = document.createElement("canvas");
       this.canvas.style.position = "absolute";
-      this.crc2 = this.canvas.getContext("2d");
-      this.mtxWorldToScreen = new ƒ.Matrix3x3();
-      this.mtxScreenToWorld = new ƒ.Matrix3x3();
+      this.dom.appendChild(this.canvas);
 
-      this.scrollContainer = document.createElement("div");
       this.scrollContainer.style.position = "absolute";
       this.scrollContainer.style.width = "100%";
       this.scrollContainer.style.height = "100%";
@@ -65,27 +62,24 @@ namespace Fudge {
       this.scrollContainer.addEventListener("pointerup", this.hndPointerUp);
       this.scrollContainer.addEventListener("pointerleave", this.hndPointerUp);
       this.scrollContainer.addEventListener("wheel", this.hndWheel);
-
-      this.scrollBody = document.createElement("div");
+      this.dom.appendChild(this.scrollContainer);
+      
       this.scrollBody.style.overflow = "hidden";
       this.scrollBody.style.height = "1px";
-
-      this.dom.appendChild(this.canvas);
-      this.dom.appendChild(this.scrollContainer);
       this.scrollContainer.appendChild(this.scrollBody);
+
 
       let buttons: HTMLDivElement = document.createElement("div");
       buttons.style.position = "absolute";
       buttons.style.left = "0";
       buttons.style.bottom = "0";
       let btnDope: HTMLButtonElement = document.createElement("button");
-      btnDope.innerText = "Dopesheet";
+      btnDope.innerText = SHEET_MODE.DOPE;
       btnDope.onclick = () => this.mode = SHEET_MODE.DOPE;
       let btnCurve: HTMLButtonElement = document.createElement("button");
-      btnCurve.innerText = "Curves";
+      btnCurve.innerText = SHEET_MODE.CURVE;
       btnCurve.onclick = () => this.mode = SHEET_MODE.CURVE;
       buttons.append(btnDope, btnCurve);
-
       this.dom.appendChild(buttons);
     }
 
@@ -95,7 +89,9 @@ namespace Fudge {
 
     private set mode(_mode: SHEET_MODE) {
       this.#mode = _mode;
+      this.setTitle(_mode);
       this.resetView();
+      this.draw();
     }
 
     //#region drawing
@@ -380,17 +376,17 @@ namespace Fudge {
     }
     //#endregion
 
-    //#region events
-    private hndFocus = (_event: FudgeEvent): void => {
-      this.graph = _event.detail.graph;
-      this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
-      this.resetView();
-    }
-
+    //#region event handling
     private hndAnimate = (_event: FudgeEvent): void => {
+      this.graph = _event.detail.graph;
       this.playbackTime = _event.detail.data.playbackTime || 0;
-      this.sequences = _event.detail.data.sequences || this.sequences;
-
+      if (_event.detail.data.sequences) // sequences is send by view animation
+        this.sequences = _event.detail.data.sequences;
+      if (_event.detail.node) { // node is send by view animation
+        this.animation = _event.detail.node.getComponent(ƒ.ComponentAnimator)?.animation;
+        this.resetView();
+      }
+      
       this.draw();
     }
 
@@ -409,8 +405,8 @@ namespace Fudge {
           if (_event.offsetY > (<HTMLElement>_event.target).clientHeight) // clicked on scroll bar
             this.scrollContainer.onscroll = this.hndScroll;
           else if (_event.offsetY <= ViewAnimationSheet.TIMELINE_HEIGHT - 30) {
+            this.hndPointerMoveTimeline(_event);
             this.scrollContainer.onpointermove = this.hndPointerMoveTimeline;
-            this.setTime(_event.offsetX);
           }
           else if (this.slopeHooks.some(_hook => this.crc2.isPointInPath(_hook, _event.offsetX, _event.offsetY))) {
             this.scrollContainer.onpointermove = this.hndPointerMoveSlope;
@@ -451,7 +447,10 @@ namespace Fudge {
 
     private hndPointerMoveTimeline = (_event: PointerEvent): void => {
       _event.preventDefault();
-      this.setTime(_event.offsetX);
+      let playbackTime: number = Math.max(0, this.getScreenToWorldPoint(_event.offsetX, 0).x);
+      let pixelPerFrame: number = 1000 / this.animation.fps;
+      playbackTime = Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
+      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: playbackTime } } });
     }
 
     private hndPointerMoveSlope = (_event: PointerEvent): void => {
@@ -476,14 +475,11 @@ namespace Fudge {
     private hndPointerUp = (_event: PointerEvent): void => {
       _event.preventDefault();
 
-      if (this.scrollContainer.onscroll) {
-        this.scrollContainer.onscroll = undefined;
+      if (this.scrollContainer.onscroll)
         this.draw();
-      }
 
-      if (this.scrollContainer.onpointermove) {
-        this.scrollContainer.onpointermove = undefined;
-      }
+      this.scrollContainer.onscroll = undefined;
+      this.scrollContainer.onpointermove = undefined;
     }
 
     private hndWheel = (_event: WheelEvent) => {
@@ -512,11 +508,6 @@ namespace Fudge {
     //#endregion
 
     private resetView(): void {
-      if (!this.animation) {
-        this.draw();
-        return;
-      } 
-
       this.mtxWorldToScreen.reset();
       this.mtxWorldToScreen.scaleX(ViewAnimationSheet.PIXEL_PER_MILLISECOND); // apply scaling
       if (this.mode == SHEET_MODE.CURVE) {
@@ -533,17 +524,8 @@ namespace Fudge {
         translation.y = ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.KEY_SIZE * 2;
       this.mtxWorldToScreen.translation = translation;
       let scaling: ƒ.Vector2 = this.mtxWorldToScreen.scaling;
-      scaling.x = this.canvas.width / ((this.animation.totalTime || ViewAnimationSheet.STANDARD_ANIMATION_LENGTH) * 1.2);
+      scaling.x = this.canvas.width / ((this.animation?.totalTime || ViewAnimationSheet.STANDARD_ANIMATION_LENGTH) * 1.2);
       this.mtxWorldToScreen.scaling = scaling;
-      
-      this.setTime(0);
-    }
-
-    private setTime(_x: number): void {
-      let playbackTime: number = Math.max(0, this.getScreenToWorldPoint(_x, 0).x);
-      let pixelPerFrame: number = 1000 / this.animation.fps;
-      playbackTime = Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
-      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: playbackTime } } });
     }
 
     private getScreenToWorldPoint(_x: number, _y: number): ƒ.Vector2 {

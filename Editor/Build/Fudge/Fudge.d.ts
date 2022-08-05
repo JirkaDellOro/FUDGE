@@ -409,7 +409,7 @@ declare namespace Fudge {
      */
     abstract class Panel extends View {
         protected goldenLayout: GoldenLayout;
-        private views;
+        protected views: View[];
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         /** Send custom copies of the given event to the views */
         broadcastEvent: (_event: FudgeEvent) => void;
@@ -563,7 +563,7 @@ declare namespace Fudge {
         private createPropertyList;
         private hndSelect;
         private hndAnimate;
-        private animate;
+        private dispatchAnimate;
         private fillToolbar;
         private hndToolbarClick;
         private pause;
@@ -610,7 +610,6 @@ declare namespace Fudge {
         private drawScale;
         private drawCursor;
         private drawEventsAndLabels;
-        private hndFocus;
         private hndAnimate;
         private hndSelect;
         private hndPointerDown;
@@ -621,7 +620,6 @@ declare namespace Fudge {
         private hndWheel;
         private hndScroll;
         private resetView;
-        private setTime;
         private getScreenToWorldPoint;
         private getBezierPoints;
     }

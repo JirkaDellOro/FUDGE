@@ -33,7 +33,7 @@ namespace Fudge {
     private node: ƒ.Node;
     private cmpAnimator: ƒ.ComponentAnimator;
     private animation: ƒ.Animation;
-    private playbackTime: number;
+    private playbackTime: number = 0;
     
     private propertyList: HTMLDivElement;
     private controller: ControllerAnimation;
@@ -47,7 +47,6 @@ namespace Fudge {
 
     constructor(_container: ComponentContainer, _state: Object) {
       super(_container, _state);
-      this.playbackTime = 0;
       this.setAnimation(null);
       this.createUserInterface();
       
@@ -90,7 +89,7 @@ namespace Fudge {
           path = _item["path"];
           this.controller.addPath(path);
           this.createPropertyList();
-          this.animate();
+          this.dispatchAnimate();
 
           break;
         case CONTEXTMENU.DELETE_PROPERTY:
@@ -114,7 +113,7 @@ namespace Fudge {
           }
           this.controller.deletePath(path);
           this.createPropertyList();
-          this.animate(this.controller.getSelectedSequences(this.selectedProperty));
+          this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
           return;
       }
     }
@@ -197,7 +196,7 @@ namespace Fudge {
           this.setAnimation(this.cmpAnimator?.animation);
           break;
         case ƒui.EVENT.CLICK:
-          if (!(_event.target instanceof HTMLElement)) break;
+          if (!(_event.target instanceof HTMLElement) || !this.animation) break;
         
           let target: HTMLElement = _event.target;
           if (target.tagName == "SUMMARY") 
@@ -206,31 +205,29 @@ namespace Fudge {
             this.selectedProperty = target;
           else if (target == this.dom)
             this.selectedProperty = null;
-          this.animate(this.controller.getSelectedSequences(this.selectedProperty));
+          this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
           break;
         case ƒui.EVENT.INPUT:
           if (_event.target instanceof ƒui.CustomElement) {
             this.controller.modifyKey(this.playbackTime, _event.target);
-            this.animate(this.controller.getSelectedSequences(this.selectedProperty));
+            this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
           }
           break;
       }
     }
 
     private setAnimation(_animation: ƒ.Animation): void {
-      if (!_animation) {
+      if (_animation) {
+        this.dom.innerHTML = "";
+        this.dom.appendChild(this.toolbar);
+        this.animation = _animation;
+        this.createPropertyList();
+      } else {
         this.animation = undefined;
         this.dom.innerHTML = "select node with an attached component animator";
-        return;
       }
-      this.dom.innerHTML = "";
-      this.dom.appendChild(this.toolbar);
-
-      this.animation = _animation;
-
-      this.createPropertyList();
       
-      this.animate(this.controller.getSelectedSequences(this.selectedProperty));
+      this.dispatchAnimate(this.controller?.getSelectedSequences(this.selectedProperty));
     }
 
     private createPropertyList(): void {
@@ -257,14 +254,14 @@ namespace Fudge {
     private hndAnimate = (_event: FudgeEvent): void => {
       if (_event.detail.view instanceof ViewAnimationSheet)
         this.pause();
-      this.playbackTime = _event.detail.data.playbackTime;
+      this.playbackTime = _event.detail.data.playbackTime || 0;
 
       let nodeMutator: ƒ.Mutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
       this.controller?.updatePropertyList(nodeMutator);
     }
 
-    private animate(_sequences?: ViewAnimationSequence[]): void {
-      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: this.playbackTime, sequences: _sequences } } });
+    private dispatchAnimate(_sequences?: ViewAnimationSequence[]): void {
+      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, node: this.node, data: { playbackTime: this.playbackTime, sequences: _sequences } } });
     }
 
     private fillToolbar(_tb: HTMLElement): void { 
@@ -323,11 +320,11 @@ namespace Fudge {
       switch (target.id) {
         case "add-label":
           this.animation.labels[this.randomNameGenerator()] = this.playbackTime;
-          this.animate();
+          this.dispatchAnimate();
           break;
         case "add-event":
           this.animation.setEvent(this.randomNameGenerator(), this.playbackTime);
-          this.animate();
+          this.dispatchAnimate();
           break;
         case "add-key":
           // TODO: readd this look how it works in unity?
@@ -337,23 +334,23 @@ namespace Fudge {
           break;
         case "remove-key":
           this.controller.deleteKey(this.selectedKey);
-          this.animate(this.controller.getSelectedSequences(this.selectedProperty));
+          this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
           break;
         case "start":
           this.playbackTime = 0;
-          this.animate();
+          this.dispatchAnimate();
           break;
         case "back": // TODO: change to next key frame
           this.playbackTime = this.playbackTime -= 1000 / this.animation.fps; // stepsPerSecond;
           this.playbackTime = Math.max(this.playbackTime, 0);
-          this.animate();
+          this.dispatchAnimate();
           break;
         case "play":
           if (this.idInterval == undefined) {
             this.time.set(this.playbackTime);
             this.idInterval = window.setInterval(() => {
               this.playbackTime = this.time.get() % this.animation.totalTime;
-              this.animate();
+              this.dispatchAnimate();
             }, 1000 / this.animation.fps);
           }
           break;
@@ -363,11 +360,11 @@ namespace Fudge {
         case "forward": // TODO: change to next key frame
           this.playbackTime = this.playbackTime += 1000 / this.animation.fps; // stepsPerSecond;
           this.playbackTime = Math.min(this.playbackTime, this.animation.totalTime);
-          this.animate();
+          this.dispatchAnimate();
           break;
         case "end":
           this.playbackTime = this.animation.totalTime;
-          this.animate();
+          this.dispatchAnimate();
           break;
         default:
 

@@ -21,13 +21,12 @@ namespace Fudge {
             type: "component",
             componentType: VIEW.ANIMATION,
             componentState: _state,
-            title: "ANIMATION"
+            title: "Properties"
           },
           {
             type: "component",
             componentType: VIEW.ANIMATION_SHEET,
-            componentState: _state,
-            title: "Sheet"
+            componentState: _state
           }
         ]
       };
@@ -58,12 +57,11 @@ namespace Fudge {
     }
 
     private hndAnimate = async (_event: FudgeEvent): Promise<void> => {
-      if (_event.eventPhase == _event.AT_TARGET)
-        this.broadcastEvent(_event);
-      if (_event.detail.data.sequences) {
-        this.broadcastEvent(_event);
-        _event.stopPropagation();
-      }
+      if (!_event.bubbles) return;
+      
+      this.views // maybe change the normal broadcast to something like this
+        .filter( _view => _view != _event.detail.view )
+        .forEach( _view => _view.dispatch(<EVENT_EDITOR>_event.type, { detail: _event.detail }) );
     }
   }
 }
