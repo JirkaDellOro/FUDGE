@@ -1981,8 +1981,7 @@ var Fudge;
         /** Send custom copies of the given event to the views */
         broadcastEvent = (_event) => {
             for (let view of this.views)
-                if (_event.detail.view != view) // stop double dispatch for bubbling events
-                    view.dispatch(_event.type, { detail: _event.detail });
+                view.dispatch(_event.type, { detail: _event.detail });
         };
         addViewComponent = (_event) => {
             // adjustmens for GoldenLayout 2
