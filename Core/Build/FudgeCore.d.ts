@@ -1873,9 +1873,9 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     enum FIELD_OF_VIEW {
-        HORIZONTAL = 0,
-        VERTICAL = 1,
-        DIAGONAL = 2
+        HORIZONTAL = "horizontal",
+        VERTICAL = "vertical",
+        DIAGONAL = "diagonal"
     }
     /**
      * Defines identifiers for the various projections a camera can provide.
@@ -1904,6 +1904,8 @@ declare namespace FudgeCore {
         private near;
         private far;
         private backgroundEnabled;
+        get xAspectCorrection(): number;
+        get yAspectCorrection(): number;
         get mtxWorld(): Matrix4x4;
         /**
          * Returns the multiplication of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix

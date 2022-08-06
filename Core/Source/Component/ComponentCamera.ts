@@ -1,7 +1,9 @@
 // / <reference path="Component.ts"/>
 namespace FudgeCore {
   export enum FIELD_OF_VIEW {
-    HORIZONTAL, VERTICAL, DIAGONAL
+    HORIZONTAL = "horizontal",
+    VERTICAL = "vertical",
+    DIAGONAL = "diagonal"
   }
   /**
    * Defines identifiers for the various projections a camera can provide.  
@@ -19,6 +21,9 @@ namespace FudgeCore {
    */
   export class ComponentCamera extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentCamera);
+    //to calculate back from viewspace
+    #xAspectCorrection: number = 1;
+    #yAspectCorrection: number = 1;
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public clrBackground: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
     //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
@@ -32,6 +37,13 @@ namespace FudgeCore {
     private far: number = 2000;
     private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
     // TODO: examine, if background should be an attribute of Camera or Viewport
+
+    public get xAspectCorrection(): number {
+      return this.#xAspectCorrection;
+    }
+    public get yAspectCorrection(): number {
+      return this.#yAspectCorrection;
+    }
 
     public get mtxWorld(): Matrix4x4 {
       let mtxCamera: Matrix4x4 = this.mtxPivot.clone;
@@ -104,6 +116,20 @@ namespace FudgeCore {
       this.projection = PROJECTION.CENTRAL;
       this.near = _near;
       this.far = _far;
+      switch (this.direction) {
+        case FIELD_OF_VIEW.DIAGONAL:
+          this.#yAspectCorrection = Math.sqrt(this.aspectRatio);
+          this.#xAspectCorrection = 1 / this.#yAspectCorrection;
+          break;
+        case FIELD_OF_VIEW.VERTICAL:
+          this.#xAspectCorrection = 1 / this.aspectRatio;
+          this.#yAspectCorrection = 1;
+          break;
+        case FIELD_OF_VIEW.HORIZONTAL:
+          this.#xAspectCorrection = 1;
+          this.#yAspectCorrection = this.aspectRatio;
+          break;
+      }
       this.mtxProjection = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction); // TODO: remove magic numbers
     }
     /**

@@ -351,9 +351,8 @@ namespace FudgeCore {
         RenderWebGL.crc3.uniformMatrix4fv(uniform, false, normalMatrix.get());
       }
 
-      uniform = shader.uniforms["u_aspect"];
-      if (uniform)
-        RenderWebGL.crc3.uniform1f(uniform, _cmpCamera.getAspect());
+      RenderWebGL.crc3.uniform1f(shader.uniforms["u_xAspect"], _cmpCamera.xAspectCorrection);
+      RenderWebGL.crc3.uniform1f(shader.uniforms["u_yAspect"], _cmpCamera.yAspectCorrection);
 
       RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }

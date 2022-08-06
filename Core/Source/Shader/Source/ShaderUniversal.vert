@@ -77,7 +77,8 @@ uniform mat4 u_mtxMeshToWorld;
 uniform mat4 u_mtxNormalWorldToView;
 uniform mat4 u_mtxWorldToView;
 uniform vec3 u_vctCamera;
-uniform float u_aspect;
+uniform float u_xAspect;
+uniform float u_yAspect;
 out vec2 v_vctTexture;
 // out vec3 v_vctNormal;
   #endif
@@ -172,8 +173,8 @@ void main() {
   vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
   // vec3 vctReflection = normalize(reflect(vctView, vctNormal));
   vec3 vctReflection = mat3(u_mtxNormalWorldToView) * vctNormal;
-  vctReflection.x = vctReflection.x / sqrt(u_aspect);
-  vctReflection.y = vctReflection.y * sqrt(u_aspect);
+  vctReflection.x = vctReflection.x * u_xAspect;
+  vctReflection.y = vctReflection.y * u_yAspect;
   vctReflection.y = -vctReflection.y;
   v_vctTexture = 1.0 * vctReflection.xy + 0.5;
     #endif
