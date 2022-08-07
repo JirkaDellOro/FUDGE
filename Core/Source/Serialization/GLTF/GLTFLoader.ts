@@ -111,7 +111,7 @@ namespace FudgeCore {
           }
           else {
             if (gltfNode.rotation)
-              node.mtxLocal.rotate(new Vector3(...gltfNode.rotation.map(rotation => rotation * 180 / Math.PI)));
+              node.mtxLocal.rotate(new Vector3(...gltfNode.rotation.map(rotation => rotation * Mathematic.rad2deg)));
             if (gltfNode.scale)
               node.mtxLocal.scale(new Vector3(...gltfNode.scale));
             if (gltfNode.translation)
@@ -172,7 +172,7 @@ namespace FudgeCore {
         if (gltfCamera.perspective)
           camera.projectCentral(
             gltfCamera.perspective.aspectRatio,
-            gltfCamera.perspective.yfov * 180 / Math.PI,
+            gltfCamera.perspective.yfov * Mathematic.rad2deg,
             null,
             gltfCamera.perspective.znear,
             gltfCamera.perspective.zfar

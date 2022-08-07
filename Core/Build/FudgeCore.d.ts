@@ -2939,11 +2939,25 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Abstract class supporting various arithmetical helper functions
+     */
+    abstract class Mathematic {
+        /** factor multiplied with angle in degrees yields the angle in radian */
+        static readonly deg2rad: number;
+        /** factor multiplied with angle in radian yields the angle in degrees */
+        static readonly rad2deg: number;
+        /**
+         * Returns one of the values passed in, either _value if within _min and _max or the boundary being exceeded by _value
+         */
+        static clamp<T>(_value: T, _min: T, _max: T, _isSmaller?: (_value1: T, _value2: T) => boolean): T;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Simple class for 3x3 matrix operations
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class Matrix3x3 extends Mutable implements Serializable, Recycable {
-        private static deg2rad;
         private data;
         private mutator;
         private vectors;
@@ -3072,7 +3086,6 @@ declare namespace FudgeCore {
      */
     export class Matrix4x4 extends Mutable implements Serializable, Recycable {
         #private;
-        private static deg2rad;
         private data;
         private mutator;
         private vectors;

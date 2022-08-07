@@ -135,7 +135,7 @@ namespace FudgeCore {
     }
     set maxRotorFirst(_value: number) {
       this.#maxRotorFirst = _value;
-      if (this.joint != null) this.joint.getLimitMotor1().upperLimit = _value * Math.PI / 180;
+      if (this.joint != null) this.joint.getLimitMotor1().upperLimit = _value * Mathematic.deg2rad;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
@@ -145,7 +145,7 @@ namespace FudgeCore {
     }
     set minRotorFirst(_value: number) {
       this.#minRotorFirst = _value;
-      if (this.joint != null) this.joint.getLimitMotor1().lowerLimit = _value * Math.PI / 180;
+      if (this.joint != null) this.joint.getLimitMotor1().lowerLimit = _value * Mathematic.deg2rad;
     }
     /**
       * The target rotational speed of the motor in m/s. 
@@ -176,7 +176,7 @@ namespace FudgeCore {
     }
     set maxRotorSecond(_value: number) {
       this.#maxRotorSecond = _value;
-      if (this.joint != null) this.joint.getLimitMotor2().upperLimit = _value * Math.PI / 180;
+      if (this.joint != null) this.joint.getLimitMotor2().upperLimit = _value * Mathematic.deg2rad;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
@@ -186,7 +186,7 @@ namespace FudgeCore {
     }
     set minRotorSecond(_value: number) {
       this.#minRotorSecond = _value;
-      if (this.joint != null) this.joint.getLimitMotor2().lowerLimit = _value * Math.PI / 180;
+      if (this.joint != null) this.joint.getLimitMotor2().lowerLimit = _value * Mathematic.deg2rad;
     }
     /**
       * The target rotational speed of the motor in m/s. 
@@ -283,9 +283,9 @@ namespace FudgeCore {
       this.#axisSpringDamperFirst = new OIMO.SpringDamper().setSpring(this.#springFrequencyFirst, this.#springDampingFirst);
       this.#axisSpringDamperSecond = new OIMO.SpringDamper().setSpring(this.#springFrequencySecond, this.#springDampingSecond);
 
-      this.#motorFirst = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Math.PI / 180, this.#maxRotorFirst * Math.PI / 180);
+      this.#motorFirst = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Mathematic.deg2rad, this.#maxRotorFirst * Mathematic.deg2rad);
       this.#motorFirst.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
-      this.#motorSecond = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Math.PI / 180, this.#maxRotorFirst * Math.PI / 180);
+      this.#motorSecond = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Mathematic.deg2rad, this.#maxRotorFirst * Mathematic.deg2rad);
       this.#motorSecond.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
 
       this.config = new OIMO.UniversalJointConfig();

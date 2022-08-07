@@ -88,10 +88,10 @@ namespace FudgeCore {
      * The maximum angle of rotation along the first axis. Value needs to be positive. Changes do rebuild the joint
      */
     get maxAngleFirstAxis(): number {
-      return this.#maxAngleFirst * 180 / Math.PI;
+      return this.#maxAngleFirst * Mathematic.rad2deg;
     }
     set maxAngleFirstAxis(_value: number) {
-      this.#maxAngleFirst = _value * Math.PI / 180;
+      this.#maxAngleFirst = _value * Mathematic.deg2rad;
       this.disconnect();
       this.dirtyStatus();
     }
@@ -100,10 +100,10 @@ namespace FudgeCore {
      * The maximum angle of rotation along the second axis. Value needs to be positive. Changes do rebuild the joint
      */
     get maxAngleSecondAxis(): number {
-      return this.#maxAngleSecond * 180 / Math.PI;
+      return this.#maxAngleSecond * Mathematic.rad2deg;
     }
     set maxAngleSecondAxis(_value: number) {
-      this.#maxAngleSecond = _value * Math.PI / 180;
+      this.#maxAngleSecond = _value * Mathematic.deg2rad;
       this.disconnect();
       this.dirtyStatus();
     }
@@ -159,10 +159,10 @@ namespace FudgeCore {
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
      */
     get maxMotorTwist(): number {
-      return this.#maxMotorTwist * 180 / Math.PI;
+      return this.#maxMotorTwist * Mathematic.rad2deg;
     }
     set maxMotorTwist(_value: number) {
-      _value *= Math.PI / 180;
+      _value *= Mathematic.deg2rad;
       this.#maxMotorTwist = _value;
       if (this.joint != null) this.joint.getTwistLimitMotor().upperLimit = _value;
     }
@@ -170,10 +170,10 @@ namespace FudgeCore {
      * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
      */
     get minMotorTwist(): number {
-      return this.#minMotorTwist * 180 / Math.PI;
+      return this.#minMotorTwist * Mathematic.rad2deg;
     }
     set minMotorTwist(_value: number) {
-      _value *= Math.PI / 180;
+      _value *= Mathematic.deg2rad;
       this.#minMotorTwist = _value;
       if (this.joint != null) this.joint.getTwistLimitMotor().lowerLimit = _value;
     }

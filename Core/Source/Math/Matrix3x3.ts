@@ -14,7 +14,6 @@ namespace FudgeCore {
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class Matrix3x3 extends Mutable implements Serializable, Recycable {
-    private static deg2rad: number = Math.PI / 180;
     private data: Float32Array = new Float32Array(9); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
     private vectors: VectorRepresentation; // vector representation of this matrix
@@ -61,7 +60,7 @@ namespace FudgeCore {
      */
     public static ROTATION(_angleInDegrees: number): Matrix3x3 {
       const mtxResult: Matrix3x3 = Recycler.get(Matrix3x3);
-      let angleInRadians: number = _angleInDegrees * Matrix3x3.deg2rad;
+      let angleInRadians: number = _angleInDegrees * Mathematic.deg2rad;
       let sin: number = Math.sin(angleInRadians);
       let cos: number = Math.cos(angleInRadians);
       mtxResult.data.set([
@@ -304,7 +303,7 @@ namespace FudgeCore {
       else
         rotation = xSkew;
 
-      rotation *= 180 / Math.PI;
+      rotation *= Mathematic.rad2deg;
 
       return rotation;
     }
