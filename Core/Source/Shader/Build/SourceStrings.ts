@@ -281,6 +281,9 @@ float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float 
     return 0.0;
   vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
   float fHitCamera = dot(vctReflection, _vctView);
+  // attempted BLINN 
+  // vec3 halfway = normalize(_vctView + _vctLight);
+  // float fHitCamera = dot(-halfway, _vctNormal);
   return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
 }
 
