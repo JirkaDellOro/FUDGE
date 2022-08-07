@@ -86,7 +86,8 @@
     "outdir": "Build",
     "register": "true",
     "define": [
-      "MATCAP"
+      "MATCAP",
+      "CAMERA"
     ]
   },
   "ShaderPick": {

@@ -73,14 +73,10 @@ out vec2 v_vctTexture;
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
 in vec3 a_vctNormal;
 uniform mat4 u_mtxNormalMeshToWorld;
-uniform mat4 u_mtxMeshToWorld;
 uniform mat4 u_mtxNormalWorldToView;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
 uniform float u_xAspect;
 uniform float u_yAspect;
 out vec2 v_vctTexture;
-// out vec3 v_vctNormal;
   #endif
 
   #if defined(SKIN)
