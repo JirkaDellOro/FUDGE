@@ -290,10 +290,8 @@ vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec
   float fIllumination = -dot(_vctNormal, vctDirection);
   if(fIllumination > 0.0f) {
     vctResult += u_fDiffuse * fIllumination * _vctColor;
-        #if defined(CAMERA)
     float fReflection = calculateReflection(vctDirection, _vctView, _vctNormal, _fSpecular);
     vctResult += fReflection * _vctColor;
-        #endif
   }
   return vctResult;
 }
