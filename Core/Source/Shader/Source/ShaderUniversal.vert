@@ -163,7 +163,7 @@ void main() {
     vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
     vec3 vctDirection = vec3(u_mtxMeshToWorld * vctPosition) - vctPositionLight;
     vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
-    vec3 vctNormalized = normalize(vctDirectionInverted);
+    // vec3 vctNormalized = normalize(vctDirectionInverted);
     float fIntensity = 1.0 - length(vctDirectionInverted) - abs(vctDirectionInverted.x) - abs(vctDirectionInverted.y);
     if(fIntensity < 0.0 || vctDirectionInverted.z < 0.0)
       continue;

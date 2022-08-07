@@ -81,9 +81,12 @@ void main() {
     vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
     vec3 vctDirection = vec3(u_mtxMeshToWorld * v_vctPosition) - vctPositionLight;
     vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
-    vec3 vctNormalized = normalize(vctDirectionInverted);
-    float fIntensity = 1.0 - length(vctDirectionInverted) - abs(vctDirectionInverted.x) - abs(vctDirectionInverted.y);
-    if(fIntensity < 0.0 || vctDirectionInverted.z < 0.0)
+    // vec3 vctNormalized = normalize(vctDirectionInverted);
+    if(vctDirectionInverted.z <= 0.0)
+      continue;
+    float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);
+    fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);
+    if(fIntensity < 0.0)
       continue;
     vctFrag += illuminateDirected(vctDirection, v_vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
