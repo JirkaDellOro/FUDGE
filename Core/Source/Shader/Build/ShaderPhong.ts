@@ -4,12 +4,16 @@ namespace FudgeCore {
 export abstract class ShaderPhong extends Shader {
   public static readonly iSubclass: number = Shader.registerSubclass(ShaderPhong);
 
-  public static define: string[] = [];
+  public static define: string[] = [
+    "LIGHT",
+    "CAMERA",
+    "PHONG"
+];
 
-  public static getCoat(): typeof Coat { return CoatColored; }
+  public static getCoat(): typeof Coat { return CoatRemissive; }
 
   public static getVertexShaderSource(): string { 
-    return this.insertDefines(shaderSources["Source/ShaderPhong.vert"], this.define);
+    return this.insertDefines(shaderSources["Source/ShaderUniversal.vert"], this.define);
   }
 
   public static getFragmentShaderSource(): string { 

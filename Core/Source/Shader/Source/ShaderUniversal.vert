@@ -79,6 +79,11 @@ uniform float u_yAspect;
 out vec2 v_vctTexture;
   #endif
 
+  #if defined(PHONG)
+out vec3 v_vctNormal;
+out vec4 v_vctPosition;
+  #endif
+
   #if defined(SKIN)
 // uniform mat4 u_mtxMeshToWorld;
 // Bones
@@ -133,6 +138,12 @@ void main() {
 
     #if defined(LIGHT)
   vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
+      #if defined(PHONG)
+  v_vctNormal = vctNormal; // pass normal to fragment shader
+  v_vctPosition = vctPosition;
+      #endif  
+
+    #if !defined(PHONG)
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
@@ -158,6 +169,7 @@ void main() {
       continue;
     v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
+      #endif // PHONG
     #endif
 
     // TEXTURE: transform UVs

@@ -71,12 +71,17 @@
     ]
   },
   "ShaderPhong": {
-    "vertex": "Source/ShaderPhong.vert",
+    "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderPhong.frag",
-    "coat": "CoatColored",
+    "coat": "CoatRemissive",
     "namespace": "FudgeCore",
     "outdir": "Build",
-    "register": "true"
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "CAMERA",
+      "PHONG"
+    ]
   },
   "ShaderMatCap": {
     "vertex": "Source/ShaderUniversal.vert",
