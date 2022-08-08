@@ -238,9 +238,10 @@ declare namespace Fudge {
         updatePropertyList(_mutator: ƒ.Mutator): void;
         modifyKey(_time: number, _element: ƒui.CustomElement): void;
         deleteKey(_key: ViewAnimationKey): void;
-        addPath(_path: string[]): void;
-        deletePath(_path: string[]): void;
+        addProperty(_path: string[]): void;
+        deleteProperty(_element: HTMLElement): void;
         getSelectedSequences(_selectedProperty: HTMLElement): ViewAnimationSequence[];
+        private deletePath;
         private hndKey;
     }
 }
@@ -580,6 +581,7 @@ declare namespace Fudge {
         private static readonly KEY_SIZE;
         private static readonly LINE_WIDTH;
         private static readonly TIMELINE_HEIGHT;
+        private static readonly SCALE_WIDTH;
         private static readonly PIXEL_PER_MILLISECOND;
         private static readonly PIXEL_PER_VALUE;
         private static readonly MINIMUM_PIXEL_PER_STEP;
@@ -599,6 +601,7 @@ declare namespace Fudge {
         private labels;
         private events;
         private slopeHooks;
+        private documentStyle;
         private posDragStart;
         constructor(_container: ComponentContainer, _state: Object);
         private get mode();

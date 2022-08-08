@@ -15,6 +15,7 @@ namespace Fudge {
     private static readonly KEY_SIZE: number = 6; // width and height in px
     private static readonly LINE_WIDTH: number = 1; // in px
     private static readonly TIMELINE_HEIGHT: number = 80; // in px
+    private static readonly SCALE_WIDTH: number = 40; // in px
     private static readonly PIXEL_PER_MILLISECOND: number = 1; // at scaling 1
     private static readonly PIXEL_PER_VALUE: number = 100; // at scaling 1
     private static readonly MINIMUM_PIXEL_PER_STEP: number = 30;
@@ -39,6 +40,8 @@ namespace Fudge {
     private labels: ViewAnimationLabel[] = [];
     private events: ViewAnimationEvent[] = [];
     private slopeHooks: Path2D[] = [];
+
+    private documentStyle: CSSStyleDeclaration = window.getComputedStyle(document.documentElement);
     
     private posDragStart: ƒ.Vector2 = new ƒ.Vector2();
     
@@ -127,11 +130,14 @@ namespace Fudge {
         this.scrollContainer.scrollLeft = -this.mtxWorldToScreen.translation.x;
       }
 
+      this.crc2.resetTransform();
       if (this.animation) {
-        if (this.mode == SHEET_MODE.CURVES) {
-          this.drawCurves();
+        if (this.mode == SHEET_MODE.CURVES)
           this.drawScale();
-        }
+        this.mtxWorldToScreen.translateX(ViewAnimationSheet.SCALE_WIDTH);
+        this.mtxScreenToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen);
+        if (this.mode == SHEET_MODE.CURVES)
+          this.drawCurves();
         this.drawKeys();
         this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
         this.drawTimeline();
@@ -141,19 +147,20 @@ namespace Fudge {
     }
 
     private drawTimeline(): void {
-      this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-background-content");
+      this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-content");
       this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
 
-      this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-background-main");
-      let animationWidth: number = this.animation.totalTime * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-      this.crc2.fillRect(0, 0, animationWidth, ViewAnimationSheet.TIMELINE_HEIGHT);
+      this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
+      let animationWidth: number = this.animation.totalTime * this.mtxWorldToScreen.scaling.x;
+      let animationStart: number = Math.min(...this.keys.map( _key => _key.key.Time )) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+      this.crc2.fillRect(animationStart, 0, animationWidth, ViewAnimationSheet.TIMELINE_HEIGHT);
       
       let timeline: Path2D = new Path2D();
       timeline.moveTo(0, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
       timeline.lineTo(this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
 
-      this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
-      this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
+      this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-text");
+      this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
       this.crc2.textBaseline = "middle";
       this.crc2.textAlign = "left";
 
@@ -218,8 +225,8 @@ namespace Fudge {
       for (const key of this.keys) {
         this.crc2.lineWidth = 4;
         this.crc2.strokeStyle = key.key == this.selectedKey?.key ? 
-          window.getComputedStyle(this.dom).getPropertyValue("--color-signal") : 
-          window.getComputedStyle(this.dom).getPropertyValue("--color-medium");
+          this.documentStyle.getPropertyValue("--color-signal") : 
+          this.documentStyle.getPropertyValue("--color-dragdrop-outline");
         this.crc2.fillStyle = key.sequence.color;
 
         this.crc2.stroke(key.path2D);
@@ -227,7 +234,7 @@ namespace Fudge {
 
         if (this.mode == SHEET_MODE.CURVES && key.key == this.selectedKey?.key) {
           this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
-          this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-medium");
+          this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
           this.crc2.fillStyle = this.crc2.strokeStyle;
 
           let [left, right] = [ƒ.Recycler.get(ƒ.Vector2), ƒ.Recycler.get(ƒ.Vector2)];
@@ -287,8 +294,8 @@ namespace Fudge {
     }
 
     private drawScale(): void {
-      this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-bright");
-      this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-bright");
+      this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
+      this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-highlight");
 
       let centerLine: Path2D = new Path2D();
       centerLine.moveTo(0, this.mtxWorldToScreen.translation.y);
@@ -314,7 +321,7 @@ namespace Fudge {
         stepLine.moveTo(0, y);
         // TODO: refine the display
         if (valuePerStep > 1 && i % 5 == 0 || valuePerStep == 1) {
-          stepLine.lineTo(35, y);
+          stepLine.lineTo(ViewAnimationSheet.SCALE_WIDTH - 5, y);
           let value: number = -i * valuePerStep;
           this.crc2.fillText(
             valuePerStep >= 1 ? value.toFixed(0) : value.toFixed(1), 
@@ -328,7 +335,7 @@ namespace Fudge {
     }
 
     private drawCursor(): void {
-      this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-signal");
+      this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-signal");
       let x: number = this.playbackTime * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
       let cursor: Path2D = new Path2D();
       cursor.moveTo(x, 0);
@@ -344,8 +351,8 @@ namespace Fudge {
       line.moveTo(0, labelDisplayHeight);
       line.lineTo(maxDistance, labelDisplayHeight);
 
-      this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
-      this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
+      this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
+      this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-text");
       this.crc2.stroke(line);
 
       this.labels = [];

@@ -951,7 +951,7 @@ var Fudge;
             let animationSequence = _key.sequence.sequence;
             animationSequence.removeKey(_key.key);
         }
-        addPath(_path) {
+        addProperty(_path) {
             let value = this.animation.animationStructure;
             for (let i = 0; i < _path.length - 1; i++) {
                 let key = _path[i];
@@ -961,26 +961,17 @@ var Fudge;
             }
             value[_path[_path.length - 1]] = new ƒ.AnimationSequence();
         }
-        deletePath(_path) {
-            let value = this.animation.animationStructure;
-            for (let i = 0; i < _path.length - 1; i++)
-                value = value[_path[i]];
-            delete value[_path[_path.length - 1]];
-            deleteEmptyPathsRecursive(this.animation.animationStructure);
-            function deleteEmptyPathsRecursive(_object) {
-                for (const key in _object) {
-                    if (_object[key] instanceof ƒ.AnimationSequence)
-                        continue;
-                    let value = deleteEmptyPathsRecursive(_object[key]);
-                    if (Object.keys(value).length == 0) {
-                        delete _object[key];
-                    }
-                    else {
-                        _object[key] = value;
-                    }
-                }
-                return _object;
+        deleteProperty(_element) {
+            if (!this.propertyList.contains(_element))
+                return;
+            let path = [];
+            let element = _element;
+            while (element !== this.propertyList) {
+                if (element instanceof ƒui.CustomElement || element instanceof ƒui.Details)
+                    path.unshift(element.getAttribute("key"));
+                element = element.parentElement;
             }
+            this.deletePath(path);
         }
         getSelectedSequences(_selectedProperty) {
             let sequences = [];
@@ -1003,6 +994,27 @@ var Fudge;
                         collectSelectedSequencesRecursive(element, _animationStructure[key], _sequences, isSelectedDescendant);
                     }
                 }
+            }
+        }
+        deletePath(_path) {
+            let value = this.animation.animationStructure;
+            for (let i = 0; i < _path.length - 1; i++)
+                value = value[_path[i]];
+            delete value[_path[_path.length - 1]];
+            deleteEmptyPathsRecursive(this.animation.animationStructure);
+            function deleteEmptyPathsRecursive(_object) {
+                for (const key in _object) {
+                    if (_object[key] instanceof ƒ.AnimationSequence)
+                        continue;
+                    let value = deleteEmptyPathsRecursive(_object[key]);
+                    if (Object.keys(value).length == 0) {
+                        delete _object[key];
+                    }
+                    else {
+                        _object[key] = value;
+                    }
+                }
+                return _object;
             }
         }
         hndKey = (_event) => {
@@ -2614,31 +2626,17 @@ var Fudge;
         contextMenuCallback(_item, _window, _event) {
             let choice = Number(_item.id);
             ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
-            let path;
             switch (choice) {
                 case Fudge.CONTEXTMENU.ADD_PROPERTY:
-                    path = _item["path"];
-                    this.controller.addPath(path);
+                    let path = Reflect.get(_item, "path");
+                    this.controller.addProperty(path);
                     this.createPropertyList();
                     this.dispatchAnimate();
                     break;
                 case Fudge.CONTEXTMENU.DELETE_PROPERTY:
-                    let element = document.activeElement;
-                    if (element.tagName == "BODY")
+                    if (!(document.activeElement instanceof HTMLElement))
                         return;
-                    path = [];
-                    while (element !== this.propertyList) {
-                        if (element instanceof ƒui.Details) {
-                            let summaryElement = element.getElementsByTagName("SUMMARY")[0];
-                            path.unshift(summaryElement.innerHTML);
-                        }
-                        if (element instanceof ƒui.CustomElement) {
-                            let labelElement = element.getElementsByTagName("LABEL")[0];
-                            path.unshift(labelElement.innerHTML);
-                        }
-                        element = element.parentElement;
-                    }
-                    this.controller.deletePath(path);
+                    this.controller.deleteProperty(document.activeElement);
                     this.createPropertyList();
                     this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
                     return;
@@ -2679,8 +2677,7 @@ var Fudge;
                 }
                 else {
                     item = new Fudge.remote.MenuItem({ label: property, id: String(Fudge.CONTEXTMENU.ADD_PROPERTY), click: _callback });
-                    //@ts-ignore
-                    item.overrideProperty("path", path);
+                    Reflect.set(item, "path", path);
                 }
                 menu.append(item);
             }
@@ -2896,6 +2893,7 @@ var Fudge;
         static KEY_SIZE = 6; // width and height in px
         static LINE_WIDTH = 1; // in px
         static TIMELINE_HEIGHT = 80; // in px
+        static SCALE_WIDTH = 40; // in px
         static PIXEL_PER_MILLISECOND = 1; // at scaling 1
         static PIXEL_PER_VALUE = 100; // at scaling 1
         static MINIMUM_PIXEL_PER_STEP = 30;
@@ -2916,6 +2914,7 @@ var Fudge;
         labels = [];
         events = [];
         slopeHooks = [];
+        documentStyle = window.getComputedStyle(document.documentElement);
         posDragStart = new ƒ.Vector2();
         constructor(_container, _state) {
             super(_container, _state);
@@ -2988,11 +2987,14 @@ var Fudge;
                 }
                 this.scrollContainer.scrollLeft = -this.mtxWorldToScreen.translation.x;
             }
+            this.crc2.resetTransform();
             if (this.animation) {
-                if (this.mode == SHEET_MODE.CURVES) {
-                    this.drawCurves();
+                if (this.mode == SHEET_MODE.CURVES)
                     this.drawScale();
-                }
+                this.mtxWorldToScreen.translateX(ViewAnimationSheet.SCALE_WIDTH);
+                this.mtxScreenToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen);
+                if (this.mode == SHEET_MODE.CURVES)
+                    this.drawCurves();
                 this.drawKeys();
                 this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
                 this.drawTimeline();
@@ -3001,16 +3003,17 @@ var Fudge;
             }
         }
         drawTimeline() {
-            this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-background-content");
+            this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-content");
             this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
-            this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-background-main");
-            let animationWidth = this.animation.totalTime * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-            this.crc2.fillRect(0, 0, animationWidth, ViewAnimationSheet.TIMELINE_HEIGHT);
+            this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
+            let animationWidth = this.animation.totalTime * this.mtxWorldToScreen.scaling.x;
+            let animationStart = Math.min(...this.keys.map(_key => _key.key.Time)) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+            this.crc2.fillRect(animationStart, 0, animationWidth, ViewAnimationSheet.TIMELINE_HEIGHT);
             let timeline = new Path2D();
             timeline.moveTo(0, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
             timeline.lineTo(this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
-            this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
-            this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
+            this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-text");
+            this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
             this.crc2.textBaseline = "middle";
             this.crc2.textAlign = "left";
             const minimumPixelPerStep = 10;
@@ -3058,14 +3061,14 @@ var Fudge;
             for (const key of this.keys) {
                 this.crc2.lineWidth = 4;
                 this.crc2.strokeStyle = key.key == this.selectedKey?.key ?
-                    window.getComputedStyle(this.dom).getPropertyValue("--color-signal") :
-                    window.getComputedStyle(this.dom).getPropertyValue("--color-medium");
+                    this.documentStyle.getPropertyValue("--color-signal") :
+                    this.documentStyle.getPropertyValue("--color-dragdrop-outline");
                 this.crc2.fillStyle = key.sequence.color;
                 this.crc2.stroke(key.path2D);
                 this.crc2.fill(key.path2D);
                 if (this.mode == SHEET_MODE.CURVES && key.key == this.selectedKey?.key) {
                     this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
-                    this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-medium");
+                    this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
                     this.crc2.fillStyle = this.crc2.strokeStyle;
                     let [left, right] = [ƒ.Recycler.get(ƒ.Vector2), ƒ.Recycler.get(ƒ.Vector2)];
                     left.set(-50, 0);
@@ -3114,8 +3117,8 @@ var Fudge;
             }
         }
         drawScale() {
-            this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-bright");
-            this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-bright");
+            this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
+            this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-highlight");
             let centerLine = new Path2D();
             centerLine.moveTo(0, this.mtxWorldToScreen.translation.y);
             centerLine.lineTo(this.canvas.width, this.mtxWorldToScreen.translation.y);
@@ -3135,7 +3138,7 @@ var Fudge;
                 stepLine.moveTo(0, y);
                 // TODO: refine the display
                 if (valuePerStep > 1 && i % 5 == 0 || valuePerStep == 1) {
-                    stepLine.lineTo(35, y);
+                    stepLine.lineTo(ViewAnimationSheet.SCALE_WIDTH - 5, y);
                     let value = -i * valuePerStep;
                     this.crc2.fillText(valuePerStep >= 1 ? value.toFixed(0) : value.toFixed(1), 33, y);
                 }
@@ -3146,7 +3149,7 @@ var Fudge;
             }
         }
         drawCursor() {
-            this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-signal");
+            this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-signal");
             let x = this.playbackTime * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
             let cursor = new Path2D();
             cursor.moveTo(x, 0);
@@ -3160,8 +3163,8 @@ var Fudge;
             let line = new Path2D();
             line.moveTo(0, labelDisplayHeight);
             line.lineTo(maxDistance, labelDisplayHeight);
-            this.crc2.strokeStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
-            this.crc2.fillStyle = window.getComputedStyle(this.dom).getPropertyValue("--color-text");
+            this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
+            this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-text");
             this.crc2.stroke(line);
             this.labels = [];
             this.events = [];
