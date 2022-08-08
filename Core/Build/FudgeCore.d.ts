@@ -6238,6 +6238,11 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    let shaderSources: {
+        [source: string]: string;
+    };
+}
+declare namespace FudgeCore {
     /**
      * Static superclass for the representation of WebGl shaderprograms.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -6383,11 +6388,6 @@ declare namespace FudgeCore {
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
-}
-declare namespace FudgeCore {
-    let shaderSources: {
-        [source: string]: string;
-    };
 }
 declare namespace FudgeCore {
     interface BoneList {

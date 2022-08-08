@@ -1,12 +1,11 @@
 #version 300 es
 /**
 * Phong shading
-* Implementation based on https://www.gsn-lib.org/docs/nodes/ShaderPluginNode.php
-* @authors Luis Keck, HFU, 2021
+* @authors Jirka Dell'Oro-Friedl, HFU, 2022
 */
 
 precision highp float;
-// precision mediump float;
+
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
 uniform float u_fSpecular;

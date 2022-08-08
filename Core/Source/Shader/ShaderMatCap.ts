@@ -12,11 +12,11 @@ export abstract class ShaderMatCap extends Shader {
   public static getCoat(): typeof Coat { return CoatTextured; }
 
   public static getVertexShaderSource(): string { 
-    return this.insertDefines(shaderSources["Source/ShaderUniversal.vert"], this.define);
+    return this.insertDefines(shaderSources["ShaderUniversal.vert"], this.define);
   }
 
   public static getFragmentShaderSource(): string { 
-    return this.insertDefines(shaderSources["Source/ShaderUniversal.frag"], this.define);
+    return this.insertDefines(shaderSources["ShaderUniversal.frag"], this.define);
   }
 
 }
