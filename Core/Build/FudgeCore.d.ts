@@ -6316,6 +6316,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     abstract class ShaderLit extends Shader {
         static readonly iSubclass: number;
+        static define: string[];
     }
 }
 declare namespace FudgeCore {
@@ -6342,12 +6343,14 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     abstract class ShaderPick extends Shader {
+        static define: string[];
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
     abstract class ShaderPickTextured extends Shader {
+        static define: string[];
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
