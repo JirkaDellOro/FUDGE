@@ -2899,7 +2899,7 @@ var Fudge;
     class ViewAnimationSheet extends Fudge.View {
         static KEY_SIZE = 6; // width and height in px
         static LINE_WIDTH = 1; // in px
-        static TIMELINE_HEIGHT = 80; // in px
+        static TIMELINE_HEIGHT = 70; // in px
         static SCALE_WIDTH = 40; // in px
         static PIXEL_PER_MILLISECOND = 1; // at scaling 1
         static PIXEL_PER_VALUE = 100; // at scaling 1
@@ -2922,7 +2922,7 @@ var Fudge;
         events = [];
         slopeHooks = [];
         documentStyle = window.getComputedStyle(document.documentElement);
-        posDragStart = new ƒ.Vector2();
+        posPanStart = new ƒ.Vector2();
         constructor(_container, _state) {
             super(_container, _state);
             this.dom.style.position = "absolute";
@@ -2997,12 +2997,13 @@ var Fudge;
                 this.scrollContainer.scrollLeft = -this.mtxWorldToScreen.translation.x;
             }
             if (this.animation) {
-                if (this.mode == SHEET_MODE.CURVES)
-                    this.drawScale();
+                this.mtxWorldToScreen.translateX(ViewAnimationSheet.SCALE_WIDTH);
+                this.generateKeys();
+                this.mtxWorldToScreen.translateX(-ViewAnimationSheet.SCALE_WIDTH);
+                this.drawScale();
                 this.mtxWorldToScreen.translateX(ViewAnimationSheet.SCALE_WIDTH);
                 this.mtxScreenToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen);
-                if (this.mode == SHEET_MODE.CURVES)
-                    this.drawCurves();
+                this.drawCurves();
                 this.drawKeys();
                 this.drawTimeline();
                 this.drawEventsAndLabels();
@@ -3012,12 +3013,17 @@ var Fudge;
         }
         drawTimeline() {
             this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
-            this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-content");
-            this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
             this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
+            this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
+            this.crc2.fillStyle = "rgba(100, 100, 255, 0.1)";
             let animationWidth = this.animation.totalTime * this.mtxWorldToScreen.scaling.x;
             let animationStart = Math.min(...this.keys.map(_key => _key.key.Time)) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-            this.crc2.fillRect(animationStart, 0, animationWidth, ViewAnimationSheet.TIMELINE_HEIGHT);
+            this.crc2.fillRect(animationStart, 0, animationWidth, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
+            if (this.selectedKey) {
+                let posScreen = this.selectedKey.posScreen;
+                this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
+                this.crc2.fillRect(posScreen.x - ViewAnimationSheet.KEY_SIZE / 2, 0, ViewAnimationSheet.KEY_SIZE, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
+            }
             let timeline = new Path2D();
             timeline.moveTo(0, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
             timeline.lineTo(this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
@@ -3051,53 +3057,52 @@ var Fudge;
             this.crc2.stroke(timeline);
         }
         drawKeys() {
-            this.keys = this.sequences.flatMap((_sequence, _iSeqeunce) => _sequence.sequence.getKeys().map((_key) => {
-                let position = ƒ.Recycler.get(ƒ.Vector2);
-                if (this.mode == SHEET_MODE.CURVES)
-                    position.set(_key.Time, _key.Value);
-                else
-                    position.set(_key.Time, (_iSeqeunce) * ViewAnimationSheet.KEY_SIZE * 2);
-                position.transform(this.mtxWorldToScreen);
-                let keyView = {
-                    key: _key,
-                    posScreen: position,
-                    path2D: generateKey(position.x, position.y, ViewAnimationSheet.KEY_SIZE, ViewAnimationSheet.KEY_SIZE),
-                    sequence: _sequence
-                };
-                ƒ.Recycler.store(ƒ.Vector2);
-                return keyView;
-            }));
-            for (const key of this.keys) {
-                this.crc2.lineWidth = 4;
-                this.crc2.strokeStyle = key.key == this.selectedKey?.key ?
-                    this.documentStyle.getPropertyValue("--color-signal") :
-                    this.documentStyle.getPropertyValue("--color-dragdrop-outline");
-                this.crc2.fillStyle = key.sequence.color;
-                this.crc2.stroke(key.path2D);
-                this.crc2.fill(key.path2D);
-                if (this.mode == SHEET_MODE.CURVES && key.key == this.selectedKey?.key) {
-                    this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
-                    this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
-                    this.crc2.fillStyle = this.crc2.strokeStyle;
-                    let [left, right] = [ƒ.Recycler.get(ƒ.Vector2), ƒ.Recycler.get(ƒ.Vector2)];
-                    left.set(-50, 0);
-                    right.set(50, 0);
-                    let angleSlopeScreen = Math.atan(key.key.SlopeIn * (this.mtxWorldToScreen.scaling.y / this.mtxWorldToScreen.scaling.x)) * (180 / Math.PI); // in degree
-                    let mtxTransform = ƒ.Matrix3x3.IDENTITY();
-                    mtxTransform.translate(key.posScreen);
-                    mtxTransform.rotate(angleSlopeScreen);
-                    left.transform(mtxTransform);
-                    right.transform(mtxTransform);
-                    let path = new Path2D();
-                    path.moveTo(left.x, left.y);
-                    path.lineTo(right.x, right.y);
-                    this.crc2.stroke(path);
-                    this.slopeHooks = [generateKey(left.x, left.y, 5, 5), generateKey(right.x, right.y, 5, 5)];
-                    this.slopeHooks.forEach(_hook => this.crc2.fill(_hook));
-                    ƒ.Recycler.store(left);
-                    ƒ.Recycler.store(right);
-                }
+            // draw selected key highlight
+            if (this.selectedKey) {
+                let posScreen = this.selectedKey.posScreen;
+                this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
+                this.crc2.fillRect(ViewAnimationSheet.SCALE_WIDTH, posScreen.y - ViewAnimationSheet.KEY_SIZE / 2, posScreen.x - ViewAnimationSheet.SCALE_WIDTH, ViewAnimationSheet.KEY_SIZE);
+                this.crc2.fillRect(posScreen.x - ViewAnimationSheet.KEY_SIZE / 2, ViewAnimationSheet.TIMELINE_HEIGHT, ViewAnimationSheet.KEY_SIZE, posScreen.y - ViewAnimationSheet.TIMELINE_HEIGHT);
             }
+            // draw unselected keys
+            this.keys.forEach(_key => {
+                if (_key == this.selectedKey)
+                    return;
+                this.crc2.lineWidth = 4;
+                this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
+                this.crc2.fillStyle = _key.sequence.color;
+                this.crc2.stroke(_key.path2D);
+                this.crc2.fill(_key.path2D);
+            });
+            // draw selected key
+            if (!this.selectedKey)
+                return;
+            this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-signal");
+            this.crc2.fillStyle = this.selectedKey.sequence.color;
+            this.crc2.stroke(this.selectedKey.path2D);
+            this.crc2.fill(this.selectedKey.path2D);
+            if (this.mode != SHEET_MODE.CURVES)
+                return;
+            this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
+            this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
+            this.crc2.fillStyle = this.crc2.strokeStyle;
+            let [left, right] = [ƒ.Recycler.get(ƒ.Vector2), ƒ.Recycler.get(ƒ.Vector2)];
+            left.set(-50, 0);
+            right.set(50, 0);
+            let angleSlopeScreen = Math.atan(this.selectedKey.key.SlopeIn * (this.mtxWorldToScreen.scaling.y / this.mtxWorldToScreen.scaling.x)) * (180 / Math.PI); // in degree
+            let mtxTransform = ƒ.Matrix3x3.IDENTITY();
+            mtxTransform.translate(this.selectedKey.posScreen);
+            mtxTransform.rotate(angleSlopeScreen);
+            left.transform(mtxTransform);
+            right.transform(mtxTransform);
+            let path = new Path2D();
+            path.moveTo(left.x, left.y);
+            path.lineTo(right.x, right.y);
+            this.crc2.stroke(path);
+            this.slopeHooks = [generateKey(left.x, left.y, 5, 5), generateKey(right.x, right.y, 5, 5)];
+            this.slopeHooks.forEach(_hook => this.crc2.fill(_hook));
+            ƒ.Recycler.store(left);
+            ƒ.Recycler.store(right);
             function generateKey(_x, _y, _w, _h) {
                 let key = new Path2D();
                 key.moveTo(_x - _w, _y);
@@ -3109,6 +3114,8 @@ var Fudge;
             }
         }
         drawCurves() {
+            if (this.mode != SHEET_MODE.CURVES)
+                return;
             for (const sequence of this.sequences) {
                 this.crc2.strokeStyle = sequence.color;
                 sequence.sequence.getKeys()
@@ -3126,6 +3133,12 @@ var Fudge;
             }
         }
         drawScale() {
+            if (this.selectedKey) {
+                this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
+                this.crc2.fillRect(0, this.selectedKey.posScreen.y - ViewAnimationSheet.KEY_SIZE / 2, ViewAnimationSheet.SCALE_WIDTH, ViewAnimationSheet.KEY_SIZE);
+            }
+            if (this.mode != SHEET_MODE.CURVES)
+                return;
             this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
             this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-highlight");
             let centerLine = new Path2D();
@@ -3163,15 +3176,18 @@ var Fudge;
             let cursor = new Path2D();
             cursor.moveTo(x, 0);
             cursor.lineTo(x, this.canvas.height);
+            this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
             this.crc2.strokeStyle = "white";
             this.crc2.stroke(cursor);
         }
         drawEventsAndLabels() {
-            let maxDistance = 10000;
-            let labelDisplayHeight = 30 + 50;
+            let labelDisplayHeight = ViewAnimationSheet.TIMELINE_HEIGHT;
+            this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
+            this.crc2.fillRect(0, ViewAnimationSheet.TIMELINE_HEIGHT - 30, this.canvas.width, 30);
             let line = new Path2D();
             line.moveTo(0, labelDisplayHeight);
-            line.lineTo(maxDistance, labelDisplayHeight);
+            line.lineTo(this.canvas.width, labelDisplayHeight);
+            this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
             this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
             this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-text");
             this.crc2.stroke(line);
@@ -3211,6 +3227,35 @@ var Fudge;
                 // this.crc2.fill(p);
                 this.crc2.stroke(p);
             }
+        }
+        generateKeys() {
+            this.keys = this.sequences.flatMap((_sequence, _iSeqeunce) => _sequence.sequence.getKeys().map((_key) => {
+                let position = ƒ.Recycler.get(ƒ.Vector2);
+                if (this.mode == SHEET_MODE.CURVES)
+                    position.set(_key.Time, _key.Value);
+                else
+                    position.set(_key.Time, (_iSeqeunce) * ViewAnimationSheet.KEY_SIZE * 2);
+                position.transform(this.mtxWorldToScreen);
+                let keyView = {
+                    key: _key,
+                    posScreen: position,
+                    path2D: this.generateKey(position.x, position.y, ViewAnimationSheet.KEY_SIZE, ViewAnimationSheet.KEY_SIZE),
+                    sequence: _sequence
+                };
+                ƒ.Recycler.store(ƒ.Vector2);
+                return keyView;
+            }));
+            if (this.selectedKey)
+                this.selectedKey = this.keys.find(_key => _key.key == this.selectedKey.key);
+        }
+        generateKey(_x, _y, _w, _h) {
+            let key = new Path2D();
+            key.moveTo(_x - _w, _y);
+            key.lineTo(_x, _y + _h);
+            key.lineTo(_x + _w, _y);
+            key.lineTo(_x, _y - _h);
+            key.closePath();
+            return key;
         }
         //#endregion
         //#region event handling
@@ -3276,7 +3321,7 @@ var Fudge;
                     break;
                 case 4:
                     this.scrollContainer.onpointermove = this.hndPointerMovePan;
-                    this.posDragStart = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);
+                    this.posPanStart = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);
                     break;
             }
         };
@@ -3298,7 +3343,7 @@ var Fudge;
         };
         hndPointerMovePan = (_event) => {
             _event.preventDefault();
-            let translation = ƒ.Vector2.DIFFERENCE(this.getScreenToWorldPoint(_event.offsetX, _event.offsetY), this.posDragStart);
+            let translation = ƒ.Vector2.DIFFERENCE(this.getScreenToWorldPoint(_event.offsetX, _event.offsetY), this.posPanStart);
             if (this.mode == SHEET_MODE.DOPE)
                 translation.y = 0;
             this.mtxWorldToScreen.translate(translation);

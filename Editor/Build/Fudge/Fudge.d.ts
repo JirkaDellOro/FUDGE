@@ -602,7 +602,7 @@ declare namespace Fudge {
         private events;
         private slopeHooks;
         private documentStyle;
-        private posDragStart;
+        private posPanStart;
         constructor(_container: ComponentContainer, _state: Object);
         private get mode();
         private set mode(value);
@@ -614,6 +614,8 @@ declare namespace Fudge {
         private drawScale;
         private drawCursor;
         private drawEventsAndLabels;
+        private generateKeys;
+        private generateKey;
         private hndFocus;
         private hndAnimate;
         private hndSelect;
