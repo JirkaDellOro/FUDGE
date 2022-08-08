@@ -72,8 +72,8 @@ namespace Fudge {
       let animationSequence: ƒ.AnimationSequence = _key.sequence.sequence;
       animationSequence.removeKey(_key.key);
     }
-
-    public addPath(_path: string[]): void {
+    
+    public addProperty(_path: string[]): void {
       let value: Object = this.animation.animationStructure;
       for (let i: number = 0; i < _path.length - 1; i++) {
         let key: string = _path[i];
@@ -84,28 +84,18 @@ namespace Fudge {
       value[_path[_path.length - 1]] = new ƒ.AnimationSequence();
     }
 
-    public deletePath(_path: string[]): void {
-      let value: Object = this.animation.animationStructure;
-      for (let i: number = 0; i < _path.length - 1; i++) 
-        value = value[_path[i]];
-      delete value[_path[_path.length - 1]];
+    public deleteProperty(_element: HTMLElement): void {
+      if (!this.propertyList.contains(_element)) return;
 
-      deleteEmptyPathsRecursive(this.animation.animationStructure);
+      let path: string[] = [];
+      let element: HTMLElement = _element;
+      while (element !== this.propertyList) {
+        if (element instanceof ƒui.CustomElement || element instanceof ƒui.Details) 
+          path.unshift(element.getAttribute("key"));
 
-      function deleteEmptyPathsRecursive(_object: Object): Object {
-        for (const key in _object) {
-          if (_object[key] instanceof ƒ.AnimationSequence) continue;
-  
-          let value: Object = deleteEmptyPathsRecursive(_object[key]);
-          if (Object.keys(value).length == 0) {
-            delete _object[key];
-          } else {
-            _object[key] = value;
-          }
-        }
-  
-        return _object;
+        element = element.parentElement;
       }
+      this.deletePath(path);
     }
 
     public getSelectedSequences(_selectedProperty: HTMLElement): ViewAnimationSequence[] {
@@ -130,6 +120,30 @@ namespace Fudge {
             collectSelectedSequencesRecursive(element, <ƒ.AnimationStructure>_animationStructure[key], _sequences, isSelectedDescendant);
           }
         }
+      }
+    }
+
+    private deletePath(_path: string[]): void {
+      let value: Object = this.animation.animationStructure;
+      for (let i: number = 0; i < _path.length - 1; i++) 
+        value = value[_path[i]];
+      delete value[_path[_path.length - 1]];
+
+      deleteEmptyPathsRecursive(this.animation.animationStructure);
+
+      function deleteEmptyPathsRecursive(_object: Object): Object {
+        for (const key in _object) {
+          if (_object[key] instanceof ƒ.AnimationSequence) continue;
+  
+          let value: Object = deleteEmptyPathsRecursive(_object[key]);
+          if (Object.keys(value).length == 0) {
+            delete _object[key];
+          } else {
+            _object[key] = value;
+          }
+        }
+  
+        return _object;
       }
     }
 

@@ -83,35 +83,17 @@ namespace Fudge {
       let choice: CONTEXTMENU = Number(_item.id);
       ƒ.Debug.fudge(`MenuSelect | id: ${CONTEXTMENU[_item.id]} | event: ${_event}`);
         
-      let path: string[];
       switch (choice) {
         case CONTEXTMENU.ADD_PROPERTY:
-          path = _item["path"];
-          this.controller.addPath(path);
+          let path: string[] = Reflect.get(_item, "path");
+          this.controller.addProperty(path);
           this.createPropertyList();
           this.dispatchAnimate();
 
           break;
         case CONTEXTMENU.DELETE_PROPERTY:
-          let element: Element = document.activeElement;
-          if (element.tagName == "BODY")
-            return;
-          
-          path = [];
-          while (element !== this.propertyList) {
-            if (element instanceof ƒui.Details) {
-              let summaryElement: Element = element.getElementsByTagName("SUMMARY")[0];
-              path.unshift(summaryElement.innerHTML);
-            }
-
-            if (element instanceof ƒui.CustomElement) {
-              let labelElement: Element = element.getElementsByTagName("LABEL")[0];
-              path.unshift(labelElement.innerHTML);
-            }
-
-            element = element.parentElement;
-          }
-          this.controller.deletePath(path);
+          if (!(document.activeElement instanceof HTMLElement)) return;
+          this.controller.deleteProperty(document.activeElement);
           this.createPropertyList();
           this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
           return;
@@ -163,8 +145,7 @@ namespace Fudge {
           item = new remote.MenuItem(
             { label: property, id: String(CONTEXTMENU.ADD_PROPERTY), click: _callback }
           );
-          //@ts-ignore
-          item.overrideProperty("path", path);
+          Reflect.set(item, "path", path);
           }
         menu.append(item);
         }
