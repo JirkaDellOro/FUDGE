@@ -51,6 +51,7 @@ namespace Fudge {
       this.createUserInterface();
       
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndSelect);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
@@ -174,6 +175,10 @@ namespace Fudge {
           this.cmpAnimator = this.node?.getComponent(ƒ.ComponentAnimator);
           this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
           this.setAnimation(this.cmpAnimator?.animation);
+          break;
+        case EVENT_EDITOR.DELETE:
+          this.controller.deleteKey(this.selectedKey);
+          this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
           break;
         case ƒui.EVENT.CLICK:
           if (!(_event.target instanceof HTMLElement) || !this.animation || _event.target instanceof HTMLButtonElement) break;
@@ -313,8 +318,7 @@ namespace Fudge {
           // this.redraw();
           break;
         case "remove-key":
-          this.controller.deleteKey(this.selectedKey);
-          this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
+          this.dispatch(EVENT_EDITOR.DELETE, { bubbles: true });
           break;
         case "start":
           this.playbackTime = 0;

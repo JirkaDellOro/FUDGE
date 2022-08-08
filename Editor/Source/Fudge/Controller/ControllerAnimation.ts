@@ -69,6 +69,7 @@ namespace Fudge {
     }
 
     public deleteKey(_key: ViewAnimationKey): void {
+      if (!_key) return;
       let animationSequence: ƒ.AnimationSequence = _key.sequence.sequence;
       animationSequence.removeKey(_key.key);
     }

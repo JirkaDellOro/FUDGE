@@ -624,6 +624,7 @@ declare namespace Fudge {
         private hndPointerUp;
         private hndWheel;
         private hndScroll;
+        private dispatchAnimate;
         private resetView;
         private getScreenToWorldPoint;
         private getBezierPoints;

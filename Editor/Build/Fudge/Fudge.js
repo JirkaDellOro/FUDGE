@@ -948,6 +948,8 @@ var Fudge;
                 key.Value = _element.getMutatorValue();
         }
         deleteKey(_key) {
+            if (!_key)
+                return;
             let animationSequence = _key.sequence.sequence;
             animationSequence.removeKey(_key.key);
         }
@@ -2036,6 +2038,7 @@ var Fudge;
                 { typeId: 7 /* Root */ }
             ]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndAnimate);
             this.setTitle("Animation | ");
@@ -2601,6 +2604,7 @@ var Fudge;
             this.setAnimation(null);
             this.createUserInterface();
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndAnimate);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndSelect);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
@@ -2702,6 +2706,10 @@ var Fudge;
                     this.cmpAnimator = this.node?.getComponent(ƒ.ComponentAnimator);
                     this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
                     this.setAnimation(this.cmpAnimator?.animation);
+                    break;
+                case Fudge.EVENT_EDITOR.DELETE:
+                    this.controller.deleteKey(this.selectedKey);
+                    this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
                     break;
                 case "click" /* CLICK */:
                     if (!(_event.target instanceof HTMLElement) || !this.animation || _event.target instanceof HTMLButtonElement)
@@ -2828,8 +2836,7 @@ var Fudge;
                     // this.redraw();
                     break;
                 case "remove-key":
-                    this.controller.deleteKey(this.selectedKey);
-                    this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
+                    this.dispatch(Fudge.EVENT_EDITOR.DELETE, { bubbles: true });
                     break;
                 case "start":
                     this.playbackTime = 0;
@@ -2963,6 +2970,8 @@ var Fudge;
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: SHEET_MODE.CURVES, click: () => this.mode = SHEET_MODE.CURVES });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Delete Key", click: () => this.dispatch(Fudge.EVENT_EDITOR.DELETE, { bubbles: true }) });
+            menu.append(item);
             return menu;
         }
         //#endregion
@@ -2987,7 +2996,6 @@ var Fudge;
                 }
                 this.scrollContainer.scrollLeft = -this.mtxWorldToScreen.translation.x;
             }
-            this.crc2.resetTransform();
             if (this.animation) {
                 if (this.mode == SHEET_MODE.CURVES)
                     this.drawScale();
@@ -2996,13 +3004,14 @@ var Fudge;
                 if (this.mode == SHEET_MODE.CURVES)
                     this.drawCurves();
                 this.drawKeys();
-                this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
                 this.drawTimeline();
                 this.drawEventsAndLabels();
                 this.drawCursor();
+                this.mtxWorldToScreen.translateX(-ViewAnimationSheet.SCALE_WIDTH);
             }
         }
         drawTimeline() {
+            this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
             this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-content");
             this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
             this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
@@ -3262,6 +3271,9 @@ var Fudge;
                         }
                     }
                     break;
+                case 2:
+                    this.contextMenu.items.find(_item => _item.label == "Delete Key").enabled = this.selectedKey != null;
+                    break;
                 case 4:
                     this.scrollContainer.onpointermove = this.hndPointerMovePan;
                     this.posDragStart = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);
@@ -3272,8 +3284,8 @@ var Fudge;
             _event.preventDefault();
             let playbackTime = Math.max(0, this.getScreenToWorldPoint(_event.offsetX, 0).x);
             let pixelPerFrame = 1000 / this.animation.fps;
-            playbackTime = Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
-            this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: playbackTime } } });
+            this.playbackTime = Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
+            this.dispatchAnimate();
         };
         hndPointerMoveSlope = (_event) => {
             _event.preventDefault();
@@ -3282,7 +3294,7 @@ var Fudge;
             let slope = vctDelta.y / vctDelta.x;
             this.selectedKey.key.SlopeIn = slope;
             this.selectedKey.key.SlopeOut = slope;
-            this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: this.playbackTime } } });
+            this.dispatchAnimate();
         };
         hndPointerMovePan = (_event) => {
             _event.preventDefault();
@@ -3319,6 +3331,9 @@ var Fudge;
             this.mtxWorldToScreen.translation = translation;
             this.draw(false);
         };
+        dispatchAnimate() {
+            this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: this.playbackTime } } });
+        }
         //#endregion
         resetView() {
             this.mtxWorldToScreen.reset();

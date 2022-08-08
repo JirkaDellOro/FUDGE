@@ -102,6 +102,8 @@ namespace Fudge {
       menu.append(item);
       item = new remote.MenuItem({ label: SHEET_MODE.CURVES, click: () => this.mode = SHEET_MODE.CURVES});
       menu.append(item);
+      item = new remote.MenuItem({ label: "Delete Key", click: () => this.dispatch(EVENT_EDITOR.DELETE, { bubbles: true }) });
+      menu.append(item);
 
       return menu;
     }
@@ -130,7 +132,6 @@ namespace Fudge {
         this.scrollContainer.scrollLeft = -this.mtxWorldToScreen.translation.x;
       }
 
-      this.crc2.resetTransform();
       if (this.animation) {
         if (this.mode == SHEET_MODE.CURVES)
           this.drawScale();
@@ -139,14 +140,16 @@ namespace Fudge {
         if (this.mode == SHEET_MODE.CURVES)
           this.drawCurves();
         this.drawKeys();
-        this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
         this.drawTimeline();
         this.drawEventsAndLabels();
         this.drawCursor();
+        this.mtxWorldToScreen.translateX(-ViewAnimationSheet.SCALE_WIDTH);
       }
     }
 
     private drawTimeline(): void {
+      this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
+
       this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-content");
       this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
 
@@ -457,6 +460,9 @@ namespace Fudge {
             }
           }
           break;
+        case 2: 
+          this.contextMenu.items.find( _item => _item.label == "Delete Key").enabled = this.selectedKey != null;
+          break;
         case 4:
           this.scrollContainer.onpointermove = this.hndPointerMovePan;
           this.posDragStart = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);
@@ -468,8 +474,8 @@ namespace Fudge {
       _event.preventDefault();
       let playbackTime: number = Math.max(0, this.getScreenToWorldPoint(_event.offsetX, 0).x);
       let pixelPerFrame: number = 1000 / this.animation.fps;
-      playbackTime = Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
-      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: playbackTime } } });
+      this.playbackTime = Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
+      this.dispatchAnimate();
     }
 
     private hndPointerMoveSlope = (_event: PointerEvent): void => {
@@ -479,7 +485,7 @@ namespace Fudge {
       let slope: number = vctDelta.y / vctDelta.x;
       this.selectedKey.key.SlopeIn = slope;
       this.selectedKey.key.SlopeOut = slope;
-      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: this.playbackTime } } });
+      this.dispatchAnimate();
     }
 
     private hndPointerMovePan = (_event: PointerEvent): void => {
@@ -523,6 +529,10 @@ namespace Fudge {
       translation.x = -this.scrollContainer.scrollLeft;
       this.mtxWorldToScreen.translation = translation;
       this.draw(false);
+    }
+
+    private dispatchAnimate(): void {
+      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: this.playbackTime } } });
     }
     //#endregion
 
