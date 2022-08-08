@@ -88,6 +88,7 @@ namespace FudgeCore {
      * @returns the Mutator for Animation. 
      */
     public updateAnimation(_time: number): Mutator {
+      this.#previous = 0;
       return this.updateAnimationLoop(null, _time);
     }
 
