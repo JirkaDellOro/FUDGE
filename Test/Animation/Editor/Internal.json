@@ -98,22 +98,15 @@
                           {
                             "time": 0,
                             "value": 0,
-                            "slopeIn": 0,
-                            "slopeOut": 0,
-                            "constant": false
-                          },
-                          {
-                            "time": 5000,
-                            "value": 360,
-                            "slopeIn": 0.07651417503775139,
-                            "slopeOut": 0.07651417503775139,
+                            "slopeIn": 0.06774086136288295,
+                            "slopeOut": 0.06774086136288295,
                             "constant": false
                           },
                           {
                             "time": 10000,
                             "value": 719,
-                            "slopeIn": 0.07111037664886023,
-                            "slopeOut": 0.07111037664886023,
+                            "slopeIn": 0.07374833733551069,
+                            "slopeOut": 0.07374833733551069,
                             "constant": false
                           }
                         ],
@@ -202,7 +195,7 @@
                   "ƒ.ComponentTransform": {
                     "local": {
                       "translation": "[0, 0, 0]",
-                      "rotation": "[0, 192.4838104248047, 0]",
+                      "rotation": "[0, 141.96534729003906, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -290,7 +283,7 @@
                         "ƒ.ComponentTransform": {
                           "local": {
                             "translation": "[5, 0, 0]",
-                            "rotation": "[0, 673.2797241210938, 0]",
+                            "rotation": "[0, 258.162353515625, 0]",
                             "scaling": "[1, 1, 1]"
                           },
                           "Component": {

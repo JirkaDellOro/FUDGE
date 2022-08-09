@@ -581,6 +581,7 @@ declare namespace Fudge {
         private static readonly KEY_SIZE;
         private static readonly LINE_WIDTH;
         private static readonly TIMELINE_HEIGHT;
+        private static readonly EVENTS_HEIGHT;
         private static readonly SCALE_WIDTH;
         private static readonly PIXEL_PER_MILLISECOND;
         private static readonly PIXEL_PER_VALUE;
@@ -608,12 +609,12 @@ declare namespace Fudge {
         private set mode(value);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         private draw;
-        private drawTimeline;
-        private drawKeys;
-        private drawCurves;
         private drawScale;
+        private drawCurves;
+        private drawKeys;
+        private drawTimeline;
+        private drawEvents;
         private drawCursor;
-        private drawEventsAndLabels;
         private generateKeys;
         private generateKey;
         private hndFocus;

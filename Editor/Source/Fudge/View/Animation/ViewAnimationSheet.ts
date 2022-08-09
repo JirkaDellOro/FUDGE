@@ -14,7 +14,8 @@ namespace Fudge {
   export class ViewAnimationSheet extends View {
     private static readonly KEY_SIZE: number = 6; // width and height in px
     private static readonly LINE_WIDTH: number = 1; // in px
-    private static readonly TIMELINE_HEIGHT: number = 70; // in px
+    private static readonly TIMELINE_HEIGHT: number = 30; // in px
+    private static readonly EVENTS_HEIGHT: number = 30; // in px
     private static readonly SCALE_WIDTH: number = 40; // in px
     private static readonly PIXEL_PER_MILLISECOND: number = 1; // at scaling 1
     private static readonly PIXEL_PER_VALUE: number = 100; // at scaling 1
@@ -142,94 +143,87 @@ namespace Fudge {
         this.drawCurves();
         this.drawKeys();
         this.drawTimeline();
-        this.drawEventsAndLabels();
+        this.drawEvents();
         this.drawCursor();
         this.mtxWorldToScreen.translateX(-ViewAnimationSheet.SCALE_WIDTH);
       }
     }
 
-    private drawTimeline(): void {
-      this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
-
-      this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
-      this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
-
-      this.crc2.fillStyle = "rgba(100, 100, 255, 0.2)";
-      let animationWidth: number = this.animation.totalTime * this.mtxWorldToScreen.scaling.x;
-      let animationStart: number = Math.min(...this.keys.map( _key => _key.key.Time )) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-      this.crc2.fillRect(animationStart, 0, animationWidth, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
+    private drawScale(): void {
+      if (this.mode != SHEET_MODE.CURVES) return;
 
       if (this.selectedKey) {
-        let posScreen: ƒ.Vector2 = this.selectedKey.posScreen;
-        this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
-        this.crc2.fillRect(posScreen.x - ViewAnimationSheet.KEY_SIZE / 2, 0, ViewAnimationSheet.KEY_SIZE, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
+        this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
+        this.crc2.fillRect(0, this.selectedKey.posScreen.y - ViewAnimationSheet.KEY_SIZE / 2, ViewAnimationSheet.SCALE_WIDTH, ViewAnimationSheet.KEY_SIZE);
       }
       
-      let timeline: Path2D = new Path2D();
-      timeline.moveTo(0, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
-      timeline.lineTo(this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
+      this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
+      this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-highlight");
 
-      this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-text");
-      this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
-      this.crc2.textBaseline = "middle";
-      this.crc2.textAlign = "left";
-      this.crc2.font = this.documentStyle.font;
+      let centerLine: Path2D = new Path2D();
+      centerLine.moveTo(0, this.mtxWorldToScreen.translation.y);
+      centerLine.lineTo(this.canvas.width, this.mtxWorldToScreen.translation.y);
+      this.crc2.stroke(centerLine);
 
-      // const minimumPixelPerStep: number = 10;
-      let pixelPerFrame: number = 30; // 1000 / this.animation.fps;
-      let pixelPerStep: number = pixelPerFrame * this.mtxWorldToScreen.scaling.x;
-      let framesPerStep: number = 1;
-      // let stepScaleFactor: number = Math.max(
-      //   Math.pow(3, Math.ceil(Math.log(minimumPixelPerStep / pixelPerStep) / Math.log(3))), 
-      //   1);
-      // pixelPerStep *= stepScaleFactor;
-      // framesPerStep *= stepScaleFactor;
-      let mod: number = 1; // should be 1, 5, 10, 30, 60, 300, 600, 1800, 3600, 18000
+      this.crc2.textBaseline = "bottom";
+      this.crc2.textAlign = "right";
 
-      let steps: number = 1 + this.canvas.width / pixelPerStep;
-      
-      if (steps > 10)
-      mod *= 5; //5 ab 20
+      let pixelPerStep: number = -this.mtxWorldToScreen.scaling.y;
+      let valuePerStep: number = 1;
+      let stepScaleFactor: number = Math.max(
+        Math.pow(2, Math.ceil(Math.log2(ViewAnimationSheet.MINIMUM_PIXEL_PER_STEP / pixelPerStep))), 
+        1);
+      pixelPerStep *= stepScaleFactor;
+      valuePerStep *= stepScaleFactor;
 
-      if (steps > 45)
-      mod *= 2; //10 ab 1:30
-      if (steps > 90)
-      mod *= 3; //30 ab 3:00
-      if (steps > 270)
-      mod *= 2; //60 ab 9:00
-      if (steps > 540)
-      mod *= 5; //300 ab 18:00
-
-      // mod *= 2; //600 ab 90:00
-      // mod *= 3; //1800 ab 180:00
-      // mod *= 2; //3600 ab 540:00
-      // mod *= 5; //18000 ab 1080:00
-
-
-      let stepOffset: number = Math.floor(-this.mtxWorldToScreen.translation.x / pixelPerStep);
-      for (let iStep: number = stepOffset; iStep < steps + stepOffset; iStep++) {
-        let x: number = (iStep * pixelPerStep + this.mtxWorldToScreen.translation.x);
-        timeline.moveTo(x, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
+      let steps: number = 1 + this.canvas.height / pixelPerStep;
+      let stepOffset: number = Math.floor(-this.mtxWorldToScreen.translation.y / pixelPerStep);
+      for (let i: number = stepOffset; i < steps + stepOffset; i++) {
+        let stepLine: Path2D = new Path2D();
+        let y: number = (i * pixelPerStep + this.mtxWorldToScreen.translation.y);
+        stepLine.moveTo(0, y);
         // TODO: refine the display
-        if (iStep % mod == 0) {
-          timeline.lineTo(x, ViewAnimationSheet.TIMELINE_HEIGHT - 60);
-          let second: number = Math.floor((iStep * framesPerStep) / this.animation.fps);
-          let frame: number = (iStep * framesPerStep) % this.animation.fps;
+        if (valuePerStep > 1 && i % 5 == 0 || valuePerStep == 1) {
+          stepLine.lineTo(ViewAnimationSheet.SCALE_WIDTH - 5, y);
+          let value: number = -i * valuePerStep;
           this.crc2.fillText(
-            `${second}:${frame < 10 ? "0" : ""}${frame}`, 
-            x + 3, 
-            ViewAnimationSheet.TIMELINE_HEIGHT - 60);
+            valuePerStep >= 1 ? value.toFixed(0) : value.toFixed(1), 
+            33, 
+            y);
         } else {
-          // timeline.lineTo(x, ViewAnimationSheet.TIMELINE_HEIGHT - 50);
+          stepLine.lineTo(30, y);
         }
+        this.crc2.stroke(stepLine);
       }
+    }
 
-      this.crc2.stroke(timeline);
+    private drawCurves(): void {
+      if (this.mode != SHEET_MODE.CURVES) return;
+
+      for (const sequence of this.sequences) {
+        this.crc2.strokeStyle = sequence.color;
+        sequence.sequence.getKeys()
+          .map( (_key, _index, _keys) => [_key, _keys[_index + 1]] as [ƒ.AnimationKey, ƒ.AnimationKey] )
+          .filter( ([_keyStart, _keyEnd]) => _keyStart && _keyEnd )
+          .map ( ([_keyStart, _keyEnd]) => this.getBezierPoints(_keyStart.functionOut, _keyStart, _keyEnd) )
+          .forEach( (_bezierPoints) => {
+            _bezierPoints.forEach( _point => _point.transform(this.mtxWorldToScreen));
+            let curve: Path2D = new Path2D();
+            curve.moveTo(_bezierPoints[0].x, _bezierPoints[0].y);
+            curve.bezierCurveTo(
+              _bezierPoints[1].x, _bezierPoints[1].y,
+              _bezierPoints[2].x, _bezierPoints[2].y,
+              _bezierPoints[3].x, _bezierPoints[3].y
+            );
+            this.crc2.stroke(curve);
+            _bezierPoints.forEach( _point => ƒ.Recycler.store(_point) );
+          });
+      }
     }
 
     private drawKeys(): void {
       // draw selected key highlight
-      if (this.selectedKey) {
+      if (this.selectedKey && this.mode == SHEET_MODE.CURVES) {
         let posScreen: ƒ.Vector2 = this.selectedKey.posScreen;
         this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
         this.crc2.fillRect(ViewAnimationSheet.SCALE_WIDTH, posScreen.y - ViewAnimationSheet.KEY_SIZE / 2, posScreen.x - ViewAnimationSheet.SCALE_WIDTH, ViewAnimationSheet.KEY_SIZE);
@@ -293,98 +287,109 @@ namespace Fudge {
       }
     }
 
-    private drawCurves(): void {
-      if (this.mode != SHEET_MODE.CURVES) return;
-
-      for (const sequence of this.sequences) {
-        this.crc2.strokeStyle = sequence.color;
-        sequence.sequence.getKeys()
-          .map( (_key, _index, _keys) => [_key, _keys[_index + 1]] as [ƒ.AnimationKey, ƒ.AnimationKey] )
-          .filter( ([_keyStart, _keyEnd]) => _keyStart && _keyEnd )
-          .map ( ([_keyStart, _keyEnd]) => this.getBezierPoints(_keyStart.functionOut, _keyStart, _keyEnd) )
-          .forEach( (_bezierPoints) => {
-            _bezierPoints.forEach( _point => _point.transform(this.mtxWorldToScreen));
-            let curve: Path2D = new Path2D();
-            curve.moveTo(_bezierPoints[0].x, _bezierPoints[0].y);
-            curve.bezierCurveTo(
-              _bezierPoints[1].x, _bezierPoints[1].y,
-              _bezierPoints[2].x, _bezierPoints[2].y,
-              _bezierPoints[3].x, _bezierPoints[3].y
-            );
-            this.crc2.stroke(curve);
-            _bezierPoints.forEach( _point => ƒ.Recycler.store(_point) );
-          });
-      }
-    }
-
-    private drawScale(): void {
-      if (this.selectedKey) {
-        this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
-        this.crc2.fillRect(0, this.selectedKey.posScreen.y - ViewAnimationSheet.KEY_SIZE / 2, ViewAnimationSheet.SCALE_WIDTH, ViewAnimationSheet.KEY_SIZE);
-      }
-
-      if (this.mode != SHEET_MODE.CURVES) return;
-
-      this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
-      this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-highlight");
-
-      let centerLine: Path2D = new Path2D();
-      centerLine.moveTo(0, this.mtxWorldToScreen.translation.y);
-      centerLine.lineTo(this.canvas.width, this.mtxWorldToScreen.translation.y);
-      this.crc2.stroke(centerLine);
-
-      this.crc2.textBaseline = "bottom";
-      this.crc2.textAlign = "right";
-
-      let pixelPerStep: number = -this.mtxWorldToScreen.scaling.y;
-      let valuePerStep: number = 1;
-      let stepScaleFactor: number = Math.max(
-        Math.pow(2, Math.ceil(Math.log2(ViewAnimationSheet.MINIMUM_PIXEL_PER_STEP / pixelPerStep))), 
-        1);
-      pixelPerStep *= stepScaleFactor;
-      valuePerStep *= stepScaleFactor;
-
-      let steps: number = 1 + this.canvas.height / pixelPerStep;
-      let stepOffset: number = Math.floor(-this.mtxWorldToScreen.translation.y / pixelPerStep);
-      for (let i: number = stepOffset; i < steps + stepOffset; i++) {
-        let stepLine: Path2D = new Path2D();
-        let y: number = (i * pixelPerStep + this.mtxWorldToScreen.translation.y);
-        stepLine.moveTo(0, y);
-        // TODO: refine the display
-        if (valuePerStep > 1 && i % 5 == 0 || valuePerStep == 1) {
-          stepLine.lineTo(ViewAnimationSheet.SCALE_WIDTH - 5, y);
-          let value: number = -i * valuePerStep;
-          this.crc2.fillText(
-            valuePerStep >= 1 ? value.toFixed(0) : value.toFixed(1), 
-            33, 
-            y);
-        } else {
-          stepLine.lineTo(30, y);
-        }
-        this.crc2.stroke(stepLine);
-      }
-    }
-
-    private drawCursor(): void {
-      this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-signal");
-      let x: number = this.playbackTime * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-      let cursor: Path2D = new Path2D();
-      cursor.moveTo(x, 0);
-      cursor.lineTo(x, this.canvas.height);
+    private drawTimeline(): void {
       this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
-      this.crc2.strokeStyle = "white";
-      this.crc2.stroke(cursor);
-    }
-
-    private drawEventsAndLabels(): void {
-      let labelDisplayHeight: number = ViewAnimationSheet.TIMELINE_HEIGHT;
 
       this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
-      this.crc2.fillRect(0, ViewAnimationSheet.TIMELINE_HEIGHT - 30, this.canvas.width, 30);
+      this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
+
+      this.crc2.fillStyle = "rgba(100, 100, 255, 0.2)";
+      let animationWidth: number = this.animation.totalTime * this.mtxWorldToScreen.scaling.x;
+      let animationStart: number = Math.min(...this.keys.map( _key => _key.key.Time )) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+      this.crc2.fillRect(animationStart, 0, animationWidth, ViewAnimationSheet.TIMELINE_HEIGHT);
+
+      if (this.selectedKey) {
+        let posScreen: ƒ.Vector2 = this.selectedKey.posScreen;
+        this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
+        this.crc2.fillRect(posScreen.x - ViewAnimationSheet.KEY_SIZE / 2, 0, ViewAnimationSheet.KEY_SIZE, ViewAnimationSheet.TIMELINE_HEIGHT);
+      }
+      
+      let timeline: Path2D = new Path2D();
+      timeline.moveTo(0, ViewAnimationSheet.TIMELINE_HEIGHT);
+      timeline.lineTo(this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
+
+      this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-text");
+      this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
+      this.crc2.textBaseline = "middle";
+      this.crc2.textAlign = "left";
+      this.crc2.font = this.documentStyle.font;
+
+      const minimumPixelPerStep: number = 60;
+      let fps: number = this.animation.fps;
+      let pixelPerFrame: number = (1000 * ViewAnimationSheet.PIXEL_PER_MILLISECOND) / fps;
+      let pixelPerStep: number = pixelPerFrame * this.mtxWorldToScreen.scaling.x;
+      let framesPerStep: number = 1;
+
+      // TODO: find a way to do this with O(1);
+      let multipliers: number[] = [2, 3, 2, 5];
+      let index: number = 2;
+      while (pixelPerStep < minimumPixelPerStep) {
+        index = (index + 1) % multipliers.length;
+        let multiplier: number = multipliers[index];
+        pixelPerStep *= multiplier;
+        framesPerStep *= multiplier;
+      }
+
+      let subSteps: number = 0;
+      let highSteps: number = 0;
+      if (framesPerStep != 1) {
+        if (framesPerStep == 5) {
+          subSteps = 5;
+        } else {
+          switch (index) {
+            case 0:
+              subSteps = 10;
+              highSteps = 5;
+              break;
+            case 2:
+              subSteps = 6;
+              highSteps = 3;
+              break;
+            case 1:
+              subSteps = 6;
+              highSteps = 2;
+              break;
+            case 3:
+              subSteps = 10;
+              highSteps = 2;
+              break;
+          }
+        }
+      }
+
+      let steps: number = 1 + this.canvas.width / pixelPerStep;
+      let stepOffset: number = Math.floor(Math.abs(this.mtxWorldToScreen.translation.x) / pixelPerStep);
+      for (let iStep: number = stepOffset; iStep < steps + stepOffset; iStep++) {
+        let xStep: number = (iStep * pixelPerStep + this.mtxWorldToScreen.translation.x);
+        timeline.moveTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT);
+        timeline.lineTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT - 20);
+        let second: number = Math.floor((iStep * framesPerStep) / fps);
+        let frame: number = (iStep * framesPerStep) % fps;
+        this.crc2.fillText(
+          `${second}:${frame < 10 ? "0" : ""}${frame}`, 
+          xStep + 3, 
+          ViewAnimationSheet.TIMELINE_HEIGHT - 20);
+
+        let pixelPerSubStep: number = pixelPerStep / subSteps;
+        for (let iSubStep: number = 1; iSubStep < subSteps; iSubStep++) {
+          let xSubStep: number = xStep + iSubStep * pixelPerSubStep;
+          timeline.moveTo(xSubStep, ViewAnimationSheet.TIMELINE_HEIGHT);
+          timeline.lineTo(xSubStep, ViewAnimationSheet.TIMELINE_HEIGHT - (iSubStep % highSteps == 0 ? 12 : 8));
+        }
+      }
+
+      this.crc2.stroke(timeline);
+    }
+
+    private drawEvents(): void {
+      let eventsHeight: number = ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT;
+
+      this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
+      this.crc2.fillRect(0, ViewAnimationSheet.TIMELINE_HEIGHT, this.canvas.width, ViewAnimationSheet.EVENTS_HEIGHT);
 
       let line: Path2D = new Path2D();
-      line.moveTo(0, labelDisplayHeight);
-      line.lineTo(this.canvas.width, labelDisplayHeight);
+      line.moveTo(0, eventsHeight);
+      line.lineTo(this.canvas.width, eventsHeight);
       this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
       this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
       this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-text");
@@ -398,33 +403,44 @@ namespace Fudge {
         let p: Path2D = new Path2D;
         this.labels.push({ label: l, path2D: p });
         let position: number = this.animation.labels[l] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-        p.moveTo(position - 3, labelDisplayHeight - 26);
-        p.lineTo(position - 3, labelDisplayHeight - 4);
-        p.lineTo(position + 3, labelDisplayHeight - 4);
-        p.lineTo(position + 3, labelDisplayHeight - 23);
-        p.lineTo(position, labelDisplayHeight - 26);
-        p.lineTo(position - 3, labelDisplayHeight - 26);
+        p.moveTo(position - 3, eventsHeight - 26);
+        p.lineTo(position - 3, eventsHeight - 4);
+        p.lineTo(position + 3, eventsHeight - 4);
+        p.lineTo(position + 3, eventsHeight - 23);
+        p.lineTo(position, eventsHeight - 26);
+        p.lineTo(position - 3, eventsHeight - 26);
         this.crc2.fill(p);
         this.crc2.stroke(p);
         let p2: Path2D = new Path2D();
-        p2.moveTo(position, labelDisplayHeight - 26);
-        p2.lineTo(position, labelDisplayHeight - 23);
-        p2.lineTo(position + 3, labelDisplayHeight - 23);
+        p2.moveTo(position, eventsHeight - 26);
+        p2.lineTo(position, eventsHeight - 23);
+        p2.lineTo(position + 3, eventsHeight - 23);
         this.crc2.stroke(p2);
       }
       for (let e in this.animation.events) {
         let p: Path2D = new Path2D;
         this.events.push({ event: e, path2D: p });
         let position: number = this.animation.events[e] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-        p.moveTo(position - 3, labelDisplayHeight - 26);
-        p.lineTo(position - 3, labelDisplayHeight - 7);
-        p.lineTo(position, labelDisplayHeight - 4);
-        p.lineTo(position + 3, labelDisplayHeight - 7);
-        p.lineTo(position + 3, labelDisplayHeight - 26);
-        p.lineTo(position - 3, labelDisplayHeight - 26);
+        p.moveTo(position - 3, eventsHeight - 26);
+        p.lineTo(position - 3, eventsHeight - 7);
+        p.lineTo(position, eventsHeight - 4);
+        p.lineTo(position + 3, eventsHeight - 7);
+        p.lineTo(position + 3, eventsHeight - 26);
+        p.lineTo(position - 3, eventsHeight - 26);
         // this.crc2.fill(p);
         this.crc2.stroke(p);
       }
+    }
+
+    private drawCursor(): void {
+      this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-signal");
+      let x: number = this.playbackTime * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+      let cursor: Path2D = new Path2D();
+      cursor.moveTo(x, 0);
+      cursor.lineTo(x, this.canvas.height);
+      this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
+      this.crc2.strokeStyle = "white";
+      this.crc2.stroke(cursor);
     }
 
     private generateKeys(): void {
@@ -497,7 +513,7 @@ namespace Fudge {
         case 1:
           if (_event.offsetY > (<HTMLElement>_event.target).clientHeight) // clicked on scroll bar
             this.scrollContainer.onscroll = this.hndScroll;
-          else if (_event.offsetY <= ViewAnimationSheet.TIMELINE_HEIGHT - 30) {
+          else if (_event.offsetY <= ViewAnimationSheet.TIMELINE_HEIGHT) {
             this.hndPointerMoveTimeline(_event);
             this.scrollContainer.onpointermove = this.hndPointerMoveTimeline;
           }
@@ -621,7 +637,7 @@ namespace Fudge {
       if (this.mode == SHEET_MODE.CURVES) 
         translation.y = this.canvas.height / 2;
       else
-        translation.y = ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.KEY_SIZE * 2;
+        translation.y = ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT + ViewAnimationSheet.KEY_SIZE * 2;
       this.mtxWorldToScreen.translation = translation;
       let scaling: ƒ.Vector2 = this.mtxWorldToScreen.scaling;
       scaling.x = this.canvas.width / ((this.animation?.totalTime || ViewAnimationSheet.STANDARD_ANIMATION_LENGTH) * 1.2);
