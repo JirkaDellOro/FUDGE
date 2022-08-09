@@ -39,7 +39,7 @@ namespace FudgeCore {
      */
     public set maxMotor(_value: number) {
       super.maxMotor = _value;
-      _value *= Mathematic.deg2rad;
+      _value *= Calc.deg2rad;
       if (this.joint)
         this.joint.getLimitMotor().upperLimit = _value;
     }
@@ -49,7 +49,7 @@ namespace FudgeCore {
     public set minMotor(_value: number) {
       super.minMotor = _value;
       if (this.joint)
-        this.joint.getLimitMotor().lowerLimit = _value * Mathematic.deg2rad;
+        this.joint.getLimitMotor().lowerLimit = _value * Calc.deg2rad;
     }
 
     /**
@@ -99,7 +99,7 @@ namespace FudgeCore {
     //#endregion
 
     protected constructJoint(): void {
-      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.minMotor * Mathematic.deg2rad, super.maxMotor * Mathematic.deg2rad);
+      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.minMotor * Calc.deg2rad, super.maxMotor * Calc.deg2rad);
       this.#rotor.setMotor(this.motorSpeed, this.motorTorque);
 
       this.config = new OIMO.RevoluteJointConfig();

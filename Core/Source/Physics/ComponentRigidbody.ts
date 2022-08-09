@@ -276,7 +276,7 @@ namespace FudgeCore {
      *  But you are able to incremental changing it instead of a direct rotation.  Although it's always prefered to use forces in physics.
      */
     public rotateBody(_rotationChange: Vector3): void {
-      this.#rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * Mathematic.deg2rad, _rotationChange.y * Mathematic.deg2rad, _rotationChange.z * Mathematic.deg2rad));
+      this.#rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * Calc.deg2rad, _rotationChange.y * Calc.deg2rad, _rotationChange.z * Calc.deg2rad));
     }
 
     /** Translating the rigidbody therefore changing it's place over time directly in physics. This way physics is changing instead of transform. 

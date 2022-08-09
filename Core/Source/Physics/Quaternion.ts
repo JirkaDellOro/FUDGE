@@ -98,9 +98,9 @@ namespace FudgeCore {
      */
     public toDegrees(): Vector3 {
       let angles: Vector3 = this.toEulerangles();
-      angles.x = angles.x * (Mathematic.rad2deg);
-      angles.y = angles.y * (Mathematic.rad2deg);
-      angles.z = angles.z * (Mathematic.rad2deg);
+      angles.x = angles.x * (Calc.rad2deg);
+      angles.y = angles.y * (Calc.rad2deg);
+      angles.z = angles.z * (Calc.rad2deg);
       return angles;
     }
 

@@ -2814,6 +2814,21 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Abstract class supporting various arithmetical helper functions
+     */
+    abstract class Calc {
+        /** factor multiplied with angle in degrees yields the angle in radian */
+        static readonly deg2rad: number;
+        /** factor multiplied with angle in radian yields the angle in degrees */
+        static readonly rad2deg: number;
+        /**
+         * Returns one of the values passed in, either _value if within _min and _max or the boundary being exceeded by _value
+         */
+        static clamp<T>(_value: T, _min: T, _max: T, _isSmaller?: (_value1: T, _value2: T) => boolean): T;
+    }
+}
+declare namespace FudgeCore {
     interface Border {
         left: number;
         top: number;
@@ -2935,21 +2950,6 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     function Mash(): Function;
     function LFIB4(): Function;
-}
-declare namespace FudgeCore {
-    /**
-     * Abstract class supporting various arithmetical helper functions
-     */
-    abstract class Mathematic {
-        /** factor multiplied with angle in degrees yields the angle in radian */
-        static readonly deg2rad: number;
-        /** factor multiplied with angle in radian yields the angle in degrees */
-        static readonly rad2deg: number;
-        /**
-         * Returns one of the values passed in, either _value if within _min and _max or the boundary being exceeded by _value
-         */
-        static clamp<T>(_value: T, _min: T, _max: T, _isSmaller?: (_value1: T, _value2: T) => boolean): T;
-    }
 }
 declare namespace FudgeCore {
     /**
