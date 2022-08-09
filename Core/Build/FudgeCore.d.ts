@@ -1904,14 +1904,13 @@ declare namespace FudgeCore {
         private near;
         private far;
         private backgroundEnabled;
-        get xAspectCorrection(): number;
-        get yAspectCorrection(): number;
         get mtxWorld(): Matrix4x4;
         /**
          * Returns the multiplication of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix
          * yielding the worldspace to viewspace matrix
          */
         get mtxWorldToView(): Matrix4x4;
+        get mtxCameraInverse(): Matrix4x4;
         resetWorldToView(): void;
         getProjection(): PROJECTION;
         getBackgroundEnabled(): boolean;

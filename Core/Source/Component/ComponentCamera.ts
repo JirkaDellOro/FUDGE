@@ -21,13 +21,11 @@ namespace FudgeCore {
    */
   export class ComponentCamera extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentCamera);
-    //to calculate back from viewspace
-    #xAspectCorrection: number = 1;
-    #yAspectCorrection: number = 1;
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public clrBackground: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
     //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
     #mtxWorldToView: Matrix4x4;
+    #mtxCameraInverse: Matrix4x4;
     private projection: PROJECTION = PROJECTION.CENTRAL;
     private mtxProjection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
     private fieldOfView: number = 45; // The camera's sensorangle.
@@ -37,13 +35,6 @@ namespace FudgeCore {
     private far: number = 2000;
     private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
     // TODO: examine, if background should be an attribute of Camera or Viewport
-
-    public get xAspectCorrection(): number {
-      return this.#xAspectCorrection;
-    }
-    public get yAspectCorrection(): number {
-      return this.#yAspectCorrection;
-    }
 
     public get mtxWorld(): Matrix4x4 {
       let mtxCamera: Matrix4x4 = this.mtxPivot.clone;
@@ -63,17 +54,24 @@ namespace FudgeCore {
         return this.#mtxWorldToView;
 
       //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
-      let mtxCamera: Matrix4x4 = this.mtxWorld;
-      let mtxInversion: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
-      this.#mtxWorldToView = Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxInversion);
-      Recycler.store(mtxCamera);
-      Recycler.store(mtxInversion);
-
+      this.#mtxWorldToView = Matrix4x4.MULTIPLICATION(this.mtxProjection, this.mtxCameraInverse);
       return this.#mtxWorldToView;
     }
 
+    public get mtxCameraInverse(): Matrix4x4 {
+      if (this.#mtxCameraInverse)
+        return this.#mtxCameraInverse;
+
+      //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
+      this.#mtxCameraInverse = Matrix4x4.INVERSION(this.mtxWorld);
+      return this.#mtxCameraInverse;
+    }
+
     public resetWorldToView(): void {
+      if (this.#mtxWorldToView) Recycler.store(this.#mtxWorldToView);
+      if (this.#mtxCameraInverse) Recycler.store(this.#mtxCameraInverse);
       this.#mtxWorldToView = null;
+      this.#mtxCameraInverse = null;
     }
 
     public getProjection(): PROJECTION {
@@ -116,20 +114,6 @@ namespace FudgeCore {
       this.projection = PROJECTION.CENTRAL;
       this.near = _near;
       this.far = _far;
-      switch (this.direction) {
-        case FIELD_OF_VIEW.DIAGONAL:
-          this.#yAspectCorrection = Math.sqrt(this.aspectRatio);
-          this.#xAspectCorrection = 1 / this.#yAspectCorrection;
-          break;
-        case FIELD_OF_VIEW.VERTICAL:
-          this.#xAspectCorrection = 1 / this.aspectRatio;
-          this.#yAspectCorrection = 1;
-          break;
-        case FIELD_OF_VIEW.HORIZONTAL:
-          this.#xAspectCorrection = 1;
-          this.#yAspectCorrection = this.aspectRatio;
-          break;
-      }
       this.mtxProjection = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction); // TODO: remove magic numbers
     }
     /**

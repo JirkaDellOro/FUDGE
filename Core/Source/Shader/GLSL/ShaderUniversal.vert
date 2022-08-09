@@ -73,9 +73,7 @@ out vec2 v_vctTexture;
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
 in vec3 a_vctNormal;
 uniform mat4 u_mtxNormalMeshToWorld;
-uniform mat4 u_mtxNormalWorldToView;
-uniform float u_xAspect;
-uniform float u_yAspect;
+uniform mat4 u_mtxNormalWorldToCamera;
 out vec2 v_vctTexture;
   #endif
 
@@ -180,13 +178,11 @@ void main() {
     #endif
 
     #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  // vec3 vctReflection = normalize(reflect(vctView, vctNormal));
-  vec3 vctReflection = mat3(u_mtxNormalWorldToView) * vctNormal;
-  vctReflection.x = vctReflection.x * u_xAspect;
-  vctReflection.y = vctReflection.y * u_yAspect;
+  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);  
+  vec3 vctReflection = normalize(mat3(u_mtxNormalWorldToCamera) * a_vctNormal);
   vctReflection.y = -vctReflection.y;
-  v_vctTexture = 1.0 * vctReflection.xy + 0.5;
+
+  v_vctTexture = 0.5 * vctReflection.xy + 0.5;
     #endif
 
     // always full opacity for now...
