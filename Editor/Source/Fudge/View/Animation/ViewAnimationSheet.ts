@@ -154,7 +154,7 @@ namespace Fudge {
       this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
       this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
 
-      this.crc2.fillStyle = "rgba(100, 100, 255, 0.1)";
+      this.crc2.fillStyle = "rgba(100, 100, 255, 0.2)";
       let animationWidth: number = this.animation.totalTime * this.mtxWorldToScreen.scaling.x;
       let animationStart: number = Math.min(...this.keys.map( _key => _key.key.Time )) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
       this.crc2.fillRect(animationStart, 0, animationWidth, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
@@ -173,24 +173,45 @@ namespace Fudge {
       this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
       this.crc2.textBaseline = "middle";
       this.crc2.textAlign = "left";
+      this.crc2.font = this.documentStyle.font;
 
-      const minimumPixelPerStep: number = 10;
-      let pixelPerFrame: number = 1000 / this.animation.fps;
+      // const minimumPixelPerStep: number = 10;
+      let pixelPerFrame: number = 30; // 1000 / this.animation.fps;
       let pixelPerStep: number = pixelPerFrame * this.mtxWorldToScreen.scaling.x;
       let framesPerStep: number = 1;
-      let stepScaleFactor: number = Math.max(
-        Math.pow(2, Math.ceil(Math.log2(minimumPixelPerStep / pixelPerStep))), 
-        1);
-      pixelPerStep *= stepScaleFactor;
-      framesPerStep *= stepScaleFactor;
+      // let stepScaleFactor: number = Math.max(
+      //   Math.pow(3, Math.ceil(Math.log(minimumPixelPerStep / pixelPerStep) / Math.log(3))), 
+      //   1);
+      // pixelPerStep *= stepScaleFactor;
+      // framesPerStep *= stepScaleFactor;
+      let mod: number = 1; // should be 1, 5, 10, 30, 60, 300, 600, 1800, 3600, 18000
 
       let steps: number = 1 + this.canvas.width / pixelPerStep;
+      
+      if (steps > 10)
+      mod *= 5; //5 ab 20
+
+      if (steps > 45)
+      mod *= 2; //10 ab 1:30
+      if (steps > 90)
+      mod *= 3; //30 ab 3:00
+      if (steps > 270)
+      mod *= 2; //60 ab 9:00
+      if (steps > 540)
+      mod *= 5; //300 ab 18:00
+
+      // mod *= 2; //600 ab 90:00
+      // mod *= 3; //1800 ab 180:00
+      // mod *= 2; //3600 ab 540:00
+      // mod *= 5; //18000 ab 1080:00
+
+
       let stepOffset: number = Math.floor(-this.mtxWorldToScreen.translation.x / pixelPerStep);
       for (let iStep: number = stepOffset; iStep < steps + stepOffset; iStep++) {
         let x: number = (iStep * pixelPerStep + this.mtxWorldToScreen.translation.x);
         timeline.moveTo(x, ViewAnimationSheet.TIMELINE_HEIGHT - 30);
         // TODO: refine the display
-        if (iStep % 5 == 0) {
+        if (iStep % mod == 0) {
           timeline.lineTo(x, ViewAnimationSheet.TIMELINE_HEIGHT - 60);
           let second: number = Math.floor((iStep * framesPerStep) / this.animation.fps);
           let frame: number = (iStep * framesPerStep) % this.animation.fps;
@@ -199,7 +220,7 @@ namespace Fudge {
             x + 3, 
             ViewAnimationSheet.TIMELINE_HEIGHT - 60);
         } else {
-          timeline.lineTo(x, ViewAnimationSheet.TIMELINE_HEIGHT - 50);
+          // timeline.lineTo(x, ViewAnimationSheet.TIMELINE_HEIGHT - 50);
         }
       }
 
