@@ -2979,7 +2979,7 @@ var Fudge;
             // this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("pointermove", this.hndPointer);
-            this.dom.addEventListener("pointerdown", this.hndPointer);
+            this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move
         }
         createUserInterface() {
             ƒAid.addStandardLightComponents(this.nodeLight);
@@ -3150,10 +3150,6 @@ var Fudge;
         //     this.viewport.draw();
         // }
         hndPointer = (_event) => {
-            if (_event.type == "pointerdown") {
-                this.#pointerMoved = false;
-                return;
-            }
             this.#pointerMoved ||= (_event.movementX != 0 || _event.movementY != 0);
             this.dom.focus({ preventScroll: true });
             let restriction;
