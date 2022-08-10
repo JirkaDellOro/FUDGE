@@ -179,13 +179,15 @@ void main() {
 
     #if defined(MATCAP)
   vec4 vctVertexInCamera = normalize(u_mtxWorldToCamera * vctPosition);
-  vctVertexInCamera.x *= -1.0;
-  vctVertexInCamera.y *= -1.0;
+  vctVertexInCamera.xy *= -1.0;
   mat4 mtx_RotX = mat4(1, 0, 0, 0, 0, vctVertexInCamera.z, vctVertexInCamera.y, 0, 0, -vctVertexInCamera.y, vctVertexInCamera.z, 0, 0, 0, 0, 1);
   mat4 mtx_RotY = mat4(vctVertexInCamera.z, 0, -vctVertexInCamera.x, 0, 0, 1, 0, 0, vctVertexInCamera.x, 0, vctVertexInCamera.z, 0, 0, 0, 0, 1);
 
   vctNormal = mat3(u_mtxNormalMeshToWorld) * a_vctNormal;
-  vctNormal = mat3(mtx_RotY) * mat3(mtx_RotX) * vctNormal;
+
+  // adds correction for things being far and to the side, but distortion for things being close
+  vctNormal = mat3(mtx_RotX * mtx_RotY) * vctNormal;
+  
   vec3 vctReflection = normalize(mat3(u_mtxWorldToCamera) * normalize(vctNormal));
   vctReflection.y = -vctReflection.y;
 
