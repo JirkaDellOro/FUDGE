@@ -73,7 +73,7 @@ out vec2 v_vctTexture;
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
 in vec3 a_vctNormal;
 uniform mat4 u_mtxNormalMeshToWorld;
-uniform mat4 u_mtxNormalWorldToCamera;
+uniform mat4 u_mtxWorldToCamera;
 out vec2 v_vctTexture;
   #endif
 
@@ -178,8 +178,15 @@ void main() {
     #endif
 
     #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);  
-  vec3 vctReflection = normalize(mat3(u_mtxNormalWorldToCamera) * a_vctNormal);
+  vec4 vctVertexInCamera = normalize(u_mtxWorldToCamera * vctPosition);
+  vctVertexInCamera.x *= -1.0;
+  vctVertexInCamera.y *= -1.0;
+  mat4 mtx_RotX = mat4(1, 0, 0, 0, 0, vctVertexInCamera.z, vctVertexInCamera.y, 0, 0, -vctVertexInCamera.y, vctVertexInCamera.z, 0, 0, 0, 0, 1);
+  mat4 mtx_RotY = mat4(vctVertexInCamera.z, 0, -vctVertexInCamera.x, 0, 0, 1, 0, 0, vctVertexInCamera.x, 0, vctVertexInCamera.z, 0, 0, 0, 0, 1);
+
+  vctNormal = mat3(u_mtxNormalMeshToWorld) * a_vctNormal;
+  vctNormal = mat3(mtx_RotY) * mat3(mtx_RotX) * vctNormal;
+  vec3 vctReflection = normalize(mat3(u_mtxWorldToCamera) * normalize(vctNormal));
   vctReflection.y = -vctReflection.y;
 
   v_vctTexture = 0.5 * vctReflection.xy + 0.5;

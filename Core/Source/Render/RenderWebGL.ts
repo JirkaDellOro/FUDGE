@@ -343,11 +343,11 @@ namespace FudgeCore {
       uniform = shader.uniforms["u_mtxWorldToView"];
       if (uniform)
         RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxWorldToView.get());
-      
-      uniform = shader.uniforms["u_mtxNormalWorldToCamera"];
+
+      uniform = shader.uniforms["u_mtxWorldToCamera"];
       if (uniform) {
-        let mtxNormalWorldToCamera: Matrix4x4 = Matrix4x4.INVERSION(_cmpCamera.mtxWorld); // todo: optimize/store in camera
-        RenderWebGL.crc3.uniformMatrix4fv(uniform, false, mtxNormalWorldToCamera.get());
+        // let mtxWorldToCamera: Matrix4x4 = Matrix4x4.INVERSION(_cmpCamera.mtxWorld); // todo: optimize/store in camera
+        RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
       }
 
       RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
