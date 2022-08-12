@@ -3019,35 +3019,54 @@ var Fudge;
                 this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
                 this.crc2.fillRect(0, this.selectedKey.posScreen.y - ViewAnimationSheet.KEY_SIZE / 2, ViewAnimationSheet.SCALE_WIDTH, ViewAnimationSheet.KEY_SIZE);
             }
-            this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
             this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-highlight");
             let centerLine = new Path2D();
             centerLine.moveTo(0, this.mtxWorldToScreen.translation.y);
             centerLine.lineTo(this.canvas.width, this.mtxWorldToScreen.translation.y);
             this.crc2.stroke(centerLine);
+            this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
             this.crc2.textBaseline = "bottom";
             this.crc2.textAlign = "right";
+            const minPixelPerStep = 60;
             let pixelPerStep = -this.mtxWorldToScreen.scaling.y;
             let valuePerStep = 1;
-            let stepScaleFactor = Math.max(Math.pow(2, Math.ceil(Math.log2(ViewAnimationSheet.MINIMUM_PIXEL_PER_STEP / pixelPerStep))), 1);
-            pixelPerStep *= stepScaleFactor;
-            valuePerStep *= stepScaleFactor;
+            let multipliers = [2, 5];
+            let iMultipliers = 0;
+            while (pixelPerStep < minPixelPerStep) {
+                iMultipliers = (iMultipliers + 1) % multipliers.length;
+                let multiplier = multipliers[iMultipliers];
+                pixelPerStep *= multiplier;
+                valuePerStep *= multiplier;
+            }
+            let subSteps = 0;
+            switch (iMultipliers) {
+                case 0:
+                    subSteps = 1;
+                    break;
+                case 1:
+                    subSteps = 4;
+                    break;
+            }
             let steps = 1 + this.canvas.height / pixelPerStep;
             let stepOffset = Math.floor(-this.mtxWorldToScreen.translation.y / pixelPerStep);
-            for (let i = stepOffset; i < steps + stepOffset; i++) {
-                let stepLine = new Path2D();
-                let y = (i * pixelPerStep + this.mtxWorldToScreen.translation.y);
-                stepLine.moveTo(0, y);
-                // TODO: refine the display
-                if (valuePerStep > 1 && i % 5 == 0 || valuePerStep == 1) {
-                    stepLine.lineTo(ViewAnimationSheet.SCALE_WIDTH - 5, y);
-                    let value = -i * valuePerStep;
-                    this.crc2.fillText(valuePerStep >= 1 ? value.toFixed(0) : value.toFixed(1), 33, y);
+            for (let iStep = stepOffset; iStep < steps + stepOffset; iStep++) {
+                let yStep = Math.round(iStep * pixelPerStep + this.mtxWorldToScreen.translation.y);
+                this.crc2.beginPath();
+                this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-highlight");
+                this.crc2.moveTo(0, yStep);
+                this.crc2.lineTo(ViewAnimationSheet.SCALE_WIDTH - 5, yStep);
+                let value = -iStep * valuePerStep;
+                this.crc2.fillText(valuePerStep >= 1 ? value.toFixed(0) : value.toFixed(1), 33, yStep);
+                this.crc2.stroke();
+                let pixelPerSubStep = pixelPerStep / (subSteps + 1);
+                for (let iSubStep = 1; iSubStep < subSteps + 1; iSubStep++) {
+                    let ySubStep = Math.round(yStep + iSubStep * pixelPerSubStep);
+                    this.crc2.beginPath();
+                    this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
+                    this.crc2.moveTo(0, ySubStep);
+                    this.crc2.lineTo(ViewAnimationSheet.SCALE_WIDTH - 5, ySubStep);
+                    this.crc2.stroke();
                 }
-                else {
-                    stepLine.lineTo(30, y);
-                }
-                this.crc2.stroke(stepLine);
             }
         }
         drawCurves() {
@@ -3147,42 +3166,42 @@ var Fudge;
             this.crc2.textBaseline = "middle";
             this.crc2.textAlign = "left";
             this.crc2.font = this.documentStyle.font;
-            const minimumPixelPerStep = 60;
+            const minPixelPerStep = 60;
             let fps = this.animation.fps;
             let pixelPerFrame = (1000 * ViewAnimationSheet.PIXEL_PER_MILLISECOND) / fps;
             let pixelPerStep = pixelPerFrame * this.mtxWorldToScreen.scaling.x;
             let framesPerStep = 1;
             // TODO: find a way to do this with O(1);
             let multipliers = [2, 3, 2, 5];
-            let index = 2;
-            while (pixelPerStep < minimumPixelPerStep) {
-                index = (index + 1) % multipliers.length;
-                let multiplier = multipliers[index];
+            let iMultipliers = 2;
+            while (pixelPerStep < minPixelPerStep) {
+                iMultipliers = (iMultipliers + 1) % multipliers.length;
+                let multiplier = multipliers[iMultipliers];
                 pixelPerStep *= multiplier;
                 framesPerStep *= multiplier;
             }
             let subSteps = 0;
-            let highSteps = 0;
+            let highSteps = 0; // every nth step will be higher
             if (framesPerStep != 1) {
                 if (framesPerStep == 5) {
                     subSteps = 5;
                 }
                 else {
-                    switch (index) {
+                    switch (iMultipliers) {
                         case 0:
-                            subSteps = 10;
+                            subSteps = 9;
                             highSteps = 5;
                             break;
                         case 2:
-                            subSteps = 6;
+                            subSteps = 5;
                             highSteps = 3;
                             break;
                         case 1:
-                            subSteps = 6;
+                            subSteps = 5;
                             highSteps = 2;
                             break;
                         case 3:
-                            subSteps = 10;
+                            subSteps = 9;
                             highSteps = 2;
                             break;
                     }
@@ -3197,8 +3216,8 @@ var Fudge;
                 let second = Math.floor((iStep * framesPerStep) / fps);
                 let frame = (iStep * framesPerStep) % fps;
                 this.crc2.fillText(`${second}:${frame < 10 ? "0" : ""}${frame}`, xStep + 3, ViewAnimationSheet.TIMELINE_HEIGHT - 20);
-                let pixelPerSubStep = pixelPerStep / subSteps;
-                for (let iSubStep = 1; iSubStep < subSteps; iSubStep++) {
+                let pixelPerSubStep = pixelPerStep / (subSteps + 1);
+                for (let iSubStep = 1; iSubStep < subSteps + 1; iSubStep++) {
                     let xSubStep = xStep + iSubStep * pixelPerSubStep;
                     timeline.moveTo(xSubStep, ViewAnimationSheet.TIMELINE_HEIGHT);
                     timeline.lineTo(xSubStep, ViewAnimationSheet.TIMELINE_HEIGHT - (iSubStep % highSteps == 0 ? 12 : 8));
