@@ -619,7 +619,6 @@ declare namespace Fudge {
         private generateKey;
         private hndFocus;
         private hndAnimate;
-        private hndSelect;
         private hndPointerDown;
         private hndPointerMoveTimeline;
         private hndPointerMoveSlope;

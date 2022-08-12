@@ -61,7 +61,6 @@ namespace Fudge {
       _container.on("resize", () => this.draw());
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndFocus);
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
-      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndSelect);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
 
       this.canvas.style.position = "absolute";
@@ -88,8 +87,8 @@ namespace Fudge {
     private set mode(_mode: SHEET_MODE) {
       this.#mode = _mode;
       this.setTitle(_mode);
-      this.contextMenu.items.forEach( _item => _item.enabled = true);
-      this.contextMenu.items.find( _item => _item.label == _mode).enabled = false;
+      this.contextMenu.getMenuItemById(SHEET_MODE.DOPE).visible = _mode != SHEET_MODE.DOPE;
+      this.contextMenu.getMenuItemById(SHEET_MODE.CURVES).visible = _mode != SHEET_MODE.CURVES;
       this.resetView();
       this.draw();
     }
@@ -99,13 +98,13 @@ namespace Fudge {
       const menu: Electron.Menu = new remote.Menu();
 
       let item: Electron.MenuItem;
-      item = new remote.MenuItem({ label: SHEET_MODE.DOPE, click: () => this.mode = SHEET_MODE.DOPE});
+      item = new remote.MenuItem({ id: SHEET_MODE.DOPE, label: SHEET_MODE.DOPE, click: () => this.mode = SHEET_MODE.DOPE});
       menu.append(item);
-      item = new remote.MenuItem({ label: SHEET_MODE.CURVES, click: () => this.mode = SHEET_MODE.CURVES});
+      item = new remote.MenuItem({ id: SHEET_MODE.CURVES, label: SHEET_MODE.CURVES, click: () => this.mode = SHEET_MODE.CURVES});
       menu.append(item);
-      item = new remote.MenuItem({ label: "Delete Key", click: () => this.dispatch(EVENT_EDITOR.DELETE, { bubbles: true }) });
+      item = new remote.MenuItem({ id: "Delete Key", label: "Delete Key", click: () => this.dispatch(EVENT_EDITOR.DELETE, { bubbles: true }) });
       menu.append(item);
-
+      
       return menu;
     }
     //#endregion
@@ -518,17 +517,10 @@ namespace Fudge {
       this.draw();
     }
 
-    private hndSelect = (_event: FudgeEvent): void => {
-      this.selectedKey = null;
-      if (_event.detail.data && "key" in _event.detail.data) {
-        this.selectedKey = _event.detail.data;
-      }
-      this.draw(false);
-    }
-
     private hndPointerDown = (_event: PointerEvent): void => {
       _event.preventDefault();
       switch (_event.buttons) {
+        case 2:
         case 1:
           if (_event.offsetY > (<HTMLElement>_event.target).clientHeight) // clicked on scroll bar
             this.scrollContainer.onscroll = this.hndScroll;
@@ -548,26 +540,25 @@ namespace Fudge {
               this.events.find(findObject);
 
             if (!obj) {
-              this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: null } });
-              return;
-            } 
+              this.selectedKey = null;
+            } else {
+              if (obj["label"]) {
+                console.log(obj["label"]);
+              }
+              else if (obj["event"]) {
+                console.log(obj["event"]);
+              }
+              else if (obj["key"]) {
+                console.log(obj["key"]);
+                this.selectedKey = <ViewAnimationKey>obj;
+              }
+            }
 
-            if (obj["label"]) {
-              console.log(obj["label"]);
-              this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: { name: obj["label"], time: this.animation.labels[obj["label"]] } } });
-            }
-            else if (obj["event"]) {
-              console.log(obj["event"]);
-              this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: { name: obj["event"], time: this.animation.events[obj["event"]] } } });
-            }
-            else if (obj["key"]) {
-              console.log(obj["key"]);
-              this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: obj } });
-            }
+            this.contextMenu.getMenuItemById(Object.values(SHEET_MODE).find( _mode => _mode != this.mode )).visible = this.selectedKey == null;
+            this.contextMenu.getMenuItemById("Delete Key").visible = this.selectedKey != null;
+            this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.selectedKey } });
+            this.draw(false);
           }
-          break;
-        case 2: 
-          this.contextMenu.items.find( _item => _item.label == "Delete Key").enabled = this.selectedKey != null;
           break;
         case 4:
           this.scrollContainer.onpointermove = this.hndPointerMovePan;

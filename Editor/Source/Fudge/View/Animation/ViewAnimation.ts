@@ -230,10 +230,7 @@ namespace Fudge {
     }
 
     private hndSelect = (_event: FudgeEvent): void => {
-      this.selectedKey = null;
-      if (_event.detail.data && "key" in _event.detail.data) {
-        this.selectedKey = _event.detail.data;
-      }
+      this.selectedKey = _event.detail.data;
     }
 
     private hndAnimate = (_event: FudgeEvent): void => {
