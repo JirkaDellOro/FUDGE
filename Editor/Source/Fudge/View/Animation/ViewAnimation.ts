@@ -194,7 +194,7 @@ namespace Fudge {
           break;
         case ƒui.EVENT.INPUT:
           if (_event.target instanceof ƒui.CustomElement) {
-            this.controller.modifyKey(this.playbackTime, _event.target);
+            this.controller.updateSequence(this.playbackTime, _event.target);
             this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
           }
           break;

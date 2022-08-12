@@ -38,7 +38,7 @@ namespace Fudge {
           if (element instanceof ƒui.CustomElement && element != document.activeElement) {
             element.style.setProperty("--color-animation-property", getNextColor());
             element.setMutatorValue(value);
-            Object.defineProperty(element, "animationSequence", { value: structureOrSequence });
+            Reflect.set(element, "animationSequence", structureOrSequence);
           }
           else {
             updatePropertyListRecursive(element, value, <ƒ.AnimationStructure>structureOrSequence);
@@ -53,19 +53,16 @@ namespace Fudge {
       }
     }
 
-    // modify or add
-    public modifyKey(_time: number, _element: ƒui.CustomElement): void {
-      let sequence: ƒ.AnimationSequence = _element["animationSequence"];
+    // modify or add key
+    public updateSequence(_time: number, _element: ƒui.CustomElement): void {
+      let sequence: ƒ.AnimationSequence = Reflect.get(_element, "animationSequence");
       if (!sequence) return;
-      let key: ƒ.AnimationKey;
-      for (let i: number = 0; i < sequence.length; i++) {
-        if (sequence.getKey(i).Time == _time)
-          key = sequence.getKey(i);
-      }
+
+      let key: ƒ.AnimationKey = sequence.getKeys().find( _key => _key.Time == _time );
       if (!key)
         sequence.addKey(new ƒ.AnimationKey(_time, <number>_element.getMutatorValue()));
       else
-        key.Value = <number>_element.getMutatorValue();
+        sequence.modifyKey(key, null, <number>_element.getMutatorValue());
     }
 
     public deleteKey(_key: ViewAnimationKey): void {

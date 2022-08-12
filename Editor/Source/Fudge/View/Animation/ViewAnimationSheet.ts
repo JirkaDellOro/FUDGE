@@ -19,7 +19,7 @@ namespace Fudge {
     private static readonly SCALE_WIDTH: number = 40; // in px
     private static readonly PIXEL_PER_MILLISECOND: number = 1; // at scaling 1
     private static readonly PIXEL_PER_VALUE: number = 100; // at scaling 1
-    private static readonly MINIMUM_PIXEL_PER_STEP: number = 30;
+    private static readonly MINIMUM_PIXEL_PER_STEP: number = 60; // at any scaling, for both x and y
     private static readonly STANDARD_ANIMATION_LENGTH: number = 1000; // in miliseconds, used when animation length is falsy
     
     #mode: SHEET_MODE;
@@ -166,13 +166,12 @@ namespace Fudge {
       this.crc2.textBaseline = "bottom";
       this.crc2.textAlign = "right";
 
-      const minPixelPerStep: number = 60;
       let pixelPerStep: number = -this.mtxWorldToScreen.scaling.y;
       let valuePerStep: number = 1;
 
       let multipliers: number[] = [2, 5];
       let iMultipliers: number = 0;
-      while (pixelPerStep < minPixelPerStep) {
+      while (pixelPerStep < ViewAnimationSheet.MINIMUM_PIXEL_PER_STEP) {
         iMultipliers = (iMultipliers + 1) % multipliers.length;
         let multiplier: number = multipliers[iMultipliers];
         pixelPerStep *= multiplier;
@@ -312,9 +311,9 @@ namespace Fudge {
       this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
 
       this.crc2.fillStyle = "rgba(100, 100, 255, 0.2)";
-      let animationWidth: number = this.animation.totalTime * this.mtxWorldToScreen.scaling.x;
       let animationStart: number = Math.min(...this.keys.map( _key => _key.key.Time )) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-      this.crc2.fillRect(animationStart, 0, animationWidth, ViewAnimationSheet.TIMELINE_HEIGHT);
+      let animationEnd: number = Math.max(...this.keys.map( _key => _key.key.Time )) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+      this.crc2.fillRect(animationStart, 0, animationEnd - animationStart, ViewAnimationSheet.TIMELINE_HEIGHT);
 
       if (this.selectedKey) {
         let posScreen: ƒ.Vector2 = this.selectedKey.posScreen;
@@ -332,7 +331,6 @@ namespace Fudge {
       this.crc2.textAlign = "left";
       this.crc2.font = this.documentStyle.font;
 
-      const minPixelPerStep: number = 60;
       let fps: number = this.animation.fps;
       let pixelPerFrame: number = (1000 * ViewAnimationSheet.PIXEL_PER_MILLISECOND) / fps;
       let pixelPerStep: number = pixelPerFrame * this.mtxWorldToScreen.scaling.x;
@@ -341,7 +339,7 @@ namespace Fudge {
       // TODO: find a way to do this with O(1);
       let multipliers: number[] = [2, 3, 2, 5];
       let iMultipliers: number = 2;
-      while (pixelPerStep < minPixelPerStep) {
+      while (pixelPerStep < ViewAnimationSheet.MINIMUM_PIXEL_PER_STEP) {
         iMultipliers = (iMultipliers + 1) % multipliers.length;
         let multiplier: number = multipliers[iMultipliers];
         pixelPerStep *= multiplier;
@@ -352,7 +350,7 @@ namespace Fudge {
       let highSteps: number = 0; // every nth step will be higher
       if (framesPerStep != 1) {
         if (framesPerStep == 5) {
-          subSteps = 5;
+          subSteps = 4;
         } else {
           switch (iMultipliers) {
             case 0:
@@ -531,9 +529,7 @@ namespace Fudge {
           else if (this.slopeHooks.some(_hook => this.crc2.isPointInPath(_hook, _event.offsetX, _event.offsetY))) {
             this.scrollContainer.onpointermove = this.hndPointerMoveSlope;
           } else {
-            let x: number = _event.offsetX;
-            let y: number = _event.offsetY;
-            const findObject: (_object: ViewAnimationKey | ViewAnimationLabel | ViewAnimationEvent) => boolean = _object => this.crc2.isPointInPath(_object.path2D, x, y);
+            const findObject: (_object: ViewAnimationKey | ViewAnimationLabel | ViewAnimationEvent) => boolean = _object => this.crc2.isPointInPath(_object.path2D, _event.offsetX, _event.offsetY);
             let obj: ViewAnimationKey | ViewAnimationLabel | ViewAnimationEvent =
               this.keys.find(findObject) ||
               this.labels.find(findObject) ||
@@ -551,6 +547,7 @@ namespace Fudge {
               else if (obj["key"]) {
                 console.log(obj["key"]);
                 this.selectedKey = <ViewAnimationKey>obj;
+                this.scrollContainer.onpointermove = this.hndPointerMoveDrag;
               }
             }
 
@@ -561,8 +558,8 @@ namespace Fudge {
           }
           break;
         case 4:
-          this.scrollContainer.onpointermove = this.hndPointerMovePan;
           this.posPanStart = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);
+          this.scrollContainer.onpointermove = this.hndPointerMovePan;
           break;
       }
     }
@@ -592,6 +589,20 @@ namespace Fudge {
         translation.y = 0;
       this.mtxWorldToScreen.translate(translation);
       this.draw();
+    }
+
+    private hndPointerMoveDrag = (_event: PointerEvent): void => {
+      _event.preventDefault();
+      let translation: ƒ.Vector2 = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);
+      let pixelPerFrame: number = 1000 / this.animation.fps;
+      translation.x = Math.max(0, translation.x);
+      translation.x = Math.round(translation.x / pixelPerFrame) * pixelPerFrame;
+
+      let key: ƒ.AnimationKey = this.selectedKey.key;
+      let sequence: ƒ.AnimationSequence = this.selectedKey.sequence.sequence;
+      sequence.modifyKey(key, translation.x, this.mode == SHEET_MODE.DOPE || _event.shiftKey ? null : translation.y);
+      this.animation.calculateTotalTime();
+      this.dispatchAnimate();
     }
 
     private hndPointerUp = (_event: PointerEvent): void => {

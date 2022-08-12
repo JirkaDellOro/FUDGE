@@ -919,7 +919,7 @@ var Fudge;
                     if (element instanceof ƒui.CustomElement && element != document.activeElement) {
                         element.style.setProperty("--color-animation-property", getNextColor());
                         element.setMutatorValue(value);
-                        Object.defineProperty(element, "animationSequence", { value: structureOrSequence });
+                        Reflect.set(element, "animationSequence", structureOrSequence);
                     }
                     else {
                         updatePropertyListRecursive(element, value, structureOrSequence);
@@ -932,20 +932,16 @@ var Fudge;
                 return color;
             }
         }
-        // modify or add
-        modifyKey(_time, _element) {
-            let sequence = _element["animationSequence"];
+        // modify or add key
+        updateSequence(_time, _element) {
+            let sequence = Reflect.get(_element, "animationSequence");
             if (!sequence)
                 return;
-            let key;
-            for (let i = 0; i < sequence.length; i++) {
-                if (sequence.getKey(i).Time == _time)
-                    key = sequence.getKey(i);
-            }
+            let key = sequence.getKeys().find(_key => _key.Time == _time);
             if (!key)
                 sequence.addKey(new ƒ.AnimationKey(_time, _element.getMutatorValue()));
             else
-                key.Value = _element.getMutatorValue();
+                sequence.modifyKey(key, null, _element.getMutatorValue());
         }
         deleteKey(_key) {
             if (!_key)
@@ -2725,7 +2721,7 @@ var Fudge;
                     break;
                 case "input" /* INPUT */:
                     if (_event.target instanceof ƒui.CustomElement) {
-                        this.controller.modifyKey(this.playbackTime, _event.target);
+                        this.controller.updateSequence(this.playbackTime, _event.target);
                         this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
                     }
                     break;
@@ -2901,7 +2897,7 @@ var Fudge;
         static SCALE_WIDTH = 40; // in px
         static PIXEL_PER_MILLISECOND = 1; // at scaling 1
         static PIXEL_PER_VALUE = 100; // at scaling 1
-        static MINIMUM_PIXEL_PER_STEP = 30;
+        static MINIMUM_PIXEL_PER_STEP = 60; // at any scaling, for both x and y
         static STANDARD_ANIMATION_LENGTH = 1000; // in miliseconds, used when animation length is falsy
         #mode;
         graph;
@@ -3023,12 +3019,11 @@ var Fudge;
             this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
             this.crc2.textBaseline = "bottom";
             this.crc2.textAlign = "right";
-            const minPixelPerStep = 60;
             let pixelPerStep = -this.mtxWorldToScreen.scaling.y;
             let valuePerStep = 1;
             let multipliers = [2, 5];
             let iMultipliers = 0;
-            while (pixelPerStep < minPixelPerStep) {
+            while (pixelPerStep < ViewAnimationSheet.MINIMUM_PIXEL_PER_STEP) {
                 iMultipliers = (iMultipliers + 1) % multipliers.length;
                 let multiplier = multipliers[iMultipliers];
                 pixelPerStep *= multiplier;
@@ -3146,9 +3141,9 @@ var Fudge;
             this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
             this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
             this.crc2.fillStyle = "rgba(100, 100, 255, 0.2)";
-            let animationWidth = this.animation.totalTime * this.mtxWorldToScreen.scaling.x;
             let animationStart = Math.min(...this.keys.map(_key => _key.key.Time)) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-            this.crc2.fillRect(animationStart, 0, animationWidth, ViewAnimationSheet.TIMELINE_HEIGHT);
+            let animationEnd = Math.max(...this.keys.map(_key => _key.key.Time)) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+            this.crc2.fillRect(animationStart, 0, animationEnd - animationStart, ViewAnimationSheet.TIMELINE_HEIGHT);
             if (this.selectedKey) {
                 let posScreen = this.selectedKey.posScreen;
                 this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
@@ -3162,7 +3157,6 @@ var Fudge;
             this.crc2.textBaseline = "middle";
             this.crc2.textAlign = "left";
             this.crc2.font = this.documentStyle.font;
-            const minPixelPerStep = 60;
             let fps = this.animation.fps;
             let pixelPerFrame = (1000 * ViewAnimationSheet.PIXEL_PER_MILLISECOND) / fps;
             let pixelPerStep = pixelPerFrame * this.mtxWorldToScreen.scaling.x;
@@ -3170,7 +3164,7 @@ var Fudge;
             // TODO: find a way to do this with O(1);
             let multipliers = [2, 3, 2, 5];
             let iMultipliers = 2;
-            while (pixelPerStep < minPixelPerStep) {
+            while (pixelPerStep < ViewAnimationSheet.MINIMUM_PIXEL_PER_STEP) {
                 iMultipliers = (iMultipliers + 1) % multipliers.length;
                 let multiplier = multipliers[iMultipliers];
                 pixelPerStep *= multiplier;
@@ -3180,7 +3174,7 @@ var Fudge;
             let highSteps = 0; // every nth step will be higher
             if (framesPerStep != 1) {
                 if (framesPerStep == 5) {
-                    subSteps = 5;
+                    subSteps = 4;
                 }
                 else {
                     switch (iMultipliers) {
@@ -3337,9 +3331,7 @@ var Fudge;
                         this.scrollContainer.onpointermove = this.hndPointerMoveSlope;
                     }
                     else {
-                        let x = _event.offsetX;
-                        let y = _event.offsetY;
-                        const findObject = _object => this.crc2.isPointInPath(_object.path2D, x, y);
+                        const findObject = _object => this.crc2.isPointInPath(_object.path2D, _event.offsetX, _event.offsetY);
                         let obj = this.keys.find(findObject) ||
                             this.labels.find(findObject) ||
                             this.events.find(findObject);
@@ -3356,6 +3348,7 @@ var Fudge;
                             else if (obj["key"]) {
                                 console.log(obj["key"]);
                                 this.selectedKey = obj;
+                                this.scrollContainer.onpointermove = this.hndPointerMoveDrag;
                             }
                         }
                         this.contextMenu.getMenuItemById(Object.values(SHEET_MODE).find(_mode => _mode != this.mode)).visible = this.selectedKey == null;
@@ -3365,8 +3358,8 @@ var Fudge;
                     }
                     break;
                 case 4:
-                    this.scrollContainer.onpointermove = this.hndPointerMovePan;
                     this.posPanStart = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);
+                    this.scrollContainer.onpointermove = this.hndPointerMovePan;
                     break;
             }
         };
@@ -3393,6 +3386,18 @@ var Fudge;
                 translation.y = 0;
             this.mtxWorldToScreen.translate(translation);
             this.draw();
+        };
+        hndPointerMoveDrag = (_event) => {
+            _event.preventDefault();
+            let translation = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);
+            let pixelPerFrame = 1000 / this.animation.fps;
+            translation.x = Math.max(0, translation.x);
+            translation.x = Math.round(translation.x / pixelPerFrame) * pixelPerFrame;
+            let key = this.selectedKey.key;
+            let sequence = this.selectedKey.sequence.sequence;
+            sequence.modifyKey(key, translation.x, this.mode == SHEET_MODE.DOPE || _event.shiftKey ? null : translation.y);
+            this.animation.calculateTotalTime();
+            this.dispatchAnimate();
         };
         hndPointerUp = (_event) => {
             _event.preventDefault();

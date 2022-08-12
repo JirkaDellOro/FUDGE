@@ -236,7 +236,7 @@ declare namespace Fudge {
         private propertyList;
         constructor(_animation: ƒ.Animation, _propertyList: HTMLElement);
         updatePropertyList(_mutator: ƒ.Mutator): void;
-        modifyKey(_time: number, _element: ƒui.CustomElement): void;
+        updateSequence(_time: number, _element: ƒui.CustomElement): void;
         deleteKey(_key: ViewAnimationKey): void;
         addProperty(_path: string[]): void;
         deleteProperty(_element: HTMLElement): void;
@@ -623,6 +623,7 @@ declare namespace Fudge {
         private hndPointerMoveTimeline;
         private hndPointerMoveSlope;
         private hndPointerMovePan;
+        private hndPointerMoveDrag;
         private hndPointerUp;
         private hndWheel;
         private hndScroll;
