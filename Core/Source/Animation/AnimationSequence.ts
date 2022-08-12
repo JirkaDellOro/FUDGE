@@ -2,7 +2,7 @@ namespace FudgeCore {
   /**
    * A sequence of {@link AnimationKey}s that is mapped to an attribute of a {@link Node} or its {@link Component}s inside the {@link Animation}.
    * Provides functions to modify said keys
-   * @author Lukas Scheuerle, HFU, 2019
+   * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
   export class AnimationSequence extends Mutable implements Serializable {
     private keys: AnimationKey[] = [];
@@ -37,6 +37,19 @@ namespace FudgeCore {
      */
     addKey(_key: AnimationKey): void {
       this.keys.push(_key);
+      this.keys.sort(AnimationKey.compare);
+      this.regenerateFunctions();
+    }
+
+    /**
+     * Modifys a given key in the sequence.
+     * @param _key the key to add
+     */
+    modifyKey(_key: AnimationKey, _time?: number, _value?: number): void {
+      if (_time != null)
+        _key.Time = _time;
+      if (_value != null)
+        _key.Value = _value;
       this.keys.sort(AnimationKey.compare);
       this.regenerateFunctions();
     }

@@ -1624,7 +1624,7 @@ declare namespace FudgeCore {
     /**
      * A sequence of {@link AnimationKey}s that is mapped to an attribute of a {@link Node} or its {@link Component}s inside the {@link Animation}.
      * Provides functions to modify said keys
-     * @author Lukas Scheuerle, HFU, 2019
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class AnimationSequence extends Mutable implements Serializable {
         private keys;
@@ -1640,6 +1640,11 @@ declare namespace FudgeCore {
          * @param _key the key to add
          */
         addKey(_key: AnimationKey): void;
+        /**
+         * Modifys a given key in the sequence.
+         * @param _key the key to add
+         */
+        modifyKey(_key: AnimationKey, _time?: number, _value?: number): void;
         /**
          * Removes a given key from the sequence.
          * @param _key the key to remove
