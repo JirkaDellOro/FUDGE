@@ -44,6 +44,19 @@ namespace FudgeCore {
     }
 
     /**
+     * Retrieve the destination canvas
+     */
+    public get canvas(): HTMLCanvasElement {
+      return this.#canvas;
+    }
+    /**
+     * Retrieve the 2D-context attached to the destination canvas
+     */
+    public get context(): CanvasRenderingContext2D {
+      return this.#crc2;
+    }
+
+    /**
      * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
      */
     public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
@@ -51,23 +64,12 @@ namespace FudgeCore {
       this.camera = _camera;
       this.#canvas = _canvas;
       this.#crc2 = _canvas.getContext("2d");
+      this.#canvas.tabIndex = 0; // can get focus and receive keyboard events
 
       this.rectSource = Render.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
 
       this.setBranch(_branch);
-    }
-    /**
-     * Retrieve the destination canvas
-     */
-    public getCanvas(): HTMLCanvasElement {
-      return this.#canvas;
-    }
-    /**
-     * Retrieve the 2D-context attached to the destination canvas
-     */
-    public getContext(): CanvasRenderingContext2D {
-      return this.#crc2;
     }
     /**
      * Retrieve the size of the destination canvas as a rectangle, x and y are always 0 

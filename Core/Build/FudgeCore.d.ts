@@ -5255,17 +5255,17 @@ declare namespace FudgeCore {
          */
         get hasFocus(): boolean;
         /**
-         * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
-         */
-        initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
-        /**
          * Retrieve the destination canvas
          */
-        getCanvas(): HTMLCanvasElement;
+        get canvas(): HTMLCanvasElement;
         /**
          * Retrieve the 2D-context attached to the destination canvas
          */
-        getContext(): CanvasRenderingContext2D;
+        get context(): CanvasRenderingContext2D;
+        /**
+         * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
+         */
+        initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
         /**
          * Retrieve the size of the destination canvas as a rectangle, x and y are always 0
          */

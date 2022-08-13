@@ -137,12 +137,9 @@ var AudioSpace;
     //   out.innerHTML = info;
     // }
     function startInteraction(_viewport) {
-        // _viewport.getCanvas().activateKeyboardEvent("", true);
-        _viewport.getCanvas().tabIndex = 0;
-        _viewport.getCanvas().focus();
-        _viewport.getCanvas().addEventListener("keydown", move);
+        _viewport.canvas.focus();
+        _viewport.canvas.addEventListener("keydown", move);
         function move(_event) {
-            // _event.stopPropagation();
             mtxTranslator.translateZ(0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.W ? -1 :
                     _event.code == ƒ.KEYBOARD_CODE.S ? 1 :

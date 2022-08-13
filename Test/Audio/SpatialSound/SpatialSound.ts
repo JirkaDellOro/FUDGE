@@ -160,13 +160,10 @@ namespace AudioSpace {
   // }
 
   function startInteraction(_viewport: ƒ.Viewport): void {
-    // _viewport.getCanvas().activateKeyboardEvent("", true);
-    _viewport.getCanvas().tabIndex = 0;
-    _viewport.getCanvas().focus();
-    _viewport.getCanvas().addEventListener("keydown", move);
+    _viewport.canvas.focus();
+    _viewport.canvas.addEventListener("keydown", move);
 
     function move(_event: ƒ.EventKeyboard): void {
-      // _event.stopPropagation();
       mtxTranslator.translateZ(0.1 *
         (_event.code == ƒ.KEYBOARD_CODE.W ? -1 :
           _event.code == ƒ.KEYBOARD_CODE.S ? 1 :
