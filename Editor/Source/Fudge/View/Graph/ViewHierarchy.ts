@@ -153,7 +153,7 @@ namespace Fudge {
     //#endregion
 
     //#region EventHandlers
-    private hndEvent = (_event: FudgeEvent): void => {
+    private hndEvent = (_event: EditorEvent): void => {
       switch (_event.type) {
         case ƒUi.EVENT.DELETE:
           this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });

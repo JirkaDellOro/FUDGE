@@ -123,10 +123,10 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     interface MapEventTypeToListener {
-        [eventType: string]: EventListenerƒ[];
+        [eventType: string]: EventListenerUnified[];
     }
     /**
-     * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
+     * Types of events specific to FUDGE, in addition to the standard DOM/Browser-Types and custom strings
      */
     const enum EVENT {
         /** dispatched to targets registered at {@link Loop}, when requested animation frame starts */
@@ -184,17 +184,17 @@ declare namespace FudgeCore {
         /** dispatched to {@link Project} when it's done loading resources from a url */
         RESOURCES_LOADED = "resourcesLoaded"
     }
-    type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | ((_event: EventPhysics) => void) | ((_event: CustomEvent) => void) | EventListenerOrEventListenerObject;
-    type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics | CustomEvent;
-    class EventTargetƒ extends EventTarget {
-        addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
-        removeEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
-        dispatchEvent(_event: Eventƒ): boolean;
+    type EventUnified = Event | CustomEvent | EventPhysics;
+    type EventListenerUnified = ((_event: Event) => void) | ((_event: CustomEvent) => void) | ((_event: EventPhysics) => void) | ((_event: EventTimer) => void) | EventListener | EventListenerOrEventListenerObject;
+    class EventTargetUnified extends EventTarget {
+        addEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void;
+        removeEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void;
+        dispatchEvent(_event: EventUnified): boolean;
     }
     /**
-     * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
+     * Base class for EventTarget singletons, which are fixed entities in the structure of FUDGE, such as the core loop
      */
-    class EventTargetStatic extends EventTargetƒ {
+    class EventTargetStatic extends EventTargetUnified {
         protected static targetStatic: EventTargetStatic;
         protected constructor();
         static addEventListener(_type: string, _handler: EventListener): void;
@@ -232,7 +232,7 @@ declare namespace FudgeCore {
      * The provided properties of the {@link Mutator} must match public properties or getters/setters of the object.
      * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
      */
-    abstract class Mutable extends EventTargetƒ {
+    abstract class Mutable extends EventTargetUnified {
         /**
          * Decorator allows to attach {@link Mutable} functionality to existing classes.
          */
@@ -400,7 +400,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Graph
      */
-    class Node extends EventTargetƒ implements Serializable {
+    class Node extends EventTargetUnified implements Serializable {
         #private;
         name: string;
         readonly mtxWorld: Matrix4x4;
@@ -535,11 +535,11 @@ declare namespace FudgeCore {
          * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
          * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
          */
-        addEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture?: boolean): void;
+        addEventListener(_type: EVENT | string, _handler: EventListenerUnified, _capture?: boolean): void;
         /**
          * Removes an event listener from the node. The signature must match the one used with addEventListener
          */
-        removeEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture?: boolean): void;
+        removeEventListener(_type: EVENT | string, _handler: EventListenerUnified, _capture?: boolean): void;
         /**
          * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
          * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
@@ -1242,7 +1242,7 @@ declare namespace FudgeCore {
         disconnect(): void;
         /**
          * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
-         * Only to be used when functionality that is not added within Fudge is needed.
+         * Only to be used when functionality that is not added within FUDGE is needed.
         */
         getOimoJoint(): OIMO.Joint;
         serialize(): Serialization;
@@ -2357,33 +2357,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    const enum EVENT_DRAGDROP {
-        DRAG = "\u0192drag",
-        DROP = "\u0192drop",
-        START = "\u0192dragstart",
-        END = "\u0192dragend",
-        OVER = "\u0192dragover"
-    }
-    /**
-     * a subclass of DragEvent .A event that represents a drag and drop interaction
-     */
-    class EventDragDrop extends DragEvent {
-        pointerX: number;
-        pointerY: number;
-        canvasX: number;
-        canvasY: number;
-        clientRect: ClientRect;
-        constructor(type: string, _event: EventDragDrop);
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * a subclass of KeyboardEvent. EventKeyboard objects describe a user interaction with the keyboard
-     * each event describes a single interaction between the user and a key (or combination of a key with modifier keys) on the keyboard.
-     */
-    class EventKeyboard extends KeyboardEvent {
-        constructor(type: string, _event: EventKeyboard);
-    }
     /**
      * Mappings of standard DOM/Browser-Events as passed from a canvas to the viewport
      */
@@ -2577,31 +2550,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    const enum EVENT_POINTER {
-        UP = "\u0192pointerup",
-        DOWN = "\u0192pointerdown",
-        MOVE = "\u0192pointermove",
-        OVER = "\u0192pointerover",
-        ENTER = "\u0192pointerenter",
-        CANCEL = "\u0192pointercancel",
-        OUT = "\u0192pointerout",
-        LEAVE = "\u0192pointerleave",
-        GOTCAPTURE = "\u0192gotpointercapture",
-        LOSTCAPTURE = "\u0192lostpointercapture"
-    }
-    /**
-     * a subclass of PointerEvent. The state of a DOM event produced by a pointer such as the geometry of the contact point
-     * */
-    class EventPointer extends PointerEvent {
-        pointerX: number;
-        pointerY: number;
-        canvasX: number;
-        canvasY: number;
-        clientRect: ClientRect;
-        constructor(type: string, _event: EventPointer);
-    }
-}
-declare namespace FudgeCore {
     const enum EVENT_TIMER {
         CALL = "\u0192lapse"
     }
@@ -2616,17 +2564,6 @@ declare namespace FudgeCore {
         lastCall: boolean;
         count: number;
         constructor(_timer: Timer, ..._arguments: Object[]);
-    }
-}
-declare namespace FudgeCore {
-    const enum EVENT_WHEEL {
-        WHEEL = "\u0192wheel"
-    }
-    /**
-     * A subclass of WheelEvent. Events that occur due to the user moving a mouse wheel or similar input device.
-     * */
-    class EventWheel extends WheelEvent {
-        constructor(type: string, _event: EventWheel);
     }
 }
 declare namespace FudgeCore {
@@ -4106,7 +4043,7 @@ declare namespace FudgeCore {
     }
     /**
        * Acts as the physical representation of the {@link Node} it's attached to.
-       * It's the connection between the Fudge rendered world and the Physics world.
+       * It's the connection between the FUDGE rendered world and the Physics world.
        * For the physics to correctly get the transformations rotations need to be applied with from left = true.
        * Or rotations need to happen before scaling.
        * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
@@ -4306,7 +4243,7 @@ declare namespace FudgeCore {
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         reduceMutator(_mutator: Mutator): void;
         private create;
-        /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
+        /** Creates the actual OimoPhysics Rigidbody out of informations the FUDGE Component has. */
         private createRigidbody;
         /** Creates a collider a shape that represents the object in the physical world.  */
         private createCollider;
@@ -4322,13 +4259,13 @@ declare namespace FudgeCore {
         /**
         * Trigger EnteringEvent Callback, automatically called by OIMO Physics within their calculations.
         * Since the event does not know which body is the trigger iniator, the event can be listened to
-        * on either the trigger or the triggered. (This is only possible with the Fudge OIMO Fork!)
+        * on either the trigger or the triggered. (This is only possible with the FUDGE OIMO Fork!)
         */
         private triggerEnter;
         /**
         * Trigger LeavingEvent Callback, automatically called by OIMO Physics within their calculations.
         * Since the event does not know which body is the trigger iniator, the event can be listened to
-        * on either the trigger or the triggered. (This is only possible with the Fudge OIMO Fork!)
+        * on either the trigger or the triggered. (This is only possible with the FUDGE OIMO Fork!)
         */
         private triggerExit;
     }
@@ -4380,7 +4317,7 @@ declare namespace FudgeCore {
         vertexShader: WebGLShader;
         fragmentShader: WebGLShader;
         uniformLocationMap: Map<string, WebGLUniformLocation>;
-        /** Introduce the Fudge Rendering Context to this class, creating a program and vertex/fragment shader in this context */
+        /** Introduce the FUDGE Rendering Context to this class, creating a program and vertex/fragment shader in this context */
         constructor(_renderingContext: WebGL2RenderingContext);
         /** Take glsl shaders as strings and compile them, attaching the compiled shaders to a program thats used by this rendering context. */
         compile(vertexSource: string, fragmentSource: string): void;
@@ -4390,7 +4327,7 @@ declare namespace FudgeCore {
         getUniformLocation(_name: string): WebGLUniformLocation;
         /** Get all indices for every attribute in the shaders of this program */
         getAttribIndices(_attribs: Array<PhysicsDebugVertexAttribute>): Array<number>;
-        /** Tell the Fudge Rendering Context to use this program to draw. */
+        /** Tell the FUDGE Rendering Context to use this program to draw. */
         use(): void;
         /** Compile a shader out of a string and validate it. */
         compileShader(shader: WebGLShader, source: string): void;
@@ -4419,7 +4356,7 @@ declare namespace FudgeCore {
         triData: Array<number>;
         triIboData: Array<number>;
         numTriData: number;
-        /** Creating the debug for physics in Fudge. Tell it to draw only wireframe objects, since Fudge is handling rendering of the objects besides physics.
+        /** Creating the debug for physics in FUDGE. Tell it to draw only wireframe objects, since FUDGE is handling rendering of the objects besides physics.
          * Override OimoPhysics Functions with own rendering. Initialize buffers and connect them with the context for later use. */
         constructor();
         /** Receive the current DebugMode from the physics settings and set the OimoPhysics.DebugDraw booleans to show only certain informations.
@@ -4432,7 +4369,7 @@ declare namespace FudgeCore {
         initializeBuffers(): void;
         /** Before OimoPhysics.world is filling the debug. Make sure the buffers are reset. Also receiving the debugMode from settings and updating the current projection for the vertexShader. */
         clearBuffers(): void;
-        /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them. */
+        /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the FUDGE rendering context. And draw each updated buffer and resetting them. */
         drawBuffers(): void;
         /** Drawing the ray into the debugDraw Call. By using the overwritten line rendering functions and drawing a point (pointSize defined in the shader) at the end of the ray. */
         debugRay(_origin: Vector3, _end: Vector3, _color: Color): void;
@@ -4440,7 +4377,7 @@ declare namespace FudgeCore {
          * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
         private initializeOverride;
         /** The source code (string) of the in physicsDebug used very simple vertexShader.
-         *  Handling the projection (which includes, view/world[is always identity in this case]/projection in Fudge). Increasing the size of single points drawn.
+         *  Handling the projection (which includes, view/world[is always identity in this case]/projection in FUDGE). Increasing the size of single points drawn.
          *  And transfer position color to the fragmentShader. */
         private vertexShaderSource;
         /** The source code (string) of the in physicsDebug used super simple fragmentShader. Unlit - only colorizing the drawn pixels, normals/position are given to make it expandable */
@@ -5235,7 +5172,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Viewport
      */
-    class Viewport extends EventTargetƒ {
+    class Viewport extends EventTargetUnified {
         #private;
         private static focus;
         name: string;
@@ -5347,32 +5284,10 @@ declare namespace FudgeCore {
         pointClientToScreen(_client: Vector2): Vector2;
         /**
          * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
-         * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire {@link Eventƒ}s accordingly.
+         * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire {@link EventUnified}s accordingly.
          * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
          */
         setFocus(_on: boolean): void;
-        /**
-         * Handle drag-drop events and dispatch to viewport as FUDGE-Event
-         */
-        private hndDragDropEvent;
-        /**
-         * Add position of the pointer mapped to canvas-coordinates as canvasX, canvasY to the event
-         */
-        private addCanvasPosition;
-        /**
-         * Handle pointer events and dispatch to viewport as FUDGE-Event
-         */
-        private hndPointerEvent;
-        /**
-         * Handle keyboard events and dispatch to viewport as FUDGE-Event, if the viewport has the focus
-         */
-        private hndKeyboardEvent;
-        /**
-         * Handle wheel event and dispatch to viewport as FUDGE-Event
-         */
-        private hndWheelEvent;
-        private activateEvent;
-        private hndComponentEvent;
     }
 }
 declare namespace FudgeCore {
@@ -5380,7 +5295,7 @@ declare namespace FudgeCore {
         [filename: string]: string;
     }
     /**
-     * Handles file transfer from a Fudge-Browserapp to the local filesystem without a local server.
+     * Handles file transfer from a FUDGE-Browserapp to the local filesystem without a local server.
      * Saves to the download-path given by the browser, loads from the player's choice.
      */
     class FileIoBrowserLocal extends EventTargetStatic {
@@ -6503,7 +6418,7 @@ declare namespace FudgeCore {
         TIME_REAL = "timeReal"
     }
     /**
-     * Core loop of a Fudge application. Initializes automatically and must be started explicitly.
+     * Core loop of a FUDGE application. Initializes automatically and must be started explicitly.
      * It then fires {@link EVENT.LOOP_FRAME} to all added listeners at each frame
      *
      * @author Jirka Dell'Oro-Friedl, HFU, 2019
@@ -6583,7 +6498,7 @@ declare namespace FudgeCore {
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Time extends EventTargetƒ {
+    class Time extends EventTargetUnified {
         /** Standard game time starting automatically with the application */
         static readonly game: Time;
         private start;

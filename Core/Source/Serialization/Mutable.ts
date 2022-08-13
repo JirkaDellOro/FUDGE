@@ -43,7 +43,7 @@ namespace FudgeCore {
    * The provided properties of the {@link Mutator} must match public properties or getters/setters of the object.
    * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
    */
-  export abstract class Mutable extends EventTargetƒ {
+  export abstract class Mutable extends EventTargetUnified {
     /**
      * Decorator allows to attach {@link Mutable} functionality to existing classes. 
      */

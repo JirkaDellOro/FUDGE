@@ -23,7 +23,7 @@ namespace FudgeCore {
    * 
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class Time extends EventTargetƒ {
+  export class Time extends EventTargetUnified {
     /** Standard game time starting automatically with the application */
     public static readonly game: Time = new Time();
     private start: number;

@@ -148,7 +148,7 @@ namespace FudgePhysics_Communication {
         moveableTransform.mtxLocal.translate(pos, true);
     }
 
-    function hndPointerMove(_event: f.EventPointer): void {
+    function hndPointerMove(_event: PointerEvent): void {
         moveableTransform.mtxLocal.rotateY(_event.movementX * speedCameraRotation);
     }
 

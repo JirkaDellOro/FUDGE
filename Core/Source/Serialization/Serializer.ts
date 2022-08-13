@@ -99,7 +99,6 @@ namespace FudgeCore {
       try {
         // loop constructed solely to access type-property. Only one expected!
         for (path in _serialization) {
-          // reconstruct = new (<General>Fudge)[typeName];
           reconstruct = Serializer.reconstruct(path);
           reconstruct = await reconstruct.deserialize(_serialization[path]);
           return reconstruct;

@@ -1,15 +1,5 @@
 namespace FudgeCore {
   /**
-   * a subclass of KeyboardEvent. EventKeyboard objects describe a user interaction with the keyboard
-   * each event describes a single interaction between the user and a key (or combination of a key with modifier keys) on the keyboard.
-   */
-  export class EventKeyboard extends KeyboardEvent {
-    constructor(type: string, _event: EventKeyboard) {
-      super(type, _event);
-    }
-  }
-
-  /**
    * Mappings of standard DOM/Browser-Events as passed from a canvas to the viewport
    */
   export const enum EVENT_KEYBOARD {

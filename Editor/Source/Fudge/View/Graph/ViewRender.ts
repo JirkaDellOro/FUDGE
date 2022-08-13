@@ -203,7 +203,7 @@ namespace Fudge {
       this.graph.addEventListener(ƒ.EVENT.RENDER_PREPARE_END, switchLight);
     }
 
-    private hndEvent = (_event: FudgeEvent): void => {
+    private hndEvent = (_event: EditorEvent): void => {
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
         case EVENT_EDITOR.FOCUS:
@@ -221,7 +221,7 @@ namespace Fudge {
       this.redraw();
     }
 
-    private hndPick = (_event: FudgeEvent): void => {
+    private hndPick = (_event: EditorEvent): void => {
       let picked: ƒ.Node = _event.detail.node;
 
       //TODO: watch out, two selects

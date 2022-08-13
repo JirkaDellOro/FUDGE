@@ -21,6 +21,6 @@ namespace Fudge {
   /**
    * Extension of CustomEvent that supports a detail field with the type EventDetail
    */
-  export class FudgeEvent extends CustomEvent<EventDetail> {
+  export class EditorEvent extends CustomEvent<EventDetail> {
   }
 }

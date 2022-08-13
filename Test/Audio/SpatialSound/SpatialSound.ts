@@ -122,7 +122,7 @@ namespace AudioSpace {
     }
   }
 
-  function hndPointerMove(_event: ƒ.EventPointer): void {
+  function hndPointerMove(_event: PointerEvent): void {
     if (!_event.buttons)
       return;
     // camera.rotateY(_event.movementX * speedCameraRotation);
@@ -163,7 +163,7 @@ namespace AudioSpace {
     _viewport.canvas.focus();
     _viewport.canvas.addEventListener("keydown", move);
 
-    function move(_event: ƒ.EventKeyboard): void {
+    function move(_event: KeyboardEvent): void {
       mtxTranslator.translateZ(0.1 *
         (_event.code == ƒ.KEYBOARD_CODE.W ? -1 :
           _event.code == ƒ.KEYBOARD_CODE.S ? 1 :

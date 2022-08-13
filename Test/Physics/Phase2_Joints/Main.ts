@@ -307,8 +307,8 @@ namespace FudgePhysics_Communication {
 
     }
 
-    function hndPointerDown(_event: f.EventPointer): void {
-        let mouse: f.Vector2 = new f.Vector2(_event.pointerX, _event.pointerY);
+    function hndPointerDown(_event: PointerEvent): void {
+        let mouse: f.Vector2 = new f.Vector2(_event.offsetX, _event.offsetY);
         let posProjection: f.Vector2 = viewPort.pointClientToProjection(mouse);
 
         let ray: f.Ray = new f.Ray(new f.Vector3(-posProjection.x, posProjection.y, 1));

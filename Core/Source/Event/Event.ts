@@ -1,12 +1,11 @@
 namespace FudgeCore {
   export interface MapEventTypeToListener {
-    [eventType: string]: EventListenerƒ[];
+    [eventType: string]: EventListenerUnified[];
   }
 
   /**
-   * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
+   * Types of events specific to FUDGE, in addition to the standard DOM/Browser-Types and custom strings
    */
-
   export const enum EVENT {
     /** dispatched to targets registered at {@link Loop}, when requested animation frame starts */
     LOOP_FRAME = "loopFrame",
@@ -64,39 +63,33 @@ namespace FudgeCore {
     RESOURCES_LOADED = "resourcesLoaded"
   }
 
-
-  // export type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics;
-
-  export type EventListenerƒ =
-    ((_event: EventPointer) => void) |
-    ((_event: EventDragDrop) => void) |
-    ((_event: EventWheel) => void) |
-    ((_event: EventKeyboard) => void) |
-    ((_event: Eventƒ) => void) |
-    ((_event: EventPhysics) => void) |
+  export type EventUnified = Event | CustomEvent | EventPhysics;
+  export type EventListenerUnified =
+    ((_event: Event) => void) |
     ((_event: CustomEvent) => void) |
+    ((_event: EventPhysics) => void) |
+    ((_event: EventTimer) => void) |
+    EventListener |
     EventListenerOrEventListenerObject;
 
-  export type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics | CustomEvent;
-  // export type EventListenerƒ = ((_event: Eventƒ) => void) | EventListener | EventListenerObject;
 
-  export class EventTargetƒ extends EventTarget {
-    addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void {
+  export class EventTargetUnified extends EventTarget {
+    addEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void {
       super.addEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);
     }
-    removeEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void {
+    removeEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void {
       super.removeEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);
     }
 
-    dispatchEvent(_event: Eventƒ): boolean {
+    dispatchEvent(_event: EventUnified): boolean {
       return super.dispatchEvent(_event);
     }
   }
 
   /**
-   * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop 
+   * Base class for EventTarget singletons, which are fixed entities in the structure of FUDGE, such as the core loop 
    */
-  export class EventTargetStatic extends EventTargetƒ {
+  export class EventTargetStatic extends EventTargetUnified {
     protected static targetStatic: EventTargetStatic = new EventTargetStatic();
 
     protected constructor() {

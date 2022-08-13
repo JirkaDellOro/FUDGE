@@ -185,9 +185,9 @@ var Fudge;
     /**
      * Extension of CustomEvent that supports a detail field with the type EventDetail
      */
-    class FudgeEvent extends CustomEvent {
+    class EditorEvent extends CustomEvent {
     }
-    Fudge.FudgeEvent = FudgeEvent;
+    Fudge.EditorEvent = EditorEvent;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -906,7 +906,7 @@ var Fudge;
             _init.bubbles = _init.bubbles || false;
             _init.cancelable = _init.cancelable || true;
             _init.detail.view = _init.detail.view || this;
-            this.dom.dispatchEvent(new Fudge.FudgeEvent(_type, _init));
+            this.dom.dispatchEvent(new Fudge.EditorEvent(_type, _init));
         }
         //#region  ContextMenu
         openContextMenu = (_event) => {
@@ -1680,11 +1680,11 @@ var Fudge;
                     if (this.graph) {
                         let newGraph = await ƒ.Project.getResource(this.graph.idResource);
                         if (this.graph != newGraph)
-                            _event = new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
+                            _event = new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
                     }
                     break;
                 case "itemselect" /* SELECT */:
-                    _event = new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.SELECT, { bubbles: false, detail: { node: _event.detail.data, view: this } });
+                    _event = new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, { bubbles: false, detail: { node: _event.detail.data, view: this } });
                     break;
             }
             this.broadcastEvent(_event);
@@ -1792,7 +1792,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.REFRES, this.hndEvent);
             this.setTitle("Project | " + Fudge.project.name);
-            this.broadcastEvent(new Fudge.FudgeEvent(Fudge.EVENT_EDITOR.SELECT, {}));
+            this.broadcastEvent(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, {}));
         }
         getState() {
             // TODO: iterate over views and collect their states for reconstruction 
@@ -3325,7 +3325,7 @@ var Fudge;
             let nodeLight = new ƒ.Node("PreviewIllumination");
             graph.addChild(nodeLight);
             ƒAid.addStandardLightComponents(nodeLight);
-            this.dom.appendChild(this.viewport.getCanvas());
+            this.dom.appendChild(this.viewport.canvas);
             let previewNode = new ƒ.Node("PreviewNode");
             graph.addChild(previewNode);
             return previewNode;
@@ -3334,7 +3334,7 @@ var Fudge;
             this.previewNode.removeAllChildren();
             this.previewNode.addChild(_node);
             this.illuminate(true);
-            this.dom.appendChild(this.viewport.getCanvas());
+            this.dom.appendChild(this.viewport.canvas);
         }
         illuminate(_on) {
             let nodeLight = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];

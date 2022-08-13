@@ -50,7 +50,7 @@ namespace ScreenToRayToScreen {
     ƒ.Debug.log("Game", root);
   }
 
-  function hndPointerMove(_event: ƒ.EventPointer): void {
+  function hndPointerMove(_event: PointerEvent): void {
     if (document.pointerLockElement) {
       camera.rotateY(_event.movementX * speedCameraRotation);
       camera.rotateX(_event.movementY * speedCameraRotation);
@@ -58,7 +58,7 @@ namespace ScreenToRayToScreen {
       return;
     }
 
-    let posProjection: ƒ.Vector2 = viewport.pointClientToProjection(new ƒ.Vector2(_event.pointerX, _event.pointerY));
+    let posProjection: ƒ.Vector2 = viewport.pointClientToProjection(new ƒ.Vector2(_event.offsetX, _event.offsetY));
 
     ƒ.Debug.clear();
 

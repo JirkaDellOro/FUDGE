@@ -105,7 +105,7 @@ namespace Mesh {
     }
   }
 
-  function hndPointerMove(_event: ƒ.EventPointer): void {
+  function hndPointerMove(_event: PointerEvent): void {
     if (!_event.buttons)
       return;
     cntMouseX.setInput(_event.movementX);

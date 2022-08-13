@@ -81,7 +81,7 @@ namespace Fudge {
       // TODO: iterate over views and collect their states for reconstruction 
     }
 
-    private hndEvent = async (_event: FudgeEvent | CustomEvent): Promise<void> => {
+    private hndEvent = async (_event: EditorEvent | CustomEvent): Promise<void> => {
       _event.stopPropagation();
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
@@ -91,20 +91,15 @@ namespace Fudge {
           if (this.graph) {
             let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
             if (this.graph != newGraph)
-              _event = new FudgeEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
+              _event = new EditorEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
           }
           break;
         case ƒui.EVENT.SELECT:
-          _event = new FudgeEvent(EVENT_EDITOR.SELECT, { bubbles: false, detail: { node: _event.detail.data, view: this } });
+          _event = new EditorEvent(EVENT_EDITOR.SELECT, { bubbles: false, detail: { node: _event.detail.data, view: this } });
           break;
       }
 
       this.broadcastEvent(_event);
     }
-
-    // private hndFocusNode = (_event: CustomEvent): void => {
-    //   let event: FudgeEvent = new FudgeEvent(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: _event.detail.data, view: this } });
-    //   this.broadcastEvent(event);
-    // }
   }
 }

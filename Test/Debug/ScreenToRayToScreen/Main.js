@@ -43,7 +43,7 @@ var ScreenToRayToScreen;
             updateDisplay();
             return;
         }
-        let posProjection = viewport.pointClientToProjection(new ƒ.Vector2(_event.pointerX, _event.pointerY));
+        let posProjection = viewport.pointClientToProjection(new ƒ.Vector2(_event.offsetX, _event.offsetY));
         ƒ.Debug.clear();
         let ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
         console.group("original");

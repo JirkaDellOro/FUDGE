@@ -73,7 +73,7 @@ namespace Fudge {
       // this.dom.addEventListener(EVENT_EDITOR.REFRES, this.hndEvent);
 
       this.setTitle("Project | " + project.name);
-      this.broadcastEvent(new FudgeEvent(EVENT_EDITOR.SELECT, {}));
+      this.broadcastEvent(new EditorEvent(EVENT_EDITOR.SELECT, {}));
     }
 
     public getState(): { [key: string]: string } {

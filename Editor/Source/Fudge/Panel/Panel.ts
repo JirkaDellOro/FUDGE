@@ -45,7 +45,7 @@ namespace Fudge {
     }
 
     /** Send custom copies of the given event to the views */
-    public broadcastEvent = (_event: FudgeEvent): void => {
+    public broadcastEvent = (_event: EditorEvent): void => {
       for (let view of this.views)
         view.dispatch(<EVENT_EDITOR>_event.type, { detail: _event.detail });
     }

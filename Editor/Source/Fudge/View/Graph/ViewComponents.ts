@@ -207,7 +207,7 @@ namespace Fudge {
       }
     }
 
-    private hndEvent = (_event: FudgeEvent): void => {
+    private hndEvent = (_event: EditorEvent): void => {
       switch (_event.type) {
         // case ƒui.EVENT.RENAME: break;
         case EVENT_EDITOR.SELECT:
@@ -255,7 +255,7 @@ namespace Fudge {
       }
     }
 
-    private hndTransform = (_event: FudgeEvent): void => {
+    private hndTransform = (_event: EditorEvent): void => {
       if (!this.getSelected())
         return;
 
