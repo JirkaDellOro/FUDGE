@@ -63,7 +63,10 @@ namespace FudgeCore {
     RESOURCES_LOADED = "resourcesLoaded"
   }
 
+  /** Union type of other event types serving as annotation for listeners and handlers */
   export type EventUnified = Event | CustomEvent | EventPhysics;
+
+  /** Unified listener type extending EventListener and EventListenerObject for CustomEvent and others */
   export type EventListenerUnified =
     ((_event: Event) => void) |
     ((_event: CustomEvent) => void) |
@@ -72,7 +75,7 @@ namespace FudgeCore {
     EventListener |
     EventListenerOrEventListenerObject;
 
-
+  /** Extends EventTarget to work with {@link EventListenerUnified} and {@link EventUnified} */
   export class EventTargetUnified extends EventTarget {
     addEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void {
       super.addEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);

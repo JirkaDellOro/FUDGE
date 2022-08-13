@@ -184,8 +184,11 @@ declare namespace FudgeCore {
         /** dispatched to {@link Project} when it's done loading resources from a url */
         RESOURCES_LOADED = "resourcesLoaded"
     }
+    /** Union type of other event types serving as annotation for listeners and handlers */
     type EventUnified = Event | CustomEvent | EventPhysics;
+    /** Unified listener type extending EventListener and EventListenerObject for CustomEvent and others */
     type EventListenerUnified = ((_event: Event) => void) | ((_event: CustomEvent) => void) | ((_event: EventPhysics) => void) | ((_event: EventTimer) => void) | EventListener | EventListenerOrEventListenerObject;
+    /** Extends EventTarget to work with {@link EventListenerUnified} and {@link EventUnified} */
     class EventTargetUnified extends EventTarget {
         addEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void;
         removeEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void;
