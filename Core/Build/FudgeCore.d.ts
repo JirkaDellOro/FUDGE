@@ -2623,7 +2623,7 @@ declare namespace FudgeCore {
         WHEEL = "\u0192wheel"
     }
     /**
-     * A supclass of WheelEvent. Events that occur due to the user moving a mouse wheel or similar input device.
+     * A subclass of WheelEvent. Events that occur due to the user moving a mouse wheel or similar input device.
      * */
     class EventWheel extends WheelEvent {
         constructor(type: string, _event: EventWheel);
@@ -5351,22 +5351,6 @@ declare namespace FudgeCore {
          * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
          */
         setFocus(_on: boolean): void;
-        /**
-         * De- / Activates the given pointer event to be propagated into the viewport as FUDGE-Event
-         */
-        activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void;
-        /**
-         * De- / Activates the given keyboard event to be propagated into the viewport as FUDGE-Event
-         */
-        activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void;
-        /**
-         * De- / Activates the given drag-drop event to be propagated into the viewport as FUDGE-Event
-         */
-        activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void;
-        /**
-         * De- / Activates the wheel event to be propagated into the viewport as FUDGE-Event
-         */
-        activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void;
         /**
          * Handle drag-drop events and dispatch to viewport as FUDGE-Event
          */

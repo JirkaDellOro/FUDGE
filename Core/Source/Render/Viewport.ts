@@ -368,35 +368,35 @@ namespace FudgeCore {
       }
     }
 
-    /**
-     * De- / Activates the given pointer event to be propagated into the viewport as FUDGE-Event 
-     */
-    public activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void {
-      this.activateEvent(this.#canvas, _type, this.hndPointerEvent, _on);
-    }
+    // /**
+    //  * De- / Activates the given pointer event to be propagated into the viewport as FUDGE-Event 
+    //  */
+    // public activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void {
+    //   this.activateEvent(this.#canvas, _type, this.hndPointerEvent, _on);
+    // }
 
-    /**
-     * De- / Activates the given keyboard event to be propagated into the viewport as FUDGE-Event
-     */
-    public activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void {
-      this.activateEvent(this.#canvas.ownerDocument, _type, this.hndKeyboardEvent, _on);
-    }
+    // /**
+    //  * De- / Activates the given keyboard event to be propagated into the viewport as FUDGE-Event
+    //  */
+    // public activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void {
+    //   this.activateEvent(this.#canvas.ownerDocument, _type, this.hndKeyboardEvent, _on);
+    // }
 
-    /**
-     * De- / Activates the given drag-drop event to be propagated into the viewport as FUDGE-Event
-     */
-    public activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void {
-      if (_type == EVENT_DRAGDROP.START)
-        this.#canvas.draggable = _on;
-      this.activateEvent(this.#canvas, _type, this.hndDragDropEvent, _on);
-    }
+    // /**
+    //  * De- / Activates the given drag-drop event to be propagated into the viewport as FUDGE-Event
+    //  */
+    // public activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void {
+    //   if (_type == EVENT_DRAGDROP.START)
+    //     this.#canvas.draggable = _on;
+    //   this.activateEvent(this.#canvas, _type, this.hndDragDropEvent, _on);
+    // }
 
-    /**
-     * De- / Activates the wheel event to be propagated into the viewport as FUDGE-Event
-     */
-    public activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void {
-      this.activateEvent(this.#canvas, _type, this.hndWheelEvent, _on);
-    }
+    // /**
+    //  * De- / Activates the wheel event to be propagated into the viewport as FUDGE-Event
+    //  */
+    // public activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void {
+    //   this.activateEvent(this.#canvas, _type, this.hndWheelEvent, _on);
+    // }
 
     /**
      * Handle drag-drop events and dispatch to viewport as FUDGE-Event

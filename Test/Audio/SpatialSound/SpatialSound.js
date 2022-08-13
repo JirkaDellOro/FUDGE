@@ -75,23 +75,15 @@ var AudioSpace;
         ƒ.AudioManager.default.listenTo(graph);
         ƒ.AudioManager.default.listenWith(camera.nodeCamera.getComponent(ƒ.ComponentAudioListener));
         // setup event handling
-        viewport.setFocus(true);
-        viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
-        viewport.activateWheelEvent("\u0192wheel" /* WHEEL */, true);
-        viewport.addEventListener("\u0192pointermove" /* MOVE */, hndPointerMove);
-        viewport.addEventListener("\u0192wheel" /* WHEEL */, hndWheelMove);
+        canvas.addEventListener("pointermove", hndPointerMove);
+        canvas.addEventListener("wheel", hndWheelMove);
         canvas.addEventListener("mousedown", canvas.requestPointerLock);
         canvas.addEventListener("mouseup", () => document.exitPointerLock());
+        document.addEventListener("keydown", () => canvas.focus());
         startInteraction(viewport);
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start();
         function update(_event) {
-            // let time: number = performance.now() / 1000;
-            // let position: ƒ.Vector3 = mtxTranslator.translation;
-            // if (parameter.xAmplitude)
-            //   position.x = parameter.xAmplitude * Math.sin(parameter.frequency * time);
-            // if (parameter.zAmplitude)
-            //   position.z = parameter.zAmplitude * Math.cos(parameter.frequency * time);
             let panner = cmpAudio.getMutatorOfNode(ƒ.AUDIO_NODE_TYPE.PANNER);
             {
                 let sin = Math.sin(Math.PI * panner["coneInnerAngle"] / 360);
@@ -145,9 +137,12 @@ var AudioSpace;
     //   out.innerHTML = info;
     // }
     function startInteraction(_viewport) {
-        _viewport.activateKeyboardEvent("\u0192keydown" /* DOWN */, true);
-        _viewport.addEventListener("\u0192keydown" /* DOWN */, move);
+        // _viewport.getCanvas().activateKeyboardEvent("", true);
+        _viewport.getCanvas().tabIndex = 0;
+        _viewport.getCanvas().focus();
+        _viewport.getCanvas().addEventListener("keydown", move);
         function move(_event) {
+            // _event.stopPropagation();
             mtxTranslator.translateZ(0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.W ? -1 :
                     _event.code == ƒ.KEYBOARD_CODE.S ? 1 :
