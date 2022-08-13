@@ -194,10 +194,8 @@ namespace FudgePhysics_Communication {
         viewPort.showSceneGraph();
         f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
 
-        viewPort.activatePointerEvent(f.EVENT_POINTER.DOWN, true);
-        viewPort.addEventListener(f.EVENT_POINTER.DOWN, hndPointerDown);
-        viewPort.activatePointerEvent(f.EVENT_POINTER.UP, true);
-        viewPort.addEventListener(f.EVENT_POINTER.UP, hndPointerUp);
+        viewPort.canvas.addEventListener("pointerdown", hndPointerDown);
+        viewPort.canvas.addEventListener("pointerup", hndPointerUp);
 
         f.Physics.adjustTransforms(hierarchy);
         f.Loop.start();
@@ -327,7 +325,7 @@ namespace FudgePhysics_Communication {
         moveableTransform.mtxLocal.translation = pos;
     }
 
-    function hndPointerUp(_event: f.EventPointer): void {
+    function hndPointerUp(_event: PointerEvent): void {
         //
     }
 

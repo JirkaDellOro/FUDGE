@@ -38,10 +38,8 @@ namespace ScreenToRayToScreen {
     ƒ.Debug.log("Viewport", viewport);
 
     // setup event handling
-    viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
-    viewport.activateWheelEvent(ƒ.EVENT_WHEEL.WHEEL, true);
-    viewport.addEventListener(ƒ.EVENT_POINTER.MOVE, hndPointerMove);
-    viewport.addEventListener(ƒ.EVENT_WHEEL.WHEEL, hndWheelMove);
+    viewport.canvas.addEventListener("pointermove", hndPointerMove);
+    viewport.canvas.addEventListener("wheel", hndWheelMove);
     // window.addEventListener("keydown", hndKeyDown);
 
 

@@ -79,8 +79,7 @@ namespace FudgePhysics_Communication {
 
         viewPort = new f.Viewport();
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
-        viewPort.activatePointerEvent(f.EVENT_POINTER.MOVE, true);
-        viewPort.addEventListener(f.EVENT_POINTER.MOVE, hndPointerMove);
+        viewPort.canvas.addEventListener("pointermove", hndPointerMove);
         viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
 
         viewPort.showSceneGraph();
