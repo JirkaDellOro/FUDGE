@@ -123,10 +123,10 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     interface MapEventTypeToListener {
-        [eventType: string]: EventListenerUnified[];
+        [eventType: string]: EventListenerƒ[];
     }
     /**
-     * Types of events specific to FUDGE, in addition to the standard DOM/Browser-Types and custom strings
+     * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
      */
     const enum EVENT {
         /** dispatched to targets registered at {@link Loop}, when requested animation frame starts */
@@ -184,20 +184,17 @@ declare namespace FudgeCore {
         /** dispatched to {@link Project} when it's done loading resources from a url */
         RESOURCES_LOADED = "resourcesLoaded"
     }
-    /** Union type of other event types serving as annotation for listeners and handlers */
-    type EventUnified = Event | CustomEvent | EventPhysics;
-    /** Unified listener type extending EventListener and EventListenerObject for CustomEvent and others */
-    type EventListenerUnified = ((_event: Event) => void) | ((_event: CustomEvent) => void) | ((_event: EventPhysics) => void) | ((_event: EventTimer) => void) | EventListener | EventListenerOrEventListenerObject;
-    /** Extends EventTarget to work with {@link EventListenerUnified} and {@link EventUnified} */
-    class EventTargetUnified extends EventTarget {
-        addEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void;
-        removeEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void;
-        dispatchEvent(_event: EventUnified): boolean;
+    type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | ((_event: EventPhysics) => void) | ((_event: CustomEvent) => void) | EventListenerOrEventListenerObject;
+    type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics | CustomEvent;
+    class EventTargetƒ extends EventTarget {
+        addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
+        removeEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
+        dispatchEvent(_event: Eventƒ): boolean;
     }
     /**
-     * Base class for EventTarget singletons, which are fixed entities in the structure of FUDGE, such as the core loop
+     * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
      */
-    class EventTargetStatic extends EventTargetUnified {
+    class EventTargetStatic extends EventTargetƒ {
         protected static targetStatic: EventTargetStatic;
         protected constructor();
         static addEventListener(_type: string, _handler: EventListener): void;
@@ -235,7 +232,7 @@ declare namespace FudgeCore {
      * The provided properties of the {@link Mutator} must match public properties or getters/setters of the object.
      * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
      */
-    abstract class Mutable extends EventTargetUnified {
+    abstract class Mutable extends EventTargetƒ {
         /**
          * Decorator allows to attach {@link Mutable} functionality to existing classes.
          */
@@ -403,7 +400,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Graph
      */
-    class Node extends EventTargetUnified implements Serializable {
+    class Node extends EventTargetƒ implements Serializable {
         #private;
         name: string;
         readonly mtxWorld: Matrix4x4;
@@ -538,11 +535,11 @@ declare namespace FudgeCore {
          * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
          * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
          */
-        addEventListener(_type: EVENT | string, _handler: EventListenerUnified, _capture?: boolean): void;
+        addEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture?: boolean): void;
         /**
          * Removes an event listener from the node. The signature must match the one used with addEventListener
          */
-        removeEventListener(_type: EVENT | string, _handler: EventListenerUnified, _capture?: boolean): void;
+        removeEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture?: boolean): void;
         /**
          * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
          * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
@@ -1245,7 +1242,7 @@ declare namespace FudgeCore {
         disconnect(): void;
         /**
          * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
-         * Only to be used when functionality that is not added within FUDGE is needed.
+         * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
         serialize(): Serialization;
@@ -1876,9 +1873,9 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     enum FIELD_OF_VIEW {
-        HORIZONTAL = "horizontal",
-        VERTICAL = "vertical",
-        DIAGONAL = "diagonal"
+        HORIZONTAL = 0,
+        VERTICAL = 1,
+        DIAGONAL = 2
     }
     /**
      * Defines identifiers for the various projections a camera can provide.
@@ -1913,7 +1910,6 @@ declare namespace FudgeCore {
          * yielding the worldspace to viewspace matrix
          */
         get mtxWorldToView(): Matrix4x4;
-        get mtxCameraInverse(): Matrix4x4;
         resetWorldToView(): void;
         getProjection(): PROJECTION;
         getBackgroundEnabled(): boolean;
@@ -2360,6 +2356,33 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    const enum EVENT_DRAGDROP {
+        DRAG = "\u0192drag",
+        DROP = "\u0192drop",
+        START = "\u0192dragstart",
+        END = "\u0192dragend",
+        OVER = "\u0192dragover"
+    }
+    /**
+     * a subclass of DragEvent .A event that represents a drag and drop interaction
+     */
+    class EventDragDrop extends DragEvent {
+        pointerX: number;
+        pointerY: number;
+        canvasX: number;
+        canvasY: number;
+        clientRect: ClientRect;
+        constructor(type: string, _event: EventDragDrop);
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * a subclass of KeyboardEvent. EventKeyboard objects describe a user interaction with the keyboard
+     * each event describes a single interaction between the user and a key (or combination of a key with modifier keys) on the keyboard.
+     */
+    class EventKeyboard extends KeyboardEvent {
+        constructor(type: string, _event: EventKeyboard);
+    }
     /**
      * Mappings of standard DOM/Browser-Events as passed from a canvas to the viewport
      */
@@ -2553,6 +2576,31 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    const enum EVENT_POINTER {
+        UP = "\u0192pointerup",
+        DOWN = "\u0192pointerdown",
+        MOVE = "\u0192pointermove",
+        OVER = "\u0192pointerover",
+        ENTER = "\u0192pointerenter",
+        CANCEL = "\u0192pointercancel",
+        OUT = "\u0192pointerout",
+        LEAVE = "\u0192pointerleave",
+        GOTCAPTURE = "\u0192gotpointercapture",
+        LOSTCAPTURE = "\u0192lostpointercapture"
+    }
+    /**
+     * a subclass of PointerEvent. The state of a DOM event produced by a pointer such as the geometry of the contact point
+     * */
+    class EventPointer extends PointerEvent {
+        pointerX: number;
+        pointerY: number;
+        canvasX: number;
+        canvasY: number;
+        clientRect: ClientRect;
+        constructor(type: string, _event: EventPointer);
+    }
+}
+declare namespace FudgeCore {
     const enum EVENT_TIMER {
         CALL = "\u0192lapse"
     }
@@ -2567,6 +2615,17 @@ declare namespace FudgeCore {
         lastCall: boolean;
         count: number;
         constructor(_timer: Timer, ..._arguments: Object[]);
+    }
+}
+declare namespace FudgeCore {
+    const enum EVENT_WHEEL {
+        WHEEL = "\u0192wheel"
+    }
+    /**
+     * A supclass of WheelEvent. Events that occur due to the user moving a mouse wheel or similar input device.
+     * */
+    class EventWheel extends WheelEvent {
+        constructor(type: string, _event: EventWheel);
     }
 }
 declare namespace FudgeCore {
@@ -2754,21 +2813,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Abstract class supporting various arithmetical helper functions
-     */
-    abstract class Calc {
-        /** factor multiplied with angle in degrees yields the angle in radian */
-        static readonly deg2rad: number;
-        /** factor multiplied with angle in radian yields the angle in degrees */
-        static readonly rad2deg: number;
-        /**
-         * Returns one of the values passed in, either _value if within _min and _max or the boundary being exceeded by _value
-         */
-        static clamp<T>(_value: T, _min: T, _max: T, _isSmaller?: (_value1: T, _value2: T) => boolean): T;
-    }
-}
-declare namespace FudgeCore {
     interface Border {
         left: number;
         top: number;
@@ -2897,6 +2941,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class Matrix3x3 extends Mutable implements Serializable, Recycable {
+        private static deg2rad;
         private data;
         private mutator;
         private vectors;
@@ -3025,6 +3070,7 @@ declare namespace FudgeCore {
      */
     export class Matrix4x4 extends Mutable implements Serializable, Recycable {
         #private;
+        private static deg2rad;
         private data;
         private mutator;
         private vectors;
@@ -3651,6 +3697,12 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    abstract class MeshMutable extends Mesh {
+        static readonly subclasses: typeof MeshMutable[];
+        protected static registerSubclass(_subClass: typeof MeshMutable): number;
+    }
+}
+declare namespace FudgeCore {
     /**
      * Generate a simple cube with edges of length 1, each face consisting of two trigons
      * ```plaintext
@@ -3736,6 +3788,7 @@ declare namespace FudgeCore {
      * @author Matthias Roming, HFU, 2022
      */
     class MeshGLTF extends Mesh {
+        static readonly iSubclass: number;
         private uriGLTF;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -3952,8 +4005,6 @@ declare namespace FudgeCore {
         constructor(_name?: string, _size?: number, _longitudes?: number, _latitudes?: number);
         private static getShape;
         create(_size?: number, _longitudes?: number, _latitudes?: number): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -4033,6 +4084,241 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+}
+declare namespace FudgeCore {
+    class MeshApple extends MeshMutable {
+        static readonly iSubclass: number;
+        constructor(_name?: string);
+    }
+}
+declare namespace FudgeCore {
+    class MeshAxe extends MeshMutable {
+        static readonly iSubclass: number;
+        private shaftLength;
+        constructor(_name?: string, _shaftLength?: number);
+        create(_shaftLength: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshBanana extends MeshMutable {
+        static readonly iSubclass: number;
+        private bananaEndLength;
+        constructor(_name?: string, _bananaEndLength?: number);
+        create(_bananaEndLength: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshBottle extends MeshMutable {
+        static readonly iSubclass: number;
+        private bottleBodyLength;
+        private bottleNeckLength;
+        constructor(_name?: string, _bottleBodyLength?: number, _bottleNeckLength?: number);
+        create(_bottleBodyLength: number, _bottleNeckLength: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshBroom extends MeshMutable {
+        static readonly iSubclass: number;
+        private headLength;
+        private headWidth;
+        private shaftLength;
+        constructor(_name?: string, _headLength?: number, _headWidth?: number, _shaftLength?: number);
+        create(_headLength: number, _headWidth: number, _shaftLength: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshCarrot extends MeshMutable {
+        static readonly iSubclass: number;
+        private carrotLength;
+        constructor(_name?: string, _carrotLength?: number);
+        create(_carrotLength: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshDiamond extends MeshMutable {
+        static readonly iSubclass: number;
+        private inflate;
+        constructor(_name?: string, _inflate?: number);
+        create(_inflate: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshDynamite extends MeshMutable {
+        static readonly iSubclass: number;
+        constructor(_name?: string);
+    }
+}
+declare namespace FudgeCore {
+    class MeshFry extends MeshMutable {
+        static readonly iSubclass: number;
+        private fryLength;
+        constructor(_name?: string, _fryLength?: number);
+        create(_fryLength: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshHammer extends MeshMutable {
+        static readonly iSubclass: number;
+        private hammerHeadPitch;
+        private shaftLength;
+        constructor(_name?: string, _hammerHeadPitch?: number, _shaftLength?: number);
+        create(_hammerHeadPitch: number, _shaftLength: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshHotDog extends MeshMutable {
+        static readonly iSubclass: number;
+        private hotDogLengthBun;
+        private hotDogLengthFilling;
+        private hotDogWidth;
+        private amountExtraLayers;
+        constructor(_name?: string, _hotDogLengthBun?: number, _hotDogLengthFilling?: number, _hotDogWidth?: number, _amountExtraLayers?: number);
+        create(_hotDogLengthBun: number, _hotDogLengthFilling: number, _hotDogWidth: number, _amountExtraLayers: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshKeySaw extends MeshMutable {
+        static readonly iSubclass: number;
+        constructor(_name?: string);
+    }
+}
+declare namespace FudgeCore {
+    class MeshMushroomTree extends MeshMutable {
+        static readonly iSubclass: number;
+        private amountTreetop;
+        constructor(_name?: string, _amountTreetop?: number);
+        create(_amountTreetop: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshNail extends MeshMutable {
+        static readonly iSubclass: number;
+        private shaftLength;
+        constructor(_name?: string, _shaftLength?: number);
+        create(_shaftLength: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshPistol extends MeshMutable {
+        static readonly iSubclass: number;
+        private hasScope;
+        constructor(_name?: string, _hasScope?: boolean);
+        create(_hasScope: boolean): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshPizza extends MeshMutable {
+        static readonly iSubclass: number;
+        private crustHeight;
+        constructor(_name?: string, _crustHeight?: number);
+        create(_crustHeight: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshPliers extends MeshMutable {
+        static readonly iSubclass: number;
+        constructor(_name?: string);
+    }
+}
+declare namespace FudgeCore {
+    class MeshScrewdriver extends MeshMutable {
+        static readonly iSubclass: number;
+        private shaftLength;
+        constructor(_name?: string, _shaftLength?: number);
+        create(_shaftLength: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshScythe extends MeshMutable {
+        static readonly iSubclass: number;
+        constructor(_name?: string);
+    }
+}
+declare namespace FudgeCore {
+    class MeshShield extends MeshMutable {
+        static readonly iSubclass: number;
+        constructor(_name?: string);
+    }
+}
+declare namespace FudgeCore {
+    class MeshShovel extends MeshMutable {
+        static readonly iSubclass: number;
+        private shovelHeadPitch;
+        private shaftLength;
+        constructor(_name?: string, _shovelHeadPitch?: number, _shaftLength?: number);
+        create(_shovelHeadPitch: number, _shaftLength: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshSword extends MeshMutable {
+        static readonly iSubclass: number;
+        private bladeLength;
+        private bladeWidth;
+        private handleWidth;
+        constructor(_name?: string, _bladeLength?: number, _bladeWidth?: number, _handleWidth?: number, _controllNumber?: number);
+        create(_bladeLength: number, _bladeWidth: number, _handleWidth: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshTanto extends MeshMutable {
+        static readonly iSubclass: number;
+        private sharpness;
+        constructor(_name?: string, _sharpness?: number);
+        create(_sharpness: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
     /**
      * Defines automatic adjustment of the collider
      */
@@ -4046,7 +4332,7 @@ declare namespace FudgeCore {
     }
     /**
        * Acts as the physical representation of the {@link Node} it's attached to.
-       * It's the connection between the FUDGE rendered world and the Physics world.
+       * It's the connection between the Fudge rendered world and the Physics world.
        * For the physics to correctly get the transformations rotations need to be applied with from left = true.
        * Or rotations need to happen before scaling.
        * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
@@ -4246,7 +4532,7 @@ declare namespace FudgeCore {
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         reduceMutator(_mutator: Mutator): void;
         private create;
-        /** Creates the actual OimoPhysics Rigidbody out of informations the FUDGE Component has. */
+        /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
         private createRigidbody;
         /** Creates a collider a shape that represents the object in the physical world.  */
         private createCollider;
@@ -4262,13 +4548,13 @@ declare namespace FudgeCore {
         /**
         * Trigger EnteringEvent Callback, automatically called by OIMO Physics within their calculations.
         * Since the event does not know which body is the trigger iniator, the event can be listened to
-        * on either the trigger or the triggered. (This is only possible with the FUDGE OIMO Fork!)
+        * on either the trigger or the triggered. (This is only possible with the Fudge OIMO Fork!)
         */
         private triggerEnter;
         /**
         * Trigger LeavingEvent Callback, automatically called by OIMO Physics within their calculations.
         * Since the event does not know which body is the trigger iniator, the event can be listened to
-        * on either the trigger or the triggered. (This is only possible with the FUDGE OIMO Fork!)
+        * on either the trigger or the triggered. (This is only possible with the Fudge OIMO Fork!)
         */
         private triggerExit;
     }
@@ -4320,7 +4606,7 @@ declare namespace FudgeCore {
         vertexShader: WebGLShader;
         fragmentShader: WebGLShader;
         uniformLocationMap: Map<string, WebGLUniformLocation>;
-        /** Introduce the FUDGE Rendering Context to this class, creating a program and vertex/fragment shader in this context */
+        /** Introduce the Fudge Rendering Context to this class, creating a program and vertex/fragment shader in this context */
         constructor(_renderingContext: WebGL2RenderingContext);
         /** Take glsl shaders as strings and compile them, attaching the compiled shaders to a program thats used by this rendering context. */
         compile(vertexSource: string, fragmentSource: string): void;
@@ -4330,7 +4616,7 @@ declare namespace FudgeCore {
         getUniformLocation(_name: string): WebGLUniformLocation;
         /** Get all indices for every attribute in the shaders of this program */
         getAttribIndices(_attribs: Array<PhysicsDebugVertexAttribute>): Array<number>;
-        /** Tell the FUDGE Rendering Context to use this program to draw. */
+        /** Tell the Fudge Rendering Context to use this program to draw. */
         use(): void;
         /** Compile a shader out of a string and validate it. */
         compileShader(shader: WebGLShader, source: string): void;
@@ -4359,7 +4645,7 @@ declare namespace FudgeCore {
         triData: Array<number>;
         triIboData: Array<number>;
         numTriData: number;
-        /** Creating the debug for physics in FUDGE. Tell it to draw only wireframe objects, since FUDGE is handling rendering of the objects besides physics.
+        /** Creating the debug for physics in Fudge. Tell it to draw only wireframe objects, since Fudge is handling rendering of the objects besides physics.
          * Override OimoPhysics Functions with own rendering. Initialize buffers and connect them with the context for later use. */
         constructor();
         /** Receive the current DebugMode from the physics settings and set the OimoPhysics.DebugDraw booleans to show only certain informations.
@@ -4372,7 +4658,7 @@ declare namespace FudgeCore {
         initializeBuffers(): void;
         /** Before OimoPhysics.world is filling the debug. Make sure the buffers are reset. Also receiving the debugMode from settings and updating the current projection for the vertexShader. */
         clearBuffers(): void;
-        /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the FUDGE rendering context. And draw each updated buffer and resetting them. */
+        /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them. */
         drawBuffers(): void;
         /** Drawing the ray into the debugDraw Call. By using the overwritten line rendering functions and drawing a point (pointSize defined in the shader) at the end of the ray. */
         debugRay(_origin: Vector3, _end: Vector3, _color: Color): void;
@@ -4380,7 +4666,7 @@ declare namespace FudgeCore {
          * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
         private initializeOverride;
         /** The source code (string) of the in physicsDebug used very simple vertexShader.
-         *  Handling the projection (which includes, view/world[is always identity in this case]/projection in FUDGE). Increasing the size of single points drawn.
+         *  Handling the projection (which includes, view/world[is always identity in this case]/projection in Fudge). Increasing the size of single points drawn.
          *  And transfer position color to the fragmentShader. */
         private vertexShaderSource;
         /** The source code (string) of the in physicsDebug used super simple fragmentShader. Unlit - only colorizing the drawn pixels, normals/position are given to make it expandable */
@@ -5175,7 +5461,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Viewport
      */
-    class Viewport extends EventTargetUnified {
+    class Viewport extends EventTargetƒ {
         #private;
         private static focus;
         name: string;
@@ -5195,17 +5481,17 @@ declare namespace FudgeCore {
          */
         get hasFocus(): boolean;
         /**
-         * Retrieve the destination canvas
-         */
-        get canvas(): HTMLCanvasElement;
-        /**
-         * Retrieve the 2D-context attached to the destination canvas
-         */
-        get context(): CanvasRenderingContext2D;
-        /**
          * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
          */
         initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
+        /**
+         * Retrieve the destination canvas
+         */
+        getCanvas(): HTMLCanvasElement;
+        /**
+         * Retrieve the 2D-context attached to the destination canvas
+         */
+        getContext(): CanvasRenderingContext2D;
         /**
          * Retrieve the size of the destination canvas as a rectangle, x and y are always 0
          */
@@ -5287,10 +5573,48 @@ declare namespace FudgeCore {
         pointClientToScreen(_client: Vector2): Vector2;
         /**
          * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
-         * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire {@link EventUnified}s accordingly.
+         * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire {@link Eventƒ}s accordingly.
          * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
          */
         setFocus(_on: boolean): void;
+        /**
+         * De- / Activates the given pointer event to be propagated into the viewport as FUDGE-Event
+         */
+        activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void;
+        /**
+         * De- / Activates the given keyboard event to be propagated into the viewport as FUDGE-Event
+         */
+        activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void;
+        /**
+         * De- / Activates the given drag-drop event to be propagated into the viewport as FUDGE-Event
+         */
+        activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void;
+        /**
+         * De- / Activates the wheel event to be propagated into the viewport as FUDGE-Event
+         */
+        activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void;
+        /**
+         * Handle drag-drop events and dispatch to viewport as FUDGE-Event
+         */
+        private hndDragDropEvent;
+        /**
+         * Add position of the pointer mapped to canvas-coordinates as canvasX, canvasY to the event
+         */
+        private addCanvasPosition;
+        /**
+         * Handle pointer events and dispatch to viewport as FUDGE-Event
+         */
+        private hndPointerEvent;
+        /**
+         * Handle keyboard events and dispatch to viewport as FUDGE-Event, if the viewport has the focus
+         */
+        private hndKeyboardEvent;
+        /**
+         * Handle wheel event and dispatch to viewport as FUDGE-Event
+         */
+        private hndWheelEvent;
+        private activateEvent;
+        private hndComponentEvent;
     }
 }
 declare namespace FudgeCore {
@@ -5298,7 +5622,7 @@ declare namespace FudgeCore {
         [filename: string]: string;
     }
     /**
-     * Handles file transfer from a FUDGE-Browserapp to the local filesystem without a local server.
+     * Handles file transfer from a Fudge-Browserapp to the local filesystem without a local server.
      * Saves to the download-path given by the browser, loads from the player's choice.
      */
     class FileIoBrowserLocal extends EventTargetStatic {
@@ -6139,11 +6463,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    let shaderSources: {
-        [source: string]: string;
-    };
-}
-declare namespace FudgeCore {
     /**
      * Static superclass for the representation of WebGl shaderprograms.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -6154,6 +6473,8 @@ declare namespace FudgeCore {
         /** list of all the subclasses derived from this class, if they registered properly*/
         static readonly subclasses: typeof Shader[];
         static define: string[];
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
         static program: WebGLProgram;
         static attributes: {
             [name: string]: number;
@@ -6173,76 +6494,107 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderFlat extends Shader {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderFlatSkin extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderFlatTextured extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderGouraud extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderGouraudSkin extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderGouraudTextured extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderLit extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderLitTextured extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderMatCap extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderPhong extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderFlatSkin extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderFlatTextured extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderGouraud extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderGouraudSkin extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderGouraudTextured extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderLit extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderLitTextured extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderMatCap extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderPhong extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderPick extends Shader {
         static define: string[];
         static getVertexShaderSource(): string;
@@ -6250,11 +6602,17 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderPickTextured extends Shader {
         static define: string[];
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
+}
+declare namespace FudgeCore {
+    let shaderSources: {
+        [source: string]: string;
+    };
 }
 declare namespace FudgeCore {
     interface BoneList {
@@ -6421,7 +6779,7 @@ declare namespace FudgeCore {
         TIME_REAL = "timeReal"
     }
     /**
-     * Core loop of a FUDGE application. Initializes automatically and must be started explicitly.
+     * Core loop of a Fudge application. Initializes automatically and must be started explicitly.
      * It then fires {@link EVENT.LOOP_FRAME} to all added listeners at each frame
      *
      * @author Jirka Dell'Oro-Friedl, HFU, 2019
@@ -6501,7 +6859,7 @@ declare namespace FudgeCore {
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Time extends EventTargetUnified {
+    class Time extends EventTargetƒ {
         /** Standard game time starting automatically with the application */
         static readonly game: Time;
         private start;
