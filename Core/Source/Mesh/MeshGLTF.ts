@@ -12,7 +12,7 @@ namespace FudgeCore {
       const serialization: Serialization = super.serialize();
       serialization.uriGLTF = this.uriGLTF;
       return serialization;
-    }
+    } 
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       super.deserialize(_serialization);
@@ -29,7 +29,6 @@ namespace FudgeCore {
       Reflect.set(this.renderMesh, "ƒindices", await _loader.getUint16Array(gltfMesh.primitives[0].indices));
       Reflect.set(this.renderMesh, "ƒvertices", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.POSITION));
       Reflect.set(this.renderMesh, "ƒnormals", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.NORMAL)); 
-      //Texture Array var here
       Reflect.set(this.renderMesh, "ƒtextureUVs", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.TEXCOORD_0));
       
       //Mit Verts anfangen (Je iteration ein Vertice (3er Schritte))
@@ -61,7 +60,7 @@ namespace FudgeCore {
       for (let i: number = 0,  j: number = 0; i <= testVerts.length; i += 3, j += 3) {
         let newFace: Face = new Face(this.vertices, testIndices[j + 0], testIndices[j + 1], testIndices[j + 2]);
         this.faces.push(newFace);
-        console.log("This face is  " + newFace + "and the incides are " + newFace.indices + " and j is " + j);
+        console.log("This face is  " + newFace + "and the indices are " + newFace.indices + " and j is " + j);
       }
       console.log("Import completed");
       console.log(this.faces);
