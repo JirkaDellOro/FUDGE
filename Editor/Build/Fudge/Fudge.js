@@ -35,13 +35,14 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 5] = "ADD_COMPONENT_SCRIPT";
         CONTEXTMENU[CONTEXTMENU["EDIT"] = 6] = "EDIT";
         CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 7] = "CREATE_MESH";
-        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 8] = "CREATE_MATERIAL";
-        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 9] = "CREATE_GRAPH";
-        CONTEXTMENU[CONTEXTMENU["SYNC_INSTANCES"] = 10] = "SYNC_INSTANCES";
-        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 11] = "REMOVE_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 12] = "ADD_JOINT";
-        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 13] = "DELETE_RESOURCE";
-        CONTEXTMENU[CONTEXTMENU["ORTHGRAPHIC_CAMERA"] = 14] = "ORTHGRAPHIC_CAMERA";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MESHMUTABLE"] = 8] = "CREATE_MESHMUTABLE";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 9] = "CREATE_MATERIAL";
+        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 10] = "CREATE_GRAPH";
+        CONTEXTMENU[CONTEXTMENU["SYNC_INSTANCES"] = 11] = "SYNC_INSTANCES";
+        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 12] = "REMOVE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 13] = "ADD_JOINT";
+        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 14] = "DELETE_RESOURCE";
+        CONTEXTMENU[CONTEXTMENU["ORTHGRAPHIC_CAMERA"] = 15] = "ORTHGRAPHIC_CAMERA";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -1038,6 +1039,11 @@ var Fudge;
             });
             menu.append(item);
             item = new Fudge.remote.MenuItem({
+                label: "Create Mutable Mesh",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MESHMUTABLE, ƒ.MeshMutable, _callback)
+            });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({
                 label: "Create Material",
                 submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader, _callback)
             });
@@ -1060,6 +1066,13 @@ var Fudge;
                 return;
             }
             switch (choice) {
+                case Fudge.CONTEXTMENU.CREATE_MESHMUTABLE:
+                    let typeMeshMutable = ƒ.MeshMutable.subclasses[iSubclass];
+                    //@ts-ignore
+                    let meshMutableNew = new typeMeshMutable();
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    this.table.selectInterval(meshMutableNew, meshMutableNew);
+                    break;
                 case Fudge.CONTEXTMENU.CREATE_MESH:
                     let typeMesh = ƒ.Mesh.subclasses[iSubclass];
                     //@ts-ignore

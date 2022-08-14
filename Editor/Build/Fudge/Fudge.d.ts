@@ -25,13 +25,14 @@ declare namespace Fudge {
         ADD_COMPONENT_SCRIPT = 5,
         EDIT = 6,
         CREATE_MESH = 7,
-        CREATE_MATERIAL = 8,
-        CREATE_GRAPH = 9,
-        SYNC_INSTANCES = 10,
-        REMOVE_COMPONENT = 11,
-        ADD_JOINT = 12,
-        DELETE_RESOURCE = 13,
-        ORTHGRAPHIC_CAMERA = 14
+        CREATE_MESHMUTABLE = 8,
+        CREATE_MATERIAL = 9,
+        CREATE_GRAPH = 10,
+        SYNC_INSTANCES = 11,
+        REMOVE_COMPONENT = 12,
+        ADD_JOINT = 13,
+        DELETE_RESOURCE = 14,
+        ORTHGRAPHIC_CAMERA = 15
     }
     enum MENU {
         QUIT = "quit",
