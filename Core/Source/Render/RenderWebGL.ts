@@ -336,12 +336,20 @@ namespace FudgeCore {
       let mtxMeshToView: Matrix4x4 = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
       let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
 
-      let uCamera: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
-      if (uCamera)
-        RenderWebGL.crc3.uniform3fv(uCamera, _cmpCamera.mtxWorld.translation.get());
-      let uWorldToView: WebGLUniformLocation = shader.uniforms["u_mtxWorldToView"];
-      if (uWorldToView)
-        RenderWebGL.crc3.uniformMatrix4fv(uWorldToView, false, _cmpCamera.mtxWorldToView.get());
+      let uniform: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
+      if (uniform)
+        RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
+
+      uniform = shader.uniforms["u_mtxWorldToView"];
+      if (uniform)
+        RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxWorldToView.get());
+
+      uniform = shader.uniforms["u_mtxWorldToCamera"];
+      if (uniform) {
+        // let mtxWorldToCamera: Matrix4x4 = Matrix4x4.INVERSION(_cmpCamera.mtxWorld); // todo: optimize/store in camera
+        RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
+      }
+
       RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }
 

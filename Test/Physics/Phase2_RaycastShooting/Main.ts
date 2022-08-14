@@ -79,8 +79,7 @@ namespace FudgePhysics_Communication {
 
         viewPort = new f.Viewport();
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
-        viewPort.activatePointerEvent(f.EVENT_POINTER.MOVE, true);
-        viewPort.addEventListener(f.EVENT_POINTER.MOVE, hndPointerMove);
+        viewPort.canvas.addEventListener("pointermove", hndPointerMove);
         viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
 
         viewPort.showSceneGraph();
@@ -148,7 +147,7 @@ namespace FudgePhysics_Communication {
         moveableTransform.mtxLocal.translate(pos, true);
     }
 
-    function hndPointerMove(_event: f.EventPointer): void {
+    function hndPointerMove(_event: PointerEvent): void {
         moveableTransform.mtxLocal.rotateY(_event.movementX * speedCameraRotation);
     }
 

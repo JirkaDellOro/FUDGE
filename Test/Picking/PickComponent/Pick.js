@@ -26,7 +26,7 @@ var PickRadius;
         sphere.getComponent(ƒ.ComponentMaterial).sortForAlpha = true;
         // radii.appendChild(sphere);
         ƒ.Debug.branch(root);
-        viewport.getCanvas().addEventListener("mousemove", pick);
+        viewport.canvas.addEventListener("mousemove", pick);
         function pick(_event) {
             document.querySelector("div").innerHTML = "";
             viewport.draw();

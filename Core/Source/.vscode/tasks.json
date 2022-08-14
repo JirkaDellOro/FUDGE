@@ -12,21 +12,34 @@
       ]
     },
     {
-      "label": "auto-watch",
       "type": "shell",
+      "label": "auto-watch",
       "command": "tsc -watch",
       "runOptions": {
         "runOn": "folderOpen"
       }
     },
     {
-      "label": "CompileShaders",
       "type": "shell",
-      "command": "node CompileShaders.mjs CompileShaders.json FudgeCore",
+      "label": "MergeShaderSources",
       "group": "build",
+      "command": "node MergeShaderSources.mjs",
       "options": {
         "cwd": "Shader/"
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
       }
+    },
+    {
+      "type": "typescript",
+      "tsconfig": "tsconfig-minimal.json",
+      "option": "watch",
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
+      "group": "build",
+      "label": "tsc: watch - tsconfig-minimal.json"
     }
   ]
 }

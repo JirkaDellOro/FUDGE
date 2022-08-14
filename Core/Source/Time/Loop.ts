@@ -14,7 +14,7 @@ namespace FudgeCore {
   }
 
   /**
-   * Core loop of a Fudge application. Initializes automatically and must be started explicitly.
+   * Core loop of a FUDGE application. Initializes automatically and must be started explicitly.
    * It then fires {@link EVENT.LOOP_FRAME} to all added listeners at each frame
    * 
    * @author Jirka Dell'Oro-Friedl, HFU, 2019

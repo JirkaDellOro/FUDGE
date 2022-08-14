@@ -65,7 +65,8 @@ namespace FudgeCore {
     public static clear(): void {
       Project.resources = {};
       Project.serialization = {};
-      Project.scriptNamespaces = {};
+      Project.clearScriptNamespaces();
+      // Project.scriptNamespaces = {};
     }
 
     // <T extends Component>(_class: new () => T): T[] {
@@ -180,6 +181,14 @@ namespace FudgeCore {
         Project.scriptNamespaces[name] = _namespace;
     }
 
+    public static clearScriptNamespaces(): void {
+      for (let name in Project.scriptNamespaces) {
+        Reflect.set(window, name, undefined);
+        Project.scriptNamespaces[name] = undefined;
+        delete Project.scriptNamespaces[name];
+      }
+    }
+
     public static getComponentScripts(): ComponentScripts {
       let compoments: ComponentScripts = {};
       for (let namespace in Project.scriptNamespaces) {
@@ -224,7 +233,7 @@ namespace FudgeCore {
 
       let serialization: Serialization = Serializer.parse(resourceFileContent);
       let reconstruction: Resources = await Project.deserialize(serialization);
-      Project.dispatchEvent(new CustomEvent(EVENT.RESOURCES_LOADED, {detail: {url: _url, resources: reconstruction}}));
+      Project.dispatchEvent(new CustomEvent(EVENT.RESOURCES_LOADED, { detail: { url: _url, resources: reconstruction } }));
       return reconstruction;
     }
 

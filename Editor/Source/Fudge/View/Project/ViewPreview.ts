@@ -159,7 +159,7 @@ namespace Fudge {
       graph.addChild(nodeLight);
       ƒAid.addStandardLightComponents(nodeLight);
 
-      this.dom.appendChild(this.viewport.getCanvas());
+      this.dom.appendChild(this.viewport.canvas);
 
       let previewNode: ƒ.Node = new ƒ.Node("PreviewNode");
       graph.addChild(previewNode);
@@ -170,7 +170,7 @@ namespace Fudge {
       this.previewNode.removeAllChildren();
       this.previewNode.addChild(_node);
       this.illuminate(true);
-      this.dom.appendChild(this.viewport.getCanvas());
+      this.dom.appendChild(this.viewport.canvas);
     }
 
     private illuminate(_on: boolean): void {

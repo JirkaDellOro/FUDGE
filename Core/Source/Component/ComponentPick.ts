@@ -7,9 +7,8 @@ namespace FudgeCore {
 
 
   /**
-   * Base class for scripts the user writes
+   * Attaches picking functionality to the node
    * @authors Jirka Dell'Oro-Friedl, HFU, 2022
-   * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
    */
   export class ComponentPick extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentPick);
@@ -31,6 +30,7 @@ namespace FudgeCore {
           if (hitInfo.hit)
             this.node.dispatchEvent(_event);
           break;
+          //TODO: PICK.CAMERA
       }
     }
 

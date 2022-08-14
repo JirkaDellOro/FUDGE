@@ -90,7 +90,7 @@ namespace FudgeCore {
       let vector: Vector3 = _vector.clone;
       if (magnitudeSquared == 0)
         throw (new RangeError("Impossible normalization"));
-      vector.scale(_length / Math.sqrt(magnitudeSquared))
+      vector.scale(_length / Math.sqrt(magnitudeSquared));
       return vector;
     }
 

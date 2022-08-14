@@ -33,6 +33,7 @@ namespace Fudge {
     private static physics: { [idGraph: string]: ƒ.Physics } = {};
 
     public static setDefaultProject(): void {
+      console.log("Set default project in local storage", project);
       if (project)
         localStorage.setItem("project", project.base.toString());
     }
@@ -151,7 +152,7 @@ namespace Fudge {
     }
 
     /** Send custom copies of the given event to the views */
-    private static broadcastEvent(_event: FudgeEvent): void {
+    private static broadcastEvent(_event: EditorEvent): void {
       for (let panel of Page.panels)
         panel.dispatch(<EVENT_EDITOR>_event.type, { detail: _event.detail });
     }
@@ -173,7 +174,7 @@ namespace Fudge {
       }
     }
 
-    private static hndEvent(_event: FudgeEvent): void {
+    private static hndEvent(_event: EditorEvent): void {
       switch (_event.type) {
         case EVENT_EDITOR.CLOSE:
           let view: View = _event.detail.view;

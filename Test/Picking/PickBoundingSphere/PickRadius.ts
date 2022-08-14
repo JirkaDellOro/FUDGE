@@ -35,10 +35,11 @@ namespace PickRadius {
 
     ƒ.Debug.branch(root);
 
-    viewport.getCanvas().addEventListener("mousemove", pickWorldSpace);
+    viewport.canvas.addEventListener("mousemove", pickWorldSpace);
 
     function pickWorldSpace(_event: MouseEvent): void {
       let ray: ƒ.Ray = viewport.getRayFromClient(new ƒ.Vector2(_event.clientX, _event.clientY));
+      console.log(_event.clientX, _event.clientY);
       ƒ.Debug.group("Pick3D");
       for (let node of zoo.getIterator()) {
         let cmpMesh: ƒ.ComponentMesh = node.getComponent(ƒ.ComponentMesh);

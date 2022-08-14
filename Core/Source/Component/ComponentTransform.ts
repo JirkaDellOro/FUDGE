@@ -5,7 +5,7 @@ namespace FudgeCore {
   }
 
   /**
-   * Attaches a transform-[[Matrix4x4} to the node, moving, scaling and rotating it in space relative to its parent.
+   * Attaches a transform-{@link Matrix4x4} to the node, moving, scaling and rotating it in space relative to its parent.
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class ComponentTransform extends Component {

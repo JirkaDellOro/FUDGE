@@ -27,7 +27,7 @@ namespace FudgeCore {
         return null;
       }
       this.oimoWorld = new OIMO.World();
-      this.#debugDraw = new PhysicsDebugDraw();  //Create a Fudge Physics debugging handling object
+      this.#debugDraw = new PhysicsDebugDraw();  //Create a FUDGE Physics debugging handling object
       this.oimoWorld.setDebugDraw(this.#debugDraw.oimoDebugDraw); //Tell OimoPhysics where to debug to and how it will be handled
     }
     /**
@@ -105,7 +105,7 @@ namespace FudgeCore {
         Physics.connectJoints(); //Connect joints if anything has happened between the last call to any of the two paired rigidbodies
       if (Time.game.getScale() != 0) { //If time is stopped do not simulate to avoid misbehaviour
         _deltaTime = _deltaTime > 1 / 30 ? 1 / 30 : _deltaTime; //If instead of a fixed rate the game framerate is used, make sure irregular timings are fixed to 30fps
-        Physics.ƒactive.oimoWorld.step(_deltaTime * Time.game.getScale());  //Update the simulation by the given deltaTime and the Fudge internal TimeScale
+        Physics.ƒactive.oimoWorld.step(_deltaTime * Time.game.getScale());  //Update the simulation by the given deltaTime and the FUDGE internal TimeScale
       }
     }
 

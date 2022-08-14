@@ -28,10 +28,8 @@ var ScreenToRayToScreen;
         viewport.initialize("Viewport", ScreenToRayToScreen.root, ScreenToRayToScreen.camera.cmpCamera, canvas);
         ƒ.Debug.log("Viewport", viewport);
         // setup event handling
-        viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
-        viewport.activateWheelEvent("\u0192wheel" /* WHEEL */, true);
-        viewport.addEventListener("\u0192pointermove" /* MOVE */, hndPointerMove);
-        viewport.addEventListener("\u0192wheel" /* WHEEL */, hndWheelMove);
+        viewport.canvas.addEventListener("pointermove", hndPointerMove);
+        viewport.canvas.addEventListener("wheel", hndWheelMove);
         // window.addEventListener("keydown", hndKeyDown);
         updateDisplay();
         ƒ.Debug.log("Game", ScreenToRayToScreen.root);
@@ -43,7 +41,7 @@ var ScreenToRayToScreen;
             updateDisplay();
             return;
         }
-        let posProjection = viewport.pointClientToProjection(new ƒ.Vector2(_event.pointerX, _event.pointerY));
+        let posProjection = viewport.pointClientToProjection(new ƒ.Vector2(_event.offsetX, _event.offsetY));
         ƒ.Debug.clear();
         let ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
         console.group("original");

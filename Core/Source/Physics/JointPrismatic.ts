@@ -81,7 +81,7 @@ namespace FudgeCore {
       this.config = new OIMO.PrismaticJointConfig(); //Create a specific config for this joint type that is calculating the local axis for both bodies
       super.constructJoint();
 
-      this.config.springDamper = this.springDamper; //Telling the config to use the motor/spring of the Fudge Component
+      this.config.springDamper = this.springDamper; //Telling the config to use the motor/spring of the FUDGE Component
       this.config.limitMotor = this.motor;
 
       this.joint = new OIMO.PrismaticJoint(this.config);

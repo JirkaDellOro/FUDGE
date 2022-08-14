@@ -15,14 +15,14 @@ namespace FudgeAid {
 
     public static expandCameraToInteractiveOrbit(_viewport: ƒ.Viewport, _showFocus: boolean = true, _speedCameraRotation: number = 1, _speedCameraTranslation: number = 0.01, _speedCameraDistance: number = 0.001): CameraOrbit {
       _viewport.setFocus(true);
-      _viewport.activatePointerEvent(ƒ.EVENT_POINTER.DOWN, true);
-      _viewport.activatePointerEvent(ƒ.EVENT_POINTER.UP, true);
-      _viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
-      _viewport.activateWheelEvent(ƒ.EVENT_WHEEL.WHEEL, true);
-      _viewport.addEventListener(ƒ.EVENT_POINTER.DOWN, hndPointerDown);
-      _viewport.addEventListener(ƒ.EVENT_POINTER.UP, hndPointerUp);
-      _viewport.addEventListener(ƒ.EVENT_POINTER.MOVE, hndPointerMove);
-      _viewport.addEventListener(ƒ.EVENT_WHEEL.WHEEL, hndWheelMove);
+      // _viewport.activatePointerEvent(ƒ.EVENT_POINTER.DOWN, true);
+      // _viewport.activatePointerEvent(ƒ.EVENT_POINTER.UP, true);
+      // _viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
+      // _viewport.activateWheelEvent(ƒ.EVENT_WHEEL.WHEEL, true);
+      _viewport.canvas.addEventListener("pointerup", hndPointerUp);
+      _viewport.canvas.addEventListener("pointerdown", hndPointerDown);
+      _viewport.canvas.addEventListener("pointermove", hndPointerMove);
+      _viewport.canvas.addEventListener("wheel", hndWheelMove);
 
       let factorPan: number = 1 / 500;
       let factorFly: number = 1 / 20;
@@ -65,7 +65,7 @@ namespace FudgeAid {
 
 
 
-      function hndPointerMove(_event: ƒ.EventPointer): void {
+      function hndPointerMove(_event: PointerEvent): void {
         if (!_event.buttons)
           return;
 
@@ -125,12 +125,12 @@ namespace FudgeAid {
         redraw();
       }
 
-      function hndPointerDown(_event: ƒ.EventPointer): void {
+      function hndPointerDown(_event: PointerEvent): void {
         flying = (_event.buttons == 2 && !_event.altKey);
         if (_event.button != 0 || _event.ctrlKey || _event.altKey || _event.shiftKey)
           return;
 
-        let pos: ƒ.Vector2 = new ƒ.Vector2(_event.canvasX, _event.canvasY);
+        let pos: ƒ.Vector2 = new ƒ.Vector2(_event.offsetX, _event.offsetY);
         let picks: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, pos);
         if (picks.length == 0)
           return;
@@ -143,10 +143,10 @@ namespace FudgeAid {
         camera.mtxLocal.translation = picks[0].posWorld;
         redraw();
 
-        _viewport.getCanvas().dispatchEvent(new CustomEvent("pick", { detail: picks[0], bubbles: true }));
+        _viewport.canvas.dispatchEvent(new CustomEvent("pick", { detail: picks[0], bubbles: true }));
       }
 
-      function hndPointerUp(_event: ƒ.EventPointer): void {
+      function hndPointerUp(_event: PointerEvent): void {
         flying = false;
       }
 

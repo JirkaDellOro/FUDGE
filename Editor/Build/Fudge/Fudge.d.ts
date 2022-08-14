@@ -117,7 +117,7 @@ declare namespace Fudge {
     /**
      * Extension of CustomEvent that supports a detail field with the type EventDetail
      */
-    class FudgeEvent extends CustomEvent<EventDetail> {
+    class EditorEvent extends CustomEvent<EventDetail> {
     }
 }
 declare namespace Fudge {
@@ -137,7 +137,6 @@ declare namespace Fudge {
         fileInternal: string;
         fileScript: string;
         fileStyles: string;
-        private includeAutoViewScript;
         private graphAutoView;
         constructor(_base: URL);
         openDialog(): Promise<boolean>;
@@ -150,7 +149,6 @@ declare namespace Fudge {
         protected reduceMutator(_mutator: ƒ.Mutator): void;
         private getGraphs;
         private createProjectHTML;
-        private getAutoViewScript;
         private settingsStringify;
         private panelsStringify;
         private stringifyHTML;
@@ -363,7 +361,7 @@ declare namespace Fudge {
         private views;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         /** Send custom copies of the given event to the views */
-        broadcastEvent: (_event: FudgeEvent) => void;
+        broadcastEvent: (_event: EditorEvent) => void;
         abstract getState(): PanelState;
         private addViewComponent;
     }
@@ -382,7 +380,6 @@ declare namespace Fudge {
             [key: string]: string;
         };
         private hndEvent;
-        private hndFocusNode;
     }
 }
 declare namespace Fudge {
@@ -508,6 +505,7 @@ declare namespace Fudge {
 declare namespace Fudge {
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     /**
      * View all components attached to a node
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -516,7 +514,9 @@ declare namespace Fudge {
         private node;
         private expanded;
         private selected;
+        private drag;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        getDragDropSources(): ƒ.ComponentCamera[];
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
@@ -539,13 +539,14 @@ declare namespace Fudge {
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewHierarchy extends View {
+        #private;
         private graph;
         private tree;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         setGraph(_graph: ƒ.Graph): void;
         getSelection(): ƒ.Node[];
         getDragDropSources(): ƒ.Node[];
-        focusNode(_node: ƒ.Node): void;
+        showNode(_node: ƒ.Node): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;

@@ -19,20 +19,18 @@ var MouseToRay;
         viewport.initialize("Viewport", MouseToRay.root, cmpCamera, canvas);
         ƒ.Debug.log("Viewport", viewport);
         // setup event handling
-        viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
-        viewport.activateWheelEvent("\u0192wheel" /* WHEEL */, true);
-        viewport.addEventListener("\u0192pointermove" /* MOVE */, hndPointerMove);
-        viewport.addEventListener("\u0192wheel" /* WHEEL */, hndWheelMove);
+        viewport.canvas.addEventListener("pointermove", hndPointerMove);
+        viewport.canvas.addEventListener("wheel", hndWheelMove);
         ƒ.Debug.log("Game", MouseToRay.root);
         viewport.draw();
     }
     function hndPointerMove(_event) {
-        ray = viewport.getRayFromClient(new ƒ.Vector2(_event.pointerX, _event.pointerY));
+        ray = viewport.getRayFromClient(new ƒ.Vector2(_event.offsetX, _event.offsetY));
         positionCube();
         let rayDistance = ray.getDistance(ƒ.Vector3.ZERO());
         let posCenter = viewport.pointWorldToClient(ƒ.Vector3.ZERO());
         let posCube = viewport.pointWorldToClient(ƒ.Vector3.SCALE(rayDistance, -1));
-        let crc2 = viewport.getContext();
+        let crc2 = viewport.context;
         crc2.moveTo(posCube.x, posCube.y);
         crc2.lineTo(posCenter.x, posCenter.y);
         crc2.strokeStyle = "white";

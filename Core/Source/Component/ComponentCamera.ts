@@ -1,7 +1,9 @@
 // / <reference path="Component.ts"/>
 namespace FudgeCore {
   export enum FIELD_OF_VIEW {
-    HORIZONTAL, VERTICAL, DIAGONAL
+    HORIZONTAL = "horizontal",
+    VERTICAL = "vertical",
+    DIAGONAL = "diagonal"
   }
   /**
    * Defines identifiers for the various projections a camera can provide.  
@@ -23,6 +25,7 @@ namespace FudgeCore {
     public clrBackground: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
     //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
     #mtxWorldToView: Matrix4x4;
+    #mtxCameraInverse: Matrix4x4;
     private projection: PROJECTION = PROJECTION.CENTRAL;
     private mtxProjection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
     private fieldOfView: number = 45; // The camera's sensorangle.
@@ -51,17 +54,24 @@ namespace FudgeCore {
         return this.#mtxWorldToView;
 
       //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
-      let mtxCamera: Matrix4x4 = this.mtxWorld;
-      let mtxInversion: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
-      this.#mtxWorldToView = Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxInversion);
-      Recycler.store(mtxCamera);
-      Recycler.store(mtxInversion);
-
+      this.#mtxWorldToView = Matrix4x4.MULTIPLICATION(this.mtxProjection, this.mtxCameraInverse);
       return this.#mtxWorldToView;
     }
 
+    public get mtxCameraInverse(): Matrix4x4 {
+      if (this.#mtxCameraInverse)
+        return this.#mtxCameraInverse;
+
+      //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
+      this.#mtxCameraInverse = Matrix4x4.INVERSION(this.mtxWorld);
+      return this.#mtxCameraInverse;
+    }
+
     public resetWorldToView(): void {
+      if (this.#mtxWorldToView) Recycler.store(this.#mtxWorldToView);
+      if (this.#mtxCameraInverse) Recycler.store(this.#mtxCameraInverse);
       this.#mtxWorldToView = null;
+      this.#mtxCameraInverse = null;
     }
 
     public getProjection(): PROJECTION {

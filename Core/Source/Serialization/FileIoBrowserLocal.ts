@@ -3,7 +3,7 @@ namespace FudgeCore {
     [filename: string]: string;
   }
   /**
-   * Handles file transfer from a Fudge-Browserapp to the local filesystem without a local server.  
+   * Handles file transfer from a FUDGE-Browserapp to the local filesystem without a local server.  
    * Saves to the download-path given by the browser, loads from the player's choice.
    */
   export class FileIoBrowserLocal extends EventTargetStatic {

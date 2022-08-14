@@ -187,7 +187,7 @@ namespace FudgeCore {
 
     /**
      * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
-     * Only to be used when functionality that is not added within Fudge is needed.
+     * Only to be used when functionality that is not added within FUDGE is needed.
     */
     public getOimoJoint(): OIMO.Joint {
       return this.joint;

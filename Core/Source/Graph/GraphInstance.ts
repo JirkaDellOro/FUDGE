@@ -60,7 +60,7 @@ namespace FudgeCore {
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.#idSource = _serialization.idSource;
-      if (!_serialization.deserializeFromSource){
+      if (!_serialization.deserializeFromSource) {
         await super.deserialize(_serialization); // instance is deserialized from individual data
         this.#deserializeFromSource = false;
       }
@@ -70,8 +70,8 @@ namespace FudgeCore {
         // if (_serialization.deserializeFromSource) // no components-> assume synchronized GraphInstance
         //   await this.set(graph); // recreate complete instance from source graph
         // else {
-          await this.connectToGraph(); // otherwise just connect
-        // }
+        await this.connectToGraph(); // otherwise just connect
+      // }
       else {
         Project.registerGraphInstanceForResync(this);
       }
