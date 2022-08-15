@@ -39,7 +39,6 @@ namespace Fudge {
     private controller: ControllerAnimation;
 
     private toolbar: HTMLDivElement;
-    private selectedKey: ViewAnimationKey;
     
     private time: ƒ.Time = new ƒ.Time();
     private idInterval: number;
@@ -54,7 +53,6 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
-      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndSelect);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.INPUT, this.hndEvent);
     }
@@ -180,10 +178,6 @@ namespace Fudge {
           this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
           this.setAnimation(this.cmpAnimator?.animation);
           break;
-        case EVENT_EDITOR.DELETE:
-          this.controller.deleteKey(this.selectedKey);
-          this.dispatchAnimate();
-          break;
         case ƒui.EVENT.INPUT:
           if (_event.target instanceof ƒui.CustomElement) {
             this.controller.updateSequence(this.playbackTime, _event.target);
@@ -225,12 +219,6 @@ namespace Fudge {
       this.controller = new ControllerAnimation(this.animation, this.propertyList, this);
       this.controller.updatePropertyList(nodeMutator);
       this.propertyList.dispatchEvent(new CustomEvent(ƒui.EVENT.CLICK));
-    }
-
-    private hndSelect = (_event: FudgeEvent): void => {
-      let detail: EventDetail = _event.detail;
-      if (detail.view instanceof ViewAnimationSheet)
-        this.selectedKey = detail.data;
     }
 
     private hndAnimate = (_event: FudgeEvent): void => {

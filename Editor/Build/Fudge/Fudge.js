@@ -947,16 +947,10 @@ var Fudge;
             else
                 sequence.modifyKey(key, null, _element.getMutatorValue());
         }
-        deleteKey(_key) {
-            if (!_key)
-                return;
-            let animationSequence = _key.sequence.sequence;
-            animationSequence.removeKey(_key.key);
-        }
         nextKey(_time, _direction) {
             let nextKey = this.sequences
                 .flatMap(_sequence => _sequence.sequence.getKeys())
-                .sort(ƒ.AnimationKey.compare)
+                .sort(_direction == "forward" && ((_a, _b) => _a.Time - _b.Time) || _direction == "backward" && ((_a, _b) => _b.Time - _a.Time))
                 .find(_key => _direction == "forward" && _key.Time > _time || _direction == "backward" && _key.Time < _time);
             if (nextKey)
                 return nextKey.Time;
@@ -2621,7 +2615,6 @@ var Fudge;
         propertyList;
         controller;
         toolbar;
-        selectedKey;
         time = new ƒ.Time();
         idInterval;
         constructor(_container, _state) {
@@ -2633,7 +2626,6 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndAnimate);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndSelect);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("input" /* INPUT */, this.hndEvent);
         }
@@ -2736,10 +2728,6 @@ var Fudge;
                     this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
                     this.setAnimation(this.cmpAnimator?.animation);
                     break;
-                case Fudge.EVENT_EDITOR.DELETE:
-                    this.controller.deleteKey(this.selectedKey);
-                    this.dispatchAnimate();
-                    break;
                 case "input" /* INPUT */:
                     if (_event.target instanceof ƒui.CustomElement) {
                         this.controller.updateSequence(this.playbackTime, _event.target);
@@ -2778,11 +2766,6 @@ var Fudge;
             this.controller.updatePropertyList(nodeMutator);
             this.propertyList.dispatchEvent(new CustomEvent("click" /* CLICK */));
         }
-        hndSelect = (_event) => {
-            let detail = _event.detail;
-            if (detail.view instanceof Fudge.ViewAnimationSheet)
-                this.selectedKey = detail.data;
-        };
         hndAnimate = (_event) => {
             if (_event.detail.view instanceof Fudge.ViewAnimationSheet)
                 this.pause();
@@ -2927,7 +2910,11 @@ var Fudge;
             menu.append(item);
             item = new Fudge.remote.MenuItem({ id: SHEET_MODE.CURVES, label: SHEET_MODE.CURVES, click: () => this.mode = SHEET_MODE.CURVES });
             menu.append(item);
-            item = new Fudge.remote.MenuItem({ id: "Delete Key", label: "Delete Key", click: () => this.dispatch(Fudge.EVENT_EDITOR.DELETE, { bubbles: true }) });
+            item = new Fudge.remote.MenuItem({ id: "Delete Key", label: "Delete Key", click: () => {
+                    let sequence = this.selectedKey.sequence.sequence;
+                    sequence.removeKey(this.selectedKey.key);
+                    this.dispatchAnimate();
+                } });
             menu.append(item);
             return menu;
         }
@@ -3286,8 +3273,8 @@ var Fudge;
         };
         hndPointerDown = (_event) => {
             _event.preventDefault();
+            const findObject = _object => this.crc2.isPointInPath(_object.path2D, _event.offsetX, _event.offsetY);
             switch (_event.buttons) {
-                case 2:
                 case 1:
                     if (_event.offsetY > _event.target.clientHeight) // clicked on scroll bar
                         this.scrollContainer.onscroll = this.hndScroll;
@@ -3299,7 +3286,6 @@ var Fudge;
                         this.scrollContainer.onpointermove = this.hndPointerMoveSlope;
                     }
                     else {
-                        const findObject = _object => this.crc2.isPointInPath(_object.path2D, _event.offsetX, _event.offsetY);
                         let obj = this.keys.find(findObject) ||
                             this.labels.find(findObject) ||
                             this.events.find(findObject);
@@ -3319,11 +3305,16 @@ var Fudge;
                                 this.scrollContainer.onpointermove = this.hndPointerMoveDrag;
                             }
                         }
-                        this.contextMenu.getMenuItemById(Object.values(SHEET_MODE).find(_mode => _mode != this.mode)).visible = this.selectedKey == null;
-                        this.contextMenu.getMenuItemById("Delete Key").visible = this.selectedKey != null;
                         this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.selectedKey } });
                         this.draw(false);
                     }
+                    break;
+                case 2:
+                    this.selectedKey = this.keys.find(findObject);
+                    this.contextMenu.getMenuItemById(Object.values(SHEET_MODE).find(_mode => _mode != this.mode)).visible = this.selectedKey == null;
+                    this.contextMenu.getMenuItemById("Delete Key").visible = this.selectedKey != null;
+                    this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.selectedKey } });
+                    this.draw(false);
                     break;
                 case 4:
                     this.posPanStart = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);

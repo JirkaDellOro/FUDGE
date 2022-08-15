@@ -103,7 +103,11 @@ namespace Fudge {
       menu.append(item);
       item = new remote.MenuItem({ id: SHEET_MODE.CURVES, label: SHEET_MODE.CURVES, click: () => this.mode = SHEET_MODE.CURVES});
       menu.append(item);
-      item = new remote.MenuItem({ id: "Delete Key", label: "Delete Key", click: () => this.dispatch(EVENT_EDITOR.DELETE, { bubbles: true }) });
+      item = new remote.MenuItem({ id: "Delete Key", label: "Delete Key", click: () => {
+        let sequence: ƒ.AnimationSequence = this.selectedKey.sequence.sequence;
+        sequence.removeKey(this.selectedKey.key);
+        this.dispatchAnimate();
+      }});
       menu.append(item);
       
       return menu;
@@ -522,8 +526,8 @@ namespace Fudge {
 
     private hndPointerDown = (_event: PointerEvent): void => {
       _event.preventDefault();
+      const findObject: (_object: ViewAnimationKey | ViewAnimationLabel | ViewAnimationEvent) => boolean = _object => this.crc2.isPointInPath(_object.path2D, _event.offsetX, _event.offsetY);
       switch (_event.buttons) {
-        case 2:
         case 1:
           if (_event.offsetY > (<HTMLElement>_event.target).clientHeight) // clicked on scroll bar
             this.scrollContainer.onscroll = this.hndScroll;
@@ -534,7 +538,6 @@ namespace Fudge {
           else if (this.slopeHooks.some(_hook => this.crc2.isPointInPath(_hook, _event.offsetX, _event.offsetY))) {
             this.scrollContainer.onpointermove = this.hndPointerMoveSlope;
           } else {
-            const findObject: (_object: ViewAnimationKey | ViewAnimationLabel | ViewAnimationEvent) => boolean = _object => this.crc2.isPointInPath(_object.path2D, _event.offsetX, _event.offsetY);
             let obj: ViewAnimationKey | ViewAnimationLabel | ViewAnimationEvent =
               this.keys.find(findObject) ||
               this.labels.find(findObject) ||
@@ -556,11 +559,16 @@ namespace Fudge {
               }
             }
 
-            this.contextMenu.getMenuItemById(Object.values(SHEET_MODE).find( _mode => _mode != this.mode )).visible = this.selectedKey == null;
-            this.contextMenu.getMenuItemById("Delete Key").visible = this.selectedKey != null;
             this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.selectedKey } });
             this.draw(false);
           }
+          break;
+        case 2:
+          this.selectedKey = this.keys.find(findObject);
+          this.contextMenu.getMenuItemById(Object.values(SHEET_MODE).find( _mode => _mode != this.mode )).visible = this.selectedKey == null;
+          this.contextMenu.getMenuItemById("Delete Key").visible = this.selectedKey != null;
+          this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.selectedKey } });
+          this.draw(false);
           break;
         case 4:
           this.posPanStart = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);

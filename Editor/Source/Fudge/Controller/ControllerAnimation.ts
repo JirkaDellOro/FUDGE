@@ -70,16 +70,10 @@ namespace Fudge {
         sequence.modifyKey(key, null, <number>_element.getMutatorValue());
     }
 
-    public deleteKey(_key: ViewAnimationKey): void {
-      if (!_key) return;
-      let animationSequence: ƒ.AnimationSequence = _key.sequence.sequence;
-      animationSequence.removeKey(_key.key);
-    }
-
     public nextKey(_time: number, _direction: "forward" | "backward"): number {
       let nextKey: ƒ.AnimationKey = this.sequences
         .flatMap(_sequence => _sequence.sequence.getKeys())
-        .sort(ƒ.AnimationKey.compare)
+        .sort(_direction == "forward" && ((_a, _b) => _a.Time - _b.Time) || _direction == "backward" && ((_a, _b) => _b.Time - _a.Time))
         .find(_key => _direction == "forward" && _key.Time > _time || _direction == "backward" && _key.Time < _time);
       if (nextKey)
         return nextKey.Time;
