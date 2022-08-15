@@ -4106,6 +4106,25 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class MeshChair extends MeshMutable {
+        static readonly iSubclass: number;
+        private leanTranslation;
+        private leanRotation;
+        private leanScaling;
+        private seatTranslation;
+        private seatRotation;
+        private seatScaling;
+        private legsTranslation;
+        private legsRotation;
+        private legsScaling;
+        constructor(_name?: string);
+        create(_leanTranslation: Vector3, _leanRotation: Vector3, _leanScaling: Vector3, _seatTranslation: Vector3, _seatRotation: Vector3, _seatScaling: Vector3, _legsTranslation: Vector3, _legsRotation: Vector3, _legsScaling: Vector3): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
     class MeshDiamond extends MeshMutable {
         static readonly iSubclass: number;
         private inflate;

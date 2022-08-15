@@ -2,24 +2,24 @@ namespace FudgeCore {
   export class MeshTanto extends MeshMutable {
     public static readonly iSubclass: number =MeshMutable.registerSubclass(MeshTanto);
 
-    private bladeLength: number = 0;
+    private sharpness: number = 0;
     
-    public constructor(_name: string = "MeshTanto", _bladeLength: number= 0) {
+    public constructor(_name: string = "MeshTanto", _sharpness: number= 0) {
       super(_name); 
-      this.create(_bladeLength);
+      this.create(_sharpness);
       
     } 
        
-    public create(_bladeLength: number): void {
+    public create(_sharpness: number): void {
         this.clear(); 
         this.vertices = new Vertices(
         new Vertex(new Vector3(-0.120339, 0.048774, -0.094342), new Vector2(0.375000, 0.000000)),
         new Vertex(new Vector3(-0.120339, -0.048774, -0.094342), new Vector2(0.375000, 1.000000)),
-        new Vertex(new Vector3(-0.120339, 0.010164 - (_bladeLength / 10), -2.568180), new Vector2(0.125000, 0.750000)),
+        new Vertex(new Vector3(-0.120339, 0.010164 - (_sharpness / 10), -2.568180), new Vector2(0.125000, 0.750000)),
         new Vertex(new Vector3(-0.120339, -0.010164, -2.568180), new Vector2(0.625000, 0.000000)),
-        new Vertex(new Vector3(0.120339, 0.048774 - (_bladeLength / 10), -0.094342), new Vector2(0.625000, 1.000000)),
+        new Vertex(new Vector3(0.120339, 0.048774 - (_sharpness / 10), -0.094342), new Vector2(0.625000, 1.000000)),
         new Vertex(new Vector3(0.120339, -0.048774, -0.094342), new Vector2(0.875000, 0.750000)),
-        new Vertex(new Vector3(0.120339, 0.010164 - (_bladeLength / 10), -2.094342), new Vector2(0.375000, 0.250000)),
+        new Vertex(new Vector3(0.120339, 0.010164 - (_sharpness / 10), -2.094342), new Vector2(0.375000, 0.250000)),
         new Vertex(new Vector3(0.120339, -0.010164, -2.094342), new Vector2(0.125000, 0.500000)),
         new Vertex(new Vector3(-0.205944, 0.126739, 1.025162), new Vector2(0.625000, 0.250000)),
         new Vertex(new Vector3(-0.205944, -0.126739, 1.025162), new Vector2(0.875000, 0.500000)),
@@ -81,19 +81,19 @@ namespace FudgeCore {
     
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
-      serialization.bladeLength = this.bladeLength;
+      serialization.sharpness = this.sharpness;
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization);
-      this.bladeLength = _serialization.bladeLength;
-      this.create(this.bladeLength);
+      this.sharpness = _serialization.sharpness;
+      this.create(this.sharpness);
       return this;
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      this.create(this.bladeLength);
+      this.create(this.sharpness);
     }
     
   }

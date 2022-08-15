@@ -1,7 +1,7 @@
 namespace FudgeCore {
 
- /*   export class MeshExtra extends Mesh {
-        public static readonly iSubclass: number = Mesh.registerSubclass(MeshExtra);
+ /*   export class MeshExtra extends MeshMutable {
+        public static readonly iSubclass: number = MeshMutable.registerSubclass(MeshExtra);
     
         public constructor(_name: string = "MeshExtra") {
           super(_name);
