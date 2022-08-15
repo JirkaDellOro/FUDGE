@@ -234,14 +234,18 @@ declare namespace Fudge {
         private static readonly PROPERTY_COLORS;
         private animation;
         private propertyList;
-        constructor(_animation: ƒ.Animation, _propertyList: HTMLElement);
+        private view;
+        private sequences;
+        constructor(_animation: ƒ.Animation, _propertyList: HTMLElement, _view: ViewAnimation);
         updatePropertyList(_mutator: ƒ.Mutator): void;
         updateSequence(_time: number, _element: ƒui.CustomElement): void;
         deleteKey(_key: ViewAnimationKey): void;
+        nextKey(_time: number, _direction: "forward" | "backward"): number;
         addProperty(_path: string[]): void;
         deleteProperty(_element: HTMLElement): void;
-        getSelectedSequences(_selectedProperty: HTMLElement): ViewAnimationSequence[];
+        private getSelectedSequences;
         private deletePath;
+        private hndEvent;
         private hndKey;
     }
 }
@@ -550,7 +554,6 @@ declare namespace Fudge {
         private controller;
         private toolbar;
         private selectedKey;
-        private selectedProperty;
         private time;
         private idInterval;
         constructor(_container: ComponentContainer, _state: Object);
@@ -565,7 +568,6 @@ declare namespace Fudge {
         private hndSelect;
         private hndAnimate;
         private dispatchAnimate;
-        private fillToolbar;
         private hndToolbarClick;
         private pause;
         private randomNameGenerator;
@@ -619,6 +621,7 @@ declare namespace Fudge {
         private generateKey;
         private hndFocus;
         private hndAnimate;
+        private hndSelect;
         private hndPointerDown;
         private hndPointerMoveTimeline;
         private hndPointerMoveSlope;

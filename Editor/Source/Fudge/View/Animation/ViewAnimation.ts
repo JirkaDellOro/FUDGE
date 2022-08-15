@@ -40,7 +40,6 @@ namespace Fudge {
 
     private toolbar: HTMLDivElement;
     private selectedKey: ViewAnimationKey;
-    private selectedProperty: HTMLElement;
     
     private time: ƒ.Time = new ƒ.Time();
     private idInterval: number;
@@ -50,13 +49,14 @@ namespace Fudge {
       this.setAnimation(null);
       this.createUserInterface();
       
+      this.dom.style.display = "flex";
+      this.dom.style.flexFlow = "column";
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndSelect);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.INPUT, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.CLICK, this.hndEvent);
     }
 
     //#region context menu
@@ -96,7 +96,7 @@ namespace Fudge {
           if (!(document.activeElement instanceof HTMLElement)) return;
           this.controller.deleteProperty(document.activeElement);
           this.createPropertyList();
-          this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
+          this.dispatchAnimate();
           return;
       }
     }
@@ -159,12 +159,16 @@ namespace Fudge {
     private createUserInterface(): void {
       this.toolbar = document.createElement("div");
       this.toolbar.id = "toolbar";
-      this.toolbar.style.width = "300px";
-      this.toolbar.style.height = "50px";
-      this.toolbar.style.marginBottom = "30px";
-      this.toolbar.style.overflow = "hidden";
-      this.fillToolbar(this.toolbar);
-      this.toolbar.addEventListener("click", this.hndToolbarClick);
+      this.toolbar.style.flex = "0 1 auto";
+
+      ["previous", "play", "next"]
+        .map(_id => {
+          let button: HTMLButtonElement = document.createElement("button");
+          button.id = _id;
+          button.onclick = this.hndToolbarClick;
+          return button;
+        })
+        .forEach(_button => this.toolbar.appendChild(_button));
     }
 
     private hndEvent = (_event: FudgeEvent): void => {
@@ -178,25 +182,16 @@ namespace Fudge {
           break;
         case EVENT_EDITOR.DELETE:
           this.controller.deleteKey(this.selectedKey);
-          this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
-          break;
-        case ƒui.EVENT.CLICK:
-          if (!(_event.target instanceof HTMLElement) || !this.animation || _event.target instanceof HTMLButtonElement) break;
-        
-          let target: HTMLElement = _event.target;
-          if (target.parentElement instanceof ƒui.Details) 
-            target = target.parentElement;
-          if (target instanceof ƒui.CustomElement || target instanceof ƒui.Details) 
-            this.selectedProperty = target;
-          else if (target == this.dom)
-            this.selectedProperty = null;
-          this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
+          this.dispatchAnimate();
           break;
         case ƒui.EVENT.INPUT:
           if (_event.target instanceof ƒui.CustomElement) {
             this.controller.updateSequence(this.playbackTime, _event.target);
-            this.dispatchAnimate(this.controller.getSelectedSequences(this.selectedProperty));
+            this.dispatchAnimate();
           }
+          break;
+        case ƒui.EVENT.CLICK:
+          this.dispatchAnimate();
           break;
       }
     }
@@ -211,144 +206,78 @@ namespace Fudge {
         this.animation = undefined;
         this.dom.innerHTML = "select node with an attached component animator";
       }
-      
-      this.dispatchAnimate(this.controller?.getSelectedSequences(this.selectedProperty));
+
+      this.dispatchAnimate();
     }
 
     private createPropertyList(): void {
       let nodeMutator: ƒ.Mutator = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback) || {};
 
       let newPropertyList: HTMLDivElement = ƒui.Generator.createInterfaceFromMutator(nodeMutator);
+      newPropertyList.style.paddingTop = "30px";
+      newPropertyList.style.flex = "1 1 auto";
       if (this.dom.contains(this.propertyList))
         this.dom.replaceChild(newPropertyList, this.propertyList);
       else
         this.dom.appendChild(newPropertyList);
       this.propertyList = newPropertyList;
 
-      this.controller = new ControllerAnimation(this.animation, this.propertyList);
+      this.controller = new ControllerAnimation(this.animation, this.propertyList, this);
       this.controller.updatePropertyList(nodeMutator);
+      this.propertyList.dispatchEvent(new CustomEvent(ƒui.EVENT.CLICK));
     }
 
     private hndSelect = (_event: FudgeEvent): void => {
-      this.selectedKey = _event.detail.data;
+      let detail: EventDetail = _event.detail;
+      if (detail.view instanceof ViewAnimationSheet)
+        this.selectedKey = detail.data;
     }
 
     private hndAnimate = (_event: FudgeEvent): void => {
       if (_event.detail.view instanceof ViewAnimationSheet)
         this.pause();
-      this.playbackTime = _event.detail.data.playbackTime;
+      this.playbackTime = _event.detail.data;
 
       let nodeMutator: ƒ.Mutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
       this.controller?.updatePropertyList(nodeMutator);
     }
 
-    private dispatchAnimate(_sequences?: ViewAnimationSequence[]): void {
-      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: this.playbackTime, sequences: _sequences } } });
+    private dispatchAnimate(): void {
+      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: this.playbackTime } });
     }
 
-    private fillToolbar(_tb: HTMLElement): void { 
-      let buttons: HTMLButtonElement[] = [];
-      buttons.push(document.createElement("button"));
-      buttons.push(document.createElement("button"));
-      buttons.push(document.createElement("button"));
-      buttons.push(document.createElement("button"));
-      buttons.push(document.createElement("button"));
-      buttons.push(document.createElement("button"));
-      buttons.push(document.createElement("button"));
-      buttons.push(document.createElement("button"));
-      buttons.push(document.createElement("button"));
-      buttons.push(document.createElement("button"));
-      buttons[0].classList.add("fa", "fa-fast-backward", "start");
-      buttons[1].classList.add("fa", "fa-backward", "back");
-      buttons[2].classList.add("fa", "fa-play", "play");
-      buttons[3].classList.add("fa", "fa-pause", "pause");
-      buttons[4].classList.add("fa", "fa-forward", "forward");
-      buttons[5].classList.add("fa", "fa-fast-forward", "end");
-      buttons[6].classList.add("fa", "fa-file", "add-label");
-      buttons[7].classList.add("fa", "fa-bookmark", "add-event");
-      buttons[8].classList.add("fa", "fa-plus-square", "add-key");
-      buttons[9].classList.add("fa", "fa-plus-square", "remove-key");
-      buttons[0].id = "start";
-      buttons[1].id = "back";
-      buttons[2].id = "play";
-      buttons[3].id = "pause";
-      buttons[4].id = "forward";
-      buttons[5].id = "end";
-      buttons[6].id = "add-label";
-      buttons[7].id = "add-event";
-      buttons[8].id = "add-key";
-      buttons[9].id = "remove-key";
-
-      buttons[0].innerText = "start";
-      buttons[1].innerText = "back";
-      buttons[2].innerText = "play";
-      buttons[3].innerText = "pause";
-      buttons[4].innerText = "forward";
-      buttons[5].innerText = "end";
-      buttons[6].innerText = "add-label";
-      buttons[7].innerText = "add-event";
-      buttons[8].innerText = "add-key";
-      buttons[9].innerText = "remove-key";
-
-      for (let b of buttons) {
-        _tb.appendChild(b);
-      }
-
-    }
-
-    private hndToolbarClick = (_e: MouseEvent) => {
-      // console.log("click", _e.target);
-      let target: HTMLInputElement = <HTMLInputElement>_e.target;
+    private hndToolbarClick = (_event: MouseEvent) => {
+      let target: HTMLInputElement = <HTMLInputElement>_event.target;
       switch (target.id) {
-        case "add-label":
-          this.animation.labels[this.randomNameGenerator()] = this.playbackTime;
-          this.dispatchAnimate();
-          break;
-        case "add-event":
-          this.animation.setEvent(this.randomNameGenerator(), this.playbackTime);
-          this.dispatchAnimate();
-          break;
-        case "add-key":
-          // TODO: readd this look how it works in unity?
-          // this.controller.addKeyToAnimationStructure(this.playbackTime);
-          // this.sheet.setSequences(this.controller.getOpenSequences());       
-          // this.redraw();
-          break;
-        case "remove-key":
-          this.dispatch(EVENT_EDITOR.DELETE, { bubbles: true });
-          break;
-        case "start":
-          this.playbackTime = 0;
-          this.dispatchAnimate();
-          break;
-        case "back": // TODO: change to next key frame
-          this.playbackTime = this.playbackTime -= 1000 / this.animation.fps; // stepsPerSecond;
-          this.playbackTime = Math.max(this.playbackTime, 0);
+        // case "add-label":
+        //   this.animation.labels[this.randomNameGenerator()] = this.playbackTime;
+        //   this.dispatchAnimate();
+        //   break;
+        // case "add-event":
+        //   this.animation.setEvent(this.randomNameGenerator(), this.playbackTime);
+        //   this.dispatchAnimate();
+        //   break;
+        case "previous": // TODO: change to next key frame
+          this.playbackTime = this.controller.nextKey(this.playbackTime, "backward");
           this.dispatchAnimate();
           break;
         case "play":
           if (this.idInterval == undefined) {
+            target.id = "pause";
             this.time.set(this.playbackTime);
             this.idInterval = window.setInterval(() => {
               this.playbackTime = this.time.get() % this.animation.totalTime;
               this.dispatchAnimate();
-            }, 1000 / this.animation.fps);
+            },                                   1000 / this.animation.fps);
           }
           break;
         case "pause":
+          target.id = "play";
           this.pause();
           break;
-        case "forward": // TODO: change to next key frame
-          this.playbackTime = this.playbackTime += 1000 / this.animation.fps; // stepsPerSecond;
-          this.playbackTime = Math.min(this.playbackTime, this.animation.totalTime);
+        case "next": // TODO: change to next key frame
+          this.playbackTime = this.controller.nextKey(this.playbackTime, "forward");
           this.dispatchAnimate();
-          break;
-        case "end":
-          this.playbackTime = this.animation.totalTime;
-          this.dispatchAnimate();
-          break;
-        default:
-
           break;
       }
     }

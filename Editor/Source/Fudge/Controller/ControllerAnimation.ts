@@ -16,14 +16,19 @@ namespace Fudge {
     ];
     private animation: ƒ.Animation;
     private propertyList: HTMLElement;
+    private view: ViewAnimation;
+    private sequences: ViewAnimationSequence[];
 
-    public constructor(_animation: ƒ.Animation, _propertyList: HTMLElement) {
+    constructor(_animation: ƒ.Animation, _propertyList: HTMLElement, _view: ViewAnimation) {
       this.animation = _animation;
       this.propertyList = _propertyList;
+      this.propertyList.addEventListener(ƒui.EVENT.CLICK, this.hndEvent);
+      this.view = _view;
     }
 
     public updatePropertyList(_mutator: ƒ.Mutator): void {
       let colorIndex: number = 0;
+
       updatePropertyListRecursive(this.propertyList, _mutator, this.animation.animationStructure);
 
       function updatePropertyListRecursive(_propertyList: HTMLElement, _mutator: ƒ.Mutator, _animationStructure: ƒ.AnimationStructure): void {
@@ -35,7 +40,7 @@ namespace Fudge {
           let value: ƒ.General = _mutator[key];
           let structureOrSequence: Object = _animationStructure[key];
           
-          if (element instanceof ƒui.CustomElement && element != document.activeElement) {
+          if (element instanceof ƒui.CustomElement && structureOrSequence instanceof ƒ.AnimationSequence) {
             element.style.setProperty("--color-animation-property", getNextColor());
             element.setMutatorValue(value);
             Reflect.set(element, "animationSequence", structureOrSequence);
@@ -70,6 +75,17 @@ namespace Fudge {
       let animationSequence: ƒ.AnimationSequence = _key.sequence.sequence;
       animationSequence.removeKey(_key.key);
     }
+
+    public nextKey(_time: number, _direction: "forward" | "backward"): number {
+      let nextKey: ƒ.AnimationKey = this.sequences
+        .flatMap(_sequence => _sequence.sequence.getKeys())
+        .sort(ƒ.AnimationKey.compare)
+        .find(_key => _direction == "forward" && _key.Time > _time || _direction == "backward" && _key.Time < _time);
+      if (nextKey)
+        return nextKey.Time;
+      else
+        return _time;
+    }
     
     public addProperty(_path: string[]): void {
       let value: Object = this.animation.animationStructure;
@@ -96,7 +112,7 @@ namespace Fudge {
       this.deletePath(path);
     }
 
-    public getSelectedSequences(_selectedProperty: HTMLElement): ViewAnimationSequence[] {
+    private getSelectedSequences(_selectedProperty?: HTMLElement): ViewAnimationSequence[] {
       let sequences: ViewAnimationSequence[] = [];
       collectSelectedSequencesRecursive(this.propertyList, this.animation.animationStructure, sequences, _selectedProperty == null);
       return sequences;
@@ -142,6 +158,24 @@ namespace Fudge {
         }
   
         return _object;
+      }
+    }
+
+    private hndEvent = (_event: CustomEvent): void => {
+      switch (_event.type) {
+        case ƒui.EVENT.CLICK:
+          if (!(_event.target instanceof HTMLElement) || !this.animation || _event.target instanceof HTMLButtonElement) break;
+        
+          let target: HTMLElement = _event.target;
+          if (target.parentElement instanceof ƒui.Details) 
+            target = target.parentElement;
+          if (target instanceof ƒui.CustomElement || target instanceof ƒui.Details) 
+            this.sequences = this.getSelectedSequences(target);
+          else if (target == this.propertyList)
+            this.sequences = this.getSelectedSequences();
+          
+          this.view.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.sequences } });
+          break;
       }
     }
 

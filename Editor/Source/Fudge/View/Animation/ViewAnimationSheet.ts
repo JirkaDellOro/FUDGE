@@ -61,6 +61,7 @@ namespace Fudge {
       _container.on("resize", () => this.draw());
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndFocus);
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndSelect);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
 
       this.canvas.style.position = "absolute";
@@ -508,11 +509,15 @@ namespace Fudge {
     }
 
     private hndAnimate = (_event: FudgeEvent): void => {
-      this.playbackTime = _event.detail.data.playbackTime;
-      if (_event.detail.data.sequences)
-        this.sequences = _event.detail.data.sequences;
-      
+      this.playbackTime = _event.detail.data;
       this.draw();
+    }
+
+    private hndSelect = (_event: FudgeEvent): void => {
+      if (_event.detail.view instanceof ViewAnimation) {
+        this.sequences = _event.detail.data;
+        this.draw();
+      }
     }
 
     private hndPointerDown = (_event: PointerEvent): void => {
@@ -640,7 +645,7 @@ namespace Fudge {
     }
 
     private dispatchAnimate(): void {
-      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: { playbackTime: this.playbackTime } } });
+      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: this.playbackTime } });
     }
     //#endregion
 
