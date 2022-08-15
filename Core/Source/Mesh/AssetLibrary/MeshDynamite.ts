@@ -4,7 +4,7 @@ namespace FudgeCore {
 
     public constructor(_name: string = "MeshDynamite") {
       super(_name);
-      // this.create();
+
 
       this.vertices = new Vertices(
         new Vertex(new Vector3(-0.310466, -0.043290, 1.569645), new Vector2(0.465302, 1.000000)),

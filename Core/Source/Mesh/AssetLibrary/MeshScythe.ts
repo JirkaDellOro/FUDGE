@@ -5,7 +5,6 @@ namespace FudgeCore {
 
     public constructor(_name: string = "MeshScythe") {
       super(_name);
-      // this.create();
 
       this.vertices = new Vertices(
         new Vertex(new Vector3(-0.120914, 0.025150, 0.036518), new Vector2(0.611982, 1.000000)),

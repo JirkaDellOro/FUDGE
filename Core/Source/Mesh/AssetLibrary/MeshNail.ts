@@ -15,14 +15,14 @@ namespace FudgeCore {
     public create(_shaftLength: number): void {
         this.clear(); 
         this.vertices = new Vertices(
-          new Vertex(new Vector3(-0.029675, 0.952079 + (this.shaftLength/2), 0.029675), new Vector2(0.019988, 0.098473)),
-          new Vertex(new Vector3(-0.029675, 0.952079 + (this.shaftLength/2), -0.029675), new Vector2(0.109933, 0.098473)),
-          new Vertex(new Vector3(0.029675, 0.952079 + (this.shaftLength/2), 0.029675), new Vector2(0.064960, 0.098473)),
-          new Vertex(new Vector3(0.029675, 0.952079 + (this.shaftLength/2), -0.029675), new Vector2(0.154906, 0.098473)),
-          new Vertex(new Vector3(0.000000, 0.952079 + (this.shaftLength/2), -0.044512), new Vector2(0.134918, 0.098473)),
-          new Vertex(new Vector3(0.000000, 0.952079 + (this.shaftLength/2), 0.044512), new Vector2(0.134918, 0.096966)),
-          new Vertex(new Vector3(-0.044512, 0.952079 + (this.shaftLength/2), -0.000000), new Vector2(0.000000, 0.096966)),
-          new Vertex(new Vector3(0.044512, 0.952079 + (this.shaftLength/2), -0.000000), new Vector2(0.089945, 0.098473)),
+          new Vertex(new Vector3(-0.029675, 0.952079 + (_shaftLength/2), 0.029675), new Vector2(0.019988, 0.098473)),
+          new Vertex(new Vector3(-0.029675, 0.952079 + (_shaftLength/2), -0.029675), new Vector2(0.109933, 0.098473)),
+          new Vertex(new Vector3(0.029675, 0.952079 + (_shaftLength/2), 0.029675), new Vector2(0.064960, 0.098473)),
+          new Vertex(new Vector3(0.029675, 0.952079 + (_shaftLength/2), -0.029675), new Vector2(0.154906, 0.098473)),
+          new Vertex(new Vector3(0.000000, 0.952079 + (_shaftLength/2), -0.044512), new Vector2(0.134918, 0.098473)),
+          new Vertex(new Vector3(0.000000, 0.952079 + (_shaftLength/2), 0.044512), new Vector2(0.134918, 0.096966)),
+          new Vertex(new Vector3(-0.044512, 0.952079 + (_shaftLength/2), -0.000000), new Vector2(0.000000, 0.096966)),
+          new Vertex(new Vector3(0.044512, 0.952079 + (_shaftLength/2), -0.000000), new Vector2(0.089945, 0.098473)),
           new Vertex(new Vector3(-0.029675, -0.275171, 0.029675), new Vector2(0.089945, 0.096966)),
           new Vertex(new Vector3(-0.029675, -0.275171, -0.029675), new Vector2(0.044973, 0.098473)),
           new Vertex(new Vector3(0.029675, -0.275171, 0.029675), new Vector2(0.044973, 0.096966)),
@@ -56,7 +56,7 @@ namespace FudgeCore {
           new Vertex(new Vector3(0.079360, -0.251138, 0.000000), new Vector2(0.263327, 0.150369)),
           new Vertex(new Vector3(-0.052907, -0.251138, 0.052907), new Vector2(0.154906, 1.000000)),
           new Vertex(new Vector3(0.052907, -0.251138, -0.052907), new Vector2(0.203363, 0.170357)),
-          new Vertex(new Vector3(0.000000, 1.079486 + (this.shaftLength/2), -0.000000), new Vector2(0.199378, 0.294043))
+          new Vertex(new Vector3(0.000000, 1.079486 + (_shaftLength/2), -0.000000), new Vector2(0.199378, 0.294043))
         
       );
         this.faces = [

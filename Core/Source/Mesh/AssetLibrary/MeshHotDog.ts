@@ -17,52 +17,52 @@ namespace FudgeCore {
     public create(_hotDogLengthBun: number, _hotDogLengthFilling: number, _hotDogWidth: number, _amountExtraLayers: number ): void {
         this.clear(); 
         this.vertices = new Vertices(
-        new Vertex(new Vector3(0.060679 + (_amountExtraLayers * 0.08) + (this.hotDogWidth / 2), -0.196488 - (this.hotDogLengthBun / 2), 0.033709), new Vector2(0.000000, 0.756401)),
-        new Vertex(new Vector3(0.060679 + (_amountExtraLayers * 0.08) +  (this.hotDogWidth / 2), 0.196488 + (this.hotDogLengthBun / 2), 0.033709), new Vector2(0.391737, 0.653006)),
-        new Vertex(new Vector3(0.060679 + (_amountExtraLayers * 0.08)  + (this.hotDogWidth / 2), -0.196488 - (this.hotDogLengthBun / 2), -0.033709), new Vector2(0.576412, 0.785739)),
-        new Vertex(new Vector3(0.060679 + (_amountExtraLayers * 0.08) + (this.hotDogWidth / 2), 0.196488 + (this.hotDogLengthBun / 2), -0.033709), new Vector2(0.391737, 0.082152)),
-        new Vertex(new Vector3(0.026970 + (_amountExtraLayers * 0.08) , -0.196488 - (this.hotDogLengthBun / 2), -0.050563), new Vector2(0.545284, 0.785739)),
-        new Vertex(new Vector3(0.026970 + (_amountExtraLayers * 0.08) , 0.196488 + (this.hotDogLengthBun / 2), -0.050563), new Vector2(0.921646, 0.540293)),
-        new Vertex(new Vector3(0.026970 + (_amountExtraLayers * 0.08) , -0.196488 - (this.hotDogLengthBun / 2), 0.050563), new Vector2(0.293803, 0.653006)),
-        new Vertex(new Vector3(0.026970 + (_amountExtraLayers * 0.08) , 0.196488 + (this.hotDogLengthBun / 2), 0.050563), new Vector2(0.871340, 0.106730)),
-        new Vertex(new Vector3(0.077533 + (_amountExtraLayers * 0.08) + (this.hotDogWidth / 2), -0.196488 - (this.hotDogLengthBun / 2), 0.000000), new Vector2(0.293803, 0.082152)),
-        new Vertex(new Vector3(0.077533 + (_amountExtraLayers * 0.08) + (this.hotDogWidth / 2), 0.196488 + (this.hotDogLengthBun / 2), 0.000000), new Vector2(0.868768, 0.535195)),
-        new Vertex(new Vector3(0.026970 + (_amountExtraLayers * 0.08) , 0.253042 + (this.hotDogLengthBun / 2), -0.000000), new Vector2(0.576413, 0.806982)),
-        new Vertex(new Vector3(0.026970 + (_amountExtraLayers * 0.08) , -0.253042 - (this.hotDogLengthBun / 2), -0.000000), new Vector2(0.293803, 0.653006)),
-        new Vertex(new Vector3(-0.026970, -0.157204 - (this.hotDogLengthFilling / 2), 0.026969), new Vector2(0.818463, 0.101632)),
-        new Vertex(new Vector3(-0.026970, 0.157204 + (this.hotDogLengthFilling / 2) , 0.026969), new Vector2(0.293803, 0.082152)),
-        new Vertex(new Vector3(-0.026970, -0.157204 - (this.hotDogLengthFilling / 2), -0.026970), new Vector2(0.031129, 0.735158)),
-        new Vertex(new Vector3(-0.026970, 0.157204 + (this.hotDogLengthFilling / 2), -0.026970), new Vector2(0.146901, 0.653006)),
-        new Vertex(new Vector3(0.026970, -0.157204 - (this.hotDogLengthFilling / 2), 0.026969), new Vector2(0.416221, 0.653006)),
-        new Vertex(new Vector3(0.026970, 0.157204 + (this.hotDogLengthFilling / 2), 0.026969), new Vector2(0.607541, 0.806982)),
-        new Vertex(new Vector3(0.026970, -0.157204 - (this.hotDogLengthFilling / 2), -0.026970), new Vector2(0.416221, 0.082152)),
-        new Vertex(new Vector3(0.026970, 0.157204 + (this.hotDogLengthFilling / 2), -0.026970), new Vector2(0.146901, 0.082152)),
-        new Vertex(new Vector3(0.000000, -0.157204 - (this.hotDogLengthFilling / 2), -0.040454), new Vector2(0.342770, 0.653006)),
-        new Vertex(new Vector3(0.000000, 0.157204 + (this.hotDogLengthFilling / 2), -0.040454), new Vector2(0.921646, 0.089660)),
-        new Vertex(new Vector3(0.000000, -0.157204 - (this.hotDogLengthFilling / 2), 0.040454), new Vector2(0.342770, 0.082152)),
-        new Vertex(new Vector3(0.000000, 0.157204 + (this.hotDogLengthFilling / 2), 0.040454), new Vector2(0.342770, 0.000000)),
-        new Vertex(new Vector3(-0.040454, -0.157204 - (this.hotDogLengthFilling / 2), 0.000000), new Vector2(0.220352, 0.000000)),
-        new Vertex(new Vector3(-0.040454, 0.157204 + (this.hotDogLengthFilling / 2), 0.000000), new Vector2(0.607541, 0.697580)),
-        new Vertex(new Vector3(0.040454, -0.157204 - (this.hotDogLengthFilling / 2), 0.000000), new Vector2(0.858957, 0.000000)),
-        new Vertex(new Vector3(0.040454, 0.157204 + (this.hotDogLengthFilling / 2), 0.000000), new Vector2(0.031129, 0.844561)),
-        new Vertex(new Vector3(0.000000, 0.202451 + (this.hotDogLengthFilling / 2), -0.000000), new Vector2(0.576413, 0.697580)),
-        new Vertex(new Vector3(0.000000, -0.202451 - (this.hotDogLengthFilling / 2), -0.000000), new Vector2(0.220352, 0.735158)),
-        new Vertex(new Vector3(-0.060679 - (this.hotDogWidth / 2), -0.196488 - (this.hotDogLengthBun / 2), 0.033709), new Vector2(0.342770, 0.735158)),
-        new Vertex(new Vector3(-0.060679 - (this.hotDogWidth / 2), 0.196488 + (this.hotDogLengthBun / 2), 0.033709), new Vector2(0.921646, 0.522450)),
-        new Vertex(new Vector3(-0.060679 - (this.hotDogWidth / 2), -0.196488 - (this.hotDogLengthBun / 2), -0.033709), new Vector2(0.858621, 0.540293)),
-        new Vertex(new Vector3(-0.060679 - (this.hotDogWidth / 2), 0.196488 + (this.hotDogLengthBun / 2), -0.033709), new Vector2(0.448555, 0.664876)),
-        new Vertex(new Vector3(-0.026970, -0.196488 - (this.hotDogLengthBun / 2), -0.050563), new Vector2(0.845765, 0.889264)),
-        new Vertex(new Vector3(-0.026970, 0.196488 + (this.hotDogLengthBun / 2), -0.050563), new Vector2(0.921646, 0.065728)),
-        new Vertex(new Vector3(-0.026970, -0.196488 - (this.hotDogLengthBun / 2) , 0.050563), new Vector2(1.000000, 0.522450)),
-        new Vertex(new Vector3(-0.026970, 0.196488 + (this.hotDogLengthBun / 2), 0.050563), new Vector2(0.749859, 0.889264)),
-        new Vertex(new Vector3(-0.077533 - (this.hotDogWidth / 2), -0.196488 - (this.hotDogLengthBun / 2), 0.000000), new Vector2(0.708004, 0.926988)),
-        new Vertex(new Vector3(-0.077533 - (this.hotDogWidth / 2), 0.196488 + (this.hotDogLengthBun / 2), 0.000000), new Vector2(0.762715, 0.540293)),
-        new Vertex(new Vector3(-0.026970, 0.253042 + (this.hotDogLengthBun / 2), -0.000000), new Vector2(1.000000, 0.065728)),
-        new Vertex(new Vector3(-0.026970, -0.253042 - (this.hotDogLengthBun / 2), -0.000000), new Vector2(0.416744, 0.722607))
+        new Vertex(new Vector3(0.060679 + (_amountExtraLayers * 0.08) + (_hotDogWidth / 2), -0.196488 - (_hotDogLengthBun / 2), 0.033709), new Vector2(0.000000, 0.756401)),
+        new Vertex(new Vector3(0.060679 + (_amountExtraLayers * 0.08) +  (_hotDogWidth / 2), 0.196488 + (_hotDogLengthBun / 2), 0.033709), new Vector2(0.391737, 0.653006)),
+        new Vertex(new Vector3(0.060679 + (_amountExtraLayers * 0.08)  + (_hotDogWidth / 2), -0.196488 - (_hotDogLengthBun / 2), -0.033709), new Vector2(0.576412, 0.785739)),
+        new Vertex(new Vector3(0.060679 + (_amountExtraLayers * 0.08) + (_hotDogWidth / 2), 0.196488 + (_hotDogLengthBun / 2), -0.033709), new Vector2(0.391737, 0.082152)),
+        new Vertex(new Vector3(0.026970 + (_amountExtraLayers * 0.08) , -0.196488 - (_hotDogLengthBun / 2), -0.050563), new Vector2(0.545284, 0.785739)),
+        new Vertex(new Vector3(0.026970 + (_amountExtraLayers * 0.08) , 0.196488 + (_hotDogLengthBun / 2), -0.050563), new Vector2(0.921646, 0.540293)),
+        new Vertex(new Vector3(0.026970 + (_amountExtraLayers * 0.08) , -0.196488 - (_hotDogLengthBun / 2), 0.050563), new Vector2(0.293803, 0.653006)),
+        new Vertex(new Vector3(0.026970 + (_amountExtraLayers * 0.08) , 0.196488 + (_hotDogLengthBun / 2), 0.050563), new Vector2(0.871340, 0.106730)),
+        new Vertex(new Vector3(0.077533 + (_amountExtraLayers * 0.08) + (_hotDogWidth / 2), -0.196488 - (_hotDogLengthBun / 2), 0.000000), new Vector2(0.293803, 0.082152)),
+        new Vertex(new Vector3(0.077533 + (_amountExtraLayers * 0.08) + (_hotDogWidth / 2), 0.196488 + (_hotDogLengthBun / 2), 0.000000), new Vector2(0.868768, 0.535195)),
+        new Vertex(new Vector3(0.026970 + (_amountExtraLayers * 0.08) , 0.253042 + (_hotDogLengthBun / 2), -0.000000), new Vector2(0.576413, 0.806982)),
+        new Vertex(new Vector3(0.026970 + (_amountExtraLayers * 0.08) , -0.253042 - (_hotDogLengthBun / 2), -0.000000), new Vector2(0.293803, 0.653006)),
+        new Vertex(new Vector3(-0.026970, -0.157204 - (_hotDogLengthFilling / 2), 0.026969), new Vector2(0.818463, 0.101632)),
+        new Vertex(new Vector3(-0.026970, 0.157204 + (_hotDogLengthFilling / 2) , 0.026969), new Vector2(0.293803, 0.082152)),
+        new Vertex(new Vector3(-0.026970, -0.157204 - (_hotDogLengthFilling / 2), -0.026970), new Vector2(0.031129, 0.735158)),
+        new Vertex(new Vector3(-0.026970, 0.157204 + (_hotDogLengthFilling / 2), -0.026970), new Vector2(0.146901, 0.653006)),
+        new Vertex(new Vector3(0.026970, -0.157204 - (_hotDogLengthFilling / 2), 0.026969), new Vector2(0.416221, 0.653006)),
+        new Vertex(new Vector3(0.026970, 0.157204 + (_hotDogLengthFilling / 2), 0.026969), new Vector2(0.607541, 0.806982)),
+        new Vertex(new Vector3(0.026970, -0.157204 - (_hotDogLengthFilling / 2), -0.026970), new Vector2(0.416221, 0.082152)),
+        new Vertex(new Vector3(0.026970, 0.157204 + (_hotDogLengthFilling / 2), -0.026970), new Vector2(0.146901, 0.082152)),
+        new Vertex(new Vector3(0.000000, -0.157204 - (_hotDogLengthFilling / 2), -0.040454), new Vector2(0.342770, 0.653006)),
+        new Vertex(new Vector3(0.000000, 0.157204 + (_hotDogLengthFilling / 2), -0.040454), new Vector2(0.921646, 0.089660)),
+        new Vertex(new Vector3(0.000000, -0.157204 - (_hotDogLengthFilling / 2), 0.040454), new Vector2(0.342770, 0.082152)),
+        new Vertex(new Vector3(0.000000, 0.157204 + (_hotDogLengthFilling / 2), 0.040454), new Vector2(0.342770, 0.000000)),
+        new Vertex(new Vector3(-0.040454, -0.157204 - (_hotDogLengthFilling / 2), 0.000000), new Vector2(0.220352, 0.000000)),
+        new Vertex(new Vector3(-0.040454, 0.157204 + (_hotDogLengthFilling / 2), 0.000000), new Vector2(0.607541, 0.697580)),
+        new Vertex(new Vector3(0.040454, -0.157204 - (_hotDogLengthFilling / 2), 0.000000), new Vector2(0.858957, 0.000000)),
+        new Vertex(new Vector3(0.040454, 0.157204 + (_hotDogLengthFilling / 2), 0.000000), new Vector2(0.031129, 0.844561)),
+        new Vertex(new Vector3(0.000000, 0.202451 + (_hotDogLengthFilling / 2), -0.000000), new Vector2(0.576413, 0.697580)),
+        new Vertex(new Vector3(0.000000, -0.202451 - (_hotDogLengthFilling / 2), -0.000000), new Vector2(0.220352, 0.735158)),
+        new Vertex(new Vector3(-0.060679 - (_hotDogWidth / 2), -0.196488 - (_hotDogLengthBun / 2), 0.033709), new Vector2(0.342770, 0.735158)),
+        new Vertex(new Vector3(-0.060679 - (_hotDogWidth / 2), 0.196488 + (_hotDogLengthBun / 2), 0.033709), new Vector2(0.921646, 0.522450)),
+        new Vertex(new Vector3(-0.060679 - (_hotDogWidth / 2), -0.196488 - (_hotDogLengthBun / 2), -0.033709), new Vector2(0.858621, 0.540293)),
+        new Vertex(new Vector3(-0.060679 - (_hotDogWidth / 2), 0.196488 + (_hotDogLengthBun / 2), -0.033709), new Vector2(0.448555, 0.664876)),
+        new Vertex(new Vector3(-0.026970, -0.196488 - (_hotDogLengthBun / 2), -0.050563), new Vector2(0.845765, 0.889264)),
+        new Vertex(new Vector3(-0.026970, 0.196488 + (_hotDogLengthBun / 2), -0.050563), new Vector2(0.921646, 0.065728)),
+        new Vertex(new Vector3(-0.026970, -0.196488 - (_hotDogLengthBun / 2) , 0.050563), new Vector2(1.000000, 0.522450)),
+        new Vertex(new Vector3(-0.026970, 0.196488 + (_hotDogLengthBun / 2), 0.050563), new Vector2(0.749859, 0.889264)),
+        new Vertex(new Vector3(-0.077533 - (_hotDogWidth / 2), -0.196488 - (_hotDogLengthBun / 2), 0.000000), new Vector2(0.708004, 0.926988)),
+        new Vertex(new Vector3(-0.077533 - (_hotDogWidth / 2), 0.196488 + (_hotDogLengthBun / 2), 0.000000), new Vector2(0.762715, 0.540293)),
+        new Vertex(new Vector3(-0.026970, 0.253042 + (_hotDogLengthBun / 2), -0.000000), new Vector2(1.000000, 0.065728)),
+        new Vertex(new Vector3(-0.026970, -0.253042 - (_hotDogLengthBun / 2), -0.000000), new Vector2(0.416744, 0.722607))
         
       );
         for (let i: number = 0;  i < _amountExtraLayers; i++) {
-        this.vertices.push(new Vertex(new Vector3(-0.026970 + (0.08 * (i + 1)) , -0.157204 - (this.hotDogLengthFilling / 2), 0.026969), new Vector2(0.921646, 0.522450)), new Vertex(new Vector3(-0.026970 + (0.08 * (i + 1)) , 0.157204 + (this.hotDogLengthFilling / 2), 0.026969), new Vector2(0.858621, 0.540293)), new Vertex(new Vector3(-0.026970 + (0.08 * (i + 1)) , -0.157204 - (this.hotDogLengthFilling / 2), -0.026970), new Vector2(0.448555, 0.664876)), new Vertex(new Vector3(-0.026970 + (0.08 * (i + 1)) , 0.157204 + (this.hotDogLengthFilling / 2), -0.026970), new Vector2(0.845765, 0.889264)), new Vertex(new Vector3(0.026970 + (0.08 * (i + 1)) , -0.157204 - (this.hotDogLengthFilling / 2), 0.026969), new Vector2(0.921646, 0.065728)), new Vertex(new Vector3(0.026970 + (0.08 * (i + 1)) , 0.157204 + (this.hotDogLengthFilling / 2), 0.026969), new Vector2(1.000000, 0.522450)), new Vertex(new Vector3(0.026970 + (0.08 * (i + 1)) , -0.157204 - (this.hotDogLengthFilling / 2), -0.026970), new Vector2(0.749859, 0.889264)), new Vertex(new Vector3(0.026970 + (0.08 * (i + 1)) , 0.157204 + (this.hotDogLengthFilling / 2), -0.026970), new Vector2(0.708004, 0.926988)), new Vertex(new Vector3(0.000000 + (0.08 * (i + 1)) , -0.157204 - (this.hotDogLengthFilling / 2), -0.040454), new Vector2(0.762715, 0.540293)), new Vertex(new Vector3(0.000000 + (0.08 * (i + 1)) , 0.157204 + (this.hotDogLengthFilling / 2), -0.040454), new Vector2(1.000000, 0.065728)), new Vertex(new Vector3(0.000000 + (0.08 * (i + 1)) , -0.157204 - (this.hotDogLengthFilling / 2), 0.040454), new Vector2(0.416744, 0.722607)), new Vertex(new Vector3(0.000000 + (0.08 * (i + 1)) , 0.157204 + (this.hotDogLengthFilling / 2), 0.040454), new Vector2(0.592509, 0.522450)), new Vertex(new Vector3(-0.040454 + (0.08 * (i + 1)) , -0.157204 - (this.hotDogLengthFilling / 2), 0.000000), new Vector2(0.899818, 0.926988)), new Vertex(new Vector3(-0.040454 + (0.08 * (i + 1)) , 0.157204 + (this.hotDogLengthFilling / 2), 0.000000), new Vector2(0.592509, 0.065728)), new Vertex(new Vector3(0.040454 + (0.08 * (i + 1)) , -0.157204 - (this.hotDogLengthFilling / 2), 0.000000), new Vector2(0.803911, 0.926988)), new Vertex(new Vector3(0.040454 + (0.08 * (i + 1)) , 0.157204 + (this.hotDogLengthFilling / 2), 0.000000), new Vector2(0.666808, 0.540293)), new Vertex(new Vector3(0.000000 + (0.08 * (i + 1)) , 0.202451 + (this.hotDogLengthFilling / 2), -0.000000), new Vector2(0.514155, 0.522450)), new Vertex(new Vector3(0.000000 + (0.08 * (i + 1)) , -0.202451 - (this.hotDogLengthFilling / 2), -0.000000), new Vector2(0.653952, 0.889264)));
+        this.vertices.push(new Vertex(new Vector3(-0.026970 + (0.08 * (i + 1)) , -0.157204 - (_hotDogLengthFilling / 2), 0.026969), new Vector2(0.921646, 0.522450)), new Vertex(new Vector3(-0.026970 + (0.08 * (i + 1)) , 0.157204 + (_hotDogLengthFilling / 2), 0.026969), new Vector2(0.858621, 0.540293)), new Vertex(new Vector3(-0.026970 + (0.08 * (i + 1)) , -0.157204 - (_hotDogLengthFilling / 2), -0.026970), new Vector2(0.448555, 0.664876)), new Vertex(new Vector3(-0.026970 + (0.08 * (i + 1)) , 0.157204 + (_hotDogLengthFilling / 2), -0.026970), new Vector2(0.845765, 0.889264)), new Vertex(new Vector3(0.026970 + (0.08 * (i + 1)) , -0.157204 - (_hotDogLengthFilling / 2), 0.026969), new Vector2(0.921646, 0.065728)), new Vertex(new Vector3(0.026970 + (0.08 * (i + 1)) , 0.157204 + (_hotDogLengthFilling / 2), 0.026969), new Vector2(1.000000, 0.522450)), new Vertex(new Vector3(0.026970 + (0.08 * (i + 1)) , -0.157204 - (_hotDogLengthFilling / 2), -0.026970), new Vector2(0.749859, 0.889264)), new Vertex(new Vector3(0.026970 + (0.08 * (i + 1)) , 0.157204 + (_hotDogLengthFilling / 2), -0.026970), new Vector2(0.708004, 0.926988)), new Vertex(new Vector3(0.000000 + (0.08 * (i + 1)) , -0.157204 - (_hotDogLengthFilling / 2), -0.040454), new Vector2(0.762715, 0.540293)), new Vertex(new Vector3(0.000000 + (0.08 * (i + 1)) , 0.157204 + (_hotDogLengthFilling / 2), -0.040454), new Vector2(1.000000, 0.065728)), new Vertex(new Vector3(0.000000 + (0.08 * (i + 1)) , -0.157204 - (_hotDogLengthFilling / 2), 0.040454), new Vector2(0.416744, 0.722607)), new Vertex(new Vector3(0.000000 + (0.08 * (i + 1)) , 0.157204 + (_hotDogLengthFilling / 2), 0.040454), new Vector2(0.592509, 0.522450)), new Vertex(new Vector3(-0.040454 + (0.08 * (i + 1)) , -0.157204 - (_hotDogLengthFilling / 2), 0.000000), new Vector2(0.899818, 0.926988)), new Vertex(new Vector3(-0.040454 + (0.08 * (i + 1)) , 0.157204 + (_hotDogLengthFilling / 2), 0.000000), new Vector2(0.592509, 0.065728)), new Vertex(new Vector3(0.040454 + (0.08 * (i + 1)) , -0.157204 - (_hotDogLengthFilling / 2), 0.000000), new Vector2(0.803911, 0.926988)), new Vertex(new Vector3(0.040454 + (0.08 * (i + 1)) , 0.157204 + (_hotDogLengthFilling / 2), 0.000000), new Vector2(0.666808, 0.540293)), new Vertex(new Vector3(0.000000 + (0.08 * (i + 1)) , 0.202451 + (_hotDogLengthFilling / 2), -0.000000), new Vector2(0.514155, 0.522450)), new Vertex(new Vector3(0.000000 + (0.08 * (i + 1)) , -0.202451 - (_hotDogLengthFilling / 2), -0.000000), new Vector2(0.653952, 0.889264)));
       //  console.log(this.vertices);
       }
         this.faces = [
@@ -159,7 +159,7 @@ namespace FudgeCore {
       this.hotDogLengthFilling = _serialization.hotDogLengthFilling;
       this.hotDogWidth = _serialization.hotDogWidth;
       this.amountExtraLayers = _serialization.amountExtraLayers;
-      this.create(this.hotDogLengthBun, this. hotDogLengthFilling, this.hotDogWidth, this.amountExtraLayers);
+      this.create(this.hotDogLengthBun, this.hotDogLengthFilling, this.hotDogWidth, this.amountExtraLayers);
       return this;
     }
 

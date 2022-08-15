@@ -5,10 +5,7 @@ namespace FudgeCore {
 
     public constructor(_name: string = "MeshPliers") {
       super(_name);
-      // this.create();
-
       this.vertices = new Vertices(
-        // ground vertices
         new Vertex(new Vector3(-0.195542, -0.341678, 0.036432), new Vector2(0.792771, 0.705512)),
         new Vertex(new Vector3(0.031128, 0.050926, 0.036432), new Vector2(0.439156, 0.822194)),
         new Vertex(new Vector3(-0.195542, -0.341678, -0.036432), new Vector2(0.099996, 0.932720)),

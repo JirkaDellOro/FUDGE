@@ -16,20 +16,20 @@ namespace FudgeCore {
         this.vertices = new Vertices(
         new Vertex(new Vector3(-0.133821, 0.066911, -0.065795), new Vector2(0.126582, 0.443038)),
         new Vertex(new Vector3(-0.133821, 0.200732, -0.065795), new Vector2(0.189873, 0.443038)),
-        new Vertex(new Vector3(0.089214 + (this.hammerHeadPitch/2), 0.200732, -0.065795), new Vector2(0.563291, 0.000000)),
+        new Vertex(new Vector3(0.089214 + (_hammerHeadPitch/2), 0.200732, -0.065795), new Vector2(0.563291, 0.000000)),
         new Vertex(new Vector3(0.178428, 0.066911, -0.065795), new Vector2(0.126582, 0.632911)),
         new Vertex(new Vector3(-0.133821, 0.200732, 0.063565), new Vector2(0.000000, 0.443038)),
         new Vertex(new Vector3(-0.133821, 0.066911, 0.063565), new Vector2(0.746835, 0.403737)),
         new Vertex(new Vector3(0.178428, 0.066911, 0.063565), new Vector2(0.000000, 0.126582)),
-        new Vertex(new Vector3(0.089214 + (this.hammerHeadPitch/2), 0.200732, 0.063565), new Vector2(0.746835, 0.228199)),
+        new Vertex(new Vector3(0.089214 + (_hammerHeadPitch/2), 0.200732, 0.063565), new Vector2(0.746835, 0.228199)),
         new Vertex(new Vector3(0.044607, 0.066911, -0.043492), new Vector2(0.189873, 0.000000)),
-        new Vertex(new Vector3(0.044607, -0.334553 - (this.shaftLength/2), -0.043492), new Vector2(0.746835, 0.000000)),
+        new Vertex(new Vector3(0.044607, -0.334553 - (_shaftLength/2), -0.043492), new Vector2(0.746835, 0.000000)),
         new Vertex(new Vector3(0.044607, 0.066911, 0.045722), new Vector2(0.563291, 0.443038)),
-        new Vertex(new Vector3(0.044607, -0.334553 - (this.shaftLength/2), 0.045722), new Vector2(0.310127, 0.632911)),
+        new Vertex(new Vector3(0.044607, -0.334553 - (_shaftLength/2), 0.045722), new Vector2(0.310127, 0.632911)),
         new Vertex(new Vector3(-0.044607, 0.066911, -0.043492), new Vector2(0.379747, 0.443038)),
-        new Vertex(new Vector3(-0.044607, -0.334553 - (this.shaftLength/2), -0.043492), new Vector2(0.563291, 0.403737)),
+        new Vertex(new Vector3(-0.044607, -0.334553 - (_shaftLength/2), -0.043492), new Vector2(0.563291, 0.403737)),
         new Vertex(new Vector3(-0.044607, 0.066911, 0.045722), new Vector2(0.379747, 0.000000)),
-        new Vertex(new Vector3(-0.044607, -0.334553 - (this.shaftLength/2), 0.045722), new Vector2(0.310127, 0.443038))
+        new Vertex(new Vector3(-0.044607, -0.334553 - (_shaftLength/2), 0.045722), new Vector2(0.310127, 0.443038))
         
       );
         this.faces = [

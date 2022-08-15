@@ -22,13 +22,13 @@ namespace FudgeCore {
         new Vertex(new Vector3(0.352333, -0.028443, -0.352333), new Vector2(0.547588, 0.166667)),
         new Vertex(new Vector3(0.287219, 0.001551, -0.287219), new Vector2(0.333333, 1.000000)),
         new Vertex(new Vector3(0.000000, -0.028443, -0.528500), new Vector2(0.453797, 0.182068)),
-        new Vertex(new Vector3(0.000000, 0.028703 + this.crustHeight, -0.486925), new Vector2(0.563451, 0.166667)),
+        new Vertex(new Vector3(0.000000, 0.028703 + _crustHeight, -0.486925), new Vector2(0.563451, 0.166667)),
         new Vertex(new Vector3(0.000000, -0.028443, 0.528500), new Vector2(0.500000, 0.666667)),
-        new Vertex(new Vector3(0.000000, 0.028703 + this.crustHeight, 0.486925), new Vector2(0.317932, 0.453798)),
+        new Vertex(new Vector3(0.000000, 0.028703 + _crustHeight, 0.486925), new Vector2(0.317932, 0.453798)),
         new Vertex(new Vector3(-0.528500, -0.028443, 0.000000), new Vector2(0.563451, 0.375000)),
-        new Vertex(new Vector3(-0.486925, 0.028703 + this.crustHeight, 0.000000), new Vector2(0.531726, 0.000000)),
+        new Vertex(new Vector3(-0.486925, 0.028703 + _crustHeight, 0.000000), new Vector2(0.531726, 0.000000)),
         new Vertex(new Vector3(0.528500, -0.028443, 0.000000), new Vector2(0.375000, 0.500000)),
-        new Vertex(new Vector3(0.486925, 0.028703 + this.crustHeight, 0.000000), new Vector2(0.134833, 0.480334)),
+        new Vertex(new Vector3(0.486925, 0.028703 + _crustHeight, 0.000000), new Vector2(0.134833, 0.480334)),
         new Vertex(new Vector3(-0.000000, 0.001551, 0.000000), new Vector2(0.515863, 0.375000)),
         new Vertex(new Vector3(-0.000000, -0.028443, 0.000000), new Vector2(0.125000, 1.000000)),
         new Vertex(new Vector3(-0.528500, 0.001551, 0.000000), new Vector2(0.547588, 0.000000)),
@@ -40,13 +40,13 @@ namespace FudgeCore {
         new Vertex(new Vector3(0.000000, 0.001551, 0.528500), new Vector2(0.547588, 0.375000)),
         new Vertex(new Vector3(-0.352333, 0.001551, 0.352333), new Vector2(0.500000, 0.875000)),
         new Vertex(new Vector3(-0.430828, 0.001551, 0.000000), new Vector2(0.563451, 0.000000)),
-        new Vertex(new Vector3(-0.324617, 0.028703 + this.crustHeight, -0.324617), new Vector2(0.480334, 0.365167)),
+        new Vertex(new Vector3(-0.324617, 0.028703 + _crustHeight, -0.324617), new Vector2(0.480334, 0.365167)),
         new Vertex(new Vector3(0.000000, 0.001551, -0.430828), new Vector2(0.250000, 0.250000)),
-        new Vertex(new Vector3(0.324617, 0.028703 + this.crustHeight, -0.324617), new Vector2(0.250000, 0.750000)),
+        new Vertex(new Vector3(0.324617, 0.028703 + _crustHeight, -0.324617), new Vector2(0.250000, 0.750000)),
         new Vertex(new Vector3(0.430828, 0.001551, 0.000000), new Vector2(0.515863, 0.375000)),
-        new Vertex(new Vector3(0.324617, 0.028703 + this.crustHeight, 0.324617), new Vector2(0.500000, 0.000000)),
+        new Vertex(new Vector3(0.324617, 0.028703 + _crustHeight, 0.324617), new Vector2(0.500000, 0.000000)),
         new Vertex(new Vector3(0.000000, 0.001551, 0.430828), new Vector2(0.000000, 0.125000)),
-        new Vertex(new Vector3(-0.324617, 0.028703 + this.crustHeight, 0.324617), new Vector2(0.515863, 0.166667))
+        new Vertex(new Vector3(-0.324617, 0.028703 + _crustHeight, 0.324617), new Vector2(0.515863, 0.166667))
         
       );
         this.faces = [

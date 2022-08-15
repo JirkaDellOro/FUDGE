@@ -15,13 +15,13 @@ namespace FudgeCore {
         this.clear(); 
         this.vertices = new Vertices(
         new Vertex(new Vector3(-0.017532, -0.204170, 0.017532), new Vector2(1.000000, 0.000000)),
-        new Vertex(new Vector3(-0.017532, 0.204170 + this.fryLength, 0.017532), new Vector2(0.333333, 0.000000)),
+        new Vertex(new Vector3(-0.017532, 0.204170 + _fryLength, 0.017532), new Vector2(0.333333, 0.000000)),
         new Vertex(new Vector3(-0.017532, -0.204170, -0.017532), new Vector2(0.333333, 0.666667)),
-        new Vertex(new Vector3(-0.017532, 0.204170 + this.fryLength, -0.017532), new Vector2(1.000000, 0.333333)),
+        new Vertex(new Vector3(-0.017532, 0.204170 + _fryLength, -0.017532), new Vector2(1.000000, 0.333333)),
         new Vertex(new Vector3(0.017532, -0.204170, 0.017532), new Vector2(0.333333, 0.333333)),
-        new Vertex(new Vector3(0.017532, 0.204170 + this.fryLength, 0.017532), new Vector2(0.333333, 1.000000)),
+        new Vertex(new Vector3(0.017532, 0.204170 + _fryLength, 0.017532), new Vector2(0.333333, 1.000000)),
         new Vertex(new Vector3(0.017532, -0.204170, -0.017532), new Vector2(0.333333, 0.000000)),
-        new Vertex(new Vector3(0.017532, 0.204170 + this.fryLength, -0.017532), new Vector2(0.333333, 0.333333))
+        new Vertex(new Vector3(0.017532, 0.204170 + _fryLength, -0.017532), new Vector2(0.333333, 0.333333))
         
       );
         this.faces = [

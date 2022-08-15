@@ -5,10 +5,8 @@ namespace FudgeCore {
 
     public constructor(_name: string = "MeshKeySaw") {
       super(_name);
-      // this.create();
-
+      
       this.vertices = new Vertices(
-        // ground vertices
         new Vertex(new Vector3(-0.003642, -0.037676, 0.002713), new Vector2(0.675116, 0.606885)),
         new Vertex(new Vector3(-0.018619, -0.040753, 0.002713), new Vector2(0.671657, 0.838192)),
         new Vertex(new Vector3(-0.003642, -0.037676, -0.002713), new Vector2(0.519697, 0.919649)),
