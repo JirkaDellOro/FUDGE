@@ -62,9 +62,15 @@ namespace Fudge {
       let item: Electron.MenuItem;
 
 
-      item = new remote.MenuItem({
+      item = new remote.MenuItem({  
         label: "Create Mesh",
         submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.CREATE_MESH, ƒ.Mesh, _callback)
+      });
+      menu.append(item);
+
+      item = new remote.MenuItem({
+        label: "Create Mutable Mesh",
+        submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.CREATE_MESHMUTABLE, ƒ.MeshMutable, _callback)
       });
       menu.append(item);
 
@@ -98,6 +104,13 @@ namespace Fudge {
       }
 
       switch (choice) {
+        case Fudge.CONTEXTMENU.CREATE_MESHMUTABLE: 
+          let typeMeshMutable = ƒ.MeshMutable.subclasses[iSubclass];
+          //@ts-ignore
+          let meshMutableNew = new typeMeshMutable();
+          this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.table.selectInterval(meshMutableNew, meshMutableNew);
+          break;
         case CONTEXTMENU.CREATE_MESH:
           let typeMesh: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
           //@ts-ignore
