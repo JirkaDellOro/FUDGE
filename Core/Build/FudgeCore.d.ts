@@ -4070,6 +4070,20 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class MeshBed extends Mesh {
+        static readonly iSubclass: number;
+        constructor(_name?: string);
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshBench extends Mesh {
+        static readonly iSubclass: number;
+        constructor(_name?: string);
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
     class MeshBottle extends MeshMutable {
         static readonly iSubclass: number;
         private bottleBodyLength;
@@ -4091,6 +4105,13 @@ declare namespace FudgeCore {
         create(_headLength: number, _headWidth: number, _shaftLength: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshCabinet extends Mesh {
+        static readonly iSubclass: number;
+        constructor(_name?: string);
         mutate(_mutator: Mutator): Promise<void>;
     }
 }
@@ -4185,6 +4206,33 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class MeshLantern extends Mesh {
+        static readonly iSubclass: number;
+        private lanternLength;
+        private mastLength;
+        private lanternWidth;
+        constructor(_name?: string, _lanternLength?: number, _mastLength?: number, _lanternWidth?: number);
+        create(_lanternLength: number, _mastLength: number, _lanternWidth: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshLetterbox extends MeshMutable {
+        static readonly iSubclass: number;
+        constructor(_name?: string);
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshMonitor extends MeshMutable {
+        static readonly iSubclass: number;
+        constructor(_name?: string);
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
     class MeshMushroomTree extends MeshMutable {
         static readonly iSubclass: number;
         private amountTreetop;
@@ -4270,6 +4318,13 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class MeshSign extends Mesh {
+        static readonly iSubclass: number;
+        constructor(_name?: string);
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
     class MeshSword extends MeshMutable {
         static readonly iSubclass: number;
         private bladeLength;
@@ -4290,6 +4345,13 @@ declare namespace FudgeCore {
         create(_sharpness: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshTraficLight extends MeshMutable {
+        static readonly iSubclass: number;
+        constructor(_name?: string);
         mutate(_mutator: Mutator): Promise<void>;
     }
 }
