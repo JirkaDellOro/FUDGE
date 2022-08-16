@@ -552,6 +552,7 @@ declare namespace Fudge {
         private propertyList;
         private controller;
         private toolbar;
+        private frameInput;
         private time;
         private idInterval;
         constructor(_container: ComponentContainer, _state: Object);
@@ -559,7 +560,7 @@ declare namespace Fudge {
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private getNodeSubmenu;
         private getMutatorSubmenu;
-        private createUserInterface;
+        private createToolbar;
         private hndEvent;
         private setAnimation;
         private createPropertyList;

@@ -39,6 +39,7 @@ namespace Fudge {
     private controller: ControllerAnimation;
 
     private toolbar: HTMLDivElement;
+    private frameInput: HTMLInputElement;
     
     private time: ƒ.Time = new ƒ.Time();
     private idInterval: number;
@@ -46,10 +47,8 @@ namespace Fudge {
     constructor(_container: ComponentContainer, _state: Object) {
       super(_container, _state);
       this.setAnimation(null);
-      this.createUserInterface();
+      this.createToolbar();
       
-      this.dom.style.display = "flex";
-      this.dom.style.flexFlow = "column";
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
@@ -154,10 +153,9 @@ namespace Fudge {
     }
     //#endregion
 
-    private createUserInterface(): void {
+    private createToolbar(): void {
       this.toolbar = document.createElement("div");
       this.toolbar.id = "toolbar";
-      this.toolbar.style.flex = "0 1 auto";
 
       ["previous", "play", "next"]
         .map(_id => {
@@ -167,6 +165,29 @@ namespace Fudge {
           return button;
         })
         .forEach(_button => this.toolbar.appendChild(_button));
+
+      this.frameInput = document.createElement("input");
+      this.frameInput.type = "text";
+      this.frameInput.id = "frameinput";
+      this.frameInput.onfocus = () => Reflect.set(this.frameInput, "previousValue", this.frameInput.value);
+      this.frameInput.onkeydown = _event => {
+        if (_event.key.length == 1 && !/\d/.test(_event.key)) {
+          _event.preventDefault();
+          return;
+        }
+        if (_event.key == ƒ.KEYBOARD_CODE.ENTER || _event.key == ƒ.KEYBOARD_CODE.NUMPAD_ENTER) {
+          this.frameInput.blur();
+          this.frameInput.focus();
+        }
+      };
+      this.frameInput.onblur = () => {
+        if (this.frameInput.value.length == 0)
+          this.frameInput.value = Reflect.get(this.frameInput, "previousValue");
+        this.frameInput.value = this.frameInput.value.match(/[1-9]\d*|0$/)[0];
+        this.playbackTime = Number.parseInt(this.frameInput.value) * 1000 / this.animation.fps;
+        this.dispatchAnimate();
+      };
+      this.toolbar.appendChild(this.frameInput);
     }
 
     private hndEvent = (_event: FudgeEvent): void => {
@@ -208,13 +229,12 @@ namespace Fudge {
       let nodeMutator: ƒ.Mutator = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback) || {};
 
       let newPropertyList: HTMLDivElement = ƒui.Generator.createInterfaceFromMutator(nodeMutator);
-      newPropertyList.style.paddingTop = "30px";
-      newPropertyList.style.flex = "1 1 auto";
       if (this.dom.contains(this.propertyList))
         this.dom.replaceChild(newPropertyList, this.propertyList);
       else
         this.dom.appendChild(newPropertyList);
       this.propertyList = newPropertyList;
+      this.propertyList.id = "propertylist";
 
       this.controller = new ControllerAnimation(this.animation, this.propertyList, this);
       this.controller.updatePropertyList(nodeMutator);
@@ -222,9 +242,11 @@ namespace Fudge {
     }
 
     private hndAnimate = (_event: FudgeEvent): void => {
-      if (_event.detail.view instanceof ViewAnimationSheet)
+      if (_event.detail.view instanceof ViewAnimationSheet) 
         this.pause();
+
       this.playbackTime = _event.detail.data;
+      this.frameInput.value = (Math.trunc(this.playbackTime / 1000 * this.animation.fps)).toString();
 
       let nodeMutator: ƒ.Mutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
       this.controller?.updatePropertyList(nodeMutator);

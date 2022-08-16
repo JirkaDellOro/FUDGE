@@ -307,22 +307,3 @@ custom-matrix3x3 {
 custom-matrix4x4 span.rowVector, custom-matrix3x3 span.rowVector {
   text-align: right
 }
-
-/* animation */
-
-div[view^=ViewAnimation] button {
-  border: none;
-  border-left: 2px solid var(--color-background-content);
-  background-color: var(--color-background-main);
-  padding: 2px;
-  width: 50px;
-  cursor: pointer;
-}
-
-div[view^=ViewAnimation] button:first-child {
-  border-left: none;
-}
-
-div[view^=ViewAnimation] button:focus {
-  outline: none;
-}
