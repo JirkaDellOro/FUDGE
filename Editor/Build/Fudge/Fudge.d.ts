@@ -579,7 +579,6 @@ declare namespace Fudge {
     class ViewAnimationSheet extends View {
         #private;
         private static readonly KEY_SIZE;
-        private static readonly LINE_WIDTH;
         private static readonly TIMELINE_HEIGHT;
         private static readonly EVENTS_HEIGHT;
         private static readonly SCALE_WIDTH;
@@ -632,6 +631,7 @@ declare namespace Fudge {
         private dispatchAnimate;
         private resetView;
         private getScreenToWorldPoint;
+        private roundOddLineWidth;
     }
 }
 declare namespace Fudge {

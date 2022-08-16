@@ -2857,8 +2857,7 @@ var Fudge;
      */
     class ViewAnimationSheet extends Fudge.View {
         static KEY_SIZE = 6; // width and height in px
-        static LINE_WIDTH = 1; // in px
-        static TIMELINE_HEIGHT = 30; // in px
+        static TIMELINE_HEIGHT = 30.5; // in px, keep .5 at end for odd line width
         static EVENTS_HEIGHT = 30; // in px
         static SCALE_WIDTH = 40; // in px
         static PIXEL_PER_MILLISECOND = 1; // at scaling 1
@@ -2982,6 +2981,8 @@ var Fudge;
                 else
                     position.set(_key.Time, (_iSeqeunce) * ViewAnimationSheet.KEY_SIZE * 2);
                 position.transform(this.mtxWorldToScreen);
+                position.x = this.roundOddLineWidth(position.x);
+                position.y = this.roundOddLineWidth(position.y);
                 let keyView = {
                     key: _key,
                     posScreen: position,
@@ -3004,7 +3005,6 @@ var Fudge;
             return key;
         }
         drawTimeline() {
-            this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
             this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
             this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
             let animationStart = Math.min(...this.keys.map(_key => _key.key.Time)) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
@@ -3014,6 +3014,7 @@ var Fudge;
             this.crc2.beginPath();
             this.crc2.moveTo(0, ViewAnimationSheet.TIMELINE_HEIGHT);
             this.crc2.lineTo(this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
+            this.crc2.lineWidth = 1;
             this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
             this.crc2.stroke();
             let fps = this.animation.fps;
@@ -3065,7 +3066,7 @@ var Fudge;
             let steps = 1 + this.canvas.width / pixelPerStep;
             let stepOffset = Math.floor(Math.abs(this.mtxWorldToScreen.translation.x) / pixelPerStep);
             for (let iStep = stepOffset; iStep < steps + stepOffset; iStep++) {
-                let xStep = (iStep * pixelPerStep + this.mtxWorldToScreen.translation.x);
+                let xStep = this.roundOddLineWidth(iStep * pixelPerStep + this.mtxWorldToScreen.translation.x);
                 timeSteps.moveTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT);
                 timeSteps.lineTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT - 20);
                 gridLines.moveTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT);
@@ -3075,7 +3076,7 @@ var Fudge;
                 this.crc2.fillText(`${second}:${frame < 10 ? "0" : ""}${frame}`, xStep + 3, ViewAnimationSheet.TIMELINE_HEIGHT - 20);
                 let pixelPerSubStep = pixelPerStep / (subSteps + 1);
                 for (let iSubStep = 1; iSubStep < subSteps + 1; iSubStep++) {
-                    let xSubStep = xStep + iSubStep * pixelPerSubStep;
+                    let xSubStep = xStep + Math.round(iSubStep * pixelPerSubStep);
                     timeSteps.moveTo(xSubStep, ViewAnimationSheet.TIMELINE_HEIGHT);
                     timeSteps.lineTo(xSubStep, ViewAnimationSheet.TIMELINE_HEIGHT - (iSubStep % highSteps == 0 ? 12 : 8));
                 }
@@ -3085,16 +3086,16 @@ var Fudge;
             this.crc2.stroke(gridLines);
         }
         drawEvents() {
-            let eventsHeight = ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT;
+            let totalHeight = ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT;
             this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
-            this.crc2.fillRect(0, ViewAnimationSheet.TIMELINE_HEIGHT, this.canvas.width, ViewAnimationSheet.EVENTS_HEIGHT);
-            let line = new Path2D();
-            line.moveTo(0, eventsHeight);
-            line.lineTo(this.canvas.width, eventsHeight);
-            this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
+            this.crc2.fillRect(0, ViewAnimationSheet.TIMELINE_HEIGHT + 0.5, this.canvas.width, ViewAnimationSheet.EVENTS_HEIGHT);
+            this.crc2.beginPath();
+            this.crc2.moveTo(0, totalHeight);
+            this.crc2.lineTo(this.canvas.width, totalHeight);
+            this.crc2.lineWidth = 1;
             this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
+            this.crc2.stroke();
             this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-text");
-            this.crc2.stroke(line);
             this.labels = [];
             this.events = [];
             if (!this.animation)
@@ -3104,30 +3105,30 @@ var Fudge;
                 let p = new Path2D;
                 this.labels.push({ label: l, path2D: p });
                 let position = this.animation.labels[l] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-                p.moveTo(position - 3, eventsHeight - 26);
-                p.lineTo(position - 3, eventsHeight - 4);
-                p.lineTo(position + 3, eventsHeight - 4);
-                p.lineTo(position + 3, eventsHeight - 23);
-                p.lineTo(position, eventsHeight - 26);
-                p.lineTo(position - 3, eventsHeight - 26);
+                p.moveTo(position - 3, totalHeight - 26);
+                p.lineTo(position - 3, totalHeight - 4);
+                p.lineTo(position + 3, totalHeight - 4);
+                p.lineTo(position + 3, totalHeight - 23);
+                p.lineTo(position, totalHeight - 26);
+                p.lineTo(position - 3, totalHeight - 26);
                 this.crc2.fill(p);
                 this.crc2.stroke(p);
                 let p2 = new Path2D();
-                p2.moveTo(position, eventsHeight - 26);
-                p2.lineTo(position, eventsHeight - 23);
-                p2.lineTo(position + 3, eventsHeight - 23);
+                p2.moveTo(position, totalHeight - 26);
+                p2.lineTo(position, totalHeight - 23);
+                p2.lineTo(position + 3, totalHeight - 23);
                 this.crc2.stroke(p2);
             }
             for (let e in this.animation.events) {
                 let p = new Path2D;
                 this.events.push({ event: e, path2D: p });
                 let position = this.animation.events[e] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-                p.moveTo(position - 3, eventsHeight - 26);
-                p.lineTo(position - 3, eventsHeight - 7);
-                p.lineTo(position, eventsHeight - 4);
-                p.lineTo(position + 3, eventsHeight - 7);
-                p.lineTo(position + 3, eventsHeight - 26);
-                p.lineTo(position - 3, eventsHeight - 26);
+                p.moveTo(position - 3, totalHeight - 26);
+                p.lineTo(position - 3, totalHeight - 7);
+                p.lineTo(position, totalHeight - 4);
+                p.lineTo(position + 3, totalHeight - 7);
+                p.lineTo(position + 3, totalHeight - 26);
+                p.lineTo(position - 3, totalHeight - 26);
                 // this.crc2.fill(p);
                 this.crc2.stroke(p);
             }
@@ -3138,14 +3139,13 @@ var Fudge;
         drawScale() {
             if (this.mode != SHEET_MODE.CURVES)
                 return;
-            this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-highlight");
-            let centerLine = new Path2D();
-            centerLine.moveTo(0, this.mtxWorldToScreen.translation.y);
-            centerLine.lineTo(this.canvas.width, this.mtxWorldToScreen.translation.y);
-            this.crc2.stroke(centerLine);
-            this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
-            this.crc2.textBaseline = "bottom";
-            this.crc2.textAlign = "right";
+            let center = this.roundOddLineWidth(this.mtxWorldToScreen.translation.y);
+            this.crc2.beginPath();
+            this.crc2.moveTo(0, center);
+            this.crc2.lineTo(this.canvas.width, center);
+            this.crc2.lineWidth = 1;
+            this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
+            this.crc2.stroke();
             let pixelPerStep = -this.mtxWorldToScreen.scaling.y;
             let valuePerStep = 1;
             let multipliers = [2, 5];
@@ -3165,24 +3165,27 @@ var Fudge;
                     subSteps = 4;
                     break;
             }
+            this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
+            this.crc2.textBaseline = "bottom";
+            this.crc2.textAlign = "right";
             let steps = 1 + this.canvas.height / pixelPerStep;
             let stepOffset = Math.floor(-this.mtxWorldToScreen.translation.y / pixelPerStep);
             for (let iStep = stepOffset; iStep < steps + stepOffset; iStep++) {
-                let yStep = Math.round(iStep * pixelPerStep + this.mtxWorldToScreen.translation.y);
+                let yStep = this.roundOddLineWidth(iStep * pixelPerStep + this.mtxWorldToScreen.translation.y);
                 this.crc2.beginPath();
-                this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-highlight");
                 this.crc2.moveTo(0, yStep);
                 this.crc2.lineTo(ViewAnimationSheet.SCALE_WIDTH - 5, yStep);
                 let value = -iStep * valuePerStep;
                 this.crc2.fillText(valuePerStep >= 1 ? value.toFixed(0) : value.toFixed(1), 33, yStep);
+                this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
                 this.crc2.stroke();
                 let pixelPerSubStep = pixelPerStep / (subSteps + 1);
                 for (let iSubStep = 1; iSubStep < subSteps + 1; iSubStep++) {
-                    let ySubStep = Math.round(yStep + iSubStep * pixelPerSubStep);
+                    let ySubStep = yStep + Math.round(iSubStep * pixelPerSubStep);
                     this.crc2.beginPath();
-                    this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
                     this.crc2.moveTo(0, ySubStep);
                     this.crc2.lineTo(ViewAnimationSheet.SCALE_WIDTH - 5, ySubStep);
+                    this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-background-main");
                     this.crc2.stroke();
                 }
             }
@@ -3245,7 +3248,7 @@ var Fudge;
             // draw slope hooks
             if (this.mode != SHEET_MODE.CURVES)
                 return;
-            this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
+            this.crc2.lineWidth = 1;
             this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
             this.crc2.fillStyle = this.crc2.strokeStyle;
             let [left, right] = [ƒ.Recycler.get(ƒ.Vector2), ƒ.Recycler.get(ƒ.Vector2)];
@@ -3268,11 +3271,11 @@ var Fudge;
         }
         drawCursor() {
             this.crc2.restore();
-            let x = this.playbackTime * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+            let x = this.roundOddLineWidth(this.playbackTime * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x);
             let cursor = new Path2D();
             cursor.moveTo(x, 0);
             cursor.lineTo(x, this.canvas.height);
-            this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
+            this.crc2.lineWidth = 1;
             this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-signal");
             this.crc2.stroke(cursor);
         }
@@ -3429,26 +3432,32 @@ var Fudge;
         resetView() {
             this.mtxWorldToScreen.reset();
             this.mtxWorldToScreen.scaleX(ViewAnimationSheet.PIXEL_PER_MILLISECOND); // apply scaling
+            this.mtxWorldToScreen.scaleX(this.canvas.width / ((this.animation?.totalTime || ViewAnimationSheet.STANDARD_ANIMATION_LENGTH) * 1.2));
             if (this.mode == SHEET_MODE.CURVES) {
                 this.mtxWorldToScreen.scaleY(-1); // flip y
                 this.mtxWorldToScreen.scaleY(ViewAnimationSheet.PIXEL_PER_VALUE); // apply scaling
+                let values = this.sequences
+                    .flatMap(_sequence => _sequence.sequence.getKeys())
+                    .map(_key => _key.Value);
+                if (values.length > 0) {
+                    let min = values.reduce((_a, _b) => Math.min(_a, _b));
+                    let max = values.reduce((_a, _b) => Math.max(_a, _b));
+                    this.mtxWorldToScreen.scaleY((this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT) / (((max - min) * ViewAnimationSheet.PIXEL_PER_VALUE) * 1.2));
+                    this.mtxWorldToScreen.translateY((this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT) - min * -this.mtxWorldToScreen.scaling.y);
+                }
+            }
+            else {
+                this.mtxWorldToScreen.translateY(ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT + ViewAnimationSheet.KEY_SIZE * 2);
             }
             this.mtxScreenToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen);
-            // TODO: adjust y scaling to fit highest and lowest key
-            let translation = this.mtxWorldToScreen.translation;
-            if (this.mode == SHEET_MODE.CURVES)
-                translation.y = this.canvas.height / 2;
-            else
-                translation.y = ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT + ViewAnimationSheet.KEY_SIZE * 2;
-            this.mtxWorldToScreen.translation = translation;
-            let scaling = this.mtxWorldToScreen.scaling;
-            scaling.x = this.canvas.width / ((this.animation?.totalTime || ViewAnimationSheet.STANDARD_ANIMATION_LENGTH) * 1.2);
-            this.mtxWorldToScreen.scaling = scaling;
         }
         getScreenToWorldPoint(_x, _y) {
             let vector = new ƒ.Vector2(_x, _y);
             vector.transform(this.mtxScreenToWorld);
             return vector;
+        }
+        roundOddLineWidth(_value) {
+            return Math.round(_value) + 0.5;
         }
     }
     Fudge.ViewAnimationSheet = ViewAnimationSheet;
