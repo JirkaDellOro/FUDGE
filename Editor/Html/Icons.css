@@ -228,8 +228,8 @@ div[view=ViewAnimation] fudge-stepper::after {
   margin-left: 5px;
   background: var(--color-animation-property);
   vertical-align: middle;
-  mask: url(../Html/Icon/AnimationProperty.svg);
-  -webkit-mask: url(../Html/Icon/AnimationProperty.svg);
+  mask: url(../Html/Icon/AnimationKey.svg);
+  -webkit-mask: url(../Html/Icon/AnimationKey.svg);
 }
 
 div[view=ViewAnimation] button::before {

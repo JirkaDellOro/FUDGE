@@ -615,8 +615,7 @@ declare namespace Fudge {
         private drawTimeline;
         private drawEvents;
         private drawCursor;
-        private generateKeys;
-        private generateKey;
+        private drawHighlight;
         private hndFocus;
         private hndAnimate;
         private hndSelect;
@@ -631,7 +630,6 @@ declare namespace Fudge {
         private dispatchAnimate;
         private resetView;
         private getScreenToWorldPoint;
-        private getBezierPoints;
     }
 }
 declare namespace Fudge {

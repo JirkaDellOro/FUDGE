@@ -2962,26 +2962,20 @@ var Fudge;
             }
             if (this.animation) {
                 this.mtxWorldToScreen.translateX(ViewAnimationSheet.SCALE_WIDTH);
-                this.generateKeys();
-                this.mtxWorldToScreen.translateX(-ViewAnimationSheet.SCALE_WIDTH);
-                this.drawScale();
-                this.mtxWorldToScreen.translateX(ViewAnimationSheet.SCALE_WIDTH);
                 this.mtxScreenToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen);
+                this.drawScale();
                 this.drawCurves();
                 this.drawKeys();
                 this.drawTimeline();
                 this.drawEvents();
                 this.drawCursor();
+                this.drawHighlight();
                 this.mtxWorldToScreen.translateX(-ViewAnimationSheet.SCALE_WIDTH);
             }
         }
         drawScale() {
             if (this.mode != SHEET_MODE.CURVES)
                 return;
-            if (this.selectedKey) {
-                this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
-                this.crc2.fillRect(0, this.selectedKey.posScreen.y - ViewAnimationSheet.KEY_SIZE / 2, ViewAnimationSheet.SCALE_WIDTH, ViewAnimationSheet.KEY_SIZE);
-            }
             this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-highlight");
             let centerLine = new Path2D();
             centerLine.moveTo(0, this.mtxWorldToScreen.translation.y);
@@ -3024,7 +3018,7 @@ var Fudge;
                 for (let iSubStep = 1; iSubStep < subSteps + 1; iSubStep++) {
                     let ySubStep = Math.round(yStep + iSubStep * pixelPerSubStep);
                     this.crc2.beginPath();
-                    this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
+                    this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
                     this.crc2.moveTo(0, ySubStep);
                     this.crc2.lineTo(ViewAnimationSheet.SCALE_WIDTH - 5, ySubStep);
                     this.crc2.stroke();
@@ -3039,7 +3033,7 @@ var Fudge;
                 sequence.sequence.getKeys()
                     .map((_key, _index, _keys) => [_key, _keys[_index + 1]])
                     .filter(([_keyStart, _keyEnd]) => _keyStart && _keyEnd)
-                    .map(([_keyStart, _keyEnd]) => this.getBezierPoints(_keyStart.functionOut, _keyStart, _keyEnd))
+                    .map(([_keyStart, _keyEnd]) => getBezierPoints(_keyStart.functionOut, _keyStart, _keyEnd))
                     .forEach((_bezierPoints) => {
                     _bezierPoints.forEach(_point => _point.transform(this.mtxWorldToScreen));
                     let curve = new Path2D();
@@ -3049,21 +3043,50 @@ var Fudge;
                     _bezierPoints.forEach(_point => ƒ.Recycler.store(_point));
                 });
             }
+            function getBezierPoints(_animationFunction, _keyStart, _keyEnd) {
+                let parameters = _animationFunction.getParameters();
+                const polarForm = (u, v, w) => {
+                    return (parameters.a * u * v * w +
+                        parameters.b * ((v * w + w * u + u * v) / 3) +
+                        parameters.c * ((u + v + w) / 3) +
+                        parameters.d);
+                };
+                let xStart = _keyStart.Time;
+                let xEnd = _keyEnd.Time;
+                let offsetTimeEnd = xEnd - xStart;
+                let points = new Array(4).fill(0).map(() => ƒ.Recycler.get(ƒ.Vector2));
+                points[0].set(xStart, polarForm(0, 0, 0));
+                points[1].set(xStart + offsetTimeEnd * 1 / 3, polarForm(0, 0, offsetTimeEnd));
+                points[2].set(xStart + offsetTimeEnd * 2 / 3, polarForm(0, offsetTimeEnd, offsetTimeEnd));
+                points[3].set(xStart + offsetTimeEnd, polarForm(offsetTimeEnd, offsetTimeEnd, offsetTimeEnd));
+                return points;
+            }
         }
         drawKeys() {
-            // draw selected key highlight
-            if (this.selectedKey && this.mode == SHEET_MODE.CURVES) {
-                let posScreen = this.selectedKey.posScreen;
-                this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
-                this.crc2.fillRect(ViewAnimationSheet.SCALE_WIDTH, posScreen.y - ViewAnimationSheet.KEY_SIZE / 2, posScreen.x - ViewAnimationSheet.SCALE_WIDTH, ViewAnimationSheet.KEY_SIZE);
-                this.crc2.fillRect(posScreen.x - ViewAnimationSheet.KEY_SIZE / 2, ViewAnimationSheet.TIMELINE_HEIGHT, ViewAnimationSheet.KEY_SIZE, posScreen.y - ViewAnimationSheet.TIMELINE_HEIGHT);
-            }
+            this.keys = this.sequences.flatMap((_sequence, _iSeqeunce) => _sequence.sequence.getKeys().map((_key) => {
+                let position = ƒ.Recycler.get(ƒ.Vector2);
+                if (this.mode == SHEET_MODE.CURVES)
+                    position.set(_key.Time, _key.Value);
+                else
+                    position.set(_key.Time, (_iSeqeunce) * ViewAnimationSheet.KEY_SIZE * 2);
+                position.transform(this.mtxWorldToScreen);
+                let keyView = {
+                    key: _key,
+                    posScreen: position,
+                    path2D: generateKey(position.x, position.y, ViewAnimationSheet.KEY_SIZE, ViewAnimationSheet.KEY_SIZE),
+                    sequence: _sequence
+                };
+                ƒ.Recycler.store(ƒ.Vector2);
+                return keyView;
+            }));
+            if (this.selectedKey)
+                this.selectedKey = this.keys.find(_key => _key.key == this.selectedKey.key);
             // draw unselected keys
             this.keys.forEach(_key => {
                 if (_key == this.selectedKey)
                     return;
                 this.crc2.lineWidth = 4;
-                this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
+                this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
                 this.crc2.fillStyle = _key.sequence.color;
                 this.crc2.stroke(_key.path2D);
                 this.crc2.fill(_key.path2D);
@@ -3078,7 +3101,7 @@ var Fudge;
             if (this.mode != SHEET_MODE.CURVES)
                 return;
             this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
-            this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
+            this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
             this.crc2.fillStyle = this.crc2.strokeStyle;
             let [left, right] = [ƒ.Recycler.get(ƒ.Vector2), ƒ.Recycler.get(ƒ.Vector2)];
             left.set(-50, 0);
@@ -3115,11 +3138,6 @@ var Fudge;
             let animationStart = Math.min(...this.keys.map(_key => _key.key.Time)) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
             let animationEnd = Math.max(...this.keys.map(_key => _key.key.Time)) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
             this.crc2.fillRect(animationStart, 0, animationEnd - animationStart, ViewAnimationSheet.TIMELINE_HEIGHT);
-            if (this.selectedKey) {
-                let posScreen = this.selectedKey.posScreen;
-                this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-dragdrop-outline");
-                this.crc2.fillRect(posScreen.x - ViewAnimationSheet.KEY_SIZE / 2, 0, ViewAnimationSheet.KEY_SIZE, ViewAnimationSheet.TIMELINE_HEIGHT);
-            }
             let timeline = new Path2D();
             timeline.moveTo(0, ViewAnimationSheet.TIMELINE_HEIGHT);
             timeline.lineTo(this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
@@ -3235,43 +3253,27 @@ var Fudge;
             }
         }
         drawCursor() {
-            this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-signal");
             let x = this.playbackTime * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
             let cursor = new Path2D();
             cursor.moveTo(x, 0);
             cursor.lineTo(x, this.canvas.height);
             this.crc2.lineWidth = ViewAnimationSheet.LINE_WIDTH;
-            this.crc2.strokeStyle = "white";
+            this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-signal");
             this.crc2.stroke(cursor);
         }
-        generateKeys() {
-            this.keys = this.sequences.flatMap((_sequence, _iSeqeunce) => _sequence.sequence.getKeys().map((_key) => {
-                let position = ƒ.Recycler.get(ƒ.Vector2);
-                if (this.mode == SHEET_MODE.CURVES)
-                    position.set(_key.Time, _key.Value);
-                else
-                    position.set(_key.Time, (_iSeqeunce) * ViewAnimationSheet.KEY_SIZE * 2);
-                position.transform(this.mtxWorldToScreen);
-                let keyView = {
-                    key: _key,
-                    posScreen: position,
-                    path2D: this.generateKey(position.x, position.y, ViewAnimationSheet.KEY_SIZE, ViewAnimationSheet.KEY_SIZE),
-                    sequence: _sequence
-                };
-                ƒ.Recycler.store(ƒ.Vector2);
-                return keyView;
-            }));
-            if (this.selectedKey)
-                this.selectedKey = this.keys.find(_key => _key.key == this.selectedKey.key);
-        }
-        generateKey(_x, _y, _w, _h) {
-            let key = new Path2D();
-            key.moveTo(_x - _w, _y);
-            key.lineTo(_x, _y + _h);
-            key.lineTo(_x + _w, _y);
-            key.lineTo(_x, _y - _h);
-            key.closePath();
-            return key;
+        drawHighlight() {
+            if (!this.selectedKey)
+                return;
+            let posScreen = this.selectedKey.posScreen;
+            this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
+            this.crc2.fillStyle += "66";
+            this.crc2.fillRect(posScreen.x - ViewAnimationSheet.KEY_SIZE / 2, 0, ViewAnimationSheet.KEY_SIZE, ViewAnimationSheet.TIMELINE_HEIGHT);
+            if (this.mode == SHEET_MODE.CURVES) {
+                this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
+                this.crc2.fillStyle += "26";
+                this.crc2.fillRect(0, posScreen.y - ViewAnimationSheet.KEY_SIZE / 2, posScreen.x, ViewAnimationSheet.KEY_SIZE);
+                this.crc2.fillRect(posScreen.x - ViewAnimationSheet.KEY_SIZE / 2, ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT, ViewAnimationSheet.KEY_SIZE, posScreen.y - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT);
+            }
         }
         //#endregion
         //#region event handling
@@ -3432,24 +3434,6 @@ var Fudge;
             let vector = new ƒ.Vector2(_x, _y);
             vector.transform(this.mtxScreenToWorld);
             return vector;
-        }
-        getBezierPoints(_animationFunction, _keyStart, _keyEnd) {
-            let parameters = _animationFunction.getParameters();
-            let polarForm = (u, v, w) => {
-                return (parameters.a * u * v * w +
-                    parameters.b * ((v * w + w * u + u * v) / 3) +
-                    parameters.c * ((u + v + w) / 3) +
-                    parameters.d);
-            };
-            let xStart = _keyStart.Time;
-            let xEnd = _keyEnd.Time;
-            let offsetTimeEnd = xEnd - xStart;
-            let points = new Array(4).fill(0).map(() => ƒ.Recycler.get(ƒ.Vector2));
-            points[0].set(xStart, polarForm(0, 0, 0));
-            points[1].set(xStart + offsetTimeEnd * 1 / 3, polarForm(0, 0, offsetTimeEnd));
-            points[2].set(xStart + offsetTimeEnd * 2 / 3, polarForm(0, offsetTimeEnd, offsetTimeEnd));
-            points[3].set(xStart + offsetTimeEnd, polarForm(offsetTimeEnd, offsetTimeEnd, offsetTimeEnd));
-            return points;
         }
     }
     Fudge.ViewAnimationSheet = ViewAnimationSheet;
