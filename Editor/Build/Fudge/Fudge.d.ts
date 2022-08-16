@@ -609,11 +609,13 @@ declare namespace Fudge {
         private set mode(value);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         private draw;
+        private generateKeys;
+        private generateKey;
+        private drawTimeline;
+        private drawEvents;
         private drawScale;
         private drawCurves;
         private drawKeys;
-        private drawTimeline;
-        private drawEvents;
         private drawCursor;
         private drawHighlight;
         private hndFocus;
