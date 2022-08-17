@@ -2862,6 +2862,7 @@ var Fudge;
         playbackTime = 0;
         canvas = document.createElement("canvas");
         crc2 = this.canvas.getContext("2d");
+        eventInput = document.createElement("input");
         scrollContainer = document.createElement("div");
         scrollBody = document.createElement("div");
         mtxWorldToScreen = new ƒ.Matrix3x3();
@@ -2884,6 +2885,7 @@ var Fudge;
             this.dom.style.height = "auto";
             this.dom.style.padding = "0";
             this.dom.style.margin = "0.5em";
+            this.dom.style.overflow = "hidden";
             this.mode = SHEET_MODE.DOPE;
             _container.on("resize", () => this.draw(true));
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndFocus);
@@ -2896,13 +2898,26 @@ var Fudge;
             this.scrollContainer.style.height = "100%";
             this.scrollContainer.style.overflowX = "scroll";
             this.scrollContainer.style.scrollBehavior = "instant";
-            this.scrollContainer.addEventListener("pointerdown", this.hndPointerDown);
-            this.scrollContainer.addEventListener("pointerup", this.hndPointerUp);
-            this.scrollContainer.addEventListener("pointerleave", this.hndPointerUp);
-            this.scrollContainer.addEventListener("wheel", this.hndWheel);
+            this.scrollContainer.onpointerdown = this.hndPointerDown;
+            this.scrollContainer.onpointerup = this.hndPointerUp;
+            this.scrollContainer.onpointerleave = this.hndPointerUp;
+            this.scrollContainer.onwheel = this.hndWheel;
             this.dom.appendChild(this.scrollContainer);
             this.scrollBody.style.height = "1px";
             this.scrollContainer.appendChild(this.scrollBody);
+            this.eventInput.type = "text";
+            this.eventInput.hidden = true;
+            this.eventInput.style.position = "absolute";
+            this.eventInput.onfocus = () => this.scrollContainer.onpointerdown = undefined;
+            this.eventInput.onblur = () => {
+                let time = this.animation.events[this.selectedEvent.event];
+                this.animation.removeEvent(this.selectedEvent.event);
+                this.animation.setEvent(this.eventInput.value, time);
+                this.selectedEvent = { event: this.eventInput.value, path2D: null };
+                this.scrollContainer.onpointerdown = this.hndPointerDown;
+                this.draw();
+            };
+            this.dom.appendChild(this.eventInput);
         }
         get mode() {
             return this.#mode;
@@ -2972,7 +2987,7 @@ var Fudge;
             let targetTime = Reflect.get(this.contextMenu, "targetTime");
             switch (choice) {
                 case "Add Event":
-                    let eventName = `${this.animation.name}Event${Object.keys(this.animation.events).length - 1}`;
+                    let eventName = `${this.animation.name}Event${Object.keys(this.animation.events).length}`;
                     this.animation.setEvent(eventName, targetTime);
                     this.selectedEvent = { event: eventName, path2D: null };
                     this.draw();
@@ -2982,7 +2997,7 @@ var Fudge;
                     this.draw();
                     break;
                 case "Add Label":
-                    let labelName = `${this.animation.name}Label${Object.keys(this.animation.events).length - 1}`;
+                    let labelName = `${this.animation.name}Label${Object.keys(this.animation.events).length}`;
                     this.animation.labels[labelName] = targetTime;
                     this.draw();
                     break;
@@ -3021,6 +3036,12 @@ var Fudge;
                 let animationWidth = this.animation?.totalTime * this.mtxWorldToScreen.scaling.x + ViewAnimationSheet.SCALE_WIDTH * 2;
                 this.scrollBody.style.width = `${Math.max(animationWidth, screenWidth)}px`;
                 this.scrollContainer.scrollLeft = leftWidth;
+            }
+            this.eventInput.hidden = this.selectedEvent == null;
+            if (this.selectedEvent) {
+                this.eventInput.style.left = `${this.animation.events[this.selectedEvent.event] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x + 10}px`;
+                this.eventInput.style.top = `${ViewAnimationSheet.TIMELINE_HEIGHT}px`;
+                this.eventInput.value = this.selectedEvent.event;
             }
         }
         generateKeys() {
@@ -3387,15 +3408,15 @@ var Fudge;
                             this.selectedEvent = null;
                         }
                         else {
-                            if (obj["label"]) {
+                            if ("label" in obj) {
                                 console.log(obj["label"]);
                             }
-                            else if (obj["event"]) {
+                            else if ("event" in obj) {
                                 console.log(obj["event"]);
                                 this.selectedEvent = obj;
                                 this.scrollContainer.onpointermove = this.hndPointerMoveDragEvent;
                             }
-                            else if (obj["key"]) {
+                            else if ("key" in obj) {
                                 console.log(obj["key"]);
                                 this.selectedKey = obj;
                                 this.scrollContainer.onpointermove = this.hndPointerMoveDragKey;

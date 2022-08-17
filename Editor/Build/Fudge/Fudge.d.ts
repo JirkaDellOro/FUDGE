@@ -591,6 +591,7 @@ declare namespace Fudge {
         private playbackTime;
         private canvas;
         private crc2;
+        private eventInput;
         private scrollContainer;
         private scrollBody;
         private mtxWorldToScreen;
