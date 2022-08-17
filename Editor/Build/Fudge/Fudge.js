@@ -2873,7 +2873,6 @@ var Fudge;
         scrollContainer = document.createElement("div");
         scrollBody = document.createElement("div");
         mtxWorldToScreen = new ƒ.Matrix3x3();
-        mtxScreenToWorld = new ƒ.Matrix3x3();
         selectedKey;
         keys = [];
         sequences = [];
@@ -2884,6 +2883,7 @@ var Fudge;
         posPanStart = new ƒ.Vector2();
         constructor(_container, _state) {
             super(_container, _state);
+            // maybe use this solution for all views?
             this.dom.style.position = "absolute";
             this.dom.style.inset = "0";
             this.dom.style.display = "block";
@@ -2891,7 +2891,7 @@ var Fudge;
             this.dom.style.padding = "0";
             this.dom.style.margin = "0.5em";
             this.mode = SHEET_MODE.DOPE;
-            _container.on("resize", () => this.draw());
+            _container.on("resize", () => this.draw(true));
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndFocus);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndAnimate);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndSelect);
@@ -2919,7 +2919,7 @@ var Fudge;
             this.contextMenu.getMenuItemById(SHEET_MODE.DOPE).visible = _mode != SHEET_MODE.DOPE;
             this.contextMenu.getMenuItemById(SHEET_MODE.CURVES).visible = _mode != SHEET_MODE.CURVES;
             this.resetView();
-            this.draw();
+            this.draw(true);
         }
         //#region context menu
         getContextMenu(_callback) {
@@ -2939,29 +2939,13 @@ var Fudge;
         }
         //#endregion
         //#region drawing
-        draw(_scroll = true, _time) {
+        draw(_scroll = false) {
             this.canvas.width = this.dom.clientWidth;
             this.canvas.height = this.dom.clientHeight;
-            if (_time != undefined)
-                this.playbackTime = _time;
             let translation = this.mtxWorldToScreen.translation;
-            translation.x = Math.min(0, translation.x);
+            translation.x = Math.min(ViewAnimationSheet.SCALE_WIDTH, translation.x);
             this.mtxWorldToScreen.translation = translation;
-            this.mtxScreenToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen);
-            if (_scroll) {
-                let timelineLength = this.canvas.width * this.mtxScreenToWorld.scaling.x + this.mtxScreenToWorld.translation.x; // in miliseconds
-                let animationLength = this.animation?.totalTime || 0;
-                if (timelineLength - animationLength > 0) {
-                    this.scrollBody.style.width = `${this.canvas.width - this.mtxWorldToScreen.translation.x}px`;
-                }
-                else {
-                    this.scrollBody.style.width = `${animationLength * 1.2 * this.mtxWorldToScreen.scaling.x}px`;
-                }
-                this.scrollContainer.scrollLeft = -this.mtxWorldToScreen.translation.x;
-            }
             if (this.animation) {
-                this.mtxWorldToScreen.translateX(ViewAnimationSheet.SCALE_WIDTH);
-                this.mtxScreenToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen);
                 this.generateKeys();
                 this.drawTimeline();
                 this.drawEvents();
@@ -2970,7 +2954,17 @@ var Fudge;
                 this.drawKeys();
                 this.drawCursor();
                 this.drawHighlight();
-                this.mtxWorldToScreen.translateX(-ViewAnimationSheet.SCALE_WIDTH);
+            }
+            if (_scroll) {
+                let viewWidth = this.canvas.width - this.mtxWorldToScreen.translation.x + ViewAnimationSheet.SCALE_WIDTH;
+                let animationWidth = this.animation?.totalTime * this.mtxWorldToScreen.scaling.x + ViewAnimationSheet.SCALE_WIDTH * 2; // in px
+                if (animationWidth > viewWidth) {
+                    this.scrollBody.style.width = `${animationWidth}px`;
+                }
+                else {
+                    this.scrollBody.style.width = `${viewWidth}px`;
+                }
+                this.scrollContainer.scrollLeft = -this.mtxWorldToScreen.translation.x + ViewAnimationSheet.SCALE_WIDTH;
             }
         }
         generateKeys() {
@@ -3299,7 +3293,7 @@ var Fudge;
             this.graph = _event.detail.graph;
             this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
             this.resetView();
-            this.draw();
+            this.draw(true);
         };
         hndAnimate = (_event) => {
             this.playbackTime = _event.detail.data;
@@ -3346,7 +3340,7 @@ var Fudge;
                             }
                         }
                         this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.selectedKey } });
-                        this.draw(false);
+                        this.draw();
                     }
                     break;
                 case 2:
@@ -3354,7 +3348,7 @@ var Fudge;
                     this.contextMenu.getMenuItemById(Object.values(SHEET_MODE).find(_mode => _mode != this.mode)).visible = this.selectedKey == null;
                     this.contextMenu.getMenuItemById("Delete Key").visible = this.selectedKey != null;
                     this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.selectedKey } });
-                    this.draw(false);
+                    this.draw();
                     break;
                 case 4:
                     this.posPanStart = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);
@@ -3372,7 +3366,7 @@ var Fudge;
         hndPointerMoveSlope = (_event) => {
             _event.preventDefault();
             let vctDelta = ƒ.Vector2.DIFFERENCE(new ƒ.Vector2(_event.offsetX, _event.offsetY), this.selectedKey.posScreen);
-            vctDelta.transform(ƒ.Matrix3x3.SCALING(this.mtxScreenToWorld.scaling));
+            vctDelta.transform(ƒ.Matrix3x3.SCALING(ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen).scaling));
             let slope = vctDelta.y / vctDelta.x;
             this.selectedKey.key.SlopeIn = slope;
             this.selectedKey.key.SlopeOut = slope;
@@ -3384,7 +3378,7 @@ var Fudge;
             if (this.mode == SHEET_MODE.DOPE)
                 translation.y = 0;
             this.mtxWorldToScreen.translate(translation);
-            this.draw();
+            this.draw(true);
         };
         hndPointerMoveDrag = (_event) => {
             _event.preventDefault();
@@ -3401,7 +3395,7 @@ var Fudge;
         hndPointerUp = (_event) => {
             _event.preventDefault();
             if (this.scrollContainer.onscroll)
-                this.draw();
+                this.draw(true);
             this.scrollContainer.onscroll = undefined;
             this.scrollContainer.onpointermove = undefined;
         };
@@ -3416,14 +3410,14 @@ var Fudge;
             this.mtxWorldToScreen.translate(posCursorWorld);
             this.mtxWorldToScreen.scale(new ƒ.Vector2(x, y));
             this.mtxWorldToScreen.translate(ƒ.Vector2.SCALE(posCursorWorld, -1));
-            this.draw();
+            this.draw(true);
         };
         hndScroll = (_event) => {
             _event.preventDefault();
             let translation = this.mtxWorldToScreen.translation;
-            translation.x = -this.scrollContainer.scrollLeft;
+            translation.x = -this.scrollContainer.scrollLeft + ViewAnimationSheet.SCALE_WIDTH;
             this.mtxWorldToScreen.translation = translation;
-            this.draw(false);
+            this.draw();
         };
         dispatchAnimate() {
             this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: this.playbackTime } });
@@ -3432,7 +3426,8 @@ var Fudge;
         resetView() {
             this.mtxWorldToScreen.reset();
             this.mtxWorldToScreen.scaleX(ViewAnimationSheet.PIXEL_PER_MILLISECOND); // apply scaling
-            this.mtxWorldToScreen.scaleX(this.canvas.width / ((this.animation?.totalTime || ViewAnimationSheet.STANDARD_ANIMATION_LENGTH) * 1.2));
+            this.mtxWorldToScreen.scaleX((this.canvas.width - 2 * ViewAnimationSheet.SCALE_WIDTH) / ((this.animation?.totalTime || ViewAnimationSheet.STANDARD_ANIMATION_LENGTH)));
+            this.mtxWorldToScreen.translateX(ViewAnimationSheet.SCALE_WIDTH);
             if (this.mode == SHEET_MODE.CURVES) {
                 this.mtxWorldToScreen.scaleY(-1); // flip y
                 this.mtxWorldToScreen.scaleY(ViewAnimationSheet.PIXEL_PER_VALUE); // apply scaling
@@ -3449,11 +3444,10 @@ var Fudge;
             else {
                 this.mtxWorldToScreen.translateY(ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT + ViewAnimationSheet.KEY_SIZE * 2);
             }
-            this.mtxScreenToWorld = ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen);
         }
         getScreenToWorldPoint(_x, _y) {
             let vector = new ƒ.Vector2(_x, _y);
-            vector.transform(this.mtxScreenToWorld);
+            vector.transform(ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen));
             return vector;
         }
         roundOddLineWidth(_value) {

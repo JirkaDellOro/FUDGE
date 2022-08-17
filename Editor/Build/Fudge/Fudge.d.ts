@@ -594,7 +594,6 @@ declare namespace Fudge {
         private scrollContainer;
         private scrollBody;
         private mtxWorldToScreen;
-        private mtxScreenToWorld;
         private selectedKey;
         private keys;
         private sequences;
