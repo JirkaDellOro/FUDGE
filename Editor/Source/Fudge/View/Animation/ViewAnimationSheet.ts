@@ -34,6 +34,7 @@ namespace Fudge {
     private mtxWorldToScreen: ƒ.Matrix3x3 = new ƒ.Matrix3x3();
     
     private selectedKey: ViewAnimationKey;
+    private selectedEvent: ViewAnimationEvent;
     private keys: ViewAnimationKey[] = [];
     private sequences: ViewAnimationSequence[] = [];
     private labels: ViewAnimationLabel[] = [];
@@ -43,6 +44,7 @@ namespace Fudge {
     private documentStyle: CSSStyleDeclaration = window.getComputedStyle(document.documentElement);
     
     private posPanStart: ƒ.Vector2 = new ƒ.Vector2();
+    private posRightClick: ƒ.Vector2 = new ƒ.Vector2();
     
     constructor(_container: ComponentContainer, _state: Object) {
       super(_container, _state);
@@ -61,7 +63,7 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndFocus);
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndSelect);
-      this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenuSheet);
 
       this.canvas.style.position = "absolute";
       this.dom.appendChild(this.canvas);
@@ -87,13 +89,44 @@ namespace Fudge {
     private set mode(_mode: SHEET_MODE) {
       this.#mode = _mode;
       this.setTitle(_mode);
-      this.contextMenu.getMenuItemById(SHEET_MODE.DOPE).visible = _mode != SHEET_MODE.DOPE;
-      this.contextMenu.getMenuItemById(SHEET_MODE.CURVES).visible = _mode != SHEET_MODE.CURVES;
       this.resetView();
       this.draw(true);
     }
 
     //#region context menu
+    protected openContextMenuSheet = (_event: Event): void => {
+      this.contextMenu.items.forEach(_item => _item.visible = false);
+      if (this.posRightClick.y > ViewAnimationSheet.TIMELINE_HEIGHT && this.posRightClick.y < ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT) { // click on events
+        let deleteEventOrLabel: ViewAnimationEvent | ViewAnimationLabel = 
+          this.events.find(_object => this.crc2.isPointInPath(_object.path2D, this.posRightClick.x, this.posRightClick.y)) ||
+          this.labels.find(_object => this.crc2.isPointInPath(_object.path2D, this.posRightClick.x, this.posRightClick.y));
+        if (deleteEventOrLabel) {
+          if ("event" in deleteEventOrLabel)
+            this.contextMenu.getMenuItemById("Delete Event").visible = true;
+          else
+            this.contextMenu.getMenuItemById("Delete Label").visible = true;
+          Reflect.set(this.contextMenu, "targetObject", deleteEventOrLabel);
+        } else {
+          this.contextMenu.getMenuItemById("Add Label").visible = true;
+          this.contextMenu.getMenuItemById("Add Event").visible = true;
+          Reflect.set(this.contextMenu, "targetTime", this.getScreenToTime(this.posRightClick.x));
+        }
+        this.openContextMenu(_event);
+      }
+
+      if (this.posRightClick.y > ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT) {
+        let targetKey: ViewAnimationKey = this.keys.find(_object => this.crc2.isPointInPath(_object.path2D, this.posRightClick.x, this.posRightClick.y));
+        if (targetKey) {
+          this.contextMenu.getMenuItemById("Delete Key").visible = true;
+          Reflect.set(this.contextMenu, "targetObject", targetKey);
+        } else {
+          this.contextMenu.getMenuItemById(SHEET_MODE.DOPE).visible = this.mode != SHEET_MODE.DOPE;
+          this.contextMenu.getMenuItemById(SHEET_MODE.CURVES).visible = this.mode != SHEET_MODE.CURVES;
+        }
+        this.openContextMenu(_event);
+      }
+    }
+
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
 
@@ -102,14 +135,53 @@ namespace Fudge {
       menu.append(item);
       item = new remote.MenuItem({ id: SHEET_MODE.CURVES, label: SHEET_MODE.CURVES, click: () => this.mode = SHEET_MODE.CURVES});
       menu.append(item);
-      item = new remote.MenuItem({ id: "Delete Key", label: "Delete Key", click: () => {
-        let sequence: ƒ.AnimationSequence = this.selectedKey.sequence.sequence;
-        sequence.removeKey(this.selectedKey.key);
-        this.dispatchAnimate();
-      }});
+      item = new remote.MenuItem({ id: "Add Event", label: "Add Event", click: _callback});
+      menu.append(item);
+      item = new remote.MenuItem({ id: "Delete Event", label: "Delete Event", click: _callback});
+      menu.append(item);
+      item = new remote.MenuItem({ id: "Add Label", label: "Add Label", click: _callback});
+      menu.append(item);
+      item = new remote.MenuItem({ id: "Delete Label", label: "Delete Label", click: _callback});
+      menu.append(item);
+      item = new remote.MenuItem({ id: "Delete Key", label: "Delete Key", click: _callback});
       menu.append(item);
       
       return menu;
+    }
+
+    protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      let choice: string = _item.id;
+      ƒ.Debug.fudge(`MenuSelect | id: ${CONTEXTMENU[_item.id]} | event: ${_event}`);
+
+      let targetObject: ƒ.General = Reflect.get(this.contextMenu, "targetObject");
+      let targetTime: number = Reflect.get(this.contextMenu, "targetTime");
+        
+      switch (choice) {
+        case "Add Event":
+          let eventName: string = `${this.animation.name}Event${Object.keys(this.animation.events).length - 1}`;
+          this.animation.setEvent(eventName, targetTime);
+          this.selectedEvent = { event: eventName, path2D: null };
+          this.draw();
+          break;
+        case "Delete Event":
+          this.animation.removeEvent(targetObject.event);
+          this.draw();
+          break;
+        case "Add Label":
+          let labelName: string = `${this.animation.name}Label${Object.keys(this.animation.events).length - 1}`;
+          this.animation.labels[labelName] = targetTime;
+          this.draw();
+          break;
+        case "Delete Label":
+          delete this.animation.labels[targetObject.label];
+          this.draw();
+          break;
+        case "Delete Key":
+          let sequence: ƒ.AnimationSequence = targetObject.sequence.sequence;
+          sequence.removeKey(targetObject.key);
+          this.dispatchAnimate();
+          break;
+      }
     }
     //#endregion
 
@@ -134,14 +206,11 @@ namespace Fudge {
       }
       
       if (_scroll) {
-        let viewWidth: number = this.canvas.width - this.mtxWorldToScreen.translation.x + ViewAnimationSheet.SCALE_WIDTH;
-        let animationWidth: number = this.animation?.totalTime * this.mtxWorldToScreen.scaling.x + ViewAnimationSheet.SCALE_WIDTH * 2; // in px
-        if (animationWidth > viewWidth) {
-          this.scrollBody.style.width = `${animationWidth}px`;
-        } else {
-          this.scrollBody.style.width = `${viewWidth}px`;
-        }
-        this.scrollContainer.scrollLeft = -this.mtxWorldToScreen.translation.x + ViewAnimationSheet.SCALE_WIDTH;
+        let leftWidth: number = -this.mtxWorldToScreen.translation.x + ViewAnimationSheet.SCALE_WIDTH;
+        let screenWidth: number = this.canvas.width + leftWidth;
+        let animationWidth: number = this.animation?.totalTime * this.mtxWorldToScreen.scaling.x + ViewAnimationSheet.SCALE_WIDTH * 2;
+        this.scrollBody.style.width = `${Math.max(animationWidth, screenWidth)}px`;
+        this.scrollContainer.scrollLeft = leftWidth;
       }
     }
 
@@ -177,13 +246,13 @@ namespace Fudge {
     }
 
     private generateKey(_x: number, _y: number, _w: number, _h: number): Path2D {
-      let key: Path2D = new Path2D();
-      key.moveTo(_x - _w, _y);
-      key.lineTo(_x, _y + _h);
-      key.lineTo(_x + _w, _y);
-      key.lineTo(_x, _y - _h);
-      key.closePath();
-      return key;
+      let path: Path2D = new Path2D();
+      path.moveTo(_x - _w, _y);
+      path.lineTo(_x, _y + _h);
+      path.lineTo(_x + _w, _y);
+      path.lineTo(_x, _y - _h);
+      path.closePath();
+      return path;
     }
 
     private drawTimeline(): void {
@@ -294,45 +363,54 @@ namespace Fudge {
       this.crc2.stroke();
       
       this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-text");
+
       this.labels = [];
       this.events = [];
       if (!this.animation) return;
-      for (let l in this.animation.labels) {
-        //TODO stop using hardcoded values
-        let p: Path2D = new Path2D;
-        this.labels.push({ label: l, path2D: p });
-        let position: number = this.animation.labels[l] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-        p.moveTo(position - 3, totalHeight - 26);
-        p.lineTo(position - 3, totalHeight - 4);
-        p.lineTo(position + 3, totalHeight - 4);
-        p.lineTo(position + 3, totalHeight - 23);
-        p.lineTo(position, totalHeight - 26);
-        p.lineTo(position - 3, totalHeight - 26);
-        this.crc2.fill(p);
-        this.crc2.stroke(p);
-        let p2: Path2D = new Path2D();
-        p2.moveTo(position, totalHeight - 26);
-        p2.lineTo(position, totalHeight - 23);
-        p2.lineTo(position + 3, totalHeight - 23);
-        this.crc2.stroke(p2);
+
+      for (const label in this.animation.labels) {
+        let x: number = this.roundOddLineWidth(this.animation.labels[label] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x);
+        let viewLabel: ViewAnimationLabel = { label: label, path2D: generateLabel(x) };
+        this.labels.push(viewLabel);
+        this.crc2.stroke(viewLabel.path2D);
       }
-      for (let e in this.animation.events) {
-        let p: Path2D = new Path2D;
-        this.events.push({ event: e, path2D: p });
-        let position: number = this.animation.events[e] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-        p.moveTo(position - 3, totalHeight - 26);
-        p.lineTo(position - 3, totalHeight - 7);
-        p.lineTo(position, totalHeight - 4);
-        p.lineTo(position + 3, totalHeight - 7);
-        p.lineTo(position + 3, totalHeight - 26);
-        p.lineTo(position - 3, totalHeight - 26);
-        // this.crc2.fill(p);
-        this.crc2.stroke(p);
+
+      for (const event in this.animation.events) {
+        let x: number = this.roundOddLineWidth(this.animation.events[event] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x);
+        let viewEvent: ViewAnimationEvent = { event: event, path2D: generateEvent(x) };
+        this.events.push(viewEvent);
+        this.crc2.stroke(viewEvent.path2D);
       }
+
+      this.selectedEvent = this.events.find(_event => _event.event == this.selectedEvent?.event);
+      if (this.selectedEvent) 
+        this.crc2.fill(this.selectedEvent.path2D);
 
       this.crc2.save();
       this.crc2.rect(0, ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT, this.canvas.width, this.canvas.height);
       this.crc2.clip();
+
+      function generateEvent(_x: number): Path2D {
+        let path: Path2D = new Path2D;
+        path.moveTo(_x - 3, totalHeight - 26);
+        path.lineTo(_x - 3, totalHeight - 7);
+        path.lineTo(_x, totalHeight - 4);
+        path.lineTo(_x + 3, totalHeight - 7);
+        path.lineTo(_x + 3, totalHeight - 26);
+        path.closePath();
+        return path;
+      }
+
+      function generateLabel(_x: number): Path2D {
+        let path: Path2D = new Path2D;
+        path.moveTo(_x - 3, totalHeight - 26);
+        path.lineTo(_x - 3, totalHeight - 4);
+        path.lineTo(_x + 3, totalHeight - 4);
+        path.lineTo(_x + 3, totalHeight - 23);
+        path.lineTo(_x, totalHeight - 26);
+        path.closePath();
+        return path;
+      }
     }
 
     private drawScale(): void {
@@ -552,8 +630,7 @@ namespace Fudge {
           else if (_event.offsetY <= ViewAnimationSheet.TIMELINE_HEIGHT) {
             this.hndPointerMoveTimeline(_event);
             this.scrollContainer.onpointermove = this.hndPointerMoveTimeline;
-          }
-          else if (this.slopeHooks.some(_hook => this.crc2.isPointInPath(_hook, _event.offsetX, _event.offsetY))) {
+          } else if (this.slopeHooks.some(_hook => this.crc2.isPointInPath(_hook, _event.offsetX, _event.offsetY))) {
             this.scrollContainer.onpointermove = this.hndPointerMoveSlope;
           } else {
             let obj: ViewAnimationKey | ViewAnimationLabel | ViewAnimationEvent =
@@ -563,30 +640,28 @@ namespace Fudge {
 
             if (!obj) {
               this.selectedKey = null;
+              this.selectedEvent = null;
             } else {
               if (obj["label"]) {
                 console.log(obj["label"]);
               }
               else if (obj["event"]) {
                 console.log(obj["event"]);
+                this.selectedEvent = <ViewAnimationEvent>obj;
+                this.scrollContainer.onpointermove = this.hndPointerMoveDragEvent;
               }
               else if (obj["key"]) {
                 console.log(obj["key"]);
                 this.selectedKey = <ViewAnimationKey>obj;
-                this.scrollContainer.onpointermove = this.hndPointerMoveDrag;
+                this.scrollContainer.onpointermove = this.hndPointerMoveDragKey;
               }
             }
-
-            this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.selectedKey } });
             this.draw();
           }
           break;
         case 2:
-          this.selectedKey = this.keys.find(findObject);
-          this.contextMenu.getMenuItemById(Object.values(SHEET_MODE).find( _mode => _mode != this.mode )).visible = this.selectedKey == null;
-          this.contextMenu.getMenuItemById("Delete Key").visible = this.selectedKey != null;
-          this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.selectedKey } });
-          this.draw();
+          this.posRightClick.x = _event.offsetX;
+          this.posRightClick.y = _event.offsetY;
           break;
         case 4:
           this.posPanStart = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);
@@ -597,9 +672,7 @@ namespace Fudge {
 
     private hndPointerMoveTimeline = (_event: PointerEvent): void => {
       _event.preventDefault();
-      let playbackTime: number = Math.max(0, this.getScreenToWorldPoint(_event.offsetX, 0).x);
-      let pixelPerFrame: number = 1000 / this.animation.fps;
-      this.playbackTime = Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
+      this.playbackTime = this.getScreenToTime(_event.offsetX);
       this.dispatchAnimate();
     }
 
@@ -622,7 +695,7 @@ namespace Fudge {
       this.draw(true);
     }
 
-    private hndPointerMoveDrag = (_event: PointerEvent): void => {
+    private hndPointerMoveDragKey = (_event: PointerEvent): void => {
       _event.preventDefault();
       let translation: ƒ.Vector2 = this.getScreenToWorldPoint(_event.offsetX, _event.offsetY);
       let pixelPerFrame: number = 1000 / this.animation.fps;
@@ -634,6 +707,12 @@ namespace Fudge {
       sequence.modifyKey(key, translation.x, this.mode == SHEET_MODE.DOPE || _event.shiftKey ? null : translation.y);
       this.animation.calculateTotalTime();
       this.dispatchAnimate();
+    }
+
+    private hndPointerMoveDragEvent = (_event: PointerEvent): void => {
+      _event.preventDefault();
+      this.animation.setEvent(this.selectedEvent.event, this.getScreenToTime(_event.offsetX));
+      this.draw();
     }
 
     private hndPointerUp = (_event: PointerEvent): void => {
@@ -702,6 +781,12 @@ namespace Fudge {
       let vector: ƒ.Vector2 = new ƒ.Vector2(_x, _y);
       vector.transform(ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen));
       return vector;
+    }
+
+    private getScreenToTime(_x: number): number {
+      let playbackTime: number = Math.max(0, (_x - this.mtxWorldToScreen.translation.x) / this.mtxWorldToScreen.scaling.x);
+      let pixelPerFrame: number = 1000 / this.animation.fps;
+      return Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
     }
 
     private roundOddLineWidth(_value: number): number {

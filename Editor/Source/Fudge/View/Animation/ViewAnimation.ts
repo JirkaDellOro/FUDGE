@@ -6,7 +6,7 @@ namespace Fudge {
     sequence: ƒ.AnimationSequence;
     color: string;
   }
-
+  
   export interface ViewAnimationKey {
     key: ƒ.AnimationKey;
     posScreen: ƒ.Vector2;
@@ -259,14 +259,6 @@ namespace Fudge {
     private hndToolbarClick = (_event: MouseEvent) => {
       let target: HTMLInputElement = <HTMLInputElement>_event.target;
       switch (target.id) {
-        // case "add-label":
-        //   this.animation.labels[this.randomNameGenerator()] = this.playbackTime;
-        //   this.dispatchAnimate();
-        //   break;
-        // case "add-event":
-        //   this.animation.setEvent(this.randomNameGenerator(), this.playbackTime);
-        //   this.dispatchAnimate();
-        //   break;
         case "previous": // TODO: change to next key frame
           this.playbackTime = this.controller.nextKey(this.playbackTime, "backward");
           this.dispatchAnimate();

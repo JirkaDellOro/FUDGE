@@ -595,6 +595,7 @@ declare namespace Fudge {
         private scrollBody;
         private mtxWorldToScreen;
         private selectedKey;
+        private selectedEvent;
         private keys;
         private sequences;
         private labels;
@@ -602,10 +603,13 @@ declare namespace Fudge {
         private slopeHooks;
         private documentStyle;
         private posPanStart;
+        private posRightClick;
         constructor(_container: ComponentContainer, _state: Object);
         private get mode();
         private set mode(value);
+        protected openContextMenuSheet: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private draw;
         private generateKeys;
         private generateKey;
@@ -623,13 +627,15 @@ declare namespace Fudge {
         private hndPointerMoveTimeline;
         private hndPointerMoveSlope;
         private hndPointerMovePan;
-        private hndPointerMoveDrag;
+        private hndPointerMoveDragKey;
+        private hndPointerMoveDragEvent;
         private hndPointerUp;
         private hndWheel;
         private hndScroll;
         private dispatchAnimate;
         private resetView;
         private getScreenToWorldPoint;
+        private getScreenToTime;
         private roundOddLineWidth;
     }
 }
