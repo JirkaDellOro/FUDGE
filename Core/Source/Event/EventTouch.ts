@@ -1,5 +1,5 @@
 namespace FudgeCore {
-  enum EVENT_TOUCH {
+  export enum EVENT_TOUCH {
     /** the standard touchstart, in here for completeness */
     START = "touchstart",
     /** the standard touchend, in here for completeness */

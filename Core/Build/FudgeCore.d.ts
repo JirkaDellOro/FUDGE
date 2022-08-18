@@ -2562,6 +2562,24 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum EVENT_TOUCH {
+        /** the standard touchstart, in here for completeness */
+        START = "touchstart",
+        /** the standard touchend, in here for completeness */
+        END = "touchend",
+        /** the standard touchmove, in here for completeness */
+        MOVE = "touchmove",
+        /** the standard touchcancel, in here for completeness */
+        CANCEL = "touchcancel",
+        /** custom event fired when the touches haven't moved outside of the tap radius */
+        TAP = "touchTap",
+        /** custom event fired when the touches have moved outside of the notch radius, details offset and cardinal direction */
+        NOTCH = "touchNotch",
+        /** custom event not implemented yet */
+        PINCH = "touchPinch",
+        /** custom event not implemented yet */
+        ROTATE = "touchRotate"
+    }
     class EventTouch {
         posStart: Vector2;
         posNotch: Vector2;
