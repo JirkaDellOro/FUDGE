@@ -1,14 +1,5 @@
 namespace FudgeCore {
   /**
-   * Mappings of standard DOM/Browser-Events as passed from a canvas to the viewport
-   */
-  export const enum EVENT_KEYBOARD {
-    UP = "ƒkeyup",
-    DOWN = "ƒkeydown",
-    PRESS = "ƒkeypress"
-  }
-
-  /**
    * The codes sent from a standard english keyboard layout
    */
   export enum KEYBOARD_CODE {

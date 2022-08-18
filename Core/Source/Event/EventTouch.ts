@@ -1,0 +1,95 @@
+namespace FudgeCore {
+  enum EVENT_TOUCH {
+    /** the standard touchstart, in here for completeness */
+    START = "touchstart",
+    /** the standard touchend, in here for completeness */
+    END = "touchend",
+    /** the standard touchmove, in here for completeness */
+    MOVE = "touchmove",
+    /** the standard touchcancel, in here for completeness */
+    CANCEL = "touchcancel",
+    /** custom event fired when the touches haven't moved outside of the tap radius */
+    TAP = "touchTap",
+    /** custom event fired when the touches have moved outside of the notch radius, details offset and cardinal direction */
+    NOTCH = "touchNotch",
+    /** custom event not implemented yet */
+    PINCH = "touchPinch",
+    /** custom event not implemented yet */
+    ROTATE = "touchRotate"
+  }
+
+  export class EventTouch {
+    public posStart: Vector2 = Vector2.ZERO();
+    public posNotch: Vector2 = Vector2.ZERO();
+    public radiusTap: number;
+    public radiusNotch: number;
+    private target: EventTarget;
+    private posPrev: Vector2 = Vector2.ZERO();
+    private moved: boolean = false;
+
+    public constructor(_target: EventTarget, _radiusTap: number = 5, _radiusNotch: number = 50) {
+      _target.addEventListener(EVENT_TOUCH.START, <EventListener>this.hndEvent);
+      _target.addEventListener(EVENT_TOUCH.END, <EventListener>this.hndEvent);
+      _target.addEventListener(EVENT_TOUCH.MOVE, <EventListener>this.hndEvent);
+      this.target = _target;
+      this.radiusTap = _radiusTap;
+      this.radiusNotch = _radiusNotch;
+    }
+
+    public hndEvent = (_event: TouchEvent): void => {
+      _event.preventDefault();
+      let touchLast: Touch = _event.touches[0];
+      let position: Vector2 = new Vector2(touchLast?.clientX, touchLast?.clientY);
+      let offset: Vector2;
+
+      switch (_event.type) {
+        case EVENT_TOUCH.START:
+          this.moved = false;
+          this.startGesture(position);
+          break;
+        case EVENT_TOUCH.END:
+          if (_event.touches.length > 0) {
+            // still touches active
+            this.startGesture(position);
+            break;
+          }
+
+          // check if there was movement, otherwise fire tap
+          if (!this.moved)
+            this.target.dispatchEvent(
+              new CustomEvent(EVENT_TOUCH.TAP, {
+                bubbles: true, detail: { position: position, touches: _event.touches }
+              })
+            );
+          break;
+        case EVENT_TOUCH.MOVE:
+          offset = Vector2.DIFFERENCE(this.posPrev, this.posStart);
+          this.moved ||= (offset.magnitude < this.radiusTap); // remember that touch moved over tap radius
+
+          // fire notch when touches moved out of notch radius and reset notch
+          offset = Vector2.DIFFERENCE(position, this.posNotch);
+          if (offset.magnitude > this.radiusNotch) {
+            let cardinal: Vector2 = Math.abs(offset.x) > Math.abs(offset.y) ?
+              Vector2.X(offset.x < 0 ? -1 : 1) :
+              Vector2.Y(offset.y < 0 ? -1 : 1);
+            this.target.dispatchEvent(
+              new CustomEvent(EVENT_TOUCH.NOTCH, {
+                bubbles: true, detail: { position: position, touches: _event.touches, offset: offset, cardinal: cardinal }
+              }));
+            this.posNotch = position;
+          }
+          //TODO: pinch, rotate...
+          break;
+        default:
+          break;
+      }
+
+      this.posPrev.set(position.x, position.y);
+    }
+
+    private startGesture(_position: Vector2): void {
+      this.posNotch.set(_position.x, _position.y);
+      this.posStart.set(_position.x, _position.y);
+    }
+  }
+}

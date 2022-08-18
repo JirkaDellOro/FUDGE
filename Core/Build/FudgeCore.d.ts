@@ -2361,14 +2361,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Mappings of standard DOM/Browser-Events as passed from a canvas to the viewport
-     */
-    const enum EVENT_KEYBOARD {
-        UP = "\u0192keyup",
-        DOWN = "\u0192keydown",
-        PRESS = "\u0192keypress"
-    }
-    /**
      * The codes sent from a standard english keyboard layout
      */
     enum KEYBOARD_CODE {
@@ -2567,6 +2559,20 @@ declare namespace FudgeCore {
         lastCall: boolean;
         count: number;
         constructor(_timer: Timer, ..._arguments: Object[]);
+    }
+}
+declare namespace FudgeCore {
+    class EventTouch {
+        posStart: Vector2;
+        posNotch: Vector2;
+        radiusTap: number;
+        radiusNotch: number;
+        private target;
+        private posPrev;
+        private moved;
+        constructor(_target: EventTarget, _radiusTap?: number, _radiusNotch?: number);
+        hndEvent: (_event: TouchEvent) => void;
+        private startGesture;
     }
 }
 declare namespace FudgeCore {
