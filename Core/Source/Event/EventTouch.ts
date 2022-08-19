@@ -12,6 +12,10 @@ namespace FudgeCore {
     TAP = "touchTap",
     /** custom event fired when the touches have moved outside of the notch radius, details offset and cardinal direction */
     NOTCH = "touchNotch",
+    /** custom event fired when the touches haven't moved outside of the tap radius for some time */
+    LONG = "touchLong",
+    /** custom event fired when two taps were detected in short succession */
+    DOUBLE = "touchDouble",
     /** custom event not implemented yet */
     PINCH = "touchPinch",
     /** custom event not implemented yet */
@@ -26,6 +30,7 @@ namespace FudgeCore {
     private target: EventTarget;
     private posPrev: Vector2 = Vector2.ZERO();
     private moved: boolean = false;
+    private timer: Timer;
 
     public constructor(_target: EventTarget, _radiusTap: number = 5, _radiusNotch: number = 50) {
       _target.addEventListener(EVENT_TOUCH.START, <EventListener>this.hndEvent);
@@ -54,13 +59,28 @@ namespace FudgeCore {
             break;
           }
 
-          // check if there was movement, otherwise fire tap
-          if (!this.moved)
+          let dispatchTap: TimerHandler = (_eventTimer: EventTimer): void => {
             this.target.dispatchEvent(
               new CustomEvent(EVENT_TOUCH.TAP, {
                 bubbles: true, detail: { position: position, touches: _event.touches }
               })
             );
+          };
+
+          // check if there was a tap before and timer is still running -> double tap
+          if (this.timer?.active) {
+            Debug.log("DoubleTap");
+            this.timer.clear();
+            this.timer = undefined;
+            this.target.dispatchEvent(
+              new CustomEvent(EVENT_TOUCH.DOUBLE, {
+                bubbles: true, detail: { position: position, touches: _event.touches }
+              }));
+          }
+          // check if there was movement, otherwise fire tap
+          else if (!this.moved)
+            this.timer = new Timer(new Time(), 100, 1, dispatchTap);
+
           break;
         case EVENT_TOUCH.MOVE:
           offset = Vector2.DIFFERENCE(this.posPrev, this.posStart);

@@ -2575,6 +2575,10 @@ declare namespace FudgeCore {
         TAP = "touchTap",
         /** custom event fired when the touches have moved outside of the notch radius, details offset and cardinal direction */
         NOTCH = "touchNotch",
+        /** custom event fired when the touches haven't moved outside of the tap radius for some time */
+        LONG = "touchLong",
+        /** custom event fired when two taps were detected in short succession */
+        DOUBLE = "touchDouble",
         /** custom event not implemented yet */
         PINCH = "touchPinch",
         /** custom event not implemented yet */
@@ -2588,6 +2592,7 @@ declare namespace FudgeCore {
         private target;
         private posPrev;
         private moved;
+        private timer;
         constructor(_target: EventTarget, _radiusTap?: number, _radiusNotch?: number);
         hndEvent: (_event: TouchEvent) => void;
         private startGesture;
