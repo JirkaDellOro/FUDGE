@@ -122,121 +122,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    interface TimeUnits {
-        hours?: number;
-        minutes?: number;
-        seconds?: number;
-        tenths?: number;
-        hundreds?: number;
-        thousands?: number;
-        fraction?: number;
-        asHours?: number;
-        asMinutes?: number;
-        asSeconds?: number;
-    }
-    interface Timers extends Object {
-        [id: number]: Timer;
-    }
-    /**
-     * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.
-     * Supports {@link Timer}s similar to window.setInterval but with respect to the scaled time.
-     * All time values are given in milliseconds
-     *
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class Time extends EventTargetUnified {
-        /** Standard game time starting automatically with the application */
-        static readonly game: Time;
-        private start;
-        private scale;
-        private offset;
-        private lastCallToElapsed;
-        private timers;
-        private idTimerAddedLast;
-        constructor();
-        /**
-         * Returns representions of the time given in milliseconds in various formats defined in {@link TimeUnits}
-         */
-        static getUnits(_milliseconds: number): TimeUnits;
-        /**
-         * Retrieves the current scaled timestamp of this instance in milliseconds
-         */
-        get(): number;
-        /**
-         * Returns the remaining time to the given point of time
-         */
-        getRemainder(_to: number): number;
-        /**
-         * (Re-) Sets the timestamp of this instance
-         * @param _time The timestamp to represent the current time (default 0.0)
-         */
-        set(_time?: number): void;
-        /**
-         * Sets the scaling of this time, allowing for slowmotion (<1) or fastforward (>1)
-         * @param _scale The desired scaling (default 1.0)
-         */
-        setScale(_scale?: number): void;
-        /**
-         * Retrieves the current scaling of this time
-         */
-        getScale(): number;
-        /**
-         * Retrieves the offset of this time
-         */
-        getOffset(): number;
-        /**
-         * Retrieves the scaled time in milliseconds passed since the last call to this method
-         * Automatically reset at every call to set(...) and setScale(...)
-         */
-        getElapsedSincePreviousCall(): number;
-        /**
-         * Returns a Promise<void> to be resolved after the time given. To be used with async/await
-         */
-        delay(_lapse: number): Promise<void>;
-        /**
-         * Stops and deletes all {@link Timer}s attached. Should be called before this Time-object leaves scope
-         */
-        clearAllTimers(): void;
-        /**
-         * Deletes {@link Timer} found using the internal id of the connected interval-object
-         * @param _id
-         */
-        deleteTimerByItsInternalId(_id: number): void;
-        /**
-         * Installs a timer at this time object
-         * @param _lapse The object-time to elapse between the calls to _callback
-         * @param _count The number of calls desired, 0 = Infinite
-         * @param _handler The function to call each the given lapse has elapsed
-         * @param _arguments Additional parameters to pass to callback function
-         */
-        setTimer(_lapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]): number;
-        /**
-         * This method is called internally by {@link Time} and {@link Timer} and must not be called otherwise
-         */
-        addTimer(_timer: Timer): number;
-        /**
-         * Deletes the timer with the id given by this time object
-         */
-        deleteTimer(_id: number): void;
-        /**
-         * Returns a reference to the timer with the given id or null if not found.
-         */
-        getTimer(_id: number): Timer;
-        /**
-         * Returns a copy of the list of timers currently installed on this time object
-         */
-        getTimers(): Timers;
-        /**
-         * Returns true if there are {@link Timers} installed to this
-         */
-        hasTimers(): boolean;
-        /**
-         * Recreates {@link Timer}s when scaling changes
-         */
-        private rescaleAllTimers;
-    }
-}
-declare namespace FudgeCore {
     interface MapEventTypeToListener {
         [eventType: string]: EventListenerUnified[];
     }
@@ -2700,7 +2585,6 @@ declare namespace FudgeCore {
         ROTATE = "touchRotate"
     }
     class EventTouch {
-        private static time;
         posStart: Vector2;
         posNotch: Vector2;
         radiusTap: number;
@@ -2712,6 +2596,7 @@ declare namespace FudgeCore {
         private timerLong;
         private timeDouble;
         private timeLong;
+        private time;
         constructor(_target: EventTarget, _radiusTap?: number, _radiusNotch?: number, _timeDouble?: number, _timerLong?: number);
         hndEvent: (_event: TouchEvent) => void;
         private startGesture;
@@ -6624,6 +6509,121 @@ declare namespace FudgeCore {
         private static loop;
         private static loopFrame;
         private static loopTime;
+    }
+}
+declare namespace FudgeCore {
+    interface TimeUnits {
+        hours?: number;
+        minutes?: number;
+        seconds?: number;
+        tenths?: number;
+        hundreds?: number;
+        thousands?: number;
+        fraction?: number;
+        asHours?: number;
+        asMinutes?: number;
+        asSeconds?: number;
+    }
+    interface Timers extends Object {
+        [id: number]: Timer;
+    }
+    /**
+     * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.
+     * Supports {@link Timer}s similar to window.setInterval but with respect to the scaled time.
+     * All time values are given in milliseconds
+     *
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Time extends EventTargetUnified {
+        /** Standard game time starting automatically with the application */
+        static readonly game: Time;
+        private start;
+        private scale;
+        private offset;
+        private lastCallToElapsed;
+        private timers;
+        private idTimerAddedLast;
+        constructor();
+        /**
+         * Returns representions of the time given in milliseconds in various formats defined in {@link TimeUnits}
+         */
+        static getUnits(_milliseconds: number): TimeUnits;
+        /**
+         * Retrieves the current scaled timestamp of this instance in milliseconds
+         */
+        get(): number;
+        /**
+         * Returns the remaining time to the given point of time
+         */
+        getRemainder(_to: number): number;
+        /**
+         * (Re-) Sets the timestamp of this instance
+         * @param _time The timestamp to represent the current time (default 0.0)
+         */
+        set(_time?: number): void;
+        /**
+         * Sets the scaling of this time, allowing for slowmotion (<1) or fastforward (>1)
+         * @param _scale The desired scaling (default 1.0)
+         */
+        setScale(_scale?: number): void;
+        /**
+         * Retrieves the current scaling of this time
+         */
+        getScale(): number;
+        /**
+         * Retrieves the offset of this time
+         */
+        getOffset(): number;
+        /**
+         * Retrieves the scaled time in milliseconds passed since the last call to this method
+         * Automatically reset at every call to set(...) and setScale(...)
+         */
+        getElapsedSincePreviousCall(): number;
+        /**
+         * Returns a Promise<void> to be resolved after the time given. To be used with async/await
+         */
+        delay(_lapse: number): Promise<void>;
+        /**
+         * Stops and deletes all {@link Timer}s attached. Should be called before this Time-object leaves scope
+         */
+        clearAllTimers(): void;
+        /**
+         * Deletes {@link Timer} found using the internal id of the connected interval-object
+         * @param _id
+         */
+        deleteTimerByItsInternalId(_id: number): void;
+        /**
+         * Installs a timer at this time object
+         * @param _lapse The object-time to elapse between the calls to _callback
+         * @param _count The number of calls desired, 0 = Infinite
+         * @param _handler The function to call each the given lapse has elapsed
+         * @param _arguments Additional parameters to pass to callback function
+         */
+        setTimer(_lapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]): number;
+        /**
+         * This method is called internally by {@link Time} and {@link Timer} and must not be called otherwise
+         */
+        addTimer(_timer: Timer): number;
+        /**
+         * Deletes the timer with the id given by this time object
+         */
+        deleteTimer(_id: number): void;
+        /**
+         * Returns a reference to the timer with the given id or null if not found.
+         */
+        getTimer(_id: number): Timer;
+        /**
+         * Returns a copy of the list of timers currently installed on this time object
+         */
+        getTimers(): Timers;
+        /**
+         * Returns true if there are {@link Timers} installed to this
+         */
+        hasTimers(): boolean;
+        /**
+         * Recreates {@link Timer}s when scaling changes
+         */
+        private rescaleAllTimers;
     }
 }
 declare namespace FudgeCore {

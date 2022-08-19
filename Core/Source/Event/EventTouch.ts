@@ -23,7 +23,6 @@ namespace FudgeCore {
   }
 
   export class EventTouch {
-    private static time: Time = new Time();
     public posStart: Vector2 = Vector2.ZERO();
     public posNotch: Vector2 = Vector2.ZERO();
     public radiusTap: number;
@@ -35,6 +34,7 @@ namespace FudgeCore {
     private timerLong: Timer;
     private timeDouble: number;
     private timeLong: number;
+    private time: Time = new Time();
 
     public constructor(_target: EventTarget, _radiusTap: number = 5, _radiusNotch: number = 50, _timeDouble: number = 200, _timerLong: number = 1000) {
       _target.addEventListener(EVENT_TOUCH.START, <EventListener>this.hndEvent);
@@ -67,7 +67,7 @@ namespace FudgeCore {
           };
 
           this.timerLong?.clear();
-          this.timerLong = new Timer(EventTouch.time, this.timeLong, 1, dispatchLong);
+          this.timerLong = new Timer(this.time, this.timeLong, 1, dispatchLong);
           break;
         case EVENT_TOUCH.END:
           if (_event.touches.length > 0) {
@@ -95,7 +95,7 @@ namespace FudgeCore {
           }
           // check if there was movement, otherwise set timer to fire tap
           else if (!this.moved)
-            this.timerDouble = new Timer(EventTouch.time, this.timeDouble, 1, dispatchTap);
+            this.timerDouble = new Timer(this.time, this.timeDouble, 1, dispatchTap);
 
           break;
         case EVENT_TOUCH.MOVE:
