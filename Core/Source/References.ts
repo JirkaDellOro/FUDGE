@@ -1,5 +1,6 @@
 /// <reference path="Debug/DebugTarget.ts"/>
 /// <reference path="Debug/Debug.ts"/>
+/// <reference path="Time/Time.ts"/>
 /// <reference path="Event/Event.ts"/>
 /// <reference path="Serialization/Mutable.ts"/>
 /// <reference path="Serialization/Serializer.ts"/> 
