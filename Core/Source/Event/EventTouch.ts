@@ -59,6 +59,7 @@ namespace FudgeCore {
           this.startGesture(position);
 
           let dispatchLong: TimerHandler = (_eventTimer: EventTimer): void => {
+            this.moved = true;
             this.target.dispatchEvent(
               new CustomEvent(EVENT_TOUCH.LONG, {
                 bubbles: true, detail: { position: position, touches: _event.touches }
@@ -70,6 +71,8 @@ namespace FudgeCore {
           this.timerLong = new Timer(this.time, this.timeLong, 1, dispatchLong);
           break;
         case EVENT_TOUCH.END:
+          this.timerLong?.clear();
+
           if (_event.touches.length > 0) {
             // still touches active
             this.startGesture(position);
