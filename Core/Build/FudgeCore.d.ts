@@ -2549,8 +2549,8 @@ declare namespace FudgeCore {
         CALL = "\u0192lapse"
     }
     /**
-     * An event that represents a call from a Timer
-     * */
+     * An event that represents a call from a {@link Timer}
+     */
     class EventTimer {
         type: EVENT_TIMER;
         target: Timer;
@@ -2562,6 +2562,9 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Custom touch events
+     */
     enum EVENT_TOUCH {
         /** custom event fired in addition to the standard touchmove, details offset to starting touch */
         MOVE = "touchMove",
@@ -2578,6 +2581,7 @@ declare namespace FudgeCore {
         /** custom event not implemented yet */
         ROTATE = "touchRotate"
     }
+    /** Details for CustomTouchEvents, use as generic CustomEvent<EventTouchDetail> */
     interface EventTouchDetail {
         position: Vector2;
         touches: TouchList;
@@ -2585,7 +2589,11 @@ declare namespace FudgeCore {
         movement?: Vector2;
         cardinal?: Vector2;
     }
-    class EventTouch {
+    /**
+     * Dispatches CustomTouchEvents to the EventTarget given with the constructor.
+     * @author Jirka Dell'Oro-Friedl, HFU, 2022
+     */
+    class TouchEventDispatcher {
         posStart: Vector2;
         posNotch: Vector2;
         radiusTap: number;

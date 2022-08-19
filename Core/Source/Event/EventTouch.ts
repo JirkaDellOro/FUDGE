@@ -1,4 +1,7 @@
 namespace FudgeCore {
+  /**
+   * Custom touch events
+   */
   export enum EVENT_TOUCH {
     /** custom event fired in addition to the standard touchmove, details offset to starting touch */
     MOVE = "touchMove",
@@ -16,6 +19,7 @@ namespace FudgeCore {
     ROTATE = "touchRotate"
   }
 
+  /** Details for CustomTouchEvents, use as generic CustomEvent<EventTouchDetail> */
   export interface EventTouchDetail {
       position: Vector2;
       touches: TouchList;
@@ -24,8 +28,11 @@ namespace FudgeCore {
       cardinal?: Vector2;
   }
   
-  
-  export class EventTouch {
+  /**
+   * Dispatches CustomTouchEvents to the EventTarget given with the constructor.
+   * @author Jirka Dell'Oro-Friedl, HFU, 2022
+   */
+  export class TouchEventDispatcher {
     public posStart: Vector2 = Vector2.ZERO();
     public posNotch: Vector2 = Vector2.ZERO();
     public radiusTap: number;
