@@ -1,13 +1,7 @@
 namespace FudgeCore {
   export enum EVENT_TOUCH {
-    /** the standard touchstart, in here for completeness */
-    START = "touchstart",
-    /** the standard touchend, in here for completeness */
-    END = "touchend",
-    /** the standard touchmove, in here for completeness */
-    MOVE = "touchmove",
-    /** the standard touchcancel, in here for completeness */
-    CANCEL = "touchcancel",
+    /** custom event fired in addition to the standard touchmove, details offset to starting touch */
+    MOVE = "touchMove",
     /** custom event fired when the touches haven't moved outside of the tap radius */
     TAP = "touchTap",
     /** custom event fired when the touches have moved outside of the notch radius, details offset and cardinal direction */
@@ -22,6 +16,14 @@ namespace FudgeCore {
     ROTATE = "touchRotate"
   }
 
+  export interface EventTouchDetail {
+      position: Vector2;
+      touches: TouchList;
+      offset?: Vector2;
+      cardinal?: Vector2;
+  }
+  
+  
   export class EventTouch {
     public posStart: Vector2 = Vector2.ZERO();
     public posNotch: Vector2 = Vector2.ZERO();
@@ -37,9 +39,9 @@ namespace FudgeCore {
     private time: Time = new Time();
 
     public constructor(_target: EventTarget, _radiusTap: number = 5, _radiusNotch: number = 50, _timeDouble: number = 200, _timerLong: number = 1000) {
-      _target.addEventListener(EVENT_TOUCH.START, <EventListener>this.hndEvent);
-      _target.addEventListener(EVENT_TOUCH.END, <EventListener>this.hndEvent);
-      _target.addEventListener(EVENT_TOUCH.MOVE, <EventListener>this.hndEvent);
+      _target.addEventListener("touchstart", <EventListener>this.hndEvent);
+      _target.addEventListener("touchend", <EventListener>this.hndEvent);
+      _target.addEventListener("touchmove", <EventListener>this.hndEvent);
       this.target = _target;
       this.radiusTap = _radiusTap;
       this.radiusNotch = _radiusNotch;
@@ -54,15 +56,15 @@ namespace FudgeCore {
       let offset: Vector2;
 
       switch (_event.type) {
-        case EVENT_TOUCH.START:
+        case "touchstart":
           this.moved = false;
           this.startGesture(position);
 
           let dispatchLong: TimerHandler = (_eventTimer: EventTimer): void => {
             this.moved = true;
             this.target.dispatchEvent(
-              new CustomEvent(EVENT_TOUCH.LONG, {
-                bubbles: true, detail: { position: position, touches: _event.touches }
+              new CustomEvent<EventTouchDetail>(EVENT_TOUCH.LONG, {
+                bubbles: true, detail: { position: position, touches: _event.touches}
               })
             );
           };
@@ -70,7 +72,7 @@ namespace FudgeCore {
           this.timerLong?.clear();
           this.timerLong = new Timer(this.time, this.timeLong, 1, dispatchLong);
           break;
-        case EVENT_TOUCH.END:
+        case "touchend":
           this.timerLong?.clear();
 
           if (_event.touches.length > 0) {
@@ -81,7 +83,7 @@ namespace FudgeCore {
 
           let dispatchTap: TimerHandler = (_eventTimer: EventTimer): void => {
             this.target.dispatchEvent(
-              new CustomEvent(EVENT_TOUCH.TAP, {
+              new CustomEvent<EventTouchDetail>(EVENT_TOUCH.TAP, {
                 bubbles: true, detail: { position: position, touches: _event.touches }
               })
             );
@@ -92,7 +94,7 @@ namespace FudgeCore {
             this.timerDouble.clear();
             // this.timer = undefined;
             this.target.dispatchEvent(
-              new CustomEvent(EVENT_TOUCH.DOUBLE, {
+              new CustomEvent<EventTouchDetail>(EVENT_TOUCH.DOUBLE, {
                 bubbles: true, detail: { position: position, touches: _event.touches }
               }));
           }
@@ -101,10 +103,13 @@ namespace FudgeCore {
             this.timerDouble = new Timer(this.time, this.timeDouble, 1, dispatchTap);
 
           break;
-        case EVENT_TOUCH.MOVE:
+        case "touchmove":
           offset = Vector2.DIFFERENCE(this.posPrev, this.posStart);
           this.moved ||= (offset.magnitude < this.radiusTap); // remember that touch moved over tap radius
-
+          this.target.dispatchEvent(
+            new CustomEvent<EventTouchDetail>(EVENT_TOUCH.MOVE, {
+              bubbles: true, detail: { position: position, touches: _event.touches, offset: offset }
+            }));
           // fire notch when touches moved out of notch radius and reset notch
           offset = Vector2.DIFFERENCE(position, this.posNotch);
           if (offset.magnitude > this.radiusNotch) {
@@ -112,7 +117,7 @@ namespace FudgeCore {
               Vector2.X(offset.x < 0 ? -1 : 1) :
               Vector2.Y(offset.y < 0 ? -1 : 1);
             this.target.dispatchEvent(
-              new CustomEvent(EVENT_TOUCH.NOTCH, {
+              new CustomEvent<EventTouchDetail>(EVENT_TOUCH.NOTCH, {
                 bubbles: true, detail: { position: position, touches: _event.touches, offset: offset, cardinal: cardinal }
               }));
             this.posNotch = position;
