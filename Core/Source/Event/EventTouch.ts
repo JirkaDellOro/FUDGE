@@ -20,6 +20,7 @@ namespace FudgeCore {
       position: Vector2;
       touches: TouchList;
       offset?: Vector2;
+      movement?: Vector2;
       cardinal?: Vector2;
   }
   
@@ -106,9 +107,10 @@ namespace FudgeCore {
         case "touchmove":
           offset = Vector2.DIFFERENCE(this.posPrev, this.posStart);
           this.moved ||= (offset.magnitude < this.radiusTap); // remember that touch moved over tap radius
+          let movement: Vector2 = Vector2.DIFFERENCE(position, this.posPrev);
           this.target.dispatchEvent(
             new CustomEvent<EventTouchDetail>(EVENT_TOUCH.MOVE, {
-              bubbles: true, detail: { position: position, touches: _event.touches, offset: offset }
+              bubbles: true, detail: { position: position, touches: _event.touches, offset: offset, movement: movement }
             }));
           // fire notch when touches moved out of notch radius and reset notch
           offset = Vector2.DIFFERENCE(position, this.posNotch);
@@ -118,7 +120,7 @@ namespace FudgeCore {
               Vector2.Y(offset.y < 0 ? -1 : 1);
             this.target.dispatchEvent(
               new CustomEvent<EventTouchDetail>(EVENT_TOUCH.NOTCH, {
-                bubbles: true, detail: { position: position, touches: _event.touches, offset: offset, cardinal: cardinal }
+                bubbles: true, detail: { position: position, touches: _event.touches, offset: offset, cardinal: cardinal, movement: movement }
               }));
             this.posNotch = position;
           }

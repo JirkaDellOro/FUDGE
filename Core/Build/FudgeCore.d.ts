@@ -2582,6 +2582,7 @@ declare namespace FudgeCore {
         position: Vector2;
         touches: TouchList;
         offset?: Vector2;
+        movement?: Vector2;
         cardinal?: Vector2;
     }
     class EventTouch {
