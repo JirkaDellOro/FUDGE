@@ -584,7 +584,6 @@ declare namespace Fudge {
         private selectedEvent;
         private keys;
         private sequences;
-        private labels;
         private events;
         private slopeHooks;
         private documentStyle;

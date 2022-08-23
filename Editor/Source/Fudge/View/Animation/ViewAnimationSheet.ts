@@ -19,7 +19,7 @@ namespace Fudge {
     type: "key";
   }
 
-  interface ViewAnimationEvent {
+  interface ViewAnimationEvent { // labels and events are implemented almost the same way
     data: string;
     path2D: Path2D;
     type: "event" | "label";
@@ -56,7 +56,6 @@ namespace Fudge {
     private selectedEvent: ViewAnimationEvent;
     private keys: ViewAnimationKey[] = [];
     private sequences: ViewAnimationSequence[] = [];
-    private labels: ViewAnimationEvent[] = [];
     private events: ViewAnimationEvent[] = [];
     private slopeHooks: Path2D[] = [];
 
@@ -138,8 +137,7 @@ namespace Fudge {
       this.contextMenu.items.forEach(_item => _item.visible = false);
       if (this.posRightClick.y > ViewAnimationSheet.TIMELINE_HEIGHT && this.posRightClick.y < ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT) { // click on events
         let deleteEvent: ViewAnimationEvent = 
-          this.events.find(_object => this.crc2.isPointInPath(_object.path2D, this.posRightClick.x, this.posRightClick.y)) ||
-          this.labels.find(_object => this.crc2.isPointInPath(_object.path2D, this.posRightClick.x, this.posRightClick.y));
+          this.events.find(_object => this.crc2.isPointInPath(_object.path2D, this.posRightClick.x, this.posRightClick.y));
         if (deleteEvent) {
           if (deleteEvent.type == "event")
             this.contextMenu.getMenuItemById("Delete Event").visible = true;
@@ -407,14 +405,13 @@ namespace Fudge {
       
       this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-text");
 
-      this.labels = [];
       this.events = [];
       if (!this.animation) return;
 
       for (const label in this.animation.labels) {
         let x: number = this.roundOddLineWidth(this.animation.labels[label] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x);
         let viewLabel: ViewAnimationEvent = { data: label, path2D: generateLabel(x), type: "label" };
-        this.labels.push(viewLabel);
+        this.events.push(viewLabel);
         this.crc2.stroke(viewLabel.path2D);
       }
 
@@ -425,7 +422,7 @@ namespace Fudge {
         this.crc2.stroke(viewEvent.path2D);
       }
 
-      this.selectedEvent =  this.events.find(_event => _event.data == this.selectedEvent?.data) || this.labels.find(_label => _label.data == this.selectedEvent?.data);
+      this.selectedEvent =  this.events.find(_event => _event.data == this.selectedEvent?.data);
       this.eventInput.hidden = this.selectedEvent == null;
       if (this.selectedEvent) {
         this.crc2.fill(this.selectedEvent.path2D);
@@ -683,7 +680,6 @@ namespace Fudge {
           } else {
             let selected: ViewAnimationKey | ViewAnimationEvent =
               this.keys.find(findObject) ||
-              this.labels.find(findObject) ||
               this.events.find(findObject);
 
             if (!selected) {

@@ -91,7 +91,7 @@ namespace FudgeCore {
     public idResource: string = undefined;
     public name: string;
     public totalTime: number = 0;
-    public labels: AnimationLabel = {};
+    public labels: AnimationLabel = {}; // TODO: labels seem to be kind of useless since they can only be jumped to which also works with a time...
     // stepsPerSecond: number = 10;
     public animationStructure: AnimationStructure;
     public events: AnimationEventTrigger = {};
