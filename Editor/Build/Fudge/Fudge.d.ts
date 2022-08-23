@@ -520,25 +520,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    import ƒ = FudgeCore;
-    interface ViewAnimationSequence {
-        sequence: ƒ.AnimationSequence;
-        color: string;
-    }
-    interface ViewAnimationKey {
-        key: ƒ.AnimationKey;
-        posScreen: ƒ.Vector2;
-        sequence: ViewAnimationSequence;
-        path2D: Path2D;
-    }
-    interface ViewAnimationEvent {
-        event: string;
-        path2D: Path2D;
-    }
-    interface ViewAnimationLabel {
-        label: string;
-        path2D: Path2D;
-    }
     /**
      * TODO: add
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
@@ -568,10 +549,14 @@ declare namespace Fudge {
         private dispatchAnimate;
         private hndToolbarClick;
         private pause;
-        private randomNameGenerator;
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
+    interface ViewAnimationSequence {
+        data: ƒ.AnimationSequence;
+        color: string;
+    }
     /**
      * TODO: add
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
@@ -635,8 +620,9 @@ declare namespace Fudge {
         private hndScroll;
         private dispatchAnimate;
         private resetView;
-        private getScreenToWorldPoint;
-        private getScreenToTime;
+        private screenToWorldPoint;
+        private worldToScreenPoint;
+        private screenToTime;
         private roundOddLineWidth;
     }
 }

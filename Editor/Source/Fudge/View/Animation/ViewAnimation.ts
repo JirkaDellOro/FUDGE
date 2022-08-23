@@ -2,28 +2,6 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
-  export interface ViewAnimationSequence {
-    sequence: ƒ.AnimationSequence;
-    color: string;
-  }
-  
-  export interface ViewAnimationKey {
-    key: ƒ.AnimationKey;
-    posScreen: ƒ.Vector2;
-    sequence: ViewAnimationSequence;
-    path2D: Path2D;
-  }
-
-  export interface ViewAnimationEvent {
-    event: string;
-    path2D: Path2D;
-  }
-
-  export interface ViewAnimationLabel {
-    label: string;
-    path2D: Path2D;
-  }
-
   /**
    * TODO: add
    * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
@@ -287,13 +265,6 @@ namespace Fudge {
     private pause(): void {
       window.clearInterval(this.idInterval);
       this.idInterval = undefined;
-    }
-
-    private randomNameGenerator(): string {
-      let attr: string[] = ["red", "blue", "green", "pink", "yellow", "purple", "orange", "fast", "slow", "quick", "boring", "questionable", "king", "queen", "smart", "gold"];
-      let anim: string[] = ["cow", "fish", "elephant", "cat", "dog", "bat", "chameleon", "caterpillar", "crocodile", "hamster", "horse", "panda", "giraffe", "lukas", "koala", "jellyfish", "lion", "lizard", "platypus", "scorpion", "penguin", "pterodactyl"];
-
-      return attr[Math.floor(Math.random() * attr.length)] + "-" + anim[Math.floor(Math.random() * anim.length)];
     }
   }
 }
