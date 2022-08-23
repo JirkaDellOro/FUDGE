@@ -50,7 +50,6 @@ namespace Fudge {
         item = new remote.MenuItem({ label: "Delete Property", id: String(CONTEXTMENU.DELETE_PROPERTY), click: _callback, accelerator: "D" });
         menu.append(item);
       }
-      
 
       return menu;
     }
@@ -61,11 +60,7 @@ namespace Fudge {
         
       switch (choice) {
         case CONTEXTMENU.ADD_PROPERTY:
-          let path: string[] = Reflect.get(_item, "path");
-          this.controller.addProperty(path);
-          this.createPropertyList();
-          this.dispatchAnimate();
-
+          // defined in getMutatorSubmenu, this seems to be the only way to keep the path associated with the menu item, attaching anything to item
           break;
         case CONTEXTMENU.DELETE_PROPERTY:
           if (!(document.activeElement instanceof HTMLElement)) return;
@@ -119,14 +114,16 @@ namespace Fudge {
           );
         } else {
           item = new remote.MenuItem(
-            { label: property, id: String(CONTEXTMENU.ADD_PROPERTY), click: _callback }
+            { label: property, id: String(CONTEXTMENU.ADD_PROPERTY), click: () => {
+              this.controller.addProperty(path);
+              this.createPropertyList();
+              this.dispatchAnimate();
+            } }
           );
-          Reflect.set(item, "path", path);
-          }
-        menu.append(item);
         }
+        menu.append(item);
+      }
 
-      
       return menu;
     }
     //#endregion

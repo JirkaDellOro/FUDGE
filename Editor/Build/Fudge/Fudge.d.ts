@@ -622,7 +622,8 @@ declare namespace Fudge {
         private screenToWorldPoint;
         private worldToScreenPoint;
         private screenToTime;
-        private roundOddLineWidth;
+        private timeToScreen;
+        private round;
     }
 }
 declare namespace Fudge {

@@ -255,30 +255,19 @@ namespace Fudge {
     }
 
     private generateKeys(): void {
-      this.keys = this.sequences.flatMap((_sequence, _iSeqeunce) => 
+      this.keys = this.sequences.flatMap((_sequence, _iSequence) => 
         _sequence.data.getKeys().map((_key) => {
-          let position: ƒ.Vector2 = ƒ.Recycler.get(ƒ.Vector2);
-          if (this.mode == SHEET_MODE.CURVES)
-            position.set(_key.Time, _key.Value);
-          else
-            position.set(_key.Time, (_iSeqeunce) * ViewAnimationSheet.KEY_SIZE * 2);
-          position.transform(this.mtxWorldToScreen);
-          position.x = this.roundOddLineWidth(position.x);
-          position.y = this.roundOddLineWidth(position.y);
-
-          let keyView: ViewAnimationKey = {
+          let viewKey: ViewAnimationKey = {
             data: _key,
             color: _sequence.color,
             path2D: this.generateKey(
-              position.x,
-              position.y,
+              this.worldToScreenPoint(_key.Time, this.mode == SHEET_MODE.CURVES ? _key.Value : _iSequence * ViewAnimationSheet.KEY_SIZE * 4),
               ViewAnimationSheet.KEY_SIZE,
               ViewAnimationSheet.KEY_SIZE
             ),
             type: "key"
           };
-          ƒ.Recycler.store(ƒ.Vector2);
-          return keyView;
+          return viewKey;
         }
       ));
 
@@ -286,12 +275,12 @@ namespace Fudge {
         this.selectedKey = this.keys.find( _key => _key.data == this.selectedKey.data );
     }
 
-    private generateKey(_x: number, _y: number, _w: number, _h: number): Path2D {
+    private generateKey(_position: ƒ.Vector2, _w: number, _h: number): Path2D {
       let path: Path2D = new Path2D();
-      path.moveTo(_x - _w, _y);
-      path.lineTo(_x, _y + _h);
-      path.lineTo(_x + _w, _y);
-      path.lineTo(_x, _y - _h);
+      path.moveTo(_position.x - _w, _position.y);
+      path.lineTo(_position.x, _position.y + _h);
+      path.lineTo(_position.x + _w, _position.y);
+      path.lineTo(_position.x, _position.y - _h);
       path.closePath();
       return path;
     }
@@ -365,7 +354,7 @@ namespace Fudge {
       let steps: number = 1 + this.canvas.width / pixelPerStep;
       let stepOffset: number = Math.floor(Math.abs(this.mtxWorldToScreen.translation.x) / pixelPerStep);
       for (let iStep: number = stepOffset; iStep < steps + stepOffset; iStep++) {
-        let xStep: number = this.roundOddLineWidth(iStep * pixelPerStep + this.mtxWorldToScreen.translation.x);
+        let xStep: number = this.round(iStep * pixelPerStep + this.mtxWorldToScreen.translation.x);
         timeSteps.moveTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT);
         timeSteps.lineTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT - 20);
         gridLines.moveTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT);
@@ -409,14 +398,14 @@ namespace Fudge {
       if (!this.animation) return;
 
       for (const label in this.animation.labels) {
-        let x: number = this.roundOddLineWidth(this.animation.labels[label] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x);
+        let x: number = this.timeToScreen(this.animation.labels[label]);
         let viewLabel: ViewAnimationEvent = { data: label, path2D: generateLabel(x), type: "label" };
         this.events.push(viewLabel);
         this.crc2.stroke(viewLabel.path2D);
       }
 
       for (const event in this.animation.events) {
-        let x: number = this.roundOddLineWidth(this.animation.events[event] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x);
+        let x: number = this.timeToScreen(this.animation.events[event]);
         let viewEvent: ViewAnimationEvent = { data: event, path2D: generateEvent(x), type: "event" };
         this.events.push(viewEvent);
         this.crc2.stroke(viewEvent.path2D);
@@ -461,7 +450,7 @@ namespace Fudge {
     private drawScale(): void {
       if (this.mode != SHEET_MODE.CURVES) return;
       
-      let center: number = this.roundOddLineWidth(this.mtxWorldToScreen.translation.y);
+      let center: number = this.round(this.mtxWorldToScreen.translation.y);
       this.crc2.beginPath();
       this.crc2.moveTo(0, center);
       this.crc2.lineTo(this.canvas.width, center);
@@ -497,7 +486,7 @@ namespace Fudge {
       let steps: number = 1 + this.canvas.height / pixelPerStep;
       let stepOffset: number = Math.floor(-this.mtxWorldToScreen.translation.y / pixelPerStep);
       for (let iStep: number = stepOffset; iStep < steps + stepOffset; iStep++) {
-        let yStep: number = this.roundOddLineWidth(iStep * pixelPerStep + this.mtxWorldToScreen.translation.y);
+        let yStep: number = this.round(iStep * pixelPerStep + this.mtxWorldToScreen.translation.y);
         this.crc2.beginPath();
         this.crc2.moveTo(0, yStep);
         this.crc2.lineTo(ViewAnimationSheet.SCALE_WIDTH - 5, yStep);
@@ -610,7 +599,7 @@ namespace Fudge {
       path.moveTo(left.x, left.y);
       path.lineTo(right.x, right.y);
       this.crc2.stroke(path);
-      this.slopeHooks = [this.generateKey(left.x, left.y, 5, 5), this.generateKey(right.x, right.y, 5, 5)];
+      this.slopeHooks = [this.generateKey(left, 5, 5), this.generateKey(right, 5, 5)];
       this.slopeHooks.forEach( _hook => this.crc2.fill(_hook) );
 
       ƒ.Recycler.store(left);
@@ -619,7 +608,7 @@ namespace Fudge {
 
     private drawCursor(): void {
       this.crc2.restore();
-      let x: number = this.roundOddLineWidth(this.playbackTime * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x);
+      let x: number = this.timeToScreen(this.playbackTime);
       let cursor: Path2D = new Path2D();
       cursor.moveTo(x, 0);
       cursor.lineTo(x, this.canvas.height);
@@ -830,6 +819,8 @@ namespace Fudge {
     private worldToScreenPoint(_x: number, _y: number): ƒ.Vector2 {
       let vector: ƒ.Vector2 = new ƒ.Vector2(_x, _y);
       vector.transform(this.mtxWorldToScreen);
+      vector.x = this.round(vector.x);
+      vector.y = this.round(vector.y);
       return vector;
     }
 
@@ -839,8 +830,15 @@ namespace Fudge {
       return Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
     }
 
-    private roundOddLineWidth(_value: number): number {
-      return Math.round(_value) + 0.5;
+    private timeToScreen(_time: number): number {
+      return this.round(_time * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x);
+    }
+
+    private round(_value: number): number { // this is needed for lines to be displayed crisp on the canvas
+      if (Math.trunc(this.crc2.lineWidth) % 2 == 0)
+        return Math.round(_value); // even line width
+      else 
+        return Math.round(_value) + 0.5; // odd line width
     }
   }
 }
