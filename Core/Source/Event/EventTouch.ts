@@ -152,7 +152,7 @@ namespace FudgeCore {
       let t: TouchList = _event.touches;
       let pinch: Vector2 = new Vector2(t[1].clientX - t[0].clientX, t[1].clientY - t[0].clientY);
       let pinchDistance: number = pinch.magnitude;
-      let pinchDelta: number = pinchDistance - this.pinchDistance;
+      let pinchDelta: number = Math.abs(pinchDistance - this.pinchDistance);
       if (pinchDelta > this.pinchTolerance)
         this.target.dispatchEvent(
           new CustomEvent<EventTouchDetail>(EVENT_TOUCH.PINCH, {
