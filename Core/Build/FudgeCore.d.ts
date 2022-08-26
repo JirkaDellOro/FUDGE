@@ -2588,6 +2588,8 @@ declare namespace FudgeCore {
         offset?: Vector2;
         movement?: Vector2;
         cardinal?: Vector2;
+        pinch?: Vector2;
+        pinchDelta?: number;
     }
     /**
      * Dispatches CustomTouchEvents to the EventTarget given with the constructor.
@@ -2606,8 +2608,11 @@ declare namespace FudgeCore {
         private timeDouble;
         private timeLong;
         private time;
+        private pinchDelta;
+        private pinchTolerance;
         constructor(_target: EventTarget, _radiusTap?: number, _radiusNotch?: number, _timeDouble?: number, _timerLong?: number);
         hndEvent: (_event: TouchEvent) => void;
+        private detectPinch;
         private startGesture;
     }
 }

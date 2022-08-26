@@ -21,13 +21,15 @@ namespace FudgeCore {
 
   /** Details for CustomTouchEvents, use as generic CustomEvent<EventTouchDetail> */
   export interface EventTouchDetail {
-      position: Vector2;
-      touches: TouchList;
-      offset?: Vector2;
-      movement?: Vector2;
-      cardinal?: Vector2;
+    position: Vector2;
+    touches: TouchList;
+    offset?: Vector2;
+    movement?: Vector2;
+    cardinal?: Vector2;
+    pinch?: Vector2;
+    pinchDelta?: number;
   }
-  
+
   /**
    * Dispatches CustomTouchEvents to the EventTarget given with the constructor.
    * @author Jirka Dell'Oro-Friedl, HFU, 2022
@@ -45,6 +47,8 @@ namespace FudgeCore {
     private timeDouble: number;
     private timeLong: number;
     private time: Time = new Time();
+    private pinchDelta: number = 0;
+    private pinchTolerance: number = 3;
 
     public constructor(_target: EventTarget, _radiusTap: number = 5, _radiusNotch: number = 50, _timeDouble: number = 200, _timerLong: number = 1000) {
       _target.addEventListener("touchstart", <EventListener>this.hndEvent);
@@ -72,7 +76,7 @@ namespace FudgeCore {
             this.moved = true;
             this.target.dispatchEvent(
               new CustomEvent<EventTouchDetail>(EVENT_TOUCH.LONG, {
-                bubbles: true, detail: { position: position, touches: _event.touches}
+                bubbles: true, detail: { position: position, touches: _event.touches }
               })
             );
           };
@@ -112,6 +116,7 @@ namespace FudgeCore {
 
           break;
         case "touchmove":
+          this.detectPinch(_event);
           offset = Vector2.DIFFERENCE(this.posPrev, this.posStart);
           this.moved ||= (offset.magnitude < this.radiusTap); // remember that touch moved over tap radius
           let movement: Vector2 = Vector2.DIFFERENCE(position, this.posPrev);
@@ -138,6 +143,21 @@ namespace FudgeCore {
       }
 
       this.posPrev.set(position.x, position.y);
+    }
+
+    private detectPinch = (_event: TouchEvent): void => {
+      if (_event.touches.length != 2)
+        return;
+
+      let t: TouchList = _event.touches;
+      let pinch: Vector2 = new Vector2(t[1].clientX - t[0].clientX, t[1].clientY - t[0].clientY);
+      let pinchDelta: number = pinch.magnitude - this.pinchDelta;
+      if (pinchDelta > this.pinchTolerance)
+        this.target.dispatchEvent(
+          new CustomEvent<EventTouchDetail>(EVENT_TOUCH.PINCH, {
+            bubbles: true, detail: { position: new Vector2(t[0].clientX, t[0].clientY), touches: _event.touches, pinch: pinch, pinchDelta: pinchDelta }
+          }));
+      this.pinchDelta = pinchDelta;
     }
 
     private startGesture(_position: Vector2): void {
