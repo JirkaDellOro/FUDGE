@@ -47,7 +47,7 @@ namespace FudgeCore {
     private timeDouble: number;
     private timeLong: number;
     private time: Time = new Time();
-    private pinchDelta: number = 0;
+    private pinchDistance: number = 0;
     private pinchTolerance: number = 3;
 
     public constructor(_target: EventTarget, _radiusTap: number = 5, _radiusNotch: number = 50, _timeDouble: number = 200, _timerLong: number = 1000) {
@@ -151,13 +151,14 @@ namespace FudgeCore {
 
       let t: TouchList = _event.touches;
       let pinch: Vector2 = new Vector2(t[1].clientX - t[0].clientX, t[1].clientY - t[0].clientY);
-      let pinchDelta: number = pinch.magnitude - this.pinchDelta;
+      let pinchDistance: number = pinch.magnitude;
+      let pinchDelta: number = pinchDistance - this.pinchDistance;
       if (pinchDelta > this.pinchTolerance)
         this.target.dispatchEvent(
           new CustomEvent<EventTouchDetail>(EVENT_TOUCH.PINCH, {
             bubbles: true, detail: { position: new Vector2(t[0].clientX, t[0].clientY), touches: _event.touches, pinch: pinch, pinchDelta: pinchDelta }
           }));
-      this.pinchDelta = pinchDelta;
+      this.pinchDistance = pinchDistance;
     }
 
     private startGesture(_position: Vector2): void {

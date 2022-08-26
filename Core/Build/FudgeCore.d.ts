@@ -2608,7 +2608,7 @@ declare namespace FudgeCore {
         private timeDouble;
         private timeLong;
         private time;
-        private pinchDelta;
+        private pinchDistance;
         private pinchTolerance;
         constructor(_target: EventTarget, _radiusTap?: number, _radiusNotch?: number, _timeDouble?: number, _timerLong?: number);
         hndEvent: (_event: TouchEvent) => void;
