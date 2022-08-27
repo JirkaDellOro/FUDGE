@@ -2614,6 +2614,7 @@ declare namespace FudgeCore {
         hndEvent: (_event: TouchEvent) => void;
         private detectPinch;
         private startGesture;
+        private calcAveragePosition;
     }
 }
 declare namespace FudgeCore {

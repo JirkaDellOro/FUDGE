@@ -64,7 +64,7 @@ namespace FudgeCore {
     public hndEvent = (_event: TouchEvent): void => {
       _event.preventDefault();
       let touchFirst: Touch = _event.touches[0];
-      let position: Vector2 = new Vector2(touchFirst?.clientX, touchFirst?.clientY);
+      let position: Vector2 = this.calcAveragePosition(_event.touches); //new Vector2(touchFirst?.clientX, touchFirst?.clientY);
       let offset: Vector2;
 
       switch (_event.type) {
@@ -171,5 +171,16 @@ namespace FudgeCore {
       this.posNotch.set(_position.x, _position.y);
       this.posStart.set(_position.x, _position.y);
     }
+
+    private calcAveragePosition(_touches: TouchList): Vector2 {
+      let average: Vector2 = Vector2.ZERO();
+      for (let touch of _touches) {
+        average.x += touch.clientX;
+        average.y += touch.clientY;
+      }
+      average.scale(1 / _touches.length);
+      return average;
+    }
   }
 }
+
