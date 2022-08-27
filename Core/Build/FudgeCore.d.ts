@@ -2611,6 +2611,7 @@ declare namespace FudgeCore {
         private pinchDistance;
         private pinchTolerance;
         constructor(_target: EventTarget, _radiusTap?: number, _radiusNotch?: number, _timeDouble?: number, _timerLong?: number);
+        activate(_on: boolean): void;
         hndEvent: (_event: TouchEvent) => void;
         private detectPinch;
         private startGesture;

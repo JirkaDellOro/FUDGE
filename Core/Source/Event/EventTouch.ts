@@ -51,14 +51,25 @@ namespace FudgeCore {
     private pinchTolerance: number = 1;
 
     public constructor(_target: EventTarget, _radiusTap: number = 5, _radiusNotch: number = 50, _timeDouble: number = 200, _timerLong: number = 1000) {
-      _target.addEventListener("touchstart", <EventListener>this.hndEvent);
-      _target.addEventListener("touchend", <EventListener>this.hndEvent);
-      _target.addEventListener("touchmove", <EventListener>this.hndEvent);
       this.target = _target;
       this.radiusTap = _radiusTap;
       this.radiusNotch = _radiusNotch;
       this.timeDouble = _timeDouble;
       this.timeLong = _timerLong;
+      this.activate(true);
+    }
+
+    public activate(_on: boolean): void {
+      if (_on) {
+        this.target.addEventListener("touchstart", <EventListener>this.hndEvent);
+        this.target.addEventListener("touchend", <EventListener>this.hndEvent);
+        this.target.addEventListener("touchmove", <EventListener>this.hndEvent);
+        return;
+      }
+
+      this.target.removeEventListener("touchstart", <EventListener>this.hndEvent);
+      this.target.removeEventListener("touchend", <EventListener>this.hndEvent);
+      this.target.removeEventListener("touchmove", <EventListener>this.hndEvent);
     }
 
     public hndEvent = (_event: TouchEvent): void => {
