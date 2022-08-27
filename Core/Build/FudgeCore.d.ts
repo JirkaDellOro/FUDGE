@@ -3439,11 +3439,11 @@ declare namespace FudgeCore {
         /**
          * Returns a randomly selected property name from the given object
          */
-        getPropertyName(_object: Object): string;
+        getPropertyName<T>(_object: T): keyof T;
         /**
          * Returns a randomly selected symbol from the given object, if symbols are used as keys
          */
-        getPropertySymbol(_object: Object): symbol;
+        getPropertySymbol<T>(_object: T): symbol;
         /**
          * Returns a random three-dimensional vector in the limits of the box defined by the vectors given as [_corner0, _corner1[
          */

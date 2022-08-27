@@ -95,15 +95,15 @@ namespace FudgeCore {
     /**
      * Returns a randomly selected property name from the given object
      */
-    public getPropertyName(_object: Object): string {
+    public getPropertyName<T>(_object: T): keyof T {
       let keys: string[] = Object.getOwnPropertyNames(_object);
-      return keys[this.getIndex(keys)];
+      return <keyof T>keys[this.getIndex(keys)];
     }
 
     /**
      * Returns a randomly selected symbol from the given object, if symbols are used as keys
      */
-    public getPropertySymbol(_object: Object): symbol {
+    public getPropertySymbol<T>(_object: T): symbol {
       let keys: symbol[] = Object.getOwnPropertySymbols(_object);
       return keys[this.getIndex(keys)];
     }
