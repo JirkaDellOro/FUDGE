@@ -2576,7 +2576,7 @@ declare namespace FudgeCore {
         LONG = "touchLong",
         /** custom event fired when two taps were detected in short succession */
         DOUBLE = "touchDouble",
-        /** custom event not implemented yet */
+        /** custom event fired when the distance between the only two touches changes beyond a tolerance */
         PINCH = "touchPinch",
         /** custom event not implemented yet */
         ROTATE = "touchRotate"

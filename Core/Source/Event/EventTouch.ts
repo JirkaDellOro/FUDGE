@@ -13,7 +13,7 @@ namespace FudgeCore {
     LONG = "touchLong",
     /** custom event fired when two taps were detected in short succession */
     DOUBLE = "touchDouble",
-    /** custom event not implemented yet */
+    /** custom event fired when the distance between the only two touches changes beyond a tolerance */
     PINCH = "touchPinch",
     /** custom event not implemented yet */
     ROTATE = "touchRotate"
@@ -122,7 +122,7 @@ namespace FudgeCore {
 
           break;
         case "touchmove":
-          this.detectPinch(_event);
+          this.detectPinch(_event, position);
           offset = Vector2.DIFFERENCE(this.posPrev, this.posStart);
           this.moved ||= (offset.magnitude < this.radiusTap); // remember that touch moved over tap radius
           let movement: Vector2 = Vector2.DIFFERENCE(position, this.posPrev);
@@ -151,7 +151,7 @@ namespace FudgeCore {
       this.posPrev.set(position.x, position.y);
     }
 
-    private detectPinch = (_event: TouchEvent): void => {
+    private detectPinch = (_event: TouchEvent, _position: Vector2): void => {
       if (_event.touches.length != 2)
         return;
 
@@ -162,7 +162,7 @@ namespace FudgeCore {
       if (Math.abs(pinchDelta) > this.pinchTolerance)
         this.target.dispatchEvent(
           new CustomEvent<EventTouchDetail>(EVENT_TOUCH.PINCH, {
-            bubbles: true, detail: { position: new Vector2(t[0].clientX, t[0].clientY), touches: _event.touches, pinch: pinch, pinchDelta: pinchDelta }
+            bubbles: true, detail: { position: _position, touches: _event.touches, pinch: pinch, pinchDelta: pinchDelta }
           }));
       this.pinchDistance = pinchDistance;
     }
