@@ -33,7 +33,7 @@ Browse through the tests, as they are also a good starting point to examine isol
 - [Aid](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Aid/modules/FudgeAid.html)
 - [OIMO.js](https://github.com/lo-th/Oimo.js)
 - [FudgeServer](https://jirkadelloro.github.io/FUDGE/Documentation/Reference/Net/index.html)
-- [FudgeClient](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Net/modules/FudgeNet.html)
+- [FudgeClient](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Net/modules/FudgeNet.html)  
 ## Code 
 Find the source code on [Github](https://github.com/JirkaDellOro/FUDGE). Below, you'll see a short description of the structure of the repository and links to the documentation.
 
