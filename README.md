@@ -5,40 +5,6 @@ This repository contains the source code, the documentation and the full develop
 
 FUDGE is a lightweight open-source game engine and editor created for educating students in an academic environment in the field of design and development of games and highly interactive applications. It may also be used as a rapid prototyping tool to easly convey and evaluate ideas for applications and games and as a tool to create educational games.
 
-# Examples
-- Material of the [Prima-Lectures](https://github.com/JirkaDellOro/Prima#examples) (Prototyping Interactive Media-Applications and Games)
-- See the [GameZone](http://games.hs-furtwangen.de/GameZone/) for a selection of applications students have created. Filter for "FUDGE" in the technology-dropdown
-- See [UfoUndLost](https://jirkadelloro.github.io/UfoundLost/UfoundLost.html), created at the GlobalGameJam 2021
-
-# Setup Runtime Environment
-Include the script FudgeCore.js in the head of your HTML-page for the minimal setup.  
-```html 
-<script src="https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js"></script>
-```
-See and examine this example of a [minimal scene on codepen](https://codepen.io/JirkaDellOro/pen/VwzveRP)
-
-# Setup Editor Environment
-- clone this repository
-- install modules required by typing `npm install` in a terminal on the FUDGE-folder
-- start the editor by typing `electron Editor/Electron` or `npm run-script run` or envoking the file FUDGE.bat using the mouse 
-![](Miscellaneous/Screenshots/Editor.png)
-
-# Learn
-## Wiki
-To get started with FUDGE, please browse through the [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki) to learn about the core concepts and the inner workings of FUDGE. Doing so will grant you an intuitive understanding extremely helpful for further working with FUDGE.  
-## Test
-Browse through the tests, as they are also a good starting point to examine isolated functionalities of FUDGE and see code running. Run your local clone with a local server or visit [Test](https://JirkaDellOro.github.io/FUDGE/Test)  
-## References
-- [Core](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Core/modules/FudgeCore.html)
-- [UserInterface](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/UserInterface/modules/FudgeUserInterface.html) 
-- [Aid](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Aid/modules/FudgeAid.html)
-- [OIMO.js](https://github.com/lo-th/Oimo.js)
-- [FudgeServer](https://jirkadelloro.github.io/FUDGE/Documentation/Reference/Net/index.html)
-- [FudgeClient](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Net/modules/FudgeNet.html)  
-
-## Code 
-Find the source code on [Github](https://github.com/JirkaDellOro/FUDGE). Below, you'll see a short description of the structure of the repository and links to the documentation.
-
 # Folders
 ## Core  
 Contains the core functionality of FUDGE needed to create games. It implements an entity component system to build scene graphs, prepares its content for rendering with WebGL2 and WebAudio, manages game loops and time, offers some standard meshes, shaders and a lighting system, handles user input and keyframe animation, serialization and more. For many games it's sufficient to work only with this module.  
