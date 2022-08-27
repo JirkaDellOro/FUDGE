@@ -1,13 +1,14 @@
 <img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="document.querySelector('h1').style.visibility='hidden'"/>  
 
-# Welcome!
+# Welcome!  
+This repository contains the source code, the documentation and the full development history of FUDGE. If you want to create using FUDGE, visit the repository [FUDGE_Runtime](https://github.com/JirkaDellOro/FUDGE_Runtime), which contains an excerpt with all you need to get going.
+
 FUDGE is a lightweight open-source game engine and editor created for educating students in an academic environment in the field of design and development of games and highly interactive applications. It may also be used as a rapid prototyping tool to easly convey and evaluate ideas for applications and games and as a tool to create educational games.
 
 # Examples
 - Material of the [Prima-Lectures](https://github.com/JirkaDellOro/Prima#examples) (Prototyping Interactive Media-Applications and Games)
 - See the [GameZone](http://games.hs-furtwangen.de/GameZone/) for a selection of applications students have created. Filter for "FUDGE" in the technology-dropdown
 - See [UfoUndLost](https://jirkadelloro.github.io/UfoundLost/UfoundLost.html), created at the GlobalGameJam 2021
-- See [SolarSystem](https://jirkadelloro.github.io/FudgeDevcom21/) created for the talk at the DevCom21 developers conference 
 
 # Setup Runtime Environment
 Include the script FudgeCore.js in the head of your HTML-page for the minimal setup.  
@@ -33,7 +34,8 @@ Browse through the tests, as they are also a good starting point to examine isol
 - [Aid](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Aid/modules/FudgeAid.html)
 - [OIMO.js](https://github.com/lo-th/Oimo.js)
 - [FudgeServer](https://jirkadelloro.github.io/FUDGE/Documentation/Reference/Net/index.html)
-- [FudgeClient](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Net/modules/FudgeNet.html)
+- [FudgeClient](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Net/modules/FudgeNet.html)  
+
 ## Code 
 Find the source code on [Github](https://github.com/JirkaDellOro/FUDGE). Below, you'll see a short description of the structure of the repository and links to the documentation.
 
