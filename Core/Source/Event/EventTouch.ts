@@ -63,14 +63,20 @@ namespace FudgeCore {
 
     public hndEvent = (_event: TouchEvent): void => {
       _event.preventDefault();
-      let touchLast: Touch = _event.touches[0];
-      let position: Vector2 = new Vector2(touchLast?.clientX, touchLast?.clientY);
+      let touchFirst: Touch = _event.touches[0];
+      let position: Vector2 = new Vector2(touchFirst?.clientX, touchFirst?.clientY);
       let offset: Vector2;
 
       switch (_event.type) {
         case "touchstart":
           this.moved = false;
           this.startGesture(position);
+
+          if (_event.touches.length == 2) {
+            // reset pinch
+            let pinch: Vector2 = new Vector2(_event.touches[1].clientX - touchFirst.clientX, _event.touches[1].clientY - touchFirst.clientY);
+            this.pinchDistance = pinch.magnitude;
+          }
 
           let dispatchLong: TimerHandler = (_eventTimer: EventTimer): void => {
             this.moved = true;
