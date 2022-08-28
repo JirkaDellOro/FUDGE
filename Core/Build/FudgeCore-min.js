@@ -167,7 +167,7 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class EventTargetƒ extends EventTarget {
+    class EventTargetUnified extends EventTarget {
         addEventListener(_type, _handler, _options) {
             super.addEventListener(_type, _handler, _options);
         }
@@ -178,8 +178,8 @@ var FudgeCore;
             return super.dispatchEvent(_event);
         }
     }
-    FudgeCore.EventTargetƒ = EventTargetƒ;
-    class EventTargetStatic extends EventTargetƒ {
+    FudgeCore.EventTargetUnified = EventTargetUnified;
+    class EventTargetStatic extends EventTargetUnified {
         constructor() {
             super();
         }
@@ -211,7 +211,7 @@ var FudgeCore;
         return mutator;
     }
     FudgeCore.getMutatorOfArbitrary = getMutatorOfArbitrary;
-    class Mutable extends FudgeCore.EventTargetƒ {
+    class Mutable extends FudgeCore.EventTargetUnified {
         static getMutatorFromPath(_mutator, _path) {
             let key = _path[0];
             let mutator = {};
@@ -427,7 +427,7 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class Node extends FudgeCore.EventTargetƒ {
+    class Node extends FudgeCore.EventTargetUnified {
         constructor(_name) {
             super();
             this.mtxWorld = FudgeCore.Matrix4x4.IDENTITY();
@@ -1742,13 +1742,10 @@ var FudgeCore;
             uniform = shader.uniforms["u_mtxWorldToView"];
             if (uniform)
                 RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxWorldToView.get());
-            uniform = shader.uniforms["u_mtxNormalWorldToView"];
+            uniform = shader.uniforms["u_mtxWorldToCamera"];
             if (uniform) {
-                let normalMatrix = FudgeCore.Matrix4x4.TRANSPOSE(FudgeCore.Matrix4x4.INVERSION(_cmpCamera.mtxWorldToView));
-                RenderWebGL.crc3.uniformMatrix4fv(uniform, false, normalMatrix.get());
+                RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
             }
-            RenderWebGL.crc3.uniform1f(shader.uniforms["u_xAspect"], _cmpCamera.xAspectCorrection);
-            RenderWebGL.crc3.uniform1f(shader.uniforms["u_yAspect"], _cmpCamera.yAspectCorrection);
             RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
         }
         static calcMeshToView(_node, _cmpMesh, _mtxWorldToView, _target) {
@@ -3349,8 +3346,6 @@ var FudgeCore;
     class ComponentCamera extends FudgeCore.Component {
         constructor() {
             super(...arguments);
-            this.#xAspectCorrection = 1;
-            this.#yAspectCorrection = 1;
             this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
             this.clrBackground = new FudgeCore.Color(0, 0, 0, 1);
             this.projection = PROJECTION.CENTRAL;
@@ -3362,15 +3357,8 @@ var FudgeCore;
             this.far = 2000;
             this.backgroundEnabled = true;
         }
-        #xAspectCorrection;
-        #yAspectCorrection;
         #mtxWorldToView;
-        get xAspectCorrection() {
-            return this.#xAspectCorrection;
-        }
-        get yAspectCorrection() {
-            return this.#yAspectCorrection;
-        }
+        #mtxCameraInverse;
         get mtxWorld() {
             let mtxCamera = this.mtxPivot.clone;
             try {
@@ -3383,15 +3371,22 @@ var FudgeCore;
         get mtxWorldToView() {
             if (this.#mtxWorldToView)
                 return this.#mtxWorldToView;
-            let mtxCamera = this.mtxWorld;
-            let mtxInversion = FudgeCore.Matrix4x4.INVERSION(mtxCamera);
-            this.#mtxWorldToView = FudgeCore.Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxInversion);
-            FudgeCore.Recycler.store(mtxCamera);
-            FudgeCore.Recycler.store(mtxInversion);
+            this.#mtxWorldToView = FudgeCore.Matrix4x4.MULTIPLICATION(this.mtxProjection, this.mtxCameraInverse);
             return this.#mtxWorldToView;
         }
+        get mtxCameraInverse() {
+            if (this.#mtxCameraInverse)
+                return this.#mtxCameraInverse;
+            this.#mtxCameraInverse = FudgeCore.Matrix4x4.INVERSION(this.mtxWorld);
+            return this.#mtxCameraInverse;
+        }
         resetWorldToView() {
+            if (this.#mtxWorldToView)
+                FudgeCore.Recycler.store(this.#mtxWorldToView);
+            if (this.#mtxCameraInverse)
+                FudgeCore.Recycler.store(this.#mtxCameraInverse);
             this.#mtxWorldToView = null;
+            this.#mtxCameraInverse = null;
         }
         getProjection() {
             return this.projection;
@@ -3421,20 +3416,6 @@ var FudgeCore;
             this.projection = PROJECTION.CENTRAL;
             this.near = _near;
             this.far = _far;
-            switch (this.direction) {
-                case FIELD_OF_VIEW.DIAGONAL:
-                    this.#yAspectCorrection = Math.sqrt(this.aspectRatio);
-                    this.#xAspectCorrection = 1 / this.#yAspectCorrection;
-                    break;
-                case FIELD_OF_VIEW.VERTICAL:
-                    this.#xAspectCorrection = 1 / this.aspectRatio;
-                    this.#yAspectCorrection = 1;
-                    break;
-                case FIELD_OF_VIEW.HORIZONTAL:
-                    this.#xAspectCorrection = 1;
-                    this.#yAspectCorrection = this.aspectRatio;
-                    break;
-            }
             this.mtxProjection = FudgeCore.Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction);
         }
         projectOrthographic(_left = -FudgeCore.Render.getCanvas().clientWidth / 2, _right = FudgeCore.Render.getCanvas().clientWidth / 2, _bottom = FudgeCore.Render.getCanvas().clientHeight / 2, _top = -FudgeCore.Render.getCanvas().clientHeight / 2) {
@@ -4208,25 +4189,6 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class EventDragDrop extends DragEvent {
-        constructor(type, _event) {
-            super(type, _event);
-            let target = _event.target;
-            this.clientRect = target.getClientRects()[0];
-            this.pointerX = _event.clientX - this.clientRect.left;
-            this.pointerY = _event.clientY - this.clientRect.top;
-        }
-    }
-    FudgeCore.EventDragDrop = EventDragDrop;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class EventKeyboard extends KeyboardEvent {
-        constructor(type, _event) {
-            super(type, _event);
-        }
-    }
-    FudgeCore.EventKeyboard = EventKeyboard;
     let KEYBOARD_CODE;
     (function (KEYBOARD_CODE) {
         KEYBOARD_CODE["A"] = "KeyA";
@@ -4412,19 +4374,6 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class EventPointer extends PointerEvent {
-        constructor(type, _event) {
-            super(type, _event);
-            let target = _event.target;
-            this.clientRect = target.getClientRects()[0];
-            this.pointerX = _event.clientX - this.clientRect.left;
-            this.pointerY = _event.clientY - this.clientRect.top;
-        }
-    }
-    FudgeCore.EventPointer = EventPointer;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
     class EventTimer {
         constructor(_timer, ..._arguments) {
             this.type = "\u0192lapse";
@@ -4439,12 +4388,137 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class EventWheel extends WheelEvent {
-        constructor(type, _event) {
-            super(type, _event);
+    let EVENT_TOUCH;
+    (function (EVENT_TOUCH) {
+        EVENT_TOUCH["MOVE"] = "touchMove";
+        EVENT_TOUCH["TAP"] = "touchTap";
+        EVENT_TOUCH["NOTCH"] = "touchNotch";
+        EVENT_TOUCH["LONG"] = "touchLong";
+        EVENT_TOUCH["DOUBLE"] = "touchDouble";
+        EVENT_TOUCH["PINCH"] = "touchPinch";
+        EVENT_TOUCH["ROTATE"] = "touchRotate";
+    })(EVENT_TOUCH = FudgeCore.EVENT_TOUCH || (FudgeCore.EVENT_TOUCH = {}));
+    class TouchEventDispatcher {
+        constructor(_target, _radiusTap = 5, _radiusNotch = 50, _timeDouble = 200, _timerLong = 1000) {
+            this.posStart = FudgeCore.Vector2.ZERO();
+            this.posNotch = FudgeCore.Vector2.ZERO();
+            this.posPrev = FudgeCore.Vector2.ZERO();
+            this.moved = false;
+            this.time = new FudgeCore.Time();
+            this.pinchDistance = 0;
+            this.pinchTolerance = 1;
+            this.hndEvent = (_event) => {
+                _event.preventDefault();
+                let touchFirst = _event.touches[0];
+                let position = this.calcAveragePosition(_event.touches);
+                let offset;
+                switch (_event.type) {
+                    case "touchstart":
+                        this.moved = false;
+                        this.startGesture(position);
+                        if (_event.touches.length == 2) {
+                            let pinch = new FudgeCore.Vector2(_event.touches[1].clientX - touchFirst.clientX, _event.touches[1].clientY - touchFirst.clientY);
+                            this.pinchDistance = pinch.magnitude;
+                        }
+                        let dispatchLong = (_eventTimer) => {
+                            this.moved = true;
+                            this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.LONG, {
+                                bubbles: true, detail: { position: position, touches: _event.touches }
+                            }));
+                        };
+                        this.timerLong?.clear();
+                        this.timerLong = new FudgeCore.Timer(this.time, this.timeLong, 1, dispatchLong);
+                        break;
+                    case "touchend":
+                        this.timerLong?.clear();
+                        if (_event.touches.length > 0) {
+                            this.startGesture(position);
+                            break;
+                        }
+                        let dispatchTap = (_eventTimer) => {
+                            this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.TAP, {
+                                bubbles: true, detail: { position: position, touches: _event.touches }
+                            }));
+                        };
+                        if (this.timerDouble?.active) {
+                            this.timerDouble.clear();
+                            this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.DOUBLE, {
+                                bubbles: true, detail: { position: position, touches: _event.touches }
+                            }));
+                        }
+                        else if (!this.moved)
+                            this.timerDouble = new FudgeCore.Timer(this.time, this.timeDouble, 1, dispatchTap);
+                        break;
+                    case "touchmove":
+                        this.detectPinch(_event, position);
+                        offset = FudgeCore.Vector2.DIFFERENCE(this.posPrev, this.posStart);
+                        this.moved ||= (offset.magnitude < this.radiusTap);
+                        let movement = FudgeCore.Vector2.DIFFERENCE(position, this.posPrev);
+                        this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.MOVE, {
+                            bubbles: true, detail: { position: position, touches: _event.touches, offset: offset, movement: movement }
+                        }));
+                        offset = FudgeCore.Vector2.DIFFERENCE(position, this.posNotch);
+                        if (offset.magnitude > this.radiusNotch) {
+                            let cardinal = Math.abs(offset.x) > Math.abs(offset.y) ?
+                                FudgeCore.Vector2.X(offset.x < 0 ? -1 : 1) :
+                                FudgeCore.Vector2.Y(offset.y < 0 ? -1 : 1);
+                            this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.NOTCH, {
+                                bubbles: true, detail: { position: position, touches: _event.touches, offset: offset, cardinal: cardinal, movement: movement }
+                            }));
+                            this.posNotch = position;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                this.posPrev.set(position.x, position.y);
+            };
+            this.detectPinch = (_event, _position) => {
+                if (_event.touches.length != 2)
+                    return;
+                let t = _event.touches;
+                let pinch = new FudgeCore.Vector2(t[1].clientX - t[0].clientX, t[1].clientY - t[0].clientY);
+                let pinchDistance = pinch.magnitude;
+                let pinchDelta = pinchDistance - this.pinchDistance;
+                if (Math.abs(pinchDelta) > this.pinchTolerance)
+                    this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.PINCH, {
+                        bubbles: true, detail: { position: _position, touches: _event.touches, pinch: pinch, pinchDelta: pinchDelta }
+                    }));
+                this.pinchDistance = pinchDistance;
+            };
+            this.target = _target;
+            this.radiusTap = _radiusTap;
+            this.radiusNotch = _radiusNotch;
+            this.timeDouble = _timeDouble;
+            this.timeLong = _timerLong;
+            this.activate(true);
+        }
+        activate(_on) {
+            if (_on) {
+                this.target.addEventListener("touchstart", this.hndEvent);
+                this.target.addEventListener("touchend", this.hndEvent);
+                this.target.addEventListener("touchmove", this.hndEvent);
+                return;
+            }
+            this.target.removeEventListener("touchstart", this.hndEvent);
+            this.target.removeEventListener("touchend", this.hndEvent);
+            this.target.removeEventListener("touchmove", this.hndEvent);
+        }
+        startGesture(_position) {
+            this.posNotch.set(_position.x, _position.y);
+            this.posStart.set(_position.x, _position.y);
+        }
+        calcAveragePosition(_touches) {
+            let average = FudgeCore.Vector2.ZERO();
+            for (let touch of _touches) {
+                average.x += touch.clientX;
+                average.y += touch.clientY;
+            }
+            average.scale(1 / _touches.length);
+            return average;
         }
     }
-    FudgeCore.EventWheel = EventWheel;
+    FudgeCore.TouchEventDispatcher = TouchEventDispatcher;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -4875,6 +4949,21 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    class Calc {
+        static clamp(_value, _min, _max, _isSmaller = (_value1, _value2) => { return _value1 < _value2; }) {
+            if (_isSmaller(_value, _min))
+                return _min;
+            if (_isSmaller(_max, _value))
+                return _max;
+            return _value;
+        }
+    }
+    Calc.deg2rad = Math.PI / 180;
+    Calc.rad2deg = 1 / Calc.deg2rad;
+    FudgeCore.Calc = Calc;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
     class Framing extends FudgeCore.Mutable {
         reduceMutator(_mutator) { }
     }
@@ -5071,21 +5160,6 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class Mathematic {
-        static clamp(_value, _min, _max, _isSmaller = (_value1, _value2) => { return _value1 < _value2; }) {
-            if (_isSmaller(_value, _min))
-                return _min;
-            if (_isSmaller(_max, _value))
-                return _max;
-            return _value;
-        }
-    }
-    Mathematic.deg2rad = Math.PI / 180;
-    Mathematic.rad2deg = 1 / Mathematic.deg2rad;
-    FudgeCore.Mathematic = Mathematic;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
     class Matrix3x3 extends FudgeCore.Mutable {
         constructor() {
             super();
@@ -5118,7 +5192,7 @@ var FudgeCore;
         }
         static ROTATION(_angleInDegrees) {
             const mtxResult = FudgeCore.Recycler.get(Matrix3x3);
-            let angleInRadians = _angleInDegrees * FudgeCore.Mathematic.deg2rad;
+            let angleInRadians = _angleInDegrees * FudgeCore.Calc.deg2rad;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
             mtxResult.data.set([
@@ -5271,7 +5345,7 @@ var FudgeCore;
                 rotation = ySkew;
             else
                 rotation = xSkew;
-            rotation *= FudgeCore.Mathematic.rad2deg;
+            rotation *= FudgeCore.Calc.rad2deg;
             return rotation;
         }
         set(_mtxTo) {
@@ -5548,7 +5622,7 @@ var FudgeCore;
         }
         static ROTATION_X(_angleInDegrees) {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let angleInRadians = _angleInDegrees * FudgeCore.Mathematic.deg2rad;
+            let angleInRadians = _angleInDegrees * FudgeCore.Calc.deg2rad;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
             mtxResult.data.set([
@@ -5561,7 +5635,7 @@ var FudgeCore;
         }
         static ROTATION_Y(_angleInDegrees) {
             let mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let angleInRadians = _angleInDegrees * FudgeCore.Mathematic.deg2rad;
+            let angleInRadians = _angleInDegrees * FudgeCore.Calc.deg2rad;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
             mtxResult.data.set([
@@ -5574,7 +5648,7 @@ var FudgeCore;
         }
         static ROTATION_Z(_angleInDegrees) {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let angleInRadians = _angleInDegrees * FudgeCore.Mathematic.deg2rad;
+            let angleInRadians = _angleInDegrees * FudgeCore.Calc.deg2rad;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
             mtxResult.data.set([
@@ -5587,7 +5661,7 @@ var FudgeCore;
         }
         static ROTATION(_eulerAnglesInDegrees) {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let anglesInRadians = FudgeCore.Vector3.SCALE(_eulerAnglesInDegrees, FudgeCore.Mathematic.deg2rad);
+            let anglesInRadians = FudgeCore.Vector3.SCALE(_eulerAnglesInDegrees, FudgeCore.Calc.deg2rad);
             let sinX = Math.sin(anglesInRadians.x);
             let cosX = Math.cos(anglesInRadians.x);
             let sinY = Math.sin(anglesInRadians.y);
@@ -5621,7 +5695,7 @@ var FudgeCore;
             return mtxResult;
         }
         static PROJECTION_CENTRAL(_aspect, _fieldOfViewInDegrees, _near, _far, _direction) {
-            let fieldOfViewInRadians = _fieldOfViewInDegrees * FudgeCore.Mathematic.deg2rad;
+            let fieldOfViewInRadians = _fieldOfViewInDegrees * FudgeCore.Calc.deg2rad;
             let f = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
             let rangeInv = 1.0 / (_near - _far);
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
@@ -5906,7 +5980,7 @@ var FudgeCore;
                 z1 = 0;
             }
             this.#eulerAngles.set(x1, y1, z1);
-            this.#eulerAngles.scale(FudgeCore.Mathematic.rad2deg);
+            this.#eulerAngles.scale(FudgeCore.Calc.rad2deg);
             return this.#eulerAngles;
         }
         set(_mtxTo) {
@@ -7786,7 +7860,7 @@ var FudgeCore;
             return this.#rigidbody;
         }
         rotateBody(_rotationChange) {
-            this.#rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * FudgeCore.Mathematic.deg2rad, _rotationChange.y * FudgeCore.Mathematic.deg2rad, _rotationChange.z * FudgeCore.Mathematic.deg2rad));
+            this.#rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * FudgeCore.Calc.deg2rad, _rotationChange.y * FudgeCore.Calc.deg2rad, _rotationChange.z * FudgeCore.Calc.deg2rad));
         }
         translateBody(_translationChange) {
             this.#rigidbody.translate(new OIMO.Vec3(_translationChange.x, _translationChange.y, _translationChange.z));
@@ -8620,7 +8694,7 @@ var FudgeCore;
         set maxRotor(_value) {
             this.#maxRotor = _value;
             if (this.joint != null)
-                this.joint.getRotationalLimitMotor().upperLimit = _value * FudgeCore.Mathematic.deg2rad;
+                this.joint.getRotationalLimitMotor().upperLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get minRotor() {
             return this.#minRotor;
@@ -8628,7 +8702,7 @@ var FudgeCore;
         set minRotor(_value) {
             this.#minRotor = _value;
             if (this.joint != null)
-                this.joint.getRotationalLimitMotor().lowerLimit = _value * FudgeCore.Mathematic.deg2rad;
+                this.joint.getRotationalLimitMotor().lowerLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get rotorSpeed() {
             return this.#rotorSpeed;
@@ -8695,7 +8769,7 @@ var FudgeCore;
             this.#rotorSpringDamper = new OIMO.SpringDamper().setSpring(this.springFrequencyRotation, this.springDampingRotation);
             this.motor = new OIMO.TranslationalLimitMotor().setLimits(super.minMotor, super.maxMotor);
             this.motor.setMotor(super.motorSpeed, this.motorForce);
-            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.minRotor * FudgeCore.Mathematic.deg2rad, this.maxRotor * FudgeCore.Mathematic.deg2rad);
+            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.minRotor * FudgeCore.Calc.deg2rad, this.maxRotor * FudgeCore.Calc.deg2rad);
             this.#rotor.setMotor(this.rotorSpeed, this.rotorTorque);
             this.config = new OIMO.CylindricalJointConfig();
             super.constructJoint();
@@ -8842,18 +8916,18 @@ var FudgeCore;
             this.dirtyStatus();
         }
         get maxAngleFirstAxis() {
-            return this.#maxAngleFirst * FudgeCore.Mathematic.rad2deg;
+            return this.#maxAngleFirst * FudgeCore.Calc.rad2deg;
         }
         set maxAngleFirstAxis(_value) {
-            this.#maxAngleFirst = _value * FudgeCore.Mathematic.deg2rad;
+            this.#maxAngleFirst = _value * FudgeCore.Calc.deg2rad;
             this.disconnect();
             this.dirtyStatus();
         }
         get maxAngleSecondAxis() {
-            return this.#maxAngleSecond * FudgeCore.Mathematic.rad2deg;
+            return this.#maxAngleSecond * FudgeCore.Calc.rad2deg;
         }
         set maxAngleSecondAxis(_value) {
-            this.#maxAngleSecond = _value * FudgeCore.Mathematic.deg2rad;
+            this.#maxAngleSecond = _value * FudgeCore.Calc.deg2rad;
             this.disconnect();
             this.dirtyStatus();
         }
@@ -8890,19 +8964,19 @@ var FudgeCore;
                 this.joint.getSwingSpringDamper().frequency = _value;
         }
         get maxMotorTwist() {
-            return this.#maxMotorTwist * FudgeCore.Mathematic.rad2deg;
+            return this.#maxMotorTwist * FudgeCore.Calc.rad2deg;
         }
         set maxMotorTwist(_value) {
-            _value *= FudgeCore.Mathematic.deg2rad;
+            _value *= FudgeCore.Calc.deg2rad;
             this.#maxMotorTwist = _value;
             if (this.joint != null)
                 this.joint.getTwistLimitMotor().upperLimit = _value;
         }
         get minMotorTwist() {
-            return this.#minMotorTwist * FudgeCore.Mathematic.rad2deg;
+            return this.#minMotorTwist * FudgeCore.Calc.rad2deg;
         }
         set minMotorTwist(_value) {
-            _value *= FudgeCore.Mathematic.deg2rad;
+            _value *= FudgeCore.Calc.deg2rad;
             this.#minMotorTwist = _value;
             if (this.joint != null)
                 this.joint.getTwistLimitMotor().lowerLimit = _value;
@@ -8990,14 +9064,14 @@ var FudgeCore;
         #rotor;
         set maxMotor(_value) {
             super.maxMotor = _value;
-            _value *= FudgeCore.Mathematic.deg2rad;
+            _value *= FudgeCore.Calc.deg2rad;
             if (this.joint)
                 this.joint.getLimitMotor().upperLimit = _value;
         }
         set minMotor(_value) {
             super.minMotor = _value;
             if (this.joint)
-                this.joint.getLimitMotor().lowerLimit = _value * FudgeCore.Mathematic.deg2rad;
+                this.joint.getLimitMotor().lowerLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get motorTorque() {
             return this.#motorTorque;
@@ -9031,7 +9105,7 @@ var FudgeCore;
             super.mutate(_mutator);
         }
         constructJoint() {
-            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.minMotor * FudgeCore.Mathematic.deg2rad, super.maxMotor * FudgeCore.Mathematic.deg2rad);
+            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.minMotor * FudgeCore.Calc.deg2rad, super.maxMotor * FudgeCore.Calc.deg2rad);
             this.#rotor.setMotor(this.motorSpeed, this.motorTorque);
             this.config = new OIMO.RevoluteJointConfig();
             super.constructJoint();
@@ -9229,7 +9303,7 @@ var FudgeCore;
         set maxRotorFirst(_value) {
             this.#maxRotorFirst = _value;
             if (this.joint != null)
-                this.joint.getLimitMotor1().upperLimit = _value * FudgeCore.Mathematic.deg2rad;
+                this.joint.getLimitMotor1().upperLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get minRotorFirst() {
             return this.#minRotorFirst;
@@ -9237,7 +9311,7 @@ var FudgeCore;
         set minRotorFirst(_value) {
             this.#minRotorFirst = _value;
             if (this.joint != null)
-                this.joint.getLimitMotor1().lowerLimit = _value * FudgeCore.Mathematic.deg2rad;
+                this.joint.getLimitMotor1().lowerLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get rotorSpeedFirst() {
             return this.#rotorSpeedFirst;
@@ -9261,7 +9335,7 @@ var FudgeCore;
         set maxRotorSecond(_value) {
             this.#maxRotorSecond = _value;
             if (this.joint != null)
-                this.joint.getLimitMotor2().upperLimit = _value * FudgeCore.Mathematic.deg2rad;
+                this.joint.getLimitMotor2().upperLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get minRotorSecond() {
             return this.#minRotorSecond;
@@ -9269,7 +9343,7 @@ var FudgeCore;
         set minRotorSecond(_value) {
             this.#minRotorSecond = _value;
             if (this.joint != null)
-                this.joint.getLimitMotor2().lowerLimit = _value * FudgeCore.Mathematic.deg2rad;
+                this.joint.getLimitMotor2().lowerLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get rotorSpeedSecond() {
             return this.#rotorSpeedSecond;
@@ -9324,9 +9398,9 @@ var FudgeCore;
         constructJoint() {
             this.#axisSpringDamperFirst = new OIMO.SpringDamper().setSpring(this.#springFrequencyFirst, this.#springDampingFirst);
             this.#axisSpringDamperSecond = new OIMO.SpringDamper().setSpring(this.#springFrequencySecond, this.#springDampingSecond);
-            this.#motorFirst = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * FudgeCore.Mathematic.deg2rad, this.#maxRotorFirst * FudgeCore.Mathematic.deg2rad);
+            this.#motorFirst = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * FudgeCore.Calc.deg2rad, this.#maxRotorFirst * FudgeCore.Calc.deg2rad);
             this.#motorFirst.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
-            this.#motorSecond = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * FudgeCore.Mathematic.deg2rad, this.#maxRotorFirst * FudgeCore.Mathematic.deg2rad);
+            this.#motorSecond = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * FudgeCore.Calc.deg2rad, this.#maxRotorFirst * FudgeCore.Calc.deg2rad);
             this.#motorSecond.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
             this.config = new OIMO.UniversalJointConfig();
             super.constructJoint(this.#axisFirst, this.#axisSecond);
@@ -9630,9 +9704,9 @@ var FudgeCore;
         }
         toDegrees() {
             let angles = this.toEulerangles();
-            angles.x = angles.x * (FudgeCore.Mathematic.rad2deg);
-            angles.y = angles.y * (FudgeCore.Mathematic.rad2deg);
-            angles.z = angles.z * (FudgeCore.Mathematic.rad2deg);
+            angles.x = angles.x * (FudgeCore.Calc.rad2deg);
+            angles.y = angles.y * (FudgeCore.Calc.rad2deg);
+            angles.z = angles.z * (FudgeCore.Calc.rad2deg);
             return angles;
         }
         getMutator() {
@@ -10070,7 +10144,7 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class Viewport extends FudgeCore.EventTargetƒ {
+    class Viewport extends FudgeCore.EventTargetUnified {
         constructor() {
             super(...arguments);
             this.name = "Viewport";
@@ -10086,38 +10160,6 @@ var FudgeCore;
             this.#branch = null;
             this.#crc2 = null;
             this.#canvas = null;
-            this.hndDragDropEvent = (_event) => {
-                let _dragevent = _event;
-                switch (_dragevent.type) {
-                    case "dragover":
-                    case "drop":
-                        _dragevent.preventDefault();
-                        _dragevent.dataTransfer.effectAllowed = "none";
-                        break;
-                    case "dragstart":
-                        _dragevent.dataTransfer.setData("text", "Hallo");
-                        _dragevent.dataTransfer.setDragImage(new Image(), 0, 0);
-                        break;
-                }
-                let event = new FudgeCore.EventDragDrop("ƒ" + _event.type, _dragevent);
-                this.addCanvasPosition(event);
-                this.dispatchEvent(event);
-            };
-            this.hndPointerEvent = (_event) => {
-                let event = new FudgeCore.EventPointer("ƒ" + _event.type, _event);
-                this.addCanvasPosition(event);
-                this.dispatchEvent(event);
-            };
-            this.hndKeyboardEvent = (_event) => {
-                if (!this.hasFocus)
-                    return;
-                let event = new FudgeCore.EventKeyboard("ƒ" + _event.type, _event);
-                this.dispatchEvent(event);
-            };
-            this.hndWheelEvent = (_event) => {
-                let event = new FudgeCore.EventWheel("ƒ" + _event.type, _event);
-                this.dispatchEvent(event);
-            };
         }
         #branch;
         #crc2;
@@ -10125,20 +10167,21 @@ var FudgeCore;
         get hasFocus() {
             return (Viewport.focus == this);
         }
+        get canvas() {
+            return this.#canvas;
+        }
+        get context() {
+            return this.#crc2;
+        }
         initialize(_name, _branch, _camera, _canvas) {
             this.name = _name;
             this.camera = _camera;
             this.#canvas = _canvas;
             this.#crc2 = _canvas.getContext("2d");
+            this.#canvas.tabIndex = 0;
             this.rectSource = FudgeCore.Render.getCanvasRect();
             this.rectDestination = this.getClientRectangle();
             this.setBranch(_branch);
-        }
-        getCanvas() {
-            return this.#canvas;
-        }
-        getContext() {
-            return this.#crc2;
         }
         getCanvasRectangle() {
             return FudgeCore.Rectangle.GET(0, 0, this.#canvas.width, this.#canvas.height);
@@ -10149,15 +10192,7 @@ var FudgeCore;
         setBranch(_branch) {
             if (_branch)
                 _branch.dispatchEvent(new Event("attachBranch"));
-            if (this.#branch) {
-                this.#branch.removeEventListener("componentAdd", this.hndComponentEvent);
-                this.#branch.removeEventListener("componentRemove", this.hndComponentEvent);
-            }
             this.#branch = _branch;
-            if (this.#branch) {
-                this.#branch.addEventListener("componentAdd", this.hndComponentEvent);
-                this.#branch.addEventListener("componentRemove", this.hndComponentEvent);
-            }
         }
         getBranch() {
             return this.#branch;
@@ -10304,33 +10339,6 @@ var FudgeCore;
                 this.dispatchEvent(new Event("focusout"));
                 Viewport.focus = null;
             }
-        }
-        activatePointerEvent(_type, _on) {
-            this.activateEvent(this.#canvas, _type, this.hndPointerEvent, _on);
-        }
-        activateKeyboardEvent(_type, _on) {
-            this.activateEvent(this.#canvas.ownerDocument, _type, this.hndKeyboardEvent, _on);
-        }
-        activateDragDropEvent(_type, _on) {
-            if (_type == "\u0192dragstart")
-                this.#canvas.draggable = _on;
-            this.activateEvent(this.#canvas, _type, this.hndDragDropEvent, _on);
-        }
-        activateWheelEvent(_type, _on) {
-            this.activateEvent(this.#canvas, _type, this.hndWheelEvent, _on);
-        }
-        addCanvasPosition(event) {
-            event.canvasX = this.#canvas.width * event.pointerX / event.clientRect.width;
-            event.canvasY = this.#canvas.height * event.pointerY / event.clientRect.height;
-        }
-        activateEvent(_target, _type, _handler, _on) {
-            _type = _type.slice(1);
-            if (_on)
-                _target.addEventListener(_type, _handler);
-            else
-                _target.removeEventListener(_type, _handler);
-        }
-        hndComponentEvent(_event) {
         }
     }
     FudgeCore.Viewport = Viewport;
@@ -10700,7 +10708,7 @@ var FudgeCore;
                     }
                     else {
                         if (gltfNode.rotation)
-                            node.mtxLocal.rotate(new FudgeCore.Vector3(...gltfNode.rotation.map(rotation => rotation * FudgeCore.Mathematic.rad2deg)));
+                            node.mtxLocal.rotate(new FudgeCore.Vector3(...gltfNode.rotation.map(rotation => rotation * FudgeCore.Calc.rad2deg)));
                         if (gltfNode.scale)
                             node.mtxLocal.scale(new FudgeCore.Vector3(...gltfNode.scale));
                         if (gltfNode.translation)
@@ -10749,7 +10757,7 @@ var FudgeCore;
                 const gltfCamera = this.gltf.cameras[_iCamera];
                 const camera = new FudgeCore.ComponentCamera();
                 if (gltfCamera.perspective)
-                    camera.projectCentral(gltfCamera.perspective.aspectRatio, gltfCamera.perspective.yfov * FudgeCore.Mathematic.rad2deg, null, gltfCamera.perspective.znear, gltfCamera.perspective.zfar);
+                    camera.projectCentral(gltfCamera.perspective.aspectRatio, gltfCamera.perspective.yfov * FudgeCore.Calc.rad2deg, null, gltfCamera.perspective.znear, gltfCamera.perspective.zfar);
                 else
                     camera.projectOrthographic(-gltfCamera.orthographic.xmag, gltfCamera.orthographic.xmag, -gltfCamera.orthographic.ymag, gltfCamera.orthographic.ymag);
                 return camera;
@@ -11231,9 +11239,7 @@ out vec2 v_vctTexture;
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
 in vec3 a_vctNormal;
 uniform mat4 u_mtxNormalMeshToWorld;
-uniform mat4 u_mtxNormalWorldToView;
-uniform float u_xAspect;
-uniform float u_yAspect;
+uniform mat4 u_mtxWorldToCamera;
 out vec2 v_vctTexture;
   #endif
 
@@ -11338,13 +11344,20 @@ void main() {
     #endif
 
     #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  // vec3 vctReflection = normalize(reflect(vctView, vctNormal));
-  vec3 vctReflection = mat3(u_mtxNormalWorldToView) * vctNormal;
-  vctReflection.x = vctReflection.x * u_xAspect;
-  vctReflection.y = vctReflection.y * u_yAspect;
+  vec4 vctVertexInCamera = normalize(u_mtxWorldToCamera * vctPosition);
+  vctVertexInCamera.xy *= -1.0;
+  mat4 mtx_RotX = mat4(1, 0, 0, 0, 0, vctVertexInCamera.z, vctVertexInCamera.y, 0, 0, -vctVertexInCamera.y, vctVertexInCamera.z, 0, 0, 0, 0, 1);
+  mat4 mtx_RotY = mat4(vctVertexInCamera.z, 0, -vctVertexInCamera.x, 0, 0, 1, 0, 0, vctVertexInCamera.x, 0, vctVertexInCamera.z, 0, 0, 0, 0, 1);
+
+  vctNormal = mat3(u_mtxNormalMeshToWorld) * a_vctNormal;
+
+  // adds correction for things being far and to the side, but distortion for things being close
+  vctNormal = mat3(mtx_RotX * mtx_RotY) * vctNormal;
+  
+  vec3 vctReflection = normalize(mat3(u_mtxWorldToCamera) * normalize(vctNormal));
   vctReflection.y = -vctReflection.y;
-  v_vctTexture = 1.0 * vctReflection.xy + 0.5;
+
+  v_vctTexture = 0.5 * vctReflection.xy + 0.5;
     #endif
 
     // always full opacity for now...
@@ -11356,8 +11369,12 @@ var FudgeCore;
     var Shader_1;
     let Shader = Shader_1 = class Shader {
         static getCoat() { return FudgeCore.CoatColored; }
-        static getVertexShaderSource() { return this.vertexShaderSource; }
-        static getFragmentShaderSource() { return this.fragmentShaderSource; }
+        static getVertexShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.vert"], this.define);
+        }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.frag"], this.define);
+        }
         static deleteProgram() { }
         static useProgram() { }
         static createProgram() { }
@@ -11382,12 +11399,6 @@ var FudgeCore;
 (function (FudgeCore) {
     class ShaderFlat extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissive; }
-        static getVertexShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.vert"], this.define);
-        }
-        static getFragmentShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.frag"], this.define);
-        }
     }
     ShaderFlat.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlat);
     ShaderFlat.define = [
@@ -11401,12 +11412,6 @@ var FudgeCore;
 (function (FudgeCore) {
     class ShaderFlatSkin extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissive; }
-        static getVertexShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.vert"], this.define);
-        }
-        static getFragmentShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.frag"], this.define);
-        }
     }
     ShaderFlatSkin.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlatSkin);
     ShaderFlatSkin.define = [
@@ -11421,12 +11426,6 @@ var FudgeCore;
 (function (FudgeCore) {
     class ShaderFlatTextured extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissiveTextured; }
-        static getVertexShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.vert"], this.define);
-        }
-        static getFragmentShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.frag"], this.define);
-        }
     }
     ShaderFlatTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlatTextured);
     ShaderFlatTextured.define = [
@@ -11441,12 +11440,6 @@ var FudgeCore;
 (function (FudgeCore) {
     class ShaderGouraud extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissive; }
-        static getVertexShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.vert"], this.define);
-        }
-        static getFragmentShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.frag"], this.define);
-        }
     }
     ShaderGouraud.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraud);
     ShaderGouraud.define = [
@@ -11459,12 +11452,6 @@ var FudgeCore;
 (function (FudgeCore) {
     class ShaderGouraudSkin extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissive; }
-        static getVertexShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.vert"], this.define);
-        }
-        static getFragmentShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.frag"], this.define);
-        }
     }
     ShaderGouraudSkin.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudSkin);
     ShaderGouraudSkin.define = [
@@ -11478,12 +11465,6 @@ var FudgeCore;
 (function (FudgeCore) {
     class ShaderGouraudTextured extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissiveTextured; }
-        static getVertexShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.vert"], this.define);
-        }
-        static getFragmentShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.frag"], this.define);
-        }
     }
     ShaderGouraudTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudTextured);
     ShaderGouraudTextured.define = [
@@ -11496,13 +11477,6 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderLit extends FudgeCore.Shader {
-        static getCoat() { return FudgeCore.CoatColored; }
-        static getVertexShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.vert"], this.define);
-        }
-        static getFragmentShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.frag"], this.define);
-        }
     }
     ShaderLit.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLit);
     ShaderLit.define = [];
@@ -11512,12 +11486,6 @@ var FudgeCore;
 (function (FudgeCore) {
     class ShaderLitTextured extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatTextured; }
-        static getVertexShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.vert"], this.define);
-        }
-        static getFragmentShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.frag"], this.define);
-        }
     }
     ShaderLitTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLitTextured);
     ShaderLitTextured.define = [
@@ -11529,12 +11497,6 @@ var FudgeCore;
 (function (FudgeCore) {
     class ShaderMatCap extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatTextured; }
-        static getVertexShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.vert"], this.define);
-        }
-        static getFragmentShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.frag"], this.define);
-        }
     }
     ShaderMatCap.iSubclass = FudgeCore.Shader.registerSubclass(ShaderMatCap);
     ShaderMatCap.define = [
@@ -11547,9 +11509,6 @@ var FudgeCore;
 (function (FudgeCore) {
     class ShaderPhong extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissive; }
-        static getVertexShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.vert"], this.define);
-        }
         static getFragmentShaderSource() {
             return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
         }
@@ -11989,7 +11948,7 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class Time extends FudgeCore.EventTargetƒ {
+    class Time extends FudgeCore.EventTargetUnified {
         constructor() {
             super();
             this.timers = {};
