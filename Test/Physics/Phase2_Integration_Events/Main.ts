@@ -70,7 +70,7 @@ namespace FudgePhysics_Communication {
 
         viewPort = new f.Viewport();
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
-        viewPort.showSceneGraph();
+        f.Debug.branch(viewPort.getBranch());
         viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.CONTACTS;
         f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
         cubes[0].getComponent(f.ComponentRigidbody).restitution = 1.3;

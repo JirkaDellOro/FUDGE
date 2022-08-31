@@ -78,7 +78,7 @@ namespace FudgePhysics_Communication {
         viewPort = new f.Viewport();
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
 
-        viewPort.showSceneGraph();
+        f.Debug.branch(viewPort.getBranch());
         f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
         f.Physics.adjustTransforms(hierarchy);
         f.Loop.start();

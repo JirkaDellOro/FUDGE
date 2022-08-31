@@ -61,7 +61,7 @@ var FudgePhysics_Communication;
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
         viewPort.canvas.addEventListener("pointermove", hndPointerMove);
         viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-        viewPort.showSceneGraph();
+        f.Debug.branch(viewPort.getBranch());
         // f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         // f.Physics.adjustTransforms(hierarchy);

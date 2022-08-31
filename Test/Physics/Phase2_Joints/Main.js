@@ -158,7 +158,7 @@ var FudgePhysics_Communication;
         cmpCamera.mtxPivot.lookAt(f.Vector3.ZERO());
         viewPort = new f.Viewport();
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
-        viewPort.showSceneGraph();
+        f.Debug.branch(viewPort.getBranch());
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         viewPort.canvas.addEventListener("pointerdown", hndPointerDown);
         viewPort.canvas.addEventListener("pointerup", hndPointerUp);

@@ -53,7 +53,7 @@ var FudgePhysics_Communication;
         cubes[3].getComponent(f.ComponentRigidbody).addEventListener("TriggerLeftCollision" /* TRIGGER_EXIT */, onTriggerExit);
         viewPort = new f.Viewport();
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
-        viewPort.showSceneGraph();
+        f.Debug.branch(viewPort.getBranch());
         viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.CONTACTS;
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         cubes[0].getComponent(f.ComponentRigidbody).restitution = 1.3;

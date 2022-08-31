@@ -102,14 +102,6 @@ namespace FudgeCore {
       return this.#branch;
     }
 
-    /**
-     * Logs this viewports scenegraph to the console.
-     * TODO: remove this method, since it's implemented in Debug
-     */
-    public showSceneGraph(): void {
-      Debug.branch(this.#branch);
-    }
-
     // #region Drawing
     /**
      * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
@@ -158,6 +150,11 @@ namespace FudgeCore {
       this.componentsPick = Render.componentsPick;
     }
 
+    /**
+     * Performs a pick on all {@link ComponentPick}s in the branch of this viewport
+     * using a ray from its camera through the client coordinates given in the event.
+     * Dispatches the event to all nodes hit.
+     */
     public dispatchPointerEvent(_event: PointerEvent): void {
       let posClient: Vector2 = new Vector2(_event.clientX, _event.clientY);
       let ray: Ray = this.getRayFromClient(posClient);
@@ -335,29 +332,6 @@ namespace FudgeCore {
     public pointClientToScreen(_client: Vector2): Vector2 {
       let screen: Vector2 = new Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
       return screen;
-    }
-
-    /**
-     * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events. 
-     * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire {@link EventUnified}s accordingly.
-     * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
-     */
-    public setFocus(_on: boolean): void {
-      if (_on) {
-        if (Viewport.focus == this)
-          return;
-        if (Viewport.focus)
-          Viewport.focus.dispatchEvent(new Event(EVENT.FOCUS_OUT));
-        Viewport.focus = this;
-        this.dispatchEvent(new Event(EVENT.FOCUS_IN));
-      }
-      else {
-        if (Viewport.focus != this)
-          return;
-
-        this.dispatchEvent(new Event(EVENT.FOCUS_OUT));
-        Viewport.focus = null;
-      }
     }
   }
 }

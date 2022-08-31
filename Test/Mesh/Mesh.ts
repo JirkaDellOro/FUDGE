@@ -85,7 +85,6 @@ namespace Mesh {
     viewport.initialize("Viewport", graph, cmpCamera, canvas);
 
     // setup event handling
-    viewport.setFocus(true);
     viewport.canvas.addEventListener("pointermove", hndPointerMove);
     viewport.canvas.addEventListener("wheel", hndWheelMove);
 
