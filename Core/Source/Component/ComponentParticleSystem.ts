@@ -10,6 +10,7 @@ namespace FudgeCore {
     public particleEffect: ParticleEffect;
     #numberOfParticles: number;
     // TODO: add color for the whole system
+    // TODO: add time for individual systems
 
     constructor(_particleEffect: ParticleEffect = null, _numberOfParticles: number = 10) {
       super();     

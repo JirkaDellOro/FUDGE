@@ -2,12 +2,14 @@ namespace FudgeCore {
   
   export namespace ParticleData {
 
-    export interface Effect extends Serialization {
+    export interface Effect {
       variables?: {[name: string]: Expression};
       color?: {r?: Expression, g?: Expression, b?: Expression, a?: Expression};
       mtxLocal?: Transformation[];
       mtxWorld?: Transformation[];
     }
+
+    export type EffectRecursive = Effect["variables"] | Effect["color"] | Effect["mtxLocal"] | Transformation | Expression;
 
     export type Expression = Function | Variable | Constant;
 

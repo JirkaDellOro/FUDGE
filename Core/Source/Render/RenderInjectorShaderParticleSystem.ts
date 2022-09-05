@@ -126,10 +126,10 @@ namespace FudgeCore {
             throw `Error in ${ParticleEffect.name}: "${newName}" is not a defined variable`;
         } else {
           for (const key in _data) {
-            if (typeof _data[key] == "string")
+            if (typeof (<General>_data)[key] == "string")
               continue;
             else
-              renameRecursive(_data[key]);
+              renameRecursive((<General>_data)[key]);
           }
         }
       }
@@ -144,14 +144,14 @@ namespace FudgeCore {
         .reduce( (_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "" );
     }
 
-    private static generateTransformations(_transformations: ParticleData.Transformation[], _localOrWorld: "Local" | "World"): string {
+    private static generateTransformations(_transformations: ParticleData.Effect["mtxLocal"], _localOrWorld: "Local" | "World"): string {
       if (!_transformations || _transformations.length == 0) return "";
 
       type Transformation = "translate" | "rotate" | "scale"; // TODO: maybe extract this from ParticleEffectData.Transformation eg. Pick<ParticleEffectData.Transformation, "transformation">;
       type CodeTransformation = [Transformation, string, string, string];
 
       let transformations: CodeTransformation[] = _transformations
-        .map( (_data: ParticleData.Transformation): CodeTransformation => {
+        .map(_data => {
           let isScale: boolean = _data.transformation === "scale";
           let [x, y, z] = [_data.x, _data.y, _data.z]
             .map( (_value) => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : (isScale ? "1.0" : "0.0") ) as [string, string, string];
@@ -213,7 +213,7 @@ namespace FudgeCore {
       return code;
     }
 
-    private static generateColor(_color: {r?: ParticleData.Expression, g?: ParticleData.Expression, b?: ParticleData.Expression, a?: ParticleData.Expression}): string {
+    private static generateColor(_color: ParticleData.Effect["color"]): string {
       if (!_color) return "";
       
       let [r, g, b, a]: [string, string, string, string] = [_color.r, _color.g, _color.b, _color.a]

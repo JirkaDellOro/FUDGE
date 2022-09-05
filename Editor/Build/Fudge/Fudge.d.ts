@@ -36,9 +36,11 @@ declare namespace Fudge {
         ILLUMINATE = 16,
         ADD_PROPERTY = 17,
         DELETE_PROPERTY = 18,
-        ADD_PARTICLE_PATH = 19,
-        ADD_PARTICLE_FUNCTION = 20,
-        ADD_PARTICLE_CONSTANT = 21
+        ADD_PARTICLE_FUNCTION = 19,
+        ADD_PARTICLE_FUNCTION_NAMED = 20,
+        ADD_PARTICLE_CONSTANT = 21,
+        ADD_PARTICLE_CONSTANT_NAMED = 22,
+        DELETE_PARTICLE_DATA = 23
     }
     enum MENU {
         QUIT = "quit",
@@ -501,9 +503,8 @@ declare namespace Fudge {
         private controller;
         constructor(_container: ComponentContainer, _state: Object);
         protected openContextMenu: (_event: Event) => void;
-        protected getCustomContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        private getMenuItemFromPath;
         private hndEvent;
         private setParticleEffect;
         private recreateTree;

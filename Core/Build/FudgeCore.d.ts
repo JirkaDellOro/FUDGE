@@ -4167,7 +4167,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     namespace ParticleData {
-        interface Effect extends Serialization {
+        interface Effect {
             variables?: {
                 [name: string]: Expression;
             };
@@ -4180,6 +4180,7 @@ declare namespace FudgeCore {
             mtxLocal?: Transformation[];
             mtxWorld?: Transformation[];
         }
+        type EffectRecursive = Effect["variables"] | Effect["color"] | Effect["mtxLocal"] | Transformation | Expression;
         type Expression = Function | Variable | Constant;
         interface Function {
             function: string;

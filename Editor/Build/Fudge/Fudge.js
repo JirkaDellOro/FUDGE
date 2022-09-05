@@ -46,9 +46,11 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 16] = "ILLUMINATE";
         CONTEXTMENU[CONTEXTMENU["ADD_PROPERTY"] = 17] = "ADD_PROPERTY";
         CONTEXTMENU[CONTEXTMENU["DELETE_PROPERTY"] = 18] = "DELETE_PROPERTY";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_PATH"] = 19] = "ADD_PARTICLE_PATH";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION"] = 20] = "ADD_PARTICLE_FUNCTION";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION"] = 19] = "ADD_PARTICLE_FUNCTION";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION_NAMED"] = 20] = "ADD_PARTICLE_FUNCTION_NAMED";
         CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT"] = 21] = "ADD_PARTICLE_CONSTANT";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT_NAMED"] = 22] = "ADD_PARTICLE_CONSTANT_NAMED";
+        CONTEXTMENU[CONTEXTMENU["DELETE_PARTICLE_DATA"] = 23] = "DELETE_PARTICLE_DATA";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -2327,7 +2329,6 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
-    // const fs: ƒ.General = require("fs");
     class ViewParticleSystem extends Fudge.View {
         graph;
         node;
@@ -2345,37 +2346,82 @@ var Fudge;
         }
         //#region  ContextMenu
         openContextMenu = (_event) => {
-            this.contextMenu = this.getCustomContextMenu(this.contextMenuCallback.bind(this));
-            this.contextMenu.popup();
+            let focus = this.tree.getFocussed();
+            this.contextMenu.items.forEach(_item => _item.visible = false);
+            let popup = false;
+            if (focus == this.particleEffectData.color || ƒ.ParticleData.isTransformation(focus)) {
+                [
+                    this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT_NAMED)),
+                    this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION_NAMED))
+                ].forEach(_item => {
+                    _item.visible = true;
+                    _item.submenu.items.forEach(_subItem => _subItem.visible = false);
+                    let ids = focus == this.particleEffectData.color ? [
+                        nameOf("r"),
+                        nameOf("g"),
+                        nameOf("b"),
+                        nameOf("a")
+                    ] : [
+                        nameOf("x"),
+                        nameOf("y"),
+                        nameOf("z")
+                    ];
+                    ids
+                        .filter(_value => !Object.keys(focus).includes(_value))
+                        .forEach(_id => _item.submenu.getMenuItemById(_id).visible = true);
+                });
+                popup = true;
+            }
+            if (Object.values(this.particleEffectData).includes(focus) && focus != this.particleEffectData.color || ƒ.ParticleData.isFunction(focus)) {
+                this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT)).visible = true;
+                this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION)).visible = true;
+                popup = true;
+            }
+            if (ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus))
+                this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.DELETE_PARTICLE_DATA)).visible = true;
+            if (popup)
+                this.contextMenu.popup();
+            function nameOf(name) {
+                return name;
+            }
         };
-        getCustomContextMenu(_callback) {
+        getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let item;
-            let focus = this.tree.getFocussed();
-            if (ƒ.ParticleData.isFunction(focus)) {
-                item = new Fudge.remote.MenuItem({ label: "Add Variable/Constant", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT), click: _callback });
-                menu.append(item);
-                item = new Fudge.remote.MenuItem({ label: "Add Function", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION), click: _callback });
-                menu.append(item);
-            }
-            else {
-                menu.append(this.getMenuItemFromPath(this.controller.getPath(focus), _callback));
-            }
-            item = new Fudge.remote.MenuItem({ label: "Delete", id: String(Fudge.CONTEXTMENU.DELETE_NODE), click: _callback, accelerator: "D" });
+            let submenu;
+            submenu = new Fudge.remote.Menu();
+            [
+                nameOf("r"),
+                nameOf("g"),
+                nameOf("b"),
+                nameOf("a"),
+                nameOf("x"),
+                nameOf("y"),
+                nameOf("z")
+            ].forEach(_value => {
+                item = new Fudge.remote.MenuItem({ label: _value, id: _value, click: _callback });
+                submenu.append(item);
+            });
+            item = new Fudge.remote.MenuItem({ label: "Add Variable/Constant", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT_NAMED), submenu: submenu });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Add Function", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION_NAMED), submenu: submenu });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Add Variable/Constant", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT), click: _callback });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Add Function", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION), click: _callback });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Delete", id: String(Fudge.CONTEXTMENU.DELETE_PARTICLE_DATA), click: _callback, accelerator: "D" });
             menu.append(item);
             return menu;
+            function nameOf(name) {
+                return name;
+            }
         }
         contextMenuCallback(_item, _window, _event) {
             ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
             let focus = this.tree.getFocussed();
             let child;
             switch (Number(_item.id)) {
-                case Fudge.CONTEXTMENU.ADD_PARTICLE_PATH:
-                    child = {};
-                    focus[_item.label] = child;
-                    this.tree.findVisible(focus).expand(true);
-                    this.tree.findVisible(child).focus();
-                    break;
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT:
                     child = { type: "constant", value: 0 };
                     let parentLabel = _item["parentLabel"];
@@ -2400,80 +2446,6 @@ var Fudge;
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                     break;
             }
-        }
-        getMenuItemFromPath(_path, _callback) {
-            let focus = this.tree.getFocussed();
-            let label;
-            let options;
-            let numberOptions = [];
-            const submenu = new Fudge.remote.Menu();
-            switch (_path[0]) {
-                case "storage":
-                    if (_path.length == 1) {
-                        label = "Add Storage";
-                        options = ["system", "update", "particle"];
-                    }
-                    else {
-                        // TODO: add variable or function
-                    }
-                    break;
-                case "transformations":
-                    if (_path.length == 1) {
-                        label = "Add Transformation";
-                        options = ["local", "world"];
-                    }
-                    else {
-                        // TODO: i dont know
-                    }
-                    break;
-                case "components":
-                    if (_path.length == 1) {
-                        label = "Add Component";
-                        options = [];
-                        for (const anyComponent of ƒ.Component.subclasses) {
-                            //@ts-ignore
-                            this.node.getComponents(anyComponent).forEach((component, index) => {
-                                options.push(component.type);
-                            });
-                        }
-                    }
-                    else {
-                        label = "Add Property";
-                        //@ts-ignore
-                        let mutator = this.node.getComponent(ƒ.Component.subclasses.find(componentType => componentType.name == _path[1])).getMutatorForAnimation();
-                        _path.splice(0, 2);
-                        while (_path.length > 0) {
-                            mutator = mutator[_path.shift()];
-                        }
-                        options = Object.keys(mutator).filter(optionLabel => mutator[optionLabel] instanceof Object || typeof mutator[optionLabel] == "number"); // only Object and number are valid
-                        numberOptions = options.filter(optionLabel => typeof mutator[optionLabel] == "number");
-                    }
-                    break;
-            }
-            options = options.filter(option => !Object.keys(focus).includes(option)); // remove options that are already added
-            let item;
-            for (const optionLabel of options) {
-                if (numberOptions.includes(optionLabel)) {
-                    let subsubmenu = new Fudge.remote.Menu();
-                    item = new Fudge.remote.MenuItem({ label: "Add Variable/Constant", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT), click: _callback });
-                    subsubmenu.append(item);
-                    //@ts-ignore
-                    item.overrideProperty("parentLabel", optionLabel);
-                    item = new Fudge.remote.MenuItem({ label: "Add Function", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION), click: _callback });
-                    subsubmenu.append(item);
-                    //@ts-ignore
-                    item.overrideProperty("parentLabel", optionLabel);
-                    item = new Fudge.remote.MenuItem({ label: optionLabel, submenu: subsubmenu });
-                }
-                else {
-                    item = new Fudge.remote.MenuItem({ label: optionLabel, id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_PATH), click: _callback });
-                }
-                submenu.append(item);
-            }
-            return new Fudge.remote.MenuItem({
-                label: label,
-                submenu: submenu
-            });
         }
         //#endregion
         hndEvent = async (_event) => {
