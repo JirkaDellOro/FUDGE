@@ -8,23 +8,16 @@ namespace Fudge {
     private node: ƒ.Node;
     private cmpParticleSystem: ƒ.ComponentParticleSystem;
     private particleEffect: ƒ.ParticleEffect;
-    private particleEffectData: ƒ.Serialization;
-    private particleEffectStructure: ƒ.ParticleEffectStructure;
+    private particleEffectData: ƒ.ParticleData.Effect;
     private idInterval: number;
 
-    // private controller: ControllerTreeParticleSystem;
-    private tree: ƒui.CustomTree<Object | ƒ.ExpressionData>;
+    private tree: ƒui.CustomTree<ƒ.Serialization>;
     private controller: ControllerTreeParticleSystem;
-    private canvas: HTMLCanvasElement;
-    private crc2: CanvasRenderingContext2D;
 
     constructor(_container: ComponentContainer, _state: Object) {
         super(_container, _state);
-
-        this.createUserInterface();
         this.setParticleEffect(null);
 
-        _container.on("resize", this.redraw);
         this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
         this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
     }
@@ -38,9 +31,9 @@ namespace Fudge {
     protected getCustomContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
-      let focus: Object | ƒ.ExpressionData = this.tree.getFocussed();
+      let focus: ƒ.Serialization = this.tree.getFocussed();
 
-      if (ƒ.ParticleEffect.isFunctionData(focus)) {
+      if (ƒ.ParticleData.isFunction(focus)) {
         item = new remote.MenuItem({ label: "Add Variable/Constant", id: String(CONTEXTMENU.ADD_PARTICLE_CONSTANT), click: _callback });
         menu.append(item);
         item = new remote.MenuItem({ label: "Add Function", id: String(CONTEXTMENU.ADD_PARTICLE_FUNCTION), click: _callback });
@@ -56,9 +49,9 @@ namespace Fudge {
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
-      let focus: Object | ƒ.ExpressionData = this.tree.getFocussed();
+      let focus: ƒ.Serialization = this.tree.getFocussed();
 
-      let child: Object | ƒ.ExpressionData;
+      let child: ƒ.Serialization;
       switch (Number(_item.id)) {
         case CONTEXTMENU.ADD_PARTICLE_PATH:
           child = {};
@@ -67,7 +60,7 @@ namespace Fudge {
           this.tree.findVisible(child).focus();
           break;
         case CONTEXTMENU.ADD_PARTICLE_CONSTANT:
-          child = <ƒ.VariableData | ƒ.ConstantData>{ type: "constant", value: 0 };
+          child = <ƒ.ParticleData.Variable | ƒ.ParticleData.Constant>{ type: "constant", value: 0 };
 
           let parentLabel: string = _item["parentLabel"];
           if (parentLabel) focus[parentLabel] = child;
@@ -76,7 +69,7 @@ namespace Fudge {
           this.tree.findVisible(child).focus();
           break;
         case CONTEXTMENU.ADD_PARTICLE_FUNCTION:
-          child = <ƒ.VariableData | ƒ.ConstantData>{ type: "constant", value: 0 };
+          child = <ƒ.ParticleData.Variable | ƒ.ParticleData.Constant>{ type: "constant", value: 0 };
 
           let parentLabell: string = _item["parentLabel"];
           if (parentLabell) focus[parentLabell] = child;
@@ -87,7 +80,7 @@ namespace Fudge {
         case CONTEXTMENU.DELETE_NODE:
           if (!focus)
             return;
-          let remove: (Object | ƒ.ExpressionData)[] = this.controller.delete([focus]);
+          let remove: ƒ.Serialization[] = this.controller.delete([focus]);
           this.tree.delete(remove);
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           break;
@@ -95,7 +88,7 @@ namespace Fudge {
     }
 
     private getMenuItemFromPath(_path: string[], _callback: ContextMenuCallback): Electron.MenuItem {
-      let focus: Object | ƒ.ExpressionData = this.tree.getFocussed();
+      let focus: ƒ.Serialization = this.tree.getFocussed();
       let label: string;
       let options: string[];
       let numberOptions: string[] = [];
@@ -204,35 +197,16 @@ namespace Fudge {
       this.particleEffect = _particleEffect;
       this.particleEffectData = _particleEffect.data;
       this.dom.innerHTML = "";
-      this.dom.appendChild(this.canvas);
       this.recreateTree(this.particleEffectData);
-      this.updateUserInterface();
-      this.redraw();
       if (this.idInterval == undefined)
         this.idInterval = window.setInterval(() => { this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph} }); }, 1000 / 30);
     }
 
 
-    private createUserInterface(): void {
-
-      this.canvas = document.createElement("canvas");
-      this.crc2 = this.canvas.getContext("2d");
-
-      this.canvas.style.position = "absolute";
-      this.canvas.style.left = "300px";
-      this.canvas.style.top = "0px";
-
-    }
-
-    private updateUserInterface(): void {
-      // this.propertyList = document.createElement("div");
-
-    }
-
     private recreateTree(_particleEffectData: ƒ.Serialization): void {
-      this.controller = new ControllerTreeParticleSystem(_particleEffectData);
-      let newTree: ƒui.CustomTree<Object | ƒ.ExpressionData> = 
-        new ƒui.CustomTree<Object | ƒ.ExpressionData>( this.controller, _particleEffectData );
+      this.controller = new ControllerTreeParticleSystem();
+      let newTree: ƒui.CustomTree<ƒ.Serialization> = 
+        new ƒui.CustomTree<ƒ.Serialization>( this.controller, _particleEffectData );
 
       if (this.tree && this.dom.contains(this.tree)) 
         this.dom.replaceChild(newTree, this.tree);
@@ -243,57 +217,6 @@ namespace Fudge {
       this.tree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
-    }
-
-    //#region drawing
-    private redraw = () => {
-      if (!this.particleEffect) return;
-      this.canvas.width = this.dom.clientWidth - 300;
-      this.canvas.height = this.dom.clientHeight;
-
-      this.crc2.resetTransform();
-      this.crc2.translate(0, 500);
-      this.crc2.clearRect(0, 0, this.canvas.height, this.canvas.width);
-      this.drawStructure(this.particleEffect.mtxLocal);
-    }
-
-    private drawStructure(_structureOrFunction: ƒ.ParticleEffectStructure | Function): void {
-      if (_structureOrFunction instanceof Function) {
-        this.drawClosure(_structureOrFunction);
-      } else {
-        for (const property in _structureOrFunction) {
-          this.drawStructure(_structureOrFunction[property]);
-        }
-      }
-    }
-
-    private drawClosure(_closure: Function): void {
-      let variables: ƒ.ParticleVariables = this.cmpParticleSystem.variables;
-      for (let iParticle: number = 0; iParticle < variables[ƒ.PARTICLE_VARIBALE_NAMES.NUMBER_OF_PARTICLES]; iParticle += 1) {
-        // console.log(iParticle);
-        this.crc2.strokeStyle = this.randomColor();
-        this.crc2.lineWidth = 2;
-        this.crc2.beginPath();
-
-        
-        for (let time: number = 0; time < 20; time++) {
-          variables[ƒ.PARTICLE_VARIBALE_NAMES.TIME] = 0;
-          // this.cmpParticleSystem.evaluateStorage(this.particleEffect.storageUpdate);
-          variables[ƒ.PARTICLE_VARIBALE_NAMES.INDEX] = iParticle;
-          // this.cmpParticleSystem.evaluateStorage(this.particleEffect.storageParticle);
-          variables["reversedParticleTime"] = time / 10;
-          let x: number = time * 100;
-          let y: number = -_closure(variables) * 1000;
-          // console.log(y);
-          if (x == 0) this.crc2.moveTo(x, y);
-          else this.crc2.lineTo(x, y);
-        }
-        this.crc2.stroke();
-      }
-    }
-
-    private randomColor(): string {
-      return "hsl(" + Math.random() * 360 + ", 80%, 80%)";
     }
     //#endregion
   }

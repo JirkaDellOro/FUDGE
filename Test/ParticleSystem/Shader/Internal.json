@@ -602,7 +602,7 @@
         {
           "ƒ.Node": {
             "name": "Firework",
-            "active": false,
+            "active": true,
             "components": {
               "ComponentParticleSystem": [
                 {

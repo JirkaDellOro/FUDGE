@@ -1,7 +1,7 @@
 namespace FudgeCore {
   export class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
     public static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number = 1000;
-    private static readonly FUNCTIONS: { [key: string]: Function } = {
+    public static readonly FUNCTIONS: { [key: string]: Function } = {
       "addition": (_parameters: string[]) => {
         return `(${_parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} + ${_value}`)})`;
       },
@@ -70,9 +70,9 @@ namespace FudgeCore {
     }
 
     public static getVertexShaderSource(this: ShaderParticleSystem): string {
-      let data: ParticleEffectData = RenderInjectorShaderParticleSystem.renameVariables(this.particleEffect.data);
-      let mtxLocal: TransformationData[] = data?.mtxLocal;
-      let mtxWorld: TransformationData[] = data?.mtxWorld;
+      let data: ParticleData.Effect = RenderInjectorShaderParticleSystem.renameVariables(this.particleEffect.data);
+      let mtxLocal: ParticleData.Transformation[] = data?.mtxLocal;
+      let mtxWorld: ParticleData.Transformation[] = data?.mtxWorld;
 
       let source: string = this.vertexShaderSource
         .replace("#version 300 es", `#version 300 es\n#define ${this.define[0]}${data.color ? "\n#define PARTICLE_COLOR" : ""}`)
@@ -101,7 +101,7 @@ namespace FudgeCore {
       return _shader.replace("#version 300 es", code);
     }
 
-    private static renameVariables(_data: ParticleEffectData): ParticleEffectData {
+    private static renameVariables(_data: ParticleData.Effect): ParticleData.Effect {
       if (!_data.variables) return _data;
 
       let variableMap: {[key: string]: string} = {};
@@ -112,13 +112,13 @@ namespace FudgeCore {
           return variableMap[_variableName] = `fVariable${_index}`; 
       });
 
-      let dataRenamed: ParticleEffectData = JSON.parse(JSON.stringify(_data));
+      let dataRenamed: ParticleData.Effect = JSON.parse(JSON.stringify(_data));
       dataRenamed.variables = Object.fromEntries(Object.entries(dataRenamed.variables).map( ([_name, _exrpession]) => [variableMap[_name], _exrpession] ));
       renameRecursive(dataRenamed);
       return dataRenamed;
 
-      function renameRecursive(_data: ParticleEffectData): void {
-        if (ParticleEffect.isVariableData(_data)) {
+      function renameRecursive(_data: ParticleData.Effect): void {
+        if (ParticleData.isVariable(_data)) {
           let newName: string = RenderInjectorShaderParticleSystem.PREDEFINED_VARIABLES[_data.name] || variableMap[_data.name];
           if (newName)
             _data.name = newName;
@@ -135,7 +135,7 @@ namespace FudgeCore {
       }
     } 
 
-    private static generateVariables(_variables: {[name: string]: ExpressionData}): string {
+    private static generateVariables(_variables: {[name: string]: ParticleData.Expression}): string {
       if (!_variables) return "";
       
       return Object.entries(_variables)
@@ -144,14 +144,14 @@ namespace FudgeCore {
         .reduce( (_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "" );
     }
 
-    private static generateTransformations(_transformations: TransformationData[], _localOrWorld: "Local" | "World"): string {
+    private static generateTransformations(_transformations: ParticleData.Transformation[], _localOrWorld: "Local" | "World"): string {
       if (!_transformations || _transformations.length == 0) return "";
 
-      type Transformation = "translate" | "rotate" | "scale"; // TODO: maybe extract this from TransformationData eg. Pick<TransformationData, "transformation">;
+      type Transformation = "translate" | "rotate" | "scale"; // TODO: maybe extract this from ParticleEffectData.Transformation eg. Pick<ParticleEffectData.Transformation, "transformation">;
       type CodeTransformation = [Transformation, string, string, string];
 
       let transformations: CodeTransformation[] = _transformations
-        .map( (_data: TransformationData): CodeTransformation => {
+        .map( (_data: ParticleData.Transformation): CodeTransformation => {
           let isScale: boolean = _data.transformation === "scale";
           let [x, y, z] = [_data.x, _data.y, _data.z]
             .map( (_value) => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : (isScale ? "1.0" : "0.0") ) as [string, string, string];
@@ -213,7 +213,7 @@ namespace FudgeCore {
       return code;
     }
 
-    private static generateColor(_color: {r?: ExpressionData, g?: ExpressionData, b?: ExpressionData, a?: ExpressionData}): string {
+    private static generateColor(_color: {r?: ParticleData.Expression, g?: ParticleData.Expression, b?: ParticleData.Expression, a?: ParticleData.Expression}): string {
       if (!_color) return "";
       
       let [r, g, b, a]: [string, string, string, string] = [_color.r, _color.g, _color.b, _color.a]
@@ -222,8 +222,8 @@ namespace FudgeCore {
       return `vec4(${r}, ${g}, ${b}, ${a});`;
     }
 
-    private static generateExpression(_expression: ExpressionData): string {
-      if (ParticleEffect.isFunctionData(_expression)) {
+    private static generateExpression(_expression: ParticleData.Expression): string {
+      if (ParticleData.isFunction(_expression)) {
         let parameters: string[] = [];
         for (let param of _expression.parameters) {
           parameters.push(RenderInjectorShaderParticleSystem.generateExpression(param));
@@ -231,11 +231,11 @@ namespace FudgeCore {
         return RenderInjectorShaderParticleSystem.generateFunction(_expression.function, parameters);
       }
   
-      if (ParticleEffect.isVariableData(_expression)) {
+      if (ParticleData.isVariable(_expression)) {
         return _expression.name;
       } 
   
-      if (ParticleEffect.isConstantData(_expression)) {
+      if (ParticleData.isConstant(_expression)) {
         let value: string = _expression.value.toString();
         return `${value}${value.includes(".") ? "" : ".0"}`;
       }

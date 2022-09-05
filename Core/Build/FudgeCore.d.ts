@@ -486,7 +486,9 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
         static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number;
-        private static readonly FUNCTIONS;
+        static readonly FUNCTIONS: {
+            [key: string]: Function;
+        };
         private static readonly PREDEFINED_VARIABLES;
         static decorate(_constructor: Function): void;
         static getVertexShaderSource(this: ShaderParticleSystem): string;
@@ -2153,23 +2155,15 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, numberOfParticles and all the defined values of the storage partition of the effect will be cached here while evaluating the effect.
-     */
-    interface ParticleVariables {
-        [key: string]: number | number[];
-    }
-    /**
      * Attaches a {@link ParticleEffect} to the node.
      * @author Jonas Plotzky, HFU, 2020
      */
     class ComponentParticleSystem extends Component {
         #private;
         static readonly iSubclass: number;
-        variables: ParticleVariables;
         randomNumbersRenderData: unknown;
+        particleEffect: ParticleEffect;
         constructor(_particleEffect?: ParticleEffect, _numberOfParticles?: number);
-        get particleEffect(): ParticleEffect;
-        set particleEffect(_newParticleEffect: ParticleEffect);
         get numberOfParticles(): number;
         /**
          * Sets the numberOfParticles of the particle effect. Caution: Setting this will result in the reevaluation of the system storage of the effect and the reinitialization of the randomNumbers array.
@@ -2177,12 +2171,10 @@ declare namespace FudgeCore {
         set numberOfParticles(_numberOfParticles: number);
         useRenderData(): void;
         deleteRenderData(): void;
-        evaluateStorage(_storageData: ParticleEffectStructure): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
         protected reduceMutator(_mutator: Mutator): void;
-        private initRandomNumbers;
     }
 }
 declare namespace FudgeCore {
@@ -4174,128 +4166,46 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * A function taking input factors (time, index, size and self defined ones) as the argument. Returning a number.
-    */
-    interface ParticleClosure {
-        (_variables: ParticleVariables): number;
-    }
-    /**
-     * Factory class to create closures.
-     * @author Jonas Plotzky, HFU, 2020
-     */
-    class ParticleClosureFactory {
-        static closures: {
-            [key: string]: Function;
-        };
-        /**
-         * Creates a closure of the given function type and passes the parameters to it.
-         * @param _function The function type of the closure you want to create.
-         * @param _parameters The parameters, which should be functions themselves, passed to the created closure.
-         */
-        static createClosure(_function: string, _parameters: Function[]): ParticleClosure;
-        /**
-         * Creates a closure which will return the sum of the given parameters,
-         *  i.e. ```_parameters[0] + ... + _parameters[n]```.
-         */
-        private static createAddition;
-        /**
-         * Creates a closure which will return the subtraction of the given parameters,
-         *  i.e. ```_parameters[0] - _parameters[1]```.
-         */
-        private static createSubtraction;
-        /**
-          * Creates a closure which will return the product of the given parameters,
-          *  i.e. ```_parameters[0] * ... * _parameters[n]```.
-          */
-        private static createMultiplication;
-        /**
-         * Creates a closure which will return the division of the given parameters,
-         *  i.e. ```_parameters[0] / _parameters[1]```.
-         */
-        private static createDivision;
-        /**
-         * Creates a closure which will return the modulo of the given parameters,
-         *  i.e. ```_parameters[0] % _parameters[1]```.
-         */
-        private static createModulo;
-        /**
-         * Interpolates a linear function between two given points.
-         * - ```_parameters[0]``` will be the input value for the function.
-         * - ```_parameters[1]``` x start value.
-         * - ```_parameters[2]``` y start value.
-         * - ```_parameters[3]``` x end value.
-         * - ```_parameters[4]``` y end value.
-         */
-        private static createLinear;
-        /**
-         * Creates a polynomial function of third degree. A,b,c and d will be evaluated while parsing.
-         * - ```_parameters[0]``` will be the input value for the function.
-         * - ```_parameters[1]``` a value.
-         * - ```_parameters[2]``` b value.
-         * - ```_parameters[3]``` c value.
-         * - ```_parameters[4]``` d value.
-         */
-        private static createPolynomial3;
-        /**
-         * Creates a closure which will return the square root of the given parameter,
-         * ```parameters[0]``` will be the input value for the function.
-         */
-        private static createSquareRoot;
-        /**
-         * Creates a closure which will return a number chosen from the randomNumbers array in _variables.
-         * - ```_parameters[0]``` representing the index of the number which will be chosen.
-         */
-        private static createRandom;
-        private static createRandomRange;
-    }
-}
-declare namespace FudgeCore {
-    enum PARTICLE_VARIBALE_NAMES {
-        TIME = "time",
-        INDEX = "index",
-        NUMBER_OF_PARTICLES = "numberOfParticles",
-        RANDOM_NUMBERS = "randomNumbers"
-    }
-    interface ParticleEffectData extends Serialization {
-        variables?: {
-            [name: string]: ExpressionData;
-        };
-        color?: {
-            r?: ExpressionData;
-            g?: ExpressionData;
-            b?: ExpressionData;
-            a?: ExpressionData;
-        };
-        mtxLocal?: TransformationData[];
-        mtxWorld?: TransformationData[];
-    }
-    /**
-     * The data format used to store the parsed paticle effect
-     */
-    interface ParticleEffectStructure {
-        [attribute: string]: ParticleEffectStructure | Function;
-    }
-    type ExpressionData = FunctionData | VariableData | ConstantData;
-    interface FunctionData {
-        function: string;
-        parameters: ExpressionData[];
-        readonly type: "function";
-    }
-    interface VariableData {
-        name: string;
-        type: "variable";
-    }
-    interface ConstantData {
-        value: number;
-        type: "constant";
-    }
-    interface TransformationData {
-        transformation: "translate" | "rotate" | "scale";
-        x?: ExpressionData;
-        y?: ExpressionData;
-        z?: ExpressionData;
-        readonly type: "transformation";
+    namespace ParticleData {
+        interface Effect extends Serialization {
+            variables?: {
+                [name: string]: Expression;
+            };
+            color?: {
+                r?: Expression;
+                g?: Expression;
+                b?: Expression;
+                a?: Expression;
+            };
+            mtxLocal?: Transformation[];
+            mtxWorld?: Transformation[];
+        }
+        type Expression = Function | Variable | Constant;
+        interface Function {
+            function: string;
+            parameters: Expression[];
+            readonly type: "function";
+        }
+        interface Variable {
+            name: string;
+            type: "variable";
+        }
+        interface Constant {
+            value: number;
+            type: "constant";
+        }
+        interface Transformation {
+            transformation: "translate" | "rotate" | "scale";
+            x?: Expression;
+            y?: Expression;
+            z?: Expression;
+            readonly type: "transformation";
+        }
+        function isExpression(_data: General): _data is Expression;
+        function isFunction(_data: General): _data is Function;
+        function isVariable(_data: General): _data is Variable;
+        function isConstant(_data: General): _data is Constant;
+        function isTransformation(_data: General): _data is Transformation;
     }
     /**
      * Holds all the information which defines the particle effect. Can load the said information out of a json file.
@@ -4305,62 +4215,19 @@ declare namespace FudgeCore {
         #private;
         name: string;
         idResource: string;
-        storageSystem: ParticleEffectStructure;
-        storageUpdate: ParticleEffectStructure;
-        storageParticle: ParticleEffectStructure;
-        mtxLocal: ParticleEffectStructure;
-        mtxWorld: ParticleEffectStructure;
-        componentMutators: ParticleEffectStructure;
         cachedMutators: {
             [key: string]: Mutator;
         };
         private shaderMap;
-        constructor(_name?: string, _particleEffectData?: ParticleEffectData);
-        static isExpressionData(_data: General): _data is ExpressionData;
-        static isFunctionData(_data: General): _data is FunctionData;
-        static isVariableData(_data: General): _data is VariableData;
-        static isConstantData(_data: General): _data is ConstantData;
-        static isTransformationData(_data: General): _data is TransformationData;
-        /**
-         * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
-         * @param _data The particle effect data to parse recursivley.
-         */
-        private static parseData;
-        /**
-         * Parse the given closure data recursivley. Returns a function depending on the closure data.
-         * @param _data The closure data to parse recursively.
-         */
-        private static parseClosure;
-        /**
-         * Creates entries in {@link variableNames} for each defined closure in _data. Predefined variables (time, index...) and previously defined ones (in json) can not be overwritten.
-         * @param _data The paticle effect data to parse.
-         */
-        private static preParseStorage;
-        get data(): ParticleEffectData;
-        set data(_data: ParticleEffectData);
+        constructor(_name?: string, _particleEffectData?: ParticleData.Effect);
+        get data(): ParticleData.Effect;
+        set data(_data: ParticleData.Effect);
         getShaderFrom(_source: ShaderInterface): ShaderParticleSystem;
-        /**
-         * Asynchronously loads the json from the given url and parses it initializing this particle effect.
-         */
-        load(_url: RequestInfo): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
-        /**
-         * Parses the data initializing this particle effect with the corresponding closures
-         * @param _data The paticle effect data to parse.
-         */
-        private parse;
-        /**
-         * Create mutators from the given _effectStructure and cache them.
-         */
-        private cacheMutators;
-        /**
-         * Create an empty mutator from _effectStructure.
-         */
-        private createEmptyMutatorFrom;
     }
 }
 declare namespace FudgeCore {

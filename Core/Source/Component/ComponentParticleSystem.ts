@@ -1,12 +1,4 @@
 namespace FudgeCore {
-
-  /**
-   * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, numberOfParticles and all the defined values of the storage partition of the effect will be cached here while evaluating the effect. 
-   */
-  export interface ParticleVariables {
-    [key: string]: number | number[];
-  }
-
   /**
    * Attaches a {@link ParticleEffect} to the node.
    * @author Jonas Plotzky, HFU, 2020
@@ -14,53 +6,31 @@ namespace FudgeCore {
   @RenderInjectorComponentParticleSystem.decorate
   export class ComponentParticleSystem extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
-    public variables: ParticleVariables = {};
     public randomNumbersRenderData: unknown;
-
-    #particleEffect: ParticleEffect;
+    public particleEffect: ParticleEffect;
+    #numberOfParticles: number;
     // TODO: add color for the whole system
 
     constructor(_particleEffect: ParticleEffect = null, _numberOfParticles: number = 10) {
-      super();
-      this.variables[PARTICLE_VARIBALE_NAMES.TIME] = 0;
-      this.variables[PARTICLE_VARIBALE_NAMES.INDEX] = 0;
-      this.variables[PARTICLE_VARIBALE_NAMES.NUMBER_OF_PARTICLES] = _numberOfParticles;
-      this.initRandomNumbers(_numberOfParticles);
-      
+      super();     
       this.particleEffect = _particleEffect;
-    }
-
-    public get particleEffect(): ParticleEffect {
-      return this.#particleEffect;
-    }
-
-    public set particleEffect(_newParticleEffect: ParticleEffect) {
-      this.#particleEffect = _newParticleEffect;
-      this.evaluateStorage(this.#particleEffect?.storageSystem);
+      this.numberOfParticles = _numberOfParticles;
     }
 
     public get numberOfParticles(): number {
-      return <number>this.variables[PARTICLE_VARIBALE_NAMES.NUMBER_OF_PARTICLES];
+      return this.#numberOfParticles;
     }
 
     /**
      * Sets the numberOfParticles of the particle effect. Caution: Setting this will result in the reevaluation of the system storage of the effect and the reinitialization of the randomNumbers array.
      */
     public set numberOfParticles(_numberOfParticles: number) {
-      if (this.numberOfParticles !== _numberOfParticles) this.initRandomNumbers(_numberOfParticles);
-      this.variables[PARTICLE_VARIBALE_NAMES.NUMBER_OF_PARTICLES] = _numberOfParticles;
-      this.evaluateStorage(this.#particleEffect?.storageSystem);
+      this.#numberOfParticles = _numberOfParticles;
       this.deleteRenderData();
     }
 
     public useRenderData(): void {/* injected by RenderInjector*/ }
     public deleteRenderData(): void {/* injected by RenderInjector*/ }
-
-    public evaluateStorage(_storageData: ParticleEffectStructure): void {
-      for (const key in _storageData) {
-        this.variables[key] = (<ParticleClosure>_storageData[key])(this.variables);
-      }
-    }
 
     //#region transfer
     public serialize(): Serialization {
@@ -94,13 +64,5 @@ namespace FudgeCore {
       delete _mutator.variables;
     }
     //#endregion
-
-    private initRandomNumbers(_numberOfParticles: number): void {
-      let randomNumbers: number[] = [];
-      for (let i: number = 0; i < _numberOfParticles + 10 /* so that its possible to have 10 different random numbers per index i.e. randomNumber(index + x) */; i++) {
-        randomNumbers.push(Math.random());
-      }
-      this.variables[PARTICLE_VARIBALE_NAMES.RANDOM_NUMBERS] = randomNumbers;
-    }
   }
 }

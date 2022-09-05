@@ -8,18 +8,10 @@ namespace Fudge {
     VALUE = "value"
   }
 
-  export class ControllerTreeParticleSystem extends ƒui.CustomTreeController<Object | ƒ.ExpressionData> {
+  export class ControllerTreeParticleSystem extends ƒui.CustomTreeController<Object | ƒ.ParticleData.Expression> {
     private parentMap: Map<Object, Object> = new Map();
-    // private particleEffectRoot: ƒ.Serialization;
 
-    constructor(_particleEffectData: ƒ.Serialization) {
-      super();
-      // this.particleEffectRoot = _particleEffectData;
-    }
-
-    public createContent(_data: Object | ƒ.ExpressionData): HTMLFormElement {
-      // let path: string[] = _dataAndPath.path;
-
+    public createContent(_data: Object | ƒ.ParticleData.Expression): HTMLFormElement {
       let content: HTMLFormElement = document.createElement("form");
       let labelKey: HTMLInputElement = document.createElement("input");
       labelKey.type = "text";
@@ -28,11 +20,11 @@ namespace Fudge {
       labelKey.id = IDS.KEY;
       content.appendChild(labelKey);
 
-      if (ƒ.ParticleEffect.isExpressionData(_data)) {
-        if (ƒ.ParticleEffect.isFunctionData(_data)) {
+      if (ƒ.ParticleData.isExpression(_data)) {
+        if (ƒ.ParticleData.isFunction(_data)) {
           let select: HTMLSelectElement = document.createElement("select");
           select.id = IDS.FUNCTION;
-          for (let key in ƒ.ParticleClosureFactory.closures) {
+          for (let key in ƒ.RenderInjectorShaderParticleSystem.FUNCTIONS) {
             let entry: HTMLOptionElement = document.createElement("option");
             entry.text = key;
             entry.value = key;
@@ -45,9 +37,9 @@ namespace Fudge {
           input.type = "text";
           input.disabled = true;
           input.id = IDS.VALUE;
-          if (ƒ.ParticleEffect.isVariableData(_data)) {  
+          if (ƒ.ParticleData.isVariable(_data)) {  
             input.value = _data.name;
-          } else if (ƒ.ParticleEffect.isConstantData(_data)) {
+          } else if (ƒ.ParticleData.isConstant(_data)) {
             input.value = _data.value.toString();
           }
           content.appendChild(input);
@@ -57,22 +49,22 @@ namespace Fudge {
       return content;
     }
 
-    public getAttributes(_data: Object | ƒ.ExpressionData): string {
+    public getAttributes(_data: Object | ƒ.ParticleData.Expression): string {
       let attributes: string[] = [];
-      if (ƒ.ParticleEffect.isFunctionData(_data) && this.getPath(_data).includes("storage")) 
+      if (ƒ.ParticleData.isFunction(_data) && this.getPath(_data).includes("variables")) 
         attributes.push("function");
-      if (ƒ.ParticleEffect.isVariableData(_data)) 
+      if (ƒ.ParticleData.isVariable(_data)) 
         attributes.push("variable");
 
       return attributes.join(" ");
     }
     
-    public rename(_data: Object | ƒ.ExpressionData, _id: string, _new: string): void {
+    public rename(_data: Object | ƒ.ParticleData.Expression, _id: string, _new: string): void {
       let inputAsNumber: number = Number.parseFloat(_new);
 
-      if (_id == IDS.KEY && Number.isNaN(inputAsNumber) && ƒ.ParticleEffect.isExpressionData(_data)) {
-        let parentData: Object | ƒ.FunctionData = this.parentMap.get(_data);
-        if (!ƒ.ParticleEffect.isFunctionData(parentData)) {
+      if (_id == IDS.KEY && Number.isNaN(inputAsNumber) && ƒ.ParticleData.isExpression(_data)) {
+        let parentData: Object | ƒ.ParticleData.Function = this.parentMap.get(_data);
+        if (!ƒ.ParticleData.isFunction(parentData)) {
           let key: string = this.getKey(_data, parentData); // Object.entries(parentData).find(entry => entry[1] == data)[0];
           if (parentData[_new]) {
             parentData[key] = parentData[_new];
@@ -85,36 +77,36 @@ namespace Fudge {
         return;
       }
       
-      if (_id == IDS.FUNCTION && ƒ.ParticleEffect.isFunctionData(_data) && Number.isNaN(inputAsNumber)) {
+      if (_id == IDS.FUNCTION && ƒ.ParticleData.isFunction(_data) && Number.isNaN(inputAsNumber)) {
         _data.function = _new;
         return;
       }
 
-      if (_id == IDS.VALUE && ƒ.ParticleEffect.isVariableData(_data) || ƒ.ParticleEffect.isConstantData(_data)) {
+      if (_id == IDS.VALUE && ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data)) {
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
         _data.type = typeof input == "string" ? "variable" : "constant";
-        if (ƒ.ParticleEffect.isVariableData(_data))
+        if (ƒ.ParticleData.isVariable(_data))
           _data.name = input as string;
-        else if (ƒ.ParticleEffect.isConstantData(_data))
+        else if (ƒ.ParticleData.isConstant(_data))
           _data.value = input as number;
         return;
       }
     }
 
-    public hasChildren(_data: Object | ƒ.ExpressionData): boolean {
+    public hasChildren(_data: Object | ƒ.ParticleData.Expression): boolean {
       let length: number = 0;
-      if (!ƒ.ParticleEffect.isVariableData(_data) && !ƒ.ParticleEffect.isConstantData(_data))
-        length = ƒ.ParticleEffect.isFunctionData(_data) ? _data.parameters.length : Object.keys(_data).length;
+      if (!ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data))
+        length = ƒ.ParticleData.isFunction(_data) ? _data.parameters.length : Object.keys(_data).length;
       return length > 0;
     }
 
-    public getChildren(_data: Object | ƒ.ExpressionData): (Object | ƒ.ExpressionData)[] {
-      let children: (Object | ƒ.ExpressionData)[] = [];
+    public getChildren(_data: Object | ƒ.ParticleData.Expression): (Object | ƒ.ParticleData.Expression)[] {
+      let children: (Object | ƒ.ParticleData.Expression)[] = [];
 
-      if (!ƒ.ParticleEffect.isVariableData(_data) && !ƒ.ParticleEffect.isConstantData(_data)) {
-        let subData: Object = ƒ.ParticleEffect.isFunctionData(_data) ? _data.parameters : _data;
+      if (!ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data)) {
+        let subData: Object = ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data;
         for (const key in subData) {
-          let child: Object | ƒ.ExpressionData = subData[key];
+          let child: Object | ƒ.ParticleData.Expression = subData[key];
           children.push(child);
           this.parentMap.set(subData[key], _data);
         }
@@ -123,10 +115,10 @@ namespace Fudge {
       return children;
     }
 
-    public delete(_focused: (Object | ƒ.ExpressionData)[]): (Object | ƒ.ExpressionData)[] {
+    public delete(_focused: (Object | ƒ.ParticleData.Expression)[]): (Object | ƒ.ParticleData.Expression)[] {
       // delete selection independend of focussed item
-      let deleted: (Object | ƒ.ExpressionData)[] = [];
-      let expend: (Object | ƒ.ExpressionData)[] = this.selection.length > 0 ? this.selection : _focused;
+      let deleted: (Object | ƒ.ParticleData.Expression)[] = [];
+      let expend: (Object | ƒ.ParticleData.Expression)[] = this.selection.length > 0 ? this.selection : _focused;
       for (let data of expend) {
         this.deleteData(data);
         deleted.push(data);
@@ -135,21 +127,21 @@ namespace Fudge {
       return deleted;
     }
 
-    public addChildren(_children: (Object | ƒ.ExpressionData)[], _target: Object | ƒ.ExpressionData): (Object | ƒ.ExpressionData)[] {
-      let move: (Object | ƒ.ExpressionData)[] = [];
+    public addChildren(_children: (Object | ƒ.ParticleData.Expression)[], _target: Object | ƒ.ParticleData.Expression): (Object | ƒ.ParticleData.Expression)[] {
+      let move: (Object | ƒ.ParticleData.Expression)[] = [];
       let tagetPath: string[] = this.getPath(_target);
 
-      if (!_children.every(_data => ƒ.ParticleEffect.isExpressionData(_data))) return;
+      if (!_children.every(_data => ƒ.ParticleData.isExpression(_data))) return;
 
-      if (ƒ.ParticleEffect.isFunctionData(_target)) {
+      if (ƒ.ParticleData.isFunction(_target)) {
         for (let data of _children) {
           if (!this.getPath(data).every(_key => tagetPath.includes(_key)))
             move.push(data);
         }
         
         for (let data of move) {
-          let moveData: ƒ.ExpressionData = data as ƒ.ExpressionData;
-          if (ƒ.ParticleEffect.isExpressionData(moveData)) {
+          let moveData: ƒ.ParticleData.Expression = data as ƒ.ParticleData.Expression;
+          if (ƒ.ParticleData.isExpression(moveData)) {
             this.deleteData(data);
             _target.parameters.push(moveData);
           }
@@ -159,19 +151,19 @@ namespace Fudge {
       return move;
     }
 
-    public async copy(_originalData: (Object | ƒ.ExpressionData)[]): Promise<(Object | ƒ.ExpressionData)[]> {
-      let copies: (Object | ƒ.ExpressionData)[] = [];
+    public async copy(_originalData: (Object | ƒ.ParticleData.Expression)[]): Promise<(Object | ƒ.ParticleData.Expression)[]> {
+      let copies: (Object | ƒ.ParticleData.Expression)[] = [];
       for (let data of _originalData) {
-        let newData: Object | ƒ.ExpressionData = JSON.parse(JSON.stringify(data));
+        let newData: Object | ƒ.ParticleData.Expression = JSON.parse(JSON.stringify(data));
         copies.push({ data: newData, path: [""] });
       }
 
       return copies;
     }
 
-    public getPath(_data:  Object | ƒ.ExpressionData): string[] {
+    public getPath(_data:  Object | ƒ.ParticleData.Expression): string[] {
       let path: string[] = [];
-      let parent: Object | ƒ.ExpressionData;
+      let parent: Object | ƒ.ParticleData.Expression;
       while (this.parentMap.has(_data)) {
         parent = this.parentMap.get(_data);
         path.unshift(this.getKey(_data, parent));
@@ -180,9 +172,9 @@ namespace Fudge {
       return path;
     }
 
-    private getKey(_data: Object | ƒ.ExpressionData, _parentData: Object | ƒ.ExpressionData): string {
+    private getKey(_data: Object | ƒ.ParticleData.Expression, _parentData: Object | ƒ.ParticleData.Expression): string {
       let key: string;
-      if (ƒ.ParticleEffect.isExpressionData(_data) && ƒ.ParticleEffect.isFunctionData(_parentData)) {
+      if (ƒ.ParticleData.isExpression(_data) && ƒ.ParticleData.isFunction(_parentData)) {
         key = _parentData.parameters.indexOf(_data).toString();
       } else {
         key = Object.entries(_parentData).find(entry => entry[1] == _data)[0];
@@ -190,10 +182,10 @@ namespace Fudge {
       return key;
     }
 
-    private deleteData(_data: Object | ƒ.FunctionData): void {
-      let parentData: Object | ƒ.FunctionData = this.parentMap.get(_data);
+    private deleteData(_data: Object | ƒ.ParticleData.Function): void {
+      let parentData: Object | ƒ.ParticleData.Function = this.parentMap.get(_data);
       let key: string = this.getKey(_data, parentData);
-      if (ƒ.ParticleEffect.isFunctionData(parentData)) {
+      if (ƒ.ParticleData.isFunction(parentData)) {
         parentData.parameters.splice(Number.parseInt(key), 1);
       } else {
         delete parentData[key];
@@ -202,20 +194,20 @@ namespace Fudge {
     }
 
     // TODO: maybe remove path methods these if path becomes unnecessary
-    // private getDataAtPath(_path: string[]): Object | ƒ.ExpressionData {
+    // private getDataAtPath(_path: string[]): Object | ƒ.ParticleData.Expression {
     //   let found: ƒ.General = this.particleEffectRoot;
       
     //   for (let i: number = 0; i < _path.length; i++) {
-    //     found = ƒ.ParticleEffect.isFunctionData(found) ? found.parameters[_path[i]] : found[_path[i]];
+    //     found = ƒ.ParticleData.isFunction(found) ? found.parameters[_path[i]] : found[_path[i]];
     //   }
 
     //   return found;
     // }
 
     // private deleteDataAtPath(_path: string[]): void {
-    //   let parentData: Object | ƒ.FunctionData = this.getDataAtPath(_path.slice(0, _path.length - 1));
+    //   let parentData: Object | ƒ.ParticleData.Function = this.getDataAtPath(_path.slice(0, _path.length - 1));
     //   let key: string = _path[_path.length - 1];
-    //   if (ƒ.ParticleEffect.isFunctionData(parentData)) {
+    //   if (ƒ.ParticleData.isFunction(parentData)) {
     //     let index: number = Number.parseInt(key);
     //     parentData.parameters.splice(index, 1);
     //   } else {

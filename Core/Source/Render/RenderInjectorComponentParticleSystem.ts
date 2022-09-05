@@ -21,7 +21,11 @@ namespace FudgeCore {
         this.randomNumbersRenderData = {};
         const texture: WebGLTexture = Render.assert<WebGLTexture>(crc3.createTexture());
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
-        let randomNumbers: number[] = this.variables[PARTICLE_VARIBALE_NAMES.RANDOM_NUMBERS] as number[];
+        let randomNumbers: number[] = [];
+        for (let i: number = 0; i < this.numberOfParticles + 10 /* so that its possible to have 10 different random numbers per index i.e. randomNumber(index + x) */; i++) {
+          randomNumbers.push(Math.random());
+        }
+
         const maxWidth: number = RenderInjectorShaderParticleSystem.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH;
         let width: number = Math.min(randomNumbers.length, maxWidth);
         let height: number = Math.ceil(randomNumbers.length / maxWidth);

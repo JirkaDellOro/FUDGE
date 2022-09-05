@@ -386,18 +386,17 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
-    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<Object | ƒ.ExpressionData> {
+    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<Object | ƒ.ParticleData.Expression> {
         private parentMap;
-        constructor(_particleEffectData: ƒ.Serialization);
-        createContent(_data: Object | ƒ.ExpressionData): HTMLFormElement;
-        getAttributes(_data: Object | ƒ.ExpressionData): string;
-        rename(_data: Object | ƒ.ExpressionData, _id: string, _new: string): void;
-        hasChildren(_data: Object | ƒ.ExpressionData): boolean;
-        getChildren(_data: Object | ƒ.ExpressionData): (Object | ƒ.ExpressionData)[];
-        delete(_focused: (Object | ƒ.ExpressionData)[]): (Object | ƒ.ExpressionData)[];
-        addChildren(_children: (Object | ƒ.ExpressionData)[], _target: Object | ƒ.ExpressionData): (Object | ƒ.ExpressionData)[];
-        copy(_originalData: (Object | ƒ.ExpressionData)[]): Promise<(Object | ƒ.ExpressionData)[]>;
-        getPath(_data: Object | ƒ.ExpressionData): string[];
+        createContent(_data: Object | ƒ.ParticleData.Expression): HTMLFormElement;
+        getAttributes(_data: Object | ƒ.ParticleData.Expression): string;
+        rename(_data: Object | ƒ.ParticleData.Expression, _id: string, _new: string): void;
+        hasChildren(_data: Object | ƒ.ParticleData.Expression): boolean;
+        getChildren(_data: Object | ƒ.ParticleData.Expression): (Object | ƒ.ParticleData.Expression)[];
+        delete(_focused: (Object | ƒ.ParticleData.Expression)[]): (Object | ƒ.ParticleData.Expression)[];
+        addChildren(_children: (Object | ƒ.ParticleData.Expression)[], _target: Object | ƒ.ParticleData.Expression): (Object | ƒ.ParticleData.Expression)[];
+        copy(_originalData: (Object | ƒ.ParticleData.Expression)[]): Promise<(Object | ƒ.ParticleData.Expression)[]>;
+        getPath(_data: Object | ƒ.ParticleData.Expression): string[];
         private getKey;
         private deleteData;
     }
@@ -497,12 +496,9 @@ declare namespace Fudge {
         private cmpParticleSystem;
         private particleEffect;
         private particleEffectData;
-        private particleEffectStructure;
         private idInterval;
         private tree;
         private controller;
-        private canvas;
-        private crc2;
         constructor(_container: ComponentContainer, _state: Object);
         protected openContextMenu: (_event: Event) => void;
         protected getCustomContextMenu(_callback: ContextMenuCallback): Electron.Menu;
@@ -510,13 +506,7 @@ declare namespace Fudge {
         private getMenuItemFromPath;
         private hndEvent;
         private setParticleEffect;
-        private createUserInterface;
-        private updateUserInterface;
         private recreateTree;
-        private redraw;
-        private drawStructure;
-        private drawClosure;
-        private randomColor;
     }
 }
 declare namespace Fudge {
