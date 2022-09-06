@@ -50,7 +50,8 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION_NAMED"] = 20] = "ADD_PARTICLE_FUNCTION_NAMED";
         CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT"] = 21] = "ADD_PARTICLE_CONSTANT";
         CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT_NAMED"] = 22] = "ADD_PARTICLE_CONSTANT_NAMED";
-        CONTEXTMENU[CONTEXTMENU["DELETE_PARTICLE_DATA"] = 23] = "DELETE_PARTICLE_DATA";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_TRANSFORMATION"] = 23] = "ADD_PARTICLE_TRANSFORMATION";
+        CONTEXTMENU[CONTEXTMENU["DELETE_PARTICLE_DATA"] = 24] = "DELETE_PARTICLE_DATA";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -1843,6 +1844,18 @@ var Fudge;
                     content.appendChild(input);
                 }
             }
+            else if (ƒ.ParticleData.isTransformation(_data)) {
+                let select = document.createElement("select");
+                select.id = "transformation" /* TRANSFORMATION */;
+                for (let key of [ƒ.Matrix4x4.prototype.translate.name, ƒ.Matrix4x4.prototype.rotate.name, ƒ.Matrix4x4.prototype.scale.name]) {
+                    let entry = document.createElement("option");
+                    entry.text = key;
+                    entry.value = key;
+                    select.add(entry);
+                }
+                select.value = _data.transformation;
+                content.appendChild(select);
+            }
             return content;
         }
         getAttributes(_data) {
@@ -1893,11 +1906,18 @@ var Fudge;
             let children = [];
             if (!ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data)) {
                 let subData = ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data;
-                for (const key in subData) {
-                    let child = subData[key];
-                    children.push(child);
-                    this.parentMap.set(subData[key], _data);
-                }
+                let subKeys = Object.keys(subData);
+                if (ƒ.ParticleData.isTransformation(_data))
+                    subKeys = Fudge.ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => subKeys.includes(_key));
+                if (this.getPath(_data).includes("color"))
+                    subKeys = Fudge.ViewParticleSystem.COLOR_KEYS.filter(_key => subKeys.includes(_key));
+                subKeys.forEach(_key => {
+                    let child = subData[_key];
+                    if (ƒ.ParticleData.isExpression(child) || typeof child == "object") {
+                        children.push(child);
+                        this.parentMap.set(subData[_key], _data);
+                    }
+                });
             }
             return children;
         }
@@ -1918,14 +1938,13 @@ var Fudge;
             if (!_children.every(_data => ƒ.ParticleData.isExpression(_data)))
                 return;
             if (ƒ.ParticleData.isFunction(_target)) {
-                for (let data of _children) {
-                    if (!this.getPath(data).every(_key => tagetPath.includes(_key)))
-                        move.push(data);
-                }
-                for (let data of move) {
-                    let moveData = data;
+                // for (let data of _children) {
+                //   if (!this.getPath(data).every(_key => tagetPath.includes(_key)))
+                //     move.push(data);
+                // }
+                for (let moveData of _children) {
                     if (ƒ.ParticleData.isExpression(moveData)) {
-                        this.deleteData(data);
+                        this.deleteData(moveData);
                         _target.parameters.push(moveData);
                     }
                 }
@@ -2330,6 +2349,8 @@ var Fudge;
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
     class ViewParticleSystem extends Fudge.View {
+        static TRANSFORMATION_KEYS = ["x", "y", "z"];
+        static COLOR_KEYS = ["r", "g", "b", "a"];
         graph;
         node;
         cmpParticleSystem;
@@ -2356,65 +2377,66 @@ var Fudge;
                 ].forEach(_item => {
                     _item.visible = true;
                     _item.submenu.items.forEach(_subItem => _subItem.visible = false);
-                    let ids = focus == this.particleEffectData.color ? [
-                        nameOf("r"),
-                        nameOf("g"),
-                        nameOf("b"),
-                        nameOf("a")
-                    ] : [
-                        nameOf("x"),
-                        nameOf("y"),
-                        nameOf("z")
-                    ];
-                    ids
+                    let labels = focus == this.particleEffectData.color ? ViewParticleSystem.COLOR_KEYS : ViewParticleSystem.TRANSFORMATION_KEYS;
+                    labels
                         .filter(_value => !Object.keys(focus).includes(_value))
-                        .forEach(_id => _item.submenu.getMenuItemById(_id).visible = true);
+                        .forEach(_label => _item.submenu.items.find(_item => _item.label == _label).visible = true);
                 });
                 popup = true;
             }
-            if (Object.values(this.particleEffectData).includes(focus) && focus != this.particleEffectData.color || ƒ.ParticleData.isFunction(focus)) {
+            if (focus == this.particleEffectData.variables || ƒ.ParticleData.isFunction(focus)) {
                 this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT)).visible = true;
                 this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION)).visible = true;
                 popup = true;
             }
-            if (ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus))
+            if (focus == this.particleEffectData.mtxLocal || focus == this.particleEffectData.mtxWorld) {
+                this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION)).visible = true;
+                popup = true;
+            }
+            if (ƒ.ParticleData.isExpression(focus) || ƒ.ParticleData.isTransformation(focus)) {
                 this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.DELETE_PARTICLE_DATA)).visible = true;
+                popup = true;
+            }
             if (popup)
                 this.contextMenu.popup();
-            function nameOf(name) {
-                return name;
-            }
         };
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let item;
-            let submenu;
-            submenu = new Fudge.remote.Menu();
-            [
-                nameOf("r"),
-                nameOf("g"),
-                nameOf("b"),
-                nameOf("a"),
-                nameOf("x"),
-                nameOf("y"),
-                nameOf("z")
-            ].forEach(_value => {
-                item = new Fudge.remote.MenuItem({ label: _value, id: _value, click: _callback });
-                submenu.append(item);
+            let options = [...ViewParticleSystem.TRANSFORMATION_KEYS, ...ViewParticleSystem.COLOR_KEYS];
+            item = new Fudge.remote.MenuItem({
+                label: "Add Variable/Constant",
+                id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT_NAMED),
+                submenu: generateSubMenu(options, String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT), _callback)
             });
-            item = new Fudge.remote.MenuItem({ label: "Add Variable/Constant", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT_NAMED), submenu: submenu });
             menu.append(item);
-            item = new Fudge.remote.MenuItem({ label: "Add Function", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION_NAMED), submenu: submenu });
+            item = new Fudge.remote.MenuItem({
+                label: "Add Function",
+                id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION_NAMED),
+                submenu: generateSubMenu(options, String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION), _callback)
+            });
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Add Variable/Constant", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT), click: _callback });
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Add Function", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION), click: _callback });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({
+                label: "Add Transformation",
+                id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION),
+                submenu: generateSubMenu([ƒ.Matrix4x4.prototype.translate.name, ƒ.Matrix4x4.prototype.rotate.name, ƒ.Matrix4x4.prototype.scale.name], String(Fudge.CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION), _callback)
+            });
+            menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Delete", id: String(Fudge.CONTEXTMENU.DELETE_PARTICLE_DATA), click: _callback, accelerator: "D" });
             menu.append(item);
             return menu;
-            function nameOf(name) {
-                return name;
+            function generateSubMenu(_options, _id, _callback) {
+                let submenu = new Fudge.remote.Menu();
+                let item;
+                _options.forEach(_option => {
+                    item = new Fudge.remote.MenuItem({ label: _option, id: _id, click: _callback });
+                    submenu.append(item);
+                });
+                return submenu;
             }
         }
         contextMenuCallback(_item, _window, _event) {
@@ -2423,22 +2445,28 @@ var Fudge;
             let child;
             switch (Number(_item.id)) {
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT:
-                    child = { type: "constant", value: 0 };
-                    let parentLabel = _item["parentLabel"];
-                    if (parentLabel)
-                        focus[parentLabel] = child;
-                    this.tree.findVisible(focus).expand(true);
-                    this.tree.findVisible(child).focus();
-                    break;
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION:
-                    child = { type: "constant", value: 0 };
-                    let parentLabell = _item["parentLabel"];
-                    if (parentLabell)
-                        focus[parentLabell] = child;
+                    child = Number(_item.id) == Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT ?
+                        { type: "constant", value: 0 } :
+                        { type: "function", function: "addition", parameters: [] };
+                    if (ƒ.ParticleData.isFunction(focus))
+                        focus.parameters.push(child);
+                    else if (ƒ.ParticleData.isTransformation(focus) || focus == this.particleEffectData.color)
+                        focus[_item.label] = child;
+                    else if (focus == this.particleEffectData.variables)
+                        focus[`variable${Object.keys(focus).length}`] = child;
                     this.tree.findVisible(focus).expand(true);
                     this.tree.findVisible(child).focus();
                     break;
-                case Fudge.CONTEXTMENU.DELETE_NODE:
+                case Fudge.CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION:
+                    if (Array.isArray(focus)) {
+                        child = { type: "transformation", transformation: _item.label };
+                        focus.push(child);
+                        this.tree.findVisible(focus).expand(true);
+                        this.tree.findVisible(child).focus();
+                    }
+                    break;
+                case Fudge.CONTEXTMENU.DELETE_PARTICLE_DATA:
                     if (!focus)
                         return;
                     let remove = this.controller.delete([focus]);

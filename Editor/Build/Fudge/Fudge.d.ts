@@ -40,7 +40,8 @@ declare namespace Fudge {
         ADD_PARTICLE_FUNCTION_NAMED = 20,
         ADD_PARTICLE_CONSTANT = 21,
         ADD_PARTICLE_CONSTANT_NAMED = 22,
-        DELETE_PARTICLE_DATA = 23
+        ADD_PARTICLE_TRANSFORMATION = 23,
+        DELETE_PARTICLE_DATA = 24
     }
     enum MENU {
         QUIT = "quit",
@@ -492,7 +493,10 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     class ViewParticleSystem extends View {
+        static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[];
+        static readonly COLOR_KEYS: (keyof ƒ.ParticleData.Effect["color"])[];
         private graph;
         private node;
         private cmpParticleSystem;

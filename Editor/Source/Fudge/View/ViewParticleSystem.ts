@@ -3,6 +3,9 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
 
   export class ViewParticleSystem extends View {
+    public static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[] = ["x", "y", "z"];
+    public static readonly COLOR_KEYS: (keyof ƒ.ParticleData.Effect["color"])[] = ["r", "g", "b", "a"];
+
     private graph: ƒ.Graph;
     private node: ƒ.Node;
     private cmpParticleSystem: ƒ.ComponentParticleSystem;
@@ -34,105 +37,115 @@ namespace Fudge {
         ].forEach(_item => {
           _item.visible = true;
           _item.submenu.items.forEach(_subItem => _subItem.visible = false);
-          let ids: string[] = focus == this.particleEffectData.color ? [ // TODO: unify this wiuth getContextMenu
-              nameOf<keyof ƒ.ParticleData.Effect["color"]>("r"),
-              nameOf<keyof ƒ.ParticleData.Effect["color"]>("g"),
-              nameOf<keyof ƒ.ParticleData.Effect["color"]>("b"),
-              nameOf<keyof ƒ.ParticleData.Effect["color"]>("a")
-            ] : [
-              nameOf<keyof ƒ.ParticleData.Transformation>("x"),
-              nameOf<keyof ƒ.ParticleData.Transformation>("y"),
-              nameOf<keyof ƒ.ParticleData.Transformation>("z")
-            ];
-      
-          ids
+          let labels: string[] = focus == this.particleEffectData.color ? ViewParticleSystem.COLOR_KEYS : ViewParticleSystem.TRANSFORMATION_KEYS;
+          labels
             .filter(_value => !Object.keys(focus).includes(_value))
-            .forEach(_id => _item.submenu.getMenuItemById(_id).visible = true);
+            .forEach(_label => _item.submenu.items.find(_item => _item.label == _label).visible = true);
         });
         popup = true;
       }
 
-      if (Object.values(this.particleEffectData).includes(focus) && focus != this.particleEffectData.color || ƒ.ParticleData.isFunction(focus)) {
+      if (focus == this.particleEffectData.variables || ƒ.ParticleData.isFunction(focus)) {
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_CONSTANT)).visible = true;
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_FUNCTION)).visible = true;
         popup = true;
       }
 
-      if (ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus)) 
+      if (focus == this.particleEffectData.mtxLocal || focus == this.particleEffectData.mtxWorld) {
+        this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION)).visible = true;
+        popup = true;
+      }
+
+      if (ƒ.ParticleData.isExpression(focus) || ƒ.ParticleData.isTransformation(focus)) {
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.DELETE_PARTICLE_DATA)).visible = true;
+        popup = true;
+      }
       
       if (popup)
         this.contextMenu.popup();
-
-      function nameOf<T>(name: T): T {
-        return name;
-      }
     }
 
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
+      let options: string[] = [...ViewParticleSystem.TRANSFORMATION_KEYS, ...ViewParticleSystem.COLOR_KEYS];
 
-      let submenu: Electron.Menu;
-      submenu = new remote.Menu();
-      [
-        nameOf<keyof ƒ.ParticleData.Effect["color"]>("r"),
-        nameOf<keyof ƒ.ParticleData.Effect["color"]>("g"),
-        nameOf<keyof ƒ.ParticleData.Effect["color"]>("b"),
-        nameOf<keyof ƒ.ParticleData.Effect["color"]>("a"),
-        nameOf<keyof ƒ.ParticleData.Transformation>("x"),
-        nameOf<keyof ƒ.ParticleData.Transformation>("y"),
-        nameOf<keyof ƒ.ParticleData.Transformation>("z")
-      ].forEach(_value => {
-        item = new remote.MenuItem({ label: _value, id: _value, click: _callback });
-        submenu.append(item);
+      item = new remote.MenuItem({ 
+        label: "Add Variable/Constant", 
+        id: String(CONTEXTMENU.ADD_PARTICLE_CONSTANT_NAMED), 
+        submenu: generateSubMenu(options, String(CONTEXTMENU.ADD_PARTICLE_CONSTANT), _callback)
       });
-
-      item = new remote.MenuItem({ label: "Add Variable/Constant", id: String(CONTEXTMENU.ADD_PARTICLE_CONSTANT_NAMED), submenu: submenu });
-      menu.append(item);
-      item = new remote.MenuItem({ label: "Add Function", id: String(CONTEXTMENU.ADD_PARTICLE_FUNCTION_NAMED), submenu: submenu });
       menu.append(item);
 
+      item = new remote.MenuItem({ 
+        label: "Add Function", 
+        id: String(CONTEXTMENU.ADD_PARTICLE_FUNCTION_NAMED), 
+        submenu: generateSubMenu(options, String(CONTEXTMENU.ADD_PARTICLE_FUNCTION), _callback)
+      });
+      menu.append(item);
 
       item = new remote.MenuItem({ label: "Add Variable/Constant", id: String(CONTEXTMENU.ADD_PARTICLE_CONSTANT), click: _callback });
       menu.append(item);
       item = new remote.MenuItem({ label: "Add Function", id: String(CONTEXTMENU.ADD_PARTICLE_FUNCTION), click: _callback });
       menu.append(item);
+
+      item = new remote.MenuItem({ 
+        label: "Add Transformation", 
+        id: String(CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION), 
+        submenu: generateSubMenu([ƒ.Matrix4x4.prototype.translate.name, ƒ.Matrix4x4.prototype.rotate.name, ƒ.Matrix4x4.prototype.scale.name], String(CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION), _callback)
+      });
+      menu.append(item);
+
+
       item = new remote.MenuItem({ label: "Delete", id: String(CONTEXTMENU.DELETE_PARTICLE_DATA), click: _callback, accelerator: "D" });
       menu.append(item);
 
       return menu;
 
-      function nameOf<T>(name: T): T {
-        return name;
+      function generateSubMenu(_options: string[], _id: string, _callback: ContextMenuCallback): Electron.Menu {
+        let submenu: Electron.Menu = new remote.Menu();
+        let item: Electron.MenuItem;
+        _options.forEach(_option => {
+          item = new remote.MenuItem({ label: _option, id: _id, click: _callback });
+          submenu.append(item);
+        });
+
+        return submenu;
       }
     }
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
-      let focus: ƒ.Serialization = this.tree.getFocussed();
+      let focus: ƒ.ParticleData.EffectRecursive = this.tree.getFocussed();
 
-      let child: ƒ.Serialization;
+      let child: ƒ.ParticleData.EffectRecursive;
       switch (Number(_item.id)) {
         case CONTEXTMENU.ADD_PARTICLE_CONSTANT:
-          child = <ƒ.ParticleData.Variable | ƒ.ParticleData.Constant>{ type: "constant", value: 0 };
+        case CONTEXTMENU.ADD_PARTICLE_FUNCTION:
+          child = Number(_item.id) == CONTEXTMENU.ADD_PARTICLE_CONSTANT ? 
+            { type: "constant", value: 0 } :
+            { type: "function", function: "addition", parameters: []};
 
-          let parentLabel: string = _item["parentLabel"];
-          if (parentLabel) focus[parentLabel] = child;
-
+          if (ƒ.ParticleData.isFunction(focus))
+            focus.parameters.push(child);
+          else if (ƒ.ParticleData.isTransformation(focus) || focus == this.particleEffectData.color) 
+            focus[_item.label] = child;
+          else if (focus == this.particleEffectData.variables) 
+            focus[`variable${Object.keys(focus).length}`] = child;
+          
           this.tree.findVisible(focus).expand(true);
           this.tree.findVisible(child).focus();
           break;
-        case CONTEXTMENU.ADD_PARTICLE_FUNCTION:
-          child = <ƒ.ParticleData.Variable | ƒ.ParticleData.Constant>{ type: "constant", value: 0 };
+        case CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION:
+          if (Array.isArray(focus)) {
+            child = { type: "transformation", transformation: <ƒ.ParticleData.Transformation["transformation"]>_item.label };
+            focus.push(child);
 
-          let parentLabell: string = _item["parentLabel"];
-          if (parentLabell) focus[parentLabell] = child;
-
-          this.tree.findVisible(focus).expand(true);
-          this.tree.findVisible(child).focus();
-          break;  
-        case CONTEXTMENU.DELETE_NODE:
+            this.tree.findVisible(focus).expand(true);
+            this.tree.findVisible(child).focus();
+          }
+          break;
+        case CONTEXTMENU.DELETE_PARTICLE_DATA:
           if (!focus)
             return;
           let remove: ƒ.Serialization[] = this.controller.delete([focus]);
