@@ -1955,7 +1955,7 @@ var Fudge;
             let copies = [];
             for (let data of _originalData) {
                 let newData = JSON.parse(JSON.stringify(data));
-                copies.push({ data: newData, path: [""] });
+                // copies.push({ data: newData, path: [""] }); // TODO: repair this
             }
             return copies;
         }
@@ -1980,10 +1980,18 @@ var Fudge;
             return key;
         }
         deleteData(_data) {
+            // TODO: prevent deletion of parameters on certain functions i.e. polynomial
             let parentData = this.parentMap.get(_data);
             let key = this.getKey(_data, parentData);
+            let index = Number.parseInt(key);
             if (ƒ.ParticleData.isFunction(parentData)) {
-                parentData.parameters.splice(Number.parseInt(key), 1);
+                if (parentData.parameters.length > 2)
+                    parentData.parameters.splice(index, 1);
+                else
+                    parentData.parameters[index] = { type: "constant", value: 0 };
+            }
+            else if (ƒ.ParticleData.isTransformation(_data) && Array.isArray(parentData)) {
+                parentData.splice(index, 1);
             }
             else {
                 delete parentData[key];
@@ -2448,7 +2456,7 @@ var Fudge;
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION:
                     child = Number(_item.id) == Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT ?
                         { type: "constant", value: 0 } :
-                        { type: "function", function: "addition", parameters: [] };
+                        { type: "function", function: "addition", parameters: [{ type: "constant", value: 0 }, { type: "constant", value: 0 }] };
                     if (ƒ.ParticleData.isFunction(focus))
                         focus.parameters.push(child);
                     else if (ƒ.ParticleData.isTransformation(focus) || focus == this.particleEffectData.color)

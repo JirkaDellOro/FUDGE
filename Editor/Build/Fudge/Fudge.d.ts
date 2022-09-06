@@ -389,17 +389,17 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
-    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<Object | ƒ.ParticleData.Expression> {
+    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.EffectRecursive> {
         private parentMap;
-        createContent(_data: Object | ƒ.ParticleData.Expression): HTMLFormElement;
-        getAttributes(_data: Object | ƒ.ParticleData.Expression): string;
-        rename(_data: Object | ƒ.ParticleData.Expression, _id: string, _new: string): void;
-        hasChildren(_data: Object | ƒ.ParticleData.Expression): boolean;
-        getChildren(_data: Object | ƒ.ParticleData.Expression): (Object | ƒ.ParticleData.Expression)[];
-        delete(_focused: (Object | ƒ.ParticleData.Expression)[]): (Object | ƒ.ParticleData.Expression)[];
-        addChildren(_children: (Object | ƒ.ParticleData.Expression)[], _target: Object | ƒ.ParticleData.Expression): (Object | ƒ.ParticleData.Expression)[];
-        copy(_originalData: (Object | ƒ.ParticleData.Expression)[]): Promise<(Object | ƒ.ParticleData.Expression)[]>;
-        getPath(_data: Object | ƒ.ParticleData.Expression): string[];
+        createContent(_data: ƒ.ParticleData.EffectRecursive): HTMLFormElement;
+        getAttributes(_data: ƒ.ParticleData.EffectRecursive): string;
+        rename(_data: ƒ.ParticleData.EffectRecursive, _id: string, _new: string): void;
+        hasChildren(_data: ƒ.ParticleData.EffectRecursive): boolean;
+        getChildren(_data: ƒ.ParticleData.EffectRecursive): (ƒ.ParticleData.EffectRecursive)[];
+        delete(_focused: (ƒ.ParticleData.EffectRecursive)[]): (ƒ.ParticleData.EffectRecursive)[];
+        addChildren(_children: (ƒ.ParticleData.EffectRecursive)[], _target: ƒ.ParticleData.EffectRecursive): (ƒ.ParticleData.EffectRecursive)[];
+        copy(_originalData: (ƒ.ParticleData.EffectRecursive)[]): Promise<(ƒ.ParticleData.EffectRecursive)[]>;
+        getPath(_data: ƒ.ParticleData.EffectRecursive): string[];
         private getKey;
         private deleteData;
     }
