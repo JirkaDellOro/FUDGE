@@ -14,7 +14,7 @@ namespace FudgeAid {
     }
 
     public static expandCameraToInteractiveOrbit(_viewport: ƒ.Viewport, _showFocus: boolean = true, _speedCameraRotation: number = 1, _speedCameraTranslation: number = 0.01, _speedCameraDistance: number = 0.001): CameraOrbit {
-      _viewport.setFocus(true);
+      // _viewport.setFocus(true);
       // _viewport.activatePointerEvent(ƒ.EVENT_POINTER.DOWN, true);
       // _viewport.activatePointerEvent(ƒ.EVENT_POINTER.UP, true);
       // _viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
