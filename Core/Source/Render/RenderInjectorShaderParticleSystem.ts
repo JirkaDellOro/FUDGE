@@ -1,23 +1,38 @@
 namespace FudgeCore {
+  export namespace ParticleData {
+    export enum FUNCTION {
+      ADDITION = "addition",
+      SUBTRACTION = "subtraction",
+      MULTIPLICATION = "multiplication",
+      DIVISION = "division",
+      MODULO = "modulo",
+      LINEAR = "linear",
+      POLYNOMIAL3 = "polynomial3",
+      SQUARE_ROOT = "squareRoot",
+      RANDOM = "random",
+      RANDOM_RANGE = "randomRange"
+    }
+  }
+
   export class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
     public static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number = 1000;
-    public static readonly FUNCTIONS: { [key: string]: Function } = {
-      "addition": (_parameters: string[]) => {
+    public static readonly FUNCTIONS: { [key in ParticleData.FUNCTION]: Function } = {
+      [ParticleData.FUNCTION.ADDITION]: (_parameters: string[]) => {
         return `(${_parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} + ${_value}`)})`;
       },
-      "subtraction": (_parameters: string[]) => {
+      [ParticleData.FUNCTION.SUBTRACTION]: (_parameters: string[]) => {
         return `(${_parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} - ${_value}`)})`;
       },
-      "multiplication": (_parameters: string[]) => {
+      [ParticleData.FUNCTION.MULTIPLICATION]: (_parameters: string[]) => {
         return `(${_parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} * ${_value}`)})`;
       },
-      "division": (_parameters: string[]) => {
+      [ParticleData.FUNCTION.DIVISION]: (_parameters: string[]) => {
         return `(${_parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} / ${_value}`)})`;
       },
-      "modulo": (_parameters: string[]) => {
+      [ParticleData.FUNCTION.MODULO]: (_parameters: string[]) => {
         return `(${_parameters.reduce((_accumulator: string, _value: string) => `mod(${_accumulator}, ${_value})`)})`;
       },
-      "linear": (_parameters: string[]) => {
+      [ParticleData.FUNCTION.LINEAR]: (_parameters: string[]) => {
         let x: string = _parameters[0];
         let xStart: string = _parameters[1];
         let yStart: string = _parameters[2];
@@ -25,7 +40,7 @@ namespace FudgeCore {
         let yEnd: string = _parameters[4];
         return `(${yStart} + (${x} - ${xStart}) * (${yEnd} - ${yStart}) / (${xEnd} - ${xStart}))`;
       },
-      "polynomial": (_parameters: string[]) => {
+      [ParticleData.FUNCTION.POLYNOMIAL3]: (_parameters: string[]) => {
         let x: string = _parameters[0];
         let a: string = _parameters[1];
         let b: string = _parameters[2];
@@ -33,15 +48,15 @@ namespace FudgeCore {
         let d: string = _parameters[4];
         return `(${a} * pow(${x}, 3.0) + ${b} * pow(${x}, 2.0) + ${c} * ${x} + ${d})`;
       },
-      "squareRoot": (_parameters: string[]) => {
+      [ParticleData.FUNCTION.SQUARE_ROOT]: (_parameters: string[]) => {
         let x: string = _parameters[0];
         return `sqrt(${x})`;
       },
-      "random": (_parameters: string[]) => {
+      [ParticleData.FUNCTION.RANDOM]: (_parameters: string[]) => {
         const maxWidth: string = RenderInjectorShaderParticleSystem.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH.toString() + ".0";
         return `texelFetch(u_fRandomNumbers, ivec2(mod(${_parameters[0]}, ${maxWidth}), ${_parameters[0]} / ${maxWidth}), 0).r`;
       },
-      "randomRange": (_parameters: string[]) => {
+      [ParticleData.FUNCTION.RANDOM_RANGE]: (_parameters: string[]) => {
         return `${RenderInjectorShaderParticleSystem.FUNCTIONS["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]}`;
       }
     };
@@ -243,8 +258,8 @@ namespace FudgeCore {
       throw `Error in ${ParticleEffect.name}: invalid node structure in particle effect serialization`;
     }
   
-    private static generateFunction(_function: string, _parameters: string[]): string {
-      if (_function in RenderInjectorShaderParticleSystem.FUNCTIONS)
+    private static generateFunction(_function: ParticleData.FUNCTION, _parameters: string[]): string {
+      if (Object.values(ParticleData.FUNCTION).includes(_function))
         return RenderInjectorShaderParticleSystem.FUNCTIONS[_function](_parameters);
       else
         throw `Error in ${ParticleEffect.name}: "${_function}" is not an operation`;

@@ -2,7 +2,7 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
-  const enum IDS {
+  const enum ID {
     KEY = "key",
     FUNCTION = "function",
     VALUE = "value",
@@ -18,13 +18,13 @@ namespace Fudge {
       labelKey.type = "text";
       labelKey.disabled = true;
       labelKey.value = this.parentMap.has(_data) ? this.getKey(_data, this.parentMap.get(_data)) : "root";
-      labelKey.id = IDS.KEY;
+      labelKey.id = ID.KEY;
       content.appendChild(labelKey);
 
       if (ƒ.ParticleData.isExpression(_data)) {
         if (ƒ.ParticleData.isFunction(_data)) {
           let select: HTMLSelectElement = document.createElement("select");
-          select.id = IDS.FUNCTION;
+          select.id = ID.FUNCTION;
           for (let key in ƒ.RenderInjectorShaderParticleSystem.FUNCTIONS) {
             let entry: HTMLOptionElement = document.createElement("option");
             entry.text = key;
@@ -37,7 +37,7 @@ namespace Fudge {
           let input: HTMLInputElement = document.createElement("input");
           input.type = "text";
           input.disabled = true;
-          input.id = IDS.VALUE;
+          input.id = ID.VALUE;
           if (ƒ.ParticleData.isVariable(_data)) {  
             input.value = _data.name;
           } else if (ƒ.ParticleData.isConstant(_data)) {
@@ -47,7 +47,7 @@ namespace Fudge {
         } 
       } else if (ƒ.ParticleData.isTransformation(_data)) {
         let select: HTMLSelectElement = document.createElement("select");
-        select.id = IDS.TRANSFORMATION;
+        select.id = ID.TRANSFORMATION;
         for (let key of [ƒ.Matrix4x4.prototype.translate.name, ƒ.Matrix4x4.prototype.rotate.name, ƒ.Matrix4x4.prototype.scale.name]) {
           let entry: HTMLOptionElement = document.createElement("option");
           entry.text = key;
@@ -74,7 +74,7 @@ namespace Fudge {
     public rename(_data: ƒ.ParticleData.EffectRecursive, _id: string, _new: string): void {
       let inputAsNumber: number = Number.parseFloat(_new);
 
-      if (_id == IDS.KEY && Number.isNaN(inputAsNumber) && ƒ.ParticleData.isExpression(_data)) {
+      if (_id == ID.KEY && Number.isNaN(inputAsNumber) && ƒ.ParticleData.isExpression(_data)) {
         let parentData: Object | ƒ.ParticleData.Function = this.parentMap.get(_data);
         if (!ƒ.ParticleData.isFunction(parentData)) {
           let key: string = this.getKey(_data, parentData); // Object.entries(parentData).find(entry => entry[1] == data)[0];
@@ -89,12 +89,12 @@ namespace Fudge {
         return;
       }
       
-      if (_id == IDS.FUNCTION && ƒ.ParticleData.isFunction(_data) && Number.isNaN(inputAsNumber)) {
-        _data.function = _new;
+      if (_id == ID.FUNCTION && ƒ.ParticleData.isFunction(_data) && Number.isNaN(inputAsNumber)) {
+        _data.function = <ƒ.ParticleData.FUNCTION>_new;
         return;
       }
 
-      if (_id == IDS.VALUE && ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data)) {
+      if (_id == ID.VALUE && ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data)) {
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
         _data.type = typeof input == "string" ? "variable" : "constant";
         if (ƒ.ParticleData.isVariable(_data))
@@ -118,10 +118,14 @@ namespace Fudge {
       if (!ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data)) {
         let subData: Object = ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data;
         let subKeys: string[] = Object.keys(subData);
+
+        // sort keys for color and vector e.g. ("r", "g", "b", "a")
         if (ƒ.ParticleData.isTransformation(_data))
           subKeys = ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => subKeys.includes(_key));
-        if (this.getPath(_data).includes("color"))
+        let path: string[] = this.getPath(_data);
+        if (path[path.length - 1] == "color")
           subKeys = ViewParticleSystem.COLOR_KEYS.filter(_key => subKeys.includes(_key));
+
         subKeys.forEach(_key => {
           let child: ƒ.ParticleData.EffectRecursive = subData[_key];
           if (ƒ.ParticleData.isExpression(child) || typeof child == "object") {

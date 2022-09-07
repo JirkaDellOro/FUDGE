@@ -484,10 +484,24 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    namespace ParticleData {
+        enum FUNCTION {
+            ADDITION = "addition",
+            SUBTRACTION = "subtraction",
+            MULTIPLICATION = "multiplication",
+            DIVISION = "division",
+            MODULO = "modulo",
+            LINEAR = "linear",
+            POLYNOMIAL3 = "polynomial3",
+            SQUARE_ROOT = "squareRoot",
+            RANDOM = "random",
+            RANDOM_RANGE = "randomRange"
+        }
+    }
     class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
         static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number;
         static readonly FUNCTIONS: {
-            [key: string]: Function;
+            [key in ParticleData.FUNCTION]: Function;
         };
         private static readonly PREDEFINED_VARIABLES;
         static decorate(_constructor: Function): void;
@@ -4183,7 +4197,7 @@ declare namespace FudgeCore {
         type EffectRecursive = Effect["variables"] | Effect["color"] | Effect["mtxLocal"] | Transformation | Expression;
         type Expression = Function | Variable | Constant;
         interface Function {
-            function: string;
+            function: FUNCTION;
             parameters: Expression[];
             readonly type: "function";
         }

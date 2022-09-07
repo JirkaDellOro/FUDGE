@@ -328,7 +328,7 @@
             "transformation": "translate",
             "y": {
               "type": "function",
-              "function": "polynomial",
+              "function": "polynomial3",
               "parameters": [
                 {
                   "type": "variable",

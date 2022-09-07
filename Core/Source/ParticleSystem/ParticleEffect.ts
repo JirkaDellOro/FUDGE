@@ -14,7 +14,7 @@ namespace FudgeCore {
     export type Expression = Function | Variable | Constant;
 
     export interface Function {
-      function: string;
+      function: FUNCTION;
       parameters: Expression[];
       readonly type: "function";
     }

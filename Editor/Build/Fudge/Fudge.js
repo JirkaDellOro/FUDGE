@@ -1907,9 +1907,11 @@ var Fudge;
             if (!ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data)) {
                 let subData = ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data;
                 let subKeys = Object.keys(subData);
+                // sort keys for color and vector e.g. ("r", "g", "b", "a")
                 if (ƒ.ParticleData.isTransformation(_data))
                     subKeys = Fudge.ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => subKeys.includes(_key));
-                if (this.getPath(_data).includes("color"))
+                let path = this.getPath(_data);
+                if (path[path.length - 1] == "color")
                     subKeys = Fudge.ViewParticleSystem.COLOR_KEYS.filter(_key => subKeys.includes(_key));
                 subKeys.forEach(_key => {
                     let child = subData[_key];
@@ -2456,7 +2458,7 @@ var Fudge;
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION:
                     child = Number(_item.id) == Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT ?
                         { type: "constant", value: 0 } :
-                        { type: "function", function: "addition", parameters: [{ type: "constant", value: 0 }, { type: "constant", value: 0 }] };
+                        { type: "function", function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: [{ type: "constant", value: 0 }, { type: "constant", value: 0 }] };
                     if (ƒ.ParticleData.isFunction(focus))
                         focus.parameters.push(child);
                     else if (ƒ.ParticleData.isTransformation(focus) || focus == this.particleEffectData.color)

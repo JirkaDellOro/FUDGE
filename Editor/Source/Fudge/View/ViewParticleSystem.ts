@@ -124,7 +124,7 @@ namespace Fudge {
         case CONTEXTMENU.ADD_PARTICLE_FUNCTION:
           child = Number(_item.id) == CONTEXTMENU.ADD_PARTICLE_CONSTANT ? 
             { type: "constant", value: 0 } :
-            { type: "function", function: "addition", parameters: [{ type: "constant", value: 0 }, { type: "constant", value: 0 }]};
+            { type: "function", function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: [{ type: "constant", value: 0 }, { type: "constant", value: 0 }]};
 
           if (ƒ.ParticleData.isFunction(focus))
             focus.parameters.push(child);
