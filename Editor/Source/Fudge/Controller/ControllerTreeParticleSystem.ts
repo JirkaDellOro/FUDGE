@@ -10,14 +10,23 @@ namespace Fudge {
   }
 
   export class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.EffectRecursive> {
-    private parentMap: Map<Object, Object> = new Map();
+    private mapChildToParent: Map<Object, Object> = new Map();
 
     public createContent(_data: ƒ.ParticleData.EffectRecursive): HTMLFormElement {
       let content: HTMLFormElement = document.createElement("form");
       let labelKey: HTMLInputElement = document.createElement("input");
       labelKey.type = "text";
       labelKey.disabled = true;
-      labelKey.value = this.parentMap.has(_data) ? this.getKey(_data, this.parentMap.get(_data)) : "root";
+      let parentData: ƒ.ParticleData.EffectRecursive = this.mapChildToParent.get(_data);
+      let paramterName: string;
+      if (ƒ.ParticleData.isFunction(parentData) && ƒ.ParticleData.isExpression(_data)) {
+        let paramterNames: string[] = ƒ.ParticleData.FUNCTION_PARAMETER_NAMES[parentData.function];
+        if (paramterNames)
+          paramterName = paramterNames[parentData.parameters.indexOf(_data)];
+      }
+      labelKey.value = parentData ? 
+        paramterName != null ? paramterName : this.getKey(_data, parentData) : 
+        "root";
       labelKey.id = ID.KEY;
       content.appendChild(labelKey);
 
@@ -25,10 +34,10 @@ namespace Fudge {
         if (ƒ.ParticleData.isFunction(_data)) {
           let select: HTMLSelectElement = document.createElement("select");
           select.id = ID.FUNCTION;
-          for (let key in ƒ.RenderInjectorShaderParticleSystem.FUNCTIONS) {
+          for (let name of Object.values(ƒ.ParticleData.FUNCTION)) {
             let entry: HTMLOptionElement = document.createElement("option");
-            entry.text = key;
-            entry.value = key;
+            entry.text = name;
+            entry.value = name;
             select.add(entry);
           }
           select.value = _data.function;
@@ -74,17 +83,23 @@ namespace Fudge {
     public rename(_data: ƒ.ParticleData.EffectRecursive, _id: string, _new: string): void {
       let inputAsNumber: number = Number.parseFloat(_new);
 
-      if (_id == ID.KEY && Number.isNaN(inputAsNumber) && ƒ.ParticleData.isExpression(_data)) {
-        let parentData: Object | ƒ.ParticleData.Function = this.parentMap.get(_data);
-        if (!ƒ.ParticleData.isFunction(parentData)) {
-          let key: string = this.getKey(_data, parentData); // Object.entries(parentData).find(entry => entry[1] == data)[0];
-          if (parentData[_new]) {
-            parentData[key] = parentData[_new];
-          } else {
-            delete parentData[key];
-          }
-          parentData[_new] = _data;
-        }
+      if (_id == ID.KEY && ƒ.ParticleData.isExpression(_data)) {
+        // let parentData: Object | ƒ.ParticleData.Function = this.parentMap.get(_data);
+        // if (ƒ.ParticleData.isFunction(parentData) && parentData.parameters[_new]) {
+        //   let key: string = this.getKey(_data, parentData);
+        //   parentData.parameters[key] = parentData.parameters[_new];
+        //   parentData.parameters[_new] = _data;
+        // }
+
+        // if (!ƒ.ParticleData.isFunction(parentData)) {
+        //   let key: string = this.getKey(_data, parentData);
+        //   if (parentData[_new]) {
+        //     parentData[key] = parentData[_new];
+        //   } else {
+        //     delete parentData[key];
+        //   }
+        //   parentData[_new] = _data;
+        // }
 
         return;
       }
@@ -94,7 +109,7 @@ namespace Fudge {
         return;
       }
 
-      if (_id == ID.VALUE && ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data)) {
+      if (_id == ID.VALUE && (ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data))) {
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
         _data.type = typeof input == "string" ? "variable" : "constant";
         if (ƒ.ParticleData.isVariable(_data))
@@ -130,7 +145,7 @@ namespace Fudge {
           let child: ƒ.ParticleData.EffectRecursive = subData[_key];
           if (ƒ.ParticleData.isExpression(child) || typeof child == "object") {
             children.push(child);
-            this.parentMap.set(subData[_key], _data);
+            this.mapChildToParent.set(subData[_key], _data);
           }
         });
       }
@@ -143,41 +158,49 @@ namespace Fudge {
       let deleted: (ƒ.ParticleData.EffectRecursive)[] = [];
       let expend: (ƒ.ParticleData.EffectRecursive)[] = this.selection.length > 0 ? this.selection : _focused;
       for (let data of expend) {
-        this.deleteData(data);
-        deleted.push(data);
+        if (this.deleteData(data))
+          deleted.push(data);
       }
       this.selection.splice(0);
       return deleted;
     }
 
     public addChildren(_children: (ƒ.ParticleData.EffectRecursive)[], _target: ƒ.ParticleData.EffectRecursive): (ƒ.ParticleData.EffectRecursive)[] {
-      let move: (ƒ.ParticleData.EffectRecursive)[] = [];
-      let tagetPath: string[] = this.getPath(_target);
-
-      if (!_children.every(_data => ƒ.ParticleData.isExpression(_data))) return;
-
-      if (ƒ.ParticleData.isFunction(_target)) {
-        // for (let data of _children) {
-        //   if (!this.getPath(data).every(_key => tagetPath.includes(_key)))
-        //     move.push(data);
-        // }
-        
-        for (let moveData of _children) {
-          if (ƒ.ParticleData.isExpression(moveData)) {
-            this.deleteData(moveData);
+      let move: ƒ.ParticleData.Expression[] = [];
+      if (ƒ.ParticleData.isFunction(_target) && _children.every(_data => ƒ.ParticleData.isExpression(_data))) {
+        for (let moveData of <ƒ.ParticleData.Expression[]>_children) {
+          let parent: ƒ.ParticleData.Function = <ƒ.ParticleData.Function>this.mapChildToParent.get(moveData);
+          if (parent) {
+            if (parent == _target) {
+              _target.parameters.push(moveData);
+              this.deleteData(moveData);
+              move.push(moveData);
+            } else {
+              if (this.deleteData(moveData))  {
+                _target.parameters.push(moveData);
+                move.push(moveData);
+                this.mapChildToParent.set(moveData, _target);
+              }
+            }
+          } else {
             _target.parameters.push(moveData);
+            move.push(moveData);
+            this.mapChildToParent.set(moveData, _target);
           }
         }
       }
-      
+
       return move;
     }
 
     public async copy(_originalData: (ƒ.ParticleData.EffectRecursive)[]): Promise<(ƒ.ParticleData.EffectRecursive)[]> {
       let copies: (ƒ.ParticleData.EffectRecursive)[] = [];
-      for (let data of _originalData) {
-        let newData: ƒ.ParticleData.EffectRecursive = JSON.parse(JSON.stringify(data));
-        // copies.push({ data: newData, path: [""] }); // TODO: repair this
+      if (_originalData.every(_data => ƒ.ParticleData.isExpression(_data))) {
+        for (let originalData of _originalData) {
+          let newData: ƒ.ParticleData.EffectRecursive = JSON.parse(JSON.stringify(originalData));
+          // this.mapChildToParent.set(newData, this.mapChildToParent.get(originalData));
+          copies.push(newData);
+        }
       }
 
       return copies;
@@ -186,8 +209,8 @@ namespace Fudge {
     public getPath(_data:  ƒ.ParticleData.EffectRecursive): string[] {
       let path: string[] = [];
       let parent: ƒ.ParticleData.EffectRecursive;
-      while (this.parentMap.has(_data)) {
-        parent = this.parentMap.get(_data);
+      while (this.mapChildToParent.has(_data)) {
+        parent = this.mapChildToParent.get(_data);
         path.unshift(this.getKey(_data, parent));
         _data = parent;
       }
@@ -204,22 +227,23 @@ namespace Fudge {
       return key;
     }
 
-    private deleteData(_data: Object | ƒ.ParticleData.Function): void {
-      // TODO: prevent deletion of parameters on certain functions i.e. polynomial
-      let parentData: Object | ƒ.ParticleData.Function = this.parentMap.get(_data);
+    private deleteData(_data: ƒ.ParticleData.EffectRecursive): boolean {
+      let parentData: ƒ.ParticleData.EffectRecursive = this.mapChildToParent.get(_data);
       let key: string = this.getKey(_data, parentData);
       let index: number = Number.parseInt(key);
       if (ƒ.ParticleData.isFunction(parentData)) {
-        if (parentData.parameters.length > 2)
+        if (parentData.parameters.length > ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[parentData.function])
           parentData.parameters.splice(index, 1);
         else
-          parentData.parameters[index] = { type: "constant", value: 0 };
+          return false;
+          // parentData.parameters[index] = JSON.parse(JSON.stringify(_data));
       } else if (ƒ.ParticleData.isTransformation(_data) && Array.isArray(parentData)) {
         parentData.splice(index, 1);
       } else {
         delete parentData[key];
       }
-      this.parentMap.delete(_data);
+      this.mapChildToParent.delete(_data);
+      return true;
     }
   }
 }

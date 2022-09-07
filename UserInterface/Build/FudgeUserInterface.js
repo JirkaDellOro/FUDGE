@@ -230,7 +230,6 @@ var FudgeUserInterface;
                     // let details: Details = Generator.createDetails(key, "Details");
                     let details = new FudgeUserInterface.Details(key, "Details");
                     details.setContent(Generator.createInterfaceFromMutator(value));
-                    // details.content.appendChild(Generator.createInterfaceFromMutator(value));
                     div.appendChild(details);
                 }
                 else
@@ -1524,9 +1523,13 @@ var FudgeUserInterface;
             for (let item of items)
                 if (_data.indexOf(item.data) > -1) {
                     // item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
+                    item.dispatchEvent(new Event("removeChild" /* REMOVE_CHILD */, { bubbles: true }));
                     let parentNode = item.parentNode;
                     deleted.push(parentNode.removeChild(item));
-                    parentNode.dispatchEvent(new Event("removeChild" /* REMOVE_CHILD */, { bubbles: true }));
+                    // siblings might need to refresh their content i.e. if they display their own index
+                    Array.from(parentNode.children)
+                        .filter(_element => _element instanceof FudgeUserInterface.CustomTreeItem)
+                        .forEach(_sibling => _sibling.refreshContent());
                 }
             return deleted;
         }
@@ -1837,6 +1840,9 @@ var FudgeUserInterface;
                 label = element.value;
             return label;
         }
+        refreshContent() {
+            this.content = this.controller.createContent(this.data);
+        }
         /**
          * Get the label text shown
          */
@@ -1900,8 +1906,9 @@ var FudgeUserInterface;
             this.checkbox = document.createElement("input");
             this.checkbox.type = "checkbox";
             this.appendChild(this.checkbox);
-            this.content = this.controller.createContent(this.data);
+            // this.content = this.controller.createContent(this.data);
             // this.appendChild(this.content);
+            this.refreshContent();
             this.refreshAttributes();
             this.tabIndex = 0;
         }
@@ -2047,7 +2054,6 @@ var FudgeUserInterface;
                 return;
             _event.stopPropagation();
             this.hasChildren = this.controller.hasChildren(this.data);
-            this.expand(true);
         };
     }
     FudgeUserInterface.CustomTreeItem = CustomTreeItem;

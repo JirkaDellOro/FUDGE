@@ -497,6 +497,12 @@ declare namespace FudgeCore {
             RANDOM = "random",
             RANDOM_RANGE = "randomRange"
         }
+        const FUNCTION_PARAMETER_NAMES: {
+            [key in ParticleData.FUNCTION]?: string[];
+        };
+        const FUNCTION_MINIMUM_PARAMETERS: {
+            [key in ParticleData.FUNCTION]: number;
+        };
     }
     class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
         static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number;

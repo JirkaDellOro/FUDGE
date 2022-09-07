@@ -101,6 +101,10 @@ namespace FudgeUserInterface {
       return label;
     }
 
+    public refreshContent(): void {
+      this.content = this.controller.createContent(this.data);
+    }
+
     /**
      * Get the label text shown
      */
@@ -175,9 +179,9 @@ namespace FudgeUserInterface {
       this.checkbox.type = "checkbox";
       this.appendChild(this.checkbox);
 
-      this.content = this.controller.createContent(this.data);
+      // this.content = this.controller.createContent(this.data);
       // this.appendChild(this.content);
-
+      this.refreshContent();
       this.refreshAttributes();
       
       this.tabIndex = 0;
@@ -341,7 +345,6 @@ namespace FudgeUserInterface {
         return;
       _event.stopPropagation();
       this.hasChildren = this.controller.hasChildren(this.data);
-      this.expand(true);
     }
   }
 

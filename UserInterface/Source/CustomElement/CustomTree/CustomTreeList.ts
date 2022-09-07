@@ -120,9 +120,13 @@ namespace FudgeUserInterface {
       for (let item of items)
         if (_data.indexOf(item.data) > -1) {
           // item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
+          item.dispatchEvent(new Event(EVENT.REMOVE_CHILD, { bubbles: true }));
           let parentNode: ParentNode = item.parentNode;
           deleted.push(parentNode.removeChild(item));
-          parentNode.dispatchEvent(new Event(EVENT.REMOVE_CHILD, { bubbles: true }));
+          // siblings might need to refresh their content i.e. if they display their own index
+          Array.from(parentNode.children)
+            .filter(_element => _element instanceof CustomTreeItem)
+            .forEach(_sibling => (<CustomTreeItem<T>>_sibling).refreshContent()); 
         }
 
       return deleted;

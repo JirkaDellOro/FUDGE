@@ -12,6 +12,26 @@ namespace FudgeCore {
       RANDOM = "random",
       RANDOM_RANGE = "randomRange"
     }
+
+    export const FUNCTION_PARAMETER_NAMES: { [key in ParticleData.FUNCTION]?: string[] } = {
+      [ParticleData.FUNCTION.LINEAR]: ["x", "xStart", "yStart", "xEnd", "yEnd"],
+      [ParticleData.FUNCTION.POLYNOMIAL3]: ["x", "a", "b", "c", "d"],
+      [ParticleData.FUNCTION.RANDOM]: ["index"],
+      [ParticleData.FUNCTION.RANDOM_RANGE]: ["index", "min", "max"]
+    };
+
+    export const FUNCTION_MINIMUM_PARAMETERS: { [key in ParticleData.FUNCTION]: number } = {
+      [ParticleData.FUNCTION.ADDITION]: 2,
+      [ParticleData.FUNCTION.SUBTRACTION]: 2,
+      [ParticleData.FUNCTION.MULTIPLICATION]: 2,
+      [ParticleData.FUNCTION.DIVISION]: 2,
+      [ParticleData.FUNCTION.MODULO]: 2,
+      [ParticleData.FUNCTION.LINEAR]: 5,
+      [ParticleData.FUNCTION.POLYNOMIAL3]: 5,
+      [ParticleData.FUNCTION.SQUARE_ROOT]: 1,
+      [ParticleData.FUNCTION.RANDOM]: 1,
+      [ParticleData.FUNCTION.RANDOM_RANGE]: 3
+    };
   }
 
   export class RenderInjectorShaderParticleSystem extends RenderInjectorShader {

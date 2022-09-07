@@ -534,6 +534,7 @@ declare namespace FudgeUserInterface {
          * Get the label text shown
          */
         getValue(_id: string): string;
+        refreshContent(): void;
         /**
          * Get the label text shown
          */
