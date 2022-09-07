@@ -67,6 +67,9 @@ declare namespace FudgeCore {
          * De- / Activate a filter for the given DebugTarget.
          */
         static setFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void;
+        static getFilter(_target: DebugTarget): DEBUG_FILTER;
+        static addFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void;
+        static removeFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void;
         /**
          * Info(...) displays additional information with low priority
          */
