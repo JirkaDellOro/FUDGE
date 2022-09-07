@@ -32,6 +32,7 @@ namespace FudgeCore {
 
   /**
    * Dispatches CustomTouchEvents to the EventTarget given with the constructor.
+   * When using touch events, make sure to set `touch-action: none` in CSS 
    * @author Jirka Dell'Oro-Friedl, HFU, 2022
    */
   export class TouchEventDispatcher {
@@ -59,6 +60,9 @@ namespace FudgeCore {
       this.activate(true);
     }
 
+    /**
+     * De-/Activates the dispatch of CustomTouchEvents
+     */
     public activate(_on: boolean): void {
       if (_on) {
         this.target.addEventListener("touchstart", <EventListener>this.hndEvent);
@@ -72,7 +76,7 @@ namespace FudgeCore {
       this.target.removeEventListener("touchmove", <EventListener>this.hndEvent);
     }
 
-    public hndEvent = (_event: TouchEvent): void => {
+    private hndEvent = (_event: TouchEvent): void => {
       _event.preventDefault();
       let touchFirst: Touch = _event.touches[0];
       let position: Vector2 = this.calcAveragePosition(_event.touches); //new Vector2(touchFirst?.clientX, touchFirst?.clientY);

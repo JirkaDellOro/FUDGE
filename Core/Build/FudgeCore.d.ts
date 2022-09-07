@@ -2596,6 +2596,7 @@ declare namespace FudgeCore {
     }
     /**
      * Dispatches CustomTouchEvents to the EventTarget given with the constructor.
+     * When using touch events, make sure to set `touch-action: none` in CSS
      * @author Jirka Dell'Oro-Friedl, HFU, 2022
      */
     class TouchEventDispatcher {
@@ -2614,8 +2615,11 @@ declare namespace FudgeCore {
         private pinchDistance;
         private pinchTolerance;
         constructor(_target: EventTarget, _radiusTap?: number, _radiusNotch?: number, _timeDouble?: number, _timerLong?: number);
+        /**
+         * De-/Activates the dispatch of CustomTouchEvents
+         */
         activate(_on: boolean): void;
-        hndEvent: (_event: TouchEvent) => void;
+        private hndEvent;
         private detectPinch;
         private startGesture;
         private calcAveragePosition;
