@@ -132,7 +132,8 @@ namespace Fudge {
             focus[_item.label] = child;
           else if (focus == this.particleEffectData.variables) 
             focus[`variable${Object.keys(focus).length}`] = child;
-          
+
+          this.controller.childToParent.set(child, focus);
           this.tree.findVisible(focus).expand(true);
           this.tree.findVisible(child).focus();
           break;

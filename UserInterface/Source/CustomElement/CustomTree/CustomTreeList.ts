@@ -116,18 +116,26 @@ namespace FudgeUserInterface {
     public delete(_data: T[]): CustomTreeItem<T>[] {
       let items: NodeListOf<CustomTreeItem<T>> = <NodeListOf<CustomTreeItem<T>>>this.querySelectorAll("li");
       let deleted: CustomTreeItem<T>[] = [];
+      let parents: CustomTreeList<T>[] = [];
 
       for (let item of items)
         if (_data.indexOf(item.data) > -1) {
           // item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
           item.dispatchEvent(new Event(EVENT.REMOVE_CHILD, { bubbles: true }));
           let parentNode: ParentNode = item.parentNode;
-          deleted.push(parentNode.removeChild(item));
-          // siblings might need to refresh their content i.e. if they display their own index
-          Array.from(parentNode.children)
-            .filter(_element => _element instanceof CustomTreeItem)
-            .forEach(_sibling => (<CustomTreeItem<T>>_sibling).refreshContent()); 
+          if (parentNode instanceof CustomTreeList) {
+            deleted.push(parentNode.removeChild(item));
+            // siblings might need to refresh their content i.e. if they display their own index
+            if (parents.indexOf(parentNode) == -1)
+              parents.push(parentNode);
+          }
         }
+      
+      for (let parent of parents) {
+        Array.from(parent.children)
+          .filter(_element => _element instanceof CustomTreeItem)
+          .forEach(_sibling => (<CustomTreeItem<T>>_sibling).refreshContent()); 
+      }
 
       return deleted;
     }

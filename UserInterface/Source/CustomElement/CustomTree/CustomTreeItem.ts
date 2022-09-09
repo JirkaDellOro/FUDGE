@@ -34,7 +34,7 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
 
       this.addEventListener(EVENT.POINTER_UP, this.hndPointerUp);
-      this.addEventListener(EVENT.RENAME_CHILD, this.hndRename);
+
       this.addEventListener(EVENT.REMOVE_CHILD, this.hndRemove);
     }
 
@@ -179,8 +179,8 @@ namespace FudgeUserInterface {
       this.checkbox.type = "checkbox";
       this.appendChild(this.checkbox);
 
-      // this.content = this.controller.createContent(this.data);
-      // this.appendChild(this.content);
+      this.content = this.controller.createContent(this.data);
+      this.appendChild(this.content);
       this.refreshContent();
       this.refreshAttributes();
       
@@ -331,13 +331,6 @@ namespace FudgeUserInterface {
       if (_event.target == this.checkbox)
         return;
       this.select(_event.ctrlKey, _event.shiftKey);
-    }
-
-    private hndRename = (_event: Event): void => {
-      if (_event.currentTarget == _event.target)
-        return;
-      _event.stopPropagation();
-      this.expand(true);
     }
 
     private hndRemove = (_event: Event): void => {

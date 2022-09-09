@@ -10,7 +10,7 @@ namespace Fudge {
   }
 
   export class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.EffectRecursive> {
-    private childToParent: Map<Object, Object> = new Map();
+    public childToParent: Map<Object, Object> = new Map();
 
     public createContent(_data: ƒ.ParticleData.EffectRecursive): HTMLFormElement {
       let content: HTMLFormElement = document.createElement("form");
@@ -47,7 +47,8 @@ namespace Fudge {
         let select: HTMLSelectElement = document.createElement("select");
         options.forEach((_option, _index) => {
           let entry: HTMLOptionElement = document.createElement("option");
-          entry.text = names ? names[_index] : _option;
+          let text: string = names ? names[_index] : null;
+          entry.text = text != null ? text : _option;
           entry.value = _option;
           select.add(entry);
         });
@@ -102,15 +103,8 @@ namespace Fudge {
 
     public getAttributes(_data: ƒ.ParticleData.EffectRecursive): string {
       let attributes: string[] = [];
-      if (ƒ.ParticleData.isFunction(_data) && this.getPath(_data).includes("variables")) 
+      if (ƒ.ParticleData.isVariable(_data) || (ƒ.ParticleData.isFunction(_data) && this.getPath(_data).includes("variables"))) 
         attributes.push("variable");
-      if (ƒ.ParticleData.isFunction(_data)) 
-        attributes.push(_data.function);
-      if (ƒ.ParticleData.isVariable(_data)) 
-        attributes.push("variable");
-      // let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
-      // if (ƒ.ParticleData.isExpression(_data) && this.getPath(parentData).pop() != "variables")
-      //   attributes.push(this.getKey(_data, parentData));
 
       return attributes.join(" ");
     }
@@ -129,8 +123,10 @@ namespace Fudge {
         return;
       }
       
-      if (_id == ID.FUNCTION && ƒ.ParticleData.isFunction(_data) && Number.isNaN(inputAsNumber)) {
+      if (_id == ID.FUNCTION && ƒ.ParticleData.isFunction(_data)) {
         _data.function = <ƒ.ParticleData.FUNCTION>_new;
+        while (_data.parameters.length < ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function])
+          _data.parameters.push({ type: "constant", value: 1} );
         return;
       }
 
@@ -192,7 +188,9 @@ namespace Fudge {
 
     public addChildren(_children: (ƒ.ParticleData.EffectRecursive)[], _target: ƒ.ParticleData.EffectRecursive): (ƒ.ParticleData.EffectRecursive)[] {
       let move: ƒ.ParticleData.Expression[] = [];
-      if (ƒ.ParticleData.isFunction(_target) && _children.every(_data => ƒ.ParticleData.isExpression(_data))) {
+      if (!_children.every(_data => ƒ.ParticleData.isExpression(_data))) return move;
+      // TODO: refactor this srsly
+      if (ƒ.ParticleData.isFunction(_target)) {
         for (let moveData of <ƒ.ParticleData.Expression[]>_children) {
           let parent: ƒ.ParticleData.Function = <ƒ.ParticleData.Function>this.childToParent.get(moveData);
           if (parent) {
@@ -200,6 +198,7 @@ namespace Fudge {
               _target.parameters.push(moveData);
               this.deleteData(moveData);
               move.push(moveData);
+              this.childToParent.set(moveData, _target);
             } else {
               if (this.deleteData(moveData))  {
                 _target.parameters.push(moveData);
@@ -214,7 +213,7 @@ namespace Fudge {
           }
         }
       }
-
+      
       return move;
     }
 
@@ -253,6 +252,8 @@ namespace Fudge {
     }
 
     private deleteData(_data: ƒ.ParticleData.EffectRecursive): boolean {
+      if (!ƒ.ParticleData.isExpression(_data)) return false;
+
       let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
       let key: string = this.getKey(_data, parentData);
       let index: number = Number.parseInt(key);
@@ -261,7 +262,6 @@ namespace Fudge {
           parentData.parameters.splice(index, 1);
         else
           return false;
-          // parentData.parameters[index] = JSON.parse(JSON.stringify(_data));
       } else if (ƒ.ParticleData.isTransformation(_data) && Array.isArray(parentData)) {
         parentData.splice(index, 1);
       } else {

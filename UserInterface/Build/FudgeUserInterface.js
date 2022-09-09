@@ -1520,17 +1520,24 @@ var FudgeUserInterface;
         delete(_data) {
             let items = this.querySelectorAll("li");
             let deleted = [];
+            let parents = [];
             for (let item of items)
                 if (_data.indexOf(item.data) > -1) {
                     // item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
                     item.dispatchEvent(new Event("removeChild" /* REMOVE_CHILD */, { bubbles: true }));
                     let parentNode = item.parentNode;
-                    deleted.push(parentNode.removeChild(item));
-                    // siblings might need to refresh their content i.e. if they display their own index
-                    Array.from(parentNode.children)
-                        .filter(_element => _element instanceof FudgeUserInterface.CustomTreeItem)
-                        .forEach(_sibling => _sibling.refreshContent());
+                    if (parentNode instanceof CustomTreeList) {
+                        deleted.push(parentNode.removeChild(item));
+                        // siblings might need to refresh their content i.e. if they display their own index
+                        if (parents.indexOf(parentNode) == -1)
+                            parents.push(parentNode);
+                    }
                 }
+            for (let parent of parents) {
+                Array.from(parent.children)
+                    .filter(_element => _element instanceof FudgeUserInterface.CustomTreeItem)
+                    .forEach(_sibling => _sibling.refreshContent());
+            }
             return deleted;
         }
         findVisible(_data) {
@@ -1627,7 +1634,12 @@ var FudgeUserInterface;
             let value = item.getValue(id);
             this.controller.rename(item.data, id, value);
             item.refreshAttributes();
-            item.dispatchEvent(new Event("renameChild" /* RENAME_CHILD */, { bubbles: true })); // parent should reevaluate all child names
+            item.expand(true);
+            let parent = item.parentElement;
+            while (!(parent instanceof FudgeUserInterface.CustomTreeItem)) {
+                parent = parent.parentElement;
+            }
+            parent.expand(true);
         }
         // Callback / Eventhandler in Tree
         hndSelect(_event) {
@@ -1782,7 +1794,6 @@ var FudgeUserInterface;
             this.addEventListener("dragstart" /* DRAG_START */, this.hndDragStart);
             this.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             this.addEventListener("pointerup" /* POINTER_UP */, this.hndPointerUp);
-            this.addEventListener("renameChild" /* RENAME_CHILD */, this.hndRename);
             this.addEventListener("removeChild" /* REMOVE_CHILD */, this.hndRemove);
         }
         /**
@@ -1906,8 +1917,8 @@ var FudgeUserInterface;
             this.checkbox = document.createElement("input");
             this.checkbox.type = "checkbox";
             this.appendChild(this.checkbox);
-            // this.content = this.controller.createContent(this.data);
-            // this.appendChild(this.content);
+            this.content = this.controller.createContent(this.data);
+            this.appendChild(this.content);
             this.refreshContent();
             this.refreshAttributes();
             this.tabIndex = 0;
@@ -2042,12 +2053,6 @@ var FudgeUserInterface;
             if (_event.target == this.checkbox)
                 return;
             this.select(_event.ctrlKey, _event.shiftKey);
-        };
-        hndRename = (_event) => {
-            if (_event.currentTarget == _event.target)
-                return;
-            _event.stopPropagation();
-            this.expand(true);
         };
         hndRemove = (_event) => {
             if (_event.currentTarget == _event.target)

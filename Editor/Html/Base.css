@@ -305,7 +305,7 @@ custom-matrix4x4 span.rowVector, custom-matrix3x3 span.rowVector {
 
 /* View Particle System */
 
-div[view=ViewParticleSystem] form > select:first-of-type {
+div[view=ViewParticleSystem] form > select {
   appearance: none;
 }
 

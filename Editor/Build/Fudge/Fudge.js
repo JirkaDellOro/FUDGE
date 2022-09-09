@@ -1839,7 +1839,8 @@ var Fudge;
                 let select = document.createElement("select");
                 options.forEach((_option, _index) => {
                     let entry = document.createElement("option");
-                    entry.text = names ? names[_index] : _option;
+                    let text = names ? names[_index] : null;
+                    entry.text = text != null ? text : _option;
                     entry.value = _option;
                     select.add(entry);
                 });
@@ -1893,15 +1894,8 @@ var Fudge;
         }
         getAttributes(_data) {
             let attributes = [];
-            if (ƒ.ParticleData.isFunction(_data) && this.getPath(_data).includes("variables"))
+            if (ƒ.ParticleData.isVariable(_data) || (ƒ.ParticleData.isFunction(_data) && this.getPath(_data).includes("variables")))
                 attributes.push("variable");
-            if (ƒ.ParticleData.isFunction(_data))
-                attributes.push(_data.function);
-            if (ƒ.ParticleData.isVariable(_data))
-                attributes.push("variable");
-            // let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
-            // if (ƒ.ParticleData.isExpression(_data) && this.getPath(parentData).pop() != "variables")
-            //   attributes.push(this.getKey(_data, parentData));
             return attributes.join(" ");
         }
         rename(_data, _id, _new) {
@@ -1915,8 +1909,10 @@ var Fudge;
                 }
                 return;
             }
-            if (_id == "function" /* FUNCTION */ && ƒ.ParticleData.isFunction(_data) && Number.isNaN(inputAsNumber)) {
+            if (_id == "function" /* FUNCTION */ && ƒ.ParticleData.isFunction(_data)) {
                 _data.function = _new;
+                while (_data.parameters.length < ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function])
+                    _data.parameters.push({ type: "constant", value: 1 });
                 return;
             }
             if (_id == "value" /* VALUE */ && (ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data))) {
@@ -1969,7 +1965,10 @@ var Fudge;
         }
         addChildren(_children, _target) {
             let move = [];
-            if (ƒ.ParticleData.isFunction(_target) && _children.every(_data => ƒ.ParticleData.isExpression(_data))) {
+            if (!_children.every(_data => ƒ.ParticleData.isExpression(_data)))
+                return move;
+            // TODO: refactor this srsly
+            if (ƒ.ParticleData.isFunction(_target)) {
                 for (let moveData of _children) {
                     let parent = this.childToParent.get(moveData);
                     if (parent) {
@@ -1977,6 +1976,7 @@ var Fudge;
                             _target.parameters.push(moveData);
                             this.deleteData(moveData);
                             move.push(moveData);
+                            this.childToParent.set(moveData, _target);
                         }
                         else {
                             if (this.deleteData(moveData)) {
@@ -2027,6 +2027,8 @@ var Fudge;
             return key;
         }
         deleteData(_data) {
+            if (!ƒ.ParticleData.isExpression(_data))
+                return false;
             let parentData = this.childToParent.get(_data);
             let key = this.getKey(_data, parentData);
             let index = Number.parseInt(key);
@@ -2035,7 +2037,6 @@ var Fudge;
                     parentData.parameters.splice(index, 1);
                 else
                     return false;
-                // parentData.parameters[index] = JSON.parse(JSON.stringify(_data));
             }
             else if (ƒ.ParticleData.isTransformation(_data) && Array.isArray(parentData)) {
                 parentData.splice(index, 1);
@@ -2511,6 +2512,7 @@ var Fudge;
                         focus[_item.label] = child;
                     else if (focus == this.particleEffectData.variables)
                         focus[`variable${Object.keys(focus).length}`] = child;
+                    this.controller.childToParent.set(child, focus);
                     this.tree.findVisible(focus).expand(true);
                     this.tree.findVisible(child).focus();
                     break;
