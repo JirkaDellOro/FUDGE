@@ -1808,24 +1808,48 @@ var Fudge;
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
     class ControllerTreeParticleSystem extends ƒui.CustomTreeController {
-        mapChildToParent = new Map();
+        childToParent = new Map();
         createContent(_data) {
             let content = document.createElement("form");
-            let labelKey = document.createElement("input");
-            labelKey.type = "text";
-            labelKey.disabled = true;
-            let parentData = this.mapChildToParent.get(_data);
-            let paramterName;
-            if (ƒ.ParticleData.isFunction(parentData) && ƒ.ParticleData.isExpression(_data)) {
-                let paramterNames = ƒ.ParticleData.FUNCTION_PARAMETER_NAMES[parentData.function];
-                if (paramterNames)
-                    paramterName = paramterNames[parentData.parameters.indexOf(_data)];
+            let parentData = this.childToParent.get(_data);
+            if (this.getPath(parentData).pop() == "variables") {
+                let labelName = document.createElement("input");
+                labelName.type = "text";
+                labelName.disabled = true;
+                labelName.value = this.getKey(_data, parentData);
+                labelName.id = "key" /* KEY */;
+                content.appendChild(labelName);
             }
-            labelKey.value = parentData ?
-                paramterName != null ? paramterName : this.getKey(_data, parentData) :
-                "root";
-            labelKey.id = "key" /* KEY */;
-            content.appendChild(labelKey);
+            if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) {
+                let spanName = document.createElement("span");
+                spanName.innerText = parentData ? this.getKey(_data, parentData) : "root";
+                content.appendChild(spanName);
+            }
+            if (ƒ.ParticleData.isExpression(_data) && this.getPath(parentData).pop() != "variables") {
+                let options;
+                let names;
+                if (ƒ.ParticleData.isFunction(parentData)) {
+                    options = Object.keys(parentData.parameters);
+                    names = ƒ.ParticleData.FUNCTION_PARAMETER_NAMES[parentData.function];
+                }
+                else if (ƒ.ParticleData.isTransformation(parentData))
+                    options = Fudge.ViewParticleSystem.TRANSFORMATION_KEYS;
+                else if (this.getPath(parentData).pop() == "color")
+                    options = Fudge.ViewParticleSystem.COLOR_KEYS;
+                let select = document.createElement("select");
+                options.forEach((_option, _index) => {
+                    let entry = document.createElement("option");
+                    entry.text = names ? names[_index] : _option;
+                    entry.value = _option;
+                    select.add(entry);
+                });
+                select.value = this.getKey(_data, parentData);
+                select.id = "key" /* KEY */;
+                content.appendChild(select);
+                let seperator = document.createElement("span");
+                seperator.innerText = ": ";
+                content.appendChild(seperator);
+            }
             if (ƒ.ParticleData.isExpression(_data)) {
                 if (ƒ.ParticleData.isFunction(_data)) {
                     let select = document.createElement("select");
@@ -1870,29 +1894,25 @@ var Fudge;
         getAttributes(_data) {
             let attributes = [];
             if (ƒ.ParticleData.isFunction(_data) && this.getPath(_data).includes("variables"))
-                attributes.push("function");
+                attributes.push("variable");
+            if (ƒ.ParticleData.isFunction(_data))
+                attributes.push(_data.function);
             if (ƒ.ParticleData.isVariable(_data))
                 attributes.push("variable");
+            // let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
+            // if (ƒ.ParticleData.isExpression(_data) && this.getPath(parentData).pop() != "variables")
+            //   attributes.push(this.getKey(_data, parentData));
             return attributes.join(" ");
         }
         rename(_data, _id, _new) {
             let inputAsNumber = Number.parseFloat(_new);
             if (_id == "key" /* KEY */ && ƒ.ParticleData.isExpression(_data)) {
-                // let parentData: Object | ƒ.ParticleData.Function = this.parentMap.get(_data);
-                // if (ƒ.ParticleData.isFunction(parentData) && parentData.parameters[_new]) {
-                //   let key: string = this.getKey(_data, parentData);
-                //   parentData.parameters[key] = parentData.parameters[_new];
-                //   parentData.parameters[_new] = _data;
-                // }
-                // if (!ƒ.ParticleData.isFunction(parentData)) {
-                //   let key: string = this.getKey(_data, parentData);
-                //   if (parentData[_new]) {
-                //     parentData[key] = parentData[_new];
-                //   } else {
-                //     delete parentData[key];
-                //   }
-                //   parentData[_new] = _data;
-                // }
+                let parentData = this.childToParent.get(_data);
+                if (ƒ.ParticleData.isFunction(parentData) && parentData.parameters[_new]) {
+                    let key = this.getKey(_data, parentData);
+                    parentData.parameters[key] = parentData.parameters[_new];
+                    parentData.parameters[_new] = _data;
+                }
                 return;
             }
             if (_id == "function" /* FUNCTION */ && ƒ.ParticleData.isFunction(_data) && Number.isNaN(inputAsNumber)) {
@@ -1930,7 +1950,7 @@ var Fudge;
                     let child = subData[_key];
                     if (ƒ.ParticleData.isExpression(child) || typeof child == "object") {
                         children.push(child);
-                        this.mapChildToParent.set(subData[_key], _data);
+                        this.childToParent.set(subData[_key], _data);
                     }
                 });
             }
@@ -1951,7 +1971,7 @@ var Fudge;
             let move = [];
             if (ƒ.ParticleData.isFunction(_target) && _children.every(_data => ƒ.ParticleData.isExpression(_data))) {
                 for (let moveData of _children) {
-                    let parent = this.mapChildToParent.get(moveData);
+                    let parent = this.childToParent.get(moveData);
                     if (parent) {
                         if (parent == _target) {
                             _target.parameters.push(moveData);
@@ -1962,14 +1982,14 @@ var Fudge;
                             if (this.deleteData(moveData)) {
                                 _target.parameters.push(moveData);
                                 move.push(moveData);
-                                this.mapChildToParent.set(moveData, _target);
+                                this.childToParent.set(moveData, _target);
                             }
                         }
                     }
                     else {
                         _target.parameters.push(moveData);
                         move.push(moveData);
-                        this.mapChildToParent.set(moveData, _target);
+                        this.childToParent.set(moveData, _target);
                     }
                 }
             }
@@ -1989,8 +2009,8 @@ var Fudge;
         getPath(_data) {
             let path = [];
             let parent;
-            while (this.mapChildToParent.has(_data)) {
-                parent = this.mapChildToParent.get(_data);
+            while (this.childToParent.has(_data)) {
+                parent = this.childToParent.get(_data);
                 path.unshift(this.getKey(_data, parent));
                 _data = parent;
             }
@@ -2007,7 +2027,7 @@ var Fudge;
             return key;
         }
         deleteData(_data) {
-            let parentData = this.mapChildToParent.get(_data);
+            let parentData = this.childToParent.get(_data);
             let key = this.getKey(_data, parentData);
             let index = Number.parseInt(key);
             if (ƒ.ParticleData.isFunction(parentData)) {
@@ -2023,7 +2043,7 @@ var Fudge;
             else {
                 delete parentData[key];
             }
-            this.mapChildToParent.delete(_data);
+            this.childToParent.delete(_data);
             return true;
         }
     }

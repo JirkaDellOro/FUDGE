@@ -10,25 +10,55 @@ namespace Fudge {
   }
 
   export class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.EffectRecursive> {
-    private mapChildToParent: Map<Object, Object> = new Map();
+    private childToParent: Map<Object, Object> = new Map();
 
     public createContent(_data: ƒ.ParticleData.EffectRecursive): HTMLFormElement {
       let content: HTMLFormElement = document.createElement("form");
-      let labelKey: HTMLInputElement = document.createElement("input");
-      labelKey.type = "text";
-      labelKey.disabled = true;
-      let parentData: ƒ.ParticleData.EffectRecursive = this.mapChildToParent.get(_data);
-      let paramterName: string;
-      if (ƒ.ParticleData.isFunction(parentData) && ƒ.ParticleData.isExpression(_data)) {
-        let paramterNames: string[] = ƒ.ParticleData.FUNCTION_PARAMETER_NAMES[parentData.function];
-        if (paramterNames)
-          paramterName = paramterNames[parentData.parameters.indexOf(_data)];
+
+      let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
+      if (this.getPath(parentData).pop() == "variables") {
+        let labelName: HTMLInputElement = document.createElement("input");
+        labelName.type = "text";
+        labelName.disabled = true;
+        labelName.value = this.getKey(_data, parentData);
+        labelName.id = ID.KEY;
+        
+        content.appendChild(labelName);
       }
-      labelKey.value = parentData ? 
-        paramterName != null ? paramterName : this.getKey(_data, parentData) : 
-        "root";
-      labelKey.id = ID.KEY;
-      content.appendChild(labelKey);
+
+      if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) {
+        let spanName: HTMLSpanElement = document.createElement("span");
+        spanName.innerText = parentData ? this.getKey(_data, parentData) : "root";
+        
+        content.appendChild(spanName);
+      }
+
+      if (ƒ.ParticleData.isExpression(_data) && this.getPath(parentData).pop() != "variables") {
+        let options: string[];
+        let names: string[];
+        if (ƒ.ParticleData.isFunction(parentData)) {
+          options = Object.keys(parentData.parameters);
+          names = ƒ.ParticleData.FUNCTION_PARAMETER_NAMES[parentData.function];
+        } else if (ƒ.ParticleData.isTransformation(parentData))
+          options = ViewParticleSystem.TRANSFORMATION_KEYS;
+        else if (this.getPath(parentData).pop() == "color")
+          options = ViewParticleSystem.COLOR_KEYS;
+
+        let select: HTMLSelectElement = document.createElement("select");
+        options.forEach((_option, _index) => {
+          let entry: HTMLOptionElement = document.createElement("option");
+          entry.text = names ? names[_index] : _option;
+          entry.value = _option;
+          select.add(entry);
+        });
+        select.value = this.getKey(_data, parentData);
+        select.id = ID.KEY;
+
+        content.appendChild(select);
+        let seperator: HTMLSpanElement = document.createElement("span");
+        seperator.innerText = ": ";
+        content.appendChild(seperator);
+      }
 
       if (ƒ.ParticleData.isExpression(_data)) {
         if (ƒ.ParticleData.isFunction(_data)) {
@@ -73,9 +103,14 @@ namespace Fudge {
     public getAttributes(_data: ƒ.ParticleData.EffectRecursive): string {
       let attributes: string[] = [];
       if (ƒ.ParticleData.isFunction(_data) && this.getPath(_data).includes("variables")) 
-        attributes.push("function");
+        attributes.push("variable");
+      if (ƒ.ParticleData.isFunction(_data)) 
+        attributes.push(_data.function);
       if (ƒ.ParticleData.isVariable(_data)) 
         attributes.push("variable");
+      // let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
+      // if (ƒ.ParticleData.isExpression(_data) && this.getPath(parentData).pop() != "variables")
+      //   attributes.push(this.getKey(_data, parentData));
 
       return attributes.join(" ");
     }
@@ -84,22 +119,12 @@ namespace Fudge {
       let inputAsNumber: number = Number.parseFloat(_new);
 
       if (_id == ID.KEY && ƒ.ParticleData.isExpression(_data)) {
-        // let parentData: Object | ƒ.ParticleData.Function = this.parentMap.get(_data);
-        // if (ƒ.ParticleData.isFunction(parentData) && parentData.parameters[_new]) {
-        //   let key: string = this.getKey(_data, parentData);
-        //   parentData.parameters[key] = parentData.parameters[_new];
-        //   parentData.parameters[_new] = _data;
-        // }
-
-        // if (!ƒ.ParticleData.isFunction(parentData)) {
-        //   let key: string = this.getKey(_data, parentData);
-        //   if (parentData[_new]) {
-        //     parentData[key] = parentData[_new];
-        //   } else {
-        //     delete parentData[key];
-        //   }
-        //   parentData[_new] = _data;
-        // }
+        let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
+        if (ƒ.ParticleData.isFunction(parentData) && parentData.parameters[_new]) {
+          let key: string = this.getKey(_data, parentData);
+          parentData.parameters[key] = parentData.parameters[_new];
+          parentData.parameters[_new] = _data;
+        }
 
         return;
       }
@@ -145,7 +170,7 @@ namespace Fudge {
           let child: ƒ.ParticleData.EffectRecursive = subData[_key];
           if (ƒ.ParticleData.isExpression(child) || typeof child == "object") {
             children.push(child);
-            this.mapChildToParent.set(subData[_key], _data);
+            this.childToParent.set(subData[_key], _data);
           }
         });
       }
@@ -169,7 +194,7 @@ namespace Fudge {
       let move: ƒ.ParticleData.Expression[] = [];
       if (ƒ.ParticleData.isFunction(_target) && _children.every(_data => ƒ.ParticleData.isExpression(_data))) {
         for (let moveData of <ƒ.ParticleData.Expression[]>_children) {
-          let parent: ƒ.ParticleData.Function = <ƒ.ParticleData.Function>this.mapChildToParent.get(moveData);
+          let parent: ƒ.ParticleData.Function = <ƒ.ParticleData.Function>this.childToParent.get(moveData);
           if (parent) {
             if (parent == _target) {
               _target.parameters.push(moveData);
@@ -179,13 +204,13 @@ namespace Fudge {
               if (this.deleteData(moveData))  {
                 _target.parameters.push(moveData);
                 move.push(moveData);
-                this.mapChildToParent.set(moveData, _target);
+                this.childToParent.set(moveData, _target);
               }
             }
           } else {
             _target.parameters.push(moveData);
             move.push(moveData);
-            this.mapChildToParent.set(moveData, _target);
+            this.childToParent.set(moveData, _target);
           }
         }
       }
@@ -209,8 +234,8 @@ namespace Fudge {
     public getPath(_data:  ƒ.ParticleData.EffectRecursive): string[] {
       let path: string[] = [];
       let parent: ƒ.ParticleData.EffectRecursive;
-      while (this.mapChildToParent.has(_data)) {
-        parent = this.mapChildToParent.get(_data);
+      while (this.childToParent.has(_data)) {
+        parent = this.childToParent.get(_data);
         path.unshift(this.getKey(_data, parent));
         _data = parent;
       }
@@ -228,7 +253,7 @@ namespace Fudge {
     }
 
     private deleteData(_data: ƒ.ParticleData.EffectRecursive): boolean {
-      let parentData: ƒ.ParticleData.EffectRecursive = this.mapChildToParent.get(_data);
+      let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
       let key: string = this.getKey(_data, parentData);
       let index: number = Number.parseInt(key);
       if (ƒ.ParticleData.isFunction(parentData)) {
@@ -242,7 +267,7 @@ namespace Fudge {
       } else {
         delete parentData[key];
       }
-      this.mapChildToParent.delete(_data);
+      this.childToParent.delete(_data);
       return true;
     }
   }
