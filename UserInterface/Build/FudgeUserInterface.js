@@ -1425,7 +1425,11 @@ var FudgeUserInterface;
         constructor(_controller, _items = []) {
             super();
             this.controller = _controller;
+            // this.divider = document.createElement("hr");
             this.addItems(_items);
+            this.addEventListener("dragenter" /* DRAG_ENTER */, this.hndDragEnter);
+            this.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
+            // this.addEventListener(EVENT.DRAG_LEAVE, this.hndDragLeave);
             this.className = "tree";
         }
         /**
@@ -1489,7 +1493,7 @@ var FudgeUserInterface;
          * Returns the content of this list as array of {@link CustomTreeItem}s
          */
         getItems() {
-            return this.children;
+            return Array.from(this.children).filter(_child => _child instanceof FudgeUserInterface.CustomTreeItem);
         }
         displaySelection(_data) {
             let items = this.querySelectorAll("li");
@@ -1547,6 +1551,38 @@ var FudgeUserInterface;
                     return item;
             return null;
         }
+        hndDragEnter = (_event) => {
+            _event.preventDefault();
+            _event.dataTransfer.dropEffect = "move";
+        };
+        hndDragOver = (_event) => {
+            _event.stopPropagation();
+            _event.preventDefault();
+            _event.dataTransfer.dropEffect = "move";
+            let target = _event.composedPath().find(_target => _target instanceof FudgeUserInterface.CustomTreeItem);
+            if (this.getItems().includes(target)) {
+                let sibling;
+                let rect = target.content.getBoundingClientRect();
+                if (_event.clientY < rect.top + rect.height / 2) {
+                    sibling = target.previousElementSibling;
+                    if (sibling instanceof FudgeUserInterface.CustomTreeItem || sibling == null) {
+                        target.before(this.controller.dragDropDivider);
+                    }
+                }
+                else {
+                    sibling = target.nextElementSibling;
+                    if (sibling instanceof FudgeUserInterface.CustomTreeItem || sibling == null) {
+                        target.after(this.controller.dragDropDivider);
+                    }
+                }
+                this.controller.dragDrop.at = Array.from(this.children).indexOf(this.controller.dragDropDivider);
+            }
+            if (_event.target == this) {
+                this.controller.dragDropDivider.remove();
+                this.controller.dragDrop.at = null;
+            }
+            this.controller.dragDrop.target = this.parentElement.data;
+        };
     }
     FudgeUserInterface.CustomTreeList = CustomTreeList;
     customElements.define("ul-custom-tree-list", CustomTreeList, { extends: "ul" });
@@ -1568,6 +1604,7 @@ var FudgeUserInterface;
      * ```
      */
     class CustomTree extends FudgeUserInterface.CustomTreeList {
+        // private divider: HTMLHRElement;
         constructor(_controller, _root) {
             super(_controller, []);
             let root = new FudgeUserInterface.CustomTreeItem(this.controller, _root);
@@ -1576,6 +1613,7 @@ var FudgeUserInterface;
             this.addEventListener("rename" /* RENAME */, this.hndRename);
             this.addEventListener("itemselect" /* SELECT */, this.hndSelect);
             this.addEventListener("drop" /* DROP */, this.hndDrop, true);
+            this.addEventListener("dragleave" /* DRAG_LEAVE */, this.hndDragLeave);
             this.addEventListener("delete" /* DELETE */, this.hndDelete);
             this.addEventListener("escape" /* ESCAPE */, this.hndEscape);
             this.addEventListener("copy" /* COPY */, this.hndCopyPaste);
@@ -1663,16 +1701,20 @@ var FudgeUserInterface;
             this.displaySelection(this.controller.selection);
         }
         hndDrop(_event) {
-            // _event.stopPropagation();
-            // console.log(_event.dataTransfer);
-            this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
+            this.controller.dragDropDivider.remove();
+            this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target, this.controller.dragDrop.at);
         }
-        addChildren(_children, _target) {
+        hndDragLeave = (_event) => {
+            let relatedTarget = _event.relatedTarget;
+            if (relatedTarget instanceof HTMLElement && relatedTarget.parentElement && !this.contains(relatedTarget))
+                this.controller.dragDropDivider.remove();
+        };
+        addChildren(_children, _target, _at) {
             // if drop target included in children -> refuse
             if (_children.indexOf(_target) > -1)
                 return;
             // add only the objects the addChildren-method of the controller returns
-            let move = this.controller.addChildren(_children, _target);
+            let move = this.controller.addChildren(_children, _target, _at);
             if (!move || move.length == 0)
                 return;
             // TODO: don't, when copying or coming from another source
@@ -1688,6 +1730,7 @@ var FudgeUserInterface;
                 targetItem.expand(true);
             _children = [];
             _target = null;
+            _at = null;
         }
         hndDelete = (_event) => {
             let target = _event.target;
@@ -1759,6 +1802,7 @@ var FudgeUserInterface;
         dragDrop = { sources: [], target: null };
         /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
         copyPaste = { sources: [], target: null };
+        dragDropDivider = document.createElement("hr");
     }
     FudgeUserInterface.CustomTreeController = CustomTreeController;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
@@ -1791,6 +1835,7 @@ var FudgeUserInterface;
             // this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
             // this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
             this.draggable = true; // TODO: add is draggable to custom controller
+            // TODO: add is dropTarget to custom controller
             this.addEventListener("dragstart" /* DRAG_START */, this.hndDragStart);
             this.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             this.addEventListener("pointerup" /* POINTER_UP */, this.hndPointerUp);
@@ -1917,8 +1962,8 @@ var FudgeUserInterface;
             this.checkbox = document.createElement("input");
             this.checkbox.type = "checkbox";
             this.appendChild(this.checkbox);
-            this.content = this.controller.createContent(this.data);
-            this.appendChild(this.content);
+            // this.content = this.controller.createContent(this.data);
+            // this.appendChild(this.content);
             this.refreshContent();
             this.refreshAttributes();
             this.tabIndex = 0;
@@ -1937,6 +1982,7 @@ var FudgeUserInterface;
             }
             let content = this.querySelector("ul");
             switch (_event.code) {
+                // TODO: repair keydowns...
                 case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
                     if (this.hasChildren && !content)
                         this.expand(true);
@@ -2034,19 +2080,24 @@ var FudgeUserInterface;
             else
                 this.controller.dragDrop.sources = [this.data];
             _event.dataTransfer.effectAllowed = "all";
+            _event.dataTransfer.setDragImage(document.createElement("img"), 0, 0);
             this.controller.dragDrop.target = null;
             // mark as already processed by this tree item to ignore it in further propagation through the tree
             _event.dataTransfer.setData("dragstart", "dragstart");
         };
         hndDragOver = (_event) => {
-            // this.controller.hndDragOver(_event);
-            if (Reflect.get(_event, "dragoverDone"))
-                return;
-            Reflect.set(_event, "dragoverDone", true);
-            // _event.stopPropagation();
-            _event.preventDefault();
-            this.controller.dragDrop.target = this.data;
-            _event.dataTransfer.dropEffect = "move";
+            let rect = this.content.getBoundingClientRect();
+            let upper = rect.top + rect.height * (1 / 3);
+            let lower = rect.top + rect.height * (2 / 3);
+            let offset = _event.clientY;
+            if (this.parentElement instanceof FudgeUserInterface.CustomTree || (offset > upper && (offset < lower || this.checkbox.checked))) {
+                _event.preventDefault();
+                _event.stopPropagation();
+                _event.dataTransfer.dropEffect = "move";
+                this.controller.dragDropDivider.remove();
+                this.controller.dragDrop.at = null;
+                this.controller.dragDrop.target = this.data;
+            }
         };
         hndPointerUp = (_event) => {
             _event.stopPropagation();

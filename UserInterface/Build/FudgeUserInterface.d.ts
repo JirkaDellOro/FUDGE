@@ -410,6 +410,8 @@ declare namespace FudgeUserInterface {
         selectInterval(_dataStart: T, _dataEnd: T): void;
         delete(_data: T[]): CustomTreeItem<T>[];
         findVisible(_data: T): CustomTreeItem<T>;
+        private hndDragEnter;
+        private hndDragOver;
     }
 }
 declare namespace FudgeUserInterface {
@@ -440,6 +442,7 @@ declare namespace FudgeUserInterface {
         private hndRename;
         private hndSelect;
         private hndDrop;
+        private hndDragLeave;
         private addChildren;
         private hndDelete;
         private hndEscape;
@@ -459,12 +462,14 @@ declare namespace FudgeUserInterface {
         dragDrop: {
             sources: T[];
             target: T;
+            at?: number;
         };
         /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
         copyPaste: {
             sources: T[];
             target: T;
         };
+        dragDropDivider: HTMLHRElement;
         /** Create an HTMLElement for the tree item representing the object  */
         abstract createContent(_object: T): HTMLFormElement;
         /** Retrieve a string to create a label for the tree item representing one of the objects properties  */
@@ -482,7 +487,7 @@ declare namespace FudgeUserInterface {
          * @param _children A list of objects the tree tries to add to the _target
          * @param _target The object referenced by the item the drop occurs on
          */
-        abstract addChildren(_sources: T[], _target: T): T[];
+        abstract addChildren(_sources: T[], _target: T, _at?: number): T[];
         /**
          * Remove the objects to be deleted, e.g. the current selection, from the data structure the tree refers to and
          * return a list of those objects in order for the according {@link CustomTreeItem} to be deleted also
@@ -900,7 +905,9 @@ declare namespace FudgeUserInterface {
         DOUBLE_CLICK = "dblclick",
         KEY_DOWN = "keydown",
         DRAG_START = "dragstart",
+        DRAG_ENTER = "dragenter",
         DRAG_OVER = "dragover",
+        DRAG_LEAVE = "dragleave",
         DROP = "drop",
         POINTER_UP = "pointerup",
         WHEEL = "wheel",

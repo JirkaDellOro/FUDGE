@@ -1963,35 +1963,45 @@ var Fudge;
             this.selection.splice(0);
             return deleted;
         }
-        addChildren(_children, _target) {
+        addChildren(_children, _target, _at) {
             let move = [];
             if (!_children.every(_data => ƒ.ParticleData.isExpression(_data)))
                 return move;
             // TODO: refactor this srsly
             if (ƒ.ParticleData.isFunction(_target)) {
-                for (let moveData of _children) {
-                    let parent = this.childToParent.get(moveData);
+                _children.forEach((_moveData, _index) => {
+                    let parent = this.childToParent.get(_moveData);
                     if (parent) {
                         if (parent == _target) {
-                            _target.parameters.push(moveData);
-                            this.deleteData(moveData);
-                            move.push(moveData);
-                            this.childToParent.set(moveData, _target);
+                            if (_at == null) {
+                                _target.parameters.push(_moveData);
+                                this.deleteData(_moveData);
+                                move.push(_moveData);
+                                this.childToParent.set(_moveData, _target);
+                            }
+                            else {
+                                let newData = JSON.parse(JSON.stringify(_moveData));
+                                _target.parameters.splice(_at + _index, 0, newData);
+                                this.deleteData(_moveData);
+                                move.push(newData);
+                                this.childToParent.delete(_moveData);
+                                this.childToParent.set(newData, _target);
+                            }
                         }
                         else {
-                            if (this.deleteData(moveData)) {
-                                _target.parameters.push(moveData);
-                                move.push(moveData);
-                                this.childToParent.set(moveData, _target);
+                            if (this.deleteData(_moveData)) {
+                                _target.parameters.push(_moveData);
+                                move.push(_moveData);
+                                this.childToParent.set(_moveData, _target);
                             }
                         }
                     }
                     else {
-                        _target.parameters.push(moveData);
-                        move.push(moveData);
-                        this.childToParent.set(moveData, _target);
+                        _target.parameters.push(_moveData);
+                        move.push(_moveData);
+                        this.childToParent.set(_moveData, _target);
                     }
-                }
+                });
             }
             return move;
         }

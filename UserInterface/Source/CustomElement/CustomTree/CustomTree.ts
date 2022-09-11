@@ -24,6 +24,7 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT.RENAME, this.hndRename);
       this.addEventListener(EVENT.SELECT, this.hndSelect);
       this.addEventListener(EVENT.DROP, this.hndDrop, true);
+      this.addEventListener(EVENT.DRAG_LEAVE, this.hndDragLeave);
       this.addEventListener(EVENT.DELETE, this.hndDelete);
       this.addEventListener(EVENT.ESCAPE, this.hndEscape);
       this.addEventListener(EVENT.COPY, this.hndCopyPaste);
@@ -126,18 +127,23 @@ namespace FudgeUserInterface {
     }
 
     private hndDrop(_event: DragEvent): void {
-      // _event.stopPropagation();
-      // console.log(_event.dataTransfer);
-      this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
+      this.controller.dragDropDivider.remove();
+      this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target, this.controller.dragDrop.at);
     }
 
-    private addChildren(_children: T[], _target: T): void {
+    private hndDragLeave = (_event: DragEvent): void => {
+      let relatedTarget: EventTarget = _event.relatedTarget;
+      if (relatedTarget instanceof HTMLElement && relatedTarget.parentElement && !this.contains(relatedTarget)) 
+        this.controller.dragDropDivider.remove();
+    }
+
+    private addChildren(_children: T[], _target: T, _at?: number): void {
       // if drop target included in children -> refuse
       if (_children.indexOf(_target) > -1)
         return;
 
       // add only the objects the addChildren-method of the controller returns
-      let move: T[] = this.controller.addChildren(<T[]>_children, <T>_target);
+      let move: T[] = this.controller.addChildren(<T[]>_children, <T>_target, _at);
       if (!move || move.length == 0)
         return;
 
@@ -157,6 +163,7 @@ namespace FudgeUserInterface {
 
       _children = [];
       _target = null;
+      _at = null;
     }
 
     private hndDelete = (_event: Event): void => {

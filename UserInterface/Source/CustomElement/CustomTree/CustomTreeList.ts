@@ -11,6 +11,8 @@ namespace FudgeUserInterface {
       super();
       this.controller = _controller;
       this.addItems(_items);
+      this.addEventListener(EVENT.DRAG_ENTER, this.hndDragEnter);
+      this.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
       this.className = "tree";
     }
 
@@ -82,7 +84,7 @@ namespace FudgeUserInterface {
      * Returns the content of this list as array of {@link CustomTreeItem}s
      */
     public getItems(): CustomTreeItem<T>[] {
-      return <CustomTreeItem<T>[]><unknown>this.children;
+      return <CustomTreeItem<T>[]>Array.from(this.children).filter(_child => _child instanceof CustomTreeItem);
     }
 
     public displaySelection(_data: T[]): void {
@@ -146,6 +148,41 @@ namespace FudgeUserInterface {
         if (_data == item.data)
           return item;
       return null;
+    }
+
+    private hndDragEnter = (_event: DragEvent): void => { // this prevents cursor from flickering
+      _event.preventDefault();
+      _event.dataTransfer.dropEffect = "move";
+    }
+
+    private hndDragOver = (_event: DragEvent): void => {
+      _event.stopPropagation();
+      _event.preventDefault();
+      _event.dataTransfer.dropEffect = "move";
+      let target: CustomTreeItem<T> = <CustomTreeItem<T>>_event.composedPath().find(_target => _target instanceof CustomTreeItem);
+      if (this.getItems().includes(target)) {
+        let sibling: Element;
+        let rect: DOMRect = target.content.getBoundingClientRect();
+        if (_event.clientY < rect.top + rect.height / 2) {
+          sibling = target.previousElementSibling;
+          if (sibling instanceof CustomTreeItem || sibling == null) {
+            target.before(this.controller.dragDropDivider);
+          }
+        } else {
+          sibling = target.nextElementSibling;
+          if (sibling instanceof CustomTreeItem || sibling == null) {
+            target.after(this.controller.dragDropDivider);
+          }
+        }
+        this.controller.dragDrop.at = Array.from(this.children).indexOf(this.controller.dragDropDivider);
+      }
+
+      if (_event.target == this) {
+        this.controller.dragDropDivider.remove();
+        this.controller.dragDrop.at = null;
+      }
+
+      this.controller.dragDrop.target = (<CustomTreeItem<T>>this.parentElement).data;
     }
   }
 

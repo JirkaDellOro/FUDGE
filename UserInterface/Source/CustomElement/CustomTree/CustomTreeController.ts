@@ -7,9 +7,11 @@ namespace FudgeUserInterface {
     /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
     public selection: T[] = [];
     /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
-    public dragDrop: { sources: T[], target: T } = { sources: [], target: null };
+    public dragDrop: { sources: T[], target: T, at?: number } = { sources: [], target: null };
     /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
     public copyPaste: { sources: T[], target: T } = { sources: [], target: null };
+
+    public dragDropDivider: HTMLHRElement = document.createElement("hr");
 
     /** Create an HTMLElement for the tree item representing the object  */
     public abstract createContent(_object: T): HTMLFormElement;
@@ -34,7 +36,7 @@ namespace FudgeUserInterface {
      * @param _children A list of objects the tree tries to add to the _target
      * @param _target The object referenced by the item the drop occurs on
      */
-    public abstract addChildren(_sources: T[], _target: T): T[];
+    public abstract addChildren(_sources: T[], _target: T, _at?: number): T[];
 
     /** 
      * Remove the objects to be deleted, e.g. the current selection, from the data structure the tree refers to and 

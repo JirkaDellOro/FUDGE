@@ -30,11 +30,10 @@ namespace FudgeUserInterface {
       // this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
 
       this.draggable = true; // TODO: add is draggable to custom controller
+      // TODO: add is dropTarget to custom controller
       this.addEventListener(EVENT.DRAG_START, this.hndDragStart);
       this.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
-
       this.addEventListener(EVENT.POINTER_UP, this.hndPointerUp);
-
       this.addEventListener(EVENT.REMOVE_CHILD, this.hndRemove);
     }
 
@@ -178,12 +177,8 @@ namespace FudgeUserInterface {
       this.checkbox = document.createElement("input");
       this.checkbox.type = "checkbox";
       this.appendChild(this.checkbox);
-
-      this.content = this.controller.createContent(this.data);
-      this.appendChild(this.content);
       this.refreshContent();
       this.refreshAttributes();
-      
       this.tabIndex = 0;
     }
 
@@ -204,6 +199,7 @@ namespace FudgeUserInterface {
       let content: CustomTreeList<T> = <CustomTreeList<T>>this.querySelector("ul");
 
       switch (_event.code) {
+        // TODO: repair keydowns...
         case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
           if (this.hasChildren && !content)
             this.expand(true);
@@ -308,22 +304,26 @@ namespace FudgeUserInterface {
       else
         this.controller.dragDrop.sources = [this.data];
       _event.dataTransfer.effectAllowed = "all";
+      _event.dataTransfer.setDragImage(document.createElement("img"), 0, 0);
       this.controller.dragDrop.target = null;
 
       // mark as already processed by this tree item to ignore it in further propagation through the tree
       _event.dataTransfer.setData("dragstart", "dragstart");
     }
 
-    private hndDragOver = (_event: DragEvent): void => {
-      // this.controller.hndDragOver(_event);
-      if (Reflect.get(_event, "dragoverDone"))
-        return;
-
-      Reflect.set(_event, "dragoverDone", true);
-      // _event.stopPropagation();
-      _event.preventDefault();
-      this.controller.dragDrop.target = this.data;
-      _event.dataTransfer.dropEffect = "move";
+    private hndDragOver = (_event: DragEvent): void => {      
+      let rect: DOMRect = this.content.getBoundingClientRect();
+      let upper: number = rect.top + rect.height * (1 / 3);
+      let lower: number = rect.top + rect.height * (2 / 3);
+      let offset: number = _event.clientY;
+      if (this.parentElement instanceof CustomTree || (offset > upper && (offset < lower || this.checkbox.checked))) {
+        _event.preventDefault();
+        _event.stopPropagation();
+        _event.dataTransfer.dropEffect = "move";
+        this.controller.dragDropDivider.remove();
+        this.controller.dragDrop.at = null;
+        this.controller.dragDrop.target = this.data;
+      }
     }
 
     private hndPointerUp = (_event: PointerEvent): void => {
