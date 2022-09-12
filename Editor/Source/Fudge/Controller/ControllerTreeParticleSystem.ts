@@ -10,7 +10,7 @@ namespace Fudge {
   }
 
   export class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.EffectRecursive> {
-    public childToParent: Map<Object, Object> = new Map();
+    public childToParent: Map<ƒ.ParticleData.EffectRecursive, ƒ.ParticleData.EffectRecursive> = new Map();
 
     public createContent(_data: ƒ.ParticleData.EffectRecursive): HTMLFormElement {
       let content: HTMLFormElement = document.createElement("form");
@@ -122,14 +122,10 @@ namespace Fudge {
 
         return;
       }
-      
       if (_id == ID.FUNCTION && ƒ.ParticleData.isFunction(_data)) {
         _data.function = <ƒ.ParticleData.FUNCTION>_new;
-        while (_data.parameters.length < ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function])
-          _data.parameters.push({ type: "constant", value: 1} );
         return;
       }
-
       if (_id == ID.VALUE && (ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data))) {
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
         _data.type = typeof input == "string" ? "variable" : "constant";
@@ -222,7 +218,7 @@ namespace Fudge {
             move.push(_moveData);
             this.childToParent.set(_moveData, _target);
           }
-        })
+        });
       }
       
       return move;
@@ -268,16 +264,13 @@ namespace Fudge {
       let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
       let key: string = this.getKey(_data, parentData);
       let index: number = Number.parseInt(key);
-      if (ƒ.ParticleData.isFunction(parentData)) {
-        if (parentData.parameters.length > ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[parentData.function])
-          parentData.parameters.splice(index, 1);
-        else
-          return false;
-      } else if (ƒ.ParticleData.isTransformation(_data) && Array.isArray(parentData)) {
+      if (ƒ.ParticleData.isFunction(parentData)) 
+        parentData.parameters.splice(index, 1);
+      else if (Array.isArray(parentData)) 
         parentData.splice(index, 1);
-      } else {
+      else 
         delete parentData[key];
-      }
+      
       this.childToParent.delete(_data);
       return true;
     }

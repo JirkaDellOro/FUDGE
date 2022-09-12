@@ -1413,6 +1413,40 @@ var FudgeUserInterface;
     }
     FudgeUserInterface.MultiLevelMenuManager = MultiLevelMenuManager;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    /**
+     * Static class to display a modal or non-modal warning.
+     */
+    class Warning {
+        static dom;
+        /**
+         * Prompt the warning to the user with the given headline, call to action and labels for the cancel- and ok-button
+         * Use `await` on call, to continue after the user has pressed one of the buttons.
+         */
+        static prompt(_errors = [], _head = "Headline", _warning = "Warning", _ok = "OK") {
+            Warning.dom = document.createElement("dialog");
+            document.body.appendChild(Warning.dom);
+            Warning.dom.innerHTML = "<h1>" + _head + "</h1>";
+            let content = document.createElement("div");
+            content.id = "content";
+            content.innerText = _errors.join("\n");
+            Warning.dom.appendChild(content);
+            let footer = document.createElement("footer");
+            footer.innerHTML = "<p>" + _warning + "</p>";
+            let btnOk = document.createElement("button");
+            btnOk.innerHTML = _ok;
+            btnOk.onclick = () => {
+                Warning.dom.close();
+                Warning.dom.remove();
+            };
+            footer.appendChild(btnOk);
+            Warning.dom.appendChild(footer);
+            Warning.dom.showModal();
+        }
+    }
+    FudgeUserInterface.Warning = Warning;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
 ///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
 ///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>

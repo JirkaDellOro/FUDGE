@@ -1896,8 +1896,6 @@ var Fudge;
             let attributes = [];
             if (ƒ.ParticleData.isVariable(_data) || (ƒ.ParticleData.isFunction(_data) && this.getPath(_data).includes("variables")))
                 attributes.push("variable");
-            if (ƒ.ParticleData.isFunction(_data) && _data.parameters.length < ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function])
-                attributes.push("invalid");
             return attributes.join(" ");
         }
         rename(_data, _id, _new) {
@@ -2042,15 +2040,12 @@ var Fudge;
             let parentData = this.childToParent.get(_data);
             let key = this.getKey(_data, parentData);
             let index = Number.parseInt(key);
-            if (ƒ.ParticleData.isFunction(parentData)) {
+            if (ƒ.ParticleData.isFunction(parentData))
                 parentData.parameters.splice(index, 1);
-            }
-            else if (ƒ.ParticleData.isTransformation(_data) && Array.isArray(parentData)) {
+            else if (Array.isArray(parentData))
                 parentData.splice(index, 1);
-            }
-            else {
+            else
                 delete parentData[key];
-            }
             this.childToParent.delete(_data);
             return true;
         }
@@ -2314,6 +2309,7 @@ var Fudge;
                 { typeId: 7 /* Root */ }
             ]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
             this.setTitle("Particle System | ");
         }
         getState() {
@@ -2423,12 +2419,14 @@ var Fudge;
         idInterval;
         tree;
         controller;
-        invalidData = [];
+        errors = [];
         constructor(_container, _state) {
             super(_container, _state);
             this.setParticleEffect(null);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
+            document.addEventListener("keydown" /* KEY_DOWN */, this.hndEvent);
         }
         //#region  ContextMenu
         openContextMenu = (_event) => {
@@ -2512,8 +2510,8 @@ var Fudge;
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT:
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION:
                     child = Number(_item.id) == Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT ?
-                        { type: "constant", value: 0 } :
-                        { type: "function", function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: [{ type: "constant", value: 0 }, { type: "constant", value: 0 }] };
+                        { type: "constant", value: 1 } :
+                        { type: "function", function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: [] };
                     if (ƒ.ParticleData.isFunction(focus))
                         focus.parameters.push(child);
                     else if (ƒ.ParticleData.isTransformation(focus) || focus == this.particleEffectData.color)
@@ -2552,32 +2550,42 @@ var Fudge;
                     this.cmpParticleSystem = this.node?.getComponent(ƒ.ComponentParticleSystem);
                     this.setParticleEffect(this.cmpParticleSystem?.particleEffect);
                     break;
+                case Fudge.EVENT_EDITOR.CLOSE:
+                    this.enableSave(true);
+                    break;
+                case "keydown" /* KEY_DOWN */:
+                    if (this.errors.length > 0 && _event instanceof KeyboardEvent && _event.code == ƒ.KEYBOARD_CODE.S && _event.ctrlKey)
+                        ƒui.Warning.prompt(this.errors.map(([_data, _error]) => _error), "Unable to save", `Project can't be saved while having unresolved errors in ${ƒ.ParticleEffect.name}`, "OK");
+                    break;
                 case Fudge.EVENT_EDITOR.MODIFY:
                 case "delete" /* DELETE */:
                 case "drop" /* DROP */:
                 case "rename" /* RENAME */:
                 case "paste" /* PASTE */:
                 case "drop" /* DROP */:
-                    let [isValid, invalidFunctions] = this.validateData(this.particleEffectData);
-                    this.invalidData
-                        .filter(_data => !invalidFunctions.includes(_data))
-                        .forEach(_data => {
-                        let item = this.tree.findVisible(_data);
-                        item.classList.remove("invalid");
-                        item.title = "";
+                    let invalid = this.validateData(this.particleEffectData);
+                    this.errors
+                        .filter(_error => !invalid.includes(_error))
+                        .map(([_data]) => this.tree.findVisible(_data))
+                        .forEach(_item => {
+                        if (!_item)
+                            return;
+                        _item.classList.remove("invalid");
+                        _item.title = "";
                     });
-                    if (isValid) {
+                    this.errors = invalid;
+                    if (this.errors.length == 0) {
                         this.particleEffect.data = JSON.parse(JSON.stringify(this.particleEffectData));
                         this.cmpParticleSystem.particleEffect = this.particleEffect;
                     }
                     else {
-                        invalidFunctions.forEach(_data => {
+                        this.errors.forEach(([_data, _error]) => {
                             let item = this.tree.findVisible(_data);
                             item.classList.add("invalid");
-                            item.title = `"${_data.function}" needs at least ${ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function]} parameters`;
+                            item.title = _error;
                         });
                     }
-                    this.invalidData = invalidFunctions;
+                    this.enableSave(this.errors.length == 0);
                     break;
             }
         };
@@ -2613,18 +2621,17 @@ var Fudge;
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
         }
         validateData(_data) {
-            let isValid = true;
             let invalid = [];
             validateRecursive(_data);
-            return [isValid, invalid];
+            return invalid;
             function validateRecursive(_data, _path = []) {
                 let recurse = _data;
                 if (ƒ.ParticleData.isFunction(_data)) {
                     let minParameters = ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function];
                     if (_data.parameters.length < ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function]) {
-                        console.warn(`${ƒ.ParticleEffect.name}: function "${_path.join("/")}: ${_data.function}" needs at least ${minParameters} parameters`);
-                        isValid = false;
-                        invalid.push(_data);
+                        let error = `"${_path.join("/")}/${_data.function}" needs at least ${minParameters} parameters`;
+                        console.warn(`${ƒ.ParticleEffect.name}: ${error}`);
+                        invalid.push([_data, error]);
                     }
                     recurse = _data.parameters;
                 }
@@ -2632,6 +2639,9 @@ var Fudge;
                     Object.entries(recurse ? recurse : _data).forEach(([_key, _value]) => validateRecursive(_value, _path.concat(_key)));
                 }
             }
+        }
+        enableSave(_on) {
+            Fudge.remote.Menu.getApplicationMenu().getMenuItemById(Fudge.MENU.PROJECT_SAVE).enabled = _on;
         }
     }
     Fudge.ViewParticleSystem = ViewParticleSystem;

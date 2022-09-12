@@ -390,7 +390,7 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
     class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.EffectRecursive> {
-        childToParent: Map<Object, Object>;
+        childToParent: Map<ƒ.ParticleData.EffectRecursive, ƒ.ParticleData.EffectRecursive>;
         createContent(_data: ƒ.ParticleData.EffectRecursive): HTMLFormElement;
         getAttributes(_data: ƒ.ParticleData.EffectRecursive): string;
         rename(_data: ƒ.ParticleData.EffectRecursive, _id: string, _new: string): void;
@@ -505,7 +505,7 @@ declare namespace Fudge {
         private idInterval;
         private tree;
         private controller;
-        private invalidData;
+        private errors;
         constructor(_container: ComponentContainer, _state: Object);
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
@@ -514,6 +514,7 @@ declare namespace Fudge {
         private setParticleEffect;
         private recreateTree;
         private validateData;
+        private enableSave;
     }
 }
 declare namespace Fudge {

@@ -377,6 +377,19 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     /**
+     * Static class to display a modal or non-modal warning.
+     */
+    class Warning {
+        static dom: HTMLDialogElement;
+        /**
+         * Prompt the warning to the user with the given headline, call to action and labels for the cancel- and ok-button
+         * Use `await` on call, to continue after the user has pressed one of the buttons.
+         */
+        static prompt(_errors?: string[], _head?: string, _warning?: string, _ok?: string): void;
+    }
+}
+declare namespace FudgeUserInterface {
+    /**
      * Extension of ul-element that keeps a list of {@link CustomTreeItem}s to represent a branch in a tree
      */
     class CustomTreeList<T> extends HTMLUListElement {

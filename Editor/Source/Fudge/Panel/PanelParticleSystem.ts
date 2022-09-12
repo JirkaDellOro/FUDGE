@@ -27,6 +27,7 @@ namespace Fudge {
         ]);
   
         this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
+        this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
         this.setTitle("Particle System | " );
       }
   
