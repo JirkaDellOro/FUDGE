@@ -4249,7 +4249,6 @@ declare namespace FudgeCore {
         getMutatorForUserInterface(): MutatorForUserInterface;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
-        private validate;
     }
 }
 declare namespace FudgeCore {

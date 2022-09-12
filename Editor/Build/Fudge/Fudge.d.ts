@@ -505,6 +505,7 @@ declare namespace Fudge {
         private idInterval;
         private tree;
         private controller;
+        private invalidData;
         constructor(_container: ComponentContainer, _state: Object);
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
@@ -512,6 +513,7 @@ declare namespace Fudge {
         private hndEvent;
         private setParticleEffect;
         private recreateTree;
+        private validateData;
     }
 }
 declare namespace Fudge {

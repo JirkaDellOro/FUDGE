@@ -83,7 +83,6 @@ namespace FudgeCore {
     }
 
     public set data(_data: ParticleData.Effect) {
-      if (!this.validate(_data)) return;
       this.#data = _data;
       this.shaderMap.forEach( shader => shader.deleteProgram() );
       this.shaderMap.clear();
@@ -140,27 +139,5 @@ namespace FudgeCore {
       delete _mutator.definedVariables;
     }
     //#endregion
-
-    private validate(_data: ParticleData.EffectRecursive): boolean {
-      let isValid: boolean = true;
-
-      validateRecursive.bind(this)(_data);
-
-      return isValid;
-
-      function validateRecursive(this: ParticleEffect, _data: ParticleData.EffectRecursive, _path: string[] = []): void {
-        if (ParticleData.isFunction(_data)) {
-          let minParameters: number = ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function];
-          if (_data.parameters.length < ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function]) {
-            console.warn(`${ParticleEffect.name}: "${this.name}" function "${_path.join("/")}: ${_data.function}" needs at least ${minParameters} parameters`);
-            isValid = false;
-          } else {
-            _data.parameters.forEach((_expression, _index) => validateRecursive.bind(this)(_expression, _path.concat(_index.toString())));
-          }
-        } else if (typeof _data == "object") {
-          Object.entries(_data).forEach(([_key, _value]) => validateRecursive.bind(this)(_value, _path.concat(_key)));
-        }
-      }
-    }
   }
 }

@@ -16,6 +16,8 @@ namespace Fudge {
     private tree: ƒui.CustomTree<ƒ.ParticleData.EffectRecursive>;
     private controller: ControllerTreeParticleSystem;
 
+    private invalidData: ƒ.ParticleData.Function[] = [];
+
     constructor(_container: ComponentContainer, _state: Object) {
         super(_container, _state);
         this.setParticleEffect(null);
@@ -136,6 +138,7 @@ namespace Fudge {
           this.controller.childToParent.set(child, focus);
           this.tree.findVisible(focus).expand(true);
           this.tree.findVisible(child).focus();
+          this.dispatch(EVENT_EDITOR.MODIFY, { detail: { data: focus } });
           break;
         case CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION:
           if (Array.isArray(focus)) {
@@ -144,6 +147,7 @@ namespace Fudge {
 
             this.tree.findVisible(focus).expand(true);
             this.tree.findVisible(child).focus();
+            this.dispatch(EVENT_EDITOR.MODIFY, { detail: { data: focus } });
           }
           break;
         case CONTEXTMENU.DELETE_PARTICLE_DATA:
@@ -151,7 +155,7 @@ namespace Fudge {
             return;
           let remove: ƒ.Serialization[] = this.controller.delete([focus]);
           this.tree.delete(remove);
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.MODIFY, { });
           break;
       }
     }
@@ -163,19 +167,39 @@ namespace Fudge {
           this.graph = _event.detail.graph;
           this.node = _event.detail.node;
           this.cmpParticleSystem = this.node?.getComponent(ƒ.ComponentParticleSystem);
-          await this.setParticleEffect(this.cmpParticleSystem?.particleEffect);
+          this.setParticleEffect(this.cmpParticleSystem?.particleEffect);
           break;
         case EVENT_EDITOR.MODIFY:
         case ƒui.EVENT.DELETE:
         case ƒui.EVENT.DROP:
         case ƒui.EVENT.RENAME:
-          this.particleEffect.data = this.particleEffectData;
-          this.cmpParticleSystem.particleEffect = this.particleEffect;
+        case ƒui.EVENT.PASTE:
+        case ƒui.EVENT.DROP:
+          let [isValid, invalidFunctions] = this.validateData(this.particleEffectData);
+          this.invalidData
+            .filter(_data => !invalidFunctions.includes(_data))
+            .forEach(_data => {
+              let item: ƒui.CustomTreeItem<ƒ.ParticleData.EffectRecursive> = this.tree.findVisible(_data);
+              item.classList.remove("invalid");
+              item.title = "";
+            });
+          
+          if (isValid) {
+            this.particleEffect.data = JSON.parse(JSON.stringify(this.particleEffectData));
+            this.cmpParticleSystem.particleEffect = this.particleEffect;
+          } else {
+            invalidFunctions.forEach(_data => {
+              let item: ƒui.CustomTreeItem<ƒ.ParticleData.EffectRecursive> = this.tree.findVisible(_data);
+              item.classList.add("invalid");
+              item.title = `"${_data.function}" needs at least ${ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function]} parameters`;
+            });
+          }
+          this.invalidData = invalidFunctions;
           break;
       }
     }
 
-    private async setParticleEffect(_particleEffect: ƒ.ParticleEffect): Promise<void> {
+    private setParticleEffect(_particleEffect: ƒ.ParticleEffect): Promise<void> {
       if (!_particleEffect) {
         this.particleEffect = undefined;
         this.tree = undefined;
@@ -186,7 +210,7 @@ namespace Fudge {
       }
 
       this.particleEffect = _particleEffect;
-      this.particleEffectData = _particleEffect.data;
+      this.particleEffectData = JSON.parse(JSON.stringify(_particleEffect.data));
       this.dom.innerHTML = "";
       this.recreateTree(this.particleEffectData);
       if (this.idInterval == undefined)
@@ -207,8 +231,33 @@ namespace Fudge {
       this.tree.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
+      this.tree.addEventListener(ƒui.EVENT.PASTE, this.hndEvent);
+      this.tree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
-    //#endregion
+
+    private validateData(_data: ƒ.ParticleData.EffectRecursive): [boolean, ƒ.ParticleData.Function[]] {
+      let isValid: boolean = true;
+      let invalid: ƒ.ParticleData.Function[] = [];
+      validateRecursive(_data);
+      return [isValid, invalid];
+
+      function validateRecursive(_data: ƒ.ParticleData.EffectRecursive, _path: string[] = []): void {
+        let recurse: Object = _data;
+        if (ƒ.ParticleData.isFunction(_data)) {
+          let minParameters: number = ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function];
+          if (_data.parameters.length < ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function]) {
+            console.warn(`${ƒ.ParticleEffect.name}: function "${_path.join("/")}: ${_data.function}" needs at least ${minParameters} parameters`);
+            isValid = false;
+            invalid.push(_data);
+          }
+          recurse = _data.parameters;
+        } 
+        
+        if (typeof recurse == "object") {
+          Object.entries(recurse ? recurse : _data).forEach(([_key, _value]) => validateRecursive(_value, _path.concat(_key)));
+        }
+      }
+    }
   }
 }
