@@ -1425,11 +1425,9 @@ var FudgeUserInterface;
         constructor(_controller, _items = []) {
             super();
             this.controller = _controller;
-            // this.divider = document.createElement("hr");
             this.addItems(_items);
             this.addEventListener("dragenter" /* DRAG_ENTER */, this.hndDragEnter);
             this.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
-            // this.addEventListener(EVENT.DRAG_LEAVE, this.hndDragLeave);
             this.className = "tree";
         }
         /**
@@ -1538,7 +1536,7 @@ var FudgeUserInterface;
                     }
                 }
             for (let parent of parents) {
-                Array.from(parent.children)
+                parent.getItems()
                     .filter(_element => _element instanceof FudgeUserInterface.CustomTreeItem)
                     .forEach(_sibling => _sibling.refreshContent());
             }
@@ -1559,28 +1557,21 @@ var FudgeUserInterface;
             _event.stopPropagation();
             _event.preventDefault();
             _event.dataTransfer.dropEffect = "move";
-            let target = _event.composedPath().find(_target => _target instanceof FudgeUserInterface.CustomTreeItem);
-            if (this.getItems().includes(target)) {
-                let sibling;
-                let rect = target.content.getBoundingClientRect();
-                if (_event.clientY < rect.top + rect.height / 2) {
-                    sibling = target.previousElementSibling;
-                    if (sibling instanceof FudgeUserInterface.CustomTreeItem || sibling == null) {
-                        target.before(this.controller.dragDropDivider);
-                    }
-                }
-                else {
-                    sibling = target.nextElementSibling;
-                    if (sibling instanceof FudgeUserInterface.CustomTreeItem || sibling == null) {
-                        target.after(this.controller.dragDropDivider);
-                    }
-                }
-                this.controller.dragDrop.at = Array.from(this.children).indexOf(this.controller.dragDropDivider);
-            }
-            if (_event.target == this) {
+            if (_event.target == this)
                 this.controller.dragDropDivider.remove();
-                this.controller.dragDrop.at = null;
+            else {
+                let target = _event.composedPath().find(_target => _target instanceof FudgeUserInterface.CustomTreeItem);
+                if (this.getItems().includes(target)) {
+                    let rect = target.content.getBoundingClientRect();
+                    let addBefore = _event.clientY < rect.top + rect.height / 2;
+                    let sibling = addBefore ? target.previousElementSibling : target.nextElementSibling;
+                    if (sibling != this.controller.dragDropDivider)
+                        addBefore ? target.before(this.controller.dragDropDivider) : target.after(this.controller.dragDropDivider);
+                }
             }
+            this.controller.dragDrop.at = this.controller.dragDropDivider.isConnected ?
+                Array.from(this.children).indexOf(this.controller.dragDropDivider) :
+                this.controller.dragDrop.at = null;
             this.controller.dragDrop.target = this.parentElement.data;
         };
     }
@@ -1604,7 +1595,6 @@ var FudgeUserInterface;
      * ```
      */
     class CustomTree extends FudgeUserInterface.CustomTreeList {
-        // private divider: HTMLHRElement;
         constructor(_controller, _root) {
             super(_controller, []);
             let root = new FudgeUserInterface.CustomTreeItem(this.controller, _root);
@@ -1672,12 +1662,12 @@ var FudgeUserInterface;
             let value = item.getValue(id);
             this.controller.rename(item.data, id, value);
             item.refreshAttributes();
-            item.expand(true);
+            // item.expand(true);
             let parent = item.parentElement;
             while (!(parent instanceof FudgeUserInterface.CustomTreeItem)) {
                 parent = parent.parentElement;
             }
-            parent.expand(true);
+            parent.refreshContent();
         }
         // Callback / Eventhandler in Tree
         hndSelect(_event) {
@@ -1802,6 +1792,7 @@ var FudgeUserInterface;
         dragDrop = { sources: [], target: null };
         /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
         copyPaste = { sources: [], target: null };
+        /** Used by the tree to indicate the drop position while dragging */
         dragDropDivider = document.createElement("hr");
     }
     FudgeUserInterface.CustomTreeController = CustomTreeController;
@@ -1860,7 +1851,7 @@ var FudgeUserInterface;
             return this.classList.contains(FudgeUserInterface.CSS_CLASS.SELECTED);
         }
         /**
-         * Returns attaches or detaches the {@link CSS_CLASS.SELECTED} to this item
+         * Attaches or detaches the {@link CSS_CLASS.SELECTED} to this item
          */
         set selected(_on) {
             if (_on)
@@ -1868,43 +1859,52 @@ var FudgeUserInterface;
             else
                 this.classList.remove(FudgeUserInterface.CSS_CLASS.SELECTED);
         }
+        /**
+         * Returns the content representing the attached {@link data}
+         */
         get content() {
             return this.#content;
         }
+        /**
+         * Set the content representing the attached {@link data}
+         */
         set content(_content) {
-            if (this.contains(this.content))
-                this.replaceChild(_content, this.content);
+            if (this.contains(this.#content))
+                this.replaceChild(_content, this.#content);
             else
                 this.appendChild(_content);
             this.#content = _content;
+            this.#content.onsubmit = () => false;
         }
         /**
-         * Set the label text to show
+         * Set the value of input element with ID
+         * @param _id the ID of the element
          */
-        setValue(_id, _text) {
+        setValue(_id, _value) {
             let element = this.content.elements.namedItem(_id);
             if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement)
-                element.value = _text;
+                element.value = _value;
         }
         /**
-         * Get the label text shown
+         * Get the value shown by input element at ID
+         * @param _id the ID of the element
          */
         getValue(_id) {
-            let label = "";
+            let value = "";
             let element = this.content.elements.namedItem(_id);
             if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement)
-                label = element.value;
-            return label;
+                value = element.value;
+            return value;
         }
         refreshContent() {
             this.content = this.controller.createContent(this.data);
         }
-        /**
-         * Get the label text shown
-         */
         refreshAttributes() {
             this.setAttribute("attributes", this.controller.getAttributes(this.data));
         }
+        // public validate(): void {
+        //   this.controller.validate(this.data);
+        // }
         /**
          * Tries to expanding the {@link CustomTreeList} of children, by dispatching {@link EVENT.EXPAND}.
          * The user of the tree needs to add an event listener to the tree
@@ -1962,8 +1962,6 @@ var FudgeUserInterface;
             this.checkbox = document.createElement("input");
             this.checkbox.type = "checkbox";
             this.appendChild(this.checkbox);
-            // this.content = this.controller.createContent(this.data);
-            // this.appendChild(this.content);
             this.refreshContent();
             this.refreshAttributes();
             this.tabIndex = 0;
@@ -2002,7 +2000,7 @@ var FudgeUserInterface;
                     this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                     break;
                 case ƒ.KEYBOARD_CODE.F2:
-                    this.startTypingLabel();
+                    this.startTypingInput();
                     break;
                 case ƒ.KEYBOARD_CODE.SPACE:
                     this.select(_event.ctrlKey, _event.shiftKey);
@@ -2033,7 +2031,7 @@ var FudgeUserInterface;
                     break;
             }
         };
-        startTypingLabel(_inputElement) {
+        startTypingInput(_inputElement) {
             if (!_inputElement)
                 _inputElement = this.content.elements.item(0);
             if (_inputElement instanceof HTMLInputElement) {
@@ -2045,11 +2043,10 @@ var FudgeUserInterface;
             _event.stopPropagation();
             if (_event.target == this.checkbox)
                 return;
-            this.startTypingLabel(_event.target);
+            this.startTypingInput(_event.target);
         };
         hndChange = (_event) => {
             let target = _event.target;
-            let item = target.parentElement;
             _event.stopPropagation();
             if (target instanceof HTMLInputElement) {
                 switch (target.type) {
@@ -2057,8 +2054,8 @@ var FudgeUserInterface;
                         this.expand(target.checked);
                         break;
                     case "text":
+                        this.focus();
                         target.disabled = true;
-                        item.focus();
                         target.dispatchEvent(new Event("rename" /* RENAME */, { bubbles: true }));
                         break;
                     case "default":
@@ -2067,6 +2064,7 @@ var FudgeUserInterface;
                 }
             }
             if (target instanceof HTMLSelectElement) {
+                this.focus();
                 target.dispatchEvent(new Event("rename" /* RENAME */, { bubbles: true }));
             }
         };

@@ -92,13 +92,14 @@ namespace FudgeUserInterface {
 
       this.controller.rename(item.data, id, value);
       item.refreshAttributes();
-      item.expand(true);
+      // item.expand(true);
 
       let parent: HTMLElement = item.parentElement;
       while (!(parent instanceof CustomTreeItem)) {
         parent = parent.parentElement;
       }
-      parent.expand(true);
+      
+      parent.refreshContent();
     }
 
     // Callback / Eventhandler in Tree

@@ -134,7 +134,7 @@ namespace FudgeUserInterface {
         }
       
       for (let parent of parents) {
-        Array.from(parent.children)
+        parent.getItems()
           .filter(_element => _element instanceof CustomTreeItem)
           .forEach(_sibling => (<CustomTreeItem<T>>_sibling).refreshContent()); 
       }
@@ -159,29 +159,23 @@ namespace FudgeUserInterface {
       _event.stopPropagation();
       _event.preventDefault();
       _event.dataTransfer.dropEffect = "move";
-      let target: CustomTreeItem<T> = <CustomTreeItem<T>>_event.composedPath().find(_target => _target instanceof CustomTreeItem);
-      if (this.getItems().includes(target)) {
-        let sibling: Element;
-        let rect: DOMRect = target.content.getBoundingClientRect();
-        if (_event.clientY < rect.top + rect.height / 2) {
-          sibling = target.previousElementSibling;
-          if (sibling instanceof CustomTreeItem || sibling == null) {
-            target.before(this.controller.dragDropDivider);
-          }
-        } else {
-          sibling = target.nextElementSibling;
-          if (sibling instanceof CustomTreeItem || sibling == null) {
-            target.after(this.controller.dragDropDivider);
-          }
-        }
-        this.controller.dragDrop.at = Array.from(this.children).indexOf(this.controller.dragDropDivider);
-      }
 
-      if (_event.target == this) {
+      if (_event.target == this)
         this.controller.dragDropDivider.remove();
-        this.controller.dragDrop.at = null;
+      else {
+        let target: CustomTreeItem<T> = <CustomTreeItem<T>>_event.composedPath().find(_target => _target instanceof CustomTreeItem);
+        if (this.getItems().includes(target)) {
+          let rect: DOMRect = target.content.getBoundingClientRect();
+          let addBefore: boolean = _event.clientY < rect.top + rect.height / 2;
+          let sibling: Element = addBefore ? target.previousElementSibling : target.nextElementSibling;
+          if (sibling != this.controller.dragDropDivider) 
+            addBefore ? target.before(this.controller.dragDropDivider) : target.after(this.controller.dragDropDivider);
+        }
       }
 
+      this.controller.dragDrop.at = this.controller.dragDropDivider.isConnected ?
+        Array.from(this.children).indexOf(this.controller.dragDropDivider) :
+        this.controller.dragDrop.at = null;
       this.controller.dragDrop.target = (<CustomTreeItem<T>>this.parentElement).data;
     }
   }

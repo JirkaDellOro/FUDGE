@@ -11,9 +11,10 @@ namespace FudgeUserInterface {
     /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
     public copyPaste: { sources: T[], target: T } = { sources: [], target: null };
 
+    /** Used by the tree to indicate the drop position while dragging */
     public dragDropDivider: HTMLHRElement = document.createElement("hr");
 
-    /** Create an HTMLElement for the tree item representing the object  */
+    /** Create an HTMLFormElement for the tree item representing the object  */
     public abstract createContent(_object: T): HTMLFormElement;
 
     /** Retrieve a string to create a label for the tree item representing one of the objects properties  */

@@ -469,8 +469,9 @@ declare namespace FudgeUserInterface {
             sources: T[];
             target: T;
         };
+        /** Used by the tree to indicate the drop position while dragging */
         dragDropDivider: HTMLHRElement;
-        /** Create an HTMLElement for the tree item representing the object  */
+        /** Create an HTMLFormElement for the tree item representing the object  */
         abstract createContent(_object: T): HTMLFormElement;
         /** Retrieve a string to create a label for the tree item representing one of the objects properties  */
         /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
@@ -526,23 +527,28 @@ declare namespace FudgeUserInterface {
          */
         get selected(): boolean;
         /**
-         * Returns attaches or detaches the {@link CSS_CLASS.SELECTED} to this item
+         * Attaches or detaches the {@link CSS_CLASS.SELECTED} to this item
          */
         set selected(_on: boolean);
+        /**
+         * Returns the content representing the attached {@link data}
+         */
         get content(): HTMLFormElement;
+        /**
+         * Set the content representing the attached {@link data}
+         */
         set content(_content: HTMLFormElement);
         /**
-         * Set the label text to show
+         * Set the value of input element with ID
+         * @param _id the ID of the element
          */
-        setValue(_id: string, _text: string): void;
+        setValue(_id: string, _value: string): void;
         /**
-         * Get the label text shown
+         * Get the value shown by input element at ID
+         * @param _id the ID of the element
          */
         getValue(_id: string): string;
         refreshContent(): void;
-        /**
-         * Get the label text shown
-         */
         refreshAttributes(): void;
         /**
          * Tries to expanding the {@link CustomTreeList} of children, by dispatching {@link EVENT.EXPAND}.
@@ -575,7 +581,7 @@ declare namespace FudgeUserInterface {
         private create;
         private hndFocus;
         private hndKey;
-        private startTypingLabel;
+        private startTypingInput;
         private hndDblClick;
         private hndChange;
         private hndDragStart;

@@ -59,7 +59,7 @@ namespace FudgeUserInterface {
     }
 
     /**
-     * Returns attaches or detaches the {@link CSS_CLASS.SELECTED} to this item
+     * Attaches or detaches the {@link CSS_CLASS.SELECTED} to this item
      */
     public set selected(_on: boolean) {
       if (_on)
@@ -68,48 +68,58 @@ namespace FudgeUserInterface {
         this.classList.remove(CSS_CLASS.SELECTED);
     }
 
+    /**
+     * Returns the content representing the attached {@link data}
+     */
     public get content(): HTMLFormElement {
       return this.#content;
     }
 
+    /**
+     * Set the content representing the attached {@link data}
+     */
     public set content(_content: HTMLFormElement) {
-      if (this.contains(this.content))
-        this.replaceChild(_content, this.content);
+      if (this.contains(this.#content))
+        this.replaceChild(_content, this.#content);
       else
         this.appendChild(_content);
       this.#content = _content;
+      this.#content.onsubmit = () => false;
     }
 
     /**
-     * Set the label text to show
+     * Set the value of input element with ID
+     * @param _id the ID of the element
      */
-    public setValue(_id: string, _text: string): void {
+    public setValue(_id: string, _value: string): void {
       let element: Element | RadioNodeList = this.content.elements.namedItem(_id);
       if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement)
-        element.value = _text;
+        element.value = _value;
     }
 
     /**
-     * Get the label text shown
+     * Get the value shown by input element at ID
+     * @param _id the ID of the element
      */
     public getValue(_id: string): string {
-      let label: string = "";
+      let value: string = "";
       let element: Element | RadioNodeList = this.content.elements.namedItem(_id);
       if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement)
-        label = element.value;
-      return label;
+        value = element.value;
+      return value;
     }
 
     public refreshContent(): void {
       this.content = this.controller.createContent(this.data);
     }
 
-    /**
-     * Get the label text shown
-     */
     public refreshAttributes(): void {
       this.setAttribute("attributes", this.controller.getAttributes(this.data));
     }
+
+    // public validate(): void {
+    //   this.controller.validate(this.data);
+    // }
 
     /**
      * Tries to expanding the {@link CustomTreeList} of children, by dispatching {@link EVENT.EXPAND}.
@@ -182,7 +192,6 @@ namespace FudgeUserInterface {
       this.tabIndex = 0;
     }
 
-
     private hndFocus = (_event: Event): void => {
       _event.stopPropagation();
       if (!(_event.target instanceof HTMLInputElement) || _event.target == this.checkbox) return;
@@ -219,7 +228,7 @@ namespace FudgeUserInterface {
           this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
           break;
         case ƒ.KEYBOARD_CODE.F2:
-          this.startTypingLabel();
+          this.startTypingInput();
           break;
         case ƒ.KEYBOARD_CODE.SPACE:
           this.select(_event.ctrlKey, _event.shiftKey);
@@ -251,7 +260,7 @@ namespace FudgeUserInterface {
       }
     }
 
-    private startTypingLabel(_inputElement?: HTMLElement): void {
+    private startTypingInput(_inputElement?: HTMLElement): void {
       if (!_inputElement) _inputElement = <HTMLElement>this.content.elements.item(0);
       if (_inputElement instanceof HTMLInputElement) {
         _inputElement.disabled = false;
@@ -263,12 +272,11 @@ namespace FudgeUserInterface {
       _event.stopPropagation();
       if (_event.target == this.checkbox) return;
       
-      this.startTypingLabel(<HTMLElement>_event.target);
+      this.startTypingInput(<HTMLElement>_event.target);
     }
 
     private hndChange = (_event: Event): void => {
       let target: HTMLElement = <HTMLElement>_event.target;
-      let item: HTMLLIElement = <HTMLLIElement>target.parentElement;
       _event.stopPropagation();
 
       if (target instanceof HTMLInputElement) {
@@ -277,8 +285,8 @@ namespace FudgeUserInterface {
             this.expand(target.checked);
             break;
           case "text":
+            this.focus();
             target.disabled = true;
-            item.focus();
             target.dispatchEvent(new Event(EVENT.RENAME, { bubbles: true }));
             break;
           case "default":
@@ -288,6 +296,7 @@ namespace FudgeUserInterface {
       }
       
       if (target instanceof HTMLSelectElement) {
+        this.focus();
         target.dispatchEvent(new Event(EVENT.RENAME, { bubbles: true }));
       }
         
