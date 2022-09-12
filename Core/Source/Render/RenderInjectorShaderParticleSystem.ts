@@ -47,7 +47,7 @@ namespace FudgeCore {
         return `(${_parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} * ${_value}`)})`;
       },
       [ParticleData.FUNCTION.DIVISION]: (_parameters: string[]) => {
-        return `(${_parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} / ${_value}`)})`;
+        return `(${_parameters[0]} / ${_parameters[1]})`;
       },
       [ParticleData.FUNCTION.MODULO]: (_parameters: string[]) => {
         return `(${_parameters.reduce((_accumulator: string, _value: string) => `mod(${_accumulator}, ${_value})`)})`;
