@@ -22,49 +22,47 @@ namespace Fudge {
       let content: HTMLFormElement = document.createElement("form");
 
       let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
+      let key: string = this.getKey(_data, parentData);
       if (parentData == this.particleEffectData.variables) {
-        let labelName: HTMLInputElement = document.createElement("input");
-        labelName.type = "text";
-        labelName.disabled = true;
-        labelName.value = this.getKey(_data, parentData);
-        labelName.id = ID.KEY;
-        
-        content.appendChild(labelName);
+        let input: HTMLInputElement = document.createElement("input");
+        input.type = "text";
+        input.disabled = true;
+        input.value = key;
+        input.id = ID.KEY;
+        content.appendChild(input);
       }
 
       if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) {
         let spanName: HTMLSpanElement = document.createElement("span");
-        spanName.innerText = parentData ? this.getKey(_data, parentData) : "root";
-        
+        spanName.innerText = parentData ? key : "root";
         content.appendChild(spanName);
       }
 
       if (ƒ.ParticleData.isExpression(_data) && parentData != this.particleEffectData.variables) {
-        let options: string[];
-        let names: string[];
-        if (ƒ.ParticleData.isFunction(parentData)) {
-          options = Object.keys(parentData.parameters);
-          names = ƒ.ParticleData.FUNCTION_PARAMETER_NAMES[parentData.function];
-        } else if (ƒ.ParticleData.isTransformation(parentData))
-          options = ViewParticleSystem.TRANSFORMATION_KEYS;
-        else if (this.getPath(parentData).pop() == "color")
-          options = ViewParticleSystem.COLOR_KEYS;
-
-        let select: HTMLSelectElement = document.createElement("select");
-        options.forEach((_option, _index) => {
-          let entry: HTMLOptionElement = document.createElement("option");
-          let text: string = names ? names[_index] : null;
-          entry.text = text != null ? text : _option;
-          entry.value = _option;
-          select.add(entry);
-        });
-        select.value = this.getKey(_data, parentData);
-        select.id = ID.KEY;
-
-        content.appendChild(select);
         let seperator: HTMLSpanElement = document.createElement("span");
         seperator.innerText = ": ";
-        content.appendChild(seperator);
+        if (ƒ.ParticleData.isFunction(parentData)) {
+          let names: string[] = ƒ.ParticleData.FUNCTION_PARAMETER_NAMES[parentData.function];
+          if (names) {
+            let name: HTMLSpanElement = document.createElement("span");
+            name.innerText = names[key] != null ? names[key] : key;
+            content.appendChild(name);
+            content.appendChild(seperator);
+          }
+        } else {
+          let options: string[] = ƒ.ParticleData.isTransformation(parentData) ? ViewParticleSystem.TRANSFORMATION_KEYS : ViewParticleSystem.COLOR_KEYS;
+          let select: HTMLSelectElement = document.createElement("select");
+          options.forEach((_option, _index) => {
+            let entry: HTMLOptionElement = document.createElement("option");
+            entry.text = _option;
+            entry.value = _option;
+            select.add(entry);
+          });
+          select.value = key;
+          select.id = ID.KEY;
+          content.appendChild(select);
+          content.appendChild(seperator);
+        }
       }
 
       if (ƒ.ParticleData.isExpression(_data)) {
@@ -84,11 +82,8 @@ namespace Fudge {
           input.type = "text";
           input.disabled = true;
           input.id = ID.VALUE;
-          if (ƒ.ParticleData.isVariable(_data)) {  
-            input.value = _data.name;
-          } else if (ƒ.ParticleData.isConstant(_data)) {
-            input.value = _data.value.toString();
-          }
+          input.setAttribute("list", "variables");
+          input.value = _data.value.toString();
           content.appendChild(input);
         } 
       } else if (ƒ.ParticleData.isTransformation(_data)) {
@@ -122,6 +117,18 @@ namespace Fudge {
         let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
         let key: string = this.getKey(_data, parentData);
         let target: Object = ƒ.ParticleData.isFunction(parentData) ? parentData.parameters : parentData;
+        
+        if (parentData == this.particleEffectData.variables) {
+          let errors: string[] = [];
+          if (this.isReferenced(key))
+            errors.push(`variable "${key}" is still referenced`);
+          if (this.particleEffectData.variables[_new])
+            errors.push(`variable "${_new}" already exists`);
+          if (errors.length > 0) {
+            ƒui.Warning.prompt(errors, "Unable to rename", "Please resolve the errors and try again" );
+            return;
+          }
+        }
 
         if (target[_new])
           target[key] = target[_new];
@@ -139,11 +146,12 @@ namespace Fudge {
 
       if (_id == ID.VALUE && (ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data))) {
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
+        if (typeof input == "string" && !this.particleEffectData.variables[input] && !ƒ.ParticleData.PREDEFINED_VARIABLES[input]) 
+          return;
+
         _data.type = typeof input == "string" ? "variable" : "constant";
-        if (ƒ.ParticleData.isVariable(_data))
-          _data.name = input as string;
-        else if (ƒ.ParticleData.isConstant(_data))
-          _data.value = input as number;
+        _data.value = input;
+
         return;
       }
     }
@@ -260,6 +268,7 @@ namespace Fudge {
 
     private getKey(_data: ƒ.ParticleData.EffectRecursive, _parentData: ƒ.ParticleData.EffectRecursive): string {
       let key: string;
+      if (!_parentData) return null;
       if (ƒ.ParticleData.isExpression(_data) && ƒ.ParticleData.isFunction(_parentData)) {
         key = _parentData.parameters.indexOf(_data).toString();
       } else {
@@ -274,6 +283,12 @@ namespace Fudge {
       let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
       let key: string = this.getKey(_data, parentData);
       let index: number = Number.parseInt(key);
+
+      if (parentData == this.particleEffectData.variables && this.isReferenced(key)) {
+        ƒui.Warning.prompt([`variable "${key}" is still referenced`], "Unable to delete", "Please resolve the errors and try again" );
+        return false;
+      }
+
       if (ƒ.ParticleData.isFunction(parentData)) 
         parentData.parameters.splice(index, 1);
       else if (Array.isArray(parentData)) 
@@ -283,6 +298,16 @@ namespace Fudge {
       
       this.childToParent.delete(_data);
       return true;
+    }
+
+    private isReferenced(_name: string, _data: ƒ.ParticleData.EffectRecursive = this.particleEffectData): boolean {
+      if (ƒ.ParticleData.isVariable(_data) && _data.value == _name) 
+        return true;
+      if (typeof _data == "object" && !ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data)) 
+        for (const subData of Object.values(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data)) 
+          if (this.isReferenced(_name, subData)) return true;
+        
+      return false;
     }
   }
 }

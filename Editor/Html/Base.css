@@ -316,3 +316,7 @@ div[view=ViewParticleSystem] ul.tree li[attributes~="variable"]>form>input:first
 div[view=ViewParticleSystem] ul.tree li.invalid {
   outline: 1px outset yellow;
 }
+
+div[view=ViewParticleSystem] input::-webkit-calendar-picker-indicator {
+  display: none;
+}

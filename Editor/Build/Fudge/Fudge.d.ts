@@ -404,6 +404,7 @@ declare namespace Fudge {
         getPath(_data: ƒ.ParticleData.EffectRecursive): string[];
         private getKey;
         private deleteData;
+        private isReferenced;
     }
 }
 declare namespace Fudge {
@@ -508,6 +509,7 @@ declare namespace Fudge {
         private tree;
         private controller;
         private errors;
+        private variables;
         constructor(_container: ComponentContainer, _state: Object);
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
@@ -517,6 +519,7 @@ declare namespace Fudge {
         private recreateTree;
         private validateData;
         private enableSave;
+        private refreshVariables;
     }
 }
 declare namespace Fudge {
