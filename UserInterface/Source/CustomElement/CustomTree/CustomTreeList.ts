@@ -11,7 +11,6 @@ namespace FudgeUserInterface {
       super();
       this.controller = _controller;
       this.addItems(_items);
-      this.addEventListener(EVENT.DRAG_ENTER, this.hndDragEnter);
       this.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
       this.className = "tree";
     }
@@ -124,13 +123,10 @@ namespace FudgeUserInterface {
         if (_data.indexOf(item.data) > -1) {
           // item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
           item.dispatchEvent(new Event(EVENT.REMOVE_CHILD, { bubbles: true }));
-          let parentNode: ParentNode = item.parentNode;
-          if (parentNode instanceof CustomTreeList) {
-            deleted.push(parentNode.removeChild(item));
-            // siblings might need to refresh their content i.e. if they display their own index
-            if (parents.indexOf(parentNode) == -1)
-              parents.push(parentNode);
-          }
+          let parent: CustomTreeList<T> = <CustomTreeList<T>>item.parentElement;
+          deleted.push(parent.removeChild(item));
+          if (parents.indexOf(parent) == -1) // siblings might need to refresh their content i.e. if they display their own index
+            parents.push(parent);
         }
       
       for (let parent of parents) {
@@ -150,10 +146,7 @@ namespace FudgeUserInterface {
       return null;
     }
 
-    private hndDragEnter = (_event: DragEvent): void => { // this prevents cursor from flickering
-      _event.preventDefault();
-      _event.dataTransfer.dropEffect = "move";
-    }
+
 
     private hndDragOver = (_event: DragEvent): void => {
       _event.stopPropagation();

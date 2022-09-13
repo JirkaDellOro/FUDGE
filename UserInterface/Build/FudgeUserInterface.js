@@ -1437,11 +1437,13 @@ var FudgeUserInterface;
             let btnOk = document.createElement("button");
             btnOk.innerHTML = _ok;
             btnOk.onclick = () => {
+                //@ts-ignore
                 Warning.dom.close();
                 Warning.dom.remove();
             };
             footer.appendChild(btnOk);
             Warning.dom.appendChild(footer);
+            //@ts-ignore
             Warning.dom.showModal();
         }
     }
@@ -1460,7 +1462,6 @@ var FudgeUserInterface;
             super();
             this.controller = _controller;
             this.addItems(_items);
-            this.addEventListener("dragenter" /* DRAG_ENTER */, this.hndDragEnter);
             this.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             this.className = "tree";
         }
@@ -1561,13 +1562,10 @@ var FudgeUserInterface;
                 if (_data.indexOf(item.data) > -1) {
                     // item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
                     item.dispatchEvent(new Event("removeChild" /* REMOVE_CHILD */, { bubbles: true }));
-                    let parentNode = item.parentNode;
-                    if (parentNode instanceof CustomTreeList) {
-                        deleted.push(parentNode.removeChild(item));
-                        // siblings might need to refresh their content i.e. if they display their own index
-                        if (parents.indexOf(parentNode) == -1)
-                            parents.push(parentNode);
-                    }
+                    let parent = item.parentElement;
+                    deleted.push(parent.removeChild(item));
+                    if (parents.indexOf(parent) == -1) // siblings might need to refresh their content i.e. if they display their own index
+                        parents.push(parent);
                 }
             for (let parent of parents) {
                 parent.getItems()
@@ -1583,10 +1581,6 @@ var FudgeUserInterface;
                     return item;
             return null;
         }
-        hndDragEnter = (_event) => {
-            _event.preventDefault();
-            _event.dataTransfer.dropEffect = "move";
-        };
         hndDragOver = (_event) => {
             _event.stopPropagation();
             _event.preventDefault();
@@ -1686,24 +1680,14 @@ var FudgeUserInterface;
             }
             return branch;
         }
-        hndRename(_event) {
-            let element = _event.target;
-            let item = element.parentElement;
-            while (!(item instanceof FudgeUserInterface.CustomTreeItem)) {
-                item = item.parentElement;
-            }
-            let id = element.id;
-            let value = item.getValue(id);
-            this.controller.rename(item.data, id, value);
-            item.refreshAttributes();
-            // item.expand(true);
-            let parent = item.parentElement;
-            while (!(parent instanceof FudgeUserInterface.CustomTreeItem)) {
-                parent = parent.parentElement;
-            }
-            parent.refreshContent();
-        }
         // Callback / Eventhandler in Tree
+        hndRename(_event) {
+            let targetItem = _event.target;
+            this.controller.rename(targetItem.data, _event.detail.id, _event.detail.value);
+            targetItem.parentElement?.parentElement?.expand(true); // refresh parent since children might have changed their order
+            targetItem.refreshAttributes();
+            targetItem.focus();
+        }
         hndSelect(_event) {
             // _event.stopPropagation();
             let detail = _event.detail;
@@ -1862,6 +1846,7 @@ var FudgeUserInterface;
             this.draggable = true; // TODO: add is draggable to custom controller
             // TODO: add is dropTarget to custom controller
             this.addEventListener("dragstart" /* DRAG_START */, this.hndDragStart);
+            this.addEventListener("dragenter" /* DRAG_ENTER */, this.hndDragEnter);
             this.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             this.addEventListener("pointerup" /* POINTER_UP */, this.hndPointerUp);
             this.addEventListener("removeChild" /* REMOVE_CHILD */, this.hndRemove);
@@ -1910,35 +1895,12 @@ var FudgeUserInterface;
             this.#content = _content;
             this.#content.onsubmit = () => false;
         }
-        /**
-         * Set the value of input element with ID
-         * @param _id the ID of the element
-         */
-        setValue(_id, _value) {
-            let element = this.content.elements.namedItem(_id);
-            if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement)
-                element.value = _value;
-        }
-        /**
-         * Get the value shown by input element at ID
-         * @param _id the ID of the element
-         */
-        getValue(_id) {
-            let value = "";
-            let element = this.content.elements.namedItem(_id);
-            if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement)
-                value = element.value;
-            return value;
-        }
         refreshContent() {
             this.content = this.controller.createContent(this.data);
         }
         refreshAttributes() {
             this.setAttribute("attributes", this.controller.getAttributes(this.data));
         }
-        // public validate(): void {
-        //   this.controller.validate(this.data);
-        // }
         /**
          * Tries to expanding the {@link CustomTreeList} of children, by dispatching {@link EVENT.EXPAND}.
          * The user of the tree needs to add an event listener to the tree
@@ -2088,19 +2050,16 @@ var FudgeUserInterface;
                         this.expand(target.checked);
                         break;
                     case "text":
-                        this.focus();
                         target.disabled = true;
-                        target.dispatchEvent(new Event("rename" /* RENAME */, { bubbles: true }));
+                        this.dispatchEvent(new CustomEvent("rename" /* RENAME */, { bubbles: true, detail: { id: target.id, value: target.value } }));
                         break;
                     case "default":
                         // console.log(target);
                         break;
                 }
             }
-            if (target instanceof HTMLSelectElement) {
-                this.focus();
-                target.dispatchEvent(new Event("rename" /* RENAME */, { bubbles: true }));
-            }
+            if (target instanceof HTMLSelectElement)
+                this.dispatchEvent(new CustomEvent("rename" /* RENAME */, { bubbles: true, detail: { id: target.id, value: target.value } }));
         };
         hndDragStart = (_event) => {
             // _event.stopPropagation();
@@ -2116,6 +2075,10 @@ var FudgeUserInterface;
             this.controller.dragDrop.target = null;
             // mark as already processed by this tree item to ignore it in further propagation through the tree
             _event.dataTransfer.setData("dragstart", "dragstart");
+        };
+        hndDragEnter = (_event) => {
+            _event.preventDefault();
+            _event.dataTransfer.dropEffect = "move";
         };
         hndDragOver = (_event) => {
             let rect = this.content.getBoundingClientRect();

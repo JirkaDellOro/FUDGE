@@ -423,7 +423,6 @@ declare namespace FudgeUserInterface {
         selectInterval(_dataStart: T, _dataEnd: T): void;
         delete(_data: T[]): CustomTreeItem<T>[];
         findVisible(_data: T): CustomTreeItem<T>;
-        private hndDragEnter;
         private hndDragOver;
     }
 }
@@ -551,16 +550,6 @@ declare namespace FudgeUserInterface {
          * Set the content representing the attached {@link data}
          */
         set content(_content: HTMLFormElement);
-        /**
-         * Set the value of input element with ID
-         * @param _id the ID of the element
-         */
-        setValue(_id: string, _value: string): void;
-        /**
-         * Get the value shown by input element at ID
-         * @param _id the ID of the element
-         */
-        getValue(_id: string): string;
         refreshContent(): void;
         refreshAttributes(): void;
         /**
@@ -598,6 +587,7 @@ declare namespace FudgeUserInterface {
         private hndDblClick;
         private hndChange;
         private hndDragStart;
+        private hndDragEnter;
         private hndDragOver;
         private hndPointerUp;
         private hndRemove;

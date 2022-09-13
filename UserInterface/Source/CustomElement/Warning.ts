@@ -1,5 +1,4 @@
 namespace FudgeUserInterface {
-  import ƒ = FudgeCore;
 
   /**
    * Static class to display a modal or non-modal warning.
@@ -25,11 +24,13 @@ namespace FudgeUserInterface {
       let btnOk: HTMLButtonElement = document.createElement("button");
       btnOk.innerHTML = _ok;
       btnOk.onclick = () => {
+        //@ts-ignore
         Warning.dom.close();
         Warning.dom.remove();
       };
       footer.appendChild(btnOk);
       Warning.dom.appendChild(footer);
+      //@ts-ignore
       Warning.dom.showModal();
     }
   }

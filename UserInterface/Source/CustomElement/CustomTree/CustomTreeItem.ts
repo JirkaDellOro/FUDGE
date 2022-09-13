@@ -32,6 +32,7 @@ namespace FudgeUserInterface {
       this.draggable = true; // TODO: add is draggable to custom controller
       // TODO: add is dropTarget to custom controller
       this.addEventListener(EVENT.DRAG_START, this.hndDragStart);
+      this.addEventListener(EVENT.DRAG_ENTER, this.hndDragEnter);
       this.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
       this.addEventListener(EVENT.POINTER_UP, this.hndPointerUp);
       this.addEventListener(EVENT.REMOVE_CHILD, this.hndRemove);
@@ -87,28 +88,6 @@ namespace FudgeUserInterface {
       this.#content.onsubmit = () => false;
     }
 
-    /**
-     * Set the value of input element with ID
-     * @param _id the ID of the element
-     */
-    public setValue(_id: string, _value: string): void {
-      let element: Element | RadioNodeList = this.content.elements.namedItem(_id);
-      if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement)
-        element.value = _value;
-    }
-
-    /**
-     * Get the value shown by input element at ID
-     * @param _id the ID of the element
-     */
-    public getValue(_id: string): string {
-      let value: string = "";
-      let element: Element | RadioNodeList = this.content.elements.namedItem(_id);
-      if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement)
-        value = element.value;
-      return value;
-    }
-
     public refreshContent(): void {
       this.content = this.controller.createContent(this.data);
     }
@@ -116,10 +95,6 @@ namespace FudgeUserInterface {
     public refreshAttributes(): void {
       this.setAttribute("attributes", this.controller.getAttributes(this.data));
     }
-
-    // public validate(): void {
-    //   this.controller.validate(this.data);
-    // }
 
     /**
      * Tries to expanding the {@link CustomTreeList} of children, by dispatching {@link EVENT.EXPAND}.
@@ -285,9 +260,8 @@ namespace FudgeUserInterface {
             this.expand(target.checked);
             break;
           case "text":
-            this.focus();
             target.disabled = true;
-            target.dispatchEvent(new Event(EVENT.RENAME, { bubbles: true }));
+            this.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { id: target.id, value: target.value }}));
             break;
           case "default":
             // console.log(target);
@@ -295,10 +269,8 @@ namespace FudgeUserInterface {
         }
       }
       
-      if (target instanceof HTMLSelectElement) {
-        this.focus();
-        target.dispatchEvent(new Event(EVENT.RENAME, { bubbles: true }));
-      }
+      if (target instanceof HTMLSelectElement) 
+        this.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { id: target.id, value: target.value } }));
         
     }
 
@@ -318,6 +290,11 @@ namespace FudgeUserInterface {
 
       // mark as already processed by this tree item to ignore it in further propagation through the tree
       _event.dataTransfer.setData("dragstart", "dragstart");
+    }
+
+    private hndDragEnter = (_event: DragEvent): void => { // this prevents cursor from flickering
+      _event.preventDefault();
+      _event.dataTransfer.dropEffect = "move";
     }
 
     private hndDragOver = (_event: DragEvent): void => {      
