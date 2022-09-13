@@ -172,6 +172,7 @@ namespace Fudge {
           this.setParticleEffect(this.cmpParticleSystem?.particleEffect);
           break;
         case EVENT_EDITOR.CLOSE:
+          document.removeEventListener(ƒui.EVENT.KEY_DOWN, this.hndEvent);
           this.enableSave(true);
           break;
         case ƒui.EVENT.KEY_DOWN:
@@ -229,7 +230,7 @@ namespace Fudge {
 
 
     private recreateTree(_particleEffectData: ƒ.Serialization): void {
-      this.controller = new ControllerTreeParticleSystem();
+      this.controller = new ControllerTreeParticleSystem(this.particleEffectData);
       let newTree: ƒui.CustomTree<ƒ.Serialization> = 
         new ƒui.CustomTree<ƒ.Serialization>( this.controller, _particleEffectData );
 

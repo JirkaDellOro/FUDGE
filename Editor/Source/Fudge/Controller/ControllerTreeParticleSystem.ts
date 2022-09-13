@@ -11,12 +11,18 @@ namespace Fudge {
 
   export class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.EffectRecursive> {
     public childToParent: Map<ƒ.ParticleData.EffectRecursive, ƒ.ParticleData.EffectRecursive> = new Map();
+    private particleEffectData: ƒ.ParticleData.Effect;
+
+    constructor(_particleEffectData: ƒ.ParticleData.Effect) {
+      super();
+      this.particleEffectData = _particleEffectData;
+    }
 
     public createContent(_data: ƒ.ParticleData.EffectRecursive): HTMLFormElement {
       let content: HTMLFormElement = document.createElement("form");
 
       let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
-      if (this.getPath(parentData).pop() == "variables") {
+      if (parentData == this.particleEffectData.variables) {
         let labelName: HTMLInputElement = document.createElement("input");
         labelName.type = "text";
         labelName.disabled = true;
@@ -33,7 +39,7 @@ namespace Fudge {
         content.appendChild(spanName);
       }
 
-      if (ƒ.ParticleData.isExpression(_data) && this.getPath(parentData).pop() != "variables") {
+      if (ƒ.ParticleData.isExpression(_data) && parentData != this.particleEffectData.variables) {
         let options: string[];
         let names: string[];
         if (ƒ.ParticleData.isFunction(parentData)) {
@@ -103,7 +109,7 @@ namespace Fudge {
 
     public getAttributes(_data: ƒ.ParticleData.EffectRecursive): string {
       let attributes: string[] = [];
-      if (ƒ.ParticleData.isVariable(_data) || (ƒ.ParticleData.isFunction(_data) && this.getPath(_data).includes("variables"))) 
+      if (ƒ.ParticleData.isVariable(_data) || this.childToParent.get(_data) == this.particleEffectData.variables) 
         attributes.push("variable");
 
       return attributes.join(" ");
@@ -154,8 +160,7 @@ namespace Fudge {
         // sort keys for color and vector e.g. ("r", "g", "b", "a")
         if (ƒ.ParticleData.isTransformation(_data))
           subKeys = ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => subKeys.includes(_key));
-        let path: string[] = this.getPath(_data);
-        if (path[path.length - 1] == "color")
+        if (_data == this.particleEffectData.color)
           subKeys = ViewParticleSystem.COLOR_KEYS.filter(_key => subKeys.includes(_key));
 
         subKeys.forEach(_key => {

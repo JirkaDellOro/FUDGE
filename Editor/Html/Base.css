@@ -309,7 +309,7 @@ div[view=ViewParticleSystem] form > select {
   appearance: none;
 }
 
-div[view=ViewParticleSystem] ul.tree li[attributes~="variable"]>form>input {
+div[view=ViewParticleSystem] ul.tree li[attributes~="variable"]>form>input:first-of-type {
   font-style: italic;
 }
 

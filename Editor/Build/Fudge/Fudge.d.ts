@@ -391,6 +391,8 @@ declare namespace Fudge {
     import ƒui = FudgeUserInterface;
     class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.EffectRecursive> {
         childToParent: Map<ƒ.ParticleData.EffectRecursive, ƒ.ParticleData.EffectRecursive>;
+        private particleEffectData;
+        constructor(_particleEffectData: ƒ.ParticleData.Effect);
         createContent(_data: ƒ.ParticleData.EffectRecursive): HTMLFormElement;
         getAttributes(_data: ƒ.ParticleData.EffectRecursive): string;
         rename(_data: ƒ.ParticleData.EffectRecursive, _id: string, _new: string): void;

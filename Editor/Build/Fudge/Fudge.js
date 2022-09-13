@@ -1809,10 +1809,15 @@ var Fudge;
     var ƒui = FudgeUserInterface;
     class ControllerTreeParticleSystem extends ƒui.CustomTreeController {
         childToParent = new Map();
+        particleEffectData;
+        constructor(_particleEffectData) {
+            super();
+            this.particleEffectData = _particleEffectData;
+        }
         createContent(_data) {
             let content = document.createElement("form");
             let parentData = this.childToParent.get(_data);
-            if (this.getPath(parentData).pop() == "variables") {
+            if (parentData == this.particleEffectData.variables) {
                 let labelName = document.createElement("input");
                 labelName.type = "text";
                 labelName.disabled = true;
@@ -1825,7 +1830,7 @@ var Fudge;
                 spanName.innerText = parentData ? this.getKey(_data, parentData) : "root";
                 content.appendChild(spanName);
             }
-            if (ƒ.ParticleData.isExpression(_data) && this.getPath(parentData).pop() != "variables") {
+            if (ƒ.ParticleData.isExpression(_data) && parentData != this.particleEffectData.variables) {
                 let options;
                 let names;
                 if (ƒ.ParticleData.isFunction(parentData)) {
@@ -1894,7 +1899,7 @@ var Fudge;
         }
         getAttributes(_data) {
             let attributes = [];
-            if (ƒ.ParticleData.isVariable(_data) || (ƒ.ParticleData.isFunction(_data) && this.getPath(_data).includes("variables")))
+            if (ƒ.ParticleData.isVariable(_data) || this.childToParent.get(_data) == this.particleEffectData.variables)
                 attributes.push("variable");
             return attributes.join(" ");
         }
@@ -1937,8 +1942,7 @@ var Fudge;
                 // sort keys for color and vector e.g. ("r", "g", "b", "a")
                 if (ƒ.ParticleData.isTransformation(_data))
                     subKeys = Fudge.ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => subKeys.includes(_key));
-                let path = this.getPath(_data);
-                if (path[path.length - 1] == "color")
+                if (_data == this.particleEffectData.color)
                     subKeys = Fudge.ViewParticleSystem.COLOR_KEYS.filter(_key => subKeys.includes(_key));
                 subKeys.forEach(_key => {
                     let child = subData[_key];
@@ -2551,6 +2555,7 @@ var Fudge;
                     this.setParticleEffect(this.cmpParticleSystem?.particleEffect);
                     break;
                 case Fudge.EVENT_EDITOR.CLOSE:
+                    document.removeEventListener("keydown" /* KEY_DOWN */, this.hndEvent);
                     this.enableSave(true);
                     break;
                 case "keydown" /* KEY_DOWN */:
@@ -2606,7 +2611,7 @@ var Fudge;
                 this.idInterval = window.setInterval(() => { this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph } }); }, 1000 / 30);
         }
         recreateTree(_particleEffectData) {
-            this.controller = new Fudge.ControllerTreeParticleSystem();
+            this.controller = new Fudge.ControllerTreeParticleSystem(this.particleEffectData);
             let newTree = new ƒui.CustomTree(this.controller, _particleEffectData);
             if (this.tree && this.dom.contains(this.tree))
                 this.dom.replaceChild(newTree, this.tree);
