@@ -1979,51 +1979,28 @@ var Fudge;
             let move = [];
             if (!_children.every(_data => ƒ.ParticleData.isExpression(_data)))
                 return move;
-            // TODO: refactor this srsly
             if (ƒ.ParticleData.isFunction(_target)) {
-                _children.forEach((_moveData, _index) => {
-                    let parent = this.childToParent.get(_moveData);
-                    if (parent) {
-                        if (parent == _target) {
-                            if (_at == null) {
-                                _target.parameters.push(_moveData);
-                                this.deleteData(_moveData);
-                                move.push(_moveData);
-                                this.childToParent.set(_moveData, _target);
-                            }
-                            else {
-                                let newData = JSON.parse(JSON.stringify(_moveData));
-                                _target.parameters.splice(_at + _index, 0, newData);
-                                this.deleteData(_moveData);
-                                move.push(newData);
-                                this.childToParent.delete(_moveData);
-                                this.childToParent.set(newData, _target);
-                            }
-                        }
-                        else {
-                            if (this.deleteData(_moveData)) {
-                                _target.parameters.push(_moveData);
-                                move.push(_moveData);
-                                this.childToParent.set(_moveData, _target);
-                            }
-                        }
-                    }
-                    else {
-                        _target.parameters.push(_moveData);
-                        move.push(_moveData);
-                        this.childToParent.set(_moveData, _target);
-                    }
-                });
+                for (let data of _children) {
+                    let index = _target.parameters.indexOf(data); // _at needs to be corrected if we are moving within same parent
+                    if (!this.deleteData(data))
+                        continue;
+                    move.push(data);
+                    this.childToParent.set(data, _target);
+                    if (index > -1 && _at > index)
+                        _at -= 1;
+                    if (_at == null)
+                        _target.parameters.push(data);
+                    else
+                        _target.parameters.splice(_at + _children.indexOf(data), 0, data);
+                }
             }
             return move;
         }
         async copy(_originalData) {
             let copies = [];
             if (_originalData.every(_data => ƒ.ParticleData.isExpression(_data))) {
-                for (let originalData of _originalData) {
-                    let newData = JSON.parse(JSON.stringify(originalData));
-                    // this.mapChildToParent.set(newData, this.mapChildToParent.get(originalData));
-                    copies.push(newData);
+                for (let data of _originalData) {
+                    copies.push(JSON.parse(JSON.stringify(data)));
                 }
             }
             return copies;
