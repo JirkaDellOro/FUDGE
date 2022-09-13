@@ -1907,11 +1907,13 @@ var Fudge;
             let inputAsNumber = Number.parseFloat(_new);
             if (_id == "key" /* KEY */ && ƒ.ParticleData.isExpression(_data)) {
                 let parentData = this.childToParent.get(_data);
-                if (ƒ.ParticleData.isFunction(parentData) && parentData.parameters[_new]) {
-                    let key = this.getKey(_data, parentData);
-                    parentData.parameters[key] = parentData.parameters[_new];
-                    parentData.parameters[_new] = _data;
-                }
+                let key = this.getKey(_data, parentData);
+                let target = ƒ.ParticleData.isFunction(parentData) ? parentData.parameters : parentData;
+                if (target[_new])
+                    target[key] = target[_new];
+                else
+                    delete target[key];
+                target[_new] = _data;
                 return;
             }
             if (_id == "function" /* FUNCTION */ && ƒ.ParticleData.isFunction(_data)) {

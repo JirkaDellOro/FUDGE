@@ -120,18 +120,23 @@ namespace Fudge {
 
       if (_id == ID.KEY && ƒ.ParticleData.isExpression(_data)) {
         let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
-        if (ƒ.ParticleData.isFunction(parentData) && parentData.parameters[_new]) {
-          let key: string = this.getKey(_data, parentData);
-          parentData.parameters[key] = parentData.parameters[_new];
-          parentData.parameters[_new] = _data;
-        }
+        let key: string = this.getKey(_data, parentData);
+        let target: Object = ƒ.ParticleData.isFunction(parentData) ? parentData.parameters : parentData;
+
+        if (target[_new])
+          target[key] = target[_new];
+        else 
+          delete target[key];
+        target[_new] = _data;
 
         return;
       }
+
       if (_id == ID.FUNCTION && ƒ.ParticleData.isFunction(_data)) {
         _data.function = <ƒ.ParticleData.FUNCTION>_new;
         return;
       }
+
       if (_id == ID.VALUE && (ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data))) {
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
         _data.type = typeof input == "string" ? "variable" : "constant";
