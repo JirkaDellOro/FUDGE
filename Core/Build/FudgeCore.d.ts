@@ -503,13 +503,15 @@ declare namespace FudgeCore {
         const FUNCTION_MINIMUM_PARAMETERS: {
             [key in ParticleData.FUNCTION]: number;
         };
+        const PREDEFINED_VARIABLES: {
+            [key: string]: string;
+        };
     }
     class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
         static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number;
         static readonly FUNCTIONS: {
             [key in ParticleData.FUNCTION]: Function;
         };
-        private static readonly PREDEFINED_VARIABLES;
         static decorate(_constructor: Function): void;
         static getVertexShaderSource(this: ShaderParticleSystem): string;
         static getFragmentShaderSource(this: ShaderParticleSystem): string;
@@ -4208,7 +4210,7 @@ declare namespace FudgeCore {
             readonly type: "function";
         }
         interface Variable {
-            name: string;
+            value: string;
             type: "variable";
         }
         interface Constant {

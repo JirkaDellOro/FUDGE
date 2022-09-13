@@ -32,6 +32,12 @@ namespace FudgeCore {
       [ParticleData.FUNCTION.RANDOM]: 1,
       [ParticleData.FUNCTION.RANDOM_RANGE]: 3
     };
+
+    export const PREDEFINED_VARIABLES: { [key: string]: string } = {
+      index: "fParticleIndex",
+      numberOfParticles: "u_fNumberOfParticles",
+      time: "u_fTime"
+    };
   }
 
   export class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
@@ -79,11 +85,6 @@ namespace FudgeCore {
       [ParticleData.FUNCTION.RANDOM_RANGE]: (_parameters: string[]) => {
         return `${RenderInjectorShaderParticleSystem.FUNCTIONS["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]}`;
       }
-    };
-    private static readonly PREDEFINED_VARIABLES: { [key: string]: string } = {
-      index: "fParticleIndex",
-      numberOfParticles: "u_fNumberOfParticles",
-      time: "u_fTime"
     };
 
     public static override decorate(_constructor: Function): void {
@@ -141,7 +142,7 @@ namespace FudgeCore {
 
       let variableMap: {[key: string]: string} = {};
       Object.keys(_data.variables).forEach( (_variableName, _index) => {
-        if (RenderInjectorShaderParticleSystem.PREDEFINED_VARIABLES[_variableName])
+        if (ParticleData.PREDEFINED_VARIABLES[_variableName])
           throw `Error in ${ParticleEffect.name}: "${_variableName}" is a predefined variable and can not be redeclared`;
         else
           return variableMap[_variableName] = `fVariable${_index}`; 
@@ -154,9 +155,9 @@ namespace FudgeCore {
 
       function renameRecursive(_data: ParticleData.Effect): void {
         if (ParticleData.isVariable(_data)) {
-          let newName: string = RenderInjectorShaderParticleSystem.PREDEFINED_VARIABLES[_data.name] || variableMap[_data.name];
+          let newName: string = ParticleData.PREDEFINED_VARIABLES[_data.value] || variableMap[_data.value];
           if (newName)
-            _data.name = newName;
+            _data.value = newName;
           else
             throw `Error in ${ParticleEffect.name}: "${newName}" is not a defined variable`;
         } else {
@@ -267,7 +268,7 @@ namespace FudgeCore {
       }
   
       if (ParticleData.isVariable(_expression)) {
-        return _expression.name;
+        return _expression.value;
       } 
   
       if (ParticleData.isConstant(_expression)) {

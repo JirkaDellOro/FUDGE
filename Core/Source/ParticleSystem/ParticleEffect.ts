@@ -20,7 +20,7 @@ namespace FudgeCore {
     }
   
     export interface Variable {
-      name: string;
+      value: string;
       type: "variable";
     }
   
