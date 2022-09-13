@@ -1714,7 +1714,7 @@ var FudgeUserInterface;
         }
         hndDragLeave = (_event) => {
             let relatedTarget = _event.relatedTarget;
-            if (relatedTarget instanceof HTMLElement && relatedTarget.parentElement && !this.contains(relatedTarget))
+            if (relatedTarget instanceof HTMLElement && !this.contains(relatedTarget) && !this.contains(relatedTarget.offsetParent)) // offset parent is for weird (invisible) divs which are placed over input elements and trigger leave events... 
                 this.controller.dragDropDivider.remove();
         };
         addChildren(_children, _target, _at) {
