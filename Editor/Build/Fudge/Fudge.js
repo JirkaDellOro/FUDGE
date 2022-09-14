@@ -2466,6 +2466,8 @@ var Fudge;
         //#region  ContextMenu
         openContextMenu = (_event) => {
             let focus = this.tree.getFocussed();
+            if (!focus)
+                return;
             this.contextMenu.items.forEach(_item => _item.visible = false);
             let popup = false;
             if (focus == this.particleEffectData.color || ƒ.ParticleData.isTransformation(focus)) {
@@ -2540,6 +2542,8 @@ var Fudge;
         contextMenuCallback(_item, _window, _event) {
             ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
             let focus = this.tree.getFocussed();
+            if (!focus)
+                return;
             let child;
             switch (Number(_item.id)) {
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT:
@@ -2572,8 +2576,6 @@ var Fudge;
                     }
                     break;
                 case Fudge.CONTEXTMENU.DELETE_PARTICLE_DATA:
-                    if (!focus)
-                        return;
                     let remove = this.controller.delete([focus]);
                     this.tree.delete(remove);
                     this.tree.clearSelection();

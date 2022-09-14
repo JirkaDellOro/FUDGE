@@ -32,6 +32,8 @@ namespace Fudge {
     //#region  ContextMenu
     protected openContextMenu = (_event: Event): void => {
       let focus: ƒ.ParticleData.EffectRecursive = this.tree.getFocussed();
+      if (!focus)
+        return;
       this.contextMenu.items.forEach(_item => _item.visible = false);
       let popup: boolean = false;
       
@@ -122,6 +124,8 @@ namespace Fudge {
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
       let focus: ƒ.ParticleData.EffectRecursive = this.tree.getFocussed();
+      if (!focus)
+        return;
 
       let child: ƒ.ParticleData.EffectRecursive;
       switch (Number(_item.id)) {
@@ -158,8 +162,6 @@ namespace Fudge {
           }
           break;
         case CONTEXTMENU.DELETE_PARTICLE_DATA:
-          if (!focus)
-            return;
           let remove: ƒ.Serialization[] = this.controller.delete([focus]);
           this.tree.delete(remove);
           this.tree.clearSelection();
