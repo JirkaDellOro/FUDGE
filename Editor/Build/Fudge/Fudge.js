@@ -2596,7 +2596,7 @@ var Fudge;
                     break;
                 case "keydown" /* KEY_DOWN */:
                     if (this.errors.length > 0 && _event instanceof KeyboardEvent && _event.code == ƒ.KEYBOARD_CODE.S && _event.ctrlKey)
-                        ƒui.Warning.prompt(this.errors.map(([_data, _error]) => _error), "Unable to save", `Project can't be saved while having unresolved errors`, "OK");
+                        ƒui.Warning.display(this.errors.map(([_data, _error]) => _error), "Unable to save", `Project can't be saved while having unresolved errors`, "OK");
                     break;
                 case Fudge.EVENT_EDITOR.MODIFY:
                 case "delete" /* DELETE */:
