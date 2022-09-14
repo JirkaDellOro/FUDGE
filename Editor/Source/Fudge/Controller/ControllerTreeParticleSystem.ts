@@ -148,8 +148,6 @@ namespace Fudge {
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
         if (typeof input == "string" && !this.particleEffectData.variables[input] && !ƒ.ParticleData.PREDEFINED_VARIABLES[input]) 
           return;
-
-        _data.type = typeof input == "string" ? "variable" : "constant";
         _data.value = input;
 
         return;
@@ -287,9 +285,9 @@ namespace Fudge {
     private isReferenced(_name: string, _data: ƒ.ParticleData.EffectRecursive = this.particleEffectData): boolean {
       if (ƒ.ParticleData.isVariable(_data) && _data.value == _name) 
         return true;
-      if (typeof _data == "object" && !ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data)) 
-        for (const subData of Object.values(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data)) 
-          if (this.isReferenced(_name, subData)) return true;
+      for (const subData of Object.values(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data)) 
+        if (typeof subData == "object" && this.isReferenced(_name, subData))
+          return true;
         
       return false;
     }

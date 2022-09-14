@@ -4207,28 +4207,24 @@ declare namespace FudgeCore {
         interface Function {
             function: FUNCTION;
             parameters: Expression[];
-            readonly type: "function";
         }
         interface Variable {
             value: string;
-            type: "variable";
         }
         interface Constant {
             value: number;
-            type: "constant";
         }
         interface Transformation {
             transformation: "translate" | "rotate" | "scale";
             x?: Expression;
             y?: Expression;
             z?: Expression;
-            readonly type: "transformation";
         }
-        function isExpression(_data: General): _data is Expression;
-        function isFunction(_data: General): _data is Function;
-        function isVariable(_data: General): _data is Variable;
-        function isConstant(_data: General): _data is Constant;
-        function isTransformation(_data: General): _data is Transformation;
+        function isExpression(_data: EffectRecursive): _data is Expression;
+        function isFunction(_data: EffectRecursive): _data is Function;
+        function isVariable(_data: EffectRecursive): _data is Variable;
+        function isConstant(_data: EffectRecursive): _data is Constant;
+        function isTransformation(_data: EffectRecursive): _data is Transformation;
     }
     /**
      * Holds all the information which defines the particle effect. Can load the said information out of a json file.

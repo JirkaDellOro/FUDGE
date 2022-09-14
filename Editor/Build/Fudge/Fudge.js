@@ -1933,7 +1933,6 @@ var Fudge;
                 let input = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
                 if (typeof input == "string" && !this.particleEffectData.variables[input] && !ƒ.ParticleData.PREDEFINED_VARIABLES[input])
                     return;
-                _data.type = typeof input == "string" ? "variable" : "constant";
                 _data.value = input;
                 return;
             }
@@ -2052,10 +2051,9 @@ var Fudge;
         isReferenced(_name, _data = this.particleEffectData) {
             if (ƒ.ParticleData.isVariable(_data) && _data.value == _name)
                 return true;
-            if (typeof _data == "object" && !ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data))
-                for (const subData of Object.values(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data))
-                    if (this.isReferenced(_name, subData))
-                        return true;
+            for (const subData of Object.values(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data))
+                if (typeof subData == "object" && this.isReferenced(_name, subData))
+                    return true;
             return false;
         }
     }
@@ -2520,8 +2518,8 @@ var Fudge;
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT:
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION:
                     child = Number(_item.id) == Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT ?
-                        { type: "constant", value: 1 } :
-                        { type: "function", function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: [] };
+                        { value: 1 } :
+                        { function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: [] };
                     if (ƒ.ParticleData.isFunction(focus))
                         focus.parameters.push(child);
                     else if (ƒ.ParticleData.isTransformation(focus) || focus == this.particleEffectData.color)
@@ -2537,7 +2535,7 @@ var Fudge;
                     break;
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION:
                     if (Array.isArray(focus)) {
-                        child = { type: "transformation", transformation: _item.label };
+                        child = { transformation: _item.label };
                         focus.push(child);
                         this.tree.findVisible(focus).expand(true);
                         this.tree.findVisible(child).focus();
@@ -2650,21 +2648,20 @@ var Fudge;
             invalid.forEach(([_data, _error]) => console.warn(`${ƒ.ParticleEffect.name}: ${_error}`));
             return invalid;
             function validateRecursive(_data, _path = []) {
-                let recurse = _data;
                 if (ƒ.ParticleData.isFunction(_data)) {
                     let minParameters = ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function];
                     if (_data.parameters.length < ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function]) {
                         let error = `"${_path.join("/")}/${_data.function}" needs at least ${minParameters} parameters`;
                         invalid.push([_data, error]);
                     }
-                    recurse = _data.parameters;
                 }
                 if (ƒ.ParticleData.isVariable(_data)) {
                     references.push([_data, _path.concat(_data.value)]);
                 }
-                if (typeof recurse == "object") {
-                    Object.entries(recurse ? recurse : _data).forEach(([_key, _value]) => validateRecursive(_value, _path.concat(_key)));
-                }
+                Object.entries(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data).forEach(([_key, _value]) => {
+                    if (typeof _value == "object")
+                        validateRecursive(_value, _path.concat(_key));
+                });
             }
         }
         enableSave(_on) {

@@ -16,17 +16,14 @@ namespace FudgeCore {
     export interface Function {
       function: FUNCTION;
       parameters: Expression[];
-      readonly type: "function";
     }
   
     export interface Variable {
       value: string;
-      type: "variable";
     }
   
     export interface Constant {
       value: number;
-      type: "constant";
     }
   
     export interface Transformation {
@@ -34,27 +31,26 @@ namespace FudgeCore {
       x?: Expression;
       y?: Expression;
       z?: Expression;
-      readonly type: "transformation";
     }
 
-    export function isExpression(_data: General): _data is Expression {
+    export function isExpression(_data: EffectRecursive): _data is Expression {
       return isFunction(_data) || isVariable(_data) || isConstant(_data);
     }
 
-    export function isFunction(_data: General): _data is Function {
-      return (_data as Function)?.type == "function";
+    export function isFunction(_data: EffectRecursive): _data is Function {
+      return "function" in _data;
     }
 
-    export function isVariable(_data: General): _data is Variable {
-      return (_data as Variable)?.type == "variable";
+    export function isVariable(_data: EffectRecursive): _data is Variable {
+      return "value" in _data && typeof _data.value == "string";
     }
 
-    export function isConstant(_data: General): _data is Constant {
-      return (_data as Constant)?.type == "constant";
+    export function isConstant(_data: EffectRecursive): _data is Constant {
+      return "value" in _data && typeof _data.value == "number";
     }
 
-    export function isTransformation(_data: General): _data is Transformation {
-      return (_data as Transformation)?.type == "transformation";
+    export function isTransformation(_data: EffectRecursive): _data is Transformation {
+      return "transformation" in _data;
     }
   }
 

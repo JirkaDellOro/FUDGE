@@ -161,12 +161,9 @@ namespace FudgeCore {
           else
             throw `Error in ${ParticleEffect.name}: "${newName}" is not a defined variable`;
         } else {
-          for (const key in _data) {
-            if (typeof (<General>_data)[key] == "string")
-              continue;
-            else
-              renameRecursive((<General>_data)[key]);
-          }
+          for (const subData of Object.values(ParticleData.isFunction(_data) ? _data.parameters : _data)) 
+            if (typeof subData == "object")
+              renameRecursive(subData);
         }
       }
     } 
