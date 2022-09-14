@@ -29,8 +29,7 @@ namespace FudgeUserInterface {
       // this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
       // this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
 
-      this.draggable = true; // TODO: add is draggable to custom controller
-      // TODO: add is dropTarget to custom controller
+      this.draggable = this.controller.draggable(_data);
       this.addEventListener(EVENT.DRAG_START, this.hndDragStart);
       this.addEventListener(EVENT.DRAG_ENTER, this.hndDragEnter);
       this.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);

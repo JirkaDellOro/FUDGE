@@ -31,6 +31,7 @@ namespace FudgeUserInterface {
 
     /** Return the object's children to show when unfolding the tree item */
     public abstract getChildren(_object: T): T[];
+
     /** 
      * Process the list of source objects to be addedAsChildren when dropping or pasting onto the target item/object, 
      * return the list of objects that should visibly become the children of the target item/object 
@@ -51,5 +52,9 @@ namespace FudgeUserInterface {
      * @param _focussed The object currently having focus
      */
     public abstract /* async */ copy(_originals: T[]): Promise<T[]>;
+
+    public draggable(_object: T): boolean {
+      return true;
+    }
   }
 }

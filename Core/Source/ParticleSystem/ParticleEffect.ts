@@ -9,7 +9,7 @@ namespace FudgeCore {
       mtxWorld?: Transformation[];
     }
 
-    export type EffectRecursive = Effect | Effect["variables"] | Effect["color"] | Effect["mtxLocal"] | Expression[] | Transformation | Expression;
+    export type EffectRecursive = Effect | Effect["variables"] | Effect["color"] | Effect["mtxLocal"] | Transformation | Expression;
 
     export type Expression = Function | Variable | Constant;
 

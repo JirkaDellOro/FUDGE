@@ -1914,7 +1914,7 @@ var Fudge;
                     if (this.particleEffectData.variables[_new])
                         errors.push(`variable "${_new}" already exists`);
                     if (errors.length > 0) {
-                        ƒui.Warning.prompt(errors, "Unable to rename", "Please resolve the errors and try again");
+                        ƒui.Warning.display(errors, "Unable to rename", "Please resolve the errors and try again");
                         return;
                     }
                 }
@@ -2010,7 +2010,7 @@ var Fudge;
                         newKey = Fudge.ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => !usedKeys.includes(_key)).shift();
                     else if (_target == this.particleEffectData.color)
                         newKey = Fudge.ViewParticleSystem.COLOR_KEYS.filter(_key => !usedKeys.includes(_key)).shift();
-                    else if (_target == this.particleEffectData.variables)
+                    else if (_target == this.particleEffectData.variables && this.getKey(data, _target) == null)
                         newKey = `variable${usedKeys.length}`;
                     if (newKey == null)
                         continue;
@@ -2031,16 +2031,19 @@ var Fudge;
                 _originals.forEach(_original => copies.push(JSON.parse(JSON.stringify(_original))));
             return copies;
         }
-        getPath(_data) {
-            let path = [];
-            let parent;
-            while (this.childToParent.has(_data)) {
-                parent = this.childToParent.get(_data);
-                path.unshift(this.getKey(_data, parent));
-                _data = parent;
-            }
-            return path;
+        draggable(_target) {
+            return ƒ.ParticleData.isExpression(_target) || ƒ.ParticleData.isTransformation(_target);
         }
+        // public getPath(_data:  ƒ.ParticleData.EffectRecursive): string[] {
+        //   let path: string[] = [];
+        //   let parent: ƒ.ParticleData.EffectRecursive;
+        //   while (this.childToParent.has(_data)) {
+        //     parent = this.childToParent.get(_data);
+        //     path.unshift(this.getKey(_data, parent));
+        //     _data = parent;
+        //   }
+        //   return path;
+        // }
         getKey(_data, _parentData) {
             let key;
             if (!_parentData)
@@ -2049,7 +2052,7 @@ var Fudge;
                 key = _parentData.parameters.indexOf(_data).toString();
             }
             else {
-                key = Object.entries(_parentData).find(entry => entry[1] == _data)[0];
+                key = Object.entries(_parentData).find(entry => entry[1] == _data)?.shift();
             }
             return key;
         }
@@ -2060,7 +2063,7 @@ var Fudge;
             let key = this.getKey(_data, parentData);
             let index = Number.parseInt(key);
             if (parentData == this.particleEffectData.variables && this.isReferenced(key)) {
-                ƒui.Warning.prompt([`variable "${key}" is still referenced`], "Unable to delete", "Please resolve the errors and try again");
+                ƒui.Warning.display([`variable "${key}" is still referenced`], "Unable to delete", "Please resolve the errors and try again");
                 return false;
             }
             if (ƒ.ParticleData.isFunction(parentData))

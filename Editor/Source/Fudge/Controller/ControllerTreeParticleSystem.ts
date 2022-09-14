@@ -125,7 +125,7 @@ namespace Fudge {
           if (this.particleEffectData.variables[_new])
             errors.push(`variable "${_new}" already exists`);
           if (errors.length > 0) {
-            ƒui.Warning.prompt(errors, "Unable to rename", "Please resolve the errors and try again" );
+            ƒui.Warning.display(errors, "Unable to rename", "Please resolve the errors and try again" );
             return;
           }
         }
@@ -198,7 +198,7 @@ namespace Fudge {
       return deleted;
     }
 
-    public addChildren(_children: (ƒ.ParticleData.EffectRecursive)[], _target: ƒ.ParticleData.EffectRecursive, _at?: number): (ƒ.ParticleData.EffectRecursive)[] {
+    public addChildren(_children: ƒ.ParticleData.EffectRecursive[], _target: ƒ.ParticleData.EffectRecursive, _at?: number): ƒ.ParticleData.EffectRecursive[] {
       let move: ƒ.ParticleData.Expression[] = [];
       let container: Object;
       if (ƒ.ParticleData.isFunction(_target) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
@@ -236,12 +236,14 @@ namespace Fudge {
             newKey = ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => !usedKeys.includes(_key)).shift();
           else if (_target == this.particleEffectData.color)
             newKey = ViewParticleSystem.COLOR_KEYS.filter(_key => !usedKeys.includes(_key)).shift();
-          else if (_target == this.particleEffectData.variables)
+          else if (_target == this.particleEffectData.variables && this.getKey(data, _target) == null) 
             newKey = `variable${usedKeys.length}`;
-          if (newKey == null) continue;
+          if (newKey == null) 
+            continue;
 
           let hasParent: boolean = this.childToParent.has(data);
-          if (hasParent && !this.deleteData(data)) continue;
+          if (hasParent && !this.deleteData(data)) 
+            continue;
           if (!hasParent)
             data = JSON.parse(JSON.stringify(data));
 
@@ -252,7 +254,7 @@ namespace Fudge {
       return move;
     }
 
-    public async copy(_originals: (ƒ.ParticleData.EffectRecursive)[]): Promise<(ƒ.ParticleData.EffectRecursive)[]> {
+    public async copy(_originals: ƒ.ParticleData.EffectRecursive[]): Promise<ƒ.ParticleData.EffectRecursive[]> {
       let copies: (ƒ.ParticleData.EffectRecursive)[] = [];
       if (_originals.every(_original => ƒ.ParticleData.isExpression(_original)) || _originals.every(_original => ƒ.ParticleData.isTransformation(_original)))
         _originals.forEach(_original => copies.push(JSON.parse(JSON.stringify(_original))));
@@ -260,16 +262,20 @@ namespace Fudge {
       return copies;
     }
 
-    public getPath(_data:  ƒ.ParticleData.EffectRecursive): string[] {
-      let path: string[] = [];
-      let parent: ƒ.ParticleData.EffectRecursive;
-      while (this.childToParent.has(_data)) {
-        parent = this.childToParent.get(_data);
-        path.unshift(this.getKey(_data, parent));
-        _data = parent;
-      }
-      return path;
+    public override draggable(_target: ƒ.ParticleData.EffectRecursive): boolean {
+      return ƒ.ParticleData.isExpression(_target) || ƒ.ParticleData.isTransformation(_target);
     }
+
+    // public getPath(_data:  ƒ.ParticleData.EffectRecursive): string[] {
+    //   let path: string[] = [];
+    //   let parent: ƒ.ParticleData.EffectRecursive;
+    //   while (this.childToParent.has(_data)) {
+    //     parent = this.childToParent.get(_data);
+    //     path.unshift(this.getKey(_data, parent));
+    //     _data = parent;
+    //   }
+    //   return path;
+    // }
 
     private getKey(_data: ƒ.ParticleData.EffectRecursive, _parentData: ƒ.ParticleData.EffectRecursive): string {
       let key: string;
@@ -277,7 +283,7 @@ namespace Fudge {
       if (ƒ.ParticleData.isExpression(_data) && ƒ.ParticleData.isFunction(_parentData)) {
         key = _parentData.parameters.indexOf(_data).toString();
       } else {
-        key = Object.entries(_parentData).find(entry => entry[1] == _data)[0];
+        key = Object.entries(_parentData).find(entry => entry[1] == _data)?.shift();
       }
       return key;
     }
@@ -291,7 +297,7 @@ namespace Fudge {
       let index: number = Number.parseInt(key);
 
       if (parentData == this.particleEffectData.variables && this.isReferenced(key)) {
-        ƒui.Warning.prompt([`variable "${key}" is still referenced`], "Unable to delete", "Please resolve the errors and try again" );
+        ƒui.Warning.display([`variable "${key}" is still referenced`], "Unable to delete", "Please resolve the errors and try again");
         return false;
       }
 

@@ -399,9 +399,9 @@ declare namespace Fudge {
         hasChildren(_data: ƒ.ParticleData.EffectRecursive): boolean;
         getChildren(_data: ƒ.ParticleData.EffectRecursive): (ƒ.ParticleData.EffectRecursive)[];
         delete(_focused: (ƒ.ParticleData.EffectRecursive)[]): (ƒ.ParticleData.EffectRecursive)[];
-        addChildren(_children: (ƒ.ParticleData.EffectRecursive)[], _target: ƒ.ParticleData.EffectRecursive, _at?: number): (ƒ.ParticleData.EffectRecursive)[];
-        copy(_originals: (ƒ.ParticleData.EffectRecursive)[]): Promise<(ƒ.ParticleData.EffectRecursive)[]>;
-        getPath(_data: ƒ.ParticleData.EffectRecursive): string[];
+        addChildren(_children: ƒ.ParticleData.EffectRecursive[], _target: ƒ.ParticleData.EffectRecursive, _at?: number): ƒ.ParticleData.EffectRecursive[];
+        copy(_originals: ƒ.ParticleData.EffectRecursive[]): Promise<ƒ.ParticleData.EffectRecursive[]>;
+        draggable(_target: ƒ.ParticleData.EffectRecursive): boolean;
         private getKey;
         private deleteData;
         private isReferenced;
