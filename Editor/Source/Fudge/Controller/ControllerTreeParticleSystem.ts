@@ -200,31 +200,55 @@ namespace Fudge {
 
     public addChildren(_children: (ƒ.ParticleData.EffectRecursive)[], _target: ƒ.ParticleData.EffectRecursive, _at?: number): (ƒ.ParticleData.EffectRecursive)[] {
       let move: ƒ.ParticleData.Expression[] = [];
-      let container: ƒ.ParticleData.EffectRecursive[];
+      let container: Object;
       if (ƒ.ParticleData.isFunction(_target) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
         container = _target.parameters;
       else if (Array.isArray(_target) && _children.every(_data => ƒ.ParticleData.isTransformation(_data)))
         container = _target;
+      else if ((ƒ.ParticleData.isTransformation(_target) || _target == this.particleEffectData.color || _target == this.particleEffectData.variables) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
+        container = _target;
+
       if (!container) 
         return move;
-      
-      for (let data of (<ƒ.ParticleData.Expression[]>_children)) {
-        let index: number = container.indexOf(data); // _at needs to be corrected if we are moving within same parent
-        let hasParent: boolean = this.childToParent.has(data);
-        if (hasParent && !this.deleteData(data)) continue;
-        if (!hasParent)
-          data = JSON.parse(JSON.stringify(data));
 
-        move.push(data);
-        this.childToParent.set(data, _target);
-        if (index > -1 && _at > index)
-          _at -= 1;
-        if (_at == null) 
-          container.push(data);
-        else 
-          container.splice(_at + _children.indexOf(data), 0, data);
-      }
-      
+      if (Array.isArray(container)) 
+        for (let data of (<ƒ.ParticleData.Expression[]>_children)) {
+          let index: number = container.indexOf(data); // _at needs to be corrected if we are moving within same parent
+          let hasParent: boolean = this.childToParent.has(data);
+          if (hasParent && !this.deleteData(data)) continue;
+          if (!hasParent)
+            data = JSON.parse(JSON.stringify(data));
+
+          move.push(data);
+          this.childToParent.set(data, _target);
+          if (index > -1 && _at > index)
+            _at -= 1;
+          if (_at == null) 
+            container.push(data);
+          else 
+            container.splice(_at + _children.indexOf(data), 0, data);
+        } 
+      else
+        for (let data of (<ƒ.ParticleData.Expression[]>_children)) {
+          let usedKeys: string[] = Object.keys(_target);
+          let newKey: string;
+          if (ƒ.ParticleData.isTransformation(_target))
+            newKey = ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => !usedKeys.includes(_key)).shift();
+          else if (_target == this.particleEffectData.color)
+            newKey = ViewParticleSystem.COLOR_KEYS.filter(_key => !usedKeys.includes(_key)).shift();
+          else if (_target == this.particleEffectData.variables)
+            newKey = `variable${usedKeys.length}`;
+          if (newKey == null) continue;
+
+          let hasParent: boolean = this.childToParent.has(data);
+          if (hasParent && !this.deleteData(data)) continue;
+          if (!hasParent)
+            data = JSON.parse(JSON.stringify(data));
+
+          _target[newKey] = data;
+          move.push(data);
+          this.childToParent.set(data, _target);
+        }
       return move;
     }
 

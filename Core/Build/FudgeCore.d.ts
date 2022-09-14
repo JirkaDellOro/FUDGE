@@ -4202,7 +4202,7 @@ declare namespace FudgeCore {
             mtxLocal?: Transformation[];
             mtxWorld?: Transformation[];
         }
-        type EffectRecursive = Effect | Effect["variables"] | Effect["color"] | Effect["mtxLocal"] | Transformation | Expression;
+        type EffectRecursive = Effect | Effect["variables"] | Effect["color"] | Effect["mtxLocal"] | Expression[] | Transformation | Expression;
         type Expression = Function | Variable | Constant;
         interface Function {
             function: FUNCTION;
