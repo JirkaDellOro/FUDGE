@@ -377,15 +377,13 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     /**
-     * Static class to display a modal or non-modal warning.
+     * Static class to display a modal warning.
      */
     class Warning {
-        static dom: HTMLDialogElement;
         /**
-         * Prompt the warning to the user with the given headline, call to action and labels for the cancel- and ok-button
-         * Use `await` on call, to continue after the user has pressed one of the buttons.
+         * Display a warning to the user with the given headline, warning text and ok butten text.
          */
-        static prompt(_errors?: string[], _head?: string, _warning?: string, _ok?: string): void;
+        static display(_errors?: string[], _headline?: string, _warning?: string, _ok?: string): void;
     }
 }
 declare namespace FudgeUserInterface {
@@ -512,6 +510,7 @@ declare namespace FudgeUserInterface {
          * @param _focussed The object currently having focus
          */
         abstract copy(_originals: T[]): Promise<T[]>;
+        draggable(_object: T): boolean;
     }
 }
 declare namespace FudgeUserInterface {

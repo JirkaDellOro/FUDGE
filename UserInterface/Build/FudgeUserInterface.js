@@ -1416,35 +1416,33 @@ var FudgeUserInterface;
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     /**
-     * Static class to display a modal or non-modal warning.
+     * Static class to display a modal warning.
      */
     class Warning {
-        static dom;
         /**
-         * Prompt the warning to the user with the given headline, call to action and labels for the cancel- and ok-button
-         * Use `await` on call, to continue after the user has pressed one of the buttons.
+         * Display a warning to the user with the given headline, warning text and ok butten text.
          */
-        static prompt(_errors = [], _head = "Headline", _warning = "Warning", _ok = "OK") {
-            Warning.dom = document.createElement("dialog");
-            document.body.appendChild(Warning.dom);
-            Warning.dom.innerHTML = "<h1>" + _head + "</h1>";
+        static display(_errors = [], _headline = "Headline", _warning = "Warning", _ok = "OK") {
+            let warning = document.createElement("dialog");
+            document.body.appendChild(warning);
+            warning.innerHTML = "<h1>" + _headline + "</h1>";
             let content = document.createElement("div");
             content.id = "content";
             content.innerText = _errors.join("\n");
-            Warning.dom.appendChild(content);
+            warning.appendChild(content);
             let footer = document.createElement("footer");
             footer.innerHTML = "<p>" + _warning + "</p>";
             let btnOk = document.createElement("button");
             btnOk.innerHTML = _ok;
             btnOk.onclick = () => {
                 //@ts-ignore
-                Warning.dom.close();
-                Warning.dom.remove();
+                warning.close();
+                warning.remove();
             };
             footer.appendChild(btnOk);
-            Warning.dom.appendChild(footer);
+            warning.appendChild(footer);
             //@ts-ignore
-            Warning.dom.showModal();
+            warning.showModal();
         }
     }
     FudgeUserInterface.Warning = Warning;
@@ -1812,6 +1810,9 @@ var FudgeUserInterface;
         copyPaste = { sources: [], target: null };
         /** Used by the tree to indicate the drop position while dragging */
         dragDropDivider = document.createElement("hr");
+        draggable(_object) {
+            return true;
+        }
     }
     FudgeUserInterface.CustomTreeController = CustomTreeController;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
@@ -1843,8 +1844,7 @@ var FudgeUserInterface;
             this.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
             // this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
             // this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
-            this.draggable = true; // TODO: add is draggable to custom controller
-            // TODO: add is dropTarget to custom controller
+            this.draggable = this.controller.draggable(_data);
             this.addEventListener("dragstart" /* DRAG_START */, this.hndDragStart);
             this.addEventListener("dragenter" /* DRAG_ENTER */, this.hndDragEnter);
             this.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
