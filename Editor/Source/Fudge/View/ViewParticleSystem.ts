@@ -141,6 +141,8 @@ namespace Fudge {
           this.controller.childToParent.set(child, focus);
           this.tree.findVisible(focus).expand(true);
           this.tree.findVisible(child).focus();
+          this.tree.clearSelection();
+          this.tree.selectInterval(child, child);
           this.dispatch(EVENT_EDITOR.MODIFY, { detail: { data: focus } });
           break;
         case CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION:
@@ -150,6 +152,8 @@ namespace Fudge {
 
             this.tree.findVisible(focus).expand(true);
             this.tree.findVisible(child).focus();
+            this.tree.clearSelection();
+            this.tree.selectInterval(child, child);
             this.dispatch(EVENT_EDITOR.MODIFY, { detail: { data: focus } });
           }
           break;
@@ -158,6 +162,7 @@ namespace Fudge {
             return;
           let remove: ƒ.Serialization[] = this.controller.delete([focus]);
           this.tree.delete(remove);
+          this.tree.clearSelection();
           this.dispatch(EVENT_EDITOR.MODIFY, { });
           break;
       }
@@ -198,7 +203,7 @@ namespace Fudge {
             });
           this.errors = invalid;
           if (this.errors.length == 0) {
-            this.particleEffect.data = JSON.parse(JSON.stringify(this.particleEffectData));
+            this.particleEffect.data = JSON.parse(JSON.stringify(this.particleEffectData)); // our working copy should only be used if it is valid 
             this.cmpParticleSystem.particleEffect = this.particleEffect;
           } else {
             this.errors.forEach(([_data, _error]) => {
@@ -212,7 +217,7 @@ namespace Fudge {
       }
     }
 
-    private setParticleEffect(_particleEffect: ƒ.ParticleEffect): Promise<void> {
+    private setParticleEffect(_particleEffect: ƒ.ParticleEffect): void {
       if (!_particleEffect) {
         this.particleEffect = undefined;
         this.tree = undefined;
@@ -223,27 +228,15 @@ namespace Fudge {
       }
 
       this.particleEffect = _particleEffect;
-      this.particleEffectData = JSON.parse(JSON.stringify(_particleEffect.data));
+      this.particleEffectData = JSON.parse(JSON.stringify(_particleEffect.data)); // we will work with a copy
       this.dom.innerHTML = "";
       this.variables = document.createElement("datalist");
       this.variables.id = "variables";
       this.dom.appendChild(this.variables);
       this.refreshVariables();
-      this.recreateTree(this.particleEffectData);
-      if (this.idInterval == undefined)
-        this.idInterval = window.setInterval(() => { this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph} }); }, 1000 / 30);
-    }
-
-
-    private recreateTree(_particleEffectData: ƒ.Serialization): void {
       this.controller = new ControllerTreeParticleSystem(this.particleEffectData);
-      let newTree: ƒui.CustomTree<ƒ.Serialization> = 
-        new ƒui.CustomTree<ƒ.Serialization>( this.controller, _particleEffectData );
-
-      if (this.tree && this.dom.contains(this.tree)) 
-        this.dom.replaceChild(newTree, this.tree);
-      else 
-        this.dom.appendChild(newTree);
+      let newTree: ƒui.CustomTree<ƒ.ParticleData.EffectRecursive> = new ƒui.CustomTree<ƒ.ParticleData.EffectRecursive>(this.controller, this.particleEffectData);
+      this.dom.appendChild(newTree);
       this.tree = newTree;
       this.tree.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);
@@ -251,6 +244,8 @@ namespace Fudge {
       this.tree.addEventListener(ƒui.EVENT.PASTE, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      if (this.idInterval == undefined)
+        this.idInterval = window.setInterval(() => { this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph} }); }, 1000 / 30);
     }
 
     private validateData(_data: ƒ.ParticleData.EffectRecursive): [ƒ.ParticleData.Expression, string][] {

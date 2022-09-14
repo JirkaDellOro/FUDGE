@@ -400,7 +400,7 @@ declare namespace Fudge {
         getChildren(_data: ƒ.ParticleData.EffectRecursive): (ƒ.ParticleData.EffectRecursive)[];
         delete(_focused: (ƒ.ParticleData.EffectRecursive)[]): (ƒ.ParticleData.EffectRecursive)[];
         addChildren(_children: (ƒ.ParticleData.EffectRecursive)[], _target: ƒ.ParticleData.EffectRecursive, _at?: number): (ƒ.ParticleData.EffectRecursive)[];
-        copy(_originalData: (ƒ.ParticleData.EffectRecursive)[]): Promise<(ƒ.ParticleData.EffectRecursive)[]>;
+        copy(_originals: (ƒ.ParticleData.EffectRecursive)[]): Promise<(ƒ.ParticleData.EffectRecursive)[]>;
         getPath(_data: ƒ.ParticleData.EffectRecursive): string[];
         private getKey;
         private deleteData;
@@ -516,7 +516,6 @@ declare namespace Fudge {
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private hndEvent;
         private setParticleEffect;
-        private recreateTree;
         private validateData;
         private enableSave;
         private refreshVariables;

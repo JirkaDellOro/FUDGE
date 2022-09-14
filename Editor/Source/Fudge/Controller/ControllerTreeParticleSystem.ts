@@ -202,34 +202,38 @@ namespace Fudge {
 
     public addChildren(_children: (ƒ.ParticleData.EffectRecursive)[], _target: ƒ.ParticleData.EffectRecursive, _at?: number): (ƒ.ParticleData.EffectRecursive)[] {
       let move: ƒ.ParticleData.Expression[] = [];
-      if (!_children.every(_data => ƒ.ParticleData.isExpression(_data))) return move;
+      let container: ƒ.ParticleData.EffectRecursive[];
+      if (ƒ.ParticleData.isFunction(_target) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
+        container = _target.parameters;
+      else if (Array.isArray(_target) && _children.every(_data => ƒ.ParticleData.isTransformation(_data)))
+        container = _target;
+      if (!container) 
+        return move;
       
-      if (ƒ.ParticleData.isFunction(_target)) {
-        for (let data of (<ƒ.ParticleData.Expression[]>_children)) {
-          let index: number = _target.parameters.indexOf(data); // _at needs to be corrected if we are moving within same parent
-          if (!this.deleteData(data)) continue;
+      for (let data of (<ƒ.ParticleData.Expression[]>_children)) {
+        let index: number = container.indexOf(data); // _at needs to be corrected if we are moving within same parent
+        let hasParent: boolean = this.childToParent.has(data);
+        if (hasParent && !this.deleteData(data)) continue;
+        if (!hasParent)
+          data = JSON.parse(JSON.stringify(data));
 
-          move.push(data);
-          this.childToParent.set(data, _target);
-          if (index > -1 && _at > index)
-            _at -= 1;
-          if (_at == null) 
-            _target.parameters.push(data);
-          else 
-            _target.parameters.splice(_at + _children.indexOf(data), 0, data);
-        }
+        move.push(data);
+        this.childToParent.set(data, _target);
+        if (index > -1 && _at > index)
+          _at -= 1;
+        if (_at == null) 
+          container.push(data);
+        else 
+          container.splice(_at + _children.indexOf(data), 0, data);
       }
       
       return move;
     }
 
-    public async copy(_originalData: (ƒ.ParticleData.EffectRecursive)[]): Promise<(ƒ.ParticleData.EffectRecursive)[]> {
+    public async copy(_originals: (ƒ.ParticleData.EffectRecursive)[]): Promise<(ƒ.ParticleData.EffectRecursive)[]> {
       let copies: (ƒ.ParticleData.EffectRecursive)[] = [];
-      if (_originalData.every(_data => ƒ.ParticleData.isExpression(_data))) {
-        for (let data of _originalData) {
-          copies.push(JSON.parse(JSON.stringify(data)));
-        }
-      }
+      if (_originals.every(_original => ƒ.ParticleData.isExpression(_original)) || _originals.every(_original => ƒ.ParticleData.isTransformation(_original)))
+        _originals.forEach(_original => copies.push(JSON.parse(JSON.stringify(_original))));
 
       return copies;
     }
@@ -257,7 +261,8 @@ namespace Fudge {
     }
 
     private deleteData(_data: ƒ.ParticleData.EffectRecursive): boolean {
-      if (!ƒ.ParticleData.isExpression(_data)) return false;
+      if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) 
+        return false;
 
       let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
       let key: string = this.getKey(_data, parentData);
