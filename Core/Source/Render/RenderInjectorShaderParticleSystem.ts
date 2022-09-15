@@ -106,23 +106,23 @@ namespace FudgeCore {
     }
 
     public static getVertexShaderSource(this: ShaderParticleSystem): string {
-      let effect: ParticleData.Effect = RenderInjectorShaderParticleSystem.renameVariables(this.particleSystem.effect);
-      let mtxLocal: ParticleData.Transformation[] = effect?.mtxLocal;
-      let mtxWorld: ParticleData.Transformation[] = effect?.mtxWorld;
+      let data: ParticleData.System = RenderInjectorShaderParticleSystem.renameVariables(this.data);
+      let mtxLocal: ParticleData.Transformation[] = data?.mtxLocal;
+      let mtxWorld: ParticleData.Transformation[] = data?.mtxWorld;
 
       let source: string = this.vertexShaderSource
-        .replace("#version 300 es", `#version 300 es\n#define ${this.define[0]}${effect.color ? "\n#define PARTICLE_COLOR" : ""}`)
-        .replace("/*$variables*/", RenderInjectorShaderParticleSystem.generateVariables(effect?.variables))
+        .replace("#version 300 es", `#version 300 es\n#define ${this.define[0]}${data.color ? "\n#define PARTICLE_COLOR" : ""}`)
+        .replace("/*$variables*/", RenderInjectorShaderParticleSystem.generateVariables(data?.variables))
         .replace("/*$mtxLocal*/", RenderInjectorShaderParticleSystem.generateTransformations(mtxLocal, "Local"))
         .replace("/*$mtxLocal*/", mtxLocal && mtxLocal.length > 0 ? "* mtxLocal" : "")
         .replace("/*$mtxWorld*/", RenderInjectorShaderParticleSystem.generateTransformations(mtxWorld, "World"))
         .replace("/*$mtxWorld*/", mtxWorld && mtxWorld.length > 0 ? "mtxWorld *" : "")
-        .replaceAll("/*$color*/", RenderInjectorShaderParticleSystem.generateColor(effect?.color));
+        .replaceAll("/*$color*/", RenderInjectorShaderParticleSystem.generateColor(data?.color));
       return source; 
     }
 
     public static getFragmentShaderSource(this: ShaderParticleSystem): string {
-      return this.fragmentShaderSource.replace("#version 300 es", `#version 300 es${this.particleSystem.effect.color ? "\n#define PARTICLE_COLOR" : ""}`);
+      return this.fragmentShaderSource.replace("#version 300 es", `#version 300 es${this.data.color ? "\n#define PARTICLE_COLOR" : ""}`);
     }
     
     //#region code generation
@@ -137,31 +137,31 @@ namespace FudgeCore {
       return _shader.replace("#version 300 es", code);
     }
 
-    private static renameVariables(_effect: ParticleData.Effect): ParticleData.Effect {
-      if (!_effect.variables) return _effect;
+    private static renameVariables(_data: ParticleData.System): ParticleData.System {
+      if (!_data.variables) return _data;
 
       let variableMap: {[key: string]: string} = {};
-      Object.keys(_effect.variables).forEach( (_variableName, _index) => {
+      Object.keys(_data.variables).forEach( (_variableName, _index) => {
         if (ParticleData.PREDEFINED_VARIABLES[_variableName])
           throw `Error in ${ParticleSystem.name}: "${_variableName}" is a predefined variable and can not be redeclared`;
         else
           return variableMap[_variableName] = `fVariable${_index}`; 
       });
 
-      let effectRenamed: ParticleData.Effect = JSON.parse(JSON.stringify(_effect));
-      effectRenamed.variables = Object.fromEntries(Object.entries(effectRenamed.variables).map(([_name, _exrpession]) => [variableMap[_name], _exrpession] ));
-      renameRecursive(effectRenamed);
-      return effectRenamed;
+      let dataRenamed: ParticleData.System = JSON.parse(JSON.stringify(_data));
+      dataRenamed.variables = Object.fromEntries(Object.entries(dataRenamed.variables).map(([_name, _exrpession]) => [variableMap[_name], _exrpession] ));
+      renameRecursive(dataRenamed);
+      return dataRenamed;
 
-      function renameRecursive(_effect: ParticleData.EffectRecursive): void {
-        if (ParticleData.isVariable(_effect)) {
-          let newName: string = ParticleData.PREDEFINED_VARIABLES[_effect.value] || variableMap[_effect.value];
+      function renameRecursive(_data: ParticleData.Recursive): void {
+        if (ParticleData.isVariable(_data)) {
+          let newName: string = ParticleData.PREDEFINED_VARIABLES[_data.value] || variableMap[_data.value];
           if (newName)
-            _effect.value = newName;
+            _data.value = newName;
           else
             throw `Error in ${ParticleSystem.name}: "${newName}" is not a defined variable`;
         } else {
-          for (const subData of Object.values(ParticleData.isFunction(_effect) ? _effect.parameters : _effect)) 
+          for (const subData of Object.values(ParticleData.isFunction(_data) ? _data.parameters : _data)) 
             if (typeof subData == "object")
               renameRecursive(subData);
         }
@@ -177,16 +177,16 @@ namespace FudgeCore {
         .reduce((_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "");
     }
 
-    private static generateTransformations(_transformations: ParticleData.Effect["mtxLocal"], _localOrWorld: "Local" | "World"): string {
+    private static generateTransformations(_transformations: ParticleData.System["mtxLocal"], _localOrWorld: "Local" | "World"): string {
       if (!_transformations || _transformations.length == 0) return "";
 
       let transformations: [ParticleData.Transformation["transformation"], string, string, string][] = _transformations
-        .map(_effect => {
-          let isScale: boolean = _effect.transformation === "scale";
-          let [x, y, z] = [_effect.x, _effect.y, _effect.z]
+        .map(_data => {
+          let isScale: boolean = _data.transformation === "scale";
+          let [x, y, z] = [_data.x, _data.y, _data.z]
             .map((_value) => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : (isScale ? "1.0" : "0.0")) as [string, string, string];
 
-          return [_effect.transformation, x, y, z];
+          return [_data.transformation, x, y, z];
         });
 
       let code: string = "";
@@ -243,7 +243,7 @@ namespace FudgeCore {
       return code;
     }
 
-    private static generateColor(_color: ParticleData.Effect["color"]): string {
+    private static generateColor(_color: ParticleData.System["color"]): string {
       if (!_color) return "";
       
       let [r, g, b, a]: [string, string, string, string] = [_color.r, _color.g, _color.b, _color.a]

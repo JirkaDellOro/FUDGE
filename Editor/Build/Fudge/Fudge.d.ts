@@ -370,21 +370,21 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
-    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.EffectRecursive> {
-        childToParent: Map<ƒ.ParticleData.EffectRecursive, ƒ.ParticleData.EffectRecursive>;
-        private particleEffect;
-        constructor(_particleEffect: ƒ.ParticleData.Effect);
-        createContent(_effect: ƒ.ParticleData.EffectRecursive): HTMLFormElement;
-        getAttributes(_effect: ƒ.ParticleData.EffectRecursive): string;
-        rename(_effect: ƒ.ParticleData.EffectRecursive, _id: string, _new: string): void;
-        hasChildren(_effect: ƒ.ParticleData.EffectRecursive): boolean;
-        getChildren(_effect: ƒ.ParticleData.EffectRecursive): (ƒ.ParticleData.EffectRecursive)[];
-        delete(_focused: (ƒ.ParticleData.EffectRecursive)[]): (ƒ.ParticleData.EffectRecursive)[];
-        addChildren(_children: ƒ.ParticleData.EffectRecursive[], _target: ƒ.ParticleData.EffectRecursive, _at?: number): ƒ.ParticleData.EffectRecursive[];
-        copy(_originals: ƒ.ParticleData.EffectRecursive[]): Promise<ƒ.ParticleData.EffectRecursive[]>;
-        draggable(_target: ƒ.ParticleData.EffectRecursive): boolean;
+    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.Recursive> {
+        childToParent: Map<ƒ.ParticleData.Recursive, ƒ.ParticleData.Recursive>;
+        private data;
+        constructor(_data: ƒ.ParticleData.System);
+        createContent(_data: ƒ.ParticleData.Recursive): HTMLFormElement;
+        getAttributes(_data: ƒ.ParticleData.Recursive): string;
+        rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): void;
+        hasChildren(_data: ƒ.ParticleData.Recursive): boolean;
+        getChildren(_data: ƒ.ParticleData.Recursive): (ƒ.ParticleData.Recursive)[];
+        delete(_focused: (ƒ.ParticleData.Recursive)[]): (ƒ.ParticleData.Recursive)[];
+        addChildren(_children: ƒ.ParticleData.Recursive[], _target: ƒ.ParticleData.Recursive, _at?: number): ƒ.ParticleData.Recursive[];
+        copy(_originals: ƒ.ParticleData.Recursive[]): Promise<ƒ.ParticleData.Recursive[]>;
+        draggable(_target: ƒ.ParticleData.Recursive): boolean;
         private getKey;
-        private deleteEffect;
+        private deleteData;
         private isReferenced;
     }
 }
@@ -480,11 +480,11 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     class ViewParticleSystem extends View {
         static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[];
-        static readonly COLOR_KEYS: (keyof ƒ.ParticleData.Effect["color"])[];
+        static readonly COLOR_KEYS: (keyof ƒ.ParticleData.System["color"])[];
         private graph;
         private node;
         private particleSystem;
-        private particleEffect;
+        private data;
         private idInterval;
         private tree;
         private controller;
@@ -496,7 +496,7 @@ declare namespace Fudge {
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private hndEvent;
         private setParticleSystem;
-        private validateEffect;
+        private validateData;
         private enableSave;
         private refreshVariables;
     }

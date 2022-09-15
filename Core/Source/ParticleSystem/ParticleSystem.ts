@@ -2,14 +2,14 @@ namespace FudgeCore {
   
   export namespace ParticleData {
 
-    export interface Effect {
+    export interface System {
       variables: {[name: string]: Expression};
       color: {r?: Expression, g?: Expression, b?: Expression, a?: Expression};
       mtxLocal: Transformation[];
       mtxWorld: Transformation[];
     }
 
-    export type EffectRecursive = Effect | Effect["variables"] | Effect["color"] | Effect["mtxLocal"] | Transformation | Expression;
+    export type Recursive = System | System["variables"] | System["color"] | System["mtxLocal"] | Transformation | Expression;
 
     export type Expression = Function | Variable | Constant;
 
@@ -33,24 +33,24 @@ namespace FudgeCore {
       z?: Expression;
     }
 
-    export function isExpression(_effect: EffectRecursive): _effect is Expression {
-      return isFunction(_effect) || isVariable(_effect) || isConstant(_effect);
+    export function isExpression(_data: Recursive): _data is Expression {
+      return isFunction(_data) || isVariable(_data) || isConstant(_data);
     }
 
-    export function isFunction(_effect: EffectRecursive): _effect is Function {
-      return "function" in _effect;
+    export function isFunction(_data: Recursive): _data is Function {
+      return "function" in _data;
     }
 
-    export function isVariable(_effect: EffectRecursive): _effect is Variable {
-      return "value" in _effect && typeof _effect.value == "string";
+    export function isVariable(_data: Recursive): _data is Variable {
+      return "value" in _data && typeof _data.value == "string";
     }
 
-    export function isConstant(_effect: EffectRecursive): _effect is Constant {
-      return "value" in _effect && typeof _effect.value == "number";
+    export function isConstant(_data: Recursive): _data is Constant {
+      return "value" in _data && typeof _data.value == "number";
     }
 
-    export function isTransformation(_effect: EffectRecursive): _effect is Transformation {
-      return "transformation" in _effect;
+    export function isTransformation(_data: Recursive): _data is Transformation {
+      return "transformation" in _data;
     }
   }
 
@@ -62,23 +62,23 @@ namespace FudgeCore {
     public name: string;
     public idResource: string = undefined;
     
-    #effect: ParticleData.Effect;
+    #data: ParticleData.System;
     private shaderToShaderParticleSystem: Map<ShaderInterface, ShaderParticleSystem> = new Map();
 
-    constructor(_name: string = ParticleSystem.name, _particleEffect: ParticleData.Effect = { variables: {}, mtxLocal: [], mtxWorld: [], color: {} }) {
+    constructor(_name: string = ParticleSystem.name, _particleEffect: ParticleData.System = { variables: {}, mtxLocal: [], mtxWorld: [], color: {} }) {
       super();
       this.name = _name;
-      this.effect = _particleEffect;
+      this.data = _particleEffect;
 
       Project.register(this);
     }
     
-    public get effect(): ParticleData.Effect {
-      return this.#effect;
+    public get data(): ParticleData.System {
+      return this.#data;
     }
 
-    public set effect(_effect: ParticleData.Effect) {
-      this.#effect = _effect;
+    public set data(_data: ParticleData.System) {
+      this.#data = _data;
       this.shaderToShaderParticleSystem.forEach(shader => shader.deleteProgram());
       this.shaderToShaderParticleSystem.clear();
     }
@@ -86,7 +86,7 @@ namespace FudgeCore {
     public getShaderFrom(_source: ShaderInterface): ShaderParticleSystem {
       if (!this.shaderToShaderParticleSystem.has(_source)) {
         let particleShader: ShaderParticleSystem = new ShaderParticleSystem();
-        particleShader.particleSystem = this;
+        particleShader.data = this.data;
         particleShader.define.push(..._source.define);
         particleShader.vertexShaderSource = _source.getVertexShaderSource();
         particleShader.fragmentShaderSource = _source.getFragmentShaderSource();
@@ -101,7 +101,7 @@ namespace FudgeCore {
       let serialization: Serialization =  {
         idResource: this.idResource,
         name: this.name,
-        effect: this.effect
+        data: this.data
       };
       return serialization;
     }
@@ -109,7 +109,7 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       Project.register(this, _serialization.idResource);
       this.name = _serialization.name;
-      this.effect = _serialization.effect;
+      this.data = _serialization.data;
       return this;
     }
 
@@ -119,7 +119,7 @@ namespace FudgeCore {
 
     public getMutator(): Mutator {
       let mutator: Mutator = super.getMutator(true);
-      mutator.effect = this.effect;
+      mutator.data = this.data;
       return mutator;
     }
     

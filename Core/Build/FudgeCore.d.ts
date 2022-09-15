@@ -4196,7 +4196,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     namespace ParticleData {
-        interface Effect {
+        interface System {
             variables: {
                 [name: string]: Expression;
             };
@@ -4209,7 +4209,7 @@ declare namespace FudgeCore {
             mtxLocal: Transformation[];
             mtxWorld: Transformation[];
         }
-        type EffectRecursive = Effect | Effect["variables"] | Effect["color"] | Effect["mtxLocal"] | Transformation | Expression;
+        type Recursive = System | System["variables"] | System["color"] | System["mtxLocal"] | Transformation | Expression;
         type Expression = Function | Variable | Constant;
         interface Function {
             function: FUNCTION;
@@ -4227,11 +4227,11 @@ declare namespace FudgeCore {
             y?: Expression;
             z?: Expression;
         }
-        function isExpression(_effect: EffectRecursive): _effect is Expression;
-        function isFunction(_effect: EffectRecursive): _effect is Function;
-        function isVariable(_effect: EffectRecursive): _effect is Variable;
-        function isConstant(_effect: EffectRecursive): _effect is Constant;
-        function isTransformation(_effect: EffectRecursive): _effect is Transformation;
+        function isExpression(_data: Recursive): _data is Expression;
+        function isFunction(_data: Recursive): _data is Function;
+        function isVariable(_data: Recursive): _data is Variable;
+        function isConstant(_data: Recursive): _data is Constant;
+        function isTransformation(_data: Recursive): _data is Transformation;
     }
     /**
      * Holds the information .
@@ -4242,9 +4242,9 @@ declare namespace FudgeCore {
         name: string;
         idResource: string;
         private shaderToShaderParticleSystem;
-        constructor(_name?: string, _particleEffect?: ParticleData.Effect);
-        get effect(): ParticleData.Effect;
-        set effect(_effect: ParticleData.Effect);
+        constructor(_name?: string, _particleEffect?: ParticleData.System);
+        get data(): ParticleData.System;
+        set data(_data: ParticleData.System);
         getShaderFrom(_source: ShaderInterface): ShaderParticleSystem;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -4255,7 +4255,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class ShaderParticleSystem implements ShaderInterface {
-        particleSystem: ParticleSystem;
+        data: ParticleData.System;
         define: string[];
         vertexShaderSource: string;
         fragmentShaderSource: string;
