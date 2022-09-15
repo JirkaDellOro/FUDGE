@@ -13,7 +13,10 @@ namespace Fudge {
     private viewport: ƒ.Viewport;
     private canvas: HTMLCanvasElement;
     private graph: ƒ.Graph;
-    private nodeLight: ƒ.Node = new ƒ.Node("Illumination"); // keeps light components for dark graphs 
+    private nodeLight: ƒ.Node = new ƒ.Node("Illumination"); // keeps light components for dark graphs
+    private throttleId: number;
+    private readonly throttleDelay: number = 1000 / 60;
+
 
     constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
@@ -182,12 +185,14 @@ namespace Fudge {
             this.setGraph(_event.detail.graph);
           break;
         // break;
-        case EVENT_EDITOR.ANIMATE:
-          if (_event instanceof FudgeEvent && _event.detail.graph != this.graph) break;
         case ƒUi.EVENT.MUTATE:
         case ƒUi.EVENT.DELETE:
         case EVENT_EDITOR.MODIFY:
           this.redraw();
+        case EVENT_EDITOR.ANIMATE:
+          if (_event instanceof FudgeEvent && _event.detail.graph != this.graph) break;
+          this.redrawThrottled();
+          break;
       }
     }
 
@@ -245,6 +250,17 @@ namespace Fudge {
       } catch (_error: unknown) {
         //nop
       }
+    }
+
+    private redrawThrottled = (_delay: number = this.throttleDelay) => {
+      if (this.throttleId)
+        return;
+
+      this.throttleId = window.setTimeout(() => {
+        this.redraw();
+        console.log("redraw");
+        this.throttleId = null;
+      }, _delay);
     }
   }
 }
