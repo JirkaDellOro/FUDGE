@@ -241,7 +241,7 @@ namespace Fudge {
           this.dispatchAnimate();
           break;
         case "play":
-          if (this.idInterval == undefined) {
+          if (this.idInterval == null) {
             target.id = "pause";
             this.time.set(this.playbackTime);
             this.idInterval = window.setInterval(() => {
@@ -251,7 +251,6 @@ namespace Fudge {
           }
           break;
         case "pause":
-          target.id = "play";
           this.pause();
           break;
         case "next": // TODO: change to next key frame
@@ -262,8 +261,10 @@ namespace Fudge {
     }
 
     private pause(): void {
+      if (this.idInterval == null) return;
+      this.toolbar.querySelector("#pause").id = "play";
       window.clearInterval(this.idInterval);
-      this.idInterval = undefined;
+      this.idInterval = null;
     }
   }
 }

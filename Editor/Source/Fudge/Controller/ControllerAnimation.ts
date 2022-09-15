@@ -62,21 +62,23 @@ namespace Fudge {
     public updateSequence(_time: number, _element: ƒui.CustomElement): void {
       let sequence: ƒ.AnimationSequence = Reflect.get(_element, "animationSequence");
       if (!sequence) return;
-
-      let key: ƒ.AnimationKey = sequence.getKeys().find( _key => _key.Time == _time );
+      
+      let time: number = ƒ.AnimationKey.toKeyTime(_time);
+      let key: ƒ.AnimationKey = sequence.getKeys().find(_key => _key.time == time);
       if (!key)
-        sequence.addKey(new ƒ.AnimationKey(_time, <number>_element.getMutatorValue()));
+        sequence.addKey(new ƒ.AnimationKey(time, <number>_element.getMutatorValue()));
       else
         sequence.modifyKey(key, null, <number>_element.getMutatorValue());
+      this.animation.calculateTotalTime();
     }
 
     public nextKey(_time: number, _direction: "forward" | "backward"): number {
       let nextKey: ƒ.AnimationKey = this.sequences
         .flatMap(_sequence => _sequence.data.getKeys())
-        .sort(_direction == "forward" && ((_a, _b) => _a.Time - _b.Time) || _direction == "backward" && ((_a, _b) => _b.Time - _a.Time))
-        .find(_key => _direction == "forward" && _key.Time > _time || _direction == "backward" && _key.Time < _time);
+        .sort(_direction == "forward" && ((_a, _b) => _a.time - _b.time) || _direction == "backward" && ((_a, _b) => _b.time - _a.time))
+        .find(_key => _direction == "forward" && _key.time > _time || _direction == "backward" && _key.time < _time);
       if (nextKey)
-        return nextKey.Time;
+        return nextKey.time;
       else
         return _time;
     }
@@ -169,15 +171,6 @@ namespace Fudge {
             this.sequences = this.getSelectedSequences();
           
           this.view.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.sequences } });
-          break;
-      }
-    }
-
-    private hndKey = (_event: KeyboardEvent): void => {
-      _event.stopPropagation();
-      switch (_event.code) {
-        case ƒ.KEYBOARD_CODE.DELETE:
-          this.propertyList.dispatchEvent(new CustomEvent(ƒui.EVENT.DELETE, { bubbles: true, detail: this }));
           break;
       }
     }

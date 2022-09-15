@@ -258,7 +258,6 @@ namespace Fudge {
 
       this.throttleId = window.setTimeout(() => {
         this.redraw();
-        console.log("redraw");
         this.throttleId = null;
       }, _delay);
     }

@@ -248,7 +248,6 @@ declare namespace Fudge {
         private getSelectedSequences;
         private deletePath;
         private hndEvent;
-        private hndKey;
     }
 }
 declare namespace Fudge {

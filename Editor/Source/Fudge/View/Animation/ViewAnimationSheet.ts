@@ -261,7 +261,7 @@ namespace Fudge {
             data: _key,
             color: _sequence.color,
             path2D: this.generateKey(
-              this.worldToScreenPoint(_key.Time, this.mode == SHEET_MODE.CURVES ? _key.Value : _iSequence * ViewAnimationSheet.KEY_SIZE * 4),
+              this.worldToScreenPoint(_key.time, this.mode == SHEET_MODE.CURVES ? _key.value : _iSequence * ViewAnimationSheet.KEY_SIZE * 4),
               ViewAnimationSheet.KEY_SIZE,
               ViewAnimationSheet.KEY_SIZE
             ),
@@ -289,8 +289,8 @@ namespace Fudge {
       this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
       this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
       
-      let animationStart: number = Math.min(...this.keys.map(_key => _key.data.Time )) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-      let animationEnd: number = Math.max(...this.keys.map(_key => _key.data.Time )) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+      let animationStart: number = Math.min(...this.keys.map(_key => _key.data.time )) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+      let animationEnd: number = Math.max(...this.keys.map(_key => _key.data.time )) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
       this.crc2.fillStyle = "rgba(100, 100, 255, 0.2)";
       this.crc2.fillRect(animationStart, 0, animationEnd - animationStart, ViewAnimationSheet.TIMELINE_HEIGHT);
       
@@ -543,8 +543,8 @@ namespace Fudge {
             parameters.d
           );
         };
-        let xStart: number = _keyStart.Time;
-        let xEnd: number = _keyEnd.Time;
+        let xStart: number = _keyStart.time;
+        let xEnd: number = _keyEnd.time;
         let offsetTimeEnd: number = xEnd - xStart;
   
         let points: ƒ.Vector2[] = new Array(4).fill(0).map(() => ƒ.Recycler.get(ƒ.Vector2));
@@ -588,9 +588,9 @@ namespace Fudge {
       left.set(-50, 0);
       right.set(50, 0);
 
-      let angleSlopeScreen: number = Math.atan(this.selectedKey.data.SlopeIn * (this.mtxWorldToScreen.scaling.y / this.mtxWorldToScreen.scaling.x)) * (180 / Math.PI); // in degree
+      let angleSlopeScreen: number = Math.atan(this.selectedKey.data.slopeIn * (this.mtxWorldToScreen.scaling.y / this.mtxWorldToScreen.scaling.x)) * (180 / Math.PI); // in degree
       let mtxTransform: ƒ.Matrix3x3 = ƒ.Matrix3x3.IDENTITY();
-      mtxTransform.translate(this.worldToScreenPoint(this.selectedKey.data.Time, this.selectedKey.data.Value));
+      mtxTransform.translate(this.worldToScreenPoint(this.selectedKey.data.time, this.selectedKey.data.value));
       mtxTransform.rotate(angleSlopeScreen);
       left.transform(mtxTransform);
       right.transform(mtxTransform);
@@ -620,7 +620,7 @@ namespace Fudge {
     private drawHighlight(): void {
       if (!this.selectedKey) return;
 
-      let posScreen: ƒ.Vector2 = this.worldToScreenPoint(this.selectedKey.data.Time, this.selectedKey.data.Value);
+      let posScreen: ƒ.Vector2 = this.worldToScreenPoint(this.selectedKey.data.time, this.selectedKey.data.value);
       this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
       this.crc2.fillStyle += "66";
       this.crc2.fillRect(posScreen.x - ViewAnimationSheet.KEY_SIZE / 2, 0, ViewAnimationSheet.KEY_SIZE, ViewAnimationSheet.TIMELINE_HEIGHT);
@@ -707,11 +707,11 @@ namespace Fudge {
 
     private hndPointerMoveSlope = (_event: PointerEvent): void => {
       _event.preventDefault();
-      let vctDelta: ƒ.Vector2 = ƒ.Vector2.DIFFERENCE(new ƒ.Vector2(_event.offsetX, _event.offsetY), this.worldToScreenPoint(this.selectedKey.data.Time, this.selectedKey.data.Value));
+      let vctDelta: ƒ.Vector2 = ƒ.Vector2.DIFFERENCE(new ƒ.Vector2(_event.offsetX, _event.offsetY), this.worldToScreenPoint(this.selectedKey.data.time, this.selectedKey.data.value));
       vctDelta.transform(ƒ.Matrix3x3.SCALING(ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen).scaling));
       let slope: number = vctDelta.y / vctDelta.x;
-      this.selectedKey.data.SlopeIn = slope;
-      this.selectedKey.data.SlopeOut = slope;
+      this.selectedKey.data.slopeIn = slope;
+      this.selectedKey.data.slopeOut = slope;
       this.dispatchAnimate();
     }
 
@@ -798,12 +798,14 @@ namespace Fudge {
 
         let values: number[] = this.sequences
           .flatMap(_sequence => _sequence.data.getKeys())
-          .map(_key => _key.Value);
-        if (values.length > 1 && values[0] != values[1]) {
-          let min: number = values.reduce((_a, _b) => Math.min(_a, _b));
-          let max: number = values.reduce((_a, _b) => Math.max(_a, _b));
-          this.mtxWorldToScreen.scaleY((this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT) / ((max - min * ViewAnimationSheet.PIXEL_PER_VALUE) * 1.2));
-          this.mtxWorldToScreen.translateY((this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT) - min * -this.mtxWorldToScreen.scaling.y);
+          .map(_key => _key.value);
+        if (values.length > 1) {
+          let min: number = values.reduce((_a, _b) => Math.min(_a, _b)); // in world space
+          let max: number = values.reduce((_a, _b) => Math.max(_a, _b)); // in world space
+          let viewHeight: number = (this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT); // in px
+          if (min != max)
+            this.mtxWorldToScreen.scaleY(viewHeight / (((max - min) * ViewAnimationSheet.PIXEL_PER_VALUE) * 1.2));
+          this.mtxWorldToScreen.translateY(viewHeight - min * this.mtxWorldToScreen.scaling.y);
         }
       } else {
         this.mtxWorldToScreen.translateY(ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT + ViewAnimationSheet.KEY_SIZE * 2);

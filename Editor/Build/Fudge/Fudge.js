@@ -944,19 +944,21 @@ var Fudge;
             let sequence = Reflect.get(_element, "animationSequence");
             if (!sequence)
                 return;
-            let key = sequence.getKeys().find(_key => _key.Time == _time);
+            let time = ƒ.AnimationKey.toKeyTime(_time);
+            let key = sequence.getKeys().find(_key => _key.time == time);
             if (!key)
-                sequence.addKey(new ƒ.AnimationKey(_time, _element.getMutatorValue()));
+                sequence.addKey(new ƒ.AnimationKey(time, _element.getMutatorValue()));
             else
                 sequence.modifyKey(key, null, _element.getMutatorValue());
+            this.animation.calculateTotalTime();
         }
         nextKey(_time, _direction) {
             let nextKey = this.sequences
                 .flatMap(_sequence => _sequence.data.getKeys())
-                .sort(_direction == "forward" && ((_a, _b) => _a.Time - _b.Time) || _direction == "backward" && ((_a, _b) => _b.Time - _a.Time))
-                .find(_key => _direction == "forward" && _key.Time > _time || _direction == "backward" && _key.Time < _time);
+                .sort(_direction == "forward" && ((_a, _b) => _a.time - _b.time) || _direction == "backward" && ((_a, _b) => _b.time - _a.time))
+                .find(_key => _direction == "forward" && _key.time > _time || _direction == "backward" && _key.time < _time);
             if (nextKey)
-                return nextKey.Time;
+                return nextKey.time;
             else
                 return _time;
         }
@@ -1039,14 +1041,6 @@ var Fudge;
                     else if (target == this.propertyList)
                         this.sequences = this.getSelectedSequences();
                     this.view.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.sequences } });
-                    break;
-            }
-        };
-        hndKey = (_event) => {
-            _event.stopPropagation();
-            switch (_event.code) {
-                case ƒ.KEYBOARD_CODE.DELETE:
-                    this.propertyList.dispatchEvent(new CustomEvent("delete" /* DELETE */, { bubbles: true, detail: this }));
                     break;
             }
         };
@@ -2911,7 +2905,7 @@ var Fudge;
                     this.dispatchAnimate();
                     break;
                 case "play":
-                    if (this.idInterval == undefined) {
+                    if (this.idInterval == null) {
                         target.id = "pause";
                         this.time.set(this.playbackTime);
                         this.idInterval = window.setInterval(() => {
@@ -2921,7 +2915,6 @@ var Fudge;
                     }
                     break;
                 case "pause":
-                    target.id = "play";
                     this.pause();
                     break;
                 case "next": // TODO: change to next key frame
@@ -2931,8 +2924,11 @@ var Fudge;
             }
         };
         pause() {
+            if (this.idInterval == null)
+                return;
+            this.toolbar.querySelector("#pause").id = "play";
             window.clearInterval(this.idInterval);
-            this.idInterval = undefined;
+            this.idInterval = null;
         }
     }
     Fudge.ViewAnimation = ViewAnimation;
@@ -3152,7 +3148,7 @@ var Fudge;
                 let viewKey = {
                     data: _key,
                     color: _sequence.color,
-                    path2D: this.generateKey(this.worldToScreenPoint(_key.Time, this.mode == SHEET_MODE.CURVES ? _key.Value : _iSequence * ViewAnimationSheet.KEY_SIZE * 4), ViewAnimationSheet.KEY_SIZE, ViewAnimationSheet.KEY_SIZE),
+                    path2D: this.generateKey(this.worldToScreenPoint(_key.time, this.mode == SHEET_MODE.CURVES ? _key.value : _iSequence * ViewAnimationSheet.KEY_SIZE * 4), ViewAnimationSheet.KEY_SIZE, ViewAnimationSheet.KEY_SIZE),
                     type: "key"
                 };
                 return viewKey;
@@ -3172,8 +3168,8 @@ var Fudge;
         drawTimeline() {
             this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
             this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
-            let animationStart = Math.min(...this.keys.map(_key => _key.data.Time)) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-            let animationEnd = Math.max(...this.keys.map(_key => _key.data.Time)) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+            let animationStart = Math.min(...this.keys.map(_key => _key.data.time)) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+            let animationEnd = Math.max(...this.keys.map(_key => _key.data.time)) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
             this.crc2.fillStyle = "rgba(100, 100, 255, 0.2)";
             this.crc2.fillRect(animationStart, 0, animationEnd - animationStart, ViewAnimationSheet.TIMELINE_HEIGHT);
             this.crc2.beginPath();
@@ -3388,8 +3384,8 @@ var Fudge;
                         parameters.c * ((u + v + w) / 3) +
                         parameters.d);
                 };
-                let xStart = _keyStart.Time;
-                let xEnd = _keyEnd.Time;
+                let xStart = _keyStart.time;
+                let xEnd = _keyEnd.time;
                 let offsetTimeEnd = xEnd - xStart;
                 let points = new Array(4).fill(0).map(() => ƒ.Recycler.get(ƒ.Vector2));
                 points[0].set(xStart, polarForm(0, 0, 0));
@@ -3426,9 +3422,9 @@ var Fudge;
             let [left, right] = [ƒ.Recycler.get(ƒ.Vector2), ƒ.Recycler.get(ƒ.Vector2)];
             left.set(-50, 0);
             right.set(50, 0);
-            let angleSlopeScreen = Math.atan(this.selectedKey.data.SlopeIn * (this.mtxWorldToScreen.scaling.y / this.mtxWorldToScreen.scaling.x)) * (180 / Math.PI); // in degree
+            let angleSlopeScreen = Math.atan(this.selectedKey.data.slopeIn * (this.mtxWorldToScreen.scaling.y / this.mtxWorldToScreen.scaling.x)) * (180 / Math.PI); // in degree
             let mtxTransform = ƒ.Matrix3x3.IDENTITY();
-            mtxTransform.translate(this.worldToScreenPoint(this.selectedKey.data.Time, this.selectedKey.data.Value));
+            mtxTransform.translate(this.worldToScreenPoint(this.selectedKey.data.time, this.selectedKey.data.value));
             mtxTransform.rotate(angleSlopeScreen);
             left.transform(mtxTransform);
             right.transform(mtxTransform);
@@ -3454,7 +3450,7 @@ var Fudge;
         drawHighlight() {
             if (!this.selectedKey)
                 return;
-            let posScreen = this.worldToScreenPoint(this.selectedKey.data.Time, this.selectedKey.data.Value);
+            let posScreen = this.worldToScreenPoint(this.selectedKey.data.time, this.selectedKey.data.value);
             this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
             this.crc2.fillStyle += "66";
             this.crc2.fillRect(posScreen.x - ViewAnimationSheet.KEY_SIZE / 2, 0, ViewAnimationSheet.KEY_SIZE, ViewAnimationSheet.TIMELINE_HEIGHT);
@@ -3536,11 +3532,11 @@ var Fudge;
         };
         hndPointerMoveSlope = (_event) => {
             _event.preventDefault();
-            let vctDelta = ƒ.Vector2.DIFFERENCE(new ƒ.Vector2(_event.offsetX, _event.offsetY), this.worldToScreenPoint(this.selectedKey.data.Time, this.selectedKey.data.Value));
+            let vctDelta = ƒ.Vector2.DIFFERENCE(new ƒ.Vector2(_event.offsetX, _event.offsetY), this.worldToScreenPoint(this.selectedKey.data.time, this.selectedKey.data.value));
             vctDelta.transform(ƒ.Matrix3x3.SCALING(ƒ.Matrix3x3.INVERSION(this.mtxWorldToScreen).scaling));
             let slope = vctDelta.y / vctDelta.x;
-            this.selectedKey.data.SlopeIn = slope;
-            this.selectedKey.data.SlopeOut = slope;
+            this.selectedKey.data.slopeIn = slope;
+            this.selectedKey.data.slopeOut = slope;
             this.dispatchAnimate();
         };
         hndPointerMovePan = (_event) => {
@@ -3613,12 +3609,14 @@ var Fudge;
                 this.mtxWorldToScreen.scaleY(ViewAnimationSheet.PIXEL_PER_VALUE); // apply scaling
                 let values = this.sequences
                     .flatMap(_sequence => _sequence.data.getKeys())
-                    .map(_key => _key.Value);
-                if (values.length > 1 && values[0] != values[1]) {
-                    let min = values.reduce((_a, _b) => Math.min(_a, _b));
-                    let max = values.reduce((_a, _b) => Math.max(_a, _b));
-                    this.mtxWorldToScreen.scaleY((this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT) / ((max - min * ViewAnimationSheet.PIXEL_PER_VALUE) * 1.2));
-                    this.mtxWorldToScreen.translateY((this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT) - min * -this.mtxWorldToScreen.scaling.y);
+                    .map(_key => _key.value);
+                if (values.length > 1) {
+                    let min = values.reduce((_a, _b) => Math.min(_a, _b)); // in world space
+                    let max = values.reduce((_a, _b) => Math.max(_a, _b)); // in world space
+                    let viewHeight = (this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT); // in px
+                    if (min != max)
+                        this.mtxWorldToScreen.scaleY(viewHeight / (((max - min) * ViewAnimationSheet.PIXEL_PER_VALUE) * 1.2));
+                    this.mtxWorldToScreen.translateY(viewHeight - min * this.mtxWorldToScreen.scaling.y);
                 }
             }
             else {
@@ -4356,7 +4354,6 @@ var Fudge;
                 return;
             this.throttleId = window.setTimeout(() => {
                 this.redraw();
-                console.log("redraw");
                 this.throttleId = null;
             }, _delay);
         };
