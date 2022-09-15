@@ -2195,7 +2195,9 @@ declare namespace FudgeCore {
         deleteRenderData(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(_extendable?: boolean): Mutator;
         getMutatorForUserInterface(): MutatorForUserInterface;
+        getMutatorForAnimation(): MutatorForAnimation;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }

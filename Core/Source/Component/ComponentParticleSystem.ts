@@ -52,17 +52,28 @@ namespace FudgeCore {
       return this;
     }
 
+    public getMutator(_extendable?: boolean): Mutator {
+      let mutator: Mutator = super.getMutator(true);
+      mutator.numberOfParticles = this.numberOfParticles;
+      return mutator;
+    }
+
     public getMutatorForUserInterface(): MutatorForUserInterface {
       let mutator: MutatorForUserInterface = <MutatorForUserInterface>this.getMutator(true);
-      mutator.numberOfParticles = this.numberOfParticles;
       mutator.particleEffect = this.particleEffect?.getMutatorForUserInterface();
+      return mutator;
+    }
 
+    public getMutatorForAnimation(): MutatorForAnimation {
+      let mutator: MutatorForAnimation = <MutatorForAnimation>this.getMutator();
+      delete mutator.particleEffect;
+      delete mutator.numberOfParticles;
       return mutator;
     }
 
     protected reduceMutator(_mutator: Mutator): void {
       super.reduceMutator(_mutator);
-      delete _mutator.variables;
+      delete _mutator.randomNumbersRenderData;
     }
     //#endregion
   }
