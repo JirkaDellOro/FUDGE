@@ -146,6 +146,11 @@ namespace Fudge {
         return;
       }
 
+      if (_id == ID.TRANSFORMATION && ƒ.ParticleData.isTransformation(_data)) {
+        _data.transformation = <ƒ.ParticleData.Transformation["transformation"]>_new;
+        return;
+      }
+
       if (_id == ID.VALUE && (ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data))) {
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
         if (typeof input == "string" && !this.particleEffectData.variables[input] && !ƒ.ParticleData.PREDEFINED_VARIABLES[input]) 

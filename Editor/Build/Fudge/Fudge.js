@@ -1809,6 +1809,10 @@ var Fudge;
                 _data.function = _new;
                 return;
             }
+            if (_id == "transformation" /* TRANSFORMATION */ && ƒ.ParticleData.isTransformation(_data)) {
+                _data.transformation = _new;
+                return;
+            }
             if (_id == "value" /* VALUE */ && (ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data))) {
                 let input = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
                 if (typeof input == "string" && !this.particleEffectData.variables[input] && !ƒ.ParticleData.PREDEFINED_VARIABLES[input])
