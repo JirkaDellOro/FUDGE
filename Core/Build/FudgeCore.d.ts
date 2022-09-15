@@ -1580,6 +1580,8 @@ declare namespace FudgeCore {
         private keyIn;
         private keyOut;
         constructor(_keyIn: AnimationKey, _keyOut?: AnimationKey);
+        set setKeyIn(_keyIn: AnimationKey);
+        set setKeyOut(_keyOut: AnimationKey);
         getParameters(): {
             a: number;
             b: number;
@@ -1592,8 +1594,6 @@ declare namespace FudgeCore {
          * @returns the value at the given time
          */
         evaluate(_time: number): number;
-        set setKeyIn(_keyIn: AnimationKey);
-        set setKeyOut(_keyOut: AnimationKey);
         /**
          * (Re-)Calculates the parameters of the cubic function.
          * See https://math.stackexchange.com/questions/3173469/calculate-cubic-equation-from-two-points-and-two-slopes-variably
@@ -1604,22 +1604,18 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Holds information about set points in time, their accompanying values as well as their slopes.
+     * Holds information about discrete points in time (rounded to 2 digits after decimal point, use {@link toKeyTime} to convert continous value to discrete), their accompanying values as well as their slopes.
      * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
      * Saved inside an {@link AnimationSequence}.
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationKey extends Mutable implements Serializable {
+        #private;
         /**Don't modify this unless you know what you're doing.*/
         functionIn: AnimationFunction;
         /**Don't modify this unless you know what you're doing.*/
         functionOut: AnimationFunction;
         broken: boolean;
-        private time;
-        private value;
-        private constant;
-        private slopeIn;
-        private slopeOut;
         constructor(_time?: number, _value?: number, _slopeIn?: number, _slopeOut?: number, _constant?: boolean);
         /**
          * Static comparation function to use in an array sort function to sort the keys by their time.
@@ -1628,16 +1624,20 @@ declare namespace FudgeCore {
          * @returns >0 if a>b, 0 if a=b, <0 if a<b
          */
         static compare(_a: AnimationKey, _b: AnimationKey): number;
-        get Time(): number;
-        set Time(_time: number);
-        get Value(): number;
-        set Value(_value: number);
-        get Constant(): boolean;
-        set Constant(_constant: boolean);
-        get SlopeIn(): number;
-        set SlopeIn(_slope: number);
-        get SlopeOut(): number;
-        set SlopeOut(_slope: number);
+        /**
+         * Round a continous value to a discrete key time
+         */
+        static toKeyTime(_time: number): number;
+        get time(): number;
+        set time(_time: number);
+        get value(): number;
+        set value(_value: number);
+        get constant(): boolean;
+        set constant(_constant: boolean);
+        get slopeIn(): number;
+        set slopeIn(_slope: number);
+        get slopeOut(): number;
+        set slopeOut(_slope: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;

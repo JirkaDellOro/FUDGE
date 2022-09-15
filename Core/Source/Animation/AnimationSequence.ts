@@ -19,16 +19,16 @@ namespace FudgeCore {
     evaluate(_time: number): number {
       if (this.keys.length == 0)
         return 0; //TODO: shouldn't return 0 but something indicating no change, like null. probably needs to be changed in Node as well to ignore non-numeric values in the applyAnimation function
-      if (this.keys.length == 1 || this.keys[0].Time >= _time)
-        return this.keys[0].Value;
+      if (this.keys.length == 1 || this.keys[0].time >= _time)
+        return this.keys[0].value;
 
 
       for (let i: number = 0; i < this.keys.length - 1; i++) {
-        if (this.keys[i].Time <= _time && this.keys[i + 1].Time > _time) {
+        if (this.keys[i].time <= _time && this.keys[i + 1].time > _time) {
           return this.keys[i].functionOut.evaluate(_time);
         }
       }
-      return this.keys[this.keys.length - 1].Value;
+      return this.keys[this.keys.length - 1].value;
     }
 
     /**
@@ -47,9 +47,9 @@ namespace FudgeCore {
      */
     modifyKey(_key: AnimationKey, _time?: number, _value?: number): void {
       if (_time != null)
-        _key.Time = _time;
+        _key.time = _time;
       if (_value != null)
-        _key.Value = _value;
+        _key.value = _value;
       this.keys.sort(AnimationKey.compare);
       this.regenerateFunctions();
     }

@@ -389,7 +389,7 @@ namespace FudgeCore {
         if (_structure[n] instanceof AnimationSequence) {
           let sequence: AnimationSequence = <AnimationSequence>_structure[n];
           if (sequence.length > 0) {
-            let sequenceTime: number = sequence.getKey(sequence.length - 1).Time;
+            let sequenceTime: number = sequence.getKey(sequence.length - 1).time;
             this.totalTime = sequenceTime > this.totalTime ? sequenceTime : this.totalTime;
           }
         } else {
@@ -485,7 +485,7 @@ namespace FudgeCore {
       let seq: AnimationSequence = new AnimationSequence();
       for (let i: number = 0; i < _sequence.length; i++) {
         let oldKey: AnimationKey = _sequence.getKey(i);
-        let key: AnimationKey = new AnimationKey(this.totalTime - oldKey.Time, oldKey.Value, oldKey.SlopeOut, oldKey.SlopeIn, oldKey.Constant);
+        let key: AnimationKey = new AnimationKey(this.totalTime - oldKey.time, oldKey.value, oldKey.slopeOut, oldKey.slopeIn, oldKey.constant);
         seq.addKey(key);
       }
       return seq;
