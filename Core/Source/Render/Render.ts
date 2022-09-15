@@ -84,7 +84,7 @@ namespace FudgeCore {
         let shader: ShaderInterface = cmpMaterial.material.getShader();
         let cmpParticleSystem: ComponentParticleSystem = _branch.getComponent(ComponentParticleSystem);
         if (cmpParticleSystem && cmpParticleSystem.isActive) 
-          shader = cmpParticleSystem.particleEffect.getShaderFrom(shader);
+          shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
         if (_shadersUsed.indexOf(shader) < 0)
           _shadersUsed.push(shader);
 

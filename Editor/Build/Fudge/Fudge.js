@@ -1135,9 +1135,9 @@ var Fudge;
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Create Graph", id: String(Fudge.CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
             menu.append(item);
-            item = new Fudge.remote.MenuItem({ label: "Create Animation", id: String(Fudge.CONTEXTMENU.CREATE_ANIMATION), click: _callback });
+            item = new Fudge.remote.MenuItem({ label: `Create ${ƒ.Animation.name}`, id: String(Fudge.CONTEXTMENU.CREATE_ANIMATION), click: _callback });
             menu.append(item);
-            item = new Fudge.remote.MenuItem({ label: "Create Particle Effect", id: String(Fudge.CONTEXTMENU.CREATE_PARTICLE_EFFECT), click: _callback });
+            item = new Fudge.remote.MenuItem({ label: `Create ${ƒ.ParticleSystem.name}`, id: String(Fudge.CONTEXTMENU.CREATE_PARTICLE_EFFECT), click: _callback });
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Delete Resource", id: String(Fudge.CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
             menu.append(item);
@@ -1179,9 +1179,9 @@ var Fudge;
                     this.table.selectInterval(animation, animation);
                     break;
                 case Fudge.CONTEXTMENU.CREATE_PARTICLE_EFFECT:
-                    let particleEffect = new ƒ.ParticleEffect();
+                    let particleSystem = new ƒ.ParticleSystem();
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
-                    this.table.selectInterval(particleEffect, particleEffect);
+                    this.table.selectInterval(particleSystem, particleSystem);
                     break;
                 case Fudge.CONTEXTMENU.DELETE_RESOURCE:
                     await this.table.controller.delete([this.table.getFocussed()]);
@@ -1263,7 +1263,7 @@ var Fudge;
         MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
         MeshOnComponentMesh: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
         AnimationOnComponentAnimator: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentAnimator, ofType: ƒ.Animation, dropEffect: "link" },
-        ParticleEffectOnComponentParticleSystem: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentParticleSystem, ofType: ƒ.ParticleEffect, dropEffect: "link" },
+        ParticleSystemOnComponentParticleSystem: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentParticleSystem, ofType: ƒ.ParticleSystem, dropEffect: "link" },
         // MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
         TextureOnMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
         TextureOnMeshRelief: { fromViews: [Fudge.ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
@@ -1335,8 +1335,8 @@ var Fudge;
             // Animation of ComponentAnimation
             if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator))
                 return;
-            // ParticleEffect of ComponentParticleSystem
-            if (this.filterDragDrop(_event, filter.ParticleEffectOnComponentParticleSystem))
+            // ParticleSystem of ComponentParticleSystem
+            if (this.filterDragDrop(_event, filter.ParticleSystemOnComponentParticleSystem))
                 return;
             function checkMimeType(_mime) {
                 return (_sources) => {
@@ -1389,8 +1389,8 @@ var Fudge;
                 this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
-            let setParticleEffect = (_sources) => {
-                this.mutable[ƒ.ParticleEffect.name] = _sources[0];
+            let setParticleSystem = (_sources) => {
+                this.mutable[ƒ.ParticleSystem.name] = _sources[0];
                 this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
@@ -1420,8 +1420,8 @@ var Fudge;
             // Animation on ComponentAnimator
             if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator, setAnimation))
                 return;
-            // ParticleEffect on ComponentParticleSystem
-            if (this.filterDragDrop(_event, filter.ParticleEffectOnComponentParticleSystem, setParticleEffect))
+            // ParticleSystem on ComponentParticleSystem
+            if (this.filterDragDrop(_event, filter.ParticleSystemOnComponentParticleSystem, setParticleSystem))
                 return;
         };
         filterDragDrop(_event, _filter, _callback = () => true) {
@@ -1687,16 +1687,16 @@ var Fudge;
     var ƒui = FudgeUserInterface;
     class ControllerTreeParticleSystem extends ƒui.CustomTreeController {
         childToParent = new Map();
-        particleEffectData;
-        constructor(_particleEffectData) {
+        particleSystemData;
+        constructor(_particleSystemData) {
             super();
-            this.particleEffectData = _particleEffectData;
+            this.particleSystemData = _particleSystemData;
         }
         createContent(_data) {
             let content = document.createElement("form");
             let parentData = this.childToParent.get(_data);
             let key = this.getKey(_data, parentData);
-            if (parentData == this.particleEffectData.variables) {
+            if (parentData == this.particleSystemData.variables) {
                 let input = document.createElement("input");
                 input.type = "text";
                 input.disabled = true;
@@ -1706,10 +1706,10 @@ var Fudge;
             }
             if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) {
                 let spanName = document.createElement("span");
-                spanName.innerText = parentData ? key : ƒ.ParticleEffect.name;
+                spanName.innerText = parentData ? key : ƒ.ParticleSystem.name;
                 content.appendChild(spanName);
             }
-            if (ƒ.ParticleData.isExpression(_data) && parentData != this.particleEffectData.variables) {
+            if (ƒ.ParticleData.isExpression(_data) && parentData != this.particleSystemData.variables) {
                 let seperator = document.createElement("span");
                 seperator.innerText = ": ";
                 if (ƒ.ParticleData.isFunction(parentData)) {
@@ -1775,7 +1775,7 @@ var Fudge;
         }
         getAttributes(_data) {
             let attributes = [];
-            if (ƒ.ParticleData.isVariable(_data) || this.childToParent.get(_data) == this.particleEffectData.variables)
+            if (ƒ.ParticleData.isVariable(_data) || this.childToParent.get(_data) == this.particleSystemData.variables)
                 attributes.push("variable");
             return attributes.join(" ");
         }
@@ -1785,11 +1785,11 @@ var Fudge;
                 let parentData = this.childToParent.get(_data);
                 let key = this.getKey(_data, parentData);
                 let target = ƒ.ParticleData.isFunction(parentData) ? parentData.parameters : parentData;
-                if (parentData == this.particleEffectData.variables) {
+                if (parentData == this.particleSystemData.variables) {
                     let errors = [];
                     if (this.isReferenced(key))
                         errors.push(`variable "${key}" is still referenced`);
-                    if (this.particleEffectData.variables[_new])
+                    if (this.particleSystemData.variables[_new])
                         errors.push(`variable "${_new}" already exists`);
                     if (ƒ.ParticleData.PREDEFINED_VARIABLES[_new])
                         errors.push(`variable "${_new}" is a predefined variable and can not be redeclared. Predefined variables: [${Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES).join(", ")}]`);
@@ -1815,7 +1815,7 @@ var Fudge;
             }
             if (_id == "value" /* VALUE */ && (ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data))) {
                 let input = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
-                if (typeof input == "string" && !this.particleEffectData.variables[input] && !ƒ.ParticleData.PREDEFINED_VARIABLES[input])
+                if (typeof input == "string" && !this.particleSystemData.variables[input] && !ƒ.ParticleData.PREDEFINED_VARIABLES[input])
                     return;
                 _data.value = input;
                 return;
@@ -1835,7 +1835,7 @@ var Fudge;
                 // sort keys for color and vector e.g. ("r", "g", "b", "a")
                 if (ƒ.ParticleData.isTransformation(_data))
                     subKeys = Fudge.ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => subKeys.includes(_key));
-                if (_data == this.particleEffectData.color)
+                if (_data == this.particleSystemData.color)
                     subKeys = Fudge.ViewParticleSystem.COLOR_KEYS.filter(_key => subKeys.includes(_key));
                 subKeys.forEach(_key => {
                     let child = subData[_key];
@@ -1865,7 +1865,7 @@ var Fudge;
                 container = _target.parameters;
             else if (Array.isArray(_target) && _children.every(_data => ƒ.ParticleData.isTransformation(_data)))
                 container = _target;
-            else if ((ƒ.ParticleData.isTransformation(_target) || _target == this.particleEffectData.color || _target == this.particleEffectData.variables) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
+            else if ((ƒ.ParticleData.isTransformation(_target) || _target == this.particleSystemData.color || _target == this.particleSystemData.variables) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
                 container = _target;
             if (!container)
                 return move;
@@ -1892,9 +1892,9 @@ var Fudge;
                     let newKey;
                     if (ƒ.ParticleData.isTransformation(_target))
                         newKey = Fudge.ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => !usedKeys.includes(_key)).shift();
-                    else if (_target == this.particleEffectData.color)
+                    else if (_target == this.particleSystemData.color)
                         newKey = Fudge.ViewParticleSystem.COLOR_KEYS.filter(_key => !usedKeys.includes(_key)).shift();
-                    else if (_target == this.particleEffectData.variables && this.getKey(data, _target) == null)
+                    else if (_target == this.particleSystemData.variables && this.getKey(data, _target) == null)
                         newKey = `variable${usedKeys.length}`;
                     if (newKey == null)
                         continue;
@@ -1946,7 +1946,7 @@ var Fudge;
             let parentData = this.childToParent.get(_data);
             let key = this.getKey(_data, parentData);
             let index = Number.parseInt(key);
-            if (parentData == this.particleEffectData.variables && this.isReferenced(key)) {
+            if (parentData == this.particleSystemData.variables && this.isReferenced(key)) {
                 ƒui.Warning.display([`variable "${key}" is still referenced`], "Unable to delete", "Please resolve the errors and try again");
                 return false;
             }
@@ -1959,7 +1959,7 @@ var Fudge;
             this.childToParent.delete(_data);
             return true;
         }
-        isReferenced(_name, _data = this.particleEffectData) {
+        isReferenced(_name, _data = this.particleSystemData) {
             if (ƒ.ParticleData.isVariable(_data) && _data.value == _name)
                 return true;
             for (const subData of Object.values(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data))
@@ -2221,7 +2221,7 @@ var Fudge;
                         type: "component",
                         componentType: Fudge.VIEW.PARTICLE_SYSTEM,
                         componentState: _state,
-                        title: ƒ.ParticleEffect.name
+                        title: ƒ.ParticleSystem.name
                     }]
             };
             this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [
@@ -2333,8 +2333,8 @@ var Fudge;
         graph;
         node;
         cmpParticleSystem;
-        particleEffect;
-        particleEffectData;
+        particleSystem;
+        particleSystemData;
         idInterval;
         tree;
         controller;
@@ -2342,7 +2342,7 @@ var Fudge;
         variables;
         constructor(_container, _state) {
             super(_container, _state);
-            this.setParticleEffect(null);
+            this.setParticleSystem(null);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
@@ -2355,26 +2355,26 @@ var Fudge;
                 return;
             this.contextMenu.items.forEach(_item => _item.visible = false);
             let popup = false;
-            if (focus == this.particleEffectData.color || ƒ.ParticleData.isTransformation(focus)) {
+            if (focus == this.particleSystemData.color || ƒ.ParticleData.isTransformation(focus)) {
                 [
                     this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT_NAMED)),
                     this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION_NAMED))
                 ].forEach(_item => {
                     _item.visible = true;
                     _item.submenu.items.forEach(_subItem => _subItem.visible = false);
-                    let labels = focus == this.particleEffectData.color ? ViewParticleSystem.COLOR_KEYS : ViewParticleSystem.TRANSFORMATION_KEYS;
+                    let labels = focus == this.particleSystemData.color ? ViewParticleSystem.COLOR_KEYS : ViewParticleSystem.TRANSFORMATION_KEYS;
                     labels
                         .filter(_value => !Object.keys(focus).includes(_value))
                         .forEach(_label => _item.submenu.items.find(_item => _item.label == _label).visible = true);
                 });
                 popup = true;
             }
-            if (focus == this.particleEffectData.variables || ƒ.ParticleData.isFunction(focus)) {
+            if (focus == this.particleSystemData.variables || ƒ.ParticleData.isFunction(focus)) {
                 this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT)).visible = true;
                 this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION)).visible = true;
                 popup = true;
             }
-            if (focus == this.particleEffectData.mtxLocal || focus == this.particleEffectData.mtxWorld) {
+            if (focus == this.particleSystemData.mtxLocal || focus == this.particleSystemData.mtxWorld) {
                 this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION)).visible = true;
                 popup = true;
             }
@@ -2438,9 +2438,9 @@ var Fudge;
                         { function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: [] };
                     if (ƒ.ParticleData.isFunction(focus))
                         focus.parameters.push(child);
-                    else if (ƒ.ParticleData.isTransformation(focus) || focus == this.particleEffectData.color)
+                    else if (ƒ.ParticleData.isTransformation(focus) || focus == this.particleSystemData.color)
                         focus[_item.label] = child;
-                    else if (focus == this.particleEffectData.variables)
+                    else if (focus == this.particleSystemData.variables)
                         focus[`variable${Object.keys(focus).length}`] = child;
                     this.controller.childToParent.set(child, focus);
                     this.tree.findVisible(focus).expand(true);
@@ -2475,7 +2475,7 @@ var Fudge;
                     this.graph = _event.detail.graph;
                     this.node = _event.detail.node;
                     this.cmpParticleSystem = this.node?.getComponent(ƒ.ComponentParticleSystem);
-                    this.setParticleEffect(this.cmpParticleSystem?.particleEffect);
+                    this.setParticleSystem(this.cmpParticleSystem?.particleSystem);
                     break;
                 case Fudge.EVENT_EDITOR.CLOSE:
                     document.removeEventListener("keydown" /* KEY_DOWN */, this.hndEvent);
@@ -2492,7 +2492,7 @@ var Fudge;
                 case "paste" /* PASTE */:
                 case "drop" /* DROP */:
                     this.refreshVariables();
-                    let invalid = this.validateData(this.particleEffectData);
+                    let invalid = this.validateData(this.particleSystemData);
                     this.errors
                         .filter(_error => !invalid.includes(_error))
                         .map(([_data]) => this.tree.findVisible(_data))
@@ -2504,8 +2504,8 @@ var Fudge;
                     });
                     this.errors = invalid;
                     if (this.errors.length == 0) {
-                        this.particleEffect.data = JSON.parse(JSON.stringify(this.particleEffectData)); // our working copy should only be used if it is valid 
-                        this.cmpParticleSystem.particleEffect = this.particleEffect;
+                        this.particleSystem.data = JSON.parse(JSON.stringify(this.particleSystemData)); // our working copy should only be used if it is valid 
+                        this.cmpParticleSystem.particleSystem = this.particleSystem;
                     }
                     else {
                         this.errors.forEach(([_data, _error]) => {
@@ -2518,24 +2518,24 @@ var Fudge;
                     break;
             }
         };
-        setParticleEffect(_particleEffect) {
-            if (!_particleEffect) {
-                this.particleEffect = undefined;
+        setParticleSystem(_particleSystem) {
+            if (!_particleSystem) {
+                this.particleSystem = undefined;
                 this.tree = undefined;
                 window.clearInterval(this.idInterval);
                 this.idInterval = undefined;
                 this.dom.innerHTML = "select a node with an attached component particle system";
                 return;
             }
-            this.particleEffect = _particleEffect;
-            this.particleEffectData = JSON.parse(JSON.stringify(_particleEffect.data)); // we will work with a copy
+            this.particleSystem = _particleSystem;
+            this.particleSystemData = JSON.parse(JSON.stringify(_particleSystem.data)); // we will work with a copy
             this.dom.innerHTML = "";
             this.variables = document.createElement("datalist");
             this.variables.id = "variables";
             this.dom.appendChild(this.variables);
             this.refreshVariables();
-            this.controller = new Fudge.ControllerTreeParticleSystem(this.particleEffectData);
-            let newTree = new ƒui.CustomTree(this.controller, this.particleEffectData);
+            this.controller = new Fudge.ControllerTreeParticleSystem(this.particleSystemData);
+            let newTree = new ƒui.CustomTree(this.controller, this.particleSystemData);
             this.dom.appendChild(newTree);
             this.tree = newTree;
             this.tree.addEventListener("rename" /* RENAME */, this.hndEvent);
@@ -2559,7 +2559,7 @@ var Fudge;
                 return indexFirstOccurence >= 0 && indexFirstOccurence >= _index;
             })
                 .forEach(([_from, _to, _data]) => invalid.push([_data, `variable "${_to}" is used before its declaration`]));
-            invalid.forEach(([_data, _error]) => console.warn(`${ƒ.ParticleEffect.name}: ${_error}`));
+            invalid.forEach(([_data, _error]) => console.warn(`${ƒ.ParticleSystem.name}: ${_error}`));
             return invalid;
             function validateRecursive(_data, _path = []) {
                 if (ƒ.ParticleData.isFunction(_data)) {
@@ -2582,7 +2582,7 @@ var Fudge;
             Fudge.remote.Menu.getApplicationMenu().getMenuItemById(Fudge.MENU.PROJECT_SAVE).enabled = _on;
         }
         refreshVariables() {
-            this.variables.innerHTML = [...Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES), ...Object.keys(this.particleEffectData.variables)].map(_name => `<option value="${_name}">`).join("");
+            this.variables.innerHTML = [...Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES), ...Object.keys(this.particleSystemData.variables)].map(_name => `<option value="${_name}">`).join("");
         }
     }
     Fudge.ViewParticleSystem = ViewParticleSystem;
@@ -3557,7 +3557,7 @@ var Fudge;
         [ƒ.Material, ƒ.ComponentMaterial],
         [ƒ.Mesh, ƒ.ComponentMesh],
         [ƒ.Animation, ƒ.ComponentAnimator],
-        [ƒ.ParticleEffect, ƒ.ComponentParticleSystem]
+        [ƒ.ParticleSystem, ƒ.ComponentParticleSystem]
     ]);
     /**
      * View all components attached to a node

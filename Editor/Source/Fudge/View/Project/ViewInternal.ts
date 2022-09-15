@@ -76,10 +76,10 @@ namespace Fudge {
       item = new remote.MenuItem({ label: "Create Graph", id: String(CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
       menu.append(item);
 
-      item = new remote.MenuItem({ label: "Create Animation", id: String(CONTEXTMENU.CREATE_ANIMATION), click: _callback });
+      item = new remote.MenuItem({ label: `Create ${ƒ.Animation.name}`, id: String(CONTEXTMENU.CREATE_ANIMATION), click: _callback });
       menu.append(item);
 
-      item = new remote.MenuItem({ label: "Create Particle Effect", id: String(CONTEXTMENU.CREATE_PARTICLE_EFFECT), click: _callback });
+      item = new remote.MenuItem({ label: `Create ${ƒ.ParticleSystem.name}`, id: String(CONTEXTMENU.CREATE_PARTICLE_EFFECT), click: _callback });
       menu.append(item);
 
       item = new remote.MenuItem({ label: "Delete Resource", id: String(CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
@@ -127,9 +127,9 @@ namespace Fudge {
           this.table.selectInterval(animation, animation);
           break;
         case CONTEXTMENU.CREATE_PARTICLE_EFFECT:
-          let particleEffect: ƒ.ParticleEffect = new ƒ.ParticleEffect();
+          let particleSystem: ƒ.ParticleSystem = new ƒ.ParticleSystem();
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
-          this.table.selectInterval(particleEffect, particleEffect);
+          this.table.selectInterval(particleSystem, particleSystem);
           break;
         case CONTEXTMENU.DELETE_RESOURCE:
           await this.table.controller.delete([this.table.getFocussed()]);

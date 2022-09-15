@@ -55,21 +55,20 @@ namespace FudgeCore {
   }
 
   /**
-   * Holds all the information which defines the particle effect. Can load the said information out of a json file.
+   * Holds the information .
    * @authors Jonas Plotzky, HFU, 2020
    */
-  export class ParticleEffect extends Mutable implements SerializableResource {
+  export class ParticleSystem extends Mutable implements SerializableResource {
     public name: string;
     public idResource: string = undefined;
-    public cachedMutators: { [key: string]: Mutator };
     
     #data: ParticleData.Effect;
-    private shaderMap: Map<ShaderInterface, ShaderParticleSystem> = new Map();
+    private shaderToShaderParticleSystem: Map<ShaderInterface, ShaderParticleSystem> = new Map();
 
-    constructor(_name: string = ParticleEffect.name, _particleEffectData: ParticleData.Effect = { variables: {}, mtxLocal: [], mtxWorld: [], color: {} }) {
+    constructor(_name: string = ParticleSystem.name, _particleSystemData: ParticleData.Effect = { variables: {}, mtxLocal: [], mtxWorld: [], color: {} }) {
       super();
       this.name = _name;
-      this.data = _particleEffectData;
+      this.data = _particleSystemData;
 
       Project.register(this);
     }
@@ -80,21 +79,21 @@ namespace FudgeCore {
 
     public set data(_data: ParticleData.Effect) {
       this.#data = _data;
-      this.shaderMap.forEach( shader => shader.deleteProgram() );
-      this.shaderMap.clear();
+      this.shaderToShaderParticleSystem.forEach(shader => shader.deleteProgram());
+      this.shaderToShaderParticleSystem.clear();
     }
 
     public getShaderFrom(_source: ShaderInterface): ShaderParticleSystem {
-      if (!this.shaderMap.has(_source)) {
+      if (!this.shaderToShaderParticleSystem.has(_source)) {
         let particleShader: ShaderParticleSystem = new ShaderParticleSystem();
-        particleShader.particleEffect = this;
+        particleShader.particleSystem = this;
         particleShader.define.push(..._source.define);
         particleShader.vertexShaderSource = _source.getVertexShaderSource();
         particleShader.fragmentShaderSource = _source.getFragmentShaderSource();
-        this.shaderMap.set(_source, particleShader);
+        this.shaderToShaderParticleSystem.set(_source, particleShader);
       }
       
-      return this.shaderMap.get(_source);
+      return this.shaderToShaderParticleSystem.get(_source);
     }
 
     //#region Transfer

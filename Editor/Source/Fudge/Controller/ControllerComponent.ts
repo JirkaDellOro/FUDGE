@@ -22,7 +22,7 @@ namespace Fudge {
     MaterialOnComponentMaterial: { fromViews: [ViewInternal], onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
     MeshOnComponentMesh: { fromViews: [ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
     AnimationOnComponentAnimator: { fromViews: [ViewInternal], onType: ƒ.ComponentAnimator, ofType: ƒ.Animation, dropEffect: "link" },
-    ParticleEffectOnComponentParticleSystem: { fromViews: [ViewInternal], onType: ƒ.ComponentParticleSystem, ofType: ƒ.ParticleEffect, dropEffect: "link" },
+    ParticleSystemOnComponentParticleSystem: { fromViews: [ViewInternal], onType: ƒ.ComponentParticleSystem, ofType: ƒ.ParticleSystem, dropEffect: "link" },
     // MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
     TextureOnMaterial: { fromViews: [ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
     TextureOnMeshRelief: { fromViews: [ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
@@ -92,8 +92,8 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.TextureOnMeshRelief)) return;
       // Animation of ComponentAnimation
       if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator)) return;
-      // ParticleEffect of ComponentParticleSystem
-      if (this.filterDragDrop(_event, filter.ParticleEffectOnComponentParticleSystem)) return;
+      // ParticleSystem of ComponentParticleSystem
+      if (this.filterDragDrop(_event, filter.ParticleSystemOnComponentParticleSystem)) return;
       
 
       function checkMimeType(_mime: MIME): (_sources: Object[]) => boolean {
@@ -147,8 +147,8 @@ namespace Fudge {
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };
-      let setParticleEffect: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
-        this.mutable[ƒ.ParticleEffect.name] = _sources[0];
+      let setParticleSystem: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
+        this.mutable[ƒ.ParticleSystem.name] = _sources[0];
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };
@@ -172,8 +172,8 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.TextureOnMeshRelief, setHeightMap)) return;
       // Animation on ComponentAnimator
       if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator, setAnimation)) return;
-      // ParticleEffect on ComponentParticleSystem
-      if (this.filterDragDrop(_event, filter.ParticleEffectOnComponentParticleSystem, setParticleEffect)) return;
+      // ParticleSystem on ComponentParticleSystem
+      if (this.filterDragDrop(_event, filter.ParticleSystemOnComponentParticleSystem, setParticleSystem)) return;
     }
 
 

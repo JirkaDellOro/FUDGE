@@ -12,7 +12,7 @@ namespace Fudge {
     [ƒ.Material, ƒ.ComponentMaterial],
     [ƒ.Mesh, ƒ.ComponentMesh],
     [ƒ.Animation, ƒ.ComponentAnimator],
-    [ƒ.ParticleEffect, ƒ.ComponentParticleSystem]
+    [ƒ.ParticleSystem, ƒ.ComponentParticleSystem]
   ]);
 
   /**

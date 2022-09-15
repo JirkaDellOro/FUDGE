@@ -2,7 +2,7 @@ namespace FudgeCore {
 
   @RenderInjectorShaderParticleSystem.decorate
   export class ShaderParticleSystem implements ShaderInterface {
-    public particleEffect: ParticleEffect;
+    public particleSystem: ParticleSystem;
     public define: string[] = [ "PARTICLE" ];
     public vertexShaderSource: string;
     public fragmentShaderSource: string;

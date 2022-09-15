@@ -59,12 +59,12 @@ namespace ParticleSystemTest {
     // particlesSystem2.getComponent(f.ComponentMesh).showToCamera = true;
     particlesSystem2.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(0.5, 1, 0.2);
 
-    let particleEffect: f.ParticleEffect = new f.ParticleEffect();
-    await particleEffect.load(inputEffectName.value);
-    console.log(particleEffect);
+    let particleSystem: f.ParticleSystem = new f.ParticleSystem();
+    await particleSystem.load(inputEffectName.value);
+    console.log(particleSystem);
 
-    cmpParticleSystem1 = new f.ComponentParticleSystem(particleEffect, inputParticleNum1.valueAsNumber);
-    cmpParticleSystem2 = new f.ComponentParticleSystem(particleEffect, inputParticleNum2.valueAsNumber);
+    cmpParticleSystem1 = new f.ComponentParticleSystem(particleSystem, inputParticleNum1.valueAsNumber);
+    cmpParticleSystem2 = new f.ComponentParticleSystem(particleSystem, inputParticleNum2.valueAsNumber);
     particlesSystem1.addComponent(cmpParticleSystem1);
     particlesSystem2.addComponent(cmpParticleSystem2);
     root.addChild(particlesSystem1);
@@ -79,12 +79,12 @@ namespace ParticleSystemTest {
     };
 
     let changeEffect: (_event: Event) => void = async (_event: Event) => {
-      let newParticleEffect: f.ParticleEffect = new f.ParticleEffect();
+      let newParticleEffect: f.ParticleSystem = new f.ParticleSystem();
       await newParticleEffect.load(inputEffectName.value);
       console.log(newParticleEffect);
 
-      cmpParticleSystem1.particleEffect = newParticleEffect;
-      cmpParticleSystem2.particleEffect = newParticleEffect;
+      cmpParticleSystem1.particleSystem = newParticleEffect;
+      cmpParticleSystem2.particleSystem = newParticleEffect;
     };
 
     inputParticleNum1.addEventListener("input", changeSize);

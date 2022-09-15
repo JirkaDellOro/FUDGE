@@ -12,13 +12,13 @@ namespace FudgeCore {
 
     protected static useRenderData(this: ComponentParticleSystem): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      if (this.randomNumbersRenderData) {
+      if (this.renderData) {
         // buffers exist
-        crc3.activeTexture(WebGL2RenderingContext.TEXTURE1); // TODO: which id to use?
-        crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.randomNumbersRenderData);
+        crc3.activeTexture(WebGL2RenderingContext.TEXTURE1); // ATTENTION!: changing this id requires changing of corresponding id in particle render method, use ctrl + shift + f search!
+        crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData);
       }
       else {
-        this.randomNumbersRenderData = {};
+        this.renderData = {};
         const texture: WebGLTexture = Render.assert<WebGLTexture>(crc3.createTexture());
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
         let randomNumbers: number[] = [];
@@ -46,7 +46,7 @@ namespace FudgeCore {
         crc3.texParameteri(crc3.TEXTURE_2D, crc3.TEXTURE_MIN_FILTER, crc3.NEAREST);
         crc3.texParameteri(crc3.TEXTURE_2D, crc3.TEXTURE_MAG_FILTER, crc3.NEAREST);
 
-        this.randomNumbersRenderData = texture;
+        this.renderData = texture;
 
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
 
@@ -55,12 +55,12 @@ namespace FudgeCore {
     }
 
     protected static deleteRenderData(this: ComponentParticleSystem): void {
-      if (!this.randomNumbersRenderData) return;
+      if (!this.renderData) return;
       
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
-      crc3.deleteTexture(this.randomNumbersRenderData);
-      delete this.randomNumbersRenderData;
+      crc3.deleteTexture(this.renderData);
+      delete this.renderData;
     }
   }
 }

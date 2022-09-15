@@ -334,7 +334,7 @@ namespace FudgeCore {
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       let drawParticles: boolean = cmpParticleSystem && cmpParticleSystem.isActive;
       let shader: ShaderInterface = cmpMaterial.material.getShader();
-      if (drawParticles) shader = cmpParticleSystem.particleEffect.getShaderFrom(shader);
+      if (drawParticles) shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
 
       shader.useProgram();   
       coat.useRenderData(shader, cmpMaterial);
@@ -364,13 +364,13 @@ namespace FudgeCore {
       }
       _cmpParticleSystem.useRenderData();
 
-      this.crc3.uniform1f(_shader.uniforms["u_fParticleSystemSize"], _cmpParticleSystem.size);
-      this.crc3.uniform1f(_shader.uniforms["u_fParticleSystemTime"], _cmpParticleSystem.time.get());
-      this.crc3.uniform1i(_shader.uniforms["u_fParticleSystemRandomNumbers"], 1);
+      RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemSize"], _cmpParticleSystem.size);
+      RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemTime"], _cmpParticleSystem.time.get());
+      RenderWebGL.crc3.uniform1i(_shader.uniforms["u_fParticleSystemRandomNumbers"], 1); // ATTENTION!: changing this id requires changing of corresponding id in component particle system render injector, use ctrl + shift + f search!
 
       let faceCamera: boolean = _cmpFaceCamera && _cmpFaceCamera.isActive;
-      this.crc3.uniform1i(_shader.uniforms["u_bParticleSystemFaceCamera"], faceCamera ? 1 : 0);
-      this.crc3.uniform1i(_shader.uniforms["u_bParticleSystemRestrict"], faceCamera && _cmpFaceCamera.restrict ? 1 : 0);
+      RenderWebGL.crc3.uniform1i(_shader.uniforms["u_bParticleSystemFaceCamera"], faceCamera ? 1 : 0);
+      RenderWebGL.crc3.uniform1i(_shader.uniforms["u_bParticleSystemRestrict"], faceCamera && _cmpFaceCamera.restrict ? 1 : 0);
 
       RenderWebGL.crc3.drawElementsInstanced(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0, _cmpParticleSystem.size);
       if (_sortForAlpha) {

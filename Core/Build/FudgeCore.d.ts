@@ -2177,19 +2177,23 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Attaches a {@link ParticleEffect} to the node.
+     * Attaches a {@link ParticleSystem} to the node.
      * @author Jonas Plotzky, HFU, 2020
      */
     class ComponentParticleSystem extends Component {
         #private;
         static readonly iSubclass: number;
-        randomNumbersRenderData: unknown;
-        particleEffect: ParticleEffect;
+        /** a texture filed with random numbers. Used by particle shader */
+        renderData: unknown;
+        particleSystem: ParticleSystem;
         readonly time: Time;
-        constructor(_particleEffect?: ParticleEffect, _size?: number);
+        constructor(_particleSystem?: ParticleSystem, _size?: number);
+        /**
+         * Get the number of particles
+         */
         get size(): number;
         /**
-         * Sets the number of particles of the particle effect. Caution: Setting this will reinitialize the random numbers array(texture) used in the shader.
+         * Set the number of particles. Caution: Setting this will reinitialize the random numbers array(texture) used in the shader.
          */
         set size(_size: number);
         useRenderData(): void;
@@ -4230,18 +4234,15 @@ declare namespace FudgeCore {
         function isTransformation(_data: EffectRecursive): _data is Transformation;
     }
     /**
-     * Holds all the information which defines the particle effect. Can load the said information out of a json file.
+     * Holds the information .
      * @authors Jonas Plotzky, HFU, 2020
      */
-    class ParticleEffect extends Mutable implements SerializableResource {
+    class ParticleSystem extends Mutable implements SerializableResource {
         #private;
         name: string;
         idResource: string;
-        cachedMutators: {
-            [key: string]: Mutator;
-        };
-        private shaderMap;
-        constructor(_name?: string, _particleEffectData?: ParticleData.Effect);
+        private shaderToShaderParticleSystem;
+        constructor(_name?: string, _particleSystemData?: ParticleData.Effect);
         get data(): ParticleData.Effect;
         set data(_data: ParticleData.Effect);
         getShaderFrom(_source: ShaderInterface): ShaderParticleSystem;
@@ -4254,7 +4255,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class ShaderParticleSystem implements ShaderInterface {
-        particleEffect: ParticleEffect;
+        particleSystem: ParticleSystem;
         define: string[];
         vertexShaderSource: string;
         fragmentShaderSource: string;

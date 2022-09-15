@@ -106,7 +106,7 @@ namespace FudgeCore {
     }
 
     public static getVertexShaderSource(this: ShaderParticleSystem): string {
-      let data: ParticleData.Effect = RenderInjectorShaderParticleSystem.renameVariables(this.particleEffect.data);
+      let data: ParticleData.Effect = RenderInjectorShaderParticleSystem.renameVariables(this.particleSystem.data);
       let mtxLocal: ParticleData.Transformation[] = data?.mtxLocal;
       let mtxWorld: ParticleData.Transformation[] = data?.mtxWorld;
 
@@ -122,7 +122,7 @@ namespace FudgeCore {
     }
 
     public static getFragmentShaderSource(this: ShaderParticleSystem): string {
-      return this.fragmentShaderSource.replace("#version 300 es", `#version 300 es${this.particleEffect.data.color ? "\n#define PARTICLE_COLOR" : ""}`);
+      return this.fragmentShaderSource.replace("#version 300 es", `#version 300 es${this.particleSystem.data.color ? "\n#define PARTICLE_COLOR" : ""}`);
     }
     
     //#region code generation
@@ -143,13 +143,13 @@ namespace FudgeCore {
       let variableMap: {[key: string]: string} = {};
       Object.keys(_data.variables).forEach( (_variableName, _index) => {
         if (ParticleData.PREDEFINED_VARIABLES[_variableName])
-          throw `Error in ${ParticleEffect.name}: "${_variableName}" is a predefined variable and can not be redeclared`;
+          throw `Error in ${ParticleSystem.name}: "${_variableName}" is a predefined variable and can not be redeclared`;
         else
           return variableMap[_variableName] = `fVariable${_index}`; 
       });
 
       let dataRenamed: ParticleData.Effect = JSON.parse(JSON.stringify(_data));
-      dataRenamed.variables = Object.fromEntries(Object.entries(dataRenamed.variables).map( ([_name, _exrpession]) => [variableMap[_name], _exrpession] ));
+      dataRenamed.variables = Object.fromEntries(Object.entries(dataRenamed.variables).map(([_name, _exrpession]) => [variableMap[_name], _exrpession] ));
       renameRecursive(dataRenamed);
       return dataRenamed;
 
@@ -159,7 +159,7 @@ namespace FudgeCore {
           if (newName)
             _data.value = newName;
           else
-            throw `Error in ${ParticleEffect.name}: "${newName}" is not a defined variable`;
+            throw `Error in ${ParticleSystem.name}: "${newName}" is not a defined variable`;
         } else {
           for (const subData of Object.values(ParticleData.isFunction(_data) ? _data.parameters : _data)) 
             if (typeof subData == "object")
@@ -172,29 +172,26 @@ namespace FudgeCore {
       if (!_variables) return "";
       
       return Object.entries(_variables)
-        .map( ([_variableName, _expressionTree]): [string, string] => [_variableName, RenderInjectorShaderParticleSystem.generateExpression(_expressionTree)] )
-        .map( ([_variableName, _code]): string => `float ${_variableName} = ${_code};` )
-        .reduce( (_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "" );
+        .map(([_variableName, _expressionTree]): [string, string] => [_variableName, RenderInjectorShaderParticleSystem.generateExpression(_expressionTree)])
+        .map(([_variableName, _code]): string => `float ${_variableName} = ${_code};`)
+        .reduce((_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "");
     }
 
     private static generateTransformations(_transformations: ParticleData.Effect["mtxLocal"], _localOrWorld: "Local" | "World"): string {
       if (!_transformations || _transformations.length == 0) return "";
 
-      type Transformation = "translate" | "rotate" | "scale"; // TODO: maybe extract this from ParticleEffectData.Transformation eg. Pick<ParticleEffectData.Transformation, "transformation">;
-      type CodeTransformation = [Transformation, string, string, string];
-
-      let transformations: CodeTransformation[] = _transformations
+      let transformations: [ParticleData.Transformation["transformation"], string, string, string][] = _transformations
         .map(_data => {
           let isScale: boolean = _data.transformation === "scale";
           let [x, y, z] = [_data.x, _data.y, _data.z]
-            .map( (_value) => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : (isScale ? "1.0" : "0.0") ) as [string, string, string];
+            .map((_value) => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : (isScale ? "1.0" : "0.0")) as [string, string, string];
 
           return [_data.transformation, x, y, z];
         });
 
       let code: string = "";
       code += transformations
-        .map( ([_transformation, _x, _y, _z]: CodeTransformation, _index: number) => {
+        .map(([_transformation, _x, _y, _z], _index: number) => {
           if (_transformation == "rotate") {
             let sin: (_value: string) => string = (_value: string) => _value == "0.0" ? "0.0" : `sin(${_value})`;
             let cos: (_value: string) => string = (_value: string) => _value == "0.0" ? "1.0" : `cos(${_value})`;
@@ -214,7 +211,7 @@ namespace FudgeCore {
       
       code += `mat4 mtx${_localOrWorld} = `;
       code += transformations
-        .map( ([_transformation, _x, _y, _z]: CodeTransformation, _index: number) => {
+        .map(([_transformation, _x, _y, _z], _index: number) => {
           switch (_transformation) {
             case "translate":
               return `mat4(
@@ -237,10 +234,10 @@ namespace FudgeCore {
               0.0, 0.0, 0.0, 1.0
               )`;
             default:
-              throw `Error in ${ParticleEffect.name}: "${_transformation}" is not a transformation`;    
+              throw `Error in ${ParticleSystem.name}: "${_transformation}" is not a transformation`;    
           }
         })
-        .reduce( (_accumulator: string, _code: string) => `${_accumulator} * \n${_code}`);
+        .reduce((_accumulator: string, _code: string) => `${_accumulator} * \n${_code}`);
       code += ";\n";
 
       return code;
@@ -250,7 +247,7 @@ namespace FudgeCore {
       if (!_color) return "";
       
       let [r, g, b, a]: [string, string, string, string] = [_color.r, _color.g, _color.b, _color.a]
-        .map( (_value): string => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : "1.0" ) as [string, string, string, string];
+        .map((_value): string => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : "1.0") as [string, string, string, string];
 
       return `vec4(${r}, ${g}, ${b}, ${a});`;
     }
@@ -273,14 +270,14 @@ namespace FudgeCore {
         return `${value}${value.includes(".") ? "" : ".0"}`;
       }
   
-      throw `Error in ${ParticleEffect.name}: invalid node structure in particle effect serialization`;
+      throw `Error in ${ParticleSystem.name}: invalid node structure in particle system serialization`;
     }
   
     private static generateFunction(_function: ParticleData.FUNCTION, _parameters: string[]): string {
       if (Object.values(ParticleData.FUNCTION).includes(_function))
         return RenderInjectorShaderParticleSystem.FUNCTIONS[_function](_parameters);
       else
-        throw `Error in ${ParticleEffect.name}: "${_function}" is not an operation`;
+        throw `Error in ${ParticleSystem.name}: "${_function}" is not an operation`;
     }
     //#endregion
   }
