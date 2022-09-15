@@ -366,7 +366,7 @@ namespace FudgeCore {
 
       RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemSize"], _cmpParticleSystem.size);
       RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemTime"], _cmpParticleSystem.time.get());
-      RenderWebGL.crc3.uniform1i(_shader.uniforms["u_fParticleSystemRandomNumbers"], 1); // ATTENTION!: changing this id requires changing of corresponding id in component particle system render injector, use ctrl + shift + f search!
+      RenderWebGL.crc3.uniform1i(_shader.uniforms["u_fParticleSystemRandomNumbers"], 1); // ATTENTION!: changing this id (the second argument) requires changing of corresponding texture id in component particle system render injector
 
       let faceCamera: boolean = _cmpFaceCamera && _cmpFaceCamera.isActive;
       RenderWebGL.crc3.uniform1i(_shader.uniforms["u_bParticleSystemFaceCamera"], faceCamera ? 1 : 0);

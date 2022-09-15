@@ -1,6 +1,7 @@
 namespace FudgeCore {
   
   export namespace ParticleData {
+    export const name: string = "ParticleEffect";
 
     export interface Effect {
       variables: {[name: string]: Expression};
@@ -33,24 +34,24 @@ namespace FudgeCore {
       z?: Expression;
     }
 
-    export function isExpression(_data: EffectRecursive): _data is Expression {
-      return isFunction(_data) || isVariable(_data) || isConstant(_data);
+    export function isExpression(_effect: EffectRecursive): _effect is Expression {
+      return isFunction(_effect) || isVariable(_effect) || isConstant(_effect);
     }
 
-    export function isFunction(_data: EffectRecursive): _data is Function {
-      return "function" in _data;
+    export function isFunction(_effect: EffectRecursive): _effect is Function {
+      return "function" in _effect;
     }
 
-    export function isVariable(_data: EffectRecursive): _data is Variable {
-      return "value" in _data && typeof _data.value == "string";
+    export function isVariable(_effect: EffectRecursive): _effect is Variable {
+      return "value" in _effect && typeof _effect.value == "string";
     }
 
-    export function isConstant(_data: EffectRecursive): _data is Constant {
-      return "value" in _data && typeof _data.value == "number";
+    export function isConstant(_effect: EffectRecursive): _effect is Constant {
+      return "value" in _effect && typeof _effect.value == "number";
     }
 
-    export function isTransformation(_data: EffectRecursive): _data is Transformation {
-      return "transformation" in _data;
+    export function isTransformation(_effect: EffectRecursive): _effect is Transformation {
+      return "transformation" in _effect;
     }
   }
 
@@ -62,23 +63,23 @@ namespace FudgeCore {
     public name: string;
     public idResource: string = undefined;
     
-    #data: ParticleData.Effect;
+    #effect: ParticleData.Effect;
     private shaderToShaderParticleSystem: Map<ShaderInterface, ShaderParticleSystem> = new Map();
 
-    constructor(_name: string = ParticleSystem.name, _particleSystemData: ParticleData.Effect = { variables: {}, mtxLocal: [], mtxWorld: [], color: {} }) {
+    constructor(_name: string = ParticleSystem.name, _particleEffect: ParticleData.Effect = { variables: {}, mtxLocal: [], mtxWorld: [], color: {} }) {
       super();
       this.name = _name;
-      this.data = _particleSystemData;
+      this.effect = _particleEffect;
 
       Project.register(this);
     }
     
-    public get data(): ParticleData.Effect {
-      return this.#data;
+    public get effect(): ParticleData.Effect {
+      return this.#effect;
     }
 
-    public set data(_data: ParticleData.Effect) {
-      this.#data = _data;
+    public set effect(_effect: ParticleData.Effect) {
+      this.#effect = _effect;
       this.shaderToShaderParticleSystem.forEach(shader => shader.deleteProgram());
       this.shaderToShaderParticleSystem.clear();
     }
@@ -101,7 +102,7 @@ namespace FudgeCore {
       let serialization: Serialization =  {
         idResource: this.idResource,
         name: this.name,
-        data: this.data
+        effect: this.effect
       };
       return serialization;
     }
@@ -109,7 +110,7 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       Project.register(this, _serialization.idResource);
       this.name = _serialization.name;
-      this.data = _serialization.data;
+      this.effect = _serialization.effect;
       return this;
     }
 
@@ -119,7 +120,7 @@ namespace FudgeCore {
 
     public getMutator(): Mutator {
       let mutator: Mutator = super.getMutator(true);
-      mutator.data = this.data;
+      mutator.effect = this.effect;
       return mutator;
     }
     

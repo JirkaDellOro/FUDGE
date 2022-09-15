@@ -4196,6 +4196,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     namespace ParticleData {
+        const name: string;
         interface Effect {
             variables: {
                 [name: string]: Expression;
@@ -4227,11 +4228,11 @@ declare namespace FudgeCore {
             y?: Expression;
             z?: Expression;
         }
-        function isExpression(_data: EffectRecursive): _data is Expression;
-        function isFunction(_data: EffectRecursive): _data is Function;
-        function isVariable(_data: EffectRecursive): _data is Variable;
-        function isConstant(_data: EffectRecursive): _data is Constant;
-        function isTransformation(_data: EffectRecursive): _data is Transformation;
+        function isExpression(_effect: EffectRecursive): _effect is Expression;
+        function isFunction(_effect: EffectRecursive): _effect is Function;
+        function isVariable(_effect: EffectRecursive): _effect is Variable;
+        function isConstant(_effect: EffectRecursive): _effect is Constant;
+        function isTransformation(_effect: EffectRecursive): _effect is Transformation;
     }
     /**
      * Holds the information .
@@ -4242,9 +4243,9 @@ declare namespace FudgeCore {
         name: string;
         idResource: string;
         private shaderToShaderParticleSystem;
-        constructor(_name?: string, _particleSystemData?: ParticleData.Effect);
-        get data(): ParticleData.Effect;
-        set data(_data: ParticleData.Effect);
+        constructor(_name?: string, _particleEffect?: ParticleData.Effect);
+        get effect(): ParticleData.Effect;
+        set effect(_effect: ParticleData.Effect);
         getShaderFrom(_source: ShaderInterface): ShaderParticleSystem;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;

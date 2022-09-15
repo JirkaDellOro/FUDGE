@@ -8,9 +8,8 @@ namespace Fudge {
 
     private graph: ƒ.Graph;
     private node: ƒ.Node;
-    private cmpParticleSystem: ƒ.ComponentParticleSystem;
     private particleSystem: ƒ.ParticleSystem;
-    private particleSystemData: ƒ.ParticleData.Effect;
+    private particleEffect: ƒ.ParticleData.Effect;
     private idInterval: number;
 
     private tree: ƒui.CustomTree<ƒ.ParticleData.EffectRecursive>;
@@ -37,14 +36,14 @@ namespace Fudge {
       this.contextMenu.items.forEach(_item => _item.visible = false);
       let popup: boolean = false;
       
-      if (focus == this.particleSystemData.color || ƒ.ParticleData.isTransformation(focus)) {
+      if (focus == this.particleEffect.color || ƒ.ParticleData.isTransformation(focus)) {
         [
           this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_CONSTANT_NAMED)),
           this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_FUNCTION_NAMED))
         ].forEach(_item => {
           _item.visible = true;
           _item.submenu.items.forEach(_subItem => _subItem.visible = false);
-          let labels: string[] = focus == this.particleSystemData.color ? ViewParticleSystem.COLOR_KEYS : ViewParticleSystem.TRANSFORMATION_KEYS;
+          let labels: string[] = focus == this.particleEffect.color ? ViewParticleSystem.COLOR_KEYS : ViewParticleSystem.TRANSFORMATION_KEYS;
           labels
             .filter(_value => !Object.keys(focus).includes(_value))
             .forEach(_label => _item.submenu.items.find(_item => _item.label == _label).visible = true);
@@ -52,13 +51,13 @@ namespace Fudge {
         popup = true;
       }
 
-      if (focus == this.particleSystemData.variables || ƒ.ParticleData.isFunction(focus)) {
+      if (focus == this.particleEffect.variables || ƒ.ParticleData.isFunction(focus)) {
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_CONSTANT)).visible = true;
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_FUNCTION)).visible = true;
         popup = true;
       }
 
-      if (focus == this.particleSystemData.mtxLocal || focus == this.particleSystemData.mtxWorld) {
+      if (focus == this.particleEffect.mtxLocal || focus == this.particleEffect.mtxWorld) {
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION)).visible = true;
         popup = true;
       }
@@ -137,9 +136,9 @@ namespace Fudge {
 
           if (ƒ.ParticleData.isFunction(focus))
             focus.parameters.push(child);
-          else if (ƒ.ParticleData.isTransformation(focus) || focus == this.particleSystemData.color) 
+          else if (ƒ.ParticleData.isTransformation(focus) || focus == this.particleEffect.color) 
             focus[_item.label] = child;
-          else if (focus == this.particleSystemData.variables) 
+          else if (focus == this.particleEffect.variables) 
             focus[`variable${Object.keys(focus).length}`] = child;
 
           this.controller.childToParent.set(child, focus);
@@ -176,8 +175,7 @@ namespace Fudge {
         case EVENT_EDITOR.FOCUS:
           this.graph = _event.detail.graph;
           this.node = _event.detail.node;
-          this.cmpParticleSystem = this.node?.getComponent(ƒ.ComponentParticleSystem);
-          this.setParticleSystem(this.cmpParticleSystem?.particleSystem);
+          this.setParticleSystem(this.node?.getComponent(ƒ.ComponentParticleSystem)?.particleSystem);
           break;
         case EVENT_EDITOR.CLOSE:
           document.removeEventListener(ƒui.EVENT.KEY_DOWN, this.hndEvent);
@@ -185,7 +183,7 @@ namespace Fudge {
           break;
         case ƒui.EVENT.KEY_DOWN:
           if (this.errors.length > 0 && _event instanceof KeyboardEvent && _event.code == ƒ.KEYBOARD_CODE.S && _event.ctrlKey)
-            ƒui.Warning.display(this.errors.map(([_data, _error]) => _error), "Unable to save", `Project can't be saved while having unresolved errors`, "OK");
+            ƒui.Warning.display(this.errors.map(([_effect, _error]) => _error), "Unable to save", `Project can't be saved while having unresolved errors`, "OK");
           break;
         case EVENT_EDITOR.MODIFY:
         case ƒui.EVENT.DELETE:
@@ -194,10 +192,10 @@ namespace Fudge {
         case ƒui.EVENT.PASTE:
         case ƒui.EVENT.DROP:
           this.refreshVariables();
-          let invalid: [ƒ.ParticleData.Expression, string][] = this.validateData(this.particleSystemData);
+          let invalid: [ƒ.ParticleData.Expression, string][] = this.validateEffect(this.particleEffect);
           this.errors
             .filter(_error => !invalid.includes(_error))
-            .map(([_data]) => this.tree.findVisible(_data))
+            .map(([_effect]) => this.tree.findVisible(_effect))
             .forEach(_item => {
               if (!_item) return;
               _item.classList.remove("invalid");
@@ -205,11 +203,10 @@ namespace Fudge {
             });
           this.errors = invalid;
           if (this.errors.length == 0) {
-            this.particleSystem.data = JSON.parse(JSON.stringify(this.particleSystemData)); // our working copy should only be used if it is valid 
-            this.cmpParticleSystem.particleSystem = this.particleSystem;
+            this.particleSystem.effect = JSON.parse(JSON.stringify(this.particleEffect)); // our working copy should only be used if it is valid 
           } else {
-            this.errors.forEach(([_data, _error]) => {
-              let item: ƒui.CustomTreeItem<ƒ.ParticleData.EffectRecursive> = this.tree.findVisible(_data);
+            this.errors.forEach(([_effect, _error]) => {
+              let item: ƒui.CustomTreeItem<ƒ.ParticleData.EffectRecursive> = this.tree.findVisible(_effect);
               item.classList.add("invalid");
               item.title = _error;
             });
@@ -230,14 +227,14 @@ namespace Fudge {
       }
 
       this.particleSystem = _particleSystem;
-      this.particleSystemData = JSON.parse(JSON.stringify(_particleSystem.data)); // we will work with a copy
+      this.particleEffect = JSON.parse(JSON.stringify(_particleSystem.effect)); // we will work with a copy
       this.dom.innerHTML = "";
       this.variables = document.createElement("datalist");
       this.variables.id = "variables";
       this.dom.appendChild(this.variables);
       this.refreshVariables();
-      this.controller = new ControllerTreeParticleSystem(this.particleSystemData);
-      let newTree: ƒui.CustomTree<ƒ.ParticleData.EffectRecursive> = new ƒui.CustomTree<ƒ.ParticleData.EffectRecursive>(this.controller, this.particleSystemData);
+      this.controller = new ControllerTreeParticleSystem(this.particleEffect);
+      let newTree: ƒui.CustomTree<ƒ.ParticleData.EffectRecursive> = new ƒui.CustomTree<ƒ.ParticleData.EffectRecursive>(this.controller, this.particleEffect);
       this.dom.appendChild(newTree);
       this.tree = newTree;
       this.tree.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
@@ -250,34 +247,34 @@ namespace Fudge {
         this.idInterval = window.setInterval(() => { this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph} }); }, 1000 / 30);
     }
 
-    private validateData(_data: ƒ.ParticleData.EffectRecursive): [ƒ.ParticleData.Expression, string][] {
+    private validateEffect(_effect: ƒ.ParticleData.EffectRecursive): [ƒ.ParticleData.Expression, string][] {
       let invalid: [ƒ.ParticleData.Expression, string][] = [];
       let references: [ƒ.ParticleData.Variable, string[]][] = [];
-      validateRecursive(_data);
+      validateRecursive(_effect);
       references
-        .filter(([_data, _path]) => _path.includes("variables"))
-        .map(([_data, _path]) => [_path[1], _path[_path.length - 1], _data] as [string, string, ƒ.ParticleData.Variable])
+        .filter(([_effect, _path]) => _path.includes("variables"))
+        .map(([_effect, _path]) => [_path[1], _path[_path.length - 1], _effect] as [string, string, ƒ.ParticleData.Variable])
         .filter(([_from, _to], _index, _references) => {
           let indexFirstOccurence: number = _references.findIndex(([_from]) => _from == _to);
           return indexFirstOccurence >= 0 && indexFirstOccurence >= _index;
         })
-        .forEach(([_from, _to, _data]) => invalid.push([_data, `variable "${_to}" is used before its declaration`]));
-      invalid.forEach(([_data, _error]) => console.warn(`${ƒ.ParticleSystem.name}: ${_error}`));
+        .forEach(([_from, _to, _effect]) => invalid.push([_effect, `variable "${_to}" is used before its declaration`]));
+      invalid.forEach(([_effect, _error]) => console.warn(`${ƒ.ParticleSystem.name}: ${_error}`));
       return invalid;
 
-      function validateRecursive(_data: ƒ.ParticleData.EffectRecursive, _path: string[] = []): void {
-        if (ƒ.ParticleData.isFunction(_data)) {
-          let minParameters: number = ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function];
-          if (_data.parameters.length < ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_data.function]) {
-            let error: string = `"${_path.join("/")}/${_data.function}" needs at least ${minParameters} parameters`;
-            invalid.push([_data, error]);
+      function validateRecursive(_effect: ƒ.ParticleData.EffectRecursive, _path: string[] = []): void {
+        if (ƒ.ParticleData.isFunction(_effect)) {
+          let minParameters: number = ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_effect.function];
+          if (_effect.parameters.length < ƒ.ParticleData.FUNCTION_MINIMUM_PARAMETERS[_effect.function]) {
+            let error: string = `"${_path.join("/")}/${_effect.function}" needs at least ${minParameters} parameters`;
+            invalid.push([_effect, error]);
           }
         }
-        if (ƒ.ParticleData.isVariable(_data)) {
-          references.push([_data, _path.concat(_data.value)]);
+        if (ƒ.ParticleData.isVariable(_effect)) {
+          references.push([_effect, _path.concat(_effect.value)]);
         }
         
-        Object.entries(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data).forEach(([_key, _value]) => {
+        Object.entries(ƒ.ParticleData.isFunction(_effect) ? _effect.parameters : _effect).forEach(([_key, _value]) => {
           if (typeof _value == "object")
             validateRecursive(_value, _path.concat(_key));
         });
@@ -289,7 +286,7 @@ namespace Fudge {
     }
 
     private refreshVariables(): void {
-      this.variables.innerHTML = [...Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES), ...Object.keys(this.particleSystemData.variables)].map(_name => `<option value="${_name}">`).join("");
+      this.variables.innerHTML = [...Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES), ...Object.keys(this.particleEffect.variables)].map(_name => `<option value="${_name}">`).join("");
     }
   }
 }

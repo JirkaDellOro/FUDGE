@@ -11,19 +11,19 @@ namespace Fudge {
 
   export class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.EffectRecursive> {
     public childToParent: Map<ƒ.ParticleData.EffectRecursive, ƒ.ParticleData.EffectRecursive> = new Map();
-    private particleSystemData: ƒ.ParticleData.Effect;
+    private particleEffect: ƒ.ParticleData.Effect;
 
-    constructor(_particleSystemData: ƒ.ParticleData.Effect) {
+    constructor(_particleEffect: ƒ.ParticleData.Effect) {
       super();
-      this.particleSystemData = _particleSystemData;
+      this.particleEffect = _particleEffect;
     }
 
-    public createContent(_data: ƒ.ParticleData.EffectRecursive): HTMLFormElement {
+    public createContent(_effect: ƒ.ParticleData.EffectRecursive): HTMLFormElement {
       let content: HTMLFormElement = document.createElement("form");
 
-      let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
-      let key: string = this.getKey(_data, parentData);
-      if (parentData == this.particleSystemData.variables) {
+      let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_effect);
+      let key: string = this.getKey(_effect, parentData);
+      if (parentData == this.particleEffect.variables) {
         let input: HTMLInputElement = document.createElement("input");
         input.type = "text";
         input.disabled = true;
@@ -32,13 +32,13 @@ namespace Fudge {
         content.appendChild(input);
       }
 
-      if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) {
+      if (!ƒ.ParticleData.isExpression(_effect) && !ƒ.ParticleData.isTransformation(_effect)) {
         let spanName: HTMLSpanElement = document.createElement("span");
         spanName.innerText = parentData ? key : ƒ.ParticleSystem.name;
         content.appendChild(spanName);
       }
 
-      if (ƒ.ParticleData.isExpression(_data) && parentData != this.particleSystemData.variables) {
+      if (ƒ.ParticleData.isExpression(_effect) && parentData != this.particleEffect.variables) {
         let seperator: HTMLSpanElement = document.createElement("span");
         seperator.innerText = ": ";
         if (ƒ.ParticleData.isFunction(parentData)) {
@@ -65,8 +65,8 @@ namespace Fudge {
         }
       }
 
-      if (ƒ.ParticleData.isExpression(_data)) {
-        if (ƒ.ParticleData.isFunction(_data)) {
+      if (ƒ.ParticleData.isExpression(_effect)) {
+        if (ƒ.ParticleData.isFunction(_effect)) {
           let select: HTMLSelectElement = document.createElement("select");
           select.id = ID.FUNCTION;
           for (let name of Object.values(ƒ.ParticleData.FUNCTION)) {
@@ -75,7 +75,7 @@ namespace Fudge {
             entry.value = name;
             select.add(entry);
           }
-          select.value = _data.function;
+          select.value = _effect.function;
           content.appendChild(select);
         } else {
           let input: HTMLInputElement = document.createElement("input");
@@ -83,10 +83,10 @@ namespace Fudge {
           input.disabled = true;
           input.id = ID.VALUE;
           input.setAttribute("list", "variables");
-          input.value = _data.value.toString();
+          input.value = _effect.value.toString();
           content.appendChild(input);
         } 
-      } else if (ƒ.ParticleData.isTransformation(_data)) {
+      } else if (ƒ.ParticleData.isTransformation(_effect)) {
         let select: HTMLSelectElement = document.createElement("select");
         select.id = ID.TRANSFORMATION;
         for (let key of [ƒ.Matrix4x4.prototype.translate.name, ƒ.Matrix4x4.prototype.rotate.name, ƒ.Matrix4x4.prototype.scale.name]) {
@@ -95,34 +95,34 @@ namespace Fudge {
           entry.value = key;
           select.add(entry);
         }
-        select.value = _data.transformation;
+        select.value = _effect.transformation;
         content.appendChild(select);
       }
 
       return content;
     }
 
-    public getAttributes(_data: ƒ.ParticleData.EffectRecursive): string {
+    public getAttributes(_effect: ƒ.ParticleData.EffectRecursive): string {
       let attributes: string[] = [];
-      if (ƒ.ParticleData.isVariable(_data) || this.childToParent.get(_data) == this.particleSystemData.variables) 
+      if (ƒ.ParticleData.isVariable(_effect) || this.childToParent.get(_effect) == this.particleEffect.variables) 
         attributes.push("variable");
 
       return attributes.join(" ");
     }
     
-    public rename(_data: ƒ.ParticleData.EffectRecursive, _id: string, _new: string): void {
+    public rename(_effect: ƒ.ParticleData.EffectRecursive, _id: string, _new: string): void {
       let inputAsNumber: number = Number.parseFloat(_new);
 
-      if (_id == ID.KEY && ƒ.ParticleData.isExpression(_data)) {
-        let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
-        let key: string = this.getKey(_data, parentData);
+      if (_id == ID.KEY && ƒ.ParticleData.isExpression(_effect)) {
+        let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_effect);
+        let key: string = this.getKey(_effect, parentData);
         let target: Object = ƒ.ParticleData.isFunction(parentData) ? parentData.parameters : parentData;
         
-        if (parentData == this.particleSystemData.variables) {
+        if (parentData == this.particleEffect.variables) {
           let errors: string[] = [];
           if (this.isReferenced(key))
             errors.push(`variable "${key}" is still referenced`);
-          if (this.particleSystemData.variables[_new])
+          if (this.particleEffect.variables[_new])
             errors.push(`variable "${_new}" already exists`);
           if (ƒ.ParticleData.PREDEFINED_VARIABLES[_new])
             errors.push(`variable "${_new}" is a predefined variable and can not be redeclared. Predefined variables: [${Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES).join(", ")}]`);
@@ -136,56 +136,56 @@ namespace Fudge {
           target[key] = target[_new];
         else 
           delete target[key];
-        target[_new] = _data;
+        target[_new] = _effect;
 
         return;
       }
 
-      if (_id == ID.FUNCTION && ƒ.ParticleData.isFunction(_data)) {
-        _data.function = <ƒ.ParticleData.FUNCTION>_new;
+      if (_id == ID.FUNCTION && ƒ.ParticleData.isFunction(_effect)) {
+        _effect.function = <ƒ.ParticleData.FUNCTION>_new;
         return;
       }
 
-      if (_id == ID.TRANSFORMATION && ƒ.ParticleData.isTransformation(_data)) {
-        _data.transformation = <ƒ.ParticleData.Transformation["transformation"]>_new;
+      if (_id == ID.TRANSFORMATION && ƒ.ParticleData.isTransformation(_effect)) {
+        _effect.transformation = <ƒ.ParticleData.Transformation["transformation"]>_new;
         return;
       }
 
-      if (_id == ID.VALUE && (ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data))) {
+      if (_id == ID.VALUE && (ƒ.ParticleData.isVariable(_effect) || ƒ.ParticleData.isConstant(_effect))) {
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
-        if (typeof input == "string" && !this.particleSystemData.variables[input] && !ƒ.ParticleData.PREDEFINED_VARIABLES[input]) 
+        if (typeof input == "string" && !this.particleEffect.variables[input] && !ƒ.ParticleData.PREDEFINED_VARIABLES[input]) 
           return;
-        _data.value = input;
+        _effect.value = input;
 
         return;
       }
     }
 
-    public hasChildren(_data: ƒ.ParticleData.EffectRecursive): boolean {
+    public hasChildren(_effect: ƒ.ParticleData.EffectRecursive): boolean {
       let length: number = 0;
-      if (!ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data))
-        length = ƒ.ParticleData.isFunction(_data) ? _data.parameters.length : Object.keys(_data).length;
+      if (!ƒ.ParticleData.isVariable(_effect) && !ƒ.ParticleData.isConstant(_effect))
+        length = ƒ.ParticleData.isFunction(_effect) ? _effect.parameters.length : Object.keys(_effect).length;
 
       return length > 0;
     }
 
-    public getChildren(_data: ƒ.ParticleData.EffectRecursive): (ƒ.ParticleData.EffectRecursive)[] {
+    public getChildren(_effect: ƒ.ParticleData.EffectRecursive): (ƒ.ParticleData.EffectRecursive)[] {
       let children: (ƒ.ParticleData.EffectRecursive)[] = [];
-      if (!ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data)) {
-        let subData: Object = ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data;
+      if (!ƒ.ParticleData.isVariable(_effect) && !ƒ.ParticleData.isConstant(_effect)) {
+        let subData: Object = ƒ.ParticleData.isFunction(_effect) ? _effect.parameters : _effect;
         let subKeys: string[] = Object.keys(subData);
 
         // sort keys for color and vector e.g. ("r", "g", "b", "a")
-        if (ƒ.ParticleData.isTransformation(_data))
+        if (ƒ.ParticleData.isTransformation(_effect))
           subKeys = ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => subKeys.includes(_key));
-        if (_data == this.particleSystemData.color)
+        if (_effect == this.particleEffect.color)
           subKeys = ViewParticleSystem.COLOR_KEYS.filter(_key => subKeys.includes(_key));
 
         subKeys.forEach(_key => {
           let child: ƒ.ParticleData.EffectRecursive = subData[_key];
           if (ƒ.ParticleData.isExpression(child) || typeof child == "object") {
             children.push(child);
-            this.childToParent.set(subData[_key], _data);
+            this.childToParent.set(subData[_key], _effect);
           }
         });
       }
@@ -197,9 +197,9 @@ namespace Fudge {
       // delete selection independend of focussed item
       let deleted: (ƒ.ParticleData.EffectRecursive)[] = [];
       let expend: (ƒ.ParticleData.EffectRecursive)[] = this.selection.length > 0 ? this.selection : _focused;
-      for (let data of expend) {
-        if (this.deleteData(data))
-          deleted.push(data);
+      for (let effect of expend) {
+        if (this.deleteEffect(effect))
+          deleted.push(effect);
       }
       this.selection.splice(0);
       return deleted;
@@ -208,55 +208,55 @@ namespace Fudge {
     public addChildren(_children: ƒ.ParticleData.EffectRecursive[], _target: ƒ.ParticleData.EffectRecursive, _at?: number): ƒ.ParticleData.EffectRecursive[] {
       let move: ƒ.ParticleData.Expression[] = [];
       let container: Object;
-      if (ƒ.ParticleData.isFunction(_target) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
+      if (ƒ.ParticleData.isFunction(_target) && _children.every(_effect => ƒ.ParticleData.isExpression(_effect)))
         container = _target.parameters;
-      else if (Array.isArray(_target) && _children.every(_data => ƒ.ParticleData.isTransformation(_data)))
+      else if (Array.isArray(_target) && _children.every(_effect => ƒ.ParticleData.isTransformation(_effect)))
         container = _target;
-      else if ((ƒ.ParticleData.isTransformation(_target) || _target == this.particleSystemData.color || _target == this.particleSystemData.variables) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
+      else if ((ƒ.ParticleData.isTransformation(_target) || _target == this.particleEffect.color || _target == this.particleEffect.variables) && _children.every(_effect => ƒ.ParticleData.isExpression(_effect)))
         container = _target;
 
       if (!container) 
         return move;
 
       if (Array.isArray(container)) 
-        for (let data of (<ƒ.ParticleData.Expression[]>_children)) {
-          let index: number = container.indexOf(data); // _at needs to be corrected if we are moving within same parent
-          let hasParent: boolean = this.childToParent.has(data);
-          if (hasParent && !this.deleteData(data)) continue;
+        for (let effect of (<ƒ.ParticleData.Expression[]>_children)) {
+          let index: number = container.indexOf(effect); // _at needs to be corrected if we are moving within same parent
+          let hasParent: boolean = this.childToParent.has(effect);
+          if (hasParent && !this.deleteEffect(effect)) continue;
           if (!hasParent)
-            data = JSON.parse(JSON.stringify(data));
+            effect = JSON.parse(JSON.stringify(effect));
 
-          move.push(data);
-          this.childToParent.set(data, _target);
+          move.push(effect);
+          this.childToParent.set(effect, _target);
           if (index > -1 && _at > index)
             _at -= 1;
           if (_at == null) 
-            container.push(data);
+            container.push(effect);
           else 
-            container.splice(_at + _children.indexOf(data), 0, data);
+            container.splice(_at + _children.indexOf(effect), 0, effect);
         } 
       else
-        for (let data of (<ƒ.ParticleData.Expression[]>_children)) {
+        for (let effect of (<ƒ.ParticleData.Expression[]>_children)) {
           let usedKeys: string[] = Object.keys(_target);
           let newKey: string;
           if (ƒ.ParticleData.isTransformation(_target))
             newKey = ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => !usedKeys.includes(_key)).shift();
-          else if (_target == this.particleSystemData.color)
+          else if (_target == this.particleEffect.color)
             newKey = ViewParticleSystem.COLOR_KEYS.filter(_key => !usedKeys.includes(_key)).shift();
-          else if (_target == this.particleSystemData.variables && this.getKey(data, _target) == null) 
+          else if (_target == this.particleEffect.variables && this.getKey(effect, _target) == null) 
             newKey = `variable${usedKeys.length}`;
           if (newKey == null) 
             continue;
 
-          let hasParent: boolean = this.childToParent.has(data);
-          if (hasParent && !this.deleteData(data)) 
+          let hasParent: boolean = this.childToParent.has(effect);
+          if (hasParent && !this.deleteEffect(effect)) 
             continue;
           if (!hasParent)
-            data = JSON.parse(JSON.stringify(data));
+            effect = JSON.parse(JSON.stringify(effect));
 
-          _target[newKey] = data;
-          move.push(data);
-          this.childToParent.set(data, _target);
+          _target[newKey] = effect;
+          move.push(effect);
+          this.childToParent.set(effect, _target);
         }
       return move;
     }
@@ -273,37 +273,26 @@ namespace Fudge {
       return ƒ.ParticleData.isExpression(_target) || ƒ.ParticleData.isTransformation(_target);
     }
 
-    // public getPath(_data:  ƒ.ParticleData.EffectRecursive): string[] {
-    //   let path: string[] = [];
-    //   let parent: ƒ.ParticleData.EffectRecursive;
-    //   while (this.childToParent.has(_data)) {
-    //     parent = this.childToParent.get(_data);
-    //     path.unshift(this.getKey(_data, parent));
-    //     _data = parent;
-    //   }
-    //   return path;
-    // }
-
-    private getKey(_data: ƒ.ParticleData.EffectRecursive, _parentData: ƒ.ParticleData.EffectRecursive): string {
+    private getKey(_effect: ƒ.ParticleData.EffectRecursive, _parentData: ƒ.ParticleData.EffectRecursive): string {
       let key: string;
       if (!_parentData) return null;
-      if (ƒ.ParticleData.isExpression(_data) && ƒ.ParticleData.isFunction(_parentData)) {
-        key = _parentData.parameters.indexOf(_data).toString();
+      if (ƒ.ParticleData.isExpression(_effect) && ƒ.ParticleData.isFunction(_parentData)) {
+        key = _parentData.parameters.indexOf(_effect).toString();
       } else {
-        key = Object.entries(_parentData).find(entry => entry[1] == _data)?.shift();
+        key = Object.entries(_parentData).find(entry => entry[1] == _effect)?.shift();
       }
       return key;
     }
 
-    private deleteData(_data: ƒ.ParticleData.EffectRecursive): boolean {
-      if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) 
+    private deleteEffect(_effect: ƒ.ParticleData.EffectRecursive): boolean {
+      if (!ƒ.ParticleData.isExpression(_effect) && !ƒ.ParticleData.isTransformation(_effect)) 
         return false;
 
-      let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_data);
-      let key: string = this.getKey(_data, parentData);
+      let parentData: ƒ.ParticleData.EffectRecursive = this.childToParent.get(_effect);
+      let key: string = this.getKey(_effect, parentData);
       let index: number = Number.parseInt(key);
 
-      if (parentData == this.particleSystemData.variables && this.isReferenced(key)) {
+      if (parentData == this.particleEffect.variables && this.isReferenced(key)) {
         ƒui.Warning.display([`variable "${key}" is still referenced`], "Unable to delete", "Please resolve the errors and try again");
         return false;
       }
@@ -315,14 +304,14 @@ namespace Fudge {
       else 
         delete parentData[key];
       
-      this.childToParent.delete(_data);
+      this.childToParent.delete(_effect);
       return true;
     }
 
-    private isReferenced(_name: string, _data: ƒ.ParticleData.EffectRecursive = this.particleSystemData): boolean {
-      if (ƒ.ParticleData.isVariable(_data) && _data.value == _name) 
+    private isReferenced(_name: string, _effect: ƒ.ParticleData.EffectRecursive = this.particleEffect): boolean {
+      if (ƒ.ParticleData.isVariable(_effect) && _effect.value == _name) 
         return true;
-      for (const subData of Object.values(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data)) 
+      for (const subData of Object.values(ƒ.ParticleData.isFunction(_effect) ? _effect.parameters : _effect)) 
         if (typeof subData == "object" && this.isReferenced(_name, subData))
           return true;
         
