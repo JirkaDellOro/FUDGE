@@ -8,14 +8,15 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
     public randomNumbersRenderData: unknown;
     public particleEffect: ParticleEffect;
+    public readonly time: Time;
+    
     #numberOfParticles: number;
-    // TODO: add color for the whole system
-    // TODO: add time for individual systems
 
     constructor(_particleEffect: ParticleEffect = null, _numberOfParticles: number = 10) {
       super();     
       this.particleEffect = _particleEffect;
       this.numberOfParticles = _numberOfParticles;
+      this.time = new Time();
     }
 
     public get numberOfParticles(): number {
@@ -23,7 +24,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Sets the numberOfParticles of the particle effect. Caution: Setting this will result in the reevaluation of the system storage of the effect and the reinitialization of the randomNumbers array.
+     * Sets the number of particles of the particle effect. Caution: Setting this will reinitialize the random numbers array(texture) used in the shader.
      */
     public set numberOfParticles(_numberOfParticles: number) {
       this.#numberOfParticles = _numberOfParticles;
@@ -60,6 +61,7 @@ namespace FudgeCore {
 
     public getMutatorForUserInterface(): MutatorForUserInterface {
       let mutator: MutatorForUserInterface = <MutatorForUserInterface>this.getMutator(true);
+      delete mutator.particleEffect;
       mutator.particleEffect = this.particleEffect?.getMutatorForUserInterface();
       return mutator;
     }
@@ -74,6 +76,7 @@ namespace FudgeCore {
     protected reduceMutator(_mutator: Mutator): void {
       super.reduceMutator(_mutator);
       delete _mutator.randomNumbersRenderData;
+      delete _mutator.time;
     }
     //#endregion
   }

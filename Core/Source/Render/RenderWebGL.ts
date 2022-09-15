@@ -364,7 +364,7 @@ namespace FudgeCore {
       }
       _cmpParticleSystem.useRenderData();
 
-      this.crc3.uniform1f(_shader.uniforms["u_fTime"], Time.game.get());
+      this.crc3.uniform1f(_shader.uniforms["u_fTime"], _cmpParticleSystem.time.get());
 
       let numberOfParticles: number = _cmpParticleSystem.numberOfParticles;
       this.crc3.uniform1f(_shader.uniforms["u_fNumberOfParticles"], numberOfParticles);

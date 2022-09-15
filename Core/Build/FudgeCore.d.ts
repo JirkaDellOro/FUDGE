@@ -2185,10 +2185,11 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         randomNumbersRenderData: unknown;
         particleEffect: ParticleEffect;
+        readonly time: Time;
         constructor(_particleEffect?: ParticleEffect, _numberOfParticles?: number);
         get numberOfParticles(): number;
         /**
-         * Sets the numberOfParticles of the particle effect. Caution: Setting this will result in the reevaluation of the system storage of the effect and the reinitialization of the randomNumbers array.
+         * Sets the number of particles of the particle effect. Caution: Setting this will reinitialize the random numbers array(texture) used in the shader.
          */
         set numberOfParticles(_numberOfParticles: number);
         useRenderData(): void;

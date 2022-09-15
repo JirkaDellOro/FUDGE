@@ -4,7 +4,7 @@ namespace Fudge {
 
   /**
    * TODO: add
-   * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+   * @authors Jonas Plotzky, HFU, 2022
    */
   export class ViewAnimation extends View {
     private graph: ƒ.Graph;
