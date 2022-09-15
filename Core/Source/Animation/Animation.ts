@@ -101,7 +101,7 @@ namespace FudgeCore {
     private eventsProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
     private animationStructuresProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
 
-    constructor(_name: string, _animStructure: AnimationStructure = {}, _fps: number = 60) {
+    constructor(_name: string = Animation.name, _animStructure: AnimationStructure = {}, _fps: number = 60) {
       super();
       this.name = _name;
       this.animationStructure = _animStructure;

@@ -1431,7 +1431,7 @@ declare namespace FudgeCore {
         private framesPerSecond;
         private eventsProcessed;
         private animationStructuresProcessed;
-        constructor(_name: string, _animStructure?: AnimationStructure, _fps?: number);
+        constructor(_name?: string, _animStructure?: AnimationStructure, _fps?: number);
         get getLabels(): Enumerator;
         get fps(): number;
         set fps(_fps: number);

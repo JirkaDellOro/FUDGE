@@ -122,14 +122,14 @@ namespace Fudge {
           this.table.selectInterval(graph, graph);
           break;
         case CONTEXTMENU.CREATE_ANIMATION:
-          let animationNew: ƒ.Animation = new ƒ.Animation("NewAnimation");
+          let animation: ƒ.Animation = new ƒ.Animation();
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
-          this.table.selectInterval(animationNew, animationNew);
+          this.table.selectInterval(animation, animation);
           break;
         case CONTEXTMENU.CREATE_PARTICLE_EFFECT:
-          let particleEffectNew: ƒ.ParticleEffect = new ƒ.ParticleEffect("NewParticleEffect");
+          let particleEffect: ƒ.ParticleEffect = new ƒ.ParticleEffect();
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
-          this.table.selectInterval(particleEffectNew, particleEffectNew);
+          this.table.selectInterval(particleEffect, particleEffect);
           break;
         case CONTEXTMENU.DELETE_RESOURCE:
           await this.table.controller.delete([this.table.getFocussed()]);

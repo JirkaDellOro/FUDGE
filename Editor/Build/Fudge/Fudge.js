@@ -1174,14 +1174,14 @@ var Fudge;
                     this.table.selectInterval(graph, graph);
                     break;
                 case Fudge.CONTEXTMENU.CREATE_ANIMATION:
-                    let animationNew = new ƒ.Animation("NewAnimation");
+                    let animation = new ƒ.Animation();
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
-                    this.table.selectInterval(animationNew, animationNew);
+                    this.table.selectInterval(animation, animation);
                     break;
                 case Fudge.CONTEXTMENU.CREATE_PARTICLE_EFFECT:
-                    let particleEffectNew = new ƒ.ParticleEffect("NewParticleEffect");
+                    let particleEffect = new ƒ.ParticleEffect();
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
-                    this.table.selectInterval(particleEffectNew, particleEffectNew);
+                    this.table.selectInterval(particleEffect, particleEffect);
                     break;
                 case Fudge.CONTEXTMENU.DELETE_RESOURCE:
                     await this.table.controller.delete([this.table.getFocussed()]);
