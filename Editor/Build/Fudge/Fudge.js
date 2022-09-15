@@ -2211,7 +2211,7 @@ var Fudge;
                         type: "component",
                         componentType: Fudge.VIEW.PARTICLE_SYSTEM,
                         componentState: _state,
-                        title: ƒ.ParticleData.name
+                        title: ƒ.ParticleSystem.name
                     }]
             };
             this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [
@@ -2219,7 +2219,7 @@ var Fudge;
             ]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
-            // this.setTitle("Particle System | " );
+            this.setTitle(ƒ.ParticleSystem.name);
         }
         getState() {
             // TODO: iterate over views and collect their states for reconstruction
@@ -2516,6 +2516,7 @@ var Fudge;
             }
             this.particleSystem = _particleSystem;
             this.particleEffect = JSON.parse(JSON.stringify(_particleSystem.effect)); // we will work with a copy
+            this.setTitle(this.particleSystem.name);
             this.dom.innerHTML = "";
             this.variables = document.createElement("datalist");
             this.variables.id = "variables";

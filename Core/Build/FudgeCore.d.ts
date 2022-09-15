@@ -4196,7 +4196,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     namespace ParticleData {
-        const name: string;
         interface Effect {
             variables: {
                 [name: string]: Expression;

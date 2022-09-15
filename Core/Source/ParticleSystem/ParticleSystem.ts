@@ -1,7 +1,6 @@
 namespace FudgeCore {
   
   export namespace ParticleData {
-    export const name: string = "ParticleEffect";
 
     export interface Effect {
       variables: {[name: string]: Expression};

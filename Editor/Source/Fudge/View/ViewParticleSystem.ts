@@ -228,6 +228,7 @@ namespace Fudge {
 
       this.particleSystem = _particleSystem;
       this.particleEffect = JSON.parse(JSON.stringify(_particleSystem.effect)); // we will work with a copy
+      this.setTitle(this.particleSystem.name);
       this.dom.innerHTML = "";
       this.variables = document.createElement("datalist");
       this.variables.id = "variables";

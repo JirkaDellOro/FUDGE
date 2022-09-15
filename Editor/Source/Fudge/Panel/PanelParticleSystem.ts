@@ -18,7 +18,7 @@ namespace Fudge {
               type: "component",
               componentType: VIEW.PARTICLE_SYSTEM,
               componentState: _state,
-              title: ƒ.ParticleData.name
+              title: ƒ.ParticleSystem.name
             }]
           };
   
@@ -28,7 +28,7 @@ namespace Fudge {
   
         this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
         this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
-        // this.setTitle("Particle System | " );
+        this.setTitle(ƒ.ParticleSystem.name);
       }
   
       public getState(): { [key: string]: string } {
