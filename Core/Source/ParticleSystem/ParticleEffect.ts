@@ -3,10 +3,10 @@ namespace FudgeCore {
   export namespace ParticleData {
 
     export interface Effect {
-      variables?: {[name: string]: Expression};
-      color?: {r?: Expression, g?: Expression, b?: Expression, a?: Expression};
-      mtxLocal?: Transformation[];
-      mtxWorld?: Transformation[];
+      variables: {[name: string]: Expression};
+      color: {r?: Expression, g?: Expression, b?: Expression, a?: Expression};
+      mtxLocal: Transformation[];
+      mtxWorld: Transformation[];
     }
 
     export type EffectRecursive = Effect | Effect["variables"] | Effect["color"] | Effect["mtxLocal"] | Transformation | Expression;
@@ -66,7 +66,7 @@ namespace FudgeCore {
     #data: ParticleData.Effect;
     private shaderMap: Map<ShaderInterface, ShaderParticleSystem> = new Map();
 
-    constructor(_name: string = "ParticleEffect", _particleEffectData: ParticleData.Effect = {}) {
+    constructor(_name: string = ParticleEffect.name, _particleEffectData: ParticleData.Effect = { variables: {}, mtxLocal: [], mtxWorld: [], color: {} }) {
       super();
       this.name = _name;
       this.data = _particleEffectData;

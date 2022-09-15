@@ -148,7 +148,7 @@ namespace Fudge {
         return true;
       };
       let setParticleEffect: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
-        this.mutable["particleEffect"] = _sources[0];
+        this.mutable[ƒ.ParticleEffect.name] = _sources[0];
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };

@@ -34,7 +34,7 @@ namespace Fudge {
 
       if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) {
         let spanName: HTMLSpanElement = document.createElement("span");
-        spanName.innerText = parentData ? key : "root";
+        spanName.innerText = parentData ? key : ƒ.ParticleEffect.name;
         content.appendChild(spanName);
       }
 
@@ -124,6 +124,8 @@ namespace Fudge {
             errors.push(`variable "${key}" is still referenced`);
           if (this.particleEffectData.variables[_new])
             errors.push(`variable "${_new}" already exists`);
+          if (ƒ.ParticleData.PREDEFINED_VARIABLES[_new])
+            errors.push(`variable "${_new}" is a predefined variable and can not be redeclared. Predefined variables: [${Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES).join(", ")}]`);
           if (errors.length > 0) {
             ƒui.Warning.display(errors, "Unable to rename", "Please resolve the errors and try again" );
             return;

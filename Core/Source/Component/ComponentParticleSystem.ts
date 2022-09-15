@@ -10,24 +10,25 @@ namespace FudgeCore {
     public particleEffect: ParticleEffect;
     public readonly time: Time;
     
-    #numberOfParticles: number;
+    /** the number of particles */
+    #size: number;
 
-    constructor(_particleEffect: ParticleEffect = null, _numberOfParticles: number = 10) {
+    constructor(_particleEffect: ParticleEffect = null, _size: number = 10) {
       super();     
       this.particleEffect = _particleEffect;
-      this.numberOfParticles = _numberOfParticles;
+      this.size = _size;
       this.time = new Time();
     }
 
-    public get numberOfParticles(): number {
-      return this.#numberOfParticles;
+    public get size(): number {
+      return this.#size;
     }
 
     /**
      * Sets the number of particles of the particle effect. Caution: Setting this will reinitialize the random numbers array(texture) used in the shader.
      */
-    public set numberOfParticles(_numberOfParticles: number) {
-      this.#numberOfParticles = _numberOfParticles;
+    public set size(_size: number) {
+      this.#size = _size;
       this.deleteRenderData();
     }
 
@@ -39,7 +40,7 @@ namespace FudgeCore {
       let serialization: Serialization = {
         [super.constructor.name]: super.serialize(),
         idParticleEffect: this.particleEffect?.idResource,
-        numberOfParticles: this.numberOfParticles
+        size: this.size
       };
 
       return serialization;
@@ -48,14 +49,14 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization[super.constructor.name]);
       if (_serialization.idParticleEffect) this.particleEffect = <ParticleEffect>await Project.getResource(_serialization.idParticleEffect);
-      this.numberOfParticles = _serialization.numberOfParticles;
+      this.size = _serialization.size;
 
       return this;
     }
 
     public getMutator(_extendable?: boolean): Mutator {
       let mutator: Mutator = super.getMutator(true);
-      mutator.numberOfParticles = this.numberOfParticles;
+      mutator.size = this.size;
       return mutator;
     }
 
@@ -69,7 +70,7 @@ namespace FudgeCore {
     public getMutatorForAnimation(): MutatorForAnimation {
       let mutator: MutatorForAnimation = <MutatorForAnimation>this.getMutator();
       delete mutator.particleEffect;
-      delete mutator.numberOfParticles;
+      delete mutator.size;
       return mutator;
     }
 

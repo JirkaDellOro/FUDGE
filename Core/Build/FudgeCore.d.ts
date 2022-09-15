@@ -2186,12 +2186,12 @@ declare namespace FudgeCore {
         randomNumbersRenderData: unknown;
         particleEffect: ParticleEffect;
         readonly time: Time;
-        constructor(_particleEffect?: ParticleEffect, _numberOfParticles?: number);
-        get numberOfParticles(): number;
+        constructor(_particleEffect?: ParticleEffect, _size?: number);
+        get size(): number;
         /**
          * Sets the number of particles of the particle effect. Caution: Setting this will reinitialize the random numbers array(texture) used in the shader.
          */
-        set numberOfParticles(_numberOfParticles: number);
+        set size(_size: number);
         useRenderData(): void;
         deleteRenderData(): void;
         serialize(): Serialization;
@@ -4193,17 +4193,17 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     namespace ParticleData {
         interface Effect {
-            variables?: {
+            variables: {
                 [name: string]: Expression;
             };
-            color?: {
+            color: {
                 r?: Expression;
                 g?: Expression;
                 b?: Expression;
                 a?: Expression;
             };
-            mtxLocal?: Transformation[];
-            mtxWorld?: Transformation[];
+            mtxLocal: Transformation[];
+            mtxWorld: Transformation[];
         }
         type EffectRecursive = Effect | Effect["variables"] | Effect["color"] | Effect["mtxLocal"] | Transformation | Expression;
         type Expression = Function | Variable | Constant;

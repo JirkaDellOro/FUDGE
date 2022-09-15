@@ -773,122 +773,6 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    var ƒui = FudgeUserInterface;
-    class AnimationList {
-        listRoot;
-        mutator;
-        index;
-        constructor(_mutator, _listContainer) {
-            this.mutator = _mutator;
-            this.listRoot = document.createElement("ul");
-            this.index = {};
-            this.listRoot = this.buildFromMutator(this.mutator);
-            _listContainer.append(this.listRoot);
-            _listContainer.addEventListener("collapse" /* COLLAPSE */, this.toggleCollapse);
-            // _listContainer.addEventListener(ƒui.EVENT.UPDATE, this.collectMutator);
-            _listContainer.addEventListener("mutate" /* MUTATE */, this.collectMutator);
-        }
-        getMutator() {
-            return this.mutator;
-        }
-        setMutator(_mutator) {
-            this.mutator = _mutator;
-            let hule = this.buildFromMutator(this.mutator);
-            this.listRoot.replaceWith(hule);
-            this.listRoot = hule;
-        }
-        collectMutator = () => {
-            let children = this.listRoot.children;
-            // for (let child of children) {
-            //   this.mutator[(<ƒui.CollapsableAnimationList>child).name] = (<ƒui.CollapsableAnimationList>child).mutator;
-            // }
-            ƒ.Debug.info(this.mutator);
-            return this.mutator;
-        };
-        getElementIndex() {
-            return this.index;
-        }
-        updateMutator(_update) {
-            this.mutator = this.updateMutatorEntry(_update, this.mutator);
-            this.updateEntry(this.mutator, this.index);
-        }
-        updateEntry(_update, _index) {
-            for (let key in _update) {
-                if (typeof _update[key] == "object") {
-                    this.updateEntry(_update[key], _index[key]);
-                }
-                else if (typeof _update[key] == "string" || "number") {
-                    let element = _index[key];
-                    element.value = _update[key];
-                }
-            }
-        }
-        updateMutatorEntry(_update, _toUpdate) {
-            let updatedMutator = _toUpdate;
-            for (let key in _update) {
-                if (typeof updatedMutator[key] == "object") {
-                    if (typeof updatedMutator[key] == "object") {
-                        updatedMutator[key] = this.updateMutatorEntry(_update[key], updatedMutator[key]);
-                    }
-                }
-                else if (typeof _update[key] == "string" || "number") {
-                    if (typeof updatedMutator[key] == "string" || "number") {
-                        updatedMutator[key] = _update[key];
-                    }
-                }
-            }
-            return updatedMutator;
-        }
-        buildFromMutator(_mutator) {
-            // let listRoot: HTMLUListElement = document.createElement("ul");
-            // for (let key in _mutator) {
-            //   let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
-            //   listRoot.append(listElement);
-            //   this.index[key] = listElement.getElementIndex();
-            //   console.log(this.index);
-            // }
-            let listRoot = ƒui.Generator.createInterfaceFromMutator(_mutator);
-            // let controller = ƒui.Controller
-            console.log(_mutator);
-            console.log(listRoot);
-            this.index = _mutator;
-            // for (let key in _mutator) {
-            // this.index[key] = document.createElement("input");
-            // let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
-            // listRoot.append(listElement);
-            // console.log(this.index);
-            // }
-            return listRoot;
-        }
-        // private buildContent(_mutator: ƒ.Mutator, listRoot: HTMLDivElement): ƒ.Mutator {
-        //   for (let key in _mutator) {
-        //     if (typeof _mutator[key] == "object") {
-        //         // let newList: CollapsableAnimationListElement = new CollapsableAnimationListElement(<ƒ.Mutator>_mutator[key], key);
-        //         // this.content.append(newList);
-        //         this.index[key] = buildContent(_mutator[key], listRoot.getElementsByClassName());
-        //     }
-        //     else {
-        //         let listEntry: HTMLLIElement = document.createElement("li");
-        //         UIGenerator.createLabelElement(key, listEntry);
-        //         let inputEntry: HTMLSpanElement = UIGenerator.createStepperElement(key, listEntry, { _value: (<number>_mutator[key]) });
-        //         this.content.append(listEntry);
-        //         this.index[key] = inputEntry;
-        //     }
-        //   }
-        // }
-        toggleCollapse = (_event) => {
-            _event.preventDefault();
-            // console.log(_event.target instanceof ƒui.CollapsableAnimationList);
-            // if (_event.target instanceof ƒui.CollapsableAnimationList) {
-            //   let target: ƒui.CollapsableAnimationList = <ƒui.CollapsableAnimationList>_event.target;
-            //   target.collapse(target);
-            // }
-        };
-    }
-    Fudge.AnimationList = AnimationList;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
     class ControllerAnimation {
@@ -1506,7 +1390,7 @@ var Fudge;
                 return true;
             };
             let setParticleEffect = (_sources) => {
-                this.mutable["particleEffect"] = _sources[0];
+                this.mutable[ƒ.ParticleEffect.name] = _sources[0];
                 this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
@@ -1822,7 +1706,7 @@ var Fudge;
             }
             if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) {
                 let spanName = document.createElement("span");
-                spanName.innerText = parentData ? key : "root";
+                spanName.innerText = parentData ? key : ƒ.ParticleEffect.name;
                 content.appendChild(spanName);
             }
             if (ƒ.ParticleData.isExpression(_data) && parentData != this.particleEffectData.variables) {
@@ -1907,6 +1791,8 @@ var Fudge;
                         errors.push(`variable "${key}" is still referenced`);
                     if (this.particleEffectData.variables[_new])
                         errors.push(`variable "${_new}" already exists`);
+                    if (ƒ.ParticleData.PREDEFINED_VARIABLES[_new])
+                        errors.push(`variable "${_new}" is a predefined variable and can not be redeclared. Predefined variables: [${Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES).join(", ")}]`);
                     if (errors.length > 0) {
                         ƒui.Warning.display(errors, "Unable to rename", "Please resolve the errors and try again");
                         return;
@@ -2316,6 +2202,7 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
     /**
      * TODO: add
      * @authors Jonas Plotzky, HFU, 2022
@@ -2330,7 +2217,7 @@ var Fudge;
                         type: "component",
                         componentType: Fudge.VIEW.PARTICLE_SYSTEM,
                         componentState: _state,
-                        title: "Particle System"
+                        title: ƒ.ParticleEffect.name
                     }]
             };
             this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [
@@ -2702,7 +2589,7 @@ var Fudge;
     var ƒui = FudgeUserInterface;
     /**
      * TODO: add
-     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+     * @authors Jonas Plotzky, HFU, 2022
      */
     class ViewAnimation extends Fudge.View {
         graph;

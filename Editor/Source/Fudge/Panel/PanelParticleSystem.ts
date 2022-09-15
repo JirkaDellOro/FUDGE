@@ -18,7 +18,7 @@ namespace Fudge {
               type: "component",
               componentType: VIEW.PARTICLE_SYSTEM,
               componentState: _state,
-              title: "Particle System"
+              title: ƒ.ParticleEffect.name
             }]
           };
   

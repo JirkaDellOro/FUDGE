@@ -1,6 +1,5 @@
 /// <reference types="../../../node_modules/electron/electron" />
 /// <reference types="../../core/build/fudgecore" />
-/// <reference types="../../../aid/build/fudgeaid" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
 /// <reference types="../../GoldenLayout/golden-layout" />
 declare namespace Fudge {
@@ -211,23 +210,6 @@ declare namespace Fudge {
         private static hndPanelCreated;
         private static loadProject;
         private static setupMainListeners;
-    }
-}
-declare namespace Fudge {
-    class AnimationList {
-        listRoot: HTMLElement;
-        private mutator;
-        private index;
-        constructor(_mutator: ƒ.Mutator, _listContainer: HTMLElement);
-        getMutator(): ƒ.Mutator;
-        setMutator(_mutator: ƒ.Mutator): void;
-        collectMutator: () => ƒ.Mutator;
-        getElementIndex(): ƒ.Mutator;
-        updateMutator(_update: ƒ.Mutator): void;
-        private updateEntry;
-        private updateMutatorEntry;
-        private buildFromMutator;
-        private toggleCollapse;
     }
 }
 declare namespace Fudge {
@@ -523,7 +505,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * TODO: add
-     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+     * @authors Jonas Plotzky, HFU, 2022
      */
     class ViewAnimation extends View {
         private graph;

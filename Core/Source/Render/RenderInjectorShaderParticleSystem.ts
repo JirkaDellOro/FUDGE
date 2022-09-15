@@ -34,9 +34,9 @@ namespace FudgeCore {
     };
 
     export const PREDEFINED_VARIABLES: { [key: string]: string } = {
-      index: "fParticleIndex",
-      numberOfParticles: "u_fNumberOfParticles",
-      time: "u_fTime"
+      systemTime: "u_fParticleSystemTime",
+      systemSize: "u_fParticleSystemSize",
+      particleId: "fParticleId"
     };
   }
 
@@ -80,7 +80,7 @@ namespace FudgeCore {
       },
       [ParticleData.FUNCTION.RANDOM]: (_parameters: string[]) => {
         const maxWidth: string = RenderInjectorShaderParticleSystem.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH.toString() + ".0";
-        return `texelFetch(u_fRandomNumbers, ivec2(mod(${_parameters[0]}, ${maxWidth}), ${_parameters[0]} / ${maxWidth}), 0).r`;
+        return `texelFetch(u_fParticleSystemRandomNumbers, ivec2(mod(${_parameters[0]}, ${maxWidth}), ${_parameters[0]} / ${maxWidth}), 0).r`;
       },
       [ParticleData.FUNCTION.RANDOM_RANGE]: (_parameters: string[]) => {
         return `${RenderInjectorShaderParticleSystem.FUNCTIONS["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]}`;

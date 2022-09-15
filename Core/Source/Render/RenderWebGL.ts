@@ -364,17 +364,15 @@ namespace FudgeCore {
       }
       _cmpParticleSystem.useRenderData();
 
-      this.crc3.uniform1f(_shader.uniforms["u_fTime"], _cmpParticleSystem.time.get());
-
-      let numberOfParticles: number = _cmpParticleSystem.numberOfParticles;
-      this.crc3.uniform1f(_shader.uniforms["u_fNumberOfParticles"], numberOfParticles);
-      this.crc3.uniform1i(_shader.uniforms["u_fRandomNumbers"], 1);
+      this.crc3.uniform1f(_shader.uniforms["u_fParticleSystemSize"], _cmpParticleSystem.size);
+      this.crc3.uniform1f(_shader.uniforms["u_fParticleSystemTime"], _cmpParticleSystem.time.get());
+      this.crc3.uniform1i(_shader.uniforms["u_fParticleSystemRandomNumbers"], 1);
 
       let faceCamera: boolean = _cmpFaceCamera && _cmpFaceCamera.isActive;
-      this.crc3.uniform1i(_shader.uniforms["u_bFaceCamera"], faceCamera ? 1 : 0);
-      this.crc3.uniform1i(_shader.uniforms["u_bRestrict"], faceCamera && _cmpFaceCamera.restrict ? 1 : 0);
+      this.crc3.uniform1i(_shader.uniforms["u_bParticleSystemFaceCamera"], faceCamera ? 1 : 0);
+      this.crc3.uniform1i(_shader.uniforms["u_bParticleSystemRestrict"], faceCamera && _cmpFaceCamera.restrict ? 1 : 0);
 
-      RenderWebGL.crc3.drawElementsInstanced(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0, numberOfParticles);
+      RenderWebGL.crc3.drawElementsInstanced(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0, _cmpParticleSystem.size);
       if (_sortForAlpha) {
         RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
         RenderWebGL.crc3.depthMask(true);
