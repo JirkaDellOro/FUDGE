@@ -559,10 +559,10 @@ namespace Fudge {
 
     private drawKeys(): void {
       // draw unselected keys
+      this.crc2.lineWidth = 4;
       this.keys.forEach( _key => {
         if (_key == this.selectedKey) return;
 
-        this.crc2.lineWidth = 4;
         this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
         this.crc2.fillStyle = _key.color;
         this.crc2.stroke(_key.path2D);
@@ -799,10 +799,10 @@ namespace Fudge {
         let values: number[] = this.sequences
           .flatMap(_sequence => _sequence.data.getKeys())
           .map(_key => _key.Value);
-        if (values.length > 0) {
+        if (values.length > 1 && values[0] != values[1]) {
           let min: number = values.reduce((_a, _b) => Math.min(_a, _b));
           let max: number = values.reduce((_a, _b) => Math.max(_a, _b));
-          this.mtxWorldToScreen.scaleY((this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT) / (((max - min) * ViewAnimationSheet.PIXEL_PER_VALUE) * 1.2));
+          this.mtxWorldToScreen.scaleY((this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT) / ((max - min * ViewAnimationSheet.PIXEL_PER_VALUE) * 1.2));
           this.mtxWorldToScreen.translateY((this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT) - min * -this.mtxWorldToScreen.scaling.y);
         }
       } else {

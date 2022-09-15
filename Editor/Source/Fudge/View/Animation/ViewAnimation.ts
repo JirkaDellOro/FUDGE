@@ -80,11 +80,14 @@ namespace Fudge {
           path.push("components");
           path.push(component.type);
           path.push(index.toString());
-          let item: Electron.MenuItem;
-          item = new remote.MenuItem(
-            { label: component.type, submenu: this.getMutatorSubmenu(component.getMutatorForAnimation(), path, _callback)}
-          );
-          menu.append(item);  
+          let mutator: ƒ.Mutator = component.getMutatorForAnimation();
+          if (mutator && Object.keys(mutator).length > 0) {
+            let item: Electron.MenuItem;
+            item = new remote.MenuItem(
+              { label: component.type, submenu: this.getMutatorSubmenu(mutator, path, _callback)}
+            );
+            menu.append(item);
+          }
         });
       }
 
@@ -192,12 +195,11 @@ namespace Fudge {
         this.dom.appendChild(this.toolbar);
         this.animation = _animation;
         this.createPropertyList();
+        this.dispatchAnimate();
       } else {
         this.animation = undefined;
         this.dom.innerHTML = "select node with an attached component animator";
       }
-
-      this.dispatchAnimate();
     }
 
     private createPropertyList(): void {

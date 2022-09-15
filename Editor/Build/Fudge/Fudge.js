@@ -2773,9 +2773,12 @@ var Fudge;
                     path.push("components");
                     path.push(component.type);
                     path.push(index.toString());
-                    let item;
-                    item = new Fudge.remote.MenuItem({ label: component.type, submenu: this.getMutatorSubmenu(component.getMutatorForAnimation(), path, _callback) });
-                    menu.append(item);
+                    let mutator = component.getMutatorForAnimation();
+                    if (mutator && Object.keys(mutator).length > 0) {
+                        let item;
+                        item = new Fudge.remote.MenuItem({ label: component.type, submenu: this.getMutatorSubmenu(mutator, path, _callback) });
+                        menu.append(item);
+                    }
                 });
             }
             for (const child of _node.getChildren()) {
@@ -2869,12 +2872,12 @@ var Fudge;
                 this.dom.appendChild(this.toolbar);
                 this.animation = _animation;
                 this.createPropertyList();
+                this.dispatchAnimate();
             }
             else {
                 this.animation = undefined;
                 this.dom.innerHTML = "select node with an attached component animator";
             }
-            this.dispatchAnimate();
         }
         createPropertyList() {
             let nodeMutator = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback) || {};
@@ -3398,10 +3401,10 @@ var Fudge;
         }
         drawKeys() {
             // draw unselected keys
+            this.crc2.lineWidth = 4;
             this.keys.forEach(_key => {
                 if (_key == this.selectedKey)
                     return;
-                this.crc2.lineWidth = 4;
                 this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
                 this.crc2.fillStyle = _key.color;
                 this.crc2.stroke(_key.path2D);
@@ -3611,10 +3614,10 @@ var Fudge;
                 let values = this.sequences
                     .flatMap(_sequence => _sequence.data.getKeys())
                     .map(_key => _key.Value);
-                if (values.length > 0) {
+                if (values.length > 1 && values[0] != values[1]) {
                     let min = values.reduce((_a, _b) => Math.min(_a, _b));
                     let max = values.reduce((_a, _b) => Math.max(_a, _b));
-                    this.mtxWorldToScreen.scaleY((this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT) / (((max - min) * ViewAnimationSheet.PIXEL_PER_VALUE) * 1.2));
+                    this.mtxWorldToScreen.scaleY((this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT) / ((max - min * ViewAnimationSheet.PIXEL_PER_VALUE) * 1.2));
                     this.mtxWorldToScreen.translateY((this.canvas.height - ViewAnimationSheet.TIMELINE_HEIGHT - ViewAnimationSheet.EVENTS_HEIGHT) - min * -this.mtxWorldToScreen.scaling.y);
                 }
             }
@@ -4142,7 +4145,9 @@ var Fudge;
         viewport;
         canvas;
         graph;
-        nodeLight = new ƒ.Node("Illumination"); // keeps light components for dark graphs 
+        nodeLight = new ƒ.Node("Illumination"); // keeps light components for dark graphs
+        throttleId;
+        throttleDelay = 1000 / 60;
         constructor(_container, _state) {
             super(_container, _state);
             this.graph = ƒ.Project.resources[_state["graph"]];
@@ -4287,13 +4292,15 @@ var Fudge;
                         this.setGraph(_event.detail.graph);
                     break;
                 // break;
-                case Fudge.EVENT_EDITOR.ANIMATE:
-                    if (_event instanceof Fudge.FudgeEvent && _event.detail.graph != this.graph)
-                        break;
                 case "mutate" /* MUTATE */:
                 case "delete" /* DELETE */:
                 case Fudge.EVENT_EDITOR.MODIFY:
                     this.redraw();
+                case Fudge.EVENT_EDITOR.ANIMATE:
+                    if (_event instanceof Fudge.FudgeEvent && _event.detail.graph != this.graph)
+                        break;
+                    this.redrawThrottled();
+                    break;
             }
         };
         hndPick = (_event) => {
@@ -4343,6 +4350,15 @@ var Fudge;
             catch (_error) {
                 //nop
             }
+        };
+        redrawThrottled = (_delay = this.throttleDelay) => {
+            if (this.throttleId)
+                return;
+            this.throttleId = window.setTimeout(() => {
+                this.redraw();
+                console.log("redraw");
+                this.throttleId = null;
+            }, _delay);
         };
     }
     Fudge.ViewRender = ViewRender;
