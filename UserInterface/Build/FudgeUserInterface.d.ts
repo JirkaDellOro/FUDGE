@@ -246,7 +246,7 @@ declare namespace FudgeUserInterface {
         /**
          * Retrieves the status of the checkbox as boolean value
          */
-        getMutatorValue(): string;
+        getMutatorValue(): string | number;
         /**
          * Sets the status of the checkbox
          */

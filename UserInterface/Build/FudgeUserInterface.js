@@ -717,9 +717,11 @@ var FudgeUserInterface;
             for (let key in this.content) {
                 if (!isNaN(parseInt(key))) //key being a number will not be shown, assuming it's a simple enum with double entries
                     continue;
+                let value = this.content[key];
                 let entry = document.createElement("option");
                 entry.text = key;
-                entry.value = this.content[key];
+                entry.setAttribute("type", typeof value);
+                entry.value = value.toString();
                 // console.log(this.getAttribute("value"));
                 if (entry.value == this.getAttribute("value")) {
                     entry.selected = true;
@@ -733,7 +735,9 @@ var FudgeUserInterface;
          * Retrieves the status of the checkbox as boolean value
          */
         getMutatorValue() {
-            return this.querySelector("select").value;
+            let select = this.querySelector("select");
+            let type = select.options[select.selectedIndex]?.getAttribute("type") || "string";
+            return type == "number" ? parseFloat(select.value) : select.value;
         }
         /**
          * Sets the status of the checkbox
