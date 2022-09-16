@@ -1823,31 +1823,30 @@ var Fudge;
             }
         }
         hasChildren(_data) {
-            let length = 0;
-            if (!ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data))
-                length = ƒ.ParticleData.isFunction(_data) ? _data.parameters.length : Object.keys(_data).length;
-            return length > 0;
+            if (ƒ.ParticleData.isConstant(_data) || ƒ.ParticleData.isVariable(_data))
+                return false;
+            return this.getChildren(_data).length > 0;
         }
         getChildren(_data) {
+            if (ƒ.ParticleData.isConstant(_data) || ƒ.ParticleData.isVariable(_data))
+                return [];
             let children = [];
-            if (!ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data)) {
-                let subData = ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data;
-                let subKeys = Object.keys(subData);
-                // sort keys for root, color and vector e.g. ("r", "g", "b", "a")
-                if (_data == this.data)
-                    subKeys = Fudge.ViewParticleSystem.PROPERTY_KEYS.filter(_key => subKeys.includes(_key));
-                if (ƒ.ParticleData.isTransformation(_data))
-                    subKeys = Fudge.ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => subKeys.includes(_key));
-                if (_data == this.data.color)
-                    subKeys = Fudge.ViewParticleSystem.COLOR_KEYS.filter(_key => subKeys.includes(_key));
-                subKeys.forEach(_key => {
-                    let child = subData[_key];
-                    if (ƒ.ParticleData.isExpression(child) || typeof child == "object") {
-                        children.push(child);
-                        this.childToParent.set(subData[_key], _data);
-                    }
-                });
-            }
+            let subData = ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data;
+            let subKeys = Object.keys(subData);
+            // sort keys for root, color and vector e.g. ("r", "g", "b", "a")
+            if (_data == this.data)
+                subKeys = Fudge.ViewParticleSystem.PROPERTY_KEYS.filter(_key => subKeys.includes(_key));
+            if (ƒ.ParticleData.isTransformation(_data))
+                subKeys = Fudge.ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => subKeys.includes(_key));
+            if (_data == this.data.color)
+                subKeys = Fudge.ViewParticleSystem.COLOR_KEYS.filter(_key => subKeys.includes(_key));
+            subKeys.forEach(_key => {
+                let child = subData[_key];
+                if (ƒ.ParticleData.isExpression(child) || typeof child == "object") {
+                    children.push(child);
+                    this.childToParent.set(subData[_key], _data);
+                }
+            });
             return children;
         }
         delete(_focused) {

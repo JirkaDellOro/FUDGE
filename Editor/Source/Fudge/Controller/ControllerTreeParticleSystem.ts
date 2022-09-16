@@ -162,35 +162,34 @@ namespace Fudge {
     }
 
     public hasChildren(_data: ƒ.ParticleData.Recursive): boolean {
-      let length: number = 0;
-      if (!ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data))
-        length = ƒ.ParticleData.isFunction(_data) ? _data.parameters.length : Object.keys(_data).length;
-
-      return length > 0;
+      if (ƒ.ParticleData.isConstant(_data) || ƒ.ParticleData.isVariable(_data))
+        return false;
+      return this.getChildren(_data).length > 0;
     }
 
-    public getChildren(_data: ƒ.ParticleData.Recursive): (ƒ.ParticleData.Recursive)[] {
-      let children: (ƒ.ParticleData.Recursive)[] = [];
-      if (!ƒ.ParticleData.isVariable(_data) && !ƒ.ParticleData.isConstant(_data)) {
-        let subData: Object = ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data;
-        let subKeys: string[] = Object.keys(subData);
+    public getChildren(_data: ƒ.ParticleData.Recursive): ƒ.ParticleData.Recursive[] {
+      if (ƒ.ParticleData.isConstant(_data) || ƒ.ParticleData.isVariable(_data))
+        return [];
 
-        // sort keys for root, color and vector e.g. ("r", "g", "b", "a")
-        if (_data == this.data)
-          subKeys = ViewParticleSystem.PROPERTY_KEYS.filter(_key => subKeys.includes(_key));
-        if (ƒ.ParticleData.isTransformation(_data))
-          subKeys = ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => subKeys.includes(_key));
-        if (_data == this.data.color)
-          subKeys = ViewParticleSystem.COLOR_KEYS.filter(_key => subKeys.includes(_key));
+      let children: ƒ.ParticleData.Recursive[] = [];
+      let subData: Object = ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data;
+      let subKeys: string[] = Object.keys(subData);
 
-        subKeys.forEach(_key => {
-          let child: ƒ.ParticleData.Recursive = subData[_key];
-          if (ƒ.ParticleData.isExpression(child) || typeof child == "object") {
-            children.push(child);
-            this.childToParent.set(subData[_key], _data);
-          }
-        });
-      }
+      // sort keys for root, color and vector e.g. ("r", "g", "b", "a")
+      if (_data == this.data)
+        subKeys = ViewParticleSystem.PROPERTY_KEYS.filter(_key => subKeys.includes(_key));
+      if (ƒ.ParticleData.isTransformation(_data))
+        subKeys = ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => subKeys.includes(_key));
+      if (_data == this.data.color)
+        subKeys = ViewParticleSystem.COLOR_KEYS.filter(_key => subKeys.includes(_key));
+
+      subKeys.forEach(_key => {
+        let child: ƒ.ParticleData.Recursive = subData[_key];
+        if (ƒ.ParticleData.isExpression(child) || typeof child == "object") {
+          children.push(child);
+          this.childToParent.set(subData[_key], _data);
+        }
+      });
 
       return children;
     }
