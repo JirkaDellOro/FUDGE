@@ -1,5 +1,5 @@
 namespace FudgeCore {
-  
+
   /**
    * Attaches a {@link ParticleSystem} to the node.
    * @author Jonas Plotzky, HFU, 2020
@@ -7,21 +7,23 @@ namespace FudgeCore {
   @RenderInjectorComponentParticleSystem.decorate
   export class ComponentParticleSystem extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
-    /** a texture filed with random numbers. Used by particle shader */
+    /** A texture filed with random numbers. Used by particle shader */
     public renderData: unknown;
+    /** When disabled try enabling {@link ComponentMaterial.prototype.sortForAlpha} */
+    public depthMask: boolean;
     public blendMode: BLEND;
-    // public depthMask: boolean;
     public particleSystem: ParticleSystem;
     public readonly time: Time;
     
-    /** the number of particles */
+    /** The number of particles */
     #size: number;
 
     constructor(_particleSystem: ParticleSystem = null, _size: number = 10) {
       super();     
       this.particleSystem = _particleSystem;
+      this.depthMask = true;
       this.size = _size;
-      this.blendMode = BLEND.ADDITIVE;
+      this.blendMode = BLEND.TRANSPARENT;
       this.time = new Time();
     }
 
@@ -49,7 +51,8 @@ namespace FudgeCore {
         [super.constructor.name]: super.serialize(),
         idParticleSystem: this.particleSystem?.idResource,
         size: this.size,
-        blendMode: this.blendMode
+        blendMode: this.blendMode,
+        depthMask: this.depthMask
       };
 
       return serialization;
@@ -60,6 +63,7 @@ namespace FudgeCore {
       if (_serialization.idParticleSystem) this.particleSystem = <ParticleSystem>await Project.getResource(_serialization.idParticleSystem);
       this.size = _serialization.size;
       this.blendMode = _serialization.blendMode;
+      this.depthMask = _serialization.depthMask;
 
       return this;
     }

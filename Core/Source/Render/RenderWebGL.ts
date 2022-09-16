@@ -169,7 +169,7 @@ namespace FudgeCore {
           RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_REVERSE_SUBTRACT);
           RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.DST_ALPHA);
           break;
-        case BLEND.MODULATE:
+        case BLEND.MODULATE: // color gets multiplied, tried to copy unitys "Particle Shader: Blending Option: Rendering Mode: Modulate"
           RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
           RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.DST_COLOR, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
         default:
@@ -366,12 +366,9 @@ namespace FudgeCore {
       }
     }
 
-    // TODO: check if this should happen somewhere else e.g. some Render injector stuff?
     protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void {
-      if (_sortForAlpha) {
-        RenderWebGL.setBlendMode(_cmpParticleSystem.blendMode);
-        RenderWebGL.crc3.depthMask(false);
-      }
+      RenderWebGL.crc3.depthMask(_cmpParticleSystem.depthMask);
+      RenderWebGL.setBlendMode(_cmpParticleSystem.blendMode);
       _cmpParticleSystem.useRenderData();
 
       RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemSize"], _cmpParticleSystem.size);
@@ -383,10 +380,9 @@ namespace FudgeCore {
       RenderWebGL.crc3.uniform1i(_shader.uniforms["u_bParticleSystemRestrict"], faceCamera && _cmpFaceCamera.restrict ? 1 : 0);
 
       RenderWebGL.crc3.drawElementsInstanced(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0, _cmpParticleSystem.size);
-      if (_sortForAlpha) {
-        RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
-        RenderWebGL.crc3.depthMask(true);
-      }
+
+      RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
+      RenderWebGL.crc3.depthMask(true);
     }
 
     private static calcMeshToView(_node: Node, _cmpMesh: ComponentMesh, _mtxWorldToView: Matrix4x4, _target?: Vector3): Matrix4x4 {

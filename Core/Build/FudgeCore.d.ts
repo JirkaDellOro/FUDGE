@@ -2151,6 +2151,7 @@ declare namespace FudgeCore {
         clrSecondary: Color;
         mtxPivot: Matrix3x3;
         material: Material;
+        /** support sorting of objects with transparency when rendering, render objects in the back first. Should be enabled when {@link ComponentParticleSystem.prototype.depthMask} is disabled */
         sortForAlpha: boolean;
         constructor(_material?: Material);
         serialize(): Serialization;
@@ -2185,8 +2186,10 @@ declare namespace FudgeCore {
     class ComponentParticleSystem extends Component {
         #private;
         static readonly iSubclass: number;
-        /** a texture filed with random numbers. Used by particle shader */
+        /** A texture filed with random numbers. Used by particle shader */
         renderData: unknown;
+        /** When disabled try enabling {@link ComponentMaterial.prototype.sortForAlpha} */
+        depthMask: boolean;
         blendMode: BLEND;
         particleSystem: ParticleSystem;
         readonly time: Time;
