@@ -2564,6 +2564,8 @@ var Fudge;
             this.tree.addEventListener("paste" /* PASTE */, this.hndEvent);
             this.tree.addEventListener("drop" /* DROP */, this.hndEvent);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
+            this.dom.title = `● Right click on "${ƒ.ParticleSystem.name}" to add properties.\n● Right click on properties to add transformations/expressions.\n● Right click on transformations/expressions to add expressions.\n● Use Copy/Cut/Paste to duplicate data.`;
+            this.tree.title = this.dom.title;
             if (this.idInterval == undefined)
                 this.idInterval = window.setInterval(() => { this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph } }); }, 1000 / 30);
         }

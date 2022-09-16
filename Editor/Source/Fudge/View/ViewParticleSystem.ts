@@ -272,6 +272,8 @@ namespace Fudge {
       this.tree.addEventListener(ƒui.EVENT.PASTE, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      this.dom.title = `● Right click on "${ƒ.ParticleSystem.name}" to add properties.\n● Right click on properties to add transformations/expressions.\n● Right click on transformations/expressions to add expressions.\n● Use Copy/Cut/Paste to duplicate data.`;
+      this.tree.title = this.dom.title;
       if (this.idInterval == undefined)
         this.idInterval = window.setInterval(() => { this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph} }); }, 1000 / 30);
     }

@@ -12,7 +12,7 @@ namespace FudgeCore {
   export type RenderTexture = WebGLTexture;
 
   export enum BLEND {
-    OPAQUE, TRANSPARENT, PARTICLE
+    OPAQUE, TRANSPARENT, ADDITIVE, SUBTRACTIVE, MODULATE
   }
 
   export interface BufferSpecification {
@@ -153,15 +153,25 @@ namespace FudgeCore {
     public static setBlendMode(_mode: BLEND): void {
       switch (_mode) {
         case BLEND.OPAQUE:
+          RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
           RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.ONE, WebGL2RenderingContext.ZERO);
           break;
         case BLEND.TRANSPARENT:
+          RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
           RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
           // RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
           break;
-        case BLEND.PARTICLE:
+        case BLEND.ADDITIVE:
+          RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
           RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.DST_ALPHA);
           break;
+        case BLEND.SUBTRACTIVE:
+          RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_REVERSE_SUBTRACT);
+          RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.DST_ALPHA);
+          break;
+        case BLEND.MODULATE:
+          RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
+          RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.DST_COLOR, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
         default:
           break;
       }
@@ -359,7 +369,7 @@ namespace FudgeCore {
     // TODO: check if this should happen somewhere else e.g. some Render injector stuff?
     protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void {
       if (_sortForAlpha) {
-        RenderWebGL.setBlendMode(BLEND.PARTICLE);
+        RenderWebGL.setBlendMode(_cmpParticleSystem.blendMode);
         RenderWebGL.crc3.depthMask(false);
       }
       _cmpParticleSystem.useRenderData();

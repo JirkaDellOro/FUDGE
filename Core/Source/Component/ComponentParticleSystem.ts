@@ -1,4 +1,5 @@
 namespace FudgeCore {
+  
   /**
    * Attaches a {@link ParticleSystem} to the node.
    * @author Jonas Plotzky, HFU, 2020
@@ -8,6 +9,8 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
     /** a texture filed with random numbers. Used by particle shader */
     public renderData: unknown;
+    public blendMode: BLEND;
+    // public depthMask: boolean;
     public particleSystem: ParticleSystem;
     public readonly time: Time;
     
@@ -18,6 +21,7 @@ namespace FudgeCore {
       super();     
       this.particleSystem = _particleSystem;
       this.size = _size;
+      this.blendMode = BLEND.ADDITIVE;
       this.time = new Time();
     }
 
@@ -44,7 +48,8 @@ namespace FudgeCore {
       let serialization: Serialization = {
         [super.constructor.name]: super.serialize(),
         idParticleSystem: this.particleSystem?.idResource,
-        size: this.size
+        size: this.size,
+        blendMode: this.blendMode
       };
 
       return serialization;
@@ -54,6 +59,7 @@ namespace FudgeCore {
       await super.deserialize(_serialization[super.constructor.name]);
       if (_serialization.idParticleSystem) this.particleSystem = <ParticleSystem>await Project.getResource(_serialization.idParticleSystem);
       this.size = _serialization.size;
+      this.blendMode = _serialization.blendMode;
 
       return this;
     }
@@ -76,6 +82,13 @@ namespace FudgeCore {
       delete mutator.particleSystem;
       delete mutator.size;
       return mutator;
+    }
+
+    public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
+      let types: MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
+      if (types.blendMode)
+        types.blendMode = BLEND;
+      return types;
     }
 
     protected reduceMutator(_mutator: Mutator): void {

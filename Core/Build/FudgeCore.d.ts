@@ -823,7 +823,9 @@ declare namespace FudgeCore {
     enum BLEND {
         OPAQUE = 0,
         TRANSPARENT = 1,
-        PARTICLE = 2
+        ADDITIVE = 2,
+        SUBTRACTIVE = 3,
+        MODULATE = 4
     }
     interface BufferSpecification {
         size: number;
@@ -2185,6 +2187,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         /** a texture filed with random numbers. Used by particle shader */
         renderData: unknown;
+        blendMode: BLEND;
         particleSystem: ParticleSystem;
         readonly time: Time;
         constructor(_particleSystem?: ParticleSystem, _size?: number);
@@ -2203,6 +2206,7 @@ declare namespace FudgeCore {
         getMutator(_extendable?: boolean): Mutator;
         getMutatorForUserInterface(): MutatorForUserInterface;
         getMutatorForAnimation(): MutatorForAnimation;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
