@@ -138,18 +138,18 @@ namespace FudgeCore {
     }
 
     private static renameVariables(_data: ParticleData.System): ParticleData.System {
-      if (!_data.variables) return _data;
-
       let variableMap: {[key: string]: string} = {};
-      Object.keys(_data.variables).forEach( (_variableName, _index) => {
-        if (ParticleData.PREDEFINED_VARIABLES[_variableName])
-          throw `Error in ${ParticleSystem.name}: "${_variableName}" is a predefined variable and can not be redeclared`;
-        else
-          return variableMap[_variableName] = `fVariable${_index}`; 
-      });
+      if (_data.variables)
+        Object.keys(_data.variables).forEach((_variableName, _index) => {
+          if (ParticleData.PREDEFINED_VARIABLES[_variableName])
+            throw `Error in ${ParticleSystem.name}: "${_variableName}" is a predefined variable and can not be redeclared`;
+          else
+            return variableMap[_variableName] = `fVariable${_index}`; 
+        });
 
       let dataRenamed: ParticleData.System = JSON.parse(JSON.stringify(_data));
-      dataRenamed.variables = Object.fromEntries(Object.entries(dataRenamed.variables).map(([_name, _exrpession]) => [variableMap[_name], _exrpession] ));
+      if (_data.variables)
+        dataRenamed.variables = Object.fromEntries(Object.entries(dataRenamed.variables).map(([_name, _exrpession]) => [variableMap[_name], _exrpession]));
       renameRecursive(dataRenamed);
       return dataRenamed;
 
@@ -160,11 +160,10 @@ namespace FudgeCore {
             _data.value = newName;
           else
             throw `Error in ${ParticleSystem.name}: "${newName}" is not a defined variable`;
-        } else {
+        } else 
           for (const subData of Object.values(ParticleData.isFunction(_data) ? _data.parameters : _data)) 
             if (typeof subData == "object")
               renameRecursive(subData);
-        }
       }
     } 
 

@@ -4197,17 +4197,17 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     namespace ParticleData {
         interface System {
-            variables: {
+            variables?: {
                 [name: string]: Expression;
             };
-            color: {
+            color?: {
                 r?: Expression;
                 g?: Expression;
                 b?: Expression;
                 a?: Expression;
             };
-            mtxLocal: Transformation[];
-            mtxWorld: Transformation[];
+            mtxLocal?: Transformation[];
+            mtxWorld?: Transformation[];
         }
         type Recursive = System | System["variables"] | System["color"] | System["mtxLocal"] | Transformation | Expression;
         type Expression = Function | Variable | Constant;
@@ -4242,7 +4242,7 @@ declare namespace FudgeCore {
         name: string;
         idResource: string;
         private shaderToShaderParticleSystem;
-        constructor(_name?: string, _particleEffect?: ParticleData.System);
+        constructor(_name?: string, _data?: ParticleData.System);
         get data(): ParticleData.System;
         set data(_data: ParticleData.System);
         getShaderFrom(_source: ShaderInterface): ShaderParticleSystem;

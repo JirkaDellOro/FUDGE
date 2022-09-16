@@ -20,10 +20,10 @@ namespace Fudge {
 
     public createContent(_data: ƒ.ParticleData.Recursive): HTMLFormElement {
       let content: HTMLFormElement = document.createElement("form");
-
       let parentData: ƒ.ParticleData.Recursive = this.childToParent.get(_data);
       let key: string = this.getKey(_data, parentData);
-      if (parentData == this.data.variables) {
+      
+      if (parentData && parentData == this.data.variables) {
         let input: HTMLInputElement = document.createElement("input");
         input.type = "text";
         input.disabled = true;
@@ -153,7 +153,7 @@ namespace Fudge {
 
       if (_id == ID.VALUE && (ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data))) {
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
-        if (typeof input == "string" && !this.data.variables[input] && !ƒ.ParticleData.PREDEFINED_VARIABLES[input]) 
+        if (typeof input == "string" && !ƒ.ParticleData.PREDEFINED_VARIABLES[input] && (this.data.variables && !this.data.variables[input])) 
           return;
         _data.value = input;
 
@@ -175,7 +175,9 @@ namespace Fudge {
         let subData: Object = ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data;
         let subKeys: string[] = Object.keys(subData);
 
-        // sort keys for color and vector e.g. ("r", "g", "b", "a")
+        // sort keys for root, color and vector e.g. ("r", "g", "b", "a")
+        if (_data == this.data)
+          subKeys = ViewParticleSystem.PROPERTY_KEYS.filter(_key => subKeys.includes(_key));
         if (ƒ.ParticleData.isTransformation(_data))
           subKeys = ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => subKeys.includes(_key));
         if (_data == this.data.color)
@@ -285,12 +287,17 @@ namespace Fudge {
     }
 
     private deleteData(_data: ƒ.ParticleData.Recursive): boolean {
-      if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) 
+      if (_data == this.data)
         return false;
 
       let parentData: ƒ.ParticleData.Recursive = this.childToParent.get(_data);
       let key: string = this.getKey(_data, parentData);
       let index: number = Number.parseInt(key);
+
+      if (parentData == this.data && Object.keys(_data).length > 0) {
+        ƒui.Warning.display([`property "${key}" still has children`], "Unable to delete", "Please resolve the errors and try again");
+        return false;
+      }
 
       if (parentData == this.data.variables && this.isReferenced(key)) {
         ƒui.Warning.display([`variable "${key}" is still referenced`], "Unable to delete", "Please resolve the errors and try again");

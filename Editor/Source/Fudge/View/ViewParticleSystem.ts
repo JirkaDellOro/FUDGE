@@ -3,6 +3,7 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
 
   export class ViewParticleSystem extends View {
+    public static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[] = ["variables", "mtxLocal", "mtxWorld", "color"];
     public static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[] = ["x", "y", "z"];
     public static readonly COLOR_KEYS: (keyof ƒ.ParticleData.System["color"])[] = ["r", "g", "b", "a"];
 
@@ -35,6 +36,16 @@ namespace Fudge {
         return;
       this.contextMenu.items.forEach(_item => _item.visible = false);
       let popup: boolean = false;
+
+      if (focus == this.data) {
+        let item: Electron.MenuItem = this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_PROPERTY));
+        item.visible = true;
+        item.submenu.items.forEach(_subItem => _subItem.visible = false);
+        ViewParticleSystem.PROPERTY_KEYS
+          .filter(_value => !Object.keys(focus).includes(_value))
+          .forEach(_label => item.submenu.items.find(_item => _item.label == _label).visible = true);
+        popup = true;
+      }
       
       if (focus == this.data.color || ƒ.ParticleData.isTransformation(focus)) {
         [
@@ -62,7 +73,7 @@ namespace Fudge {
         popup = true;
       }
 
-      if (ƒ.ParticleData.isExpression(focus) || ƒ.ParticleData.isTransformation(focus)) {
+      if (focus != this.data) {
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.DELETE_PARTICLE_DATA)).visible = true;
         popup = true;
       }
@@ -74,8 +85,16 @@ namespace Fudge {
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
-      let options: string[] = [...ViewParticleSystem.TRANSFORMATION_KEYS, ...ViewParticleSystem.COLOR_KEYS];
-
+      let options: string[] = ViewParticleSystem.PROPERTY_KEYS;
+      
+      item = new remote.MenuItem({ 
+        label: "Add Property", 
+        id: String(CONTEXTMENU.ADD_PARTICLE_PROPERTY), 
+        submenu: generateSubMenu(options, String(CONTEXTMENU.ADD_PARTICLE_PROPERTY), _callback)
+      });
+      menu.append(item);
+      
+      options = [...ViewParticleSystem.TRANSFORMATION_KEYS, ...ViewParticleSystem.COLOR_KEYS];
       item = new remote.MenuItem({ 
         label: "Add Variable/Constant", 
         id: String(CONTEXTMENU.ADD_PARTICLE_CONSTANT_NAMED), 
@@ -128,15 +147,24 @@ namespace Fudge {
 
       let child: ƒ.ParticleData.Recursive;
       switch (Number(_item.id)) {
+        case CONTEXTMENU.ADD_PARTICLE_PROPERTY:
         case CONTEXTMENU.ADD_PARTICLE_CONSTANT:
         case CONTEXTMENU.ADD_PARTICLE_FUNCTION:
-          child = Number(_item.id) == CONTEXTMENU.ADD_PARTICLE_CONSTANT ? 
-            { value: 1 } :
-            { function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: []};
+          switch (Number(_item.id)) {
+            case CONTEXTMENU.ADD_PARTICLE_PROPERTY:
+              child = _item.label == "mtxWorld" || _item.label == "mtxLocal" ? [] : {};
+              break;
+            case CONTEXTMENU.ADD_PARTICLE_CONSTANT:
+              child = { value: 1 };
+              break;
+            case CONTEXTMENU.ADD_PARTICLE_FUNCTION:
+              child = { function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: []};
+              break;
+          }
 
           if (ƒ.ParticleData.isFunction(focus))
-            focus.parameters.push(child);
-          else if (ƒ.ParticleData.isTransformation(focus) || focus == this.data.color) 
+            focus.parameters.push(<ƒ.ParticleData.Expression>child);
+          else if (ƒ.ParticleData.isTransformation(focus) || focus == this.data.color || focus == this.data) 
             focus[_item.label] = child;
           else if (focus == this.data.variables) 
             focus[`variable${Object.keys(focus).length}`] = child;
@@ -287,7 +315,10 @@ namespace Fudge {
     }
 
     private refreshVariables(): void {
-      this.variables.innerHTML = [...Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES), ...Object.keys(this.data.variables)].map(_name => `<option value="${_name}">`).join("");
+      let options: string[] = Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES);
+      if (this.data.variables)
+        options.push(...Object.keys(this.data.variables));
+      this.variables.innerHTML = options.map(_name => `<option value="${_name}">`).join("");
     }
   }
 }
