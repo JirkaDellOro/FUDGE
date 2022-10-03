@@ -92,6 +92,20 @@ var FudgeCore;
                     Debug.delegates[parsed].set(_target, _target.delegates[parsed]);
             }
         }
+        static getFilter(_target) {
+            let result = 0;
+            for (let filter in _target.delegates)
+                result |= parseInt(filter);
+            return result;
+        }
+        static addFilter(_target, _filter) {
+            let current = Debug.getFilter(_target);
+            Debug.setFilter(_target, current | _filter);
+        }
+        static removeFilter(_target, _filter) {
+            let current = Debug.getFilter(_target);
+            Debug.setFilter(_target, current ^ _filter);
+        }
         static info(_message, ..._args) {
             Debug.delegate(FudgeCore.DEBUG_FILTER.INFO, _message, _args);
         }
@@ -10197,9 +10211,6 @@ var FudgeCore;
         getBranch() {
             return this.#branch;
         }
-        showSceneGraph() {
-            FudgeCore.Debug.branch(this.#branch);
-        }
         draw(_calculateTransforms = true) {
             if (!this.#branch)
                 return;
@@ -10323,22 +10334,6 @@ var FudgeCore;
         pointClientToScreen(_client) {
             let screen = new FudgeCore.Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
             return screen;
-        }
-        setFocus(_on) {
-            if (_on) {
-                if (Viewport.focus == this)
-                    return;
-                if (Viewport.focus)
-                    Viewport.focus.dispatchEvent(new Event("focusout"));
-                Viewport.focus = this;
-                this.dispatchEvent(new Event("focusin"));
-            }
-            else {
-                if (Viewport.focus != this)
-                    return;
-                this.dispatchEvent(new Event("focusout"));
-                Viewport.focus = null;
-            }
         }
     }
     FudgeCore.Viewport = Viewport;
