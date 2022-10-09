@@ -6,9 +6,9 @@
 - Find more tests in the folder "Miscellaneous"
 
 ## Animation
-- [PaymodesTriggerLabel](Test\Animation\PlaymodesTriggerLabel\Test.html)  
+- [PaymodesTriggerLabel](Animation/PlaymodesTriggerLabel/Test.html)  
 Test the triggering of animation events and jumping to labels defined in the animation.
-- [Serialization](Test\Animation\Serialization\Test.html)  
+- [Serialization](Animation/Serialization/Test.html)  
 Test the de-/serialization of animations.
 ## Audio
 - [Audio Graph Insertion](Audio/GraphInsertion/Test.html)  
@@ -18,40 +18,55 @@ Test the handling of the WebAudio context to mix the audiosignals of selected br
 - [SpatialSound](Audio/SpatialSound/Test.html)  
 Complex test for spatial stereo audio. Orbit the camera around the world origin, move an audio source and adjust the panner cones.
 ## Controls
-- [Controls](Test\Controls\Test.html)  
+- [Controls](Controls/Test.html)  
 Test the amplifictation, delay and the proportional, integral or differential processing of inputs.
 ## Debug
-- [Debug](Test\Debug\Test.html)  
+- [Debug](Debug/Test.html)  
 Test the debug class that routes log-messages, warnings or error-messages to various outputs.
+- [Output](Debug/ScreenToRayToScreen/Test.html)  
+Test debug output to various targets.
 ## Mesh
-- [Mesh](Test\Mesh\Test.html)  
+- [Mesh](Mesh/Test.html)  
 Display the built-in meshes.
 ## Net
-- [Client](Test\Net\Client\index.html)  
+- [Client](Net/Client/index.html)  
 - Server: start with `node Server.js <port>` in folder Test/Net/Server 
 Test connectivity between Server and Clients with WebSockets and between Clients as peer-to-peer connections with RTC and the automatic setup of a mesh structure or an authoritative peer. Disable public firewall!
 ## Physics
-- [Welding](Test\Physics\Convex_ChairTest\FudgePhysics_ConvexWelding.html)  
+- [Welding](Physics/Convex_ChairTest/FudgePhysics_ConvexWelding.html)  
 Concave objects consisting of boxes welded together using welding joints fall from the sky and bounce around. 
-- [Joints](Test\Physics\Phase2_Joints\Main.html)  
+- [Joints](Physics/Phase2_Joints/Main.html)  
 Test all joint types and collisions.  
 - There are more tests in the folder, view locally.
+## Picking
+-[PickComponent](Picking/PickComponent/MeshZoo.html)
+Test different picking methods using ComponentPick
+-[PickShader](Picking/PickShader/Picking.html)
+Test picking using the pick shader with overlapping quads
 ## Random
-- [Random](Random\Test.html)  
+- [Random](Random/Test.html)  
 Test various formats and methods to create structures and information using random numbers.
 ## Rectangles
-- [Collision](Rectangles\Collision\Test.html)  
+- [Collision](Rectangles/Collision/Test.html)  
 Test the collision detection of rectangles and the calculation of the overlapping area.
-- [MapRectangles](Rectangles\MapRectangles\Test.html)  
+- [MapRectangles](Rectangles/MapRectangles/Test.html)  
 Test the mapping of one Rectangle onto another used for viewport framing.
 ## Resources
-- [Graph](Resources\Graph\Test.html)  
+- [Graph](Resources/Graph/Test.html)  
 Test the creation, serialization, deserialization and recreation of a graph and graphinstances.
-- [SubclassRegistration](Resources\SubclassRegistration\Test.html)  
+- [SubclassRegistration](Resources/SubclassRegistration/Test.html)  
 Test the registration of all classes creating resources which is crucial for deserialization
+## Skeleton
+[SkeletonTest](Skeleton/SkeletonTest.html)  
+Skeleton with two bones moving, deforming a cylinder  
+[SkeletonImportTest](Skeleton/SkeletonImportTest.html)  
+Import obj-file with skeleton animation, needs fix
 ## Sprite
-- [Sprites](Sprite\Test.html)  
+- [Sprites](Sprite/Test.html)  
 Test the spriteclass and spritesheets as defined in Aid at this point of time (11/2021). Sprites should be handled by Animation later.
+## StateMachine
+[StateMachine](StateMachine/Test.html)  
+Standalone state machine and ComponentStateMachine running parallel.
 ## Time
-- [Time](Time\Test.html)  
+- [Time](Time/Test.html)  
 Test the handling of time, the core game loop and timer events
