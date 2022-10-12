@@ -481,9 +481,8 @@ declare namespace FudgeUserInterface {
         };
         /** Used by the tree to indicate the drop position while dragging */
         dragDropDivider: HTMLHRElement;
-        /** Create an HTMLFormElement for the tree item representing the object  */
+        /** Create an HTMLFormElement for the tree item representing the object */
         abstract createContent(_object: T): HTMLFormElement;
-        /** Retrieve a string to create a label for the tree item representing one of the objects properties  */
         /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
         abstract getAttributes(_object: T): string;
         /** Process the proposed new label */
@@ -510,6 +509,9 @@ declare namespace FudgeUserInterface {
          * @param _focussed The object currently having focus
          */
         abstract copy(_originals: T[]): Promise<T[]>;
+        /**
+         * Override if some objects should not be draggable
+         */
         draggable(_object: T): boolean;
     }
 }

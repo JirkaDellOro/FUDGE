@@ -1814,6 +1814,9 @@ var FudgeUserInterface;
         copyPaste = { sources: [], target: null };
         /** Used by the tree to indicate the drop position while dragging */
         dragDropDivider = document.createElement("hr");
+        /**
+         * Override if some objects should not be draggable
+         */
         draggable(_object) {
             return true;
         }
@@ -1980,7 +1983,7 @@ var FudgeUserInterface;
             }
             let content = this.querySelector("ul");
             switch (_event.code) {
-                // TODO: repair keydowns...
+                // TODO: repair arrow key navigation
                 case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
                     if (this.hasChildren && !content)
                         this.expand(true);
