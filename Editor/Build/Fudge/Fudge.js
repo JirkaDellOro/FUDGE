@@ -2509,6 +2509,7 @@ var Fudge;
                 case "delete" /* DELETE */:
                 case "drop" /* DROP */:
                 case "rename" /* RENAME */:
+                case "cut" /* CUT */: // TODO: customs trees cut is async, this should happen after cut is finished
                 case "paste" /* PASTE */:
                 case "drop" /* DROP */:
                     this.refreshVariables();
@@ -2561,6 +2562,7 @@ var Fudge;
             this.tree.addEventListener("rename" /* RENAME */, this.hndEvent);
             this.tree.addEventListener("drop" /* DROP */, this.hndEvent);
             this.tree.addEventListener("delete" /* DELETE */, this.hndEvent);
+            this.tree.addEventListener("cut" /* CUT */, this.hndEvent);
             this.tree.addEventListener("paste" /* PASTE */, this.hndEvent);
             this.tree.addEventListener("drop" /* DROP */, this.hndEvent);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);

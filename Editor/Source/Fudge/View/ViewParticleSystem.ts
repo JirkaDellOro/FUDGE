@@ -217,6 +217,7 @@ namespace Fudge {
         case ƒui.EVENT.DELETE:
         case ƒui.EVENT.DROP:
         case ƒui.EVENT.RENAME:
+        case ƒui.EVENT.CUT: // TODO: customs trees cut is async, this should happen after cut is finished
         case ƒui.EVENT.PASTE:
         case ƒui.EVENT.DROP:
           this.refreshVariables();
@@ -269,6 +270,7 @@ namespace Fudge {
       this.tree.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
+      this.tree.addEventListener(ƒui.EVENT.CUT, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.PASTE, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
