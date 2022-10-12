@@ -507,6 +507,10 @@ declare namespace FudgeCore {
             [key: string]: string;
         };
     }
+    /**
+     * Compiles particle system shaders from shader universal derivates for WebGL
+     * @authors Jonas Plotzky, HFU, 2022
+     */
     class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
         static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number;
         static readonly FUNCTIONS: {
@@ -525,6 +529,10 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * buffers the random number data for the particle system into WebGL
+     * @authors Jonas Plotzky, HFU, 2022
+     */
     class RenderInjectorComponentParticleSystem {
         static decorate(_constructor: Function): void;
         protected static useRenderData(this: ComponentParticleSystem): void;
@@ -2181,7 +2189,9 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Attaches a {@link ParticleSystem} to the node.
-     * @author Jonas Plotzky, HFU, 2020
+     * Works in conjunction with {@link ComponentMesh} and {@link ComponentMaterial} to create a shader particle system.
+     * Additionally a {@link ComponentFaceCamera} can be attached to make the particles face the camera.
+     * @author Jonas Plotzky, HFU, 2022
      */
     class ComponentParticleSystem extends Component {
         #private;
@@ -3189,7 +3199,7 @@ declare namespace FudgeCore {
      */
     export class Matrix4x4 extends Mutable implements Serializable, Recycable {
         #private;
-        private static deg2rad;
+        static readonly deg2rad: number;
         private data;
         private mutator;
         private vectors;
@@ -4202,6 +4212,9 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * The namesapce for handling the particle data
+     */
     namespace ParticleData {
         interface System {
             variables?: {
@@ -4241,13 +4254,17 @@ declare namespace FudgeCore {
         function isTransformation(_data: Recursive): _data is Transformation;
     }
     /**
-     * Holds the information .
-     * @authors Jonas Plotzky, HFU, 2020
+     * Holds information on how to mutate the particles of a particle system.
+     * A full particle system is composed by attaching a {@link ComponentParticleSystem}, {@link ComponentMesh} and {@link ComponentMaterial} to the same {@link Node}.
+     * Additionally a {@link ComponentFaceCamera} can be attached to make the particles face the camera.
+     * @authors Jonas Plotzky, HFU, 2022
      */
     class ParticleSystem extends Mutable implements SerializableResource {
         #private;
         name: string;
         idResource: string;
+        /** Map of shader universal derivates to corresponding computed {@link ShaderParticleSystem}.
+         * This way each particle system resource can be used in conjunction with all shader universal derivates */
         private shaderToShaderParticleSystem;
         constructor(_name?: string, _data?: ParticleData.System);
         get data(): ParticleData.System;

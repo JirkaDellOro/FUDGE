@@ -22,7 +22,7 @@ namespace FudgeCore {
    */
 
   export class Matrix4x4 extends Mutable implements Serializable, Recycable {
-    private static deg2rad: number = Math.PI / 180;
+    public static readonly deg2rad: number = Math.PI / 180;
     #eulerAngles: Vector3 = Vector3.ZERO();
     #vectors: VectorRepresentation = { translation: Vector3.ZERO(), rotation: Vector3.ZERO(), scaling: Vector3.ZERO() };
 

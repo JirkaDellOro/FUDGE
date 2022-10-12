@@ -196,15 +196,16 @@ namespace FudgeCore {
       code += transformations
         .map(([_transformation, _x, _y, _z], _index: number) => {
           if (_transformation == "rotate") {
-            let sin: (_value: string) => string = (_value: string) => _value == "0.0" ? "0.0" : `sin(${_value})`;
-            let cos: (_value: string) => string = (_value: string) => _value == "0.0" ? "1.0" : `cos(${_value})`;
-
-            return `float fSinX${_index} = ${sin(_x)};
-              float fCosX${_index} = ${cos(_x)};
-              float fSinY${_index} = ${sin(_y)};
-              float fCosY${_index} = ${cos(_y)};
-              float fSinZ${_index} = ${sin(_z)};
-              float fCosZ${_index} = ${cos(_z)};\n`;
+            let toDegree: (_value: string) => string = (_value: string) => `${_value} * ${Matrix4x4.deg2rad}`;
+            return `float fXRadians${_index} = ${toDegree(_x)};
+              float fYRadians${_index} = ${toDegree(_y)};
+              float fZRadians${_index} = ${toDegree(_z)};
+              float fSinX${_index} = sin(fXRadians${_index});
+              float fCosX${_index} = cos(fXRadians${_index}); 
+              float fSinY${_index} = sin(fYRadians${_index});
+              float fCosY${_index} = cos(fYRadians${_index});
+              float fSinZ${_index} = sin(fZRadians${_index});
+              float fCosZ${_index} = cos(fZRadians${_index});\n`;
           } else
             return "";
         })
