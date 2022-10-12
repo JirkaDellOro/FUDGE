@@ -14,11 +14,8 @@ namespace FudgeUserInterface {
     /** Used by the tree to indicate the drop position while dragging */
     public dragDropDivider: HTMLHRElement = document.createElement("hr");
 
-    /** Create an HTMLFormElement for the tree item representing the object  */
+    /** Create an HTMLFormElement for the tree item representing the object */
     public abstract createContent(_object: T): HTMLFormElement;
-
-    /** Retrieve a string to create a label for the tree item representing one of the objects properties  */
-    // public abstract getLabel(_key: string, _object: T): string;
 
     /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
     public abstract getAttributes(_object: T): string;
@@ -53,6 +50,9 @@ namespace FudgeUserInterface {
      */
     public abstract /* async */ copy(_originals: T[]): Promise<T[]>;
 
+    /**
+     * Override if some objects should not be draggable
+     */
     public draggable(_object: T): boolean {
       return true;
     }

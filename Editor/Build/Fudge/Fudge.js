@@ -2323,6 +2323,10 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
+    /**
+     * View and edit a particle system attached to a node.
+     * @authors Jonas Plotzky, HFU, 2022
+     */
     class ViewParticleSystem extends Fudge.View {
         static PROPERTY_KEYS = ["variables", "mtxLocal", "mtxWorld", "color"];
         static TRANSFORMATION_KEYS = ["x", "y", "z"];
@@ -2619,7 +2623,7 @@ var Fudge;
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
     /**
-     * TODO: add
+     * View and edit the animatable properties of a node with an attached component animation.
      * @authors Jonas Plotzky, HFU, 2022
      */
     class ViewAnimation extends Fudge.View {
@@ -2860,7 +2864,7 @@ var Fudge;
         SHEET_MODE["CURVES"] = "Curves";
     })(SHEET_MODE || (SHEET_MODE = {}));
     /**
-     * TODO: add
+     * View and edit animation sequences, animation keys and curves connecting them.
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimationSheet extends Fudge.View {

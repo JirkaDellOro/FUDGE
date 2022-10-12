@@ -1,8 +1,10 @@
 namespace FudgeCore {
 
   /**
-   * Attaches a {@link ParticleSystem} to the node.
-   * @author Jonas Plotzky, HFU, 2020
+   * Attaches a {@link ParticleSystem} to the node. 
+   * Works in conjunction with {@link ComponentMesh} and {@link ComponentMaterial} to create a shader particle system.
+   * Additionally a {@link ComponentFaceCamera} can be attached to make the particles face the camera.
+   * @author Jonas Plotzky, HFU, 2022
    */
   @RenderInjectorComponentParticleSystem.decorate
   export class ComponentParticleSystem extends Component {

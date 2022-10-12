@@ -1,5 +1,9 @@
 namespace FudgeCore {
 
+  /**
+   * buffers the random number data for the particle system into WebGL
+   * @authors Jonas Plotzky, HFU, 2022
+   */
   export class RenderInjectorComponentParticleSystem {
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor.prototype, "useRenderData", {

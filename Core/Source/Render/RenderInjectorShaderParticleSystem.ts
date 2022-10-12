@@ -40,6 +40,10 @@ namespace FudgeCore {
     };
   }
 
+  /**
+   * Compiles particle system shaders from shader universal derivates for WebGL
+   * @authors Jonas Plotzky, HFU, 2022
+   */
   export class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
     public static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number = 1000;
     public static readonly FUNCTIONS: { [key in ParticleData.FUNCTION]: Function } = {

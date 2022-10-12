@@ -1,5 +1,8 @@
 namespace FudgeCore {
   
+  /**
+   * The namesapce for handling the particle data
+   */
   export namespace ParticleData {
 
     export interface System {
@@ -55,14 +58,18 @@ namespace FudgeCore {
   }
 
   /**
-   * Holds the information .
-   * @authors Jonas Plotzky, HFU, 2020
+   * Holds information on how to mutate the particles of a particle system.
+   * A full particle system is composed by attaching a {@link ComponentParticleSystem}, {@link ComponentMesh} and {@link ComponentMaterial} to the same {@link Node}. 
+   * Additionally a {@link ComponentFaceCamera} can be attached to make the particles face the camera.
+   * @authors Jonas Plotzky, HFU, 2022
    */
   export class ParticleSystem extends Mutable implements SerializableResource {
     public name: string;
     public idResource: string = undefined;
     
     #data: ParticleData.System;
+    /** Map of shader universal derivates to corresponding computed {@link ShaderParticleSystem}. 
+     * This way each particle system resource can be used in conjunction with all shader universal derivates */
     private shaderToShaderParticleSystem: Map<ShaderInterface, ShaderParticleSystem> = new Map();
 
     constructor(_name: string = ParticleSystem.name, _data: ParticleData.System = {}) {

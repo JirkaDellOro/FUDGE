@@ -26,7 +26,7 @@ namespace Fudge {
   }
 
   /**
-   * TODO: add
+   * View and edit animation sequences, animation keys and curves connecting them.
    * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
   export class ViewAnimationSheet extends View {

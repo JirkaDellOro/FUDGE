@@ -479,6 +479,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    /**
+     * View and edit a particle system attached to a node.
+     * @authors Jonas Plotzky, HFU, 2022
+     */
     class ViewParticleSystem extends View {
         static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[];
         static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[];
@@ -505,7 +509,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * TODO: add
+     * View and edit the animatable properties of a node with an attached component animation.
      * @authors Jonas Plotzky, HFU, 2022
      */
     class ViewAnimation extends View {
@@ -542,7 +546,7 @@ declare namespace Fudge {
         color: string;
     }
     /**
-     * TODO: add
+     * View and edit animation sequences, animation keys and curves connecting them.
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimationSheet extends View {

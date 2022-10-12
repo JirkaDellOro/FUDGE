@@ -146,8 +146,6 @@ namespace FudgeUserInterface {
       return null;
     }
 
-
-
     private hndDragOver = (_event: DragEvent): void => {
       _event.stopPropagation();
       _event.preventDefault();

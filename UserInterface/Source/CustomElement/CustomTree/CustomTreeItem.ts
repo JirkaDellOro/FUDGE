@@ -182,7 +182,7 @@ namespace FudgeUserInterface {
       let content: CustomTreeList<T> = <CustomTreeList<T>>this.querySelector("ul");
 
       switch (_event.code) {
-        // TODO: repair keydowns...
+        // TODO: repair arrow key navigation
         case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
           if (this.hasChildren && !content)
             this.expand(true);

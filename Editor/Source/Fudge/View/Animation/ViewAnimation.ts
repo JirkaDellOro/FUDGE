@@ -3,7 +3,7 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
 
   /**
-   * TODO: add
+   * View and edit the animatable properties of a node with an attached component animation.
    * @authors Jonas Plotzky, HFU, 2022
    */
   export class ViewAnimation extends View {

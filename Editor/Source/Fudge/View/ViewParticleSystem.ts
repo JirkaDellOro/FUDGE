@@ -2,6 +2,10 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
+  /**
+   * View and edit a particle system attached to a node.
+   * @authors Jonas Plotzky, HFU, 2022
+   */
   export class ViewParticleSystem extends View {
     public static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[] = ["variables", "mtxLocal", "mtxWorld", "color"];
     public static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[] = ["x", "y", "z"];
