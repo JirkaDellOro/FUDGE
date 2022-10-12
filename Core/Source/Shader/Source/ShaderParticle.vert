@@ -1,7 +1,7 @@
 #version 300 es
 /**
-* TODO: write this
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2022
+* Particle shader similar to lit textured shader
+* @authors Jonas Plotzky, HFU, 2022
 */
 
 uniform mat4 u_mtxMeshToWorld;
@@ -13,7 +13,9 @@ uniform mat3 u_mtxPivot;
 in vec2 a_vctTexture;
 out vec2 v_vctTexture;
 
+  #if defined(PARTICLE_COLOR)
 out vec4 v_vctColor;
+  #endif
 
 uniform float u_fParticleSystemSize;
 uniform float u_fParticleSystemTime;
@@ -58,5 +60,7 @@ void main() {
   // calculate position
   gl_Position = u_mtxWorldToView * mtxMeshToWorld * vctPosition;
   v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-  /*$color*/
+    #if defined(PARTICLE_COLOR)
+  v_vctColor = /*$color*/;
+    #endif
 }

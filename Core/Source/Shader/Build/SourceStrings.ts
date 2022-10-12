@@ -457,7 +457,9 @@ uniform mat3 u_mtxPivot;
 in vec2 a_vctTexture;
 out vec2 v_vctTexture;
 
+  #if defined(PARTICLE_COLOR)
 out vec4 v_vctColor;
+  #endif
 
 uniform float u_fParticleSystemSize;
 uniform float u_fParticleSystemTime;
@@ -502,7 +504,9 @@ void main() {
   // calculate position
   gl_Position = u_mtxWorldToView * mtxMeshToWorld * vctPosition;
   v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-  /*$color*/
+    #if defined(PARTICLE_COLOR)
+  v_vctColor = /*$color*/;
+    #endif
 }`;
   shaderSources["Source/ShaderParticle.frag"] = `#version 300 es
 /**
@@ -513,7 +517,10 @@ void main() {
 precision mediump float;
 
 uniform vec4 u_vctColor;
+  
+  #if defined(PARTICLE_COLOR)
 in vec4 v_vctColor;
+  #endif
 
 in vec2 v_vctTexture;
 uniform sampler2D u_texture;
@@ -523,7 +530,11 @@ out vec4 vctFrag;
 void main() {
   // TEXTURE: multiply with texel color
   vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag = u_vctColor * v_vctColor * vctColorTexture;
+  vctFrag = u_vctColor * vctColorTexture;
+    #if defined(PARTICLE_COLOR)
+  vctFrag *= v_vctColor;
+    #endif
+
 
   // discard pixel alltogether when transparent: don't show in Z-Buffer
   if(vctFrag.a < 0.01)
