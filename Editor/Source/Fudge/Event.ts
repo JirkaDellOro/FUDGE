@@ -6,8 +6,7 @@ namespace Fudge {
     DELETE = "EDITOR_DELETE",
     CLOSE = "EDITOR_CLOSE",
     TRANSFORM = "EDITOR_TRANSFORM",
-    FOCUS = "EDITOR_FOCUS",
-    ANIMATE = "EDITOR_ANIMATE"
+    FOCUS = "EDITOR_FOCUS"
   }
 
   export interface EventDetail {

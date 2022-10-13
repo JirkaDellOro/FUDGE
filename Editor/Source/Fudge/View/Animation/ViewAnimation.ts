@@ -7,7 +7,6 @@ namespace Fudge {
    * @authors Jonas Plotzky, HFU, 2022
    */
   export class ViewAnimation extends View {
-    private graph: ƒ.Graph;
     private node: ƒ.Node;
     private cmpAnimator: ƒ.ComponentAnimator;
     private animation: ƒ.Animation;
@@ -27,11 +26,28 @@ namespace Fudge {
       this.setAnimation(null);
       this.createToolbar();
       
-      this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.INPUT, this.hndEvent);
+    }
+
+    protected hndDragOver(_event: DragEvent, _viewSource: View): void {
+      _event.dataTransfer.dropEffect = "none";
+
+      let source: Object = _viewSource.getDragDropSources()[0];
+      if (!(_viewSource instanceof ViewHierarchy) || !(source instanceof ƒ.Node) || !source.getComponent(ƒ.ComponentAnimator))
+        return;
+
+      _event.dataTransfer.dropEffect = "link";
+      _event.preventDefault();
+      _event.stopPropagation();
+    }
+
+    protected hndDrop(_event: DragEvent, _viewSource: View): void {
+      let source: Object = _viewSource.getDragDropSources()[0];
+      this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: <ƒ.Node>source } });
     }
 
     //#region context menu
@@ -66,7 +82,7 @@ namespace Fudge {
           if (!(document.activeElement instanceof HTMLElement)) return;
           this.controller.deleteProperty(document.activeElement);
           this.createPropertyList();
-          this.dispatchAnimate();
+          this.animate();
           return;
       }
     }
@@ -120,7 +136,7 @@ namespace Fudge {
             { label: property, id: String(CONTEXTMENU.ADD_PROPERTY), click: () => {
               this.controller.addProperty(path);
               this.createPropertyList();
-              this.dispatchAnimate();
+              this.animate();
             } }
           );
         }
@@ -163,28 +179,39 @@ namespace Fudge {
           this.frameInput.value = Reflect.get(this.frameInput, "previousValue");
         this.frameInput.value = this.frameInput.value.match(/[1-9]\d*|0$/)[0];
         this.playbackTime = Number.parseInt(this.frameInput.value) * 1000 / this.animation.fps;
-        this.dispatchAnimate();
+        this.animate();
       };
       this.toolbar.appendChild(this.frameInput);
     }
 
     private hndEvent = (_event: EditorEvent): void => {
       switch (_event.type) {
-        case EVENT_EDITOR.FOCUS:
-          this.graph = _event.detail.graph;
-          this.node = _event.detail.node;
-          this.cmpAnimator = this.node?.getComponent(ƒ.ComponentAnimator);
-          this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-          this.setAnimation(this.cmpAnimator?.animation);
+        case EVENT_EDITOR.SELECT:
+          if (_event.detail.node != null) {
+            this.node = _event.detail.node;
+            this.cmpAnimator = this.node?.getComponent(ƒ.ComponentAnimator);
+            this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+            this.setAnimation(this.cmpAnimator?.animation);
+          }
+          break;
+        case EVENT_EDITOR.MODIFY:
+          if (_event.detail.view instanceof ViewAnimationSheet) 
+            this.pause();
+
+          this.playbackTime = _event.detail.data;
+          this.frameInput.value = (Math.trunc(this.playbackTime / 1000 * this.animation.fps)).toString();
+
+          let nodeMutator: ƒ.Mutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
+          this.controller?.updatePropertyList(nodeMutator);
           break;
         case ƒui.EVENT.INPUT:
           if (_event.target instanceof ƒui.CustomElement) {
             this.controller.updateSequence(this.playbackTime, _event.target);
-            this.dispatchAnimate();
+            this.animate();
           }
           break;
         case ƒui.EVENT.CLICK:
-          this.dispatchAnimate();
+          this.animate();
           break;
       }
     }
@@ -195,10 +222,10 @@ namespace Fudge {
         this.dom.appendChild(this.toolbar);
         this.animation = _animation;
         this.createPropertyList();
-        this.dispatchAnimate();
+        this.animate();
       } else {
         this.animation = undefined;
-        this.dom.innerHTML = "select node with an attached component animator";
+        this.dom.innerHTML = "Drop a node with an attached component animator here to edit";
       }
     }
 
@@ -218,27 +245,16 @@ namespace Fudge {
       this.propertyList.dispatchEvent(new CustomEvent(ƒui.EVENT.CLICK));
     }
 
-    private hndAnimate = (_event: EditorEvent): void => {
-      if (_event.detail.view instanceof ViewAnimationSheet) 
-        this.pause();
-
-      this.playbackTime = _event.detail.data;
-      this.frameInput.value = (Math.trunc(this.playbackTime / 1000 * this.animation.fps)).toString();
-
-      let nodeMutator: ƒ.Mutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
-      this.controller?.updatePropertyList(nodeMutator);
-    }
-
-    private dispatchAnimate(): void {
-      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: this.playbackTime } });
+    private animate(): void {
+      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true, detail: { data: this.playbackTime } });
     }
 
     private hndToolbarClick = (_event: MouseEvent) => {
       let target: HTMLInputElement = <HTMLInputElement>_event.target;
       switch (target.id) {
-        case "previous": // TODO: change to next key frame
+        case "previous":
           this.playbackTime = this.controller.nextKey(this.playbackTime, "backward");
-          this.dispatchAnimate();
+          this.animate();
           break;
         case "play":
           if (this.idInterval == null) {
@@ -246,16 +262,16 @@ namespace Fudge {
             this.time.set(this.playbackTime);
             this.idInterval = window.setInterval(() => {
               this.playbackTime = this.time.get() % this.animation.totalTime;
-              this.dispatchAnimate();
+              this.animate();
             },                                   1000 / this.animation.fps);
           }
           break;
         case "pause":
           this.pause();
           break;
-        case "next": // TODO: change to next key frame
+        case "next":
           this.playbackTime = this.controller.nextKey(this.playbackTime, "forward");
-          this.dispatchAnimate();
+          this.animate();
           break;
       }
     }

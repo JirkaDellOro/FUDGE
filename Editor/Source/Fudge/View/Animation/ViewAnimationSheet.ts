@@ -41,7 +41,6 @@ namespace Fudge {
     
     #mode: SHEET_MODE;
 
-    private graph: ƒ.Graph;
     private animation: ƒ.Animation;
     private playbackTime: number = 0;
     
@@ -79,9 +78,8 @@ namespace Fudge {
       this.mode = SHEET_MODE.DOPE;
 
       _container.on("resize", () => this.draw(true));
-      this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndFocus);
-      this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
-      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndSelect);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenuSheet);
 
       this.canvas.style.position = "absolute";
@@ -219,7 +217,7 @@ namespace Fudge {
         case "Delete Key":
           let sequence: ƒ.AnimationSequence = this.sequences.find(_sequence => _sequence.data.getKeys().includes(targetKey.data)).data;
           sequence.removeKey(targetKey.data);
-          this.dispatchAnimate();
+          this.animate();
           break;
       }
     }
@@ -635,22 +633,24 @@ namespace Fudge {
     //#endregion
 
     //#region event handling
-    private hndFocus = (_event: EditorEvent): void => {
-      this.graph = _event.detail.graph;
-      this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
-      this.resetView();
-      this.draw(true);
-    }
-
-    private hndAnimate = (_event: EditorEvent): void => {
-      this.playbackTime = _event.detail.data;
-      this.draw();
-    }
-
-    private hndSelect = (_event: EditorEvent): void => {
-      if (_event.detail.view instanceof ViewAnimation) {
-        this.sequences = _event.detail.data;
-        this.draw();
+    private hndEvent = (_event: EditorEvent): void => {
+      switch (_event.type) {
+        case EVENT_EDITOR.SELECT:
+          if (_event.detail.node != null) {
+            this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
+            this.resetView();
+            this.draw(true);
+          }
+    
+          if (_event.detail.data != null) {
+            this.sequences = _event.detail.data;
+            this.draw();
+          }
+          break;
+        case EVENT_EDITOR.MODIFY:
+          this.playbackTime = _event.detail.data;
+          this.draw();
+          break;
       }
     }
 
@@ -702,7 +702,7 @@ namespace Fudge {
     private hndPointerMoveTimeline = (_event: PointerEvent): void => {
       _event.preventDefault();
       this.playbackTime = this.screenToTime(_event.offsetX);
-      this.dispatchAnimate();
+      this.animate();
     }
 
     private hndPointerMoveSlope = (_event: PointerEvent): void => {
@@ -712,7 +712,7 @@ namespace Fudge {
       let slope: number = vctDelta.y / vctDelta.x;
       this.selectedKey.data.slopeIn = slope;
       this.selectedKey.data.slopeOut = slope;
-      this.dispatchAnimate();
+      this.animate();
     }
 
     private hndPointerMovePan = (_event: PointerEvent): void => {
@@ -735,7 +735,7 @@ namespace Fudge {
       let sequence: ƒ.AnimationSequence = this.sequences.find(_sequence => _sequence.data.getKeys().includes(key)).data;
       sequence.modifyKey(key, translation.x, this.mode == SHEET_MODE.DOPE || _event.shiftKey ? null : translation.y);
       this.animation.calculateTotalTime();
-      this.dispatchAnimate();
+      this.animate();
     }
 
     private hndPointerMoveDragEvent = (_event: PointerEvent): void => {
@@ -782,8 +782,8 @@ namespace Fudge {
       this.draw();
     }
 
-    private dispatchAnimate(): void {
-      this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph, data: this.playbackTime } });
+    private animate(): void {
+      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true, detail: { data: this.playbackTime } });
     }
     //#endregion
 

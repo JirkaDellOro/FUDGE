@@ -120,8 +120,7 @@ declare namespace Fudge {
         DELETE = "EDITOR_DELETE",
         CLOSE = "EDITOR_CLOSE",
         TRANSFORM = "EDITOR_TRANSFORM",
-        FOCUS = "EDITOR_FOCUS",
-        ANIMATE = "EDITOR_ANIMATE"
+        FOCUS = "EDITOR_FOCUS"
     }
     interface EventDetail {
         node?: ƒ.Node;
@@ -419,7 +418,6 @@ declare namespace Fudge {
             [key: string]: string;
         };
         private hndEvent;
-        private hndAnimate;
     }
 }
 declare namespace Fudge {
@@ -511,7 +509,6 @@ declare namespace Fudge {
      * @authors Jonas Plotzky, HFU, 2022
      */
     class ViewAnimation extends View {
-        private graph;
         private node;
         private cmpAnimator;
         private animation;
@@ -523,6 +520,8 @@ declare namespace Fudge {
         private time;
         private idInterval;
         constructor(_container: ComponentContainer, _state: Object);
+        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
+        protected hndDrop(_event: DragEvent, _viewSource: View): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private getNodeSubmenu;
@@ -531,8 +530,7 @@ declare namespace Fudge {
         private hndEvent;
         private setAnimation;
         private createPropertyList;
-        private hndAnimate;
-        private dispatchAnimate;
+        private animate;
         private hndToolbarClick;
         private pause;
     }
@@ -557,7 +555,6 @@ declare namespace Fudge {
         private static readonly PIXEL_PER_VALUE;
         private static readonly MINIMUM_PIXEL_PER_STEP;
         private static readonly STANDARD_ANIMATION_LENGTH;
-        private graph;
         private animation;
         private playbackTime;
         private canvas;
@@ -591,9 +588,7 @@ declare namespace Fudge {
         private drawKeys;
         private drawCursor;
         private drawHighlight;
-        private hndFocus;
-        private hndAnimate;
-        private hndSelect;
+        private hndEvent;
         private hndPointerDown;
         private hndPointerMoveTimeline;
         private hndPointerMoveSlope;
@@ -603,7 +598,7 @@ declare namespace Fudge {
         private hndPointerUp;
         private hndWheel;
         private hndScroll;
-        private dispatchAnimate;
+        private animate;
         private resetView;
         private screenToWorldPoint;
         private worldToScreenPoint;

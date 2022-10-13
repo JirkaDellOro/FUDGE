@@ -36,9 +36,7 @@ namespace Fudge {
       ]);
 
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
-      // this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndAnimate);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
 
       this.setTitle("Animation | " );
     }
@@ -55,14 +53,6 @@ namespace Fudge {
 
       this.broadcastEvent(_event);
       _event.stopPropagation();
-    }
-
-    private hndAnimate = async (_event: EditorEvent): Promise<void> => {
-      if (!_event.bubbles) return;
-      
-      this.views // maybe change the normal broadcast to something like this
-        .filter( _view => _view != _event.detail.view )
-        .forEach( _view => _view.dispatch(<EVENT_EDITOR>_event.type, { detail: _event.detail }) );
     }
   }
 }
