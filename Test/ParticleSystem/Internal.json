@@ -175,19 +175,6 @@
       "idResource": "MeshSphere|2022-10-12T16:59:52.193Z|43654",
       "name": "MeshSphere",
       "type": "MeshSphere",
-      "shape": {
-        "ƒ.Vector2": [
-          "[0, 0.5]",
-          "[0.19134171307086945, 0.4619397521018982]",
-          "[0.3535533845424652, 0.3535533845424652]",
-          "[0.4619397521018982, 0.19134171307086945]",
-          "[0.5, 0]",
-          "[0.4619397521018982, -0.19134171307086945]",
-          "[0.3535533845424652, -0.3535533845424652]",
-          "[0.19134171307086945, -0.4619397521018982]",
-          "[0, -0.5]"
-        ]
-      },
       "longitudes": 8,
       "latitudes": 8
     }
@@ -338,7 +325,16 @@
     "ƒ.Graph": {
       "name": "Graph",
       "active": true,
-      "components": {},
+      "components": {
+        "CustomComponentScript": [
+          {
+            "Script.CustomComponentScript": {
+              "active": true,
+              "message": "CustomComponentScript added to "
+            }
+          }
+        ]
+      },
       "children": [
         {
           "ƒ.Node": {
