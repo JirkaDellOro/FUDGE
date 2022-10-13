@@ -14,7 +14,6 @@ namespace FudgeCore {
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class Matrix3x3 extends Mutable implements Serializable, Recycable {
-    private static deg2rad: number = Math.PI / 180;
     private data: Float32Array = new Float32Array(9); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
     private vectors: VectorRepresentation; // vector representation of this matrix
@@ -61,7 +60,7 @@ namespace FudgeCore {
      */
     public static ROTATION(_angleInDegrees: number): Matrix3x3 {
       const mtxResult: Matrix3x3 = Recycler.get(Matrix3x3);
-      let angleInRadians: number = _angleInDegrees * Matrix3x3.deg2rad;
+      let angleInRadians: number = _angleInDegrees * Calc.deg2rad;
       let sin: number = Math.sin(angleInRadians);
       let cos: number = Math.cos(angleInRadians);
       mtxResult.data.set([
@@ -160,8 +159,8 @@ namespace FudgeCore {
     public get scaling(): Vector2 {
       if (!this.vectors.scaling)
         this.vectors.scaling = new Vector2(
-          Math.hypot(this.data[0], this.data[1]),
-          Math.hypot(this.data[3], this.data[4])
+          Math.hypot(this.data[0], this.data[1]), // * (this.data[0] < 0 ? -1 : 1),
+          Math.hypot(this.data[3], this.data[4]) // * (this.data[4] < 0 ? -1 : 1)
         );
       return this.vectors.scaling; // .clone;
     }
@@ -179,6 +178,9 @@ namespace FudgeCore {
       return mtxClone;
     }
 
+    /**
+     * Resets the matrix to the identity-matrix and clears cache. Used by the recycler to reset.
+     */
     public recycle(): void {
       this.data = new Float32Array([
         1, 0, 0,
@@ -186,6 +188,13 @@ namespace FudgeCore {
         0, 0, 1
       ]);
       this.resetCache(); 
+    }
+    
+    /**
+     * Resets the matrix to the identity-matrix and clears cache.
+     */
+    public reset(): void {
+      this.recycle();
     }
 
     //#region Translation
@@ -294,7 +303,7 @@ namespace FudgeCore {
       else
         rotation = xSkew;
 
-      rotation *= 180 / Math.PI;
+      rotation *= Calc.rad2deg;
 
       return rotation;
     }

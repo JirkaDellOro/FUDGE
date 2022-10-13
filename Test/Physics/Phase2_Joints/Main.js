@@ -158,12 +158,10 @@ var FudgePhysics_Communication;
         cmpCamera.mtxPivot.lookAt(f.Vector3.ZERO());
         viewPort = new f.Viewport();
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
-        viewPort.showSceneGraph();
+        f.Debug.branch(viewPort.getBranch());
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
-        viewPort.activatePointerEvent("\u0192pointerdown" /* DOWN */, true);
-        viewPort.addEventListener("\u0192pointerdown" /* DOWN */, hndPointerDown);
-        viewPort.activatePointerEvent("\u0192pointerup" /* UP */, true);
-        viewPort.addEventListener("\u0192pointerup" /* UP */, hndPointerUp);
+        viewPort.canvas.addEventListener("pointerdown", hndPointerDown);
+        viewPort.canvas.addEventListener("pointerup", hndPointerUp);
         f.Physics.adjustTransforms(hierarchy);
         f.Loop.start();
     }
@@ -262,7 +260,7 @@ var FudgePhysics_Communication;
         }
     }
     function hndPointerDown(_event) {
-        let mouse = new f.Vector2(_event.pointerX, _event.pointerY);
+        let mouse = new f.Vector2(_event.offsetX, _event.offsetY);
         let posProjection = viewPort.pointClientToProjection(mouse);
         let ray = new f.Ray(new f.Vector3(-posProjection.x, posProjection.y, 1));
         ray.origin.transform(cmpCamera.mtxPivot);

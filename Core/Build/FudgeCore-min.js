@@ -92,6 +92,20 @@ var FudgeCore;
                     Debug.delegates[parsed].set(_target, _target.delegates[parsed]);
             }
         }
+        static getFilter(_target) {
+            let result = 0;
+            for (let filter in _target.delegates)
+                result |= parseInt(filter);
+            return result;
+        }
+        static addFilter(_target, _filter) {
+            let current = Debug.getFilter(_target);
+            Debug.setFilter(_target, current | _filter);
+        }
+        static removeFilter(_target, _filter) {
+            let current = Debug.getFilter(_target);
+            Debug.setFilter(_target, current ^ _filter);
+        }
         static info(_message, ..._args) {
             Debug.delegate(FudgeCore.DEBUG_FILTER.INFO, _message, _args);
         }
@@ -167,7 +181,7 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class EventTargetƒ extends EventTarget {
+    class EventTargetUnified extends EventTarget {
         addEventListener(_type, _handler, _options) {
             super.addEventListener(_type, _handler, _options);
         }
@@ -178,8 +192,8 @@ var FudgeCore;
             return super.dispatchEvent(_event);
         }
     }
-    FudgeCore.EventTargetƒ = EventTargetƒ;
-    class EventTargetStatic extends EventTargetƒ {
+    FudgeCore.EventTargetUnified = EventTargetUnified;
+    class EventTargetStatic extends EventTargetUnified {
         constructor() {
             super();
         }
@@ -211,11 +225,11 @@ var FudgeCore;
         return mutator;
     }
     FudgeCore.getMutatorOfArbitrary = getMutatorOfArbitrary;
-    class Mutable extends FudgeCore.EventTargetƒ {
+    class Mutable extends FudgeCore.EventTargetUnified {
         static getMutatorFromPath(_mutator, _path) {
             let key = _path[0];
             let mutator = {};
-            if (!_mutator[key])
+            if (_mutator[key] == undefined)
                 return _mutator;
             mutator[key] = _mutator[key];
             if (_path.length > 1)
@@ -345,7 +359,7 @@ var FudgeCore;
                 }
             }
             catch (_error) {
-                throw new Error(`Deserialization of ${path} failed: ` + _error);
+                throw new Error(`Deserialization of ${path}, ${Reflect.get(reconstruct, "idResource")} failed: ` + _error);
             }
             return null;
         }
@@ -424,6 +438,352 @@ var FudgeCore;
     }
     Serializer.namespaces = { "ƒ": FudgeCore };
     FudgeCore.Serializer = Serializer;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class Node extends FudgeCore.EventTargetUnified {
+        constructor(_name) {
+            super();
+            this.mtxWorld = FudgeCore.Matrix4x4.IDENTITY();
+            this.timestampUpdate = 0;
+            this.nNodesInBranch = 0;
+            this.radius = 0;
+            this.parent = null;
+            this.children = [];
+            this.components = {};
+            this.listeners = {};
+            this.captures = {};
+            this.active = true;
+            this.appendChild = this.addChild;
+            this.name = _name;
+        }
+        #mtxWorldInverseUpdated;
+        #mtxWorldInverse;
+        get isActive() {
+            return this.active;
+        }
+        get cmpTransform() {
+            return this.getComponents(FudgeCore.ComponentTransform)[0];
+        }
+        get mtxLocal() {
+            return this.cmpTransform.mtxLocal;
+        }
+        get mtxWorldInverse() {
+            if (this.#mtxWorldInverseUpdated != this.timestampUpdate)
+                this.#mtxWorldInverse = FudgeCore.Matrix4x4.INVERSION(this.mtxWorld);
+            this.#mtxWorldInverseUpdated = this.timestampUpdate;
+            return this.#mtxWorldInverse;
+        }
+        get nChildren() {
+            return this.children.length;
+        }
+        *getIterator(_active = false) {
+            if (!_active || this.isActive) {
+                yield this;
+                for (let child of this.children)
+                    yield* child.getIterator(_active);
+            }
+        }
+        [Symbol.iterator]() {
+            return this.getIterator();
+        }
+        activate(_on) {
+            this.active = _on;
+            this.dispatchEvent(new Event(_on ? "nodeActivate" : "nodeDeactivate", { bubbles: true }));
+            this.broadcastEvent(new Event(_on ? "nodeActivate" : "nodeDeactivate"));
+        }
+        getParent() {
+            return this.parent;
+        }
+        getAncestor() {
+            let ancestor = this;
+            while (ancestor.getParent())
+                ancestor = ancestor.getParent();
+            return ancestor;
+        }
+        getPath() {
+            let ancestor = this;
+            let path = [this];
+            while (ancestor.getParent())
+                path.unshift(ancestor = ancestor.getParent());
+            return path;
+        }
+        getChild(_index) {
+            return this.children[_index];
+        }
+        getChildren() {
+            return this.children.slice(0);
+        }
+        getChildrenByName(_name) {
+            let found = [];
+            found = this.children.filter((_node) => _node.name == _name);
+            return found;
+        }
+        addChild(_child) {
+            if (this.children.includes(_child))
+                return;
+            let inAudioGraph = false;
+            let graphListened = FudgeCore.AudioManager.default.getGraphListeningTo();
+            let ancestor = this;
+            while (ancestor) {
+                ancestor.timestampUpdate = 0;
+                inAudioGraph = inAudioGraph || (ancestor == graphListened);
+                if (ancestor == _child)
+                    throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
+                else
+                    ancestor = ancestor.parent;
+            }
+            let previousParent = _child.parent;
+            if (previousParent)
+                previousParent.removeChild(_child);
+            this.children.push(_child);
+            _child.parent = this;
+            _child.dispatchEvent(new Event("childAppend", { bubbles: true }));
+            if (inAudioGraph)
+                _child.broadcastEvent(new Event("childAppendToAudioGraph"));
+        }
+        removeChild(_child) {
+            let found = this.findChild(_child);
+            if (found < 0)
+                return;
+            _child.dispatchEvent(new Event("childRemove", { bubbles: true }));
+            _child.broadcastEvent(new Event("nodeDeactivate"));
+            if (this.isDescendantOf(FudgeCore.AudioManager.default.getGraphListeningTo()))
+                _child.broadcastEvent(new Event("childRemoveFromAudioGraph"));
+            this.children.splice(found, 1);
+            _child.parent = null;
+        }
+        removeAllChildren() {
+            while (this.children.length)
+                this.removeChild(this.children[0]);
+        }
+        findChild(_search) {
+            return this.children.indexOf(_search);
+        }
+        replaceChild(_replace, _with) {
+            let found = this.findChild(_replace);
+            if (found < 0)
+                return false;
+            let previousParent = _with.getParent();
+            if (previousParent)
+                previousParent.removeChild(_with);
+            _replace.parent = null;
+            this.children[found] = _with;
+            _with.parent = this;
+            _with.dispatchEvent(new Event("childAppend", { bubbles: true }));
+            if (this.isDescendantOf(FudgeCore.AudioManager.default.getGraphListeningTo()))
+                _with.broadcastEvent(new Event("childAppendToAudioGraph"));
+            return true;
+        }
+        isUpdated(_timestampUpdate) {
+            return (this.timestampUpdate == _timestampUpdate);
+        }
+        isDescendantOf(_ancestor) {
+            let node = this;
+            while (node && node != _ancestor)
+                node = node.parent;
+            return (node != null);
+        }
+        applyAnimation(_mutator) {
+            if (_mutator.components) {
+                for (let componentName in _mutator.components) {
+                    if (this.components[componentName]) {
+                        let mutatorOfComponent = _mutator.components;
+                        for (let i in mutatorOfComponent[componentName]) {
+                            if (this.components[componentName][+i]) {
+                                let componentToMutate = this.components[componentName][+i];
+                                let mutatorArray = mutatorOfComponent[componentName];
+                                let mutatorWithComponentName = mutatorArray[+i];
+                                for (let cname in mutatorWithComponentName) {
+                                    let mutatorToGive = mutatorWithComponentName[cname];
+                                    componentToMutate.mutate(mutatorToGive);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (_mutator.children) {
+                for (let i = 0; i < _mutator.children.length; i++) {
+                    let name = _mutator.children[i]["ƒ.Node"].name;
+                    let childNodes = this.getChildrenByName(name);
+                    for (let childNode of childNodes) {
+                        childNode.applyAnimation(_mutator.children[i]["ƒ.Node"]);
+                    }
+                }
+            }
+        }
+        getAllComponents() {
+            let all = [];
+            for (let type in this.components) {
+                all = all.concat(this.components[type]);
+            }
+            return all;
+        }
+        getComponents(_class) {
+            return (this.components[_class.name] || []).slice(0);
+        }
+        getComponent(_class) {
+            let list = this.components[_class.name];
+            if (list)
+                return list[0];
+            return null;
+        }
+        attach(_component) {
+            this.addComponent(_component);
+        }
+        addComponent(_component) {
+            if (_component.node == this)
+                return;
+            let cmpList = this.components[_component.type];
+            if (cmpList === undefined)
+                this.components[_component.type] = [_component];
+            else if (cmpList.length && _component.isSingleton)
+                throw new Error(`Component ${_component.type} is marked singleton and can't be attached, no more than one allowed`);
+            else
+                cmpList.push(_component);
+            _component.attachToNode(this);
+            _component.dispatchEvent(new Event("componentAdd"));
+            this.dispatchEventToTargetOnly(new CustomEvent("componentAdd", { detail: _component }));
+        }
+        detach(_component) {
+            this.removeComponent(_component);
+        }
+        removeComponent(_component) {
+            try {
+                let componentsOfType = this.components[_component.type];
+                let foundAt = componentsOfType.indexOf(_component);
+                if (foundAt < 0)
+                    return;
+                _component.dispatchEvent(new Event("componentRemove"));
+                this.dispatchEventToTargetOnly(new CustomEvent("componentRemove", { detail: _component }));
+                componentsOfType.splice(foundAt, 1);
+                _component.attachToNode(null);
+            }
+            catch (_error) {
+                throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
+            }
+        }
+        serialize() {
+            let serialization = {
+                name: this.name,
+                active: this.active
+            };
+            let components = {};
+            for (let type in this.components) {
+                components[type] = [];
+                for (let component of this.components[type]) {
+                    components[type].push(FudgeCore.Serializer.serialize(component));
+                }
+            }
+            serialization["components"] = components;
+            let children = [];
+            for (let child of this.children) {
+                children.push(FudgeCore.Serializer.serialize(child));
+            }
+            serialization["children"] = children;
+            this.dispatchEvent(new Event("nodeSerialized"));
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            this.name = _serialization.name;
+            for (let type in _serialization.components) {
+                for (let serializedComponent of _serialization.components[type]) {
+                    let deserializedComponent = await FudgeCore.Serializer.deserialize(serializedComponent);
+                    this.addComponent(deserializedComponent);
+                }
+            }
+            if (_serialization.children)
+                for (let serializedChild of _serialization.children) {
+                    let deserializedChild = await FudgeCore.Serializer.deserialize(serializedChild);
+                    this.appendChild(deserializedChild);
+                }
+            this.dispatchEvent(new Event("nodeDeserialized"));
+            for (let component of this.getAllComponents())
+                component.dispatchEvent(new Event("nodeDeserialized"));
+            this.activate(_serialization.active);
+            return this;
+        }
+        toHierarchyString(_node = null, _level = 0) {
+            if (!_node)
+                _node = this;
+            let prefix = "+".repeat(_level);
+            let output = prefix + " " + _node.name + " | ";
+            for (let type in _node.components)
+                output += _node.components[type].length + " " + type.split("Component").pop() + ", ";
+            output = output.slice(0, -2) + "</br>";
+            for (let child of _node.children) {
+                output += this.toHierarchyString(child, _level + 1);
+            }
+            return output;
+        }
+        addEventListener(_type, _handler, _capture = false) {
+            let listListeners = _capture ? this.captures : this.listeners;
+            if (!listListeners[_type])
+                listListeners[_type] = [];
+            listListeners[_type].push(_handler);
+        }
+        removeEventListener(_type, _handler, _capture = false) {
+            let listenersForType = _capture ? this.captures[_type] : this.listeners[_type];
+            if (listenersForType)
+                for (let i = listenersForType.length - 1; i >= 0; i--)
+                    if (listenersForType[i] == _handler)
+                        listenersForType.splice(i, 1);
+        }
+        dispatchEvent(_event) {
+            let ancestors = [];
+            let upcoming = this;
+            Object.defineProperty(_event, "target", { writable: true, value: this });
+            while (upcoming.parent)
+                ancestors.push(upcoming = upcoming.parent);
+            Object.defineProperty(_event, "path", { writable: true, value: new Array(this, ...ancestors) });
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
+            for (let i = ancestors.length - 1; i >= 0; i--) {
+                let ancestor = ancestors[i];
+                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
+                this.callListeners(ancestor.captures[_event.type], _event);
+            }
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
+            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
+            this.callListeners(this.captures[_event.type], _event);
+            this.callListeners(this.listeners[_event.type], _event);
+            if (!_event.bubbles)
+                return true;
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.BUBBLING_PHASE });
+            for (let i = 0; i < ancestors.length; i++) {
+                let ancestor = ancestors[i];
+                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
+                this.callListeners(ancestor.listeners[_event.type], _event);
+            }
+            return true;
+        }
+        dispatchEventToTargetOnly(_event) {
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
+            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
+            this.callListeners(this.listeners[_event.type], _event);
+            return true;
+        }
+        broadcastEvent(_event) {
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
+            Object.defineProperty(_event, "target", { writable: true, value: this });
+            this.broadcastEventRecursive(_event);
+        }
+        broadcastEventRecursive(_event) {
+            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
+            let captures = this.captures[_event.type] || [];
+            for (let handler of captures)
+                handler(_event);
+            for (let child of this.children) {
+                child.broadcastEventRecursive(_event);
+            }
+        }
+        callListeners(_listeners, _event) {
+            if (_listeners?.length > 0)
+                for (let handler of _listeners)
+                    handler(_event);
+        }
+    }
+    FudgeCore.Node = Node;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -1319,18 +1679,19 @@ var FudgeCore;
                 return color;
             }
         }
-        static pick(_node, _mtxMeshToWorld, _mtxWorldToView) {
+        static pick(_node, _mtxMeshToWorld, _cmpCamera) {
             try {
-                let cmpMaterial = _node.getComponent(FudgeCore.ComponentMaterial);
                 let cmpMesh = _node.getComponent(FudgeCore.ComponentMesh);
+                let cmpMaterial = _node.getComponent(FudgeCore.ComponentMaterial);
                 let coat = cmpMaterial.material.coat;
                 let shader = coat instanceof FudgeCore.CoatTextured ? FudgeCore.ShaderPickTextured : FudgeCore.ShaderPick;
                 shader.useProgram();
                 coat.useRenderData(shader, cmpMaterial);
+                let mtxMeshToView = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
                 let sizeUniformLocation = shader.uniforms["u_vctSize"];
                 RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, [RenderWebGL.sizePick, RenderWebGL.sizePick]);
                 let mesh = cmpMesh.mesh;
-                let renderBuffers = mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView, FudgeCore.Render.ƒpicked.length);
+                let renderBuffers = mesh.useRenderBuffers(shader, _mtxMeshToWorld, mtxMeshToView, FudgeCore.Render.ƒpicked.length);
                 RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
                 let pick = new FudgeCore.Pick(_node);
                 FudgeCore.Render.ƒpicked.push(pick);
@@ -1352,43 +1713,70 @@ var FudgeCore;
                     RenderWebGL.crc3.uniform4fv(ambient, result.getArray());
                 }
             }
-            let nDirectional = uni["u_nLightsDirectional"];
-            if (nDirectional) {
-                RenderWebGL.crc3.uniform1ui(nDirectional, 0);
-                let cmpLights = _lights.get(FudgeCore.LightDirectional);
-                if (cmpLights) {
-                    let n = cmpLights.length;
-                    RenderWebGL.crc3.uniform1ui(nDirectional, n);
-                    for (let i = 0; i < n; i++) {
-                        let cmpLight = cmpLights[i];
-                        RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].vctColor`], cmpLight.light.color.getArray());
-                        let direction = FudgeCore.Vector3.Z();
-                        direction.transform(cmpLight.mtxPivot, false);
-                        direction.transform(cmpLight.node.mtxWorld, false);
-                        direction.normalize();
-                        RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].vctDirection`], direction.get());
+            fillLightBuffers(FudgeCore.LightDirectional, "u_nLightsDirectional", "u_directional");
+            fillLightBuffers(FudgeCore.LightPoint, "u_nLightsPoint", "u_point");
+            fillLightBuffers(FudgeCore.LightSpot, "u_nLightsSpot", "u_spot");
+            function fillLightBuffers(_type, _uniNumber, _uniStruct) {
+                let uniLights = uni[_uniNumber];
+                if (uniLights) {
+                    RenderWebGL.crc3.uniform1ui(uniLights, 0);
+                    let cmpLights = _lights.get(_type);
+                    if (cmpLights) {
+                        let n = cmpLights.length;
+                        RenderWebGL.crc3.uniform1ui(uniLights, n);
+                        let i = 0;
+                        for (let cmpLight of cmpLights) {
+                            RenderWebGL.crc3.uniform4fv(uni[`${_uniStruct}[${i}].vctColor`], cmpLight.light.color.getArray());
+                            let mtxTotal = FudgeCore.Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
+                            RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShape`], false, mtxTotal.get());
+                            if (_type != FudgeCore.LightDirectional) {
+                                let mtxInverse = mtxTotal.inverse();
+                                RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShapeInverse`], false, mtxInverse.get());
+                                FudgeCore.Recycler.store(mtxInverse);
+                            }
+                            FudgeCore.Recycler.store(mtxTotal);
+                            i++;
+                        }
                     }
                 }
             }
         }
-        static drawMesh(_cmpMesh, cmpMaterial, _cmpCamera) {
-            let shader = cmpMaterial.material.getShader();
+        static drawNode(_node, _cmpCamera) {
+            let cmpMesh = _node.getComponent(FudgeCore.ComponentMesh);
+            let cmpMaterial = _node.getComponent(FudgeCore.ComponentMaterial);
             let coat = cmpMaterial.material.coat;
-            let mtxMeshToView = FudgeCore.Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, _cmpMesh.mtxWorld);
+            let shader = cmpMaterial.material.getShader();
             shader.useProgram();
-            let renderBuffers;
-            if (_cmpMesh.mesh instanceof FudgeCore.MeshSkin)
-                renderBuffers = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
-            else
-                renderBuffers = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView);
             coat.useRenderData(shader, cmpMaterial);
-            let uCamera = shader.uniforms["u_vctCamera"];
-            if (uCamera)
-                RenderWebGL.crc3.uniform3fv(uCamera, _cmpCamera.mtxWorld.translation.get());
-            let uWorldToView = shader.uniforms["u_mtxWorldToView"];
-            if (uWorldToView)
-                RenderWebGL.crc3.uniformMatrix4fv(uWorldToView, false, _cmpCamera.mtxWorldToView.get());
+            let mtxMeshToView = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
+            let renderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
+            let uniform = shader.uniforms["u_vctCamera"];
+            if (uniform)
+                RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
+            uniform = shader.uniforms["u_mtxWorldToView"];
+            if (uniform)
+                RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxWorldToView.get());
+            uniform = shader.uniforms["u_mtxWorldToCamera"];
+            if (uniform) {
+                RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
+            }
             RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+        }
+        static calcMeshToView(_node, _cmpMesh, _mtxWorldToView, _target) {
+            let cmpFaceCamera = _node.getComponent(FudgeCore.ComponentFaceCamera);
+            if (cmpFaceCamera && cmpFaceCamera.isActive) {
+                let mtxMeshToView;
+                mtxMeshToView = _cmpMesh.mtxWorld.clone;
+                mtxMeshToView.lookAt(_target, cmpFaceCamera.upLocal ? null : cmpFaceCamera.up, cmpFaceCamera.restrict);
+                return FudgeCore.Matrix4x4.MULTIPLICATION(_mtxWorldToView, mtxMeshToView);
+            }
+            return FudgeCore.Matrix4x4.MULTIPLICATION(_mtxWorldToView, _cmpMesh.mtxWorld);
+        }
+        static getRenderBuffers(_cmpMesh, _shader, _mtxMeshToView) {
+            if (_cmpMesh.mesh instanceof FudgeCore.MeshSkin)
+                return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
+            else
+                return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView);
         }
     }
     RenderWebGL.crc3 = RenderWebGL.initialize();
@@ -1441,350 +1829,6 @@ var FudgeCore;
         }
     }
     FudgeCore.RenderInjectorTexture = RenderInjectorTexture;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class Node extends FudgeCore.EventTargetƒ {
-        constructor(_name) {
-            super();
-            this.mtxWorld = FudgeCore.Matrix4x4.IDENTITY();
-            this.timestampUpdate = 0;
-            this.nNodesInBranch = 0;
-            this.radius = 0;
-            this.parent = null;
-            this.children = [];
-            this.components = {};
-            this.listeners = {};
-            this.captures = {};
-            this.active = true;
-            this.appendChild = this.addChild;
-            this.name = _name;
-        }
-        #mtxWorldInverseUpdated;
-        #mtxWorldInverse;
-        get isActive() {
-            return this.active;
-        }
-        get cmpTransform() {
-            return this.getComponents(FudgeCore.ComponentTransform)[0];
-        }
-        get mtxLocal() {
-            return this.cmpTransform.mtxLocal;
-        }
-        get mtxWorldInverse() {
-            if (this.#mtxWorldInverseUpdated != this.timestampUpdate)
-                this.#mtxWorldInverse = FudgeCore.Matrix4x4.INVERSION(this.mtxWorld);
-            this.#mtxWorldInverseUpdated = this.timestampUpdate;
-            return this.#mtxWorldInverse;
-        }
-        get nChildren() {
-            return this.children.length;
-        }
-        *getIterator(_active = false) {
-            if (!_active || this.isActive) {
-                yield this;
-                for (let child of this.children)
-                    yield* child.getIterator(_active);
-            }
-        }
-        [Symbol.iterator]() {
-            return this.getIterator();
-        }
-        activate(_on) {
-            this.active = _on;
-            this.dispatchEvent(new Event(_on ? "nodeActivate" : "nodeDeactivate", { bubbles: true }));
-            this.broadcastEvent(new Event(_on ? "nodeActivate" : "nodeDeactivate"));
-        }
-        getParent() {
-            return this.parent;
-        }
-        getAncestor() {
-            let ancestor = this;
-            while (ancestor.getParent())
-                ancestor = ancestor.getParent();
-            return ancestor;
-        }
-        getPath() {
-            let ancestor = this;
-            let path = [this];
-            while (ancestor.getParent())
-                path.unshift(ancestor = ancestor.getParent());
-            return path;
-        }
-        getChild(_index) {
-            return this.children[_index];
-        }
-        getChildren() {
-            return this.children.slice(0);
-        }
-        getChildrenByName(_name) {
-            let found = [];
-            found = this.children.filter((_node) => _node.name == _name);
-            return found;
-        }
-        addChild(_child) {
-            if (this.children.includes(_child))
-                return;
-            let inAudioGraph = false;
-            let graphListened = FudgeCore.AudioManager.default.getGraphListeningTo();
-            let ancestor = this;
-            while (ancestor) {
-                ancestor.timestampUpdate = 0;
-                inAudioGraph = inAudioGraph || (ancestor == graphListened);
-                if (ancestor == _child)
-                    throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
-                else
-                    ancestor = ancestor.parent;
-            }
-            let previousParent = _child.parent;
-            if (previousParent)
-                previousParent.removeChild(_child);
-            this.children.push(_child);
-            _child.parent = this;
-            _child.dispatchEvent(new Event("childAppend", { bubbles: true }));
-            if (inAudioGraph)
-                _child.broadcastEvent(new Event("childAppendToAudioGraph"));
-        }
-        removeChild(_child) {
-            let found = this.findChild(_child);
-            if (found < 0)
-                return;
-            _child.dispatchEvent(new Event("childRemove", { bubbles: true }));
-            if (this.isDescendantOf(FudgeCore.AudioManager.default.getGraphListeningTo()))
-                _child.broadcastEvent(new Event("childRemoveFromAudioGraph"));
-            this.children.splice(found, 1);
-            _child.parent = null;
-        }
-        removeAllChildren() {
-            while (this.children.length)
-                this.removeChild(this.children[0]);
-        }
-        findChild(_search) {
-            return this.children.indexOf(_search);
-        }
-        replaceChild(_replace, _with) {
-            let found = this.findChild(_replace);
-            if (found < 0)
-                return false;
-            let previousParent = _with.getParent();
-            if (previousParent)
-                previousParent.removeChild(_with);
-            _replace.parent = null;
-            this.children[found] = _with;
-            _with.parent = this;
-            _with.dispatchEvent(new Event("childAppend", { bubbles: true }));
-            if (this.isDescendantOf(FudgeCore.AudioManager.default.getGraphListeningTo()))
-                _with.broadcastEvent(new Event("childAppendToAudioGraph"));
-            return true;
-        }
-        isUpdated(_timestampUpdate) {
-            return (this.timestampUpdate == _timestampUpdate);
-        }
-        isDescendantOf(_ancestor) {
-            let node = this;
-            while (node && node != _ancestor)
-                node = node.parent;
-            return (node != null);
-        }
-        applyAnimation(_mutator) {
-            if (_mutator.components) {
-                for (let componentName in _mutator.components) {
-                    if (this.components[componentName]) {
-                        let mutatorOfComponent = _mutator.components;
-                        for (let i in mutatorOfComponent[componentName]) {
-                            if (this.components[componentName][+i]) {
-                                let componentToMutate = this.components[componentName][+i];
-                                let mutatorArray = mutatorOfComponent[componentName];
-                                let mutatorWithComponentName = mutatorArray[+i];
-                                for (let cname in mutatorWithComponentName) {
-                                    let mutatorToGive = mutatorWithComponentName[cname];
-                                    componentToMutate.mutate(mutatorToGive);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (_mutator.children) {
-                for (let i = 0; i < _mutator.children.length; i++) {
-                    let name = _mutator.children[i]["ƒ.Node"].name;
-                    let childNodes = this.getChildrenByName(name);
-                    for (let childNode of childNodes) {
-                        childNode.applyAnimation(_mutator.children[i]["ƒ.Node"]);
-                    }
-                }
-            }
-        }
-        getAllComponents() {
-            let all = [];
-            for (let type in this.components) {
-                all = all.concat(this.components[type]);
-            }
-            return all;
-        }
-        getComponents(_class) {
-            return (this.components[_class.name] || []).slice(0);
-        }
-        getComponent(_class) {
-            let list = this.components[_class.name];
-            if (list)
-                return list[0];
-            return null;
-        }
-        attach(_component) {
-            this.addComponent(_component);
-        }
-        addComponent(_component) {
-            if (_component.node == this)
-                return;
-            let cmpList = this.components[_component.type];
-            if (cmpList === undefined)
-                this.components[_component.type] = [_component];
-            else if (cmpList.length && _component.isSingleton)
-                throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
-            else
-                cmpList.push(_component);
-            _component.attachToNode(this);
-            _component.dispatchEvent(new Event("componentAdd"));
-            this.dispatchEventToTargetOnly(new CustomEvent("componentAdd", { detail: _component }));
-        }
-        detach(_component) {
-            this.removeComponent(_component);
-        }
-        removeComponent(_component) {
-            try {
-                let componentsOfType = this.components[_component.type];
-                let foundAt = componentsOfType.indexOf(_component);
-                if (foundAt < 0)
-                    return;
-                _component.dispatchEvent(new Event("componentRemove"));
-                this.dispatchEventToTargetOnly(new CustomEvent("componentRemove", { detail: _component }));
-                componentsOfType.splice(foundAt, 1);
-                _component.attachToNode(null);
-            }
-            catch (_error) {
-                throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
-            }
-        }
-        serialize() {
-            let serialization = {
-                name: this.name,
-                active: this.active
-            };
-            let components = {};
-            for (let type in this.components) {
-                components[type] = [];
-                for (let component of this.components[type]) {
-                    components[type].push(FudgeCore.Serializer.serialize(component));
-                }
-            }
-            serialization["components"] = components;
-            let children = [];
-            for (let child of this.children) {
-                children.push(FudgeCore.Serializer.serialize(child));
-            }
-            serialization["children"] = children;
-            this.dispatchEvent(new Event("nodeSerialized"));
-            return serialization;
-        }
-        async deserialize(_serialization) {
-            this.name = _serialization.name;
-            for (let type in _serialization.components) {
-                for (let serializedComponent of _serialization.components[type]) {
-                    let deserializedComponent = await FudgeCore.Serializer.deserialize(serializedComponent);
-                    this.addComponent(deserializedComponent);
-                }
-            }
-            for (let serializedChild of _serialization.children) {
-                let deserializedChild = await FudgeCore.Serializer.deserialize(serializedChild);
-                this.appendChild(deserializedChild);
-            }
-            this.dispatchEvent(new Event("nodeDeserialized"));
-            for (let component of this.getAllComponents())
-                component.dispatchEvent(new Event("nodeDeserialized"));
-            this.activate(_serialization.active);
-            return this;
-        }
-        toHierarchyString(_node = null, _level = 0) {
-            if (!_node)
-                _node = this;
-            let prefix = "+".repeat(_level);
-            let output = prefix + " " + _node.name + " | ";
-            for (let type in _node.components)
-                output += _node.components[type].length + " " + type.split("Component").pop() + ", ";
-            output = output.slice(0, -2) + "</br>";
-            for (let child of _node.children) {
-                output += this.toHierarchyString(child, _level + 1);
-            }
-            return output;
-        }
-        addEventListener(_type, _handler, _capture = false) {
-            let listListeners = _capture ? this.captures : this.listeners;
-            if (!listListeners[_type])
-                listListeners[_type] = [];
-            listListeners[_type].push(_handler);
-        }
-        removeEventListener(_type, _handler, _capture = false) {
-            let listenersForType = _capture ? this.captures[_type] : this.listeners[_type];
-            if (listenersForType)
-                for (let i = listenersForType.length - 1; i >= 0; i--)
-                    if (listenersForType[i] == _handler)
-                        listenersForType.splice(i, 1);
-        }
-        dispatchEvent(_event) {
-            let ancestors = [];
-            let upcoming = this;
-            Object.defineProperty(_event, "target", { writable: true, value: this });
-            while (upcoming.parent)
-                ancestors.push(upcoming = upcoming.parent);
-            Object.defineProperty(_event, "path", { writable: true, value: new Array(this, ...ancestors) });
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
-            for (let i = ancestors.length - 1; i >= 0; i--) {
-                let ancestor = ancestors[i];
-                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
-                this.callListeners(ancestor.captures[_event.type], _event);
-            }
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
-            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
-            this.callListeners(this.captures[_event.type], _event);
-            this.callListeners(this.listeners[_event.type], _event);
-            if (!_event.bubbles)
-                return true;
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.BUBBLING_PHASE });
-            for (let i = 0; i < ancestors.length; i++) {
-                let ancestor = ancestors[i];
-                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
-                this.callListeners(ancestor.listeners[_event.type], _event);
-            }
-            return true;
-        }
-        dispatchEventToTargetOnly(_event) {
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
-            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
-            this.callListeners(this.listeners[_event.type], _event);
-            return true;
-        }
-        broadcastEvent(_event) {
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
-            Object.defineProperty(_event, "target", { writable: true, value: this });
-            this.broadcastEventRecursive(_event);
-        }
-        broadcastEventRecursive(_event) {
-            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
-            let captures = this.captures[_event.type] || [];
-            for (let handler of captures)
-                handler(_event);
-            for (let child of this.children) {
-                child.broadcastEventRecursive(_event);
-            }
-        }
-        callListeners(_listeners, _event) {
-            if (_listeners?.length > 0)
-                for (let handler of _listeners)
-                    handler(_event);
-        }
-    }
-    FudgeCore.Node = Node;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -3302,9 +3346,9 @@ var FudgeCore;
 (function (FudgeCore) {
     let FIELD_OF_VIEW;
     (function (FIELD_OF_VIEW) {
-        FIELD_OF_VIEW[FIELD_OF_VIEW["HORIZONTAL"] = 0] = "HORIZONTAL";
-        FIELD_OF_VIEW[FIELD_OF_VIEW["VERTICAL"] = 1] = "VERTICAL";
-        FIELD_OF_VIEW[FIELD_OF_VIEW["DIAGONAL"] = 2] = "DIAGONAL";
+        FIELD_OF_VIEW["HORIZONTAL"] = "horizontal";
+        FIELD_OF_VIEW["VERTICAL"] = "vertical";
+        FIELD_OF_VIEW["DIAGONAL"] = "diagonal";
     })(FIELD_OF_VIEW = FudgeCore.FIELD_OF_VIEW || (FudgeCore.FIELD_OF_VIEW = {}));
     let PROJECTION;
     (function (PROJECTION) {
@@ -3328,6 +3372,7 @@ var FudgeCore;
             this.backgroundEnabled = true;
         }
         #mtxWorldToView;
+        #mtxCameraInverse;
         get mtxWorld() {
             let mtxCamera = this.mtxPivot.clone;
             try {
@@ -3340,15 +3385,22 @@ var FudgeCore;
         get mtxWorldToView() {
             if (this.#mtxWorldToView)
                 return this.#mtxWorldToView;
-            let mtxCamera = this.mtxWorld;
-            let mtxInversion = FudgeCore.Matrix4x4.INVERSION(mtxCamera);
-            this.#mtxWorldToView = FudgeCore.Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxInversion);
-            FudgeCore.Recycler.store(mtxCamera);
-            FudgeCore.Recycler.store(mtxInversion);
+            this.#mtxWorldToView = FudgeCore.Matrix4x4.MULTIPLICATION(this.mtxProjection, this.mtxCameraInverse);
             return this.#mtxWorldToView;
         }
+        get mtxCameraInverse() {
+            if (this.#mtxCameraInverse)
+                return this.#mtxCameraInverse;
+            this.#mtxCameraInverse = FudgeCore.Matrix4x4.INVERSION(this.mtxWorld);
+            return this.#mtxCameraInverse;
+        }
         resetWorldToView() {
+            if (this.#mtxWorldToView)
+                FudgeCore.Recycler.store(this.#mtxWorldToView);
+            if (this.#mtxCameraInverse)
+                FudgeCore.Recycler.store(this.#mtxCameraInverse);
             this.#mtxWorldToView = null;
+            this.#mtxCameraInverse = null;
         }
         getProjection() {
             return this.projection;
@@ -3380,7 +3432,7 @@ var FudgeCore;
             this.far = _far;
             this.mtxProjection = FudgeCore.Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction);
         }
-        projectOrthographic(_left = 0, _right = FudgeCore.Render.getCanvas().clientWidth, _bottom = FudgeCore.Render.getCanvas().clientHeight, _top = 0) {
+        projectOrthographic(_left = -FudgeCore.Render.getCanvas().clientWidth / 2, _right = FudgeCore.Render.getCanvas().clientWidth / 2, _bottom = FudgeCore.Render.getCanvas().clientHeight / 2, _top = -FudgeCore.Render.getCanvas().clientHeight / 2) {
             this.projection = PROJECTION.ORTHOGRAPHIC;
             this.mtxProjection = FudgeCore.Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400);
         }
@@ -3477,6 +3529,20 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    class ComponentFaceCamera extends FudgeCore.Component {
+        constructor() {
+            super();
+            this.upLocal = true;
+            this.up = FudgeCore.Vector3.Y(1);
+            this.restrict = false;
+            this.singleton = true;
+        }
+    }
+    ComponentFaceCamera.iSubclass = FudgeCore.Component.registerSubclass(ComponentFaceCamera);
+    FudgeCore.ComponentFaceCamera = ComponentFaceCamera;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
     class ComponentGraphFilter extends FudgeCore.Component {
         constructor() {
             super();
@@ -3517,22 +3583,12 @@ var FudgeCore;
     }
     FudgeCore.Light = Light;
     class LightAmbient extends Light {
-        constructor(_color = new FudgeCore.Color(1, 1, 1, 1)) {
-            super(_color);
-        }
     }
     FudgeCore.LightAmbient = LightAmbient;
     class LightDirectional extends Light {
-        constructor(_color = new FudgeCore.Color(1, 1, 1, 1)) {
-            super(_color);
-        }
     }
     FudgeCore.LightDirectional = LightDirectional;
     class LightPoint extends Light {
-        constructor() {
-            super(...arguments);
-            this.range = 10;
-        }
     }
     FudgeCore.LightPoint = LightPoint;
     class LightSpot extends Light {
@@ -3785,24 +3841,6 @@ var FudgeCore;
             super();
             this.mtxLocal = _mtxInit;
         }
-        lookAt(_targetWorld, _up) {
-            let container = this.node;
-            if (!container && !container.getParent())
-                return this.mtxLocal.lookAt(_targetWorld, _up);
-            let mtxWorld = container.mtxWorld.clone;
-            mtxWorld.lookAt(_targetWorld, _up, true);
-            let mtxLocal = FudgeCore.Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
-            this.mtxLocal = mtxLocal;
-        }
-        showTo(_targetWorld, _up) {
-            let container = this.node;
-            if (!container && !container.getParent())
-                return this.mtxLocal.showTo(_targetWorld, _up);
-            let mtxWorld = container.mtxWorld.clone;
-            mtxWorld.showTo(_targetWorld, _up, true);
-            let mtxLocal = FudgeCore.Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
-            this.mtxLocal = mtxLocal;
-        }
         rebase(_node = null) {
             let mtxResult = this.mtxLocal;
             let container = this.node;
@@ -3868,7 +3906,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Control extends EventTarget {
-        constructor(_name, _factor = 1, _type = 0, _active = true) {
+        constructor(_name, _factor = 1, _type = 0, _delay = 0) {
             super();
             this.rateDispatchOutput = 0;
             this.valuePrevious = 0;
@@ -3906,8 +3944,9 @@ var FudgeCore;
             };
             this.factor = _factor;
             this.type = _type;
-            this.active = _active;
+            this.active = true;
             this.name = _name;
+            this.setDelay(_delay);
         }
         setTimebase(_time) {
             this.time = _time;
@@ -4164,25 +4203,6 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class EventDragDrop extends DragEvent {
-        constructor(type, _event) {
-            super(type, _event);
-            let target = _event.target;
-            this.clientRect = target.getClientRects()[0];
-            this.pointerX = _event.clientX - this.clientRect.left;
-            this.pointerY = _event.clientY - this.clientRect.top;
-        }
-    }
-    FudgeCore.EventDragDrop = EventDragDrop;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class EventKeyboard extends KeyboardEvent {
-        constructor(type, _event) {
-            super(type, _event);
-        }
-    }
-    FudgeCore.EventKeyboard = EventKeyboard;
     let KEYBOARD_CODE;
     (function (KEYBOARD_CODE) {
         KEYBOARD_CODE["A"] = "KeyA";
@@ -4368,19 +4388,6 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class EventPointer extends PointerEvent {
-        constructor(type, _event) {
-            super(type, _event);
-            let target = _event.target;
-            this.clientRect = target.getClientRects()[0];
-            this.pointerX = _event.clientX - this.clientRect.left;
-            this.pointerY = _event.clientY - this.clientRect.top;
-        }
-    }
-    FudgeCore.EventPointer = EventPointer;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
     class EventTimer {
         constructor(_timer, ..._arguments) {
             this.type = "\u0192lapse";
@@ -4395,20 +4402,151 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class EventWheel extends WheelEvent {
-        constructor(type, _event) {
-            super(type, _event);
+    let EVENT_TOUCH;
+    (function (EVENT_TOUCH) {
+        EVENT_TOUCH["MOVE"] = "touchMove";
+        EVENT_TOUCH["TAP"] = "touchTap";
+        EVENT_TOUCH["NOTCH"] = "touchNotch";
+        EVENT_TOUCH["LONG"] = "touchLong";
+        EVENT_TOUCH["DOUBLE"] = "touchDouble";
+        EVENT_TOUCH["PINCH"] = "touchPinch";
+        EVENT_TOUCH["ROTATE"] = "touchRotate";
+    })(EVENT_TOUCH = FudgeCore.EVENT_TOUCH || (FudgeCore.EVENT_TOUCH = {}));
+    class TouchEventDispatcher {
+        constructor(_target, _radiusTap = 5, _radiusNotch = 50, _timeDouble = 200, _timerLong = 1000) {
+            this.posStart = FudgeCore.Vector2.ZERO();
+            this.posNotch = FudgeCore.Vector2.ZERO();
+            this.posPrev = FudgeCore.Vector2.ZERO();
+            this.moved = false;
+            this.time = new FudgeCore.Time();
+            this.pinchDistance = 0;
+            this.pinchTolerance = 1;
+            this.hndEvent = (_event) => {
+                _event.preventDefault();
+                let touchFirst = _event.touches[0];
+                let position = this.calcAveragePosition(_event.touches);
+                let offset;
+                switch (_event.type) {
+                    case "touchstart":
+                        this.moved = false;
+                        this.startGesture(position);
+                        if (_event.touches.length == 2) {
+                            let pinch = new FudgeCore.Vector2(_event.touches[1].clientX - touchFirst.clientX, _event.touches[1].clientY - touchFirst.clientY);
+                            this.pinchDistance = pinch.magnitude;
+                        }
+                        let dispatchLong = (_eventTimer) => {
+                            this.moved = true;
+                            this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.LONG, {
+                                bubbles: true, detail: { position: position, touches: _event.touches }
+                            }));
+                        };
+                        this.timerLong?.clear();
+                        this.timerLong = new FudgeCore.Timer(this.time, this.timeLong, 1, dispatchLong);
+                        break;
+                    case "touchend":
+                        this.timerLong?.clear();
+                        if (_event.touches.length > 0) {
+                            this.startGesture(position);
+                            break;
+                        }
+                        let dispatchTap = (_eventTimer) => {
+                            this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.TAP, {
+                                bubbles: true, detail: { position: position, touches: _event.touches }
+                            }));
+                        };
+                        if (this.timerDouble?.active) {
+                            this.timerDouble.clear();
+                            this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.DOUBLE, {
+                                bubbles: true, detail: { position: position, touches: _event.touches }
+                            }));
+                        }
+                        else if (!this.moved)
+                            this.timerDouble = new FudgeCore.Timer(this.time, this.timeDouble, 1, dispatchTap);
+                        break;
+                    case "touchmove":
+                        this.detectPinch(_event, position);
+                        offset = FudgeCore.Vector2.DIFFERENCE(this.posPrev, this.posStart);
+                        this.moved ||= (offset.magnitude < this.radiusTap);
+                        let movement = FudgeCore.Vector2.DIFFERENCE(position, this.posPrev);
+                        this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.MOVE, {
+                            bubbles: true, detail: { position: position, touches: _event.touches, offset: offset, movement: movement }
+                        }));
+                        offset = FudgeCore.Vector2.DIFFERENCE(position, this.posNotch);
+                        if (offset.magnitude > this.radiusNotch) {
+                            let cardinal = Math.abs(offset.x) > Math.abs(offset.y) ?
+                                FudgeCore.Vector2.X(offset.x < 0 ? -1 : 1) :
+                                FudgeCore.Vector2.Y(offset.y < 0 ? -1 : 1);
+                            this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.NOTCH, {
+                                bubbles: true, detail: { position: position, touches: _event.touches, offset: offset, cardinal: cardinal, movement: movement }
+                            }));
+                            this.posNotch = position;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                this.posPrev.set(position.x, position.y);
+            };
+            this.detectPinch = (_event, _position) => {
+                if (_event.touches.length != 2)
+                    return;
+                let t = _event.touches;
+                let pinch = new FudgeCore.Vector2(t[1].clientX - t[0].clientX, t[1].clientY - t[0].clientY);
+                let pinchDistance = pinch.magnitude;
+                let pinchDelta = pinchDistance - this.pinchDistance;
+                if (Math.abs(pinchDelta) > this.pinchTolerance)
+                    this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.PINCH, {
+                        bubbles: true, detail: { position: _position, touches: _event.touches, pinch: pinch, pinchDelta: pinchDelta }
+                    }));
+                this.pinchDistance = pinchDistance;
+            };
+            this.target = _target;
+            this.radiusTap = _radiusTap;
+            this.radiusNotch = _radiusNotch;
+            this.timeDouble = _timeDouble;
+            this.timeLong = _timerLong;
+            this.activate(true);
+        }
+        activate(_on) {
+            if (_on) {
+                this.target.addEventListener("touchstart", this.hndEvent);
+                this.target.addEventListener("touchend", this.hndEvent);
+                this.target.addEventListener("touchmove", this.hndEvent);
+                return;
+            }
+            this.target.removeEventListener("touchstart", this.hndEvent);
+            this.target.removeEventListener("touchend", this.hndEvent);
+            this.target.removeEventListener("touchmove", this.hndEvent);
+        }
+        startGesture(_position) {
+            this.posNotch.set(_position.x, _position.y);
+            this.posStart.set(_position.x, _position.y);
+        }
+        calcAveragePosition(_touches) {
+            let average = FudgeCore.Vector2.ZERO();
+            for (let touch of _touches) {
+                average.x += touch.clientX;
+                average.y += touch.clientY;
+            }
+            average.scale(1 / _touches.length);
+            return average;
         }
     }
-    FudgeCore.EventWheel = EventWheel;
+    FudgeCore.TouchEventDispatcher = TouchEventDispatcher;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Graph extends FudgeCore.Node {
-        constructor() {
-            super(...arguments);
+        constructor(_name = "Graph") {
+            super(_name);
             this.idResource = undefined;
             this.type = "Graph";
+            this.hndMutate = async (_event) => {
+                _event.detail.path = Reflect.get(_event, "path");
+                this.dispatchEvent(new CustomEvent("mutateGraph", { detail: _event.detail }));
+                this.dispatchEvent(new Event("mutateGraphDone"));
+            };
+            this.addEventListener("mutate", this.hndMutate);
         }
         serialize() {
             let serialization = super.serialize();
@@ -4419,7 +4557,8 @@ var FudgeCore;
         async deserialize(_serialization) {
             await super.deserialize(_serialization);
             FudgeCore.Project.register(this, _serialization.idResource);
-            FudgeCore.Project.resyncGraphInstances(this);
+            await FudgeCore.Project.resyncGraphInstances(this);
+            this.dispatchEvent(new Event("graphDeserialized"));
             return this;
         }
     }
@@ -4427,28 +4566,41 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    let SYNC;
+    (function (SYNC) {
+        SYNC[SYNC["READY"] = 0] = "READY";
+        SYNC[SYNC["GRAPH_SYNCED"] = 1] = "GRAPH_SYNCED";
+        SYNC[SYNC["GRAPH_DONE"] = 2] = "GRAPH_DONE";
+        SYNC[SYNC["INSTANCE"] = 3] = "INSTANCE";
+    })(SYNC || (SYNC = {}));
     class GraphInstance extends FudgeCore.Node {
         constructor(_graph) {
             super("GraphInstance");
             this.#idSource = undefined;
-            this.#sync = true;
+            this.#sync = SYNC.READY;
+            this.#deserializeFromSource = true;
             this.hndMutationGraph = async (_event) => {
-                if (!this.#sync) {
-                    this.#sync = true;
+                if (this.#sync != SYNC.READY) {
+                    this.#sync = SYNC.READY;
                     return;
                 }
                 if (this.isFiltered())
                     return;
-                this.#sync = false;
-                await this.reflectMutation(_event, _event.currentTarget, this);
-                this.#sync = true;
+                this.#sync = SYNC.GRAPH_SYNCED;
+                await this.reflectMutation(_event, _event.currentTarget, this, _event.detail.path);
             };
             this.hndMutationInstance = async (_event) => {
-                if (!this.#sync)
+                if (this.#sync != SYNC.READY) {
+                    this.#sync = SYNC.READY;
                     return;
+                }
+                if (_event.target instanceof GraphInstance && _event.target != this) {
+                    return;
+                }
                 if (this.isFiltered())
                     return;
-                await this.reflectMutation(_event, this, this.get());
+                this.#sync = SYNC.INSTANCE;
+                await this.reflectMutation(_event, this, this.get(), Reflect.get(_event, "path"));
             };
             this.addEventListener("mutate", this.hndMutationInstance, true);
             if (!_graph)
@@ -4457,6 +4609,7 @@ var FudgeCore;
         }
         #idSource;
         #sync;
+        #deserializeFromSource;
         get idSource() {
             return this.#idSource;
         }
@@ -4465,22 +4618,35 @@ var FudgeCore;
             await this.set(resource);
         }
         serialize() {
-            let serialization = super.serialize();
+            let filter = this.getComponent(FudgeCore.ComponentGraphFilter);
+            let serialization = {};
+            if (filter && filter.isActive)
+                serialization = super.serialize();
+            else
+                serialization.deserializeFromSource = true;
+            serialization.name = this.name;
             serialization.idSource = this.#idSource;
             return serialization;
         }
         async deserialize(_serialization) {
             this.#idSource = _serialization.idSource;
-            await super.deserialize(_serialization);
-            if (this.get())
-                this.connectToGraph();
-            else
+            if (!_serialization.deserializeFromSource) {
+                await super.deserialize(_serialization);
+                this.#deserializeFromSource = false;
+            }
+            let graph = this.get();
+            if (graph)
+                await this.connectToGraph();
+            else {
                 FudgeCore.Project.registerGraphInstanceForResync(this);
+            }
             return this;
         }
-        connectToGraph() {
+        async connectToGraph() {
             let graph = this.get();
-            graph.addEventListener("mutate", this.hndMutationGraph, true);
+            if (this.#deserializeFromSource)
+                await this.set(graph);
+            graph.addEventListener("mutateGraph", this.hndMutationGraph);
         }
         async set(_graph) {
             let serialization = FudgeCore.Serializer.serialize(_graph);
@@ -4494,11 +4660,20 @@ var FudgeCore;
         get() {
             return FudgeCore.Project.resources[this.#idSource];
         }
-        async reflectMutation(_event, _source, _destination) {
-            let path = Reflect.get(_event, "path");
-            let index = path.indexOf(_source);
-            for (let i = index - 1; i >= 0; i--)
-                _destination = _destination.getChildrenByName(path[i].name)[0];
+        async reflectMutation(_event, _source, _destination, _path) {
+            for (let node of _path)
+                if (node instanceof GraphInstance)
+                    if (node == this)
+                        break;
+                    else {
+                        console.log("Sync aborted, target already synced");
+                        return;
+                    }
+            let index = _path.indexOf(_source);
+            for (let i = index - 1; i >= 0; i--) {
+                let childIndex = _path[i].getParent().findChild(_path[i]);
+                _destination = _destination.getChild(childIndex);
+            }
             let cmpMutate = _destination.getComponent(_event.detail.component.constructor);
             if (cmpMutate)
                 await cmpMutate.mutate(_event.detail.mutator);
@@ -4788,6 +4963,21 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    class Calc {
+        static clamp(_value, _min, _max, _isSmaller = (_value1, _value2) => { return _value1 < _value2; }) {
+            if (_isSmaller(_value, _min))
+                return _min;
+            if (_isSmaller(_max, _value))
+                return _max;
+            return _value;
+        }
+    }
+    Calc.deg2rad = Math.PI / 180;
+    Calc.rad2deg = 1 / Calc.deg2rad;
+    FudgeCore.Calc = Calc;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
     class Framing extends FudgeCore.Mutable {
         reduceMutator(_mutator) { }
     }
@@ -5016,7 +5206,7 @@ var FudgeCore;
         }
         static ROTATION(_angleInDegrees) {
             const mtxResult = FudgeCore.Recycler.get(Matrix3x3);
-            let angleInRadians = _angleInDegrees * Matrix3x3.deg2rad;
+            let angleInRadians = _angleInDegrees * FudgeCore.Calc.deg2rad;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
             mtxResult.data.set([
@@ -5109,6 +5299,9 @@ var FudgeCore;
             ]);
             this.resetCache();
         }
+        reset() {
+            this.recycle();
+        }
         translate(_by) {
             const mtxResult = Matrix3x3.MULTIPLICATION(this, Matrix3x3.TRANSLATION(_by));
             this.set(mtxResult);
@@ -5166,7 +5359,7 @@ var FudgeCore;
                 rotation = ySkew;
             else
                 rotation = xSkew;
-            rotation *= 180 / Math.PI;
+            rotation *= FudgeCore.Calc.rad2deg;
             return rotation;
         }
         set(_mtxTo) {
@@ -5249,7 +5442,6 @@ var FudgeCore;
             this.mutator = null;
         }
     }
-    Matrix3x3.deg2rad = Math.PI / 180;
     FudgeCore.Matrix3x3 = Matrix3x3;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -5414,32 +5606,16 @@ var FudgeCore;
             ]);
             return mtxResult;
         }
-        static LOOK_AT(_translation, _target, _up = FudgeCore.Vector3.Y()) {
+        static LOOK_AT(_translation, _target, _up = FudgeCore.Vector3.Y(), _restrict = false) {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
             let zAxis = FudgeCore.Vector3.DIFFERENCE(_target, _translation);
             zAxis.normalize();
             let xAxis = FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(_up, zAxis));
-            let yAxis = FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(zAxis, xAxis));
+            let yAxis = _restrict ? _up : FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(zAxis, xAxis));
+            zAxis = _restrict ? FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(xAxis, _up)) : zAxis;
             mtxResult.data.set([
                 xAxis.x, xAxis.y, xAxis.z, 0,
                 yAxis.x, yAxis.y, yAxis.z, 0,
-                zAxis.x, zAxis.y, zAxis.z, 0,
-                _translation.x,
-                _translation.y,
-                _translation.z,
-                1
-            ]);
-            return mtxResult;
-        }
-        static SHOW_TO(_translation, _target, _up = FudgeCore.Vector3.Y()) {
-            const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let zAxis = FudgeCore.Vector3.DIFFERENCE(_target, _translation);
-            zAxis.normalize();
-            let xAxis = FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(_up, zAxis));
-            zAxis = FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(xAxis, _up));
-            mtxResult.data.set([
-                xAxis.x, xAxis.y, xAxis.z, 0,
-                _up.x, _up.y, _up.z, 0,
                 zAxis.x, zAxis.y, zAxis.z, 0,
                 _translation.x,
                 _translation.y,
@@ -5460,7 +5636,7 @@ var FudgeCore;
         }
         static ROTATION_X(_angleInDegrees) {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let angleInRadians = _angleInDegrees * Matrix4x4.deg2rad;
+            let angleInRadians = _angleInDegrees * FudgeCore.Calc.deg2rad;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
             mtxResult.data.set([
@@ -5473,7 +5649,7 @@ var FudgeCore;
         }
         static ROTATION_Y(_angleInDegrees) {
             let mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let angleInRadians = _angleInDegrees * Matrix4x4.deg2rad;
+            let angleInRadians = _angleInDegrees * FudgeCore.Calc.deg2rad;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
             mtxResult.data.set([
@@ -5486,7 +5662,7 @@ var FudgeCore;
         }
         static ROTATION_Z(_angleInDegrees) {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let angleInRadians = _angleInDegrees * Matrix4x4.deg2rad;
+            let angleInRadians = _angleInDegrees * FudgeCore.Calc.deg2rad;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
             mtxResult.data.set([
@@ -5499,7 +5675,7 @@ var FudgeCore;
         }
         static ROTATION(_eulerAnglesInDegrees) {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let anglesInRadians = FudgeCore.Vector3.SCALE(_eulerAnglesInDegrees, Matrix4x4.deg2rad);
+            let anglesInRadians = FudgeCore.Vector3.SCALE(_eulerAnglesInDegrees, FudgeCore.Calc.deg2rad);
             let sinX = Math.sin(anglesInRadians.x);
             let cosX = Math.cos(anglesInRadians.x);
             let sinY = Math.sin(anglesInRadians.y);
@@ -5533,7 +5709,7 @@ var FudgeCore;
             return mtxResult;
         }
         static PROJECTION_CENTRAL(_aspect, _fieldOfViewInDegrees, _near, _far, _direction) {
-            let fieldOfViewInRadians = _fieldOfViewInDegrees * Matrix4x4.deg2rad;
+            let fieldOfViewInRadians = _fieldOfViewInDegrees * FudgeCore.Calc.deg2rad;
             let f = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
             let rangeInv = 1.0 / (_near - _far);
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
@@ -5559,8 +5735,8 @@ var FudgeCore;
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
             mtxResult.data.set([
                 2 / (_right - _left), 0, 0, 0,
-                0, 2 / (_top - _bottom), 0, 0,
-                0, 0, 2 / (_near - _far), 0,
+                0, -2 / (_top - _bottom), 0, 0,
+                0, 0, 2 / (_far - _near), 0,
                 (_left + _right) / (_left - _right),
                 (_bottom + _top) / (_bottom - _top),
                 (_near + _far) / (_near - _far),
@@ -5616,6 +5792,9 @@ var FudgeCore;
                 0, 0, 0, 1
             ]);
             this.resetCache();
+        }
+        reset() {
+            this.recycle();
         }
         rotate(_by, _fromLeft = false) {
             let mtxRotation = Matrix4x4.ROTATION(_by);
@@ -5719,48 +5898,10 @@ var FudgeCore;
             this.multiply(mtxRotation, _fromLeft);
             FudgeCore.Recycler.store(mtxRotation);
         }
-        lookAt(_target, _up, _preserveScaling = true) {
-            if (!_up)
-                _up = this.getY();
-            const mtxResult = Matrix4x4.LOOK_AT(this.translation, _target, _up);
-            if (_preserveScaling)
-                mtxResult.scale(this.scaling);
-            this.set(mtxResult);
-            FudgeCore.Recycler.store(mtxResult);
-        }
-        lookAtRotate(_target, _up, _preserveScaling = true) {
-            if (!_up)
-                _up = this.getY();
-            let scaling = this.scaling;
-            let difference = FudgeCore.Vector3.DIFFERENCE(_target, this.translation);
-            difference.normalize();
-            let cos = FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getZ()), difference);
-            let sin = FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getX()), difference);
-            let mtxRotation = FudgeCore.Recycler.borrow(Matrix4x4);
-            mtxRotation.data.set([
-                cos, 0, -sin, 0,
-                0, 1, 0, 0,
-                sin, 0, cos, 0,
-                0, 0, 0, 1
-            ]);
-            this.multiply(mtxRotation, false);
-            cos = FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getZ()), difference);
-            sin = -FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getY()), difference);
-            mtxRotation.data.set([
-                1, 0, 0, 0,
-                0, cos, sin, 0,
-                0, -sin, cos, 0,
-                0, 0, 0, 1
-            ]);
-            this.multiply(mtxRotation, false);
-            this.scaling = scaling;
-        }
-        showTo(_target, _up, _preserveScaling = true) {
-            if (!_up)
-                _up = this.getY();
-            const mtxResult = Matrix4x4.SHOW_TO(this.translation, _target, _up);
-            if (_preserveScaling)
-                mtxResult.scale(this.scaling);
+        lookAt(_target, _up, _restrict = false) {
+            _up = _up ? FudgeCore.Vector3.NORMALIZATION(_up) : FudgeCore.Vector3.NORMALIZATION(this.getY());
+            const mtxResult = Matrix4x4.LOOK_AT(this.translation, _target, _up, _restrict);
+            mtxResult.scale(this.scaling);
             this.set(mtxResult);
             FudgeCore.Recycler.store(mtxResult);
         }
@@ -5853,7 +5994,7 @@ var FudgeCore;
                 z1 = 0;
             }
             this.#eulerAngles.set(x1, y1, z1);
-            this.#eulerAngles.scale(180 / Math.PI);
+            this.#eulerAngles.scale(FudgeCore.Calc.rad2deg);
             return this.#eulerAngles;
         }
         set(_mtxTo) {
@@ -5958,9 +6099,8 @@ var FudgeCore;
             let mtxResult = Matrix4x4.IDENTITY();
             if (vectors.translation)
                 mtxResult.translate(vectors.translation);
-            if (vectors.rotation) {
+            if (vectors.rotation)
                 mtxResult.rotate(vectors.rotation);
-            }
             if (vectors.scaling)
                 mtxResult.scale(vectors.scaling);
             this.set(mtxResult);
@@ -5983,7 +6123,6 @@ var FudgeCore;
             this.mutator = null;
         }
     }
-    Matrix4x4.deg2rad = Math.PI / 180;
     FudgeCore.Matrix4x4 = Matrix4x4;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -6643,7 +6782,7 @@ var FudgeCore;
                 this.ƒradius = this.createRadius();
             return this.ƒradius;
         }
-        useRenderBuffers(_shader, _mtxWorld, _mtxProjection, _id) { return null; }
+        useRenderBuffers(_shader, _mtxMeshToWorld, _mtxMeshToView, _id) { return null; }
         getRenderBuffers(_shader) { return null; }
         deleteRenderBuffers(_shader) { }
         clear() {
@@ -6939,11 +7078,11 @@ var FudgeCore;
                     continue;
                 const parts = line.split(" ");
                 parts.shift();
-                if (!line || line.startsWith("v "))
-                    positions.push(new FudgeCore.Vector3(...parts.map(x => +x)));
-                else if (!line || line.startsWith("vt "))
-                    uvs.push(new FudgeCore.Vector2(...parts.map(x => +x)));
-                else if (!line || line.startsWith("f "))
+                if (line.startsWith("v "))
+                    positions.push(new FudgeCore.Vector3(...parts.map(_value => +_value)));
+                else if (line.startsWith("vt "))
+                    uvs.push(new FudgeCore.Vector2(...parts.map((_value, _index) => +_value * (_index == 1 ? -1 : 1))));
+                else if (line.startsWith("f "))
                     for (let i = 0; i < 3; i++) {
                         faceInfo.push({
                             iPosition: +parts[i].split("/")[0] - 1,
@@ -7387,6 +7526,7 @@ var FudgeCore;
         }
         serialize() {
             let serialization = super.serialize();
+            delete serialization.shape;
             serialization.latitudes = this.latitudes;
             return serialization;
         }
@@ -7734,7 +7874,7 @@ var FudgeCore;
             return this.#rigidbody;
         }
         rotateBody(_rotationChange) {
-            this.#rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * Math.PI / 180, _rotationChange.y * Math.PI / 180, _rotationChange.z * Math.PI / 180));
+            this.#rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * FudgeCore.Calc.deg2rad, _rotationChange.y * FudgeCore.Calc.deg2rad, _rotationChange.z * FudgeCore.Calc.deg2rad));
         }
         translateBody(_translationChange) {
             this.#rigidbody.translate(new OIMO.Vec3(_translationChange.x, _translationChange.y, _translationChange.z));
@@ -7803,7 +7943,8 @@ var FudgeCore;
             this.#rigidbody.setMassData(this.#massData);
             this.setPosition(position);
             this.setRotation(rotation);
-            this.#mtxPivotUnscaled = FudgeCore.Matrix4x4.CONSTRUCTION({ translation: this.mtxPivot.translation, rotation: this.mtxPivot.rotation, scaling: FudgeCore.Vector3.ONE() });
+            let scalingInverse = this.node.mtxWorld.scaling.map(_i => 1 / _i);
+            this.#mtxPivotUnscaled = FudgeCore.Matrix4x4.CONSTRUCTION({ translation: this.mtxPivot.translation, rotation: this.mtxPivot.rotation, scaling: scalingInverse });
             this.#mtxPivotInverse = FudgeCore.Matrix4x4.INVERSION(this.#mtxPivotUnscaled);
             this.addRigidbodyToWorld();
             this.isInitialized = true;
@@ -8567,7 +8708,7 @@ var FudgeCore;
         set maxRotor(_value) {
             this.#maxRotor = _value;
             if (this.joint != null)
-                this.joint.getRotationalLimitMotor().upperLimit = _value * Math.PI / 180;
+                this.joint.getRotationalLimitMotor().upperLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get minRotor() {
             return this.#minRotor;
@@ -8575,7 +8716,7 @@ var FudgeCore;
         set minRotor(_value) {
             this.#minRotor = _value;
             if (this.joint != null)
-                this.joint.getRotationalLimitMotor().lowerLimit = _value * Math.PI / 180;
+                this.joint.getRotationalLimitMotor().lowerLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get rotorSpeed() {
             return this.#rotorSpeed;
@@ -8642,7 +8783,7 @@ var FudgeCore;
             this.#rotorSpringDamper = new OIMO.SpringDamper().setSpring(this.springFrequencyRotation, this.springDampingRotation);
             this.motor = new OIMO.TranslationalLimitMotor().setLimits(super.minMotor, super.maxMotor);
             this.motor.setMotor(super.motorSpeed, this.motorForce);
-            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.minRotor * Math.PI / 180, this.maxRotor * Math.PI / 180);
+            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.minRotor * FudgeCore.Calc.deg2rad, this.maxRotor * FudgeCore.Calc.deg2rad);
             this.#rotor.setMotor(this.rotorSpeed, this.rotorTorque);
             this.config = new OIMO.CylindricalJointConfig();
             super.constructJoint();
@@ -8789,18 +8930,18 @@ var FudgeCore;
             this.dirtyStatus();
         }
         get maxAngleFirstAxis() {
-            return this.#maxAngleFirst * 180 / Math.PI;
+            return this.#maxAngleFirst * FudgeCore.Calc.rad2deg;
         }
         set maxAngleFirstAxis(_value) {
-            this.#maxAngleFirst = _value * Math.PI / 180;
+            this.#maxAngleFirst = _value * FudgeCore.Calc.deg2rad;
             this.disconnect();
             this.dirtyStatus();
         }
         get maxAngleSecondAxis() {
-            return this.#maxAngleSecond * 180 / Math.PI;
+            return this.#maxAngleSecond * FudgeCore.Calc.rad2deg;
         }
         set maxAngleSecondAxis(_value) {
-            this.#maxAngleSecond = _value * Math.PI / 180;
+            this.#maxAngleSecond = _value * FudgeCore.Calc.deg2rad;
             this.disconnect();
             this.dirtyStatus();
         }
@@ -8837,19 +8978,19 @@ var FudgeCore;
                 this.joint.getSwingSpringDamper().frequency = _value;
         }
         get maxMotorTwist() {
-            return this.#maxMotorTwist * 180 / Math.PI;
+            return this.#maxMotorTwist * FudgeCore.Calc.rad2deg;
         }
         set maxMotorTwist(_value) {
-            _value *= Math.PI / 180;
+            _value *= FudgeCore.Calc.deg2rad;
             this.#maxMotorTwist = _value;
             if (this.joint != null)
                 this.joint.getTwistLimitMotor().upperLimit = _value;
         }
         get minMotorTwist() {
-            return this.#minMotorTwist * 180 / Math.PI;
+            return this.#minMotorTwist * FudgeCore.Calc.rad2deg;
         }
         set minMotorTwist(_value) {
-            _value *= Math.PI / 180;
+            _value *= FudgeCore.Calc.deg2rad;
             this.#minMotorTwist = _value;
             if (this.joint != null)
                 this.joint.getTwistLimitMotor().lowerLimit = _value;
@@ -8937,14 +9078,14 @@ var FudgeCore;
         #rotor;
         set maxMotor(_value) {
             super.maxMotor = _value;
-            _value *= Math.PI / 180;
+            _value *= FudgeCore.Calc.deg2rad;
             if (this.joint)
                 this.joint.getLimitMotor().upperLimit = _value;
         }
         set minMotor(_value) {
             super.minMotor = _value;
             if (this.joint)
-                this.joint.getLimitMotor().lowerLimit = _value * Math.PI / 180;
+                this.joint.getLimitMotor().lowerLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get motorTorque() {
             return this.#motorTorque;
@@ -8978,7 +9119,7 @@ var FudgeCore;
             super.mutate(_mutator);
         }
         constructJoint() {
-            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.minMotor * Math.PI / 180, super.maxMotor * Math.PI / 180);
+            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.minMotor * FudgeCore.Calc.deg2rad, super.maxMotor * FudgeCore.Calc.deg2rad);
             this.#rotor.setMotor(this.motorSpeed, this.motorTorque);
             this.config = new OIMO.RevoluteJointConfig();
             super.constructJoint();
@@ -9176,7 +9317,7 @@ var FudgeCore;
         set maxRotorFirst(_value) {
             this.#maxRotorFirst = _value;
             if (this.joint != null)
-                this.joint.getLimitMotor1().upperLimit = _value * Math.PI / 180;
+                this.joint.getLimitMotor1().upperLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get minRotorFirst() {
             return this.#minRotorFirst;
@@ -9184,7 +9325,7 @@ var FudgeCore;
         set minRotorFirst(_value) {
             this.#minRotorFirst = _value;
             if (this.joint != null)
-                this.joint.getLimitMotor1().lowerLimit = _value * Math.PI / 180;
+                this.joint.getLimitMotor1().lowerLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get rotorSpeedFirst() {
             return this.#rotorSpeedFirst;
@@ -9208,7 +9349,7 @@ var FudgeCore;
         set maxRotorSecond(_value) {
             this.#maxRotorSecond = _value;
             if (this.joint != null)
-                this.joint.getLimitMotor2().upperLimit = _value * Math.PI / 180;
+                this.joint.getLimitMotor2().upperLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get minRotorSecond() {
             return this.#minRotorSecond;
@@ -9216,7 +9357,7 @@ var FudgeCore;
         set minRotorSecond(_value) {
             this.#minRotorSecond = _value;
             if (this.joint != null)
-                this.joint.getLimitMotor2().lowerLimit = _value * Math.PI / 180;
+                this.joint.getLimitMotor2().lowerLimit = _value * FudgeCore.Calc.deg2rad;
         }
         get rotorSpeedSecond() {
             return this.#rotorSpeedSecond;
@@ -9271,9 +9412,9 @@ var FudgeCore;
         constructJoint() {
             this.#axisSpringDamperFirst = new OIMO.SpringDamper().setSpring(this.#springFrequencyFirst, this.#springDampingFirst);
             this.#axisSpringDamperSecond = new OIMO.SpringDamper().setSpring(this.#springFrequencySecond, this.#springDampingSecond);
-            this.#motorFirst = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Math.PI / 180, this.#maxRotorFirst * Math.PI / 180);
+            this.#motorFirst = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * FudgeCore.Calc.deg2rad, this.#maxRotorFirst * FudgeCore.Calc.deg2rad);
             this.#motorFirst.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
-            this.#motorSecond = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Math.PI / 180, this.#maxRotorFirst * Math.PI / 180);
+            this.#motorSecond = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * FudgeCore.Calc.deg2rad, this.#maxRotorFirst * FudgeCore.Calc.deg2rad);
             this.#motorSecond.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
             this.config = new OIMO.UniversalJointConfig();
             super.constructJoint(this.#axisFirst, this.#axisSecond);
@@ -9577,9 +9718,9 @@ var FudgeCore;
         }
         toDegrees() {
             let angles = this.toEulerangles();
-            angles.x = angles.x * (180 / Math.PI);
-            angles.y = angles.y * (180 / Math.PI);
-            angles.z = angles.z * (180 / Math.PI);
+            angles.x = angles.x * (FudgeCore.Calc.rad2deg);
+            angles.y = angles.y * (FudgeCore.Calc.rad2deg);
+            angles.z = angles.z * (FudgeCore.Calc.rad2deg);
             return angles;
         }
         getMutator() {
@@ -9735,7 +9876,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Render extends FudgeCore.RenderWebGL {
-        static prepare(_branch, _options = {}, _mtxWorld = FudgeCore.Matrix4x4.IDENTITY(), _lights = new Map(), _shadersUsed = null) {
+        static prepare(_branch, _options = {}, _mtxWorld = FudgeCore.Matrix4x4.IDENTITY(), _shadersUsed = null) {
             let firstLevel = (_shadersUsed == null);
             if (firstLevel) {
                 _shadersUsed = [];
@@ -9744,7 +9885,8 @@ var FudgeCore;
                 Render.nodesAlpha.reset();
                 Render.nodesPhysics.reset();
                 Render.componentsPick.reset();
-                Render.dispatchEvent(new Event("renderPrepareStart"));
+                Render.lights.forEach(_array => _array.reset());
+                _branch.dispatchEvent(new Event("renderPrepareStart"));
             }
             if (!_branch.isActive)
                 return;
@@ -9770,17 +9912,7 @@ var FudgeCore;
                 Render.componentsPick.push(cmpPick);
             }
             let cmpLights = _branch.getComponents(FudgeCore.ComponentLight);
-            for (let cmpLight of cmpLights) {
-                if (!cmpLight.isActive)
-                    continue;
-                let type = cmpLight.light.getType();
-                let lightsOfType = _lights.get(type);
-                if (!lightsOfType) {
-                    lightsOfType = [];
-                    _lights.set(type, lightsOfType);
-                }
-                lightsOfType.push(cmpLight);
-            }
+            Render.addLights(cmpLights);
             let cmpMesh = _branch.getComponent(FudgeCore.ComponentMesh);
             let cmpMaterial = _branch.getComponent(FudgeCore.ComponentMaterial);
             if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
@@ -9797,7 +9929,7 @@ var FudgeCore;
                     Render.nodesSimple.push(_branch);
             }
             for (let child of _branch.getChildren()) {
-                Render.prepare(child, _options, _branch.mtxWorld, _lights, _shadersUsed);
+                Render.prepare(child, _options, _branch.mtxWorld, _shadersUsed);
                 _branch.nNodesInBranch += child.nNodesInBranch;
                 let cmpMeshChild = child.getComponent(FudgeCore.ComponentMesh);
                 let position = cmpMeshChild ? cmpMeshChild.mtxWorld.translation : child.mtxWorld.translation;
@@ -9806,9 +9938,22 @@ var FudgeCore;
                 FudgeCore.Recycler.store(position);
             }
             if (firstLevel) {
-                Render.dispatchEvent(new Event("renderPrepareEnd"));
+                _branch.dispatchEvent(new Event("renderPrepareEnd"));
                 for (let shader of _shadersUsed)
-                    Render.setLightsInShader(shader, _lights);
+                    Render.setLightsInShader(shader, Render.lights);
+            }
+        }
+        static addLights(cmpLights) {
+            for (let cmpLight of cmpLights) {
+                if (!cmpLight.isActive)
+                    continue;
+                let type = cmpLight.light.getType();
+                let lightsOfType = Render.lights.get(type);
+                if (!lightsOfType) {
+                    lightsOfType = new FudgeCore.RecycableArray();
+                    Render.lights.set(type, lightsOfType);
+                }
+                lightsOfType.push(cmpLight);
             }
         }
         static pickBranch(_nodes, _cmpCamera) {
@@ -9820,9 +9965,7 @@ var FudgeCore;
                 let cmpMesh = node.getComponent(FudgeCore.ComponentMesh);
                 let cmpMaterial = node.getComponent(FudgeCore.ComponentMaterial);
                 if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
-                    let mtxMeshToView = FudgeCore.Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
-                    Render.pick(node, node.mtxWorld, mtxMeshToView);
-                    FudgeCore.Recycler.store(mtxMeshToView);
+                    Render.pick(node, node.mtxWorld, _cmpCamera);
                 }
             }
             Render.setBlendMode(FudgeCore.BLEND.TRANSPARENT);
@@ -9846,9 +9989,7 @@ var FudgeCore;
         }
         static drawList(_cmpCamera, _list) {
             for (let node of _list) {
-                let cmpMesh = node.getComponent(FudgeCore.ComponentMesh);
-                let cmpMaterial = node.getComponent(FudgeCore.ComponentMaterial);
-                Render.drawMesh(cmpMesh, cmpMaterial, _cmpCamera);
+                Render.drawNode(node, _cmpCamera);
             }
         }
         static transformByPhysics(_node, _cmpRigidbody) {
@@ -9880,6 +10021,7 @@ var FudgeCore;
     Render.rectClip = new FudgeCore.Rectangle(-1, 1, 2, -2);
     Render.nodesPhysics = new FudgeCore.RecycableArray();
     Render.componentsPick = new FudgeCore.RecycableArray();
+    Render.lights = new Map();
     Render.nodesSimple = new FudgeCore.RecycableArray();
     Render.nodesAlpha = new FudgeCore.RecycableArray();
     FudgeCore.Render = Render;
@@ -10016,7 +10158,7 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class Viewport extends FudgeCore.EventTargetƒ {
+    class Viewport extends FudgeCore.EventTargetUnified {
         constructor() {
             super(...arguments);
             this.name = "Viewport";
@@ -10032,38 +10174,6 @@ var FudgeCore;
             this.#branch = null;
             this.#crc2 = null;
             this.#canvas = null;
-            this.hndDragDropEvent = (_event) => {
-                let _dragevent = _event;
-                switch (_dragevent.type) {
-                    case "dragover":
-                    case "drop":
-                        _dragevent.preventDefault();
-                        _dragevent.dataTransfer.effectAllowed = "none";
-                        break;
-                    case "dragstart":
-                        _dragevent.dataTransfer.setData("text", "Hallo");
-                        _dragevent.dataTransfer.setDragImage(new Image(), 0, 0);
-                        break;
-                }
-                let event = new FudgeCore.EventDragDrop("ƒ" + _event.type, _dragevent);
-                this.addCanvasPosition(event);
-                this.dispatchEvent(event);
-            };
-            this.hndPointerEvent = (_event) => {
-                let event = new FudgeCore.EventPointer("ƒ" + _event.type, _event);
-                this.addCanvasPosition(event);
-                this.dispatchEvent(event);
-            };
-            this.hndKeyboardEvent = (_event) => {
-                if (!this.hasFocus)
-                    return;
-                let event = new FudgeCore.EventKeyboard("ƒ" + _event.type, _event);
-                this.dispatchEvent(event);
-            };
-            this.hndWheelEvent = (_event) => {
-                let event = new FudgeCore.EventWheel("ƒ" + _event.type, _event);
-                this.dispatchEvent(event);
-            };
         }
         #branch;
         #crc2;
@@ -10071,20 +10181,21 @@ var FudgeCore;
         get hasFocus() {
             return (Viewport.focus == this);
         }
+        get canvas() {
+            return this.#canvas;
+        }
+        get context() {
+            return this.#crc2;
+        }
         initialize(_name, _branch, _camera, _canvas) {
             this.name = _name;
             this.camera = _camera;
             this.#canvas = _canvas;
             this.#crc2 = _canvas.getContext("2d");
+            this.#canvas.tabIndex = 0;
             this.rectSource = FudgeCore.Render.getCanvasRect();
             this.rectDestination = this.getClientRectangle();
             this.setBranch(_branch);
-        }
-        getCanvas() {
-            return this.#canvas;
-        }
-        getContext() {
-            return this.#crc2;
         }
         getCanvasRectangle() {
             return FudgeCore.Rectangle.GET(0, 0, this.#canvas.width, this.#canvas.height);
@@ -10093,21 +10204,12 @@ var FudgeCore;
             return FudgeCore.Rectangle.GET(0, 0, this.#canvas.clientWidth, this.#canvas.clientHeight);
         }
         setBranch(_branch) {
-            if (this.#branch) {
-                this.#branch.removeEventListener("componentAdd", this.hndComponentEvent);
-                this.#branch.removeEventListener("componentRemove", this.hndComponentEvent);
-            }
+            if (_branch)
+                _branch.dispatchEvent(new Event("attachBranch"));
             this.#branch = _branch;
-            if (this.#branch) {
-                this.#branch.addEventListener("componentAdd", this.hndComponentEvent);
-                this.#branch.addEventListener("componentRemove", this.hndComponentEvent);
-            }
         }
         getBranch() {
             return this.#branch;
-        }
-        showSceneGraph() {
-            FudgeCore.Debug.branch(this.#branch);
         }
         draw(_calculateTransforms = true) {
             if (!this.#branch)
@@ -10134,7 +10236,9 @@ var FudgeCore;
             let mtxRoot = FudgeCore.Matrix4x4.IDENTITY();
             if (this.#branch.getParent())
                 mtxRoot = this.#branch.getParent().mtxWorld;
+            this.dispatchEvent(new Event("renderPrepareStart"));
             FudgeCore.Render.prepare(this.#branch, null, mtxRoot);
+            this.dispatchEvent(new Event("renderPrepareEnd"));
             this.componentsPick = FudgeCore.Render.componentsPick;
         }
         dispatchPointerEvent(_event) {
@@ -10230,49 +10334,6 @@ var FudgeCore;
         pointClientToScreen(_client) {
             let screen = new FudgeCore.Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
             return screen;
-        }
-        setFocus(_on) {
-            if (_on) {
-                if (Viewport.focus == this)
-                    return;
-                if (Viewport.focus)
-                    Viewport.focus.dispatchEvent(new Event("focusout"));
-                Viewport.focus = this;
-                this.dispatchEvent(new Event("focusin"));
-            }
-            else {
-                if (Viewport.focus != this)
-                    return;
-                this.dispatchEvent(new Event("focusout"));
-                Viewport.focus = null;
-            }
-        }
-        activatePointerEvent(_type, _on) {
-            this.activateEvent(this.#canvas, _type, this.hndPointerEvent, _on);
-        }
-        activateKeyboardEvent(_type, _on) {
-            this.activateEvent(this.#canvas.ownerDocument, _type, this.hndKeyboardEvent, _on);
-        }
-        activateDragDropEvent(_type, _on) {
-            if (_type == "\u0192dragstart")
-                this.#canvas.draggable = _on;
-            this.activateEvent(this.#canvas, _type, this.hndDragDropEvent, _on);
-        }
-        activateWheelEvent(_type, _on) {
-            this.activateEvent(this.#canvas, _type, this.hndWheelEvent, _on);
-        }
-        addCanvasPosition(event) {
-            event.canvasX = this.#canvas.width * event.pointerX / event.clientRect.width;
-            event.canvasY = this.#canvas.height * event.pointerY / event.clientRect.height;
-        }
-        activateEvent(_target, _type, _handler, _on) {
-            _type = _type.slice(1);
-            if (_on)
-                _target.addEventListener(_type, _handler);
-            else
-                _target.removeEventListener(_type, _handler);
-        }
-        hndComponentEvent(_event) {
         }
     }
     FudgeCore.Viewport = Viewport;
@@ -10385,7 +10446,7 @@ var FudgeCore;
         MODE[MODE["EDITOR"] = 0] = "EDITOR";
         MODE[MODE["RUNTIME"] = 1] = "RUNTIME";
     })(MODE = FudgeCore.MODE || (FudgeCore.MODE = {}));
-    class Project {
+    class Project extends FudgeCore.EventTargetStatic {
         static register(_resource, _idResource) {
             if (_resource.idResource)
                 if (_resource.idResource == _idResource)
@@ -10402,14 +10463,23 @@ var FudgeCore;
         static clear() {
             Project.resources = {};
             Project.serialization = {};
-            Project.scriptNamespaces = {};
+            Project.clearScriptNamespaces();
         }
-        static getResourcesOfType(_type) {
-            let found = {};
+        static getResourcesByType(_type) {
+            let found = [];
             for (let resourceId in Project.resources) {
                 let resource = Project.resources[resourceId];
                 if (resource instanceof _type)
-                    found[resourceId] = resource;
+                    found.push(resource);
+            }
+            return found;
+        }
+        static getResourcesByName(_name) {
+            let found = [];
+            for (let resourceId in Project.resources) {
+                let resource = Project.resources[resourceId];
+                if (resource.name == _name)
+                    found.push(resource);
             }
             return found;
         }
@@ -10447,8 +10517,8 @@ var FudgeCore;
             return graph;
         }
         static async createGraphInstance(_graph) {
-            let instance = new FudgeCore.GraphInstance();
-            await instance.set(_graph);
+            let instance = new FudgeCore.GraphInstance(_graph);
+            await instance.connectToGraph();
             return instance;
         }
         static registerGraphInstanceForResync(_instance) {
@@ -10456,12 +10526,12 @@ var FudgeCore;
             instances.push(_instance);
             Project.graphInstancesToResync[_instance.idSource] = instances;
         }
-        static resyncGraphInstances(_graph) {
+        static async resyncGraphInstances(_graph) {
             let instances = Project.graphInstancesToResync[_graph.idResource];
             if (!instances)
                 return;
             for (let instance of instances)
-                instance.connectToGraph();
+                await instance.connectToGraph();
             delete (Project.graphInstancesToResync[_graph.idResource]);
         }
         static registerScriptNamespace(_namespace) {
@@ -10469,15 +10539,25 @@ var FudgeCore;
             if (!Project.scriptNamespaces[name])
                 Project.scriptNamespaces[name] = _namespace;
         }
+        static clearScriptNamespaces() {
+            for (let name in Project.scriptNamespaces) {
+                Reflect.set(window, name, undefined);
+                Project.scriptNamespaces[name] = undefined;
+                delete Project.scriptNamespaces[name];
+            }
+        }
         static getComponentScripts() {
             let compoments = {};
             for (let namespace in Project.scriptNamespaces) {
                 compoments[namespace] = [];
                 for (let name in Project.scriptNamespaces[namespace]) {
                     let script = Reflect.get(Project.scriptNamespaces[namespace], name);
-                    let o = Object.create(script);
-                    if (o.prototype instanceof FudgeCore.ComponentScript)
-                        compoments[namespace].push(script);
+                    try {
+                        let o = Object.create(script);
+                        if (o.prototype instanceof FudgeCore.ComponentScript)
+                            compoments[namespace].push(script);
+                    }
+                    catch (_e) { }
                 }
             }
             return compoments;
@@ -10503,6 +10583,7 @@ var FudgeCore;
             const resourceFileContent = await response.text();
             let serialization = FudgeCore.Serializer.parse(resourceFileContent);
             let reconstruction = await Project.deserialize(serialization);
+            Project.dispatchEvent(new CustomEvent("resourcesLoaded", { detail: { url: _url, resources: reconstruction } }));
             return reconstruction;
         }
         static async loadResourcesFromHTML() {
@@ -10622,7 +10703,7 @@ var FudgeCore;
                     }
                     else {
                         if (gltfNode.rotation)
-                            node.mtxLocal.rotate(new FudgeCore.Vector3(...gltfNode.rotation.map(rotation => rotation * 180 / Math.PI)));
+                            node.mtxLocal.rotate(new FudgeCore.Vector3(...gltfNode.rotation.map(rotation => rotation * FudgeCore.Calc.rad2deg)));
                         if (gltfNode.scale)
                             node.mtxLocal.scale(new FudgeCore.Vector3(...gltfNode.scale));
                         if (gltfNode.translation)
@@ -10671,7 +10752,7 @@ var FudgeCore;
                 const gltfCamera = this.gltf.cameras[_iCamera];
                 const camera = new FudgeCore.ComponentCamera();
                 if (gltfCamera.perspective)
-                    camera.projectCentral(gltfCamera.perspective.aspectRatio, gltfCamera.perspective.yfov * 180 / Math.PI, null, gltfCamera.perspective.znear, gltfCamera.perspective.zfar);
+                    camera.projectCentral(gltfCamera.perspective.aspectRatio, gltfCamera.perspective.yfov * FudgeCore.Calc.rad2deg, null, gltfCamera.perspective.znear, gltfCamera.perspective.zfar);
                 else
                     camera.projectOrthographic(-gltfCamera.orthographic.xmag, gltfCamera.orthographic.xmag, -gltfCamera.orthographic.ymag, gltfCamera.orthographic.ymag);
                 return camera;
@@ -10861,2070 +10942,99 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    var Shader_1;
-    let Shader = Shader_1 = class Shader {
-        static getCoat() { return FudgeCore.CoatColored; }
-        static getVertexShaderSource() { return this.vertexShaderSource; }
-        static getFragmentShaderSource() { return this.fragmentShaderSource; }
-        static deleteProgram() { }
-        static useProgram() { }
-        static createProgram() { }
-        static registerSubclass(_subclass) { return Shader_1.subclasses.push(_subclass) - 1; }
-    };
-    Shader.baseClass = Shader_1;
-    Shader.subclasses = [];
-    Shader = Shader_1 = __decorate([
-        FudgeCore.RenderInjectorShader.decorate
-    ], Shader);
-    FudgeCore.Shader = Shader;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderFlat extends FudgeCore.Shader {
-        static getCoat() { return FudgeCore.CoatRemissive; }
-        static getVertexShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define FLAT
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define FLAT
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
-        }
-    }
-    ShaderFlat.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlat);
-    ShaderFlat.define = [
-        "LIGHT",
-        "FLAT",
-        "CAMERA"
-    ];
-    FudgeCore.ShaderFlat = ShaderFlat;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderFlatSkin extends FudgeCore.Shader {
-        static getCoat() { return FudgeCore.CoatRemissive; }
-        static getVertexShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define FLAT
-#define SKIN
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define FLAT
-#define SKIN
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
-        }
-    }
-    ShaderFlatSkin.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlatSkin);
-    ShaderFlatSkin.define = [
-        "LIGHT",
-        "FLAT",
-        "SKIN"
-    ];
-    FudgeCore.ShaderFlatSkin = ShaderFlatSkin;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderFlatTextured extends FudgeCore.Shader {
-        static getCoat() { return FudgeCore.CoatRemissiveTextured; }
-        static getVertexShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define FLAT
-#define TEXTURE
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define FLAT
-#define TEXTURE
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
-        }
-    }
-    ShaderFlatTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlatTextured);
-    ShaderFlatTextured.define = [
-        "LIGHT",
-        "FLAT",
-        "TEXTURE",
-        "CAMERA"
-    ];
-    FudgeCore.ShaderFlatTextured = ShaderFlatTextured;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderGouraud extends FudgeCore.Shader {
-        static getCoat() { return FudgeCore.CoatRemissive; }
-        static getVertexShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
-        }
-    }
-    ShaderGouraud.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraud);
-    ShaderGouraud.define = [
-        "LIGHT",
-        "CAMERA"
-    ];
-    FudgeCore.ShaderGouraud = ShaderGouraud;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderGouraudSkin extends FudgeCore.Shader {
-        static getCoat() { return FudgeCore.CoatRemissive; }
-        static getVertexShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define SKIN
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define SKIN
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
-        }
-    }
-    ShaderGouraudSkin.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudSkin);
-    ShaderGouraudSkin.define = [
-        "LIGHT",
-        "SKIN"
-    ];
-    FudgeCore.ShaderGouraudSkin = ShaderGouraudSkin;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderGouraudTextured extends FudgeCore.Shader {
-        static getCoat() { return FudgeCore.CoatRemissiveTextured; }
-        static getVertexShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define TEXTURE
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
-#define LIGHT
-#define TEXTURE
-#define CAMERA
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
-        }
-    }
-    ShaderGouraudTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudTextured);
-    ShaderGouraudTextured.define = [
-        "LIGHT",
-        "TEXTURE",
-        "CAMERA"
-    ];
-    FudgeCore.ShaderGouraudTextured = ShaderGouraudTextured;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderLit extends FudgeCore.Shader {
-        static getCoat() { return FudgeCore.CoatColored; }
-        static getVertexShaderSource() {
-            return `#version 300 es
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
-        }
-    }
-    ShaderLit.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLit);
-    ShaderLit.define = [];
-    FudgeCore.ShaderLit = ShaderLit;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderLitTextured extends FudgeCore.Shader {
-        static getCoat() { return FudgeCore.CoatTextured; }
-        static getVertexShaderSource() {
-            return `#version 300 es
-#define TEXTURE
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
-#define TEXTURE
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
-        }
-    }
-    ShaderLitTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLitTextured);
-    ShaderLitTextured.define = [
-        "TEXTURE"
-    ];
-    FudgeCore.ShaderLitTextured = ShaderLitTextured;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderMatCap extends FudgeCore.Shader {
-        static getCoat() { return FudgeCore.CoatTextured; }
-        static getVertexShaderSource() {
-            return `#version 300 es
-#define CAMERA
-#define MATCAP
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-  // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxMeshToView;
-in vec3 a_vctPosition;
-
-  // LIGHT: offer buffers for lighting vertices with different light types
-  #if defined(LIGHT)
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctNormal;
-uniform float u_fDiffuse;
-
-struct LightAmbient {
-  vec4 vctColor;
-};
-struct LightDirectional {
-  vec4 vctColor;
-  vec3 vctDirection;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-  #endif 
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-  #endif
-
-  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
-in vec3 a_vctNormal;
-uniform mat4 u_mtxNormalMeshToWorld;
-out vec2 v_vctTexture;
-  #endif
-
-  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA)
-uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
-}
-  #endif
-
-  #if defined(SKIN)
-uniform mat4 u_mtxMeshToWorld;
-// Bones
-struct Bone {
-  mat4 matrix;
-};
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-  // regular if not FLAT
-out vec4 v_vctColor;
-  #endif
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  mat4 mtxMeshToView = u_mtxMeshToView;
-
-    #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
-  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
-    #endif
-
-    #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
-    #endif
-
-    // calculate position and normal according to input and defines
-  gl_Position = mtxMeshToView * vctPosition;
-
-    #if defined(CAMERA)
-  // view vector needed
-  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
-  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
-    #endif
-
-    #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
-  // calculate the directional lighting effect
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
-    if(fIllumination > 0.0f) {
-      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
-        #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
-      v_vctColor += fReflection * u_directional[i].vctColor;
-        #endif
-    }
-  }
-    #endif
-
-    // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #endif
-
-    #if defined(MATCAP)
-  vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormal);
-  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
-  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
-  v_vctTexture.y *= -1.0;
-    #endif
-
-    // always full opacity for now...
-  v_vctColor.a = 1.0;
-}
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
-#define CAMERA
-#define MATCAP
-
-/**
-* Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
-*/
-
-precision mediump float;
-
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
-in vec4 v_vctColor;
-  #endif
-
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE) || defined(MATCAP)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
-out vec4 vctFrag;
-
-void main() {
-    // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
-  vctFrag *= v_vctColor;
-    #endif
-
-    // TEXTURE: multiply with texel color
-    #if defined(TEXTURE) || defined(MATCAP)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= vctColorTexture;
-    #endif
-
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}
-`;
-        }
-    }
-    ShaderMatCap.iSubclass = FudgeCore.Shader.registerSubclass(ShaderMatCap);
-    ShaderMatCap.define = [
-        "CAMERA",
-        "MATCAP"
-    ];
-    FudgeCore.ShaderMatCap = ShaderMatCap;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderPhong extends FudgeCore.Shader {
-        static getCoat() { return FudgeCore.CoatColored; }
-        static getVertexShaderSource() {
-            return `#version 300 es
+    FudgeCore.shaderSources = {};
+    FudgeCore.shaderSources["ShaderPhong.frag"] = `#version 300 es
 /**
 * Phong shading
-* Implementation based on https://www.gsn-lib.org/docs/nodes/ShaderPluginNode.php
-* @authors Luis Keck, HFU, 2021
+* @authors Jirka Dell'Oro-Friedl, HFU, 2022
 */
+
 precision highp float;
 
-in vec3 a_vctPosition;
-in vec3 a_vctNormalVertex;
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxMeshToView;
-uniform mat4 u_mtxNormalMeshToWorld;
-
-out vec3 f_normal;
-out vec3 v_position;
-
-void main() {
-  f_normal = vec3(u_mtxNormalMeshToWorld * vec4(a_vctNormalVertex, 0.0));
-  vec4 v_position4 = u_mtxMeshToWorld * vec4(a_vctPosition, 1.0);
-  v_position = vec3(v_position4) / v_position4.w;
-  gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
-}
-        
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
-/**
-* Phong shading
-* Implementation based on https://www.gsn-lib.org/docs/nodes/ShaderPluginNode.php
-* @authors Luis Keck, HFU, 2021
-*/
-precision highp float;
-
-struct LightAmbient {
-    vec4 color;
-};
-struct LightDirectional {
-    vec4 color;
-    vec3 direction;
-};
-
-const uint MAX_LIGHTS_DIRECTIONAL = 100u;
-uniform LightAmbient u_ambient;
-uniform uint u_nLightsDirectional;
-uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
-
-in vec3 f_normal;
-in vec3 v_position;
 uniform vec4 u_vctColor;
+uniform float u_fDiffuse;
 uniform float u_fSpecular;
+uniform mat4 u_mtxMeshToWorld;
+uniform vec3 u_vctCamera;
+
+in vec4 v_vctColor;
+in vec4 v_vctPosition;
+in vec3 v_vctNormal;
 out vec4 vctFrag;
 
-vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
-    vec3 color = vec3(1);
-    vec3 R = reflect(-light_dir, normal);
-    float spec_dot = max(dot(R, view_dir), 0.0);
-    color += pow(spec_dot, shininess);
-    return color;
+struct Light {
+  vec4 vctColor;
+  mat4 mtxShape;
+  mat4 mtxShapeInverse;
+};
+
+const uint MAX_LIGHTS_DIRECTIONAL = 10u;
+const uint MAX_LIGHTS_POINT = 50u;
+const uint MAX_LIGHTS_SPOT = 50u;
+
+uniform Light u_ambient;
+uniform uint u_nLightsDirectional;
+uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+uniform uint u_nLightsPoint;
+uniform Light u_point[MAX_LIGHTS_POINT];
+uniform uint u_nLightsSpot;
+uniform Light u_spot[MAX_LIGHTS_SPOT];
+
+float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
+  if(_fSpecular <= 0.0)
+    return 0.0;
+  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
+  float fHitCamera = dot(vctReflection, _vctView);
+  // attempted BLINN 
+  // vec3 halfway = normalize(_vctView + _vctLight);
+  // float fHitCamera = dot(-halfway, _vctNormal);
+  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
+}
+
+vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _vctView, float _fSpecular) {
+  vec4 vctResult = vec4(0, 0, 0, 1);
+  vec3 vctDirection = normalize(_vctDirection);
+  float fIllumination = -dot(_vctNormal, vctDirection);
+  if(fIllumination > 0.0f) {
+    vctResult += u_fDiffuse * fIllumination * _vctColor;
+    float fReflection = calculateReflection(vctDirection, _vctView, _vctNormal, _fSpecular);
+    vctResult += fReflection * _vctColor;
+  }
+  return vctResult;
 }
 
 void main() {
-    vctFrag = u_ambient.color;
-    for(uint i = 0u; i < u_nLightsDirectional; i++) {
-        vec3 light_dir = normalize(-u_directional[i].direction);
-        vec3 view_dir = normalize(v_position);
-        vec3 N = normalize(f_normal);
+  vctFrag = v_vctColor;
+  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * v_vctPosition) - u_vctCamera);
 
-        float illuminance = dot(light_dir, N);
-        if(illuminance > 0.0) {
-            vec3 reflection = calculateReflection(light_dir, view_dir, N, u_fSpecular);
-            vctFrag += vec4(reflection, 1.0) * illuminance * u_directional[i].color;
-        }
-    }
-    vctFrag *= u_vctColor;
-    vctFrag.a = 1.0;
-}       
-`;
-        }
-    }
-    ShaderPhong.iSubclass = FudgeCore.Shader.registerSubclass(ShaderPhong);
-    ShaderPhong.define = [];
-    FudgeCore.ShaderPhong = ShaderPhong;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderPick extends FudgeCore.Shader {
-        static getVertexShaderSource() {
-            return `#version 300 es
-/**
-* Renders for Raycasting
-* @authors Jirka Dell'Oro-Friedl, HFU, 2019
-*/
-in vec3 a_vctPosition;       
-uniform mat4 u_mtxMeshToView;
-
-void main() {   
-    gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
-}
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
+  for(uint i = 0u; i < u_nLightsDirectional; i++) {
+    vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
+    vctFrag += illuminateDirected(vctDirection, v_vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
+  }
+  // calculate point light effect
+  for(uint i = 0u; i < u_nLightsPoint; i++) {
+    vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
+    vec3 vctDirection = vec3(u_mtxMeshToWorld * v_vctPosition) - vctPositionLight;
+    float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
+    if(fIntensity < 0.0)
+      continue;
+    vctFrag += illuminateDirected(vctDirection, v_vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
+  }
+  // calculate spot light effect
+  for(uint i = 0u; i < u_nLightsSpot; i++) {
+    vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
+    vec3 vctDirection = vec3(u_mtxMeshToWorld * v_vctPosition) - vctPositionLight;
+    vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
+    if(vctDirectionInverted.z <= 0.0)
+      continue;
+    float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);
+    fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);
+    if(fIntensity < 0.0)
+      continue;
+    vctFrag += illuminateDirected(vctDirection, v_vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
+  }
+}`;
+    FudgeCore.shaderSources["ShaderPick.frag"] = `#version 300 es
 /**
 * Renders for Raycasting
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -12947,37 +11057,19 @@ void main() {
     uint icolor = uint(u_vctColor.r * 255.0) << 24 | uint(u_vctColor.g * 255.0) << 16 | uint(u_vctColor.b * 255.0) << 8 | uint(u_vctColor.a * 255.0);
                 
     vctFrag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, 0, 0);
-}
-`;
-        }
-    }
-    ShaderPick.define = [];
-    FudgeCore.ShaderPick = ShaderPick;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ShaderPickTextured extends FudgeCore.Shader {
-        static getVertexShaderSource() {
-            return `#version 300 es
+}`;
+    FudgeCore.shaderSources["ShaderPick.vert"] = `#version 300 es
 /**
 * Renders for Raycasting
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019
 */
 in vec3 a_vctPosition;       
-in vec2 a_vctTexture;
 uniform mat4 u_mtxMeshToView;
-uniform mat3 u_mtxPivot;
-
-out vec2 v_vctTexture;
 
 void main() {   
     gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
-    v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-}
-`;
-        }
-        static getFragmentShaderSource() {
-            return `#version 300 es
+}`;
+    FudgeCore.shaderSources["ShaderPickTextured.frag"] = `#version 300 es
 /**
 * Renders for Raycasting
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -13004,8 +11096,447 @@ void main() {
     uint icolor = uint(vctColor.r * 255.0) << 24 | uint(vctColor.g * 255.0) << 16 | uint(vctColor.b * 255.0) << 8 | uint(vctColor.a * 255.0);
   
   vctFrag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, floatBitsToInt(v_vctTexture.x), floatBitsToInt(v_vctTexture.y));
+}`;
+    FudgeCore.shaderSources["ShaderPickTextured.vert"] = `#version 300 es
+/**
+* Renders for Raycasting
+* @authors Jirka Dell'Oro-Friedl, HFU, 2019
+*/
+in vec3 a_vctPosition;       
+in vec2 a_vctTexture;
+uniform mat4 u_mtxMeshToView;
+uniform mat3 u_mtxPivot;
+
+out vec2 v_vctTexture;
+
+void main() {   
+    gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
+    v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+}`;
+    FudgeCore.shaderSources["ShaderUniversal.frag"] = `#version 300 es
+/**
+* Universal Shader as base for many others. Controlled by compiler directives
+* @authors Jirka Dell'Oro-Friedl, HFU, 2021
+*/
+
+precision mediump float;
+
+  // MINIMAL (no define needed): include base color
+uniform vec4 u_vctColor;
+
+  // FLAT: input vertex colors flat, so the third of a triangle determines the color
+  #if defined(FLAT) 
+flat in vec4 v_vctColor;
+  // LIGHT: input vertex colors for each vertex for interpolation over the face
+  #elif defined(LIGHT)
+in vec4 v_vctColor;
+  #endif
+
+  // TEXTURE: input UVs and texture
+  #if defined(TEXTURE) || defined(MATCAP)
+in vec2 v_vctTexture;
+uniform sampler2D u_texture;
+  #endif
+
+out vec4 vctFrag;
+
+void main() {
+    // MINIMAL: set the base color
+  vctFrag = u_vctColor;
+
+    // VERTEX: multiply with vertex color
+    #if defined(FLAT) || defined(LIGHT)
+  vctFrag *= v_vctColor;
+    #endif
+
+    // TEXTURE: multiply with texel color
+    #if defined(TEXTURE) || defined(MATCAP)
+  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+  vctFrag *= vctColorTexture;
+    #endif
+
+    // discard pixel alltogether when transparent: don't show in Z-Buffer
+  if(vctFrag.a < 0.01)
+    discard;
+}`;
+    FudgeCore.shaderSources["ShaderUniversal.vert"] = `#version 300 es
+/**
+* Universal Shader as base for many others. Controlled by compiler directives
+* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
+*/
+
+  // MINIMAL (no define needed): buffers for transformation
+uniform mat4 u_mtxMeshToView;
+in vec3 a_vctPosition;
+
+  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
+  #if defined(CAMERA)
+uniform float u_fSpecular;
+uniform mat4 u_mtxMeshToWorld;
+// uniform mat4 u_mtxWorldToView;
+uniform vec3 u_vctCamera;
+
+float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
+  if(_fSpecular <= 0.0)
+    return 0.0;
+  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
+  float fHitCamera = dot(vctReflection, _vctView);
+  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
 }
-`;
+  #endif
+
+  // LIGHT: offer buffers for lighting vertices with different light types
+  #if defined(LIGHT)
+uniform mat4 u_mtxNormalMeshToWorld;
+in vec3 a_vctNormal;
+uniform float u_fDiffuse;
+
+struct Light {
+  vec4 vctColor;
+  mat4 mtxShape;
+  mat4 mtxShapeInverse;
+};
+
+const uint MAX_LIGHTS_DIRECTIONAL = 10u;
+const uint MAX_LIGHTS_POINT = 50u;
+const uint MAX_LIGHTS_SPOT = 50u;
+
+uniform Light u_ambient;
+uniform uint u_nLightsDirectional;
+uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+uniform uint u_nLightsPoint;
+uniform Light u_point[MAX_LIGHTS_POINT];
+uniform uint u_nLightsSpot;
+uniform Light u_spot[MAX_LIGHTS_SPOT];
+
+vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _vctView, float _fSpecular) {
+  vec4 vctResult = vec4(0, 0, 0, 1);
+  vec3 vctDirection = normalize(_vctDirection);
+  float fIllumination = -dot(_vctNormal, vctDirection);
+  if(fIllumination > 0.0f) {
+    vctResult += u_fDiffuse * fIllumination * _vctColor;
+        #if defined(CAMERA)
+    float fReflection = calculateReflection(vctDirection, _vctView, _vctNormal, _fSpecular);
+    vctResult += fReflection * _vctColor;
+        #endif
+  }
+  return vctResult;
+}
+  #endif 
+
+  // TEXTURE: offer buffers for UVs and pivot matrix
+  #if defined(TEXTURE)
+uniform mat3 u_mtxPivot;
+in vec2 a_vctTexture;
+out vec2 v_vctTexture;
+  #endif
+
+  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
+in vec3 a_vctNormal;
+uniform mat4 u_mtxNormalMeshToWorld;
+uniform mat4 u_mtxWorldToCamera;
+out vec2 v_vctTexture;
+  #endif
+
+  #if defined(PHONG)
+out vec3 v_vctNormal;
+out vec4 v_vctPosition;
+  #endif
+
+  #if defined(SKIN)
+// uniform mat4 u_mtxMeshToWorld;
+// Bones
+struct Bone {
+  mat4 matrix;
+};
+
+const uint MAX_BONES = 10u;
+
+in uvec4 a_iBone;
+in vec4 a_fWeight;
+
+uniform Bone u_bones[MAX_BONES];
+  #endif
+
+  // FLAT: outbuffer is flat
+  #if defined(FLAT)
+flat out vec4 v_vctColor;
+  #else
+  // regular if not FLAT
+out vec4 v_vctColor;
+  #endif
+
+void main() {
+  vec4 vctPosition = vec4(a_vctPosition, 1.0);
+  mat4 mtxMeshToView = u_mtxMeshToView;
+
+    #if defined(LIGHT) || defined(MATCAP)
+  vec3 vctNormal = a_vctNormal;
+  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
+      #if defined(LIGHT)
+  v_vctColor = u_fDiffuse * u_ambient.vctColor;
+      #endif
+    #endif
+
+    #if defined(SKIN)
+  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
+    a_fWeight.y * u_bones[a_iBone.y].matrix +
+    a_fWeight.z * u_bones[a_iBone.z].matrix +
+    a_fWeight.w * u_bones[a_iBone.w].matrix;
+
+  mtxMeshToView *= mtxSkin;
+  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
+    #endif
+
+    // calculate position and normal according to input and defines
+  gl_Position = mtxMeshToView * vctPosition;
+
+    #if defined(CAMERA) || defined(MATCAP)
+  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
+    #endif
+
+    #if defined(LIGHT)
+  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
+      #if defined(PHONG)
+  v_vctNormal = vctNormal; // pass normal to fragment shader
+  v_vctPosition = vctPosition;
+      #endif  
+
+    #if !defined(PHONG)
+  // calculate directional light effect
+  for(uint i = 0u; i < u_nLightsDirectional; i++) {
+    vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
+    v_vctColor += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
+  }
+  // calculate point light effect
+  for(uint i = 0u; i < u_nLightsPoint; i++) {
+    vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
+    vec3 vctDirection = vec3(u_mtxMeshToWorld * vctPosition) - vctPositionLight;
+    float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
+    if(fIntensity < 0.0)
+      continue;
+    v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
+  }
+  // calculate spot light effect
+  for(uint i = 0u; i < u_nLightsSpot; i++) {
+    vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
+    vec3 vctDirection = vec3(u_mtxMeshToWorld * vctPosition) - vctPositionLight;
+    vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
+    if(vctDirectionInverted.z <= 0.0)
+      continue;
+    float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);
+    fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);
+    if(fIntensity < 0.0)
+      continue;
+    v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
+  }
+      #endif // PHONG
+    #endif
+
+    // TEXTURE: transform UVs
+    #if defined(TEXTURE)
+  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+    #endif
+
+    #if defined(MATCAP)
+  vec4 vctVertexInCamera = normalize(u_mtxWorldToCamera * vctPosition);
+  vctVertexInCamera.xy *= -1.0;
+  mat4 mtx_RotX = mat4(1, 0, 0, 0, 0, vctVertexInCamera.z, vctVertexInCamera.y, 0, 0, -vctVertexInCamera.y, vctVertexInCamera.z, 0, 0, 0, 0, 1);
+  mat4 mtx_RotY = mat4(vctVertexInCamera.z, 0, -vctVertexInCamera.x, 0, 0, 1, 0, 0, vctVertexInCamera.x, 0, vctVertexInCamera.z, 0, 0, 0, 0, 1);
+
+  vctNormal = mat3(u_mtxNormalMeshToWorld) * a_vctNormal;
+
+  // adds correction for things being far and to the side, but distortion for things being close
+  vctNormal = mat3(mtx_RotX * mtx_RotY) * vctNormal;
+  
+  vec3 vctReflection = normalize(mat3(u_mtxWorldToCamera) * normalize(vctNormal));
+  vctReflection.y = -vctReflection.y;
+
+  v_vctTexture = 0.5 * vctReflection.xy + 0.5;
+    #endif
+
+    // always full opacity for now...
+  v_vctColor.a = 1.0;
+}`;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    var Shader_1;
+    let Shader = Shader_1 = class Shader {
+        static getCoat() { return FudgeCore.CoatColored; }
+        static getVertexShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.vert"], this.define);
+        }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.frag"], this.define);
+        }
+        static deleteProgram() { }
+        static useProgram() { }
+        static createProgram() { }
+        static registerSubclass(_subclass) { return Shader_1.subclasses.push(_subclass) - 1; }
+        static insertDefines(_shader, _defines) {
+            if (!_defines)
+                return _shader;
+            let code = `#version 300 es\n`;
+            for (let define of _defines)
+                code += `#define ${define}\n`;
+            return _shader.replace("#version 300 es", code);
+        }
+    };
+    Shader.baseClass = Shader_1;
+    Shader.subclasses = [];
+    Shader = Shader_1 = __decorate([
+        FudgeCore.RenderInjectorShader.decorate
+    ], Shader);
+    FudgeCore.Shader = Shader;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderFlat extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatRemissive; }
+    }
+    ShaderFlat.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlat);
+    ShaderFlat.define = [
+        "LIGHT",
+        "FLAT",
+        "CAMERA"
+    ];
+    FudgeCore.ShaderFlat = ShaderFlat;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderFlatSkin extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatRemissive; }
+    }
+    ShaderFlatSkin.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlatSkin);
+    ShaderFlatSkin.define = [
+        "LIGHT",
+        "FLAT",
+        "SKIN",
+        "CAMERA"
+    ];
+    FudgeCore.ShaderFlatSkin = ShaderFlatSkin;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderFlatTextured extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatRemissiveTextured; }
+    }
+    ShaderFlatTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlatTextured);
+    ShaderFlatTextured.define = [
+        "LIGHT",
+        "FLAT",
+        "TEXTURE",
+        "CAMERA"
+    ];
+    FudgeCore.ShaderFlatTextured = ShaderFlatTextured;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderGouraud extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatRemissive; }
+    }
+    ShaderGouraud.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraud);
+    ShaderGouraud.define = [
+        "LIGHT",
+        "CAMERA"
+    ];
+    FudgeCore.ShaderGouraud = ShaderGouraud;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderGouraudSkin extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatRemissive; }
+    }
+    ShaderGouraudSkin.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudSkin);
+    ShaderGouraudSkin.define = [
+        "LIGHT",
+        "SKIN",
+        "CAMERA"
+    ];
+    FudgeCore.ShaderGouraudSkin = ShaderGouraudSkin;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderGouraudTextured extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatRemissiveTextured; }
+    }
+    ShaderGouraudTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudTextured);
+    ShaderGouraudTextured.define = [
+        "LIGHT",
+        "TEXTURE",
+        "CAMERA"
+    ];
+    FudgeCore.ShaderGouraudTextured = ShaderGouraudTextured;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderLit extends FudgeCore.Shader {
+    }
+    ShaderLit.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLit);
+    ShaderLit.define = [];
+    FudgeCore.ShaderLit = ShaderLit;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderLitTextured extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatTextured; }
+    }
+    ShaderLitTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLitTextured);
+    ShaderLitTextured.define = [
+        "TEXTURE"
+    ];
+    FudgeCore.ShaderLitTextured = ShaderLitTextured;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderMatCap extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatTextured; }
+    }
+    ShaderMatCap.iSubclass = FudgeCore.Shader.registerSubclass(ShaderMatCap);
+    ShaderMatCap.define = [
+        "MATCAP",
+        "CAMERA"
+    ];
+    FudgeCore.ShaderMatCap = ShaderMatCap;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderPhong extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatRemissive; }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
+        }
+    }
+    ShaderPhong.iSubclass = FudgeCore.Shader.registerSubclass(ShaderPhong);
+    ShaderPhong.define = [
+        "LIGHT",
+        "CAMERA",
+        "PHONG"
+    ];
+    FudgeCore.ShaderPhong = ShaderPhong;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderPick extends FudgeCore.Shader {
+        static getVertexShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderPick.vert"], this.define);
+        }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderPick.frag"], this.define);
+        }
+    }
+    ShaderPick.define = [];
+    FudgeCore.ShaderPick = ShaderPick;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderPickTextured extends FudgeCore.Shader {
+        static getVertexShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderPickTextured.vert"], this.define);
+        }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderPickTextured.frag"], this.define);
         }
     }
     ShaderPickTextured.define = [];
@@ -13412,7 +11943,7 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class Time extends FudgeCore.EventTargetƒ {
+    class Time extends FudgeCore.EventTargetUnified {
         constructor() {
             super();
             this.timers = {};

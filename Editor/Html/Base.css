@@ -79,6 +79,9 @@ ul.tree li {
 ul.tree li[attributes~="inactive"]>input {
   text-decoration: line-through;
 }
+ul.tree li[attributes~="GraphInstance"]>input {
+  font-style: italic;
+}
 
 ul.tree ul {
   padding-left: 1em;
@@ -249,6 +252,10 @@ option {
 
 fudge-boolean, fudge-color, fudge-textinput, fudge-stepper, fudge-select {
   display: block;
+}
+
+fudge-digit {
+  font-family: monospace;
 }
 
 /* custom elements */

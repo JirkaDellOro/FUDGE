@@ -27,10 +27,11 @@ declare namespace Fudge {
         CREATE_MESH = 7,
         CREATE_MATERIAL = 8,
         CREATE_GRAPH = 9,
-        REMOVE_COMPONENT = 10,
-        ADD_JOINT = 11,
-        DELETE_RESOURCE = 12,
-        ILLUMINATE = 13
+        SYNC_INSTANCES = 10,
+        REMOVE_COMPONENT = 11,
+        ADD_JOINT = 12,
+        DELETE_RESOURCE = 13,
+        ORTHGRAPHIC_CAMERA = 14
     }
     enum MENU {
         QUIT = "quit",
@@ -43,17 +44,6 @@ declare namespace Fudge {
         PANEL_PROJECT_OPEN = "panelProjectOpen",
         PANEL_HELP_OPEN = "panelHelpOpen",
         FULLSCREEN = "fullscreen"
-    }
-    enum EVENT_EDITOR {
-        SET_GRAPH = "setGraph",
-        FOCUS_NODE = "focusNode",
-        SET_PROJECT = "setProject",
-        UPDATE = "update",
-        REFRESH = "refresh",
-        DESTROY = "destroy",
-        CLEAR_PROJECT = "clearProject",
-        TRANSFORM = "transform",
-        SELECT_NODE = "selectNode"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
@@ -107,9 +97,33 @@ declare namespace Fudge {
     export {};
 }
 declare namespace Fudge {
+    enum EVENT_EDITOR {
+        CREATE = "EDITOR_CREATE",
+        SELECT = "EDITOR_SELECT",
+        MODIFY = "EDITOR_MODIFY",
+        DELETE = "EDITOR_DELETE",
+        CLOSE = "EDITOR_CLOSE",
+        TRANSFORM = "EDITOR_TRANSFORM",
+        FOCUS = "EDITOR_FOCUS"
+    }
+    interface EventDetail {
+        node?: ƒ.Node;
+        graph?: ƒ.Graph;
+        resource?: ƒ.SerializableResource;
+        mutable?: ƒ.Mutable;
+        transform?: Object;
+        view?: View;
+    }
+    /**
+     * Extension of CustomEvent that supports a detail field with the type EventDetail
+     */
+    class EditorEvent extends CustomEvent<EventDetail> {
+    }
+}
+declare namespace Fudge {
     let watcher: ƒ.General;
     function newProject(): Promise<void>;
-    function saveProject(_new?: boolean): Promise<void>;
+    function saveProject(_new?: boolean): Promise<boolean>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
 }
@@ -123,7 +137,6 @@ declare namespace Fudge {
         fileInternal: string;
         fileScript: string;
         fileStyles: string;
-        private includeAutoViewScript;
         private graphAutoView;
         constructor(_base: URL);
         openDialog(): Promise<boolean>;
@@ -136,7 +149,6 @@ declare namespace Fudge {
         protected reduceMutator(_mutator: ƒ.Mutator): void;
         private getGraphs;
         private createProjectHTML;
-        private getAutoViewScript;
         private settingsStringify;
         private panelsStringify;
         private stringifyHTML;
@@ -217,6 +229,7 @@ declare namespace Fudge {
         private static registerViewForDragDrop;
         setTitle(_title: string): void;
         getDragDropSources(): Object[];
+        dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
@@ -348,7 +361,7 @@ declare namespace Fudge {
         private views;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         /** Send custom copies of the given event to the views */
-        broadcastEvent: (_event: Event) => void;
+        broadcastEvent: (_event: EditorEvent) => void;
         abstract getState(): PanelState;
         private addViewComponent;
     }
@@ -367,13 +380,12 @@ declare namespace Fudge {
             [key: string]: string;
         };
         private hndEvent;
-        private hndFocusNode;
     }
 }
 declare namespace Fudge {
     /**
-    * Shows a graph and offers means for manipulation
-    * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+    * Shows a help and documentation
+    * @authors Jirka Dell'Oro-Friedl, HFU, 2021
     */
     class PanelHelp extends Panel {
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
@@ -493,6 +505,7 @@ declare namespace Fudge {
 declare namespace Fudge {
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     /**
      * View all components attached to a node
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -501,7 +514,9 @@ declare namespace Fudge {
         private node;
         private expanded;
         private selected;
+        private drag;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        getDragDropSources(): ƒ.ComponentCamera[];
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
@@ -524,18 +539,20 @@ declare namespace Fudge {
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewHierarchy extends View {
+        #private;
         private graph;
         private tree;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         setGraph(_graph: ƒ.Graph): void;
         getSelection(): ƒ.Node[];
         getDragDropSources(): ƒ.Node[];
-        focusNode(_node: ƒ.Node): void;
+        showNode(_node: ƒ.Node): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private hndEvent;
+        private checkGraphDrop;
     }
 }
 declare namespace Fudge {
@@ -550,7 +567,7 @@ declare namespace Fudge {
         private viewport;
         private canvas;
         private graph;
-        private viewGraph;
+        private nodeLight;
         constructor(_container: ComponentContainer, _state: JsonValue);
         createUserInterface(): void;
         setGraph(_node: ƒ.Graph): void;
@@ -559,7 +576,8 @@ declare namespace Fudge {
         protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
-        private illuminateGraph;
+        private setCameraOrthographic;
+        private hndPrepare;
         private hndEvent;
         private hndPick;
         private hndPointer;
@@ -587,7 +605,7 @@ declare namespace Fudge {
         private fillContent;
         private createStandardGraph;
         private setViewObject;
-        private illuminateGraph;
+        private illuminate;
         private createFilePreview;
         private createTextPreview;
         private createImagePreview;

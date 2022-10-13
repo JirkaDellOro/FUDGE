@@ -88,7 +88,7 @@ namespace FudgeCore {
     }
     set maxRotor(_value: number) {
       this.#maxRotor = _value;
-      if (this.joint != null) this.joint.getRotationalLimitMotor().upperLimit = _value * Math.PI / 180;
+      if (this.joint != null) this.joint.getRotationalLimitMotor().upperLimit = _value * Calc.deg2rad;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
@@ -98,7 +98,7 @@ namespace FudgeCore {
     }
     set minRotor(_value: number) {
       this.#minRotor = _value;
-      if (this.joint != null) this.joint.getRotationalLimitMotor().lowerLimit = _value * Math.PI / 180;
+      if (this.joint != null) this.joint.getRotationalLimitMotor().lowerLimit = _value * Calc.deg2rad;
     }
     /**
       * The target rotational speed of the motor in m/s. 
@@ -204,7 +204,7 @@ namespace FudgeCore {
 
       this.motor = new OIMO.TranslationalLimitMotor().setLimits(super.minMotor, super.maxMotor);
       this.motor.setMotor(super.motorSpeed, this.motorForce);
-      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.minRotor * Math.PI / 180, this.maxRotor * Math.PI / 180);
+      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.minRotor * Calc.deg2rad, this.maxRotor * Calc.deg2rad);
       this.#rotor.setMotor(this.rotorSpeed, this.rotorTorque);
 
       this.config = new OIMO.CylindricalJointConfig();

@@ -16,8 +16,12 @@ namespace Fudge {
       return ControllerTableResource.head;
     }
 
-    public getLabel(_object: ƒ.SerializableResource): string { return ""; }
-    public rename(_object: ƒ.SerializableResource, _new: string): boolean { return false; }
+    public getLabel(_object: ƒ.SerializableResource): string {
+      return "";
+    }
+    public rename(_object: ƒ.SerializableResource, _new: string): boolean {
+      return false;
+    }
     public copy(_originals: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]> { return null; }
 
     public async delete(_focussed: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]> {

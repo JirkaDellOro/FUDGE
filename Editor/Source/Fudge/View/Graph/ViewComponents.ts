@@ -21,22 +21,28 @@ namespace Fudge {
     private node: ƒ.Node;
     private expanded: { [type: string]: boolean } = { ComponentTransform: true };
     private selected: string = "ComponentTransform";
+    private drag: ƒ.ComponentCamera;
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
       this.fillContent();
 
-      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndTransform);
       // this.dom.addEventListener(ƒUi.EVENT.RENAME, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.EXPAND, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.COLLAPSE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
-      this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndTransform);
       this.dom.addEventListener(ƒUi.EVENT.CLICK, this.hndEvent, true);
       this.dom.addEventListener(ƒUi.EVENT.KEY_DOWN, this.hndEvent, true);
+      this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent, true);
+    }
+
+    public getDragDropSources(): ƒ.ComponentCamera[] {
+      return [this.drag];
     }
 
     //#region  ContextMenu
@@ -108,6 +114,7 @@ namespace Fudge {
       ƒ.Debug.info(cmpNew.type, cmpNew);
 
       this.node.addComponent(cmpNew);
+      this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
       this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: this.node } }));
     }
     //#endregion
@@ -140,7 +147,7 @@ namespace Fudge {
         this.node.addComponent(cmpNew);
         this.expanded[cmpNew.type] = true;
       }
-      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+      this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
     }
 
     private fillContent(): void {
@@ -171,6 +178,10 @@ namespace Fudge {
         Reflect.set(details, "controller", controller); // insert a link back to the controller
         details.expand(this.expanded[component.type]);
         this.dom.append(details);
+        if (component instanceof ƒ.ComponentCamera) {
+          details.draggable = true;
+          details.addEventListener("dragstart", (_event: Event) => { this.drag = <ƒ.ComponentCamera>component; });
+        }
         if (component instanceof ƒ.ComponentRigidbody) {
           let pivot: HTMLElement = controller.domElement.querySelector("[key=mtxPivot");
           let opacity: string = pivot.style.opacity;
@@ -181,24 +192,34 @@ namespace Fudge {
             pivot.style.opacity = initialization == ƒ.BODY_INIT.TO_PIVOT ? opacity : "0.3";
           }
         }
+        if (component instanceof ƒ.ComponentFaceCamera) {
+          let up: HTMLElement = controller.domElement.querySelector("[key=up");
+          let opacity: string = up.style.opacity;
+          setUpOpacity(null);
+          controller.domElement.addEventListener(ƒUi.EVENT.MUTATE, setUpOpacity);
+          function setUpOpacity(_event: Event): void {
+            let upLocal: boolean = controller.getMutator({ upLocal: true }).upLocal;
+            up.style.opacity = !upLocal ? opacity : "0.3";
+          }
+        }
         if (details.getAttribute("key") == this.selected)
           this.select(details, false);
       }
     }
 
-    private hndEvent = (_event: CustomEvent): void => {
+    private hndEvent = (_event: EditorEvent): void => {
       switch (_event.type) {
         // case ƒui.EVENT.RENAME: break;
-        case EVENT_EDITOR.SET_GRAPH:
-        case EVENT_EDITOR.FOCUS_NODE:
-          this.node = _event.detail;
-        case EVENT_EDITOR.UPDATE:
+        case EVENT_EDITOR.SELECT:
+        // case EVENT_EDITOR.FOCUS:
+          this.node = _event.detail.graph || _event.detail.node;
+        case EVENT_EDITOR.MODIFY:
           this.fillContent();
           break;
         case ƒUi.EVENT.DELETE:
-          let component: ƒ.Component = _event.detail.mutable;
+          let component: ƒ.Component = <ƒ.Component>_event.detail.mutable;
           this.node.removeComponent(component);
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           break;
         case ƒUi.EVENT.KEY_DOWN:
         case ƒUi.EVENT.CLICK:
@@ -222,12 +243,19 @@ namespace Fudge {
         case ƒUi.EVENT.EXPAND:
         case ƒUi.EVENT.COLLAPSE:
           this.expanded[(<ƒUi.Details>_event.target).getAttribute("type")] = (_event.type == ƒUi.EVENT.EXPAND);
+          break;
+        case ƒUi.EVENT.MUTATE:
+          let cmpRigidbody: ƒ.ComponentRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
+          if (cmpRigidbody) {
+            cmpRigidbody.initialize();
+            // this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: this.node } });
+          }
         default:
           break;
       }
     }
 
-    private hndTransform = (_event: CustomEvent): void => {
+    private hndTransform = (_event: EditorEvent): void => {
       if (!this.getSelected())
         return;
 
@@ -237,7 +265,7 @@ namespace Fudge {
       if (!mtxTransform)
         return;
 
-      let dtl: ƒ.General = _event.detail;
+      let dtl: ƒ.General = _event.detail.transform;
       let mtxCamera: ƒ.Matrix4x4 = (<ƒ.ComponentCamera>dtl.camera).node.mtxWorld;
       let distance: number = mtxCamera.getTranslationTo(this.node.mtxWorld).magnitude;
       if (dtl.transform == TRANSFORM.ROTATE)

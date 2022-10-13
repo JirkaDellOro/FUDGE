@@ -242,22 +242,22 @@ namespace FudgeCore {
     * A cameraprojection with extremely narrow focus is used, so each pixel of the buffer would hold the same information from the node,  
     * but the fragment shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
     */
-    protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void { // create Texture to render to, int-rgba
+    protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _cmpCamera: ComponentCamera): void { // create Texture to render to, int-rgba
       try {
-        let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-
+        let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let coat: Coat = cmpMaterial.material.coat;
         let shader: typeof Shader = coat instanceof CoatTextured ? ShaderPickTextured : ShaderPick;
 
         shader.useProgram();
         coat.useRenderData(shader, cmpMaterial);
+        let mtxMeshToView: Matrix4x4 = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
 
         let sizeUniformLocation: WebGLUniformLocation = shader.uniforms["u_vctSize"];
         RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, [RenderWebGL.sizePick, RenderWebGL.sizePick]);
 
         let mesh: Mesh = cmpMesh.mesh;
-        let renderBuffers: RenderBuffers = mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView, Render.ƒpicked.length);
+        let renderBuffers: RenderBuffers = mesh.useRenderBuffers(shader, _mtxMeshToWorld, mtxMeshToView, Render.ƒpicked.length);
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
 
         let pick: Pick = new Pick(_node);
@@ -280,7 +280,7 @@ namespace FudgeCore {
       let ambient: WebGLUniformLocation = uni["u_ambient.vctColor"];
       if (ambient) {
         RenderWebGL.crc3.uniform4fv(ambient, [0, 0, 0, 0]);
-        let cmpLights: ComponentLight[] = _lights.get(LightAmbient);
+        let cmpLights: RecycableArray<ComponentLight> = _lights.get(LightAmbient);
         if (cmpLights) {
           // TODO: add up ambient lights to a single color
           let result: Color = new Color(0, 0, 0, 1);
@@ -290,22 +290,32 @@ namespace FudgeCore {
         }
       }
 
-      // Directional
-      let nDirectional: WebGLUniformLocation = uni["u_nLightsDirectional"];
-      if (nDirectional) {
-        RenderWebGL.crc3.uniform1ui(nDirectional, 0);
-        let cmpLights: ComponentLight[] = _lights.get(LightDirectional);
-        if (cmpLights) {
-          let n: number = cmpLights.length;
-          RenderWebGL.crc3.uniform1ui(nDirectional, n);
-          for (let i: number = 0; i < n; i++) {
-            let cmpLight: ComponentLight = cmpLights[i];
-            RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].vctColor`], cmpLight.light.color.getArray());
-            let direction: Vector3 = Vector3.Z();
-            direction.transform(cmpLight.mtxPivot, false);
-            direction.transform(cmpLight.node.mtxWorld, false);
-            direction.normalize();
-            RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].vctDirection`], direction.get());
+      fillLightBuffers(LightDirectional, "u_nLightsDirectional", "u_directional");
+      fillLightBuffers(LightPoint, "u_nLightsPoint", "u_point");
+      fillLightBuffers(LightSpot, "u_nLightsSpot", "u_spot");
+
+      function fillLightBuffers(_type: TypeOfLight, _uniNumber: string, _uniStruct: string): void {
+        let uniLights: WebGLUniformLocation = uni[_uniNumber];
+        if (uniLights) {
+          RenderWebGL.crc3.uniform1ui(uniLights, 0);
+          let cmpLights: RecycableArray<ComponentLight> = _lights.get(_type);
+          if (cmpLights) {
+            let n: number = cmpLights.length;
+            RenderWebGL.crc3.uniform1ui(uniLights, n);
+            let i: number = 0;
+            for (let cmpLight of cmpLights) {
+              RenderWebGL.crc3.uniform4fv(uni[`${_uniStruct}[${i}].vctColor`], cmpLight.light.color.getArray());
+              //TODO: could be optimized, no need to calculate for each shader
+              let mtxTotal: Matrix4x4 = Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
+              RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShape`], false, mtxTotal.get());
+              if (_type != LightDirectional) {
+                let mtxInverse: Matrix4x4 = mtxTotal.inverse();
+                RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShapeInverse`], false, mtxInverse.get());
+                Recycler.store(mtxInverse);
+              }
+              Recycler.store(mtxTotal);
+              i++;
+            }
           }
         }
       }
@@ -315,25 +325,52 @@ namespace FudgeCore {
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
      */
-    protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _cmpCamera: ComponentCamera): void {
-      let shader: typeof Shader = cmpMaterial.material.getShader();
+    protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void {
+      let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
+      let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
       let coat: Coat = cmpMaterial.material.coat;
-      let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, _cmpMesh.mtxWorld);
-      shader.useProgram();
-      let renderBuffers: RenderBuffers;
-      if (_cmpMesh.mesh instanceof MeshSkin)
-        renderBuffers = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
-      else
-        renderBuffers = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView);
+      let shader: typeof Shader = cmpMaterial.material.getShader();
 
+      shader.useProgram();
       coat.useRenderData(shader, cmpMaterial);
-      let uCamera: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
-      if (uCamera)
-        RenderWebGL.crc3.uniform3fv(uCamera, _cmpCamera.mtxWorld.translation.get());
-      let uWorldToView: WebGLUniformLocation = shader.uniforms["u_mtxWorldToView"];
-      if (uWorldToView)
-        RenderWebGL.crc3.uniformMatrix4fv(uWorldToView, false, _cmpCamera.mtxWorldToView.get());
+      let mtxMeshToView: Matrix4x4 = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
+      let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
+
+      let uniform: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
+      if (uniform)
+        RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
+
+      uniform = shader.uniforms["u_mtxWorldToView"];
+      if (uniform)
+        RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxWorldToView.get());
+
+      uniform = shader.uniforms["u_mtxWorldToCamera"];
+      if (uniform) {
+        // let mtxWorldToCamera: Matrix4x4 = Matrix4x4.INVERSION(_cmpCamera.mtxWorld); // todo: optimize/store in camera
+        RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
+      }
+
       RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+    }
+
+    private static calcMeshToView(_node: Node, _cmpMesh: ComponentMesh, _mtxWorldToView: Matrix4x4, _target?: Vector3): Matrix4x4 {
+      let cmpFaceCamera: ComponentFaceCamera = _node.getComponent(ComponentFaceCamera);
+      if (cmpFaceCamera && cmpFaceCamera.isActive) {
+        let mtxMeshToView: Matrix4x4;
+        mtxMeshToView = _cmpMesh.mtxWorld.clone;
+        mtxMeshToView.lookAt(_target, cmpFaceCamera.upLocal ? null : cmpFaceCamera.up, cmpFaceCamera.restrict);
+        return Matrix4x4.MULTIPLICATION(_mtxWorldToView, mtxMeshToView);
+      }
+
+      return Matrix4x4.MULTIPLICATION(_mtxWorldToView, _cmpMesh.mtxWorld);
+    }
+
+    private static getRenderBuffers(_cmpMesh: ComponentMesh, _shader: typeof Shader, _mtxMeshToView: Matrix4x4): RenderBuffers {
+      if (_cmpMesh.mesh instanceof MeshSkin)
+        // TODO: make mesh skin pickable
+        return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
+      else
+        return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView);
     }
   }
 }

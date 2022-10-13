@@ -34,7 +34,8 @@ namespace Fudge {
       "CustomComponentScript.txt": "Source/CustomComponentScript.ts",
       "Main.txt": "Source/Main.ts",
       "tsconfig.txt": "Source/tsconfig.json",
-      "Script.txt": " Build/Script.js"
+      "Script.txt": " Build/Script.js",
+      "Autoview.js": "../Autoview.js"
     };
     copyFiles(copyTemplates, new URL("Editor/Source/Template/", ƒPath), new URL("Script/", base));
 
@@ -52,15 +53,14 @@ namespace Fudge {
     }
   }
 
-  export async function saveProject(_new: boolean = false): Promise<void> {
+  export async function saveProject(_new: boolean = false): Promise<boolean> {
     if (!project)
-      return;
+      return false;
 
     if (!await project.openDialog())
-      return;
+      return false;
 
-    if (watcher)
-      watcher.close();
+    unwatchFolder();
 
     let base: URL = project.base;
 
@@ -77,6 +77,7 @@ namespace Fudge {
     fs.writeFileSync(jsonFileName, project.getProjectJSON());
 
     watchFolder();
+    return true;
   }
 
   export async function promptLoadProject(): Promise<URL> {
@@ -95,11 +96,9 @@ namespace Fudge {
     ƒ.Debug.info(htmlContent);
     ƒ.Debug.groupEnd();
 
-    if (watcher)
-      watcher.close();
+    unwatchFolder();
 
     project = new Project(_url);
-
     await project.load(htmlContent);
 
     watchFolder();
@@ -112,15 +111,23 @@ namespace Fudge {
     async function hndFileChange(_event: string, _url: URL): Promise<void> {
       let filename: string = _url.toString();
       if (filename == project.fileIndex || filename == project.fileInternal || filename == project.fileScript) {
-        watcher.close();
+        unwatchFolder();
         let promise: Promise<boolean> = ƒui.Dialog.prompt(null, false, "Important file change", "Reload project?", "Reload", "Cancel");
         if (await promise) {
           await loadProject(project.base);
         } else
           watcher = fs.watch(dir, { recursive: true }, hndFileChange);
-        document.dispatchEvent(new Event(EVENT_EDITOR.UPDATE));
+        document.dispatchEvent(new Event(EVENT_EDITOR.MODIFY));
       }
     }
+  }
+
+
+  function unwatchFolder(): void {
+    if (!watcher)
+      return;
+    watcher.unref();
+    watcher.close();
   }
 }
 

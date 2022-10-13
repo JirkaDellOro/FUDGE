@@ -37,10 +37,11 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 7] = "CREATE_MESH";
         CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 8] = "CREATE_MATERIAL";
         CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 9] = "CREATE_GRAPH";
-        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 10] = "REMOVE_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 11] = "ADD_JOINT";
-        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 12] = "DELETE_RESOURCE";
-        CONTEXTMENU[CONTEXTMENU["ILLUMINATE"] = 13] = "ILLUMINATE";
+        CONTEXTMENU[CONTEXTMENU["SYNC_INSTANCES"] = 10] = "SYNC_INSTANCES";
+        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 11] = "REMOVE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 12] = "ADD_JOINT";
+        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 13] = "DELETE_RESOURCE";
+        CONTEXTMENU[CONTEXTMENU["ORTHGRAPHIC_CAMERA"] = 14] = "ORTHGRAPHIC_CAMERA";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -55,18 +56,6 @@ var Fudge;
         MENU["PANEL_HELP_OPEN"] = "panelHelpOpen";
         MENU["FULLSCREEN"] = "fullscreen";
     })(MENU = Fudge.MENU || (Fudge.MENU = {}));
-    let EVENT_EDITOR;
-    (function (EVENT_EDITOR) {
-        EVENT_EDITOR["SET_GRAPH"] = "setGraph";
-        EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
-        EVENT_EDITOR["SET_PROJECT"] = "setProject";
-        EVENT_EDITOR["UPDATE"] = "update";
-        EVENT_EDITOR["REFRESH"] = "refresh";
-        EVENT_EDITOR["DESTROY"] = "destroy";
-        EVENT_EDITOR["CLEAR_PROJECT"] = "clearProject";
-        EVENT_EDITOR["TRANSFORM"] = "transform";
-        EVENT_EDITOR["SELECT_NODE"] = "selectNode";
-    })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
         PANEL["GRAPH"] = "PanelGraph";
@@ -183,6 +172,25 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    let EVENT_EDITOR;
+    (function (EVENT_EDITOR) {
+        EVENT_EDITOR["CREATE"] = "EDITOR_CREATE";
+        EVENT_EDITOR["SELECT"] = "EDITOR_SELECT";
+        EVENT_EDITOR["MODIFY"] = "EDITOR_MODIFY";
+        EVENT_EDITOR["DELETE"] = "EDITOR_DELETE";
+        EVENT_EDITOR["CLOSE"] = "EDITOR_CLOSE";
+        EVENT_EDITOR["TRANSFORM"] = "EDITOR_TRANSFORM";
+        EVENT_EDITOR["FOCUS"] = "EDITOR_FOCUS";
+    })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
+    /**
+     * Extension of CustomEvent that supports a detail field with the type EventDetail
+     */
+    class EditorEvent extends CustomEvent {
+    }
+    Fudge.EditorEvent = EditorEvent;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     const fs = require("fs");
     var ƒui = FudgeUserInterface;
     async function newProject() {
@@ -205,7 +213,8 @@ var Fudge;
             "CustomComponentScript.txt": "Source/CustomComponentScript.ts",
             "Main.txt": "Source/Main.ts",
             "tsconfig.txt": "Source/tsconfig.json",
-            "Script.txt": " Build/Script.js"
+            "Script.txt": " Build/Script.js",
+            "Autoview.js": "../Autoview.js"
         };
         copyFiles(copyTemplates, new URL("Editor/Source/Template/", ƒPath), new URL("Script/", base));
         let definition = await fetch("https://JirkaDellOro.github.io/FUDGE/Core/Build/FudgeCore.d.ts");
@@ -222,11 +231,10 @@ var Fudge;
     }
     async function saveProject(_new = false) {
         if (!Fudge.project)
-            return;
+            return false;
         if (!await Fudge.project.openDialog())
-            return;
-        if (Fudge.watcher)
-            Fudge.watcher.close();
+            return false;
+        unwatchFolder();
         let base = Fudge.project.base;
         if (_new) {
             let cssFileName = new URL(Fudge.project.fileStyles, base);
@@ -238,6 +246,7 @@ var Fudge;
         let jsonFileName = new URL(Fudge.project.fileInternal, base);
         fs.writeFileSync(jsonFileName, Fudge.project.getProjectJSON());
         watchFolder();
+        return true;
     }
     Fudge.saveProject = saveProject;
     async function promptLoadProject() {
@@ -255,8 +264,7 @@ var Fudge;
         ƒ.Debug.groupCollapsed("File content");
         ƒ.Debug.info(htmlContent);
         ƒ.Debug.groupEnd();
-        if (Fudge.watcher)
-            Fudge.watcher.close();
+        unwatchFolder();
         Fudge.project = new Fudge.Project(_url);
         await Fudge.project.load(htmlContent);
         watchFolder();
@@ -268,16 +276,22 @@ var Fudge;
         async function hndFileChange(_event, _url) {
             let filename = _url.toString();
             if (filename == Fudge.project.fileIndex || filename == Fudge.project.fileInternal || filename == Fudge.project.fileScript) {
-                Fudge.watcher.close();
+                unwatchFolder();
                 let promise = ƒui.Dialog.prompt(null, false, "Important file change", "Reload project?", "Reload", "Cancel");
                 if (await promise) {
                     await loadProject(Fudge.project.base);
                 }
                 else
                     Fudge.watcher = fs.watch(dir, { recursive: true }, hndFileChange);
-                document.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE));
+                document.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY));
             }
         }
+    }
+    function unwatchFolder() {
+        if (!Fudge.watcher)
+            return;
+        Fudge.watcher.unref();
+        Fudge.watcher.close();
     }
 })(Fudge || (Fudge = {}));
 var Fudge;
@@ -293,7 +307,7 @@ var Fudge;
         fileScript = "Script/Build/Script.js";
         fileStyles = "styles.css";
         #document;
-        includeAutoViewScript = true;
+        // private includeAutoViewScript: boolean = true;
         graphAutoView = "";
         constructor(_base) {
             super();
@@ -322,7 +336,6 @@ var Fudge;
             const parser = new DOMParser();
             this.#document = parser.parseFromString(htmlContent, "text/html");
             const head = this.#document.querySelector("head");
-            //TODO: should old scripts be removed from memory first? How?
             const scripts = head.querySelectorAll("script");
             for (let script of scripts) {
                 if (script.getAttribute("editor") == "true") {
@@ -370,13 +383,14 @@ var Fudge;
             settings.setAttribute("autoview", this.graphAutoView);
             settings.setAttribute("project", this.settingsStringify());
             settings.setAttribute("panels", this.panelsStringify());
-            let autoViewScript = this.#document.querySelector("script[name=autoView]");
-            if (this.includeAutoViewScript) {
-                if (!autoViewScript)
-                    this.#document.head.appendChild(this.getAutoViewScript());
-            }
-            else if (autoViewScript)
-                this.#document.head.removeChild(autoViewScript);
+            // let autoViewScript: HTMLScriptElement = this.#document.querySelector("script[name=autoView]");
+            // if (this.includeAutoViewScript) {
+            //   if (!autoViewScript)
+            //     this.#document.head.appendChild(this.getAutoViewScript());
+            // }
+            // else
+            //   if (autoViewScript)
+            //     this.#document.head.removeChild(autoViewScript);
             return this.stringifyHTML(this.#document);
         }
         getMutatorAttributeTypes(_mutator) {
@@ -393,11 +407,10 @@ var Fudge;
             delete _mutator.fileStyles;
         }
         getGraphs() {
-            let graphs = ƒ.Project.getResourcesOfType(ƒ.Graph);
+            let graphs = ƒ.Project.getResourcesByType(ƒ.Graph);
             let result = {};
-            for (let id in graphs) {
-                let graph = graphs[id];
-                result[graph.name] = id;
+            for (let graph of graphs) {
+                result[graph.name] = graph.idResource;
             }
             return result;
         }
@@ -412,7 +425,7 @@ var Fudge;
             }));
             html.head.appendChild(html.createComment("CRLF"));
             html.head.appendChild(html.createComment("Activate the following line to include the FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!"));
-            html.head.appendChild(html.createComment(`<script type="text/javascript" src="../../../Physics/OimoPhysics.js"></script>`));
+            html.head.appendChild(html.createComment(`<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js"></script>`));
             html.head.appendChild(html.createComment("CRLF"));
             html.head.appendChild(html.createComment("Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks"));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js" }));
@@ -424,11 +437,15 @@ var Fudge;
             html.head.appendChild(html.createComment("Load custom scripts"));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: this.fileScript, editor: "true" }));
             html.head.appendChild(html.createComment("CRLF"));
-            if (this.includeAutoViewScript)
-                html.head.appendChild(this.getAutoViewScript());
+            // if (this.includeAutoViewScript)
+            //   html.head.appendChild(this.getAutoViewScript());
+            html.head.appendChild(html.createComment("Load Autoview script"));
+            html.head.appendChild(createTag("script", { type: "text/javascript", src: "Autoview.js" }));
+            html.head.appendChild(html.createComment("CRLF"));
             html.body.appendChild(html.createComment("Dialog shown at startup only"));
             let dialog = createTag("dialog");
-            dialog.appendChild(createTag("h1", {}, "Title (will be replaced by autoView)"));
+            dialog.appendChild(createTag("p", {}, "FUDGE Autoview"));
+            dialog.appendChild(createTag("h1", {}, "Title (will be replaced by Autoview)"));
             dialog.appendChild(createTag("p", {}, "click to start"));
             html.body.appendChild(dialog);
             html.body.appendChild(html.createComment("Canvas for FUDGE to render to"));
@@ -443,68 +460,69 @@ var Fudge;
             }
             return this.stringifyHTML(html);
         }
-        getAutoViewScript() {
-            let code;
-            code = (function (_graphId) {
-                /**
-                 * AutoView-Script
-                 * Loads and displays the selected graph and implements a basic orbit camera
-                 * @author Jirka Dell'Oro-Friedl, HFU, 2021
-                 */
-                window.addEventListener("load", init);
-                // show dialog for startup
-                let dialog;
-                function init(_event) {
-                    dialog = document.querySelector("dialog");
-                    dialog.querySelector("h1").textContent = document.title;
-                    dialog.addEventListener("click", function (_event) {
-                        // @ts-ignore until HTMLDialog is implemented by all browsers and available in dom.d.ts
-                        dialog.close();
-                        startInteractiveViewport();
-                    });
-                    //@ts-ignore
-                    dialog.showModal();
-                }
-                // setup and start interactive viewport
-                async function startInteractiveViewport() {
-                    // load resources referenced in the link-tag
-                    await FudgeCore.Project.loadResourcesFromHTML();
-                    FudgeCore.Debug.log("Project:", FudgeCore.Project.resources);
-                    // pick the graph to show
-                    let graph = FudgeCore.Project.resources[_graphId];
-                    FudgeCore.Debug.log("Graph:", graph);
-                    if (!graph) {
-                        alert("Nothing to render. Create a graph with at least a mesh, material and probably some light");
-                        return;
-                    }
-                    // setup the viewport
-                    let cmpCamera = new FudgeCore.ComponentCamera();
-                    let canvas = document.querySelector("canvas");
-                    let viewport = new FudgeCore.Viewport();
-                    viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
-                    FudgeCore.Debug.log("Viewport:", viewport);
-                    // hide the cursor when interacting, also suppressing right-click menu
-                    canvas.addEventListener("mousedown", canvas.requestPointerLock);
-                    canvas.addEventListener("mouseup", function () { document.exitPointerLock(); });
-                    // make the camera interactive (complex method in FudgeAid)
-                    FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
-                    // setup audio
-                    let cmpListener = new ƒ.ComponentAudioListener();
-                    cmpCamera.node.addComponent(cmpListener);
-                    FudgeCore.AudioManager.default.listenWith(cmpListener);
-                    FudgeCore.AudioManager.default.listenTo(graph);
-                    FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);
-                    // draw viewport once for immediate feedback
-                    viewport.draw();
-                    canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));
-                }
-            }).toString();
-            code = "(" + code + `)(document.head.querySelector("meta[autoView]").getAttribute("autoView"));\n`;
-            let script = document.createElement("script");
-            script.setAttribute("name", "autoView");
-            script.textContent = code;
-            return script;
-        }
+        // private getAutoViewScript(): HTMLScriptElement {
+        //   let code: string;
+        //   code = (function (_graphId: string): void {
+        //     /**
+        //      * AutoView-Script
+        //      * Loads and displays the selected graph and implements a basic orbit camera
+        //      * @author Jirka Dell'Oro-Friedl, HFU, 2021
+        //      */
+        //     window.addEventListener("load", init);
+        //     // show dialog for startup
+        //     let dialog: HTMLDialogElement;
+        //     function init(_event: Event): void {
+        //       dialog = document.querySelector("dialog");
+        //       dialog.querySelector("h1").textContent = document.title;
+        //       dialog.addEventListener("click", function (_event: Event): void {
+        //         // @ts-ign re until HTMLDialog is implemented by all browsers and available in dom.d.ts
+        //         dialog.close();
+        //         startInteractiveViewport();
+        //       });
+        //       //@ts-ignore
+        //       dialog.showModal();
+        //     }
+        //     // setup and start interactive viewport
+        //     async function startInteractiveViewport(): Promise<void> {
+        //       // load resources referenced in the link-tag
+        //       await FudgeCore.Project.loadResourcesFromHTML();
+        //       FudgeCore.Debug.log("Project:", FudgeCore.Project.resources);
+        //       // pick the graph to show
+        //       let graph: ƒ.Graph = <ƒ.Graph>FudgeCore.Project.resources[_graphId];
+        //       FudgeCore.Debug.log("Graph:", graph);
+        //       if (!graph) {
+        //         alert("Nothing to render. Create a graph with at least a mesh, material and probably some light");
+        //         return;
+        //       }
+        //       // setup the viewport
+        //       let cmpCamera: ƒ.ComponentCamera = new FudgeCore.ComponentCamera();
+        //       let canvas: HTMLCanvasElement = document.querySelector("canvas");
+        //       let viewport: ƒ.Viewport = new FudgeCore.Viewport();
+        //       viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
+        //       FudgeCore.Debug.log("Viewport:", viewport);
+        //       // hide the cursor when interacting, also suppressing right-click menu
+        //       canvas.addEventListener("mousedown", canvas.requestPointerLock);
+        //       canvas.addEventListener("mouseup", function (): void { document.exitPointerLock(); });
+        //       // make the camera interactive (complex method in FudgeAid)
+        //       let cameraOrbit: FudgeAid.CameraOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
+        //       // setup audio
+        //       let cmpListener: ƒ.ComponentAudioListener = new ƒ.ComponentAudioListener();
+        //       cmpCamera.node.addComponent(cmpListener);
+        //       FudgeCore.AudioManager.default.listenWith(cmpListener);
+        //       FudgeCore.AudioManager.default.listenTo(graph);
+        //       FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);
+        //       // draw viewport once for immediate feedback
+        //       FudgeCore.Render.prepare(cameraOrbit);
+        //       viewport.draw();
+        //       canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));
+        //     }
+        //   }).toString();
+        //   code = "(" + code + `)(document.head.querySelector("meta[autoView]").getAttribute("autoView"));\n`;
+        //   let script: HTMLScriptElement = document.createElement("script");
+        //   script.setAttribute("name", "autoView");
+        //   script.textContent = code;
+        //   return script;
+        // }
         settingsStringify() {
             let settings = JSON.stringify(Fudge.project.getMutator());
             settings = settings.replace(/"/g, "'");
@@ -550,6 +568,7 @@ var Fudge;
         static panels = [];
         static physics = {};
         static setDefaultProject() {
+            console.log("Set default project in local storage", Fudge.project);
             if (Fudge.project)
                 localStorage.setItem("project", Fudge.project.base.toString());
         }
@@ -640,19 +659,15 @@ var Fudge;
         }
         //#region Page-Events from DOM
         static setupPageListeners() {
-            document.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.SELECT, Page.hndEvent);
             document.addEventListener("mutate" /* MUTATE */, Page.hndEvent);
-            document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
-            document.addEventListener(Fudge.EVENT_EDITOR.REFRESH, Page.hndEvent);
-            document.addEventListener(Fudge.EVENT_EDITOR.DESTROY, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
         }
         /** Send custom copies of the given event to the views */
         static broadcastEvent(_event) {
-            for (let panel of Page.panels) {
-                let event = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
-                panel.dom.dispatchEvent(event);
-            }
+            for (let panel of Page.panels)
+                panel.dispatch(_event.type, { detail: _event.detail });
         }
         static hndKey = (_event) => {
             document.exitPointerLock();
@@ -670,19 +685,13 @@ var Fudge;
             }
         };
         static hndEvent(_event) {
-            // ƒ.Debug.fudge("Page received", _event.type, _event);
             switch (_event.type) {
-                case Fudge.EVENT_EDITOR.DESTROY:
-                    let view = _event.detail;
+                case Fudge.EVENT_EDITOR.CLOSE:
+                    let view = _event.detail.view;
                     if (view instanceof Fudge.Panel)
                         Page.panels.splice(Page.panels.indexOf(view), 1);
                     console.log("Panels", Page.panels);
                     break;
-                case Fudge.EVENT_EDITOR.SET_GRAPH:
-                    let panel = Page.find(Fudge.PanelGraph);
-                    if (!panel.length)
-                        Page.add(Fudge.PanelGraph, null);
-                // break;
                 default:
                     Page.broadcastEvent(_event);
                     break;
@@ -696,12 +705,10 @@ var Fudge;
             }
         };
         static async loadProject(_url) {
-            Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.CLEAR_PROJECT));
             await Fudge.loadProject(_url);
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-            Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_PROJECT));
         }
         //#region Main-Events from Electron
         static setupMainListeners() {
@@ -711,11 +718,10 @@ var Fudge;
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-                Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_PROJECT));
             });
-            Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_SAVE, (_event, _args) => {
-                Fudge.saveProject();
-                Page.setDefaultProject();
+            Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_SAVE, async (_event, _args) => {
+                if (await Fudge.saveProject())
+                    Page.setDefaultProject();
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_LOAD, async (_event, _args) => {
                 let url = await Fudge.promptLoadProject();
@@ -725,7 +731,6 @@ var Fudge;
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_GRAPH_OPEN, (_event, _args) => {
                 Page.add(Fudge.PanelGraph, null);
-                // Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.UPDATE, { detail: node }));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PROJECT_OPEN, (_event, _args) => {
                 Page.add(Fudge.PanelProject, null);
@@ -857,10 +862,10 @@ var Fudge;
             //_container.getElement().append(this.dom); //old
             _container.element.appendChild(this.dom);
             this.container = _container;
-            this.container.on("destroy", () => this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.DESTROY, { bubbles: true, detail: this })));
+            this.container.on("destroy", () => this.dispatch(Fudge.EVENT_EDITOR.CLOSE, { bubbles: true, detail: { view: this } }));
             // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
+            // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
             this.id = View.registerViewForDragDrop(this);
         }
         static getViewSource(_event) {
@@ -887,7 +892,7 @@ var Fudge;
                 // _event.stopPropagation();
                 let viewSource = View.getViewSource(_event);
                 _this.hndDrop(_event, viewSource);
-            }, true);
+            }, false);
             return View.idCount++;
         }
         setTitle(_title) {
@@ -895,6 +900,13 @@ var Fudge;
         }
         getDragDropSources() {
             return [];
+        }
+        dispatch(_type, _init) {
+            _init.detail = _init.detail || {};
+            _init.bubbles = _init.bubbles || false;
+            _init.cancelable = _init.cancelable || true;
+            _init.detail.view = _init.detail.view || this;
+            this.dom.dispatchEvent(new Fudge.EditorEvent(_type, _init));
         }
         //#region  ContextMenu
         openContextMenu = (_event) => {
@@ -917,11 +929,11 @@ var Fudge;
             // _event.dataTransfer.dropEffect = "link";
         }
         hndEventCommon = (_event) => {
-            switch (_event.type) {
-                case Fudge.EVENT_EDITOR.SET_PROJECT:
-                    this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-                    break;
-            }
+            // switch (_event.type) {
+            //   case EVENT_EDITOR.SET_PROJECT:
+            //     this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+            //     break;
+            // }
         };
     }
     Fudge.View = View;
@@ -938,8 +950,8 @@ var Fudge;
         tree;
         constructor(_container, _state) {
             super(_container, _state);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
         }
         setProject() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -981,8 +993,8 @@ var Fudge;
         table;
         constructor(_container, _state) {
             super(_container, _state);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
@@ -1009,6 +1021,13 @@ var Fudge;
         getDragDropSources() {
             return this.table.controller.dragDrop.sources;
         }
+        // TODO: this is a preparation for syncing a graph with its instances after structural changes
+        // protected openContextMenu = (_event: Event): void => {
+        //   let row: HTMLTableRowElement = <HTMLTableRowElement>_event.composedPath().find((_element) => (<HTMLElement>_element).tagName == "TR");
+        //   if (row)
+        //     this.contextMenu.getMenuItemById(String(CONTEXTMENU.SYNC_INSTANCES)).enabled = (row.getAttribute("icon") == "Graph");
+        //   this.contextMenu.popup();
+        // }
         // #region  ContextMenu
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
@@ -1027,6 +1046,8 @@ var Fudge;
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Delete Resource", id: String(Fudge.CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
             menu.append(item);
+            // item = new remote.MenuItem({ label: "Sync Instances", id: String(CONTEXTMENU.SYNC_INSTANCES), click: _callback, accelerator: "S" });
+            // menu.append(item);
             // ContextMenu.appendCopyPaste(menu);
             return menu;
         }
@@ -1043,23 +1064,23 @@ var Fudge;
                     let typeMesh = ƒ.Mesh.subclasses[iSubclass];
                     //@ts-ignore
                     let meshNew = new typeMesh();
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                     this.table.selectInterval(meshNew, meshNew);
                     break;
                 case Fudge.CONTEXTMENU.CREATE_MATERIAL:
                     let typeShader = ƒ.Shader.subclasses[iSubclass];
                     let mtrNew = new ƒ.Material(typeShader.name, typeShader);
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                     this.table.selectInterval(mtrNew, mtrNew);
                     break;
                 case Fudge.CONTEXTMENU.CREATE_GRAPH:
                     let graph = await ƒ.Project.registerAsGraph(new ƒ.Node("NewGraph"));
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                     this.table.selectInterval(graph, graph);
                     break;
                 case Fudge.CONTEXTMENU.DELETE_RESOURCE:
                     await this.table.controller.delete([this.table.getFocussed()]);
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                     break;
             }
         }
@@ -1103,17 +1124,17 @@ var Fudge;
                     }
                 }
             }
-            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
         }
         hndEvent = (_event) => {
             switch (_event.type) {
-                case Fudge.EVENT_EDITOR.SET_PROJECT:
-                case Fudge.EVENT_EDITOR.UPDATE:
+                case Fudge.EVENT_EDITOR.SELECT:
+                case Fudge.EVENT_EDITOR.MODIFY:
                     // case ƒui.EVENT.MUTATE:
                     this.listResources();
                     break;
                 case "removeChild" /* REMOVE_CHILD */:
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                     break;
             }
         };
@@ -1224,22 +1245,22 @@ var Fudge;
                 if (!this.mutable[key])
                     return false;
                 this.mutable[key] = _sources[0];
-                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
             let setMaterial = (_sources) => {
                 this.mutable["material"] = _sources[0];
-                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
             let setMesh = (_sources) => {
                 this.mutable["mesh"] = _sources[0];
-                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
             let setTexture = (_sources) => {
                 this.mutable["coat"]["texture"] = _sources[0];
-                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
             let setHeightMap = (_sources) => {
@@ -1247,7 +1268,7 @@ var Fudge;
                 let mutator = this.mutable.getMutator();
                 mutator.texture = _sources[0];
                 this.mutable.mutate(mutator);
-                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
             // texture
@@ -1327,8 +1348,12 @@ var Fudge;
         getHead() {
             return ControllerTableResource.head;
         }
-        getLabel(_object) { return ""; }
-        rename(_object, _new) { return false; }
+        getLabel(_object) {
+            return "";
+        }
+        rename(_object, _new) {
+            return false;
+        }
         copy(_originals) { return null; }
         async delete(_focussed) {
             console.log(_focussed, this.selection);
@@ -1477,8 +1502,10 @@ var Fudge;
             return _node.name;
         }
         getAttributes(_node) {
-            let attributes = _node.isActive ? "active" : "inactive";
-            return attributes;
+            let attributes = [_node.isActive ? "active" : "inactive"];
+            if (_node instanceof ƒ.GraphInstance)
+                attributes.push("GraphInstance");
+            return attributes.join(" ");
         }
         rename(_node, _new) {
             _node.name = _new;
@@ -1561,10 +1588,8 @@ var Fudge;
         }
         /** Send custom copies of the given event to the views */
         broadcastEvent = (_event) => {
-            for (let view of this.views) {
-                let event = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
-                view.dom.dispatchEvent(event);
-            }
+            for (let view of this.views)
+                view.dispatch(_event.type, { detail: _event.detail });
         };
         addViewComponent = (_event) => {
             // adjustmens for GoldenLayout 2
@@ -1615,17 +1640,16 @@ var Fudge;
             };
             this.goldenLayout.addItemAtLocation(config, [{ typeId: 7 /* Root */ }]);
             // this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
-            this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT_NODE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
             if (_state["graph"])
                 ƒ.Project.getResource(_state["graph"]).then((_graph) => {
-                    this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: _graph }));
+                    this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: _graph } });
                     // TODO: trace the node saved. The name is not sufficient, path is necessary...
                     // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { detail: _graph.findChild }));
                 });
@@ -1647,26 +1671,23 @@ var Fudge;
             // TODO: iterate over views and collect their states for reconstruction 
         }
         hndEvent = async (_event) => {
+            _event.stopPropagation();
             switch (_event.type) {
-                case Fudge.EVENT_EDITOR.SET_GRAPH:
-                    this.setGraph(_event.detail);
-                    break;
-                case Fudge.EVENT_EDITOR.SET_PROJECT:
-                case Fudge.EVENT_EDITOR.UPDATE:
+                case Fudge.EVENT_EDITOR.SELECT:
+                    this.setGraph(_event.detail.graph);
+                case Fudge.EVENT_EDITOR.MODIFY:
                     // TODO: meaningful difference between update and setgraph
                     if (this.graph) {
                         let newGraph = await ƒ.Project.getResource(this.graph.idResource);
                         if (this.graph != newGraph)
-                            _event = new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: newGraph });
+                            _event = new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
                     }
+                    break;
+                case "itemselect" /* SELECT */:
+                    _event = new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, { bubbles: false, detail: { node: _event.detail.data, view: this } });
                     break;
             }
             this.broadcastEvent(_event);
-            _event.stopPropagation();
-        };
-        hndFocusNode = (_event) => {
-            let event = new CustomEvent(Fudge.EVENT_EDITOR.FOCUS_NODE, { bubbles: false, detail: _event.detail.data });
-            this.broadcastEvent(event);
         };
     }
     Fudge.PanelGraph = PanelGraph;
@@ -1674,8 +1695,8 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-    * Shows a graph and offers means for manipulation
-    * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+    * Shows a help and documentation
+    * @authors Jirka Dell'Oro-Friedl, HFU, 2021
     */
     class PanelHelp extends Fudge.Panel {
         constructor(_container, _state) {
@@ -1765,13 +1786,13 @@ var Fudge;
                     }]
             };
             this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: 7 /* Root */ }]);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.REFRESH, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.REFRES, this.hndEvent);
             this.setTitle("Project | " + Fudge.project.name);
-            this.broadcastEvent(new Event(Fudge.EVENT_EDITOR.SET_PROJECT));
+            this.broadcastEvent(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, {}));
         }
         getState() {
             // TODO: iterate over views and collect their states for reconstruction 
@@ -2429,20 +2450,25 @@ var Fudge;
         node;
         expanded = { ComponentTransform: true };
         selected = "ComponentTransform";
+        drag;
         constructor(_container, _state) {
             super(_container, _state);
             this.fillContent();
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndTransform);
             // this.dom.addEventListener(ƒUi.EVENT.RENAME, this.hndEvent);
             this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.dom.addEventListener("expand" /* EXPAND */, this.hndEvent);
             this.dom.addEventListener("collapse" /* COLLAPSE */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndTransform);
             this.dom.addEventListener("click" /* CLICK */, this.hndEvent, true);
             this.dom.addEventListener("keydown" /* KEY_DOWN */, this.hndEvent, true);
+            this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent, true);
+        }
+        getDragDropSources() {
+            return [this.drag];
         }
         //#region  ContextMenu
         getContextMenu(_callback) {
@@ -2508,6 +2534,7 @@ var Fudge;
                 }
             ƒ.Debug.info(cmpNew.type, cmpNew);
             this.node.addComponent(cmpNew);
+            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
             this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.node } }));
         }
         //#endregion
@@ -2536,7 +2563,7 @@ var Fudge;
                 this.node.addComponent(cmpNew);
                 this.expanded[cmpNew.type] = true;
             }
-            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
         }
         fillContent() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -2563,6 +2590,10 @@ var Fudge;
                 Reflect.set(details, "controller", controller); // insert a link back to the controller
                 details.expand(this.expanded[component.type]);
                 this.dom.append(details);
+                if (component instanceof ƒ.ComponentCamera) {
+                    details.draggable = true;
+                    details.addEventListener("dragstart", (_event) => { this.drag = component; });
+                }
                 if (component instanceof ƒ.ComponentRigidbody) {
                     let pivot = controller.domElement.querySelector("[key=mtxPivot");
                     let opacity = pivot.style.opacity;
@@ -2573,6 +2604,16 @@ var Fudge;
                         pivot.style.opacity = initialization == ƒ.BODY_INIT.TO_PIVOT ? opacity : "0.3";
                     }
                 }
+                if (component instanceof ƒ.ComponentFaceCamera) {
+                    let up = controller.domElement.querySelector("[key=up");
+                    let opacity = up.style.opacity;
+                    setUpOpacity(null);
+                    controller.domElement.addEventListener("mutate" /* MUTATE */, setUpOpacity);
+                    function setUpOpacity(_event) {
+                        let upLocal = controller.getMutator({ upLocal: true }).upLocal;
+                        up.style.opacity = !upLocal ? opacity : "0.3";
+                    }
+                }
                 if (details.getAttribute("key") == this.selected)
                     this.select(details, false);
             }
@@ -2580,16 +2621,16 @@ var Fudge;
         hndEvent = (_event) => {
             switch (_event.type) {
                 // case ƒui.EVENT.RENAME: break;
-                case Fudge.EVENT_EDITOR.SET_GRAPH:
-                case Fudge.EVENT_EDITOR.FOCUS_NODE:
-                    this.node = _event.detail;
-                case Fudge.EVENT_EDITOR.UPDATE:
+                case Fudge.EVENT_EDITOR.SELECT:
+                    // case EVENT_EDITOR.FOCUS:
+                    this.node = _event.detail.graph || _event.detail.node;
+                case Fudge.EVENT_EDITOR.MODIFY:
                     this.fillContent();
                     break;
                 case "delete" /* DELETE */:
                     let component = _event.detail.mutable;
                     this.node.removeComponent(component);
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                     break;
                 case "keydown" /* KEY_DOWN */:
                 case "click" /* CLICK */:
@@ -2614,6 +2655,13 @@ var Fudge;
                 case "expand" /* EXPAND */:
                 case "collapse" /* COLLAPSE */:
                     this.expanded[_event.target.getAttribute("type")] = (_event.type == "expand" /* EXPAND */);
+                    break;
+                case "mutate" /* MUTATE */:
+                    let cmpRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
+                    if (cmpRigidbody) {
+                        cmpRigidbody.initialize();
+                        // this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: this.node } });
+                    }
                 default:
                     break;
             }
@@ -2626,7 +2674,7 @@ var Fudge;
             let mtxTransform = Reflect.get(component, "mtxLocal") || Reflect.get(component, "mtxPivot");
             if (!mtxTransform)
                 return;
-            let dtl = _event.detail;
+            let dtl = _event.detail.transform;
             let mtxCamera = dtl.camera.node.mtxWorld;
             let distance = mtxCamera.getTranslationTo(this.node.mtxWorld).magnitude;
             if (dtl.transform == Fudge.TRANSFORM.ROTATE)
@@ -2728,17 +2776,16 @@ var Fudge;
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewHierarchy extends Fudge.View {
+        #selectionPrevious = [];
         graph;
-        // private selectedNode: ƒ.Node;
         tree;
         constructor(_container, _state) {
             super(_container, _state);
             // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
             this.setGraph(_state.node);
-            // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.setSelectedNode);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT_NODE, this.hndEvent);
+            // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
         }
         setGraph(_graph) {
             if (!_graph) {
@@ -2754,7 +2801,7 @@ var Fudge;
             this.tree = new ƒUi.Tree(new Fudge.ControllerTreeHierarchy(), this.graph);
             // this.listController.listRoot.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
             //TODO: examine if tree should fire common UI-EVENT for selection instead
-            // this.tree.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
+            this.tree.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.tree.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.append(this.tree);
@@ -2767,24 +2814,32 @@ var Fudge;
         getDragDropSources() {
             return this.tree.controller.dragDrop.sources;
         }
-        focusNode(_node) {
+        showNode(_node) {
             let path = _node.getPath();
             path = path.splice(path.indexOf(this.graph));
             this.tree.show(path);
         }
         hndDragOver(_event, _viewSource) {
+            _event.dataTransfer.dropEffect = "none";
+            let target = this.tree?.controller.dragDrop.target;
             if (_viewSource == this) {
+                for (let source of _viewSource.getDragDropSources())
+                    if (!this.checkGraphDrop(source, target))
+                        return;
+                _event.dataTransfer.dropEffect = "copy";
                 _event.stopPropagation();
                 return; // continue with standard tree behaviour
             }
-            _event.dataTransfer.dropEffect = "none";
             if (_event.target == this.dom)
                 return;
             if (!(_viewSource instanceof Fudge.ViewInternal))
                 return;
             let source = _viewSource.getDragDropSources()[0];
-            if (!(source instanceof ƒ.Graph))
+            if (!(source instanceof ƒ.Graph) && !(source instanceof ƒ.GraphInstance))
                 return;
+            if (!this.checkGraphDrop(source, target))
+                return;
+            // gpt to this point -> allow drop
             _event.dataTransfer.dropEffect = "copy";
             _event.preventDefault();
             _event.stopPropagation();
@@ -2798,7 +2853,7 @@ var Fudge;
             let target = this.tree.controller.dragDrop.target;
             target.appendChild(instance);
             this.tree.findVisible(target).expand(true);
-            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
         }
         //#region  ContextMenu
         getContextMenu(_callback) {
@@ -2825,7 +2880,7 @@ var Fudge;
                 case Fudge.CONTEXTMENU.ACTIVATE_NODE:
                     focus.activate(!focus.isActive);
                     this.tree.findVisible(focus).refreshAttributes();
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.REFRESH, { bubbles: true }));
+                    this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
                     break;
                 case Fudge.CONTEXTMENU.DELETE_NODE:
                     // focus.addChild(child);
@@ -2835,7 +2890,7 @@ var Fudge;
                     focus.getParent().removeChild(focus);
                     ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
                     ƒ.Physics.cleanup();
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
                     break;
             }
         }
@@ -2844,17 +2899,46 @@ var Fudge;
         hndEvent = (_event) => {
             switch (_event.type) {
                 case "delete" /* DELETE */:
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
                     break;
-                case Fudge.EVENT_EDITOR.SELECT_NODE:
-                    this.tree.displaySelection([_event.detail]);
-                case Fudge.EVENT_EDITOR.FOCUS_NODE:
-                    this.focusNode(_event.detail);
+                case "itemselect" /* SELECT */:
+                    //only dispatch the event to focus the node, if the node is in the current and the previous selection  
+                    let node = _event.detail["data"];
+                    if (this.#selectionPrevious.includes(node) && this.getSelection().includes(node))
+                        this.dispatch(Fudge.EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: node, view: this } });
+                    this.#selectionPrevious = this.getSelection().slice(0);
                     break;
-                default:
-                    this.setGraph(_event.detail);
+                case Fudge.EVENT_EDITOR.SELECT:
+                    if (_event.detail.node) {
+                        this.showNode(_event.detail.node);
+                        this.tree.displaySelection([_event.detail.node]);
+                    }
+                    else {
+                        this.setGraph(_event.detail.graph);
+                        break;
+                    }
+                    break;
             }
         };
+        //#endregion
+        checkGraphDrop(_source, _target) {
+            let idSources = [];
+            for (let node of _source.getIterator())
+                if (node instanceof ƒ.GraphInstance)
+                    idSources.push(node.idSource);
+                else if (node instanceof ƒ.Graph)
+                    idSources.push(node.idResource);
+            do {
+                if (_target instanceof ƒ.Graph)
+                    if (idSources.indexOf(_target.idResource) > -1)
+                        return false;
+                if (_target instanceof ƒ.GraphInstance)
+                    if (idSources.indexOf(_target.idSource) > -1)
+                        return false;
+                _target = _target.getParent();
+            } while (_target);
+            return true;
+        }
     }
     Fudge.ViewHierarchy = ViewHierarchy;
 })(Fudge || (Fudge = {}));
@@ -2872,54 +2956,44 @@ var Fudge;
         viewport;
         canvas;
         graph;
-        viewGraph;
+        nodeLight = new ƒ.Node("Illumination"); // keeps light components for dark graphs 
         constructor(_container, _state) {
             super(_container, _state);
             this.graph = ƒ.Project.resources[_state["graph"]];
             this.createUserInterface();
             let title = `● Drop a graph from "Internal" here.\n`;
-            title += "● Use mousebuttons and ctrl-, shift- or alt-key to navigate view.\n";
-            title += "● Click to select node, rightclick to select transformations.\n";
-            title += "● Hold X, Y or Z to transform. Add shift-key to invert restriction.\n";
-            title += "● Transformation affects selected component.";
+            title += "● Use mousebuttons and ctrl-, shift- or alt-key to navigate editor camera.\n";
+            title += "● Drop camera component here to see through that camera.\n";
+            title += "● Manipulate transformations in this view:\n";
+            title += "  - Click to select node, rightclick to select transformations.\n";
+            title += "  - Select component to manipulate in view Components.\n";
+            title += "  - Hold X, Y or Z and move mouse to transform. Add shift-key to invert restriction.\n";
             this.dom.title = title;
             this.dom.tabIndex = 0;
             _container.on("resize", this.redraw);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.REFRESH, this.hndEvent);
-            this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
-            this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent, true);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
+            // this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
+            // this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("pointermove", this.hndPointer);
-            this.dom.addEventListener("pointerdown", this.hndPointer);
+            this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move
         }
         createUserInterface() {
-            this.viewGraph = new ƒ.Node("ViewGraph");
-            let viewNode = new ƒ.Node("ViewNode");
-            let nodeLight = new ƒ.Node("ViewIllumination");
-            viewNode.addChild(nodeLight);
-            viewNode.addChild(this.viewGraph);
-            ƒAid.addStandardLightComponents(nodeLight);
+            ƒAid.addStandardLightComponents(this.nodeLight);
             let cmpCamera = new ƒ.ComponentCamera();
-            // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
-            // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
-            cmpCamera.projectCentral(1, 45);
             this.canvas = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
             let container = document.createElement("div");
             container.style.borderWidth = "0px";
             document.body.appendChild(this.canvas);
-            // this.dom.append(this.canvas);
             this.viewport = new ƒ.Viewport();
-            this.viewport.initialize("ViewNode_Viewport", viewNode, cmpCamera, this.canvas);
+            this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
             this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-            // this.viewport.draw();
+            this.viewport.addEventListener("renderPrepareStart" /* RENDER_PREPARE_START */, this.hndPrepare);
             this.setGraph(null);
-            // this.canvas.addEventListener(ƒUi.EVENT.CLICK, this.activeViewport);
             this.canvas.addEventListener("pointerdown", this.activeViewport);
             this.canvas.addEventListener("pick", this.hndPick);
         }
@@ -2933,18 +3007,13 @@ var Fudge;
                 this.dom.innerHTML = "";
                 this.dom.appendChild(this.canvas);
             }
-            // this.graph.broadcastEvent(new Event(ƒ.EVENT.DISCONNECT_JOINT));
-            // ƒ.Physics.cleanup();
             this.graph = _node;
             ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
             ƒ.Physics.cleanup();
             this.graph.broadcastEvent(new Event("disconnectJoint" /* DISCONNECT_JOINT */));
             ƒ.Physics.connectJoints();
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-            // this.viewport.setBranch(this.graph);
-            this.viewGraph.removeAllChildren();
-            this.viewGraph.appendChild(this.graph);
-            this.illuminateGraph();
+            this.viewport.setBranch(this.graph);
             this.redraw();
         }
         //#region  ContextMenu
@@ -2968,7 +3037,7 @@ var Fudge;
                 ]
             });
             menu.append(item);
-            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE], checked: false, type: "checkbox", click: _callback });
+            item = new Fudge.remote.MenuItem({ label: "Orthographic Camera", id: String(Fudge.CONTEXTMENU.ORTHGRAPHIC_CAMERA), type: "checkbox", click: _callback, accelerator: process.platform == "darwin" ? "O" : "O" });
             menu.append(item);
             return menu;
         }
@@ -2980,9 +3049,6 @@ var Fudge;
                 case Fudge.TRANSFORM.SCALE:
                     Fudge.Page.setTransform(_item.id);
                     break;
-                case Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]:
-                    this.illuminateGraph();
-                    break;
                 case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.NONE]:
                 case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.COLLIDERS]:
                 case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER]:
@@ -2991,6 +3057,10 @@ var Fudge;
                 case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY]:
                     this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE[_item.id];
                     this.redraw();
+                    break;
+                case String(Fudge.CONTEXTMENU.ORTHGRAPHIC_CAMERA):
+                    let on = this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ORTHGRAPHIC_CAMERA)).checked;
+                    this.setCameraOrthographic(on);
                     break;
             }
         }
@@ -3002,52 +3072,77 @@ var Fudge;
         //#endregion
         hndDragOver(_event, _viewSource) {
             _event.dataTransfer.dropEffect = "none";
-            // if (this.dom != _event.target)
-            //   return;
-            if (!(_viewSource instanceof Fudge.ViewInternal))
-                return;
-            let source = _viewSource.getDragDropSources()[0];
-            if (!(source instanceof ƒ.Graph))
-                return;
+            if (!(_viewSource instanceof Fudge.ViewComponents)) { // allow dropping cameracomponent to see through that camera (at this time, the only draggable)
+                if (!(_viewSource instanceof Fudge.ViewInternal)) // allow dropping a graph
+                    return;
+                let source = _viewSource.getDragDropSources()[0];
+                if (!(source instanceof ƒ.Graph))
+                    return;
+            }
             _event.dataTransfer.dropEffect = "link";
             _event.preventDefault();
             _event.stopPropagation();
         }
         hndDrop(_event, _viewSource) {
             let source = _viewSource.getDragDropSources()[0];
-            // this.setGraph(<ƒ.Node>source);
-            this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
-        }
-        illuminateGraph() {
-            let nodeLight = this.viewGraph.getParent().getChildrenByName("ViewIllumination")[0];
-            if (nodeLight) {
-                nodeLight.activate(this.contextMenu.getMenuItemById(Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]).checked);
+            if (source instanceof ƒ.ComponentCamera) {
+                this.setCameraOrthographic(false);
+                this.viewport.camera = source;
                 this.redraw();
             }
+            else
+                this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source } });
         }
+        setCameraOrthographic(_on = false) {
+            this.viewport.camera = this.cmrOrbit.cmpCamera;
+            if (_on) {
+                this.cmrOrbit.cmpCamera.projectCentral(2, 1, ƒ.FIELD_OF_VIEW.DIAGONAL, 10, 20000);
+                this.cmrOrbit.maxDistance = 10000;
+                this.cmrOrbit.distance *= 50;
+            }
+            else {
+                this.cmrOrbit.cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL, 0.01, 1000);
+                this.cmrOrbit.maxDistance = 1000;
+                this.cmrOrbit.distance /= 50;
+            }
+            this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ORTHGRAPHIC_CAMERA)).checked = _on;
+            ƒ.Render.prepare(this.cmrOrbit);
+            this.redraw();
+        }
+        hndPrepare = (_event) => {
+            let switchLight = (_event) => {
+                let lightsPresent = false;
+                ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
+                this.setTitle(`${lightsPresent ? "RENDER" : "Render"} | ${this.graph.name}`);
+                if (!lightsPresent)
+                    ƒ.Render.addLights(this.nodeLight.getComponents(ƒ.ComponentLight));
+                this.graph.removeEventListener("renderPrepareEnd" /* RENDER_PREPARE_END */, switchLight);
+            };
+            this.graph.addEventListener("renderPrepareEnd" /* RENDER_PREPARE_END */, switchLight);
+        };
         hndEvent = (_event) => {
             switch (_event.type) {
-                case Fudge.EVENT_EDITOR.CLEAR_PROJECT:
-                    this.setGraph(null);
+                case Fudge.EVENT_EDITOR.SELECT:
+                case Fudge.EVENT_EDITOR.FOCUS:
+                    let detail = _event.detail;
+                    if (detail.node) {
+                        if (detail.view == this)
+                            return;
+                        if (_event.type == Fudge.EVENT_EDITOR.FOCUS)
+                            this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
+                        ƒ.Render.prepare(this.cmrOrbit);
+                    }
+                    else
+                        this.setGraph(_event.detail.graph);
                     break;
-                case Fudge.EVENT_EDITOR.SET_GRAPH:
-                    this.setGraph(_event.detail);
-                    break;
-                case Fudge.EVENT_EDITOR.FOCUS_NODE:
-                    this.cmrOrbit.mtxLocal.translation = _event.detail.mtxWorld.translation;
-                    ƒ.Render.prepare(this.cmrOrbit);
-                // break;
-                case "mutate" /* MUTATE */:
-                case "delete" /* DELETE */:
-                case Fudge.EVENT_EDITOR.UPDATE:
-                case Fudge.EVENT_EDITOR.REFRESH:
-                    this.redraw();
             }
+            this.redraw();
         };
         hndPick = (_event) => {
             let picked = _event.detail.node;
-            this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SELECT_NODE, { bubbles: true, detail: picked }));
-            this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: picked } }));
+            //TODO: watch out, two selects
+            this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: picked } });
+            // this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: picked } }));
         };
         // private animate = (_e: Event) => {
         //   this.viewport.setGraph(this.graph);
@@ -3055,10 +3150,6 @@ var Fudge;
         //     this.viewport.draw();
         // }
         hndPointer = (_event) => {
-            if (_event.type == "pointerdown") {
-                this.#pointerMoved = false;
-                return;
-            }
             this.#pointerMoved ||= (_event.movementX != 0 || _event.movementY != 0);
             this.dom.focus({ preventScroll: true });
             let restriction;
@@ -3071,10 +3162,10 @@ var Fudge;
             if (!restriction)
                 return;
             this.canvas.requestPointerLock();
-            let detail = {
+            let data = {
                 transform: Fudge.Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera, inverted: _event.shiftKey
             };
-            this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: detail }));
+            this.dispatch(Fudge.EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: { transform: data } });
             this.redraw();
         };
         activeViewport = (_event) => {
@@ -3088,6 +3179,7 @@ var Fudge;
                 // ƒ.Physics.connectJoints();
             }
             catch (_error) {
+                // console.error(_error);
                 //nop
             }
         };
@@ -3125,8 +3217,8 @@ var Fudge;
             _container.on("resize", this.redraw);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent, true);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent, true);
+            // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
         }
@@ -3144,16 +3236,16 @@ var Fudge;
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let item;
-            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
-            menu.append(item);
+            // item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU[CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
+            // menu.append(item);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
             ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
             switch (_item.id) {
-                case Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]:
-                    this.illuminateGraph();
-                    break;
+                // case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
+                //   this.illuminateGraph();
+                //   break;
             }
         }
         //#endregion
@@ -3164,7 +3256,7 @@ var Fudge;
                 this.setTitle("Preview");
                 return;
             }
-            this.setTitle("Preview | " + this.resource.name);
+            let lightsPresent = true;
             //@ts-ignore
             let type = this.resource.type || "Function";
             if (this.resource instanceof ƒ.Mesh)
@@ -3200,6 +3292,11 @@ var Fudge;
                 case "Graph":
                     ƒ.Project.createGraphInstance(this.resource).then((_instance) => {
                         previewObject.appendChild(_instance);
+                        ƒ.Render.prepare(_instance);
+                        lightsPresent = false;
+                        ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
+                        this.illuminate(!lightsPresent);
+                        this.setTitle(`${lightsPresent ? "PREVIEW" : "Preview"} | ${this.resource.name}`);
                         this.redraw();
                     });
                     ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);
@@ -3220,6 +3317,7 @@ var Fudge;
                     break;
                 default: break;
             }
+            this.setTitle(`Preview | ${this.resource.name}`);
         }
         createStandardGraph() {
             let graph = new ƒ.Node("PreviewScene");
@@ -3227,7 +3325,7 @@ var Fudge;
             let nodeLight = new ƒ.Node("PreviewIllumination");
             graph.addChild(nodeLight);
             ƒAid.addStandardLightComponents(nodeLight);
-            this.dom.appendChild(this.viewport.getCanvas());
+            this.dom.appendChild(this.viewport.canvas);
             let previewNode = new ƒ.Node("PreviewNode");
             graph.addChild(previewNode);
             return previewNode;
@@ -3235,16 +3333,13 @@ var Fudge;
         setViewObject(_node, _graphIllumination = false) {
             this.previewNode.removeAllChildren();
             this.previewNode.addChild(_node);
-            if (_graphIllumination) // otherwise, light is always on!
-                this.illuminateGraph();
-            this.dom.appendChild(this.viewport.getCanvas());
+            this.illuminate(true);
+            this.dom.appendChild(this.viewport.canvas);
         }
-        illuminateGraph() {
+        illuminate(_on) {
             let nodeLight = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
-            if (nodeLight) {
-                nodeLight.activate(this.contextMenu.getMenuItemById(Fudge.CONTEXTMENU[Fudge.CONTEXTMENU.ILLUMINATE]).checked);
-                this.redraw();
-            }
+            nodeLight.activate(_on);
+            this.redraw();
         }
         createFilePreview(_entry) {
             let mime = _entry.getMimeType();
@@ -3287,7 +3382,7 @@ var Fudge;
                 //   this.resource = undefined;
                 //   break;
                 case "change" /* CHANGE */:
-                case Fudge.EVENT_EDITOR.UPDATE:
+                case Fudge.EVENT_EDITOR.MODIFY:
                     if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture /*  || this.resource instanceof ƒ.Material */)
                         this.fillContent();
                 case "mutate" /* MUTATE */:
@@ -3342,11 +3437,8 @@ var Fudge;
             super(_container, _state);
             this.fillContent();
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent, true);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-            // this.dom.addEventListener(EVENT_EDITOR.FOCUS_RESOURCE, this.hndEvent);
-            // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
-            // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent, true);
+            // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
         }
         //#region  ContextMenu
         // protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
@@ -3420,11 +3512,12 @@ var Fudge;
         }
         hndEvent = (_event) => {
             switch (_event.type) {
-                case Fudge.EVENT_EDITOR.SET_PROJECT:
-                    this.resource = undefined;
-                    break;
+                // case EVENT_EDITOR.SET_PROJECT:
+                //   this.resource = undefined;
+                //   break;
                 case "itemselect" /* SELECT */:
-                    this.resource = _event.detail.data;
+                    // let detail: EventDetail = <EventDetail>_event.detail;
+                    this.resource = (_event.detail.data);
                     break;
                 default:
                     break;
@@ -3447,8 +3540,8 @@ var Fudge;
         table;
         constructor(_container, _state) {
             super(_container, _state);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
         }
         listScripts() {
@@ -3482,8 +3575,8 @@ var Fudge;
         //#endregion
         hndEvent = (_event) => {
             switch (_event.type) {
-                case Fudge.EVENT_EDITOR.SET_PROJECT:
-                case Fudge.EVENT_EDITOR.UPDATE:
+                case Fudge.EVENT_EDITOR.SELECT:
+                case Fudge.EVENT_EDITOR.MODIFY:
                     this.listScripts();
                     break;
                 // case ƒui.EVENT.SELECT:

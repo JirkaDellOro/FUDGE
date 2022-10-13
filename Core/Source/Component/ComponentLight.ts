@@ -13,6 +13,7 @@ namespace FudgeCore {
   }
   /**
     * Attaches a {@link Light} to the node
+    * The pivot matrix has different effects depending on the type of the {@link Light}. See there for details.
     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
     */
   export class ComponentLight extends Component {
@@ -20,6 +21,7 @@ namespace FudgeCore {
     // private static constructors: { [type: string]: General } = { [LIGHT_TYPE.AMBIENT]: LightAmbient, [LIGHT_TYPE.DIRECTIONAL]: LightDirectional, [LIGHT_TYPE.POINT]: LightPoint, [LIGHT_TYPE.SPOT]: LightSpot };
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public light: Light = null;
+    //TODO: since there is almost no functionality left in Light, eliminate it and put all in the component as with the camera...
 
     constructor(_light: Light = new LightAmbient()) {
       super();

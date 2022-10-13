@@ -17,7 +17,7 @@ namespace Fudge {
     private id: number;
 
     constructor(_container: ComponentContainer, _state: JsonValue) {
-      this.dom = document.createElement("div"); 
+      this.dom = document.createElement("div");
       this.dom.style.height = "100%";
       this.dom.style.overflow = "auto";
       this.dom.setAttribute("view", this.constructor.name);
@@ -26,13 +26,11 @@ namespace Fudge {
       _container.element.appendChild(this.dom);
       this.container = _container;
 
-      this.container.on("destroy", () => this.dom.dispatchEvent(
-        new CustomEvent(EVENT_EDITOR.DESTROY, { bubbles: true, detail: this }))
-      );
+      this.container.on("destroy", () => this.dispatch(EVENT_EDITOR.CLOSE, { bubbles: true, detail: { view: this } }));
 
       // console.log(this.contextMenuCallback);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
+      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
 
       this.id = View.registerViewForDragDrop(this);
     }
@@ -68,7 +66,7 @@ namespace Fudge {
           let viewSource: View = View.getViewSource(_event);
           _this.hndDrop(_event, viewSource);
         },
-        true);
+        false);
 
       return View.idCount++;
     }
@@ -79,6 +77,14 @@ namespace Fudge {
 
     public getDragDropSources(): Object[] {
       return [];
+    }
+
+    public dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void {
+      _init.detail = _init.detail || {};
+      _init.bubbles = _init.bubbles || false;
+      _init.cancelable = _init.cancelable || true;
+      _init.detail.view = _init.detail.view || this;
+      this.dom.dispatchEvent(new EditorEvent(_type, _init));
     }
 
     //#region  ContextMenu
@@ -107,11 +113,11 @@ namespace Fudge {
     }
 
     private hndEventCommon = (_event: Event): void => {
-      switch (_event.type) {
-        case EVENT_EDITOR.SET_PROJECT:
-          this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-          break;
-      }
+      // switch (_event.type) {
+      //   case EVENT_EDITOR.SET_PROJECT:
+      //     this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+      //     break;
+      // }
     }
     //#endregion
 

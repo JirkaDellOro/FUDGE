@@ -32,18 +32,17 @@ namespace FudgeCore {
 
   /**
    * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)  
+   * Attached to a node by {@link ComponentLight}, the pivot matrix is ignored.
    * ```plaintext
    * ~ ~ ~  
    *  ~ ~ ~  
    * ```
    */
   export class LightAmbient extends Light {
-    constructor(_color: Color = new Color(1, 1, 1, 1)) {
-      super(_color);
-    }
   }
   /**
    * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)  
+   * Attached to a node by {@link ComponentLight}, the pivot matrix specifies the direction of the light only.
    * ```plaintext
    * --->  
    * --->  
@@ -51,12 +50,12 @@ namespace FudgeCore {
    * ```
    */
   export class LightDirectional extends Light {
-    constructor(_color: Color = new Color(1, 1, 1, 1)) {
-      super(_color);
-    }
   }
   /**
    * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)  
+   * Attached to a node by {@link ComponentLight}, the pivot matrix specifies the position of the light, it's shape and rotation. 
+   * So with uneven scaling, other shapes than a perfect sphere, such as an oval or a disc, are possible, which creates a visible effect of the rotation too. 
+   * The intensity of the light drops linearly from 1 in the center to 0 at the perimeter of the shape.
    * ```plaintext
    *         .\|/.
    *        -- o --
@@ -64,10 +63,11 @@ namespace FudgeCore {
    * ```
    */
   export class LightPoint extends Light {
-    public range: number = 10;
   }
   /**
    * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color  
+   * Attached to a node by {@link ComponentLight}, the pivot matrix specifies the position of the light, the direction and the size and angles of the cone.
+   * The intensity of the light drops linearly from 1 in the center to 0 at the outer limits of the cone.
    * ```plaintext
    *          o  
    *         /|\  

@@ -42,12 +42,13 @@ namespace FudgeCore {
     protected timeOutputTargetSet: number = 0;
     protected idTimer: number = undefined;
 
-    constructor(_name: string, _factor: number = 1, _type: CONTROL_TYPE = CONTROL_TYPE.PROPORTIONAL, _active: boolean = true) {
+    constructor(_name: string, _factor: number = 1, _type: CONTROL_TYPE = CONTROL_TYPE.PROPORTIONAL, _delay: number = 0) {
       super();
       this.factor = _factor;
       this.type = _type;
-      this.active = _active;
+      this.active = true;
       this.name = _name;
+      this.setDelay(_delay);
     }
 
     /**

@@ -122,6 +122,20 @@ var FudgeCore;
                     Debug.delegates[parsed].set(_target, _target.delegates[parsed]);
             }
         }
+        static getFilter(_target) {
+            let result = 0;
+            for (let filter in _target.delegates)
+                result |= parseInt(filter);
+            return result;
+        }
+        static addFilter(_target, _filter) {
+            let current = Debug.getFilter(_target);
+            Debug.setFilter(_target, current | _filter);
+        }
+        static removeFilter(_target, _filter) {
+            let current = Debug.getFilter(_target);
+            Debug.setFilter(_target, current ^ _filter);
+        }
         /**
          * Info(...) displays additional information with low priority
          */
@@ -239,8 +253,8 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    // export type EventListenerƒ = ((_event: Eventƒ) => void) | EventListener | EventListenerObject;
-    class EventTargetƒ extends EventTarget {
+    /** Extends EventTarget to work with {@link EventListenerUnified} and {@link EventUnified} */
+    class EventTargetUnified extends EventTarget {
         addEventListener(_type, _handler, _options) {
             super.addEventListener(_type, _handler, _options);
         }
@@ -251,11 +265,11 @@ var FudgeCore;
             return super.dispatchEvent(_event);
         }
     }
-    FudgeCore.EventTargetƒ = EventTargetƒ;
+    FudgeCore.EventTargetUnified = EventTargetUnified;
     /**
-     * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
+     * Base class for EventTarget singletons, which are fixed entities in the structure of FUDGE, such as the core loop
      */
-    class EventTargetStatic extends EventTargetƒ {
+    class EventTargetStatic extends EventTargetUnified {
         constructor() {
             super();
         }
@@ -300,7 +314,7 @@ var FudgeCore;
      * The provided properties of the {@link Mutator} must match public properties or getters/setters of the object.
      * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
      */
-    class Mutable extends FudgeCore.EventTargetƒ {
+    class Mutable extends FudgeCore.EventTargetUnified {
         /**
          * Decorator allows to attach {@link Mutable} functionality to existing classes.
          */
@@ -314,7 +328,7 @@ var FudgeCore;
         static getMutatorFromPath(_mutator, _path) {
             let key = _path[0];
             let mutator = {};
-            if (!_mutator[key]) // if the path deviates from mutator structure, return the mutator
+            if (_mutator[key] == undefined) // if the path deviates from mutator structure, return the mutator
                 return _mutator;
             mutator[key] = _mutator[key];
             if (_path.length > 1)
@@ -526,14 +540,13 @@ var FudgeCore;
             try {
                 // loop constructed solely to access type-property. Only one expected!
                 for (path in _serialization) {
-                    // reconstruct = new (<General>Fudge)[typeName];
                     reconstruct = Serializer.reconstruct(path);
                     reconstruct = await reconstruct.deserialize(_serialization[path]);
                     return reconstruct;
                 }
             }
             catch (_error) {
-                throw new Error(`Deserialization of ${path} failed: ` + _error);
+                throw new Error(`Deserialization of ${path}, ${Reflect.get(reconstruct, "idResource")} failed: ` + _error);
             }
             return null;
         }
@@ -653,6 +666,489 @@ var FudgeCore;
     /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
     Serializer.namespaces = { "ƒ": FudgeCore };
     FudgeCore.Serializer = Serializer;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    /**
+     * Represents a node in the scenetree.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Graph
+     */
+    class Node extends FudgeCore.EventTargetUnified {
+        /**
+         * Creates a new node with a name and initializes all attributes
+         */
+        constructor(_name) {
+            super();
+            this.mtxWorld = FudgeCore.Matrix4x4.IDENTITY();
+            this.timestampUpdate = 0;
+            /** The number of nodes of the whole branch including this node and all successors */
+            this.nNodesInBranch = 0;
+            /** The radius of the bounding sphere in world dimensions enclosing the geometry of this node and all successors in the branch */
+            this.radius = 0;
+            this.parent = null; // The parent of this node.
+            this.children = []; // array of child nodes appended to this node.
+            this.components = {};
+            // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
+            // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
+            this.listeners = {};
+            this.captures = {};
+            this.active = true;
+            /**
+             * Simply calls {@link addChild}. This reference is here solely because appendChild is the equivalent method in DOM.
+             * See and preferably use {@link addChild}
+             */
+            // tslint:disable-next-line: member-ordering
+            this.appendChild = this.addChild;
+            this.name = _name;
+        }
+        #mtxWorldInverseUpdated;
+        #mtxWorldInverse;
+        get isActive() {
+            return this.active;
+        }
+        /**
+         * Shortcut to retrieve this nodes {@link ComponentTransform}
+         */
+        get cmpTransform() {
+            return this.getComponents(FudgeCore.ComponentTransform)[0];
+        }
+        /**
+         * Shortcut to retrieve the local {@link Matrix4x4} attached to this nodes {@link ComponentTransform}
+         * Fails if no {@link ComponentTransform} is attached
+         */
+        get mtxLocal() {
+            return this.cmpTransform.mtxLocal;
+        }
+        get mtxWorldInverse() {
+            if (this.#mtxWorldInverseUpdated != this.timestampUpdate)
+                this.#mtxWorldInverse = FudgeCore.Matrix4x4.INVERSION(this.mtxWorld);
+            this.#mtxWorldInverseUpdated = this.timestampUpdate;
+            return this.#mtxWorldInverse;
+        }
+        /**
+         * Returns the number of children attached to this
+         */
+        get nChildren() {
+            return this.children.length;
+        }
+        /**
+         * Generator yielding the node and all decendants in the graph below for iteration
+         * Inactive nodes and their descendants can be filtered
+         */
+        *getIterator(_active = false) {
+            if (!_active || this.isActive) {
+                yield this;
+                for (let child of this.children)
+                    yield* child.getIterator(_active);
+            }
+        }
+        [Symbol.iterator]() {
+            return this.getIterator();
+        }
+        activate(_on) {
+            this.active = _on;
+            this.dispatchEvent(new Event(_on ? "nodeActivate" /* NODE_ACTIVATE */ : "nodeDeactivate" /* NODE_DEACTIVATE */, { bubbles: true }));
+            this.broadcastEvent(new Event(_on ? "nodeActivate" /* NODE_ACTIVATE */ : "nodeDeactivate" /* NODE_DEACTIVATE */));
+        }
+        // #region Scenetree
+        /**
+         * Returns a reference to this nodes parent node
+         */
+        getParent() {
+            return this.parent;
+        }
+        /**
+         * Traces back the ancestors of this node and returns the first
+         */
+        getAncestor() {
+            let ancestor = this;
+            while (ancestor.getParent())
+                ancestor = ancestor.getParent();
+            return ancestor;
+        }
+        /**
+         * Traces the hierarchy upwards to the first ancestor and returns the path through the graph to this node
+         */
+        getPath() {
+            let ancestor = this;
+            let path = [this];
+            while (ancestor.getParent())
+                path.unshift(ancestor = ancestor.getParent());
+            return path;
+        }
+        /**
+         * Returns child at the given index in the list of children
+         */
+        getChild(_index) {
+            return this.children[_index];
+        }
+        /**
+         * Returns a clone of the list of children
+         */
+        getChildren() {
+            return this.children.slice(0);
+        }
+        /**
+         * Returns an array of references to childnodes with the supplied name.
+         */
+        getChildrenByName(_name) {
+            let found = [];
+            found = this.children.filter((_node) => _node.name == _name);
+            return found;
+        }
+        /**
+         * Adds the given reference to a node to the list of children, if not already in
+         * @throws Error when trying to add an ancestor of this
+         */
+        addChild(_child) {
+            if (this.children.includes(_child))
+                // _node is already a child of this
+                return;
+            let inAudioGraph = false;
+            let graphListened = FudgeCore.AudioManager.default.getGraphListeningTo();
+            let ancestor = this;
+            while (ancestor) {
+                ancestor.timestampUpdate = 0;
+                inAudioGraph = inAudioGraph || (ancestor == graphListened);
+                if (ancestor == _child)
+                    throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
+                else
+                    ancestor = ancestor.parent;
+            }
+            let previousParent = _child.parent;
+            if (previousParent)
+                previousParent.removeChild(_child);
+            this.children.push(_child);
+            _child.parent = this;
+            _child.dispatchEvent(new Event("childAppend" /* CHILD_APPEND */, { bubbles: true }));
+            if (inAudioGraph)
+                _child.broadcastEvent(new Event("childAppendToAudioGraph" /* CHILD_APPEND */));
+        }
+        /**
+         * Removes the reference to the give node from the list of children
+         */
+        removeChild(_child) {
+            let found = this.findChild(_child);
+            if (found < 0)
+                return;
+            _child.dispatchEvent(new Event("childRemove" /* CHILD_REMOVE */, { bubbles: true }));
+            _child.broadcastEvent(new Event("nodeDeactivate" /* NODE_DEACTIVATE */));
+            if (this.isDescendantOf(FudgeCore.AudioManager.default.getGraphListeningTo()))
+                _child.broadcastEvent(new Event("childRemoveFromAudioGraph" /* CHILD_REMOVE */));
+            this.children.splice(found, 1);
+            _child.parent = null;
+        }
+        /**
+         * Removes all references in the list of children
+         */
+        removeAllChildren() {
+            while (this.children.length)
+                this.removeChild(this.children[0]);
+        }
+        /**
+         * Returns the position of the node in the list of children or -1 if not found
+         */
+        findChild(_search) {
+            return this.children.indexOf(_search);
+        }
+        /**
+         * Replaces a child node with another, preserving the position in the list of children
+         */
+        replaceChild(_replace, _with) {
+            let found = this.findChild(_replace);
+            if (found < 0)
+                return false;
+            let previousParent = _with.getParent();
+            if (previousParent)
+                previousParent.removeChild(_with);
+            _replace.parent = null;
+            this.children[found] = _with;
+            _with.parent = this;
+            _with.dispatchEvent(new Event("childAppend" /* CHILD_APPEND */, { bubbles: true }));
+            if (this.isDescendantOf(FudgeCore.AudioManager.default.getGraphListeningTo()))
+                _with.broadcastEvent(new Event("childAppendToAudioGraph" /* CHILD_APPEND */));
+            return true;
+        }
+        isUpdated(_timestampUpdate) {
+            return (this.timestampUpdate == _timestampUpdate);
+        }
+        isDescendantOf(_ancestor) {
+            let node = this;
+            while (node && node != _ancestor)
+                node = node.parent;
+            return (node != null);
+        }
+        /**
+         * Applies a Mutator from {@link Animation} to all its components and transfers it to its children.
+         */
+        applyAnimation(_mutator) {
+            if (_mutator.components) {
+                for (let componentName in _mutator.components) {
+                    if (this.components[componentName]) {
+                        let mutatorOfComponent = _mutator.components;
+                        for (let i in mutatorOfComponent[componentName]) {
+                            if (this.components[componentName][+i]) {
+                                let componentToMutate = this.components[componentName][+i];
+                                let mutatorArray = mutatorOfComponent[componentName];
+                                let mutatorWithComponentName = mutatorArray[+i];
+                                for (let cname in mutatorWithComponentName) { // trick used to get the only entry in the list
+                                    let mutatorToGive = mutatorWithComponentName[cname];
+                                    componentToMutate.mutate(mutatorToGive);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (_mutator.children) {
+                for (let i = 0; i < _mutator.children.length; i++) {
+                    let name = _mutator.children[i]["ƒ.Node"].name;
+                    let childNodes = this.getChildrenByName(name);
+                    for (let childNode of childNodes) {
+                        childNode.applyAnimation(_mutator.children[i]["ƒ.Node"]);
+                    }
+                }
+            }
+        }
+        // #endregion
+        // #region Components
+        /**
+         * Returns a list of all components attached to this node, independent of type.
+         */
+        getAllComponents() {
+            let all = [];
+            for (let type in this.components) {
+                all = all.concat(this.components[type]);
+            }
+            return all;
+        }
+        /**
+         * Returns a clone of the list of components of the given class attached to this node.
+         */
+        getComponents(_class) {
+            return (this.components[_class.name] || []).slice(0);
+        }
+        /**
+         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
+         */
+        getComponent(_class) {
+            let list = this.components[_class.name];
+            if (list)
+                return list[0];
+            return null;
+        }
+        /**
+         * Attach the given component to this node. Identical to {@link addComponent}
+         */
+        attach(_component) {
+            this.addComponent(_component);
+        }
+        /**
+         * Attach the given component to this node
+         */
+        addComponent(_component) {
+            if (_component.node == this)
+                return;
+            let cmpList = this.components[_component.type];
+            if (cmpList === undefined)
+                this.components[_component.type] = [_component];
+            else if (cmpList.length && _component.isSingleton)
+                throw new Error(`Component ${_component.type} is marked singleton and can't be attached, no more than one allowed`);
+            else
+                cmpList.push(_component);
+            _component.attachToNode(this);
+            _component.dispatchEvent(new Event("componentAdd" /* COMPONENT_ADD */));
+            this.dispatchEventToTargetOnly(new CustomEvent("componentAdd" /* COMPONENT_ADD */, { detail: _component })); // TODO: see if this is be feasable
+        }
+        /**
+         * Detach the given component from this node. Identical to {@link removeComponent}
+         */
+        detach(_component) {
+            this.removeComponent(_component);
+        }
+        /**
+         * Removes the given component from the node, if it was attached, and sets its parent to null.
+         */
+        removeComponent(_component) {
+            try {
+                let componentsOfType = this.components[_component.type];
+                let foundAt = componentsOfType.indexOf(_component);
+                if (foundAt < 0)
+                    return;
+                _component.dispatchEvent(new Event("componentRemove" /* COMPONENT_REMOVE */));
+                this.dispatchEventToTargetOnly(new CustomEvent("componentRemove" /* COMPONENT_REMOVE */, { detail: _component })); // TODO: see if this would be feasable
+                componentsOfType.splice(foundAt, 1);
+                _component.attachToNode(null);
+            }
+            catch (_error) {
+                throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
+            }
+        }
+        // #endregion
+        // #region Serialization
+        serialize() {
+            let serialization = {
+                name: this.name,
+                active: this.active
+            };
+            let components = {};
+            for (let type in this.components) {
+                components[type] = [];
+                for (let component of this.components[type]) {
+                    // components[type].push(component.serialize());
+                    components[type].push(FudgeCore.Serializer.serialize(component));
+                }
+            }
+            serialization["components"] = components;
+            let children = [];
+            for (let child of this.children) {
+                children.push(FudgeCore.Serializer.serialize(child));
+            }
+            serialization["children"] = children;
+            this.dispatchEvent(new Event("nodeSerialized" /* NODE_SERIALIZED */));
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            this.name = _serialization.name;
+            // this.parent = is set when the nodes are added
+            // deserialize components first so scripts can react to children being appended
+            for (let type in _serialization.components) {
+                for (let serializedComponent of _serialization.components[type]) {
+                    let deserializedComponent = await FudgeCore.Serializer.deserialize(serializedComponent);
+                    this.addComponent(deserializedComponent);
+                }
+            }
+            if (_serialization.children)
+                for (let serializedChild of _serialization.children) {
+                    let deserializedChild = await FudgeCore.Serializer.deserialize(serializedChild);
+                    this.appendChild(deserializedChild);
+                }
+            this.dispatchEvent(new Event("nodeDeserialized" /* NODE_DESERIALIZED */));
+            for (let component of this.getAllComponents())
+                component.dispatchEvent(new Event("nodeDeserialized" /* NODE_DESERIALIZED */));
+            this.activate(_serialization.active);
+            return this;
+        }
+        // #endregion
+        /**
+         * Creates a string as representation of this node and its descendants
+         */
+        toHierarchyString(_node = null, _level = 0) {
+            // TODO: refactor for better readability
+            if (!_node)
+                _node = this;
+            let prefix = "+".repeat(_level);
+            let output = prefix + " " + _node.name + " | ";
+            for (let type in _node.components)
+                output += _node.components[type].length + " " + type.split("Component").pop() + ", ";
+            output = output.slice(0, -2) + "</br>";
+            for (let child of _node.children) {
+                output += this.toHierarchyString(child, _level + 1);
+            }
+            return output;
+        }
+        // #region Events
+        /**
+         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
+         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
+         */
+        addEventListener(_type, _handler, _capture = false) {
+            let listListeners = _capture ? this.captures : this.listeners;
+            if (!listListeners[_type])
+                listListeners[_type] = [];
+            listListeners[_type].push(_handler);
+        }
+        /**
+         * Removes an event listener from the node. The signature must match the one used with addEventListener
+         */
+        removeEventListener(_type, _handler, _capture = false) {
+            let listenersForType = _capture ? this.captures[_type] : this.listeners[_type];
+            if (listenersForType)
+                for (let i = listenersForType.length - 1; i >= 0; i--)
+                    if (listenersForType[i] == _handler)
+                        listenersForType.splice(i, 1);
+        }
+        /**
+         * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
+         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
+         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
+         */
+        dispatchEvent(_event) {
+            let ancestors = [];
+            let upcoming = this;
+            // overwrite event target
+            Object.defineProperty(_event, "target", { writable: true, value: this });
+            // TODO: consider using Reflect instead of Object throughout. See also Render and Mutable...
+            while (upcoming.parent)
+                ancestors.push(upcoming = upcoming.parent);
+            Object.defineProperty(_event, "path", { writable: true, value: new Array(this, ...ancestors) });
+            // capture phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
+            for (let i = ancestors.length - 1; i >= 0; i--) {
+                let ancestor = ancestors[i];
+                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
+                this.callListeners(ancestor.captures[_event.type], _event);
+            }
+            // target phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
+            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
+            this.callListeners(this.captures[_event.type], _event);
+            this.callListeners(this.listeners[_event.type], _event);
+            if (!_event.bubbles)
+                return true;
+            // bubble phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.BUBBLING_PHASE });
+            for (let i = 0; i < ancestors.length; i++) {
+                let ancestor = ancestors[i];
+                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
+                this.callListeners(ancestor.listeners[_event.type], _event);
+            }
+            return true; //TODO: return a meaningful value, see documentation of dispatch event
+        }
+        /**
+         * Dispatches a synthetic event to target without travelling through the graph hierarchy neither during capture nor bubbling phase
+         */
+        dispatchEventToTargetOnly(_event) {
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
+            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
+            this.callListeners(this.listeners[_event.type], _event); // TODO: examine if this should go to the captures instead of the listeners
+            return true;
+        }
+        /**
+         * Broadcasts a synthetic event to this node and from there to all nodes deeper in the hierarchy,
+         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
+         */
+        broadcastEvent(_event) {
+            // overwrite event target and phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
+            Object.defineProperty(_event, "target", { writable: true, value: this });
+            this.broadcastEventRecursive(_event);
+        }
+        broadcastEventRecursive(_event) {
+            // capture phase only
+            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
+            let captures = this.captures[_event.type] || [];
+            for (let handler of captures)
+                // @ts-ignore
+                handler(_event);
+            // appears to be slower, astonishingly...
+            // captures.forEach(function (handler: Function): void {
+            //     handler(_event);
+            // });
+            // same for children
+            for (let child of this.children) {
+                child.broadcastEventRecursive(_event);
+            }
+        }
+        callListeners(_listeners, _event) {
+            if (_listeners?.length > 0)
+                for (let handler of _listeners)
+                    // @ts-ignore
+                    handler(_event);
+        }
+    }
+    FudgeCore.Node = Node;
 })(FudgeCore || (FudgeCore = {}));
 // / <reference path="../Transfer/Serializer.ts"/>
 // / <reference path="../Transfer/Mutable.ts"/>
@@ -1866,18 +2362,19 @@ var FudgeCore;
         * A cameraprojection with extremely narrow focus is used, so each pixel of the buffer would hold the same information from the node,
         * but the fragment shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
         */
-        static pick(_node, _mtxMeshToWorld, _mtxWorldToView) {
+        static pick(_node, _mtxMeshToWorld, _cmpCamera) {
             try {
-                let cmpMaterial = _node.getComponent(FudgeCore.ComponentMaterial);
                 let cmpMesh = _node.getComponent(FudgeCore.ComponentMesh);
+                let cmpMaterial = _node.getComponent(FudgeCore.ComponentMaterial);
                 let coat = cmpMaterial.material.coat;
                 let shader = coat instanceof FudgeCore.CoatTextured ? FudgeCore.ShaderPickTextured : FudgeCore.ShaderPick;
                 shader.useProgram();
                 coat.useRenderData(shader, cmpMaterial);
+                let mtxMeshToView = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
                 let sizeUniformLocation = shader.uniforms["u_vctSize"];
                 RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, [RenderWebGL.sizePick, RenderWebGL.sizePick]);
                 let mesh = cmpMesh.mesh;
-                let renderBuffers = mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView, FudgeCore.Render.ƒpicked.length);
+                let renderBuffers = mesh.useRenderBuffers(shader, _mtxMeshToWorld, mtxMeshToView, FudgeCore.Render.ƒpicked.length);
                 RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
                 let pick = new FudgeCore.Pick(_node);
                 FudgeCore.Render.ƒpicked.push(pick);
@@ -1907,22 +2404,31 @@ var FudgeCore;
                     RenderWebGL.crc3.uniform4fv(ambient, result.getArray());
                 }
             }
-            // Directional
-            let nDirectional = uni["u_nLightsDirectional"];
-            if (nDirectional) {
-                RenderWebGL.crc3.uniform1ui(nDirectional, 0);
-                let cmpLights = _lights.get(FudgeCore.LightDirectional);
-                if (cmpLights) {
-                    let n = cmpLights.length;
-                    RenderWebGL.crc3.uniform1ui(nDirectional, n);
-                    for (let i = 0; i < n; i++) {
-                        let cmpLight = cmpLights[i];
-                        RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].vctColor`], cmpLight.light.color.getArray());
-                        let direction = FudgeCore.Vector3.Z();
-                        direction.transform(cmpLight.mtxPivot, false);
-                        direction.transform(cmpLight.node.mtxWorld, false);
-                        direction.normalize();
-                        RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].vctDirection`], direction.get());
+            fillLightBuffers(FudgeCore.LightDirectional, "u_nLightsDirectional", "u_directional");
+            fillLightBuffers(FudgeCore.LightPoint, "u_nLightsPoint", "u_point");
+            fillLightBuffers(FudgeCore.LightSpot, "u_nLightsSpot", "u_spot");
+            function fillLightBuffers(_type, _uniNumber, _uniStruct) {
+                let uniLights = uni[_uniNumber];
+                if (uniLights) {
+                    RenderWebGL.crc3.uniform1ui(uniLights, 0);
+                    let cmpLights = _lights.get(_type);
+                    if (cmpLights) {
+                        let n = cmpLights.length;
+                        RenderWebGL.crc3.uniform1ui(uniLights, n);
+                        let i = 0;
+                        for (let cmpLight of cmpLights) {
+                            RenderWebGL.crc3.uniform4fv(uni[`${_uniStruct}[${i}].vctColor`], cmpLight.light.color.getArray());
+                            //TODO: could be optimized, no need to calculate for each shader
+                            let mtxTotal = FudgeCore.Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
+                            RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShape`], false, mtxTotal.get());
+                            if (_type != FudgeCore.LightDirectional) {
+                                let mtxInverse = mtxTotal.inverse();
+                                RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShapeInverse`], false, mtxInverse.get());
+                                FudgeCore.Recycler.store(mtxInverse);
+                            }
+                            FudgeCore.Recycler.store(mtxTotal);
+                            i++;
+                        }
                     }
                 }
             }
@@ -1931,24 +2437,44 @@ var FudgeCore;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
-        static drawMesh(_cmpMesh, cmpMaterial, _cmpCamera) {
-            let shader = cmpMaterial.material.getShader();
+        static drawNode(_node, _cmpCamera) {
+            let cmpMesh = _node.getComponent(FudgeCore.ComponentMesh);
+            let cmpMaterial = _node.getComponent(FudgeCore.ComponentMaterial);
             let coat = cmpMaterial.material.coat;
-            let mtxMeshToView = FudgeCore.Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, _cmpMesh.mtxWorld);
+            let shader = cmpMaterial.material.getShader();
             shader.useProgram();
-            let renderBuffers;
-            if (_cmpMesh.mesh instanceof FudgeCore.MeshSkin)
-                renderBuffers = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
-            else
-                renderBuffers = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView);
             coat.useRenderData(shader, cmpMaterial);
-            let uCamera = shader.uniforms["u_vctCamera"];
-            if (uCamera)
-                RenderWebGL.crc3.uniform3fv(uCamera, _cmpCamera.mtxWorld.translation.get());
-            let uWorldToView = shader.uniforms["u_mtxWorldToView"];
-            if (uWorldToView)
-                RenderWebGL.crc3.uniformMatrix4fv(uWorldToView, false, _cmpCamera.mtxWorldToView.get());
+            let mtxMeshToView = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
+            let renderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
+            let uniform = shader.uniforms["u_vctCamera"];
+            if (uniform)
+                RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
+            uniform = shader.uniforms["u_mtxWorldToView"];
+            if (uniform)
+                RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxWorldToView.get());
+            uniform = shader.uniforms["u_mtxWorldToCamera"];
+            if (uniform) {
+                // let mtxWorldToCamera: Matrix4x4 = Matrix4x4.INVERSION(_cmpCamera.mtxWorld); // todo: optimize/store in camera
+                RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
+            }
             RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+        }
+        static calcMeshToView(_node, _cmpMesh, _mtxWorldToView, _target) {
+            let cmpFaceCamera = _node.getComponent(FudgeCore.ComponentFaceCamera);
+            if (cmpFaceCamera && cmpFaceCamera.isActive) {
+                let mtxMeshToView;
+                mtxMeshToView = _cmpMesh.mtxWorld.clone;
+                mtxMeshToView.lookAt(_target, cmpFaceCamera.upLocal ? null : cmpFaceCamera.up, cmpFaceCamera.restrict);
+                return FudgeCore.Matrix4x4.MULTIPLICATION(_mtxWorldToView, mtxMeshToView);
+            }
+            return FudgeCore.Matrix4x4.MULTIPLICATION(_mtxWorldToView, _cmpMesh.mtxWorld);
+        }
+        static getRenderBuffers(_cmpMesh, _shader, _mtxMeshToView) {
+            if (_cmpMesh.mesh instanceof FudgeCore.MeshSkin)
+                // TODO: make mesh skin pickable
+                return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
+            else
+                return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView);
         }
     }
     RenderWebGL.crc3 = RenderWebGL.initialize();
@@ -2004,488 +2530,6 @@ var FudgeCore;
         }
     }
     FudgeCore.RenderInjectorTexture = RenderInjectorTexture;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    /**
-     * Represents a node in the scenetree.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Graph
-     */
-    class Node extends FudgeCore.EventTargetƒ {
-        /**
-         * Creates a new node with a name and initializes all attributes
-         */
-        constructor(_name) {
-            super();
-            this.mtxWorld = FudgeCore.Matrix4x4.IDENTITY();
-            this.timestampUpdate = 0;
-            /** The number of nodes of the whole branch including this node and all successors */
-            this.nNodesInBranch = 0;
-            /** The radius of the bounding sphere in world dimensions enclosing the geometry of this node and all successors in the branch */
-            this.radius = 0;
-            this.parent = null; // The parent of this node.
-            this.children = []; // array of child nodes appended to this node.
-            this.components = {};
-            // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
-            // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
-            this.listeners = {};
-            this.captures = {};
-            this.active = true;
-            /**
-             * Simply calls {@link addChild}. This reference is here solely because appendChild is the equivalent method in DOM.
-             * See and preferably use {@link addChild}
-             */
-            // tslint:disable-next-line: member-ordering
-            this.appendChild = this.addChild;
-            this.name = _name;
-        }
-        #mtxWorldInverseUpdated;
-        #mtxWorldInverse;
-        get isActive() {
-            return this.active;
-        }
-        /**
-         * Shortcut to retrieve this nodes {@link ComponentTransform}
-         */
-        get cmpTransform() {
-            return this.getComponents(FudgeCore.ComponentTransform)[0];
-        }
-        /**
-         * Shortcut to retrieve the local {@link Matrix4x4} attached to this nodes {@link ComponentTransform}
-         * Fails if no {@link ComponentTransform} is attached
-         */
-        get mtxLocal() {
-            return this.cmpTransform.mtxLocal;
-        }
-        get mtxWorldInverse() {
-            if (this.#mtxWorldInverseUpdated != this.timestampUpdate)
-                this.#mtxWorldInverse = FudgeCore.Matrix4x4.INVERSION(this.mtxWorld);
-            this.#mtxWorldInverseUpdated = this.timestampUpdate;
-            return this.#mtxWorldInverse;
-        }
-        /**
-         * Returns the number of children attached to this
-         */
-        get nChildren() {
-            return this.children.length;
-        }
-        /**
-         * Generator yielding the node and all decendants in the graph below for iteration
-         * Inactive nodes and their descendants can be filtered
-         */
-        *getIterator(_active = false) {
-            if (!_active || this.isActive) {
-                yield this;
-                for (let child of this.children)
-                    yield* child.getIterator(_active);
-            }
-        }
-        [Symbol.iterator]() {
-            return this.getIterator();
-        }
-        activate(_on) {
-            this.active = _on;
-            // TODO: check if COMPONENT_ACTIVATE/DEACTIVATE is the correct event to dispatch. Shouldn't it be something like NODE_ACTIVATE/DEACTIVATE?
-            this.dispatchEvent(new Event(_on ? "nodeActivate" /* NODE_ACTIVATE */ : "nodeDeactivate" /* NODE_DEACTIVATE */, { bubbles: true }));
-            this.broadcastEvent(new Event(_on ? "nodeActivate" /* NODE_ACTIVATE */ : "nodeDeactivate" /* NODE_DEACTIVATE */));
-        }
-        // #region Scenetree
-        /**
-         * Returns a reference to this nodes parent node
-         */
-        getParent() {
-            return this.parent;
-        }
-        /**
-         * Traces back the ancestors of this node and returns the first
-         */
-        getAncestor() {
-            let ancestor = this;
-            while (ancestor.getParent())
-                ancestor = ancestor.getParent();
-            return ancestor;
-        }
-        /**
-         * Traces the hierarchy upwards to the first ancestor and returns the path through the graph to this node
-         */
-        getPath() {
-            let ancestor = this;
-            let path = [this];
-            while (ancestor.getParent())
-                path.unshift(ancestor = ancestor.getParent());
-            return path;
-        }
-        /**
-         * Returns child at the given index in the list of children
-         */
-        getChild(_index) {
-            return this.children[_index];
-        }
-        /**
-         * Returns a clone of the list of children
-         */
-        getChildren() {
-            return this.children.slice(0);
-        }
-        /**
-         * Returns an array of references to childnodes with the supplied name.
-         */
-        getChildrenByName(_name) {
-            let found = [];
-            found = this.children.filter((_node) => _node.name == _name);
-            return found;
-        }
-        /**
-         * Adds the given reference to a node to the list of children, if not already in
-         * @throws Error when trying to add an ancestor of this
-         */
-        addChild(_child) {
-            if (this.children.includes(_child))
-                // _node is already a child of this
-                return;
-            let inAudioGraph = false;
-            let graphListened = FudgeCore.AudioManager.default.getGraphListeningTo();
-            let ancestor = this;
-            while (ancestor) {
-                ancestor.timestampUpdate = 0;
-                inAudioGraph = inAudioGraph || (ancestor == graphListened);
-                if (ancestor == _child)
-                    throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
-                else
-                    ancestor = ancestor.parent;
-            }
-            let previousParent = _child.parent;
-            if (previousParent)
-                previousParent.removeChild(_child);
-            this.children.push(_child);
-            _child.parent = this;
-            _child.dispatchEvent(new Event("childAppend" /* CHILD_APPEND */, { bubbles: true }));
-            if (inAudioGraph)
-                _child.broadcastEvent(new Event("childAppendToAudioGraph" /* CHILD_APPEND */));
-        }
-        /**
-         * Removes the reference to the give node from the list of children
-         */
-        removeChild(_child) {
-            let found = this.findChild(_child);
-            if (found < 0)
-                return;
-            _child.dispatchEvent(new Event("childRemove" /* CHILD_REMOVE */, { bubbles: true }));
-            if (this.isDescendantOf(FudgeCore.AudioManager.default.getGraphListeningTo()))
-                _child.broadcastEvent(new Event("childRemoveFromAudioGraph" /* CHILD_REMOVE */));
-            this.children.splice(found, 1);
-            _child.parent = null;
-        }
-        /**
-         * Removes all references in the list of children
-         */
-        removeAllChildren() {
-            while (this.children.length)
-                this.removeChild(this.children[0]);
-        }
-        /**
-         * Returns the position of the node in the list of children or -1 if not found
-         */
-        findChild(_search) {
-            return this.children.indexOf(_search);
-        }
-        /**
-         * Replaces a child node with another, preserving the position in the list of children
-         */
-        replaceChild(_replace, _with) {
-            let found = this.findChild(_replace);
-            if (found < 0)
-                return false;
-            let previousParent = _with.getParent();
-            if (previousParent)
-                previousParent.removeChild(_with);
-            _replace.parent = null;
-            this.children[found] = _with;
-            _with.parent = this;
-            _with.dispatchEvent(new Event("childAppend" /* CHILD_APPEND */, { bubbles: true }));
-            if (this.isDescendantOf(FudgeCore.AudioManager.default.getGraphListeningTo()))
-                _with.broadcastEvent(new Event("childAppendToAudioGraph" /* CHILD_APPEND */));
-            return true;
-        }
-        isUpdated(_timestampUpdate) {
-            return (this.timestampUpdate == _timestampUpdate);
-        }
-        isDescendantOf(_ancestor) {
-            let node = this;
-            while (node && node != _ancestor)
-                node = node.parent;
-            return (node != null);
-        }
-        /**
-         * Applies a Mutator from {@link Animation} to all its components and transfers it to its children.
-         */
-        applyAnimation(_mutator) {
-            if (_mutator.components) {
-                for (let componentName in _mutator.components) {
-                    if (this.components[componentName]) {
-                        let mutatorOfComponent = _mutator.components;
-                        for (let i in mutatorOfComponent[componentName]) {
-                            if (this.components[componentName][+i]) {
-                                let componentToMutate = this.components[componentName][+i];
-                                let mutatorArray = mutatorOfComponent[componentName];
-                                let mutatorWithComponentName = mutatorArray[+i];
-                                for (let cname in mutatorWithComponentName) { // trick used to get the only entry in the list
-                                    let mutatorToGive = mutatorWithComponentName[cname];
-                                    componentToMutate.mutate(mutatorToGive);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (_mutator.children) {
-                for (let i = 0; i < _mutator.children.length; i++) {
-                    let name = _mutator.children[i]["ƒ.Node"].name;
-                    let childNodes = this.getChildrenByName(name);
-                    for (let childNode of childNodes) {
-                        childNode.applyAnimation(_mutator.children[i]["ƒ.Node"]);
-                    }
-                }
-            }
-        }
-        // #endregion
-        // #region Components
-        /**
-         * Returns a list of all components attached to this node, independent of type.
-         */
-        getAllComponents() {
-            let all = [];
-            for (let type in this.components) {
-                all = all.concat(this.components[type]);
-            }
-            return all;
-        }
-        /**
-         * Returns a clone of the list of components of the given class attached to this node.
-         */
-        getComponents(_class) {
-            return (this.components[_class.name] || []).slice(0);
-        }
-        /**
-         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
-         */
-        getComponent(_class) {
-            let list = this.components[_class.name];
-            if (list)
-                return list[0];
-            return null;
-        }
-        /**
-         * Attach the given component to this node. Identical to {@link addComponent}
-         */
-        attach(_component) {
-            this.addComponent(_component);
-        }
-        /**
-         * Attach the given component to this node
-         */
-        addComponent(_component) {
-            if (_component.node == this)
-                return;
-            let cmpList = this.components[_component.type];
-            if (cmpList === undefined)
-                this.components[_component.type] = [_component];
-            else if (cmpList.length && _component.isSingleton)
-                throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
-            else
-                cmpList.push(_component);
-            _component.attachToNode(this);
-            _component.dispatchEvent(new Event("componentAdd" /* COMPONENT_ADD */));
-            this.dispatchEventToTargetOnly(new CustomEvent("componentAdd" /* COMPONENT_ADD */, { detail: _component })); // TODO: see if this is be feasable
-        }
-        /**
-         * Detach the given component from this node. Identical to {@link removeComponent}
-         */
-        detach(_component) {
-            this.removeComponent(_component);
-        }
-        /**
-         * Removes the given component from the node, if it was attached, and sets its parent to null.
-         */
-        removeComponent(_component) {
-            try {
-                let componentsOfType = this.components[_component.type];
-                let foundAt = componentsOfType.indexOf(_component);
-                if (foundAt < 0)
-                    return;
-                _component.dispatchEvent(new Event("componentRemove" /* COMPONENT_REMOVE */));
-                this.dispatchEventToTargetOnly(new CustomEvent("componentRemove" /* COMPONENT_REMOVE */, { detail: _component })); // TODO: see if this would be feasable
-                componentsOfType.splice(foundAt, 1);
-                _component.attachToNode(null);
-            }
-            catch (_error) {
-                throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
-            }
-        }
-        // #endregion
-        // #region Serialization
-        serialize() {
-            let serialization = {
-                name: this.name,
-                active: this.active
-            };
-            let components = {};
-            for (let type in this.components) {
-                components[type] = [];
-                for (let component of this.components[type]) {
-                    // components[type].push(component.serialize());
-                    components[type].push(FudgeCore.Serializer.serialize(component));
-                }
-            }
-            serialization["components"] = components;
-            let children = [];
-            for (let child of this.children) {
-                children.push(FudgeCore.Serializer.serialize(child));
-            }
-            serialization["children"] = children;
-            this.dispatchEvent(new Event("nodeSerialized" /* NODE_SERIALIZED */));
-            return serialization;
-        }
-        async deserialize(_serialization) {
-            this.name = _serialization.name;
-            // this.parent = is set when the nodes are added
-            // deserialize components first so scripts can react to children being appended
-            for (let type in _serialization.components) {
-                for (let serializedComponent of _serialization.components[type]) {
-                    let deserializedComponent = await FudgeCore.Serializer.deserialize(serializedComponent);
-                    this.addComponent(deserializedComponent);
-                }
-            }
-            for (let serializedChild of _serialization.children) {
-                let deserializedChild = await FudgeCore.Serializer.deserialize(serializedChild);
-                this.appendChild(deserializedChild);
-            }
-            this.dispatchEvent(new Event("nodeDeserialized" /* NODE_DESERIALIZED */));
-            for (let component of this.getAllComponents())
-                component.dispatchEvent(new Event("nodeDeserialized" /* NODE_DESERIALIZED */));
-            this.activate(_serialization.active);
-            return this;
-        }
-        // #endregion
-        /**
-         * Creates a string as representation of this node and its descendants
-         */
-        toHierarchyString(_node = null, _level = 0) {
-            // TODO: refactor for better readability
-            if (!_node)
-                _node = this;
-            let prefix = "+".repeat(_level);
-            let output = prefix + " " + _node.name + " | ";
-            for (let type in _node.components)
-                output += _node.components[type].length + " " + type.split("Component").pop() + ", ";
-            output = output.slice(0, -2) + "</br>";
-            for (let child of _node.children) {
-                output += this.toHierarchyString(child, _level + 1);
-            }
-            return output;
-        }
-        // #region Events
-        /**
-         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
-         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
-         */
-        addEventListener(_type, _handler, _capture = false) {
-            let listListeners = _capture ? this.captures : this.listeners;
-            if (!listListeners[_type])
-                listListeners[_type] = [];
-            listListeners[_type].push(_handler);
-        }
-        /**
-         * Removes an event listener from the node. The signature must match the one used with addEventListener
-         */
-        removeEventListener(_type, _handler, _capture = false) {
-            let listenersForType = _capture ? this.captures[_type] : this.listeners[_type];
-            if (listenersForType)
-                for (let i = listenersForType.length - 1; i >= 0; i--)
-                    if (listenersForType[i] == _handler)
-                        listenersForType.splice(i, 1);
-        }
-        /**
-         * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
-         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
-         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
-         */
-        dispatchEvent(_event) {
-            let ancestors = [];
-            let upcoming = this;
-            // overwrite event target
-            Object.defineProperty(_event, "target", { writable: true, value: this });
-            // TODO: consider using Reflect instead of Object throughout. See also Render and Mutable...
-            while (upcoming.parent)
-                ancestors.push(upcoming = upcoming.parent);
-            Object.defineProperty(_event, "path", { writable: true, value: new Array(this, ...ancestors) });
-            // capture phase
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
-            for (let i = ancestors.length - 1; i >= 0; i--) {
-                let ancestor = ancestors[i];
-                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
-                this.callListeners(ancestor.captures[_event.type], _event);
-            }
-            // target phase
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
-            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
-            this.callListeners(this.captures[_event.type], _event);
-            this.callListeners(this.listeners[_event.type], _event);
-            if (!_event.bubbles)
-                return true;
-            // bubble phase
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.BUBBLING_PHASE });
-            for (let i = 0; i < ancestors.length; i++) {
-                let ancestor = ancestors[i];
-                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
-                this.callListeners(ancestor.listeners[_event.type], _event);
-            }
-            return true; //TODO: return a meaningful value, see documentation of dispatch event
-        }
-        /**
-         * Dispatches a synthetic event to target without travelling through the graph hierarchy neither during capture nor bubbling phase
-         */
-        dispatchEventToTargetOnly(_event) {
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
-            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
-            this.callListeners(this.listeners[_event.type], _event); // TODO: examine if this should go to the captures instead of the listeners
-            return true;
-        }
-        /**
-         * Broadcasts a synthetic event to this node and from there to all nodes deeper in the hierarchy,
-         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
-         */
-        broadcastEvent(_event) {
-            // overwrite event target and phase
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
-            Object.defineProperty(_event, "target", { writable: true, value: this });
-            this.broadcastEventRecursive(_event);
-        }
-        broadcastEventRecursive(_event) {
-            // capture phase only
-            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
-            let captures = this.captures[_event.type] || [];
-            for (let handler of captures)
-                // @ts-ignore
-                handler(_event);
-            // appears to be slower, astonishingly...
-            // captures.forEach(function (handler: Function): void {
-            //     handler(_event);
-            // });
-            // same for children
-            for (let child of this.children) {
-                child.broadcastEventRecursive(_event);
-            }
-        }
-        callListeners(_listeners, _event) {
-            if (_listeners?.length > 0)
-                for (let handler of _listeners)
-                    // @ts-ignore
-                    handler(_event);
-        }
-    }
-    FudgeCore.Node = Node;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -2865,7 +2909,7 @@ var FudgeCore;
         }
         /**
          * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
-         * Only to be used when functionality that is not added within Fudge is needed.
+         * Only to be used when functionality that is not added within FUDGE is needed.
         */
         getOimoJoint() {
             return this.joint;
@@ -3098,14 +3142,15 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 /// <reference path="Debug/DebugTarget.ts"/>
 /// <reference path="Debug/Debug.ts"/>
+// / <reference path="Time/Time.ts"/>
 /// <reference path="Event/Event.ts"/>
 /// <reference path="Serialization/Mutable.ts"/>
 /// <reference path="Serialization/Serializer.ts"/> 
+/// <reference path="Graph/Node.ts"/>
 /// <reference path="Component/Component.ts"/>
 /// <reference path="Recycle/RecycableArray.ts"/>
 /// <reference path="Render/RenderWebGL.ts"/>
 /// <reference path="Render/RenderInjectorTexture.ts"/>
-/// <reference path="Graph/Node.ts"/>
 /// <reference path="Physics/HelpersPhysics.ts"/>
 /// <reference path="Physics/Joint.ts"/>
 /// <reference path="Physics/JointAxial.ts"/>
@@ -4609,9 +4654,9 @@ var FudgeCore;
 (function (FudgeCore) {
     let FIELD_OF_VIEW;
     (function (FIELD_OF_VIEW) {
-        FIELD_OF_VIEW[FIELD_OF_VIEW["HORIZONTAL"] = 0] = "HORIZONTAL";
-        FIELD_OF_VIEW[FIELD_OF_VIEW["VERTICAL"] = 1] = "VERTICAL";
-        FIELD_OF_VIEW[FIELD_OF_VIEW["DIAGONAL"] = 2] = "DIAGONAL";
+        FIELD_OF_VIEW["HORIZONTAL"] = "horizontal";
+        FIELD_OF_VIEW["VERTICAL"] = "vertical";
+        FIELD_OF_VIEW["DIAGONAL"] = "diagonal";
     })(FIELD_OF_VIEW = FudgeCore.FIELD_OF_VIEW || (FudgeCore.FIELD_OF_VIEW = {}));
     /**
      * Defines identifiers for the various projections a camera can provide.
@@ -4645,6 +4690,7 @@ var FudgeCore;
         }
         //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
         #mtxWorldToView;
+        #mtxCameraInverse;
         // TODO: examine, if background should be an attribute of Camera or Viewport
         get mtxWorld() {
             let mtxCamera = this.mtxPivot.clone;
@@ -4664,15 +4710,23 @@ var FudgeCore;
             if (this.#mtxWorldToView)
                 return this.#mtxWorldToView;
             //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
-            let mtxCamera = this.mtxWorld;
-            let mtxInversion = FudgeCore.Matrix4x4.INVERSION(mtxCamera);
-            this.#mtxWorldToView = FudgeCore.Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxInversion);
-            FudgeCore.Recycler.store(mtxCamera);
-            FudgeCore.Recycler.store(mtxInversion);
+            this.#mtxWorldToView = FudgeCore.Matrix4x4.MULTIPLICATION(this.mtxProjection, this.mtxCameraInverse);
             return this.#mtxWorldToView;
         }
+        get mtxCameraInverse() {
+            if (this.#mtxCameraInverse)
+                return this.#mtxCameraInverse;
+            //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
+            this.#mtxCameraInverse = FudgeCore.Matrix4x4.INVERSION(this.mtxWorld);
+            return this.#mtxCameraInverse;
+        }
         resetWorldToView() {
+            if (this.#mtxWorldToView)
+                FudgeCore.Recycler.store(this.#mtxWorldToView);
+            if (this.#mtxCameraInverse)
+                FudgeCore.Recycler.store(this.#mtxCameraInverse);
             this.#mtxWorldToView = null;
+            this.#mtxCameraInverse = null;
         }
         getProjection() {
             return this.projection;
@@ -4711,13 +4765,13 @@ var FudgeCore;
             this.mtxProjection = FudgeCore.Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction); // TODO: remove magic numbers
         }
         /**
-         * Set the camera to orthographic projection. The origin is in the top left corner of the canvas.
-         * @param _left The positionvalue of the projectionspace's left border. (Default = 0)
-         * @param _right The positionvalue of the projectionspace's right border. (Default = canvas.clientWidth)
-         * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
-         * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
+         * Set the camera to orthographic projection. Default values are derived the canvas client dimensions
+         * @param _left The positionvalue of the projectionspace's left border.
+         * @param _right The positionvalue of the projectionspace's right border.
+         * @param _bottom The positionvalue of the projectionspace's bottom border.
+         * @param _top The positionvalue of the projectionspace's top border.
          */
-        projectOrthographic(_left = 0, _right = FudgeCore.Render.getCanvas().clientWidth, _bottom = FudgeCore.Render.getCanvas().clientHeight, _top = 0) {
+        projectOrthographic(_left = -FudgeCore.Render.getCanvas().clientWidth / 2, _right = FudgeCore.Render.getCanvas().clientWidth / 2, _bottom = FudgeCore.Render.getCanvas().clientHeight / 2, _top = -FudgeCore.Render.getCanvas().clientHeight / 2) {
             this.projection = PROJECTION.ORTHOGRAPHIC;
             this.mtxProjection = FudgeCore.Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
@@ -4819,7 +4873,27 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     /**
-     * Synchronizes the graph instance this component is attached to with the graph and vice versa
+     * Makes the node face the camera when rendering, respecting restrictions for rotation around specific axis
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
+     */
+    class ComponentFaceCamera extends FudgeCore.Component {
+        constructor() {
+            super();
+            this.upLocal = true;
+            this.up = FudgeCore.Vector3.Y(1);
+            this.restrict = false;
+            this.singleton = true;
+        }
+    }
+    ComponentFaceCamera.iSubclass = FudgeCore.Component.registerSubclass(ComponentFaceCamera);
+    FudgeCore.ComponentFaceCamera = ComponentFaceCamera;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    /**
+     * Filters synchronization between a graph instance and the graph it is connected to. If active, no synchronization occurs.
+     * Maybe more finegrained in the future...
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
      */
@@ -4868,19 +4942,18 @@ var FudgeCore;
     FudgeCore.Light = Light;
     /**
      * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
+     * Attached to a node by {@link ComponentLight}, the pivot matrix is ignored.
      * ```plaintext
      * ~ ~ ~
      *  ~ ~ ~
      * ```
      */
     class LightAmbient extends Light {
-        constructor(_color = new FudgeCore.Color(1, 1, 1, 1)) {
-            super(_color);
-        }
     }
     FudgeCore.LightAmbient = LightAmbient;
     /**
      * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
+     * Attached to a node by {@link ComponentLight}, the pivot matrix specifies the direction of the light only.
      * ```plaintext
      * --->
      * --->
@@ -4888,13 +4961,13 @@ var FudgeCore;
      * ```
      */
     class LightDirectional extends Light {
-        constructor(_color = new FudgeCore.Color(1, 1, 1, 1)) {
-            super(_color);
-        }
     }
     FudgeCore.LightDirectional = LightDirectional;
     /**
      * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
+     * Attached to a node by {@link ComponentLight}, the pivot matrix specifies the position of the light, it's shape and rotation.
+     * So with uneven scaling, other shapes than a perfect sphere, such as an oval or a disc, are possible, which creates a visible effect of the rotation too.
+     * The intensity of the light drops linearly from 1 in the center to 0 at the perimeter of the shape.
      * ```plaintext
      *         .\|/.
      *        -- o --
@@ -4902,14 +4975,12 @@ var FudgeCore;
      * ```
      */
     class LightPoint extends Light {
-        constructor() {
-            super(...arguments);
-            this.range = 10;
-        }
     }
     FudgeCore.LightPoint = LightPoint;
     /**
      * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
+     * Attached to a node by {@link ComponentLight}, the pivot matrix specifies the position of the light, the direction and the size and angles of the cone.
+     * The intensity of the light drops linearly from 1 in the center to 0 at the outer limits of the cone.
      * ```plaintext
      *          o
      *         /|\
@@ -4937,9 +5008,11 @@ var FudgeCore;
     })(LIGHT_TYPE = FudgeCore.LIGHT_TYPE || (FudgeCore.LIGHT_TYPE = {}));
     /**
       * Attaches a {@link Light} to the node
+      * The pivot matrix has different effects depending on the type of the {@link Light}. See there for details.
       * @authors Jirka Dell'Oro-Friedl, HFU, 2019
       */
     class ComponentLight extends FudgeCore.Component {
+        //TODO: since there is almost no functionality left in Light, eliminate it and put all in the component as with the camera...
         constructor(_light = new FudgeCore.LightAmbient()) {
             super();
             // private static constructors: { [type: string]: General } = { [LIGHT_TYPE.AMBIENT]: LightAmbient, [LIGHT_TYPE.DIRECTIONAL]: LightDirectional, [LIGHT_TYPE.POINT]: LightPoint, [LIGHT_TYPE.SPOT]: LightSpot };
@@ -5158,9 +5231,8 @@ var FudgeCore;
         PICK["PHYSICS"] = "physics";
     })(PICK = FudgeCore.PICK || (FudgeCore.PICK = {}));
     /**
-     * Base class for scripts the user writes
+     * Attaches picking functionality to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
-     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
      */
     class ComponentPick extends FudgeCore.Component {
         constructor() {
@@ -5182,6 +5254,7 @@ var FudgeCore;
                     if (hitInfo.hit)
                         this.node.dispatchEvent(_event);
                     break;
+                //TODO: PICK.CAMERA
             }
         }
         serialize() {
@@ -5236,7 +5309,7 @@ var FudgeCore;
         BASE[BASE["NODE"] = 3] = "NODE";
     })(BASE = FudgeCore.BASE || (FudgeCore.BASE = {}));
     /**
-     * Attaches a transform-[[Matrix4x4} to the node, moving, scaling and rotating it in space relative to its parent.
+     * Attaches a transform-{@link Matrix4x4} to the node, moving, scaling and rotating it in space relative to its parent.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends FudgeCore.Component {
@@ -5245,34 +5318,6 @@ var FudgeCore;
             this.mtxLocal = _mtxInit;
         }
         //#region Transformations respecting the hierarchy
-        /**
-         * Adjusts the rotation to point the z-axis directly at the given target point in world space and tilts it to accord with the given up vector,
-         * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used.
-         */
-        lookAt(_targetWorld, _up) {
-            let container = this.node;
-            if (!container && !container.getParent())
-                return this.mtxLocal.lookAt(_targetWorld, _up);
-            // component is attached to a child node -> transform respecting the hierarchy
-            let mtxWorld = container.mtxWorld.clone;
-            mtxWorld.lookAt(_targetWorld, _up, true);
-            let mtxLocal = FudgeCore.Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
-            this.mtxLocal = mtxLocal;
-        }
-        /**
-         * Adjusts the rotation to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
-         * respectively calculating yaw only. If no up vector is given, the previous up-vector is used.
-         */
-        showTo(_targetWorld, _up) {
-            let container = this.node;
-            if (!container && !container.getParent())
-                return this.mtxLocal.showTo(_targetWorld, _up);
-            // component is attached to a child node -> transform respecting the hierarchy
-            let mtxWorld = container.mtxWorld.clone;
-            mtxWorld.showTo(_targetWorld, _up, true);
-            let mtxLocal = FudgeCore.Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
-            this.mtxLocal = mtxLocal;
-        }
         /**
          * recalculates this local matrix to yield the identical world matrix based on the given node.
          * Use rebase before appending the container of this component to another node while preserving its transformation in the world.
@@ -5370,7 +5415,7 @@ var FudgeCore;
      * ```
      */
     class Control extends EventTarget {
-        constructor(_name, _factor = 1, _type = 0 /* PROPORTIONAL */, _active = true) {
+        constructor(_name, _factor = 1, _type = 0 /* PROPORTIONAL */, _delay = 0) {
             super();
             this.rateDispatchOutput = 0;
             this.valuePrevious = 0;
@@ -5408,8 +5453,9 @@ var FudgeCore;
             };
             this.factor = _factor;
             this.type = _type;
-            this.active = _active;
+            this.active = true;
             this.name = _name;
+            this.setDelay(_delay);
         }
         /**
          * Set the time-object to be used when calculating the output in {@link CONTROL_TYPE.INTEGRAL}
@@ -5774,32 +5820,6 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     /**
-     * a subclass of DragEvent .A event that represents a drag and drop interaction
-     */
-    class EventDragDrop extends DragEvent {
-        constructor(type, _event) {
-            super(type, _event);
-            let target = _event.target;
-            this.clientRect = target.getClientRects()[0];
-            this.pointerX = _event.clientX - this.clientRect.left;
-            this.pointerY = _event.clientY - this.clientRect.top;
-        }
-    }
-    FudgeCore.EventDragDrop = EventDragDrop;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    /**
-     * a subclass of KeyboardEvent. EventKeyboard objects describe a user interaction with the keyboard
-     * each event describes a single interaction between the user and a key (or combination of a key with modifier keys) on the keyboard.
-     */
-    class EventKeyboard extends KeyboardEvent {
-        constructor(type, _event) {
-            super(type, _event);
-        }
-    }
-    FudgeCore.EventKeyboard = EventKeyboard;
-    /**
      * The codes sent from a standard english keyboard layout
      */
     let KEYBOARD_CODE;
@@ -6006,24 +6026,8 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     /**
-     * a subclass of PointerEvent. The state of a DOM event produced by a pointer such as the geometry of the contact point
-     * */
-    class EventPointer extends PointerEvent {
-        constructor(type, _event) {
-            super(type, _event);
-            let target = _event.target;
-            this.clientRect = target.getClientRects()[0];
-            this.pointerX = _event.clientX - this.clientRect.left;
-            this.pointerY = _event.clientY - this.clientRect.top;
-        }
-    }
-    FudgeCore.EventPointer = EventPointer;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    /**
-     * An event that represents a call from a Timer
-     * */
+     * An event that represents a call from a {@link Timer}
+     */
     class EventTimer {
         constructor(_timer, ..._arguments) {
             this.type = "\u0192lapse" /* CALL */;
@@ -6039,14 +6043,161 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     /**
-     * A supclass of WheelEvent. Events that occur due to the user moving a mouse wheel or similar input device.
-     * */
-    class EventWheel extends WheelEvent {
-        constructor(type, _event) {
-            super(type, _event);
+     * Custom touch events
+     */
+    let EVENT_TOUCH;
+    (function (EVENT_TOUCH) {
+        /** custom event fired in addition to the standard touchmove, details offset to starting touch */
+        EVENT_TOUCH["MOVE"] = "touchMove";
+        /** custom event fired when the touches haven't moved outside of the tap radius */
+        EVENT_TOUCH["TAP"] = "touchTap";
+        /** custom event fired when the touches have moved outside of the notch radius, details offset and cardinal direction */
+        EVENT_TOUCH["NOTCH"] = "touchNotch";
+        /** custom event fired when the touches haven't moved outside of the tap radius for some time */
+        EVENT_TOUCH["LONG"] = "touchLong";
+        /** custom event fired when two taps were detected in short succession */
+        EVENT_TOUCH["DOUBLE"] = "touchDouble";
+        /** custom event fired when the distance between the only two touches changes beyond a tolerance */
+        EVENT_TOUCH["PINCH"] = "touchPinch";
+        /** custom event not implemented yet */
+        EVENT_TOUCH["ROTATE"] = "touchRotate";
+    })(EVENT_TOUCH = FudgeCore.EVENT_TOUCH || (FudgeCore.EVENT_TOUCH = {}));
+    /**
+     * Dispatches CustomTouchEvents to the EventTarget given with the constructor.
+     * When using touch events, make sure to set `touch-action: none` in CSS
+     * @author Jirka Dell'Oro-Friedl, HFU, 2022
+     */
+    class TouchEventDispatcher {
+        constructor(_target, _radiusTap = 5, _radiusNotch = 50, _timeDouble = 200, _timerLong = 1000) {
+            this.posStart = FudgeCore.Vector2.ZERO();
+            this.posNotch = FudgeCore.Vector2.ZERO();
+            this.posPrev = FudgeCore.Vector2.ZERO();
+            this.moved = false;
+            this.time = new FudgeCore.Time();
+            this.pinchDistance = 0;
+            this.pinchTolerance = 1;
+            this.hndEvent = (_event) => {
+                _event.preventDefault();
+                let touchFirst = _event.touches[0];
+                let position = this.calcAveragePosition(_event.touches); //new Vector2(touchFirst?.clientX, touchFirst?.clientY);
+                let offset;
+                switch (_event.type) {
+                    case "touchstart":
+                        this.moved = false;
+                        this.startGesture(position);
+                        if (_event.touches.length == 2) {
+                            // reset pinch
+                            let pinch = new FudgeCore.Vector2(_event.touches[1].clientX - touchFirst.clientX, _event.touches[1].clientY - touchFirst.clientY);
+                            this.pinchDistance = pinch.magnitude;
+                        }
+                        let dispatchLong = (_eventTimer) => {
+                            this.moved = true;
+                            this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.LONG, {
+                                bubbles: true, detail: { position: position, touches: _event.touches }
+                            }));
+                        };
+                        this.timerLong?.clear();
+                        this.timerLong = new FudgeCore.Timer(this.time, this.timeLong, 1, dispatchLong);
+                        break;
+                    case "touchend":
+                        this.timerLong?.clear();
+                        if (_event.touches.length > 0) {
+                            // still touches active
+                            this.startGesture(position);
+                            break;
+                        }
+                        let dispatchTap = (_eventTimer) => {
+                            this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.TAP, {
+                                bubbles: true, detail: { position: position, touches: _event.touches }
+                            }));
+                        };
+                        // check if there was a tap before and timer is still running -> double tap
+                        if (this.timerDouble?.active) {
+                            this.timerDouble.clear();
+                            // this.timer = undefined;
+                            this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.DOUBLE, {
+                                bubbles: true, detail: { position: position, touches: _event.touches }
+                            }));
+                        }
+                        // check if there was movement, otherwise set timer to fire tap
+                        else if (!this.moved)
+                            this.timerDouble = new FudgeCore.Timer(this.time, this.timeDouble, 1, dispatchTap);
+                        break;
+                    case "touchmove":
+                        this.detectPinch(_event, position);
+                        offset = FudgeCore.Vector2.DIFFERENCE(this.posPrev, this.posStart);
+                        this.moved ||= (offset.magnitude < this.radiusTap); // remember that touch moved over tap radius
+                        let movement = FudgeCore.Vector2.DIFFERENCE(position, this.posPrev);
+                        this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.MOVE, {
+                            bubbles: true, detail: { position: position, touches: _event.touches, offset: offset, movement: movement }
+                        }));
+                        // fire notch when touches moved out of notch radius and reset notch
+                        offset = FudgeCore.Vector2.DIFFERENCE(position, this.posNotch);
+                        if (offset.magnitude > this.radiusNotch) {
+                            let cardinal = Math.abs(offset.x) > Math.abs(offset.y) ?
+                                FudgeCore.Vector2.X(offset.x < 0 ? -1 : 1) :
+                                FudgeCore.Vector2.Y(offset.y < 0 ? -1 : 1);
+                            this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.NOTCH, {
+                                bubbles: true, detail: { position: position, touches: _event.touches, offset: offset, cardinal: cardinal, movement: movement }
+                            }));
+                            this.posNotch = position;
+                        }
+                        //TODO: pinch, rotate...
+                        break;
+                    default:
+                        break;
+                }
+                this.posPrev.set(position.x, position.y);
+            };
+            this.detectPinch = (_event, _position) => {
+                if (_event.touches.length != 2)
+                    return;
+                let t = _event.touches;
+                let pinch = new FudgeCore.Vector2(t[1].clientX - t[0].clientX, t[1].clientY - t[0].clientY);
+                let pinchDistance = pinch.magnitude;
+                let pinchDelta = pinchDistance - this.pinchDistance;
+                if (Math.abs(pinchDelta) > this.pinchTolerance)
+                    this.target.dispatchEvent(new CustomEvent(EVENT_TOUCH.PINCH, {
+                        bubbles: true, detail: { position: _position, touches: _event.touches, pinch: pinch, pinchDelta: pinchDelta }
+                    }));
+                this.pinchDistance = pinchDistance;
+            };
+            this.target = _target;
+            this.radiusTap = _radiusTap;
+            this.radiusNotch = _radiusNotch;
+            this.timeDouble = _timeDouble;
+            this.timeLong = _timerLong;
+            this.activate(true);
+        }
+        /**
+         * De-/Activates the dispatch of CustomTouchEvents
+         */
+        activate(_on) {
+            if (_on) {
+                this.target.addEventListener("touchstart", this.hndEvent);
+                this.target.addEventListener("touchend", this.hndEvent);
+                this.target.addEventListener("touchmove", this.hndEvent);
+                return;
+            }
+            this.target.removeEventListener("touchstart", this.hndEvent);
+            this.target.removeEventListener("touchend", this.hndEvent);
+            this.target.removeEventListener("touchmove", this.hndEvent);
+        }
+        startGesture(_position) {
+            this.posNotch.set(_position.x, _position.y);
+            this.posStart.set(_position.x, _position.y);
+        }
+        calcAveragePosition(_touches) {
+            let average = FudgeCore.Vector2.ZERO();
+            for (let touch of _touches) {
+                average.x += touch.clientX;
+                average.y += touch.clientY;
+            }
+            average.scale(1 / _touches.length);
+            return average;
         }
     }
-    FudgeCore.EventWheel = EventWheel;
+    FudgeCore.TouchEventDispatcher = TouchEventDispatcher;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -6056,10 +6207,25 @@ var FudgeCore;
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
      */
     class Graph extends FudgeCore.Node {
-        constructor() {
-            super(...arguments);
+        // #syncing: boolean = false;
+        constructor(_name = "Graph") {
+            super(_name);
             this.idResource = undefined;
             this.type = "Graph";
+            this.hndMutate = async (_event) => {
+                // TODO: if path contains a graph instance below this, don't dispatch!
+                // let path: Node[] = Reflect.get(_event, "path");
+                // for (let node of path)
+                //   if (node instanceof GraphInstance && node.idSource != this.idResource)
+                //     return;
+                // console.log("Graph mutates", this.name);
+                // this.#syncing = true;
+                _event.detail.path = Reflect.get(_event, "path"); // save path to target in detail
+                this.dispatchEvent(new CustomEvent("mutateGraph" /* MUTATE_GRAPH */, { detail: _event.detail }));
+                this.dispatchEvent(new Event("mutateGraphDone" /* MUTATE_GRAPH_DONE */));
+                // this.#syncing = false;
+            };
+            this.addEventListener("mutate" /* MUTATE */, this.hndMutate);
         }
         serialize() {
             let serialization = super.serialize();
@@ -6070,7 +6236,8 @@ var FudgeCore;
         async deserialize(_serialization) {
             await super.deserialize(_serialization);
             FudgeCore.Project.register(this, _serialization.idResource);
-            FudgeCore.Project.resyncGraphInstances(this);
+            await FudgeCore.Project.resyncGraphInstances(this);
+            this.dispatchEvent(new Event("graphDeserialized" /* GRAPH_DESERIALIZED */));
             return this;
         }
     }
@@ -6084,6 +6251,13 @@ var FudgeCore;
      * @author Jirka Dell'Oro-Friedl, HFU, 2019
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
      */
+    let SYNC;
+    (function (SYNC) {
+        SYNC[SYNC["READY"] = 0] = "READY";
+        SYNC[SYNC["GRAPH_SYNCED"] = 1] = "GRAPH_SYNCED";
+        SYNC[SYNC["GRAPH_DONE"] = 2] = "GRAPH_DONE";
+        SYNC[SYNC["INSTANCE"] = 3] = "INSTANCE";
+    })(SYNC || (SYNC = {}));
     class GraphInstance extends FudgeCore.Node {
         /**
          * This constructor allone will not create a reconstruction, but only save the id.
@@ -6095,30 +6269,41 @@ var FudgeCore;
             /** id of the resource that instance was created from */
             // TODO: examine, if this should be a direct reference to the Graph, instead of the id
             this.#idSource = undefined;
-            this.#sync = true;
+            this.#sync = SYNC.READY;
+            this.#deserializeFromSource = true;
             /**
              * Source graph mutated, reflect mutation in this instance
              */
             this.hndMutationGraph = async (_event) => {
-                if (!this.#sync) {
-                    this.#sync = true;
+                // console.log("Reflect Graph-Mutation to Instance", SYNC[this.#sync], (<Graph>_event.currentTarget).name, this.getPath().map(_node => _node.name));
+                if (this.#sync != SYNC.READY) {
+                    // console.log("Sync aborted, switch to ready");
+                    this.#sync = SYNC.READY;
                     return;
                 }
                 if (this.isFiltered())
                     return;
-                this.#sync = false; // do not sync again, since mutation is already a synchronization
-                await this.reflectMutation(_event, _event.currentTarget, this);
-                this.#sync = true;
+                this.#sync = SYNC.GRAPH_SYNCED; // do not sync again, since mutation is already a synchronization
+                await this.reflectMutation(_event, _event.currentTarget, this, _event.detail.path);
             };
             /**
              * This instance mutated, reflect mutation in source graph
              */
             this.hndMutationInstance = async (_event) => {
-                if (!this.#sync)
+                // console.log("Reflect Instance-Mutation to Graph", SYNC[this.#sync], this.getPath().map(_node => _node.name), this.get().name);
+                if (this.#sync != SYNC.READY) {
+                    // console.log("Sync aborted, switch to ready");
+                    this.#sync = SYNC.READY;
                     return;
+                }
+                if (_event.target instanceof GraphInstance && _event.target != this) {
+                    // console.log("Sync aborted, target already synced");
+                    return;
+                }
                 if (this.isFiltered())
                     return;
-                await this.reflectMutation(_event, this, this.get());
+                this.#sync = SYNC.INSTANCE; // do not sync again, since mutation is already a synchronization
+                await this.reflectMutation(_event, this, this.get(), Reflect.get(_event, "path"));
             };
             this.addEventListener("mutate" /* MUTATE */, this.hndMutationInstance, true);
             if (!_graph)
@@ -6129,6 +6314,7 @@ var FudgeCore;
         // TODO: examine, if this should be a direct reference to the Graph, instead of the id
         #idSource;
         #sync;
+        #deserializeFromSource;
         get idSource() {
             return this.#idSource;
         }
@@ -6141,23 +6327,41 @@ var FudgeCore;
         }
         //TODO: optimize using the referenced Graph, serialize/deserialize only the differences
         serialize() {
-            let serialization = super.serialize();
+            let filter = this.getComponent(FudgeCore.ComponentGraphFilter);
+            let serialization = {};
+            if (filter && filter.isActive) // if graph synchronisation is unfiltered, knowing the source is sufficient for serialization
+                serialization = super.serialize();
+            else
+                serialization.deserializeFromSource = true;
+            serialization.name = this.name;
             serialization.idSource = this.#idSource;
             return serialization;
         }
         async deserialize(_serialization) {
             this.#idSource = _serialization.idSource;
-            await super.deserialize(_serialization);
-            if (this.get())
-                this.connectToGraph();
-            else
+            if (!_serialization.deserializeFromSource) {
+                await super.deserialize(_serialization); // instance is deserialized from individual data
+                this.#deserializeFromSource = false;
+            }
+            let graph = this.get();
+            if (graph)
+                // if (_serialization.deserializeFromSource) // no components-> assume synchronized GraphInstance
+                //   await this.set(graph); // recreate complete instance from source graph
+                // else {
+                await this.connectToGraph(); // otherwise just connect
+            // }
+            else {
                 FudgeCore.Project.registerGraphInstanceForResync(this);
+            }
             return this;
         }
-        connectToGraph() {
+        async connectToGraph() {
             let graph = this.get();
+            if (this.#deserializeFromSource)
+                await this.set(graph);
             // graph.addEventListener(EVENT.MUTATE, (_event: CustomEvent) => this.hndMutation, true);
-            graph.addEventListener("mutate" /* MUTATE */, this.hndMutationGraph, true);
+            graph.addEventListener("mutateGraph" /* MUTATE_GRAPH */, this.hndMutationGraph);
+            // graph.addEventListener(EVENT.MUTATE_GRAPH_DONE, () => { console.log("Done", this.name); /* this.#sync = true; */ });
         }
         /**
          * Set this node to be a recreation of the {@link Graph} given
@@ -6179,12 +6383,22 @@ var FudgeCore;
         get() {
             return FudgeCore.Project.resources[this.#idSource];
         }
-        async reflectMutation(_event, _source, _destination) {
+        async reflectMutation(_event, _source, _destination, _path) {
             // console.log("Reflect mutation", _source, _destination);
-            let path = Reflect.get(_event, "path");
-            let index = path.indexOf(_source);
-            for (let i = index - 1; i >= 0; i--)
-                _destination = _destination.getChildrenByName(path[i].name)[0]; // TODO: respect index for non-singleton components...
+            for (let node of _path)
+                if (node instanceof GraphInstance)
+                    if (node == this)
+                        break;
+                    else {
+                        console.log("Sync aborted, target already synced");
+                        return;
+                    }
+            let index = _path.indexOf(_source);
+            for (let i = index - 1; i >= 0; i--) {
+                let childIndex = _path[i].getParent().findChild(_path[i]); // get the index of the childnode in the original path
+                _destination = _destination.getChild(childIndex); // get the corresponding child in this path
+                // TODO: respect index for non-singleton components...
+            }
             let cmpMutate = _destination.getComponent(_event.detail.component.constructor);
             if (cmpMutate)
                 await cmpMutate.mutate(_event.detail.mutator);
@@ -6530,6 +6744,29 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     /**
+     * Abstract class supporting various arithmetical helper functions
+     */
+    class Calc {
+        /**
+         * Returns one of the values passed in, either _value if within _min and _max or the boundary being exceeded by _value
+         */
+        static clamp(_value, _min, _max, _isSmaller = (_value1, _value2) => { return _value1 < _value2; }) {
+            if (_isSmaller(_value, _min))
+                return _min;
+            if (_isSmaller(_max, _value))
+                return _max;
+            return _value;
+        }
+    }
+    /** factor multiplied with angle in degrees yields the angle in radian */
+    Calc.deg2rad = Math.PI / 180;
+    /** factor multiplied with angle in radian yields the angle in degrees */
+    Calc.rad2deg = 1 / Calc.deg2rad;
+    FudgeCore.Calc = Calc;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    /**
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle and vice versa
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -6826,7 +7063,7 @@ var FudgeCore;
          */
         static ROTATION(_angleInDegrees) {
             const mtxResult = FudgeCore.Recycler.get(Matrix3x3);
-            let angleInRadians = _angleInDegrees * Matrix3x3.deg2rad;
+            let angleInRadians = _angleInDegrees * FudgeCore.Calc.deg2rad;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
             mtxResult.data.set([
@@ -6918,7 +7155,9 @@ var FudgeCore;
          */
         get scaling() {
             if (!this.vectors.scaling)
-                this.vectors.scaling = new FudgeCore.Vector2(Math.hypot(this.data[0], this.data[1]), Math.hypot(this.data[3], this.data[4]));
+                this.vectors.scaling = new FudgeCore.Vector2(Math.hypot(this.data[0], this.data[1]), // * (this.data[0] < 0 ? -1 : 1),
+                Math.hypot(this.data[3], this.data[4]) // * (this.data[4] < 0 ? -1 : 1)
+                );
             return this.vectors.scaling; // .clone;
         }
         set scaling(_scaling) {
@@ -6933,6 +7172,9 @@ var FudgeCore;
             mtxClone.set(this);
             return mtxClone;
         }
+        /**
+         * Resets the matrix to the identity-matrix and clears cache. Used by the recycler to reset.
+         */
         recycle() {
             this.data = new Float32Array([
                 1, 0, 0,
@@ -6940,6 +7182,12 @@ var FudgeCore;
                 0, 0, 1
             ]);
             this.resetCache();
+        }
+        /**
+         * Resets the matrix to the identity-matrix and clears cache.
+         */
+        reset() {
+            this.recycle();
         }
         //#region Translation
         /**
@@ -7035,7 +7283,7 @@ var FudgeCore;
                 rotation = ySkew;
             else
                 rotation = xSkew;
-            rotation *= 180 / Math.PI;
+            rotation *= FudgeCore.Calc.rad2deg;
             return rotation;
         }
         /**
@@ -7128,7 +7376,6 @@ var FudgeCore;
             this.mutator = null;
         }
     }
-    Matrix3x3.deg2rad = Math.PI / 180;
     FudgeCore.Matrix3x3 = Matrix3x3;
     //#endregion
 })(FudgeCore || (FudgeCore = {}));
@@ -7328,13 +7575,15 @@ var FudgeCore;
         /**
          * Computes and returns a matrix with the given translation, its z-axis pointing directly at the given target,
          * and a minimal angle between its y-axis and the given up-{@link Vector3}, respetively calculating yaw and pitch.
+         * The pitch may be restricted to the up-vector to only calculate yaw.
          */
-        static LOOK_AT(_translation, _target, _up = FudgeCore.Vector3.Y()) {
+        static LOOK_AT(_translation, _target, _up = FudgeCore.Vector3.Y(), _restrict = false) {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
             let zAxis = FudgeCore.Vector3.DIFFERENCE(_target, _translation);
             zAxis.normalize();
             let xAxis = FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(_up, zAxis));
-            let yAxis = FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(zAxis, xAxis));
+            let yAxis = _restrict ? _up : FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(zAxis, xAxis));
+            zAxis = _restrict ? FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(xAxis, _up)) : zAxis;
             mtxResult.data.set([
                 xAxis.x, xAxis.y, xAxis.z, 0,
                 yAxis.x, yAxis.y, yAxis.z, 0,
@@ -7350,24 +7599,25 @@ var FudgeCore;
          * Computes and returns a matrix with the given translation, its y-axis matching the given up-{@link Vector3}
          * and its z-axis facing towards the given target at a minimal angle, respetively calculating yaw only.
          */
-        static SHOW_TO(_translation, _target, _up = FudgeCore.Vector3.Y()) {
-            const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let zAxis = FudgeCore.Vector3.DIFFERENCE(_target, _translation);
-            zAxis.normalize();
-            let xAxis = FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(_up, zAxis));
-            // let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
-            zAxis = FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(xAxis, _up));
-            mtxResult.data.set([
-                xAxis.x, xAxis.y, xAxis.z, 0,
-                _up.x, _up.y, _up.z, 0,
-                zAxis.x, zAxis.y, zAxis.z, 0,
-                _translation.x,
-                _translation.y,
-                _translation.z,
-                1
-            ]);
-            return mtxResult;
-        }
+        // public static SHOW_TO(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
+        //   const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+        //   let zAxis: Vector3 = Vector3.DIFFERENCE(_target, _translation);
+        //   zAxis.normalize();
+        //   let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
+        //   // let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
+        //   zAxis = Vector3.NORMALIZATION(Vector3.CROSS(xAxis, _up));
+        //   mtxResult.data.set(
+        //     [
+        //       xAxis.x, xAxis.y, xAxis.z, 0,
+        //       _up.x, _up.y, _up.z, 0,
+        //       zAxis.x, zAxis.y, zAxis.z, 0,
+        //       _translation.x,
+        //       _translation.y,
+        //       _translation.z,
+        //       1
+        //     ]);
+        //   return mtxResult;
+        // }
         /**
          * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given {@link Vector3}.
          */
@@ -7386,7 +7636,7 @@ var FudgeCore;
          */
         static ROTATION_X(_angleInDegrees) {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let angleInRadians = _angleInDegrees * Matrix4x4.deg2rad;
+            let angleInRadians = _angleInDegrees * FudgeCore.Calc.deg2rad;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
             mtxResult.data.set([
@@ -7402,7 +7652,7 @@ var FudgeCore;
          */
         static ROTATION_Y(_angleInDegrees) {
             let mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let angleInRadians = _angleInDegrees * Matrix4x4.deg2rad;
+            let angleInRadians = _angleInDegrees * FudgeCore.Calc.deg2rad;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
             mtxResult.data.set([
@@ -7418,7 +7668,7 @@ var FudgeCore;
          */
         static ROTATION_Z(_angleInDegrees) {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let angleInRadians = _angleInDegrees * Matrix4x4.deg2rad;
+            let angleInRadians = _angleInDegrees * FudgeCore.Calc.deg2rad;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
             mtxResult.data.set([
@@ -7435,7 +7685,7 @@ var FudgeCore;
          */
         static ROTATION(_eulerAnglesInDegrees) {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let anglesInRadians = FudgeCore.Vector3.SCALE(_eulerAnglesInDegrees, Matrix4x4.deg2rad);
+            let anglesInRadians = FudgeCore.Vector3.SCALE(_eulerAnglesInDegrees, FudgeCore.Calc.deg2rad);
             let sinX = Math.sin(anglesInRadians.x);
             let cosX = Math.cos(anglesInRadians.x);
             let sinY = Math.sin(anglesInRadians.y);
@@ -7487,7 +7737,7 @@ var FudgeCore;
          */
         static PROJECTION_CENTRAL(_aspect, _fieldOfViewInDegrees, _near, _far, _direction) {
             //TODO: camera looks down negative z-direction, should be positive
-            let fieldOfViewInRadians = _fieldOfViewInDegrees * Matrix4x4.deg2rad;
+            let fieldOfViewInRadians = _fieldOfViewInDegrees * FudgeCore.Calc.deg2rad;
             let f = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
             let rangeInv = 1.0 / (_near - _far);
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
@@ -7523,8 +7773,8 @@ var FudgeCore;
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
             mtxResult.data.set([
                 2 / (_right - _left), 0, 0, 0,
-                0, 2 / (_top - _bottom), 0, 0,
-                0, 0, 2 / (_near - _far), 0,
+                0, -2 / (_top - _bottom), 0, 0,
+                0, 0, 2 / (_far - _near), 0,
                 (_left + _right) / (_left - _right),
                 (_bottom + _top) / (_bottom - _top),
                 (_near + _far) / (_near - _far),
@@ -7577,7 +7827,10 @@ var FudgeCore;
         get scaling() {
             if (!this.vectors.scaling) {
                 this.vectors.scaling = this.#vectors.scaling;
-                this.vectors.scaling.set(Math.hypot(this.data[0], this.data[1], this.data[2]), Math.hypot(this.data[4], this.data[5], this.data[6]), Math.hypot(this.data[8], this.data[9], this.data[10]));
+                this.vectors.scaling.set(Math.hypot(this.data[0], this.data[1], this.data[2]), //* (this.data[0] < 0 ? -1 : 1),
+                Math.hypot(this.data[4], this.data[5], this.data[6]), //* (this.data[5] < 0 ? -1 : 1),
+                Math.hypot(this.data[8], this.data[9], this.data[10]) // * (this.data[10] < 0 ? -1 : 1)
+                );
             }
             return this.vectors.scaling; // .clone;
         }
@@ -7594,6 +7847,9 @@ var FudgeCore;
             return mtxClone;
         }
         //#endregion
+        /**
+         * Resets the matrix to the identity-matrix and clears cache. Used by the recycler to reset.
+         */
         recycle() {
             this.data.set([
                 1, 0, 0, 0,
@@ -7602,6 +7858,12 @@ var FudgeCore;
                 0, 0, 0, 1
             ]);
             this.resetCache();
+        }
+        /**
+         * Resets the matrix to the identity-matrix and clears cache.
+         */
+        reset() {
+            this.recycle();
         }
         //#region Rotation
         /**
@@ -7726,14 +7988,12 @@ var FudgeCore;
         /**
          * Adjusts the rotation of this matrix to point the z-axis directly at the given target and tilts it to accord with the given up-{@link Vector3},
          * respectively calculating yaw and pitch. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used.
-         * When _preserveScaling is false, a rotated identity matrix is the result.
+         * The pitch may be restricted to the up-vector to only calculate yaw.
          */
-        lookAt(_target, _up, _preserveScaling = true) {
-            if (!_up)
-                _up = this.getY();
-            const mtxResult = Matrix4x4.LOOK_AT(this.translation, _target, _up);
-            if (_preserveScaling)
-                mtxResult.scale(this.scaling);
+        lookAt(_target, _up, _restrict = false) {
+            _up = _up ? FudgeCore.Vector3.NORMALIZATION(_up) : FudgeCore.Vector3.NORMALIZATION(this.getY());
+            const mtxResult = Matrix4x4.LOOK_AT(this.translation, _target, _up, _restrict);
+            mtxResult.scale(this.scaling);
             this.set(mtxResult);
             FudgeCore.Recycler.store(mtxResult);
         }
@@ -7741,49 +8001,36 @@ var FudgeCore;
          * Same as {@link Matrix4x4.lookAt}, but optimized and needs testing
          */
         // TODO: testing lookat that really just rotates the matrix rather than creating a new one
-        lookAtRotate(_target, _up, _preserveScaling = true) {
-            if (!_up)
-                _up = this.getY();
-            let scaling = this.scaling;
-            let difference = FudgeCore.Vector3.DIFFERENCE(_target, this.translation);
-            difference.normalize();
-            let cos = FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getZ()), difference);
-            let sin = FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getX()), difference);
-            // console.log(sin, cos);
-            let mtxRotation = FudgeCore.Recycler.borrow(Matrix4x4);
-            mtxRotation.data.set([
-                cos, 0, -sin, 0,
-                0, 1, 0, 0,
-                sin, 0, cos, 0,
-                0, 0, 0, 1
-            ]);
-            this.multiply(mtxRotation, false);
-            cos = FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getZ()), difference);
-            sin = -FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getY()), difference);
-            // console.log(sin, cos);
-            mtxRotation.data.set([
-                1, 0, 0, 0,
-                0, cos, sin, 0,
-                0, -sin, cos, 0,
-                0, 0, 0, 1
-            ]);
-            this.multiply(mtxRotation, false);
-            this.scaling = scaling;
-        }
-        /**
-         * Adjusts the rotation of this matrix to match its y-axis with the given up-{@link Vector3} and facing its z-axis toward the given target at minimal angle,
-         * respectively calculating yaw only. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used.
-         * When _preserveScaling is false, a rotated identity matrix is the result.
-         */
-        showTo(_target, _up, _preserveScaling = true) {
-            if (!_up)
-                _up = this.getY();
-            const mtxResult = Matrix4x4.SHOW_TO(this.translation, _target, _up);
-            if (_preserveScaling)
-                mtxResult.scale(this.scaling);
-            this.set(mtxResult);
-            FudgeCore.Recycler.store(mtxResult);
-        }
+        // public lookAtRotate(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
+        //   if (!_up)
+        //     _up = this.getY();
+        //   let scaling: Vector3 = this.scaling;
+        //   let difference: Vector3 = Vector3.DIFFERENCE(_target, this.translation);
+        //   difference.normalize();
+        //   let cos: number = Vector3.DOT(Vector3.NORMALIZATION(this.getZ()), difference);
+        //   let sin: number = Vector3.DOT(Vector3.NORMALIZATION(this.getX()), difference);
+        //   // console.log(sin, cos);
+        //   let mtxRotation: Matrix4x4 = Recycler.get(Matrix4x4);
+        //   mtxRotation.data.set([
+        //     cos, 0, -sin, 0,
+        //     0, 1, 0, 0,
+        //     sin, 0, cos, 0,
+        //     0, 0, 0, 1
+        //   ]);
+        //   this.multiply(mtxRotation, false);
+        //   cos = Vector3.DOT(Vector3.NORMALIZATION(this.getZ()), difference);
+        //   sin = -Vector3.DOT(Vector3.NORMALIZATION(this.getY()), difference);
+        //   // console.log(sin, cos);
+        //   mtxRotation.data.set([
+        //     1, 0, 0, 0,
+        //     0, cos, sin, 0,
+        //     0, -sin, cos, 0,
+        //     0, 0, 0, 1
+        //   ]);
+        //   this.multiply(mtxRotation, false);
+        //   this.scaling = scaling;
+        //   Recycler.store(mtxRotation);
+        // }
         //#endregion
         //#region Translation
         /**
@@ -7884,9 +8131,34 @@ var FudgeCore;
         }
         //#endregion
         //#region Transfer
+        // public getEulerAnglesNew(): Vector3 {
+        //   let scaling: Vector3 = this.scaling;
+        //   let thetaX: number, thetaY: number, thetaZ: number;
+        //   let r02: number = this.data[2] / scaling.z;
+        //   let r11: number = this.data[5] / scaling.y;
+        //   if (r02 < 1) {
+        //     if (r02 > -1) {
+        //       thetaY = Math.asin(-r02);
+        //       thetaZ = Math.atan2(this.data[1] / scaling.y, this.data[0] / scaling.x);
+        //       thetaX = Math.atan2(this.data[9] / scaling.z, this.data[10] / scaling.z);
+        //     }
+        //     else {
+        //       thetaY = Math.PI / 2;
+        //       thetaZ = -Math.atan2(this.data[6] / scaling.y, r11);
+        //       thetaX = 0;
+        //     }
+        //   }
+        //   else {
+        //     thetaY = -Math.PI / 2;
+        //     thetaZ = Math.atan2(-this.data[6] / scaling.y, r11);
+        //     thetaX = 0;
+        //   }
+        //   this.#eulerAngles.set(-thetaX, thetaY, thetaZ);
+        //   this.#eulerAngles.scale(Mathematic.rad2deg);
+        //   return this.#eulerAngles;
+        // }
         /**
          * Calculates and returns the euler-angles representing the current rotation of this matrix.
-         * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate.
          */
         getEulerAngles() {
             let scaling = this.scaling;
@@ -7917,9 +8189,8 @@ var FudgeCore;
                 y1 = Math.atan2(-this.data[2] / scaling.x, sy);
                 z1 = 0;
             }
-            // let rotation: Vector3 = Recycler.borrow(Vector3);
             this.#eulerAngles.set(x1, y1, z1);
-            this.#eulerAngles.scale(180 / Math.PI);
+            this.#eulerAngles.scale(FudgeCore.Calc.rad2deg);
             return this.#eulerAngles;
         }
         /**
@@ -7939,6 +8210,7 @@ var FudgeCore;
          * Return the elements of this matrix as a Float32Array
          */
         get() {
+            // TODO: optimization, it shouldn't always return a copy, since this bloats memory
             return new Float32Array(this.data);
         }
         /**
@@ -8054,12 +8326,9 @@ var FudgeCore;
             let mtxResult = Matrix4x4.IDENTITY();
             if (vectors.translation)
                 mtxResult.translate(vectors.translation);
-            if (vectors.rotation) {
-                // mtxResult.rotateZ(vectors.rotation.z);
-                // mtxResult.rotateY(vectors.rotation.y);
-                // mtxResult.rotateX(vectors.rotation.x);
+            // problem: previous rotation might have been calculated back as a scaling and vice versa. Applying again might double the effect...
+            if (vectors.rotation)
                 mtxResult.rotate(vectors.rotation);
-            }
             if (vectors.scaling)
                 mtxResult.scale(vectors.scaling);
             this.set(mtxResult);
@@ -8082,7 +8351,6 @@ var FudgeCore;
             this.mutator = null;
         }
     }
-    Matrix4x4.deg2rad = Math.PI / 180;
     FudgeCore.Matrix4x4 = Matrix4x4;
     //#endregion
 })(FudgeCore || (FudgeCore = {}));
@@ -9066,7 +9334,7 @@ var FudgeCore;
                 this.ƒradius = this.createRadius();
             return this.ƒradius;
         }
-        useRenderBuffers(_shader, _mtxWorld, _mtxProjection, _id) { return null; /* injected by RenderInjector*/ }
+        useRenderBuffers(_shader, _mtxMeshToWorld, _mtxMeshToView, _id) { return null; /* injected by RenderInjector*/ }
         getRenderBuffers(_shader) { return null; /* injected by RenderInjector*/ }
         deleteRenderBuffers(_shader) { }
         clear() {
@@ -9459,14 +9727,14 @@ var FudgeCore;
                 const parts = line.split(" ");
                 parts.shift();
                 //Vertex - example: v 0.70 -0.45 -0.52
-                if (!line || line.startsWith("v "))
-                    positions.push(new FudgeCore.Vector3(...parts.map(x => +x)));
+                if (line.startsWith("v "))
+                    positions.push(new FudgeCore.Vector3(...parts.map(_value => +_value)));
                 //Texcoord - example: vt 0.545454 0.472382
-                else if (!line || line.startsWith("vt "))
-                    uvs.push(new FudgeCore.Vector2(...parts.map(x => +x)));
+                else if (line.startsWith("vt "))
+                    uvs.push(new FudgeCore.Vector2(...parts.map((_value, _index) => +_value * (_index == 1 ? -1 : 1))));
                 /*Face Indices - example: f 1/1/1 2/2/1 3/3/1 -->
                 vertex1/texcoord1/normal1 vertex2/texcoord2/normal2 vertex3/texcoord3/normal3*/
-                else if (!line || line.startsWith("f "))
+                else if (line.startsWith("f "))
                     for (let i = 0; i < 3; i++) {
                         faceInfo.push({
                             iPosition: +parts[i].split("/")[0] - 1,
@@ -10002,6 +10270,7 @@ var FudgeCore;
         //#region Transfer
         serialize() {
             let serialization = super.serialize();
+            delete serialization.shape;
             serialization.latitudes = this.latitudes;
             return serialization;
         }
@@ -10239,7 +10508,7 @@ var FudgeCore;
     })(BODY_INIT = FudgeCore.BODY_INIT || (FudgeCore.BODY_INIT = {}));
     /**
        * Acts as the physical representation of the {@link Node} it's attached to.
-       * It's the connection between the Fudge rendered world and the Physics world.
+       * It's the connection between the FUDGE rendered world and the Physics world.
        * For the physics to correctly get the transformations rotations need to be applied with from left = true.
        * Or rotations need to happen before scaling.
        * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
@@ -10324,7 +10593,7 @@ var FudgeCore;
         }
         /** ID to reference this specific ComponentRigidbody */
         #id;
-        //Private informations - Mostly OimoPhysics variables that should not be exposed to the Fudge User and manipulated by them
+        //Private informations - Mostly OimoPhysics variables that should not be exposed to the FUDGE User and manipulated by them
         #collider;
         #colliderInfo;
         #collisionGroup;
@@ -10482,7 +10751,7 @@ var FudgeCore;
          *  But you are able to incremental changing it instead of a direct rotation.  Although it's always prefered to use forces in physics.
          */
         rotateBody(_rotationChange) {
-            this.#rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * Math.PI / 180, _rotationChange.y * Math.PI / 180, _rotationChange.z * Math.PI / 180));
+            this.#rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * FudgeCore.Calc.deg2rad, _rotationChange.y * FudgeCore.Calc.deg2rad, _rotationChange.z * FudgeCore.Calc.deg2rad));
         }
         /** Translating the rigidbody therefore changing it's place over time directly in physics. This way physics is changing instead of transform.
          *  But you are able to incrementally changing it instead of a direct position. Although it's always prefered to use forces in physics.
@@ -10540,7 +10809,7 @@ var FudgeCore;
             let oldCollider = this.#rigidbody.getShapeList();
             this.#rigidbody.addShape(this.#collider); //add new collider, before removing the old, so the rb is never active with 0 colliders
             this.#rigidbody.removeShape(oldCollider); //remove the old collider
-            this.#collider.userData = this; //reset the extra information so that this collider knows to which Fudge Component it's connected
+            this.#collider.userData = this; //reset the extra information so that this collider knows to which FUDGE Component it's connected
             this.#collider.setCollisionGroup(this.collisionGroup);
             this.#collider.setCollisionMask(this.collisionMask);
             this.#collider.setRestitution(this.#restitution);
@@ -10574,7 +10843,8 @@ var FudgeCore;
             this.#rigidbody.setMassData(this.#massData);
             this.setPosition(position); //set the actual new rotation/position for this Rb again since it's now updated
             this.setRotation(rotation);
-            this.#mtxPivotUnscaled = FudgeCore.Matrix4x4.CONSTRUCTION({ translation: this.mtxPivot.translation, rotation: this.mtxPivot.rotation, scaling: FudgeCore.Vector3.ONE() });
+            let scalingInverse = this.node.mtxWorld.scaling.map(_i => 1 / _i);
+            this.#mtxPivotUnscaled = FudgeCore.Matrix4x4.CONSTRUCTION({ translation: this.mtxPivot.translation, rotation: this.mtxPivot.rotation, scaling: scalingInverse });
             this.#mtxPivotInverse = FudgeCore.Matrix4x4.INVERSION(this.#mtxPivotUnscaled);
             this.addRigidbodyToWorld();
             this.isInitialized = true;
@@ -10893,7 +11163,7 @@ var FudgeCore;
             this.#callbacks.beginTriggerContact = this.triggerEnter;
             this.#callbacks.endTriggerContact = this.triggerExit;
         }
-        /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
+        /** Creates the actual OimoPhysics Rigidbody out of informations the FUDGE Component has. */
         createRigidbody(_mass, _type, _colliderType, _mtxTransform, _collisionGroup = FudgeCore.COLLISION_GROUP.DEFAULT) {
             let oimoType; //Need the conversion from simple enum to number because if enum is defined as Oimo.RigidyBodyType you have to include Oimo to use FUDGE at all
             switch (_type) {
@@ -10914,7 +11184,7 @@ var FudgeCore;
             // while (this.#rigidbody && this.#rigidbody.getShapeList() != null)
             //   this.#rigidbody.removeShape(this.#rigidbody.getShapeList());
             let tmpTransform = _mtxTransform == null ? super.node != null ? super.node.mtxWorld : FudgeCore.Matrix4x4.IDENTITY() : _mtxTransform; //Get transform informations from the world, since physics does not care about hierarchy
-            //Convert informations from Fudge to OimoPhysics and creating a collider with it, while also adding a pivot to derivate from the transform informations if needed
+            //Convert informations from FUDGE to OimoPhysics and creating a collider with it, while also adding a pivot to derivate from the transform informations if needed
             let scale = new OIMO.Vec3((tmpTransform.scaling.x * this.mtxPivot.scaling.x) / 2, (tmpTransform.scaling.y * this.mtxPivot.scaling.y) / 2, (tmpTransform.scaling.z * this.mtxPivot.scaling.z) / 2);
             let position = new OIMO.Vec3(tmpTransform.translation.x + this.mtxPivot.translation.x, tmpTransform.translation.y + this.mtxPivot.translation.y, tmpTransform.translation.z + this.mtxPivot.translation.z);
             let rotation = new OIMO.Vec3(tmpTransform.rotation.x + this.mtxPivot.rotation.x, tmpTransform.rotation.y + this.mtxPivot.rotation.y, tmpTransform.rotation.z + this.mtxPivot.rotation.z);
@@ -10975,7 +11245,7 @@ var FudgeCore;
         }
         /** Creating a shape that represents a in itself closed form, out of the given vertices. */
         createConvexGeometryCollider(_vertices, _scale) {
-            let verticesAsVec3 = new Array(); //Convert Fudge Vector3 to OimoVec3
+            let verticesAsVec3 = new Array(); //Convert FUDGE Vector3 to OimoVec3
             for (let i = 0; i < _vertices.length; i += 3) { //3 Values for one point
                 verticesAsVec3.push(new OIMO.Vec3(_vertices[i] * _scale.x, _vertices[i + 1] * _scale.y, _vertices[i + 2] * _scale.z));
             }
@@ -11012,7 +11282,7 @@ var FudgeCore;
         /**
         * Trigger EnteringEvent Callback, automatically called by OIMO Physics within their calculations.
         * Since the event does not know which body is the trigger iniator, the event can be listened to
-        * on either the trigger or the triggered. (This is only possible with the Fudge OIMO Fork!)
+        * on either the trigger or the triggered. (This is only possible with the FUDGE OIMO Fork!)
         */
         triggerEnter(contact) {
             let objHit; //collision consisting of 2 bodies, so Hit1/2
@@ -11051,7 +11321,7 @@ var FudgeCore;
         /**
         * Trigger LeavingEvent Callback, automatically called by OIMO Physics within their calculations.
         * Since the event does not know which body is the trigger iniator, the event can be listened to
-        * on either the trigger or the triggered. (This is only possible with the Fudge OIMO Fork!)
+        * on either the trigger or the triggered. (This is only possible with the FUDGE OIMO Fork!)
         */
         triggerExit(contact) {
             //REMOVE OLD Triggering Body
@@ -11162,7 +11432,7 @@ var FudgeCore;
     FudgeCore.PhysicsDebugVertexAttribute = PhysicsDebugVertexAttribute;
     /** Internal class for Shaders used only by the physics debugDraw */
     class PhysicsDebugShader {
-        /** Introduce the Fudge Rendering Context to this class, creating a program and vertex/fragment shader in this context */
+        /** Introduce the FUDGE Rendering Context to this class, creating a program and vertex/fragment shader in this context */
         constructor(_renderingContext) {
             this.gl = _renderingContext;
             this.program = this.gl.createProgram();
@@ -11206,7 +11476,7 @@ var FudgeCore;
             });
             return indices;
         }
-        /** Tell the Fudge Rendering Context to use this program to draw. */
+        /** Tell the FUDGE Rendering Context to use this program to draw. */
         use() {
             this.gl.useProgram(this.program);
         }
@@ -11224,7 +11494,7 @@ var FudgeCore;
      * @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo
      */
     class PhysicsDebugDraw extends FudgeCore.RenderWebGL {
-        /** Creating the debug for physics in Fudge. Tell it to draw only wireframe objects, since Fudge is handling rendering of the objects besides physics.
+        /** Creating the debug for physics in FUDGE. Tell it to draw only wireframe objects, since FUDGE is handling rendering of the objects besides physics.
          * Override OimoPhysics Functions with own rendering. Initialize buffers and connect them with the context for later use. */
         constructor() {
             super();
@@ -11287,7 +11557,7 @@ var FudgeCore;
         }
         /** Before OimoPhysics.world is filling the debug. Make sure the buffers are reset. Also receiving the debugMode from settings and updating the current projection for the vertexShader. */
         clearBuffers() {
-            this.gl.lineWidth(2.0); //Does not affect anything because lineWidth is currently only supported by Microsoft Edge and Fudge is optimized for Chrome
+            this.gl.lineWidth(2.0); //Does not affect anything because lineWidth is currently only supported by Microsoft Edge and FUDGE is optimized for Chrome
             this.pointData = []; //Resetting the data to be filled again
             this.lineData = [];
             this.triData = [];
@@ -11295,7 +11565,7 @@ var FudgeCore;
             this.numLineData = 0;
             this.numTriData = 0;
         }
-        /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them. */
+        /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the FUDGE rendering context. And draw each updated buffer and resetting them. */
         drawBuffers() {
             this.shader.use();
             let projection = FudgeCore.Physics.mainCam.mtxWorldToView.get();
@@ -11387,7 +11657,7 @@ var FudgeCore;
             };
         }
         /** The source code (string) of the in physicsDebug used very simple vertexShader.
-         *  Handling the projection (which includes, view/world[is always identity in this case]/projection in Fudge). Increasing the size of single points drawn.
+         *  Handling the projection (which includes, view/world[is always identity in this case]/projection in FUDGE). Increasing the size of single points drawn.
          *  And transfer position color to the fragmentShader. */
         vertexShaderSource() {
             return `
@@ -11524,7 +11794,7 @@ var FudgeCore;
         set maxRotor(_value) {
             this.#maxRotor = _value;
             if (this.joint != null)
-                this.joint.getRotationalLimitMotor().upperLimit = _value * Math.PI / 180;
+                this.joint.getRotationalLimitMotor().upperLimit = _value * FudgeCore.Calc.deg2rad;
         }
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
@@ -11535,7 +11805,7 @@ var FudgeCore;
         set minRotor(_value) {
             this.#minRotor = _value;
             if (this.joint != null)
-                this.joint.getRotationalLimitMotor().lowerLimit = _value * Math.PI / 180;
+                this.joint.getRotationalLimitMotor().lowerLimit = _value * FudgeCore.Calc.deg2rad;
         }
         /**
           * The target rotational speed of the motor in m/s.
@@ -11620,7 +11890,7 @@ var FudgeCore;
             this.#rotorSpringDamper = new OIMO.SpringDamper().setSpring(this.springFrequencyRotation, this.springDampingRotation);
             this.motor = new OIMO.TranslationalLimitMotor().setLimits(super.minMotor, super.maxMotor);
             this.motor.setMotor(super.motorSpeed, this.motorForce);
-            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.minRotor * Math.PI / 180, this.maxRotor * Math.PI / 180);
+            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.minRotor * FudgeCore.Calc.deg2rad, this.maxRotor * FudgeCore.Calc.deg2rad);
             this.#rotor.setMotor(this.rotorSpeed, this.rotorTorque);
             this.config = new OIMO.CylindricalJointConfig();
             super.constructJoint();
@@ -11707,7 +11977,7 @@ var FudgeCore;
             this.motor.setMotor(this.motorSpeed, this.motorForce);
             this.config = new OIMO.PrismaticJointConfig(); //Create a specific config for this joint type that is calculating the local axis for both bodies
             super.constructJoint();
-            this.config.springDamper = this.springDamper; //Telling the config to use the motor/spring of the Fudge Component
+            this.config.springDamper = this.springDamper; //Telling the config to use the motor/spring of the FUDGE Component
             this.config.limitMotor = this.motor;
             this.joint = new OIMO.PrismaticJoint(this.config);
             this.configureJoint();
@@ -11826,10 +12096,10 @@ var FudgeCore;
          * The maximum angle of rotation along the first axis. Value needs to be positive. Changes do rebuild the joint
          */
         get maxAngleFirstAxis() {
-            return this.#maxAngleFirst * 180 / Math.PI;
+            return this.#maxAngleFirst * FudgeCore.Calc.rad2deg;
         }
         set maxAngleFirstAxis(_value) {
-            this.#maxAngleFirst = _value * Math.PI / 180;
+            this.#maxAngleFirst = _value * FudgeCore.Calc.deg2rad;
             this.disconnect();
             this.dirtyStatus();
         }
@@ -11837,10 +12107,10 @@ var FudgeCore;
          * The maximum angle of rotation along the second axis. Value needs to be positive. Changes do rebuild the joint
          */
         get maxAngleSecondAxis() {
-            return this.#maxAngleSecond * 180 / Math.PI;
+            return this.#maxAngleSecond * FudgeCore.Calc.rad2deg;
         }
         set maxAngleSecondAxis(_value) {
-            this.#maxAngleSecond = _value * Math.PI / 180;
+            this.#maxAngleSecond = _value * FudgeCore.Calc.deg2rad;
             this.disconnect();
             this.dirtyStatus();
         }
@@ -11892,10 +12162,10 @@ var FudgeCore;
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
         get maxMotorTwist() {
-            return this.#maxMotorTwist * 180 / Math.PI;
+            return this.#maxMotorTwist * FudgeCore.Calc.rad2deg;
         }
         set maxMotorTwist(_value) {
-            _value *= Math.PI / 180;
+            _value *= FudgeCore.Calc.deg2rad;
             this.#maxMotorTwist = _value;
             if (this.joint != null)
                 this.joint.getTwistLimitMotor().upperLimit = _value;
@@ -11904,10 +12174,10 @@ var FudgeCore;
          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
          */
         get minMotorTwist() {
-            return this.#minMotorTwist * 180 / Math.PI;
+            return this.#minMotorTwist * FudgeCore.Calc.rad2deg;
         }
         set minMotorTwist(_value) {
-            _value *= Math.PI / 180;
+            _value *= FudgeCore.Calc.deg2rad;
             this.#minMotorTwist = _value;
             if (this.joint != null)
                 this.joint.getTwistLimitMotor().lowerLimit = _value;
@@ -12028,7 +12298,7 @@ var FudgeCore;
          */
         set maxMotor(_value) {
             super.maxMotor = _value;
-            _value *= Math.PI / 180;
+            _value *= FudgeCore.Calc.deg2rad;
             if (this.joint)
                 this.joint.getLimitMotor().upperLimit = _value;
         }
@@ -12038,7 +12308,7 @@ var FudgeCore;
         set minMotor(_value) {
             super.minMotor = _value;
             if (this.joint)
-                this.joint.getLimitMotor().lowerLimit = _value * Math.PI / 180;
+                this.joint.getLimitMotor().lowerLimit = _value * FudgeCore.Calc.deg2rad;
         }
         /**
           * The maximum motor force in Newton. force <= 0 equals disabled.
@@ -12081,7 +12351,7 @@ var FudgeCore;
         }
         //#endregion
         constructJoint() {
-            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.minMotor * Math.PI / 180, super.maxMotor * Math.PI / 180);
+            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.minMotor * FudgeCore.Calc.deg2rad, super.maxMotor * FudgeCore.Calc.deg2rad);
             this.#rotor.setMotor(this.motorSpeed, this.motorTorque);
             this.config = new OIMO.RevoluteJointConfig();
             super.constructJoint();
@@ -12349,7 +12619,7 @@ var FudgeCore;
         set maxRotorFirst(_value) {
             this.#maxRotorFirst = _value;
             if (this.joint != null)
-                this.joint.getLimitMotor1().upperLimit = _value * Math.PI / 180;
+                this.joint.getLimitMotor1().upperLimit = _value * FudgeCore.Calc.deg2rad;
         }
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
@@ -12360,7 +12630,7 @@ var FudgeCore;
         set minRotorFirst(_value) {
             this.#minRotorFirst = _value;
             if (this.joint != null)
-                this.joint.getLimitMotor1().lowerLimit = _value * Math.PI / 180;
+                this.joint.getLimitMotor1().lowerLimit = _value * FudgeCore.Calc.deg2rad;
         }
         /**
           * The target rotational speed of the motor in m/s.
@@ -12393,7 +12663,7 @@ var FudgeCore;
         set maxRotorSecond(_value) {
             this.#maxRotorSecond = _value;
             if (this.joint != null)
-                this.joint.getLimitMotor2().upperLimit = _value * Math.PI / 180;
+                this.joint.getLimitMotor2().upperLimit = _value * FudgeCore.Calc.deg2rad;
         }
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
@@ -12404,7 +12674,7 @@ var FudgeCore;
         set minRotorSecond(_value) {
             this.#minRotorSecond = _value;
             if (this.joint != null)
-                this.joint.getLimitMotor2().lowerLimit = _value * Math.PI / 180;
+                this.joint.getLimitMotor2().lowerLimit = _value * FudgeCore.Calc.deg2rad;
         }
         /**
           * The target rotational speed of the motor in m/s.
@@ -12471,9 +12741,9 @@ var FudgeCore;
         constructJoint() {
             this.#axisSpringDamperFirst = new OIMO.SpringDamper().setSpring(this.#springFrequencyFirst, this.#springDampingFirst);
             this.#axisSpringDamperSecond = new OIMO.SpringDamper().setSpring(this.#springFrequencySecond, this.#springDampingSecond);
-            this.#motorFirst = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Math.PI / 180, this.#maxRotorFirst * Math.PI / 180);
+            this.#motorFirst = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * FudgeCore.Calc.deg2rad, this.#maxRotorFirst * FudgeCore.Calc.deg2rad);
             this.#motorFirst.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
-            this.#motorSecond = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Math.PI / 180, this.#maxRotorFirst * Math.PI / 180);
+            this.#motorSecond = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * FudgeCore.Calc.deg2rad, this.#maxRotorFirst * FudgeCore.Calc.deg2rad);
             this.#motorSecond.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
             this.config = new OIMO.UniversalJointConfig();
             super.constructJoint(this.#axisFirst, this.#axisSecond);
@@ -12545,7 +12815,7 @@ var FudgeCore;
                 return null;
             }
             this.oimoWorld = new OIMO.World();
-            this.#debugDraw = new FudgeCore.PhysicsDebugDraw(); //Create a Fudge Physics debugging handling object
+            this.#debugDraw = new FudgeCore.PhysicsDebugDraw(); //Create a FUDGE Physics debugging handling object
             this.oimoWorld.setDebugDraw(this.#debugDraw.oimoDebugDraw); //Tell OimoPhysics where to debug to and how it will be handled
         }
         /** The rendering of physical debug informations. Used internally no interaction needed.*/
@@ -12624,7 +12894,7 @@ var FudgeCore;
                 Physics.connectJoints(); //Connect joints if anything has happened between the last call to any of the two paired rigidbodies
             if (FudgeCore.Time.game.getScale() != 0) { //If time is stopped do not simulate to avoid misbehaviour
                 _deltaTime = _deltaTime > 1 / 30 ? 1 / 30 : _deltaTime; //If instead of a fixed rate the game framerate is used, make sure irregular timings are fixed to 30fps
-                Physics.ƒactive.oimoWorld.step(_deltaTime * FudgeCore.Time.game.getScale()); //Update the simulation by the given deltaTime and the Fudge internal TimeScale
+                Physics.ƒactive.oimoWorld.step(_deltaTime * FudgeCore.Time.game.getScale()); //Update the simulation by the given deltaTime and the FUDGE internal TimeScale
             }
         }
         /**
@@ -12884,9 +13154,9 @@ var FudgeCore;
          */
         toDegrees() {
             let angles = this.toEulerangles();
-            angles.x = angles.x * (180 / Math.PI);
-            angles.y = angles.y * (180 / Math.PI);
-            angles.z = angles.z * (180 / Math.PI);
+            angles.x = angles.x * (FudgeCore.Calc.rad2deg);
+            angles.y = angles.y * (FudgeCore.Calc.rad2deg);
+            angles.z = angles.z * (FudgeCore.Calc.rad2deg);
             return angles;
         }
         getMutator() {
@@ -13121,7 +13391,7 @@ var FudgeCore;
          * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
          * render passes.
          */
-        static prepare(_branch, _options = {}, _mtxWorld = FudgeCore.Matrix4x4.IDENTITY(), _lights = new Map(), _shadersUsed = null) {
+        static prepare(_branch, _options = {}, _mtxWorld = FudgeCore.Matrix4x4.IDENTITY(), _shadersUsed = null) {
             let firstLevel = (_shadersUsed == null);
             if (firstLevel) {
                 _shadersUsed = [];
@@ -13130,7 +13400,8 @@ var FudgeCore;
                 Render.nodesAlpha.reset();
                 Render.nodesPhysics.reset();
                 Render.componentsPick.reset();
-                Render.dispatchEvent(new Event("renderPrepareStart" /* RENDER_PREPARE_START */));
+                Render.lights.forEach(_array => _array.reset());
+                _branch.dispatchEvent(new Event("renderPrepareStart" /* RENDER_PREPARE_START */));
             }
             if (!_branch.isActive)
                 return; // don't add branch to render list if not active
@@ -13156,17 +13427,7 @@ var FudgeCore;
                 Render.componentsPick.push(cmpPick); // add this component to pick list
             }
             let cmpLights = _branch.getComponents(FudgeCore.ComponentLight);
-            for (let cmpLight of cmpLights) {
-                if (!cmpLight.isActive)
-                    continue;
-                let type = cmpLight.light.getType();
-                let lightsOfType = _lights.get(type);
-                if (!lightsOfType) {
-                    lightsOfType = [];
-                    _lights.set(type, lightsOfType);
-                }
-                lightsOfType.push(cmpLight);
-            }
+            Render.addLights(cmpLights);
             let cmpMesh = _branch.getComponent(FudgeCore.ComponentMesh);
             let cmpMaterial = _branch.getComponent(FudgeCore.ComponentMaterial);
             if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
@@ -13184,7 +13445,7 @@ var FudgeCore;
                     Render.nodesSimple.push(_branch); // add this node to render list
             }
             for (let child of _branch.getChildren()) {
-                Render.prepare(child, _options, _branch.mtxWorld, _lights, _shadersUsed);
+                Render.prepare(child, _options, _branch.mtxWorld, _shadersUsed);
                 _branch.nNodesInBranch += child.nNodesInBranch;
                 let cmpMeshChild = child.getComponent(FudgeCore.ComponentMesh);
                 let position = cmpMeshChild ? cmpMeshChild.mtxWorld.translation : child.mtxWorld.translation;
@@ -13193,12 +13454,23 @@ var FudgeCore;
                 FudgeCore.Recycler.store(position);
             }
             if (firstLevel) {
-                Render.dispatchEvent(new Event("renderPrepareEnd" /* RENDER_PREPARE_END */));
+                _branch.dispatchEvent(new Event("renderPrepareEnd" /* RENDER_PREPARE_END */));
                 for (let shader of _shadersUsed)
-                    Render.setLightsInShader(shader, _lights);
+                    Render.setLightsInShader(shader, Render.lights);
             }
-            //Calculate Physics based on all previous calculations    
-            // Render.setupPhysicalTransform(_branch);
+        }
+        static addLights(cmpLights) {
+            for (let cmpLight of cmpLights) {
+                if (!cmpLight.isActive)
+                    continue;
+                let type = cmpLight.light.getType();
+                let lightsOfType = Render.lights.get(type);
+                if (!lightsOfType) {
+                    lightsOfType = new FudgeCore.RecycableArray();
+                    Render.lights.set(type, lightsOfType);
+                }
+                lightsOfType.push(cmpLight);
+            }
         }
         //#endregion
         //#region Picking
@@ -13215,10 +13487,10 @@ var FudgeCore;
                 let cmpMesh = node.getComponent(FudgeCore.ComponentMesh);
                 let cmpMaterial = node.getComponent(FudgeCore.ComponentMaterial);
                 if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
-                    let mtxMeshToView = FudgeCore.Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
-                    Render.pick(node, node.mtxWorld, mtxMeshToView);
+                    // let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
+                    Render.pick(node, node.mtxWorld, _cmpCamera);
                     // RenderParticles.drawParticles();
-                    FudgeCore.Recycler.store(mtxMeshToView);
+                    // Recycler.store(mtxMeshToView);
                 }
             }
             Render.setBlendMode(FudgeCore.BLEND.TRANSPARENT);
@@ -13244,9 +13516,7 @@ var FudgeCore;
         }
         static drawList(_cmpCamera, _list) {
             for (let node of _list) {
-                let cmpMesh = node.getComponent(FudgeCore.ComponentMesh);
-                let cmpMaterial = node.getComponent(FudgeCore.ComponentMaterial);
-                Render.drawMesh(cmpMesh, cmpMaterial, _cmpCamera);
+                Render.drawNode(node, _cmpCamera);
             }
         }
         //#region Physics
@@ -13279,6 +13549,7 @@ var FudgeCore;
     Render.rectClip = new FudgeCore.Rectangle(-1, 1, 2, -2);
     Render.nodesPhysics = new FudgeCore.RecycableArray();
     Render.componentsPick = new FudgeCore.RecycableArray();
+    Render.lights = new Map();
     Render.nodesSimple = new FudgeCore.RecycableArray();
     Render.nodesAlpha = new FudgeCore.RecycableArray();
     FudgeCore.Render = Render;
@@ -13441,7 +13712,7 @@ var FudgeCore;
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Viewport
      */
-    class Viewport extends FudgeCore.EventTargetƒ {
+    class Viewport extends FudgeCore.EventTargetUnified {
         constructor() {
             super(...arguments);
             this.name = "Viewport"; // The name to call this viewport by.
@@ -13460,53 +13731,6 @@ var FudgeCore;
             this.#branch = null; // The to render with all its descendants.
             this.#crc2 = null;
             this.#canvas = null;
-            /**
-             * Handle drag-drop events and dispatch to viewport as FUDGE-Event
-             */
-            this.hndDragDropEvent = (_event) => {
-                let _dragevent = _event;
-                switch (_dragevent.type) {
-                    case "dragover":
-                    case "drop":
-                        _dragevent.preventDefault();
-                        _dragevent.dataTransfer.effectAllowed = "none";
-                        break;
-                    case "dragstart":
-                        // just dummy data,  valid data should be set in handler registered by the user
-                        _dragevent.dataTransfer.setData("text", "Hallo");
-                        // TODO: check if there is a better solution to hide the ghost image of the draggable object
-                        _dragevent.dataTransfer.setDragImage(new Image(), 0, 0);
-                        break;
-                }
-                let event = new FudgeCore.EventDragDrop("ƒ" + _event.type, _dragevent);
-                this.addCanvasPosition(event);
-                this.dispatchEvent(event);
-            };
-            /**
-             * Handle pointer events and dispatch to viewport as FUDGE-Event
-             */
-            this.hndPointerEvent = (_event) => {
-                let event = new FudgeCore.EventPointer("ƒ" + _event.type, _event);
-                this.addCanvasPosition(event);
-                this.dispatchEvent(event);
-            };
-            /**
-             * Handle keyboard events and dispatch to viewport as FUDGE-Event, if the viewport has the focus
-             */
-            this.hndKeyboardEvent = (_event) => {
-                if (!this.hasFocus)
-                    return;
-                let event = new FudgeCore.EventKeyboard("ƒ" + _event.type, _event);
-                this.dispatchEvent(event);
-            };
-            /**
-             * Handle wheel event and dispatch to viewport as FUDGE-Event
-             */
-            this.hndWheelEvent = (_event) => {
-                let event = new FudgeCore.EventWheel("ƒ" + _event.type, _event);
-                this.dispatchEvent(event);
-            };
-            // #endregion
         }
         #branch; // The to render with all its descendants.
         #crc2;
@@ -13520,6 +13744,18 @@ var FudgeCore;
             return (Viewport.focus == this);
         }
         /**
+         * Retrieve the destination canvas
+         */
+        get canvas() {
+            return this.#canvas;
+        }
+        /**
+         * Retrieve the 2D-context attached to the destination canvas
+         */
+        get context() {
+            return this.#crc2;
+        }
+        /**
          * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
          */
         initialize(_name, _branch, _camera, _canvas) {
@@ -13527,21 +13763,10 @@ var FudgeCore;
             this.camera = _camera;
             this.#canvas = _canvas;
             this.#crc2 = _canvas.getContext("2d");
+            this.#canvas.tabIndex = 0; // can get focus and receive keyboard events
             this.rectSource = FudgeCore.Render.getCanvasRect();
             this.rectDestination = this.getClientRectangle();
             this.setBranch(_branch);
-        }
-        /**
-         * Retrieve the destination canvas
-         */
-        getCanvas() {
-            return this.#canvas;
-        }
-        /**
-         * Retrieve the 2D-context attached to the destination canvas
-         */
-        getContext() {
-            return this.#crc2;
         }
         /**
          * Retrieve the size of the destination canvas as a rectangle, x and y are always 0
@@ -13561,29 +13786,15 @@ var FudgeCore;
          * Set the branch to be drawn in the viewport.
          */
         setBranch(_branch) {
-            // TODO: figure out what the event handling was created for. Doesn't have another effect than information on the console (deactivated)
-            if (this.#branch) {
-                this.#branch.removeEventListener("componentAdd" /* COMPONENT_ADD */, this.hndComponentEvent);
-                this.#branch.removeEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndComponentEvent);
-            }
+            if (_branch)
+                _branch.dispatchEvent(new Event("attachBranch" /* ATTACH_BRANCH */));
             this.#branch = _branch;
-            if (this.#branch) {
-                this.#branch.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndComponentEvent);
-                this.#branch.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndComponentEvent);
-            }
         }
         /**
          * Retrieve the branch this viewport renders
          */
         getBranch() {
             return this.#branch;
-        }
-        /**
-         * Logs this viewports scenegraph to the console.
-         * TODO: remove this method, since it's implemented in Debug
-         */
-        showSceneGraph() {
-            FudgeCore.Debug.branch(this.#branch);
         }
         // #region Drawing
         /**
@@ -13618,9 +13829,16 @@ var FudgeCore;
             let mtxRoot = FudgeCore.Matrix4x4.IDENTITY();
             if (this.#branch.getParent())
                 mtxRoot = this.#branch.getParent().mtxWorld;
+            this.dispatchEvent(new Event("renderPrepareStart" /* RENDER_PREPARE_START */));
             FudgeCore.Render.prepare(this.#branch, null, mtxRoot);
+            this.dispatchEvent(new Event("renderPrepareEnd" /* RENDER_PREPARE_END */));
             this.componentsPick = FudgeCore.Render.componentsPick;
         }
+        /**
+         * Performs a pick on all {@link ComponentPick}s in the branch of this viewport
+         * using a ray from its camera through the client coordinates given in the event.
+         * Dispatches the event to all nodes hit.
+         */
         dispatchPointerEvent(_event) {
             let posClient = new FudgeCore.Vector2(_event.clientX, _event.clientY);
             let ray = this.getRayFromClient(posClient);
@@ -13673,6 +13891,9 @@ var FudgeCore;
          */
         adjustCamera() {
             let rect = FudgeCore.Render.getRenderRectangle();
+            // if (this.camera.getProjection() == PROJECTION.ORTHOGRAPHIC)
+            //   this.camera.projectOrthographic(-rect.width / 20, rect.width / 20, rect.height / 20, -rect.height / 20);
+            // else
             this.camera.projectCentral(rect.width / rect.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar());
         }
         // #endregion
@@ -13772,78 +13993,13 @@ var FudgeCore;
             let screen = new FudgeCore.Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
             return screen;
         }
-        /**
-         * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
-         * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire {@link Eventƒ}s accordingly.
-         * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
-         */
-        setFocus(_on) {
-            if (_on) {
-                if (Viewport.focus == this)
-                    return;
-                if (Viewport.focus)
-                    Viewport.focus.dispatchEvent(new Event("focusout" /* FOCUS_OUT */));
-                Viewport.focus = this;
-                this.dispatchEvent(new Event("focusin" /* FOCUS_IN */));
-            }
-            else {
-                if (Viewport.focus != this)
-                    return;
-                this.dispatchEvent(new Event("focusout" /* FOCUS_OUT */));
-                Viewport.focus = null;
-            }
-        }
-        /**
-         * De- / Activates the given pointer event to be propagated into the viewport as FUDGE-Event
-         */
-        activatePointerEvent(_type, _on) {
-            this.activateEvent(this.#canvas, _type, this.hndPointerEvent, _on);
-        }
-        /**
-         * De- / Activates the given keyboard event to be propagated into the viewport as FUDGE-Event
-         */
-        activateKeyboardEvent(_type, _on) {
-            this.activateEvent(this.#canvas.ownerDocument, _type, this.hndKeyboardEvent, _on);
-        }
-        /**
-         * De- / Activates the given drag-drop event to be propagated into the viewport as FUDGE-Event
-         */
-        activateDragDropEvent(_type, _on) {
-            if (_type == "\u0192dragstart" /* START */)
-                this.#canvas.draggable = _on;
-            this.activateEvent(this.#canvas, _type, this.hndDragDropEvent, _on);
-        }
-        /**
-         * De- / Activates the wheel event to be propagated into the viewport as FUDGE-Event
-         */
-        activateWheelEvent(_type, _on) {
-            this.activateEvent(this.#canvas, _type, this.hndWheelEvent, _on);
-        }
-        /**
-         * Add position of the pointer mapped to canvas-coordinates as canvasX, canvasY to the event
-         */
-        addCanvasPosition(event) {
-            event.canvasX = this.#canvas.width * event.pointerX / event.clientRect.width;
-            event.canvasY = this.#canvas.height * event.pointerY / event.clientRect.height;
-        }
-        activateEvent(_target, _type, _handler, _on) {
-            _type = _type.slice(1); // chip the ƒlorin
-            if (_on)
-                _target.addEventListener(_type, _handler);
-            else
-                _target.removeEventListener(_type, _handler);
-        }
-        hndComponentEvent(_event) {
-            // TODO: find out what the idea was here...
-            // Debug.fudge(_event);
-        }
     }
     FudgeCore.Viewport = Viewport;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     /**
-     * Handles file transfer from a Fudge-Browserapp to the local filesystem without a local server.
+     * Handles file transfer from a FUDGE-Browserapp to the local filesystem without a local server.
      * Saves to the download-path given by the browser, loads from the player's choice.
      */
     class FileIoBrowserLocal extends FudgeCore.EventTargetStatic {
@@ -13976,7 +14132,7 @@ var FudgeCore;
      * Keeps a list of the resources and generates ids to retrieve them.
      * Resources are objects referenced multiple times but supposed to be stored only once
      */
-    class Project {
+    class Project extends FudgeCore.EventTargetStatic {
         /**
          * Registers the resource and generates an id for it by default.
          * If the resource already has an id, thus having been registered, its deleted from the list and registered anew.
@@ -13998,17 +14154,27 @@ var FudgeCore;
         static clear() {
             Project.resources = {};
             Project.serialization = {};
-            Project.scriptNamespaces = {};
+            Project.clearScriptNamespaces();
+            // Project.scriptNamespaces = {};
         }
         // <T extends Component>(_class: new () => T): T[] {
         //   return <T[]>(this.components[_class.name] || []).slice(0);
         // }
-        static getResourcesOfType(_type) {
-            let found = {};
+        static getResourcesByType(_type) {
+            let found = [];
             for (let resourceId in Project.resources) {
                 let resource = Project.resources[resourceId];
                 if (resource instanceof _type)
-                    found[resourceId] = resource;
+                    found.push(resource);
+            }
+            return found;
+        }
+        static getResourcesByName(_name) {
+            let found = [];
+            for (let resourceId in Project.resources) {
+                let resource = Project.resources[resourceId];
+                if (resource.name == _name)
+                    found.push(resource);
             }
             return found;
         }
@@ -14062,9 +14228,13 @@ var FudgeCore;
             }
             return graph;
         }
+        /**
+         * Creates and returns a {@link GraphInstance} of the given {@link Graph}
+         * and connects it to the graph for synchronisation of mutation.
+         */
         static async createGraphInstance(_graph) {
-            let instance = new FudgeCore.GraphInstance(); // TODO: cleanup since creation moved here
-            await instance.set(_graph);
+            let instance = new FudgeCore.GraphInstance(_graph); // TODO: cleanup since creation moved here
+            await instance.connectToGraph();
             return instance;
         }
         static registerGraphInstanceForResync(_instance) {
@@ -14072,12 +14242,12 @@ var FudgeCore;
             instances.push(_instance);
             Project.graphInstancesToResync[_instance.idSource] = instances;
         }
-        static resyncGraphInstances(_graph) {
+        static async resyncGraphInstances(_graph) {
             let instances = Project.graphInstancesToResync[_graph.idResource];
             if (!instances)
                 return;
             for (let instance of instances)
-                instance.connectToGraph();
+                await instance.connectToGraph();
             delete (Project.graphInstancesToResync[_graph.idResource]);
         }
         static registerScriptNamespace(_namespace) {
@@ -14085,25 +14255,26 @@ var FudgeCore;
             if (!Project.scriptNamespaces[name])
                 Project.scriptNamespaces[name] = _namespace;
         }
+        static clearScriptNamespaces() {
+            for (let name in Project.scriptNamespaces) {
+                Reflect.set(window, name, undefined);
+                Project.scriptNamespaces[name] = undefined;
+                delete Project.scriptNamespaces[name];
+            }
+        }
         static getComponentScripts() {
             let compoments = {};
             for (let namespace in Project.scriptNamespaces) {
                 compoments[namespace] = [];
                 for (let name in Project.scriptNamespaces[namespace]) {
                     let script = Reflect.get(Project.scriptNamespaces[namespace], name);
-                    // is script a subclass of ComponentScript? instanceof doesn't work, since no instance is created
-                    // let superclass: Object = script;
-                    // while (superclass) {
-                    //   superclass = Reflect.getPrototypeOf(superclass);
-                    //   if (superclass == ComponentScript) {
-                    //     scripts.push(script);
-                    //     break;
-                    //   }
-                    // }
                     // Using Object.create doesn't call the constructor, but instanceof can be used. More elegant than the loop above, though maybe not as performant. 
-                    let o = Object.create(script);
-                    if (o.prototype instanceof FudgeCore.ComponentScript)
-                        compoments[namespace].push(script);
+                    try {
+                        let o = Object.create(script);
+                        if (o.prototype instanceof FudgeCore.ComponentScript)
+                            compoments[namespace].push(script);
+                    }
+                    catch (_e) { /* */ }
                 }
             }
             return compoments;
@@ -14131,6 +14302,7 @@ var FudgeCore;
             const resourceFileContent = await response.text();
             let serialization = FudgeCore.Serializer.parse(resourceFileContent);
             let reconstruction = await Project.deserialize(serialization);
+            Project.dispatchEvent(new CustomEvent("resourcesLoaded" /* RESOURCES_LOADED */, { detail: { url: _url, resources: reconstruction } }));
             return reconstruction;
         }
         static async loadResourcesFromHTML() {
@@ -14259,7 +14431,7 @@ var FudgeCore;
                     }
                     else {
                         if (gltfNode.rotation)
-                            node.mtxLocal.rotate(new FudgeCore.Vector3(...gltfNode.rotation.map(rotation => rotation * 180 / Math.PI)));
+                            node.mtxLocal.rotate(new FudgeCore.Vector3(...gltfNode.rotation.map(rotation => rotation * FudgeCore.Calc.rad2deg)));
                         if (gltfNode.scale)
                             node.mtxLocal.scale(new FudgeCore.Vector3(...gltfNode.scale));
                         if (gltfNode.translation)
@@ -14311,7 +14483,7 @@ var FudgeCore;
                 const gltfCamera = this.gltf.cameras[_iCamera];
                 const camera = new FudgeCore.ComponentCamera();
                 if (gltfCamera.perspective)
-                    camera.projectCentral(gltfCamera.perspective.aspectRatio, gltfCamera.perspective.yfov * 180 / Math.PI, null, gltfCamera.perspective.znear, gltfCamera.perspective.zfar);
+                    camera.projectCentral(gltfCamera.perspective.aspectRatio, gltfCamera.perspective.yfov * FudgeCore.Calc.rad2deg, null, gltfCamera.perspective.znear, gltfCamera.perspective.zfar);
                 else
                     camera.projectOrthographic(-gltfCamera.orthographic.xmag, gltfCamera.orthographic.xmag, -gltfCamera.orthographic.ymag, gltfCamera.orthographic.ymag);
                 return camera;
@@ -14503,35 +14675,6 @@ var FudgeCore;
         }
     }
     FudgeCore.GLTFLoader = GLTFLoader;
-})(FudgeCore || (FudgeCore = {}));
-// / <reference path="../Coat/Coat.ts"/>
-var FudgeCore;
-// / <reference path="../Coat/Coat.ts"/>
-(function (FudgeCore) {
-    /**
-     * Static superclass for the representation of WebGl shaderprograms.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    var Shader_1;
-    // TODO: define attribute/uniforms as layout and use those consistently in shaders
-    let Shader = Shader_1 = class Shader {
-        /** The type of coat that can be used with this shader to create a material */
-        static getCoat() { return FudgeCore.CoatColored; }
-        static getVertexShaderSource() { return this.vertexShaderSource; }
-        static getFragmentShaderSource() { return this.fragmentShaderSource; }
-        static deleteProgram() { }
-        static useProgram() { }
-        static createProgram() { }
-        static registerSubclass(_subclass) { return Shader_1.subclasses.push(_subclass) - 1; }
-    };
-    /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
-    Shader.baseClass = Shader_1;
-    /** list of all the subclasses derived from this class, if they registered properly*/
-    Shader.subclasses = [];
-    Shader = Shader_1 = __decorate([
-        FudgeCore.RenderInjectorShader.decorate
-    ], Shader);
-    FudgeCore.Shader = Shader;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -16489,9 +16632,9 @@ var FudgeCore;
             return `#version 300 es
 /**
 * Phong shading
-* Implementation based on https://www.gsn-lib.org/docs/nodes/ShaderPluginNode.php
-* @authors Luis Keck, HFU, 2021
+* @authors Jirka Dell'Oro-Friedl, HFU, 2022
 */
+
 precision highp float;
 
 in vec3 a_vctPosition;
@@ -16537,23 +16680,60 @@ uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
 in vec3 f_normal;
 in vec3 v_position;
 uniform vec4 u_vctColor;
+uniform float u_fDiffuse;
 uniform float u_fSpecular;
+uniform mat4 u_mtxMeshToWorld;
+uniform vec3 u_vctCamera;
+
+in vec4 v_vctColor;
+in vec4 v_vctPosition;
+in vec3 v_vctNormal;
 out vec4 vctFrag;
 
-vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
-    vec3 color = vec3(1);
-    vec3 R = reflect(-light_dir, normal);
-    float spec_dot = max(dot(R, view_dir), 0.0);
-    color += pow(spec_dot, shininess);
-    return color;
+struct Light {
+  vec4 vctColor;
+  mat4 mtxShape;
+  mat4 mtxShapeInverse;
+};
+
+const uint MAX_LIGHTS_DIRECTIONAL = 10u;
+const uint MAX_LIGHTS_POINT = 50u;
+const uint MAX_LIGHTS_SPOT = 50u;
+
+uniform Light u_ambient;
+uniform uint u_nLightsDirectional;
+uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+uniform uint u_nLightsPoint;
+uniform Light u_point[MAX_LIGHTS_POINT];
+uniform uint u_nLightsSpot;
+uniform Light u_spot[MAX_LIGHTS_SPOT];
+
+float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
+  if(_fSpecular <= 0.0)
+    return 0.0;
+  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
+  float fHitCamera = dot(vctReflection, _vctView);
+  // attempted BLINN 
+  // vec3 halfway = normalize(_vctView + _vctLight);
+  // float fHitCamera = dot(-halfway, _vctNormal);
+  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
+}
+
+vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _vctView, float _fSpecular) {
+  vec4 vctResult = vec4(0, 0, 0, 1);
+  vec3 vctDirection = normalize(_vctDirection);
+  float fIllumination = -dot(_vctNormal, vctDirection);
+  if(fIllumination > 0.0f) {
+    vctResult += u_fDiffuse * fIllumination * _vctColor;
+    float fReflection = calculateReflection(vctDirection, _vctView, _vctNormal, _fSpecular);
+    vctResult += fReflection * _vctColor;
+  }
+  return vctResult;
 }
 
 void main() {
-    vctFrag = u_ambient.color;
-    for(uint i = 0u; i < u_nLightsDirectional; i++) {
-        vec3 light_dir = normalize(-u_directional[i].direction);
-        vec3 view_dir = normalize(v_position);
-        vec3 N = normalize(f_normal);
+  vctFrag = v_vctColor;
+  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * v_vctPosition) - u_vctCamera);
 
         float illuminance = dot(light_dir, N);
         if(illuminance > 0.0) {
@@ -16631,11 +16811,7 @@ var FudgeCore;
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019
 */
 in vec3 a_vctPosition;       
-in vec2 a_vctTexture;
 uniform mat4 u_mtxMeshToView;
-uniform mat3 u_mtxPivot;
-
-out vec2 v_vctTexture;
 
 void main() {   
     gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
@@ -17039,7 +17215,7 @@ var FudgeCore;
         LOOP_MODE["TIME_REAL"] = "timeReal";
     })(LOOP_MODE = FudgeCore.LOOP_MODE || (FudgeCore.LOOP_MODE = {}));
     /**
-     * Core loop of a Fudge application. Initializes automatically and must be started explicitly.
+     * Core loop of a FUDGE application. Initializes automatically and must be started explicitly.
      * It then fires {@link EVENT.LOOP_FRAME} to all added listeners at each frame
      *
      * @author Jirka Dell'Oro-Friedl, HFU, 2019
@@ -17183,7 +17359,7 @@ var FudgeCore;
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Time extends FudgeCore.EventTargetƒ {
+    class Time extends FudgeCore.EventTargetUnified {
         constructor() {
             super();
             this.timers = {};
@@ -17194,11 +17370,8 @@ var FudgeCore;
             this.lastCallToElapsed = 0.0;
         }
         /**
-         * Returns the game-time-object which starts automatically and serves as base for various internal operations.
+         * Returns representions of the time given in milliseconds in various formats defined in {@link TimeUnits}
          */
-        // public static get game(): Time {
-        //   return Time.gameTime;
-        // }
         static getUnits(_milliseconds) {
             let units = {};
             units.asSeconds = _milliseconds / 1000;

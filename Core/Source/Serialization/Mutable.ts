@@ -43,7 +43,7 @@ namespace FudgeCore {
    * The provided properties of the {@link Mutator} must match public properties or getters/setters of the object.
    * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
    */
-  export abstract class Mutable extends EventTargetƒ {
+  export abstract class Mutable extends EventTargetUnified {
     /**
      * Decorator allows to attach {@link Mutable} functionality to existing classes. 
      */
@@ -58,7 +58,7 @@ namespace FudgeCore {
     public static getMutatorFromPath(_mutator: Mutator, _path: string[]): Mutator {
       let key: string = _path[0];
       let mutator: Mutator = {};
-      if (!_mutator[key]) // if the path deviates from mutator structure, return the mutator
+      if (_mutator[key] == undefined) // if the path deviates from mutator structure, return the mutator
         return _mutator;
       mutator[key] = _mutator[key];
       if (_path.length > 1)

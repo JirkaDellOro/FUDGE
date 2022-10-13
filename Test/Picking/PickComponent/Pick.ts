@@ -38,7 +38,7 @@ namespace PickRadius {
 
     ƒ.Debug.branch(root);
 
-    viewport.getCanvas().addEventListener("mousemove", pick);
+    viewport.canvas.addEventListener("mousemove", pick);
 
     function pick(_event: PointerEvent): void {
       document.querySelector("div").innerHTML = "";

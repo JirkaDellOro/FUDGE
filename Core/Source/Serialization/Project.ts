@@ -34,7 +34,7 @@ namespace FudgeCore {
    * Keeps a list of the resources and generates ids to retrieve them.  
    * Resources are objects referenced multiple times but supposed to be stored only once
    */
-  export abstract class Project {
+  export abstract class Project extends EventTargetStatic {
     public static resources: Resources = {};
     public static serialization: SerializationOfResources = {};
     public static scriptNamespaces: ScriptNamespaces = {};
@@ -65,19 +65,30 @@ namespace FudgeCore {
     public static clear(): void {
       Project.resources = {};
       Project.serialization = {};
-      Project.scriptNamespaces = {};
+      Project.clearScriptNamespaces();
+      // Project.scriptNamespaces = {};
     }
 
     // <T extends Component>(_class: new () => T): T[] {
     //   return <T[]>(this.components[_class.name] || []).slice(0);
     // }
 
-    public static getResourcesOfType<T>(_type: new (_args: General) => T): Resources {
-      let found: Resources = {};
+    public static getResourcesByType<T>(_type: new (_args: General) => T): SerializableResource[] {
+      let found: SerializableResource[] = [];
       for (let resourceId in Project.resources) {
         let resource: SerializableResource = Project.resources[resourceId];
         if (resource instanceof _type)
-          found[resourceId] = resource;
+          found.push(resource);
+      }
+      return found;
+    }
+
+    public static getResourcesByName(_name: string): SerializableResource[] {
+      let found: SerializableResource[] = [];
+      for (let resourceId in Project.resources) {
+        let resource: SerializableResource = Project.resources[resourceId];
+        if (resource.name == _name)
+          found.push(resource);
       }
       return found;
     }
@@ -139,9 +150,13 @@ namespace FudgeCore {
       return graph;
     }
 
+    /**
+     * Creates and returns a {@link GraphInstance} of the given {@link Graph} 
+     * and connects it to the graph for synchronisation of mutation.
+     */
     public static async createGraphInstance(_graph: Graph): Promise<GraphInstance> {
-      let instance: GraphInstance = new GraphInstance(); // TODO: cleanup since creation moved here
-      await instance.set(_graph);
+      let instance: GraphInstance = new GraphInstance(_graph); // TODO: cleanup since creation moved here
+      await instance.connectToGraph();
       return instance;
     }
 
@@ -151,13 +166,13 @@ namespace FudgeCore {
       Project.graphInstancesToResync[_instance.idSource] = instances;
     }
 
-    public static resyncGraphInstances(_graph: Graph): void {
+    public static async resyncGraphInstances(_graph: Graph): Promise<void> {
       let instances: GraphInstance[] = Project.graphInstancesToResync[_graph.idResource];
       if (!instances)
         return;
       for (let instance of instances)
-        instance.connectToGraph();
-      delete(Project.graphInstancesToResync[_graph.idResource]);
+        await instance.connectToGraph();
+      delete (Project.graphInstancesToResync[_graph.idResource]);
     }
 
     public static registerScriptNamespace(_namespace: Object): void {
@@ -166,28 +181,27 @@ namespace FudgeCore {
         Project.scriptNamespaces[name] = _namespace;
     }
 
+    public static clearScriptNamespaces(): void {
+      for (let name in Project.scriptNamespaces) {
+        Reflect.set(window, name, undefined);
+        Project.scriptNamespaces[name] = undefined;
+        delete Project.scriptNamespaces[name];
+      }
+    }
+
     public static getComponentScripts(): ComponentScripts {
       let compoments: ComponentScripts = {};
       for (let namespace in Project.scriptNamespaces) {
         compoments[namespace] = [];
         for (let name in Project.scriptNamespaces[namespace]) {
           let script: ComponentScript = Reflect.get(Project.scriptNamespaces[namespace], name);
-
-          // is script a subclass of ComponentScript? instanceof doesn't work, since no instance is created
-
-          // let superclass: Object = script;
-          // while (superclass) {
-          //   superclass = Reflect.getPrototypeOf(superclass);
-          //   if (superclass == ComponentScript) {
-          //     scripts.push(script);
-          //     break;
-          //   }
-          // }
-
           // Using Object.create doesn't call the constructor, but instanceof can be used. More elegant than the loop above, though maybe not as performant. 
-          let o: General = Object.create(script);
-          if (o.prototype instanceof ComponentScript)
-            compoments[namespace].push(script);
+
+          try {
+            let o: General = Object.create(script);
+            if (o.prototype instanceof ComponentScript)
+              compoments[namespace].push(script);
+          } catch (_e) { /* */ }
         }
       }
       return compoments;
@@ -219,6 +233,7 @@ namespace FudgeCore {
 
       let serialization: Serialization = Serializer.parse(resourceFileContent);
       let reconstruction: Resources = await Project.deserialize(serialization);
+      Project.dispatchEvent(new CustomEvent(EVENT.RESOURCES_LOADED, { detail: { url: _url, resources: reconstruction } }));
       return reconstruction;
     }
 

@@ -5,11 +5,17 @@ namespace FudgeCore {
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
    */
+
+  enum SYNC {
+    READY, GRAPH_SYNCED, GRAPH_DONE, INSTANCE
+  }
+
   export class GraphInstance extends Node {
     /** id of the resource that instance was created from */
     // TODO: examine, if this should be a direct reference to the Graph, instead of the id
     #idSource: string = undefined;
-    #sync: boolean = true;
+    #sync: SYNC = SYNC.READY;
+    #deserializeFromSource: boolean = true;
 
     /**
      * This constructor allone will not create a reconstruction, but only save the id.
@@ -39,25 +45,47 @@ namespace FudgeCore {
 
     //TODO: optimize using the referenced Graph, serialize/deserialize only the differences
     public serialize(): Serialization {
-      let serialization: Serialization = super.serialize();
+      let filter: ComponentGraphFilter = this.getComponent(ComponentGraphFilter);
+      let serialization: Serialization = {};
+
+      if (filter && filter.isActive) // if graph synchronisation is unfiltered, knowing the source is sufficient for serialization
+        serialization = super.serialize();
+      else
+        serialization.deserializeFromSource = true;
+
+      serialization.name = this.name;
       serialization.idSource = this.#idSource;
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.#idSource = _serialization.idSource;
-      await super.deserialize(_serialization);
-      if (this.get())
-        this.connectToGraph();
-      else
+      if (!_serialization.deserializeFromSource) {
+        await super.deserialize(_serialization); // instance is deserialized from individual data
+        this.#deserializeFromSource = false;
+      }
+      let graph: Graph = this.get();
+
+      if (graph)
+        // if (_serialization.deserializeFromSource) // no components-> assume synchronized GraphInstance
+        //   await this.set(graph); // recreate complete instance from source graph
+        // else {
+        await this.connectToGraph(); // otherwise just connect
+      // }
+      else {
         Project.registerGraphInstanceForResync(this);
+      }
       return this;
     }
 
-    public connectToGraph(): void {
+    public async connectToGraph(): Promise<void> {
       let graph: Graph = this.get();
+      if (this.#deserializeFromSource)
+        await this.set(graph);
+
       // graph.addEventListener(EVENT.MUTATE, (_event: CustomEvent) => this.hndMutation, true);
-      graph.addEventListener(EVENT.MUTATE, this.hndMutationGraph, true);
+      graph.addEventListener(EVENT.MUTATE_GRAPH, this.hndMutationGraph);
+      // graph.addEventListener(EVENT.MUTATE_GRAPH_DONE, () => { console.log("Done", this.name); /* this.#sync = true; */ });
     }
 
     /**
@@ -86,38 +114,59 @@ namespace FudgeCore {
      * Source graph mutated, reflect mutation in this instance
      */
     private hndMutationGraph = async (_event: CustomEvent): Promise<void> => {
-      if (!this.#sync) {
-        this.#sync = true;
+      // console.log("Reflect Graph-Mutation to Instance", SYNC[this.#sync], (<Graph>_event.currentTarget).name, this.getPath().map(_node => _node.name));
+      if (this.#sync != SYNC.READY) {
+        // console.log("Sync aborted, switch to ready");
+        this.#sync = SYNC.READY;
         return;
       }
 
       if (this.isFiltered())
         return;
 
-      this.#sync = false; // do not sync again, since mutation is already a synchronization
-      await this.reflectMutation(_event, <Graph>_event.currentTarget, this);
-      this.#sync = true;
+      this.#sync = SYNC.GRAPH_SYNCED; // do not sync again, since mutation is already a synchronization
+      await this.reflectMutation(_event, <Graph>_event.currentTarget, this, _event.detail.path);
     }
 
     /**
      * This instance mutated, reflect mutation in source graph
      */
     private hndMutationInstance = async (_event: CustomEvent): Promise<void> => {
-      if (!this.#sync)
+      // console.log("Reflect Instance-Mutation to Graph", SYNC[this.#sync], this.getPath().map(_node => _node.name), this.get().name);
+      if (this.#sync != SYNC.READY) {
+        // console.log("Sync aborted, switch to ready");
+        this.#sync = SYNC.READY;
         return;
+      }
+
+      if (_event.target instanceof GraphInstance && _event.target != this) {
+        // console.log("Sync aborted, target already synced");
+        return;
+      }
 
       if (this.isFiltered())
         return;
 
-      await this.reflectMutation(_event, this, this.get());
+      this.#sync = SYNC.INSTANCE; // do not sync again, since mutation is already a synchronization
+      await this.reflectMutation(_event, this, this.get(), Reflect.get(_event, "path"));
     }
 
-    private async reflectMutation(_event: CustomEvent, _source: Node, _destination: Node): Promise<void> {
+    private async reflectMutation(_event: CustomEvent, _source: Node, _destination: Node, _path: Node[]): Promise<void> {
       // console.log("Reflect mutation", _source, _destination);
-      let path: Node[] = Reflect.get(_event, "path");
-      let index: number = path.indexOf(_source);
-      for (let i: number = index - 1; i >= 0; i--)
-        _destination = _destination.getChildrenByName(path[i].name)[0]; // TODO: respect index for non-singleton components...
+      for (let node of _path)
+        if (node instanceof GraphInstance)
+          if (node == this) break;
+          else {
+            console.log("Sync aborted, target already synced");
+            return;
+          }
+
+      let index: number = _path.indexOf(_source);
+      for (let i: number = index - 1; i >= 0; i--) {
+        let childIndex: number = _path[i].getParent().findChild(_path[i]); // get the index of the childnode in the original path
+        _destination = _destination.getChild(childIndex); // get the corresponding child in this path
+        // TODO: respect index for non-singleton components...
+      }
       let cmpMutate: Component = _destination.getComponent(_event.detail.component.constructor);
       if (cmpMutate)
         await cmpMutate.mutate(_event.detail.mutator);
