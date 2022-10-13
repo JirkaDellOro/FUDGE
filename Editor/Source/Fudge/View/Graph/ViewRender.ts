@@ -14,9 +14,6 @@ namespace Fudge {
     private canvas: HTMLCanvasElement;
     private graph: ƒ.Graph;
     private nodeLight: ƒ.Node = new ƒ.Node("Illumination"); // keeps light components for dark graphs
-    private throttleId: number;
-    private readonly throttleDelay: number = 1000 / 60;
-
 
     constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
@@ -45,6 +42,10 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
       this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move
+      window.setInterval(() => {
+        if (this.contextMenu.getMenuItemById(String(CONTEXTMENU.RENDER_CONTINUOUSLY)).checked)
+          this.redraw();
+      },                 1000 / 30);
     }
 
     createUserInterface(): void {
@@ -114,6 +115,9 @@ namespace Fudge {
       menu.append(item);
 
       item = new remote.MenuItem({ label: "Orthographic Camera", id: String(CONTEXTMENU.ORTHGRAPHIC_CAMERA), type: "checkbox", click: _callback, accelerator: process.platform == "darwin" ? "O" : "O" });
+      menu.append(item);
+
+      item = new remote.MenuItem({ label: "Render Continuously", id: String(CONTEXTMENU.RENDER_CONTINUOUSLY), type: "checkbox", click: _callback });
       menu.append(item);
 
       return menu;
@@ -280,16 +284,6 @@ namespace Fudge {
         // console.error(_error);
         //nop
       }
-    }
-
-    private redrawThrottled = (_delay: number = this.throttleDelay) => {
-      if (this.throttleId)
-        return;
-
-      this.throttleId = window.setTimeout(() => {
-        this.redraw();
-        this.throttleId = null;
-      }, _delay);
     }
   }
 }

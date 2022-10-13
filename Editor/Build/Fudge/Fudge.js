@@ -44,15 +44,16 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 14] = "ADD_JOINT";
         CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 15] = "DELETE_RESOURCE";
         CONTEXTMENU[CONTEXTMENU["ORTHGRAPHIC_CAMERA"] = 16] = "ORTHGRAPHIC_CAMERA";
-        CONTEXTMENU[CONTEXTMENU["ADD_PROPERTY"] = 17] = "ADD_PROPERTY";
-        CONTEXTMENU[CONTEXTMENU["DELETE_PROPERTY"] = 18] = "DELETE_PROPERTY";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_PROPERTY"] = 19] = "ADD_PARTICLE_PROPERTY";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION"] = 20] = "ADD_PARTICLE_FUNCTION";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION_NAMED"] = 21] = "ADD_PARTICLE_FUNCTION_NAMED";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT"] = 22] = "ADD_PARTICLE_CONSTANT";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT_NAMED"] = 23] = "ADD_PARTICLE_CONSTANT_NAMED";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_TRANSFORMATION"] = 24] = "ADD_PARTICLE_TRANSFORMATION";
-        CONTEXTMENU[CONTEXTMENU["DELETE_PARTICLE_DATA"] = 25] = "DELETE_PARTICLE_DATA";
+        CONTEXTMENU[CONTEXTMENU["RENDER_CONTINUOUSLY"] = 17] = "RENDER_CONTINUOUSLY";
+        CONTEXTMENU[CONTEXTMENU["ADD_PROPERTY"] = 18] = "ADD_PROPERTY";
+        CONTEXTMENU[CONTEXTMENU["DELETE_PROPERTY"] = 19] = "DELETE_PROPERTY";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_PROPERTY"] = 20] = "ADD_PARTICLE_PROPERTY";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION"] = 21] = "ADD_PARTICLE_FUNCTION";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION_NAMED"] = 22] = "ADD_PARTICLE_FUNCTION_NAMED";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT"] = 23] = "ADD_PARTICLE_CONSTANT";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT_NAMED"] = 24] = "ADD_PARTICLE_CONSTANT_NAMED";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_TRANSFORMATION"] = 25] = "ADD_PARTICLE_TRANSFORMATION";
+        CONTEXTMENU[CONTEXTMENU["DELETE_PARTICLE_DATA"] = 26] = "DELETE_PARTICLE_DATA";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -4110,8 +4111,6 @@ var Fudge;
         canvas;
         graph;
         nodeLight = new ƒ.Node("Illumination"); // keeps light components for dark graphs
-        throttleId;
-        throttleDelay = 1000 / 60;
         constructor(_container, _state) {
             super(_container, _state);
             this.graph = ƒ.Project.resources[_state["graph"]];
@@ -4136,6 +4135,10 @@ var Fudge;
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("pointermove", this.hndPointer);
             this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move
+            window.setInterval(() => {
+                if (this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.RENDER_CONTINUOUSLY)).checked)
+                    this.redraw();
+            }, 1000 / 30);
         }
         createUserInterface() {
             ƒAid.addStandardLightComponents(this.nodeLight);
@@ -4194,6 +4197,8 @@ var Fudge;
             });
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Orthographic Camera", id: String(Fudge.CONTEXTMENU.ORTHGRAPHIC_CAMERA), type: "checkbox", click: _callback, accelerator: process.platform == "darwin" ? "O" : "O" });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Render Continuously", id: String(Fudge.CONTEXTMENU.RENDER_CONTINUOUSLY), type: "checkbox", click: _callback });
             menu.append(item);
             return menu;
         }
@@ -4342,14 +4347,6 @@ var Fudge;
                 // console.error(_error);
                 //nop
             }
-        };
-        redrawThrottled = (_delay = this.throttleDelay) => {
-            if (this.throttleId)
-                return;
-            this.throttleId = window.setTimeout(() => {
-                this.redraw();
-                this.throttleId = null;
-            }, _delay);
         };
     }
     Fudge.ViewRender = ViewRender;
