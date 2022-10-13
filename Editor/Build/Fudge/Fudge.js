@@ -2486,8 +2486,12 @@ var Fudge;
         //#region  event handling
         hndDragOver(_event, _viewSource) {
             _event.dataTransfer.dropEffect = "none";
-            if (!(_viewSource instanceof Fudge.ViewInternal) || !(_viewSource.getDragDropSources()[0] instanceof ƒ.ParticleSystem))
+            let source = _viewSource.getDragDropSources()[0];
+            if (source instanceof ƒ.Node)
+                source = source.getComponent(ƒ.ComponentParticleSystem)?.particleSystem;
+            if (!(source instanceof ƒ.ParticleSystem))
                 return;
+            _viewSource.getDragDropSources()[0] = source;
             _event.dataTransfer.dropEffect = "link";
             _event.preventDefault();
             _event.stopPropagation();
