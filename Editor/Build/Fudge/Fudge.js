@@ -2501,6 +2501,7 @@ var Fudge;
             this.setParticleSystem(source);
         }
         hndEvent = async (_event) => {
+            _event.stopPropagation();
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.CLOSE:
                     document.removeEventListener("keydown" /* KEY_DOWN */, this.hndEvent);
@@ -2516,7 +2517,6 @@ var Fudge;
                 case "rename" /* RENAME */:
                 case "cut" /* CUT */: // TODO: customs trees cut is async, this should happen after cut is finished
                 case "paste" /* PASTE */:
-                case "drop" /* DROP */:
                     this.refreshVariables();
                     let invalid = this.validateData(this.data);
                     this.errors

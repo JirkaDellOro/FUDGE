@@ -219,6 +219,7 @@ namespace Fudge {
     }
 
     private hndEvent = async (_event: EditorEvent): Promise<void> => {
+      _event.stopPropagation();
       switch (_event.type) {
         case EVENT_EDITOR.CLOSE:
           document.removeEventListener(ƒui.EVENT.KEY_DOWN, this.hndEvent);
@@ -234,7 +235,6 @@ namespace Fudge {
         case ƒui.EVENT.RENAME:
         case ƒui.EVENT.CUT: // TODO: customs trees cut is async, this should happen after cut is finished
         case ƒui.EVENT.PASTE:
-        case ƒui.EVENT.DROP:
           this.refreshVariables();
           let invalid: [ƒ.ParticleData.Expression, string][] = this.validateData(this.data);
           this.errors

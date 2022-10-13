@@ -326,20 +326,13 @@
       "name": "Graph",
       "active": true,
       "components": {
-        "CustomComponentScript": [
-          {
-            "Script.CustomComponentScript": {
-              "active": true,
-              "message": "CustomComponentScript added to "
-            }
-          }
-        ]
+        "CustomComponentScript": []
       },
       "children": [
         {
           "ƒ.Node": {
             "name": "Flame",
-            "active": true,
+            "active": false,
             "components": {
               "ComponentMesh": [
                 {
@@ -415,7 +408,7 @@
         {
           "ƒ.Node": {
             "name": "Sun",
-            "active": false,
+            "active": true,
             "components": {
               "ComponentMesh": [
                 {
@@ -436,17 +429,17 @@
                 {
                   "ƒ.ComponentMaterial": {
                     "sortForAlpha": false,
-                    "clrPrimary": "[0.9333333333333333, 1, 0, 1]",
+                    "clrPrimary": "[0.984313725490196, 1, 0, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
                       "translation": "[0, 0]",
                       "rotation": 0,
-                      "scaling": "[31, 1]"
+                      "scaling": "[1, 1]"
                     },
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2022-10-12T17:00:01.954Z|82264"
+                    "idMaterial": "Material|2022-10-13T20:29:25.699Z|09694"
                   }
                 }
               ],
@@ -470,15 +463,15 @@
                     "pivot": {
                       "translation": "[0, 0, 0]",
                       "rotation": "[0, 0, 0]",
-                      "scaling": "[1, 1, 1]"
+                      "scaling": "[9.999999046325684, 10, 10]"
                     },
                     "light": {
-                      "ƒ.LightAmbient": {
+                      "ƒ.LightPoint": {
                         "color": "[1, 1, 1, 1]"
                       }
                     },
                     "Component": {
-                      "active": false
+                      "active": true
                     }
                   }
                 }
@@ -553,48 +546,6 @@
                   },
                   "children": []
                 }
-              },
-              {
-                "ƒ.Node": {
-                  "name": "DirectionalLight",
-                  "active": true,
-                  "components": {
-                    "ComponentTransform": [
-                      {
-                        "ƒ.ComponentTransform": {
-                          "local": {
-                            "translation": "[0, 0, 0]",
-                            "rotation": "[0, 0, 0]",
-                            "scaling": "[1, 1, 1]"
-                          },
-                          "Component": {
-                            "active": true
-                          }
-                        }
-                      }
-                    ],
-                    "ComponentLight": [
-                      {
-                        "ƒ.ComponentLight": {
-                          "pivot": {
-                            "translation": "[0, 0, 0]",
-                            "rotation": "[0, 0, 0]",
-                            "scaling": "[1, 1, 1]"
-                          },
-                          "light": {
-                            "ƒ.LightDirectional": {
-                              "color": "[1, 1, 1, 1]"
-                            }
-                          },
-                          "Component": {
-                            "active": true
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  "children": []
-                }
               }
             ]
           }
@@ -602,6 +553,18 @@
       ],
       "idResource": "Graph|2022-10-12T15:22:44.800Z|84622",
       "type": "Graph"
+    }
+  },
+  "Material|2022-10-13T20:29:25.699Z|09694": {
+    "ƒ.Material": {
+      "name": "ShaderLit",
+      "idResource": "Material|2022-10-13T20:29:25.699Z|09694",
+      "shader": "ShaderLit",
+      "coat": {
+        "ƒ.CoatColored": {
+          "color": "[1, 1, 1, 1]"
+        }
+      }
     }
   }
 }
