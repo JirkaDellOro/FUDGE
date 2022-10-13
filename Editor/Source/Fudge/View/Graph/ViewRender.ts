@@ -13,7 +13,10 @@ namespace Fudge {
     private viewport: ƒ.Viewport;
     private canvas: HTMLCanvasElement;
     private graph: ƒ.Graph;
-    private nodeLight: ƒ.Node = new ƒ.Node("Illumination"); // keeps light components for dark graphs 
+    private nodeLight: ƒ.Node = new ƒ.Node("Illumination"); // keeps light components for dark graphs
+    private throttleId: number;
+    private readonly throttleDelay: number = 1000 / 60;
+
 
     constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
@@ -35,6 +38,7 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       // this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       // this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
@@ -217,8 +221,12 @@ namespace Fudge {
           } else
             this.setGraph(_event.detail.graph);
           break;
+        // break;
+        case ƒUi.EVENT.MUTATE:
+        case ƒUi.EVENT.DELETE:
+        case EVENT_EDITOR.MODIFY:
+          this.redraw();
       }
-      this.redraw();
     }
 
     private hndPick = (_event: EditorEvent): void => {
@@ -272,6 +280,16 @@ namespace Fudge {
         // console.error(_error);
         //nop
       }
+    }
+
+    private redrawThrottled = (_delay: number = this.throttleDelay) => {
+      if (this.throttleId)
+        return;
+
+      this.throttleId = window.setTimeout(() => {
+        this.redraw();
+        this.throttleId = null;
+      }, _delay);
     }
   }
 }

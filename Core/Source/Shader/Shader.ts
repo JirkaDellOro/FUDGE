@@ -1,5 +1,17 @@
 // / <reference path="../Coat/Coat.ts"/>
 namespace FudgeCore {
+  export interface ShaderInterface {
+    define: string[];
+    program: WebGLProgram;
+    attributes: { [name: string]: number };
+    uniforms: { [name: string]: WebGLUniformLocation };
+    getVertexShaderSource(): string;
+    getFragmentShaderSource(): string;
+    deleteProgram(this: ShaderInterface): void;
+    useProgram(this: ShaderInterface): void;
+    createProgram(this: ShaderInterface): void;
+  }
+
   /**
    * Static superclass for the representation of WebGl shaderprograms. 
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019

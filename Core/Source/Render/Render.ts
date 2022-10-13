@@ -26,7 +26,7 @@ namespace FudgeCore {
      * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
      * render passes.
      */
-    public static prepare(_branch: Node, _options: RenderPrepareOptions = {}, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _shadersUsed: (typeof Shader)[] = null): void {
+    public static prepare(_branch: Node, _options: RenderPrepareOptions = {}, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _shadersUsed: (ShaderInterface)[] = null): void {
       let firstLevel: boolean = (_shadersUsed == null);
       if (firstLevel) {
         _shadersUsed = [];
@@ -76,12 +76,15 @@ namespace FudgeCore {
 
       let cmpMesh: ComponentMesh = _branch.getComponent(ComponentMesh);
       let cmpMaterial: ComponentMaterial = _branch.getComponent(ComponentMaterial);
+      
       if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
-        // TODO: careful when using particlesystem, pivot must not change node position
         let mtxWorldMesh: Matrix4x4 = Matrix4x4.MULTIPLICATION(_branch.mtxWorld, cmpMesh.mtxPivot);
         cmpMesh.mtxWorld.set(mtxWorldMesh);
         Recycler.store(mtxWorldMesh); // TODO: examine, why recycling this causes meshes to be misplaced...
-        let shader: typeof Shader = cmpMaterial.material.getShader();
+        let shader: ShaderInterface = cmpMaterial.material.getShader();
+        let cmpParticleSystem: ComponentParticleSystem = _branch.getComponent(ComponentParticleSystem);
+        if (cmpParticleSystem && cmpParticleSystem.isActive) 
+          shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
         if (_shadersUsed.indexOf(shader) < 0)
           _shadersUsed.push(shader);
 

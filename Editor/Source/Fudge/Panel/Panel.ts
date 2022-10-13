@@ -17,7 +17,7 @@ namespace Fudge {
   // extends view vorrübergehend entfernt
   export abstract class Panel extends View {
     protected goldenLayout: GoldenLayout;
-    private views: View[] = [];
+    protected views: View[] = [];
     //public dom; // muss vielleicht weg
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {

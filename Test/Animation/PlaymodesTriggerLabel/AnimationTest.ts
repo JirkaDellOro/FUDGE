@@ -45,8 +45,8 @@ namespace AnimatorControleTest {
 
     let animStructure: ƒ.AnimationStructure = {
       components: {
-        ComponentTransform: [
-          {
+        ComponentTransform: {
+          "1": {
             "ƒ.ComponentTransform": {
               mtxLocal: {
                 rotation: {
@@ -56,7 +56,7 @@ namespace AnimatorControleTest {
               }
             }
           }
-        ]
+        }
       }
     };
 

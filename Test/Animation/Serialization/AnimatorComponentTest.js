@@ -23,8 +23,8 @@ var AnimatorComponentTest;
         animseq.addKey(new ƒ.AnimationKey(5000, 45));
         let animStructure = {
             components: {
-                ComponentTransform: [
-                    {
+                ComponentTransform: {
+                    "1": {
                         "ƒ.ComponentTransform": {
                             mtxLocal: {
                                 rotation: {
@@ -34,7 +34,7 @@ var AnimatorComponentTest;
                             }
                         }
                     }
-                ]
+                }
             }
         };
         let animation = new ƒ.Animation("testAnimation", animStructure, 1);

@@ -114,13 +114,7 @@ namespace FudgeUserInterface {
     }
 
     public static findChildElementByKey(_domElement: HTMLElement, key: string): HTMLElement {
-      let result: HTMLElement;
-      try {
-        result = _domElement.querySelector(`[key = ${key}]`);
-      } catch (_error) {
-        result = _domElement.querySelector(`[key = ${"ƒ" + key}]`);
-      }
-      return result;
+      return _domElement.querySelector(`[key = "${key}"]`);
     }
 
     public getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {

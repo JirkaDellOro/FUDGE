@@ -106,7 +106,8 @@ var SkeletonTest;
             bones: {
                 LowerBone: {
                     components: {
-                        ComponentTransform: [{
+                        ComponentTransform: {
+                            1: {
                                 "ƒ.ComponentTransform": {
                                     mtxLocal: {
                                         scaling: {
@@ -119,7 +120,8 @@ var SkeletonTest;
                                         }
                                     }
                                 }
-                            }]
+                            }
+                        }
                     }
                 }
             }

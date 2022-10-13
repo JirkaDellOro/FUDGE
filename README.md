@@ -48,7 +48,6 @@ A collection of various other documents and resources, including unmaintained ex
 - VR Components
 - Particle Editor
 - Animation Editor
-
 ## Done  
 
 | Name               | Area                              |

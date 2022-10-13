@@ -28,9 +28,11 @@ namespace FudgeUserInterface {
       for (let key in this.content) {
         if (!isNaN(parseInt(key))) //key being a number will not be shown, assuming it's a simple enum with double entries
           continue;
+        let value: string | number = (<{ [key: string]: string | number }>this.content)[key];
         let entry: HTMLOptionElement = document.createElement("option");
         entry.text = key;
-        entry.value = (<{ [key: string]: string }>this.content)[key];
+        entry.setAttribute("type", typeof value);
+        entry.value = value.toString();
         // console.log(this.getAttribute("value"));
         if (entry.value == this.getAttribute("value")) {
           entry.selected = true;
@@ -44,8 +46,10 @@ namespace FudgeUserInterface {
     /**
      * Retrieves the status of the checkbox as boolean value
      */
-    public getMutatorValue(): string {
-      return this.querySelector("select").value;
+    public getMutatorValue(): string | number {
+      let select: HTMLSelectElement = this.querySelector("select");
+      let type: string = select.options[select.selectedIndex]?.getAttribute("type") || "string";
+      return type == "number" ? parseFloat(select.value) : select.value;
     }
     /**
      * Sets the status of the checkbox

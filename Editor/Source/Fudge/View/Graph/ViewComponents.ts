@@ -10,7 +10,9 @@ namespace Fudge {
   let resourceToComponent: Map<Function, typeof ƒ.Component> = new Map<Function, typeof ƒ.Component>([
     [ƒ.Audio, ƒ.ComponentAudio],
     [ƒ.Material, ƒ.ComponentMaterial],
-    [ƒ.Mesh, ƒ.ComponentMesh]
+    [ƒ.Mesh, ƒ.ComponentMesh],
+    [ƒ.Animation, ƒ.ComponentAnimator],
+    [ƒ.ParticleSystem, ƒ.ComponentParticleSystem]
   ]);
 
   /**
@@ -183,7 +185,7 @@ namespace Fudge {
           details.addEventListener("dragstart", (_event: Event) => { this.drag = <ƒ.ComponentCamera>component; });
         }
         if (component instanceof ƒ.ComponentRigidbody) {
-          let pivot: HTMLElement = controller.domElement.querySelector("[key=mtxPivot");
+          let pivot: HTMLElement = controller.domElement.querySelector("[key='mtxPivot'");
           let opacity: string = pivot.style.opacity;
           setPivotOpacity(null);
           controller.domElement.addEventListener(ƒUi.EVENT.MUTATE, setPivotOpacity);
@@ -193,7 +195,7 @@ namespace Fudge {
           }
         }
         if (component instanceof ƒ.ComponentFaceCamera) {
-          let up: HTMLElement = controller.domElement.querySelector("[key=up");
+          let up: HTMLElement = controller.domElement.querySelector("[key='up'");
           let opacity: string = up.style.opacity;
           setUpOpacity(null);
           controller.domElement.addEventListener(ƒUi.EVENT.MUTATE, setUpOpacity);

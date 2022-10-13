@@ -87,8 +87,8 @@ namespace FudgeCore {
       return this;
     }
 
-    public async mutate(_mutator: Mutator): Promise<void> {
-      await super.mutate(_mutator);
+    public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
+      await super.mutate(_mutator, _selection, _dispatchMutate);
       if (typeof (_mutator.active) !== "undefined")
         this.activate(_mutator.active);
     }

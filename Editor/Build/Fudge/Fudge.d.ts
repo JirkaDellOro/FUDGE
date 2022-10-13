@@ -1,8 +1,7 @@
 /// <reference types="../../../node_modules/electron/electron" />
 /// <reference types="../../core/build/fudgecore" />
-/// <reference types="../../../aid/build/fudgeaid" />
-/// <reference types="../../GoldenLayout/golden-layout" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
+/// <reference types="../../GoldenLayout/golden-layout" />
 declare namespace Fudge {
     export type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     type Subclass<T> = {
@@ -27,11 +26,22 @@ declare namespace Fudge {
         CREATE_MESH = 7,
         CREATE_MATERIAL = 8,
         CREATE_GRAPH = 9,
-        SYNC_INSTANCES = 10,
-        REMOVE_COMPONENT = 11,
-        ADD_JOINT = 12,
-        DELETE_RESOURCE = 13,
-        ORTHGRAPHIC_CAMERA = 14
+        CREATE_ANIMATION = 10,
+        CREATE_PARTICLE_EFFECT = 11,
+        SYNC_INSTANCES = 12,
+        REMOVE_COMPONENT = 13,
+        ADD_JOINT = 14,
+        DELETE_RESOURCE = 15,
+        ORTHGRAPHIC_CAMERA = 16,
+        ADD_PROPERTY = 17,
+        DELETE_PROPERTY = 18,
+        ADD_PARTICLE_PROPERTY = 19,
+        ADD_PARTICLE_FUNCTION = 20,
+        ADD_PARTICLE_FUNCTION_NAMED = 21,
+        ADD_PARTICLE_CONSTANT = 22,
+        ADD_PARTICLE_CONSTANT_NAMED = 23,
+        ADD_PARTICLE_TRANSFORMATION = 24,
+        DELETE_PARTICLE_DATA = 25
     }
     enum MENU {
         QUIT = "quit",
@@ -43,16 +53,20 @@ declare namespace Fudge {
         PANEL_ANIMATION_OPEN = "panelAnimationOpen",
         PANEL_PROJECT_OPEN = "panelProjectOpen",
         PANEL_HELP_OPEN = "panelHelpOpen",
+        PANEL_PARTICLE_SYSTEM_OPEN = "panelParticleSystemOpen",
         FULLSCREEN = "fullscreen"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
         PROJECT = "PanelProject",
-        HELP = "PanelHelp"
+        HELP = "PanelHelp",
+        ANIMATION = "PanelAnimation",
+        PARTICLE_SYSTEM = "PanelParticleSystem"
     }
     enum VIEW {
         HIERARCHY = "ViewHierarchy",
         ANIMATION = "ViewAnimation",
+        ANIMATION_SHEET = "ViewAnimationSheet",
         RENDER = "ViewRender",
         COMPONENTS = "ViewComponents",
         CAMERA = "ViewCamera",
@@ -60,7 +74,8 @@ declare namespace Fudge {
         EXTERNAL = "ViewExternal",
         PROPERTIES = "ViewProperties",
         PREVIEW = "ViewPreview",
-        SCRIPT = "ViewScript"
+        SCRIPT = "ViewScript",
+        PARTICLE_SYSTEM = "ViewParticleSystem"
     }
     enum TRANSFORM {
         TRANSLATE = "translate",
@@ -104,7 +119,8 @@ declare namespace Fudge {
         DELETE = "EDITOR_DELETE",
         CLOSE = "EDITOR_CLOSE",
         TRANSFORM = "EDITOR_TRANSFORM",
-        FOCUS = "EDITOR_FOCUS"
+        FOCUS = "EDITOR_FOCUS",
+        ANIMATE = "EDITOR_ANIMATE"
     }
     interface EventDetail {
         node?: ƒ.Node;
@@ -113,6 +129,7 @@ declare namespace Fudge {
         mutable?: ƒ.Mutable;
         transform?: Object;
         view?: View;
+        data?: ƒ.General;
     }
     /**
      * Extension of CustomEvent that supports a detail field with the type EventDetail
@@ -196,20 +213,23 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    class AnimationList {
-        listRoot: HTMLElement;
-        private mutator;
-        private index;
-        constructor(_mutator: ƒ.Mutator, _listContainer: HTMLElement);
-        getMutator(): ƒ.Mutator;
-        setMutator(_mutator: ƒ.Mutator): void;
-        collectMutator: () => ƒ.Mutator;
-        getElementIndex(): ƒ.Mutator;
-        updateMutator(_update: ƒ.Mutator): void;
-        private updateEntry;
-        private updateMutatorEntry;
-        private buildFromMutator;
-        private toggleCollapse;
+    import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
+    class ControllerAnimation {
+        private static readonly PROPERTY_COLORS;
+        private animation;
+        private propertyList;
+        private view;
+        private sequences;
+        constructor(_animation: ƒ.Animation, _propertyList: HTMLElement, _view: ViewAnimation);
+        updatePropertyList(_mutator: ƒ.Mutator): void;
+        updateSequence(_time: number, _element: ƒui.CustomElement): void;
+        nextKey(_time: number, _direction: "forward" | "backward"): number;
+        addProperty(_path: string[]): void;
+        deleteProperty(_element: HTMLElement): void;
+        private getSelectedSequences;
+        private deletePath;
+        private hndEvent;
     }
 }
 declare namespace Fudge {
@@ -348,6 +368,27 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
+    class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.Recursive> {
+        childToParent: Map<ƒ.ParticleData.Recursive, ƒ.ParticleData.Recursive>;
+        private data;
+        constructor(_data: ƒ.ParticleData.System);
+        createContent(_data: ƒ.ParticleData.Recursive): HTMLFormElement;
+        getAttributes(_data: ƒ.ParticleData.Recursive): string;
+        rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): void;
+        hasChildren(_data: ƒ.ParticleData.Recursive): boolean;
+        getChildren(_data: ƒ.ParticleData.Recursive): ƒ.ParticleData.Recursive[];
+        delete(_focused: (ƒ.ParticleData.Recursive)[]): (ƒ.ParticleData.Recursive)[];
+        addChildren(_children: ƒ.ParticleData.Recursive[], _target: ƒ.ParticleData.Recursive, _at?: number): ƒ.ParticleData.Recursive[];
+        copy(_originals: ƒ.ParticleData.Recursive[]): Promise<ƒ.ParticleData.Recursive[]>;
+        draggable(_target: ƒ.ParticleData.Recursive): boolean;
+        private getKey;
+        private deleteData;
+        private isReferenced;
+    }
+}
+declare namespace Fudge {
     interface PanelState {
         [key: string]: string;
     }
@@ -358,12 +399,26 @@ declare namespace Fudge {
      */
     abstract class Panel extends View {
         protected goldenLayout: GoldenLayout;
-        private views;
+        protected views: View[];
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         /** Send custom copies of the given event to the views */
         broadcastEvent: (_event: EditorEvent) => void;
         abstract getState(): PanelState;
         private addViewComponent;
+    }
+}
+declare namespace Fudge {
+    /**
+     * TODO: add
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    class PanelAnimation extends Panel {
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        getState(): {
+            [key: string]: string;
+        };
+        private hndEvent;
+        private hndAnimate;
     }
 }
 declare namespace Fudge {
@@ -396,6 +451,19 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
+     * TODO: add
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    class PanelParticleSystem extends Panel {
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        getState(): {
+            [key: string]: string;
+        };
+        private hndEvent;
+    }
+}
+declare namespace Fudge {
+    /**
      * Display the project structure and offer functions for creation, deletion and adjustment of resources
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020
      */
@@ -408,101 +476,141 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    interface ViewAnimationKey {
-        key: FudgeCore.AnimationKey;
-        path2D: Path2D;
-        sequence: ViewAnimationSequence;
-    }
-    interface ViewAnimationSequence {
-        color: string;
-        element: HTMLElement;
-        sequence: FudgeCore.AnimationSequence;
-    }
-    interface ViewAnimationEvent {
-        event: string;
-        path2D: Path2D;
-    }
-    interface ViewAnimationLabel {
-        label: string;
-        path2D: Path2D;
-    }
-    class ViewAnimation extends View {
-        node: FudgeCore.Node;
-        animation: FudgeCore.Animation;
-        cmpAnimator: FudgeCore.ComponentAnimator;
-        playbackTime: number;
-        controller: AnimationList;
-        private canvas;
-        private attributeList;
-        private crc;
-        private sheet;
-        private toolbar;
-        private hover;
-        private time;
-        private playing;
+    import ƒ = FudgeCore;
+    /**
+     * View and edit a particle system attached to a node.
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    class ViewParticleSystem extends View {
+        static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[];
+        static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[];
+        static readonly COLOR_KEYS: (keyof ƒ.ParticleData.System["color"])[];
+        private graph;
+        private node;
+        private particleSystem;
+        private data;
+        private idInterval;
+        private tree;
+        private controller;
+        private errors;
+        private variables;
         constructor(_container: ComponentContainer, _state: Object);
-        openAnimation(): void;
-        fillContent(): void;
-        installListeners(): void;
-        mouseClick(_e: MouseEvent): void;
-        mouseDown(_e: MouseEvent): void;
-        mouseMove(_e: MouseEvent): void;
-        mouseUp(_e: MouseEvent): void;
-        private fillToolbar;
-        private toolbarClick;
-        private toolbarChange;
-        private changeAttribute;
-        private updateDisplay;
-        private setTime;
-        private playAnimation;
-        private randomNameGenerator;
+        protected openContextMenu: (_event: Event) => void;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private hndEvent;
+        private setParticleSystem;
+        private validateData;
+        private enableSave;
+        private refreshVariables;
     }
 }
 declare namespace Fudge {
-    abstract class ViewAnimationSheet {
-        view: ViewAnimation;
-        seq: FudgeCore.AnimationSequence[];
-        crc2: CanvasRenderingContext2D;
-        scale: FudgeCore.Vector2;
-        protected position: FudgeCore.Vector2;
-        protected savedImage: ImageData;
-        protected keys: ViewAnimationKey[];
-        protected sequences: ViewAnimationSequence[];
-        protected labels: ViewAnimationLabel[];
-        protected events: ViewAnimationEvent[];
-        constructor(_view: ViewAnimation, _crc: CanvasRenderingContext2D, _seq: FudgeCore.AnimationSequence[], _scale?: FudgeCore.Vector2, _pos?: FudgeCore.Vector2);
-        moveTo(_time: number, _value?: number): void;
-        translate(): void;
-        redraw(_time: number): void;
-        clear(): void;
-        drawTimeline(): void;
-        drawCursor(_time: number): void;
-        drawKeys(): void;
-        getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent;
-        protected traverseStructures(_animation: FudgeCore.AnimationStructure, _inputs: FudgeCore.Mutator): void;
-        protected abstract drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void;
-        protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
-        private drawEventsAndLabels;
-        private calculateDisplay;
+    /**
+     * View and edit the animatable properties of a node with an attached component animation.
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    class ViewAnimation extends View {
+        private graph;
+        private node;
+        private cmpAnimator;
+        private animation;
+        private playbackTime;
+        private propertyList;
+        private controller;
+        private toolbar;
+        private frameInput;
+        private time;
+        private idInterval;
+        constructor(_container: ComponentContainer, _state: Object);
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private getNodeSubmenu;
+        private getMutatorSubmenu;
+        private createToolbar;
+        private hndEvent;
+        private setAnimation;
+        private createPropertyList;
+        private hndAnimate;
+        private dispatchAnimate;
+        private hndToolbarClick;
+        private pause;
     }
 }
 declare namespace Fudge {
-    class ViewAnimationSheetCurve extends ViewAnimationSheet {
-        drawKeys(): void;
-        protected drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void;
-        protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
-        private drawYScale;
-        private calcScaleSize;
-        private randomColor;
+    import ƒ = FudgeCore;
+    interface ViewAnimationSequence {
+        data: ƒ.AnimationSequence;
+        color: string;
     }
-}
-declare namespace Fudge {
-    class ViewAnimationSheetDope extends ViewAnimationSheet {
-        drawKeys(): Promise<void>;
-        protected drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void;
+    /**
+     * View and edit animation sequences, animation keys and curves connecting them.
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+     */
+    class ViewAnimationSheet extends View {
+        #private;
+        private static readonly KEY_SIZE;
+        private static readonly TIMELINE_HEIGHT;
+        private static readonly EVENTS_HEIGHT;
+        private static readonly SCALE_WIDTH;
+        private static readonly PIXEL_PER_MILLISECOND;
+        private static readonly PIXEL_PER_VALUE;
+        private static readonly MINIMUM_PIXEL_PER_STEP;
+        private static readonly STANDARD_ANIMATION_LENGTH;
+        private graph;
+        private animation;
+        private playbackTime;
+        private canvas;
+        private crc2;
+        private eventInput;
+        private scrollContainer;
+        private scrollBody;
+        private mtxWorldToScreen;
+        private selectedKey;
+        private selectedEvent;
+        private keys;
+        private sequences;
+        private events;
+        private slopeHooks;
+        private documentStyle;
+        private posPanStart;
+        private posRightClick;
+        constructor(_container: ComponentContainer, _state: Object);
+        private get mode();
+        private set mode(value);
+        protected openContextMenuSheet: (_event: Event) => void;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private draw;
+        private generateKeys;
+        private generateKey;
+        private drawTimeline;
+        private drawEvents;
+        private drawScale;
+        private drawCurves;
+        private drawKeys;
+        private drawCursor;
+        private drawHighlight;
+        private hndFocus;
+        private hndAnimate;
+        private hndSelect;
+        private hndPointerDown;
+        private hndPointerMoveTimeline;
+        private hndPointerMoveSlope;
+        private hndPointerMovePan;
+        private hndPointerMoveDragKey;
+        private hndPointerMoveDragEvent;
+        private hndPointerUp;
+        private hndWheel;
+        private hndScroll;
+        private dispatchAnimate;
+        private resetView;
+        private screenToWorldPoint;
+        private worldToScreenPoint;
+        private screenToTime;
+        private timeToScreen;
+        private round;
     }
-}
-declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
@@ -568,6 +676,8 @@ declare namespace Fudge {
         private canvas;
         private graph;
         private nodeLight;
+        private throttleId;
+        private readonly throttleDelay;
         constructor(_container: ComponentContainer, _state: JsonValue);
         createUserInterface(): void;
         setGraph(_node: ƒ.Graph): void;
@@ -583,6 +693,7 @@ declare namespace Fudge {
         private hndPointer;
         private activeViewport;
         private redraw;
+        private redrawThrottled;
     }
 }
 declare namespace Fudge {

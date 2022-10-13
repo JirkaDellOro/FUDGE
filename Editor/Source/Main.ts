@@ -111,7 +111,8 @@ namespace Main {
           { label: "Help", id: Fudge.MENU.PANEL_HELP_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+H" : "Ctrl+H", enabled: true },
           { label: "Project", id: Fudge.MENU.PANEL_PROJECT_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+R" : "Ctrl+R", enabled: false },
           { label: "Graph", id: Fudge.MENU.PANEL_GRAPH_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+G", enabled: false },
-          { label: "Animation", id: Fudge.MENU.PANEL_ANIMATION_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I", enabled: false }
+          { label: "Animation", id: Fudge.MENU.PANEL_ANIMATION_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I", enabled: false },
+          { label: "Particle System", id: Fudge.MENU.PANEL_PARTICLE_SYSTEM_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "" : "", enabled: false }
         ]
       },
       {

@@ -96,6 +96,8 @@ namespace Fudge {
       Page.goldenLayout.registerComponentConstructor(PANEL.PROJECT, PanelProject);
       Page.goldenLayout.registerComponentConstructor(PANEL.GRAPH, PanelGraph);
       Page.goldenLayout.registerComponentConstructor(PANEL.HELP, PanelHelp);
+      Page.goldenLayout.registerComponentConstructor(PANEL.ANIMATION, PanelAnimation);
+      Page.goldenLayout.registerComponentConstructor(PANEL.PARTICLE_SYSTEM, PanelParticleSystem);
 
       Page.loadLayout();
     }
@@ -148,6 +150,8 @@ namespace Fudge {
       document.addEventListener(EVENT_EDITOR.SELECT, Page.hndEvent);
       document.addEventListener(ƒui.EVENT.MUTATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.CLOSE, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.FOCUS, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.ANIMATE, Page.hndEvent);
       document.addEventListener("keyup", Page.hndKey);
     }
 
@@ -201,6 +205,8 @@ namespace Fudge {
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
+      ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_ANIMATION_OPEN, on: true });
+      ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PARTICLE_SYSTEM_OPEN, on: true });
     }
 
     //#region Main-Events from Electron
@@ -211,6 +217,8 @@ namespace Fudge {
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
+        ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_ANIMATION_OPEN, on: true });
+        ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PARTICLE_SYSTEM_OPEN, on: true });
       });
 
       ipcRenderer.on(MENU.PROJECT_SAVE, async (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -242,8 +250,15 @@ namespace Fudge {
       });
 
       ipcRenderer.on(MENU.PANEL_ANIMATION_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
-        //   PanelManager.instance.addPanel(panel);
+        Page.add(PanelAnimation, null);  
+        // let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
+        // PanelManager.instance.addPanel(panel);
+      });
+
+      ipcRenderer.on(MENU.PANEL_PARTICLE_SYSTEM_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+        Page.add(PanelParticleSystem, null);  
+        // let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
+        // PanelManager.instance.addPanel(panel);
       });
     }
   }

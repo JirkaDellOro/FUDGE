@@ -6,7 +6,19 @@ namespace FudgeCore {
    * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
    */
   export interface AnimationStructure {
-    [attribute: string]: Serialization | AnimationSequence;
+    [attribute: string]: AnimationStructure | AnimationSequence;
+  }
+
+  export interface AnimationStructureVector3 extends AnimationStructure {
+    x: AnimationSequence;
+    y: AnimationSequence;
+    z: AnimationSequence;
+  }
+
+  export interface AnimationStructureMatrix4x4 extends AnimationStructure {
+    rotation?: AnimationStructureVector3;
+    scale?: AnimationStructureVector3;
+    translation?: AnimationStructureVector3;
   }
 
   /**
@@ -76,20 +88,20 @@ namespace FudgeCore {
    * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class Animation extends Mutable implements SerializableResource {
-    idResource: string;
-    name: string;
-    totalTime: number = 0;
-    labels: AnimationLabel = {};
+    public idResource: string = undefined;
+    public name: string;
+    public totalTime: number = 0;
+    public labels: AnimationLabel = {}; // TODO: labels seem to be kind of useless since they can only be jumped to which also works with a time...
     // stepsPerSecond: number = 10;
-    animationStructure: AnimationStructure;
-    events: AnimationEventTrigger = {};
-    private framesPerSecond: number = 60;
+    public animationStructure: AnimationStructure;
+    public events: AnimationEventTrigger = {};
+    private framesPerSecond: number = 60; // TODO: change this and its accessors to #framesPerSecond?
 
     // processed eventlist and animation strucutres for playback.
     private eventsProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
     private animationStructuresProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
 
-    constructor(_name: string, _animStructure: AnimationStructure = {}, _fps: number = 60) {
+    constructor(_name: string = Animation.name, _animStructure: AnimationStructure = {}, _fps: number = 60) {
       super();
       this.name = _name;
       this.animationStructure = _animStructure;
@@ -253,12 +265,12 @@ namespace FudgeCore {
       for (let name in this.events) {
         s.events[name] = this.events[name];
       }
-      s.animationStructure = this.traverseStructureForSerialisation(this.animationStructure);
+      s.animationStructure = this.traverseStructureForSerialization(this.animationStructure);
       return s;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.idResource = _serialization.idResource;
+      Project.register(this, _serialization.idResource);
       this.name = _serialization.name;
       this.framesPerSecond = _serialization.fps;
       // this.stepsPerSecond = _serialization.sps;
@@ -272,7 +284,7 @@ namespace FudgeCore {
       }
       this.eventsProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
 
-      this.animationStructure = await this.traverseStructureForDeserialisation(_serialization.animationStructure);
+      this.animationStructure = await this.traverseStructureForDeserialization(_serialization.animationStructure);
 
       this.animationStructuresProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
 
@@ -290,33 +302,41 @@ namespace FudgeCore {
      * @param _structure The Animation Structure at the current level to transform into the Serialization.
      * @returns the filled Serialization.
      */
-    private traverseStructureForSerialisation(_structure: AnimationStructure): Serialization {
-      let newSerialization: Serialization = {};
-      for (let n in _structure) {
-        if (_structure[n] instanceof AnimationSequence) {
-          newSerialization[n] = _structure[n].serialize();
+    private traverseStructureForSerialization(_structure: AnimationStructure): Serialization {
+      let serialization: Serialization = {};
+      for (const property in _structure) {
+        let structureOrSequence: AnimationStructure | AnimationSequence = _structure[property];
+        if (structureOrSequence instanceof AnimationSequence) {
+          serialization[property] = structureOrSequence.serialize();
         } else {
-          newSerialization[n] = this.traverseStructureForSerialisation(<AnimationStructure>_structure[n]);
+          if (Component.subclasses.some(type => type.name == property)) {
+            serialization[property] = [];
+            for (const i in structureOrSequence) {
+              (<Serialization[]>serialization[property]).push(this.traverseStructureForSerialization(<AnimationStructure>structureOrSequence[i]));
+            }
+          } else {
+            serialization[property] = this.traverseStructureForSerialization(structureOrSequence);
+          }
         }
       }
-      return newSerialization;
+      return serialization;
     }
     /**
      * Traverses a Serialization to create a new AnimationStructure.
      * @param _serialization The serialization to transfer into an AnimationStructure
      * @returns the newly created AnimationStructure.
      */
-    private async traverseStructureForDeserialisation(_serialization: Serialization): Promise<AnimationStructure> {
-      let newStructure: AnimationStructure = {};
+    private async traverseStructureForDeserialization(_serialization: Serialization): Promise<AnimationStructure> {
+      let structure: AnimationStructure = {};
       for (let n in _serialization) {
         if (_serialization[n].animationSequence) {
           let animSeq: AnimationSequence = new AnimationSequence();
-          newStructure[n] = await animSeq.deserialize(_serialization[n]);
+          structure[n] = <AnimationSequence>(await animSeq.deserialize(_serialization[n]));
         } else {
-          newStructure[n] = await this.traverseStructureForDeserialisation(_serialization[n]);
+          structure[n] = await this.traverseStructureForDeserialization(_serialization[n]);
         }
       }
-      return newStructure;
+      return structure;
     }
     //#endregion
 
@@ -369,7 +389,7 @@ namespace FudgeCore {
         if (_structure[n] instanceof AnimationSequence) {
           let sequence: AnimationSequence = <AnimationSequence>_structure[n];
           if (sequence.length > 0) {
-            let sequenceTime: number = sequence.getKey(sequence.length - 1).Time;
+            let sequenceTime: number = sequence.getKey(sequence.length - 1).time;
             this.totalTime = sequenceTime > this.totalTime ? sequenceTime : this.totalTime;
           }
         } else {
@@ -465,7 +485,7 @@ namespace FudgeCore {
       let seq: AnimationSequence = new AnimationSequence();
       for (let i: number = 0; i < _sequence.length; i++) {
         let oldKey: AnimationKey = _sequence.getKey(i);
-        let key: AnimationKey = new AnimationKey(this.totalTime - oldKey.Time, oldKey.Value, oldKey.SlopeOut, oldKey.SlopeIn, oldKey.Constant);
+        let key: AnimationKey = new AnimationKey(this.totalTime - oldKey.time, oldKey.value, oldKey.slopeOut, oldKey.slopeIn, oldKey.constant);
         seq.addKey(key);
       }
       return seq;

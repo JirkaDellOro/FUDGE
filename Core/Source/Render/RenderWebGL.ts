@@ -2,6 +2,8 @@
 ///<reference path="RenderInjectorShader.ts"/>
 ///<reference path="RenderInjectorCoat.ts"/>
 ///<reference path="RenderInjectorMesh.ts"/>
+///<reference path="RenderInjectorShaderParticleSystem.ts"/>
+///<reference path="RenderInjectorComponentParticleSystem.ts"/>
 ///<reference path="../Math/Rectangle.ts"/>
 
 namespace FudgeCore {
@@ -10,7 +12,7 @@ namespace FudgeCore {
   export type RenderTexture = WebGLTexture;
 
   export enum BLEND {
-    OPAQUE, TRANSPARENT, PARTICLE
+    OPAQUE, TRANSPARENT, ADDITIVE, SUBTRACTIVE, MODULATE
   }
 
   export interface BufferSpecification {
@@ -151,15 +153,25 @@ namespace FudgeCore {
     public static setBlendMode(_mode: BLEND): void {
       switch (_mode) {
         case BLEND.OPAQUE:
+          RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
           RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.ONE, WebGL2RenderingContext.ZERO);
           break;
         case BLEND.TRANSPARENT:
+          RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
           RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
           // RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
           break;
-        case BLEND.PARTICLE:
+        case BLEND.ADDITIVE:
+          RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
           RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.DST_ALPHA);
           break;
+        case BLEND.SUBTRACTIVE:
+          RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_REVERSE_SUBTRACT);
+          RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.DST_ALPHA);
+          break;
+        case BLEND.MODULATE: // color gets multiplied, tried to copy unitys "Particle Shader: Blending Option: Rendering Mode: Modulate"
+          RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
+          RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.DST_COLOR, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
         default:
           break;
       }
@@ -247,7 +259,7 @@ namespace FudgeCore {
         let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let coat: Coat = cmpMaterial.material.coat;
-        let shader: typeof Shader = coat instanceof CoatTextured ? ShaderPickTextured : ShaderPick;
+        let shader: ShaderInterface = coat instanceof CoatTextured ? ShaderPickTextured : ShaderPick;
 
         shader.useProgram();
         coat.useRenderData(shader, cmpMaterial);
@@ -272,7 +284,7 @@ namespace FudgeCore {
     /**
      * Set light data in shaders
      */
-    protected static setLightsInShader(_shader: typeof Shader, _lights: MapLightTypeToLightList): void {
+    protected static setLightsInShader(_shader: ShaderInterface, _lights: MapLightTypeToLightList): void {
       _shader.useProgram();
       let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
 
@@ -329,10 +341,14 @@ namespace FudgeCore {
       let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
       let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
       let coat: Coat = cmpMaterial.material.coat;
-      let shader: typeof Shader = cmpMaterial.material.getShader();
+      let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
+      let drawParticles: boolean = cmpParticleSystem && cmpParticleSystem.isActive;
+      let shader: ShaderInterface = cmpMaterial.material.getShader();
+      if (drawParticles) shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
 
-      shader.useProgram();
+      shader.useProgram();   
       coat.useRenderData(shader, cmpMaterial);
+      
       let mtxMeshToView: Matrix4x4 = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
       let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
 
@@ -350,7 +366,30 @@ namespace FudgeCore {
         RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
       }
 
-      RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+      if (drawParticles) {
+        RenderWebGL.drawParticles(cmpParticleSystem, shader, renderBuffers, _node.getComponent(ComponentFaceCamera), cmpMaterial.sortForAlpha);
+      } else {
+        RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+      }
+    }
+
+    protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void {
+      RenderWebGL.crc3.depthMask(_cmpParticleSystem.depthMask);
+      RenderWebGL.setBlendMode(_cmpParticleSystem.blendMode);
+      _cmpParticleSystem.useRenderData();
+
+      RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemSize"], _cmpParticleSystem.size);
+      RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemTime"], _cmpParticleSystem.time.get());
+      RenderWebGL.crc3.uniform1i(_shader.uniforms["u_fParticleSystemRandomNumbers"], 1); // ATTENTION!: changing this id (the second argument) requires changing of corresponding texture id in component particle system render injector
+
+      let faceCamera: boolean = _cmpFaceCamera && _cmpFaceCamera.isActive;
+      RenderWebGL.crc3.uniform1i(_shader.uniforms["u_bParticleSystemFaceCamera"], faceCamera ? 1 : 0);
+      RenderWebGL.crc3.uniform1i(_shader.uniforms["u_bParticleSystemRestrict"], faceCamera && _cmpFaceCamera.restrict ? 1 : 0);
+
+      RenderWebGL.crc3.drawElementsInstanced(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0, _cmpParticleSystem.size);
+
+      RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
+      RenderWebGL.crc3.depthMask(true);
     }
 
     private static calcMeshToView(_node: Node, _cmpMesh: ComponentMesh, _mtxWorldToView: Matrix4x4, _target?: Vector3): Matrix4x4 {
@@ -365,12 +404,14 @@ namespace FudgeCore {
       return Matrix4x4.MULTIPLICATION(_mtxWorldToView, _cmpMesh.mtxWorld);
     }
 
-    private static getRenderBuffers(_cmpMesh: ComponentMesh, _shader: typeof Shader, _mtxMeshToView: Matrix4x4): RenderBuffers {
+    private static getRenderBuffers(_cmpMesh: ComponentMesh, _shader: ShaderInterface, _mtxMeshToView: Matrix4x4): RenderBuffers {
       if (_cmpMesh.mesh instanceof MeshSkin)
         // TODO: make mesh skin pickable
         return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
       else
         return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView);
     }
+
+
   }
 }

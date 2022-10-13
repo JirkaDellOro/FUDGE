@@ -128,20 +128,22 @@ namespace SkeletonTest {
       bones: {
         LowerBone: {
           components: {
-            ComponentTransform: [{
-              "ƒ.ComponentTransform": {
-                mtxLocal: {
-                  scaling: {
-                    x: sequenceScaling,
-                    y: sequenceScaling,
-                    z: sequenceScaling
-                  },
-                  translation: {
-                    y: sequenceTranslation
+            ComponentTransform: {
+              1: {
+                "ƒ.ComponentTransform": {
+                  mtxLocal: {
+                    scaling: {
+                      x: sequenceScaling,
+                      y: sequenceScaling,
+                      z: sequenceScaling
+                    },
+                    translation: {
+                      y: sequenceTranslation
+                    }
                   }
                 }
               }
-            }]
+            }
           }
         }
       }

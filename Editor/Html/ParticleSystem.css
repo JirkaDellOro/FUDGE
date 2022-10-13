@@ -1,0 +1,14 @@
+/* View Particle System */
+
+
+div[view=ViewParticleSystem] ul.tree li[attributes~="variable"]>form>input:first-of-type {
+  font-style: italic;
+}
+
+div[view=ViewParticleSystem] ul.tree li.invalid {
+  outline: 1px outset yellow; /* maybe add this to theme vars */
+}
+
+div[view=ViewParticleSystem] form input {
+  width: 10em;
+}

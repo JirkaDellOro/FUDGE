@@ -21,6 +21,8 @@ namespace Fudge {
     UrlOnAudio: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: DirectoryEntry, dropEffect: "link" },
     MaterialOnComponentMaterial: { fromViews: [ViewInternal], onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
     MeshOnComponentMesh: { fromViews: [ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
+    AnimationOnComponentAnimator: { fromViews: [ViewInternal], onType: ƒ.ComponentAnimator, ofType: ƒ.Animation, dropEffect: "link" },
+    ParticleSystemOnComponentParticleSystem: { fromViews: [ViewInternal], onType: ƒ.ComponentParticleSystem, ofType: ƒ.ParticleSystem, dropEffect: "link" },
     // MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
     TextureOnMaterial: { fromViews: [ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
     TextureOnMeshRelief: { fromViews: [ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
@@ -88,6 +90,11 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.TextureOnMaterial)) return;
       // Texture on MeshRelief
       if (this.filterDragDrop(_event, filter.TextureOnMeshRelief)) return;
+      // Animation of ComponentAnimation
+      if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator)) return;
+      // ParticleSystem of ComponentParticleSystem
+      if (this.filterDragDrop(_event, filter.ParticleSystemOnComponentParticleSystem)) return;
+      
 
       function checkMimeType(_mime: MIME): (_sources: Object[]) => boolean {
         return (_sources: Object[]): boolean => {
@@ -135,6 +142,16 @@ namespace Fudge {
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };
+      let setAnimation: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
+        this.mutable["animation"] = _sources[0];
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+        return true;
+      };
+      let setParticleSystem: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
+        this.mutable[ƒ.ParticleSystem.name] = _sources[0];
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+        return true;
+      };
 
       // texture
       if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink)) return;
@@ -153,6 +170,10 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.TextureOnMaterial, setTexture)) return;
       // Texture on MeshRelief
       if (this.filterDragDrop(_event, filter.TextureOnMeshRelief, setHeightMap)) return;
+      // Animation on ComponentAnimator
+      if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator, setAnimation)) return;
+      // ParticleSystem on ComponentParticleSystem
+      if (this.filterDragDrop(_event, filter.ParticleSystemOnComponentParticleSystem, setParticleSystem)) return;
     }
 
 
