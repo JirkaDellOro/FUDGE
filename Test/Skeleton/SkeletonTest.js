@@ -106,22 +106,20 @@ var SkeletonTest;
             bones: {
                 LowerBone: {
                     components: {
-                        ComponentTransform: {
-                            1: {
-                                "ƒ.ComponentTransform": {
-                                    mtxLocal: {
-                                        scaling: {
-                                            x: sequenceScaling,
-                                            y: sequenceScaling,
-                                            z: sequenceScaling
-                                        },
-                                        translation: {
-                                            y: sequenceTranslation
-                                        }
+                        ComponentTransform: [
+                            {
+                                mtxLocal: {
+                                    scaling: {
+                                        x: sequenceScaling,
+                                        y: sequenceScaling,
+                                        z: sequenceScaling
+                                    },
+                                    translation: {
+                                        y: sequenceTranslation
                                     }
                                 }
                             }
-                        }
+                        ]
                     }
                 }
             }

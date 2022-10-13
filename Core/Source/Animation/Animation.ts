@@ -6,7 +6,7 @@ namespace FudgeCore {
    * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
    */
   export interface AnimationStructure {
-    [attribute: string]: AnimationStructure | AnimationSequence;
+    [attribute: string]: AnimationStructure[] | AnimationStructure | AnimationSequence;
   }
 
   export interface AnimationStructureVector3 extends AnimationStructure {
@@ -302,17 +302,17 @@ namespace FudgeCore {
      * @param _structure The Animation Structure at the current level to transform into the Serialization.
      * @returns the filled Serialization.
      */
-    private traverseStructureForSerialization(_structure: AnimationStructure): Serialization {
+    private traverseStructureForSerialization(_structure: Object): Serialization {
       let serialization: Serialization = {};
       for (const property in _structure) {
-        let structureOrSequence: AnimationStructure | AnimationSequence = _structure[property];
+        let structureOrSequence: Object = (<General>_structure)[property];
         if (structureOrSequence instanceof AnimationSequence) {
           serialization[property] = structureOrSequence.serialize();
         } else {
           if (Component.subclasses.some(type => type.name == property)) {
             serialization[property] = [];
             for (const i in structureOrSequence) {
-              (<Serialization[]>serialization[property]).push(this.traverseStructureForSerialization(<AnimationStructure>structureOrSequence[i]));
+              (<Serialization[]>serialization[property]).push(this.traverseStructureForSerialization((<General>structureOrSequence)[i]));
             }
           } else {
             serialization[property] = this.traverseStructureForSerialization(structureOrSequence);

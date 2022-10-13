@@ -36,18 +36,16 @@ var AnimatorControleTest;
         animseq.addKey(new ƒ.AnimationKey(time1, value1));
         let animStructure = {
             components: {
-                ComponentTransform: {
-                    "1": {
-                        "ƒ.ComponentTransform": {
-                            mtxLocal: {
-                                rotation: {
-                                    x: animseq,
-                                    y: animseq
-                                }
+                ComponentTransform: [
+                    {
+                        mtxLocal: {
+                            rotation: {
+                                x: animseq,
+                                y: animseq
                             }
                         }
                     }
-                }
+                ]
             }
         };
         let fpsInput = document.querySelector("input[name=fps]");

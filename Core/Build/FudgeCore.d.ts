@@ -1380,7 +1380,7 @@ declare namespace FudgeCore {
      * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
      */
     interface AnimationStructure {
-        [attribute: string]: AnimationStructure | AnimationSequence;
+        [attribute: string]: AnimationStructure[] | AnimationStructure | AnimationSequence;
     }
     interface AnimationStructureVector3 extends AnimationStructure {
         x: AnimationSequence;

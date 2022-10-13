@@ -45,18 +45,16 @@ namespace AnimatorControleTest {
 
     let animStructure: ƒ.AnimationStructure = {
       components: {
-        ComponentTransform: {
-          "1": {
-            "ƒ.ComponentTransform": {
-              mtxLocal: {
-                rotation: {
-                  x: animseq,
-                  y: animseq
-                }
+        ComponentTransform: [
+          {
+            mtxLocal: {
+              rotation: {
+                x: animseq,
+                y: animseq
               }
             }
           }
-        }
+        ]
       }
     };
 
