@@ -26,7 +26,6 @@ namespace Fudge {
           { typeId: LayoutManager.LocationSelector.TypeId.Root }
         ]);
   
-        this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
         this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
         this.setTitle(ƒ.ParticleSystem.name);
       }
@@ -37,10 +36,6 @@ namespace Fudge {
       }
 
       private hndEvent = async (_event: EditorEvent): Promise<void> => {
-        // switch (_event.type) {
-  
-        // }
-  
         this.broadcastEvent(_event);
         _event.stopPropagation();
       }

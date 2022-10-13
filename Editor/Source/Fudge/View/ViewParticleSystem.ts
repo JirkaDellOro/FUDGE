@@ -11,11 +11,8 @@ namespace Fudge {
     public static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[] = ["x", "y", "z"];
     public static readonly COLOR_KEYS: (keyof ƒ.ParticleData.System["color"])[] = ["r", "g", "b", "a"];
 
-    private graph: ƒ.Graph;
-    private node: ƒ.Node;
     private particleSystem: ƒ.ParticleSystem;
     private data: ƒ.ParticleData.System;
-    private idInterval: number;
 
     private tree: ƒui.CustomTree<ƒ.ParticleData.Recursive>;
     private controller: ControllerTreeParticleSystem;
@@ -26,14 +23,12 @@ namespace Fudge {
     constructor(_container: ComponentContainer, _state: Object) {
         super(_container, _state);
         this.setParticleSystem(null);
-
-        this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
         this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
         this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
         document.addEventListener(ƒui.EVENT.KEY_DOWN, this.hndEvent);
     }
 
-    //#region  ContextMenu
+    //#region context menu
     protected openContextMenu = (_event: Event): void => {
       let focus: ƒ.ParticleData.Recursive = this.tree.getFocussed();
       if (!focus)
@@ -202,13 +197,25 @@ namespace Fudge {
     }
     //#endregion
 
+    //#region  event handling
+    protected hndDragOver(_event: DragEvent, _viewSource: View): void {
+      _event.dataTransfer.dropEffect = "none";
+
+      if (!(_viewSource instanceof ViewInternal) || !(_viewSource.getDragDropSources()[0] instanceof ƒ.ParticleSystem))
+        return;
+
+      _event.dataTransfer.dropEffect = "link";
+      _event.preventDefault();
+      _event.stopPropagation();
+    }
+
+    protected hndDrop(_event: DragEvent, _viewSource: View): void {
+      let source: Object = _viewSource.getDragDropSources()[0];
+      this.setParticleSystem(<ƒ.ParticleSystem>source);
+    }
+
     private hndEvent = async (_event: EditorEvent): Promise<void> => {
       switch (_event.type) {
-        case EVENT_EDITOR.FOCUS:
-          this.graph = _event.detail.graph;
-          this.node = _event.detail.node;
-          this.setParticleSystem(this.node?.getComponent(ƒ.ComponentParticleSystem)?.particleSystem);
-          break;
         case EVENT_EDITOR.CLOSE:
           document.removeEventListener(ƒui.EVENT.KEY_DOWN, this.hndEvent);
           this.enableSave(true);
@@ -248,14 +255,13 @@ namespace Fudge {
           break;
       }
     }
+    //#endregion
 
     private setParticleSystem(_particleSystem: ƒ.ParticleSystem): void {
       if (!_particleSystem) {
         this.particleSystem = undefined;
         this.tree = undefined;
-        window.clearInterval(this.idInterval);
-        this.idInterval = undefined;
-        this.dom.innerHTML = "select a node with an attached component particle system";
+        this.dom.innerHTML = "Drop a particle system here to edit";
         return;
       }
 
@@ -280,8 +286,6 @@ namespace Fudge {
       this.tree.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.title = `● Right click on "${ƒ.ParticleSystem.name}" to add properties.\n● Right click on properties to add transformations/expressions.\n● Right click on transformations/expressions to add expressions.\n● Use Copy/Cut/Paste to duplicate data.`;
       this.tree.title = this.dom.title;
-      if (this.idInterval == undefined)
-        this.idInterval = window.setInterval(() => { this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph} }); }, 1000 / 30);
     }
 
     private validateData(_data: ƒ.ParticleData.Recursive): [ƒ.ParticleData.Expression, string][] {

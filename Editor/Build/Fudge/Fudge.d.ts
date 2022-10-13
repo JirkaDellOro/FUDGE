@@ -485,11 +485,8 @@ declare namespace Fudge {
         static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[];
         static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[];
         static readonly COLOR_KEYS: (keyof ƒ.ParticleData.System["color"])[];
-        private graph;
-        private node;
         private particleSystem;
         private data;
-        private idInterval;
         private tree;
         private controller;
         private errors;
@@ -498,6 +495,8 @@ declare namespace Fudge {
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
+        protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private hndEvent;
         private setParticleSystem;
         private validateData;

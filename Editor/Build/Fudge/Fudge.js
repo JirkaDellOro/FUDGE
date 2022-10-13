@@ -681,7 +681,6 @@ var Fudge;
             document.addEventListener(Fudge.EVENT_EDITOR.SELECT, Page.hndEvent);
             document.addEventListener("mutate" /* MUTATE */, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
-            document.addEventListener(Fudge.EVENT_EDITOR.FOCUS, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
         }
@@ -2231,7 +2230,6 @@ var Fudge;
             this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [
                 { typeId: 7 /* Root */ }
             ]);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
             this.setTitle(ƒ.ParticleSystem.name);
         }
@@ -2240,8 +2238,6 @@ var Fudge;
             return {};
         }
         hndEvent = async (_event) => {
-            // switch (_event.type) {
-            // }
             this.broadcastEvent(_event);
             _event.stopPropagation();
         };
@@ -2339,11 +2335,8 @@ var Fudge;
         static PROPERTY_KEYS = ["variables", "mtxLocal", "mtxWorld", "color"];
         static TRANSFORMATION_KEYS = ["x", "y", "z"];
         static COLOR_KEYS = ["r", "g", "b", "a"];
-        graph;
-        node;
         particleSystem;
         data;
-        idInterval;
         tree;
         controller;
         errors = [];
@@ -2351,12 +2344,11 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.setParticleSystem(null);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
             document.addEventListener("keydown" /* KEY_DOWN */, this.hndEvent);
         }
-        //#region  ContextMenu
+        //#region context menu
         openContextMenu = (_event) => {
             let focus = this.tree.getFocussed();
             if (!focus)
@@ -2502,13 +2494,21 @@ var Fudge;
             }
         }
         //#endregion
+        //#region  event handling
+        hndDragOver(_event, _viewSource) {
+            _event.dataTransfer.dropEffect = "none";
+            if (!(_viewSource instanceof Fudge.ViewInternal) || !(_viewSource.getDragDropSources()[0] instanceof ƒ.ParticleSystem))
+                return;
+            _event.dataTransfer.dropEffect = "link";
+            _event.preventDefault();
+            _event.stopPropagation();
+        }
+        hndDrop(_event, _viewSource) {
+            let source = _viewSource.getDragDropSources()[0];
+            this.setParticleSystem(source);
+        }
         hndEvent = async (_event) => {
             switch (_event.type) {
-                case Fudge.EVENT_EDITOR.FOCUS:
-                    this.graph = _event.detail.graph;
-                    this.node = _event.detail.node;
-                    this.setParticleSystem(this.node?.getComponent(ƒ.ComponentParticleSystem)?.particleSystem);
-                    break;
                 case Fudge.EVENT_EDITOR.CLOSE:
                     document.removeEventListener("keydown" /* KEY_DOWN */, this.hndEvent);
                     this.enableSave(true);
@@ -2550,13 +2550,12 @@ var Fudge;
                     break;
             }
         };
+        //#endregion
         setParticleSystem(_particleSystem) {
             if (!_particleSystem) {
                 this.particleSystem = undefined;
                 this.tree = undefined;
-                window.clearInterval(this.idInterval);
-                this.idInterval = undefined;
-                this.dom.innerHTML = "select a node with an attached component particle system";
+                this.dom.innerHTML = "Drop a particle system here to edit";
                 return;
             }
             this.particleSystem = _particleSystem;
@@ -2580,8 +2579,6 @@ var Fudge;
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.title = `● Right click on "${ƒ.ParticleSystem.name}" to add properties.\n● Right click on properties to add transformations/expressions.\n● Right click on transformations/expressions to add expressions.\n● Use Copy/Cut/Paste to duplicate data.`;
             this.tree.title = this.dom.title;
-            if (this.idInterval == undefined)
-                this.idInterval = window.setInterval(() => { this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true, detail: { graph: this.graph } }); }, 1000 / 30);
         }
         validateData(_data) {
             let invalid = [];
