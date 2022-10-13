@@ -12,7 +12,6 @@ in vec3 a_vctPosition;
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
   #if defined(CAMERA) || defined(PARTICLE)
 uniform mat4 u_mtxMeshToWorld;
-// uniform mat4 u_mtxWorldToView;
 uniform vec3 u_vctCamera;
   #endif
 
@@ -110,6 +109,7 @@ out vec4 v_vctColor;
   #endif
 
   #if defined(PARTICLE)
+uniform mat4 u_mtxWorldToView;
 uniform float u_fParticleSystemSize;
 uniform float u_fParticleSystemTime;
 uniform sampler2D u_fParticleSystemRandomNumbers;
