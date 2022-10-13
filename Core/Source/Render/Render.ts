@@ -83,7 +83,7 @@ namespace FudgeCore {
         Recycler.store(mtxWorldMesh); // TODO: examine, why recycling this causes meshes to be misplaced...
         let shader: ShaderInterface = cmpMaterial.material.getShader();
         let cmpParticleSystem: ComponentParticleSystem = _branch.getComponent(ComponentParticleSystem);
-        if (cmpParticleSystem && cmpParticleSystem.isActive) 
+        if (cmpParticleSystem && cmpParticleSystem.isActive && cmpParticleSystem.particleSystem != null) 
           shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
         if (_shadersUsed.indexOf(shader) < 0)
           _shadersUsed.push(shader);
