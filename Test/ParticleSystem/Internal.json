@@ -346,6 +346,20 @@
         "mtxWorld": [
           {
             "transformation": "rotate",
+            "y": {
+              "function": "multiplication",
+              "parameters": [
+                {
+                  "value": "systemTime"
+                },
+                {
+                  "value": -0.0001
+                }
+              ]
+            }
+          },
+          {
+            "transformation": "rotate",
             "x": {
               "function": "randomRange",
               "parameters": [
@@ -414,10 +428,10 @@
                   "value": "particleId"
                 },
                 {
-                  "value": 40
+                  "value": 20
                 },
                 {
-                  "value": 5000
+                  "value": 50
                 }
               ]
             }
@@ -585,7 +599,7 @@
                             "active": true
                           },
                           "idParticleSystem": "ParticleSystem|2022-10-13T20:55:33.532Z|40614",
-                          "size": 1000000,
+                          "size": 10000,
                           "blendMode": 1,
                           "depthMask": false
                         }

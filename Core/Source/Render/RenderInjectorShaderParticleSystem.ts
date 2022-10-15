@@ -195,17 +195,18 @@ namespace FudgeCore {
       let code: string = "";
       code += transformations
         .map(([_transformation, _x, _y, _z], _index: number) => {
+          let rotateId: string = _index + _localOrWorld;
           if (_transformation == "rotate") {
             let toDegree: (_value: string) => string = (_value: string) => `${_value} * ${Calc.deg2rad}`;
-            return `float fXRadians${_index} = ${toDegree(_x)};
-              float fYRadians${_index} = ${toDegree(_y)};
-              float fZRadians${_index} = ${toDegree(_z)};
-              float fSinX${_index} = sin(fXRadians${_index});
-              float fCosX${_index} = cos(fXRadians${_index}); 
-              float fSinY${_index} = sin(fYRadians${_index});
-              float fCosY${_index} = cos(fYRadians${_index});
-              float fSinZ${_index} = sin(fZRadians${_index});
-              float fCosZ${_index} = cos(fZRadians${_index});\n`;
+            return `float fXRadians${rotateId} = ${toDegree(_x)};
+              float fYRadians${rotateId} = ${toDegree(_y)};
+              float fZRadians${rotateId} = ${toDegree(_z)};
+              float fSinX${rotateId} = sin(fXRadians${rotateId});
+              float fCosX${rotateId} = cos(fXRadians${rotateId}); 
+              float fSinY${rotateId} = sin(fYRadians${rotateId});
+              float fCosY${rotateId} = cos(fYRadians${rotateId});
+              float fSinZ${rotateId} = sin(fZRadians${rotateId});
+              float fCosZ${rotateId} = cos(fZRadians${rotateId});\n`;
           } else
             return "";
         })
@@ -216,6 +217,7 @@ namespace FudgeCore {
       code += `mat4 mtx${_localOrWorld} = `;
       code += transformations
         .map(([_transformation, _x, _y, _z], _index: number) => {
+          let rotateId: string = _index + _localOrWorld;
           switch (_transformation) {
             case "translate":
               return `mat4(
@@ -225,9 +227,9 @@ namespace FudgeCore {
               ${_x}, ${_y}, ${_z}, 1.0)`;
             case "rotate":
               return `mat4(
-              fCosZ${_index} * fCosY${_index}, fSinZ${_index} * fCosY${_index}, -fSinY${_index}, 0.0,
-              fCosZ${_index} * fSinY${_index} * fSinX${_index} - fSinZ${_index} * fCosX${_index}, fSinZ${_index} * fSinY${_index} * fSinX${_index} + fCosZ${_index} * fCosX${_index}, fCosY${_index} * fSinX${_index}, 0.0,
-              fCosZ${_index} * fSinY${_index} * fCosX${_index} + fSinZ${_index} * fSinX${_index}, fSinZ${_index} * fSinY${_index} * fCosX${_index} - fCosZ${_index} * fSinX${_index}, fCosY${_index} * fCosX${_index}, 0.0,
+              fCosZ${rotateId} * fCosY${rotateId}, fSinZ${rotateId} * fCosY${rotateId}, -fSinY${rotateId}, 0.0,
+              fCosZ${rotateId} * fSinY${rotateId} * fSinX${rotateId} - fSinZ${rotateId} * fCosX${rotateId}, fSinZ${rotateId} * fSinY${rotateId} * fSinX${rotateId} + fCosZ${rotateId} * fCosX${rotateId}, fCosY${rotateId} * fSinX${rotateId}, 0.0,
+              fCosZ${rotateId} * fSinY${rotateId} * fCosX${rotateId} + fSinZ${rotateId} * fSinX${rotateId}, fSinZ${rotateId} * fSinY${rotateId} * fCosX${rotateId} - fCosZ${rotateId} * fSinX${rotateId}, fCosY${rotateId} * fCosX${rotateId}, 0.0,
               0.0, 0.0, 0.0, 1.0
               )`;
             case "scale":
