@@ -26,6 +26,8 @@ namespace FudgeCore {
       this.uriGLTF = _loader.uri;
       return this;
     }
+
+    // TODO: lazy-getter to retrieve the face normals. Initialize faces on call.
     
   }
 }
