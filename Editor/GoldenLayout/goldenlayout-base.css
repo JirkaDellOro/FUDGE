@@ -145,6 +145,7 @@
   padding-right: 25px;
   position: relative;
   touch-action: none;
+  white-space: nowrap;
 }
 
 .lm_header .lm_tab i {

@@ -7,6 +7,11 @@ namespace Fudge {
     public getLabel(_entry: DirectoryEntry): string {
       return _entry.name;
     }
+
+    public getAttributes(_object: DirectoryEntry): string {
+        return "";
+    }
+
     public rename(_entry: DirectoryEntry, _new: string): boolean {
       _entry.name = _new;
       return true;

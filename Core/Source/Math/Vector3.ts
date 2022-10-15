@@ -7,7 +7,7 @@ namespace FudgeCore {
    *            /
    *          +z   
    * ```
-   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
    */
   export class Vector3 extends Mutable implements Recycable {
     private data: Float32Array; // TODO: check why this shouldn't be x,y,z as numbers...
@@ -86,17 +86,11 @@ namespace FudgeCore {
      * Creates and returns a vector which is a copy of the given vector scaled to the given length
      */
     public static NORMALIZATION(_vector: Vector3, _length: number = 1): Vector3 {
-      let magnitude: number = _vector.magnitude;
-      let vector: Vector3;
-      try {
-        if (magnitude == 0)
-          throw (new RangeError("Impossible normalization"));
-        vector = Vector3.ZERO();
-        let factor: number = _length / _vector.magnitude;
-        vector.set(_vector.x * factor, _vector.y * factor, _vector.z * factor);
-      } catch (_error) {
-        Debug.warn(_error);
-      }
+      let magnitudeSquared: number = _vector.magnitudeSquared;
+      let vector: Vector3 = _vector.clone;
+      if (magnitudeSquared == 0)
+        throw (new RangeError("Impossible normalization"));
+      vector.scale(_length / Math.sqrt(magnitudeSquared));
       return vector;
     }
 

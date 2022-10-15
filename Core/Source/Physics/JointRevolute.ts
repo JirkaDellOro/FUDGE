@@ -39,7 +39,7 @@ namespace FudgeCore {
      */
     public set maxMotor(_value: number) {
       super.maxMotor = _value;
-      _value *= Math.PI / 180;
+      _value *= Calc.deg2rad;
       if (this.joint)
         this.joint.getLimitMotor().upperLimit = _value;
     }
@@ -49,7 +49,7 @@ namespace FudgeCore {
     public set minMotor(_value: number) {
       super.minMotor = _value;
       if (this.joint)
-        this.joint.getLimitMotor().lowerLimit = _value * Math.PI / 180;
+        this.joint.getLimitMotor().lowerLimit = _value * Calc.deg2rad;
     }
 
     /**
@@ -91,14 +91,15 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.motorTorque = _mutator.motorTorque;
+      if (typeof (_mutator.motorTorque) !== "undefined")
+        this.motorTorque = _mutator.motorTorque;
       delete _mutator.motorTorque;
       super.mutate(_mutator);
     }
     //#endregion
 
     protected constructJoint(): void {
-      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.minMotor * Math.PI / 180, super.maxMotor * Math.PI / 180);
+      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.minMotor * Calc.deg2rad, super.maxMotor * Calc.deg2rad);
       this.#rotor.setMotor(this.motorSpeed, this.motorTorque);
 
       this.config = new OIMO.RevoluteJointConfig();

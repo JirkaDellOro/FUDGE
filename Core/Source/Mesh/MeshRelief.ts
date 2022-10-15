@@ -16,7 +16,7 @@ namespace FudgeCore {
     private static createHeightMapFunction(_texture: TextureImage): HeightMapFunction {
       let array: Uint8ClampedArray = MeshRelief.textureToClampedArray(_texture);
       let heightMapFunction: HeightMapFunction = (_x: number, _z: number) => {
-        let pixel: number = _z * _texture.image.width + _x;
+        let pixel: number = Math.round(_z * _texture.image.width + _x);
         return array[pixel * 4] / 255;
       };
       return heightMapFunction;
@@ -38,7 +38,8 @@ namespace FudgeCore {
       if (!_texture)
         return;
       this.texture = _texture;
-      super.create(_texture ? new Vector2(_texture.image.width - 1, _texture.image.height - 1) : undefined, undefined, MeshRelief.createHeightMapFunction(_texture));
+      let resolution: Vector2 = _texture ? new Vector2(_texture.image.width - 1, _texture.image.height - 1) : undefined;
+      super.create(resolution, resolution, MeshRelief.createHeightMapFunction(_texture));
     }
 
     //#region Transfer
@@ -63,7 +64,8 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.setTexture(_mutator.texture);
+      if (typeof (_mutator.texture) !== "undefined")
+        this.setTexture(_mutator.texture);
     }
 
     protected reduceMutator(_mutator: Mutator): void {
@@ -73,28 +75,5 @@ namespace FudgeCore {
       delete _mutator.resolution;
     }
     //#endregion
-
-    protected createVertices(): Float32Array {
-      let vertices: Vector3[] = [];
-      // let vertices: Float32Array = new Float32Array((this.resolution.x + 1) * (this.resolution.y + 1) * 3);
-      //Iterate over each cell to generate grid of vertices
-      let row: Vector3[];
-      for (let z: number = 0; z <= this.resolution.y; z++) {
-        row = [];
-        for (let x: number = 0; x <= this.resolution.x; x++) {
-          let xNorm: number = x / this.resolution.x;
-          let zNorm: number = z / this.resolution.y;
-          row.push(new Vector3(
-            xNorm - 0.5,
-            this.heightMapFunction(x, z),
-            zNorm - 0.5
-          ));
-        }
-        vertices.push(...row);
-        if (z > 0 && z <= this.resolution.y - 1) // duplicate row to separate vertex- and face-normals
-          vertices.push(...row);
-      }
-      return new Float32Array(vertices.map((_v: Vector3) => [_v.x, _v.y, _v.z]).flat());
-    }
   }
 }

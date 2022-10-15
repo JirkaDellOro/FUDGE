@@ -14,7 +14,8 @@ var Turorials_FUDGEPhysics_Lesson1;
     let bodies = new Array(); // Array of all physical objects in the scene to have a quick reference
     let carBody;
     //Setting Variables
-    let materialPlayer = new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 0.5, 0.35, 1)));
+    let materialPlayer = new f.Material("Player", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.7, 0.5, 0.35, 1)));
+    let speedChange = 5;
     //Car Settings / Joints
     let frontSuspensionRight;
     let frontSuspensionLeft;
@@ -33,15 +34,16 @@ var Turorials_FUDGEPhysics_Lesson1;
         //For this demo we want a higher accuracy since semi-real car physics are very delicate to calculate (thats why normally a raycast car is used for approximation)
         //OimoPhysics which is integrated in Fudge is using a correctionAlgorithm on solver iterations instead of fully recalculate physics too often, 
         //so you can crank the number of solver iterations higher than with most engines. But Oimo is in general less accurate.
-        f.Physics.world.setSolverIterations(1000);
+        // f.Physics.setSolverIterations(1000);
         f.Physics.settings.defaultRestitution = 0.15;
         f.Physics.settings.defaultFriction = 0.95;
+        f.Physics.settings.solverIterations = 500;
         //f.Physics.settings.defaultConstraintSolverType = 1; //Use most accurate joint solving, slower but needed for complex things like cars
         //Experiment with defaultConstraintSolverType and defaultCorrectionAlgorithm
         //PHYSICS 
         //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
-        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
-        bodies[0].mtxLocal.scale(new f.Vector3(14, 0.3, 14)); //Scale the body with it's standard ComponentTransform
+        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
+        bodies[0].mtxLocal.scale(new f.Vector3(25, 0.3, 25)); //Scale the body with it's standard ComponentTransform
         //bodies[0].mtxLocal.rotateX(4, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
         hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
         //A car is basically wheels on a suspension. A suspension is a prismatic spring and a wheel is on a revolute joint.
@@ -70,7 +72,7 @@ var Turorials_FUDGEPhysics_Lesson1;
     //Function to animate/update the Fudge scene, commonly known as gameloop
     function update() {
         //PHYSICS - Simulate physical changes each frame, parameter to set time between frames
-        f.Physics.world.simulate(f.Loop.timeFrameReal / 1000);
+        f.Physics.simulate(f.Loop.timeFrameReal / 1000);
         viewPort.draw(); // Draw the current Fudge Scene to the canvas
     }
     // Function to quickly create a node with multiple needed FudgeComponents, including a physics component
@@ -117,19 +119,23 @@ var Turorials_FUDGEPhysics_Lesson1;
         bodies[16].mtxLocal.rotateZ(90, false);
         hierarchy.appendChild(bodies[16]);
         //SuspensionHolders
-        bodies[17] = createCompleteNode("Car_HolderRight_Front", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC);
+        bodies[17] = createCompleteNode("Car_HolderRight_Front", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_4);
+        bodies[17].getComponent(f.ComponentRigidbody).collisionMask = f.COLLISION_GROUP.GROUP_4;
         bodies[17].mtxLocal.translate(new f.Vector3(0.4, 1.5, -0.75));
         bodies[17].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
         hierarchy.appendChild(bodies[17]);
-        bodies[18] = createCompleteNode("Car_HolderRight_Back", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC);
+        bodies[18] = createCompleteNode("Car_HolderRight_Back", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_4);
+        bodies[18].getComponent(f.ComponentRigidbody).collisionMask = f.COLLISION_GROUP.GROUP_4;
         bodies[18].mtxLocal.translate(new f.Vector3(0.4, 1.5, 0.75));
         bodies[18].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
         hierarchy.appendChild(bodies[18]);
-        bodies[19] = createCompleteNode("Car_HolderLeft_Front", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC);
+        bodies[19] = createCompleteNode("Car_HolderLeft_Front", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_4);
+        bodies[19].getComponent(f.ComponentRigidbody).collisionMask = f.COLLISION_GROUP.GROUP_4;
         bodies[19].mtxLocal.translate(new f.Vector3(-0.4, 1.5, -0.75));
         bodies[19].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
         hierarchy.appendChild(bodies[19]);
-        bodies[20] = createCompleteNode("Car_HolderLeft_Back", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC);
+        bodies[20] = createCompleteNode("Car_HolderLeft_Back", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_4);
+        bodies[20].getComponent(f.ComponentRigidbody).collisionMask = f.COLLISION_GROUP.GROUP_4;
         bodies[20].mtxLocal.translate(new f.Vector3(-0.4, 1.5, 0.75));
         bodies[20].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
         hierarchy.appendChild(bodies[20]);
@@ -181,10 +187,10 @@ var Turorials_FUDGEPhysics_Lesson1;
         bodies[18].addComponent(wheelJointBackRight);
         wheelJointBackLeft = new f.JointRevolute(bodies[20].getComponent(f.ComponentRigidbody), bodies[16].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
         bodies[20].addComponent(wheelJointBackLeft);
-        wheelJointFrontRight.motorSpeed = -5;
-        wheelJointFrontRight.motorTorque = 50;
-        wheelJointFrontLeft.motorSpeed = -5;
-        wheelJointFrontLeft.motorTorque = 50;
+        // wheelJointFrontRight.motorSpeed = -5;
+        wheelJointFrontRight.motorTorque = 5000;
+        // wheelJointFrontLeft.motorSpeed = -5;
+        wheelJointFrontLeft.motorTorque = 5000;
         // wheelJoint_backR.motorSpeed = -5;
         // wheelJoint_backR.motorTorque = 50;
         // wheelJoint_backL.motorSpeed = -5;
@@ -197,24 +203,30 @@ var Turorials_FUDGEPhysics_Lesson1;
             frontSuspensionLeft.minRotor = currentAngle < maxAngle ? currentAngle++ : currentAngle;
             frontSuspensionRight.maxRotor = currentAngle < maxAngle ? currentAngle++ : currentAngle;
             frontSuspensionRight.minRotor = currentAngle < maxAngle ? currentAngle++ : currentAngle;
+            console.log(frontSuspensionLeft.maxRotor);
+            console.log(frontSuspensionLeft.minRotor);
         }
         if (_event.code == f.KEYBOARD_CODE.W) {
-            bodies[12].getComponent(f.ComponentRigidbody).applyForce(new f.Vector3(0, 10, 0));
-            wheelJointFrontRight.motorSpeed++;
-            wheelJointFrontLeft.motorSpeed++;
+            carBody.applyForce(new f.Vector3(0, 10, 0));
+            wheelJointFrontRight.motorSpeed += speedChange;
+            wheelJointFrontLeft.motorSpeed += speedChange;
         }
         if (_event.code == f.KEYBOARD_CODE.S) {
-            //
+            wheelJointFrontRight.motorSpeed -= speedChange;
+            wheelJointFrontLeft.motorSpeed -= speedChange;
         }
         if (_event.code == f.KEYBOARD_CODE.D) {
             frontSuspensionLeft.maxRotor = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
             frontSuspensionLeft.minRotor = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
-            frontSuspensionRight.maxRotor = currentAngle < maxAngle ? currentAngle-- : currentAngle;
-            frontSuspensionRight.minRotor = currentAngle < maxAngle ? currentAngle-- : currentAngle;
+            frontSuspensionRight.maxRotor = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
+            frontSuspensionRight.minRotor = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
         }
         if (_event.code == f.KEYBOARD_CODE.T) {
             viewPort.physicsDebugMode = viewPort.physicsDebugMode == f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER ? f.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY : f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             frontSuspensionRight.maxMotor = 0;
+        }
+        if (_event.code == f.KEYBOARD_CODE.X) {
+            f.Time.game.setScale(f.Time.game.getScale() === 1 ? 0 : 1);
         }
     }
 })(Turorials_FUDGEPhysics_Lesson1 || (Turorials_FUDGEPhysics_Lesson1 = {}));

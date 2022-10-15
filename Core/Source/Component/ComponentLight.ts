@@ -1,6 +1,6 @@
 ///<reference path="../Light/Light.ts"/>
 namespace FudgeCore {
- 
+
   /**
    * Defines identifiers for the various types of light this component can provide.  
    */
@@ -11,15 +11,17 @@ namespace FudgeCore {
     POINT = "LightPoint",
     SPOT = "LightSpot"
   }
- /**
-   * Attaches a {@link Light} to the node
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-   */
+  /**
+    * Attaches a {@link Light} to the node
+    * The pivot matrix has different effects depending on the type of the {@link Light}. See there for details.
+    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+    */
   export class ComponentLight extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentLight);
     // private static constructors: { [type: string]: General } = { [LIGHT_TYPE.AMBIENT]: LightAmbient, [LIGHT_TYPE.DIRECTIONAL]: LightDirectional, [LIGHT_TYPE.POINT]: LightPoint, [LIGHT_TYPE.SPOT]: LightSpot };
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public light: Light = null;
+    //TODO: since there is almost no functionality left in Light, eliminate it and put all in the component as with the camera...
 
     constructor(_light: Light = new LightAmbient()) {
       super();
@@ -41,10 +43,12 @@ namespace FudgeCore {
         pivot: this.mtxPivot.serialize(),
         light: Serializer.serialize(this.light)
       };
+      serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization[super.constructor.name]);
       await this.mtxPivot.deserialize(_serialization.pivot);
       this.light = await <Promise<Light>>Serializer.deserialize(_serialization.light);
       return this;
@@ -65,9 +69,8 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       let type: string = _mutator.type;
-      if (type != this.light.constructor.name)
-      this.setType(Serializer.getConstructor<Light>(type));
-
+      if (typeof (type) !== "undefined" && type != this.light.constructor.name)
+        this.setType(Serializer.getConstructor<Light>(type));
       delete (_mutator.type); // exclude light type from further mutation
       super.mutate(_mutator);
       _mutator.type = type; // reconstruct mutator

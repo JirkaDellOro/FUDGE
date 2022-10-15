@@ -1,4 +1,8 @@
 namespace FudgeCore {
+  /**
+   * Mesh loaded from a GLTF-file
+   * @author Matthias Roming, HFU, 2022
+   */
   export class MeshGLTF extends Mesh {
 
     private uriGLTF: string;
@@ -19,10 +23,11 @@ namespace FudgeCore {
     public async load(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF> {
       const gltfMesh: GLTF.Mesh = _loader.gltf.meshes[_iMesh];
       this.name = gltfMesh.name;
-      this.ƒindices = await _loader.getUint16Array(gltfMesh.primitives[0].indices);
-      this.ƒvertices = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.POSITION);
-      this.ƒnormalsVertex = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.NORMAL);
-      this.ƒtextureUVs = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.TEXCOORD_0);
+      this.renderMesh = new RenderMesh(this);
+      Reflect.set(this.renderMesh, "ƒindices", await _loader.getUint16Array(gltfMesh.primitives[0].indices));
+      Reflect.set(this.renderMesh, "ƒvertices", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.POSITION));
+      Reflect.set(this.renderMesh, "ƒnormals", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.NORMAL)); 
+      Reflect.set(this.renderMesh, "ƒtextureUVs", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.TEXCOORD_0));
       this.uriGLTF = _loader.uri;
       return this;
     }

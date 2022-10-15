@@ -14,7 +14,6 @@ namespace FudgeCore {
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class Matrix3x3 extends Mutable implements Serializable, Recycable {
-    private static deg2rad: number = Math.PI / 180;
     private data: Float32Array = new Float32Array(9); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
     private vectors: VectorRepresentation; // vector representation of this matrix
@@ -61,7 +60,7 @@ namespace FudgeCore {
      */
     public static ROTATION(_angleInDegrees: number): Matrix3x3 {
       const mtxResult: Matrix3x3 = Recycler.get(Matrix3x3);
-      let angleInRadians: number = _angleInDegrees * Matrix3x3.deg2rad;
+      let angleInRadians: number = _angleInDegrees * Calc.deg2rad;
       let sin: number = Math.sin(angleInRadians);
       let cos: number = Math.cos(angleInRadians);
       mtxResult.data.set([
@@ -121,6 +120,42 @@ namespace FudgeCore {
       return mtxResult;
     }
 
+    /**
+     * Computes and returns the inverse of a passed matrix.
+     * @param _mtx The matrix to compute the inverse of.
+     */
+    public static INVERSION(_mtx: Matrix3x3): Matrix3x3 {
+      let m: Float32Array = _mtx.data;
+      let m00: number = m[0 * 3 + 0];
+      let m01: number = m[0 * 3 + 1];
+      let m02: number = m[0 * 3 + 2];
+      let m10: number = m[1 * 3 + 0];
+      let m11: number = m[1 * 3 + 1];
+      let m12: number = m[1 * 3 + 2];
+      let m20: number = m[2 * 3 + 0];
+      let m21: number = m[2 * 3 + 1];
+      let m22: number = m[2 * 3 + 2];
+
+      let d: number = 1 /
+        (m00 * (m11 * m22 - m21 * m12) -
+        m01 * (m10 * m22 - m12 * m20) +
+        m02 * (m10 * m21 - m11 * m20));
+
+      const mtxResult: Matrix3x3 = Recycler.get(Matrix3x3);
+      mtxResult.data.set([
+        d * (m11 * m22 - m21 * m12), // [0]
+        d * (m02 * m21 - m01 * m22), // [1]
+        d * (m01 * m12 - m02 * m11), // [2]
+        d * (m12 * m20 - m10 * m22), // [3]
+        d * (m00 * m22 - m02 * m20), // [4]
+        d * (m10 * m02 - m00 * m12), // [5]
+        d * (m10 * m21 - m20 * m11), // [6]
+        d * (m20 * m01 - m00 * m21), // [7]
+        d * (m00 * m11 - m10 * m01) // [8]
+      ]);
+      return mtxResult;
+    }
+
     /** 
      * - get: return a vector representation of the translation {@link Vector2}.  
      * **Caution!** Use immediately, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
@@ -160,8 +195,8 @@ namespace FudgeCore {
     public get scaling(): Vector2 {
       if (!this.vectors.scaling)
         this.vectors.scaling = new Vector2(
-          Math.hypot(this.data[0], this.data[1]),
-          Math.hypot(this.data[3], this.data[4])
+          Math.hypot(this.data[0], this.data[1]) * (this.data[0] < 0 ? -1 : 1),
+          Math.hypot(this.data[3], this.data[4]) * (this.data[4] < 0 ? -1 : 1)
         );
       return this.vectors.scaling; // .clone;
     }
@@ -179,6 +214,9 @@ namespace FudgeCore {
       return mtxClone;
     }
 
+    /**
+     * Resets the matrix to the identity-matrix and clears cache. Used by the recycler to reset.
+     */
     public recycle(): void {
       this.data = new Float32Array([
         1, 0, 0,
@@ -186,6 +224,13 @@ namespace FudgeCore {
         0, 0, 1
       ]);
       this.resetCache(); 
+    }
+    
+    /**
+     * Resets the matrix to the identity-matrix and clears cache.
+     */
+    public reset(): void {
+      this.recycle();
     }
 
     //#region Translation
@@ -294,7 +339,7 @@ namespace FudgeCore {
       else
         rotation = xSkew;
 
-      rotation *= 180 / Math.PI;
+      rotation *= Calc.rad2deg;
 
       return rotation;
     }

@@ -20,31 +20,31 @@ var FudgePhysics_Communication;
         f.Debug.log(app);
         hierarchy = new f.Node("Scene");
         document.addEventListener("keypress", hndKey);
-        ground = createCompleteMeshNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
+        ground = createCompleteMeshNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatRemissive(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
         ground.mtxLocal.scale(new f.Vector3(20, 0.3, 20));
         ground.mtxLocal.translate(new f.Vector3(0, -1.5, 0));
         hierarchy.appendChild(ground);
-        bodies[0] = createCompleteMeshNode("Target", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
+        bodies[0] = createCompleteMeshNode("Target 1", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
         hierarchy.appendChild(bodies[0]);
         bodies[0].mtxLocal.translate(new f.Vector3(-10, 2, -10), true);
         bodies[0].mtxLocal.scale(new f.Vector3(3, 5, 3));
         bodies[0].mtxLocal.rotateY(45);
-        bodies[1] = createCompleteMeshNode("Target", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
+        bodies[1] = createCompleteMeshNode("Target 2", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
         hierarchy.appendChild(bodies[1]);
         bodies[1].mtxLocal.translate(new f.Vector3(10, 2, 10), true);
         bodies[1].mtxLocal.scale(new f.Vector3(3, 5, 3));
         bodies[1].mtxLocal.rotateY(-45);
-        bodies[2] = createCompleteMeshNode("Target", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
+        bodies[2] = createCompleteMeshNode("Target 3", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
         hierarchy.appendChild(bodies[2]);
         bodies[2].mtxLocal.translate(new f.Vector3(10, 2, 0), true);
         bodies[2].mtxLocal.scale(new f.Vector3(3, 5, 5));
-        bodies[3] = createCompleteMeshNode("Player", new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube(), 1, f.BODY_TYPE.KINEMATIC);
+        bodies[3] = createCompleteMeshNode("Player", new f.Material("Player", f.ShaderFlat, new f.CoatRemissive(new f.Color(0, 0, 1, 1))), new f.MeshCube(), 1, f.BODY_TYPE.KINEMATIC);
         moveableTransform = bodies[3].getComponent(f.ComponentTransform);
         hierarchy.appendChild(bodies[3]);
         moveableTransform.mtxLocal.scale(new f.Vector3(1, 2, 1));
         moveableTransform.mtxLocal.rotateY(180);
         moveableTransform.mtxLocal.translate(new f.Vector3(0, 0.5, 0));
-        bodies[4] = createCompleteMeshNode("PlayerGun", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube, 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
+        bodies[4] = createCompleteMeshNode("PlayerGun", new f.Material("Cube", f.ShaderFlat, new f.CoatRemissive(new f.Color(0, 0, 1, 1))), new f.MeshCube, 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
         bodies[4].removeComponent(bodies[4].getComponent(f.ComponentRigidbody));
         bodies[4].mtxLocal.translate(new f.Vector3(-0.5, 0, 1), true);
         bodies[4].mtxLocal.scale(new f.Vector3(0.3, 0.3, 2));
@@ -59,18 +59,17 @@ var FudgePhysics_Communication;
         bodies[3].addComponent(cmpCamera);
         viewPort = new f.Viewport();
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
-        viewPort.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
-        viewPort.addEventListener("\u0192pointermove" /* MOVE */, hndPointerMove);
+        viewPort.canvas.addEventListener("pointermove", hndPointerMove);
         viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-        viewPort.showSceneGraph();
+        f.Debug.branch(viewPort.getBranch());
         // f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
-        f.Physics.adjustTransforms(hierarchy);
+        // f.Physics.adjustTransforms(hierarchy);
         f.Loop.start();
     }
     function update() {
         continousRaycast();
-        f.Physics.world.simulate();
+        f.Physics.simulate();
         viewPort.draw();
         measureFPS();
     }
@@ -126,8 +125,8 @@ var FudgePhysics_Communication;
         forward = f.Vector3.Z();
         forward.transform(bodies[4].mtxWorld, false);
         hitInfo = f.Physics.raycast(origin, forward, 20, true);
-        if (hitInfo.hit == true && hitInfo.rigidbodyComponent.node.name == "Target") {
-            f.Debug.log("hit");
+        if (hitInfo.hit == true && hitInfo.rigidbodyComponent.node.name.includes("Target")) {
+            f.Debug.log("hit", hitInfo.rigidbodyComponent.node.name);
         }
     }
 })(FudgePhysics_Communication || (FudgePhysics_Communication = {}));

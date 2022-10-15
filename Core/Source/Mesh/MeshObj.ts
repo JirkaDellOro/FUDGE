@@ -4,16 +4,23 @@ namespace FudgeCore {
    * static LOAD Method. Currently only works with triangulated Meshes
    * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
    * @todo UVs, Load Materials, Support Quads
-   * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021 */
+   * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 */
+
+  interface FaceInfo {
+    iPosition: number;
+    iUV: number;
+    iNormal: number;
+  }
+
   export class MeshObj extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshObj);
     public url: RequestInfo;
 
-    protected verts: number[] = [];
-    protected uvs: number[] = [];
-    protected inds: number[] = [];
-    protected facenormals: number[] = [];
-    protected facecrossproducts: number[] = [];
+    // protected verts: number[] = [];
+    // protected uvs: number[] = [];
+    // protected inds: number[] = [];
+    // protected facenormals: number[] = [];
+    // protected facecrossproducts: number[] = [];
 
     public constructor(_name?: string, _url?: RequestInfo) {
       super(_name); {
@@ -41,7 +48,12 @@ namespace FudgeCore {
 
     /** Splits up the obj string into separate arrays for each datatype */
     public parseObj(data: string): void {
+      this.clear();
       const lines: string[] = data.split("\n");
+
+      let positions: Vector3[] = [];
+      let uvs: Vector2[] = [];
+      let faceInfo: FaceInfo[] = [];
 
       for (let line of lines) {
         line = line.trim();
@@ -53,24 +65,40 @@ namespace FudgeCore {
         parts.shift();
 
         //Vertex - example: v 0.70 -0.45 -0.52
-        if (!line || line.startsWith("v ")) this.verts.push(...parts.map(x => +x));
+        if (line.startsWith("v "))
+          positions.push(new Vector3(...parts.map(_value => +_value)));
 
         //Texcoord - example: vt 0.545454 0.472382
-        else if (!line || line.startsWith("vt ")) this.uvs.push(...parts.map(x => +x));
+        else if (line.startsWith("vt "))
+          uvs.push(new Vector2(...parts.map((_value, _index) => +_value * (_index == 1 ? -1 : 1))));
 
         /*Face Indices - example: f 1/1/1 2/2/1 3/3/1 -->
         vertex1/texcoord1/normal1 vertex2/texcoord2/normal2 vertex3/texcoord3/normal3*/
-        else if (!line || line.startsWith("f ")) {
-          this.inds.push(
-            +parts[0].split("/")[0] - 1,
-            +parts[1].split("/")[0] - 1,
-            +parts[2].split("/")[0] - 1
-          );
-        }
+        else if (line.startsWith("f "))
+          for (let i: number = 0; i < 3; i++) {
+            faceInfo.push({
+              iPosition: +parts[i].split("/")[0] - 1,
+              iUV: +parts[i].split("/")[1] - 1,
+              iNormal: +parts[i].split("/")[2] - 1
+            });
+          }
       }
 
-      this.splitVertices();
-      this.clear();
+      this.vertices = new Vertices(...positions.map((_p: Vector3) => new Vertex(_p)));
+      for (let i: number = 0; i < faceInfo.length; i += 3) {
+        let indices: number[] = [];
+        for (let v: number = 0; v < 3; v++) {
+          let info: FaceInfo = faceInfo[i + v];
+          let index: number = info.iPosition;
+          if (this.vertices[index].uv) {
+            index = this.vertices.length;
+            this.vertices.push(new Vertex(info.iPosition));
+          }
+          this.vertices[index].uv = uvs[info.iUV];
+          indices.push(index);
+        }
+        this.faces.push(new Face(this.vertices, indices[0], indices[1], indices[2]));
+      }
     }
 
     //#region Transfer
@@ -87,89 +115,9 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      this.load(_mutator.url);
+      if (typeof (_mutator.url) !== "undefined")
+        this.load(_mutator.url);
     }
     //#endregion
-    /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
-    protected splitVertices(): void {
-      let vertsNew: number[] = [];
-      //let uvsNew: number[] = [];
-      let indicesNew: number[] = [];
-      let faceNormalsNew: number[] = [];
-      let faceCrossProductsNew: number[] = [];
-
-      // For each face
-      for (let i: number = 0; i < this.inds.length; i += 3) {
-
-        // Get its 3 vertices
-        let v1: Vector3 = new Vector3(
-          this.verts[this.inds[i + 0] * 3 + 0],
-          this.verts[this.inds[i + 0] * 3 + 1],
-          this.verts[this.inds[i + 0] * 3 + 2]
-        );
-
-        let v2: Vector3 = new Vector3(
-          this.verts[this.inds[i + 1] * 3 + 0],
-          this.verts[this.inds[i + 1] * 3 + 1],
-          this.verts[this.inds[i + 1] * 3 + 2]
-        );
-
-        let v3: Vector3 = new Vector3(
-          this.verts[this.inds[i + 2] * 3 + 0],
-          this.verts[this.inds[i + 2] * 3 + 1],
-          this.verts[this.inds[i + 2] * 3 + 2]
-        );
-
-        // Calculate Normal by three face vertices
-        let normal: Vector3 = Vector3.CROSS(Vector3.DIFFERENCE(v2, v1), Vector3.DIFFERENCE(v3, v1));
-
-        faceCrossProductsNew.push(
-          normal.x, normal.y, normal.z,
-          normal.x, normal.y, normal.z,
-          normal.x, normal.y, normal.z);
-
-        normal.normalize();
-
-        // Use same Normal for all three face verices
-        faceNormalsNew.push(
-          normal.x, normal.y, normal.z,
-          normal.x, normal.y, normal.z,
-          normal.x, normal.y, normal.z);
-
-        vertsNew.push(
-          v1.x, v1.y, v1.z,
-          v2.x, v2.y, v2.z,
-          v3.x, v3.y, v3.z);
-
-        indicesNew.push(i, i + 1, i + 2);
-      }
-
-      this.verts = vertsNew;
-      // this.uvs = uvsNew;
-      this.inds = indicesNew;
-      this.facenormals = faceNormalsNew;
-      this.facecrossproducts = faceCrossProductsNew;
-    }
-
-    protected createVertices(): Float32Array {
-      return new Float32Array(this.verts);
-    }
-
-    protected createTextureUVs(): Float32Array {
-      //TODO: not working yet
-      return new Float32Array(this.uvs);
-    }
-
-    protected createIndices(): Uint16Array {
-      return new Uint16Array(this.inds);
-    }
-
-    protected calculateFaceCrossProducts(): Float32Array {
-      return new Float32Array(this.facecrossproducts);
-    }
-
-    protected createFlatNormals(): Float32Array {
-      return new Float32Array(this.facenormals);
-    }
   }
 }

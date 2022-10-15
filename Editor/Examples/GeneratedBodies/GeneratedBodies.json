@@ -54,11 +54,12 @@
     "ƒ.Material": {
       "name": "mtrTextured",
       "idResource": "Material|2021-03-12T08:01:39.005Z|42220",
-      "shader": "ShaderTexture",
+      "shader": "ShaderFlatTextured",
       "coat": {
-        "ƒ.CoatTextured": {
-          "name": "Coat",
-          "color": "[1, 1, 1, 1]"
+        "ƒ.CoatRemissiveTextured": {
+          "color": "[1, 1, 1, 1]",
+          "diffuse": 1,
+          "specular": 1
         }
       }
     }
@@ -69,9 +70,10 @@
       "idResource": "Material|2021-03-12T08:21:45.681Z|49886",
       "shader": "ShaderFlat",
       "coat": {
-        "ƒ.CoatColored": {
-          "name": "Coat",
-          "color": "[1, 1, 1, 1]"
+        "ƒ.CoatRemissive": {
+          "color": "[1, 1, 1, 1]",
+          "diffuse": 1,
+          "specular": 1
         }
       }
     }
@@ -91,13 +93,13 @@
           "[0.10000000149011612, -0.699999988079071]"
         ]
       },
-      "fitTexture": true,
-      "sectors": 13
+      "longitudes": 14
     }
   },
   "Graph|2021-03-12T08:01:20.043Z|34632": {
     "ƒ.Graph": {
       "name": "Bodies",
+      "active": true,
       "components": {
         "ComponentLight": [
           {
@@ -111,6 +113,9 @@
                 "ƒ.LightDirectional": {
                   "color": "[0, 1, 0, 1]"
                 }
+              },
+              "Component": {
+                "active": true
               }
             }
           },
@@ -123,8 +128,11 @@
               },
               "light": {
                 "ƒ.LightAmbient": {
-                  "color": "[0.2549019607843137, 0.24313725490196078, 0.24313725490196078, 1]"
+                  "color": "[0.2823529411764706, 0.25882352941176473, 0.25882352941176473, 1]"
                 }
+              },
+              "Component": {
+                "active": true
               }
             }
           },
@@ -139,6 +147,9 @@
                 "ƒ.LightDirectional": {
                   "color": "[1, 0, 0, 1]"
                 }
+              },
+              "Component": {
+                "active": true
               }
             }
           }
@@ -148,6 +159,7 @@
         {
           "ƒ.Node": {
             "name": "Extrusion",
+            "active": true,
             "components": {
               "ComponentMesh": [
                 {
@@ -203,6 +215,7 @@
         {
           "ƒ.Node": {
             "name": "Polygon",
+            "active": true,
             "components": {
               "ComponentMesh": [
                 {
@@ -258,6 +271,7 @@
         {
           "ƒ.Node": {
             "name": "Cylinder",
+            "active": true,
             "components": {
               "ComponentMesh": [
                 {

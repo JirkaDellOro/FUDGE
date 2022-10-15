@@ -4,7 +4,7 @@
 namespace AudioSpace {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
-  
+
   let out: HTMLOutputElement;
 
   let camera: ƒAid.CameraOrbit;
@@ -34,8 +34,8 @@ namespace AudioSpace {
   async function init(_event: Event): Promise<void> {
     out = document.querySelector("output");
 
-    const mtrWhite: ƒ.Material = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white")));
-    const mtrGrey: ƒ.Material = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("slategrey")));
+    const mtrWhite: ƒ.Material = new ƒ.Material("White", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("white")));
+    const mtrGrey: ƒ.Material = new ƒ.Material("White", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("slategrey")));
     const inner: ƒAid.Node = new ƒAid.Node("Inner", ƒ.Matrix4x4.IDENTITY(), mtrWhite, new ƒ.MeshPyramid());
     const outer: ƒAid.Node = new ƒAid.Node("Outer", ƒ.Matrix4x4.IDENTITY(), mtrGrey, new ƒ.MeshPyramid());
     const mtxMesh: ƒ.Matrix4x4 = inner.mtxMeshPivot;
@@ -88,14 +88,11 @@ namespace AudioSpace {
     ƒ.AudioManager.default.listenWith(camera.nodeCamera.getComponent(ƒ.ComponentAudioListener));
 
     // setup event handling
-    viewport.setFocus(true);
-    viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
-    viewport.activateWheelEvent(ƒ.EVENT_WHEEL.WHEEL, true);
-    viewport.addEventListener(ƒ.EVENT_POINTER.MOVE, hndPointerMove);
-    viewport.addEventListener(ƒ.EVENT_WHEEL.WHEEL, hndWheelMove);
-
+    canvas.addEventListener("pointermove", hndPointerMove);
+    canvas.addEventListener("wheel", hndWheelMove);
     canvas.addEventListener("mousedown", canvas.requestPointerLock);
     canvas.addEventListener("mouseup", () => document.exitPointerLock());
+    document.addEventListener("keydown", () => canvas.focus());
 
     startInteraction(viewport);
 
@@ -103,13 +100,6 @@ namespace AudioSpace {
     ƒ.Loop.start();
 
     function update(_event: Event): void {
-      // let time: number = performance.now() / 1000;
-      // let position: ƒ.Vector3 = mtxTranslator.translation;
-
-      // if (parameter.xAmplitude)
-      //   position.x = parameter.xAmplitude * Math.sin(parameter.frequency * time);
-      // if (parameter.zAmplitude)
-      //   position.z = parameter.zAmplitude * Math.cos(parameter.frequency * time);
 
       let panner: ƒ.Mutator = cmpAudio.getMutatorOfNode(ƒ.AUDIO_NODE_TYPE.PANNER);
       {
@@ -132,7 +122,7 @@ namespace AudioSpace {
     }
   }
 
-  function hndPointerMove(_event: ƒ.EventPointer): void {
+  function hndPointerMove(_event: PointerEvent): void {
     if (!_event.buttons)
       return;
     // camera.rotateY(_event.movementX * speedCameraRotation);
@@ -170,10 +160,10 @@ namespace AudioSpace {
   // }
 
   function startInteraction(_viewport: ƒ.Viewport): void {
-    _viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
-    _viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, move);
+    _viewport.canvas.focus();
+    _viewport.canvas.addEventListener("keydown", move);
 
-    function move(_event: ƒ.EventKeyboard): void {
+    function move(_event: KeyboardEvent): void {
       mtxTranslator.translateZ(0.1 *
         (_event.code == ƒ.KEYBOARD_CODE.W ? -1 :
           _event.code == ƒ.KEYBOARD_CODE.S ? 1 :

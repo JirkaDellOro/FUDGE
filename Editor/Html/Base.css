@@ -72,8 +72,20 @@ ul.tree {
   list-style: none;
 }
 
+ul.tree form {
+  display: inline;
+}
+
 ul.tree li {
   white-space: nowrap;
+}
+
+ul.tree li[attributes~="inactive"]>input {
+  text-decoration: line-through;
+}
+
+ul.tree li[attributes~="GraphInstance"]>input {
+  font-style: italic;
 }
 
 ul.tree ul {
@@ -99,6 +111,7 @@ ul.tree input[type="checkbox"]:checked~ul {
 ul.tree input[type="checkbox"]~ul {
   display: none;
 }
+
 
 /* Table */
 
@@ -142,6 +155,7 @@ table.sortable .selected input {
   color: var(--color-highlight);
   font-weight: bold;
 }
+
 table.sortable td {
   vertical-align: bottom;
 }
@@ -154,6 +168,11 @@ table.sortable td>input:disabled {
 /* Text input */
 
 ul.tree .selected>input {
+  color: var(--color-highlight);
+  font-weight: bold;
+}
+
+ul.tree .selected>:not(ul.tree) * {
   color: var(--color-highlight);
   font-weight: bold;
 }
@@ -203,17 +222,28 @@ details.selected>summary {
 
 dialog {
   background-color: var(--color-background-main);
-  border: none;
+  border: 1px solid var(--color-bright);
   color: var(--color-text);
   box-shadow: 0px 0px 10px 5px var(--color-background-main);
   top: 50%;
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
   z-index: 1000;
+  padding: 2em;
 }
 
 dialog>div#content {
   background-color: var(--color-background-content);
+}
+
+dialog>h1 {
+  color: var(--color-signal);
+  height: 2em;
+}
+
+dialog>footer>p {
+  padding-top: 2em;
+  padding-bottom: 1em;
 }
 
 /* Select */
@@ -233,6 +263,10 @@ option {
 
 fudge-boolean, fudge-color, fudge-textinput, fudge-stepper, fudge-select {
   display: block;
+}
+
+fudge-digit {
+  font-family: monospace;
 }
 
 /* custom elements */

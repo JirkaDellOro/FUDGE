@@ -11,7 +11,7 @@ namespace AnimatorControleTest {
 
   function init(): void {
     root = new ƒ.Node("Root");
-    node = new ƒAid.Node("Test", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("texture", ƒ.ShaderTexture, new ƒ.CoatTextured()), new ƒ.MeshCube("Cube"));
+    node = new ƒAid.Node("Test", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("texture", ƒ.ShaderLitTextured, new ƒ.CoatTextured()), new ƒ.MeshCube("Cube"));
     root.appendChild(node);
     viewport = ƒAid.Viewport.create(root);
     viewport.draw();
@@ -47,12 +47,10 @@ namespace AnimatorControleTest {
       components: {
         ComponentTransform: [
           {
-            "ƒ.ComponentTransform": {
-              mtxLocal: {
-                rotation: {
-                  x: animseq,
-                  y: animseq
-                }
+            mtxLocal: {
+              rotation: {
+                x: animseq,
+                y: animseq
               }
             }
           }

@@ -30,32 +30,17 @@ var Mesh;
         // scene setup
         graph.addChild(translator);
         graph.addChild(camera);
-        let material = new ƒ.Material("texture", ƒ.ShaderTexture, new ƒ.CoatTextured());
-        //let material: ƒ.Material = new ƒ.Material("matheial", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("Red")));
+        let material = new ƒ.Material("texture", ƒ.ShaderLitTextured, new ƒ.CoatTextured());
+        //let material: ƒ.Material = new ƒ.Material("matheial", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("Red")));
         let subclass = ƒ.Mesh.subclasses;
         for (let i = 0; i < subclass.length; i++) {
             console.log(subclass[i].name);
             let node = new ƒ.Node(subclass[i].name.replace("Mesh", ""));
             let mesh;
             switch (subclass[i].name) {
-                // case "MeshPolygon":
-                //   mesh = new ƒ.MeshPolygon();
-                //   break;
-                // case "MeshExtrusion":
-                //   mesh = new ƒ.MeshExtrusion();
-                //   break;
-                // case "MeshRotation":
-                //   mesh = new ƒ.MeshRotation();
-                //   break;
-                // case "MeshSphere":
-                //   mesh = new ƒ.MeshSphere();
-                //   break;
-                // case "MeshTerrain":
-                //   mesh = new ƒ.MeshTerrain();
-                //   break;
-                // case "MeshTorus":
-                //   mesh = new ƒ.MeshTorus();
-                //   break;
+                case "MeshObj":
+                    mesh = new ƒ.MeshObj("Icosphere", "Icosphere.obj");
+                    break;
                 default:
                     //@ts-ignore
                     mesh = new subclass[i]();
@@ -74,11 +59,8 @@ var Mesh;
         const canvas = document.querySelector("canvas");
         viewport.initialize("Viewport", graph, cmpCamera, canvas);
         // setup event handling
-        viewport.setFocus(true);
-        viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
-        viewport.activateWheelEvent("\u0192wheel" /* WHEEL */, true);
-        viewport.addEventListener("\u0192pointermove" /* MOVE */, hndPointerMove);
-        viewport.addEventListener("\u0192wheel" /* WHEEL */, hndWheelMove);
+        viewport.canvas.addEventListener("pointermove", hndPointerMove);
+        viewport.canvas.addEventListener("wheel", hndWheelMove);
         //window.addEventListener("keypress", hndKeyboard);
         canvas.addEventListener("mousedown", canvas.requestPointerLock);
         canvas.addEventListener("mouseup", () => document.exitPointerLock());
@@ -99,8 +81,7 @@ var Mesh;
         camera.distance += _event.deltaY * speedCameraTranslation;
     }
     function startInteraction(_viewport) {
-        _viewport.activateKeyboardEvent("\u0192keydown" /* DOWN */, true);
-        _viewport.addEventListener("\u0192keydown" /* DOWN */, move);
+        _viewport.canvas.addEventListener("keydown", move);
         function move(_event) {
             mtxTranslator.translateZ(0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.W ? -1 :

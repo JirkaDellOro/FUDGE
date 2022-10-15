@@ -1,0 +1,51 @@
+{
+  "Storage": {
+    "update": {
+      "normTime": {
+        "function": "modulo",
+        "parameters": [
+          "time",
+          1
+        ]
+      }
+    }
+  },
+  "ComponentTransform": {
+    "local": {
+      "rotation": {
+        "z": {
+          "function": "multiplication",
+          "parameters": [
+            "normTime",
+            360
+          ]
+        }
+      },
+      "scaling": {
+        "x": "normTime",
+        "y": "normTime",
+        "z": "normTime"
+      },
+      "translation": {
+        "y": "normTime"
+      }
+    }
+  },
+  "ComponentMaterial": {
+    "clrPrimary": {
+      "a": 1,
+      "b": 1,
+      "g": 0,
+      "r": {
+        "function": "modulo",
+        "parameters": [
+          "time",
+          1
+        ]
+      }
+    },
+    "clrSecondary": {
+      "b": 0
+    }
+  }
+}

@@ -1,7 +1,9 @@
 // / <reference path="Component.ts"/>
 namespace FudgeCore {
   export enum FIELD_OF_VIEW {
-    HORIZONTAL, VERTICAL, DIAGONAL
+    HORIZONTAL = "horizontal",
+    VERTICAL = "vertical",
+    DIAGONAL = "diagonal"
   }
   /**
    * Defines identifiers for the various projections a camera can provide.  
@@ -23,6 +25,7 @@ namespace FudgeCore {
     public clrBackground: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
     //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
     #mtxWorldToView: Matrix4x4;
+    #mtxCameraInverse: Matrix4x4;
     private projection: PROJECTION = PROJECTION.CENTRAL;
     private mtxProjection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
     private fieldOfView: number = 45; // The camera's sensorangle.
@@ -33,24 +36,42 @@ namespace FudgeCore {
     private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
     // TODO: examine, if background should be an attribute of Camera or Viewport
 
+    public get mtxWorld(): Matrix4x4 {
+      let mtxCamera: Matrix4x4 = this.mtxPivot.clone;
+      try {
+        mtxCamera = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
+      } catch (_error) {
+        // no container node or no world transformation found -> continue with pivot only
+      }
+      return mtxCamera;
+    }
     /**
      * Returns the multiplication of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix
      * yielding the worldspace to viewspace matrix
      */
     public get mtxWorldToView(): Matrix4x4 {
+      if (this.#mtxWorldToView)
+        return this.#mtxWorldToView;
+
       //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
-      let mtxCamera: Matrix4x4 = this.mtxPivot.clone;
-      try {
-        mtxCamera = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
-      } catch (_error) {   
-        // no container node or no world transformation found -> continue with pivot only
-      }
-      let mtxInversion: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
-      this.#mtxWorldToView = Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxInversion);
-      Recycler.store(mtxCamera);
-      Recycler.store(mtxInversion);
-      
+      this.#mtxWorldToView = Matrix4x4.MULTIPLICATION(this.mtxProjection, this.mtxCameraInverse);
       return this.#mtxWorldToView;
+    }
+
+    public get mtxCameraInverse(): Matrix4x4 {
+      if (this.#mtxCameraInverse)
+        return this.#mtxCameraInverse;
+
+      //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
+      this.#mtxCameraInverse = Matrix4x4.INVERSION(this.mtxWorld);
+      return this.#mtxCameraInverse;
+    }
+
+    public resetWorldToView(): void {
+      if (this.#mtxWorldToView) Recycler.store(this.#mtxWorldToView);
+      if (this.#mtxCameraInverse) Recycler.store(this.#mtxCameraInverse);
+      this.#mtxWorldToView = null;
+      this.#mtxCameraInverse = null;
     }
 
     public getProjection(): PROJECTION {
@@ -96,13 +117,13 @@ namespace FudgeCore {
       this.mtxProjection = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction); // TODO: remove magic numbers
     }
     /**
-     * Set the camera to orthographic projection. The origin is in the top left corner of the canvas.
-     * @param _left The positionvalue of the projectionspace's left border. (Default = 0)
-     * @param _right The positionvalue of the projectionspace's right border. (Default = canvas.clientWidth)
-     * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
-     * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
+     * Set the camera to orthographic projection. Default values are derived the canvas client dimensions
+     * @param _left The positionvalue of the projectionspace's left border.    
+     * @param _right The positionvalue of the projectionspace's right border.  
+     * @param _bottom The positionvalue of the projectionspace's bottom border.
+     * @param _top The positionvalue of the projectionspace's top border.      
      */
-    public projectOrthographic(_left: number = 0, _right: number = Render.getCanvas().clientWidth, _bottom: number = Render.getCanvas().clientHeight, _top: number = 0): void {
+    public projectOrthographic(_left: number = -Render.getCanvas().clientWidth / 2, _right: number = Render.getCanvas().clientWidth / 2, _bottom: number = Render.getCanvas().clientHeight / 2, _top: number = -Render.getCanvas().clientHeight / 2): void {
       this.projection = PROJECTION.ORTHOGRAPHIC;
       this.mtxProjection = Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
     }
@@ -142,7 +163,7 @@ namespace FudgeCore {
       return result;
     }
 
-    public pointClipToWorld(_pointInClipSpace: Vector3): Vector3 {      
+    public pointClipToWorld(_pointInClipSpace: Vector3): Vector3 {
       let mtxViewToWorld: Matrix4x4 = Matrix4x4.INVERSION(this.mtxWorldToView);
       let m: Float32Array = mtxViewToWorld.get();
       let rayWorld: Vector3 = Vector3.TRANSFORMATION(_pointInClipSpace, mtxViewToWorld, true);

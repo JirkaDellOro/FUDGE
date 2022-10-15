@@ -40,37 +40,37 @@ namespace FudgeCore {
         this.node.addChild(this.skeleton);
     }
 
-    /**
-     * Calculates the position of a vertex transformed by the skeleton
-     * @param _index index of the vertex
-     */
-    public getVertexPosition(_index: number): Vector3 {
-      // extract the vertex data (vertices: 3D vectors, bone indices & weights: 4D vectors)
-      const iVertex: number = _index * 3;
-      const iBoneInfluence: number = _index * 4;
+    // /**
+    //  * Calculates the position of a vertex transformed by the skeleton
+    //  * @param _index index of the vertex
+    //  */
+    // public getVertexPosition(_index: number): Vector3 {
+    //   // extract the vertex data (vertices: 3D vectors, bone indices & weights: 4D vectors)
+    //   const iVertex: number = _index * 3;
+    //   const iBoneInfluence: number = _index * 4;
       
-      const vertex: Vector3 = new Vector3(...this.mesh.vertices.slice(iVertex, iVertex + 3));
-      if (!(this.mesh instanceof MeshSkin)) return vertex;
+    //   const vertex: Vector3 = new Vector3(...Reflect.get(this.mesh, "renderMesh").vertices.slice(iVertex, iVertex + 3));
+    //   if (!(this.mesh instanceof MeshSkin)) return vertex;
 
-      const iBones: Uint8Array = this.mesh.iBones.slice(iBoneInfluence, iBoneInfluence + 4);
-      const weights: Float32Array = this.mesh.weights.slice(iBoneInfluence, iBoneInfluence + 4);
+    //   const iBones: Uint8Array = this.mesh.iBones.slice(iBoneInfluence, iBoneInfluence + 4);
+    //   const weights: Float32Array = this.mesh.weights.slice(iBoneInfluence, iBoneInfluence + 4);
 
-      // get bone matrices
-      const mtxBones: Array<Matrix4x4> = this.skeleton.mtxBones;
+    //   // get bone matrices
+    //   const mtxBones: Array<Matrix4x4> = this.skeleton.mtxBones;
 
-      // skin matrix S = sum_i=1^m{w_i * B_i}
-      const skinMatrix: Matrix4x4 = new Matrix4x4();
-      skinMatrix.set(Array
-        .from(iBones)
-        .map((iBone, iWeight) => mtxBones[iBone].get().map(value => value * weights[iWeight])) // apply weight on each matrix
-        .reduce((mtxSum, mtxBone) => mtxSum.map((value, index) => value + mtxBone[index])) // sum up the matrices
-      );
+    //   // skin matrix S = sum_i=1^m{w_i * B_i}
+    //   const skinMatrix: Matrix4x4 = new Matrix4x4();
+    //   skinMatrix.set(Array
+    //     .from(iBones)
+    //     .map((iBone, iWeight) => mtxBones[iBone].get().map(value => value * weights[iWeight])) // apply weight on each matrix
+    //     .reduce((mtxSum, mtxBone) => mtxSum.map((value, index) => value + mtxBone[index])) // sum up the matrices
+    //   );
 
-      // transform vertex
-      vertex.transform(skinMatrix);
+    //   // transform vertex
+    //   vertex.transform(skinMatrix);
 
-      return vertex;
-    }
+    //   return vertex;
+    // }
 
     // TODO: remove or think if the transformed bounding box is of value or can be made to be
     // public get boundingBox(): Box {

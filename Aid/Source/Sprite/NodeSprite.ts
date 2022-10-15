@@ -18,7 +18,7 @@ namespace FudgeAid {
 
       this.cmpMesh = new ƒ.ComponentMesh(NodeSprite.mesh);
       // Define coat from the SpriteSheet to use when rendering
-      this.cmpMaterial = new ƒ.ComponentMaterial(new ƒ.Material(_name, ƒ.ShaderTexture, null));
+      this.cmpMaterial = new ƒ.ComponentMaterial(new ƒ.Material(_name, ƒ.ShaderLitTextured, null));
       this.addComponent(this.cmpMesh);
       this.addComponent(this.cmpMaterial);
     }
@@ -45,6 +45,8 @@ namespace FudgeAid {
      * Show a specific frame of the sequence
      */
     public showFrame(_index: number): void {
+      if (this.timer)
+        ƒ.Time.game.deleteTimer(this.timer);
       let spriteFrame: SpriteFrame = this.animation.frames[_index];
       this.cmpMesh.mtxPivot = spriteFrame.mtxPivot;
       this.cmpMaterial.mtxPivot = spriteFrame.mtxTexture;

@@ -1,12 +1,11 @@
 namespace FudgeCore {
   export interface MapEventTypeToListener {
-    [eventType: string]: EventListenerƒ[];
+    [eventType: string]: EventListenerUnified[];
   }
 
   /**
-   * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
+   * Types of events specific to FUDGE, in addition to the standard DOM/Browser-Types and custom strings
    */
-
   export const enum EVENT {
     /** dispatched to targets registered at {@link Loop}, when requested animation frame starts */
     LOOP_FRAME = "loopFrame",
@@ -18,12 +17,20 @@ namespace FudgeCore {
     COMPONENT_ACTIVATE = "componentActivate",
     /** dispatched to a {@link Component} when its being deactivated */
     COMPONENT_DEACTIVATE = "componentDeactivate",
+    /** dispatched to a {@link Node}, it's successors and ancestors when its being activated */
+    NODE_ACTIVATE = "nodeActivate",
+    /** dispatched to a {@link Node}, it's successors and ancestors when its being deactivated */
+    NODE_DEACTIVATE = "nodeDeactivate",
     /** dispatched to a child {@link Node} and its ancestors after it was appended to a parent */
     CHILD_APPEND = "childAppend",
     /** dispatched to a child {@link Node} and its ancestors just before its being removed from its parent */
     CHILD_REMOVE = "childRemove",
-    /** dispatched to a {@link Mutable} when its being mutated */
+    /** dispatched to a {@link Mutable} when it mutates */
     MUTATE = "mutate",
+    /** dispatched to a {@link GraphInstance} when the graph it connects to mutates */
+    MUTATE_GRAPH = "mutateGraph",
+    /** dispatched to a {@link GraphInstance} after {@link MUTATE_GRAPH} to signal that all instances were informed*/
+    MUTATE_GRAPH_DONE = "mutateGraphDone",
     /** dispatched to {@link Viewport} when it gets the focus to receive keyboard input */
     FOCUS_IN = "focusin",
     /** dispatched to {@link Viewport} when it loses the focus to receive keyboard input */
@@ -34,6 +41,8 @@ namespace FudgeCore {
     NODE_DESERIALIZED = "nodeDeserialized",
     /** dispatched to {@link GraphInstance} when it's content is set according to a serialization of a {@link Graph}  */
     GRAPH_INSTANTIATED = "graphInstantiated",
+    /** dispatched to a {@link Graph} when it's finished deserializing  */
+    GRAPH_DESERIALIZED = "graphDeserialized",
     /** dispatched to {@link Time} when it's scaling changed  */
     TIME_SCALED = "timeScaled",
     /** dispatched to {@link FileIoBrowserLocal} when a list of files has been loaded  */
@@ -42,43 +51,48 @@ namespace FudgeCore {
     FILE_SAVED = "fileSaved",
     /** dispatched to {@link Node} when recalculating transforms for render */
     RENDER_PREPARE = "renderPrepare",
+    /** dispatched to {@link Viewport} and {@link Node} when recalculation of the branch to render starts. */
     RENDER_PREPARE_START = "renderPrepareStart",
-    RENDER_PREPARE_END = "renderPrepareEnd"
+    /** dispatched to {@link Viewport} and {@link Node} when recalculation of the branch to render ends. The branch dispatches before the lights are transmitted to the shaders  */
+    RENDER_PREPARE_END = "renderPrepareEnd",
+    /** dispatched to {@link Joint}-Components in order to disconnect */
+    DISCONNECT_JOINT = "disconnectJoint",
+    /** dispatched to {@link Node} when it gets attached to a viewport for rendering */
+    ATTACH_BRANCH = "attachBranch",
+    /** dispatched to {@link Project} when it's done loading resources from a url */
+    RESOURCES_LOADED = "resourcesLoaded"
   }
 
+  /** Union type of other event types serving as annotation for listeners and handlers */
+  export type EventUnified = Event | CustomEvent | EventPhysics;
 
-  // export type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics;
-
-  export type EventListenerƒ =
-    ((_event: EventPointer) => void) |
-    ((_event: EventDragDrop) => void) |
-    ((_event: EventWheel) => void) |
-    ((_event: EventKeyboard) => void) |
-    ((_event: Eventƒ) => void) |
-    ((_event: EventPhysics) => void) |
+  /** Unified listener type extending EventListener and EventListenerObject for CustomEvent and others */
+  export type EventListenerUnified =
+    ((_event: Event) => void) |
     ((_event: CustomEvent) => void) |
+    ((_event: EventPhysics) => void) |
+    ((_event: EventTimer) => void) |
+    EventListener |
     EventListenerOrEventListenerObject;
 
-  export type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics | CustomEvent;
-  // export type EventListenerƒ = ((_event: Eventƒ) => void) | EventListener | EventListenerObject;
-
-  export class EventTargetƒ extends EventTarget {
-    addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void {
+  /** Extends EventTarget to work with {@link EventListenerUnified} and {@link EventUnified} */
+  export class EventTargetUnified extends EventTarget {
+    addEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void {
       super.addEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);
     }
-    removeEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void {
+    removeEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void {
       super.removeEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);
     }
 
-    dispatchEvent(_event: Eventƒ): boolean {
+    dispatchEvent(_event: EventUnified): boolean {
       return super.dispatchEvent(_event);
     }
   }
 
   /**
-   * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop 
+   * Base class for EventTarget singletons, which are fixed entities in the structure of FUDGE, such as the core loop 
    */
-  export class EventTargetStatic extends EventTargetƒ {
+  export class EventTargetStatic extends EventTargetUnified {
     protected static targetStatic: EventTargetStatic = new EventTargetStatic();
 
     protected constructor() {

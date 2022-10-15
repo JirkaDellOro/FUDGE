@@ -16,11 +16,12 @@ namespace Fudge {
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
-      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.REMOVE_CHILD, this.hndEvent);
     }
 
     public listResources(): void {
@@ -47,11 +48,18 @@ namespace Fudge {
       return this.table.controller.dragDrop.sources;
     }
 
+    // TODO: this is a preparation for syncing a graph with its instances after structural changes
+    // protected openContextMenu = (_event: Event): void => {
+    //   let row: HTMLTableRowElement = <HTMLTableRowElement>_event.composedPath().find((_element) => (<HTMLElement>_element).tagName == "TR");
+    //   if (row)
+    //     this.contextMenu.getMenuItemById(String(CONTEXTMENU.SYNC_INSTANCES)).enabled = (row.getAttribute("icon") == "Graph");
+    //   this.contextMenu.popup();
+    // }
+
     // #region  ContextMenu
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
-
 
       item = new remote.MenuItem({
         label: "Create Mesh",
@@ -68,41 +76,65 @@ namespace Fudge {
       item = new remote.MenuItem({ label: "Create Graph", id: String(CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
       menu.append(item);
 
+      item = new remote.MenuItem({ label: `Create ${ƒ.Animation.name}`, id: String(CONTEXTMENU.CREATE_ANIMATION), click: _callback });
+      menu.append(item);
+
+      item = new remote.MenuItem({ label: `Create ${ƒ.ParticleSystem.name}`, id: String(CONTEXTMENU.CREATE_PARTICLE_EFFECT), click: _callback });
+      menu.append(item);
+
+      item = new remote.MenuItem({ label: "Delete Resource", id: String(CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
+      menu.append(item);
+
+      // item = new remote.MenuItem({ label: "Sync Instances", id: String(CONTEXTMENU.SYNC_INSTANCES), click: _callback, accelerator: "S" });
+      // menu.append(item);
+
+
       // ContextMenu.appendCopyPaste(menu);
       return menu;
     }
 
     protected async contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void> {
+      let choice: CONTEXTMENU = Number(_item.id);
       ƒ.Debug.fudge(`MenuSelect | id: ${CONTEXTMENU[_item.id]} | event: ${_event}`);
       let iSubclass: number = _item["iSubclass"];
-      if (!iSubclass) {
+      if (!iSubclass && (choice == CONTEXTMENU.CREATE_MESH || choice == CONTEXTMENU.CREATE_MATERIAL)) {
         alert("Funky Electron-Error... please try again");
         return;
       }
 
-      switch (Number(_item.id)) {
+      switch (choice) {
         case CONTEXTMENU.CREATE_MESH:
           let typeMesh: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
           //@ts-ignore
           let meshNew: ƒ.Mesh = new typeMesh();
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           this.table.selectInterval(meshNew, meshNew);
           break;
         case CONTEXTMENU.CREATE_MATERIAL:
           let typeShader: typeof ƒ.Shader = ƒ.Shader.subclasses[iSubclass];
           let mtrNew: ƒ.Material = new ƒ.Material(typeShader.name, typeShader);
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           this.table.selectInterval(mtrNew, mtrNew);
           break;
         case CONTEXTMENU.CREATE_GRAPH:
           let graph: ƒ.Graph = await ƒ.Project.registerAsGraph(new ƒ.Node("NewGraph"));
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           this.table.selectInterval(graph, graph);
           break;
-        // case CONTEXTMENU.EDIT:
-        //   let resource: ƒ.SerializableResource = this.table.getFocussed();
-        //   this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
-        //   break;
+        case CONTEXTMENU.CREATE_ANIMATION:
+          let animation: ƒ.Animation = new ƒ.Animation();
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.table.selectInterval(animation, animation);
+          break;
+        case CONTEXTMENU.CREATE_PARTICLE_EFFECT:
+          let particleSystem: ƒ.ParticleSystem = new ƒ.ParticleSystem();
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.table.selectInterval(particleSystem, particleSystem);
+          break;
+        case CONTEXTMENU.DELETE_RESOURCE:
+          await this.table.controller.delete([this.table.getFocussed()]);
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          break;
       }
     }
     //#endregion
@@ -150,19 +182,19 @@ namespace Fudge {
         }
       }
 
-      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+      this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
     }
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
-        case EVENT_EDITOR.SET_PROJECT:
-        case EVENT_EDITOR.UPDATE:
-        case ƒui.EVENT.MUTATE:
+        case EVENT_EDITOR.SELECT:
+        case EVENT_EDITOR.MODIFY:
+          // case ƒui.EVENT.MUTATE:
           this.listResources();
           break;
-        // case ƒui.EVENT.SELECT:
-        //   console.log(_event.detail.data);
-        //   break;
+        case ƒui.EVENT.REMOVE_CHILD:
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          break;
       }
     }
   }

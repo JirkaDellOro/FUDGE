@@ -88,10 +88,10 @@ namespace FudgeCore {
      * The maximum angle of rotation along the first axis. Value needs to be positive. Changes do rebuild the joint
      */
     get maxAngleFirstAxis(): number {
-      return this.#maxAngleFirst * 180 / Math.PI;
+      return this.#maxAngleFirst * Calc.rad2deg;
     }
     set maxAngleFirstAxis(_value: number) {
-      this.#maxAngleFirst = _value * Math.PI / 180;
+      this.#maxAngleFirst = _value * Calc.deg2rad;
       this.disconnect();
       this.dirtyStatus();
     }
@@ -100,10 +100,10 @@ namespace FudgeCore {
      * The maximum angle of rotation along the second axis. Value needs to be positive. Changes do rebuild the joint
      */
     get maxAngleSecondAxis(): number {
-      return this.#maxAngleSecond * 180 / Math.PI;
+      return this.#maxAngleSecond * Calc.rad2deg;
     }
     set maxAngleSecondAxis(_value: number) {
-      this.#maxAngleSecond = _value * Math.PI / 180;
+      this.#maxAngleSecond = _value * Calc.deg2rad;
       this.disconnect();
       this.dirtyStatus();
     }
@@ -159,10 +159,10 @@ namespace FudgeCore {
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
      */
     get maxMotorTwist(): number {
-      return this.#maxMotorTwist * 180 / Math.PI;
+      return this.#maxMotorTwist * Calc.rad2deg;
     }
     set maxMotorTwist(_value: number) {
-      _value *= Math.PI / 180;
+      _value *= Calc.deg2rad;
       this.#maxMotorTwist = _value;
       if (this.joint != null) this.joint.getTwistLimitMotor().upperLimit = _value;
     }
@@ -170,10 +170,10 @@ namespace FudgeCore {
      * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
      */
     get minMotorTwist(): number {
-      return this.#minMotorTwist * 180 / Math.PI;
+      return this.#minMotorTwist * Calc.rad2deg;
     }
     set minMotorTwist(_value: number) {
-      _value *= Math.PI / 180;
+      _value *= Calc.deg2rad;
       this.#minMotorTwist = _value;
       if (this.joint != null) this.joint.getTwistLimitMotor().lowerLimit = _value;
     }
@@ -222,8 +222,10 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.axisFirst = new Vector3(...<number[]>(Object.values(_mutator.axisFirst)));
-      this.axisSecond = new Vector3(...<number[]>(Object.values(_mutator.axisSecond)));
+      if (typeof (_mutator.axisFirst) !== "undefined")
+        this.axisFirst = new Vector3(...<number[]>(Object.values(_mutator.axisFirst)));
+      if (typeof (_mutator.axisSecond) !== "undefined")
+        this.axisSecond = new Vector3(...<number[]>(Object.values(_mutator.axisSecond)));
       delete _mutator.axisFirst;
       delete _mutator.axisSecond;
       this.#mutate(_mutator);
@@ -256,16 +258,13 @@ namespace FudgeCore {
     }
 
     #mutate = (_mutator: Mutator): void => {
-      this.#maxAngleFirst = _mutator.maxAngleFirst;
-      this.#maxAngleSecond = _mutator.maxAngleSecond;
-      this.springDampingTwist = _mutator.springDampingTwist;
-      this.springFrequencyTwist = _mutator.springFrequencyTwist;
-      this.springDampingSwing = _mutator.springDampingSwing;
-      this.springFrequencySwing = _mutator.springFrequencySwing;
-      this.maxMotorTwist = _mutator.maxMotorTwist;
-      this.minMotorTwist = _mutator.minMotorTwist;
-      this.motorSpeedTwist = _mutator.motorSpeedTwist;
-      this.motorTorqueTwist = _mutator.motorTorqueTwist;
+      if (typeof (_mutator.maxAngleFirst) !== "undefined")
+        this.#maxAngleFirst = _mutator.maxAngleFirst;
+      if (typeof (_mutator.maxAngleSecond) !== "undefined")
+        this.#maxAngleSecond = _mutator.maxAngleSecond;
+      this.mutateBase(_mutator, [
+        "springDampingTwist", "springFrequencyTwist", "springDampingSwing", "springFrequencySwing", "maxMotorTwist", "minMotorTwist", "motorSpeedTwist", "motorTorqueTwist"
+      ]);
     }
     //#endregion
 

@@ -69,7 +69,7 @@ namespace FudgeUserInterface {
         if (value instanceof Object) {
           // let details: Details = Generator.createDetails(key, "Details");
           let details: Details = new Details(key, "Details");
-          details.content.appendChild(Generator.createInterfaceFromMutator(value));
+          details.setContent(Generator.createInterfaceFromMutator(value));
           div.appendChild(details);
         }
         else

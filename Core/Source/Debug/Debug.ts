@@ -32,6 +32,23 @@ namespace FudgeCore {
       }
     }
 
+    public static getFilter(_target: DebugTarget): DEBUG_FILTER {
+      let result: DEBUG_FILTER = 0;
+      for (let filter in _target.delegates)
+        result |= parseInt(filter);
+      return result;
+    }
+
+    public static addFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void {
+      let current: DEBUG_FILTER = Debug.getFilter(_target);
+      Debug.setFilter(_target, current | _filter);
+    }
+
+    public static removeFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void {
+      let current: DEBUG_FILTER = Debug.getFilter(_target);
+      Debug.setFilter(_target, current ^ _filter);
+    }
+
     /**
      * Info(...) displays additional information with low priority
      */

@@ -1,0 +1,37 @@
+div[view=ViewAnimation] {
+  display: flex;
+  flex-flow: column;
+}
+
+div[view=ViewAnimation] #toolbar {
+  background-color: var(--color-background-main);
+  display: flex;
+  flex-grow: 0;
+}
+
+div[view=ViewAnimation] #frameinput {
+  margin: 2px;
+  margin-left: auto;
+  min-width: 20px;
+  width: 40px;
+  text-align: end;
+}
+
+div[view=ViewAnimation] button {
+  border: none;
+  border-right: 2px solid var(--color-background-content);
+  background-color: var(--color-background-main);
+  padding: 2px;
+  min-width: 20px;
+  width: 50px;
+  cursor: pointer;
+}
+
+div[view=ViewAnimation] button:focus {
+  outline: none;
+}
+
+div[view=ViewAnimation] #propertylist {
+  padding-top: 30px;
+  flex-grow: 1;
+}

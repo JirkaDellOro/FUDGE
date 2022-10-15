@@ -13,13 +13,19 @@ namespace FudgeCore {
 
   /**
      * Acts as the physical representation of the {@link Node} it's attached to.
-     * It's the connection between the Fudge rendered world and the Physics world.
+     * It's the connection between the FUDGE rendered world and the Physics world.
      * For the physics to correctly get the transformations rotations need to be applied with from left = true.
      * Or rotations need to happen before scaling.
      * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
   export class ComponentRigidbody extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentRigidbody);
+    private static mapBodyType: { [type: number]: number } = (typeof OIMO == "undefined") ?
+      {
+        [BODY_TYPE.DYNAMIC]: BODY_TYPE.DYNAMIC, [BODY_TYPE.STATIC]: BODY_TYPE.STATIC, [BODY_TYPE.KINEMATIC]: BODY_TYPE.KINEMATIC
+      } : {
+        [BODY_TYPE.DYNAMIC]: OIMO.RigidBodyType.DYNAMIC, [BODY_TYPE.STATIC]: OIMO.RigidBodyType.STATIC, [BODY_TYPE.KINEMATIC]: OIMO.RigidBodyType.KINEMATIC
+      };
 
     /** Transformation of the collider relative to the node's transform. Once set mostly remains constant. 
      * If altered, {@link isInitialized} must be reset to false to recreate the collider in the next {@link Render.prepare}
@@ -53,7 +59,7 @@ namespace FudgeCore {
     /** ID to reference this specific ComponentRigidbody */
     #id: number = 0;
 
-    //Private informations - Mostly OimoPhysics variables that should not be exposed to the Fudge User and manipulated by them
+    //Private informations - Mostly OimoPhysics variables that should not be exposed to the FUDGE User and manipulated by them
     #collider: OIMO.Shape;
     #colliderInfo: OIMO.ShapeConfig;
     #collisionGroup: COLLISION_GROUP = COLLISION_GROUP.DEFAULT;
@@ -76,11 +82,19 @@ namespace FudgeCore {
 
     #callbacks: OIMO.ContactCallback; //Callback Methods when within the oimoSystem a event is happening
 
+    // #physics: Physics; //TODO: keep a pointer to the physics instance used by this component
+
     /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
     constructor(_mass: number = 1, _type: BODY_TYPE = BODY_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: COLLISION_GROUP = Physics.settings.defaultCollisionGroup, _mtxTransform: Matrix4x4 = null, _convexMesh: Float32Array = null) {
       super();
       this.create(_mass, _type, _colliderType, _group, _mtxTransform, _convexMesh);
+
+      this.addEventListener(EVENT.COMPONENT_ADD, this.hndEvent);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.hndEvent);
+      // this.addEventListener(EVENT.NODE_DESERIALIZED, this.hndEvent);
     }
+
+
 
     //#region Accessors
     public get id(): number {
@@ -103,22 +117,7 @@ namespace FudgeCore {
     /** Set the body type. See {@link BODY_TYPE} */
     public set typeBody(_value: BODY_TYPE) {
       this.#typeBody = _value;
-      let oimoType: number;
-      switch (this.#typeBody) {
-        case BODY_TYPE.DYNAMIC:
-          oimoType = OIMO.RigidBodyType.DYNAMIC;
-          break;
-        case BODY_TYPE.STATIC:
-          oimoType = OIMO.RigidBodyType.STATIC;
-          break;
-        case BODY_TYPE.KINEMATIC:
-          oimoType = OIMO.RigidBodyType.KINEMATIC;
-          break;
-        default:
-          oimoType = OIMO.RigidBodyType.DYNAMIC;
-          break;
-      }
-      this.#rigidbody.setType(oimoType);
+      this.#rigidbody.setType(ComponentRigidbody.mapBodyType[this.#typeBody]);
       this.#rigidbody.setMassData(this.#massData); //have to reset mass after changing the type, since Oimo is handling mass internally wrong when switching types
     }
 
@@ -239,6 +238,31 @@ namespace FudgeCore {
     }
     //#endregion
 
+    // Activate the functions of this component as response to events
+    public hndEvent = (_event: Event): void => {
+      switch (_event.type) {
+        case EVENT.COMPONENT_ADD:
+          // this.addEventListener(EVENT.COMPONENT_ACTIVATE, this.addRigidbodyToWorld);
+          this.addEventListener(EVENT.COMPONENT_DEACTIVATE, this.removeRigidbodyFromWorld);
+          // this.node.addEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld, true); // use capture to react to broadcast!
+          this.node.addEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld, true);
+          if (!this.node.cmpTransform)
+            Debug.warn(`ComponentRigidbody attached to node missing ComponentTransform`, this.node);
+          break;
+        case EVENT.COMPONENT_REMOVE:
+          // this.removeEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
+          this.removeEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld);
+          // this.node.removeEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld, true); // use capture to react to broadcast!
+          this.node.removeEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld, true);
+          this.removeRigidbodyFromWorld();
+          break;
+        case EVENT.NODE_DESERIALIZED:
+          if (!this.node.cmpTransform)
+            Debug.error(`ComponentRigidbody attached to node missing ComponentTransform`, this.node);
+          break;
+      }
+    }
+
     //#region Transformation
     /**
      * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
@@ -252,7 +276,7 @@ namespace FudgeCore {
      *  But you are able to incremental changing it instead of a direct rotation.  Although it's always prefered to use forces in physics.
      */
     public rotateBody(_rotationChange: Vector3): void {
-      this.#rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * Math.PI / 180, _rotationChange.y * Math.PI / 180, _rotationChange.z * Math.PI / 180));
+      this.#rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * Calc.deg2rad, _rotationChange.y * Calc.deg2rad, _rotationChange.z * Calc.deg2rad));
     }
 
     /** Translating the rigidbody therefore changing it's place over time directly in physics. This way physics is changing instead of transform. 
@@ -319,7 +343,7 @@ namespace FudgeCore {
       let oldCollider: OIMO.Shape = this.#rigidbody.getShapeList();
       this.#rigidbody.addShape(this.#collider); //add new collider, before removing the old, so the rb is never active with 0 colliders
       this.#rigidbody.removeShape(oldCollider); //remove the old collider
-      this.#collider.userData = this; //reset the extra information so that this collider knows to which Fudge Component it's connected
+      this.#collider.userData = this; //reset the extra information so that this collider knows to which FUDGE Component it's connected
       this.#collider.setCollisionGroup(this.collisionGroup);
       this.#collider.setCollisionMask(this.collisionMask);
 
@@ -334,7 +358,7 @@ namespace FudgeCore {
     public initialize(): void {
       if (!this.node) // delay initialization until this rigidbody is attached to a node
         return;
-      switch (this.initialization) {
+      switch (Number(this.initialization)) {
         case BODY_INIT.TO_NODE:
           this.mtxPivot = Matrix4x4.IDENTITY();
           break;
@@ -358,7 +382,8 @@ namespace FudgeCore {
       this.setPosition(position); //set the actual new rotation/position for this Rb again since it's now updated
       this.setRotation(rotation);
 
-      this.#mtxPivotUnscaled = Matrix4x4.CONSTRUCTION({ translation: this.mtxPivot.translation, rotation: this.mtxPivot.rotation, scaling: Vector3.ONE() });
+      let scalingInverse: Vector3 = this.node.mtxWorld.scaling.map(_i => 1 / _i);
+      this.#mtxPivotUnscaled = Matrix4x4.CONSTRUCTION({ translation: this.mtxPivot.translation, rotation: this.mtxPivot.rotation, scaling: scalingInverse });
       this.#mtxPivotInverse = Matrix4x4.INVERSION(this.#mtxPivotUnscaled);
 
       this.addRigidbodyToWorld();
@@ -582,7 +607,7 @@ namespace FudgeCore {
         hitInfo.hitPoint = new Vector3(endpoint.x, endpoint.y, endpoint.z);
       }
       if (_debugDraw) {
-        Physics.world.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
+        Physics.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
       }
       return hitInfo;
     }
@@ -630,24 +655,32 @@ namespace FudgeCore {
 
     /** Change properties by an associative array */
     public async mutate(_mutator: Mutator): Promise<void> {
-      super.mutate(_mutator);
+      if (_mutator.typeBody != undefined)
+        _mutator.typeBody = parseInt(_mutator.typeBody);
+      if (_mutator.typeCollider != undefined)
+        _mutator.typeCollider = parseInt(_mutator.typeCollider);
+      if (_mutator.initialization != undefined)
+        _mutator.initialization = parseInt(_mutator.initialization);
+      await super.mutate(_mutator);
+      if (_mutator.initialization != undefined && this.isActive)
+        this.initialize();
+      // TODO: see if this alternative should be, at least partially, done with mutateSelection
+      // let callIfExist: Function = (_key: string, _setter: Function) => {
+      //   if (_mutator[_key])
+      //     _setter(_mutator[_key]);
+      // };
 
-      let callIfExist: Function = (_key: string, _setter: Function) => {
-        if (_mutator[_key])
-          _setter(_mutator[_key]);
-      };
+      // callIfExist("friction", (_value: number) => this.friction = _value);
+      // callIfExist("restitution", (_value: number) => this.restitution = _value);
+      // callIfExist("mass", (_value: number) => this.mass = _value);
+      // callIfExist("dampTranslation", (_value: number) => this.dampTranslation = _value);
+      // callIfExist("dampRotation", (_value: number) => this.dampRotation = _value);
+      // callIfExist("effectGravity", (_value: number) => this.effectGravity = _value);
+      // callIfExist("collisionGroup", (_value: COLLISION_GROUP) => this.collisionGroup = _value);
+      // callIfExist("typeBody", (_value: string) => this.typeBody = parseInt(_value));
+      // callIfExist("typeCollider", (_value: string) => this.typeCollider = parseInt(_value));
 
-      callIfExist("friction", (_value: number) => this.friction = _value);
-      callIfExist("restitution", (_value: number) => this.restitution = _value);
-      callIfExist("mass", (_value: number) => this.mass = _value);
-      callIfExist("dampTranslation", (_value: number) => this.dampTranslation = _value);
-      callIfExist("dampRotation", (_value: number) => this.dampRotation = _value);
-      callIfExist("effectGravity", (_value: number) => this.effectGravity = _value);
-      callIfExist("collisionGroup", (_value: COLLISION_GROUP) => this.collisionGroup = _value);
-      callIfExist("typeBody", (_value: string) => this.typeBody = parseInt(_value));
-      callIfExist("typeCollider", (_value: string) => this.typeCollider = parseInt(_value));
-
-      this.dispatchEvent(new Event(EVENT.MUTATE));
+      // this.dispatchEvent(new Event(EVENT.MUTATE));
     }
 
     public getMutator(): Mutator {
@@ -699,21 +732,15 @@ namespace FudgeCore {
       this.collisionMask = Physics.settings.defaultCollisionMask;
       //Create the actual rigidbody in the OimoPhysics Space
       this.createRigidbody(_mass, _type, this.#typeCollider, _mtxTransform, this.#collisionGroup);
-      this.#id = Physics.world.distributeBodyID();
+      this.#id = Physics.distributeBodyID();
 
       // Event Callbacks directly from OIMO Physics
       this.#callbacks = new OIMO.ContactCallback(); //fehm
       this.#callbacks.beginTriggerContact = this.triggerEnter;
       this.#callbacks.endTriggerContact = this.triggerExit;
-
-      //Handling adding/removing the component
-      // this.removeEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld); // in case it already exists
-      this.removeEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld); // in case it already exists
-      // this.addEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
-      this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld);
     }
 
-    /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
+    /** Creates the actual OimoPhysics Rigidbody out of informations the FUDGE Component has. */
     private createRigidbody(_mass: number, _type: BODY_TYPE, _colliderType: COLLIDER_TYPE, _mtxTransform: Matrix4x4, _collisionGroup: COLLISION_GROUP = COLLISION_GROUP.DEFAULT): void {
       let oimoType: number; //Need the conversion from simple enum to number because if enum is defined as Oimo.RigidyBodyType you have to include Oimo to use FUDGE at all
       switch (_type) {
@@ -736,7 +763,7 @@ namespace FudgeCore {
       //   this.#rigidbody.removeShape(this.#rigidbody.getShapeList());
 
       let tmpTransform: Matrix4x4 = _mtxTransform == null ? super.node != null ? super.node.mtxWorld : Matrix4x4.IDENTITY() : _mtxTransform; //Get transform informations from the world, since physics does not care about hierarchy
-      //Convert informations from Fudge to OimoPhysics and creating a collider with it, while also adding a pivot to derivate from the transform informations if needed
+      //Convert informations from FUDGE to OimoPhysics and creating a collider with it, while also adding a pivot to derivate from the transform informations if needed
       let scale: OIMO.Vec3 = new OIMO.Vec3((tmpTransform.scaling.x * this.mtxPivot.scaling.x) / 2, (tmpTransform.scaling.y * this.mtxPivot.scaling.y) / 2, (tmpTransform.scaling.z * this.mtxPivot.scaling.z) / 2);
       let position: OIMO.Vec3 = new OIMO.Vec3(tmpTransform.translation.x + this.mtxPivot.translation.x, tmpTransform.translation.y + this.mtxPivot.translation.y, tmpTransform.translation.z + this.mtxPivot.translation.z);
       let rotation: OIMO.Vec3 = new OIMO.Vec3(tmpTransform.rotation.x + this.mtxPivot.rotation.x, tmpTransform.rotation.y + this.mtxPivot.rotation.y, tmpTransform.rotation.z + this.mtxPivot.rotation.z);
@@ -799,7 +826,7 @@ namespace FudgeCore {
 
     /** Creating a shape that represents a in itself closed form, out of the given vertices. */
     private createConvexGeometryCollider(_vertices: Float32Array, _scale: OIMO.Vec3): OIMO.ConvexHullGeometry {
-      let verticesAsVec3: OIMO.Vec3[] = new Array(); //Convert Fudge Vector3 to OimoVec3
+      let verticesAsVec3: OIMO.Vec3[] = new Array(); //Convert FUDGE Vector3 to OimoVec3
       for (let i: number = 0; i < _vertices.length; i += 3) { //3 Values for one point
         verticesAsVec3.push(new OIMO.Vec3(_vertices[i] * _scale.x, _vertices[i + 1] * _scale.y, _vertices[i + 2] * _scale.z));
       }
@@ -816,13 +843,14 @@ namespace FudgeCore {
     }
 
     /** Adding this ComponentRigidbody to the Physiscs.world giving the oimoPhysics system the information needed */
-    private addRigidbodyToWorld(): void {
-      Physics.world.addRigidbody(this);
+    private addRigidbodyToWorld = (): void => {
+      if (!this.#rigidbody._world)
+        Physics.addRigidbody(this);
     }
 
     /** Removing this ComponentRigidbody from the Physiscs.world taking the informations from the oimoPhysics system */
-    private removeRigidbodyFromWorld(): void {
-      Physics.world.removeRigidbody(this);
+    private removeRigidbodyFromWorld = (): void => {
+      Physics.removeRigidbody(this);
       this.isInitialized = false;
     }
 
@@ -852,7 +880,7 @@ namespace FudgeCore {
     /**
     * Trigger EnteringEvent Callback, automatically called by OIMO Physics within their calculations.
     * Since the event does not know which body is the trigger iniator, the event can be listened to
-    * on either the trigger or the triggered. (This is only possible with the Fudge OIMO Fork!)
+    * on either the trigger or the triggered. (This is only possible with the FUDGE OIMO Fork!)
     */
     private triggerEnter(contact: OIMO.Contact): void {
       let objHit: ComponentRigidbody; //collision consisting of 2 bodies, so Hit1/2
@@ -893,7 +921,7 @@ namespace FudgeCore {
     /**
     * Trigger LeavingEvent Callback, automatically called by OIMO Physics within their calculations.
     * Since the event does not know which body is the trigger iniator, the event can be listened to
-    * on either the trigger or the triggered. (This is only possible with the Fudge OIMO Fork!)
+    * on either the trigger or the triggered. (This is only possible with the FUDGE OIMO Fork!)
     */
     private triggerExit(contact: OIMO.Contact): void {
       //REMOVE OLD Triggering Body

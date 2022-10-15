@@ -17,17 +17,27 @@
   <form id="connect">
     <fieldset>
       <legend>WS (WebSocket)</legend>
-      <input type="text" name="server" value="wss://fudge-server.herokuapp.com" list="urls">
-      <!-- <input type="text" name="server" value="" list="urls"> -->
+      <!-- <input type="text" name="server" value="wss://fudge-server.herokuapp.com" list="urls"> -->
+      <!-- <input type="text" name="server" value="ws://localhost:8080" list="urls"> -->
+      <input type="text" name="server" value="" list="urls">
       <datalist id="urls">
         <option value="ws://localhost:8080">
-        <option value="wss://fudge-server.herokuapp.com">
+        <option value="wss://fudge-server.herokuapp.com"></option>
+        <option value="wss://jirka.uber.space/FudgeServer">
       </datalist>
       <button type="button" id="connect">Connect</button><br />
       <input type="text" id="id" value="" disabled> id <br />
       <input type="text" name="name" value="" disabled>
       <button type="button" id="rename">&lt;-Name</button>
       <input type="text" name="proposal" value=""><br />
+      <fieldset id="rooms">
+        <legend>Rooms</legend>
+        <button type="button" id="get">Get</button>
+        <button type="button" id="create">Create</button>
+        <button type="button" id="join">Join</button>
+        <input type="text" name="room"><br/>
+        <textarea cols="40"></textarea>
+      </fieldset>
     </fieldset>
     <fieldset>
       <legend>WebRTC</legend>
@@ -46,8 +56,8 @@
       <legend>Communication</legend>
       Send <textarea cols=70 rows="1" name="message">Test</textarea><br />
       using
-      <input type="radio" name="protocol" value="ws" id="ws" /><label for="ws">WS</label>
-      <input type="radio" name="protocol" value="rtc" id="rtc" checked /><label for="rtc">RTC</label>
+      <input type="radio" name="protocol" value="ws" id="ws" checked /><label for="ws">WS</label>
+      <input type="radio" name="protocol" value="rtc" id="rtc" /><label for="rtc">RTC</label>
       to <button type="button" id="sendServer">server (TCP only)</button>
       <button type="button" id="sendHost">host</button>
       <button type="button" id="sendAll">all</button>

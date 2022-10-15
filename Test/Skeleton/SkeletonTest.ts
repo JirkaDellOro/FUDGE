@@ -29,7 +29,7 @@ namespace SkeletonTest {
     camera.addComponent(new ƒ.ComponentTransform());
     camera.getComponent(ƒ.ComponentCamera).clrBackground.setHex("4472C4FF");
     camera.mtxLocal.translateZ(10);
-    camera.mtxLocal.showTo(ƒ.Vector3.ZERO(), camera.mtxLocal.getY());
+    camera.mtxLocal.lookAt(ƒ.Vector3.ZERO(), camera.mtxLocal.getY());
     scene.addChild(camera);
 
     // setup light
@@ -69,26 +69,18 @@ namespace SkeletonTest {
         ],
         6
       );
-      this.ƒvertices = meshSource.vertices;
-      this.ƒindices = meshSource.indices;
-      const iBones: number[] = [];
-      const weights: number[] = [];
-      for (let iVertex: number = 0; iVertex < this.ƒvertices.length; iVertex += 3) {
-        iBones.push(
-          MeshSkinCylinder.skeleton.indexOfBone("LowerBone"),
-          MeshSkinCylinder.skeleton.indexOfBone("UpperBone"),
-          0,
-          0
-        );
-        weights.push(
-          1 - this.ƒvertices[iVertex + 1] / 4,
-          this.ƒvertices[iVertex + 1] / 4,
-          0,
-          0
-        );
+
+      this.vertices = Reflect.get(meshSource, "vertices");
+      this.faces = Reflect.get(meshSource, "faces");
+
+      for (let vertex of this.vertices.originals) {
+        vertex.bones = [
+          { index: MeshSkinCylinder.skeleton.indexOfBone("LowerBone"), weight: 1 - vertex.position.y / 4 },
+          { index: MeshSkinCylinder.skeleton.indexOfBone("UpperBone"), weight: vertex.position.y / 4 },
+          { index: 0, weight: 0 },
+          { index: 0, weight: 0 }
+        ];
       }
-      this.ƒiBones = new Uint8Array(iBones);
-      this.ƒweights = new Float32Array(weights);
     }
 
     public static get skeleton(): ƒ.Skeleton {
@@ -136,24 +128,26 @@ namespace SkeletonTest {
       bones: {
         LowerBone: {
           components: {
-            ComponentTransform: [ { "ƒ.ComponentTransform": {
-              mtxLocal: {
-                scaling: {
-                  x: sequenceScaling,
-                  y: sequenceScaling,
-                  z: sequenceScaling
-                },
-                translation: {
-                  y: sequenceTranslation
+            ComponentTransform: [
+              {
+                mtxLocal: {
+                  scaling: {
+                    x: sequenceScaling,
+                    y: sequenceScaling,
+                    z: sequenceScaling
+                  },
+                  translation: {
+                    y: sequenceTranslation
+                  }
                 }
               }
-            }}]
+            ]
           }
         }
       }
     });
     const cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP);
-    skeletonInstance.addComponent(cmpAnimator);    
+    skeletonInstance.addComponent(cmpAnimator);
     cmpAnimator.activate(true);
     cylinder.addChild(skeletonInstance);
 
@@ -164,8 +158,8 @@ namespace SkeletonTest {
     cmpMesh.bindSkeleton(skeletonInstance);
     cylinder.addComponent(cmpMesh);
 
-    // setup component material
-    const material: ƒ.Material = new ƒ.Material("MaterialCylinder", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("White")));
+    // setup component material 
+    const material: ƒ.Material = new ƒ.Material("MaterialCylinder", ƒ.ShaderGouraudSkin, new ƒ.CoatRemissive(ƒ.Color.CSS("White")));
     const cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(material);
     cylinder.addComponent(cmpMaterial);
 

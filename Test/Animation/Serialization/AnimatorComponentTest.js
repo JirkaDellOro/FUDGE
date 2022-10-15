@@ -14,7 +14,7 @@ var AnimatorComponentTest;
         console.log("%cStart over", "color: red;");
         let root = new ƒ.Node("Root");
         let node;
-        node = new ƒAid.Node("Test", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("Texture", ƒ.ShaderTexture, new ƒ.CoatTextured()), new ƒ.MeshCube("Cube"));
+        node = new ƒAid.Node("Test", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("Texture", ƒ.ShaderLitTextured, new ƒ.CoatTextured()), new ƒ.MeshCube("Cube"));
         root.appendChild(node);
         viewport.setBranch(root);
         viewport.draw();
@@ -25,12 +25,10 @@ var AnimatorComponentTest;
             components: {
                 ComponentTransform: [
                     {
-                        "ƒ.ComponentTransform": {
-                            mtxLocal: {
-                                rotation: {
-                                    x: animseq,
-                                    y: animseq
-                                }
+                        mtxLocal: {
+                            rotation: {
+                                x: animseq,
+                                y: animseq
                             }
                         }
                     }

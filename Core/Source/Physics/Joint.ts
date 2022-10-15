@@ -45,10 +45,10 @@ namespace FudgeCore {
         Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
         actual constraint ain't existent until the game starts
       */
-      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
-      this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeJoint);
+      this.addEventListener(EVENT.COMPONENT_ADD, this.hndEvent);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.hndEvent);
     }
-    
+
     protected static registerSubclass(_subclass: typeof Joint): number { return Joint.subclasses.push(_subclass) - 1; }
 
     /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
@@ -187,7 +187,7 @@ namespace FudgeCore {
 
     /**
      * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
-     * Only to be used when functionality that is not added within Fudge is needed.
+     * Only to be used when functionality that is not added within FUDGE is needed.
     */
     public getOimoJoint(): OIMO.Joint {
       return this.joint;
@@ -216,9 +216,11 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.anchor = new Vector3(...<number[]>(Object.values(_mutator.anchor)));
+      if (typeof (_mutator.anchor) !== "undefined")
+        this.anchor = new Vector3(...<number[]>(Object.values(_mutator.anchor)));
       delete _mutator.anchor;
-      this.connectChild(_mutator.nameChildToConnect);
+      if (typeof (_mutator.nameChildToConnect) !== "undefined")
+        this.connectChild(_mutator.nameChildToConnect);
       this.#mutate(_mutator);
       this.deleteFromMutator(_mutator, this.#getMutator());
       super.mutate(_mutator);
@@ -235,9 +237,7 @@ namespace FudgeCore {
     }
 
     #mutate = (_mutator: Mutator): void => {
-      this.internalCollision = _mutator.internalCollision;
-      this.breakForce = _mutator.breakForce;
-      this.breakTorque = _mutator.breakTorque;
+      this.mutateBase(_mutator, ["internalCollision", "breakForce", "breakTorque"]);
     }
 
     protected reduceMutator(_mutator: Mutator): void {
@@ -249,15 +249,15 @@ namespace FudgeCore {
 
     /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
     protected dirtyStatus(): void {
-      Physics.world.changeJointStatus(this);
+      Physics.changeJointStatus(this);
     }
 
     protected addJoint(): void {
-      Physics.world.addJoint(this);
+      Physics.addJoint(this);
     }
 
     protected removeJoint(): void {
-      Physics.world.removeJoint(this);
+      Physics.removeJoint(this);
     }
 
     protected constructJoint(..._configParams: Object[]): void {
@@ -277,6 +277,19 @@ namespace FudgeCore {
     protected deleteFromMutator(_mutator: Mutator, _delete: Mutator): void {
       for (let key in _delete)
         delete _mutator[key];
+    }
+
+    private hndEvent = (_event: Event) => {
+      switch (_event.type) {
+        case EVENT.COMPONENT_ADD:
+          this.node.addEventListener(EVENT.DISCONNECT_JOINT, () => { this.disconnect(); this.dirtyStatus(); }, true);
+          this.dirtyStatus();
+          break;
+        case EVENT.COMPONENT_REMOVE:
+          this.node.removeEventListener(EVENT.DISCONNECT_JOINT, () => { this.disconnect(); this.dirtyStatus(); }, true);
+          this.removeJoint();
+          break;
+      }
     }
   }
 }

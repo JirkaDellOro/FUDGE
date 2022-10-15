@@ -11,13 +11,13 @@ namespace FudgeUserInterface {
     /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
     public copyPaste: { sources: T[], target: T } = { sources: [], target: null };
 
-    /** Retrieve a string to create a label for the table item representing the object  */
+    /** Retrieve a string to create a label for the table item representing the object (appears not to be called yet)  */
     public abstract getLabel(_object: T): string;
 
-    /** Return false to disallow renaming the item/object, or processes the proposed new label */
+    /** Return false to disallow renaming the item/object, or processes the proposed new label (appears not to be called yet) */
     public abstract rename(_object: T, _new: string): boolean;
 
-    public abstract delete(_focussed: T[]): T[];
+    public async delete(_focussed: T[]): Promise<T[]> { return _focussed; }
 
     /** 
      * Return a list of copies of the objects given for copy & paste

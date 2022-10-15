@@ -3,8 +3,8 @@ namespace FudgeCore {
         CALL = "ƒlapse"
     }
     /**
-     * An event that represents a call from a Timer
-     * */
+     * An event that represents a call from a {@link Timer}
+     */
     export class EventTimer {
         public type: EVENT_TIMER = EVENT_TIMER.CALL;
         public target: Timer;

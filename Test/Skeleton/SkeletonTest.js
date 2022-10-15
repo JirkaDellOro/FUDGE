@@ -12,18 +12,18 @@ var SkeletonTest;
         rotatorX.addComponent(new ƒ.ComponentTransform());
         const rotatorY = new ƒ.Node("RotatorY");
         rotatorY.addComponent(new ƒ.ComponentTransform());
-        const zylinder = await createAnimatedCylinder();
-        console.log(zylinder);
+        const cylinder = await createAnimatedCylinder();
+        console.log(cylinder);
         scene.addChild(rotatorX);
         rotatorX.addChild(rotatorY);
-        rotatorY.addChild(zylinder);
+        rotatorY.addChild(cylinder);
         // setup camera
         const camera = new ƒ.Node("Camera");
         camera.addComponent(new ƒ.ComponentCamera());
         camera.addComponent(new ƒ.ComponentTransform());
         camera.getComponent(ƒ.ComponentCamera).clrBackground.setHex("4472C4FF");
         camera.mtxLocal.translateZ(10);
-        camera.mtxLocal.showTo(ƒ.Vector3.ZERO(), camera.mtxLocal.getY());
+        camera.mtxLocal.lookAt(ƒ.Vector3.ZERO(), camera.mtxLocal.getY());
         scene.addChild(camera);
         // setup light
         const cmpLightDirectional = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0.5, 0.5, 0.5)));
@@ -41,9 +41,10 @@ var SkeletonTest;
         ƒ.Loop.start();
     }
     class MeshSkinCylinder extends ƒ.MeshSkin {
+        static ƒskeleton;
         constructor() {
             super();
-            const meshSource = new ƒ.MeshRotation("MeshExtrusion", [
+            const meshSource = new ƒ.MeshRotation("MeshRotation", [
                 new ƒ.Vector2(0, 4),
                 new ƒ.Vector2(1, 4),
                 new ƒ.Vector2(1, 3),
@@ -52,16 +53,16 @@ var SkeletonTest;
                 new ƒ.Vector2(1, 0),
                 new ƒ.Vector2(0, 0)
             ], 6);
-            this.ƒvertices = meshSource.vertices;
-            this.ƒindices = meshSource.indices;
-            const iBones = [];
-            const weights = [];
-            for (let iVertex = 0; iVertex < this.ƒvertices.length; iVertex += 3) {
-                iBones.push(MeshSkinCylinder.skeleton.indexOfBone("LowerBone"), MeshSkinCylinder.skeleton.indexOfBone("UpperBone"), 0, 0);
-                weights.push(1 - this.ƒvertices[iVertex + 1] / 4, this.ƒvertices[iVertex + 1] / 4, 0, 0);
+            this.vertices = Reflect.get(meshSource, "vertices");
+            this.faces = Reflect.get(meshSource, "faces");
+            for (let vertex of this.vertices.originals) {
+                vertex.bones = [
+                    { index: MeshSkinCylinder.skeleton.indexOfBone("LowerBone"), weight: 1 - vertex.position.y / 4 },
+                    { index: MeshSkinCylinder.skeleton.indexOfBone("UpperBone"), weight: vertex.position.y / 4 },
+                    { index: 0, weight: 0 },
+                    { index: 0, weight: 0 }
+                ];
             }
-            this.ƒiBones = new Uint8Array(iBones);
-            this.ƒweights = new Float32Array(weights);
         }
         static get skeleton() {
             if (!this.ƒskeleton) {
@@ -75,7 +76,7 @@ var SkeletonTest;
         }
     }
     async function createAnimatedCylinder() {
-        const zylinder = new ƒ.Node("CylinderAnimated");
+        const cylinder = new ƒ.Node("CylinderAnimated");
         // skeleton serialization test
         const serialization = ƒ.Serializer.serialize(MeshSkinCylinder.skeleton);
         console.log(serialization);
@@ -105,18 +106,20 @@ var SkeletonTest;
             bones: {
                 LowerBone: {
                     components: {
-                        ComponentTransform: [{ "ƒ.ComponentTransform": {
-                                    mtxLocal: {
-                                        scaling: {
-                                            x: sequenceScaling,
-                                            y: sequenceScaling,
-                                            z: sequenceScaling
-                                        },
-                                        translation: {
-                                            y: sequenceTranslation
-                                        }
+                        ComponentTransform: [
+                            {
+                                mtxLocal: {
+                                    scaling: {
+                                        x: sequenceScaling,
+                                        y: sequenceScaling,
+                                        z: sequenceScaling
+                                    },
+                                    translation: {
+                                        y: sequenceTranslation
                                     }
-                                } }]
+                                }
+                            }
+                        ]
                     }
                 }
             }
@@ -124,18 +127,18 @@ var SkeletonTest;
         const cmpAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP);
         skeletonInstance.addComponent(cmpAnimator);
         cmpAnimator.activate(true);
-        zylinder.addChild(skeletonInstance);
+        cylinder.addChild(skeletonInstance);
         // setup component mesh
         const mesh = new MeshSkinCylinder();
         const cmpMesh = new ƒ.ComponentMesh(mesh);
         cmpMesh.mtxPivot.translateY(-2);
         cmpMesh.bindSkeleton(skeletonInstance);
-        zylinder.addComponent(cmpMesh);
-        // setup component material
-        const material = new ƒ.Material("MaterialZylinder", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("White")));
+        cylinder.addComponent(cmpMesh);
+        // setup component material 
+        const material = new ƒ.Material("MaterialCylinder", ƒ.ShaderGouraudSkin, new ƒ.CoatRemissive(ƒ.Color.CSS("White")));
         const cmpMaterial = new ƒ.ComponentMaterial(material);
-        zylinder.addComponent(cmpMaterial);
-        return zylinder;
+        cylinder.addComponent(cmpMaterial);
+        return cylinder;
     }
     function update(_viewport, _mtxRotatorX, _mtxRotatorY) {
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT]))

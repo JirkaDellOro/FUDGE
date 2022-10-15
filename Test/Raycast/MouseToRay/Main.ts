@@ -24,24 +24,22 @@ namespace MouseToRay {
     ƒ.Debug.log("Viewport", viewport);
 
     // setup event handling
-    viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
-    viewport.activateWheelEvent(ƒ.EVENT_WHEEL.WHEEL, true);
-    viewport.addEventListener(ƒ.EVENT_POINTER.MOVE, hndPointerMove);
-    viewport.addEventListener(ƒ.EVENT_WHEEL.WHEEL, hndWheelMove);
+    viewport.canvas.addEventListener("pointermove", hndPointerMove);
+    viewport.canvas.addEventListener("wheel", hndWheelMove);
 
     ƒ.Debug.log("Game", root);
 
     viewport.draw();
   }
 
-  function hndPointerMove(_event: ƒ.EventPointer): void {
-    ray = viewport.getRayFromClient(new ƒ.Vector2(_event.pointerX, _event.pointerY));
+  function hndPointerMove(_event: PointerEvent): void {
+    ray = viewport.getRayFromClient(new ƒ.Vector2(_event.offsetX, _event.offsetY));
     positionCube();
 
     let rayDistance: ƒ.Vector3 = ray.getDistance(ƒ.Vector3.ZERO());
     let posCenter: ƒ.Vector2 = viewport.pointWorldToClient(ƒ.Vector3.ZERO());
     let posCube: ƒ.Vector2 = viewport.pointWorldToClient(ƒ.Vector3.SCALE(rayDistance, -1));
-    let crc2: CanvasRenderingContext2D = viewport.getContext();
+    let crc2: CanvasRenderingContext2D = viewport.context;
     crc2.moveTo(posCube.x, posCube.y);
     crc2.lineTo(posCenter.x, posCenter.y);
     crc2.strokeStyle = "white";
@@ -82,7 +80,7 @@ namespace MouseToRay {
     root.addChild(new ƒAid.NodeCoordinateSystem());
     ƒAid.addStandardLightComponents(root);
 
-    let cube: ƒAid.Node = new ƒAid.Node("Cube", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("RED"))), new ƒ.MeshCube());
+    let cube: ƒAid.Node = new ƒAid.Node("Cube", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("RED"))), new ƒ.MeshCube());
     root.addChild(cube);
   }
 }

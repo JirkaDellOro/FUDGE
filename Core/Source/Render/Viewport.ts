@@ -4,9 +4,10 @@ namespace FudgeCore {
    * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
    * through a series of {@link Framing} objects. The stages involved are in order of rendering
    * {@link Render}.viewport -> {@link Viewport}.source -> {@link Viewport}.destination -> DOM-Canvas -> Client(CSS)
-   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
+   * @link https://github.com/JirkaDellOro/FUDGE/wiki/Viewport
    */
-  export class Viewport extends EventTargetƒ {
+  export class Viewport extends EventTargetUnified {
     private static focus: Viewport;
 
     public name: string = "Viewport"; // The name to call this viewport by.
@@ -27,6 +28,7 @@ namespace FudgeCore {
     public adjustingCamera: boolean = true;
     public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
 
+    public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
 
     #branch: Node = null; // The to render with all its descendants.
     #crc2: CanvasRenderingContext2D = null;
@@ -42,6 +44,19 @@ namespace FudgeCore {
     }
 
     /**
+     * Retrieve the destination canvas
+     */
+    public get canvas(): HTMLCanvasElement {
+      return this.#canvas;
+    }
+    /**
+     * Retrieve the 2D-context attached to the destination canvas
+     */
+    public get context(): CanvasRenderingContext2D {
+      return this.#crc2;
+    }
+
+    /**
      * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
      */
     public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
@@ -49,23 +64,12 @@ namespace FudgeCore {
       this.camera = _camera;
       this.#canvas = _canvas;
       this.#crc2 = _canvas.getContext("2d");
+      this.#canvas.tabIndex = 0; // can get focus and receive keyboard events
 
       this.rectSource = Render.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
 
       this.setBranch(_branch);
-    }
-    /**
-     * Retrieve the destination canvas
-     */
-    public getCanvas(): HTMLCanvasElement {
-      return this.#canvas;
-    }
-    /**
-     * Retrieve the 2D-context attached to the destination canvas
-     */
-    public getContext(): CanvasRenderingContext2D {
-      return this.#crc2;
     }
     /**
      * Retrieve the size of the destination canvas as a rectangle, x and y are always 0 
@@ -86,16 +90,9 @@ namespace FudgeCore {
      * Set the branch to be drawn in the viewport.
      */
     public setBranch(_branch: Node): void {
-      // TODO: figure out what the event handling was created for. Doesn't have another effect than information on the console (deactivated)
-      if (this.#branch) {
-        this.#branch.removeEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
-        this.#branch.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
-      }
+      if (_branch)
+        _branch.dispatchEvent(new Event(EVENT.ATTACH_BRANCH));
       this.#branch = _branch;
-      if (this.#branch) {
-        this.#branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
-        this.#branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
-      }
     }
 
     /**
@@ -103,14 +100,6 @@ namespace FudgeCore {
      */
     public getBranch(): Node {
       return this.#branch;
-    }
-
-    /**
-     * Logs this viewports scenegraph to the console.
-     * TODO: remove this method, since it's implemented in Debug
-     */
-    public showSceneGraph(): void {
-      Debug.branch(this.#branch);
     }
 
     // #region Drawing
@@ -137,7 +126,7 @@ namespace FudgeCore {
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
-        Physics.world.draw(this.camera, this.physicsDebugMode);
+        Physics.draw(this.camera, this.physicsDebugMode);
       }
 
       this.#crc2.imageSmoothingEnabled = false;
@@ -155,9 +144,36 @@ namespace FudgeCore {
       let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
+      this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
       Render.prepare(this.#branch, null, mtxRoot);
+      this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
+      this.componentsPick = Render.componentsPick;
     }
 
+    /**
+     * Performs a pick on all {@link ComponentPick}s in the branch of this viewport
+     * using a ray from its camera through the client coordinates given in the event.
+     * Dispatches the event to all nodes hit.
+     */
+    public dispatchPointerEvent(_event: PointerEvent): void {
+      let posClient: Vector2 = new Vector2(_event.clientX, _event.clientY);
+      let ray: Ray = this.getRayFromClient(posClient);
+      // let cameraPicks: RecycableArray<Node> = Recycler.get(RecycableArray); //TODO: think about optimization later
+      let cameraPicks: Node[] = [];
+      let otherPicks: ComponentPick[] = [];
+      for (let cmpPick of this.componentsPick)
+        cmpPick.pick == PICK.CAMERA ? cameraPicks.push(cmpPick.node) : otherPicks.push(cmpPick);
+
+      if (cameraPicks.length) {
+        let picks: Pick[] = Picker.pickCamera(cameraPicks, this.camera, this.pointClientToProjection(posClient));
+        for (let pick of picks)
+          pick.node.dispatchEvent(_event);
+      }
+
+      for (let cmpPick of otherPicks) {
+        cmpPick.pickAndDispatch(ray, _event);
+      }
+    }
 
     /**
      * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
@@ -197,8 +213,12 @@ namespace FudgeCore {
      */
     public adjustCamera(): void {
       let rect: Rectangle = Render.getRenderRectangle();
+      // if (this.camera.getProjection() == PROJECTION.ORTHOGRAPHIC)
+      //   this.camera.projectOrthographic(-rect.width / 20, rect.width / 20, rect.height / 20, -rect.height / 20);
+      // else
       this.camera.projectCentral(
-        rect.width / rect.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar());
+        rect.width / rect.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar()
+      );
     }
     // #endregion
 
@@ -313,130 +333,5 @@ namespace FudgeCore {
       let screen: Vector2 = new Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
       return screen;
     }
-
-    /**
-     * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events. 
-     * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire {@link Eventƒ}s accordingly.
-     * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
-     */
-    public setFocus(_on: boolean): void {
-      if (_on) {
-        if (Viewport.focus == this)
-          return;
-        if (Viewport.focus)
-          Viewport.focus.dispatchEvent(new Event(EVENT.FOCUS_OUT));
-        Viewport.focus = this;
-        this.dispatchEvent(new Event(EVENT.FOCUS_IN));
-      }
-      else {
-        if (Viewport.focus != this)
-          return;
-
-        this.dispatchEvent(new Event(EVENT.FOCUS_OUT));
-        Viewport.focus = null;
-      }
-    }
-
-    /**
-     * De- / Activates the given pointer event to be propagated into the viewport as FUDGE-Event 
-     */
-    public activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void {
-      this.activateEvent(this.#canvas, _type, this.hndPointerEvent, _on);
-    }
-
-    /**
-     * De- / Activates the given keyboard event to be propagated into the viewport as FUDGE-Event
-     */
-    public activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void {
-      this.activateEvent(this.#canvas.ownerDocument, _type, this.hndKeyboardEvent, _on);
-    }
-
-    /**
-     * De- / Activates the given drag-drop event to be propagated into the viewport as FUDGE-Event
-     */
-    public activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void {
-      if (_type == EVENT_DRAGDROP.START)
-        this.#canvas.draggable = _on;
-      this.activateEvent(this.#canvas, _type, this.hndDragDropEvent, _on);
-    }
-
-    /**
-     * De- / Activates the wheel event to be propagated into the viewport as FUDGE-Event
-     */
-    public activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void {
-      this.activateEvent(this.#canvas, _type, this.hndWheelEvent, _on);
-    }
-
-    /**
-     * Handle drag-drop events and dispatch to viewport as FUDGE-Event
-     */
-    private hndDragDropEvent: EventListener = (_event: Event) => {
-      let _dragevent: EventDragDrop = <EventDragDrop>_event;
-      switch (_dragevent.type) {
-        case "dragover":
-        case "drop":
-          _dragevent.preventDefault();
-          _dragevent.dataTransfer.effectAllowed = "none";
-          break;
-        case "dragstart":
-          // just dummy data,  valid data should be set in handler registered by the user
-          _dragevent.dataTransfer.setData("text", "Hallo");
-          // TODO: check if there is a better solution to hide the ghost image of the draggable object
-          _dragevent.dataTransfer.setDragImage(new Image(), 0, 0);
-          break;
-      }
-      let event: EventDragDrop = new EventDragDrop("ƒ" + _event.type, _dragevent);
-      this.addCanvasPosition(event);
-      this.dispatchEvent(event);
-    }
-
-    /**
-     * Add position of the pointer mapped to canvas-coordinates as canvasX, canvasY to the event
-     */
-    private addCanvasPosition(event: EventPointer | EventDragDrop): void {
-      event.canvasX = this.#canvas.width * event.pointerX / event.clientRect.width;
-      event.canvasY = this.#canvas.height * event.pointerY / event.clientRect.height;
-    }
-
-    /**
-     * Handle pointer events and dispatch to viewport as FUDGE-Event
-     */
-    private hndPointerEvent: EventListener = (_event: Event) => {
-      let event: EventPointer = new EventPointer("ƒ" + _event.type, <EventPointer>_event);
-      this.addCanvasPosition(event);
-      this.dispatchEvent(event);
-    }
-
-    /**
-     * Handle keyboard events and dispatch to viewport as FUDGE-Event, if the viewport has the focus
-     */
-    private hndKeyboardEvent: EventListener = (_event: Event) => {
-      if (!this.hasFocus)
-        return;
-      let event: EventKeyboard = new EventKeyboard("ƒ" + _event.type, <EventKeyboard>_event);
-      this.dispatchEvent(event);
-    }
-
-    /**
-     * Handle wheel event and dispatch to viewport as FUDGE-Event
-     */
-    private hndWheelEvent: EventListener = (_event: Event) => {
-      let event: EventWheel = new EventWheel("ƒ" + _event.type, <EventWheel>_event);
-      this.dispatchEvent(event);
-    }
-
-    private activateEvent(_target: EventTarget, _type: string, _handler: EventListener, _on: boolean): void {
-      _type = _type.slice(1); // chip the ƒlorin
-      if (_on)
-        _target.addEventListener(_type, _handler);
-      else
-        _target.removeEventListener(_type, _handler);
-    }
-
-    private hndComponentEvent(_event: Event): void {
-      // TODO: find out what the idea was here...
-      // Debug.fudge(_event);
-    }
-    // #endregion
   }
 }

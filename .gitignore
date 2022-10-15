@@ -1,5 +1,4 @@
 *.tsbuildinfo
-.vscode
 FudgeCore.js.map
 FudgeAid.js.map
 node_modules

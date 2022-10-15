@@ -13,8 +13,8 @@ namespace Fudge {
    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
-      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
@@ -53,8 +53,8 @@ namespace Fudge {
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
-        case EVENT_EDITOR.SET_PROJECT:
-        case EVENT_EDITOR.UPDATE:
+        case EVENT_EDITOR.SELECT:
+        case EVENT_EDITOR.MODIFY:
           this.listScripts();
           break;
         // case ƒui.EVENT.SELECT:

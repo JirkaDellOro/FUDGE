@@ -23,7 +23,7 @@ var SkeletonTest;
         camera.addComponent(new ƒ.ComponentTransform());
         camera.getComponent(ƒ.ComponentCamera).clrBackground.setHex("4472C4FF");
         camera.mtxLocal.translateZ(10);
-        camera.mtxLocal.showTo(ƒ.Vector3.ZERO(), camera.mtxLocal.getY());
+        camera.mtxLocal.lookAt(ƒ.Vector3.ZERO(), camera.mtxLocal.getY());
         scene.addChild(camera);
         // setup light
         const cmpLightDirectional = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0.5, 0.5, 0.5)));

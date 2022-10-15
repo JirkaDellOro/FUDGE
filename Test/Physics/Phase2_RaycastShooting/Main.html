@@ -2,48 +2,58 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Fudge and Physics - Default</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="../../../../Physics/OimoPhysics.js"></script>
-  <script src="../../../../Core/Build/FudgeCore.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Fudge and Physics - Default</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="../../../Physics/OimoPhysics.js"></script>
+    <script src="../../../Core/Build/FudgeCore.js"></script>
 </head>
 
 <body>
-  <script src="../../dialog-polyfill.min.js"></script>
-  <script src="../../TestInstructions.js"></script>
-  <script>
-    TestInstructions.display({
-      Name: "Type the name of the test here",
-      Test: [
-        "Describe what is actually being tested here",
-      ],
-      Setup: [
-        "Explain the setup of the scene",
-        "Use multilple lines separated by comma"
-      ],
-      Act: [
-        "Describe what the tester can do",
-      ],
-      Observe: [
-        "Describe what the tester should pay attention to",
-      ],
-      Control: [
-        "Describe how the tester can perform actions, which controls to use",
-      ],
-      Expect: [
-        "Describe what the tester is supposed to see, which desired behavior is supposed to be observed while testing",
-      ]
-    });
-  </script>
+    <script src="../../dialog-polyfill.min.js"></script>
+    <script src="../../TestInstructions.js"></script>
+    <script>
+        TestInstructions.display({
+            Name: "Raycast - Following Transforms - Detecting Bodies",
+            Test: [
+                "If a raycast is shot out of the 'hand' in the <b>correct direction</b>,",
+                "even when the body is changing it's direction dynamically.",
+                "Correct detection of bodies in the world",
+                "<b>Latency</b> between physical simulation and FUDGE visualization."
+            ],
+            Setup: [
+                "A player controlled raycast in the center of the scene",
+                "that is continously (every frame) firing a raycast in it's forward direction",
+                "Bodies that can be detected by the raycast"
+            ],
+            Act: [
+                "Turn/Move the player character to change the raycast result",
+            ],
+            Observe: [
+                "Raycast direction",
+                "Response of raycast 'hitting' a body",
+                "length of raycast - hitpoint"
+            ],
+            Control: [
+                "Movemouse left/right to turn the player",
+                "wasd to move"
+            ],
+            Expect: [
+                "If a body is hit the console is indicating a hit and a name, so the detection receives values",
+                "The direction of the raycast points towards the same direction the 'hand' does and never lags behind,",
+                "more than 'one' frame.",
+                "The hitpointer indicates corectly in what distance and where the raycast hit the body"
+            ]
+        });
+    </script>
 
-  <h1>Fudge_Physics - Raycast Testing</h1>
-  <h2 id="FPS">FPS</h2>
-  <canvas width="600" height="400"></canvas>
-  <script src="Main.js"></script>
-  <p>Move - WASD, Turn - MouseMovement</p>
+    <h1>Fudge_Physics - Raycast Testing</h1>
+    <h2 id="FPS">FPS</h2>
+    <canvas width="600" height="400"></canvas>
+    <script src="Main.js"></script>
+    <p>Move - WASD, Turn - MouseMovement</p>
 </body>
 
 </html>

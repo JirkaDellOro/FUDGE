@@ -23,15 +23,15 @@ namespace FudgeUserInterface {
       content.id = "content";
       Dialog.dom.appendChild(content);
 
-      let div: HTMLDivElement = document.createElement("div");
-      div.innerHTML = "<p>" + _callToAction + "</p>";
+      let footer: HTMLElement = document.createElement("footer");
+      footer.innerHTML = "<p>" + _callToAction + "</p>";
       let btnCancel: HTMLButtonElement = document.createElement("button");
       btnCancel.innerHTML = _cancel;
-      div.appendChild(btnCancel);
+      footer.appendChild(btnCancel);
       let btnOk: HTMLButtonElement = document.createElement("button");
       btnOk.innerHTML = _ok;
-      div.appendChild(btnOk);
-      Dialog.dom.appendChild(div);
+      footer.appendChild(btnOk);
+      Dialog.dom.appendChild(footer);
       if (_modal)
         //@ts-ignore
         Dialog.dom.showModal();
@@ -44,7 +44,11 @@ namespace FudgeUserInterface {
           btnCancel.removeEventListener("click", hndButton);
           btnOk.removeEventListener("click", hndButton);
           if (_event.target == btnOk)
-            Controller.updateMutator(content, _data);
+            try {
+              Controller.updateMutator(content, _data);
+            } catch (_e) {
+              ƒ.Debug.info(_e);
+            }
           //@ts-ignore
           Dialog.dom.close();
           document.body.removeChild(Dialog.dom);

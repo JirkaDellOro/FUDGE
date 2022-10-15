@@ -11,7 +11,7 @@ var PickRadius;
         root.replaceChild(zoo, radii);
         root.appendChild(zoo);
         let meshShpere = new ƒ.MeshSphere("BoundingSphere", 40, 40);
-        let material = new ƒ.Material("Transparent", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white", 0.5)));
+        let material = new ƒ.Material("Transparent", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("white", 0.5)));
         for (let child of zoo.getChildren()) {
             let sphere = new ƒAid.Node("BoundingSphere", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2)), material, meshShpere);
             sphere.mtxLocal.scale(ƒ.Vector3.ONE(child.radius));
@@ -25,9 +25,10 @@ var PickRadius;
         sphere.getComponent(ƒ.ComponentMaterial).sortForAlpha = true;
         // radii.appendChild(sphere);
         ƒ.Debug.branch(root);
-        viewport.getCanvas().addEventListener("mousemove", pickWorldSpace);
+        viewport.canvas.addEventListener("mousemove", pickWorldSpace);
         function pickWorldSpace(_event) {
             let ray = viewport.getRayFromClient(new ƒ.Vector2(_event.clientX, _event.clientY));
+            console.log(_event.clientX, _event.clientY);
             ƒ.Debug.group("Pick3D");
             for (let node of zoo.getIterator()) {
                 let cmpMesh = node.getComponent(ƒ.ComponentMesh);

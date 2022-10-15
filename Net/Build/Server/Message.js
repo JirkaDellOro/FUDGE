@@ -34,6 +34,12 @@ var FudgeNet;
         /** dissolve peer-to-peer-connection between the client identified with `idTarget` and all the peers
          * identified by the array giwen with `content.peers` or to all peers the client is connected to, if content.peers is undefined */
         COMMAND["DISCONNECT_PEERS"] = "disconnectPeers";
+        /** sent to the server to create a new room and return its id */
+        COMMAND["ROOM_CREATE"] = "roomCreate";
+        /** sent to the server and back to the calling client to retrieve an array of available room ids */
+        COMMAND["ROOM_GET_IDS"] = "roomGetIds";
+        /** sent to the server to join the calling client to the room given with the id, sent back to all clients in the room after */
+        COMMAND["ROOM_ENTER"] = "roomEnter";
     })(COMMAND = FudgeNet.COMMAND || (FudgeNet.COMMAND = {}));
     /**
      * Defines the route the message should take.
