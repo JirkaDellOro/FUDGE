@@ -693,7 +693,6 @@ declare namespace FudgeCore {
         static decorate(_constructor: Function): void;
         static getVertexShaderSource(this: ShaderParticleSystem): string;
         static getFragmentShaderSource(this: ShaderParticleSystem): string;
-        protected static appendDefines(_shader: string, _defines: string[]): string;
         private static renameVariables;
         private static generateVariables;
         private static generateTransformations;

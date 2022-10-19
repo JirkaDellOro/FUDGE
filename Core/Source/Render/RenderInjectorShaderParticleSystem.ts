@@ -130,17 +130,6 @@ namespace FudgeCore {
     }
     
     //#region code generation
-    protected static appendDefines(_shader: string, _defines: string[]): string {
-      if (!_defines)
-        return _shader;
-
-      let code: string = `#version 300 es\n`;
-      for (let define of _defines)
-        code += `#define ${define}\n`;
-
-      return _shader.replace("#version 300 es", code);
-    }
-
     private static renameVariables(_data: ParticleData.System): ParticleData.System {
       let variableMap: {[key: string]: string} = {};
       if (_data.variables)
