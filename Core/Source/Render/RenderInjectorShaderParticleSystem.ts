@@ -92,15 +92,7 @@ namespace FudgeCore {
     };
 
     public static override decorate(_constructor: Function): void {
-      Object.defineProperty(_constructor.prototype, "useProgram", {
-        value: RenderInjectorShader.useProgram
-      });
-      Object.defineProperty(_constructor.prototype, "deleteProgram", {
-        value: RenderInjectorShader.deleteProgram
-      });
-      Object.defineProperty(_constructor.prototype, "createProgram", {
-        value: RenderInjectorShader.createProgram
-      });
+      super.decorate(_constructor.prototype);
       Object.defineProperty(_constructor.prototype, "getVertexShaderSource", {
         value: RenderInjectorShaderParticleSystem.getVertexShaderSource
       });

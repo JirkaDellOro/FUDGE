@@ -101,7 +101,6 @@ namespace FudgeCore {
       if (!this.shaderToShaderParticleSystem.has(_source)) {
         let particleShader: ShaderParticleSystem = new ShaderParticleSystem();
         particleShader.data = this.data;
-        particleShader.define.push(..._source.define);
         particleShader.vertexShaderSource = _source.getVertexShaderSource();
         particleShader.fragmentShaderSource = _source.getFragmentShaderSource();
         this.shaderToShaderParticleSystem.set(_source, particleShader);
