@@ -483,7 +483,7 @@ declare namespace Fudge {
     class ViewParticleSystem extends View {
         static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[];
         static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[];
-        static readonly COLOR_KEYS: (keyof ƒ.ParticleData.System["color"])[];
+        static readonly COLOR_KEYS: (keyof ƒ.ParticleData.Color)[];
         private particleSystem;
         private data;
         private tree;

@@ -6,13 +6,20 @@ namespace FudgeCore {
   export namespace ParticleData {
 
     export interface System {
-      variables?: {[name: string]: Expression};
-      color?: {r?: Expression, g?: Expression, b?: Expression, a?: Expression};
+      variables?: { [name: string]: Expression };
+      color?: Color;
       mtxLocal?: Transformation[];
       mtxWorld?: Transformation[];
     }
-
-    export type Recursive = System | System["variables"] | System["color"] | System["mtxLocal"] | Transformation | Expression;
+    
+    export type Recursive = System | System["variables"] | Color | System["mtxLocal"] | Transformation | Expression;
+    
+    export interface Color {
+      r?: Expression;
+      g?: Expression; 
+      b?: Expression; 
+      a?: Expression;
+    }
 
     export type Expression = Function | Variable | Constant;
 

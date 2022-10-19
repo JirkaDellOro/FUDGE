@@ -238,7 +238,7 @@ namespace FudgeCore {
       return code;
     }
 
-    private static generateColor(_color: ParticleData.System["color"]): string {
+    private static generateColor(_color: ParticleData.Color): string {
       if (!_color) return "";
       
       let [r, g, b, a]: [string, string, string, string] = [_color.r, _color.g, _color.b, _color.a]

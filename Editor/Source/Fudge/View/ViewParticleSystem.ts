@@ -9,7 +9,7 @@ namespace Fudge {
   export class ViewParticleSystem extends View {
     public static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[] = ["variables", "mtxLocal", "mtxWorld", "color"];
     public static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[] = ["x", "y", "z"];
-    public static readonly COLOR_KEYS: (keyof ƒ.ParticleData.System["color"])[] = ["r", "g", "b", "a"];
+    public static readonly COLOR_KEYS: (keyof ƒ.ParticleData.Color)[] = ["r", "g", "b", "a"];
 
     private particleSystem: ƒ.ParticleSystem;
     private data: ƒ.ParticleData.System;

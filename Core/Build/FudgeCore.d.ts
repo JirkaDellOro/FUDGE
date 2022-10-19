@@ -4224,16 +4224,17 @@ declare namespace FudgeCore {
             variables?: {
                 [name: string]: Expression;
             };
-            color?: {
-                r?: Expression;
-                g?: Expression;
-                b?: Expression;
-                a?: Expression;
-            };
+            color?: Color;
             mtxLocal?: Transformation[];
             mtxWorld?: Transformation[];
         }
-        type Recursive = System | System["variables"] | System["color"] | System["mtxLocal"] | Transformation | Expression;
+        type Recursive = System | System["variables"] | Color | System["mtxLocal"] | Transformation | Expression;
+        interface Color {
+            r?: Expression;
+            g?: Expression;
+            b?: Expression;
+            a?: Expression;
+        }
         type Expression = Function | Variable | Constant;
         interface Function {
             function: FUNCTION;
