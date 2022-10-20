@@ -3925,6 +3925,7 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF>;
+        private createVerticesAndFaces;
     }
 }
 declare namespace FudgeCore {
@@ -4089,6 +4090,7 @@ declare namespace FudgeCore {
         load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
         useRenderBuffers(_shader: ShaderInterface, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
         protected reduceMutator(_mutator: Mutator): void;
+        private createBones;
     }
 }
 declare namespace FudgeCore {
