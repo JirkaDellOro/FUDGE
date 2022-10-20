@@ -41,7 +41,6 @@ var SkeletonTest;
         ƒ.Loop.start();
     }
     class MeshSkinCylinder extends ƒ.MeshSkin {
-        static ƒskeleton;
         constructor() {
             super();
             const meshSource = new ƒ.MeshRotation("MeshRotation", [
@@ -135,7 +134,7 @@ var SkeletonTest;
         cmpMesh.bindSkeleton(skeletonInstance);
         cylinder.addComponent(cmpMesh);
         // setup component material 
-        const material = new ƒ.Material("MaterialCylinder", ƒ.ShaderGouraudSkin, new ƒ.CoatRemissive(ƒ.Color.CSS("White")));
+        const material = new ƒ.Material("MaterialCylinder", ƒ.ShaderFlatSkin, new ƒ.CoatRemissive(ƒ.Color.CSS("White")));
         const cmpMaterial = new ƒ.ComponentMaterial(material);
         cylinder.addComponent(cmpMaterial);
         return cylinder;

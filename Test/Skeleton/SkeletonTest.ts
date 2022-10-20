@@ -159,7 +159,7 @@ namespace SkeletonTest {
     cylinder.addComponent(cmpMesh);
 
     // setup component material 
-    const material: ƒ.Material = new ƒ.Material("MaterialCylinder", ƒ.ShaderGouraudSkin, new ƒ.CoatRemissive(ƒ.Color.CSS("White")));
+    const material: ƒ.Material = new ƒ.Material("MaterialCylinder", ƒ.ShaderFlatSkin, new ƒ.CoatRemissive(ƒ.Color.CSS("White")));
     const cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(material);
     cylinder.addComponent(cmpMaterial);
 
