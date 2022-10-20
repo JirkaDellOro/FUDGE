@@ -461,7 +461,7 @@ namespace FudgeCore {
         this.vectors.translation = this.#vectors.translation;
         this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
       }
-      return this.vectors.translation; // .clone;
+      return this.vectors.translation.clone;
     }
 
     /** 
