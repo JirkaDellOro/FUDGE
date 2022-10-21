@@ -1774,22 +1774,22 @@ var FudgeUserInterface;
                     this.dispatchEvent(new Event("delete" /* DELETE */, { bubbles: true }));
                     break;
                 case ƒ.KEYBOARD_CODE.C:
-                    if (!_event.ctrlKey)
-                        break;
-                    _event.preventDefault();
-                    this.dispatchEvent(new Event("copy" /* COPY */, { bubbles: true }));
+                    if (_event.ctrlKey || _event.metaKey) {
+                        _event.preventDefault();
+                        this.dispatchEvent(new Event("copy" /* COPY */, { bubbles: true }));
+                    }
                     break;
                 case ƒ.KEYBOARD_CODE.V:
-                    if (!_event.ctrlKey)
-                        break;
-                    _event.preventDefault();
-                    this.dispatchEvent(new Event("paste" /* PASTE */, { bubbles: true }));
+                    if (_event.ctrlKey || _event.metaKey) {
+                        _event.preventDefault();
+                        this.dispatchEvent(new Event("paste" /* PASTE */, { bubbles: true }));
+                    }
                     break;
                 case ƒ.KEYBOARD_CODE.X:
-                    if (!_event.ctrlKey)
-                        break;
-                    _event.preventDefault();
-                    this.dispatchEvent(new Event("cut" /* CUT */, { bubbles: true }));
+                    if (_event.ctrlKey || _event.metaKey) {
+                        _event.preventDefault();
+                        this.dispatchEvent(new Event("cut" /* CUT */, { bubbles: true }));
+                    }
                     break;
             }
         };
@@ -2330,22 +2330,22 @@ var FudgeUserInterface;
                     this.dispatchEvent(new Event("delete" /* DELETE */, { bubbles: true }));
                     break;
                 case ƒ.KEYBOARD_CODE.C:
-                    if (!_event.ctrlKey)
-                        break;
-                    _event.preventDefault();
-                    this.dispatchEvent(new Event("copy" /* COPY */, { bubbles: true }));
+                    if (_event.ctrlKey || _event.metaKey) {
+                        _event.preventDefault();
+                        this.dispatchEvent(new Event("copy" /* COPY */, { bubbles: true }));
+                    }
                     break;
                 case ƒ.KEYBOARD_CODE.V:
-                    if (!_event.ctrlKey)
-                        break;
-                    _event.preventDefault();
-                    this.dispatchEvent(new Event("paste" /* PASTE */, { bubbles: true }));
+                    if (_event.ctrlKey || _event.metaKey) {
+                        _event.preventDefault();
+                        this.dispatchEvent(new Event("paste" /* PASTE */, { bubbles: true }));
+                    }
                     break;
                 case ƒ.KEYBOARD_CODE.X:
-                    if (!_event.ctrlKey)
-                        break;
-                    _event.preventDefault();
-                    this.dispatchEvent(new Event("cut" /* CUT */, { bubbles: true }));
+                    if (_event.ctrlKey || _event.metaKey) {
+                        _event.preventDefault();
+                        this.dispatchEvent(new Event("cut" /* CUT */, { bubbles: true }));
+                    }
                     break;
             }
         };

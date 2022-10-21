@@ -165,7 +165,7 @@ namespace FudgeUserInterface {
       this.appendChild(this.label);
 
       this.refreshAttributes();
-      
+
       this.tabIndex = 0;
     }
 
@@ -213,22 +213,22 @@ namespace FudgeUserInterface {
           this.dispatchEvent(new Event(EVENT.DELETE, { bubbles: true }));
           break;
         case ƒ.KEYBOARD_CODE.C:
-          if (!_event.ctrlKey)
-            break;
-          _event.preventDefault();
-          this.dispatchEvent(new Event(EVENT.COPY, { bubbles: true }));
+          if (_event.ctrlKey || _event.metaKey) {
+            _event.preventDefault();
+            this.dispatchEvent(new Event(EVENT.COPY, { bubbles: true }));
+          }
           break;
         case ƒ.KEYBOARD_CODE.V:
-          if (!_event.ctrlKey)
-            break;
-          _event.preventDefault();
-          this.dispatchEvent(new Event(EVENT.PASTE, { bubbles: true }));
+          if (_event.ctrlKey || _event.metaKey) {
+            _event.preventDefault();
+            this.dispatchEvent(new Event(EVENT.PASTE, { bubbles: true }));
+          }
           break;
         case ƒ.KEYBOARD_CODE.X:
-          if (!_event.ctrlKey)
-            break;
-          _event.preventDefault();
-          this.dispatchEvent(new Event(EVENT.CUT, { bubbles: true }));
+          if (_event.ctrlKey || _event.metaKey) {
+            _event.preventDefault();
+            this.dispatchEvent(new Event(EVENT.CUT, { bubbles: true }));
+          }
           break;
       }
     }
