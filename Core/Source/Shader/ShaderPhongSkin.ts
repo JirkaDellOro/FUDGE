@@ -6,7 +6,7 @@ namespace FudgeCore {
       "LIGHT",
       "CAMERA",
       "PHONG",
-      "FLAT"
+      "SKIN"
     ];
 
     public static getCoat(): typeof Coat { return CoatRemissive; }
