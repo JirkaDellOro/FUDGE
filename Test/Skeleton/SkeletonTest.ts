@@ -47,7 +47,8 @@ namespace SkeletonTest {
     console.log(viewport);
 
     // run loop
-    ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal));
+    ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, () =>
+      update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal, cylinder.getComponent(ƒ.ComponentMaterial).material));
     ƒ.Loop.start();
   }
 
@@ -166,7 +167,7 @@ namespace SkeletonTest {
     return cylinder;
   }
 
-  function update(_viewport: ƒ.Viewport, _mtxRotatorX: ƒ.Matrix4x4, _mtxRotatorY: ƒ.Matrix4x4): void {
+  function update(_viewport: ƒ.Viewport, _mtxRotatorX: ƒ.Matrix4x4, _mtxRotatorY: ƒ.Matrix4x4, _material: ƒ.Material): void {
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT])) _mtxRotatorY.rotateY(3);
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_UP])) _mtxRotatorX.rotateX(-3);
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_LEFT])) _mtxRotatorY.rotateY(-3);
@@ -175,6 +176,9 @@ namespace SkeletonTest {
       _mtxRotatorX.set(ƒ.Matrix4x4.IDENTITY());
       _mtxRotatorY.set(ƒ.Matrix4x4.IDENTITY());
     }
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) _material.setShader(ƒ.ShaderFlatSkin);
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.G])) _material.setShader(ƒ.ShaderGouraudSkin);
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H])) _material.setShader(ƒ.ShaderPhongSkin);
     _viewport.draw();
   }
 }
