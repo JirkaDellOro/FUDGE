@@ -656,6 +656,7 @@ namespace Fudge {
 
     private hndPointerDown = (_event: PointerEvent): void => {
       _event.preventDefault();
+      this.canvas.focus();
       const findObject: (_object: ViewAnimationKey | ViewAnimationEvent) => boolean = _object => this.crc2.isPointInPath(_object.path2D, _event.offsetX, _event.offsetY);
       switch (_event.buttons) {
         case 1:
