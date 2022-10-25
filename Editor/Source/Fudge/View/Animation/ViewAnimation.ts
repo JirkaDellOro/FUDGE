@@ -4,7 +4,7 @@ namespace Fudge {
 
   /**
    * View and edit the animatable properties of a node with an attached component animation.
-   * @authors Jonas Plotzky, HFU, 2022
+   * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
   export class ViewAnimation extends View {
     private node: ƒ.Node;

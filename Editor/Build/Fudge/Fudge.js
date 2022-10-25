@@ -2622,7 +2622,7 @@ var Fudge;
     var ƒui = FudgeUserInterface;
     /**
      * View and edit the animatable properties of a node with an attached component animation.
-     * @authors Jonas Plotzky, HFU, 2022
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimation extends Fudge.View {
         node;
