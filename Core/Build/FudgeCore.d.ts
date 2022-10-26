@@ -665,7 +665,7 @@ declare namespace FudgeCore {
             MULTIPLICATION = "multiplication",
             DIVISION = "division",
             MODULO = "modulo",
-            LINEAR = "linear",
+            POWER = "power",
             POLYNOMIAL3 = "polynomial3",
             SQUARE_ROOT = "squareRoot",
             RANDOM = "random",

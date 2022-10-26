@@ -294,7 +294,15 @@
               "function": "randomRange",
               "parameters": [
                 {
-                  "value": "particleId"
+                  "function": "addition",
+                  "parameters": [
+                    {
+                      "value": "particleId"
+                    },
+                    {
+                      "value": 1
+                    }
+                  ]
                 },
                 {
                   "value": "minWidth"
