@@ -5,8 +5,7 @@ namespace FudgeCore {
         static #xrReferenceSpace: XRReferenceSpace = null;
         static #xrFrame: XRFrame = null;
         static #xrCamera: ComponentCamera = null;
-
-
+        static #oldMtx: Matrix4x4 = new Matrix4x4;
         constructor() {
             super();
         }
@@ -31,13 +30,18 @@ namespace FudgeCore {
                 return XRViewport.#xrReferenceSpace;
             else return null;
         }
+
         //#endregion
 
         // DAS MUSS RAUS HIER 
         //#region VR EVENTS
 
         //#endregion
-
+        public static setXRRigidtransform(_newMtx: Matrix4x4): void {
+            let newPos: Vector3 = _newMtx.getTranslationTo(this.#oldMtx);
+            this.#xrReferenceSpace = this.#xrReferenceSpace.getOffsetReferenceSpace(new XRRigidTransform(newPos, Vector3.ZERO()));
+            this.#oldMtx = _newMtx;
+        }
 
         public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
             super.initialize(_name, _branch, _camera, _canvas);

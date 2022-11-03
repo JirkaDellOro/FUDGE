@@ -5154,7 +5154,7 @@ declare namespace FudgeCore {
          * for each node in the line of sight and return that as an unsorted {@link Pick}-array
          */
         static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera): Pick[];
-        static beginXRSession(_xrSessionMode: XRSessionMode, _xrReferenceSpaceType: XRReferenceSpaceType): Promise<void>;
+        static initializeXR(_xrSessionMode: XRSessionMode, _xrReferenceSpaceType: XRReferenceSpaceType): Promise<void>;
         static draw(_cmpCamera: ComponentCamera): void;
         static drawXR(_cmpCamera: ComponentCamera, _xrFrame?: XRFrame): void;
         private static drawListAlpha;
@@ -5367,6 +5367,7 @@ declare namespace FudgeCore {
         static set xrReferenceSpace(_xrReferenceSpace: XRReferenceSpace);
         static get xrSession(): XRSession;
         static get xrReferenceSpace(): XRReferenceSpace;
+        static setXRRigidtransform(_newMtx: Matrix4x4): void;
         initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
     }
 }

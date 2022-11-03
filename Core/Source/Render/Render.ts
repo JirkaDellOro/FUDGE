@@ -156,7 +156,7 @@ namespace FudgeCore {
     //#endregion
     //#region VR Session
 
-    public static async beginXRSession(_xrSessionMode: XRSessionMode, _xrReferenceSpaceType: XRReferenceSpaceType): Promise<void> {
+    public static async initializeXR(_xrSessionMode: XRSessionMode, _xrReferenceSpaceType: XRReferenceSpaceType): Promise<void> {
       let session: XRSession = await navigator.xr.requestSession(_xrSessionMode);
       XRViewport.xrReferenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
       await RenderWebGL.crc3.makeXRCompatible();

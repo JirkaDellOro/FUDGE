@@ -1,5 +1,5 @@
 namespace FudgeCore {
-  export let shaderSources: {[source: string]: string} = {};
+  export let shaderSources: { [source: string]: string } = {};
   shaderSources["ShaderPhong.frag"] = `#version 300 es
 /**
 * Phong shading
@@ -254,9 +254,9 @@ struct Light {
   mat4 mtxShapeInverse;
 };
 
-const uint MAX_LIGHTS_DIRECTIONAL = 10u;
-const uint MAX_LIGHTS_POINT = 50u;
-const uint MAX_LIGHTS_SPOT = 50u;
+const uint MAX_LIGHTS_DIRECTIONAL = 5u;
+const uint MAX_LIGHTS_POINT = 10u;
+const uint MAX_LIGHTS_SPOT = 10u;
 
 uniform Light u_ambient;
 uniform uint u_nLightsDirectional;

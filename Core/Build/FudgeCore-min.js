@@ -10004,7 +10004,7 @@ var FudgeCore;
             Render.resetFrameBuffer();
             return picks;
         }
-        static async beginXRSession(_xrSessionMode, _xrReferenceSpaceType) {
+        static async initializeXR(_xrSessionMode, _xrReferenceSpaceType) {
             let session = await navigator.xr.requestSession(_xrSessionMode);
             FudgeCore.XRViewport.xrReferenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
             await FudgeCore.RenderWebGL.crc3.makeXRCompatible();
@@ -10413,6 +10413,7 @@ var FudgeCore;
         static #xrReferenceSpace = null;
         static #xrFrame = null;
         static #xrCamera = null;
+        static #oldMtx = new FudgeCore.Matrix4x4;
         static set xrFrame(_xrFrame) {
             XRViewport.#xrFrame = _xrFrame;
             FudgeCore.Render.drawXR(XRViewport.#xrCamera, XRViewport.#xrFrame);
@@ -10434,6 +10435,11 @@ var FudgeCore;
                 return XRViewport.#xrReferenceSpace;
             else
                 return null;
+        }
+        static setXRRigidtransform(_newMtx) {
+            let newPos = _newMtx.getTranslationTo(this.#oldMtx);
+            this.#xrReferenceSpace = this.#xrReferenceSpace.getOffsetReferenceSpace(new XRRigidTransform(newPos, FudgeCore.Vector3.ZERO()));
+            this.#oldMtx = _newMtx;
         }
         initialize(_name, _branch, _camera, _canvas) {
             super.initialize(_name, _branch, _camera, _canvas);
@@ -11301,9 +11307,9 @@ struct Light {
   mat4 mtxShapeInverse;
 };
 
-const uint MAX_LIGHTS_DIRECTIONAL = 10u;
-const uint MAX_LIGHTS_POINT = 50u;
-const uint MAX_LIGHTS_SPOT = 50u;
+const uint MAX_LIGHTS_DIRECTIONAL = 5u;
+const uint MAX_LIGHTS_POINT = 10u;
+const uint MAX_LIGHTS_SPOT = 10u;
 
 uniform Light u_ambient;
 uniform uint u_nLightsDirectional;
