@@ -154,14 +154,46 @@ namespace FudgeCore {
       return picks;
     }
     //#endregion
+    //#region VR Session
 
+    public static async beginXRSession(_xrSessionMode: XRSessionMode, _xrReferenceSpaceType: XRReferenceSpaceType): Promise<void> {
+      let session: XRSession = await navigator.xr.requestSession(_xrSessionMode);
+      XRViewport.xrReferenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
+      await RenderWebGL.crc3.makeXRCompatible();
+      await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, RenderWebGL.crc3) });
+      XRViewport.xrSession = session;
+    }
+    //#endregion
     //#region Drawing
     public static draw(_cmpCamera: ComponentCamera): void {
       _cmpCamera.resetWorldToView();
       Render.drawList(_cmpCamera, this.nodesSimple);
       Render.drawListAlpha(_cmpCamera);
     }
+    public static drawXR(_cmpCamera: ComponentCamera, _xrFrame: XRFrame = null): void {
+      if (_xrFrame == null) {
+        Render.draw(_cmpCamera);
+      } else {
+        _cmpCamera.resetWorldToView();
+        let glLayer: XRWebGLLayer = XRViewport.xrSession.renderState.baseLayer;
+        let pose: XRViewerPose = _xrFrame.getViewerPose(XRViewport.xrReferenceSpace);
 
+        if (pose) {
+          RenderWebGL.crc3.bindFramebuffer(RenderWebGL.crc3.FRAMEBUFFER, glLayer.framebuffer);
+          RenderWebGL.crc3.clear(RenderWebGL.crc3.COLOR_BUFFER_BIT | RenderWebGL.crc3.DEPTH_BUFFER_BIT);
+          for (let view of pose.views) {
+            let viewport: globalThis.XRViewport = glLayer.getViewport(view);
+
+            _cmpCamera.mtxCameraInverse.set(view.transform.inverse.matrix);
+            _cmpCamera.mtxProjection.set(view.projectionMatrix);
+
+            RenderWebGL.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+            Render.drawListAlpha(_cmpCamera);
+            Render.drawList(_cmpCamera, Render.nodesSimple);
+          }
+        }
+      }
+    }
     private static drawListAlpha(_cmpCamera: ComponentCamera): void {
       function sort(_a: Node, _b: Node): number {
         return (Reflect.get(_a, "zCamera") < Reflect.get(_b, "zCamera")) ? 1 : -1;

@@ -94,14 +94,32 @@ namespace FudgeCore {
         _branch.dispatchEvent(new Event(EVENT.ATTACH_BRANCH));
       this.#branch = _branch;
     }
-
+    /**
+     * Set the context from canvas.
+     */
+    public setContext(_cr2c: CanvasRenderingContext2D): void {
+      if (_cr2c)
+        this.#crc2 = _cr2c;
+    }
     /**
      * Retrieve the branch this viewport renders
      */
     public getBranch(): Node {
       return this.#branch;
     }
-
+    /**
+     * Retrieve the context from canvas
+     */
+    public getContext(): CanvasRenderingContext2D {
+      return this.#crc2;
+    }
+    /**
+     * Set the canvas.
+     */
+    public setCanvas(_canvas: HTMLCanvasElement): void {
+      if (_canvas)
+        this.#canvas = _canvas;
+    }
     // #region Drawing
     /**
      * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
