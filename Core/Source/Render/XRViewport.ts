@@ -40,7 +40,7 @@ namespace FudgeCore {
         public static setXRRigidtransform(_newMtx: Matrix4x4): void {
             let newPos: Vector3 = _newMtx.getTranslationTo(this.#oldMtx);
             this.#xrReferenceSpace = this.#xrReferenceSpace.getOffsetReferenceSpace(new XRRigidTransform(newPos, Vector3.ZERO()));
-            this.#oldMtx = _newMtx;
+            this.#oldMtx = _newMtx.clone;
         }
 
         public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {

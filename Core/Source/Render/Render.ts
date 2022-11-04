@@ -184,6 +184,7 @@ namespace FudgeCore {
           for (let view of pose.views) {
             let viewport: globalThis.XRViewport = glLayer.getViewport(view);
 
+            _cmpCamera.mtxPivot.set(view.transform.matrix);
             _cmpCamera.mtxCameraInverse.set(view.transform.inverse.matrix);
             _cmpCamera.mtxProjection.set(view.projectionMatrix);
 

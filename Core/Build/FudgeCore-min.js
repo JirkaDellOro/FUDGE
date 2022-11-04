@@ -10029,6 +10029,7 @@ var FudgeCore;
                     FudgeCore.RenderWebGL.crc3.clear(FudgeCore.RenderWebGL.crc3.COLOR_BUFFER_BIT | FudgeCore.RenderWebGL.crc3.DEPTH_BUFFER_BIT);
                     for (let view of pose.views) {
                         let viewport = glLayer.getViewport(view);
+                        _cmpCamera.mtxPivot.set(view.transform.matrix);
                         _cmpCamera.mtxCameraInverse.set(view.transform.inverse.matrix);
                         _cmpCamera.mtxProjection.set(view.projectionMatrix);
                         FudgeCore.RenderWebGL.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
@@ -10439,7 +10440,7 @@ var FudgeCore;
         static setXRRigidtransform(_newMtx) {
             let newPos = _newMtx.getTranslationTo(this.#oldMtx);
             this.#xrReferenceSpace = this.#xrReferenceSpace.getOffsetReferenceSpace(new XRRigidTransform(newPos, FudgeCore.Vector3.ZERO()));
-            this.#oldMtx = _newMtx;
+            this.#oldMtx = _newMtx.clone;
         }
         initialize(_name, _branch, _camera, _canvas) {
             super.initialize(_name, _branch, _camera, _canvas);
