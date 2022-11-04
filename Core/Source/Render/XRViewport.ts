@@ -5,7 +5,6 @@ namespace FudgeCore {
         static #xrReferenceSpace: XRReferenceSpace = null;
         static #xrFrame: XRFrame = null;
         static #xrCamera: ComponentCamera = null;
-        static #oldMtx: Matrix4x4 = new Matrix4x4;
         constructor() {
             super();
         }
@@ -32,10 +31,14 @@ namespace FudgeCore {
         }
         //#endregion
         //region webXR functions
-        public static setXRRigidtransform(_newMtx: Matrix4x4): void {
-            let newPos: Vector3 = _newMtx.getTranslationTo(this.#oldMtx);
+        public static setRigidtransfromToCamera(): void {
+            let invertedCameraPos: Vector3 = new Vector3(-this.#xrCamera.mtxWorld.translation.x, -this.#xrCamera.mtxWorld.translation.y, -this.#xrCamera.mtxWorld.translation.z);
+            this.#xrReferenceSpace = this.#xrReferenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invertedCameraPos, Vector3.ZERO()));
+
+        }
+        public static setNewXRRigidtransform(_newMtx: Matrix4x4): void {
+            let newPos: Vector3 = this.#xrCamera.mtxWorld.getTranslationTo(_newMtx);
             this.#xrReferenceSpace = this.#xrReferenceSpace.getOffsetReferenceSpace(new XRRigidTransform(newPos, Vector3.ZERO()));
-            this.#oldMtx = _newMtx.clone;
         }
         //#endregion
 
