@@ -90,7 +90,7 @@
             ]
           },
           "particleScaling": {
-            "value": 0.3
+            "value": 0.2
           }
         },
         "mtxLocal": [
@@ -173,10 +173,10 @@
   "MeshSphere|2022-10-12T16:59:52.193Z|43654": {
     "ƒ.MeshSphere": {
       "idResource": "MeshSphere|2022-10-12T16:59:52.193Z|43654",
-      "name": "MeshSphere",
+      "name": "ComplexSphere",
       "type": "MeshSphere",
-      "longitudes": 8,
-      "latitudes": 8
+      "longitudes": 20,
+      "latitudes": 20
     }
   },
   "Material|2022-10-12T17:00:01.954Z|82264": {
@@ -460,6 +460,15 @@
       }
     }
   },
+  "MeshSphere|2022-10-27T16:57:58.549Z|09916": {
+    "ƒ.MeshSphere": {
+      "idResource": "MeshSphere|2022-10-27T16:57:58.549Z|09916",
+      "name": "SimpleSphere",
+      "type": "MeshSphere",
+      "longitudes": 8,
+      "latitudes": 8
+    }
+  },
   "Graph|2022-10-12T15:22:44.800Z|84622": {
     "ƒ.Graph": {
       "name": "Graph",
@@ -524,7 +533,7 @@
                 {
                   "ƒ.ComponentMaterial": {
                     "sortForAlpha": false,
-                    "clrPrimary": "[1, 0.5568627450980392, 0.1411764705882353, 1]",
+                    "clrPrimary": "[1, 0.5, 0.15, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
                       "translation": "[0, 0]",
@@ -535,13 +544,6 @@
                       "active": true
                     },
                     "idMaterial": "Material|2022-10-12T15:20:29.381Z|54955"
-                  }
-                }
-              ],
-              "ParticleSystemTimeController": [
-                {
-                  "Script.ParticleSystemTimeController": {
-                    "active": true
                   }
                 }
               ]
@@ -712,7 +714,7 @@
                           "ComponentMesh": [
                             {
                               "ƒ.ComponentMesh": {
-                                "idMesh": "MeshSphere|2022-10-12T16:59:52.193Z|43654",
+                                "idMesh": "MeshSphere|2022-10-27T16:57:58.549Z|09916",
                                 "pivot": {
                                   "translation": "[0, 0, 0]",
                                   "rotation": "[0, 0, 0]",
