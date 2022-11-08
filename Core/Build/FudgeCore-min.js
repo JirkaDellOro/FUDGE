@@ -10016,7 +10016,7 @@ var FudgeCore;
             Render.drawList(_cmpCamera, this.nodesSimple);
             Render.drawListAlpha(_cmpCamera);
         }
-        static drawXR(_cmpCamera, _xrFrame = null) {
+        static drawXR(_cmpCamera, _xrFrame = null, _physicsDebugMode) {
             if (_xrFrame == null) {
                 Render.draw(_cmpCamera);
             }
@@ -10029,12 +10029,19 @@ var FudgeCore;
                     FudgeCore.RenderWebGL.crc3.clear(FudgeCore.RenderWebGL.crc3.COLOR_BUFFER_BIT | FudgeCore.RenderWebGL.crc3.DEPTH_BUFFER_BIT);
                     for (let view of pose.views) {
                         let viewport = glLayer.getViewport(view);
+                        FudgeCore.RenderWebGL.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+                        FudgeCore.XRViewport.setController(_xrFrame);
+                        FudgeCore.XRViewport.setRays();
                         _cmpCamera.mtxPivot.set(view.transform.matrix);
                         _cmpCamera.mtxCameraInverse.set(view.transform.inverse.matrix);
                         _cmpCamera.mtxProjection.set(view.projectionMatrix);
-                        FudgeCore.RenderWebGL.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
-                        Render.drawListAlpha(_cmpCamera);
-                        Render.drawList(_cmpCamera, Render.nodesSimple);
+                        if (_physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.NONE) {
+                            FudgeCore.Physics.draw(_cmpCamera, _physicsDebugMode);
+                        }
+                        if (_physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) {
+                            Render.drawListAlpha(_cmpCamera);
+                            Render.drawList(_cmpCamera, Render.nodesSimple);
+                        }
                     }
                 }
             }
@@ -10278,18 +10285,7 @@ var FudgeCore;
                 this.#canvas = _canvas;
         }
         draw(_calculateTransforms = true) {
-            if (!this.#branch)
-                return;
-            FudgeCore.Render.resetFrameBuffer();
-            if (!this.camera.isActive)
-                return;
-            if (this.adjustingFrames)
-                this.adjustFrames();
-            if (this.adjustingCamera)
-                this.adjustCamera();
-            if (_calculateTransforms)
-                this.calculateTransforms();
-            FudgeCore.Render.clear(this.camera.clrBackground);
+            this.calculateDrawing(_calculateTransforms);
             if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
                 FudgeCore.Render.draw(this.camera);
             if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.NONE) {
@@ -10401,6 +10397,20 @@ var FudgeCore;
             let screen = new FudgeCore.Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
             return screen;
         }
+        calculateDrawing(_calculateTransforms = true) {
+            if (!this.#branch)
+                return;
+            FudgeCore.Render.resetFrameBuffer();
+            if (!this.camera.isActive)
+                return;
+            if (this.adjustingFrames)
+                this.adjustFrames();
+            if (this.adjustingCamera)
+                this.adjustCamera();
+            if (_calculateTransforms)
+                this.calculateTransforms();
+            FudgeCore.Render.clear(this.camera.clrBackground);
+        }
     }
     FudgeCore.Viewport = Viewport;
 })(FudgeCore || (FudgeCore = {}));
@@ -10414,16 +10424,36 @@ var FudgeCore;
         static #xrReferenceSpace = null;
         static #xrFrame = null;
         static #xrCamera = null;
-        static #oldMtx = new FudgeCore.Matrix4x4;
+        static #physisDebugMode = FudgeCore.PHYSICS_DEBUGMODE.NONE;
+        static #rightController = new FudgeCore.ComponentTransform();
+        static #leftController = new FudgeCore.ComponentTransform();
         static set xrFrame(_xrFrame) {
             XRViewport.#xrFrame = _xrFrame;
-            FudgeCore.Render.drawXR(XRViewport.#xrCamera, XRViewport.#xrFrame);
+            FudgeCore.Render.drawXR(XRViewport.#xrCamera, XRViewport.#xrFrame, this.#physisDebugMode);
+        }
+        static set rightController(_rCntrlTransform) {
+            XRViewport.#rightController.mtxLocal = _rCntrlTransform.mtxLocal;
+        }
+        static set leftController(_lCntrlTransform) {
+            XRViewport.#leftController.mtxLocal = _lCntrlTransform.mtxLocal;
         }
         static set xrSession(_xrSession) {
             XRViewport.#xrSession = _xrSession;
         }
         static set xrReferenceSpace(_xrReferenceSpace) {
             XRViewport.#xrReferenceSpace = _xrReferenceSpace;
+        }
+        static get rightController() {
+            if (XRViewport.#rightController)
+                return XRViewport.#rightController;
+            else
+                return null;
+        }
+        static get leftController() {
+            if (XRViewport.#leftController)
+                return XRViewport.#leftController;
+            else
+                return null;
         }
         static get xrSession() {
             if (XRViewport.#xrSession)
@@ -10437,14 +10467,35 @@ var FudgeCore;
             else
                 return null;
         }
-        static setXRRigidtransform(_newMtx) {
-            let newPos = _newMtx.getTranslationTo(this.#oldMtx);
-            this.#xrReferenceSpace = this.#xrReferenceSpace.getOffsetReferenceSpace(new XRRigidTransform(newPos, FudgeCore.Vector3.ZERO()));
-            this.#oldMtx = _newMtx.clone;
+        static setNewXRRigidtransform(_newPos = FudgeCore.Vector3.ZERO(), _newRot = FudgeCore.Vector3.ZERO()) {
+            this.#xrReferenceSpace = this.#xrReferenceSpace.getOffsetReferenceSpace(new XRRigidTransform(_newPos, _newRot));
+        }
+        static setController(_xrFrame) {
+            if (XRViewport.xrSession.inputSources[0]) {
+                XRViewport.rightController.mtxLocal.set(_xrFrame.getPose(XRViewport.xrSession.inputSources[0].targetRaySpace, XRViewport.xrReferenceSpace).transform.matrix);
+            }
+            if (XRViewport.xrSession.inputSources[1]) {
+                XRViewport.leftController.mtxLocal.set(_xrFrame.getPose(XRViewport.xrSession.inputSources[1].targetRaySpace, XRViewport.xrReferenceSpace).transform.matrix);
+            }
+        }
+        static setRays() {
+            let vecZLefttCntrl = XRViewport.leftController.mtxLocal.getZ();
+            FudgeCore.Physics.raycast(XRViewport.leftController.mtxLocal.translation, new FudgeCore.Vector3(-vecZLefttCntrl.x, -vecZLefttCntrl.y, -vecZLefttCntrl.z), 80, true);
+            let vecZRightCntrl = XRViewport.rightController.mtxLocal.getZ();
+            FudgeCore.Physics.raycast(XRViewport.rightController.mtxLocal.translation, new FudgeCore.Vector3(-vecZRightCntrl.x, -vecZRightCntrl.y, -vecZRightCntrl.z), 80, true);
         }
         initialize(_name, _branch, _camera, _canvas) {
             super.initialize(_name, _branch, _camera, _canvas);
             XRViewport.#xrCamera = _camera;
+        }
+        draw(_calculateTransforms = true) {
+            if (XRViewport.xrSession == null) {
+                super.draw(_calculateTransforms);
+            }
+            else {
+                XRViewport.#physisDebugMode = this.physicsDebugMode;
+                super.calculateDrawing(_calculateTransforms);
+            }
         }
     }
     FudgeCore.XRViewport = XRViewport;

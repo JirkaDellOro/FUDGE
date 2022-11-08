@@ -123,23 +123,10 @@ namespace FudgeCore {
     // #region Drawing
     /**
      * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
-     * Pass `false` if calculation was already done for this frame 
+     * Pass `false` if calculation was already done for this frame. TODO: Calculation has been moved to protected method because of XR Session @JIRKA
      */
     public draw(_calculateTransforms: boolean = true): void {
-      if (!this.#branch)
-        return;
-      Render.resetFrameBuffer();
-      if (!this.camera.isActive)
-        return;
-      if (this.adjustingFrames)
-        this.adjustFrames();
-      if (this.adjustingCamera)
-        this.adjustCamera();
-
-      if (_calculateTransforms)
-        this.calculateTransforms();
-
-      Render.clear(this.camera.clrBackground);
+      this.calculateDrawing(_calculateTransforms);
 
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
@@ -350,6 +337,25 @@ namespace FudgeCore {
     public pointClientToScreen(_client: Vector2): Vector2 {
       let screen: Vector2 = new Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
       return screen;
+    }
+    /**
+   * Calculation is processed here
+   * Pass `false` if calculation was already done for this frame  
+   */
+    protected calculateDrawing(_calculateTransforms: boolean = true): void {
+      if (!this.#branch)
+        return;
+      Render.resetFrameBuffer();
+      if (!this.camera.isActive)
+        return;
+      if (this.adjustingFrames)
+        this.adjustFrames();
+      if (this.adjustingCamera)
+        this.adjustCamera();
+
+      if (_calculateTransforms)
+        this.calculateTransforms();
+      Render.clear(this.camera.clrBackground);
     }
   }
 }

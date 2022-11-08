@@ -5156,7 +5156,7 @@ declare namespace FudgeCore {
         static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera): Pick[];
         static initializeXR(_xrSessionMode: XRSessionMode, _xrReferenceSpaceType: XRReferenceSpaceType): Promise<void>;
         static draw(_cmpCamera: ComponentCamera): void;
-        static drawXR(_cmpCamera: ComponentCamera, _xrFrame?: XRFrame): void;
+        static drawXR(_cmpCamera: ComponentCamera, _xrFrame: XRFrame, _physicsDebugMode: PHYSICS_DEBUGMODE): void;
         private static drawListAlpha;
         private static drawList;
         private static transformByPhysics;
@@ -5295,7 +5295,7 @@ declare namespace FudgeCore {
         setCanvas(_canvas: HTMLCanvasElement): void;
         /**
          * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
-         * Pass `false` if calculation was already done for this frame
+         * Pass `false` if calculation was already done for this frame. TODO: Calculation has been moved to protected method because of XR Session @JIRKA
          */
         draw(_calculateTransforms?: boolean): void;
         /**
@@ -5356,6 +5356,11 @@ declare namespace FudgeCore {
          * Returns a point in the browser page matching the given point of the viewport
          */
         pointClientToScreen(_client: Vector2): Vector2;
+        /**
+       * Calculation is processed here
+       * Pass `false` if calculation was already done for this frame
+       */
+        protected calculateDrawing(_calculateTransforms?: boolean): void;
     }
 }
 declare namespace FudgeCore {
@@ -5363,13 +5368,19 @@ declare namespace FudgeCore {
         #private;
         constructor();
         static set xrFrame(_xrFrame: XRFrame);
+        static set rightController(_rCntrlTransform: ComponentTransform);
+        static set leftController(_lCntrlTransform: ComponentTransform);
         static set xrSession(_xrSession: XRSession);
         static set xrReferenceSpace(_xrReferenceSpace: XRReferenceSpace);
+        static get rightController(): ComponentTransform;
+        static get leftController(): ComponentTransform;
         static get xrSession(): XRSession;
         static get xrReferenceSpace(): XRReferenceSpace;
-        static setRigidtransfromToCamera(): void;
-        static setNewXRRigidtransform(_newMtx: Matrix4x4): void;
+        static setNewXRRigidtransform(_newPos?: Vector3, _newRot?: Vector3): void;
+        static setController(_xrFrame: XRFrame): void;
+        static setRays(): void;
         initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
+        draw(_calculateTransforms?: boolean): void;
     }
 }
 declare namespace FudgeCore {

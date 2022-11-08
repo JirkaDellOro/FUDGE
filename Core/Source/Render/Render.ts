@@ -170,7 +170,7 @@ namespace FudgeCore {
       Render.drawList(_cmpCamera, this.nodesSimple);
       Render.drawListAlpha(_cmpCamera);
     }
-    public static drawXR(_cmpCamera: ComponentCamera, _xrFrame: XRFrame = null): void {
+    public static drawXR(_cmpCamera: ComponentCamera, _xrFrame: XRFrame = null, _physicsDebugMode: PHYSICS_DEBUGMODE): void {
       if (_xrFrame == null) {
         Render.draw(_cmpCamera);
       } else {
@@ -181,20 +181,30 @@ namespace FudgeCore {
         if (pose) {
           RenderWebGL.crc3.bindFramebuffer(RenderWebGL.crc3.FRAMEBUFFER, glLayer.framebuffer);
           RenderWebGL.crc3.clear(RenderWebGL.crc3.COLOR_BUFFER_BIT | RenderWebGL.crc3.DEPTH_BUFFER_BIT);
+
           for (let view of pose.views) {
             let viewport: globalThis.XRViewport = glLayer.getViewport(view);
+            RenderWebGL.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
 
+            XRViewport.setController(_xrFrame);
+            XRViewport.setRays();
             _cmpCamera.mtxPivot.set(view.transform.matrix);
             _cmpCamera.mtxCameraInverse.set(view.transform.inverse.matrix);
             _cmpCamera.mtxProjection.set(view.projectionMatrix);
 
-            RenderWebGL.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
-            Render.drawListAlpha(_cmpCamera);
-            Render.drawList(_cmpCamera, Render.nodesSimple);
+            if (_physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
+              Physics.draw(_cmpCamera, _physicsDebugMode);
+            }
+            if (_physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) {
+              Render.drawListAlpha(_cmpCamera);
+              Render.drawList(_cmpCamera, Render.nodesSimple);
+            }
           }
         }
       }
     }
+
+
     private static drawListAlpha(_cmpCamera: ComponentCamera): void {
       function sort(_a: Node, _b: Node): number {
         return (Reflect.get(_a, "zCamera") < Reflect.get(_b, "zCamera")) ? 1 : -1;
@@ -245,6 +255,6 @@ namespace FudgeCore {
       Recycler.store(mtxWorld);
       Recycler.store(mtxLocal);
     }
+    //#endregion
   }
-  //#endregion
 }
