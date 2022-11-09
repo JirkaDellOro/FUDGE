@@ -187,7 +187,9 @@ namespace FudgeCore {
             RenderWebGL.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
 
             XRViewport.setController(_xrFrame);
+            //just for testing porpuses, rays get drawed only on one screen if they are not setted here // have to investigate why
             XRViewport.setRays();
+
             _cmpCamera.mtxPivot.set(view.transform.matrix);
             _cmpCamera.mtxCameraInverse.set(view.transform.inverse.matrix);
             _cmpCamera.mtxProjection.set(view.projectionMatrix);

@@ -17,12 +17,12 @@ namespace FudgeCore {
             XRViewport.#xrFrame = _xrFrame;
             Render.drawXR(XRViewport.#xrCamera, XRViewport.#xrFrame, this.#physisDebugMode);
         }
-        public static set rightController(_rCntrlTransform: ComponentTransform) {
-            XRViewport.#rightController.mtxLocal = _rCntrlTransform.mtxLocal;
-        }
-        public static set leftController(_lCntrlTransform: ComponentTransform) {
-            XRViewport.#leftController.mtxLocal = _lCntrlTransform.mtxLocal;
-        }
+        // public static set rightController(_rCntrlTransform: ComponentTransform) {
+        //     XRViewport.#rightController.mtxLocal = _rCntrlTransform.mtxLocal;
+        // }
+        // public static set leftController(_lCntrlTransform: ComponentTransform) {
+        //     XRViewport.#leftController.mtxLocal = _lCntrlTransform.mtxLocal;
+        // }
         public static set xrSession(_xrSession: XRSession) {
             XRViewport.#xrSession = _xrSession;
         }
@@ -57,20 +57,34 @@ namespace FudgeCore {
         public static setNewXRRigidtransform(_newPos: Vector3 = Vector3.ZERO(), _newRot: Vector3 = Vector3.ZERO()): void {
             this.#xrReferenceSpace = this.#xrReferenceSpace.getOffsetReferenceSpace(new XRRigidTransform(_newPos, _newRot));
         }
-        public static setController(_xrFrame: XRFrame): void {
-            if (XRViewport.xrSession.inputSources[0]) {
-                XRViewport.rightController.mtxLocal.set(_xrFrame.getPose(XRViewport.xrSession.inputSources[0].targetRaySpace, XRViewport.xrReferenceSpace).transform.matrix);
-            }
-            if (XRViewport.xrSession.inputSources[1]) {
-                XRViewport.leftController.mtxLocal.set(_xrFrame.getPose(XRViewport.xrSession.inputSources[1].targetRaySpace, XRViewport.xrReferenceSpace).transform.matrix);
-            }
-        }
-        public static setRays(): void {
-            let vecZLefttCntrl: Vector3 = XRViewport.leftController.mtxLocal.getZ();
-            Physics.raycast(XRViewport.leftController.mtxLocal.translation, new Vector3(-vecZLefttCntrl.x, -vecZLefttCntrl.y, -vecZLefttCntrl.z), 80, true);
 
-            let vecZRightCntrl: Vector3 = XRViewport.rightController.mtxLocal.getZ();
-            Physics.raycast(XRViewport.rightController.mtxLocal.translation, new Vector3(-vecZRightCntrl.x, -vecZRightCntrl.y, -vecZRightCntrl.z), 80, true);
+        public static setController(_xrFrame: XRFrame): void {
+            if (XRViewport.xrSession.inputSources.length > 0)
+                XRViewport.xrSession.inputSources.forEach(controller => {
+                    try {
+                        switch (controller.handedness) {
+                            case ("right"):
+                                XRViewport.#rightController.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.xrReferenceSpace).transform.matrix);
+                                break;
+                            case ("left"):
+                                XRViewport.#leftController.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.xrReferenceSpace).transform.matrix);
+                                break;
+                        }
+                    } catch (e: unknown) {
+                        Debug.info("Input Sources disconnected, not possible to set new Matrix");
+                    }
+
+                });
+            else
+                Debug.info("Input Devices detected: ", XRViewport.xrSession.inputSources.length);
+        }
+
+        public static setRays(): void {
+            let vecZLefttCntrl: Vector3 = XRViewport.#leftController.mtxLocal.getZ();
+            Physics.raycast(XRViewport.#leftController.mtxLocal.translation, new Vector3(-vecZLefttCntrl.x, -vecZLefttCntrl.y, -vecZLefttCntrl.z), 80, true);
+
+            let vecZRightCntrl: Vector3 = XRViewport.#rightController.mtxLocal.getZ();
+            Physics.raycast(XRViewport.#rightController.mtxLocal.translation, new Vector3(-vecZRightCntrl.x, -vecZRightCntrl.y, -vecZRightCntrl.z), 80, true);
         }
         //#endregion
 

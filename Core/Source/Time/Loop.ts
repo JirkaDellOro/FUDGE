@@ -117,6 +117,7 @@ namespace FudgeCore {
           break;
         case LOOP_MODE.FRAME_REQUEST_XR:
           XRViewport.xrSession.cancelAnimationFrame(Loop.idRequest);
+          XRViewport.xrSession = null;
           break;
         case LOOP_MODE.TIME_REAL:
           window.clearInterval(Loop.idIntervall);

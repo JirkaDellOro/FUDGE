@@ -5368,8 +5368,6 @@ declare namespace FudgeCore {
         #private;
         constructor();
         static set xrFrame(_xrFrame: XRFrame);
-        static set rightController(_rCntrlTransform: ComponentTransform);
-        static set leftController(_lCntrlTransform: ComponentTransform);
         static set xrSession(_xrSession: XRSession);
         static set xrReferenceSpace(_xrReferenceSpace: XRReferenceSpace);
         static get rightController(): ComponentTransform;
