@@ -3552,7 +3552,8 @@ var Fudge;
             for (let namespace in ƒ.Project.scriptNamespaces) {
                 for (let index in ƒ.Project.scriptNamespaces[namespace]) {
                     let script = ƒ.Project.scriptNamespaces[namespace][index];
-                    scriptinfos.push(new Fudge.ScriptInfo(script, namespace));
+                    if (script.name)
+                        scriptinfos.push(new Fudge.ScriptInfo(script, namespace));
                 }
             }
             this.table = new ƒui.Table(new Fudge.ControllerTableScript(), scriptinfos);
