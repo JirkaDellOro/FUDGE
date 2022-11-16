@@ -21,7 +21,11 @@ namespace FudgeCore {
       let v1: Vector3 = Vector3.DIFFERENCE(trigon[1], trigon[0]);
       let v2: Vector3 = Vector3.DIFFERENCE(trigon[2], trigon[0]);
       this.normalUnscaled = Vector3.CROSS(v1, v2);
-      this.normal = Vector3.NORMALIZATION(this.normalUnscaled);
+      try {
+        this.normal = Vector3.NORMALIZATION(this.normalUnscaled);
+      } catch (_error: unknown) {
+        console.warn(_error);
+      }
     }
 
     public getPosition(_index: number): Vector3 {
