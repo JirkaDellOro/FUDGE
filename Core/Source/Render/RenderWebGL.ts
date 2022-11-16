@@ -269,24 +269,81 @@ namespace FudgeCore {
     //#endregion
 
     //#region Lights
+    // protected static setLightsInShader(_shader: typeof Shader, _lights: MapLightTypeToLightList): void {
+    //   _shader.useProgram();
+    //   let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
+
+    //   // Ambient
+    //   let ambient: WebGLUniformLocation = uni["u_ambient.vctColor"];
+    //   if (ambient) {
+    //     RenderWebGL.crc3.uniform4fv(ambient, [0, 0, 0, 0]);
+    //     let cmpLights: RecycableArray<ComponentLight> = _lights.get(LightAmbient);
+    //     if (cmpLights) {
+    //       // TODO: add up ambient lights to a single color
+    //       let result: Color = new Color(0, 0, 0, 1);
+    //       for (let cmpLight of cmpLights)
+    //         result.add(cmpLight.light.color);
+    //       RenderWebGL.crc3.uniform4fv(ambient, result.getArray());
+    //     }
+    //   }
+
+    //   fillLightBuffers(LightDirectional, "u_nLightsDirectional", "u_directional");
+    //   fillLightBuffers(LightPoint, "u_nLightsPoint", "u_point");
+    //   fillLightBuffers(LightSpot, "u_nLightsSpot", "u_spot");
+
+    //   function fillLightBuffers(_type: TypeOfLight, _uniNumber: string, _uniStruct: string): void {
+    //     let uniLights: WebGLUniformLocation = uni[_uniNumber];
+    //     if (uniLights) {
+    //       RenderWebGL.crc3.uniform1ui(uniLights, 0);
+    //       let cmpLights: RecycableArray<ComponentLight> = _lights.get(_type);
+    //       if (cmpLights) {
+    //         let n: number = cmpLights.length;
+    //         RenderWebGL.crc3.uniform1ui(uniLights, n);
+    //         let i: number = 0;
+    //         for (let cmpLight of cmpLights) {
+    //           RenderWebGL.crc3.uniform4fv(uni[`${_uniStruct}[${i}].vctColor`], cmpLight.light.color.getArray());
+    //           //TODO: could be optimized, no need to calculate for each shader
+    //           let mtxTotal: Matrix4x4 = Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
+    //           RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShape`], false, mtxTotal.get());
+    //           if (_type != LightDirectional) {
+    //             let mtxInverse: Matrix4x4 = mtxTotal.inverse();
+    //             RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShapeInverse`], false, mtxInverse.get());
+    //             Recycler.store(mtxInverse);
+    //           }
+    //           Recycler.store(mtxTotal);
+    //           i++;
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
     /**
      * Set light data in shaders
      */
     protected static setLightsInShader(_shader: typeof Shader, _lights: MapLightTypeToLightList): void {
       _shader.useProgram();
-      let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
-
+      let uni: { [name: string]: any } = RenderInjectorShader.uboLightsInfo;
       // Ambient
-      let ambient: WebGLUniformLocation = uni["u_ambient.vctColor"];
+      let ambient: any = uni["u_ambient.vctColor"];
       if (ambient) {
-        RenderWebGL.crc3.uniform4fv(ambient, [0, 0, 0, 0]);
+        //RenderWebGL.crc3.uniform4fv(ambient, [0, 0, 0, 0]);
+        this.crc3.bufferSubData(
+          this.crc3.UNIFORM_BUFFER,
+          ambient.offset,
+          new Float32Array(0)
+        );
         let cmpLights: RecycableArray<ComponentLight> = _lights.get(LightAmbient);
         if (cmpLights) {
           // TODO: add up ambient lights to a single color
           let result: Color = new Color(0, 0, 0, 1);
           for (let cmpLight of cmpLights)
             result.add(cmpLight.light.color);
-          RenderWebGL.crc3.uniform4fv(ambient, result.getArray());
+          //RenderWebGL.crc3.uniform4fv(ambient, result.getArray());
+          this.crc3.bufferSubData(
+            this.crc3.UNIFORM_BUFFER,
+            ambient.offset,
+            new Float32Array(result.getArray())
+          );
         }
       }
 
@@ -295,22 +352,57 @@ namespace FudgeCore {
       fillLightBuffers(LightSpot, "u_nLightsSpot", "u_spot");
 
       function fillLightBuffers(_type: TypeOfLight, _uniNumber: string, _uniStruct: string): void {
-        let uniLights: WebGLUniformLocation = uni[_uniNumber];
+        let uniLights: { [name: string]: any } = uni[_uniNumber];
         if (uniLights) {
-          RenderWebGL.crc3.uniform1ui(uniLights, 0);
+
+          // RenderWebGL.crc3.uniform1ui(uniLights, 0);
+          let zeroOut: ArrayBuffer = new Uint8Array([0]);;
+          RenderWebGL.crc3.bufferSubData(
+            RenderWebGL.crc3.UNIFORM_BUFFER,
+            uniLights.offset,
+            zeroOut
+          );
+
           let cmpLights: RecycableArray<ComponentLight> = _lights.get(_type);
           if (cmpLights) {
             let n: number = cmpLights.length;
-            RenderWebGL.crc3.uniform1ui(uniLights, n);
+
+            // RenderWebGL.crc3.uniform1ui(uniLights, n);
+            let nLightsAmount: ArrayBuffer = new Uint8Array([n]);;
+            RenderWebGL.crc3.bufferSubData(
+              RenderWebGL.crc3.UNIFORM_BUFFER,
+              uniLights.offset,
+              nLightsAmount
+            );
+
             let i: number = 0;
             for (let cmpLight of cmpLights) {
-              RenderWebGL.crc3.uniform4fv(uni[`${_uniStruct}[${i}].vctColor`], cmpLight.light.color.getArray());
+              //RenderWebGL.crc3.uniform4fv(uni[`${_uniStruct}[${i}].vctColor`], cmpLight.light.color.getArray());
+              RenderWebGL.crc3.bufferSubData(
+                RenderWebGL.crc3.UNIFORM_BUFFER,
+                uni[`${_uniStruct}[${i}].vctColor`].offset,
+                cmpLight.light.color.getArray()
+              );
               //TODO: could be optimized, no need to calculate for each shader
               let mtxTotal: Matrix4x4 = Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
-              RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShape`], false, mtxTotal.get());
+
+              //   RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShape`], false, mtxTotal.get());
+              RenderWebGL.crc3.bufferSubData(
+                RenderWebGL.crc3.UNIFORM_BUFFER,
+                uni[`${_uniStruct}[${i}].mtxShape`].offset,
+                mtxTotal.get()
+              );
+
               if (_type != LightDirectional) {
+
+                //  RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShapeInverse`], false, mtxInverse.get());
                 let mtxInverse: Matrix4x4 = mtxTotal.inverse();
-                RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShapeInverse`], false, mtxInverse.get());
+                RenderWebGL.crc3.bufferSubData(
+                  RenderWebGL.crc3.UNIFORM_BUFFER,
+                  uni[`${_uniStruct}[${i}].mtxShapeInverse`].offset,
+                  mtxInverse.get()
+                );
+
                 Recycler.store(mtxInverse);
               }
               Recycler.store(mtxTotal);
@@ -349,7 +441,6 @@ namespace FudgeCore {
         // let mtxWorldToCamera: Matrix4x4 = Matrix4x4.INVERSION(_cmpCamera.mtxWorld); // todo: optimize/store in camera
         RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
       }
-
       RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }
 

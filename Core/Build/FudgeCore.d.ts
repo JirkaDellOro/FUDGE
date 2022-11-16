@@ -635,6 +635,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class RenderInjectorShader {
+        static uboLightsInfo: any;
         static decorate(_constructor: Function): void;
         static useProgram(this: typeof Shader): void;
         static deleteProgram(this: typeof Shader): void;
