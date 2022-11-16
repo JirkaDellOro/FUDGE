@@ -41,7 +41,7 @@ namespace FudgeCore {
         crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(shdVertex));
         crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(shdFragment));
         crc3.linkProgram(program);
-        bindUniformBufferObject();
+        // bindUniformBufferObject();
         let error: string = RenderWebGL.assert<string>(crc3.getProgramInfoLog(program));
         if (error !== "") {
           throw new Error("Error linking Shader: " + error);
@@ -89,7 +89,7 @@ namespace FudgeCore {
       function detectUniforms(): { [name: string]: WebGLUniformLocation } {
 
 
-
+        let uniformInfos: string[] = new Array();
         let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
         let uniformCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
         for (let i: number = 0; i < uniformCount; i++) {
@@ -97,14 +97,16 @@ namespace FudgeCore {
           if (!info) {
             break;
           }
-          // console.log(info.name);
-
           if (crc3.getUniformLocation(program, info.name) != null)
             detectedUniforms[info.name] = RenderWebGL.assert<WebGLRenderbuffer>(crc3.getUniformLocation(program, info.name));
+          else
+            uniformInfos.push(info.name);
         }
+        bindUniformBufferObject(uniformInfos);
         return detectedUniforms;
       }
-      function bindUniformBufferObject(): void {
+      function bindUniformBufferObject(_uniformNames: string[]): void {
+
         let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
         const blockIndex = crc3.getUniformBlockIndex(program, "UNIFORMS_LIGHT");
         const blockSize = crc3.getActiveUniformBlockParameter(
@@ -118,30 +120,11 @@ namespace FudgeCore {
         crc3.bindBuffer(crc3.UNIFORM_BUFFER, null);
         crc3.uniformBlockBinding(program, blockIndex, 0);
         crc3.bindBufferBase(crc3.UNIFORM_BUFFER, 0, uboBuffer);
-        let uboVariableNames = ["u_ambient.vctColor", "u_ambient.mtxShape", "u_ambient.mtxShapeInverse", "u_nLightsDirectional", "u_nLightsPoint", "u_nLightsSpot"];
 
-        for (let i: number = 0; i < 150; i++) {
-          uboVariableNames.push("u_directional[" + i + "].vctColor");
-          uboVariableNames.push("u_directional[" + i + "].mtxShape");
-          uboVariableNames.push("u_directional[" + i + "].mtxShapeInverse");
-
-        }
-        for (let i: number = 0; i < 150; i++) {
-          uboVariableNames.push("u_point[" + i + "].vctColor");
-          uboVariableNames.push("u_point[" + i + "].mtxShape");
-          uboVariableNames.push("u_point[" + i + "].mtxShapeInverse");
-
-        }
-        for (let i: number = 0; i < 150; i++) {
-          uboVariableNames.push("u_spot[" + i + "].vctColor");
-          uboVariableNames.push("u_spot[" + i + "].mtxShape");
-          uboVariableNames.push("u_spot[" + i + "].mtxShapeInverse");
-
-        }
         // Get the respective index of the member variables inside our Uniform Block
         let uboVariableIndices: any = crc3.getUniformIndices(
           program,
-          uboVariableNames
+          _uniformNames
         );
 
         // Get the offset of the member variables inside our Uniform Block in bytes
@@ -152,7 +135,7 @@ namespace FudgeCore {
         );
 
         // Create an object to map each variable name to its respective index and offset
-        uboVariableNames.forEach((name, index) => {
+        _uniformNames.forEach((name, index) => {
           RenderInjectorShader.uboLightsInfo[name] = {
             index: uboVariableIndices[index],
             offset: uboVariableOffsets[index],
