@@ -634,13 +634,26 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    class RenderInjectorShader {
-        static uboLightsInfo: any;
+    export class RenderInjectorShader {
+        static uboLightsInfo: {
+            [key: string]: UboLightStrucure;
+        };
+        private static ubosSetted;
         static decorate(_constructor: Function): void;
         static useProgram(this: typeof Shader): void;
         static deleteProgram(this: typeof Shader): void;
         protected static createProgram(this: typeof Shader): void;
     }
+    class UboLightStrucure {
+        private index;
+        private offset;
+        constructor(_index: {
+            [key: string]: number;
+        }, _offset: {
+            [key: string]: number;
+        });
+    }
+    export {};
 }
 declare namespace FudgeCore {
     class RenderInjectorCoat extends RenderInjector {

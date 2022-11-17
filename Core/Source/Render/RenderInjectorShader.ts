@@ -1,7 +1,9 @@
 namespace FudgeCore {
   //gives WebGL Buffer the data from the {@link Shader}
   export class RenderInjectorShader {
-    public static uboLightsInfo: any = {};
+    public static uboLightsInfo: { [key: string]: UboLightStrucure } = {};
+    private static ubosSetted: boolean;
+
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor, "useProgram", {
         value: RenderInjectorShader.useProgram
@@ -56,7 +58,6 @@ namespace FudgeCore {
         Debug.error(_error);
         debugger;
       }
-
       function compileShader(_shaderCode: string, _shaderType: GLenum): WebGLShader | null {
         let webGLShader: WebGLShader = crc3.createShader(_shaderType);
         crc3.shaderSource(webGLShader, _shaderCode);
@@ -86,10 +87,9 @@ namespace FudgeCore {
         return detectedAttributes;
       }
 
+
       function detectUniforms(): { [name: string]: WebGLUniformLocation } {
-
-
-        let uniformInfos: string[] = new Array();
+        let uboInfos: string[] = new Array();
         let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
         let uniformCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
         for (let i: number = 0; i < uniformCount; i++) {
@@ -99,13 +99,14 @@ namespace FudgeCore {
           }
           if (crc3.getUniformLocation(program, info.name) != null)
             detectedUniforms[info.name] = RenderWebGL.assert<WebGLRenderbuffer>(crc3.getUniformLocation(program, info.name));
-          else
-            uniformInfos.push(info.name);
+          else if (!RenderInjectorShader.ubosSetted)
+            uboInfos.push(info.name);
         }
-        bindUniformBufferObject(uniformInfos);
+        if (!RenderInjectorShader.ubosSetted)
+          bindLightUBO(uboInfos)
         return detectedUniforms;
       }
-      function bindUniformBufferObject(_uniformNames: string[]): void {
+      function bindLightUBO(_uniformNames: string[]): void {
 
         let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
         const blockIndex = crc3.getUniformBlockIndex(program, "UNIFORMS_LIGHT");
@@ -126,7 +127,6 @@ namespace FudgeCore {
           program,
           _uniformNames
         );
-
         // Get the offset of the member variables inside our Uniform Block in bytes
         let uboVariableOffsets: any = crc3.getActiveUniforms(
           program,
@@ -136,12 +136,19 @@ namespace FudgeCore {
 
         // Create an object to map each variable name to its respective index and offset
         _uniformNames.forEach((name, index) => {
-          RenderInjectorShader.uboLightsInfo[name] = {
-            index: uboVariableIndices[index],
-            offset: uboVariableOffsets[index],
-          };
+          RenderInjectorShader.uboLightsInfo[name] = new UboLightStrucure(uboVariableIndices[index], uboVariableOffsets[index]);
         });
+        RenderInjectorShader.ubosSetted = true;
       }
+    }
+
+  }
+  class UboLightStrucure {
+    private index: { [key: string]: number } = {};
+    private offset: { [key: string]: number } = {};
+    constructor(_index: { [key: string]: number }, _offset: { [key: string]: number }) {
+      this.index = _index;
+      this.offset = _offset;
     }
   }
 }
