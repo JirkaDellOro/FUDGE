@@ -5681,6 +5681,136 @@ declare namespace FudgeCore {
     }
     export {};
 }
+declare namespace FudgeCore.FBX {
+    class BufferReader {
+        offset: number;
+        readonly view: DataView;
+        constructor(_buffer: ArrayBuffer);
+        getChar(_offset?: number): string;
+        getBool(_offset?: number): boolean;
+        getUint8(_offset?: number): number;
+        getUint32(_offset?: number): number;
+        getUint64(_offset?: number): number;
+        getInt16(_offset?: number): number;
+        getInt32(_offset?: number): number;
+        getInt64(_offset?: number): number;
+        getFloat32(_offset?: number): number;
+        getFloat64(_offset?: number): number;
+        getString(_length: number, _offset?: number): string;
+        getIterable(_getter: () => number, _length: number, _offset?: number): Iterable<number>;
+    }
+}
+declare namespace FudgeCore.FBX {
+    interface Document {
+        uid: number;
+        name: string;
+        sourceObject: Object;
+        activeAnimStackName: string;
+        rootNode: number;
+    }
+    interface Definitions {
+        version: number;
+        objectTypes: ObjectType[];
+    }
+    interface ObjectType {
+        name: string;
+        count: number;
+        propertyTemplate: PropertyTemplate;
+    }
+    interface PropertyTemplate {
+        name: string;
+        [propertyName: string]: Property;
+    }
+    interface Object {
+        uid: number;
+        name: string;
+        type: string;
+        subtype: string;
+    }
+    interface Mesh extends Object {
+        version: number;
+        vertices: Float32Array;
+        indices: Uint16Array;
+        edges?: Uint16Array;
+        layerElementNormal: LayerElementNormal;
+        layerElementUV: LayerElementUV;
+        layerElementMaterial: LayerElementMaterial;
+    }
+    interface Material extends Object {
+        version: number;
+        shadingModel: string;
+        multiLayer: boolean;
+        emissive: Vector3;
+        ambient: Vector3;
+        diffuse: Vector3;
+        specular: Vector3;
+        shininess: number;
+        opacity: number;
+        reflectivity: number;
+    }
+    interface LayerElement {
+        name: string;
+        version: number;
+        mapping: MappingInformationType;
+        referencing: ReferenceInformationType;
+    }
+    interface LayerElementNormal extends LayerElement {
+        normals: Float32Array;
+    }
+    interface LayerElementUV extends LayerElement {
+        uvs?: Float32Array;
+        uvIndices?: Uint16Array;
+    }
+    interface LayerElementMaterial extends LayerElement {
+        materials?: number;
+    }
+    enum MappingInformationType {
+        ByVertex = 0,
+        ByPolygon = 1,
+        ByPolygonVertex = 2,
+        ByEdge = 3,
+        AllSame = 4
+    }
+    enum ReferenceInformationType {
+        Direct = 0,
+        IndexToDirect = 1
+    }
+    interface Connection {
+        parentUID: number;
+        childUID: number;
+        propertyName: string;
+    }
+    type Property = boolean | number | string | Vector3;
+    interface Node {
+        name: string;
+        properties: NodeProperty[];
+        children: Node[];
+    }
+    type NodeProperty = boolean | number | string | Uint8Array | Uint16Array | Float32Array;
+    const binaryStartChars: Uint8Array;
+    enum ArrayEncoding {
+        UNCOMPRESSED = 0,
+        COMPRESSED = 1
+    }
+}
+declare namespace FudgeCore {
+    class FBXLoader {
+        #private;
+        private static loaders;
+        readonly nodes: FBX.Node[];
+        readonly uri: string;
+        constructor(_buffer: ArrayBuffer, _uri: string);
+        static LOAD(_uri: string): Promise<FBXLoader>;
+        getObjects(): FBX.Object[];
+        private loadObject;
+        private loadLayerElement;
+        private getNode;
+        private getPropertyValue;
+    }
+}
+declare namespace FudgeCore.FBX {
+    function parseNodesFromBinary(_buffer: ArrayBuffer): FBX.Node[];
+}
 declare namespace GLTF {
     type GlTfId = number;
     /**
