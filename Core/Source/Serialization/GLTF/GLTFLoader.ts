@@ -328,8 +328,7 @@ namespace FudgeCore {
         this.#buffers = [];
       if (!this.#buffers[gltfBufferView.buffer]) {
         const response: Response = await fetch(gltfBuffer.uri);
-        const blob: Blob = await response.blob();
-        this.#buffers[gltfBufferView.buffer] = await blob.arrayBuffer();
+        this.#buffers[gltfBufferView.buffer] = await response.arrayBuffer();
       }
 
       const buffer: ArrayBuffer = this.#buffers[gltfBufferView.buffer];
