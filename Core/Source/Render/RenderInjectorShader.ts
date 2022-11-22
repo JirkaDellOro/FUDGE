@@ -144,8 +144,8 @@ namespace FudgeCore {
 
   }
   class UboLightStrucure {
-    private index: { [key: string]: number } = {};
-    private offset: { [key: string]: number } = {};
+    public index: { [key: string]: number } = {};
+    public offset: { [key: string]: number } = {};
     constructor(_index: { [key: string]: number }, _offset: { [key: string]: number }) {
       this.index = _index;
       this.offset = _offset;

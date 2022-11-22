@@ -154,56 +154,12 @@ namespace FudgeCore {
       return picks;
     }
     //#endregion
-    //#region VR Session
 
-    public static async initializeXR(_xrSessionMode: XRSessionMode, _xrReferenceSpaceType: XRReferenceSpaceType): Promise<void> {
-      let session: XRSession = await navigator.xr.requestSession(_xrSessionMode);
-      XRViewport.xrReferenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
-      await RenderWebGL.crc3.makeXRCompatible();
-      await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, RenderWebGL.crc3) });
-      XRViewport.xrSession = session;
-    }
-    //#endregion
     //#region Drawing
     public static draw(_cmpCamera: ComponentCamera): void {
       _cmpCamera.resetWorldToView();
       Render.drawList(_cmpCamera, this.nodesSimple);
       Render.drawListAlpha(_cmpCamera);
-    }
-    public static drawXR(_cmpCamera: ComponentCamera, _xrFrame: XRFrame = null, _physicsDebugMode: PHYSICS_DEBUGMODE): void {
-      if (_xrFrame == null) {
-        Render.draw(_cmpCamera);
-      } else {
-        _cmpCamera.resetWorldToView();
-        let glLayer: XRWebGLLayer = XRViewport.xrSession.renderState.baseLayer;
-        let pose: XRViewerPose = _xrFrame.getViewerPose(XRViewport.xrReferenceSpace);
-
-        if (pose) {
-          RenderWebGL.crc3.bindFramebuffer(RenderWebGL.crc3.FRAMEBUFFER, glLayer.framebuffer);
-          RenderWebGL.crc3.clear(RenderWebGL.crc3.COLOR_BUFFER_BIT | RenderWebGL.crc3.DEPTH_BUFFER_BIT);
-
-          for (let view of pose.views) {
-            let viewport: globalThis.XRViewport = glLayer.getViewport(view);
-            RenderWebGL.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
-
-            XRViewport.setController(_xrFrame);
-            //just for testing porpuses, rays get drawed only on one screen if they are not setted here // have to investigate why
-            XRViewport.setRays();
-
-            _cmpCamera.mtxPivot.set(view.transform.matrix);
-            _cmpCamera.mtxCameraInverse.set(view.transform.inverse.matrix);
-            _cmpCamera.mtxProjection.set(view.projectionMatrix);
-
-            if (_physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
-              Physics.draw(_cmpCamera, _physicsDebugMode);
-            }
-            if (_physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) {
-              Render.drawListAlpha(_cmpCamera);
-              Render.drawList(_cmpCamera, Render.nodesSimple);
-            }
-          }
-        }
-      }
     }
 
 

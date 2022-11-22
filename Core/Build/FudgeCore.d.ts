@@ -645,8 +645,12 @@ declare namespace FudgeCore {
         protected static createProgram(this: typeof Shader): void;
     }
     class UboLightStrucure {
-        private index;
-        private offset;
+        index: {
+            [key: string]: number;
+        };
+        offset: {
+            [key: string]: number;
+        };
         constructor(_index: {
             [key: string]: number;
         }, _offset: {
@@ -2328,6 +2332,23 @@ declare namespace FudgeCore {
         static mapToTrit(_positive: KEYBOARD_CODE[], _negative: KEYBOARD_CODE[]): number;
         private static initialize;
         private static hndKeyInteraction;
+    }
+}
+declare namespace FudgeCore {
+    class XRController extends ComponentTransform {
+        rayHit: RayHitInfo;
+        isRayHitInfo: boolean;
+        setRay(): void;
+    }
+}
+declare namespace FudgeCore {
+    class XRTool {
+        rightController: XRController;
+        leftController: XRController;
+        xrSession: XRSession;
+        xrReferenceSpace: XRReferenceSpace;
+        setNewXRRigidtransform(_newPos?: Vector3, _newRot?: Vector3): void;
+        setController(_xrFrame: XRFrame): void;
     }
 }
 declare namespace FudgeCore {
@@ -5168,9 +5189,7 @@ declare namespace FudgeCore {
          * for each node in the line of sight and return that as an unsorted {@link Pick}-array
          */
         static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera): Pick[];
-        static initializeXR(_xrSessionMode: XRSessionMode, _xrReferenceSpaceType: XRReferenceSpaceType): Promise<void>;
         static draw(_cmpCamera: ComponentCamera): void;
-        static drawXR(_cmpCamera: ComponentCamera, _xrFrame: XRFrame, _physicsDebugMode: PHYSICS_DEBUGMODE): void;
         private static drawListAlpha;
         private static drawList;
         private static transformByPhysics;
@@ -5379,20 +5398,16 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class XRViewport extends Viewport {
-        #private;
+        private static xrViewportInstance;
+        xrTool: XRTool;
+        isActive: boolean;
+        private useController;
+        static get XRViewportInstance(): XRViewport;
+        static SETXRFRAME(_xrFrame: XRFrame): void;
         constructor();
-        static set xrFrame(_xrFrame: XRFrame);
-        static set xrSession(_xrSession: XRSession);
-        static set xrReferenceSpace(_xrReferenceSpace: XRReferenceSpace);
-        static get rightController(): ComponentTransform;
-        static get leftController(): ComponentTransform;
-        static get xrSession(): XRSession;
-        static get xrReferenceSpace(): XRReferenceSpace;
-        static setNewXRRigidtransform(_newPos?: Vector3, _newRot?: Vector3): void;
-        static setController(_xrFrame: XRFrame): void;
-        static setRays(): void;
-        initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
+        initializeXR(_xrSessionMode: XRSessionMode, _xrReferenceSpaceType: XRReferenceSpaceType, _useController: boolean): Promise<void>;
         draw(_calculateTransforms?: boolean): void;
+        drawXR(_xrFrame?: XRFrame): void;
     }
 }
 declare namespace FudgeCore {

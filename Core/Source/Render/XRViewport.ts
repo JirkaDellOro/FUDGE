@@ -1,109 +1,87 @@
 namespace FudgeCore {
-    export class XRViewport extends Viewport {
-        //region static  VR Attributes
-        static #xrSession: XRSession = null;
-        static #xrReferenceSpace: XRReferenceSpace = null;
-        static #xrFrame: XRFrame = null;
-        static #xrCamera: ComponentCamera = null;
-        static #physisDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
-        static #rightController: ComponentTransform = new ComponentTransform();
-        static #leftController: ComponentTransform = new ComponentTransform();
+  export class XRViewport extends Viewport {
+    //static instance of Viewport 
+    private static xrViewportInstance: XRViewport = null;
 
-        constructor() {
-            super();
-        }
-        //region static getter/setter VR Attributes 
-        public static set xrFrame(_xrFrame: XRFrame) {
-            XRViewport.#xrFrame = _xrFrame;
-            Render.drawXR(XRViewport.#xrCamera, XRViewport.#xrFrame, this.#physisDebugMode);
-        }
-        // public static set rightController(_rCntrlTransform: ComponentTransform) {
-        //     XRViewport.#rightController.mtxLocal = _rCntrlTransform.mtxLocal;
-        // }
-        // public static set leftController(_lCntrlTransform: ComponentTransform) {
-        //     XRViewport.#leftController.mtxLocal = _lCntrlTransform.mtxLocal;
-        // }
-        public static set xrSession(_xrSession: XRSession) {
-            XRViewport.#xrSession = _xrSession;
-        }
-        public static set xrReferenceSpace(_xrReferenceSpace: XRReferenceSpace) {
-            XRViewport.#xrReferenceSpace = _xrReferenceSpace;
-        }
+    public xrTool: XRTool = new XRTool();
+    public isActive: boolean = false;
+    private useController: boolean = false;
 
-
-        public static get rightController(): ComponentTransform {
-            if (XRViewport.#rightController)
-                return XRViewport.#rightController;
-            else return null;
-        }
-        public static get leftController(): ComponentTransform {
-            if (XRViewport.#leftController)
-                return XRViewport.#leftController;
-            else return null;
-        }
-
-        public static get xrSession(): XRSession {
-            if (XRViewport.#xrSession)
-                return XRViewport.#xrSession;
-            else return null;
-        }
-        public static get xrReferenceSpace(): XRReferenceSpace {
-            if (XRViewport.#xrReferenceSpace)
-                return XRViewport.#xrReferenceSpace;
-            else return null;
-        }
-        //#endregion
-        //region static webXR functions
-        public static setNewXRRigidtransform(_newPos: Vector3 = Vector3.ZERO(), _newRot: Vector3 = Vector3.ZERO()): void {
-            this.#xrReferenceSpace = this.#xrReferenceSpace.getOffsetReferenceSpace(new XRRigidTransform(_newPos, _newRot));
-        }
-
-        public static setController(_xrFrame: XRFrame): void {
-            if (XRViewport.xrSession.inputSources.length > 0)
-                XRViewport.xrSession.inputSources.forEach(controller => {
-                    try {
-                        switch (controller.handedness) {
-                            case ("right"):
-                                XRViewport.#rightController.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.xrReferenceSpace).transform.matrix);
-                                break;
-                            case ("left"):
-                                XRViewport.#leftController.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.xrReferenceSpace).transform.matrix);
-                                break;
-                        }
-                    } catch (e: unknown) {
-                        Debug.info("Input Sources disconnected, not possible to set new Matrix");
-                    }
-
-                });
-            else
-                Debug.info("Input Devices detected: ", XRViewport.xrSession.inputSources.length);
-        }
-
-        public static setRays(): void {
-            let vecZLefttCntrl: Vector3 = XRViewport.#leftController.mtxLocal.getZ();
-            Physics.raycast(XRViewport.#leftController.mtxLocal.translation, new Vector3(-vecZLefttCntrl.x, -vecZLefttCntrl.y, -vecZLefttCntrl.z), 80, true);
-
-            let vecZRightCntrl: Vector3 = XRViewport.#rightController.mtxLocal.getZ();
-            Physics.raycast(XRViewport.#rightController.mtxLocal.translation, new Vector3(-vecZRightCntrl.x, -vecZRightCntrl.y, -vecZRightCntrl.z), 80, true);
-        }
-        //#endregion
-
-
-        public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
-            super.initialize(_name, _branch, _camera, _canvas);
-            //#region VR Session
-            XRViewport.#xrCamera = _camera;
-            //#endregion
-        }
-        public draw(_calculateTransforms: boolean = true): void {
-            if (XRViewport.xrSession == null) {
-                super.draw(_calculateTransforms);
-            }
-            else {
-                XRViewport.#physisDebugMode = this.physicsDebugMode;
-                super.calculateDrawing(_calculateTransforms);
-            }
-
-        }
+    public static get XRViewportInstance(): XRViewport {
+      if (!this.xrViewportInstance) return null;
+      else return this.xrViewportInstance;
     }
+
+    public static SETXRFRAME(_xrFrame: XRFrame): void {
+      return this.xrViewportInstance.drawXR(_xrFrame);
+    }
+
+    constructor() {
+      super();
+      XRViewport.xrViewportInstance = this;
+    }
+
+    // the xrSession is initialized here, after xrSession is setted and FrameRequestXR is called from user, the XRViewport is ready to go.
+    public async initializeXR(_xrSessionMode: XRSessionMode, _xrReferenceSpaceType: XRReferenceSpaceType, _useController: boolean): Promise<void> {
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+      let session: XRSession = await navigator.xr.requestSession(_xrSessionMode);
+      this.xrTool.xrReferenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
+      await crc3.makeXRCompatible();
+      await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, crc3) });
+      this.useController = _useController;
+      if (_useController) {
+        this.xrTool.rightController = new XRController();
+        this.xrTool.leftController = new XRController();
+      }
+      this.xrTool.xrSession = session;
+      this.isActive = true;
+    }
+
+    //override viewport draw method for xr - draws normal as long as initializeXR is not called 
+    public draw(_calculateTransforms: boolean = true): void {
+      if (this.xrTool.xrSession == null) {
+        super.draw(_calculateTransforms);
+      }
+    }
+
+    //real draw method in XR Mode - called from Loop Class over static instance of this class.
+    public drawXR(_xrFrame: XRFrame = null): void {
+      if (!_xrFrame) {
+        super.draw(true);
+      } else {
+        let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+
+        let glLayer: XRWebGLLayer = this.xrTool.xrSession.renderState.baseLayer;
+        let pose: XRViewerPose = _xrFrame.getViewerPose(this.xrTool.xrReferenceSpace);
+        if (pose) {
+          super.calculateDrawing(true);
+          for (let view of pose.views) {
+            this.camera.resetWorldToView();
+            let viewport: globalThis.XRViewport = glLayer.getViewport(view);
+            crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+
+            if (this.useController)
+              this.xrTool.setController(_xrFrame);
+            //just for testing porpuses, rays get only on one screen if they are not setted here // have to investigate why
+            if (this.xrTool.rightController.isRayHitInfo)
+              this.xrTool.rightController.setRay();
+            if (this.xrTool.leftController.isRayHitInfo)
+              this.xrTool.leftController.setRay();
+
+            this.camera.mtxPivot.set(view.transform.matrix);
+            this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
+            this.camera.mtxProjection.set(view.projectionMatrix);
+
+            if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
+              Physics.draw(this.camera, this.physicsDebugMode);
+            }
+            if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) {
+              Render.draw(this.camera);
+            }
+          }
+        }
+      }
+    }
+  }
 }
+
