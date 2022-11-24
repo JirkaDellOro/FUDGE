@@ -3,43 +3,38 @@ namespace FudgeCore {
     //static instance of Viewport 
     private static xrViewportInstance: XRViewport = null;
 
-    public xrTool: XRTool = new XRTool();
-    public isActive: boolean = false;
+    public xr: XR = new XR();
+
     private useController: boolean = false;
 
     public static get XRViewportInstance(): XRViewport {
       if (!this.xrViewportInstance) return null;
       else return this.xrViewportInstance;
     }
-
-    public static SETXRFRAME(_xrFrame: XRFrame): void {
-      return this.xrViewportInstance.drawXR(_xrFrame);
-    }
-
+    // sets static reference of non static class :-0
     constructor() {
       super();
       XRViewport.xrViewportInstance = this;
     }
 
     // the xrSession is initialized here, after xrSession is setted and FrameRequestXR is called from user, the XRViewport is ready to go.
-    public async initializeXR(_xrSessionMode: XRSessionMode, _xrReferenceSpaceType: XRReferenceSpaceType, _useController: boolean): Promise<void> {
+    public async initializeXR(_xrSessionMode: XRSessionMode = "immersive-vr", _xrReferenceSpaceType: XRReferenceSpaceType = "local", _useController: boolean = false): Promise<void> {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       let session: XRSession = await navigator.xr.requestSession(_xrSessionMode);
-      this.xrTool.xrReferenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
+      this.xr.xrReferenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
       await crc3.makeXRCompatible();
       await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, crc3) });
       this.useController = _useController;
       if (_useController) {
-        this.xrTool.rightController = new XRController();
-        this.xrTool.leftController = new XRController();
+        this.xr.rightController = new XRController();
+        this.xr.leftController = new XRController();
       }
-      this.xrTool.xrSession = session;
-      this.isActive = true;
+      this.xr.xrSession = session;
     }
 
     //override viewport draw method for xr - draws normal as long as initializeXR is not called 
     public draw(_calculateTransforms: boolean = true): void {
-      if (this.xrTool.xrSession == null) {
+      if (this.xr.xrSession == null) {
         super.draw(_calculateTransforms);
       }
     }
@@ -51,8 +46,8 @@ namespace FudgeCore {
       } else {
         let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
-        let glLayer: XRWebGLLayer = this.xrTool.xrSession.renderState.baseLayer;
-        let pose: XRViewerPose = _xrFrame.getViewerPose(this.xrTool.xrReferenceSpace);
+        let glLayer: XRWebGLLayer = this.xr.xrSession.renderState.baseLayer;
+        let pose: XRViewerPose = _xrFrame.getViewerPose(this.xr.xrReferenceSpace);
         if (pose) {
           super.calculateDrawing(true);
           for (let view of pose.views) {
@@ -61,12 +56,15 @@ namespace FudgeCore {
             crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
 
             if (this.useController)
-              this.xrTool.setController(_xrFrame);
+              this.xr.setController(_xrFrame);
+
+            //------------------------------------------
             //just for testing porpuses, rays get only on one screen if they are not setted here // have to investigate why
-            if (this.xrTool.rightController.isRayHitInfo)
-              this.xrTool.rightController.setRay();
-            if (this.xrTool.leftController.isRayHitInfo)
-              this.xrTool.leftController.setRay();
+            if (this.xr.rightController.isRayHitInfo)
+              this.xr.rightController.setRay();
+            if (this.xr.leftController.isRayHitInfo)
+              this.xr.leftController.setRay();
+            //------------------------------------------
 
             this.camera.mtxPivot.set(view.transform.matrix);
             this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);

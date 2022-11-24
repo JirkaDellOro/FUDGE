@@ -1,5 +1,5 @@
 namespace FudgeCore {
-    export class XRTool {
+    export class XR extends Component {
 
         public rightController: XRController = null;
         public leftController: XRController = null;
