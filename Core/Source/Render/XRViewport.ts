@@ -6,24 +6,27 @@ namespace FudgeCore {
     public xr: XR = new XR();
 
     private useController: boolean = false;
+    private crc3: WebGL2RenderingContext = null;
 
+    // sets static reference of non static class :-0
     public static get XRViewportInstance(): XRViewport {
       if (!this.xrViewportInstance) return null;
       else return this.xrViewportInstance;
     }
-    // sets static reference of non static class :-0
+
     constructor() {
       super();
       XRViewport.xrViewportInstance = this;
+      this.crc3 = RenderWebGL.getRenderingContext();
     }
 
     // the xrSession is initialized here, after xrSession is setted and FrameRequestXR is called from user, the XRViewport is ready to go.
     public async initializeXR(_xrSessionMode: XRSessionMode = "immersive-vr", _xrReferenceSpaceType: XRReferenceSpaceType = "local", _useController: boolean = false): Promise<void> {
-      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+
       let session: XRSession = await navigator.xr.requestSession(_xrSessionMode);
       this.xr.xrReferenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
-      await crc3.makeXRCompatible();
-      await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, crc3) });
+      await this.crc3.makeXRCompatible();
+      await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3) });
       this.useController = _useController;
       if (_useController) {
         this.xr.rightController = new XRController();
@@ -44,16 +47,16 @@ namespace FudgeCore {
       if (!_xrFrame) {
         super.draw(true);
       } else {
-        let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+        super.calculateDrawing(true);
 
         let glLayer: XRWebGLLayer = this.xr.xrSession.renderState.baseLayer;
         let pose: XRViewerPose = _xrFrame.getViewerPose(this.xr.xrReferenceSpace);
+        this.crc3.bindFramebuffer(this.crc3.FRAMEBUFFER, glLayer.framebuffer);
+
         if (pose) {
-          super.calculateDrawing(true);
           for (let view of pose.views) {
-            this.camera.resetWorldToView();
             let viewport: globalThis.XRViewport = glLayer.getViewport(view);
-            crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+            this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
 
             if (this.useController)
               this.xr.setController(_xrFrame);
@@ -70,11 +73,10 @@ namespace FudgeCore {
             this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
             this.camera.mtxProjection.set(view.projectionMatrix);
 
+            if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
+              Render.draw(this.camera);
             if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
               Physics.draw(this.camera, this.physicsDebugMode);
-            }
-            if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) {
-              Render.draw(this.camera);
             }
           }
         }

@@ -5401,6 +5401,7 @@ declare namespace FudgeCore {
         private static xrViewportInstance;
         xr: XR;
         private useController;
+        private crc3;
         static get XRViewportInstance(): XRViewport;
         constructor();
         initializeXR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType, _useController?: boolean): Promise<void>;
