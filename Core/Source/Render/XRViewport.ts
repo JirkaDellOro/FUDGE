@@ -9,9 +9,8 @@ namespace FudgeCore {
     private crc3: WebGL2RenderingContext = null;
 
     // sets static reference of non static class :-0
-    public static get XRViewportInstance(): XRViewport {
-      if (!this.xrViewportInstance) return null;
-      else return this.xrViewportInstance;
+    public static get default(): XRViewport {
+      return this.xrViewportInstance;
     }
 
     constructor() {
