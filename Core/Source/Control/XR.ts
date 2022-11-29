@@ -1,8 +1,10 @@
 namespace FudgeCore {
     export class XR extends Component {
 
-        public rightController: XRController = null;
-        public leftController: XRController = null;
+        public rightController: ComponentTransform = null;
+        public leftController: ComponentTransform = null;
+        public rayHitInfoRight: RayHitInfo;
+        public rayHitInfoLeft: RayHitInfo;
         public xrSession: XRSession = null;
         public xrReferenceSpace: XRReferenceSpace = null;
 
@@ -24,12 +26,17 @@ namespace FudgeCore {
                                 break;
                         }
                     } catch (e: unknown) {
-                        Debug.info("Input Sources disconnected: " + e);
+                        Debug.info("Input Sources Error: " + e);
                     }
 
                 });
-            else
-                Debug.info("No Input Devices detected");
+        }
+        //just for testing porpuses, rays get drawed only on one screen if they are not setted here // have to investigate why
+        public setRay(): void {
+            let vecZCntrlR: Vector3 = this.rightController.mtxLocal.getZ();
+            this.rayHitInfoRight = Physics.raycast(this.rightController.mtxLocal.translation, new Vector3(-vecZCntrlR.x, -vecZCntrlR.y, -vecZCntrlR.z), 80, true);
+            let vecZCntrlL: Vector3 = this.leftController.mtxLocal.getZ();
+            this.rayHitInfoLeft = Physics.raycast(this.leftController.mtxLocal.translation, new Vector3(-vecZCntrlL.x, -vecZCntrlL.y, -vecZCntrlL.z), 80, true);
         }
 
     }

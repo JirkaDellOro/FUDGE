@@ -20,16 +20,17 @@ namespace FudgeCore {
     }
 
     // the xrSession is initialized here, after xrSession is setted and FrameRequestXR is called from user, the XRViewport is ready to go.
-    public async initializeXR(_xrSessionMode: XRSessionMode = "immersive-vr", _xrReferenceSpaceType: XRReferenceSpaceType = "local", _useController: boolean = false): Promise<void> {
+    public async initializeXR(_xrSessionMode: XRSessionMode = "immersive-vr", _xrReferenceSpaceType: XRReferenceSpaceType = "local", _xrController: boolean = false): Promise<void> {
 
       let session: XRSession = await navigator.xr.requestSession(_xrSessionMode);
       this.xr.xrReferenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
       await this.crc3.makeXRCompatible();
-      await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3) });
-      this.useController = _useController;
-      if (_useController) {
-        this.xr.rightController = new XRController();
-        this.xr.leftController = new XRController();
+      let nativeScaleFactor = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
+      await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3, { framebufferScaleFactor: nativeScaleFactor }) });
+      this.useController = _xrController;
+      if (_xrController) {
+        this.xr.rightController = new ComponentTransform();
+        this.xr.leftController = new ComponentTransform();
       }
       this.xr.xrSession = session;
     }
@@ -57,16 +58,17 @@ namespace FudgeCore {
             let viewport: globalThis.XRViewport = glLayer.getViewport(view);
             this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
 
-            if (this.useController)
+            if (this.useController) {
               this.xr.setController(_xrFrame);
+              //------------------------------------------
+              //just for testing porpuses, rays get only on one screen if they are not setted here // have to investigate why
 
-            //------------------------------------------
-            //just for testing porpuses, rays get only on one screen if they are not setted here // have to investigate why
-            if (this.xr.rightController.isRayHitInfo)
-              this.xr.rightController.setRay();
-            if (this.xr.leftController.isRayHitInfo)
-              this.xr.leftController.setRay();
-            //------------------------------------------
+              this.xr.setRay();
+              //------------------------------------------
+            }
+
+
+
 
             this.camera.mtxPivot.set(view.transform.matrix);
             this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);

@@ -2336,18 +2336,14 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class XR extends Component {
-        rightController: XRController;
-        leftController: XRController;
+        rightController: ComponentTransform;
+        leftController: ComponentTransform;
+        rayHitInfoRight: RayHitInfo;
+        rayHitInfoLeft: RayHitInfo;
         xrSession: XRSession;
         xrReferenceSpace: XRReferenceSpace;
         setNewXRRigidtransform(_newPos?: Vector3, _newRot?: Vector3): void;
         setController(_xrFrame: XRFrame): void;
-    }
-}
-declare namespace FudgeCore {
-    class XRController extends ComponentTransform {
-        rayHit: RayHitInfo;
-        isRayHitInfo: boolean;
         setRay(): void;
     }
 }
@@ -5402,9 +5398,9 @@ declare namespace FudgeCore {
         xr: XR;
         private useController;
         private crc3;
-        static get XRViewportInstance(): XRViewport;
+        static get default(): XRViewport;
         constructor();
-        initializeXR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType, _useController?: boolean): Promise<void>;
+        initializeXR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType, _xrController?: boolean): Promise<void>;
         draw(_calculateTransforms?: boolean): void;
         drawXR(_xrFrame?: XRFrame): void;
     }
