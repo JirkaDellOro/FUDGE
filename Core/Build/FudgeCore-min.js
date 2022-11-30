@@ -988,18 +988,52 @@ var FudgeCore;
             function detectUniforms() {
                 let detectedUniforms = {};
                 let uniformCount = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
+                let oldLength = RenderInjectorShader.uboInfos.length;
                 for (let i = 0; i < uniformCount; i++) {
                     let info = FudgeCore.RenderWebGL.assert(crc3.getActiveUniform(program, i));
                     if (!info) {
                         break;
                     }
-                    detectedUniforms[info.name] = FudgeCore.RenderWebGL.assert(crc3.getUniformLocation(program, info.name));
+                    if (crc3.getUniformLocation(program, info.name) != null)
+                        detectedUniforms[info.name] = FudgeCore.RenderWebGL.assert(crc3.getUniformLocation(program, info.name));
+                    else if (!RenderInjectorShader.uboInfos.includes(info.name)) {
+                        console.log(info.name);
+                        RenderInjectorShader.uboInfos.push(info.name);
+                    }
                 }
+                if (oldLength < RenderInjectorShader.uboInfos.length)
+                    bindLightUBO();
                 return detectedUniforms;
+            }
+            function bindLightUBO() {
+                let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
+                const blockIndex = crc3.getUniformBlockIndex(program, "UNIFORMS_LIGHT");
+                const blockSize = crc3.getActiveUniformBlockParameter(program, blockIndex, crc3.UNIFORM_BLOCK_DATA_SIZE);
+                const uboBuffer = crc3.createBuffer();
+                crc3.bindBuffer(crc3.UNIFORM_BUFFER, uboBuffer);
+                crc3.bufferData(crc3.UNIFORM_BUFFER, blockSize, crc3.DYNAMIC_DRAW);
+                crc3.bindBuffer(crc3.UNIFORM_BUFFER, null);
+                crc3.uniformBlockBinding(program, blockIndex, 0);
+                crc3.bindBufferBase(crc3.UNIFORM_BUFFER, 0, uboBuffer);
+                let uboVariableIndices = crc3.getUniformIndices(program, RenderInjectorShader.uboInfos);
+                let uboVariableOffsets = crc3.getActiveUniforms(program, uboVariableIndices, crc3.UNIFORM_OFFSET);
+                RenderInjectorShader.uboInfos.forEach((name, index) => {
+                    RenderInjectorShader.uboLightsInfo[name] = new UboLightStrucure(uboVariableIndices[index], uboVariableOffsets[index]);
+                });
             }
         }
     }
+    RenderInjectorShader.uboLightsInfo = {};
+    RenderInjectorShader.uboInfos = new Array();
     FudgeCore.RenderInjectorShader = RenderInjectorShader;
+    class UboLightStrucure {
+        constructor(_index, _offset) {
+            this.index = {};
+            this.offset = {};
+            this.index = _index;
+            this.offset = _offset;
+        }
+    }
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -1701,16 +1735,16 @@ var FudgeCore;
         }
         static setLightsInShader(_shader, _lights) {
             _shader.useProgram();
-            let uni = _shader.uniforms;
+            let uni = FudgeCore.RenderInjectorShader.uboLightsInfo;
             let ambient = uni["u_ambient.vctColor"];
             if (ambient) {
-                RenderWebGL.crc3.uniform4fv(ambient, [0, 0, 0, 0]);
+                this.crc3.bufferSubData(this.crc3.UNIFORM_BUFFER, ambient.offset, new Float32Array(0));
                 let cmpLights = _lights.get(FudgeCore.LightAmbient);
                 if (cmpLights) {
                     let result = new FudgeCore.Color(0, 0, 0, 1);
                     for (let cmpLight of cmpLights)
                         result.add(cmpLight.light.color);
-                    RenderWebGL.crc3.uniform4fv(ambient, result.getArray());
+                    this.crc3.bufferSubData(this.crc3.UNIFORM_BUFFER, ambient.offset, new Float32Array(result.getArray()));
                 }
             }
             fillLightBuffers(FudgeCore.LightDirectional, "u_nLightsDirectional", "u_directional");
@@ -1719,19 +1753,23 @@ var FudgeCore;
             function fillLightBuffers(_type, _uniNumber, _uniStruct) {
                 let uniLights = uni[_uniNumber];
                 if (uniLights) {
-                    RenderWebGL.crc3.uniform1ui(uniLights, 0);
+                    let zeroOut = new Uint8Array([0]);
+                    ;
+                    RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uniLights.offset, zeroOut);
                     let cmpLights = _lights.get(_type);
                     if (cmpLights) {
                         let n = cmpLights.length;
-                        RenderWebGL.crc3.uniform1ui(uniLights, n);
+                        let nLightsAmount = new Uint8Array([n]);
+                        ;
+                        RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uniLights.offset, nLightsAmount);
                         let i = 0;
                         for (let cmpLight of cmpLights) {
-                            RenderWebGL.crc3.uniform4fv(uni[`${_uniStruct}[${i}].vctColor`], cmpLight.light.color.getArray());
+                            RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uni[`${_uniStruct}[${i}].vctColor`].offset, cmpLight.light.color.getArray());
                             let mtxTotal = FudgeCore.Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
-                            RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShape`], false, mtxTotal.get());
+                            RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uni[`${_uniStruct}[${i}].mtxShape`].offset, mtxTotal.get());
                             if (_type != FudgeCore.LightDirectional) {
                                 let mtxInverse = mtxTotal.inverse();
-                                RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShapeInverse`], false, mtxInverse.get());
+                                RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uni[`${_uniStruct}[${i}].mtxShapeInverse`].offset, mtxInverse.get());
                                 FudgeCore.Recycler.store(mtxInverse);
                             }
                             FudgeCore.Recycler.store(mtxTotal);
@@ -3362,8 +3400,8 @@ var FudgeCore;
             super(...arguments);
             this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
             this.clrBackground = new FudgeCore.Color(0, 0, 0, 1);
+            this.#mtxProjection = new FudgeCore.Matrix4x4;
             this.projection = PROJECTION.CENTRAL;
-            this.mtxProjection = new FudgeCore.Matrix4x4;
             this.fieldOfView = 45;
             this.aspectRatio = 1.0;
             this.direction = FIELD_OF_VIEW.DIAGONAL;
@@ -3373,6 +3411,7 @@ var FudgeCore;
         }
         #mtxWorldToView;
         #mtxCameraInverse;
+        #mtxProjection;
         get mtxWorld() {
             let mtxCamera = this.mtxPivot.clone;
             try {
@@ -3385,7 +3424,7 @@ var FudgeCore;
         get mtxWorldToView() {
             if (this.#mtxWorldToView)
                 return this.#mtxWorldToView;
-            this.#mtxWorldToView = FudgeCore.Matrix4x4.MULTIPLICATION(this.mtxProjection, this.mtxCameraInverse);
+            this.#mtxWorldToView = FudgeCore.Matrix4x4.MULTIPLICATION(this.#mtxProjection, this.mtxCameraInverse);
             return this.#mtxWorldToView;
         }
         get mtxCameraInverse() {
@@ -3393,6 +3432,12 @@ var FudgeCore;
                 return this.#mtxCameraInverse;
             this.#mtxCameraInverse = FudgeCore.Matrix4x4.INVERSION(this.mtxWorld);
             return this.#mtxCameraInverse;
+        }
+        get mtxProjection() {
+            if (this.#mtxProjection)
+                return this.#mtxProjection;
+            this.#mtxProjection = new FudgeCore.Matrix4x4;
+            return this.#mtxProjection;
         }
         resetWorldToView() {
             if (this.#mtxWorldToView)
@@ -3430,11 +3475,11 @@ var FudgeCore;
             this.projection = PROJECTION.CENTRAL;
             this.near = _near;
             this.far = _far;
-            this.mtxProjection = FudgeCore.Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction);
+            this.#mtxProjection = FudgeCore.Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction);
         }
         projectOrthographic(_left = -FudgeCore.Render.getCanvas().clientWidth / 2, _right = FudgeCore.Render.getCanvas().clientWidth / 2, _bottom = FudgeCore.Render.getCanvas().clientHeight / 2, _top = -FudgeCore.Render.getCanvas().clientHeight / 2) {
             this.projection = PROJECTION.ORTHOGRAPHIC;
-            this.mtxProjection = FudgeCore.Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400);
+            this.#mtxProjection = FudgeCore.Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400);
         }
         getProjectionRectangle() {
             let tanFov = Math.tan(Math.PI * this.fieldOfView / 360);
@@ -4123,6 +4168,46 @@ var FudgeCore;
     }
     Keyboard.keysPressed = Keyboard.initialize();
     FudgeCore.Keyboard = Keyboard;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class XR extends FudgeCore.Component {
+        constructor() {
+            super(...arguments);
+            this.rightController = null;
+            this.leftController = null;
+            this.xrSession = null;
+            this.xrReferenceSpace = null;
+        }
+        setNewXRRigidtransform(_newPos = FudgeCore.Vector3.ZERO(), _newRot = FudgeCore.Vector3.ZERO()) {
+            this.xrReferenceSpace = this.xrReferenceSpace.getOffsetReferenceSpace(new XRRigidTransform(_newPos, _newRot));
+        }
+        setController(_xrFrame) {
+            if (this.xrSession.inputSources.length > 0)
+                this.xrSession.inputSources.forEach(controller => {
+                    try {
+                        switch (controller.handedness) {
+                            case ("right"):
+                                this.rightController.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, this.xrReferenceSpace).transform.matrix);
+                                break;
+                            case ("left"):
+                                this.leftController.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, this.xrReferenceSpace).transform.matrix);
+                                break;
+                        }
+                    }
+                    catch (e) {
+                        FudgeCore.Debug.info("Input Sources Error: " + e);
+                    }
+                });
+        }
+        setRay() {
+            let vecZCntrlR = this.rightController.mtxLocal.getZ();
+            this.rayHitInfoRight = FudgeCore.Physics.raycast(this.rightController.mtxLocal.translation, new FudgeCore.Vector3(-vecZCntrlR.x, -vecZCntrlR.y, -vecZCntrlR.z), 80, true);
+            let vecZCntrlL = this.leftController.mtxLocal.getZ();
+            this.rayHitInfoLeft = FudgeCore.Physics.raycast(this.leftController.mtxLocal.translation, new FudgeCore.Vector3(-vecZCntrlL.x, -vecZCntrlL.y, -vecZCntrlL.z), 80, true);
+        }
+    }
+    FudgeCore.XR = XR;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -5757,7 +5842,7 @@ var FudgeCore;
                 this.vectors.translation = this.#vectors.translation;
                 this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
             }
-            return this.vectors.translation;
+            return this.vectors.translation.clone;
         }
         get rotation() {
             if (!this.vectors.rotation)
@@ -10208,22 +10293,22 @@ var FudgeCore;
                 _branch.dispatchEvent(new Event("attachBranch"));
             this.#branch = _branch;
         }
+        setContext(_cr2c) {
+            if (_cr2c)
+                this.#crc2 = _cr2c;
+        }
         getBranch() {
             return this.#branch;
         }
+        getContext() {
+            return this.#crc2;
+        }
+        setCanvas(_canvas) {
+            if (_canvas)
+                this.#canvas = _canvas;
+        }
         draw(_calculateTransforms = true) {
-            if (!this.#branch)
-                return;
-            FudgeCore.Render.resetFrameBuffer();
-            if (!this.camera.isActive)
-                return;
-            if (this.adjustingFrames)
-                this.adjustFrames();
-            if (this.adjustingCamera)
-                this.adjustCamera();
-            if (_calculateTransforms)
-                this.calculateTransforms();
-            FudgeCore.Render.clear(this.camera.clrBackground);
+            this.calculateDrawing(_calculateTransforms);
             if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
                 FudgeCore.Render.draw(this.camera);
             if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.NONE) {
@@ -10335,8 +10420,87 @@ var FudgeCore;
             let screen = new FudgeCore.Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
             return screen;
         }
+        calculateDrawing(_calculateTransforms = true) {
+            if (!this.#branch)
+                return;
+            FudgeCore.Render.resetFrameBuffer();
+            if (!this.camera.isActive)
+                return;
+            if (this.adjustingFrames)
+                this.adjustFrames();
+            if (this.adjustingCamera)
+                this.adjustCamera();
+            if (_calculateTransforms)
+                this.calculateTransforms();
+            FudgeCore.Render.clear(this.camera.clrBackground);
+        }
     }
     FudgeCore.Viewport = Viewport;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class XRViewport extends FudgeCore.Viewport {
+        constructor() {
+            super();
+            this.xr = new FudgeCore.XR();
+            this.useController = false;
+            this.crc3 = null;
+            XRViewport.xrViewportInstance = this;
+            this.crc3 = FudgeCore.RenderWebGL.getRenderingContext();
+        }
+        static get default() {
+            return this.xrViewportInstance;
+        }
+        async initializeXR(_xrSessionMode = "immersive-vr", _xrReferenceSpaceType = "local", _xrController = false) {
+            let session = await navigator.xr.requestSession(_xrSessionMode);
+            this.xr.xrReferenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
+            await this.crc3.makeXRCompatible();
+            let nativeScaleFactor = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
+            await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3, { framebufferScaleFactor: nativeScaleFactor }) });
+            this.useController = _xrController;
+            if (_xrController) {
+                this.xr.rightController = new FudgeCore.ComponentTransform();
+                this.xr.leftController = new FudgeCore.ComponentTransform();
+            }
+            this.xr.xrSession = session;
+        }
+        draw(_calculateTransforms = true) {
+            if (this.xr.xrSession == null) {
+                super.draw(_calculateTransforms);
+            }
+        }
+        drawXR(_xrFrame = null) {
+            if (!_xrFrame) {
+                super.draw(true);
+            }
+            else {
+                super.calculateDrawing(true);
+                let glLayer = this.xr.xrSession.renderState.baseLayer;
+                let pose = _xrFrame.getViewerPose(this.xr.xrReferenceSpace);
+                this.crc3.bindFramebuffer(this.crc3.FRAMEBUFFER, glLayer.framebuffer);
+                if (pose) {
+                    for (let view of pose.views) {
+                        let viewport = glLayer.getViewport(view);
+                        this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+                        if (this.useController) {
+                            this.xr.setController(_xrFrame);
+                            this.xr.setRay();
+                        }
+                        this.camera.mtxPivot.set(view.transform.matrix);
+                        this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
+                        this.camera.mtxProjection.set(view.projectionMatrix);
+                        if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
+                            FudgeCore.Render.draw(this.camera);
+                        if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.NONE) {
+                            FudgeCore.Physics.draw(this.camera, this.physicsDebugMode);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    XRViewport.xrViewportInstance = null;
+    FudgeCore.XRViewport = XRViewport;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -10962,23 +11126,9 @@ in vec4 v_vctPosition;
 in vec3 v_vctNormal;
 out vec4 vctFrag;
 
-struct Light {
-  vec4 vctColor;
-  mat4 mtxShape;
-  mat4 mtxShapeInverse;
-};
 
-const uint MAX_LIGHTS_DIRECTIONAL = 10u;
-const uint MAX_LIGHTS_POINT = 50u;
-const uint MAX_LIGHTS_SPOT = 50u;
 
-uniform Light u_ambient;
-uniform uint u_nLightsDirectional;
-uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
-uniform uint u_nLightsPoint;
-uniform Light u_point[MAX_LIGHTS_POINT];
-uniform uint u_nLightsSpot;
-uniform Light u_spot[MAX_LIGHTS_SPOT];
+
 
 float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
   if(_fSpecular <= 0.0)
@@ -11197,17 +11347,25 @@ struct Light {
   mat4 mtxShapeInverse;
 };
 
-const uint MAX_LIGHTS_DIRECTIONAL = 10u;
-const uint MAX_LIGHTS_POINT = 50u;
-const uint MAX_LIGHTS_SPOT = 50u;
 
+
+const uint MAX_LIGHTS_DIRECTIONAL = 150u;
+const uint MAX_LIGHTS_POINT = 150u;
+const uint MAX_LIGHTS_SPOT = 150u;
+
+
+ layout(std140) uniform UNIFORMS_LIGHT
+{
 uniform Light u_ambient;
 uniform uint u_nLightsDirectional;
-uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
 uniform uint u_nLightsPoint;
-uniform Light u_point[MAX_LIGHTS_POINT];
 uniform uint u_nLightsSpot;
+uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+uniform Light u_point[MAX_LIGHTS_POINT];
 uniform Light u_spot[MAX_LIGHTS_SPOT];
+
+} ;
+
 
 vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _vctView, float _fSpecular) {
   vec4 vctResult = vec4(0, 0, 0, 1);
@@ -11261,7 +11419,7 @@ uniform Bone u_bones[MAX_BONES];
   // FLAT: outbuffer is flat
   #if defined(FLAT)
 flat out vec4 v_vctColor;
-  #else
+  #elif defined(LIGHT)
   // regular if not FLAT
 out vec4 v_vctColor;
   #endif
@@ -11269,7 +11427,6 @@ out vec4 v_vctColor;
 void main() {
   vec4 vctPosition = vec4(a_vctPosition, 1.0);
   mat4 mtxMeshToView = u_mtxMeshToView;
-
     #if defined(LIGHT) || defined(MATCAP)
   vec3 vctNormal = a_vctNormal;
   mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
@@ -11317,6 +11474,7 @@ void main() {
       continue;
     v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
   }
+
   // calculate spot light effect
   for(uint i = 0u; i < u_nLightsSpot; i++) {
     vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
@@ -11356,7 +11514,9 @@ void main() {
     #endif
 
     // always full opacity for now...
+    #if defined(LIGHT)
   v_vctColor.a = 1.0;
+    #endif
 }`;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -11827,6 +11987,7 @@ var FudgeCore;
     let LOOP_MODE;
     (function (LOOP_MODE) {
         LOOP_MODE["FRAME_REQUEST"] = "frameRequest";
+        LOOP_MODE["FRAME_REQUEST_XR"] = "frameRequestXR";
         LOOP_MODE["TIME_GAME"] = "timeGame";
         LOOP_MODE["TIME_REAL"] = "timeReal";
     })(LOOP_MODE = FudgeCore.LOOP_MODE || (FudgeCore.LOOP_MODE = {}));
@@ -11859,6 +12020,9 @@ var FudgeCore;
                 case LOOP_MODE.FRAME_REQUEST:
                     Loop.loopFrame();
                     break;
+                case LOOP_MODE.FRAME_REQUEST_XR:
+                    Loop.loopFrameXR();
+                    break;
                 case LOOP_MODE.TIME_REAL:
                     Loop.idIntervall = window.setInterval(Loop.loopTime, 1000 / Loop.fpsDesired);
                     Loop.loopTime();
@@ -11878,6 +12042,10 @@ var FudgeCore;
             switch (Loop.mode) {
                 case LOOP_MODE.FRAME_REQUEST:
                     window.cancelAnimationFrame(Loop.idRequest);
+                    break;
+                case LOOP_MODE.FRAME_REQUEST_XR:
+                    FudgeCore.XRViewport.default.xr.xrSession.cancelAnimationFrame(Loop.idRequest);
+                    FudgeCore.XRViewport.default.xr.xrSession = null;
                     break;
                 case LOOP_MODE.TIME_REAL:
                     window.clearInterval(Loop.idIntervall);
@@ -11915,6 +12083,11 @@ var FudgeCore;
         static loopFrame() {
             Loop.loop();
             Loop.idRequest = window.requestAnimationFrame(Loop.loopFrame);
+        }
+        static loopFrameXR(_time = null, _xrFrame = null) {
+            Loop.loop();
+            FudgeCore.XRViewport.default.drawXR(_xrFrame);
+            Loop.idRequest = FudgeCore.XRViewport.default.xr.xrSession.requestAnimationFrame(Loop.loopFrameXR);
         }
         static loopTime() {
             if (Loop.syncWithAnimationFrame)

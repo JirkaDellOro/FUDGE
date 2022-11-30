@@ -19,9 +19,23 @@ in vec4 v_vctPosition;
 in vec3 v_vctNormal;
 out vec4 vctFrag;
 
+// struct Light {
+//   vec4 vctColor;
+//   mat4 mtxShape;
+//   mat4 mtxShapeInverse;
+// };
 
+// const uint MAX_LIGHTS_DIRECTIONAL = 10u;
+// const uint MAX_LIGHTS_POINT = 50u;
+// const uint MAX_LIGHTS_SPOT = 50u;
 
-
+// uniform Light u_ambient;
+// uniform uint u_nLightsDirectional;
+// uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+// uniform uint u_nLightsPoint;
+// uniform Light u_point[MAX_LIGHTS_POINT];
+// uniform uint u_nLightsSpot;
+// uniform Light u_spot[MAX_LIGHTS_SPOT];
 
 float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
   if(_fSpecular <= 0.0)
@@ -242,9 +256,12 @@ struct Light {
 
 
 
-const uint MAX_LIGHTS_DIRECTIONAL = 150u;
-const uint MAX_LIGHTS_POINT = 150u;
-const uint MAX_LIGHTS_SPOT = 150u;
+const uint MAX_LIGHTS_DIRECTIONAL = 15u;
+const uint MAX_LIGHTS_POINT = 100u;
+const uint MAX_LIGHTS_SPOT = 100u;
+
+
+
 
 
  layout(std140) uniform UNIFORMS_LIGHT

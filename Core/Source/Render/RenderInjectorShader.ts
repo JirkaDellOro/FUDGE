@@ -2,7 +2,8 @@ namespace FudgeCore {
   //gives WebGL Buffer the data from the {@link Shader}
   export class RenderInjectorShader {
     public static uboLightsInfo: { [key: string]: UboLightStrucure } = {};
-    private static ubosSetted: boolean;
+    private static uboInfos: string[] = new Array();
+    private static hasSettedUBO: boolean = false;
 
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor, "useProgram", {
@@ -40,10 +41,12 @@ namespace FudgeCore {
       try {
         let shdVertex: WebGLShader = compileShader(this.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER);
         let shdFragment: WebGLShader = compileShader(this.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER);
+
         crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(shdVertex));
         crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(shdFragment));
         crc3.linkProgram(program);
-        // bindUniformBufferObject();
+        initializeUBO();
+
         let error: string = RenderWebGL.assert<string>(crc3.getProgramInfoLog(program));
         if (error !== "") {
           throw new Error("Error linking Shader: " + error);
@@ -81,6 +84,7 @@ namespace FudgeCore {
           if (!attributeInfo) {
             break;
           }
+
           detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(program, attributeInfo.name);
 
         }
@@ -89,9 +93,9 @@ namespace FudgeCore {
 
 
       function detectUniforms(): { [name: string]: WebGLUniformLocation } {
-        let uboInfos: string[] = new Array();
         let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
         let uniformCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
+        let oldLength: number = RenderInjectorShader.uboInfos.length;
         for (let i: number = 0; i < uniformCount; i++) {
           let info: WebGLActiveInfo = RenderWebGL.assert<WebGLActiveInfo>(crc3.getActiveUniform(program, i));
           if (!info) {
@@ -99,33 +103,41 @@ namespace FudgeCore {
           }
           if (crc3.getUniformLocation(program, info.name) != null)
             detectedUniforms[info.name] = RenderWebGL.assert<WebGLRenderbuffer>(crc3.getUniformLocation(program, info.name));
-          else if (!RenderInjectorShader.ubosSetted)
-            uboInfos.push(info.name);
+          else if (!RenderInjectorShader.uboInfos.includes(info.name)) {
+            RenderInjectorShader.uboInfos.push(info.name);
+
+          }
         }
-        if (!RenderInjectorShader.ubosSetted)
-          bindLightUBO(uboInfos)
+        if (oldLength < RenderInjectorShader.uboInfos.length)
+          setUniformInfosInUBO()
         return detectedUniforms;
       }
-      function bindLightUBO(_uniformNames: string[]): void {
+      function initializeUBO(): void {
+        if (!RenderInjectorShader.hasSettedUBO) {
+          let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+          const blockIndex = crc3.getUniformBlockIndex(program, "UNIFORMS_LIGHT");
+          const blockSize = crc3.getActiveUniformBlockParameter(
+            program,
+            blockIndex,
+            crc3.UNIFORM_BLOCK_DATA_SIZE
+          );
+          const uboBuffer = crc3.createBuffer();
+          crc3.bindBuffer(crc3.UNIFORM_BUFFER, uboBuffer);
+          crc3.bufferData(crc3.UNIFORM_BUFFER, blockSize, crc3.DYNAMIC_DRAW);
+          crc3.bindBuffer(crc3.UNIFORM_BUFFER, null);
+          crc3.uniformBlockBinding(program, blockIndex, 0);
+          crc3.bindBufferBase(crc3.UNIFORM_BUFFER, 0, uboBuffer);
+          RenderInjectorShader.hasSettedUBO = true;
+        }
+      }
+      function setUniformInfosInUBO(): void {
 
-        let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-        const blockIndex = crc3.getUniformBlockIndex(program, "UNIFORMS_LIGHT");
-        const blockSize = crc3.getActiveUniformBlockParameter(
-          program,
-          blockIndex,
-          crc3.UNIFORM_BLOCK_DATA_SIZE
-        );
-        const uboBuffer = crc3.createBuffer();
-        crc3.bindBuffer(crc3.UNIFORM_BUFFER, uboBuffer);
-        crc3.bufferData(crc3.UNIFORM_BUFFER, blockSize, crc3.DYNAMIC_DRAW);
-        crc3.bindBuffer(crc3.UNIFORM_BUFFER, null);
-        crc3.uniformBlockBinding(program, blockIndex, 0);
-        crc3.bindBufferBase(crc3.UNIFORM_BUFFER, 0, uboBuffer);
+
 
         // Get the respective index of the member variables inside our Uniform Block
         let uboVariableIndices: any = crc3.getUniformIndices(
           program,
-          _uniformNames
+          RenderInjectorShader.uboInfos
         );
         // Get the offset of the member variables inside our Uniform Block in bytes
         let uboVariableOffsets: any = crc3.getActiveUniforms(
@@ -135,10 +147,9 @@ namespace FudgeCore {
         );
 
         // Create an object to map each variable name to its respective index and offset
-        _uniformNames.forEach((name, index) => {
+        RenderInjectorShader.uboInfos.forEach((name, index) => {
           RenderInjectorShader.uboLightsInfo[name] = new UboLightStrucure(uboVariableIndices[index], uboVariableOffsets[index]);
         });
-        RenderInjectorShader.ubosSetted = true;
       }
     }
 

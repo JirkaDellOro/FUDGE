@@ -38,9 +38,12 @@ struct Light {
 
 
 
-const uint MAX_LIGHTS_DIRECTIONAL = 150u;
-const uint MAX_LIGHTS_POINT = 150u;
-const uint MAX_LIGHTS_SPOT = 150u;
+const uint MAX_LIGHTS_DIRECTIONAL = 15u;
+const uint MAX_LIGHTS_POINT = 100u;
+const uint MAX_LIGHTS_SPOT = 100u;
+
+
+
 
 
  layout(std140) uniform UNIFORMS_LIGHT
