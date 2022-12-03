@@ -639,7 +639,6 @@ declare namespace FudgeCore {
             [key: string]: UboLightStrucure;
         };
         private static uboInfos;
-        private static hasSettedUBO;
         static decorate(_constructor: Function): void;
         static useProgram(this: typeof Shader): void;
         static deleteProgram(this: typeof Shader): void;

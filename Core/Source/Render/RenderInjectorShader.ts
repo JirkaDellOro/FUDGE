@@ -3,7 +3,6 @@ namespace FudgeCore {
   export class RenderInjectorShader {
     public static uboLightsInfo: { [key: string]: UboLightStrucure } = {};
     private static uboInfos: string[] = new Array();
-    private static hasSettedUBO: boolean = false;
 
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor, "useProgram", {
@@ -20,6 +19,7 @@ namespace FudgeCore {
     public static useProgram(this: typeof Shader): void {
       if (!this.program)
         this.createProgram();
+
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       crc3.useProgram(this.program);
     }
@@ -45,7 +45,8 @@ namespace FudgeCore {
         crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(shdVertex));
         crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(shdFragment));
         crc3.linkProgram(program);
-        initializeUBO();
+
+
 
         let error: string = RenderWebGL.assert<string>(crc3.getProgramInfoLog(program));
         if (error !== "") {
@@ -67,6 +68,8 @@ namespace FudgeCore {
         crc3.compileShader(webGLShader);
         let error: string = RenderWebGL.assert<string>(crc3.getShaderInfoLog(webGLShader));
         if (error !== "") {
+          console.log(_shaderCode);
+
           throw new Error("Error compiling shader: " + error);
         }
         // Check for any compilation errors.
@@ -103,37 +106,16 @@ namespace FudgeCore {
           }
           if (crc3.getUniformLocation(program, info.name) != null)
             detectedUniforms[info.name] = RenderWebGL.assert<WebGLRenderbuffer>(crc3.getUniformLocation(program, info.name));
-          else if (!RenderInjectorShader.uboInfos.includes(info.name)) {
+          else if (!RenderInjectorShader.uboInfos.includes(info.name))
             RenderInjectorShader.uboInfos.push(info.name);
-
-          }
         }
         if (oldLength < RenderInjectorShader.uboInfos.length)
           setUniformInfosInUBO()
         return detectedUniforms;
       }
-      function initializeUBO(): void {
-        if (!RenderInjectorShader.hasSettedUBO) {
-          let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-          const blockIndex = crc3.getUniformBlockIndex(program, "UNIFORMS_LIGHT");
-          const blockSize = crc3.getActiveUniformBlockParameter(
-            program,
-            blockIndex,
-            crc3.UNIFORM_BLOCK_DATA_SIZE
-          );
-          const uboBuffer = crc3.createBuffer();
-          crc3.bindBuffer(crc3.UNIFORM_BUFFER, uboBuffer);
-          crc3.bufferData(crc3.UNIFORM_BUFFER, blockSize, crc3.DYNAMIC_DRAW);
-          crc3.bindBuffer(crc3.UNIFORM_BUFFER, null);
-          crc3.uniformBlockBinding(program, blockIndex, 0);
-          crc3.bindBufferBase(crc3.UNIFORM_BUFFER, 0, uboBuffer);
-          RenderInjectorShader.hasSettedUBO = true;
-        }
-      }
+
       function setUniformInfosInUBO(): void {
-
-
-
+        initializeUBO();
         // Get the respective index of the member variables inside our Uniform Block
         let uboVariableIndices: any = crc3.getUniformIndices(
           program,
@@ -151,9 +133,25 @@ namespace FudgeCore {
           RenderInjectorShader.uboLightsInfo[name] = new UboLightStrucure(uboVariableIndices[index], uboVariableOffsets[index]);
         });
       }
-    }
 
+      function initializeUBO(): void {
+        let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+        const blockIndex = crc3.getUniformBlockIndex(program, "UNIFORMS_LIGHT");
+        const blockSize = crc3.getActiveUniformBlockParameter(
+          program,
+          blockIndex,
+          crc3.UNIFORM_BLOCK_DATA_SIZE
+        );
+        const uboBuffer = crc3.createBuffer();
+        crc3.bindBuffer(crc3.UNIFORM_BUFFER, uboBuffer);
+        crc3.bufferData(crc3.UNIFORM_BUFFER, blockSize, crc3.DYNAMIC_DRAW);
+        crc3.bindBuffer(crc3.UNIFORM_BUFFER, null);
+        crc3.uniformBlockBinding(program, blockIndex, 0);
+        crc3.bindBufferBase(crc3.UNIFORM_BUFFER, 0, uboBuffer);
+      }
+    }
   }
+
   class UboLightStrucure {
     public index: { [key: string]: number } = {};
     public offset: { [key: string]: number } = {};

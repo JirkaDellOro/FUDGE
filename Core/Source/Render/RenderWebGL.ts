@@ -57,6 +57,7 @@ namespace FudgeCore {
       RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
       // RenderOperator.crc3.pixelStorei(WebGL2RenderingContext.UNPACK_FLIP_Y_WEBGL, true);
       RenderWebGL.rectRender = RenderWebGL.getCanvasRect();
+
       return crc3;
     }
 
@@ -322,6 +323,7 @@ namespace FudgeCore {
      */
     protected static setLightsInShader(_shader: typeof Shader, _lights: MapLightTypeToLightList): void {
       _shader.useProgram();
+
       let uni: { [name: string]: any } = RenderInjectorShader.uboLightsInfo;
       // Ambient
       let ambient: any = uni["u_ambient.vctColor"];
