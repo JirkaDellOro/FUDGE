@@ -36,17 +36,20 @@ namespace FudgeAid {
 
     public setAnimation(_animation: SpriteSheetAnimation): void {
       this.animation = _animation;
+      this.stopAnimation();
+      this.showFrame(0);
+    }
+
+    public stopAnimation(): void {
       if (this.timer)
         ƒ.Time.game.deleteTimer(this.timer);
-      this.showFrame(0);
     }
 
     /**
      * Show a specific frame of the sequence
      */
     public showFrame(_index: number): void {
-      if (this.timer)
-        ƒ.Time.game.deleteTimer(this.timer);
+      this.stopAnimation();
       let spriteFrame: SpriteFrame = this.animation.frames[_index];
       this.cmpMesh.mtxPivot = spriteFrame.mtxPivot;
       this.cmpMaterial.mtxPivot = spriteFrame.mtxTexture;
@@ -69,7 +72,5 @@ namespace FudgeAid {
     public setFrameDirection(_direction: number): void {
       this.direction = Math.floor(_direction);
     }
-
-    
   }
 }
