@@ -4173,7 +4173,7 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class XR extends FudgeCore.Component {
+    class VR extends FudgeCore.Component {
         constructor() {
             super(...arguments);
             this.rightController = null;
@@ -4209,7 +4209,7 @@ var FudgeCore;
             this.rayHitInfoLeft = FudgeCore.Physics.raycast(this.leftController.mtxLocal.translation, new FudgeCore.Vector3(-vecZCntrlL.x, -vecZCntrlL.y, -vecZCntrlL.z), 80, true);
         }
     }
-    FudgeCore.XR = XR;
+    FudgeCore.VR = VR;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -10296,22 +10296,22 @@ var FudgeCore;
                 _branch.dispatchEvent(new Event("attachBranch"));
             this.#branch = _branch;
         }
-        setContext(_cr2c) {
-            if (_cr2c)
-                this.#crc2 = _cr2c;
-        }
         getBranch() {
             return this.#branch;
         }
-        getContext() {
-            return this.#crc2;
-        }
-        setCanvas(_canvas) {
-            if (_canvas)
-                this.#canvas = _canvas;
-        }
         draw(_calculateTransforms = true) {
-            this.calculateDrawing(_calculateTransforms);
+            if (!this.#branch)
+                return;
+            FudgeCore.Render.resetFrameBuffer();
+            if (!this.camera.isActive)
+                return;
+            if (this.adjustingFrames)
+                this.adjustFrames();
+            if (this.adjustingCamera)
+                this.adjustCamera();
+            if (_calculateTransforms)
+                this.calculateTransforms();
+            FudgeCore.Render.clear(this.camera.clrBackground);
             if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
                 FudgeCore.Render.draw(this.camera);
             if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.NONE) {
@@ -10325,6 +10325,7 @@ var FudgeCore;
             if (this.#branch.getParent())
                 mtxRoot = this.#branch.getParent().mtxWorld;
             this.dispatchEvent(new Event("renderPrepareStart"));
+            this.adjustFrames();
             FudgeCore.Render.prepare(this.#branch, null, mtxRoot);
             this.dispatchEvent(new Event("renderPrepareEnd"));
             this.componentsPick = FudgeCore.Render.componentsPick;
@@ -10423,20 +10424,6 @@ var FudgeCore;
             let screen = new FudgeCore.Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
             return screen;
         }
-        calculateDrawing(_calculateTransforms = true) {
-            if (!this.#branch)
-                return;
-            FudgeCore.Render.resetFrameBuffer();
-            if (!this.camera.isActive)
-                return;
-            if (this.adjustingFrames)
-                this.adjustFrames();
-            if (this.adjustingCamera)
-                this.adjustCamera();
-            if (_calculateTransforms)
-                this.calculateTransforms();
-            FudgeCore.Render.clear(this.camera.clrBackground);
-        }
     }
     FudgeCore.Viewport = Viewport;
 })(FudgeCore || (FudgeCore = {}));
@@ -10445,7 +10432,7 @@ var FudgeCore;
     class XRViewport extends FudgeCore.Viewport {
         constructor() {
             super();
-            this.xr = new FudgeCore.XR();
+            this.vr = new FudgeCore.VR();
             this.useController = false;
             this.crc3 = null;
             XRViewport.xrViewportInstance = this;
@@ -10454,42 +10441,44 @@ var FudgeCore;
         static get default() {
             return this.xrViewportInstance;
         }
-        async initializeXR(_xrSessionMode = "immersive-vr", _xrReferenceSpaceType = "local", _xrController = false) {
+        async initializeVR(_xrSessionMode = "immersive-vr", _xrReferenceSpaceType = "local", _xrController = false) {
             let session = await navigator.xr.requestSession(_xrSessionMode);
-            this.xr.xrReferenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
+            this.vr.xrReferenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
             await this.crc3.makeXRCompatible();
             let nativeScaleFactor = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
             await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3, { framebufferScaleFactor: nativeScaleFactor }) });
             this.useController = _xrController;
             if (_xrController) {
-                this.xr.rightController = new FudgeCore.ComponentTransform();
-                this.xr.leftController = new FudgeCore.ComponentTransform();
+                this.vr.rightController = new FudgeCore.ComponentTransform();
+                this.vr.leftController = new FudgeCore.ComponentTransform();
             }
-            this.xr.xrSession = session;
+            this.vr.xrSession = session;
         }
         draw(_calculateTransforms = true) {
-            if (this.xr.xrSession == null) {
+            if (this.vr.xrSession == null) {
                 super.draw(_calculateTransforms);
             }
         }
-        drawXR(_xrFrame = null) {
+        drawVR(_xrFrame = null) {
             if (!_xrFrame) {
                 super.draw(true);
             }
             else {
-                let glLayer = this.xr.xrSession.renderState.baseLayer;
-                let pose = _xrFrame.getViewerPose(this.xr.xrReferenceSpace);
+                let pose = _xrFrame.getViewerPose(this.vr.xrReferenceSpace);
+                let glLayer = this.vr.xrSession.renderState.baseLayer;
                 this.crc3.bindFramebuffer(this.crc3.FRAMEBUFFER, glLayer.framebuffer);
+                super.calculateTransforms();
+                FudgeCore.Render.clear(this.camera.clrBackground);
                 if (pose) {
                     for (let view of pose.views) {
                         let viewport = glLayer.getViewport(view);
-                        this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+                        this.adjustFramesVR(viewport);
+                        this.adjustCameraVR(viewport);
                         if (this.useController)
-                            this.xr.setController(_xrFrame);
-                        super.calculateDrawing(true);
+                            this.vr.setController(_xrFrame);
+                        this.camera.mtxProjection.set(view.projectionMatrix);
                         this.camera.mtxPivot.set(view.transform.matrix);
                         this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
-                        this.camera.mtxProjection.set(view.projectionMatrix);
                         if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
                             FudgeCore.Render.draw(this.camera);
                         if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.NONE) {
@@ -10498,6 +10487,16 @@ var FudgeCore;
                     }
                 }
             }
+        }
+        adjustFramesVR(_viewport) {
+            let rectClient = this.getClientRectangle();
+            let rectCanvas = this.frameClientToCanvas.getRect(rectClient);
+            FudgeCore.Render.getCanvas().width = rectCanvas.width;
+            FudgeCore.Render.getCanvas().height = rectCanvas.height;
+            FudgeCore.Render.setRenderRectangle(new FudgeCore.Rectangle(_viewport.x, _viewport.y, _viewport.width, _viewport.height));
+        }
+        adjustCameraVR(_viewport) {
+            this.camera.projectCentral(_viewport.width / _viewport.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar());
         }
     }
     XRViewport.xrViewportInstance = null;
@@ -12068,8 +12067,8 @@ var FudgeCore;
                     window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 case LOOP_MODE.FRAME_REQUEST_XR:
-                    FudgeCore.XRViewport.default.xr.xrSession.cancelAnimationFrame(Loop.idRequest);
-                    FudgeCore.XRViewport.default.xr.xrSession = null;
+                    FudgeCore.XRViewport.default.vr.xrSession.cancelAnimationFrame(Loop.idRequest);
+                    FudgeCore.XRViewport.default.vr.xrSession = null;
                     break;
                 case LOOP_MODE.TIME_REAL:
                     window.clearInterval(Loop.idIntervall);
@@ -12110,8 +12109,8 @@ var FudgeCore;
         }
         static loopFrameXR(_time = null, _xrFrame = null) {
             Loop.loop();
-            FudgeCore.XRViewport.default.drawXR(_xrFrame);
-            Loop.idRequest = FudgeCore.XRViewport.default.xr.xrSession.requestAnimationFrame(Loop.loopFrameXR);
+            FudgeCore.XRViewport.default.drawVR(_xrFrame);
+            Loop.idRequest = FudgeCore.XRViewport.default.vr.xrSession.requestAnimationFrame(Loop.loopFrameXR);
         }
         static loopTime() {
             if (Loop.syncWithAnimationFrame)
