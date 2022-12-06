@@ -116,8 +116,8 @@ namespace FudgeCore {
           window.cancelAnimationFrame(Loop.idRequest);
           break;
         case LOOP_MODE.FRAME_REQUEST_XR:
-          XRViewport.default.xr.xrSession.cancelAnimationFrame(Loop.idRequest);
-          XRViewport.default.xr.xrSession = null;
+          XRViewport.default.vr.xrSession.cancelAnimationFrame(Loop.idRequest);
+          XRViewport.default.vr.xrSession = null;
           break;
         case LOOP_MODE.TIME_REAL:
           window.clearInterval(Loop.idIntervall);
@@ -167,8 +167,8 @@ namespace FudgeCore {
     }
     private static loopFrameXR(_time: number = null, _xrFrame: XRFrame = null): void {
       Loop.loop();
-      XRViewport.default.drawXR(_xrFrame);
-      Loop.idRequest = XRViewport.default.xr.xrSession.requestAnimationFrame(Loop.loopFrameXR);
+      XRViewport.default.drawVR(_xrFrame);
+      Loop.idRequest = XRViewport.default.vr.xrSession.requestAnimationFrame(Loop.loopFrameXR);
     }
     private static loopTime(): void {
       if (Loop.syncWithAnimationFrame)

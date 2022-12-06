@@ -19,7 +19,7 @@ in vec4 v_vctPosition;
 in vec3 v_vctNormal;
 out vec4 vctFrag;
 
-  struct Light {
+struct Light {
   vec4 vctColor;
   mat4 mtxShape;
   mat4 mtxShapeInverse;
@@ -262,8 +262,6 @@ uniform float u_fDiffuse;
 
 
 uniform Light u_ambient;
-
-
 
 #if !defined(PHONG)
 

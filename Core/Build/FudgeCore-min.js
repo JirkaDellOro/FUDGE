@@ -965,6 +965,7 @@ var FudgeCore;
                 crc3.compileShader(webGLShader);
                 let error = FudgeCore.RenderWebGL.assert(crc3.getShaderInfoLog(webGLShader));
                 if (error !== "") {
+                    console.log(_shaderCode);
                     throw new Error("Error compiling shader: " + error);
                 }
                 if (!crc3.getShaderParameter(webGLShader, WebGL2RenderingContext.COMPILE_STATUS)) {
@@ -996,16 +997,22 @@ var FudgeCore;
                     }
                     if (crc3.getUniformLocation(program, info.name) != null)
                         detectedUniforms[info.name] = FudgeCore.RenderWebGL.assert(crc3.getUniformLocation(program, info.name));
-                    else if (!RenderInjectorShader.uboInfos.includes(info.name)) {
-                        console.log(info.name);
+                    else if (!RenderInjectorShader.uboInfos.includes(info.name))
                         RenderInjectorShader.uboInfos.push(info.name);
-                    }
                 }
                 if (oldLength < RenderInjectorShader.uboInfos.length)
-                    bindLightUBO();
+                    setUniformInfosInUBO();
                 return detectedUniforms;
             }
-            function bindLightUBO() {
+            function setUniformInfosInUBO() {
+                initializeUBO();
+                let uboVariableIndices = crc3.getUniformIndices(program, RenderInjectorShader.uboInfos);
+                let uboVariableOffsets = crc3.getActiveUniforms(program, uboVariableIndices, crc3.UNIFORM_OFFSET);
+                RenderInjectorShader.uboInfos.forEach((name, index) => {
+                    RenderInjectorShader.uboLightsInfo[name] = new UboLightStrucure(uboVariableIndices[index], uboVariableOffsets[index]);
+                });
+            }
+            function initializeUBO() {
                 let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
                 const blockIndex = crc3.getUniformBlockIndex(program, "UNIFORMS_LIGHT");
                 const blockSize = crc3.getActiveUniformBlockParameter(program, blockIndex, crc3.UNIFORM_BLOCK_DATA_SIZE);
@@ -1015,11 +1022,6 @@ var FudgeCore;
                 crc3.bindBuffer(crc3.UNIFORM_BUFFER, null);
                 crc3.uniformBlockBinding(program, blockIndex, 0);
                 crc3.bindBufferBase(crc3.UNIFORM_BUFFER, 0, uboBuffer);
-                let uboVariableIndices = crc3.getUniformIndices(program, RenderInjectorShader.uboInfos);
-                let uboVariableOffsets = crc3.getActiveUniforms(program, uboVariableIndices, crc3.UNIFORM_OFFSET);
-                RenderInjectorShader.uboInfos.forEach((name, index) => {
-                    RenderInjectorShader.uboLightsInfo[name] = new UboLightStrucure(uboVariableIndices[index], uboVariableOffsets[index]);
-                });
             }
         }
     }
@@ -10024,8 +10026,9 @@ var FudgeCore;
             }
             if (firstLevel) {
                 _branch.dispatchEvent(new Event("renderPrepareEnd"));
-                for (let shader of _shadersUsed)
+                for (let shader of _shadersUsed) {
                     Render.setLightsInShader(shader, Render.lights);
+                }
             }
         }
         static addLights(cmpLights) {
@@ -10474,7 +10477,6 @@ var FudgeCore;
                 super.draw(true);
             }
             else {
-                super.calculateDrawing(true);
                 let glLayer = this.xr.xrSession.renderState.baseLayer;
                 let pose = _xrFrame.getViewerPose(this.xr.xrReferenceSpace);
                 this.crc3.bindFramebuffer(this.crc3.FRAMEBUFFER, glLayer.framebuffer);
@@ -10482,10 +10484,9 @@ var FudgeCore;
                     for (let view of pose.views) {
                         let viewport = glLayer.getViewport(view);
                         this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
-                        if (this.useController) {
+                        if (this.useController)
                             this.xr.setController(_xrFrame);
-                            this.xr.setRay();
-                        }
+                        super.calculateDrawing(true);
                         this.camera.mtxPivot.set(view.transform.matrix);
                         this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
                         this.camera.mtxProjection.set(view.projectionMatrix);
@@ -11126,7 +11127,27 @@ in vec4 v_vctPosition;
 in vec3 v_vctNormal;
 out vec4 vctFrag;
 
+struct Light {
+  vec4 vctColor;
+  mat4 mtxShape;
+  mat4 mtxShapeInverse;
+};
+uniform Light u_ambient;
 
+const uint MAX_LIGHTS_DIRECTIONAL = 15u;
+const uint MAX_LIGHTS_POINT = 100u;
+const uint MAX_LIGHTS_SPOT = 100u;
+
+ layout(std140) uniform UNIFORMS_LIGHT
+{
+uniform uint u_nLightsDirectional;
+uniform uint u_nLightsPoint;
+uniform uint u_nLightsSpot;
+uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+uniform Light u_point[MAX_LIGHTS_POINT];
+uniform Light u_spot[MAX_LIGHTS_SPOT];
+
+} ;
 
 
 
@@ -11341,22 +11362,23 @@ uniform mat4 u_mtxNormalMeshToWorld;
 in vec3 a_vctNormal;
 uniform float u_fDiffuse;
 
-struct Light {
+  struct Light {
   vec4 vctColor;
   mat4 mtxShape;
   mat4 mtxShapeInverse;
 };
 
 
+uniform Light u_ambient;
 
-const uint MAX_LIGHTS_DIRECTIONAL = 150u;
-const uint MAX_LIGHTS_POINT = 150u;
-const uint MAX_LIGHTS_SPOT = 150u;
+#if !defined(PHONG)
 
+const uint MAX_LIGHTS_DIRECTIONAL = 15u;
+const uint MAX_LIGHTS_POINT = 100u;
+const uint MAX_LIGHTS_SPOT = 100u;
 
  layout(std140) uniform UNIFORMS_LIGHT
 {
-uniform Light u_ambient;
 uniform uint u_nLightsDirectional;
 uniform uint u_nLightsPoint;
 uniform uint u_nLightsSpot;
@@ -11365,6 +11387,8 @@ uniform Light u_point[MAX_LIGHTS_POINT];
 uniform Light u_spot[MAX_LIGHTS_SPOT];
 
 } ;
+
+  #endif
 
 
 vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _vctView, float _fSpecular) {

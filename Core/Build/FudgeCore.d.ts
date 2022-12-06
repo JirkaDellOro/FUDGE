@@ -2335,7 +2335,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    class XR extends Component {
+    class VR extends Component {
         rightController: ComponentTransform;
         leftController: ComponentTransform;
         rayHitInfoRight: RayHitInfo;
@@ -5307,24 +5307,12 @@ declare namespace FudgeCore {
          */
         setBranch(_branch: Node): void;
         /**
-         * Set the context from canvas.
-         */
-        setContext(_cr2c: CanvasRenderingContext2D): void;
-        /**
          * Retrieve the branch this viewport renders
          */
         getBranch(): Node;
         /**
-         * Retrieve the context from canvas
-         */
-        getContext(): CanvasRenderingContext2D;
-        /**
-         * Set the canvas.
-         */
-        setCanvas(_canvas: HTMLCanvasElement): void;
-        /**
          * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
-         * Pass `false` if calculation was already done for this frame. TODO: Calculation has been moved to protected method because of XR Session @JIRKA
+         * Pass `false` if calculation was already done for this frame
          */
         draw(_calculateTransforms?: boolean): void;
         /**
@@ -5385,24 +5373,21 @@ declare namespace FudgeCore {
          * Returns a point in the browser page matching the given point of the viewport
          */
         pointClientToScreen(_client: Vector2): Vector2;
-        /**
-       * Calculation is processed here
-       * Pass `false` if calculation was already done for this frame
-       */
-        protected calculateDrawing(_calculateTransforms?: boolean): void;
     }
 }
 declare namespace FudgeCore {
     class XRViewport extends Viewport {
         private static xrViewportInstance;
-        xr: XR;
+        vr: VR;
         private useController;
         private crc3;
         static get default(): XRViewport;
         constructor();
-        initializeXR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType, _xrController?: boolean): Promise<void>;
+        initializeVR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType, _xrController?: boolean): Promise<void>;
         draw(_calculateTransforms?: boolean): void;
-        drawXR(_xrFrame?: XRFrame): void;
+        drawVR(_xrFrame?: XRFrame): void;
+        private adjustFramesVR;
+        private adjustCameraVR;
     }
 }
 declare namespace FudgeCore {

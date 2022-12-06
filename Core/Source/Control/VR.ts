@@ -1,5 +1,5 @@
 namespace FudgeCore {
-    export class XR extends Component {
+    export class VR extends Component {
 
         public rightController: ComponentTransform = null;
         public leftController: ComponentTransform = null;

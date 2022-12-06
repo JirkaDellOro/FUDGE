@@ -94,39 +94,34 @@ namespace FudgeCore {
         _branch.dispatchEvent(new Event(EVENT.ATTACH_BRANCH));
       this.#branch = _branch;
     }
-    /**
-     * Set the context from canvas.
-     */
-    public setContext(_cr2c: CanvasRenderingContext2D): void {
-      if (_cr2c)
-        this.#crc2 = _cr2c;
-    }
+
     /**
      * Retrieve the branch this viewport renders
      */
     public getBranch(): Node {
       return this.#branch;
     }
-    /**
-     * Retrieve the context from canvas
-     */
-    public getContext(): CanvasRenderingContext2D {
-      return this.#crc2;
-    }
-    /**
-     * Set the canvas.
-     */
-    public setCanvas(_canvas: HTMLCanvasElement): void {
-      if (_canvas)
-        this.#canvas = _canvas;
-    }
+
     // #region Drawing
     /**
      * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
-     * Pass `false` if calculation was already done for this frame. TODO: Calculation has been moved to protected method because of XR Session @JIRKA
+     * Pass `false` if calculation was already done for this frame 
      */
     public draw(_calculateTransforms: boolean = true): void {
-      this.calculateDrawing(_calculateTransforms);
+      if (!this.#branch)
+        return;
+      Render.resetFrameBuffer();
+      if (!this.camera.isActive)
+        return;
+      if (this.adjustingFrames)
+        this.adjustFrames();
+      if (this.adjustingCamera)
+        this.adjustCamera();
+
+      if (_calculateTransforms)
+        this.calculateTransforms();
+
+      Render.clear(this.camera.clrBackground);
 
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
@@ -150,6 +145,7 @@ namespace FudgeCore {
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
       this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
+      this.adjustFrames();
       Render.prepare(this.#branch, null, mtxRoot);
       this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
       this.componentsPick = Render.componentsPick;
@@ -337,25 +333,6 @@ namespace FudgeCore {
     public pointClientToScreen(_client: Vector2): Vector2 {
       let screen: Vector2 = new Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
       return screen;
-    }
-    /**
-   * Calculation is processed here
-   * Pass `false` if calculation was already done for this frame  
-   */
-    protected calculateDrawing(_calculateTransforms: boolean = true): void {
-      if (!this.#branch)
-        return;
-      Render.resetFrameBuffer();
-      if (!this.camera.isActive)
-        return;
-      if (this.adjustingFrames)
-        this.adjustFrames();
-      if (this.adjustingCamera)
-        this.adjustCamera();
-
-      if (_calculateTransforms)
-        this.calculateTransforms();
-      Render.clear(this.camera.clrBackground);
     }
   }
 }
