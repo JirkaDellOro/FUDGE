@@ -131,8 +131,8 @@ namespace FudgeCore {
     /**
      * Reset the offscreen framebuffer to the original RenderingContext
      */
-    public static resetFrameBuffer(_color: Color = null): void {
-      RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
+    public static resetFrameBuffer(_frameBuffer: WebGLFramebuffer = null): void {
+      RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, _frameBuffer);
     }
 
     /**

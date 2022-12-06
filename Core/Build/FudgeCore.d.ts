@@ -1030,7 +1030,7 @@ declare namespace FudgeCore {
         /**
          * Reset the offscreen framebuffer to the original RenderingContext
          */
-        static resetFrameBuffer(_color?: Color): void;
+        static resetFrameBuffer(_frameBuffer?: WebGLFramebuffer): void;
         /**
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
@@ -5386,6 +5386,7 @@ declare namespace FudgeCore {
         initializeVR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType, _xrController?: boolean): Promise<void>;
         draw(_calculateTransforms?: boolean): void;
         drawVR(_xrFrame?: XRFrame): void;
+        private calculateTransformsXR;
         private adjustFramesVR;
         private adjustCameraVR;
     }

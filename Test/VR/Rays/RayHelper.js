@@ -46,8 +46,7 @@ var RaysSceneVR;
             let forward;
             forward = f.Vector3.Z();
             forward.transform(rayNode.mtxWorld, false);
-            let ray = new f.Ray(new f.Vector3(0, 0, -1), new f.Vector3(2, 0, 1), 0.1);
-            // let ray: f.Ray = new f.Ray(new f.Vector3(forward.x * 10000, forward.y * 10000, forward.z * 10000), rayNode.mtxLocal.translation, 0.1);
+            let ray = new f.Ray(new f.Vector3(forward.x * 10000, forward.y * 10000, forward.z * 10000), rayNode.mtxLocal.translation, 0.1);
             if (!this.pick) {
                 rayNode.getComponent(f.ComponentMesh).mtxPivot.scaling = new f.Vector3(0.1, this.maxLength, 0.1);
                 rayNode.getComponent(f.ComponentMesh).mtxPivot.translation = new f.Vector3(0, 0, -this.maxLength / 2);
@@ -55,19 +54,16 @@ var RaysSceneVR;
             else {
                 let distance = ray.getDistance(this.pick.mtxLocal.translation);
                 rayNode.getComponent(f.ComponentMesh).mtxPivot.scaling = new f.Vector3(0.1, distance.magnitude, 0.1);
-                console.log(rayNode.mtxLocal.translation);
                 rayNode.getComponent(f.ComponentMesh).mtxPivot.translation = new f.Vector3(0, 0, -distance.magnitude / 2);
             }
-            let picker = f.Picker.pickRay(this.pickableObjects, ray, 0, 100000000000000000);
-            picker.sort((a, b) => a.zBuffer < b.zBuffer ? -1 : 1);
-            picker.forEach(element => {
-                console.log(element.node.name);
-            });
-            if (picker.length > 0) {
-                this.pick = picker[0].node;
-            }
-            else
-                this.pick = null;
+            // let picker: f.Pick[] = f.Picker.pickRay(this.pickableObjects, ray, 0, 100000000000000000);
+            // picker.sort((a: f.Pick, b: f.Pick) => a.zBuffer < b.zBuffer ? -1 : 1);
+            // picker.forEach(element => {
+            //     console.log(element.node.name);
+            // });
+            // if (picker.length > 0) {
+            //     this.pick = picker[0].node;
+            // } else this.pick = null;
         };
         update = () => {
             if (this.xrViewport.vr.xrSession)

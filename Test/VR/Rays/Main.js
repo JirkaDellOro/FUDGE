@@ -43,7 +43,7 @@ var RaysSceneVR;
             //initalizes xr session 
             await xrViewport.initializeVR("immersive-vr", "local", true);
             xrViewport.vr.xrSession.addEventListener("end", onEndSession);
-            //initializeRays();
+            initializeRays();
             //stop normal loop of winodws.animationFrame
             f.Loop.stop();
             //set xr transform to matrix from ComponentCamera -> xr transform = camera transform
@@ -61,7 +61,7 @@ var RaysSceneVR;
     }
     function update(_event) {
         let pickableObjects = graph.getChildrenByName("CubeContainer")[0].getChildren();
-        let ray = new f.Ray(new f.Vector3(0, 0, 1), new f.Vector3(1, 0, -1), 0.1);
+        let ray = new f.Ray(new f.Vector3(0, 0, -1), new f.Vector3(1, 0, 1), 0.1);
         let picker = f.Picker.pickRay(pickableObjects, ray, 0, 100000000000000000);
         // console.log(picker.length);
         xrViewport.draw();

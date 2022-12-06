@@ -50,9 +50,7 @@ namespace FudgeCore {
         let pose: XRViewerPose = _xrFrame.getViewerPose(this.vr.xrReferenceSpace);
         let glLayer: XRWebGLLayer = this.vr.xrSession.renderState.baseLayer;
 
-        this.crc3.bindFramebuffer(this.crc3.FRAMEBUFFER, glLayer.framebuffer);
-        super.calculateTransforms();
-
+        Render.resetFrameBuffer(glLayer.framebuffer);
         Render.clear(this.camera.clrBackground);
 
         if (pose) {
@@ -61,6 +59,7 @@ namespace FudgeCore {
             // this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
             this.adjustFramesVR(viewport);
             this.adjustCameraVR(viewport);
+            this.calculateTransformsXR(viewport);
 
             if (this.useController)
               this.vr.setController(_xrFrame);
@@ -68,6 +67,7 @@ namespace FudgeCore {
             this.camera.mtxProjection.set(view.projectionMatrix);
             this.camera.mtxPivot.set(view.transform.matrix);
             this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
+
 
             if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
               Render.draw(this.camera);
@@ -82,6 +82,16 @@ namespace FudgeCore {
           }
         }
       }
+    }
+    private calculateTransformsXR(_viewport: globalThis.XRViewport): void {
+      let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
+      if (this.getBranch().getParent())
+        mtxRoot = this.getBranch().getParent().mtxWorld;
+      this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
+      this.adjustFramesVR(_viewport);
+      Render.prepare(this.getBranch(), null, mtxRoot);
+      this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
+      this.componentsPick = Render.componentsPick;
     }
     private adjustFramesVR(_viewport: globalThis.XRViewport): void {
       // get the rectangle of the canvas area as displayed (consider css)
