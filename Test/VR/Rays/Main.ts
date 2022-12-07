@@ -1,4 +1,4 @@
-namespace RaysSceneVR {
+namespace ImmersiveSceneVR {
   import f = FudgeCore;
   f.Debug.info("Main Program Template running!");
 
@@ -23,11 +23,8 @@ namespace RaysSceneVR {
     xrViewport.initialize("Viewport", graph, cmpCamera, canvas);
 
 
-    xrViewport.draw();
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
     f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
-
-
 
     checkForVRSupport();
   }
@@ -51,7 +48,7 @@ namespace RaysSceneVR {
     enterXRButton.addEventListener("click", async function () {
       //initalizes xr session 
       await xrViewport.initializeVR("immersive-vr", "local", true);
-      xrViewport.vr.xrSession.addEventListener("end", onEndSession);
+      xrViewport.vr.session.addEventListener("end", onEndSession);
 
       initializeRays();
       //stop normal loop of winodws.animationFrame
@@ -68,8 +65,8 @@ namespace RaysSceneVR {
     let pickableObjects: f.Node[] = graph.getChildrenByName("CubeContainer")[0].getChildren();
     let rightRayNode = graph.getChildrenByName("raysContainer")[0].getChild(0);
     let leftRayNode = graph.getChildrenByName("raysContainer")[0].getChild(1);
-    rightRayNode.addComponent(new RayHelper(xrViewport, xrViewport.vr.rightController, 50, pickableObjects));
-    leftRayNode.addComponent(new RayHelper(xrViewport, xrViewport.vr.leftController, 50, pickableObjects));
+    rightRayNode.addComponent(new RayHelper(xrViewport, xrViewport.vr.rController, 50, pickableObjects));
+    leftRayNode.addComponent(new RayHelper(xrViewport, xrViewport.vr.lController, 50, pickableObjects));
   }
 
   function update(_event: Event): void {
@@ -86,4 +83,47 @@ namespace RaysSceneVR {
     f.Loop.stop();
     f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
   }
+  // function onSqueeze(_event: XRInputSourceEvent): void {
+  //     if (actualTeleportationObj) {
+  //         let newPos: f.Vector3 = f.Vector3.DIFFERENCE(cmpCamera.mtxWorld.translation, actualTeleportationObj.getComponent(f.ComponentTransform).mtxLocal.translation);
+  //         newPos.y -= 0.5;
+  //         xrViewport.vr.setNewXRRigidtransform(newPos);
+  //         actualTeleportationObj.getComponent(f.ComponentMaterial).clrPrimary.a = 0.5;
+  //         actualTeleportationObj = null;
+  //     }
+  // }
+
+  // function onSelectStart(_event: XRInputSourceEvent): void {
+  //     if (actualThrowObject) {
+  //         if (_event.inputSource.handedness == "right") {
+  //             selectPressedRight = true;
+  //         }
+  //         if (_event.inputSource.handedness == "left") {
+  //             selectPressedLeft = true;
+  //         }
+  //     }
+  // }
+
+  // function onSelectEnd(_event: XRInputSourceEvent): void {
+  //     if (actualThrowObject) {
+  //         if (_event.inputSource.handedness == "right") {
+  //             actualThrowObject.getComponent(f.ComponentRigidbody).setVelocity(f.Vector3.ZERO());
+  //             let velocity: f.Vector3 = f.Vector3.DIFFERENCE(rightController.mtxLocal.translation, cmpCamera.mtxPivot.translation);
+  //             velocity.scale(20);
+  //             actualThrowObject.getComponent(f.ComponentRigidbody).addVelocity(velocity);
+  //             actualThrowObject.getComponent(f.ComponentMaterial).clrPrimary.a = 0.5;
+  //             actualThrowObject = null;
+  //             selectPressedRight = false;
+  //         } else {
+  //             actualThrowObject.getComponent(f.ComponentRigidbody).setVelocity(f.Vector3.ZERO());
+  //             let direction: f.Vector3 = f.Vector3.DIFFERENCE(leftController.mtxLocal.translation, cmpCamera.mtxPivot.translation);
+  //             direction.scale(20);
+  //             actualThrowObject.getComponent(f.ComponentRigidbody).addVelocity(direction);
+  //             actualThrowObject.getComponent(f.ComponentMaterial).clrPrimary.a = 0.5;
+  //             actualThrowObject = null;
+  //             selectPressedLeft = false;
+  //         }
+  //     }
+
+  // }
 }

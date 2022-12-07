@@ -1,6 +1,6 @@
-namespace RaysSceneVR {
+namespace ImmersiveSceneVR {
     import f = FudgeCore;
-    f.Project.registerScriptNamespace(RaysSceneVR);  // Register the namespace to FUDGE for serialization
+    f.Project.registerScriptNamespace(ImmersiveSceneVR);  // Register the namespace to FUDGE for serialization
 
     export class RayHelper extends f.ComponentScript {
         // Register the script as component for use in the editor via drag&drop
@@ -79,7 +79,7 @@ namespace RaysSceneVR {
         }
 
         private update = (): void => {
-            if (this.xrViewport.vr.xrSession)
+            if (this.xrViewport.vr.session)
                 this.computeRay(this.controllerTransform, this.node);
         }
     }

@@ -1,12 +1,13 @@
-var VRIntegration;
-(function (VRIntegration) {
+var PhysicsVR;
+(function (PhysicsVR) {
     var f = FudgeCore;
-    f.Project.registerScriptNamespace(VRIntegration); // Register the namespace to FUDGE for serialization
+    f.Project.registerScriptNamespace(PhysicsVR); // Register the namespace to FUDGE for serialization
     class Translator extends f.ComponentScript {
         // Register the script as component for use in the editor via drag&drop
         static iSubclass = f.Component.registerSubclass(Translator);
         // Properties may be mutated by users in the editor via the automatically created user interface
-        message = "CustomComponentScript added to ";
+        message = "Translator added to ";
+        static speed = 0.1;
         constructor() {
             super();
             // Don't start when running in editor
@@ -33,24 +34,15 @@ var VRIntegration;
                     break;
             }
         };
-        hasToTurn = false;
+        randomRot = f.Random.default.getRange(-0.5, 0.5);
         update = (_event) => {
-            if (this.node.name != "FudgeLogo") {
-                if (this.node.getComponent(f.ComponentTransform).mtxLocal.translation.x < 6.1 && !this.hasToTurn) {
-                    this.node.getComponent(f.ComponentRigidbody).applyForce(f.Vector3.X(2.2));
-                    if (this.node.getComponent(f.ComponentTransform).mtxLocal.translation.x > 6)
-                        this.hasToTurn = true;
-                }
-                else if (this.node.getComponent(f.ComponentTransform).mtxLocal.translation.x > -6.1 && this.hasToTurn) {
-                    this.node.getComponent(f.ComponentRigidbody).applyForce(f.Vector3.X(-2.2));
-                    if (this.node.getComponent(f.ComponentTransform).mtxLocal.translation.x < -6)
-                        this.hasToTurn = false;
-                }
-            }
-            else
-                this.node.getComponent(f.ComponentTransform).mtxLocal.rotateY(0.1);
+            this.node.getComponent(f.ComponentTransform).mtxLocal.translateZ(Translator.speed);
+            // this.node.getComponent(f.ComponentTransform).mtxLocal.rotateX(0.1);
+            this.node.getComponent(f.ComponentTransform).mtxLocal.rotateZ(this.randomRot);
+            if (this.node.getComponent(f.ComponentTransform).mtxLocal.translation.z > 70)
+                PhysicsVR.cubeContainer.removeChild(this.node);
         };
     }
-    VRIntegration.Translator = Translator;
-})(VRIntegration || (VRIntegration = {}));
+    PhysicsVR.Translator = Translator;
+})(PhysicsVR || (PhysicsVR = {}));
 //# sourceMappingURL=Translator.js.map

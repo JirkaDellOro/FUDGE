@@ -1,13 +1,13 @@
-namespace VRIntegration {
+namespace PhysicsVR {
   import f = FudgeCore;
-  f.Project.registerScriptNamespace(VRIntegration);  // Register the namespace to FUDGE for serialization
+  f.Project.registerScriptNamespace(PhysicsVR);  // Register the namespace to FUDGE for serialization
 
   export class Translator extends f.ComponentScript {
     // Register the script as component for use in the editor via drag&drop
     public static readonly iSubclass: number = f.Component.registerSubclass(Translator);
     // Properties may be mutated by users in the editor via the automatically created user interface
-    public message: string = "CustomComponentScript added to ";
-
+    public message: string = "Translator added to ";
+    public static speed: number = 0.1;
 
     constructor() {
       super();
@@ -20,6 +20,7 @@ namespace VRIntegration {
       this.addEventListener(f.EVENT.COMPONENT_ADD, this.hndEvent);
       this.addEventListener(f.EVENT.COMPONENT_REMOVE, this.hndEvent);
       this.addEventListener(f.EVENT.NODE_DESERIALIZED, this.hndEvent);
+
     }
 
     // Activate the functions of this component as response to events
@@ -40,22 +41,13 @@ namespace VRIntegration {
           break;
       }
     }
-    private hasToTurn: boolean = false;
+    private randomRot = f.Random.default.getRange(-0.5, 0.5);
     private update = (_event: Event): void => {
-      if (this.node.name != "FudgeLogo") {
-        if (this.node.getComponent(f.ComponentTransform).mtxLocal.translation.x < 6.1 && !this.hasToTurn) {
-          this.node.getComponent(f.ComponentRigidbody).applyForce(f.Vector3.X(2.2));
-          if (this.node.getComponent(f.ComponentTransform).mtxLocal.translation.x > 6)
-            this.hasToTurn = true;
-        }
-        else if (this.node.getComponent(f.ComponentTransform).mtxLocal.translation.x > -6.1 && this.hasToTurn) {
-          this.node.getComponent(f.ComponentRigidbody).applyForce(f.Vector3.X(-2.2));
-          if (this.node.getComponent(f.ComponentTransform).mtxLocal.translation.x < -6)
-            this.hasToTurn = false;
-        }
-      }
-      else
-        this.node.getComponent(f.ComponentTransform).mtxLocal.rotateY(0.1);
+      this.node.getComponent(f.ComponentTransform).mtxLocal.translateZ(Translator.speed);
+      // this.node.getComponent(f.ComponentTransform).mtxLocal.rotateX(0.1);
+      this.node.getComponent(f.ComponentTransform).mtxLocal.rotateZ(this.randomRot);
+      if (this.node.getComponent(f.ComponentTransform).mtxLocal.translation.z > 70)
+        cubeContainer.removeChild(this.node);
     }
   }
 }

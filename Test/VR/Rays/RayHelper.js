@@ -1,7 +1,7 @@
-var RaysSceneVR;
-(function (RaysSceneVR) {
+var ImmersiveSceneVR;
+(function (ImmersiveSceneVR) {
     var f = FudgeCore;
-    f.Project.registerScriptNamespace(RaysSceneVR); // Register the namespace to FUDGE for serialization
+    f.Project.registerScriptNamespace(ImmersiveSceneVR); // Register the namespace to FUDGE for serialization
     class RayHelper extends f.ComponentScript {
         // Register the script as component for use in the editor via drag&drop
         //  public static readonly iSubclass: number = f.Component.registerSubclass(RayHelper);
@@ -66,10 +66,10 @@ var RaysSceneVR;
             // } else this.pick = null;
         };
         update = () => {
-            if (this.xrViewport.vr.xrSession)
+            if (this.xrViewport.vr.session)
                 this.computeRay(this.controllerTransform, this.node);
         };
     }
-    RaysSceneVR.RayHelper = RayHelper;
-})(RaysSceneVR || (RaysSceneVR = {}));
+    ImmersiveSceneVR.RayHelper = RayHelper;
+})(ImmersiveSceneVR || (ImmersiveSceneVR = {}));
 //# sourceMappingURL=RayHelper.js.map

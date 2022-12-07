@@ -1,4 +1,4 @@
-namespace RaysSceneVR {
+namespace ImmersiveSceneVR {
   import f = FudgeCore;
   f.Debug.info("Main Program Template running!");
 
@@ -22,7 +22,6 @@ namespace RaysSceneVR {
     xrViewport.initialize("Viewport", graph, cmpCamera, canvas);
 
 
-    xrViewport.draw();
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
     f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
 
@@ -48,7 +47,7 @@ namespace RaysSceneVR {
     enterXRButton.addEventListener("click", async function () {
       //initalizes xr session 
       await xrViewport.initializeVR("immersive-vr", "local", false);
-      xrViewport.vr.xrSession.addEventListener("end", onEndSession);
+      xrViewport.vr.session.addEventListener("end", onEndSession);
 
       //stop normal loop of winodws.animationFrame
       f.Loop.stop();

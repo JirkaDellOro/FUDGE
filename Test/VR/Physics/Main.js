@@ -1,15 +1,21 @@
-var VRIntegration;
-(function (VRIntegration) {
+var PhysicsVR;
+(function (PhysicsVR) {
     var f = FudgeCore;
     let xrViewport = new f.XRViewport();
     let graph = null;
     let cmpCamera = null;
     let rightController = null;
     let leftController = null;
+    PhysicsVR.cubeContainer = null;
+    let cubeGraph = null;
+    let spawnTime = 0;
+    let spawnTrigger = 500;
+    let cubeInstances = new Array();
     window.addEventListener("load", init);
     async function init() {
         await FudgeCore.Project.loadResources("Internal.json");
         graph = f.Project.resources[document.head.querySelector("meta[autoView]").getAttribute("autoView")];
+        cubeGraph = f.Project.resources["Graph|2022-12-07T15:00:44.501Z|51271"];
         FudgeCore.Debug.log("Graph:", graph);
         if (!graph) {
             alert("Nothing to render. Create a graph with at least a mesh, material and probably some light");
@@ -21,12 +27,15 @@ var VRIntegration;
         xrViewport.initialize("Viewport", graph, cmpCamera, canvas);
         rightController = graph.getChildrenByName("rightController")[0];
         leftController = graph.getChildrenByName("leftController")[0];
-        xrViewport.draw();
+        PhysicsVR.cubeContainer = graph.getChildrenByName("cubeContainer")[0];
+        for (let i = 0; i <= 150; i++) {
+            cubeInstances[i] = await f.Project.createGraphInstance(cubeGraph);
+        }
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
         checkForVRSupport();
     }
-    // check device/browser capabilities for XR Session 
+    // check device/browser capabilities for VR Session 
     function checkForVRSupport() {
         navigator.xr.isSessionSupported("immersive-vr").then((supported) => {
             if (supported)
@@ -35,9 +44,9 @@ var VRIntegration;
                 console.log("Session not supported");
         });
     }
-    //main function to start XR Session
+    //main function to start VR Session
     function initializeVR() {
-        //create XR Button -> Browser 
+        //create XR Button -> Browser  //!important: look up the css file.
         let enterXRButton = document.createElement("button");
         enterXRButton.id = "xrButton";
         enterXRButton.innerHTML = "Enter VR";
@@ -48,115 +57,36 @@ var VRIntegration;
             //stop normal loop of winodws.animationFrame
             f.Loop.stop();
             //set controllers matrix information to component transform from node controller made in FUDGE Editor
-            rightController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vr.rightController.mtxLocal;
-            leftController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vr.leftController.mtxLocal;
-            //set controllers buttons events
-            xrViewport.vr.xrSession.addEventListener("squeeze", onSqueeze);
-            xrViewport.vr.xrSession.addEventListener("selectstart", onSelectStart);
-            xrViewport.vr.xrSession.addEventListener("selectend", onSelectEnd);
-            xrViewport.vr.xrSession.addEventListener("end", onEndSession);
+            rightController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vr.rController.mtxLocal;
+            leftController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vr.lController.mtxLocal;
+            //triggers onEndSession function with user exits xr session
+            xrViewport.vr.session.addEventListener("end", onEndSession);
             //set xr transform to matrix from ComponentCamera -> xr transform = camera transform
             xrViewport.vr.setNewXRRigidtransform(f.Vector3.DIFFERENCE(f.Vector3.ZERO(), cmpCamera.mtxWorld.translation));
             //start xrSession.animationFrame instead of window.animationFrame, your xr-session is ready to go!
             f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);
         });
     }
-    let actualTeleportationObj = null;
-    let actualThrowObject = null;
-    let selectPressedRight = false;
-    let selectPressedLeft = false;
-    let hasHitThisFrameTeleObj = false;
+    let increment = 0;
     function update(_event) {
-        hasHitThisFrameTeleObj = false;
-        if (xrViewport.vr.xrSession) {
-            if (xrViewport.vr.rayHitInfoRight)
-                if (xrViewport.vr.rayHitInfoRight.hit) {
-                    if (xrViewport.vr.rayHitInfoRight.rigidbodyComponent.typeBody != f.BODY_TYPE.STATIC && xrViewport.vr.rayHitInfoRight.rigidbodyComponent.node.name != "New Node") {
-                        hasHitThisFrameTeleObj = true;
-                        actualTeleportationObj = xrViewport.vr.rayHitInfoRight.rigidbodyComponent.node;
-                        actualTeleportationObj.getComponent(f.ComponentMaterial).clrPrimary.a = 1;
-                    }
-                    if (xrViewport.vr.rayHitInfoRight.rigidbodyComponent.typeBody != f.BODY_TYPE.STATIC && xrViewport.vr.rayHitInfoRight.rigidbodyComponent.node.name == "New Node") {
-                        if (xrViewport.vr.rayHitInfoRight.rigidbodyComponent.node != actualThrowObject && actualThrowObject != null)
-                            actualThrowObject.getComponent(f.ComponentMaterial).clrPrimary.a = 0.5;
-                        actualThrowObject = xrViewport.vr.rayHitInfoRight.rigidbodyComponent.node;
-                        actualThrowObject.getComponent(f.ComponentMaterial).clrPrimary.a = 1;
-                    }
-                }
-            if (xrViewport.vr.rayHitInfoLeft)
-                if (xrViewport.vr.rayHitInfoLeft.hit) {
-                    if (xrViewport.vr.rayHitInfoLeft.rigidbodyComponent.typeBody != f.BODY_TYPE.STATIC && xrViewport.vr.rayHitInfoLeft.rigidbodyComponent.node.name != "New Node") {
-                        hasHitThisFrameTeleObj = true;
-                        actualTeleportationObj = xrViewport.vr.rayHitInfoLeft.rigidbodyComponent.node;
-                        actualTeleportationObj.getComponent(f.ComponentMaterial).clrPrimary.a = 1;
-                    }
-                    if (xrViewport.vr.rayHitInfoLeft.rigidbodyComponent.typeBody != f.BODY_TYPE.STATIC && xrViewport.vr.rayHitInfoLeft.rigidbodyComponent.node.name == "New Node") {
-                        if (xrViewport.vr.rayHitInfoLeft.rigidbodyComponent.node != actualThrowObject && actualThrowObject != null)
-                            actualThrowObject.getComponent(f.ComponentMaterial).clrPrimary.a = 0.5;
-                        actualThrowObject = xrViewport.vr.rayHitInfoLeft.rigidbodyComponent.node;
-                        actualThrowObject.getComponent(f.ComponentMaterial).clrPrimary.a = 1;
-                    }
-                }
-            if (!hasHitThisFrameTeleObj && actualTeleportationObj != null) {
-                actualTeleportationObj.getComponent(f.ComponentMaterial).clrPrimary.a = 0.5;
-                actualTeleportationObj = null;
-            }
-            if (actualThrowObject != null) {
-                if (selectPressedLeft) {
-                    actualThrowObject.getComponent(f.ComponentRigidbody).setPosition(leftController.mtxWorld.translation);
-                }
-                if (selectPressedRight) {
-                    actualThrowObject.getComponent(f.ComponentRigidbody).setPosition(rightController.mtxWorld.translation);
-                }
+        if (xrViewport.vr.session) {
+            spawnTime += 1;
+            if (spawnTime == spawnTrigger) {
+                spawnTime = 0;
+                PhysicsVR.Translator.speed += 0.002;
+                spawnTrigger -= 5;
+                cubeInstances[increment].getComponent(f.ComponentMaterial).clrPrimary = new f.Color(f.Random.default.getRange(0, 1), f.Random.default.getRange(0, 1), f.Random.default.getRange(0, 1), 1);
+                cubeInstances[increment].mtxLocal.translation = new f.Vector3(f.Random.default.getRange(-2, 2), f.Random.default.getRange(-0.5, 0.5), f.Random.default.getRange(-2, 2));
+                PhysicsVR.cubeContainer.appendChild(cubeInstances[increment]);
+                increment++;
             }
         }
         f.Physics.simulate();
         xrViewport.draw();
     }
-    function onSqueeze(_event) {
-        if (actualTeleportationObj) {
-            let newPos = f.Vector3.DIFFERENCE(cmpCamera.mtxWorld.translation, actualTeleportationObj.getComponent(f.ComponentTransform).mtxLocal.translation);
-            newPos.y -= 0.5;
-            xrViewport.vr.setNewXRRigidtransform(newPos);
-            actualTeleportationObj.getComponent(f.ComponentMaterial).clrPrimary.a = 0.5;
-            actualTeleportationObj = null;
-        }
-    }
-    function onSelectStart(_event) {
-        if (actualThrowObject) {
-            if (_event.inputSource.handedness == "right") {
-                selectPressedRight = true;
-            }
-            if (_event.inputSource.handedness == "left") {
-                selectPressedLeft = true;
-            }
-        }
-    }
-    function onSelectEnd(_event) {
-        if (actualThrowObject) {
-            if (_event.inputSource.handedness == "right") {
-                actualThrowObject.getComponent(f.ComponentRigidbody).setVelocity(f.Vector3.ZERO());
-                let velocity = f.Vector3.DIFFERENCE(rightController.mtxLocal.translation, cmpCamera.mtxPivot.translation);
-                velocity.scale(20);
-                actualThrowObject.getComponent(f.ComponentRigidbody).addVelocity(velocity);
-                actualThrowObject.getComponent(f.ComponentMaterial).clrPrimary.a = 0.5;
-                actualThrowObject = null;
-                selectPressedRight = false;
-            }
-            else {
-                actualThrowObject.getComponent(f.ComponentRigidbody).setVelocity(f.Vector3.ZERO());
-                let direction = f.Vector3.DIFFERENCE(leftController.mtxLocal.translation, cmpCamera.mtxPivot.translation);
-                direction.scale(20);
-                actualThrowObject.getComponent(f.ComponentRigidbody).addVelocity(direction);
-                actualThrowObject.getComponent(f.ComponentMaterial).clrPrimary.a = 0.5;
-                actualThrowObject = null;
-                selectPressedLeft = false;
-            }
-        }
-    }
     function onEndSession() {
         f.Loop.stop();
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
     }
-})(VRIntegration || (VRIntegration = {}));
+})(PhysicsVR || (PhysicsVR = {}));
 //# sourceMappingURL=Main.js.map

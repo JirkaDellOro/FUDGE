@@ -21,23 +21,22 @@ namespace FudgeCore {
 
     // the xrSession is initialized here, after xrSession is setted and FrameRequestXR is called from user, the XRViewport is ready to go.
     public async initializeVR(_xrSessionMode: XRSessionMode = "immersive-vr", _xrReferenceSpaceType: XRReferenceSpaceType = "local", _xrController: boolean = false): Promise<void> {
-
       let session: XRSession = await navigator.xr.requestSession(_xrSessionMode);
-      this.vr.xrReferenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
+      this.vr.referenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
       await this.crc3.makeXRCompatible();
       let nativeScaleFactor = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
       await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3, { framebufferScaleFactor: nativeScaleFactor }) });
       this.useController = _xrController;
       if (_xrController) {
-        this.vr.rightController = new ComponentTransform();
-        this.vr.leftController = new ComponentTransform();
+        this.vr.rController = new ComponentTransform();
+        this.vr.lController = new ComponentTransform();
       }
-      this.vr.xrSession = session;
+      this.vr.session = session;
     }
 
     //override viewport draw method for xr - draws normal as long as initializeXR is not called 
     public draw(_calculateTransforms: boolean = true): void {
-      if (this.vr.xrSession == null) {
+      if (this.vr.session == null) {
         super.draw(_calculateTransforms);
       }
     }
@@ -47,19 +46,18 @@ namespace FudgeCore {
       if (!_xrFrame) {
         super.draw(true);
       } else {
-        let pose: XRViewerPose = _xrFrame.getViewerPose(this.vr.xrReferenceSpace);
-        let glLayer: XRWebGLLayer = this.vr.xrSession.renderState.baseLayer;
+        let pose: XRViewerPose = _xrFrame.getViewerPose(this.vr.referenceSpace);
+        let glLayer: XRWebGLLayer = this.vr.session.renderState.baseLayer;
 
         Render.resetFrameBuffer(glLayer.framebuffer);
         Render.clear(this.camera.clrBackground);
-
         if (pose) {
           for (let view of pose.views) {
             let viewport: globalThis.XRViewport = glLayer.getViewport(view);
-            // this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+            this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
             this.adjustFramesVR(viewport);
             this.adjustCameraVR(viewport);
-            this.calculateTransformsXR(viewport);
+            this.calculateTransformsVR(viewport);
 
             if (this.useController)
               this.vr.setController(_xrFrame);
@@ -83,7 +81,7 @@ namespace FudgeCore {
         }
       }
     }
-    private calculateTransformsXR(_viewport: globalThis.XRViewport): void {
+    private calculateTransformsVR(_viewport: globalThis.XRViewport): void {
       let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
       if (this.getBranch().getParent())
         mtxRoot = this.getBranch().getParent().mtxWorld;

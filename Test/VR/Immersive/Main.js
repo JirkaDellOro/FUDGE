@@ -1,5 +1,5 @@
-var RaysSceneVR;
-(function (RaysSceneVR) {
+var ImmersiveSceneVR;
+(function (ImmersiveSceneVR) {
     var f = FudgeCore;
     f.Debug.info("Main Program Template running!");
     let xrViewport = new f.XRViewport();
@@ -18,7 +18,6 @@ var RaysSceneVR;
         cmpCamera = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCamera);
         cmpCamera.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
         xrViewport.initialize("Viewport", graph, cmpCamera, canvas);
-        xrViewport.draw();
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
         checkForVRSupport();
@@ -42,7 +41,7 @@ var RaysSceneVR;
         enterXRButton.addEventListener("click", async function () {
             //initalizes xr session 
             await xrViewport.initializeVR("immersive-vr", "local", false);
-            xrViewport.vr.xrSession.addEventListener("end", onEndSession);
+            xrViewport.vr.session.addEventListener("end", onEndSession);
             //stop normal loop of winodws.animationFrame
             f.Loop.stop();
             //set xr transform to matrix from ComponentCamera -> xr transform = camera transform
@@ -59,5 +58,5 @@ var RaysSceneVR;
         f.Loop.stop();
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
     }
-})(RaysSceneVR || (RaysSceneVR = {}));
+})(ImmersiveSceneVR || (ImmersiveSceneVR = {}));
 //# sourceMappingURL=Main.js.map

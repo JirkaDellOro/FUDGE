@@ -2336,15 +2336,12 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class VR extends Component {
-        rightController: ComponentTransform;
-        leftController: ComponentTransform;
-        rayHitInfoRight: RayHitInfo;
-        rayHitInfoLeft: RayHitInfo;
-        xrSession: XRSession;
-        xrReferenceSpace: XRReferenceSpace;
+        rController: ComponentTransform;
+        lController: ComponentTransform;
+        session: XRSession;
+        referenceSpace: XRReferenceSpace;
         setNewXRRigidtransform(_newPos?: Vector3, _newRot?: Vector3): void;
         setController(_xrFrame: XRFrame): void;
-        setRay(): void;
     }
 }
 declare namespace FudgeCore {
@@ -5386,7 +5383,7 @@ declare namespace FudgeCore {
         initializeVR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType, _xrController?: boolean): Promise<void>;
         draw(_calculateTransforms?: boolean): void;
         drawVR(_xrFrame?: XRFrame): void;
-        private calculateTransformsXR;
+        private calculateTransformsVR;
         private adjustFramesVR;
         private adjustCameraVR;
     }
