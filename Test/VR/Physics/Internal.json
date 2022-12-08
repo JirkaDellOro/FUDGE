@@ -1384,7 +1384,7 @@
                             {
                               "ƒ.ComponentTransform": {
                                 "local": {
-                                  "translation": "[-6, 3, 0]",
+                                  "translation": "[-6, 3.3999998569488525, 0]",
                                   "rotation": "[0, 0, 90]",
                                   "scaling": "[1, 1, 1]"
                                 },

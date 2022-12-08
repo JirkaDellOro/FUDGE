@@ -83,6 +83,30 @@ namespace ImmersiveSceneVR {
     f.Loop.stop();
     f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // function onSqueeze(_event: XRInputSourceEvent): void {
   //     if (actualTeleportationObj) {
   //         let newPos: f.Vector3 = f.Vector3.DIFFERENCE(cmpCamera.mtxWorld.translation, actualTeleportationObj.getComponent(f.ComponentTransform).mtxLocal.translation);
