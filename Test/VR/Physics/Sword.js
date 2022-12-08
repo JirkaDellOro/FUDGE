@@ -2,12 +2,11 @@ var PhysicsVR;
 (function (PhysicsVR) {
     var f = FudgeCore;
     f.Project.registerScriptNamespace(PhysicsVR); // Register the namespace to FUDGE for serialization
-    class Translator extends f.ComponentScript {
+    class Sword extends f.ComponentScript {
         // Register the script as component for use in the editor via drag&drop
-        static iSubclass = f.Component.registerSubclass(Translator);
+        static iSubclass = f.Component.registerSubclass(Sword);
         // Properties may be mutated by users in the editor via the automatically created user interface
-        static speed = 25;
-        hasHitted = false;
+        static speed = 15;
         constructor() {
             super();
             // Don't start when running in editor
@@ -22,9 +21,7 @@ var PhysicsVR;
         hndEvent = (_event) => {
             switch (_event.type) {
                 case "componentAdd" /* COMPONENT_ADD */:
-                    f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.update);
-                    f.Loop.start(f.LOOP_MODE.FRAME_REQUEST, 60);
-                    this.addVel();
+                    this.node.getComponent(f.ComponentRigidbody).addEventListener("ColliderEnteredCollision" /* COLLISION_ENTER */, this.onColiisionEnter);
                     break;
                 case "componentRemove" /* COMPONENT_REMOVE */:
                     this.removeEventListener("componentAdd" /* COMPONENT_ADD */, this.hndEvent);
@@ -35,19 +32,21 @@ var PhysicsVR;
                     break;
             }
         };
-        addVel = () => {
-            this.node.getComponent(f.ComponentRigidbody).addVelocity(f.Vector3.Z(Translator.speed));
-        };
-        randomRot = f.Random.default.getRange(-0.5, 0.5);
-        update = (_event) => {
-            if (!this.hasHitted) {
-                this.node.getComponent(f.ComponentRigidbody).rotateBody(f.Vector3.X(-0.5));
-                this.node.getComponent(f.ComponentRigidbody).rotateBody(f.Vector3.Z(this.randomRot));
-                if (this.node.getComponent(f.ComponentTransform).mtxLocal.translation.z > 70 && this.node)
-                    PhysicsVR.cubeContainer.removeChild(this.node);
+        onColiisionEnter = (_event) => {
+            if (_event.cmpRigidbody.node.name == "CubeInstance") {
+                if (_event.cmpRigidbody.node) {
+                    _event.cmpRigidbody.node.getComponent(PhysicsVR.Translator).hasHitted = true;
+                    _event.cmpRigidbody.setVelocity(f.Vector3.DIFFERENCE(_event.cmpRigidbody.mtxPivot.translation, this.node.mtxLocal.translation));
+                    _event.cmpRigidbody.effectGravity = 1;
+                    this.removeHittedObject(_event.cmpRigidbody.node);
+                }
             }
         };
+        removeHittedObject = async (_objectHit) => {
+            await f.Time.game.delay(1250);
+            PhysicsVR.cubeContainer.removeChild(_objectHit);
+        };
     }
-    PhysicsVR.Translator = Translator;
+    PhysicsVR.Sword = Sword;
 })(PhysicsVR || (PhysicsVR = {}));
-//# sourceMappingURL=Translator.js.map
+//# sourceMappingURL=Sword.js.map

@@ -9,7 +9,7 @@ namespace PhysicsVR {
     export let cubeContainer: f.Node = null;
     let cubeGraph: f.Graph = null;
     let spawnTime: number = 0;
-    let spawnTrigger: number = 500;
+    let spawnTrigger: number = 600;
     let cubeInstances: f.GraphInstance[] = new Array();
     window.addEventListener("load", init);
 
@@ -35,7 +35,7 @@ namespace PhysicsVR {
         }
 
         f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
-        f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
+        f.Loop.start(f.LOOP_MODE.FRAME_REQUEST, 60);
 
         checkForVRSupport();
     }
@@ -75,24 +75,28 @@ namespace PhysicsVR {
             //set xr transform to matrix from ComponentCamera -> xr transform = camera transform
             xrViewport.vr.setNewXRRigidtransform(f.Vector3.DIFFERENCE(f.Vector3.ZERO(), cmpCamera.mtxWorld.translation));
             //start xrSession.animationFrame instead of window.animationFrame, your xr-session is ready to go!
-            f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);
+            f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR, 60);
         }
         );
     }
     let increment: number = 0;
+    let spawnAmount: number = 0;
     function update(_event: Event): void {
 
         if (xrViewport.vr.session) {
-            spawnTime += 1;
+            spawnTime += 4;
             if (spawnTime == spawnTrigger) {
                 spawnTime = 0;
-                Translator.speed += 0.002;
-                spawnTrigger -= 5;
-                cubeInstances[increment].getComponent(f.ComponentMaterial).clrPrimary = new f.Color(f.Random.default.getRange(0, 1), f.Random.default.getRange(0, 1), f.Random.default.getRange(0, 1), 1);
-                cubeInstances[increment].mtxLocal.translation = new f.Vector3(f.Random.default.getRange(-2, 2), f.Random.default.getRange(-0.5, 0.5), f.Random.default.getRange(-2, 2));
-                cubeContainer.appendChild(cubeInstances[increment]);
-                increment++;
+                Translator.speed += 0.0002;
+                spawnTrigger -= 4;
+                for (let i = 0; i <= spawnAmount; i++) {
+                    cubeInstances[increment].getComponent(f.ComponentMaterial).clrPrimary = new f.Color(f.Random.default.getRange(0, 1), f.Random.default.getRange(0, 1), f.Random.default.getRange(0, 1), 1);
+                    cubeInstances[increment].mtxLocal.translation = new f.Vector3(f.Random.default.getRange(-2, 2), f.Random.default.getRange(-0.5, 0.5), f.Random.default.getRange(-2, 2));
+                    cubeContainer.appendChild(cubeInstances[increment]);
+                    increment++;
 
+                }
+                spawnAmount += 0.15;
             }
         }
 

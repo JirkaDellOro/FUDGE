@@ -9,7 +9,7 @@ var PhysicsVR;
     PhysicsVR.cubeContainer = null;
     let cubeGraph = null;
     let spawnTime = 0;
-    let spawnTrigger = 500;
+    let spawnTrigger = 600;
     let cubeInstances = new Array();
     window.addEventListener("load", init);
     async function init() {
@@ -32,7 +32,7 @@ var PhysicsVR;
             cubeInstances[i] = await f.Project.createGraphInstance(cubeGraph);
         }
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
-        f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
+        f.Loop.start(f.LOOP_MODE.FRAME_REQUEST, 60);
         checkForVRSupport();
     }
     // check device/browser capabilities for VR Session 
@@ -64,21 +64,25 @@ var PhysicsVR;
             //set xr transform to matrix from ComponentCamera -> xr transform = camera transform
             xrViewport.vr.setNewXRRigidtransform(f.Vector3.DIFFERENCE(f.Vector3.ZERO(), cmpCamera.mtxWorld.translation));
             //start xrSession.animationFrame instead of window.animationFrame, your xr-session is ready to go!
-            f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);
+            f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR, 60);
         });
     }
     let increment = 0;
+    let spawnAmount = 0;
     function update(_event) {
         if (xrViewport.vr.session) {
-            spawnTime += 1;
+            spawnTime += 4;
             if (spawnTime == spawnTrigger) {
                 spawnTime = 0;
-                PhysicsVR.Translator.speed += 0.002;
-                spawnTrigger -= 5;
-                cubeInstances[increment].getComponent(f.ComponentMaterial).clrPrimary = new f.Color(f.Random.default.getRange(0, 1), f.Random.default.getRange(0, 1), f.Random.default.getRange(0, 1), 1);
-                cubeInstances[increment].mtxLocal.translation = new f.Vector3(f.Random.default.getRange(-2, 2), f.Random.default.getRange(-0.5, 0.5), f.Random.default.getRange(-2, 2));
-                PhysicsVR.cubeContainer.appendChild(cubeInstances[increment]);
-                increment++;
+                PhysicsVR.Translator.speed += 0.0002;
+                spawnTrigger -= 4;
+                for (let i = 0; i <= spawnAmount; i++) {
+                    cubeInstances[increment].getComponent(f.ComponentMaterial).clrPrimary = new f.Color(f.Random.default.getRange(0, 1), f.Random.default.getRange(0, 1), f.Random.default.getRange(0, 1), 1);
+                    cubeInstances[increment].mtxLocal.translation = new f.Vector3(f.Random.default.getRange(-2, 2), f.Random.default.getRange(-0.5, 0.5), f.Random.default.getRange(-2, 2));
+                    PhysicsVR.cubeContainer.appendChild(cubeInstances[increment]);
+                    increment++;
+                }
+                spawnAmount += 0.15;
             }
         }
         f.Physics.simulate();

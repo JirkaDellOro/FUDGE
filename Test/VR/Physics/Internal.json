@@ -84,7 +84,7 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "specular": 0
+          "specular": 1
         }
       }
     }
@@ -136,29 +136,12 @@
                   "ƒ.ComponentLight": {
                     "pivot": {
                       "translation": "[0, 20, 0]",
-                      "rotation": "[0, 0, 0]",
-                      "scaling": "[999, 999, 999]"
+                      "rotation": "[-1390, 350, 350]",
+                      "scaling": "[219, 489, 189]"
                     },
                     "light": {
                       "ƒ.LightPoint": {
-                        "color": "[1, 1, 1, 1]"
-                      }
-                    },
-                    "Component": {
-                      "active": true
-                    }
-                  }
-                },
-                {
-                  "ƒ.ComponentLight": {
-                    "pivot": {
-                      "translation": "[-7, 27, 1]",
-                      "rotation": "[200, 70, 123]",
-                      "scaling": "[990, 999, 999]"
-                    },
-                    "light": {
-                      "ƒ.LightSpot": {
-                        "color": "[1, 1, 1, 1]"
+                        "color": "[0, 1, 0.16470588235294117, 1]"
                       }
                     },
                     "Component": {
@@ -170,12 +153,12 @@
                   "ƒ.ComponentLight": {
                     "pivot": {
                       "translation": "[0, 3, 0]",
-                      "rotation": "[19, 17100, 12]",
+                      "rotation": "[510, 15100, 0]",
                       "scaling": "[25, 25, 25]"
                     },
                     "light": {
                       "ƒ.LightDirectional": {
-                        "color": "[1, 1, 1, 1]"
+                        "color": "[0.9019607843137255, 0, 1, 1]"
                       }
                     },
                     "Component": {
@@ -212,7 +195,7 @@
                 {
                   "ƒ.ComponentMaterial": {
                     "sortForAlpha": false,
-                    "clrPrimary": "[0.4588235294117647, 0.4588235294117647, 0.4588235294117647, 1]",
+                    "clrPrimary": "[1, 1, 1, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
                       "translation": "[0, 0]",
@@ -1535,7 +1518,7 @@
                 {
                   "ƒ.ComponentMaterial": {
                     "sortForAlpha": false,
-                    "clrPrimary": "[1, 0, 0, 0.64]",
+                    "clrPrimary": "[0.30980392156862746, 0.30980392156862746, 0.30980392156862746, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
                       "translation": "[0, 0]",
@@ -1587,6 +1570,14 @@
                     }
                   }
                 }
+              ],
+              "Sword": [
+                {
+                  "PhysicsVR.Sword": {
+                    "active": true,
+                    "message": "Translator added to "
+                  }
+                }
               ]
             },
             "children": []
@@ -1616,7 +1607,7 @@
                 {
                   "ƒ.ComponentMaterial": {
                     "sortForAlpha": false,
-                    "clrPrimary": "[1, 0, 0, 0.59]",
+                    "clrPrimary": "[0.3215686274509804, 0.3215686274509804, 0.3215686274509804, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
                       "translation": "[0, 0]",
@@ -1666,6 +1657,14 @@
                     "Component": {
                       "active": true
                     }
+                  }
+                }
+              ],
+              "Sword": [
+                {
+                  "PhysicsVR.Sword": {
+                    "active": true,
+                    "message": "Translator added to "
                   }
                 }
               ]
@@ -1763,7 +1762,7 @@
               "Component": {
                 "active": true
               },
-              "idMaterial": "Material|2022-10-16T12:30:00.346Z|27603"
+              "idMaterial": "Material|2022-11-16T15:44:16.562Z|68520"
             }
           }
         ],
@@ -1776,8 +1775,8 @@
               "mass": 1,
               "dampTranslation": 0.1,
               "dampRotation": 0.1,
-              "effectGravity": 1,
-              "typeBody": "KINEMATIC",
+              "effectGravity": 0,
+              "typeBody": "DYNAMIC",
               "typeCollider": "CUBE",
               "isTrigger": false,
               "id": 1,

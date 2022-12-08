@@ -2,12 +2,12 @@ namespace PhysicsVR {
   import f = FudgeCore;
   f.Project.registerScriptNamespace(PhysicsVR);  // Register the namespace to FUDGE for serialization
 
-  export class Translator extends f.ComponentScript {
+  export class Sword extends f.ComponentScript {
     // Register the script as component for use in the editor via drag&drop
-    public static readonly iSubclass: number = f.Component.registerSubclass(Translator);
+    public static readonly iSubclass: number = f.Component.registerSubclass(Sword);
     // Properties may be mutated by users in the editor via the automatically created user interface
-    public static speed: number = 25;
-    public hasHitted: boolean = false;
+    public static speed: number = 15;
+
     constructor() {
       super();
 
@@ -26,9 +26,8 @@ namespace PhysicsVR {
     public hndEvent = (_event: Event): void => {
       switch (_event.type) {
         case f.EVENT.COMPONENT_ADD:
-          f.Loop.addEventListener(f.EVENT.LOOP_FRAME, this.update);
-          f.Loop.start(f.LOOP_MODE.FRAME_REQUEST, 60);
-          this.addVel();
+          this.node.getComponent(f.ComponentRigidbody).addEventListener(f.EVENT_PHYSICS.COLLISION_ENTER, this.onColiisionEnter);
+
 
           break;
         case f.EVENT.COMPONENT_REMOVE:
@@ -40,19 +39,20 @@ namespace PhysicsVR {
           break;
       }
     }
-    private addVel = (): void => {
-      this.node.getComponent(f.ComponentRigidbody).addVelocity(f.Vector3.Z(Translator.speed));
-
-    }
-    private randomRot = f.Random.default.getRange(-0.5, 0.5);
-    private update = (_event: Event): void => {
-      if (!this.hasHitted) {
-        this.node.getComponent(f.ComponentRigidbody).rotateBody(f.Vector3.X(-0.5))
-        this.node.getComponent(f.ComponentRigidbody).rotateBody(f.Vector3.Z(this.randomRot));
-        if (this.node.getComponent(f.ComponentTransform).mtxLocal.translation.z > 70 && this.node)
-          cubeContainer.removeChild(this.node);
+    private onColiisionEnter = (_event: f.EventPhysics): void => {
+      if (_event.cmpRigidbody.node.name == "CubeInstance") {
+        if (_event.cmpRigidbody.node) {
+          _event.cmpRigidbody.node.getComponent(Translator).hasHitted = true;
+          _event.cmpRigidbody.setVelocity(f.Vector3.DIFFERENCE(_event.cmpRigidbody.mtxPivot.translation, this.node.mtxLocal.translation));
+          _event.cmpRigidbody.effectGravity = 1;
+          this.removeHittedObject(_event.cmpRigidbody.node);
+        }
       }
+    }
+    private removeHittedObject = async (_objectHit: f.Node): Promise<void> => {
 
+      await f.Time.game.delay(1250);
+      cubeContainer.removeChild(_objectHit);
     }
   }
 }
