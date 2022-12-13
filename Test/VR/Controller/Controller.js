@@ -41,7 +41,7 @@ var RaySceneVR;
         checkController = () => {
             this.node.getComponent(f.ComponentTransform).mtxLocal = this.controller.cntrlTransform.mtxLocal;
             this.joyStick.mtxLocal.rotation = new f.Vector3(this.controller.thumbstickX * 20, this.controller.thumbstickY * 20, 0);
-            console.log(this.joyStick.mtxLocal.rotation);
+            console.log(this.joyStick.mtxLocal.rotation.x);
             //this.joyStick.mtxLocal.rotation.z = this.controller.thumbstickY;
         };
         update = () => {

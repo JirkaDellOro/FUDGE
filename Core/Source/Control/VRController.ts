@@ -11,5 +11,6 @@ namespace FudgeCore {
         public thumbstickX: number = null;
         public thumbstickY: number = null;
 
+
     }
 }
