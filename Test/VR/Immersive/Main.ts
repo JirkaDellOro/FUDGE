@@ -1,4 +1,4 @@
-namespace ImmersiveSceneVR {
+namespace RaySceneVR {
   import f = FudgeCore;
   f.Debug.info("Main Program Template running!");
 
@@ -46,9 +46,10 @@ namespace ImmersiveSceneVR {
 
     enterXRButton.addEventListener("click", async function () {
       //initalizes xr session 
-      await xrViewport.initializeVR("immersive-vr", "local", false);
-      xrViewport.vr.session.addEventListener("end", onEndSession);
-
+      if (!xrViewport.vr.session) {
+        await xrViewport.initializeVR("immersive-vr", "local", false);
+        xrViewport.vr.session.addEventListener("end", onEndSession);
+      }
       //stop normal loop of winodws.animationFrame
       f.Loop.stop();
       //set xr transform to matrix from ComponentCamera -> xr transform = camera transform

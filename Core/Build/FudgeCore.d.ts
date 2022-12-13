@@ -638,7 +638,7 @@ declare namespace FudgeCore {
         static uboLightsInfo: {
             [key: string]: UboLightStrucure;
         };
-        private static uboInfos;
+        private static ubosSetted;
         static decorate(_constructor: Function): void;
         static useProgram(this: typeof Shader): void;
         static deleteProgram(this: typeof Shader): void;
@@ -1030,7 +1030,7 @@ declare namespace FudgeCore {
         /**
          * Reset the offscreen framebuffer to the original RenderingContext
          */
-        static resetFrameBuffer(_frameBuffer?: WebGLFramebuffer): void;
+        static resetFrameBuffer(_color?: Color): void;
         /**
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
@@ -2335,13 +2335,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    class VR extends Component {
-        rController: ComponentTransform;
-        lController: ComponentTransform;
-        session: XRSession;
-        referenceSpace: XRReferenceSpace;
+    class XR extends Component {
+        rightController: ComponentTransform;
+        leftController: ComponentTransform;
+        rayHitInfoRight: RayHitInfo;
+        rayHitInfoLeft: RayHitInfo;
+        xrSession: XRSession;
+        xrReferenceSpace: XRReferenceSpace;
         setNewXRRigidtransform(_newPos?: Vector3, _newRot?: Vector3): void;
         setController(_xrFrame: XRFrame): void;
+        setRay(): void;
     }
 }
 declare namespace FudgeCore {
@@ -5304,12 +5307,24 @@ declare namespace FudgeCore {
          */
         setBranch(_branch: Node): void;
         /**
+         * Set the context from canvas.
+         */
+        setContext(_cr2c: CanvasRenderingContext2D): void;
+        /**
          * Retrieve the branch this viewport renders
          */
         getBranch(): Node;
         /**
+         * Retrieve the context from canvas
+         */
+        getContext(): CanvasRenderingContext2D;
+        /**
+         * Set the canvas.
+         */
+        setCanvas(_canvas: HTMLCanvasElement): void;
+        /**
          * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
-         * Pass `false` if calculation was already done for this frame
+         * Pass `false` if calculation was already done for this frame. TODO: Calculation has been moved to protected method because of XR Session @JIRKA
          */
         draw(_calculateTransforms?: boolean): void;
         /**
@@ -5370,22 +5385,24 @@ declare namespace FudgeCore {
          * Returns a point in the browser page matching the given point of the viewport
          */
         pointClientToScreen(_client: Vector2): Vector2;
+        /**
+       * Calculation is processed here
+       * Pass `false` if calculation was already done for this frame
+       */
+        protected calculateDrawing(_calculateTransforms?: boolean): void;
     }
 }
 declare namespace FudgeCore {
     class XRViewport extends Viewport {
         private static xrViewportInstance;
-        vr: VR;
+        xr: XR;
         private useController;
         private crc3;
         static get default(): XRViewport;
         constructor();
-        initializeVR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType, _xrController?: boolean): Promise<void>;
+        initializeXR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType, _xrController?: boolean): Promise<void>;
         draw(_calculateTransforms?: boolean): void;
-        drawVR(_xrFrame?: XRFrame): void;
-        private calculateTransformsVR;
-        private adjustFramesVR;
-        private adjustCameraVR;
+        drawXR(_xrFrame?: XRFrame): void;
     }
 }
 declare namespace FudgeCore {

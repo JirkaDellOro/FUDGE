@@ -1,5 +1,5 @@
-var ImmersiveSceneVR;
-(function (ImmersiveSceneVR) {
+var RaySceneVR;
+(function (RaySceneVR) {
     var f = FudgeCore;
     f.Debug.info("Main Program Template running!");
     let xrViewport = new f.XRViewport();
@@ -40,8 +40,10 @@ var ImmersiveSceneVR;
         document.body.appendChild(enterXRButton);
         enterXRButton.addEventListener("click", async function () {
             //initalizes xr session 
-            await xrViewport.initializeVR("immersive-vr", "local", false);
-            xrViewport.vr.session.addEventListener("end", onEndSession);
+            if (!xrViewport.vr.session) {
+                await xrViewport.initializeVR("immersive-vr", "local", false);
+                xrViewport.vr.session.addEventListener("end", onEndSession);
+            }
             //stop normal loop of winodws.animationFrame
             f.Loop.stop();
             //set xr transform to matrix from ComponentCamera -> xr transform = camera transform
@@ -58,5 +60,5 @@ var ImmersiveSceneVR;
         f.Loop.stop();
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
     }
-})(ImmersiveSceneVR || (ImmersiveSceneVR = {}));
+})(RaySceneVR || (RaySceneVR = {}));
 //# sourceMappingURL=Main.js.map

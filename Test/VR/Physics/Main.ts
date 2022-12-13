@@ -61,16 +61,17 @@ namespace PhysicsVR {
 
         enterXRButton.addEventListener("click", async function () {
             //initalizes xr session 
-            await xrViewport.initializeVR("immersive-vr", "local", true);
-
+            if (!xrViewport.vr.session) {
+                await xrViewport.initializeVR("immersive-vr", "local", true);
+                //triggers onEndSession function with user exits xr session
+                xrViewport.vr.session.addEventListener("end", onEndSession);
+            }
             //stop normal loop of winodws.animationFrame
             f.Loop.stop();
 
             //set controllers matrix information to component transform from node controller made in FUDGE Editor
-            rightController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vr.rController.mtxLocal;
-            leftController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vr.lController.mtxLocal;
-            //triggers onEndSession function with user exits xr session
-            xrViewport.vr.session.addEventListener("end", onEndSession);
+            rightController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vr.rController.cntrlTransform.mtxLocal;
+            leftController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vr.lController.cntrlTransform.mtxLocal;
 
             //set xr transform to matrix from ComponentCamera -> xr transform = camera transform
             xrViewport.vr.setNewXRRigidtransform(f.Vector3.DIFFERENCE(f.Vector3.ZERO(), cmpCamera.mtxWorld.translation));

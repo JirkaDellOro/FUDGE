@@ -108,20 +108,7 @@ namespace FudgeCore {
      * Pass `false` if calculation was already done for this frame 
      */
     public draw(_calculateTransforms: boolean = true): void {
-      if (!this.#branch)
-        return;
-      Render.resetFrameBuffer();
-      if (!this.camera.isActive)
-        return;
-      if (this.adjustingFrames)
-        this.adjustFrames();
-      if (this.adjustingCamera)
-        this.adjustCamera();
-
-      if (_calculateTransforms)
-        this.calculateTransforms();
-
-      Render.clear(this.camera.clrBackground);
+      this.computeDrawing(_calculateTransforms);
 
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
@@ -136,7 +123,22 @@ namespace FudgeCore {
         this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
       );
     }
+    public computeDrawing(_calculateTransforms: boolean = true) {
+      if (!this.#branch)
+        return;
+      Render.resetFrameBuffer();
+      if (!this.camera.isActive)
+        return;
+      if (this.adjustingFrames)
+        this.adjustFrames();
+      if (this.adjustingCamera)
+        this.adjustCamera();
 
+      if (_calculateTransforms)
+        this.calculateTransforms();
+
+      Render.clear(this.camera.clrBackground);
+    }
     /**
      * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh}es 
      */
@@ -209,6 +211,7 @@ namespace FudgeCore {
       Recycler.store(rectCanvas);
       Recycler.store(rectRender);
     }
+
     /**
      * Adjust the camera parameters to fit the rendering into the render vieport
      */

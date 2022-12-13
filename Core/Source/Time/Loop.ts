@@ -167,7 +167,7 @@ namespace FudgeCore {
     }
     private static loopFrameXR(_time: number = null, _xrFrame: XRFrame = null): void {
       Loop.loop();
-      XRViewport.default.drawVR(_xrFrame);
+      XRViewport.default.draw(true, _xrFrame);
       Loop.idRequest = XRViewport.default.vr.session.requestAnimationFrame(Loop.loopFrameXR);
     }
     private static loopTime(): void {

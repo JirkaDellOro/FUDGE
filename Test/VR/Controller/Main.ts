@@ -51,7 +51,9 @@ namespace RaySceneVR {
         await xrViewport.initializeVR("immersive-vr", "local", true);
         xrViewport.vr.session.addEventListener("end", onEndSession);
       }
-      initializeRays();
+
+
+      initializeController();
       //stop normal loop of winodws.animationFrame
       f.Loop.stop();
       //set xr transform to matrix from ComponentCamera -> xr transform = camera transform
@@ -62,21 +64,14 @@ namespace RaySceneVR {
     );
   }
 
-  function initializeRays(): void {
-    let pickableObjects: f.Node[] = graph.getChildrenByName("CubeContainer")[0].getChildren();
-    let rightRayNode = graph.getChildrenByName("raysContainer")[0].getChild(0);
-    let leftRayNode = graph.getChildrenByName("raysContainer")[0].getChild(1);
-    rightRayNode.addComponent(new RayHelper(xrViewport, xrViewport.vr.rController, 50, pickableObjects));
-    leftRayNode.addComponent(new RayHelper(xrViewport, xrViewport.vr.lController, 50, pickableObjects));
+  function initializeController(): void {
+    let rightCntrl = graph.getChildrenByName("ControllerRight")[0];
+    let leftCntrl = graph.getChildrenByName("ControllerLeft")[0];
+    rightCntrl.addComponent(new Controller(xrViewport, xrViewport.vr.rController));
+    leftCntrl.addComponent(new Controller(xrViewport, xrViewport.vr.lController));
   }
 
   function update(_event: Event): void {
-    let pickableObjects: f.Node[] = graph.getChildrenByName("CubeContainer")[0].getChildren();
-
-    let ray: f.Ray = new f.Ray(new f.Vector3(0, 0, -1), new f.Vector3(1, 0, 1), 0.1);
-
-    let picker: f.Pick[] = f.Picker.pickRay(pickableObjects, ray, 0, 100000000000000000);
-    // console.log(picker.length);
     xrViewport.draw();
 
   }
