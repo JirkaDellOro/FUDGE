@@ -5,7 +5,6 @@ namespace RaySceneVR {
   let xrViewport: f.XRViewport = new f.XRViewport();
   let graph: f.Graph = null;
   let cmpCamera: f.ComponentCamera = null;
-
   window.addEventListener("load", init);
 
   async function init() {

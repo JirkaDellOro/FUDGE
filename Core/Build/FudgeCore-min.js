@@ -4195,11 +4195,25 @@ var FudgeCore;
                                 this.rController.thumbstickY = controller.gamepad.axes[3];
                                 if (!this.rController.gamePad) {
                                     this.rController.gamePad = controller.gamepad;
-                                    this.rController.select = controller.gamepad.buttons[0];
-                                    this.rController.trigger = controller.gamepad.buttons[1];
-                                    this.rController.thumgstickButton = controller.gamepad.buttons[3];
-                                    this.rController.bButton = controller.gamepad.buttons[5];
-                                    this.rController.aButton = controller.gamepad.buttons[4];
+                                    for (let i = 0; i <= 5; i++) {
+                                        switch (i) {
+                                            case (0):
+                                                this.rController.mappedButtons["select"] = controller.gamepad.buttons[0];
+                                                break;
+                                            case (1):
+                                                this.rController.mappedButtons["trigger"] = controller.gamepad.buttons[1];
+                                                break;
+                                            case (3):
+                                                this.rController.mappedButtons["thumbStick"] = controller.gamepad.buttons[3];
+                                                break;
+                                            case (4):
+                                                this.rController.mappedButtons["A"] = controller.gamepad.buttons[4];
+                                                break;
+                                            case (5):
+                                                this.rController.mappedButtons["B"] = controller.gamepad.buttons[5];
+                                                break;
+                                        }
+                                    }
                                 }
                                 break;
                             case ("left"):
@@ -4207,12 +4221,25 @@ var FudgeCore;
                                 this.lController.thumbstickX = controller.gamepad.axes[2];
                                 this.lController.thumbstickY = controller.gamepad.axes[3];
                                 if (!this.lController.gamePad) {
-                                    this.lController.gamePad = controller.gamepad;
-                                    this.lController.select = controller.gamepad.buttons[0];
-                                    this.lController.trigger = controller.gamepad.buttons[1];
-                                    this.lController.thumgstickButton = controller.gamepad.buttons[3];
-                                    this.lController.bButton = controller.gamepad.buttons[5];
-                                    this.lController.aButton = controller.gamepad.buttons[4];
+                                    for (let i = 0; i <= 5; i++) {
+                                        switch (i) {
+                                            case (0):
+                                                this.lController.mappedButtons["select"] = controller.gamepad.buttons[0];
+                                                break;
+                                            case (1):
+                                                this.lController.mappedButtons["trigger"] = controller.gamepad.buttons[1];
+                                                break;
+                                            case (3):
+                                                this.lController.mappedButtons["thumbStick"] = controller.gamepad.buttons[3];
+                                                break;
+                                            case (4):
+                                                this.lController.mappedButtons["A"] = controller.gamepad.buttons[4];
+                                                break;
+                                            case (5):
+                                                this.lController.mappedButtons["B"] = controller.gamepad.buttons[5];
+                                                break;
+                                        }
+                                    }
                                 }
                                 break;
                         }
@@ -4233,11 +4260,7 @@ var FudgeCore;
             super(...arguments);
             this.cntrlTransform = null;
             this.gamePad = null;
-            this.trigger = null;
-            this.select = null;
-            this.aButton = null;
-            this.bButton = null;
-            this.thumgstickButton = null;
+            this.mappedButtons = {};
             this.thumbstickX = null;
             this.thumbstickY = null;
         }

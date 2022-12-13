@@ -2348,11 +2348,9 @@ declare namespace FudgeCore {
     class VRController extends Component {
         cntrlTransform: ComponentTransform;
         gamePad: Gamepad;
-        trigger: GamepadButton;
-        select: GamepadButton;
-        aButton: GamepadButton;
-        bButton: GamepadButton;
-        thumgstickButton: GamepadButton;
+        mappedButtons: {
+            [key: string]: GamepadButton;
+        };
         thumbstickX: number;
         thumbstickY: number;
     }
