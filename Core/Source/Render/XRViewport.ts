@@ -1,8 +1,8 @@
 namespace FudgeCore {
-  export enum VRSessionMode {
+  export enum VRSESSIONMODE {
     IMMERSIVEVR = "immersive-vr",
   }
-  export enum VRReferenceSpaceType {
+  export enum VRREFERENCESPACE {
     VIEWER = "viewer",
     LOCAL = "local",
     LOCALFLOOR = "local-floor",
@@ -29,9 +29,9 @@ namespace FudgeCore {
       this.crc3 = RenderWebGL.getRenderingContext();
     }
 
-    // the xrSession is initialized here, after xrSession is setted and FrameRequestXR is called from user, the XRViewport is ready to go.
-    public async initializeVR(_xrReferenceSpaceType: XRReferenceSpaceType = VRReferenceSpaceType.LOCAL, _xrController: boolean = false): Promise<void> {
-      let session: XRSession = await navigator.xr.requestSession(VRSessionMode.IMMERSIVEVR);
+    // the vrSession is initialized here, after xrSession is setted and FrameRequestXR is called from user, the XRViewport is ready to go.
+    public async initializeVR(_xrReferenceSpaceType: XRReferenceSpaceType = VRREFERENCESPACE.LOCAL, _xrController: boolean = false): Promise<void> {
+      let session: XRSession = await navigator.xr.requestSession(VRSESSIONMODE.IMMERSIVEVR);
       this.vr.referenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
       await this.crc3.makeXRCompatible();
       let nativeScaleFactor = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
@@ -43,10 +43,11 @@ namespace FudgeCore {
       }
       this.vr.session = session;
     }
+    public async initializeAR(_xrSessionMode: XRSessionMode = null, _xrReferenceSpaceType: XRReferenceSpaceType = null,): Promise<void> {
+      console.log("NOT IMPLEMENTED YET");
+    }
 
 
-
-    //real draw method in XR Mode - called from Loop Class over static instance of this class.
     //real draw method in XR Mode - called from Loop Class over static instance of this class.
     public draw(_calculateTransforms: boolean = true, _xrFrame: XRFrame = null): void {
       if (!this.vr.session)
@@ -82,60 +83,6 @@ namespace FudgeCore {
         }
       }
     }
-    // private calculateTransformsVR(_viewport: globalThis.XRViewport): void {
-    //   let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
-    //   if (this.getBranch().getParent())
-    //     mtxRoot = this.getBranch().getParent().mtxWorld;
-    //   this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
-    //   this.adjustFramesVR(_viewport);
-    //   Render.prepare(this.getBranch(), null, mtxRoot);
-    //   this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
-    //   this.componentsPick = Render.componentsPick;
-    // }
-    // private adjustFramesVR(_viewport: globalThis.XRViewport): void {
-    //   // get the rectangle of the canvas area as displayed (consider css)
-    //   let rectClient: Rectangle = this.getClientRectangle();
-    //   // adjust the canvas size according to the given framing applied to client
-    //   let rectCanvas: Rectangle = this.frameClientToCanvas.getRect(rectClient);
-    //   Render.getCanvas().width = rectCanvas.width;
-    //   Render.getCanvas().height = rectCanvas.height;
-
-    //   let rectTemp: Rectangle;
-    //   // adjust the destination area on the target-canvas to render to by applying the framing to canvas
-    //   rectTemp = this.frameCanvasToDestination.getRect(rectCanvas);
-    //   this.rectDestination.copy(rectTemp);
-    //   Recycler.store(rectTemp);
-    //   // adjust the area on the source-canvas to render from by applying the framing to destination area
-    //   rectTemp = this.frameDestinationToSource.getRect(this.rectDestination);
-    //   this.rectSource.copy(rectTemp);
-    //   Recycler.store(rectTemp);
-
-    //   // having an offset source does make sense only when multiple viewports display parts of the same rendering. For now: shift it to 0,0
-    //   this.rectSource.x = this.rectSource.y = 0;
-    //   // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport. For now, it's always adjusted to the current viewport
-    //   let rectRender: Rectangle = this.frameSourceToRender.getRect(this.rectSource);
-    //   Render.setRenderRectangle(new Rectangle(_viewport.x, _viewport.y, _viewport.width, _viewport.height));
-    //   // no more transformation after this for now, offscreen canvas and render-viewport have the same size
-    //   Render.setCanvasSize(rectRender.width, rectRender.height);
-
-    //   Recycler.store(rectClient);
-    //   Recycler.store(rectCanvas);
-    //   Recycler.store(rectRender);
-
-    //   // // get the rectangle of the canvas area as displayed (consider css)
-    //   // let rectClient: Rectangle = this.getClientRectangle();
-    //   // // adjust the canvas size according to the given framing applied to client
-    //   // let rectCanvas: Rectangle = this.frameClientToCanvas.getRect(rectClient);
-    //   // Render.getCanvas().width = rectCanvas.width;
-    //   // Render.getCanvas().height = rectCanvas.height;
-    //   // Render.setRenderRectangle(new Rectangle(_viewport.x, _viewport.y, _viewport.width, _viewport.height));
-    // }
-
-    // private adjustCameraVR(_viewport: globalThis.XRViewport): void {
-    //   this.camera.projectCentral(
-    //     _viewport.width / _viewport.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar()
-    //   );
-    // }
   }
 }
 

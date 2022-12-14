@@ -42,7 +42,7 @@ namespace PhysicsVR {
 
     // check device/browser capabilities for VR Session 
     function checkForVRSupport(): void {
-        navigator.xr.isSessionSupported("immersive-vr").then((supported: boolean) => {
+        navigator.xr.isSessionSupported(f.VRSESSIONMODE.IMMERSIVEVR).then((supported: boolean) => {
             if (supported)
                 setupVR();
             else
@@ -62,7 +62,7 @@ namespace PhysicsVR {
         enterXRButton.addEventListener("click", async function () {
             //initalizes xr session 
             if (!xrViewport.vr.session) {
-                await xrViewport.initializeVR(f.VRReferenceSpaceType.LOCAL, true);
+                await xrViewport.initializeVR(f.VRREFERENCESPACE.LOCAL, true);
                 //triggers onEndSession function with user exits xr session
                 xrViewport.vr.session.addEventListener("end", onEndSession);
             }

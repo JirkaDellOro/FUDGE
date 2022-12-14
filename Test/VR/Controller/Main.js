@@ -24,7 +24,7 @@ var RaySceneVR;
     }
     // check device/browser capabilities for XR Session 
     function checkForVRSupport() {
-        navigator.xr.isSessionSupported(f.VRSessionMode.IMMERSIVEVR).then((supported) => {
+        navigator.xr.isSessionSupported(f.VRSESSIONMODE.IMMERSIVEVR).then((supported) => {
             if (supported)
                 setupVR();
             else
@@ -41,7 +41,7 @@ var RaySceneVR;
         enterXRButton.addEventListener("click", async function () {
             //initalizes xr session 
             if (!xrViewport.vr.session) {
-                await xrViewport.initializeVR(f.VRReferenceSpaceType.LOCAL, true);
+                await xrViewport.initializeVR(f.VRREFERENCESPACE.LOCAL, true);
                 xrViewport.vr.session.addEventListener("end", onEndSession);
             }
             initializeController();

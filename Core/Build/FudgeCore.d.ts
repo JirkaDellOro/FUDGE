@@ -5382,10 +5382,10 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    enum VRSessionMode {
+    enum VRSESSIONMODE {
         IMMERSIVEVR = "immersive-vr"
     }
-    enum VRReferenceSpaceType {
+    enum VRREFERENCESPACE {
         VIEWER = "viewer",
         LOCAL = "local",
         LOCALFLOOR = "local-floor",
@@ -5400,6 +5400,7 @@ declare namespace FudgeCore {
         static get default(): XRViewport;
         constructor();
         initializeVR(_xrReferenceSpaceType?: XRReferenceSpaceType, _xrController?: boolean): Promise<void>;
+        initializeAR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType): Promise<void>;
         draw(_calculateTransforms?: boolean, _xrFrame?: XRFrame): void;
     }
 }
