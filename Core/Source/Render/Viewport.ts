@@ -109,7 +109,6 @@ namespace FudgeCore {
      */
     public draw(_calculateTransforms: boolean = true): void {
       this.computeDrawing(_calculateTransforms);
-
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
@@ -123,6 +122,9 @@ namespace FudgeCore {
         this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
       );
     }
+    /**
+    * The transforms in the branch are recalculated here.
+    */
     public computeDrawing(_calculateTransforms: boolean = true) {
       if (!this.#branch)
         return;

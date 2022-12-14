@@ -2340,7 +2340,13 @@ declare namespace FudgeCore {
         lController: VRController;
         session: XRSession;
         referenceSpace: XRReferenceSpace;
+        /**
+         * Sets new position in the reference space of  XR Session, also known as teleportation.
+         */
         setNewXRRigidtransform(_newPos?: Vector3, _newRot?: Vector3): void;
+        /**
+        * Sets controller matrices, gamepad references and thumbsticks movements.
+        */
         setController(_xrFrame: XRFrame): void;
     }
 }
@@ -5320,6 +5326,9 @@ declare namespace FudgeCore {
          * Pass `false` if calculation was already done for this frame
          */
         draw(_calculateTransforms?: boolean): void;
+        /**
+        * The transforms in the branch are recalculated here.
+        */
         computeDrawing(_calculateTransforms?: boolean): void;
         /**
          * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh}es
@@ -5382,15 +5391,19 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+      * Could be expand with more available modes in the future, until now only immersive session is supported.
+      */
     enum VRSESSIONMODE {
         IMMERSIVEVR = "immersive-vr"
     }
+    /**
+      * Different reference vr-spaces available, user has to check if the space is supported with its device.
+      * Could be expand with more available space types in the future, until now only viewer and local space types are supported.
+      */
     enum VRREFERENCESPACE {
         VIEWER = "viewer",
-        LOCAL = "local",
-        LOCALFLOOR = "local-floor",
-        BOUNDEDFLOOR = "bounded-floor",
-        UNBOUNDED = "unbounded"
+        LOCAL = "local"
     }
     class XRViewport extends Viewport {
         private static xrViewportInstance;
@@ -5399,8 +5412,18 @@ declare namespace FudgeCore {
         private crc3;
         static get default(): XRViewport;
         constructor();
-        initializeVR(_xrReferenceSpaceType?: XRReferenceSpaceType, _xrController?: boolean): Promise<void>;
+        /**
+          * The VR Session is initialized here, after XR-Session is setted and FrameRequestXR is called from user, the XRViewport is ready to draw.
+          * Also VR - Controller are initilized if user sets vrController-boolean to true.
+          */
+        initializeVR(_vrReferenceSpaceType?: VRREFERENCESPACE, _vrController?: boolean): Promise<void>;
+        /**
+        * The AR Session could be initialized here. Up till now not implemented.
+        */
         initializeAR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType): Promise<void>;
+        /**
+        * Real draw method in XR Mode - called from Loop Method {@link Loop} with a static reference of this class.
+        */
         draw(_calculateTransforms?: boolean, _xrFrame?: XRFrame): void;
     }
 }

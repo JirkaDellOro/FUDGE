@@ -1,14 +1,19 @@
 namespace FudgeCore {
+  /**
+    * Could be expand with more available modes in the future, until now only immersive session is supported.
+    */
   export enum VRSESSIONMODE {
     IMMERSIVEVR = "immersive-vr",
   }
+  /**
+    * Different reference vr-spaces available, user has to check if the space is supported with its device.
+    * Could be expand with more available space types in the future, until now only viewer and local space types are supported.
+    */
   export enum VRREFERENCESPACE {
     VIEWER = "viewer",
     LOCAL = "local",
-    LOCALFLOOR = "local-floor",
-    BOUNDEDFLOOR = "bounded-floor",
-    UNBOUNDED = "unbounded"
   }
+
   export class XRViewport extends Viewport {
     //static instance of Viewport 
     private static xrViewportInstance: XRViewport = null;
@@ -18,7 +23,6 @@ namespace FudgeCore {
     private useController: boolean = false;
     private crc3: WebGL2RenderingContext = null;
 
-    // sets static reference of non static class :-0
     public static get default(): XRViewport {
       return this.xrViewportInstance;
     }
@@ -29,26 +33,34 @@ namespace FudgeCore {
       this.crc3 = RenderWebGL.getRenderingContext();
     }
 
-    // the vrSession is initialized here, after xrSession is setted and FrameRequestXR is called from user, the XRViewport is ready to go.
-    public async initializeVR(_xrReferenceSpaceType: XRReferenceSpaceType = VRREFERENCESPACE.LOCAL, _xrController: boolean = false): Promise<void> {
+    /**
+      * The VR Session is initialized here, after XR-Session is setted and FrameRequestXR is called from user, the XRViewport is ready to draw.
+      * Also VR - Controller are initilized if user sets vrController-boolean to true.
+      */
+    public async initializeVR(_vrReferenceSpaceType: VRREFERENCESPACE = VRREFERENCESPACE.LOCAL, _vrController: boolean = false): Promise<void> {
       let session: XRSession = await navigator.xr.requestSession(VRSESSIONMODE.IMMERSIVEVR);
-      this.vr.referenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
+      this.vr.referenceSpace = await session.requestReferenceSpace(_vrReferenceSpaceType);
       await this.crc3.makeXRCompatible();
       let nativeScaleFactor = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
       await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3, { framebufferScaleFactor: nativeScaleFactor }) });
-      this.useController = _xrController;
-      if (_xrController) {
+      this.useController = _vrController;
+      if (_vrController) {
         this.vr.rController.cntrlTransform = new ComponentTransform();
         this.vr.lController.cntrlTransform = new ComponentTransform();
       }
       this.vr.session = session;
     }
-    public async initializeAR(_xrSessionMode: XRSessionMode = null, _xrReferenceSpaceType: XRReferenceSpaceType = null,): Promise<void> {
-      console.log("NOT IMPLEMENTED YET");
+
+    /**
+    * The AR Session could be initialized here. Up till now not implemented. 
+    */
+    public async initializeAR(_xrSessionMode: XRSessionMode = null, _xrReferenceSpaceType: XRReferenceSpaceType = null): Promise<void> {
+      Debug.error("NOT IMPLEMENTED YET! Check out initializeVR!");
     }
 
-
-    //real draw method in XR Mode - called from Loop Class over static instance of this class.
+    /**
+    * Real draw method in XR Mode - called from Loop Method {@link Loop} with a static reference of this class.
+    */
     public draw(_calculateTransforms: boolean = true, _xrFrame: XRFrame = null): void {
       if (!this.vr.session)
         super.draw(_calculateTransforms);

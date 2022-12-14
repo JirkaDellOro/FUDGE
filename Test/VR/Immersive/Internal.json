@@ -2132,7 +2132,7 @@
                       {
                         "ƒ.ComponentMaterial": {
                           "sortForAlpha": false,
-                          "clrPrimary": "[0.5490196078431373, 0.5490196078431373, 0.5490196078431373, 1]",
+                          "clrPrimary": "[0.7019607843137254, 0.7019607843137254, 0.7019607843137254, 1]",
                           "clrSecondary": "[1, 1, 1, 1]",
                           "pivot": {
                             "translation": "[0, 0]",
@@ -2142,7 +2142,7 @@
                           "Component": {
                             "active": true
                           },
-                          "idMaterial": "Material|2022-11-29T10:04:46.080Z|68749"
+                          "idMaterial": "Material|2022-12-06T13:21:05.457Z|46369"
                         }
                       }
                     ]
@@ -3922,10 +3922,21 @@
       "coat": {
         "ƒ.CoatRemissiveTextured": {
           "color": "[1, 1, 1, 1]",
-          "idTexture": "TextureImage|2022-12-06T13:20:57.658Z|48936",
+          "idTexture": "TextureImage|2022-12-14T13:31:40.277Z|98724",
           "diffuse": 1,
           "specular": 0
         }
+      }
+    }
+  },
+  "TextureImage|2022-12-14T13:31:40.277Z|98724": {
+    "ƒ.TextureImage": {
+      "url": "textures\\whiteBricks.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2022-12-14T13:31:40.277Z|98724",
+        "name": "textures\\whiteBricks.png",
+        "mipmap": "CRISP"
       }
     }
   }

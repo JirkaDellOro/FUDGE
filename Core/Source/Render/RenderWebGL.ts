@@ -323,29 +323,19 @@ namespace FudgeCore {
      */
     protected static setLightsInShader(_shader: typeof Shader, _lights: MapLightTypeToLightList): void {
       _shader.useProgram();
+      let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
 
-      let uni: { [name: string]: any } = RenderInjectorShader.uboLightsInfo;
       // Ambient
-      let ambient: any = uni["u_ambient.vctColor"];
+      let ambient: WebGLUniformLocation = uni["u_ambient.vctColor"];
       if (ambient) {
-        //RenderWebGL.crc3.uniform4fv(ambient, [0, 0, 0, 0]);
-        this.crc3.bufferSubData(
-          this.crc3.UNIFORM_BUFFER,
-          ambient.offset,
-          new Float32Array(0)
-        );
+        RenderWebGL.crc3.uniform4fv(ambient, [0, 0, 0, 0]);
         let cmpLights: RecycableArray<ComponentLight> = _lights.get(LightAmbient);
         if (cmpLights) {
           // TODO: add up ambient lights to a single color
           let result: Color = new Color(0, 0, 0, 1);
           for (let cmpLight of cmpLights)
             result.add(cmpLight.light.color);
-          //RenderWebGL.crc3.uniform4fv(ambient, result.getArray());
-          this.crc3.bufferSubData(
-            this.crc3.UNIFORM_BUFFER,
-            ambient.offset,
-            new Float32Array(result.getArray())
-          );
+          RenderWebGL.crc3.uniform4fv(ambient, result.getArray());
         }
       }
 
@@ -354,6 +344,7 @@ namespace FudgeCore {
       fillLightBuffers(LightSpot, "u_nLightsSpot", "u_spot");
 
       function fillLightBuffers(_type: TypeOfLight, _uniNumber: string, _uniStruct: string): void {
+        let uni: { [name: string]: any } = RenderInjectorShader.uboLightsInfo;
         let uniLights: { [name: string]: any } = uni[_uniNumber];
         if (uniLights) {
 
