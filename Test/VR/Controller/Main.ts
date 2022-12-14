@@ -29,15 +29,15 @@ namespace RaySceneVR {
   }
   // check device/browser capabilities for XR Session 
   function checkForVRSupport(): void {
-    navigator.xr.isSessionSupported("immersive-vr").then((supported: boolean) => {
+    navigator.xr.isSessionSupported(f.VRSessionMode.IMMERSIVEVR).then((supported: boolean) => {
       if (supported)
-        initializeVR();
+        setupVR();
       else
         console.log("Session not supported");
     });
   }
   //main function to start XR Session
-  function initializeVR(): void {
+  function setupVR(): void {
     //create XR Button -> Browser 
     let enterXRButton: HTMLButtonElement = document.createElement("button");
     enterXRButton.id = "xrButton";
@@ -47,18 +47,19 @@ namespace RaySceneVR {
     enterXRButton.addEventListener("click", async function () {
       //initalizes xr session 
       if (!xrViewport.vr.session) {
-        await xrViewport.initializeVR("immersive-vr", "local", true);
+        await xrViewport.initializeVR(f.VRReferenceSpaceType.LOCAL, true);
         xrViewport.vr.session.addEventListener("end", onEndSession);
       }
-
-
       initializeController();
+
       //stop normal loop of winodws.animationFrame
       f.Loop.stop();
       //set xr transform to matrix from ComponentCamera -> xr transform = camera transform
       xrViewport.vr.setNewXRRigidtransform(f.Vector3.DIFFERENCE(f.Vector3.ZERO(), cmpCamera.mtxWorld.translation));
       //start xrSession.animationFrame instead of window.animationFrame, your xr-session is ready to go!
       f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);
+
+
     }
     );
   }

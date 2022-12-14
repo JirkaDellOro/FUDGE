@@ -31,13 +31,13 @@ namespace RaySceneVR {
   function checkForVRSupport(): void {
     navigator.xr.isSessionSupported("immersive-vr").then((supported: boolean) => {
       if (supported)
-        initializeVR();
+        setupVR();
       else
         console.log("Session not supported");
     });
   }
   //main function to start XR Session
-  function initializeVR(): void {
+  function setupVR(): void {
     //create XR Button -> Browser 
     let enterXRButton: HTMLButtonElement = document.createElement("button");
     enterXRButton.id = "xrButton";
@@ -47,7 +47,7 @@ namespace RaySceneVR {
     enterXRButton.addEventListener("click", async function () {
       //initalizes xr session 
       if (!xrViewport.vr.session) {
-        await xrViewport.initializeVR("immersive-vr", "local", false);
+        await xrViewport.initializeVR(f.VRReferenceSpaceType.LOCAL, false);
         xrViewport.vr.session.addEventListener("end", onEndSession);
       }
       //stop normal loop of winodws.animationFrame

@@ -1,4 +1,14 @@
 namespace FudgeCore {
+  export enum VRSessionMode {
+    IMMERSIVEVR = "immersive-vr",
+  }
+  export enum VRReferenceSpaceType {
+    VIEWER = "viewer",
+    LOCAL = "local",
+    LOCALFLOOR = "local-floor",
+    BOUNDEDFLOOR = "bounded-floor",
+    UNBOUNDED = "unbounded"
+  }
   export class XRViewport extends Viewport {
     //static instance of Viewport 
     private static xrViewportInstance: XRViewport = null;
@@ -20,8 +30,8 @@ namespace FudgeCore {
     }
 
     // the xrSession is initialized here, after xrSession is setted and FrameRequestXR is called from user, the XRViewport is ready to go.
-    public async initializeVR(_xrSessionMode: XRSessionMode = "immersive-vr", _xrReferenceSpaceType: XRReferenceSpaceType = "local", _xrController: boolean = false): Promise<void> {
-      let session: XRSession = await navigator.xr.requestSession(_xrSessionMode);
+    public async initializeVR(_xrReferenceSpaceType: XRReferenceSpaceType = VRReferenceSpaceType.LOCAL, _xrController: boolean = false): Promise<void> {
+      let session: XRSession = await navigator.xr.requestSession(VRSessionMode.IMMERSIVEVR);
       this.vr.referenceSpace = await session.requestReferenceSpace(_xrReferenceSpaceType);
       await this.crc3.makeXRCompatible();
       let nativeScaleFactor = XRWebGLLayer.getNativeFramebufferScaleFactor(session);

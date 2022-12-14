@@ -3,11 +3,7 @@ namespace FudgeCore {
 
         public cntrlTransform: ComponentTransform = null;
         public gamePad: Gamepad = null;
-
-        public mappedButtons: { [key: string]: GamepadButton } = {};
         public thumbstickX: number = null;
         public thumbstickY: number = null;
-
-
     }
 }

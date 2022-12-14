@@ -2348,9 +2348,6 @@ declare namespace FudgeCore {
     class VRController extends Component {
         cntrlTransform: ComponentTransform;
         gamePad: Gamepad;
-        mappedButtons: {
-            [key: string]: GamepadButton;
-        };
         thumbstickX: number;
         thumbstickY: number;
     }
@@ -5385,6 +5382,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum VRSessionMode {
+        IMMERSIVEVR = "immersive-vr"
+    }
+    enum VRReferenceSpaceType {
+        VIEWER = "viewer",
+        LOCAL = "local",
+        LOCALFLOOR = "local-floor",
+        BOUNDEDFLOOR = "bounded-floor",
+        UNBOUNDED = "unbounded"
+    }
     class XRViewport extends Viewport {
         private static xrViewportInstance;
         vr: VR;
@@ -5392,7 +5399,7 @@ declare namespace FudgeCore {
         private crc3;
         static get default(): XRViewport;
         constructor();
-        initializeVR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType, _xrController?: boolean): Promise<void>;
+        initializeVR(_xrReferenceSpaceType?: XRReferenceSpaceType, _xrController?: boolean): Promise<void>;
         draw(_calculateTransforms?: boolean, _xrFrame?: XRFrame): void;
     }
 }

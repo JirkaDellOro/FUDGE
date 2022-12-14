@@ -26,13 +26,13 @@ var RaySceneVR;
     function checkForVRSupport() {
         navigator.xr.isSessionSupported("immersive-vr").then((supported) => {
             if (supported)
-                initializeVR();
+                setupVR();
             else
                 console.log("Session not supported");
         });
     }
     //main function to start XR Session
-    function initializeVR() {
+    function setupVR() {
         //create XR Button -> Browser 
         let enterXRButton = document.createElement("button");
         enterXRButton.id = "xrButton";
@@ -41,7 +41,7 @@ var RaySceneVR;
         enterXRButton.addEventListener("click", async function () {
             //initalizes xr session 
             if (!xrViewport.vr.session) {
-                await xrViewport.initializeVR("immersive-vr", "local", false);
+                await xrViewport.initializeVR(f.VRReferenceSpaceType.LOCAL, false);
                 xrViewport.vr.session.addEventListener("end", onEndSession);
             }
             //stop normal loop of winodws.animationFrame

@@ -44,13 +44,13 @@ namespace PhysicsVR {
     function checkForVRSupport(): void {
         navigator.xr.isSessionSupported("immersive-vr").then((supported: boolean) => {
             if (supported)
-                initializeVR();
+                setupVR();
             else
                 console.log("Session not supported");
         });
     }
     //main function to start VR Session
-    function initializeVR(): void {
+    function setupVR(): void {
 
 
         //create XR Button -> Browser  //!important: look up the css file.
@@ -62,7 +62,7 @@ namespace PhysicsVR {
         enterXRButton.addEventListener("click", async function () {
             //initalizes xr session 
             if (!xrViewport.vr.session) {
-                await xrViewport.initializeVR("immersive-vr", "local", true);
+                await xrViewport.initializeVR(f.VRReferenceSpaceType.LOCAL, true);
                 //triggers onEndSession function with user exits xr session
                 xrViewport.vr.session.addEventListener("end", onEndSession);
             }

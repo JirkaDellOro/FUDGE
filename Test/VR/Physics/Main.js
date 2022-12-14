@@ -39,13 +39,13 @@ var PhysicsVR;
     function checkForVRSupport() {
         navigator.xr.isSessionSupported("immersive-vr").then((supported) => {
             if (supported)
-                initializeVR();
+                setupVR();
             else
                 console.log("Session not supported");
         });
     }
     //main function to start VR Session
-    function initializeVR() {
+    function setupVR() {
         //create XR Button -> Browser  //!important: look up the css file.
         let enterXRButton = document.createElement("button");
         enterXRButton.id = "xrButton";
@@ -54,7 +54,7 @@ var PhysicsVR;
         enterXRButton.addEventListener("click", async function () {
             //initalizes xr session 
             if (!xrViewport.vr.session) {
-                await xrViewport.initializeVR("immersive-vr", "local", true);
+                await xrViewport.initializeVR(f.VRReferenceSpaceType.LOCAL, true);
                 //triggers onEndSession function with user exits xr session
                 xrViewport.vr.session.addEventListener("end", onEndSession);
             }

@@ -20,33 +20,15 @@ namespace FudgeCore {
                                 this.rController.cntrlTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, this.referenceSpace).transform.matrix);
                                 this.rController.thumbstickX = controller.gamepad.axes[2];
                                 this.rController.thumbstickY = controller.gamepad.axes[3];
-                                if (!this.rController.gamePad) {
+                                if (!this.rController.gamePad)
                                     this.rController.gamePad = controller.gamepad;
-                                    for (let i = 0; i <= 5; i++) {
-                                        switch (i) {
-                                            case (0): this.rController.mappedButtons["select"] = controller.gamepad.buttons[0]; break;
-                                            case (1): this.rController.mappedButtons["trigger"] = controller.gamepad.buttons[1]; break;
-                                            case (3): this.rController.mappedButtons["thumbStick"] = controller.gamepad.buttons[3]; break;
-                                            case (4): this.rController.mappedButtons["A"] = controller.gamepad.buttons[4]; break;
-                                            case (5): this.rController.mappedButtons["B"] = controller.gamepad.buttons[5]; break;
-                                        }
-                                    }
-                                }
                                 break;
                             case ("left"):
                                 this.lController.cntrlTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, this.referenceSpace).transform.matrix);
                                 this.lController.thumbstickX = controller.gamepad.axes[2];
                                 this.lController.thumbstickY = controller.gamepad.axes[3];
                                 if (!this.lController.gamePad) {
-                                    for (let i = 0; i <= 5; i++) {
-                                        switch (i) {
-                                            case (0): this.lController.mappedButtons["select"] = controller.gamepad.buttons[0]; break;
-                                            case (1): this.lController.mappedButtons["trigger"] = controller.gamepad.buttons[1]; break;
-                                            case (3): this.lController.mappedButtons["thumbStick"] = controller.gamepad.buttons[3]; break;
-                                            case (4): this.lController.mappedButtons["A"] = controller.gamepad.buttons[4]; break;
-                                            case (5): this.lController.mappedButtons["B"] = controller.gamepad.buttons[5]; break;
-                                        }
-                                    }
+                                    this.lController.gamePad = controller.gamepad;
                                 }
                                 break;
                         }
