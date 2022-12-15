@@ -62,7 +62,7 @@ namespace PhysicsVR {
         enterXRButton.addEventListener("click", async function () {
             //initalizes xr session 
             if (!xrViewport.vr.session) {
-                await xrViewport.initializeVR(f.VRREFERENCESPACE.LOCAL, true);
+                await xrViewport.initializeVR(f.VRSESSIONMODE.IMMERSIVEVR, f.VRREFERENCESPACE.LOCAL, true);
                 //triggers onEndSession function with user exits xr session
                 xrViewport.vr.session.addEventListener("end", onEndSession);
             }
@@ -83,8 +83,9 @@ namespace PhysicsVR {
     let increment: number = 0;
     let spawnAmount: number = 0;
     function update(_event: Event): void {
-
-        if (xrViewport.vr.session) {
+        f.Physics.simulate();
+        xrViewport.draw();
+        if (xrViewport.vr.session && increment != cubeInstances.length) {
             spawnTime += 4;
             if (spawnTime == spawnTrigger) {
                 spawnTime = 0;
@@ -100,12 +101,6 @@ namespace PhysicsVR {
                 spawnAmount += 0.15;
             }
         }
-
-
-
-
-        f.Physics.simulate();
-        xrViewport.draw();
     }
 
 

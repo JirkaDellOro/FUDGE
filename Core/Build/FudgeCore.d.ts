@@ -2335,6 +2335,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     *   VR Component Class, for Session Management, Controller Management and Reference Space setting.
+     *  @author Valentin Schmidberger, HFU, 2022
+     */
+    class VRController {
+        cntrlTransform: ComponentTransform;
+        gamePad: Gamepad;
+        thumbstickX: number;
+        thumbstickY: number;
+    }
     class VR extends Component {
         rController: VRController;
         lController: VRController;
@@ -2345,17 +2355,9 @@ declare namespace FudgeCore {
          */
         setNewXRRigidtransform(_newPos?: Vector3, _newRot?: Vector3): void;
         /**
-        * Sets controller matrices, gamepad references and thumbsticks movements.
-        */
+         * Sets controller matrices, gamepad references and thumbsticks movements.
+         */
         setController(_xrFrame: XRFrame): void;
-    }
-}
-declare namespace FudgeCore {
-    class VRController extends Component {
-        cntrlTransform: ComponentTransform;
-        gamePad: Gamepad;
-        thumbstickX: number;
-        thumbstickY: number;
     }
 }
 declare namespace FudgeCore {
@@ -5392,38 +5394,45 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-      * Could be expand with more available modes in the future, until now only immersive session is supported.
-      */
+     * Could be expand with more available modes in the future, until now only #immersive session is supported.
+     */
     enum VRSESSIONMODE {
         IMMERSIVEVR = "immersive-vr"
     }
     /**
-      * Different reference vr-spaces available, user has to check if the space is supported with its device.
-      * Could be expand with more available space types in the future, until now only viewer and local space types are supported.
-      */
+     * Different reference vr-spaces available, user has to check if the space is supported with its device.
+     * Could be expand with more available space types in the future, until now only #viewer and #local space types are supported.
+     */
     enum VRREFERENCESPACE {
         VIEWER = "viewer",
         LOCAL = "local"
     }
+    /**
+     * @author Valentin Schmidberger, HFU, 2022
+     * XRViewport (webXR)-extension of Viewport, to display FUDGE content on Head Mounted Displays such as HTC Vive, Quest, Pico etc.
+     */
     class XRViewport extends Viewport {
         private static xrViewportInstance;
         vr: VR;
         private useController;
         private crc3;
-        static get default(): XRViewport;
         constructor();
         /**
-          * The VR Session is initialized here, after XR-Session is setted and FrameRequestXR is called from user, the XRViewport is ready to draw.
-          * Also VR - Controller are initilized if user sets vrController-boolean to true.
-          */
-        initializeVR(_vrReferenceSpaceType?: VRREFERENCESPACE, _vrController?: boolean): Promise<void>;
+         * To retrieve private static Instance of Viewport, just needed for calling the drawXR Method in {@link Loop}
+         */
+        static get default(): XRViewport;
         /**
-        * The AR Session could be initialized here. Up till now not implemented.
-        */
+         * The VR Session is initialized here, after XR-Session is setted and FrameRequestXR is called from user, the XRViewport is ready to draw.
+         * Also VR - Controller are initilized if user sets vrController-boolean to true.
+         */
+        initializeVR(_vrSessionMode?: VRSESSIONMODE, _vrReferenceSpaceType?: VRREFERENCESPACE, _vrController?: boolean): Promise<void>;
+        /**
+         * The AR Session could be initialized here. Up till now not implemented.
+         */
         initializeAR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType): Promise<void>;
         /**
-        * Real draw method in XR Mode - called from Loop Method {@link Loop} with a static reference of this class.
-        */
+         * Real draw method in XR Mode - called from Loop Method {@link Loop} with a static reference of this class.
+         */
         draw(_calculateTransforms?: boolean, _xrFrame?: XRFrame): void;
     }
 }

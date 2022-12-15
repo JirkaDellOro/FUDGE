@@ -1,4 +1,16 @@
 namespace FudgeCore {
+    /**
+     *   VR Component Class, for Session Management, Controller Management and Reference Space setting. 
+     *  @author Valentin Schmidberger, HFU, 2022
+     */
+    export class VRController {
+
+        public cntrlTransform: ComponentTransform = null;
+        public gamePad: Gamepad = null;
+        public thumbstickX: number = null;
+        public thumbstickY: number = null;
+    }
+
     export class VR extends Component {
 
         public rController: VRController = new VRController();
@@ -14,8 +26,8 @@ namespace FudgeCore {
         }
 
         /**
-        * Sets controller matrices, gamepad references and thumbsticks movements.
-        */
+         * Sets controller matrices, gamepad references and thumbsticks movements.
+         */
         public setController(_xrFrame: XRFrame): void {
             if (this.session.inputSources.length > 0) {
                 this.session.inputSources.forEach(controller => {

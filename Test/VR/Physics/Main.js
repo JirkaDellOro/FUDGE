@@ -54,7 +54,7 @@ var PhysicsVR;
         enterXRButton.addEventListener("click", async function () {
             //initalizes xr session 
             if (!xrViewport.vr.session) {
-                await xrViewport.initializeVR(f.VRREFERENCESPACE.LOCAL, true);
+                await xrViewport.initializeVR(f.VRSESSIONMODE.IMMERSIVEVR, f.VRREFERENCESPACE.LOCAL, true);
                 //triggers onEndSession function with user exits xr session
                 xrViewport.vr.session.addEventListener("end", onEndSession);
             }
@@ -72,7 +72,9 @@ var PhysicsVR;
     let increment = 0;
     let spawnAmount = 0;
     function update(_event) {
-        if (xrViewport.vr.session) {
+        f.Physics.simulate();
+        xrViewport.draw();
+        if (xrViewport.vr.session && increment != cubeInstances.length) {
             spawnTime += 4;
             if (spawnTime == spawnTrigger) {
                 spawnTime = 0;
@@ -87,8 +89,6 @@ var PhysicsVR;
                 spawnAmount += 0.15;
             }
         }
-        f.Physics.simulate();
-        xrViewport.draw();
     }
     function onEndSession() {
         f.Loop.stop();

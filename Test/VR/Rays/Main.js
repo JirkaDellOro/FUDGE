@@ -41,7 +41,7 @@ var AudioSceneVR;
         enterXRButton.addEventListener("click", async function () {
             //initalizes xr session 
             if (!xrViewport.vr.session) {
-                await xrViewport.initializeVR(f.VRREFERENCESPACE.LOCAL, true);
+                await xrViewport.initializeVR(f.VRSESSIONMODE.IMMERSIVEVR, f.VRREFERENCESPACE.LOCAL, true);
                 xrViewport.vr.session.addEventListener("end", onEndSession);
             }
             initializeRays();

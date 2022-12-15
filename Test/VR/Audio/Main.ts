@@ -54,7 +54,7 @@ namespace AudioSceneVR {
 
       //initalizes xr session 
       if (!xrViewport.vr.session) {
-        await xrViewport.initializeVR(f.VRREFERENCESPACE.LOCAL, true);
+        await xrViewport.initializeVR(f.VRSESSIONMODE.IMMERSIVEVR,f.VRREFERENCESPACE.LOCAL, true);
 
         xrViewport.vr.session.addEventListener("select", onSelect);
         xrViewport.vr.session.addEventListener("squeeze", onSqueeze);

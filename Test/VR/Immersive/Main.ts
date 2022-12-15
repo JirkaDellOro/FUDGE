@@ -47,7 +47,7 @@ namespace AudioSceneVR {
     enterXRButton.addEventListener("click", async function () {
       //initalizes xr session 
       if (!xrViewport.vr.session) {
-        await xrViewport.initializeVR(f.VRREFERENCESPACE.LOCAL, false);
+        await xrViewport.initializeVR(f.VRSESSIONMODE.IMMERSIVEVR, f.VRREFERENCESPACE.LOCAL, false);
         xrViewport.vr.session.addEventListener("end", onEndSession);
       }
       //stop normal loop of winodws.animationFrame
