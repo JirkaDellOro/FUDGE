@@ -1,5 +1,6 @@
 namespace FudgeCore {
   /**
+   * @author Valentin Schmidberger, HFU, 2022
    * Could be expand with more available modes in the future, until now only #immersive session is supported.
    */
   export enum VRSESSIONMODE {
@@ -16,7 +17,6 @@ namespace FudgeCore {
   }
 
   /**
-   * @author Valentin Schmidberger, HFU, 2022
    * XRViewport (webXR)-extension of Viewport, to display FUDGE content on Head Mounted Displays such as HTC Vive, Quest, Pico etc.
    */
   export class XRViewport extends Viewport {

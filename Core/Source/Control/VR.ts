@@ -1,7 +1,7 @@
 namespace FudgeCore {
     /**
-     *   VR Component Class, for Session Management, Controller Management and Reference Space setting. 
-     *  @author Valentin Schmidberger, HFU, 2022
+     * @author Valentin Schmidberger, HFU, 2022
+     * VR Component Class, for Session Management, Controller Management and Reference Space setting. 
      */
     export class VRController {
 

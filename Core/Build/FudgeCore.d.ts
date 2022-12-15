@@ -2336,8 +2336,8 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     *   VR Component Class, for Session Management, Controller Management and Reference Space setting.
-     *  @author Valentin Schmidberger, HFU, 2022
+     * @author Valentin Schmidberger, HFU, 2022
+     * VR Component Class, for Session Management, Controller Management and Reference Space setting.
      */
     class VRController {
         cntrlTransform: ComponentTransform;
@@ -5394,6 +5394,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * @author Valentin Schmidberger, HFU, 2022
      * Could be expand with more available modes in the future, until now only #immersive session is supported.
      */
     enum VRSESSIONMODE {
@@ -5408,7 +5409,6 @@ declare namespace FudgeCore {
         LOCAL = "local"
     }
     /**
-     * @author Valentin Schmidberger, HFU, 2022
      * XRViewport (webXR)-extension of Viewport, to display FUDGE content on Head Mounted Displays such as HTC Vive, Quest, Pico etc.
      */
     class XRViewport extends Viewport {
