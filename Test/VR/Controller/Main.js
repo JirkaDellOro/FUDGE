@@ -1,5 +1,5 @@
-var RaySceneVR;
-(function (RaySceneVR) {
+var AudioSceneVR;
+(function (AudioSceneVR) {
     var f = FudgeCore;
     f.Debug.info("Main Program Template running!");
     let xrViewport = new f.XRViewport();
@@ -56,8 +56,8 @@ var RaySceneVR;
     function initializeController() {
         let rightCntrl = graph.getChildrenByName("ControllerRight")[0];
         let leftCntrl = graph.getChildrenByName("ControllerLeft")[0];
-        rightCntrl.addComponent(new RaySceneVR.Controller(xrViewport, xrViewport.vr.rController));
-        leftCntrl.addComponent(new RaySceneVR.Controller(xrViewport, xrViewport.vr.lController));
+        rightCntrl.addComponent(new AudioSceneVR.Controller(xrViewport, xrViewport.vr.rController));
+        leftCntrl.addComponent(new AudioSceneVR.Controller(xrViewport, xrViewport.vr.lController));
     }
     function update(_event) {
         xrViewport.draw();
@@ -106,5 +106,5 @@ var RaySceneVR;
     //         }
     //     }
     // }
-})(RaySceneVR || (RaySceneVR = {}));
+})(AudioSceneVR || (AudioSceneVR = {}));
 //# sourceMappingURL=Main.js.map

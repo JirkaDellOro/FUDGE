@@ -1,6 +1,6 @@
-namespace RaySceneVR {
+namespace AudioSceneVR {
     import f = FudgeCore;
-    f.Project.registerScriptNamespace(RaySceneVR);  // Register the namespace to FUDGE for serialization
+    f.Project.registerScriptNamespace(AudioSceneVR);  // Register the namespace to FUDGE for serialization
 
     export class Controller extends f.ComponentScript {
         private xrViewport: f.XRViewport = null;

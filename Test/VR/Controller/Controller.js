@@ -1,7 +1,7 @@
-var RaySceneVR;
-(function (RaySceneVR) {
+var AudioSceneVR;
+(function (AudioSceneVR) {
     var f = FudgeCore;
-    f.Project.registerScriptNamespace(RaySceneVR); // Register the namespace to FUDGE for serialization
+    f.Project.registerScriptNamespace(AudioSceneVR); // Register the namespace to FUDGE for serialization
     class Controller extends f.ComponentScript {
         xrViewport = null;
         controller;
@@ -112,6 +112,6 @@ var RaySceneVR;
             }
         };
     }
-    RaySceneVR.Controller = Controller;
-})(RaySceneVR || (RaySceneVR = {}));
+    AudioSceneVR.Controller = Controller;
+})(AudioSceneVR || (AudioSceneVR = {}));
 //# sourceMappingURL=Controller.js.map

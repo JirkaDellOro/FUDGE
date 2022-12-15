@@ -1,7 +1,7 @@
-var RaySceneVR;
-(function (RaySceneVR) {
+var AudioSceneVR;
+(function (AudioSceneVR) {
     var f = FudgeCore;
-    f.Project.registerScriptNamespace(RaySceneVR); // Register the namespace to FUDGE for serialization
+    f.Project.registerScriptNamespace(AudioSceneVR); // Register the namespace to FUDGE for serialization
     class RayHelper extends f.ComponentScript {
         // Register the script as component for use in the editor via drag&drop
         //  public static readonly iSubclass: number = f.Component.registerSubclass(RayHelper);
@@ -70,6 +70,6 @@ var RaySceneVR;
                 this.computeRay();
         };
     }
-    RaySceneVR.RayHelper = RayHelper;
-})(RaySceneVR || (RaySceneVR = {}));
+    AudioSceneVR.RayHelper = RayHelper;
+})(AudioSceneVR || (AudioSceneVR = {}));
 //# sourceMappingURL=RayHelper.js.map

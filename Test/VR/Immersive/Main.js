@@ -1,5 +1,5 @@
-var RaySceneVR;
-(function (RaySceneVR) {
+var AudioSceneVR;
+(function (AudioSceneVR) {
     var f = FudgeCore;
     f.Debug.info("Main Program Template running!");
     let xrViewport = new f.XRViewport();
@@ -60,5 +60,5 @@ var RaySceneVR;
         f.Loop.stop();
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
     }
-})(RaySceneVR || (RaySceneVR = {}));
+})(AudioSceneVR || (AudioSceneVR = {}));
 //# sourceMappingURL=Main.js.map

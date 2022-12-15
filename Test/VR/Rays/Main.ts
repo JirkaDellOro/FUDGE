@@ -1,4 +1,4 @@
-namespace RaySceneVR {
+namespace AudioSceneVR {
   import f = FudgeCore;
   f.Debug.info("Main Program Template running!");
 

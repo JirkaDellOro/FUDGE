@@ -1,5 +1,5 @@
-var RaySceneVR;
-(function (RaySceneVR) {
+var AudioSceneVR;
+(function (AudioSceneVR) {
     var f = FudgeCore;
     f.Debug.info("Main Program Template running!");
     let xrViewport = new f.XRViewport();
@@ -48,6 +48,7 @@ var RaySceneVR;
             if (!xrViewport.vr.session) {
                 await xrViewport.initializeVR(f.VRREFERENCESPACE.LOCAL, true);
                 xrViewport.vr.session.addEventListener("select", onSelect);
+                xrViewport.vr.session.addEventListener("squeeze", onSqueeze);
                 xrViewport.vr.session.addEventListener("end", onEndSession);
             }
             //stop normal loop of winodws.animationFrame
@@ -77,6 +78,20 @@ var RaySceneVR;
                 audioLeft.play(false);
             else
                 audioLeft.play(true);
+        }
+    }
+    function onSqueeze(_event) {
+        if (_event.inputSource.handedness == "right") {
+            if (audioRight.node.getComponent(AudioSceneVR.Translator).isTranslating)
+                audioRight.node.getComponent(AudioSceneVR.Translator).isTranslating = false;
+            else
+                audioRight.node.getComponent(AudioSceneVR.Translator).isTranslating = true;
+        }
+        if (_event.inputSource.handedness == "left") {
+            if (audioLeft.node.getComponent(AudioSceneVR.Translator).isTranslating)
+                audioLeft.node.getComponent(AudioSceneVR.Translator).isTranslating = false;
+            else
+                audioLeft.node.getComponent(AudioSceneVR.Translator).isTranslating = true;
         }
     }
     function update(_event) {
@@ -127,5 +142,5 @@ var RaySceneVR;
     //         }
     //     }
     // }
-})(RaySceneVR || (RaySceneVR = {}));
+})(AudioSceneVR || (AudioSceneVR = {}));
 //# sourceMappingURL=Main.js.map

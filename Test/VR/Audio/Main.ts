@@ -1,4 +1,4 @@
-namespace RaySceneVR {
+namespace AudioSceneVR {
   import f = FudgeCore;
   f.Debug.info("Main Program Template running!");
 
@@ -57,6 +57,7 @@ namespace RaySceneVR {
         await xrViewport.initializeVR(f.VRREFERENCESPACE.LOCAL, true);
 
         xrViewport.vr.session.addEventListener("select", onSelect);
+        xrViewport.vr.session.addEventListener("squeeze", onSqueeze);
 
         xrViewport.vr.session.addEventListener("end", onEndSession);
       }
@@ -92,6 +93,20 @@ namespace RaySceneVR {
       else
         audioLeft.play(true);
 
+    }
+  }
+  function onSqueeze(_event: XRInputSourceEvent): void {
+    if (_event.inputSource.handedness == "right") {
+      if (audioRight.node.getComponent(Translator).isTranslating)
+        audioRight.node.getComponent(Translator).isTranslating = false;
+      else
+        audioRight.node.getComponent(Translator).isTranslating = true;
+    }
+    if (_event.inputSource.handedness == "left") {
+      if (audioLeft.node.getComponent(Translator).isTranslating)
+        audioLeft.node.getComponent(Translator).isTranslating = false;
+      else
+        audioLeft.node.getComponent(Translator).isTranslating = true;
     }
   }
   function update(_event: Event): void {

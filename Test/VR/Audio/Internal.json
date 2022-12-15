@@ -36,6 +36,15 @@
       "type": "Audio"
     }
   },
+  "MeshSphere|2022-12-14T15:18:54.471Z|64838": {
+    "ƒ.MeshSphere": {
+      "idResource": "MeshSphere|2022-12-14T15:18:54.471Z|64838",
+      "name": "MeshSphere",
+      "type": "MeshSphere",
+      "longitudes": 8,
+      "latitudes": 8
+    }
+  },
   "Graph|2022-12-14T14:00:48.574Z|80970": {
     "ƒ.Graph": {
       "name": "Audio",
@@ -204,7 +213,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[8, 1, 0]",
+                      "translation": "[8, 1, -3]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -246,6 +255,15 @@
                     "idMaterial": "Material|2022-12-14T14:10:01.601Z|62258"
                   }
                 }
+              ],
+              "Translator": [
+                {
+                  "AudioSceneVR.Translator": {
+                    "active": true,
+                    "message": "CustomComponentScript added to ",
+                    "hasToTurn": false
+                  }
+                }
               ]
             },
             "children": []
@@ -271,7 +289,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[-8, 1, 0]",
+                      "translation": "[-8, 1, -3]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -313,6 +331,15 @@
                     "idMaterial": "Material|2022-12-14T14:10:01.601Z|62258"
                   }
                 }
+              ],
+              "Translator": [
+                {
+                  "AudioSceneVR.Translator": {
+                    "active": true,
+                    "message": "CustomComponentScript added to ",
+                    "hasToTurn": false
+                  }
+                }
               ]
             },
             "children": []
@@ -329,15 +356,6 @@
       "idResource": "Audio|2022-12-14T14:05:13.067Z|67547",
       "name": "Audios\\BloomR.mp3",
       "type": "Audio"
-    }
-  },
-  "MeshSphere|2022-12-14T15:18:54.471Z|64838": {
-    "ƒ.MeshSphere": {
-      "idResource": "MeshSphere|2022-12-14T15:18:54.471Z|64838",
-      "name": "MeshSphere",
-      "type": "MeshSphere",
-      "longitudes": 8,
-      "latitudes": 8
     }
   }
 }
