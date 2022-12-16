@@ -66,8 +66,12 @@ namespace AudioSceneVR {
       //set xr transform to matrix from ComponentCamera -> xr transform = camera transform
       console.log(cmpCamera.mtxWorld.toString());
 
-      xrViewport.vr.setNewXRRigidtransform(cmpCamera.mtxWorld.translation, f.Vector3.SCALE(cmpCamera.mtxWorld.rotation, Math.PI / 180));
-      xrViewport.vr.setNewXRRigidtransform(f.Vector3.ZERO(), f.Vector3.Y(Math.PI));
+
+
+      //set xr rigid transform to rot&pos of ComponentCamera
+      xrViewport.vr.addXRRigidPos(cmpCamera.mtxWorld.translation);
+      xrViewport.vr.addXRRigidRot(f.Vector3.SCALE(cmpCamera.mtxPivot.rotation, Math.PI / 180));
+
 
       //start xrSession.animationFrame instead of window.animationFrame, your xr-session is ready to go!
       f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);

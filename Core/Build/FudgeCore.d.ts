@@ -2350,10 +2350,13 @@ declare namespace FudgeCore {
         lController: VRController;
         session: XRSession;
         referenceSpace: XRReferenceSpace;
+        private actualRigidPos;
+        private oldRigidPos;
         /**
          * Sets new position in the reference space of  XR Session, also known as teleportation.
          */
-        setNewXRRigidtransform(_newPos?: Vector3, _newDir?: Vector3): void;
+        addXRRigidPos(_newPos?: Vector3): void;
+        addXRRigidRot(_newRot?: Vector3): void;
         /**
          * Sets controller matrices, gamepad references and thumbsticks movements.
          */

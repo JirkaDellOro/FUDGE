@@ -62,6 +62,7 @@ namespace FudgeCore {
       this.calculateTransforms();
       console.log(this.camera.mtxWorld.toString());
       this.xrCamera.mtxPivot = this.camera.mtxWorld;
+      this.xrCamera.clrBackground = this.camera.clrBackground;
       this.camera = this.xrCamera;
     }
 

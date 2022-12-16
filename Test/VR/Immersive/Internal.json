@@ -643,6 +643,32 @@
       }
     }
   },
+  "Material|2022-12-06T13:21:05.457Z|46369": {
+    "ƒ.Material": {
+      "name": "whiteWall",
+      "idResource": "Material|2022-12-06T13:21:05.457Z|46369",
+      "shader": "ShaderGouraudTextured",
+      "coat": {
+        "ƒ.CoatRemissiveTextured": {
+          "color": "[1, 1, 1, 1]",
+          "idTexture": "TextureImage|2022-12-14T13:31:40.277Z|98724",
+          "diffuse": 1,
+          "specular": 0
+        }
+      }
+    }
+  },
+  "TextureImage|2022-12-14T13:31:40.277Z|98724": {
+    "ƒ.TextureImage": {
+      "url": "textures\\whiteBricks.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2022-12-14T13:31:40.277Z|98724",
+        "name": "textures\\whiteBricks.png",
+        "mipmap": "CRISP"
+      }
+    }
+  },
   "Graph|2022-11-29T08:25:35.990Z|27463": {
     "ƒ.Graph": {
       "name": "ImmersionScene",
@@ -3852,7 +3878,7 @@
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
-                    "aspect": 1,
+                    "aspect": 1.439252336448598,
                     "pivot": {
                       "translation": "[-5, 0.9999997615814209, 0]",
                       "rotation": "[0, 0, 0]",
@@ -3910,32 +3936,6 @@
       "Texture": {
         "idResource": "TextureImage|2022-12-06T13:20:57.658Z|48936",
         "name": "textures\\whitewall.jpg",
-        "mipmap": "CRISP"
-      }
-    }
-  },
-  "Material|2022-12-06T13:21:05.457Z|46369": {
-    "ƒ.Material": {
-      "name": "whiteWall",
-      "idResource": "Material|2022-12-06T13:21:05.457Z|46369",
-      "shader": "ShaderGouraudTextured",
-      "coat": {
-        "ƒ.CoatRemissiveTextured": {
-          "color": "[1, 1, 1, 1]",
-          "idTexture": "TextureImage|2022-12-14T13:31:40.277Z|98724",
-          "diffuse": 1,
-          "specular": 0
-        }
-      }
-    }
-  },
-  "TextureImage|2022-12-14T13:31:40.277Z|98724": {
-    "ƒ.TextureImage": {
-      "url": "textures\\whiteBricks.png",
-      "type": "TextureImage",
-      "Texture": {
-        "idResource": "TextureImage|2022-12-14T13:31:40.277Z|98724",
-        "name": "textures\\whiteBricks.png",
         "mipmap": "CRISP"
       }
     }

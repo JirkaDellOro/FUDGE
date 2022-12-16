@@ -52,8 +52,9 @@ namespace AudioSceneVR {
       }
       //stop normal loop of winodws.animationFrame
       f.Loop.stop();
-      //set xr transform to matrix from ComponentCamera -> xr transform = camera transform
-      xrViewport.vr.setNewXRRigidtransform(f.Vector3.DIFFERENCE(f.Vector3.ZERO(), cmpCamera.mtxWorld.translation));
+      //set xr rigid transform to rot&pos of ComponentCamera
+      xrViewport.vr.addXRRigidPos(cmpCamera.mtxWorld.translation);
+      xrViewport.vr.addXRRigidRot(f.Vector3.SCALE(cmpCamera.mtxPivot.rotation, Math.PI / 180));
       //start xrSession.animationFrame instead of window.animationFrame, your xr-session is ready to go!
       f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);
     }

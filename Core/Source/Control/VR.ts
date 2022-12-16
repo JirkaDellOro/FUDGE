@@ -18,19 +18,34 @@ namespace FudgeCore {
         public session: XRSession = null;
         public referenceSpace: XRReferenceSpace = null;
 
+        private actualRigidPos: Vector3 = Vector3.ZERO();
+        private oldRigidPos: Vector3 = Vector3.ZERO();
+
         /**
          * Sets new position in the reference space of  XR Session, also known as teleportation.
          */
-        public setNewXRRigidtransform(_newPos: Vector3 = Vector3.ZERO(), _newDir: Vector3 = Vector3.ZERO()): void {
-            let orientation: Quaternion = new Quaternion();
-            let pos: Vector3 = new Vector3(_newPos.x, -_newPos.y, _newPos.z);
-            orientation.setFromVector3(_newDir.x, _newDir.y, _newDir.z);
-            // this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(pos, <DOMPointInit><unknown>orientation));
-            this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
+        public addXRRigidPos(_newPos: Vector3 = Vector3.ZERO()): void {
+            let pos: Vector3 = Vector3.SCALE(_newPos, -1);
+
             this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(pos));
+            this.actualRigidPos = Vector3.DIFFERENCE(pos, this.oldRigidPos);
+            this.oldRigidPos = this.actualRigidPos;
+
+            //  console.log(this.referenceSpace);
+        }
+        public addXRRigidRot(_newRot: Vector3 = Vector3.ZERO()): void {
+            let orientation: Quaternion = new Quaternion();
+            orientation.setFromVector3(_newRot.x, (Math.PI - _newRot.y), _newRot.z);
+            //set xr - rig back to origin
+            this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(Vector3.ZERO(), this.actualRigidPos), Vector3.ZERO()));
+
+            //rotate xr rig in origin
+            this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
+
+            //set xr - rig back to last position
+            this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(this.actualRigidPos, Vector3.ZERO()), Vector3.ZERO()));
 
 
-            console.log(this.referenceSpace);
         }
 
         /**

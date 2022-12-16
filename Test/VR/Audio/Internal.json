@@ -148,7 +148,7 @@
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
-                    "aspect": 1.5440613026819923,
+                    "aspect": 1.439252336448598,
                     "pivot": {
                       "translation": "[0, 2, -20]",
                       "rotation": "[0, 0, 0]",
@@ -197,20 +197,6 @@
                       "active": true
                     },
                     "idMaterial": "Material|2022-12-14T14:10:01.601Z|62258"
-                  }
-                }
-              ],
-              "ComponentTransform": [
-                {
-                  "ƒ.ComponentTransform": {
-                    "local": {
-                      "translation": "[0, 0, 0]",
-                      "rotation": "[0, 90, 0]",
-                      "scaling": "[1, 1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    }
                   }
                 }
               ]
