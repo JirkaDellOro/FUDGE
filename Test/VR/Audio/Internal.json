@@ -49,7 +49,41 @@
     "ƒ.Graph": {
       "name": "Audio",
       "active": true,
-      "components": {},
+      "components": {
+        "ComponentMesh": [
+          {
+            "ƒ.ComponentMesh": {
+              "idMesh": "MeshCube|2022-12-14T14:09:52.468Z|46047",
+              "pivot": {
+                "translation": "[0, 1, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "Component": {
+                "active": true
+              }
+            }
+          }
+        ],
+        "ComponentMaterial": [
+          {
+            "ƒ.ComponentMaterial": {
+              "sortForAlpha": false,
+              "clrPrimary": "[0.9333333333333333, 0, 1, 1]",
+              "clrSecondary": "[1, 1, 1, 1]",
+              "pivot": {
+                "translation": "[0, 0]",
+                "rotation": 0,
+                "scaling": "[1, 1]"
+              },
+              "Component": {
+                "active": true
+              },
+              "idMaterial": "Material|2022-12-14T14:10:01.601Z|62258"
+            }
+          }
+        ]
+      },
       "children": [
         {
           "ƒ.Node": {
@@ -114,9 +148,9 @@
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
-                    "aspect": 1,
+                    "aspect": 1.5440613026819923,
                     "pivot": {
-                      "translation": "[0, 1.600000023841858, 3]",
+                      "translation": "[0, 2, -20]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -130,6 +164,53 @@
                 {
                   "ƒ.ComponentAudioListener": {
                     "active": true
+                  }
+                }
+              ],
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshCube|2022-12-14T14:09:52.468Z|46047",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2022-12-14T14:10:01.601Z|62258"
+                  }
+                }
+              ],
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 90, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
                   }
                 }
               ]
@@ -213,7 +294,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[8, 1, -3]",
+                      "translation": "[8, 1, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -261,7 +342,8 @@
                   "AudioSceneVR.Translator": {
                     "active": true,
                     "message": "CustomComponentScript added to ",
-                    "hasToTurn": false
+                    "hasToTurn": false,
+                    "isTranslating": false
                   }
                 }
               ]
@@ -289,7 +371,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[-8, 1, -3]",
+                      "translation": "[-8, 1, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -337,11 +419,20 @@
                   "AudioSceneVR.Translator": {
                     "active": true,
                     "message": "CustomComponentScript added to ",
-                    "hasToTurn": false
+                    "hasToTurn": false,
+                    "isTranslating": false
                   }
                 }
               ]
             },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "New Node",
+            "active": true,
+            "components": {},
             "children": []
           }
         }

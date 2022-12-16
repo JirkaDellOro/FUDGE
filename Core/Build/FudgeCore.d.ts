@@ -2353,7 +2353,7 @@ declare namespace FudgeCore {
         /**
          * Sets new position in the reference space of  XR Session, also known as teleportation.
          */
-        setNewXRRigidtransform(_newPos?: Vector3, _newRot?: Vector3): void;
+        setNewXRRigidtransform(_newPos?: Vector3, _newDir?: Vector3): void;
         /**
          * Sets controller matrices, gamepad references and thumbsticks movements.
          */
@@ -5416,6 +5416,7 @@ declare namespace FudgeCore {
         vr: VR;
         private useController;
         private crc3;
+        private xrCamera;
         constructor();
         /**
          * To retrieve private static Instance of Viewport, just needed for calling the drawXR Method in {@link Loop}

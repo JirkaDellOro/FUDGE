@@ -26,11 +26,13 @@ namespace FudgeCore {
 
     private useController: boolean = false;
     private crc3: WebGL2RenderingContext = null;
+    private xrCamera: ComponentCamera = null;
 
     constructor() {
       super();
       XRViewport.xrViewportInstance = this;
       this.crc3 = RenderWebGL.getRenderingContext();
+      this.xrCamera = new ComponentCamera();
     }
 
     /**
@@ -45,6 +47,7 @@ namespace FudgeCore {
      * Also VR - Controller are initilized if user sets vrController-boolean to true.
      */
     public async initializeVR(_vrSessionMode: VRSESSIONMODE = VRSESSIONMODE.IMMERSIVEVR, _vrReferenceSpaceType: VRREFERENCESPACE = VRREFERENCESPACE.LOCAL, _vrController: boolean = false): Promise<void> {
+
       let session: XRSession = await navigator.xr.requestSession(_vrSessionMode);
       this.vr.referenceSpace = await session.requestReferenceSpace(_vrReferenceSpaceType);
       await this.crc3.makeXRCompatible();
@@ -56,6 +59,10 @@ namespace FudgeCore {
         this.vr.lController.cntrlTransform = new ComponentTransform();
       }
       this.vr.session = session;
+      this.calculateTransforms();
+      console.log(this.camera.mtxWorld.toString());
+      this.xrCamera.mtxPivot = this.camera.mtxWorld;
+      this.camera = this.xrCamera;
     }
 
     /**
@@ -91,6 +98,7 @@ namespace FudgeCore {
             this.camera.mtxProjection.set(view.projectionMatrix);
             this.camera.mtxPivot.set(view.transform.matrix);
             this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
+
 
 
             if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)

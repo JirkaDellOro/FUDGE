@@ -54,7 +54,7 @@ namespace AudioSceneVR {
 
       //initalizes xr session 
       if (!xrViewport.vr.session) {
-        await xrViewport.initializeVR(f.VRSESSIONMODE.IMMERSIVEVR,f.VRREFERENCESPACE.LOCAL, true);
+        await xrViewport.initializeVR(f.VRSESSIONMODE.IMMERSIVEVR, f.VRREFERENCESPACE.LOCAL, true);
 
         xrViewport.vr.session.addEventListener("select", onSelect);
         xrViewport.vr.session.addEventListener("squeeze", onSqueeze);
@@ -64,7 +64,11 @@ namespace AudioSceneVR {
       //stop normal loop of winodws.animationFrame
       f.Loop.stop();
       //set xr transform to matrix from ComponentCamera -> xr transform = camera transform
-      xrViewport.vr.setNewXRRigidtransform(f.Vector3.DIFFERENCE(f.Vector3.ZERO(), cmpCamera.mtxWorld.translation));
+      console.log(cmpCamera.mtxWorld.toString());
+
+      xrViewport.vr.setNewXRRigidtransform(cmpCamera.mtxWorld.translation, f.Vector3.SCALE(cmpCamera.mtxWorld.rotation, Math.PI / 180));
+      xrViewport.vr.setNewXRRigidtransform(f.Vector3.ZERO(), f.Vector3.Y(Math.PI));
+
       //start xrSession.animationFrame instead of window.animationFrame, your xr-session is ready to go!
       f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);
 
@@ -117,71 +121,4 @@ namespace AudioSceneVR {
     f.Loop.stop();
     f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // function onSqueeze(_event: XRInputSourceEvent): void {
-  //     if (actualTeleportationObj) {
-  //         let newPos: f.Vector3 = f.Vector3.DIFFERENCE(cmpCamera.mtxWorld.translation, actualTeleportationObj.getComponent(f.ComponentTransform).mtxLocal.translation);
-  //         newPos.y -= 0.5;
-  //         xrViewport.vr.setNewXRRigidtransform(newPos);
-  //         actualTeleportationObj.getComponent(f.ComponentMaterial).clrPrimary.a = 0.5;
-  //         actualTeleportationObj = null;
-  //     }
-  // }
-
-  // function onSelectStart(_event: XRInputSourceEvent): void {
-  //     if (actualThrowObject) {
-  //         if (_event.inputSource.handedness == "right") {
-  //             selectPressedRight = true;
-  //         }
-  //         if (_event.inputSource.handedness == "left") {
-  //             selectPressedLeft = true;
-  //         }
-  //     }
-  // }
-
-  // function onSelectEnd(_event: XRInputSourceEvent): void {
-  //     if (actualThrowObject) {
-  //         if (_event.inputSource.handedness == "right") {
-  //             actualThrowObject.getComponent(f.ComponentRigidbody).setVelocity(f.Vector3.ZERO());
-  //             let velocity: f.Vector3 = f.Vector3.DIFFERENCE(rightController.mtxLocal.translation, cmpCamera.mtxPivot.translation);
-  //             velocity.scale(20);
-  //             actualThrowObject.getComponent(f.ComponentRigidbody).addVelocity(velocity);
-  //             actualThrowObject.getComponent(f.ComponentMaterial).clrPrimary.a = 0.5;
-  //             actualThrowObject = null;
-  //             selectPressedRight = false;
-  //         } else {
-  //             actualThrowObject.getComponent(f.ComponentRigidbody).setVelocity(f.Vector3.ZERO());
-  //             let direction: f.Vector3 = f.Vector3.DIFFERENCE(leftController.mtxLocal.translation, cmpCamera.mtxPivot.translation);
-  //             direction.scale(20);
-  //             actualThrowObject.getComponent(f.ComponentRigidbody).addVelocity(direction);
-  //             actualThrowObject.getComponent(f.ComponentMaterial).clrPrimary.a = 0.5;
-  //             actualThrowObject = null;
-  //             selectPressedLeft = false;
-  //         }
-  //     }
-
-  // }
 }

@@ -21,8 +21,16 @@ namespace FudgeCore {
         /**
          * Sets new position in the reference space of  XR Session, also known as teleportation.
          */
-        public setNewXRRigidtransform(_newPos: Vector3 = Vector3.ZERO(), _newRot: Vector3 = Vector3.ZERO()): void {
-            this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(_newPos, _newRot));
+        public setNewXRRigidtransform(_newPos: Vector3 = Vector3.ZERO(), _newDir: Vector3 = Vector3.ZERO()): void {
+            let orientation: Quaternion = new Quaternion();
+            let pos: Vector3 = new Vector3(_newPos.x, -_newPos.y, _newPos.z);
+            orientation.setFromVector3(_newDir.x, _newDir.y, _newDir.z);
+            // this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(pos, <DOMPointInit><unknown>orientation));
+            this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
+            this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(pos));
+
+
+            console.log(this.referenceSpace);
         }
 
         /**
