@@ -20,28 +20,33 @@ namespace FudgeCore {
    * XRViewport (webXR)-extension of Viewport, to display FUDGE content on Head Mounted and AR(not implemted yet) Devices 
    */
   export class XRViewport extends Viewport {
+    private static xrCamera: ComponentCamera = null;
     private static xrViewportInstance: XRViewport = null;
 
     public vr: VR = new VR();
 
     private useController: boolean = false;
     private crc3: WebGL2RenderingContext = null;
-    private xrCamera: ComponentCamera = null;
 
     constructor() {
       super();
       XRViewport.xrViewportInstance = this;
+
       this.crc3 = RenderWebGL.getRenderingContext();
-      this.xrCamera = new ComponentCamera();
     }
 
     /**
-     * To retrieve private static Instance of Viewport, just needed for calling the drawXR Method in {@link Loop}
+     * To retrieve private static Instance of xr Viewport, just needed for calling the drawXR Method in {@link Loop}
      */
     public static get default(): XRViewport {
       return this.xrViewportInstance;
     }
-
+    /**
+      * To retrieve private static Camera of xr Viewport, when user will set new rigid transform.
+      */
+    public static get camera(): ComponentCamera {
+      return this.xrCamera;
+    }
     /**
      * The VR Session is initialized here, after XR-Session is setted and FrameRequestXR is called from user, the XRViewport is ready to draw.
      * Also VR - Controller are initialized, if user sets vrController-boolean.
@@ -60,10 +65,11 @@ namespace FudgeCore {
       }
       this.vr.session = session;
       this.calculateTransforms();
-      console.log(this.camera.mtxWorld.toString());
-      this.xrCamera.mtxPivot = this.camera.mtxWorld;
-      this.xrCamera.clrBackground = this.camera.clrBackground;
-      this.camera = this.xrCamera;
+
+      XRViewport.xrCamera = new ComponentCamera();
+      XRViewport.xrCamera.mtxPivot = this.camera.mtxWorld;
+      XRViewport.xrCamera.clrBackground = this.camera.clrBackground;
+      this.camera = XRViewport.xrCamera;
     }
 
     /**

@@ -5415,16 +5415,20 @@ declare namespace FudgeCore {
      * XRViewport (webXR)-extension of Viewport, to display FUDGE content on Head Mounted and AR(not implemted yet) Devices
      */
     class XRViewport extends Viewport {
+        private static xrCamera;
         private static xrViewportInstance;
         vr: VR;
         private useController;
         private crc3;
-        private xrCamera;
         constructor();
         /**
-         * To retrieve private static Instance of Viewport, just needed for calling the drawXR Method in {@link Loop}
+         * To retrieve private static Instance of xr Viewport, just needed for calling the drawXR Method in {@link Loop}
          */
         static get default(): XRViewport;
+        /**
+          * To retrieve private static Camera of xr Viewport, when user will set new rigid transform.
+          */
+        static get camera(): ComponentCamera;
         /**
          * The VR Session is initialized here, after XR-Session is setted and FrameRequestXR is called from user, the XRViewport is ready to draw.
          * Also VR - Controller are initialized, if user sets vrController-boolean.
