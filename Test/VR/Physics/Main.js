@@ -37,7 +37,7 @@ var PhysicsVR;
     }
     // check device/browser capabilities for VR Session 
     function checkForVRSupport() {
-        navigator.xr.isSessionSupported(f.VRSESSIONMODE.IMMERSIVEVR).then((supported) => {
+        navigator.xr.isSessionSupported(f.VR_SESSION_MODE.IMMERSIVE_VR).then((supported) => {
             if (supported)
                 setupVR();
             else
@@ -54,7 +54,7 @@ var PhysicsVR;
         enterXRButton.addEventListener("click", async function () {
             //initalizes xr session 
             if (!xrViewport.vr.session) {
-                await xrViewport.initializeVR(f.VRSESSIONMODE.IMMERSIVEVR, f.VRREFERENCESPACE.LOCAL, true);
+                await xrViewport.initializeVR(f.VR_SESSION_MODE.IMMERSIVE_VR, f.VR_REFERENCE_SPACE.LOCAL, true);
                 //triggers onEndSession function with user exits xr session
                 xrViewport.vr.session.addEventListener("end", onEndSession);
             }

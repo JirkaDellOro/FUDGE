@@ -1,7 +1,7 @@
 namespace FudgeCore {
     /**
      * @author Valentin Schmidberger, HFU, 2022
-     * VR Component Class, for Session Management, Controller Management and Reference Space setting. 
+     * VR Component Class, for Session Management, Controller Management and Reference Space Management. 
      */
     export class VRController {
 
@@ -38,14 +38,10 @@ namespace FudgeCore {
             orientation.setFromVector3(_newRot.x, (Math.PI - _newRot.y), _newRot.z);
             //set xr - rig back to origin
             this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(Vector3.ZERO(), this.actualRigidPos), Vector3.ZERO()));
-
             //rotate xr rig in origin
             this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
-
             //set xr - rig back to last position
             this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(this.actualRigidPos, Vector3.ZERO()), Vector3.ZERO()));
-
-
         }
 
         /**

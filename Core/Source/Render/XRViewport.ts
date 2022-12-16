@@ -1,23 +1,23 @@
 namespace FudgeCore {
   /**
    * @author Valentin Schmidberger, HFU, 2022
-   * Could be expand with more available modes in the future, until now only #immersive session is supported.
+   * Could be expand with more available modes in the future, until now #immersive session is supported.
    */
-  export enum VRSESSIONMODE {
-    IMMERSIVEVR = "immersive-vr",
+  export enum VR_SESSION_MODE {
+    IMMERSIVE_VR = "immersive-vr",
   }
 
   /**
    * Different reference vr-spaces available, user has to check if the space is supported with its device.
-   * Could be expand with more available space types in the future, until now only #viewer and #local space types are supported.
+   * Could be expand with more available space types in the future, until now #viewer and #local space types are supported.
    */
-  export enum VRREFERENCESPACE {
+  export enum VR_REFERENCE_SPACE {
     VIEWER = "viewer",
     LOCAL = "local",
   }
 
   /**
-   * XRViewport (webXR)-extension of Viewport, to display FUDGE content on Head Mounted Displays such as HTC Vive, Quest, Pico etc.
+   * XRViewport (webXR)-extension of Viewport, to display FUDGE content on Head Mounted and AR(not implemted yet) Devices 
    */
   export class XRViewport extends Viewport {
     private static xrViewportInstance: XRViewport = null;
@@ -44,9 +44,9 @@ namespace FudgeCore {
 
     /**
      * The VR Session is initialized here, after XR-Session is setted and FrameRequestXR is called from user, the XRViewport is ready to draw.
-     * Also VR - Controller are initilized if user sets vrController-boolean to true.
+     * Also VR - Controller are initialized, if user sets vrController-boolean.
      */
-    public async initializeVR(_vrSessionMode: VRSESSIONMODE = VRSESSIONMODE.IMMERSIVEVR, _vrReferenceSpaceType: VRREFERENCESPACE = VRREFERENCESPACE.LOCAL, _vrController: boolean = false): Promise<void> {
+    public async initializeVR(_vrSessionMode: VR_SESSION_MODE = VR_SESSION_MODE.IMMERSIVE_VR, _vrReferenceSpaceType: VR_REFERENCE_SPACE = VR_REFERENCE_SPACE.LOCAL, _vrController: boolean = false): Promise<void> {
 
       let session: XRSession = await navigator.xr.requestSession(_vrSessionMode);
       this.vr.referenceSpace = await session.requestReferenceSpace(_vrReferenceSpaceType);
