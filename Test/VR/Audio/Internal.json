@@ -50,39 +50,8 @@
       "name": "Audio",
       "active": true,
       "components": {
-        "ComponentMesh": [
-          {
-            "ƒ.ComponentMesh": {
-              "idMesh": "MeshCube|2022-12-14T14:09:52.468Z|46047",
-              "pivot": {
-                "translation": "[0, 1, 0]",
-                "rotation": "[0, 0, 0]",
-                "scaling": "[1, 1, 1]"
-              },
-              "Component": {
-                "active": true
-              }
-            }
-          }
-        ],
-        "ComponentMaterial": [
-          {
-            "ƒ.ComponentMaterial": {
-              "sortForAlpha": false,
-              "clrPrimary": "[0.9333333333333333, 0, 1, 1]",
-              "clrSecondary": "[1, 1, 1, 1]",
-              "pivot": {
-                "translation": "[0, 0]",
-                "rotation": 0,
-                "scaling": "[1, 1]"
-              },
-              "Component": {
-                "active": true
-              },
-              "idMaterial": "Material|2022-12-14T14:10:01.601Z|62258"
-            }
-          }
-        ]
+        "ComponentMesh": [],
+        "ComponentMaterial": []
       },
       "children": [
         {
@@ -150,7 +119,7 @@
                     "direction": "diagonal",
                     "aspect": 1.439252336448598,
                     "pivot": {
-                      "translation": "[0, 2, -20]",
+                      "translation": "[0, 2, -16]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -167,39 +136,8 @@
                   }
                 }
               ],
-              "ComponentMesh": [
-                {
-                  "ƒ.ComponentMesh": {
-                    "idMesh": "MeshCube|2022-12-14T14:09:52.468Z|46047",
-                    "pivot": {
-                      "translation": "[0, 0, 0]",
-                      "rotation": "[0, 0, 0]",
-                      "scaling": "[1, 1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    }
-                  }
-                }
-              ],
-              "ComponentMaterial": [
-                {
-                  "ƒ.ComponentMaterial": {
-                    "sortForAlpha": false,
-                    "clrPrimary": "[1, 1, 1, 1]",
-                    "clrSecondary": "[1, 1, 1, 1]",
-                    "pivot": {
-                      "translation": "[0, 0]",
-                      "rotation": 0,
-                      "scaling": "[1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    },
-                    "idMaterial": "Material|2022-12-14T14:10:01.601Z|62258"
-                  }
-                }
-              ]
+              "ComponentMesh": [],
+              "ComponentMaterial": []
             },
             "children": []
           }
@@ -262,7 +200,7 @@
         },
         {
           "ƒ.Node": {
-            "name": "AudioR",
+            "name": "AudioL",
             "active": true,
             "components": {
               "ComponentAudio": [
@@ -339,7 +277,7 @@
         },
         {
           "ƒ.Node": {
-            "name": "AudioL",
+            "name": "AudioR",
             "active": true,
             "components": {
               "ComponentAudio": [
@@ -411,14 +349,6 @@
                 }
               ]
             },
-            "children": []
-          }
-        },
-        {
-          "ƒ.Node": {
-            "name": "New Node",
-            "active": true,
-            "components": {},
             "children": []
           }
         }

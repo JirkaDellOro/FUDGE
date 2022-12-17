@@ -91,7 +91,7 @@ namespace AudioSceneVR {
         }
 
         private update = (): void => {
-            if (this.xrViewport.vr.session) {
+            if (this.xrViewport.session) {
                 try {
                     if (this.mappedButtons["select"])
                         this.updateController();

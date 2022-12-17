@@ -66,7 +66,7 @@ var AudioSceneVR;
             // } else this.pick = null;
         };
         update = () => {
-            if (this.xrViewport.vr.session)
+            if (this.xrViewport.session)
                 this.computeRay();
         };
     }

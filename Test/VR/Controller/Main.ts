@@ -29,7 +29,7 @@ namespace AudioSceneVR {
   }
   // check device/browser capabilities for XR Session 
   function checkForVRSupport(): void {
-    navigator.xr.isSessionSupported(f.VR_SESSION_MODE.IMMERSIVE_VR).then((supported: boolean) => {
+    navigator.xr.isSessionSupported(f.XR_SESSION_MODE.IMMERSIVE_VR).then((supported: boolean) => {
       if (supported)
         setupVR();
       else
@@ -46,21 +46,20 @@ namespace AudioSceneVR {
 
     enterXRButton.addEventListener("click", async function () {
       //initalizes xr session 
-      if (!xrViewport.vr.session) {
-        await xrViewport.initializeVR(f.VR_SESSION_MODE.IMMERSIVE_VR, f.VR_REFERENCE_SPACE.LOCAL, true);
-        xrViewport.vr.session.addEventListener("end", onEndSession);
+      if (!xrViewport.session) {
+        await xrViewport.initializeVR(f.XR_SESSION_MODE.IMMERSIVE_VR, f.XR_REFERENCE_SPACE.LOCAL, true);
+        xrViewport.session.addEventListener("end", onEndSession);
       }
       initializeController();
 
       //stop normal loop of winodws.animationFrame
       f.Loop.stop();
       //set xr rigid transform to rot&pos of ComponentCamera
-      xrViewport.vr.addXRRigidPos(cmpCamera.mtxWorld.translation);
-      xrViewport.vr.addXRRigidRot(f.Vector3.SCALE(cmpCamera.mtxPivot.rotation, Math.PI / 180));
+      xrViewport.vr.setPositionVRRig(cmpCamera.mtxWorld.translation);
+      xrViewport.vr.rotateVRRig(cmpCamera.mtxPivot.rotation);
+
       //start xrSession.animationFrame instead of window.animationFrame, your xr-session is ready to go!
       f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);
-
-
     }
     );
   }

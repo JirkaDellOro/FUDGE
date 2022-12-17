@@ -82,7 +82,7 @@ var AudioSceneVR;
                 this.joyStick.mtxPivot.translation = new f.Vector3(this.joyStick.mtxPivot.translation.x, this.oldjoyStick.y, this.joyStick.mtxPivot.translation.z);
         };
         update = () => {
-            if (this.xrViewport.vr.session) {
+            if (this.xrViewport.session) {
                 try {
                     if (this.mappedButtons["select"])
                         this.updateController();

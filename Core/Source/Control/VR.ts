@@ -15,45 +15,46 @@ namespace FudgeCore {
 
         public rController: VRController = new VRController();
         public lController: VRController = new VRController();
-        public session: XRSession = null;
-        public referenceSpace: XRReferenceSpace = null;
+        private actualPos: Vector3 = Vector3.ZERO();
 
-        private actualRigidPos: Vector3 = Vector3.ZERO();
-        private oldRigidPos: Vector3 = Vector3.ZERO();
 
         /**
-         * Sets new position in the reference space of  XR Session, also known as teleportation.
+         * Sets a Vector3 in the reference space of XR Session.
          */
-        public addXRRigidPos(_newPos: Vector3 = Vector3.ZERO()): void {
-            let pos: Vector3 = Vector3.SCALE(_newPos, -1);
+        public setPositionVRRig(_newPos: Vector3 = Vector3.ZERO()): void {
+            let posAddToVRRig: Vector3 = Vector3.DIFFERENCE(_newPos, this.actualPos);
+            this.actualPos = Vector3.SUM(this.actualPos, posAddToVRRig);
+            let invTranslation: Vector3 = Vector3.SCALE(posAddToVRRig, -1);
 
-            this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(pos));
-            this.actualRigidPos = Vector3.DIFFERENCE(pos, this.oldRigidPos);
-            this.oldRigidPos = this.actualRigidPos;
-
-            //  console.log(this.referenceSpace);
+            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
         }
-        public addXRRigidRot(_newRot: Vector3 = Vector3.ZERO()): void {
+        /**
+         * Adds Vector3 Rotation in the reference space of XR Session. 
+         * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin. 
+         */
+        public rotateVRRig(_newRot: Vector3): void {
+            let newRot: Vector3 = Vector3.SCALE(_newRot, Math.PI / 180)
             let orientation: Quaternion = new Quaternion();
-            orientation.setFromVector3(_newRot.x, (Math.PI - _newRot.y), _newRot.z);
+            orientation.setFromVector3(newRot.x, newRot.y, newRot.z);
+
             //set xr - rig back to origin
-            this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(Vector3.ZERO(), this.actualRigidPos), Vector3.ZERO()));
+            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(this.actualPos, Vector3.ZERO())));
             //rotate xr rig in origin
-            this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
-            //set xr - rig back to last position
-            this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(this.actualRigidPos, Vector3.ZERO()), Vector3.ZERO()));
+            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
+            //set xr - rig back to last position 
+            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(Vector3.ZERO(), this.actualPos)));
         }
 
         /**
          * Sets controller matrices, gamepad references and thumbsticks movements.
          */
         public setController(_xrFrame: XRFrame): void {
-            if (this.session.inputSources.length > 0) {
-                this.session.inputSources.forEach(controller => {
+            if (XRViewport.default.session.inputSources.length > 0) {
+                XRViewport.default.session.inputSources.forEach(controller => {
                     try {
                         switch (controller.handedness) {
                             case ("right"):
-                                this.rController.cntrlTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, this.referenceSpace).transform.matrix);
+                                this.rController.cntrlTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
                                 if (this.rController.gamePad) {
                                     this.rController.thumbstickX = controller.gamepad.axes[2];
                                     this.rController.thumbstickY = controller.gamepad.axes[3];
@@ -62,7 +63,7 @@ namespace FudgeCore {
                                     this.rController.gamePad = controller.gamepad;
                                 break;
                             case ("left"):
-                                this.lController.cntrlTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, this.referenceSpace).transform.matrix);
+                                this.lController.cntrlTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
                                 if (this.lController.gamePad) {
                                     this.lController.thumbstickX = controller.gamepad.axes[2];
                                     this.lController.thumbstickY = controller.gamepad.axes[3];

@@ -2348,15 +2348,16 @@ declare namespace FudgeCore {
     class VR extends Component {
         rController: VRController;
         lController: VRController;
-        session: XRSession;
-        referenceSpace: XRReferenceSpace;
-        private actualRigidPos;
-        private oldRigidPos;
+        private actualPos;
         /**
-         * Sets new position in the reference space of  XR Session, also known as teleportation.
+         * Sets a Vector3 in the reference space of XR Session.
          */
-        addXRRigidPos(_newPos?: Vector3): void;
-        addXRRigidRot(_newRot?: Vector3): void;
+        setPositionVRRig(_newPos?: Vector3): void;
+        /**
+         * Adds Vector3 Rotation in the reference space of XR Session.
+         * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
+         */
+        rotateVRRig(_newRot: Vector3): void;
         /**
          * Sets controller matrices, gamepad references and thumbsticks movements.
          */
@@ -5400,14 +5401,14 @@ declare namespace FudgeCore {
      * @author Valentin Schmidberger, HFU, 2022
      * Could be expand with more available modes in the future, until now #immersive session is supported.
      */
-    enum VR_SESSION_MODE {
+    enum XR_SESSION_MODE {
         IMMERSIVE_VR = "immersive-vr"
     }
     /**
      * Different reference vr-spaces available, user has to check if the space is supported with its device.
      * Could be expand with more available space types in the future, until now #viewer and #local space types are supported.
      */
-    enum VR_REFERENCE_SPACE {
+    enum XR_REFERENCE_SPACE {
         VIEWER = "viewer",
         LOCAL = "local"
     }
@@ -5415,29 +5416,27 @@ declare namespace FudgeCore {
      * XRViewport (webXR)-extension of Viewport, to display FUDGE content on Head Mounted and AR(not implemted yet) Devices
      */
     class XRViewport extends Viewport {
-        private static xrCamera;
         private static xrViewportInstance;
         vr: VR;
-        private useController;
+        session: XRSession;
+        referenceSpace: XRReferenceSpace;
+        private useVRController;
         private crc3;
+        private xrCamera;
         constructor();
         /**
          * To retrieve private static Instance of xr Viewport, just needed for calling the drawXR Method in {@link Loop}
          */
         static get default(): XRViewport;
         /**
-          * To retrieve private static Camera of xr Viewport, when user will set new rigid transform.
-          */
-        static get camera(): ComponentCamera;
-        /**
          * The VR Session is initialized here, after XR-Session is setted and FrameRequestXR is called from user, the XRViewport is ready to draw.
          * Also VR - Controller are initialized, if user sets vrController-boolean.
          */
-        initializeVR(_vrSessionMode?: VR_SESSION_MODE, _vrReferenceSpaceType?: VR_REFERENCE_SPACE, _vrController?: boolean): Promise<void>;
+        initializeVR(_vrSessionMode?: XR_SESSION_MODE, _vrReferenceSpaceType?: XR_REFERENCE_SPACE, _vrController?: boolean): Promise<void>;
         /**
          * The AR Session could be initialized here. Up till now not implemented.
          */
-        initializeAR(_xrSessionMode?: XRSessionMode, _xrReferenceSpaceType?: XRReferenceSpaceType): Promise<void>;
+        initializeAR(_arSessionMode?: XRSessionMode, _arReferenceSpaceType?: XRReferenceSpaceType): Promise<void>;
         /**
          * Real draw method in XR Mode - called from Loop Method {@link Loop} with a static reference of this class.
          */

@@ -79,7 +79,7 @@ namespace AudioSceneVR {
         }
 
         private update = (): void => {
-            if (this.xrViewport.vr.session)
+            if (this.xrViewport.session)
                 this.computeRay();
         }
     }
