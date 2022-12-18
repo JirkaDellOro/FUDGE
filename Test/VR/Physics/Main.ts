@@ -73,10 +73,10 @@ namespace PhysicsVR {
             rightController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vr.rController.cntrlTransform.mtxLocal;
             leftController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vr.lController.cntrlTransform.mtxLocal;
 
-            //set xr rigid transform to rot&pos of ComponentCamera
-            xrViewport.vr.setPositionVRRig(cmpCamera.mtxWorld.translation);
-            xrViewport.vr.rotateVRRig(cmpCamera.mtxPivot.rotation);
-            //start xrSession.animationFrame instead of window.animationFrame, your xr-session is ready to go!
+            //set xr rig transform to rot&pos of ComponentCamera
+            xrViewport.vr.rigPosition = cmpCamera.mtxWorld.translation;
+            xrViewport.vr.rigRotation = cmpCamera.mtxPivot.rotation;
+            //starts xr-session.animationFrame instead of window.animationFrame, your xr-session is ready to go!
             f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR, 60);
         }
         );

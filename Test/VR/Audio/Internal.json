@@ -49,10 +49,7 @@
     "ƒ.Graph": {
       "name": "Audio",
       "active": true,
-      "components": {
-        "ComponentMesh": [],
-        "ComponentMaterial": []
-      },
+      "components": {},
       "children": [
         {
           "ƒ.Node": {
@@ -119,7 +116,7 @@
                     "direction": "diagonal",
                     "aspect": 1.439252336448598,
                     "pivot": {
-                      "translation": "[0, 2, -16]",
+                      "translation": "[0, 1, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -135,9 +132,7 @@
                     "active": true
                   }
                 }
-              ],
-              "ComponentMesh": [],
-              "ComponentMaterial": []
+              ]
             },
             "children": []
           }

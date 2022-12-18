@@ -2348,20 +2348,31 @@ declare namespace FudgeCore {
     class VR extends Component {
         rController: VRController;
         lController: VRController;
-        private actualPos;
-        /**
-         * Sets a Vector3 in the reference space of XR Session.
-         */
-        setPositionVRRig(_newPos?: Vector3): void;
-        /**
-         * Adds Vector3 Rotation in the reference space of XR Session.
-         * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
-         */
-        rotateVRRig(_newRot: Vector3): void;
+        constructor();
+        setControllerConfigs(_xrFrame: XRFrame): void;
         /**
          * Sets controller matrices, gamepad references and thumbsticks movements.
          */
-        setController(_xrFrame: XRFrame): void;
+        private setController;
+        private initilizeGamepads;
+        /**
+         * Sets a Vector3 as Position of the reference space.
+         */
+        set rigPosition(_newPos: Vector3);
+        /**
+         * Adds a Vector3 in Position of the reference space.
+         */
+        translateRig(_by: Vector3): void;
+        /**
+         * Sets Vector3 Rotation of the reference space.
+         * Rotation needs to be set in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
+         */
+        set rigRotation(_newRot: Vector3);
+        /**
+         * Adds a Vector3 in Rotation of the reference space.
+         * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
+         */
+        rotateRig(_by: Vector3): void;
     }
 }
 declare namespace FudgeCore {
@@ -5420,6 +5431,7 @@ declare namespace FudgeCore {
         vr: VR;
         session: XRSession;
         referenceSpace: XRReferenceSpace;
+        xrRigmtxLocal: Matrix4x4;
         private useVRController;
         private crc3;
         private xrCamera;

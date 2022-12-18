@@ -26,10 +26,11 @@ namespace FudgeCore {
 
     public session: XRSession = null;
     public referenceSpace: XRReferenceSpace = null;
-
+    public xrRigmtxLocal: Matrix4x4 = new Matrix4x4();
     private useVRController: boolean = false;
     private crc3: WebGL2RenderingContext = null;
     private xrCamera: ComponentCamera = null;
+
     constructor() {
       super();
       XRViewport.xrViewportInstance = this;
@@ -57,8 +58,10 @@ namespace FudgeCore {
 
       this.xrCamera = new ComponentCamera();
       this.xrCamera.mtxPivot = this.camera.mtxWorld;
-      this.xrCamera.clrBackground = this.camera.clrBackground;
-      this.camera = this.xrCamera;
+      this.camera.mtxPivot = this.xrCamera.mtxPivot;
+
+
+      this.session = session;
       this.vr = new VR();
       this.useVRController = _vrController;
       if (_vrController) {
@@ -66,9 +69,7 @@ namespace FudgeCore {
         this.vr.lController.cntrlTransform = new ComponentTransform();
       }
       // sets the rotation of the FUDGE Camera to 180 degree, because the XR Rig is looking in the direction of negative z 
-      this.vr.rotateVRRig(Vector3.Y(180));
-
-      this.session = session;
+      this.vr.rotateRig(Vector3.Y(180));
       this.calculateTransforms();
     }
 
@@ -100,13 +101,15 @@ namespace FudgeCore {
 
 
             if (this.useVRController)
-              this.vr.setController(_xrFrame);
+              this.vr.setControllerConfigs(_xrFrame);
 
             this.camera.mtxProjection.set(view.projectionMatrix);
             this.camera.mtxPivot.set(view.transform.matrix);
+            // if (this.camera.node.getComponent(ComponentAudioListener))
+            //   this.camera.node.getComponent(ComponentAudioListener).mtxPivot.set(this.camera.mtxPivot);
             this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
 
-
+            this.xrRigmtxLocal.set(view.transform.matrix);
 
 
             if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)

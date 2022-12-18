@@ -64,12 +64,13 @@ namespace AudioSceneVR {
       //stop normal loop of winodws.animationFrame
       f.Loop.stop();
 
-      //set xr rigid transform to rot&pos of ComponentCamera
-      xrViewport.vr.setPositionVRRig(cmpCamera.mtxWorld.translation);
-      xrViewport.vr.rotateVRRig(cmpCamera.mtxPivot.rotation);
+      //set xr rig transform to rot&pos of ComponentCamera
+      //hint: maybe you want to set your FUDGE Camera to y= 1.6 because this is the initial height of the xr rig
+      xrViewport.vr.rigPosition = cmpCamera.mtxWorld.translation;
+      xrViewport.vr.rigRotation = cmpCamera.mtxPivot.rotation;
 
 
-      //start xrSession.animationFrame instead of window.animationFrame, your xr-session is ready to go!
+      //starts xr-session.animationFrame instead of window.animationFrame, your xr-session is ready to go!
       f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);
     }
     );
@@ -79,7 +80,6 @@ namespace AudioSceneVR {
     f.AudioManager.default.listenWith(cmpCamera.node.getComponent(f.ComponentAudioListener));
     audioLeft = graph.getChildrenByName("AudioL")[0].getComponent(f.ComponentAudio);
     audioRight = graph.getChildrenByName("AudioR")[0].getComponent(f.ComponentAudio);
-
   }
   function onSelect(_event: XRInputSourceEvent): void {
     console.log(_event.inputSource.handedness);
@@ -114,6 +114,9 @@ namespace AudioSceneVR {
   function update(_event: Event): void {
     xrViewport.draw();
     f.AudioManager.default.update();
+    // have to rotate audio listener by 180 degrees because xr camera is rotated automatically by 180 (for looking in positive z direction)
+    cmpCamera.node.getComponent(f.ComponentAudioListener).mtxPivot.rotation = new f.Vector3(cmpCamera.mtxPivot.rotation.x, cmpCamera.mtxPivot.rotation.y - 180, cmpCamera.mtxPivot.rotation.z);
+    cmpCamera.node.getComponent(f.ComponentAudioListener).mtxPivot.translation = cmpCamera.mtxPivot.translation;
   }
   function onEndSession(): void {
     f.Loop.stop();

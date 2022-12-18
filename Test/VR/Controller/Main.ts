@@ -54,11 +54,12 @@ namespace AudioSceneVR {
 
       //stop normal loop of winodws.animationFrame
       f.Loop.stop();
-      //set xr rigid transform to rot&pos of ComponentCamera
-      xrViewport.vr.setPositionVRRig(cmpCamera.mtxWorld.translation);
-      xrViewport.vr.rotateVRRig(cmpCamera.mtxPivot.rotation);
+      //set xr rig transform to rot&pos of ComponentCamera
+      //hint: maybe you want to set your FUDGE Camera to y= 1.6 because this is the initial height of the xr rig
+      xrViewport.vr.rigPosition = cmpCamera.mtxWorld.translation;
+      xrViewport.vr.rigRotation = cmpCamera.mtxPivot.rotation;
 
-      //start xrSession.animationFrame instead of window.animationFrame, your xr-session is ready to go!
+      //starts xr-session.animationFrame instead of window.animationFrame, your xr-session is ready to go!
       f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);
     }
     );
