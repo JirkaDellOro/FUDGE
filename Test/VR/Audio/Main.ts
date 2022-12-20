@@ -4,7 +4,7 @@ namespace AudioSceneVR {
 
   let xrViewport: f.XRViewport = new f.XRViewport();
   let graph: f.Graph = null;
-  let cmpCamera: f.ComponentCamera = null;
+  let cmpCameraVR: f.ComponentCameraVR = null;
   let audioLeft: f.ComponentAudio = null;
   let audioRight: f.ComponentAudio = null;
 
@@ -19,10 +19,10 @@ namespace AudioSceneVR {
       return;
     }
     let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector("canvas");
-    cmpCamera = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCamera);
-    cmpCamera.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
+    cmpCameraVR = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCameraVR);
+    cmpCameraVR.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
 
-    xrViewport.initialize("Viewport", graph, cmpCamera, canvas);
+    xrViewport.initialize("Viewport", graph, cmpCameraVR, canvas);
     setupAudio();
 
 
@@ -64,11 +64,6 @@ namespace AudioSceneVR {
       //stop normal loop of winodws.animationFrame
       f.Loop.stop();
 
-      //set xr rig transform to rot&pos of ComponentCamera
-      //hint: maybe you want to set your FUDGE Camera to y= 1.6 because this is the initial height of the xr rig
-      xrViewport.vr.rigPosition = cmpCamera.mtxWorld.translation;
-      xrViewport.vr.rigRotation = cmpCamera.mtxPivot.rotation;
-      xrViewport.vr.rotateRig(f.Vector3.Y(90));
 
 
       //starts xr-session.animationFrame instead of window.animationFrame, your xr-session is ready to go!
@@ -78,7 +73,7 @@ namespace AudioSceneVR {
   }
   function setupAudio(): void {
     f.AudioManager.default.listenTo(graph);
-    f.AudioManager.default.listenWith(cmpCamera.node.getComponent(f.ComponentAudioListener));
+    f.AudioManager.default.listenWith(cmpCameraVR.node.getComponent(f.ComponentAudioListener));
     audioLeft = graph.getChildrenByName("AudioL")[0].getComponent(f.ComponentAudio);
     audioRight = graph.getChildrenByName("AudioR")[0].getComponent(f.ComponentAudio);
   }
@@ -115,9 +110,6 @@ namespace AudioSceneVR {
   function update(_event: Event): void {
     xrViewport.draw();
     f.AudioManager.default.update();
-    // have to rotate audio listener by 180 degrees because xr camera is rotated automatically by 180 (for looking in positive z direction)
-    cmpCamera.node.mtxLocal.rotation = new f.Vector3(cmpCamera.mtxPivot.rotation.x, cmpCamera.mtxPivot.rotation.y - 180, cmpCamera.mtxPivot.rotation.z);
-    cmpCamera.node.mtxLocal.translation = cmpCamera.mtxPivot.translation;
   }
   function onEndSession(): void {
     f.Loop.stop();

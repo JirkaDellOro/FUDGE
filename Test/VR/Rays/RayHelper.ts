@@ -48,7 +48,7 @@ namespace AudioSceneVR {
         private computeRay = (): void => {
 
 
-            this.node.getComponent(f.ComponentTransform).mtxLocal = this.controller.cntrlTransform.mtxLocal;
+            this.node.getComponent(f.ComponentTransform).mtxLocal = this.controller.cmpTransform.mtxLocal;
             let forward: f.Vector3;
             forward = f.Vector3.Z();
             forward.transform(this.node.mtxWorld, false);

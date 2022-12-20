@@ -5,7 +5,7 @@ namespace FudgeCore {
      */
     export class VRController {
 
-        public cntrlTransform: ComponentTransform = null; //cmpTransform 
+        public cmpTransform: ComponentTransform = null;
         public gamePad: Gamepad = null;
         public thumbstickX: number = null;
         public thumbstickY: number = null;
@@ -13,12 +13,15 @@ namespace FudgeCore {
 
     export class VR {
 
-        public rController: VRController = new VRController(); // right - left ausschreiben!!!
-        public lController: VRController = new VRController();
-        constructor() {
-            this.initilizeGamepads();
+        public rightCntrl: VRController = new VRController();
+        public leftCntrl: VRController = new VRController();
 
+        public deviceTransform: ComponentTransform = null;
+
+        constructor() {
+            this.initializeGamepads();
         }
+
         public setControllerConfigs(_xrFrame: XRFrame): void {
             if (_xrFrame)
                 this.setController(_xrFrame);
@@ -32,16 +35,16 @@ namespace FudgeCore {
                     try {
                         switch (controller.handedness) {
                             case ("right"):
-                                this.rController.cntrlTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
-                                if (this.rController.gamePad) {
-                                    this.rController.thumbstickX = controller.gamepad.axes[2];
-                                    this.rController.thumbstickY = controller.gamepad.axes[3];
+                                this.rightCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
+                                if (this.rightCntrl.gamePad) {
+                                    this.rightCntrl.thumbstickX = controller.gamepad.axes[2];
+                                    this.rightCntrl.thumbstickY = controller.gamepad.axes[3];
                                 }
                             case ("left"):
-                                this.lController.cntrlTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
-                                if (this.lController.gamePad) {
-                                    this.lController.thumbstickX = controller.gamepad.axes[2];
-                                    this.lController.thumbstickY = controller.gamepad.axes[3];
+                                this.leftCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
+                                if (this.leftCntrl.gamePad) {
+                                    this.leftCntrl.thumbstickX = controller.gamepad.axes[2];
+                                    this.leftCntrl.thumbstickY = controller.gamepad.axes[3];
                                 }
                                 break;
                         }
@@ -52,72 +55,71 @@ namespace FudgeCore {
             }
         }
 
-        private initilizeGamepads(): void {
+        private initializeGamepads(): void {
             XRViewport.default.session.inputSources.forEach(controller => {
                 switch (controller.handedness) {
                     case ("right"):
-                        this.rController.gamePad = controller.gamepad;
+                        this.rightCntrl.gamePad = controller.gamepad;
                         break;
                     case ("left"):
-                        this.lController.gamePad = controller.gamepad;
+                        this.leftCntrl.gamePad = controller.gamepad;
                         break;
                 }
             });
         }
-
         /**
-         * Sets a Vector3 as Position of the reference space.
-         */
-        public set rigPosition(_newPos: Vector3) {
-            let invTranslation: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(_newPos, XRViewport.default.xrRigmtxLocal.translation), -1);
+* Sets a Vector3 as Position of the reference space.
+*/
+        public set positionDevice(_newPos: Vector3) {
+            let invTranslation: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(_newPos, this.deviceTransform.mtxLocal.translation), -1);
             XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
-            XRViewport.default.xrRigmtxLocal.translation = _newPos;
+            this.deviceTransform.mtxLocal.translation = _newPos;
         }
 
         /**
          * Adds a Vector3 in Position of the reference space.
          */
-        public translateRig(_by: Vector3): void {
+        public translateDevice(_by: Vector3): void {
             let invTranslation: Vector3 = Vector3.SCALE(_by, -1);
             XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
-            XRViewport.default.xrRigmtxLocal.translate(_by);
+            this.deviceTransform.mtxLocal.translate(_by);
         }
 
         /**
          * Sets Vector3 Rotation of the reference space.
          * Rotation needs to be set in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin. 
          */
-        public set rigRotation(_newRot: Vector3) {
-            let newRot: Vector3 = Vector3.SCALE(Vector3.SUM(_newRot, XRViewport.default.xrRigmtxLocal.rotation), Math.PI / 180);
+        public set rotationDevice(_newRot: Vector3) {
+            let newRot: Vector3 = Vector3.SCALE(Vector3.SUM(_newRot, this.deviceTransform.mtxLocal.rotation), Math.PI / 180);
 
             let orientation: Quaternion = new Quaternion();
             orientation.setFromVector3(newRot.x, newRot.y, newRot.z);
             //set xr - rig back to origin
-            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(XRViewport.default.xrRigmtxLocal.translation, Vector3.ZERO())));
+            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(this.deviceTransform.mtxLocal.translation, Vector3.ZERO())));
             //rotate xr rig in origin
             XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
             //set xr - rig back to last position 
-            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(Vector3.ZERO(), XRViewport.default.xrRigmtxLocal.translation)));
-            XRViewport.default.xrRigmtxLocal.rotation = _newRot;
+            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(Vector3.ZERO(), this.deviceTransform.mtxLocal.translation)));
+            this.deviceTransform.mtxLocal.rotation = _newRot;
         }
 
         /**
          * Adds a Vector3 in Rotation of the reference space.
          * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin. 
          */
-        public rotateRig(_by: Vector3): void {
+        public rotateDevice(_by: Vector3): void {
             let rotAmount: Vector3 = Vector3.SCALE(_by, Math.PI / 180);
 
             let orientation: Quaternion = new Quaternion();
             orientation.setFromVector3(rotAmount.x, rotAmount.y, rotAmount.z);
 
             //set xr - rig back to origin
-            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(XRViewport.default.xrRigmtxLocal.translation, Vector3.ZERO())));
+            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(this.deviceTransform.mtxLocal.translation, Vector3.ZERO())));
             //rotate xr rig in origin
             XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
             //set xr - rig back to last position 
-            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(Vector3.ZERO(), XRViewport.default.xrRigmtxLocal.translation)));
-            XRViewport.default.xrRigmtxLocal.rotate(_by);
+            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(Vector3.ZERO(), this.deviceTransform.mtxLocal.translation)));
+            this.deviceTransform.mtxLocal.rotate(_by);
         }
     }
 }

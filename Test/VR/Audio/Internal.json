@@ -101,31 +101,6 @@
             "name": "Camera",
             "active": true,
             "components": {
-              "ComponentCamera": [
-                {
-                  "ƒ.ComponentCamera": {
-                    "backgroundColor": {
-                      "r": 1,
-                      "g": 1,
-                      "b": 1,
-                      "a": 1
-                    },
-                    "backgroundEnabled": true,
-                    "projection": "central",
-                    "fieldOfView": 45,
-                    "direction": "diagonal",
-                    "aspect": 1.5440613026819923,
-                    "pivot": {
-                      "translation": "[0, 1, 0]",
-                      "rotation": "[0, 270, 0]",
-                      "scaling": "[1, 1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    }
-                  }
-                }
-              ],
               "ComponentAudioListener": [
                 {
                   "ƒ.ComponentAudioListener": {
@@ -138,6 +113,31 @@
                   "ƒ.ComponentTransform": {
                     "local": {
                       "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentCameraVR": [
+                {
+                  "ƒ.ComponentCameraVR": {
+                    "backgroundColor": {
+                      "r": 0,
+                      "g": 0,
+                      "b": 0,
+                      "a": 1
+                    },
+                    "backgroundEnabled": true,
+                    "projection": "central",
+                    "fieldOfView": 45,
+                    "direction": "diagonal",
+                    "aspect": 1.250778816199377,
+                    "pivot": {
+                      "translation": "[0, 2, -3]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -372,6 +372,46 @@
       "idResource": "Audio|2022-12-14T14:05:13.067Z|67547",
       "name": "Audios\\BloomR.mp3",
       "type": "Audio"
+    }
+  },
+  "Animation|2022-12-20T16:32:13.277Z|72960": {
+    "ƒ.Animation": {
+      "idResource": "Animation|2022-12-20T13:13:07.543Z|85208",
+      "name": "",
+      "labels": {},
+      "events": {},
+      "fps": 60,
+      "animationStructure": {}
+    }
+  },
+  "Animation|2022-12-20T14:24:30.076Z|00271": {
+    "ƒ.Animation": {
+      "idResource": "Animation|2022-12-20T13:13:07.543Z|85208",
+      "name": "",
+      "labels": {},
+      "events": {},
+      "fps": 60,
+      "animationStructure": {}
+    }
+  },
+  "Animation|2022-12-20T16:32:13.278Z|56777": {
+    "ƒ.Animation": {
+      "idResource": "Animation|2022-12-20T13:13:07.543Z|85208",
+      "name": "",
+      "labels": {},
+      "events": {},
+      "fps": 60,
+      "animationStructure": {}
+    }
+  },
+  "Animation|2022-12-20T13:13:07.543Z|85208": {
+    "ƒ.Animation": {
+      "idResource": "Animation|2022-12-20T13:13:07.543Z|85208",
+      "name": "",
+      "labels": {},
+      "events": {},
+      "fps": 60,
+      "animationStructure": {}
     }
   }
 }

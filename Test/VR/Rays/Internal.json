@@ -399,9 +399,9 @@
                       {
                         "ƒ.ComponentTransform": {
                           "local": {
-                            "translation": "[6, 0, 0]",
-                            "rotation": "[61, 0, 0]",
-                            "scaling": "[3, 4, 4]"
+                            "translation": "[3, 0, 0]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[1, 1, 1]"
                           },
                           "Component": {
                             "active": true
@@ -429,9 +429,24 @@
             "name": "Camera",
             "active": true,
             "components": {
-              "ComponentCamera": [
+              "ComponentCamera": [],
+              "ComponentTransform": [
                 {
-                  "ƒ.ComponentCamera": {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentCameraVR": [
+                {
+                  "ƒ.ComponentCameraVR": {
                     "backgroundColor": {
                       "r": 0,
                       "g": 0,
@@ -442,9 +457,9 @@
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
-                    "aspect": 1.439252336448598,
+                    "aspect": 1.250778816199377,
                     "pivot": {
-                      "translation": "[2, 0, -9]",
+                      "translation": "[0, 0, -9]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },

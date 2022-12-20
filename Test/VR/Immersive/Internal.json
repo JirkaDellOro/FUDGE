@@ -3865,9 +3865,24 @@
             "name": "Camera",
             "active": true,
             "components": {
-              "ComponentCamera": [
+              "ComponentCamera": [],
+              "ComponentTransform": [
                 {
-                  "ƒ.ComponentCamera": {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentCameraVR": [
+                {
+                  "ƒ.ComponentCameraVR": {
                     "backgroundColor": {
                       "r": 0,
                       "g": 0,
@@ -3878,9 +3893,9 @@
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
-                    "aspect": 1.439252336448598,
+                    "aspect": 1,
                     "pivot": {
-                      "translation": "[-5, 0.9999997615814209, 0]",
+                      "translation": "[-5, 1, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -3938,6 +3953,16 @@
         "name": "textures\\whitewall.jpg",
         "mipmap": "CRISP"
       }
+    }
+  },
+  "Animation|2022-12-20T13:44:54.139Z|29828": {
+    "ƒ.Animation": {
+      "idResource": "Animation|2022-12-20T13:44:54.139Z|29828",
+      "name": "",
+      "labels": {},
+      "events": {},
+      "fps": 60,
+      "animationStructure": {}
     }
   }
 }

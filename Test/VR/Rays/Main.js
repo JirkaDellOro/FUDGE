@@ -4,7 +4,7 @@ var AudioSceneVR;
     f.Debug.info("Main Program Template running!");
     let xrViewport = new f.XRViewport();
     let graph = null;
-    let cmpCamera = null;
+    let cmpCameraVR = null;
     window.addEventListener("load", init);
     async function init() {
         await FudgeCore.Project.loadResources("Internal.json");
@@ -15,9 +15,9 @@ var AudioSceneVR;
             return;
         }
         let canvas = document.querySelector("canvas");
-        cmpCamera = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCamera);
-        cmpCamera.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
-        xrViewport.initialize("Viewport", graph, cmpCamera, canvas);
+        cmpCameraVR = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCameraVR);
+        cmpCameraVR.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
+        xrViewport.initialize("Viewport", graph, cmpCameraVR, canvas);
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
         checkForVRSupport();
@@ -47,10 +47,6 @@ var AudioSceneVR;
             initializeRays();
             //stop normal loop of winodws.animationFrame
             f.Loop.stop();
-            //set xr rig transform to rot&pos of ComponentCamera
-            //hint: maybe you want to set your FUDGE Camera to y= 1.6 because this is the initial height of the xr rig
-            xrViewport.vr.rigPosition = cmpCamera.mtxWorld.translation;
-            xrViewport.vr.rigRotation = cmpCamera.mtxPivot.rotation;
             //starts xr-session.animationFrame instead of window.animationFrame, your xr-session is ready to go!
             f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);
         });
@@ -59,8 +55,8 @@ var AudioSceneVR;
         let pickableObjects = graph.getChildrenByName("CubeContainer")[0].getChildren();
         let rightRayNode = graph.getChildrenByName("raysContainer")[0].getChild(0);
         let leftRayNode = graph.getChildrenByName("raysContainer")[0].getChild(1);
-        rightRayNode.addComponent(new AudioSceneVR.RayHelper(xrViewport, xrViewport.vr.rController, 50, pickableObjects));
-        leftRayNode.addComponent(new AudioSceneVR.RayHelper(xrViewport, xrViewport.vr.lController, 50, pickableObjects));
+        rightRayNode.addComponent(new AudioSceneVR.RayHelper(xrViewport, xrViewport.vr.rightCntrl, 50, pickableObjects));
+        leftRayNode.addComponent(new AudioSceneVR.RayHelper(xrViewport, xrViewport.vr.leftCntrl, 50, pickableObjects));
     }
     function update(_event) {
         let pickableObjects = graph.getChildrenByName("CubeContainer")[0].getChildren();

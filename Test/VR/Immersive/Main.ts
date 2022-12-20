@@ -4,7 +4,7 @@ namespace AudioSceneVR {
 
   let xrViewport: f.XRViewport = new f.XRViewport();
   let graph: f.Graph = null;
-  let cmpCamera: f.ComponentCamera = null;
+  let cmpCameraVR: f.ComponentCameraVR = null;
   window.addEventListener("load", init);
 
   async function init() {
@@ -16,10 +16,10 @@ namespace AudioSceneVR {
       return;
     }
     let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector("canvas");
-    cmpCamera = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCamera);
-    cmpCamera.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
+    cmpCameraVR = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCameraVR);
+    cmpCameraVR.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
 
-    xrViewport.initialize("Viewport", graph, cmpCamera, canvas);
+    xrViewport.initialize("Viewport", graph, cmpCameraVR, canvas);
 
 
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
@@ -52,10 +52,6 @@ namespace AudioSceneVR {
       }
       //stop normal loop of winodws.animationFrame
       f.Loop.stop();
-      //set xr rig transform to rot&pos of ComponentCamera
-      //hint: maybe you want to set your FUDGE Camera to y= 1.6 because this is the initial height of the xr rig
-      xrViewport.vr.rigPosition = cmpCamera.mtxWorld.translation;
-      xrViewport.vr.rigRotation = cmpCamera.mtxPivot.rotation;
       //starts xr-session.animationFrame instead of window.animationFrame, your xr-session is ready to go!
       f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);
     }

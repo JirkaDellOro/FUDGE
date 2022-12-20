@@ -135,7 +135,7 @@
                 {
                   "ƒ.ComponentLight": {
                     "pivot": {
-                      "translation": "[0, 20, 0]",
+                      "translation": "[10, 20, 0]",
                       "rotation": "[-1390, 350, 350]",
                       "scaling": "[219, 489, 189]"
                     },
@@ -153,7 +153,7 @@
                   "ƒ.ComponentLight": {
                     "pivot": {
                       "translation": "[0, 3, 0]",
-                      "rotation": "[510, 15100, 0]",
+                      "rotation": "[40, 15100, 0]",
                       "scaling": "[25, 25, 25]"
                     },
                     "light": {
@@ -213,7 +213,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[0, 0, -22]",
+                      "translation": "[0, 0, 33]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -261,8 +261,8 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[-0.4000000059604645, 0.20000001788139343, -58]",
-                      "rotation": "[0, 0, 0]",
+                      "translation": "[0.20000001788139343, 0.20000001788139343, 67]",
+                      "rotation": "[0, 180, 0]",
                       "scaling": "[0.19999997317790985, 0.20000000298023224, 0.20000001788139343]"
                     },
                     "Component": {
@@ -1465,9 +1465,24 @@
             "name": "Camera",
             "active": true,
             "components": {
-              "ComponentCamera": [
+              "ComponentCamera": [],
+              "ComponentTransform": [
                 {
-                  "ƒ.ComponentCamera": {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentCameraVR": [
+                {
+                  "ƒ.ComponentCameraVR": {
                     "backgroundColor": {
                       "r": 0,
                       "g": 0,
@@ -1478,10 +1493,10 @@
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
-                    "aspect": 1,
+                    "aspect": 1.250778816199377,
                     "pivot": {
-                      "translation": "[0, 1, 8]",
-                      "rotation": "[0, 180, 0]",
+                      "translation": "[0, 1, 0]",
+                      "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -1574,8 +1589,7 @@
               "Sword": [
                 {
                   "PhysicsVR.Sword": {
-                    "active": true,
-                    "message": "Translator added to "
+                    "active": true
                   }
                 }
               ]
@@ -1663,8 +1677,7 @@
               "Sword": [
                 {
                   "PhysicsVR.Sword": {
-                    "active": true,
-                    "message": "Translator added to "
+                    "active": true
                   }
                 }
               ]
@@ -1681,7 +1694,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[0, 1, -56]",
+                      "translation": "[0, 1, 65]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -1795,7 +1808,7 @@
           {
             "PhysicsVR.Translator": {
               "active": true,
-              "message": "Translator added to ",
+              "hasHitted": false,
               "randomRot": 0.2504408857572864
             }
           }

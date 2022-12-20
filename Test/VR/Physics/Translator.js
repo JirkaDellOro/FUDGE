@@ -36,7 +36,7 @@ var PhysicsVR;
             }
         };
         addVel = () => {
-            this.node.getComponent(f.ComponentRigidbody).addVelocity(f.Vector3.Z(Translator.speed));
+            this.node.getComponent(f.ComponentRigidbody).addVelocity(f.Vector3.Z(-Translator.speed));
         };
         randomRot = f.Random.default.getRange(-0.5, 0.5);
         update = (_event) => {

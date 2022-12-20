@@ -1973,6 +1973,12 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class ComponentCameraVR extends ComponentCamera {
+        static readonly iSubclass: number;
+        constructor();
+    }
+}
+declare namespace FudgeCore {
     /**
      * Makes the node face the camera when rendering, respecting restrictions for rotation around specific axis
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
@@ -2340,39 +2346,40 @@ declare namespace FudgeCore {
      * VR Component Class, for Session Management, Controller Management and Reference Space Management.
      */
     class VRController {
-        cntrlTransform: ComponentTransform;
+        cmpTransform: ComponentTransform;
         gamePad: Gamepad;
         thumbstickX: number;
         thumbstickY: number;
     }
     class VR {
-        rController: VRController;
-        lController: VRController;
+        rightCntrl: VRController;
+        leftCntrl: VRController;
+        deviceTransform: ComponentTransform;
         constructor();
         setControllerConfigs(_xrFrame: XRFrame): void;
         /**
          * Sets controller matrices, gamepad references and thumbsticks movements.
          */
         private setController;
-        private initilizeGamepads;
+        private initializeGamepads;
         /**
-         * Sets a Vector3 as Position of the reference space.
-         */
-        set rigPosition(_newPos: Vector3);
+* Sets a Vector3 as Position of the reference space.
+*/
+        set positionDevice(_newPos: Vector3);
         /**
          * Adds a Vector3 in Position of the reference space.
          */
-        translateRig(_by: Vector3): void;
+        translateDevice(_by: Vector3): void;
         /**
          * Sets Vector3 Rotation of the reference space.
          * Rotation needs to be set in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
          */
-        set rigRotation(_newRot: Vector3);
+        set rotationDevice(_newRot: Vector3);
         /**
          * Adds a Vector3 in Rotation of the reference space.
          * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
          */
-        rotateRig(_by: Vector3): void;
+        rotateDevice(_by: Vector3): void;
     }
 }
 declare namespace FudgeCore {
@@ -5296,6 +5303,7 @@ declare namespace FudgeCore {
         private static focus;
         name: string;
         camera: ComponentCamera;
+        protected cameraVR: ComponentCameraVR;
         rectSource: Rectangle;
         rectDestination: Rectangle;
         frameClientToCanvas: FramingScaled;
@@ -5410,46 +5418,54 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * @author Valentin Schmidberger, HFU, 2022
-     * Could be expand with more available modes in the future, until now #immersive session is supported.
+     * Different xr session modes available. Could be expand with more modes in the future.
      */
     enum XR_SESSION_MODE {
         IMMERSIVE_VR = "immersive-vr"
     }
     /**
-     * Different reference vr-spaces available, user has to check if the space is supported with its device.
-     * Could be expand with more available space types in the future, until now #viewer and #local space types are supported.
+     * Different reference vr-spaces available, creator has to check if the space is supported with its device.
+     * Could be expand with more available space types in the future.
      */
     enum XR_REFERENCE_SPACE {
         VIEWER = "viewer",
         LOCAL = "local"
     }
     /**
-     * XRViewport (webXR)-extension of Viewport, to display FUDGE content on Head Mounted and AR(not implemted yet) Devices
+     * XRViewport (webXR)-extension of Viewport, to displaying its branch on Head Mounted and AR (not implemted yet) Devices
      */
     class XRViewport extends Viewport {
         private static xrViewportInstance;
         vr: VR;
         session: XRSession;
         referenceSpace: XRReferenceSpace;
-        xrRigmtxLocal: Matrix4x4;
         private useVRController;
         private crc3;
+        private poseDevice;
+        private deviceTransform;
         constructor();
         /**
-         * To retrieve private static Instance of xr Viewport, just needed for calling the drawXR Method in {@link Loop}
+         * To retrieve private static instance of xr viewport, readonly.
          */
         static get default(): XRViewport;
         /**
-         * The VR Session is initialized here, after XR-Session is setted and FrameRequestXR is called from user, the XRViewport is ready to draw.
-         * Also VR - Controller are initialized, if user sets vrController-boolean.
+          * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
+          */
+        initialize(_name: string, _branch: Node, _cameraVR: ComponentCameraVR, _canvas: HTMLCanvasElement): void;
+        /**
+         * The VR Session is initialized here, also VR - Controller are initialized, if boolean is true.
+         * Creator has to call FrameRequestXR after this Method to run the viewport in virtual reality.
          */
         initializeVR(_vrSessionMode?: XR_SESSION_MODE, _vrReferenceSpaceType?: XR_REFERENCE_SPACE, _vrController?: boolean): Promise<void>;
+        private initializeInternalDeviceTransform;
         /**
-         * The AR Session could be initialized here. Up till now not implemented.
+         * The AR session could be initialized here. Up till now not implemented.
          */
         initializeAR(_arSessionMode?: XRSessionMode, _arReferenceSpaceType?: XRReferenceSpaceType): Promise<void>;
         /**
-         * Real draw method in XR Mode - called from Loop Method {@link Loop} with a static reference of this class.
+         * Draw the xr viewport displaying its branch. By default, the transforms in the branch are recalculated first.
+         * Pass `false` if calculation was already done for this frame
+         * Called from loop method {@link Loop} again with the xrFrame parameter handover, as soon as FRAME_REQUEST_XR is called from creator.
          */
         draw(_calculateTransforms?: boolean, _xrFrame?: XRFrame): void;
     }

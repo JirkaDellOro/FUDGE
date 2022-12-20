@@ -42,7 +42,7 @@ var AudioSceneVR;
             }
         };
         computeRay = () => {
-            this.node.getComponent(f.ComponentTransform).mtxLocal = this.controller.cntrlTransform.mtxLocal;
+            this.node.getComponent(f.ComponentTransform).mtxLocal = this.controller.cmpTransform.mtxLocal;
             let forward;
             forward = f.Vector3.Z();
             forward.transform(this.node.mtxWorld, false);

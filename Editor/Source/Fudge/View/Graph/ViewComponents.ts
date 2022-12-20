@@ -100,9 +100,9 @@ namespace Fudge {
 
       //@ts-ignore
       let cmpNew: ƒ.Component = new component();
-      if (cmpNew instanceof ƒ.ComponentRigidbody)
+      if (cmpNew instanceof ƒ.ComponentRigidbody || cmpNew instanceof ƒ.ComponentCameraVR)
         if (!this.node.cmpTransform) {
-          alert("To attach ComponentRigidbody, first attach ComponentTransform!");
+          alert("To attach this Component, first attach ComponentTransform!");
           return;
         }
       if (cmpNew instanceof ƒ.ComponentGraphFilter)
@@ -211,7 +211,7 @@ namespace Fudge {
       switch (_event.type) {
         // case ƒui.EVENT.RENAME: break;
         case EVENT_EDITOR.SELECT:
-        // case EVENT_EDITOR.FOCUS:
+          // case EVENT_EDITOR.FOCUS:
           this.node = _event.detail.graph || _event.detail.node;
         case EVENT_EDITOR.MODIFY:
           this.fillContent();

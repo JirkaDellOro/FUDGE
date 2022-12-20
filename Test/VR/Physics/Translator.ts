@@ -41,7 +41,7 @@ namespace PhysicsVR {
       }
     }
     private addVel = (): void => {
-      this.node.getComponent(f.ComponentRigidbody).addVelocity(f.Vector3.Z(Translator.speed));
+      this.node.getComponent(f.ComponentRigidbody).addVelocity(f.Vector3.Z(-Translator.speed));
 
     }
     private randomRot = f.Random.default.getRange(-0.5, 0.5);

@@ -143,9 +143,24 @@
             "name": "Camera",
             "active": true,
             "components": {
-              "ComponentCamera": [
+              "ComponentCamera": [],
+              "ComponentTransform": [
                 {
-                  "ƒ.ComponentCamera": {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentCameraVR": [
+                {
+                  "ƒ.ComponentCameraVR": {
                     "backgroundColor": {
                       "r": 0,
                       "g": 0,

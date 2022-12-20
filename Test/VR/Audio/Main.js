@@ -4,7 +4,7 @@ var AudioSceneVR;
     f.Debug.info("Main Program Template running!");
     let xrViewport = new f.XRViewport();
     let graph = null;
-    let cmpCamera = null;
+    let cmpCameraVR = null;
     let audioLeft = null;
     let audioRight = null;
     window.addEventListener("load", init);
@@ -17,9 +17,9 @@ var AudioSceneVR;
             return;
         }
         let canvas = document.querySelector("canvas");
-        cmpCamera = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCamera);
-        cmpCamera.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
-        xrViewport.initialize("Viewport", graph, cmpCamera, canvas);
+        cmpCameraVR = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCameraVR);
+        cmpCameraVR.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
+        xrViewport.initialize("Viewport", graph, cmpCameraVR, canvas);
         setupAudio();
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
@@ -53,18 +53,13 @@ var AudioSceneVR;
             }
             //stop normal loop of winodws.animationFrame
             f.Loop.stop();
-            //set xr rig transform to rot&pos of ComponentCamera
-            //hint: maybe you want to set your FUDGE Camera to y= 1.6 because this is the initial height of the xr rig
-            xrViewport.vr.rigPosition = cmpCamera.mtxWorld.translation;
-            xrViewport.vr.rigRotation = cmpCamera.mtxPivot.rotation;
-            xrViewport.vr.rotateRig(f.Vector3.Y(90));
             //starts xr-session.animationFrame instead of window.animationFrame, your xr-session is ready to go!
             f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);
         });
     }
     function setupAudio() {
         f.AudioManager.default.listenTo(graph);
-        f.AudioManager.default.listenWith(cmpCamera.node.getComponent(f.ComponentAudioListener));
+        f.AudioManager.default.listenWith(cmpCameraVR.node.getComponent(f.ComponentAudioListener));
         audioLeft = graph.getChildrenByName("AudioL")[0].getComponent(f.ComponentAudio);
         audioRight = graph.getChildrenByName("AudioR")[0].getComponent(f.ComponentAudio);
     }
@@ -100,9 +95,6 @@ var AudioSceneVR;
     function update(_event) {
         xrViewport.draw();
         f.AudioManager.default.update();
-        // have to rotate audio listener by 180 degrees because xr camera is rotated automatically by 180 (for looking in positive z direction)
-        cmpCamera.node.mtxLocal.rotation = new f.Vector3(cmpCamera.mtxPivot.rotation.x, cmpCamera.mtxPivot.rotation.y - 180, cmpCamera.mtxPivot.rotation.z);
-        cmpCamera.node.mtxLocal.translation = cmpCamera.mtxPivot.translation;
     }
     function onEndSession() {
         f.Loop.stop();
