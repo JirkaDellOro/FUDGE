@@ -52,28 +52,29 @@ namespace AudioSceneVR {
             let forward: f.Vector3;
             forward = f.Vector3.Z();
             forward.transform(this.node.mtxWorld, false);
-            let ray: f.Ray = new f.Ray(new f.Vector3(forward.x * 10000, forward.y * 10000, forward.z * 10000), this.node.mtxLocal.translation, 0.1);
+            let ray: f.Ray = new f.Ray(new f.Vector3(-forward.x * 10000, -forward.y * 10000, -forward.z * 10000), this.node.mtxLocal.translation, 0.1);
 
-            if (!this.pick) {
-                this.node.getComponent(f.ComponentMesh).mtxPivot.scaling = new f.Vector3(0.1, this.maxLength, 0.1);
-                this.node.getComponent(f.ComponentMesh).mtxPivot.translation = new f.Vector3(0, 0, -this.maxLength / 2);
-            } else {
-                let distance: f.Vector3 = ray.getDistance(this.pick.mtxLocal.translation);
-                this.node.getComponent(f.ComponentMesh).mtxPivot.scaling = new f.Vector3(0.1, distance.magnitude, 0.1);
-                this.node.getComponent(f.ComponentMesh).mtxPivot.translation = new f.Vector3(0, 0, -distance.magnitude / 2);
-            }
+            // if (!this.pick) {
+            //     this.node.getComponent(f.ComponentMesh).mtxPivot.scaling = new f.Vector3(0.1, this.maxLength, 0.1);
+            //     this.node.getComponent(f.ComponentMesh).mtxPivot.translation = new f.Vector3(0, 0, -this.maxLength / 2);
+            // } else {
+            //     let distance: f.Vector3 = ray.getDistance(this.pick.mtxLocal.translation);
+            //     this.node.getComponent(f.ComponentMesh).mtxPivot.scaling = new f.Vector3(0.1, distance.magnitude, 0.1);
+            //     this.node.getComponent(f.ComponentMesh).mtxPivot.translation = new f.Vector3(0, 0, -distance.magnitude / 2);
+            // }
+            this.node.getComponent(f.ComponentMesh).mtxPivot.scaling = new f.Vector3(0.1, this.maxLength, 0.1);
+            this.node.getComponent(f.ComponentMesh).mtxPivot.translation = new f.Vector3(0, 0, -this.maxLength / 2);
 
+            let picker: f.Pick[] = f.Picker.pickRay(this.pickableObjects, ray, 0, 100000000000000000);
+            picker.sort((a: f.Pick, b: f.Pick) => a.zBuffer < b.zBuffer ? -1 : 1);
 
-            // let picker: f.Pick[] = f.Picker.pickRay(this.pickableObjects, ray, 0, 100000000000000000);
-            // picker.sort((a: f.Pick, b: f.Pick) => a.zBuffer < b.zBuffer ? -1 : 1);
+            picker.forEach(element => {
+                console.log(element.node.name);
+            });
 
-            // picker.forEach(element => {
-            //     console.log(element.node.name);
-            // });
-
-            // if (picker.length > 0) {
-            //     this.pick = picker[0].node;
-            // } else this.pick = null;
+            if (picker.length > 0) {
+                this.pick = picker[0].node;
+            } else this.pick = null;
 
 
         }

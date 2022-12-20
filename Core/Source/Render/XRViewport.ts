@@ -26,15 +26,13 @@ namespace FudgeCore {
 
     public session: XRSession = null;
     public referenceSpace: XRReferenceSpace = null;
-    public xrRigmtxLocal: Matrix4x4 = new Matrix4x4();
+    public xrRigmtxLocal: Matrix4x4 = new Matrix4x4(); //mtxDeviceLocal
     private useVRController: boolean = false;
     private crc3: WebGL2RenderingContext = null;
-    private xrCamera: ComponentCamera = null;
 
     constructor() {
       super();
       XRViewport.xrViewportInstance = this;
-
       this.crc3 = RenderWebGL.getRenderingContext();
     }
 
@@ -55,11 +53,11 @@ namespace FudgeCore {
       await this.crc3.makeXRCompatible();
       let nativeScaleFactor = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
       await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3, { framebufferScaleFactor: nativeScaleFactor }) });
+      // field of view anschauen was noch geht!
 
-      this.xrCamera = new ComponentCamera();
-      this.xrCamera.mtxPivot = this.camera.mtxWorld;
-      this.camera.mtxPivot = this.xrCamera.mtxPivot;
-
+      let xrCamera: ComponentCamera = new ComponentCamera();
+      xrCamera.mtxPivot = this.camera.mtxWorld;
+      this.camera = xrCamera;
 
       this.session = session;
       this.vr = new VR();
@@ -91,12 +89,15 @@ namespace FudgeCore {
         super.computeDrawing(_calculateTransforms);
         let pose: XRViewerPose = _xrFrame.getViewerPose(this.referenceSpace);
         let glLayer: XRWebGLLayer = this.session.renderState.baseLayer;
-
         Render.resetFrameBuffer(glLayer.framebuffer);
         Render.clear(this.camera.clrBackground);
+
+        let rect: Rectangle = Render.getRenderRectangle();
+
         if (pose) {
           for (let view of pose.views) {
             let viewport: globalThis.XRViewport = glLayer.getViewport(view);
+
             this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
 
 
@@ -118,7 +119,9 @@ namespace FudgeCore {
               Physics.draw(this.camera, this.physicsDebugMode);
             }
           }
+          Render.setRenderRectangle(rect);
         }
+
       }
     }
   }

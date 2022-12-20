@@ -5,18 +5,17 @@ namespace FudgeCore {
      */
     export class VRController {
 
-        public cntrlTransform: ComponentTransform = null;
+        public cntrlTransform: ComponentTransform = null; //cmpTransform 
         public gamePad: Gamepad = null;
         public thumbstickX: number = null;
         public thumbstickY: number = null;
     }
 
-    export class VR extends Component {
+    export class VR {
 
-        public rController: VRController = new VRController();
+        public rController: VRController = new VRController(); // right - left ausschreiben!!!
         public lController: VRController = new VRController();
         constructor() {
-            super();
             this.initilizeGamepads();
 
         }
@@ -89,7 +88,8 @@ namespace FudgeCore {
          * Rotation needs to be set in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin. 
          */
         public set rigRotation(_newRot: Vector3) {
-            let newRot: Vector3 = Vector3.SCALE(_newRot, Math.PI / 180);
+            let newRot: Vector3 = Vector3.SCALE(Vector3.SUM(_newRot, XRViewport.default.xrRigmtxLocal.rotation), Math.PI / 180);
+
             let orientation: Quaternion = new Quaternion();
             orientation.setFromVector3(newRot.x, newRot.y, newRot.z);
             //set xr - rig back to origin
@@ -106,7 +106,8 @@ namespace FudgeCore {
          * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin. 
          */
         public rotateRig(_by: Vector3): void {
-            let rotAmount: Vector3 = Vector3.SCALE(Vector3.SUM(_by, XRViewport.default.xrRigmtxLocal.rotation), Math.PI / 180);
+            let rotAmount: Vector3 = Vector3.SCALE(_by, Math.PI / 180);
+
             let orientation: Quaternion = new Quaternion();
             orientation.setFromVector3(rotAmount.x, rotAmount.y, rotAmount.z);
 

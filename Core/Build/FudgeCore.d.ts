@@ -2345,7 +2345,7 @@ declare namespace FudgeCore {
         thumbstickX: number;
         thumbstickY: number;
     }
-    class VR extends Component {
+    class VR {
         rController: VRController;
         lController: VRController;
         constructor();
@@ -5434,7 +5434,6 @@ declare namespace FudgeCore {
         xrRigmtxLocal: Matrix4x4;
         private useVRController;
         private crc3;
-        private xrCamera;
         constructor();
         /**
          * To retrieve private static Instance of xr Viewport, just needed for calling the drawXR Method in {@link Loop}

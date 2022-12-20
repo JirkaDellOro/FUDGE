@@ -57,6 +57,7 @@ var AudioSceneVR;
             //hint: maybe you want to set your FUDGE Camera to y= 1.6 because this is the initial height of the xr rig
             xrViewport.vr.rigPosition = cmpCamera.mtxWorld.translation;
             xrViewport.vr.rigRotation = cmpCamera.mtxPivot.rotation;
+            xrViewport.vr.rotateRig(f.Vector3.Y(90));
             //starts xr-session.animationFrame instead of window.animationFrame, your xr-session is ready to go!
             f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR);
         });
@@ -100,8 +101,8 @@ var AudioSceneVR;
         xrViewport.draw();
         f.AudioManager.default.update();
         // have to rotate audio listener by 180 degrees because xr camera is rotated automatically by 180 (for looking in positive z direction)
-        cmpCamera.node.getComponent(f.ComponentAudioListener).mtxPivot.rotation = new f.Vector3(cmpCamera.mtxPivot.rotation.x, cmpCamera.mtxPivot.rotation.y - 180, cmpCamera.mtxPivot.rotation.z);
-        cmpCamera.node.getComponent(f.ComponentAudioListener).mtxPivot.translation = cmpCamera.mtxPivot.translation;
+        cmpCamera.node.mtxLocal.rotation = new f.Vector3(cmpCamera.mtxPivot.rotation.x, cmpCamera.mtxPivot.rotation.y - 180, cmpCamera.mtxPivot.rotation.z);
+        cmpCamera.node.mtxLocal.translation = cmpCamera.mtxPivot.translation;
     }
     function onEndSession() {
         f.Loop.stop();

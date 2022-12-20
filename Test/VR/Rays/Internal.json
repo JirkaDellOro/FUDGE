@@ -167,7 +167,7 @@
             "children": [
               {
                 "ƒ.Node": {
-                  "name": "Cube",
+                  "name": "Red",
                   "active": true,
                   "components": {
                     "ComponentMesh": [
@@ -207,7 +207,7 @@
                       {
                         "ƒ.ComponentTransform": {
                           "local": {
-                            "translation": "[-1, 0, 0]",
+                            "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
                             "scaling": "[1, 1, 1]"
                           },
@@ -231,7 +231,7 @@
               },
               {
                 "ƒ.Node": {
-                  "name": "Cube1",
+                  "name": "Green",
                   "active": true,
                   "components": {
                     "ComponentMesh": [
@@ -295,7 +295,7 @@
               },
               {
                 "ƒ.Node": {
-                  "name": "Cube2",
+                  "name": "Blue",
                   "active": true,
                   "components": {
                     "ComponentMesh": [
@@ -335,7 +335,7 @@
                       {
                         "ƒ.ComponentTransform": {
                           "local": {
-                            "translation": "[3, 0, 0]",
+                            "translation": "[2, 0, 0]",
                             "rotation": "[0, 0, 0]",
                             "scaling": "[1, 1, 1]"
                           },
@@ -359,7 +359,7 @@
               },
               {
                 "ƒ.Node": {
-                  "name": "Cube3",
+                  "name": "Yellow",
                   "active": true,
                   "components": {
                     "ComponentMesh": [
@@ -399,9 +399,9 @@
                       {
                         "ƒ.ComponentTransform": {
                           "local": {
-                            "translation": "[5, 0, 0]",
-                            "rotation": "[0, 0, 0]",
-                            "scaling": "[1, 1, 1]"
+                            "translation": "[6, 0, 0]",
+                            "rotation": "[61, 0, 0]",
+                            "scaling": "[3, 4, 4]"
                           },
                           "Component": {
                             "active": true
