@@ -52,7 +52,7 @@ var AudioSceneVR;
         });
     }
     function initializeRays() {
-        let pickableObjects = graph.getChildrenByName("CubeContainer")[0].getChildren();
+        let pickableObjects = graph.getChildrenByName("CubeContainer")[0];
         let rightRayNode = graph.getChildrenByName("raysContainer")[0].getChild(0);
         let leftRayNode = graph.getChildrenByName("raysContainer")[0].getChild(1);
         rightRayNode.addComponent(new AudioSceneVR.RayHelper(xrViewport, xrViewport.vrDevice.rightCntrl, 50, pickableObjects));

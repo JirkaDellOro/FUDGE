@@ -11,13 +11,16 @@ namespace AudioSceneVR {
         private controller: f.VRController;
         private maxLength: number;
         private pickableObjects: f.Node[];
+        private cubeContainer: f.Node;
         private pick: f.Node = null;
-        constructor(_xrViewport: f.XRViewport, _controller: f.VRController, _lengthRay: number, _pickableObjects: f.Node[]) {
+        private ray: f.Ray = null;
+        constructor(_xrViewport: f.XRViewport, _controller: f.VRController, _lengthRay: number, _cubeContainer: f.Node) {
             super();
             this.xrViewport = _xrViewport;
             this.controller = _controller;
             this.maxLength = _lengthRay;
-            this.pickableObjects = _pickableObjects;
+            this.cubeContainer = _cubeContainer;
+            this.pickableObjects = _cubeContainer.getChildren();
             // Don't start when running in editor
             if (f.Project.mode == f.MODE.EDITOR)
                 return;
@@ -34,6 +37,10 @@ namespace AudioSceneVR {
                 case f.EVENT.COMPONENT_ADD:
                     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, this.update);
                     f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
+                    this.xrViewport.session.addEventListener("squeeze", this.onSqueeze);
+                    this.xrViewport.session.addEventListener("selectstart", this.onSelectStart);
+                    this.xrViewport.session.addEventListener("selectend", this.onSelectEnd);
+
                     break;
                 case f.EVENT.COMPONENT_REMOVE:
                     this.removeEventListener(f.EVENT.COMPONENT_ADD, this.hndEvent);
@@ -46,42 +53,68 @@ namespace AudioSceneVR {
         }
 
         private computeRay = (): void => {
+            if (!this.hasObject) {
+                this.node.getComponent(f.ComponentTransform).mtxLocal = this.controller.cmpTransform.mtxLocal;
+                let forward: f.Vector3;
+                forward = f.Vector3.Z();
+                forward.transform(this.node.mtxWorld, false);
+                this.ray = new f.Ray(f.Vector3.SCALE(new f.Vector3(forward.x, forward.y, forward.z), -1000), this.node.mtxLocal.translation, 0.1);
 
+                if (!this.pick) {
+                    this.node.getComponent(f.ComponentMesh).mtxPivot.scaling = new f.Vector3(0.025, this.maxLength, 0.025);
+                    this.node.getComponent(f.ComponentMesh).mtxPivot.translation = new f.Vector3(0, 0, -this.maxLength / 2 + 0.2);
+                    this.node.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(100, 100, 100, 0.5);
+                } else {
+                    let distance: f.Vector3 = f.Vector3.DIFFERENCE(this.pick.mtxLocal.translation, this.controller.cmpTransform.mtxLocal.translation);
+                    this.node.getComponent(f.ComponentMesh).mtxPivot.scaling = new f.Vector3(0.025, distance.magnitude, 0.025);
+                    this.node.getComponent(f.ComponentMesh).mtxPivot.translation = new f.Vector3(0, 0, -distance.magnitude / 2 + 0.2);
+                    this.node.getComponent(f.ComponentMaterial).clrPrimary = this.pick.getComponent(f.ComponentMaterial).clrPrimary;
+                    this.node.getComponent(f.ComponentMaterial).clrPrimary.a = 0.5;
+                }
 
-            this.node.getComponent(f.ComponentTransform).mtxLocal = this.controller.cmpTransform.mtxLocal;
-            let forward: f.Vector3;
-            forward = f.Vector3.Z();
-            forward.transform(this.node.mtxWorld, false);
-            let ray: f.Ray = new f.Ray(new f.Vector3(-forward.x * 10000, -forward.y * 10000, -forward.z * 10000), this.node.mtxLocal.translation, 0.1);
+                let picker: f.Pick[] = f.Picker.pickRay(this.pickableObjects, this.ray, 0, 1);
+                picker.sort((a: f.Pick, b: f.Pick) => a.zBuffer < b.zBuffer ? -1 : 1);
 
-            // if (!this.pick) {
-            //     this.node.getComponent(f.ComponentMesh).mtxPivot.scaling = new f.Vector3(0.1, this.maxLength, 0.1);
-            //     this.node.getComponent(f.ComponentMesh).mtxPivot.translation = new f.Vector3(0, 0, -this.maxLength / 2);
-            // } else {
-            //     let distance: f.Vector3 = ray.getDistance(this.pick.mtxLocal.translation);
-            //     this.node.getComponent(f.ComponentMesh).mtxPivot.scaling = new f.Vector3(0.1, distance.magnitude, 0.1);
-            //     this.node.getComponent(f.ComponentMesh).mtxPivot.translation = new f.Vector3(0, 0, -distance.magnitude / 2);
-            // }
-            this.node.getComponent(f.ComponentMesh).mtxPivot.scaling = new f.Vector3(0.1, this.maxLength, 0.1);
-            this.node.getComponent(f.ComponentMesh).mtxPivot.translation = new f.Vector3(0, 0, -this.maxLength / 2);
-
-            let picker: f.Pick[] = f.Picker.pickRay(this.pickableObjects, ray, 0, 100000000000000000);
-            picker.sort((a: f.Pick, b: f.Pick) => a.zBuffer < b.zBuffer ? -1 : 1);
-
-            picker.forEach(element => {
-                console.log(element.node.name);
-            });
-
-            if (picker.length > 0) {
-                this.pick = picker[0].node;
-            } else this.pick = null;
-
+                if (picker.length > 0) {
+                    this.pick = picker[0].node;
+                } else this.pick = null;
+            }
 
         }
-
+        private hasObject: boolean = false;
+        private
         private update = (): void => {
             if (this.xrViewport.session)
                 this.computeRay();
+
+            if (this.hasObject) {
+                this.pick.mtxLocal.translation = new f.Vector3(0, 0, -this.node.getComponent(f.ComponentMesh).mtxPivot.scaling.y);
+                this.pick.mtxLocal.rotation = this.controller.cmpTransform.mtxLocal.rotation;
+
+            }
+
+        }
+        private onSqueeze = (_event: XRInputSourceEvent): void => {
+            if (this.pick) {
+                this.xrViewport.vrDevice.translation = this.pick.getComponent(f.ComponentTransform).mtxLocal.translation;
+            }
+        }
+        private onSelectStart = (_event: XRInputSourceEvent): void => {
+            if (this.pick) {
+                this.node.addChild(this.pick);
+                this.hasObject = true;
+            }
+
+        }
+
+        private onSelectEnd = (_event: XRInputSourceEvent): void => {
+            if (this.pick) {
+                this.hasObject = false;
+                this.cubeContainer.addChild(this.pick);
+                this.pick.mtxLocal.translation = new f.Vector3(this.pick.mtxWorld.translation.x, this.pick.mtxWorld.translation.y, this.pick.mtxWorld.translation.z);
+                this.pick.mtxLocal.rotation = new f.Vector3(this.pick.mtxWorld.rotation.x, this.pick.mtxWorld.rotation.y, this.pick.mtxWorld.rotation.z);
+
+            }
         }
     }
 }

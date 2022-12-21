@@ -61,7 +61,7 @@ namespace AudioSceneVR {
   }
 
   function initializeRays(): void {
-    let pickableObjects: f.Node[] = graph.getChildrenByName("CubeContainer")[0].getChildren();
+    let pickableObjects: f.Node = graph.getChildrenByName("CubeContainer")[0];
     let rightRayNode = graph.getChildrenByName("raysContainer")[0].getChild(0);
     let leftRayNode = graph.getChildrenByName("raysContainer")[0].getChild(1);
     rightRayNode.addComponent(new RayHelper(xrViewport, xrViewport.vrDevice.rightCntrl, 50, pickableObjects));

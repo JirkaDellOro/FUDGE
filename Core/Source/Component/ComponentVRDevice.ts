@@ -54,7 +54,7 @@ namespace FudgeCore {
         /**
          * Sets a Vector3 as Position of the reference space.
          */
-        public set position(_newPos: Vector3) {
+        public set translation(_newPos: Vector3) {
             let invTranslation: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(_newPos, this.#mtxLocal.translation), -1);
             XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
             this.#mtxLocal.translation = _newPos;
@@ -96,7 +96,6 @@ namespace FudgeCore {
 
             let orientation: Quaternion = new Quaternion();
             orientation.setFromVector3(rotAmount.x, rotAmount.y, rotAmount.z);
-            console.log(this.#mtxLocal.translation.toString());
             //set xr - rig back to origin
             XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(this.#mtxLocal.translation, Vector3.ZERO())));
             //rotate xr rig in origin
@@ -114,12 +113,14 @@ namespace FudgeCore {
                         switch (controller.handedness) {
                             case ("right"):
                                 this.rightCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
+
                                 if (this.rightCntrl.gamePad) {
                                     this.rightCntrl.thumbstickX = controller.gamepad.axes[2];
                                     this.rightCntrl.thumbstickY = controller.gamepad.axes[3];
                                 }
                             case ("left"):
                                 this.leftCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
+
                                 if (this.leftCntrl.gamePad) {
                                     this.leftCntrl.thumbstickX = controller.gamepad.axes[2];
                                     this.leftCntrl.thumbstickY = controller.gamepad.axes[3];

@@ -2220,7 +2220,7 @@ declare namespace FudgeCore {
         /**
          * Sets a Vector3 as Position of the reference space.
          */
-        set position(_newPos: Vector3);
+        set translation(_newPos: Vector3);
         /**
          * Adds a Vector3 in Position of the reference space.
          */
