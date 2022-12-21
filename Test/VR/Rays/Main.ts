@@ -4,7 +4,7 @@ namespace AudioSceneVR {
 
   let xrViewport: f.XRViewport = new f.XRViewport();
   let graph: f.Graph = null;
-  let cmpCameraVR: f.ComponentCameraVR = null;
+  let cmpVRDevice: f.ComponentVRDevice = null;
 
   window.addEventListener("load", init);
 
@@ -17,10 +17,10 @@ namespace AudioSceneVR {
       return;
     }
     let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector("canvas");
-    cmpCameraVR = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCameraVR);
-    cmpCameraVR.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
+    cmpVRDevice = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentVRDevice);
+    cmpVRDevice.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
 
-    xrViewport.initialize("Viewport", graph, cmpCameraVR, canvas);
+    xrViewport.initialize("Viewport", graph, cmpVRDevice, canvas);
 
 
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
@@ -64,8 +64,8 @@ namespace AudioSceneVR {
     let pickableObjects: f.Node[] = graph.getChildrenByName("CubeContainer")[0].getChildren();
     let rightRayNode = graph.getChildrenByName("raysContainer")[0].getChild(0);
     let leftRayNode = graph.getChildrenByName("raysContainer")[0].getChild(1);
-    rightRayNode.addComponent(new RayHelper(xrViewport, xrViewport.vr.rightCntrl, 50, pickableObjects));
-    leftRayNode.addComponent(new RayHelper(xrViewport, xrViewport.vr.leftCntrl, 50, pickableObjects));
+    rightRayNode.addComponent(new RayHelper(xrViewport, xrViewport.vrDevice.rightCntrl, 50, pickableObjects));
+    leftRayNode.addComponent(new RayHelper(xrViewport, xrViewport.vrDevice.leftCntrl, 50, pickableObjects));
   }
 
   function update(_event: Event): void {

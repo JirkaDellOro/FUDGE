@@ -12,8 +12,6 @@ namespace FudgeCore {
 
     public name: string = "Viewport"; // The name to call this viewport by.
     public camera: ComponentCamera = null; // The camera representing the view parameters to render the branch.
-    protected cameraVR: ComponentCameraVR = null
-
     public rectSource: Rectangle;
     public rectDestination: Rectangle;
 

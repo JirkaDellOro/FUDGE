@@ -4,7 +4,7 @@ var AudioSceneVR;
     f.Debug.info("Main Program Template running!");
     let xrViewport = new f.XRViewport();
     let graph = null;
-    let cmpCameraVR = null;
+    let cmpVRDevice = null;
     window.addEventListener("load", init);
     async function init() {
         await FudgeCore.Project.loadResources("Internal.json");
@@ -15,9 +15,9 @@ var AudioSceneVR;
             return;
         }
         let canvas = document.querySelector("canvas");
-        cmpCameraVR = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCameraVR);
-        cmpCameraVR.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
-        xrViewport.initialize("Viewport", graph, cmpCameraVR, canvas);
+        cmpVRDevice = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentVRDevice);
+        cmpVRDevice.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
+        xrViewport.initialize("Viewport", graph, cmpVRDevice, canvas);
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
         checkForVRSupport();
@@ -55,8 +55,8 @@ var AudioSceneVR;
         let pickableObjects = graph.getChildrenByName("CubeContainer")[0].getChildren();
         let rightRayNode = graph.getChildrenByName("raysContainer")[0].getChild(0);
         let leftRayNode = graph.getChildrenByName("raysContainer")[0].getChild(1);
-        rightRayNode.addComponent(new AudioSceneVR.RayHelper(xrViewport, xrViewport.vr.rightCntrl, 50, pickableObjects));
-        leftRayNode.addComponent(new AudioSceneVR.RayHelper(xrViewport, xrViewport.vr.leftCntrl, 50, pickableObjects));
+        rightRayNode.addComponent(new AudioSceneVR.RayHelper(xrViewport, xrViewport.vrDevice.rightCntrl, 50, pickableObjects));
+        leftRayNode.addComponent(new AudioSceneVR.RayHelper(xrViewport, xrViewport.vrDevice.leftCntrl, 50, pickableObjects));
     }
     function update(_event) {
         let pickableObjects = graph.getChildrenByName("CubeContainer")[0].getChildren();

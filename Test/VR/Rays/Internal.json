@@ -444,9 +444,9 @@
                   }
                 }
               ],
-              "ComponentCameraVR": [
+              "ComponentVRDevice": [
                 {
-                  "ƒ.ComponentCameraVR": {
+                  "ƒ.ComponentVRDevice": {
                     "backgroundColor": {
                       "r": 0,
                       "g": 0,

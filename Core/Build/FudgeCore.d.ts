@@ -1973,12 +1973,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    class ComponentCameraVR extends ComponentCamera {
-        static readonly iSubclass: number;
-        constructor();
-    }
-}
-declare namespace FudgeCore {
     /**
      * Makes the node face the camera when rendering, respecting restrictions for rotation around specific axis
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
@@ -2194,6 +2188,58 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+    * @author Valentin Schmidberger, HFU, 2022
+    * VR Component Class, for Session Management, Controller Management and Reference Space Management.
+    */
+    class VRController {
+        cmpTransform: ComponentTransform;
+        gamePad: Gamepad;
+        thumbstickX: number;
+        thumbstickY: number;
+    }
+    class ComponentVRDevice extends ComponentCamera {
+        #private;
+        static readonly iSubclass: number;
+        rightCntrl: VRController;
+        leftCntrl: VRController;
+        constructor();
+        /**
+         * Sets controller matrices, gamepad references and thumbsticks movements.
+         * Creator dont need to call this method.
+         * Its automatically called when controller boolean is true.
+         */
+        setControllerConfigs(_xrFrame: XRFrame): void;
+        get mtxLocal(): Matrix4x4;
+        /**
+         * Initiliaze Gamepad for right and left Controller
+         * Creator dont need to call this method.
+         * Its automatically called when controller boolean is true.
+         */
+        initializeGamepads(): void;
+        /**
+         * Sets a Vector3 as Position of the reference space.
+         */
+        set position(_newPos: Vector3);
+        /**
+         * Adds a Vector3 in Position of the reference space.
+         */
+        translate(_by: Vector3): void;
+        /**
+         * Sets Vector3 Rotation of the reference space.
+         * Rotation needs to be set in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
+         */
+        set rotation(_newRot: Vector3);
+        /**
+         * Adds a Vector3 in Rotation of the reference space.
+         * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
+         */
+        rotate(_by: Vector3): void;
+        private setController;
+        private getMtxLocalFromCmpTransform;
+    }
+}
+declare namespace FudgeCore {
     const enum EVENT_CONTROL {
         INPUT = "input",
         OUTPUT = "output"
@@ -2338,48 +2384,6 @@ declare namespace FudgeCore {
         static mapToTrit(_positive: KEYBOARD_CODE[], _negative: KEYBOARD_CODE[]): number;
         private static initialize;
         private static hndKeyInteraction;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * @author Valentin Schmidberger, HFU, 2022
-     * VR Component Class, for Session Management, Controller Management and Reference Space Management.
-     */
-    class VRController {
-        cmpTransform: ComponentTransform;
-        gamePad: Gamepad;
-        thumbstickX: number;
-        thumbstickY: number;
-    }
-    class VR {
-        rightCntrl: VRController;
-        leftCntrl: VRController;
-        deviceTransform: ComponentTransform;
-        constructor();
-        setControllerConfigs(_xrFrame: XRFrame): void;
-        /**
-         * Sets controller matrices, gamepad references and thumbsticks movements.
-         */
-        private setController;
-        private initializeGamepads;
-        /**
-* Sets a Vector3 as Position of the reference space.
-*/
-        set positionDevice(_newPos: Vector3);
-        /**
-         * Adds a Vector3 in Position of the reference space.
-         */
-        translateDevice(_by: Vector3): void;
-        /**
-         * Sets Vector3 Rotation of the reference space.
-         * Rotation needs to be set in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
-         */
-        set rotationDevice(_newRot: Vector3);
-        /**
-         * Adds a Vector3 in Rotation of the reference space.
-         * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
-         */
-        rotateDevice(_by: Vector3): void;
     }
 }
 declare namespace FudgeCore {
@@ -5303,7 +5307,6 @@ declare namespace FudgeCore {
         private static focus;
         name: string;
         camera: ComponentCamera;
-        protected cameraVR: ComponentCameraVR;
         rectSource: Rectangle;
         rectDestination: Rectangle;
         frameClientToCanvas: FramingScaled;
@@ -5436,13 +5439,12 @@ declare namespace FudgeCore {
      */
     class XRViewport extends Viewport {
         private static xrViewportInstance;
-        vr: VR;
+        vrDevice: ComponentVRDevice;
         session: XRSession;
         referenceSpace: XRReferenceSpace;
         private useVRController;
         private crc3;
-        private poseDevice;
-        private deviceTransform;
+        private poseMtx;
         constructor();
         /**
          * To retrieve private static instance of xr viewport, readonly.
@@ -5451,13 +5453,13 @@ declare namespace FudgeCore {
         /**
           * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
           */
-        initialize(_name: string, _branch: Node, _cameraVR: ComponentCameraVR, _canvas: HTMLCanvasElement): void;
+        initialize(_name: string, _branch: Node, _cameraXR: ComponentVRDevice, _canvas: HTMLCanvasElement): void;
         /**
          * The VR Session is initialized here, also VR - Controller are initialized, if boolean is true.
          * Creator has to call FrameRequestXR after this Method to run the viewport in virtual reality.
          */
         initializeVR(_vrSessionMode?: XR_SESSION_MODE, _vrReferenceSpaceType?: XR_REFERENCE_SPACE, _vrController?: boolean): Promise<void>;
-        private initializeInternalDeviceTransform;
+        private initializevrDeviceTransform;
         /**
          * The AR session could be initialized here. Up till now not implemented.
          */

@@ -26,17 +26,13 @@ namespace FudgeCore {
    */
   export class XRViewport extends Viewport {
     private static xrViewportInstance: XRViewport = null;
-
-    public vr: VR = null;
-
+    public vrDevice: ComponentVRDevice = null;
     public session: XRSession = null;
     public referenceSpace: XRReferenceSpace = null;
     private useVRController: boolean = false;
     private crc3: WebGL2RenderingContext = null;
 
-    private poseDevice: Matrix4x4 = new Matrix4x4();
-    private deviceTransform: ComponentTransform = null;
-
+    private poseMtx: Matrix4x4 = new Matrix4x4();
     constructor() {
       super();
       XRViewport.xrViewportInstance = this;
@@ -52,55 +48,52 @@ namespace FudgeCore {
     /**
       * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
       */
-    public initialize(_name: string, _branch: Node, _cameraVR: ComponentCameraVR, _canvas: HTMLCanvasElement): void {
-
-      super.initialize(_name, _branch, _cameraVR, _canvas);
-      let deviceCamera: ComponentCamera = new ComponentCamera();
-      deviceCamera.mtxPivot = _cameraVR.mtxWorld;
-      deviceCamera.clrBackground = _cameraVR.clrBackground;
-      this.deviceTransform = _cameraVR.node.getComponent(ComponentTransform);
-      this.camera = deviceCamera;
+    public initialize(_name: string, _branch: Node, _cameraXR: ComponentVRDevice /* | ComponentCameraAR*/, _canvas: HTMLCanvasElement): void {
+      super.initialize(_name, _branch, _cameraXR, _canvas);
+      this.camera = _cameraXR;
     }
 
     /**
      * The VR Session is initialized here, also VR - Controller are initialized, if boolean is true.
      * Creator has to call FrameRequestXR after this Method to run the viewport in virtual reality.
      */
-    public async initializeVR(_vrSessionMode: XR_SESSION_MODE = XR_SESSION_MODE.IMMERSIVE_VR, _vrReferenceSpaceType: XR_REFERENCE_SPACE = XR_REFERENCE_SPACE.LOCAL, _vrController: boolean = false): Promise<void> {
+    public async initializeVR(_vrSessionMode: XR_SESSION_MODE = XR_SESSION_MODE.IMMERSIVE_VR, _vrReferenceSpaceType: XR_REFERENCE_SPACE = XR_REFERENCE_SPACE.LOCAL,
+      _vrController: boolean = false): Promise<void> {
       let session: XRSession = await navigator.xr.requestSession(_vrSessionMode);
       this.referenceSpace = await session.requestReferenceSpace(_vrReferenceSpaceType);
       await this.crc3.makeXRCompatible();
       let nativeScaleFactor = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
       await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3, { framebufferScaleFactor: nativeScaleFactor }) });      // field of view anschauen was noch geht!
 
-      this.initializeInternalDeviceTransform(this.camera.mtxPivot);
+      this.vrDevice = <ComponentVRDevice>this.camera;
 
+
+      this.initializevrDeviceTransform(this.camera.mtxWorld);
       this.session = session;
-
-      this.vr = new VR();
-      this.vr.deviceTransform = this.deviceTransform;
+      this.vrDevice.initializeGamepads();
 
       this.useVRController = _vrController;
       if (_vrController) {
-        this.vr.rightCntrl.cmpTransform = new ComponentTransform();
-        this.vr.leftCntrl.cmpTransform = new ComponentTransform();
+        this.vrDevice.rightCntrl.cmpTransform = new ComponentTransform();
+        this.vrDevice.leftCntrl.cmpTransform = new ComponentTransform();
       }
 
 
-      // sets the rotation & position of the inital viewport camera and adding 180 degree, because the XR Rig is looking in the direction of negative z 
       this.calculateTransforms();
     }
-    private initializeInternalDeviceTransform(_newMtx: Matrix4x4) {
+    // sets the rotation & position of the inital camera  of cmpVRDevice and adding 180 degree, because the XR Rig is looking in the direction of negative z 
+    private initializevrDeviceTransform(_newMtx: Matrix4x4) {
       let newRot: Vector3 = Vector3.SCALE(new Vector3(_newMtx.rotation.x, _newMtx.rotation.y - 180, _newMtx.rotation.z), Math.PI / 180);
-
       let orientation: Quaternion = new Quaternion();
       orientation.setFromVector3(newRot.x, newRot.y, newRot.z);
-      //set xr - rig back to origin
       //rotate xr rig in origin
       XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
+      this.camera.mtxPivot.rotateY(180);
 
-      let invTranslation: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(_newMtx.translation, this.deviceTransform.mtxLocal.translation), -1);
+      let invTranslation: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(_newMtx.translation, Vector3.ZERO()), -1);
       XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
+      this.vrDevice.mtxLocal.translation = this.camera.mtxWorld.translation;
+      this.camera.mtxPivot.translation = Vector3.ZERO();
     }
     /**
      * The AR session could be initialized here. Up till now not implemented. 
@@ -125,10 +118,9 @@ namespace FudgeCore {
         Render.resetFrameBuffer(glLayer.framebuffer);
         Render.clear(this.camera.clrBackground);
 
-        this.poseDevice.set(pose.transform.matrix);
-
-        this.vr.deviceTransform.mtxLocal.translation = this.poseDevice.translation;
-        this.vr.deviceTransform.mtxLocal.rotation = new Vector3(this.poseDevice.rotation.x, this.poseDevice.rotation.y - 180, this.poseDevice.rotation.z);
+        this.poseMtx.set(pose.transform.matrix);
+        this.poseMtx.rotateY(180);
+        this.vrDevice.mtxLocal.set(this.poseMtx);
 
         if (pose) {
           for (let view of pose.views) {
@@ -136,9 +128,7 @@ namespace FudgeCore {
             this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
 
             if (this.useVRController)
-              this.vr.setControllerConfigs(_xrFrame);
-
-            this.camera.mtxPivot.set(view.transform.matrix);
+              this.vrDevice.setControllerConfigs(_xrFrame);
             this.camera.mtxProjection.set(view.projectionMatrix);
             this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
 

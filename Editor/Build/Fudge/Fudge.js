@@ -2521,7 +2521,7 @@ var Fudge;
             }
             //@ts-ignore
             let cmpNew = new component();
-            if (cmpNew instanceof ƒ.ComponentRigidbody || cmpNew instanceof ƒ.ComponentCameraVR)
+            if (cmpNew instanceof ƒ.ComponentRigidbody || cmpNew instanceof ƒ.ComponentVRDevice)
                 if (!this.node.cmpTransform) {
                     alert("To attach this Component, first attach ComponentTransform!");
                     return;

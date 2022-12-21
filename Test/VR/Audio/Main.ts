@@ -4,7 +4,7 @@ namespace AudioSceneVR {
 
   let xrViewport: f.XRViewport = new f.XRViewport();
   let graph: f.Graph = null;
-  let cmpCameraVR: f.ComponentCameraVR = null;
+  let cmpVRDevice: f.ComponentVRDevice = null;
   let audioLeft: f.ComponentAudio = null;
   let audioRight: f.ComponentAudio = null;
 
@@ -19,10 +19,10 @@ namespace AudioSceneVR {
       return;
     }
     let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector("canvas");
-    cmpCameraVR = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCameraVR);
-    cmpCameraVR.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
+    cmpVRDevice = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentVRDevice);
+    cmpVRDevice.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
 
-    xrViewport.initialize("Viewport", graph, cmpCameraVR, canvas);
+    xrViewport.initialize("Viewport", graph, cmpVRDevice, canvas);
     setupAudio();
 
 
@@ -73,7 +73,7 @@ namespace AudioSceneVR {
   }
   function setupAudio(): void {
     f.AudioManager.default.listenTo(graph);
-    f.AudioManager.default.listenWith(cmpCameraVR.node.getComponent(f.ComponentAudioListener));
+    f.AudioManager.default.listenWith(cmpVRDevice.node.getComponent(f.ComponentAudioListener));
     audioLeft = graph.getChildrenByName("AudioL")[0].getComponent(f.ComponentAudio);
     audioRight = graph.getChildrenByName("AudioR")[0].getComponent(f.ComponentAudio);
   }

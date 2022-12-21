@@ -4,7 +4,7 @@ var AudioSceneVR;
     f.Debug.info("Main Program Template running!");
     let xrViewport = new f.XRViewport();
     let graph = null;
-    let cmpCameraVR = null;
+    let cmpVRDevice = null;
     let audioLeft = null;
     let audioRight = null;
     window.addEventListener("load", init);
@@ -17,9 +17,9 @@ var AudioSceneVR;
             return;
         }
         let canvas = document.querySelector("canvas");
-        cmpCameraVR = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCameraVR);
-        cmpCameraVR.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
-        xrViewport.initialize("Viewport", graph, cmpCameraVR, canvas);
+        cmpVRDevice = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentVRDevice);
+        cmpVRDevice.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
+        xrViewport.initialize("Viewport", graph, cmpVRDevice, canvas);
         setupAudio();
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
@@ -59,7 +59,7 @@ var AudioSceneVR;
     }
     function setupAudio() {
         f.AudioManager.default.listenTo(graph);
-        f.AudioManager.default.listenWith(cmpCameraVR.node.getComponent(f.ComponentAudioListener));
+        f.AudioManager.default.listenWith(cmpVRDevice.node.getComponent(f.ComponentAudioListener));
         audioLeft = graph.getChildrenByName("AudioL")[0].getComponent(f.ComponentAudio);
         audioRight = graph.getChildrenByName("AudioR")[0].getComponent(f.ComponentAudio);
     }

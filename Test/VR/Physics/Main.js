@@ -3,7 +3,7 @@ var PhysicsVR;
     var f = FudgeCore;
     let xrViewport = new f.XRViewport();
     let graph = null;
-    let cmpCameraVR = null;
+    let cmpVRDevice = null;
     let rightController = null;
     let leftController = null;
     PhysicsVR.cubeContainer = null;
@@ -22,9 +22,9 @@ var PhysicsVR;
             return;
         }
         let canvas = document.querySelector("canvas");
-        cmpCameraVR = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentCameraVR);
+        cmpVRDevice = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentVRDevice);
         xrViewport.physicsDebugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-        xrViewport.initialize("Viewport", graph, cmpCameraVR, canvas);
+        xrViewport.initialize("Viewport", graph, cmpVRDevice, canvas);
         rightController = graph.getChildrenByName("rightController")[0];
         leftController = graph.getChildrenByName("leftController")[0];
         PhysicsVR.cubeContainer = graph.getChildrenByName("cubeContainer")[0];
@@ -61,8 +61,8 @@ var PhysicsVR;
             //stop normal loop of winodws.animationFrame
             f.Loop.stop();
             //set controllers matrix information to component transform from node controller made in FUDGE Editor
-            rightController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vr.rightCntrl.cmpTransform.mtxLocal;
-            leftController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vr.leftCntrl.cmpTransform.mtxLocal;
+            rightController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vrDevice.rightCntrl.cmpTransform.mtxLocal;
+            leftController.getComponent(f.ComponentTransform).mtxLocal = xrViewport.vrDevice.leftCntrl.cmpTransform.mtxLocal;
             //starts xr-session.animationFrame instead of window.animationFrame, your xr-session is ready to go!
             f.Loop.start(f.LOOP_MODE.FRAME_REQUEST_XR, 60);
         });
