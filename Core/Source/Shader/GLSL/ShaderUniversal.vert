@@ -4,6 +4,8 @@
 * @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
 */
 
+precision highp float;
+
   // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxMeshToView;
 in vec3 a_vctPosition;
