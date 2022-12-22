@@ -176,7 +176,7 @@ void main() {
 * @authors Jirka Dell'Oro-Friedl, HFU, 2021
 */
 
-precision mediump float;
+precision highp float;
 
   // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;
