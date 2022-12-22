@@ -5,6 +5,7 @@
 */
 
 precision mediump float;
+precision highp int;
 
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;

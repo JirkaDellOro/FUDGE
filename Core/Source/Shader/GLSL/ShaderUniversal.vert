@@ -5,6 +5,7 @@
 */
 
 precision mediump float;
+precision highp int;
 
   // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxMeshToView;

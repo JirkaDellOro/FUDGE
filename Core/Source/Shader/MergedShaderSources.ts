@@ -7,6 +7,7 @@ namespace FudgeCore {
 */
 
 precision mediump float;
+precision highp int;
 
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
@@ -177,6 +178,7 @@ void main() {
 */
 
 precision mediump float;
+precision highp int;
 
   // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;
@@ -223,6 +225,7 @@ void main() {
 */
 
 precision mediump float;
+precision highp int;
 
   // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxMeshToView;
