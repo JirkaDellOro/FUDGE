@@ -4,7 +4,7 @@
 * @authors Jirka Dell'Oro-Friedl, HFU, 2022
 */
 
-precision highp float;
+precision mediump float;
 
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;

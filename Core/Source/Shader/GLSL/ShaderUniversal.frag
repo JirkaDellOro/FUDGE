@@ -4,7 +4,7 @@
 * @authors Jirka Dell'Oro-Friedl, HFU, 2021
 */
 
-precision highp float;
+precision mediump float;
 
   // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;

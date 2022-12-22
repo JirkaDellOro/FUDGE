@@ -6,7 +6,7 @@ namespace FudgeCore {
 * @authors Jirka Dell'Oro-Friedl, HFU, 2022
 */
 
-precision highp float;
+precision mediump float;
 
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
@@ -176,7 +176,7 @@ void main() {
 * @authors Jirka Dell'Oro-Friedl, HFU, 2021
 */
 
-precision highp float;
+precision mediump float;
 
   // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;
@@ -222,7 +222,7 @@ void main() {
 * @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
 */
 
-precision highp float;
+precision mediump float;
 
   // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxMeshToView;
