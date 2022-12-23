@@ -1,6 +1,6 @@
-namespace PhysicsVR {
+namespace PhysicsSceneVR {
   import f = FudgeCore;
-  f.Project.registerScriptNamespace(PhysicsVR);  // Register the namespace to FUDGE for serialization
+  f.Project.registerScriptNamespace(PhysicsSceneVR);  // Register the namespace to FUDGE for serialization
 
   export class Sword extends f.ComponentScript {
     // Register the script as component for use in the editor via drag&drop

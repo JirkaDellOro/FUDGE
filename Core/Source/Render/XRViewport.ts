@@ -69,15 +69,13 @@ namespace FudgeCore {
 
 
       this.initializevrDeviceTransform(this.camera.mtxWorld);
-      this.session = session;
-      this.vrDevice.initializeGamepads();
-
       this.useVRController = _vrController;
       if (_vrController) {
         this.vrDevice.rightCntrl.cmpTransform = new ComponentTransform();
         this.vrDevice.leftCntrl.cmpTransform = new ComponentTransform();
       }
 
+      this.session = session;
 
       this.calculateTransforms();
     }
@@ -128,7 +126,7 @@ namespace FudgeCore {
             this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
 
             if (this.useVRController)
-              this.vrDevice.setControllerConfigs(_xrFrame);
+              this.setControllerConfigs(_xrFrame);
             this.camera.mtxProjection.set(view.projectionMatrix);
             this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
 
@@ -140,6 +138,40 @@ namespace FudgeCore {
             }
           }
           Render.setRenderRectangle(Render.getRenderRectangle());
+        }
+      }
+    }
+    //Sets controller matrices and thumbsticks movements.
+    private setControllerConfigs(_xrFrame: XRFrame): void {
+      if (_xrFrame) {
+        if (XRViewport.default.session.inputSources.length > 0) {
+          XRViewport.default.session.inputSources.forEach(controller => {
+            try {
+              switch (controller.handedness) {
+                case ("right"):
+                  this.vrDevice.rightCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
+                  if (!this.vrDevice.rightCntrl.gamePad)
+                    this.vrDevice.rightCntrl.gamePad = controller.gamepad;
+                  else {
+                    this.vrDevice.rightCntrl.thumbstickX = controller.gamepad.axes[2];
+                    this.vrDevice.rightCntrl.thumbstickY = controller.gamepad.axes[3];
+                  }
+                  break;
+                case ("left"):
+                  this.vrDevice.leftCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
+
+                  if (!this.vrDevice.leftCntrl.gamePad)
+                    this.vrDevice.leftCntrl.gamePad = controller.gamepad;
+                  else {
+                    this.vrDevice.leftCntrl.thumbstickX = controller.gamepad.axes[2];
+                    this.vrDevice.leftCntrl.thumbstickY = controller.gamepad.axes[3];
+                  }
+                  break;
+              }
+            } catch (e: unknown) {
+              Debug.info("Input Sources Error: " + e);
+            }
+          });
         }
       }
     }

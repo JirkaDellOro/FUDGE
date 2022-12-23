@@ -1,6 +1,6 @@
-namespace AudioSceneVR {
+namespace ControllerSceneVR {
     import f = FudgeCore;
-    f.Project.registerScriptNamespace(AudioSceneVR);  // Register the namespace to FUDGE for serialization
+    f.Project.registerScriptNamespace(ControllerSceneVR);  // Register the namespace to FUDGE for serialization
 
     export class Controller extends f.ComponentScript {
         private xrViewport: f.XRViewport = null;
@@ -40,7 +40,6 @@ namespace AudioSceneVR {
                     this.initController();
 
                     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, this.update);
-                    f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
                     break;
                 case f.EVENT.COMPONENT_REMOVE:
                     this.removeEventListener(f.EVENT.COMPONENT_ADD, this.hndEvent);
@@ -106,6 +105,7 @@ namespace AudioSceneVR {
                             }
                         }
                 } catch (error) {
+                    f.Debug.error("Mapped Buttons are not initialized correctly!")
                 }
             }
         }

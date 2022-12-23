@@ -1,4 +1,4 @@
-namespace AudioSceneVR {
+namespace RaySceneVR {
   import f = FudgeCore;
   f.Debug.info("Main Program Template running!");
 
@@ -69,14 +69,6 @@ namespace AudioSceneVR {
   }
 
   function update(_event: Event): void {
-    let pickableObjects: f.Node[] = graph.getChildrenByName("CubeContainer")[0].getChildren();
-
-    // let ray: f.Ray = new f.Ray(new f.Vector3(0, 0, 1), new f.Vector3(0, 0, -1), 1);
-
-    // let picker: f.Pick[] = f.Picker.pickRay(pickableObjects, ray, 0, 100000000000000000);
-    // picker.forEach(element => {
-    //   console.log(element.node.name);
-    // });
     xrViewport.draw();
 
   }

@@ -1,6 +1,6 @@
-namespace AudioSceneVR {
+namespace RaySceneVR {
     import f = FudgeCore;
-    f.Project.registerScriptNamespace(AudioSceneVR);  // Register the namespace to FUDGE for serialization
+    f.Project.registerScriptNamespace(RaySceneVR);  // Register the namespace to FUDGE for serialization
 
     export class RayHelper extends f.ComponentScript {
         // Register the script as component for use in the editor via drag&drop

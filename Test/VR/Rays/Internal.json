@@ -544,9 +544,9 @@
                         "ƒ.ComponentMesh": {
                           "idMesh": "MeshRotation|2022-12-01T12:53:08.829Z|53794",
                           "pivot": {
-                            "translation": "[0, 0, 0]",
+                            "translation": "[0, 0, -2]",
                             "rotation": "[90, 0, 0]",
-                            "scaling": "[0.09999998658895493, 1, 0.10000000149011612]"
+                            "scaling": "[0.02500000037252903, 1, 0.02500000037252903]"
                           },
                           "Component": {
                             "active": true
@@ -558,7 +558,7 @@
                       {
                         "ƒ.ComponentMaterial": {
                           "sortForAlpha": false,
-                          "clrPrimary": "[0.39215686274509803, 0.39215686274509803, 0.39215686274509803, 0.4]",
+                          "clrPrimary": "[0.39215686274509803, 0.39215686274509803, 0.39215686274509803, 0.5]",
                           "clrSecondary": "[1, 1, 1, 1]",
                           "pivot": {
                             "translation": "[0, 0]",
@@ -576,7 +576,7 @@
                       {
                         "ƒ.ComponentTransform": {
                           "local": {
-                            "translation": "[0, 0, -1]",
+                            "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
                             "scaling": "[1, 1, 1]"
                           },

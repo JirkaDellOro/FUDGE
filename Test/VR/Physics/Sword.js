@@ -1,7 +1,7 @@
-var PhysicsVR;
-(function (PhysicsVR) {
+var PhysicsSceneVR;
+(function (PhysicsSceneVR) {
     var f = FudgeCore;
-    f.Project.registerScriptNamespace(PhysicsVR); // Register the namespace to FUDGE for serialization
+    f.Project.registerScriptNamespace(PhysicsSceneVR); // Register the namespace to FUDGE for serialization
     class Sword extends f.ComponentScript {
         // Register the script as component for use in the editor via drag&drop
         static iSubclass = f.Component.registerSubclass(Sword);
@@ -35,7 +35,7 @@ var PhysicsVR;
         onColiisionEnter = (_event) => {
             if (_event.cmpRigidbody.node.name == "CubeInstance") {
                 if (_event.cmpRigidbody.node) {
-                    _event.cmpRigidbody.node.getComponent(PhysicsVR.Translator).hasHitted = true;
+                    _event.cmpRigidbody.node.getComponent(PhysicsSceneVR.Translator).hasHitted = true;
                     _event.cmpRigidbody.setVelocity(f.Vector3.DIFFERENCE(_event.cmpRigidbody.mtxPivot.translation, this.node.mtxLocal.translation));
                     _event.cmpRigidbody.effectGravity = 1;
                     this.removeHittedObject(_event.cmpRigidbody.node);
@@ -44,9 +44,9 @@ var PhysicsVR;
         };
         removeHittedObject = async (_objectHit) => {
             await f.Time.game.delay(1250);
-            PhysicsVR.cubeContainer.removeChild(_objectHit);
+            PhysicsSceneVR.cubeContainer.removeChild(_objectHit);
         };
     }
-    PhysicsVR.Sword = Sword;
-})(PhysicsVR || (PhysicsVR = {}));
+    PhysicsSceneVR.Sword = Sword;
+})(PhysicsSceneVR || (PhysicsSceneVR = {}));
 //# sourceMappingURL=Sword.js.map

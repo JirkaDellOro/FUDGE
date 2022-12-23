@@ -1,12 +1,12 @@
-var PhysicsVR;
-(function (PhysicsVR) {
+var PhysicsSceneVR;
+(function (PhysicsSceneVR) {
     var f = FudgeCore;
     let xrViewport = new f.XRViewport();
     let graph = null;
     let cmpVRDevice = null;
     let rightController = null;
     let leftController = null;
-    PhysicsVR.cubeContainer = null;
+    PhysicsSceneVR.cubeContainer = null;
     let cubeGraph = null;
     let spawnTime = 0;
     let spawnTrigger = 600;
@@ -27,7 +27,7 @@ var PhysicsVR;
         xrViewport.initialize("Viewport", graph, cmpVRDevice, canvas);
         rightController = graph.getChildrenByName("rightController")[0];
         leftController = graph.getChildrenByName("leftController")[0];
-        PhysicsVR.cubeContainer = graph.getChildrenByName("cubeContainer")[0];
+        PhysicsSceneVR.cubeContainer = graph.getChildrenByName("cubeContainer")[0];
         for (let i = 0; i <= 150; i++) {
             cubeInstances[i] = await f.Project.createGraphInstance(cubeGraph);
         }
@@ -76,12 +76,12 @@ var PhysicsVR;
             spawnTime += 4;
             if (spawnTime == spawnTrigger) {
                 spawnTime = 0;
-                PhysicsVR.Translator.speed += 0.0002;
+                PhysicsSceneVR.Translator.speed += 0.0002;
                 spawnTrigger -= 4;
                 for (let i = 0; i <= spawnAmount; i++) {
                     cubeInstances[increment].getComponent(f.ComponentMaterial).clrPrimary = new f.Color(f.Random.default.getRange(0, 1), f.Random.default.getRange(0, 1), f.Random.default.getRange(0, 1), 1);
                     cubeInstances[increment].mtxLocal.translation = new f.Vector3(f.Random.default.getRange(-2, 2), f.Random.default.getRange(-0.5, 0.5), f.Random.default.getRange(-2, 2));
-                    PhysicsVR.cubeContainer.appendChild(cubeInstances[increment]);
+                    PhysicsSceneVR.cubeContainer.appendChild(cubeInstances[increment]);
                     increment++;
                 }
                 spawnAmount += 0.15;
@@ -92,5 +92,5 @@ var PhysicsVR;
         f.Loop.stop();
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
     }
-})(PhysicsVR || (PhysicsVR = {}));
+})(PhysicsSceneVR || (PhysicsSceneVR = {}));
 //# sourceMappingURL=Main.js.map

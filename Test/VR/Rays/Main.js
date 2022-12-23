@@ -1,5 +1,5 @@
-var AudioSceneVR;
-(function (AudioSceneVR) {
+var RaySceneVR;
+(function (RaySceneVR) {
     var f = FudgeCore;
     f.Debug.info("Main Program Template running!");
     let xrViewport = new f.XRViewport();
@@ -55,16 +55,10 @@ var AudioSceneVR;
         let pickableObjects = graph.getChildrenByName("CubeContainer")[0];
         let rightRayNode = graph.getChildrenByName("raysContainer")[0].getChild(0);
         let leftRayNode = graph.getChildrenByName("raysContainer")[0].getChild(1);
-        rightRayNode.addComponent(new AudioSceneVR.RayHelper(xrViewport, xrViewport.vrDevice.rightCntrl, 50, pickableObjects));
-        leftRayNode.addComponent(new AudioSceneVR.RayHelper(xrViewport, xrViewport.vrDevice.leftCntrl, 50, pickableObjects));
+        rightRayNode.addComponent(new RaySceneVR.RayHelper(xrViewport, xrViewport.vrDevice.rightCntrl, 50, pickableObjects));
+        leftRayNode.addComponent(new RaySceneVR.RayHelper(xrViewport, xrViewport.vrDevice.leftCntrl, 50, pickableObjects));
     }
     function update(_event) {
-        let pickableObjects = graph.getChildrenByName("CubeContainer")[0].getChildren();
-        // let ray: f.Ray = new f.Ray(new f.Vector3(0, 0, 1), new f.Vector3(0, 0, -1), 1);
-        // let picker: f.Pick[] = f.Picker.pickRay(pickableObjects, ray, 0, 100000000000000000);
-        // picker.forEach(element => {
-        //   console.log(element.node.name);
-        // });
         xrViewport.draw();
     }
     function onEndSession() {
@@ -111,5 +105,5 @@ var AudioSceneVR;
     //         }
     //     }
     // }
-})(AudioSceneVR || (AudioSceneVR = {}));
+})(RaySceneVR || (RaySceneVR = {}));
 //# sourceMappingURL=Main.js.map

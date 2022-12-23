@@ -23,34 +23,14 @@ namespace FudgeCore {
         }
 
         /**
-         * Sets controller matrices, gamepad references and thumbsticks movements.
-         * Creator dont need to call this method. 
-         * Its automatically called when controller boolean is true.
+         * Returns the actual matrix of the vr - device.
+         * Creators should use this for readonly purposes.  
          */
-        public setControllerConfigs(_xrFrame: XRFrame): void {
-            if (_xrFrame)
-                this.setController(_xrFrame);
-        }
         public get mtxLocal(): Matrix4x4 {
             return this.#mtxLocal;
         }
-        /**
-         * Initiliaze Gamepad for right and left Controller
-         * Creator dont need to call this method.
-         * Its automatically called when controller boolean is true.
-         */
-        public initializeGamepads(): void {
-            XRViewport.default.session.inputSources.forEach(controller => {
-                switch (controller.handedness) {
-                    case ("right"):
-                        this.rightCntrl.gamePad = controller.gamepad;
-                        break;
-                    case ("left"):
-                        this.leftCntrl.gamePad = controller.gamepad;
-                        break;
-                }
-            });
-        }
+
+
         /**
          * Sets a Vector3 as Position of the reference space.
          */
@@ -106,33 +86,7 @@ namespace FudgeCore {
         }
 
 
-        private setController(_xrFrame: XRFrame): void {
-            if (XRViewport.default.session.inputSources.length > 0) {
-                XRViewport.default.session.inputSources.forEach(controller => {
-                    try {
-                        switch (controller.handedness) {
-                            case ("right"):
-                                this.rightCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
 
-                                if (this.rightCntrl.gamePad) {
-                                    this.rightCntrl.thumbstickX = controller.gamepad.axes[2];
-                                    this.rightCntrl.thumbstickY = controller.gamepad.axes[3];
-                                }
-                            case ("left"):
-                                this.leftCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
-
-                                if (this.leftCntrl.gamePad) {
-                                    this.leftCntrl.thumbstickX = controller.gamepad.axes[2];
-                                    this.leftCntrl.thumbstickY = controller.gamepad.axes[3];
-                                }
-                                break;
-                        }
-                    } catch (e: unknown) {
-                        Debug.info("Input Sources Error: " + e);
-                    }
-                });
-            }
-        }
         private getMtxLocalFromCmpTransform(): void {
             this.#mtxLocal = this.node.getComponent(ComponentTransform).mtxLocal;
 

@@ -1,7 +1,7 @@
-var AudioSceneVR;
-(function (AudioSceneVR) {
+var ControllerSceneVR;
+(function (ControllerSceneVR) {
     var f = FudgeCore;
-    f.Project.registerScriptNamespace(AudioSceneVR); // Register the namespace to FUDGE for serialization
+    f.Project.registerScriptNamespace(ControllerSceneVR); // Register the namespace to FUDGE for serialization
     class Controller extends f.ComponentScript {
         xrViewport = null;
         controller;
@@ -34,7 +34,6 @@ var AudioSceneVR;
                 case "componentAdd" /* COMPONENT_ADD */:
                     this.initController();
                     f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.update);
-                    f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
                     break;
                 case "componentRemove" /* COMPONENT_REMOVE */:
                     this.removeEventListener("componentAdd" /* COMPONENT_ADD */, this.hndEvent);
@@ -108,10 +107,11 @@ var AudioSceneVR;
                         }
                 }
                 catch (error) {
+                    f.Debug.error("Mapped Buttons are not initialized correctly!");
                 }
             }
         };
     }
-    AudioSceneVR.Controller = Controller;
-})(AudioSceneVR || (AudioSceneVR = {}));
+    ControllerSceneVR.Controller = Controller;
+})(ControllerSceneVR || (ControllerSceneVR = {}));
 //# sourceMappingURL=Controller.js.map

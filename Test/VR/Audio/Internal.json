@@ -112,7 +112,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[0, 0, 0]",
+                      "translation": "[0, 2, -4]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -135,7 +135,7 @@
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
-                    "aspect": 1,
+                    "aspect": 1.0651340996168583,
                     "pivot": {
                       "translation": "[0, 0, 0]",
                       "rotation": "[0, 0, 0]",

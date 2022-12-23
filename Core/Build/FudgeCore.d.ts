@@ -2205,18 +2205,10 @@ declare namespace FudgeCore {
         leftCntrl: VRController;
         constructor();
         /**
-         * Sets controller matrices, gamepad references and thumbsticks movements.
-         * Creator dont need to call this method.
-         * Its automatically called when controller boolean is true.
+         * Returns the actual matrix of the vr - device.
+         * Creators should use this for readonly purposes.
          */
-        setControllerConfigs(_xrFrame: XRFrame): void;
         get mtxLocal(): Matrix4x4;
-        /**
-         * Initiliaze Gamepad for right and left Controller
-         * Creator dont need to call this method.
-         * Its automatically called when controller boolean is true.
-         */
-        initializeGamepads(): void;
         /**
          * Sets a Vector3 as Position of the reference space.
          */
@@ -2235,7 +2227,6 @@ declare namespace FudgeCore {
          * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
          */
         rotate(_by: Vector3): void;
-        private setController;
         private getMtxLocalFromCmpTransform;
     }
 }
@@ -5470,6 +5461,7 @@ declare namespace FudgeCore {
          * Called from loop method {@link Loop} again with the xrFrame parameter handover, as soon as FRAME_REQUEST_XR is called from creator.
          */
         draw(_calculateTransforms?: boolean, _xrFrame?: XRFrame): void;
+        private setControllerConfigs;
     }
 }
 declare namespace FudgeCore {

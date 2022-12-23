@@ -1,5 +1,5 @@
-var AudioSceneVR;
-(function (AudioSceneVR) {
+var ImmersiveSceneVR;
+(function (ImmersiveSceneVR) {
     var f = FudgeCore;
     f.Debug.info("Main Program Template running!");
     let xrViewport = new f.XRViewport();
@@ -58,5 +58,5 @@ var AudioSceneVR;
         f.Loop.stop();
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
     }
-})(AudioSceneVR || (AudioSceneVR = {}));
+})(ImmersiveSceneVR || (ImmersiveSceneVR = {}));
 //# sourceMappingURL=Main.js.map
