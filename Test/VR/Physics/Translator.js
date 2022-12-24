@@ -1,7 +1,7 @@
-var PhysicsSceneVR;
-(function (PhysicsSceneVR) {
+var PhysicsVR;
+(function (PhysicsVR) {
     var f = FudgeCore;
-    f.Project.registerScriptNamespace(PhysicsSceneVR); // Register the namespace to FUDGE for serialization
+    f.Project.registerScriptNamespace(PhysicsVR); // Register the namespace to FUDGE for serialization
     class Translator extends f.ComponentScript {
         // Register the script as component for use in the editor via drag&drop
         static iSubclass = f.Component.registerSubclass(Translator);
@@ -44,10 +44,10 @@ var PhysicsSceneVR;
                 this.node.getComponent(f.ComponentRigidbody).rotateBody(f.Vector3.X(-0.5));
                 this.node.getComponent(f.ComponentRigidbody).rotateBody(f.Vector3.Z(this.randomRot));
                 if (this.node.getComponent(f.ComponentTransform).mtxLocal.translation.z > 70 && this.node)
-                    PhysicsSceneVR.cubeContainer.removeChild(this.node);
+                    PhysicsVR.cubeContainer.removeChild(this.node);
             }
         };
     }
-    PhysicsSceneVR.Translator = Translator;
-})(PhysicsSceneVR || (PhysicsSceneVR = {}));
+    PhysicsVR.Translator = Translator;
+})(PhysicsVR || (PhysicsVR = {}));
 //# sourceMappingURL=Translator.js.map

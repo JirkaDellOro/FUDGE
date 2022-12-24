@@ -82,18 +82,20 @@ namespace RaySceneVR {
 
         }
         private hasObject: boolean = false;
-        private
+        private lastPosCntrl: f.Vector3 = f.Vector3.ZERO();
         private update = (): void => {
-            if (this.xrViewport.session)
+            if (this.xrViewport.session) {
                 this.computeRay();
 
-            if (this.hasObject) {
-                this.pick.mtxLocal.translation = new f.Vector3(0, 0, -this.node.getComponent(f.ComponentMesh).mtxPivot.scaling.y);
-                this.pick.mtxLocal.rotation = this.controller.cmpTransform.mtxLocal.rotation;
+                if (this.hasObject) {
+                    let interpolatedDiff: number = f.Vector3.DIFFERENCE(this.lastPosCntrl, this.controller.cmpTransform.mtxLocal.translation).z;
+                    this.pick.mtxLocal.translation = new f.Vector3(0, 0, -this.node.getComponent(f.ComponentMesh).mtxPivot.scaling.y + (interpolatedDiff * 25));
+                    this.pick.mtxLocal.rotation = this.controller.cmpTransform.mtxLocal.rotation;
 
+                }
             }
-
         }
+
         private onSqueeze = (_event: XRInputSourceEvent): void => {
             if (this.pick) {
                 this.xrViewport.vrDevice.translation = this.pick.getComponent(f.ComponentTransform).mtxLocal.translation;
@@ -102,6 +104,7 @@ namespace RaySceneVR {
         private onSelectStart = (_event: XRInputSourceEvent): void => {
             if (this.pick) {
                 this.node.addChild(this.pick);
+                this.lastPosCntrl = this.controller.cmpTransform.mtxLocal.translation;
                 this.hasObject = true;
             }
 

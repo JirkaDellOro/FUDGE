@@ -76,13 +76,15 @@ var RaySceneVR;
             }
         };
         hasObject = false;
-        private;
+        lastPosCntrl = f.Vector3.ZERO();
         update = () => {
-            if (this.xrViewport.session)
+            if (this.xrViewport.session) {
                 this.computeRay();
-            if (this.hasObject) {
-                this.pick.mtxLocal.translation = new f.Vector3(0, 0, -this.node.getComponent(f.ComponentMesh).mtxPivot.scaling.y);
-                this.pick.mtxLocal.rotation = this.controller.cmpTransform.mtxLocal.rotation;
+                if (this.hasObject) {
+                    let interpolatedDiff = f.Vector3.DIFFERENCE(this.lastPosCntrl, this.controller.cmpTransform.mtxLocal.translation).z;
+                    this.pick.mtxLocal.translation = new f.Vector3(0, 0, -this.node.getComponent(f.ComponentMesh).mtxPivot.scaling.y + (interpolatedDiff * 25));
+                    this.pick.mtxLocal.rotation = this.controller.cmpTransform.mtxLocal.rotation;
+                }
             }
         };
         onSqueeze = (_event) => {
@@ -93,6 +95,7 @@ var RaySceneVR;
         onSelectStart = (_event) => {
             if (this.pick) {
                 this.node.addChild(this.pick);
+                this.lastPosCntrl = this.controller.cmpTransform.mtxLocal.translation;
                 this.hasObject = true;
             }
         };

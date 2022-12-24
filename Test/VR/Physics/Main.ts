@@ -1,4 +1,4 @@
-namespace PhysicsSceneVR {
+namespace PhysicsVR {
     import f = FudgeCore;
 
     let xrViewport: f.XRViewport = new f.XRViewport();
