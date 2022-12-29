@@ -791,8 +791,7 @@ declare namespace FudgeCore {
          */
         get magnitudeSquared(): number;
         /**
-         * @returns A deep copy of the vector.
-         * TODO: rename this clone and create a new method copy, which copies the values from a vector given
+         * Creates and returns a clone of this
          */
         get clone(): Vector2;
         /**
@@ -804,6 +803,10 @@ declare namespace FudgeCore {
          */
         set geo(_geo: Geo2);
         recycle(): void;
+        /**
+         * Copies the values of the given vector into this
+         */
+        copy(_original: Vector2): void;
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
          * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
@@ -3561,8 +3564,7 @@ declare namespace FudgeCore {
          */
         get magnitudeSquared(): number;
         /**
-         * Returns a copy of this vector
-         * TODO: rename this clone and create a new method copy, which copies the values from a vector given
+         * Creates and returns a clone of this vector
          */
         get clone(): Vector3;
         /**
@@ -3572,6 +3574,10 @@ declare namespace FudgeCore {
         set geo(_geo: Geo3);
         get geo(): Geo3;
         recycle(): void;
+        /**
+         * Copies the values of the given vector into this
+         */
+        copy(_original: Vector3): void;
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
          * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
@@ -5291,6 +5297,8 @@ declare namespace FudgeCore {
          * Performs a pick on all {@link ComponentPick}s in the branch of this viewport
          * using a ray from its camera through the client coordinates given in the event.
          * Dispatches the event to all nodes hit.
+         * If {@link PICK.CAMERA} was chosen as the method to pick, a pick property gets added to the event,
+         * which holds the detailed information, but is overwritten for each node.
          */
         dispatchPointerEvent(_event: PointerEvent): void;
         /**
