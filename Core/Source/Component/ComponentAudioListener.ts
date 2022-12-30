@@ -41,6 +41,8 @@ namespace FudgeCore {
 
       Recycler.store(forward);
       Recycler.store(up);
+      if (this.node)
+        Recycler.store(mtxResult);
 
       // Debug.log(mtxResult.translation.toString(), forward.toString(), up.toString());
     }
