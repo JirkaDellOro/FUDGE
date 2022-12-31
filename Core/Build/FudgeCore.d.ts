@@ -4096,6 +4096,60 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class Maze extends Node {
+        idResource: string;
+        type: string;
+        nodes: MazeNode[][][];
+        private static index;
+        constructor(_nodes: Array<Array<Array<MazeNode>>>);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        addNode(_n: MazeNode): void;
+        aStar(_start: MazeNode, _end: MazeNode): MazeNode[];
+    }
+}
+declare namespace FudgeCore {
+    class MazeGrid extends Maze {
+        constructor(_length: number, _width: number);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        static create(_width: number, _length: number): MazeNode[][][];
+        addNeighbors(): void;
+    }
+}
+declare namespace FudgeCore {
+    class MazeHexGrid extends Maze {
+        constructor(_length: number, _width: number);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        static create(_width: number, _length: number): MazeNode[][][];
+        addNeighbors(): void;
+    }
+}
+declare namespace FudgeCore {
+    class MazeNode extends Node {
+        idResource: string;
+        type: string;
+        private static index;
+        currentCost: number;
+        totalCost: number;
+        walkable: boolean;
+        difficulty: number;
+        neighbors: Array<string>;
+        previousNode: MazeNode;
+        constructor(_x: number, _y: number, _z: number, _walk?: boolean, _dif?: number, _neighbors?: Array<string>);
+        create(_walk: boolean, _dif: number, _neighbors?: Array<string>): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        addNeighborFromNode(_n: MazeNode): void;
+        addNeighborFromName(_id: string): void;
+        estimateDistance(_b: MazeNode): number;
+        getCost(_b: MazeNode): number;
+        getNeighbors(): Array<MazeNode>;
+        getNeighbor(_n: string): MazeNode;
+    }
+}
+declare namespace FudgeCore {
     /**
      * Defines automatic adjustment of the collider
      */
