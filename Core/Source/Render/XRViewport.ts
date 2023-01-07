@@ -45,6 +45,7 @@ namespace FudgeCore {
     public static get default(): XRViewport {
       return this.xrViewportInstance;
     }
+
     /**
       * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
       */
@@ -63,7 +64,8 @@ namespace FudgeCore {
       this.referenceSpace = await session.requestReferenceSpace(_vrReferenceSpaceType);
       await this.crc3.makeXRCompatible();
       let nativeScaleFactor = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
-      await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3, { framebufferScaleFactor: nativeScaleFactor }) });      // field of view anschauen was noch geht!
+      //TODO:  Field of view könnte an der Stelle noch verändert werden.
+      await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3, { framebufferScaleFactor: nativeScaleFactor }) });
 
       this.vrDevice = <ComponentVRDevice>this.camera;
 
@@ -79,6 +81,14 @@ namespace FudgeCore {
 
       this.calculateTransforms();
     }
+
+    /**
+     * The AR session could be initialized here. Up till now not implemented. 
+     */
+    public async initializeAR(_arSessionMode: XR_SESSION_MODE = null, _arReferenceSpaceType: XR_REFERENCE_SPACE = null): Promise<void> {
+      Debug.error("NOT IMPLEMENTED YET! Check out initializeVR!");
+    }
+
     // sets the rotation & position of the inital camera  of cmpVRDevice and adding 180 degree, because the XR Rig is looking in the direction of negative z 
     private initializevrDeviceTransform(_newMtx: Matrix4x4) {
       let newRot: Vector3 = Vector3.SCALE(new Vector3(_newMtx.rotation.x, _newMtx.rotation.y - 180, _newMtx.rotation.z), Math.PI / 180);
@@ -92,12 +102,6 @@ namespace FudgeCore {
       XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
       this.vrDevice.mtxLocal.translation = this.camera.mtxWorld.translation;
       this.camera.mtxPivot.translation = Vector3.ZERO();
-    }
-    /**
-     * The AR session could be initialized here. Up till now not implemented. 
-     */
-    public async initializeAR(_arSessionMode: XRSessionMode = null, _arReferenceSpaceType: XRReferenceSpaceType = null): Promise<void> {
-      Debug.error("NOT IMPLEMENTED YET! Check out initializeVR!");
     }
 
     /**
@@ -141,6 +145,7 @@ namespace FudgeCore {
         }
       }
     }
+
     //Sets controller matrices and thumbsticks movements.
     private setControllerConfigs(_xrFrame: XRFrame): void {
       if (_xrFrame) {

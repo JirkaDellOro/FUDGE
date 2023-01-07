@@ -5450,11 +5450,11 @@ declare namespace FudgeCore {
          * Creator has to call FrameRequestXR after this Method to run the viewport in virtual reality.
          */
         initializeVR(_vrSessionMode?: XR_SESSION_MODE, _vrReferenceSpaceType?: XR_REFERENCE_SPACE, _vrController?: boolean): Promise<void>;
-        private initializevrDeviceTransform;
         /**
          * The AR session could be initialized here. Up till now not implemented.
          */
-        initializeAR(_arSessionMode?: XRSessionMode, _arReferenceSpaceType?: XRReferenceSpaceType): Promise<void>;
+        initializeAR(_arSessionMode?: XR_SESSION_MODE, _arReferenceSpaceType?: XR_REFERENCE_SPACE): Promise<void>;
+        private initializevrDeviceTransform;
         /**
          * Draw the xr viewport displaying its branch. By default, the transforms in the branch are recalculated first.
          * Pass `false` if calculation was already done for this frame
