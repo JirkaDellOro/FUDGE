@@ -97,6 +97,11 @@ tr[icon^=Animation]>td:first-child::before {
   -webkit-mask: url(../Html/Icon/Animation.svg);
 }
 
+tr[icon^=ParticleSystem]>td:first-child::before {
+  mask: url(../Html/Icon/Particles.svg);
+  -webkit-mask: url(../Html/Icon/Particles.svg);
+}
+
 /* Panel titles */
 
 div.lm_tab[title^="Graph"]::before {
@@ -117,6 +122,11 @@ div.lm_tab[title^="Help"]::before {
 div.lm_tab[title^="Animation"]::before {
   mask: url(../Html/Icon/Animation.svg);
   -webkit-mask: url(../Html/Icon/Animation.svg);
+}
+
+div.lm_tab[title^="ParticleSystem"]::before {
+  mask: url(../Html/Icon/Particles.svg);
+  -webkit-mask: url(../Html/Icon/Particles.svg);
 }
 
 
@@ -241,6 +251,11 @@ details[key^=shape]>summary::after {
 details[key^=animation]>summary::after, details[key^=Animation]>summary::after, details[key^=ComponentAnimator]>summary::after {
   mask: url(../Html/Icon/Animation.svg);
   -webkit-mask: url(../Html/Icon/Animation.svg);
+}
+
+details[key^=particleSystem]>summary::after, details[key^=ParticleSystem]>summary::after, details[key^=ComponentParticleSystem]>summary::after {
+  mask: url(../Html/Icon/Particles.svg);
+  -webkit-mask: url(../Html/Icon/Particles.svg);
 }
 
 /* Animation */
