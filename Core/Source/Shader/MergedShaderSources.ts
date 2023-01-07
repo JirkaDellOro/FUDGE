@@ -104,7 +104,8 @@ void main() {
 * @authors Jirka Dell'Oro-Friedl, HFU, 2022
 */
 
-precision highp float;
+precision mediump float;
+precision highp int;
 
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
@@ -275,6 +276,7 @@ void main() {
 */
 
 precision mediump float;
+precision highp int;
 
   // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;
@@ -319,6 +321,9 @@ void main() {
 * Universal Shader as base for many others. Controlled by compiler directives
 * @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
 */
+
+precision mediump float;
+precision highp int;
 
   // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxMeshToView;
@@ -419,7 +424,7 @@ uniform Bone u_bones[MAX_BONES];
   // FLAT: outbuffer is flat
   #if defined(FLAT)
 flat out vec4 v_vctColor;
-  #else
+  #elif defined(LIGHT)
   // regular if not FLAT
 out vec4 v_vctColor;
   #endif
@@ -575,6 +580,7 @@ void main() {
       #endif
     #else
     // always full opacity for now...
+    #if defined(LIGHT)
   v_vctColor.a = 1.0;
     #endif
 }`;

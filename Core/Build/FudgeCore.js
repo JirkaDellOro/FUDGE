@@ -546,7 +546,8 @@ var FudgeCore;
                 }
             }
             catch (_error) {
-                throw new Error(`Deserialization of ${path}, ${Reflect.get(reconstruct, "idResource")} failed: ` + _error);
+                let message = `Deserialization of ${path}, ${reconstruct ? Reflect.get(reconstruct, "idResource") : ""} failed: ` + _error;
+                throw new Error(message);
             }
             return null;
         }
@@ -2120,8 +2121,7 @@ var FudgeCore;
             return Vector2.DOT(this, this);
         }
         /**
-         * @returns A deep copy of the vector.
-         * TODO: rename this clone and create a new method copy, which copies the values from a vector given
+         * Creates and returns a clone of this
          */
         get clone() {
             let clone = FudgeCore.Recycler.get(Vector2);
@@ -2149,6 +2149,12 @@ var FudgeCore;
         //#endregion
         recycle() {
             this.data.set([0, 0]);
+        }
+        /**
+         * Copies the values of the given vector into this
+         */
+        copy(_original) {
+            this.data.set(_original.data);
         }
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
@@ -4389,7 +4395,9 @@ var FudgeCore;
     }
     FudgeCore.Audio = Audio;
 })(FudgeCore || (FudgeCore = {}));
+///<reference path="../Event/EventAudio.ts"/>
 var FudgeCore;
+///<reference path="../Event/EventAudio.ts"/>
 (function (FudgeCore) {
     /**
      * Extends the standard AudioContext for integration with FUDGE-graphs.
@@ -4428,7 +4436,8 @@ var FudgeCore;
              * Updates the spatial settings of the AudioNodes effected in the current FUDGE-graph
              */
             this.update = () => {
-                this.graph.broadcastEvent(new Event("updateAudioGraph" /* UPDATE */));
+                // this.graph.broadcastEvent(new Event(EVENT_AUDIO.UPDATE));
+                this.graph.broadcastEvent(AudioManager.eventUpdate);
                 if (this.cmpListener)
                     this.cmpListener.update(this.listener);
             };
@@ -4450,6 +4459,7 @@ var FudgeCore;
     }
     /** The default context that may be used throughout the project without the need to create others */
     AudioManager.default = new AudioManager({ latencyHint: "interactive", sampleRate: 44100 });
+    AudioManager.eventUpdate = new Event("updateAudioGraph" /* UPDATE */);
     FudgeCore.AudioManager = AudioManager;
 })(FudgeCore || (FudgeCore = {}));
 // namespace FudgeCore {
@@ -5053,6 +5063,8 @@ var FudgeCore;
             }
             FudgeCore.Recycler.store(forward);
             FudgeCore.Recycler.store(up);
+            if (this.node)
+                FudgeCore.Recycler.store(mtxResult);
             // Debug.log(mtxResult.translation.toString(), forward.toString(), up.toString());
         }
     }
@@ -8335,7 +8347,7 @@ var FudgeCore;
                 this.vectors.translation = this.#vectors.translation;
                 this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
             }
-            return this.vectors.translation; // .clone;
+            return this.vectors.translation.clone;
         }
         /**
          * - get: return a vector representation of the rotation {@link Vector3}.
@@ -9591,8 +9603,7 @@ var FudgeCore;
             return Vector3.DOT(this, this);
         }
         /**
-         * Returns a copy of this vector
-         * TODO: rename this clone and create a new method copy, which copies the values from a vector given
+         * Creates and returns a clone of this vector
          */
         get clone() {
             let clone = FudgeCore.Recycler.get(Vector3);
@@ -9620,6 +9631,12 @@ var FudgeCore;
         //#endregion
         recycle() {
             this.data.set([0, 0, 0]);
+        }
+        /**
+         * Copies the values of the given vector into this
+         */
+        copy(_original) {
+            this.data.set(_original.data);
         }
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
@@ -14474,6 +14491,8 @@ var FudgeCore;
          * Performs a pick on all {@link ComponentPick}s in the branch of this viewport
          * using a ray from its camera through the client coordinates given in the event.
          * Dispatches the event to all nodes hit.
+         * If {@link PICK.CAMERA} was chosen as the method to pick, a pick property gets added to the event,
+         * which holds the detailed information, but is overwritten for each node.
          */
         dispatchPointerEvent(_event) {
             let posClient = new FudgeCore.Vector2(_event.clientX, _event.clientY);
@@ -14485,8 +14504,10 @@ var FudgeCore;
                 cmpPick.pick == FudgeCore.PICK.CAMERA ? cameraPicks.push(cmpPick.node) : otherPicks.push(cmpPick);
             if (cameraPicks.length) {
                 let picks = FudgeCore.Picker.pickCamera(cameraPicks, this.camera, this.pointClientToProjection(posClient));
-                for (let pick of picks)
+                for (let pick of picks) {
+                    Reflect.set(_event, "pick", pick);
                     pick.node.dispatchEvent(_event);
+                }
             }
             for (let cmpPick of otherPicks) {
                 cmpPick.pickAndDispatch(ray, _event);
@@ -15419,7 +15440,8 @@ void main() {
 * @authors Jirka Dell'Oro-Friedl, HFU, 2022
 */
 
-precision highp float;
+precision mediump float;
+precision highp int;
 
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
@@ -15590,6 +15612,7 @@ void main() {
 */
 
 precision mediump float;
+precision highp int;
 
   // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;
@@ -15634,6 +15657,9 @@ void main() {
 * Universal Shader as base for many others. Controlled by compiler directives
 * @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
 */
+
+precision mediump float;
+precision highp int;
 
   // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxMeshToView;
@@ -15734,7 +15760,7 @@ uniform Bone u_bones[MAX_BONES];
   // FLAT: outbuffer is flat
   #if defined(FLAT)
 flat out vec4 v_vctColor;
-  #else
+  #elif defined(LIGHT)
   // regular if not FLAT
 out vec4 v_vctColor;
   #endif
@@ -15890,6 +15916,7 @@ void main() {
       #endif
     #else
     // always full opacity for now...
+    #if defined(LIGHT)
   v_vctColor.a = 1.0;
     #endif
 }`;

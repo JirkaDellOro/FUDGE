@@ -1,3 +1,4 @@
+///<reference path="../Event/EventAudio.ts"/>
 namespace FudgeCore {
   /**
    * Extends the standard AudioContext for integration with FUDGE-graphs.
@@ -11,6 +12,7 @@ namespace FudgeCore {
     public readonly gain: GainNode;
     private graph: Node = null;
     private cmpListener: ComponentAudioListener = null;
+    private static eventUpdate: Event = new Event(EVENT_AUDIO.UPDATE);
 
     constructor(contextOptions?: AudioContextOptions) {
       super(contextOptions);
@@ -62,7 +64,8 @@ namespace FudgeCore {
      * Updates the spatial settings of the AudioNodes effected in the current FUDGE-graph
      */
     public update = (): void => {
-      this.graph.broadcastEvent(new Event(EVENT_AUDIO.UPDATE));
+      // this.graph.broadcastEvent(new Event(EVENT_AUDIO.UPDATE));
+      this.graph.broadcastEvent(AudioManager.eventUpdate);
       if (this.cmpListener)
         this.cmpListener.update(this.listener);
     }

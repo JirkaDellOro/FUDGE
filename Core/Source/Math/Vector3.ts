@@ -216,8 +216,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a copy of this vector
-     * TODO: rename this clone and create a new method copy, which copies the values from a vector given 
+     * Creates and returns a clone of this vector
      */
     public get clone(): Vector3 {
       let clone: Vector3 = Recycler.get(Vector3);
@@ -249,6 +248,13 @@ namespace FudgeCore {
 
     public recycle(): void {
       this.data.set([0, 0, 0]);
+    }
+    
+    /**
+     * Copies the values of the given vector into this
+     */
+    public copy(_original: Vector3): void {
+      this.data.set(_original.data);
     }
 
     /**

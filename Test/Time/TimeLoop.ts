@@ -39,6 +39,7 @@ namespace TimeLoop {
   function handleTimeout(): void {
     let meter: HTMLMeterElement = document.querySelector("[name=event]");
     meter.value = 1 + meter.value % 10;
+    handleButtonClick(null);
   }
   function handleFrame(_event: Event): void {
     let meter: HTMLMeterElement = document.querySelector("[name=frame]");

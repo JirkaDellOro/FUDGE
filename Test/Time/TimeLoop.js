@@ -34,6 +34,7 @@ var TimeLoop;
     function handleTimeout() {
         let meter = document.querySelector("[name=event]");
         meter.value = 1 + meter.value % 10;
+        handleButtonClick(null);
     }
     function handleFrame(_event) {
         let meter = document.querySelector("[name=frame]");

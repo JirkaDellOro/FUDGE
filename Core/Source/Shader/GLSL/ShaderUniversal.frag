@@ -5,6 +5,7 @@
 */
 
 precision mediump float;
+precision highp int;
 
   // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;

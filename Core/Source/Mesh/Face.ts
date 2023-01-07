@@ -40,10 +40,10 @@ namespace FudgeCore {
       let n0: Vector3 = Vector3.CROSS(diffs[1], diffs[0]);
       let n1: Vector3 = Vector3.CROSS(diffs[2], diffs[1]);
       let n2: Vector3 = Vector3.CROSS(diffs[0], diffs[2]);
-  
+
       let dot1: number = Vector3.DOT(n0, n1);
       let dot2: number = Vector3.DOT(n0, n2);
-  
+
       return !(dot1 < 0 || dot2 < 0);
     }
   }

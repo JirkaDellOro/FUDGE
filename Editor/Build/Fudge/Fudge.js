@@ -3818,7 +3818,7 @@ var Fudge;
                     this.expanded[_event.target.getAttribute("type")] = (_event.type == "expand" /* EXPAND */);
                     break;
                 case "mutate" /* MUTATE */:
-                    let cmpRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
+                    let cmpRigidbody = this.node?.getComponent(ƒ.ComponentRigidbody);
                     if (cmpRigidbody) {
                         cmpRigidbody.initialize();
                         // this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: this.node } });
@@ -4723,7 +4723,8 @@ var Fudge;
             for (let namespace in ƒ.Project.scriptNamespaces) {
                 for (let index in ƒ.Project.scriptNamespaces[namespace]) {
                     let script = ƒ.Project.scriptNamespaces[namespace][index];
-                    scriptinfos.push(new Fudge.ScriptInfo(script, namespace));
+                    if (script.name)
+                        scriptinfos.push(new Fudge.ScriptInfo(script, namespace));
                 }
             }
             this.table = new ƒui.Table(new Fudge.ControllerTableScript(), scriptinfos);
