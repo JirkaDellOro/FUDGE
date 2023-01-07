@@ -106,7 +106,7 @@ uniform Bone u_bones[MAX_BONES];
   // FLAT: outbuffer is flat
   #if defined(FLAT)
 flat out vec4 v_vctColor;
-  #elif defined(LIGHT)
+  #elif defined(LIGHT) || defined(PARTICLE)
   // regular if not FLAT
 out vec4 v_vctColor;
   #endif
@@ -262,7 +262,8 @@ void main() {
       #endif
     #else
     // always full opacity for now...
-    #if defined(LIGHT)
-  v_vctColor.a = 1.0;
+      #if defined(LIGHT)
+    v_vctColor.a = 1.0;
+      #endif
     #endif
 }
