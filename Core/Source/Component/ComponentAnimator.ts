@@ -150,7 +150,6 @@ namespace FudgeCore {
     //#region updateAnimation
     /**
      * Updates the Animation.
-     * Gets called every time the Loop fires the LOOP_FRAME Event.
      * Uses the built-in time unless a different time is specified.
      * May also be called from updateAnimation().
      */

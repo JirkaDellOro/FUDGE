@@ -92,6 +92,11 @@ tr[icon^=Texture]>td:first-child::before {
   -webkit-mask: url(../Html/Icon/Texture.svg);
 }
 
+tr[icon^=Animation]>td:first-child::before {
+  mask: url(../Html/Icon/Animation.svg);
+  -webkit-mask: url(../Html/Icon/Animation.svg);
+}
+
 /* Panel titles */
 
 div.lm_tab[title^="Graph"]::before {
@@ -107,6 +112,11 @@ div.lm_tab[title^="Project"]::before {
 div.lm_tab[title^="Help"]::before {
   mask: url(../Html/Icon/Help.svg);
   -webkit-mask: url(../Html/Icon/Help.svg);
+}
+
+div.lm_tab[title^="Animation"]::before {
+  mask: url(../Html/Icon/Animation.svg);
+  -webkit-mask: url(../Html/Icon/Animation.svg);
 }
 
 
@@ -149,6 +159,16 @@ div.lm_tab[title^="Hierarchy"]::before {
 div.lm_tab[title^="Components"]::before {
   mask: url(../Html/Icon/Components.svg);
   -webkit-mask: url(../Html/Icon/Components.svg);
+}
+
+div.lm_tab[title^="Dopesheet"]::before {
+  mask: url(../Html/Icon/Dopesheet.svg);
+  -webkit-mask: url(../Html/Icon/Dopesheet.svg);
+}
+
+div.lm_tab[title^="Curves"]::before {
+  mask: url(../Html/Icon/Curves.svg);
+  -webkit-mask: url(../Html/Icon/Curves.svg);
 }
 
 /* Properties */
@@ -218,9 +238,15 @@ details[key^=shape]>summary::after {
   -webkit-mask: url(../Html/Icon/Shape.svg);
 }
 
+details[key^=animation]>summary::after, details[key^=Animation]>summary::after, details[key^=ComponentAnimator]>summary::after {
+  mask: url(../Html/Icon/Animation.svg);
+  -webkit-mask: url(../Html/Icon/Animation.svg);
+}
+
 /* Animation */
 div[view=ViewAnimation] fudge-stepper {
-  --color-animation-property: var(--color-background-content); /* will be overriten by ControllerAnimation code */
+  --color-animation-property: var(--color-background-content);
+  /* will be overriten by ControllerAnimation code */
 }
 
 div[view=ViewAnimation] fudge-stepper::after {
