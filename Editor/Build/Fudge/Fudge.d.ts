@@ -120,7 +120,8 @@ declare namespace Fudge {
         DELETE = "EDITOR_DELETE",
         CLOSE = "EDITOR_CLOSE",
         TRANSFORM = "EDITOR_TRANSFORM",
-        FOCUS = "EDITOR_FOCUS"
+        FOCUS = "EDITOR_FOCUS",
+        ANIMATE = "EDITOR_ANIMATE"
     }
     interface EventDetail {
         node?: ƒ.Node;

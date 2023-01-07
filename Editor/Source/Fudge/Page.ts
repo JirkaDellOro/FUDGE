@@ -150,6 +150,7 @@ namespace Fudge {
       document.addEventListener(EVENT_EDITOR.SELECT, Page.hndEvent);
       document.addEventListener(ƒui.EVENT.MUTATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.CLOSE, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.ANIMATE, Page.hndEvent);
       document.addEventListener("keyup", Page.hndKey);
     }
 

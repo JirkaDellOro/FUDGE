@@ -198,6 +198,7 @@ var Fudge;
         EVENT_EDITOR["CLOSE"] = "EDITOR_CLOSE";
         EVENT_EDITOR["TRANSFORM"] = "EDITOR_TRANSFORM";
         EVENT_EDITOR["FOCUS"] = "EDITOR_FOCUS";
+        EVENT_EDITOR["ANIMATE"] = "EDITOR_ANIMATE";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     /**
      * Extension of CustomEvent that supports a detail field with the type EventDetail
@@ -681,6 +682,7 @@ var Fudge;
             document.addEventListener(Fudge.EVENT_EDITOR.SELECT, Page.hndEvent);
             document.addEventListener("mutate" /* MUTATE */, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
         }
         /** Send custom copies of the given event to the views */
@@ -2117,6 +2119,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndEvent);
             if (_state["graph"])
                 ƒ.Project.getResource(_state["graph"]).then((_graph) => {
                     this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: _graph } });
@@ -3410,6 +3413,7 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.MODIFY:
                     this.playbackTime = _event.detail.data;
                     this.draw();
+                    this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true });
                     break;
             }
         };
@@ -4135,6 +4139,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             // this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
             // this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
@@ -4306,6 +4311,7 @@ var Fudge;
                 case "mutate" /* MUTATE */:
                 case "delete" /* DELETE */:
                 case Fudge.EVENT_EDITOR.MODIFY:
+                case Fudge.EVENT_EDITOR.ANIMATE:
                     this.redraw();
             }
         };

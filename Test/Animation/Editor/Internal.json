@@ -164,7 +164,7 @@
                   "ƒ.ComponentTransform": {
                     "local": {
                       "translation": "[0, 0, 0]",
-                      "rotation": "[0, 175.2782440185547, 0]",
+                      "rotation": "[0, 42.79568099975586, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -252,7 +252,7 @@
                         "ƒ.ComponentTransform": {
                           "local": {
                             "translation": "[5, 0, 0]",
-                            "rotation": "[0, 323.4866943359375, 0]",
+                            "rotation": "[0, 74.4469223022461, 0]",
                             "scaling": "[1, 1, 1]"
                           },
                           "Component": {

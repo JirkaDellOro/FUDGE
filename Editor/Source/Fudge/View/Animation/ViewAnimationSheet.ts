@@ -650,6 +650,7 @@ namespace Fudge {
         case EVENT_EDITOR.MODIFY:
           this.playbackTime = _event.detail.data;
           this.draw();
+          this.dispatch(EVENT_EDITOR.ANIMATE, {bubbles: true});
           break;
       }
     }
