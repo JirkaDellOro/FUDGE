@@ -36,15 +36,15 @@
                       {
                         "time": 0,
                         "value": 0,
-                        "slopeIn": 0,
-                        "slopeOut": 0,
+                        "slopeIn": 0.0009947177816240515,
+                        "slopeOut": 0.0009947177816240515,
                         "constant": false
                       },
                       {
                         "time": 1000,
                         "value": 1,
-                        "slopeIn": 0,
-                        "slopeOut": 0,
+                        "slopeIn": 0.0010080472973473037,
+                        "slopeOut": 0.0010080472973473037,
                         "constant": false
                       }
                     ],
@@ -85,7 +85,7 @@
               "clrPrimary": "[1, 1, 1, 1]",
               "clrSecondary": "[1, 1, 1, 1]",
               "pivot": {
-                "translation": "[0.6480000019073486, 0.10000000149011612]",
+                "translation": "[0, 0]",
                 "rotation": 0,
                 "scaling": "[0.49999991059303284, 0.49999991059303284]"
               },
@@ -104,7 +104,7 @@
               },
               "idAnimation": "Animation|2023-01-08T11:24:34.193Z|38529",
               "playmode": 0,
-              "playback": 0,
+              "playback": 1,
               "scale": 1,
               "scaleWithGameTime": true,
               "animateInEditor": false

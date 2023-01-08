@@ -14,7 +14,7 @@ namespace FudgeCore {
     /**
      * Evaluates the sequence at the given point in time.
      * @param _time the point in time at which to evaluate the sequence in milliseconds.
-     * @returns the value of the sequence at the given time. 0 if there are no keys.
+     * @returns the value of the sequence at the given time. undefined if there are no keys.
      */
     evaluate(_time: number): number {
       if (this.keys.length == 0)
