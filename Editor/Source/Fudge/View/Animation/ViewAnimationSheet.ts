@@ -361,10 +361,9 @@ namespace Fudge {
         timeSteps.lineTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT - 20);
         gridLines.moveTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT);
         gridLines.lineTo(xStep, this.canvas.height);
-        let second: number = Math.floor((iStep * framesPerStep) / fps);
-        let frame: number = (iStep * framesPerStep) % fps;
+       let time: number = iStep  * framesPerStep / fps;
         this.crc2.fillText(
-          `${second}:${frame < 10 ? "0" : ""}${frame}`, 
+          `${time.toFixed(2)}`, 
           xStep + 3,
           ViewAnimationSheet.TIMELINE_HEIGHT - 20);
 
@@ -834,8 +833,7 @@ namespace Fudge {
 
     private screenToTime(_x: number): number {
       let playbackTime: number = Math.max(0, (_x - this.mtxWorldToScreen.translation.x) / this.mtxWorldToScreen.scaling.x);
-      let pixelPerFrame: number = 1000 / this.animation.fps;
-      return Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
+      return playbackTime;
     }
 
     private timeToScreen(_time: number): number {

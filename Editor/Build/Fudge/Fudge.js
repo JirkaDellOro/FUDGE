@@ -3174,9 +3174,8 @@ var Fudge;
                 timeSteps.lineTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT - 20);
                 gridLines.moveTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT);
                 gridLines.lineTo(xStep, this.canvas.height);
-                let second = Math.floor((iStep * framesPerStep) / fps);
-                let frame = (iStep * framesPerStep) % fps;
-                this.crc2.fillText(`${second}:${frame < 10 ? "0" : ""}${frame}`, xStep + 3, ViewAnimationSheet.TIMELINE_HEIGHT - 20);
+                let time = iStep * framesPerStep / fps;
+                this.crc2.fillText(`${time.toFixed(2)}`, xStep + 3, ViewAnimationSheet.TIMELINE_HEIGHT - 20);
                 let pixelPerSubStep = pixelPerStep / (subSteps + 1);
                 for (let iSubStep = 1; iSubStep < subSteps + 1; iSubStep++) {
                     let xSubStep = xStep + Math.round(iSubStep * pixelPerSubStep);
@@ -3584,8 +3583,7 @@ var Fudge;
         }
         screenToTime(_x) {
             let playbackTime = Math.max(0, (_x - this.mtxWorldToScreen.translation.x) / this.mtxWorldToScreen.scaling.x);
-            let pixelPerFrame = 1000 / this.animation.fps;
-            return Math.round(playbackTime / pixelPerFrame) * pixelPerFrame;
+            return playbackTime;
         }
         timeToScreen(_time) {
             return this.round(_time * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x);
