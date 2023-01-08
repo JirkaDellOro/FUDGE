@@ -216,6 +216,10 @@ namespace Fudge {
           break;
         case "Delete Key":
           let sequence: ƒ.AnimationSequence = this.sequences.find(_sequence => _sequence.data.getKeys().includes(targetKey.data)).data;
+          if (sequence.length < 2){
+            ƒ.Debug.warn("Only one key left in sequence. Delete property instead.");
+            break;
+          }
           sequence.removeKey(targetKey.data);
           this.animate();
           break;

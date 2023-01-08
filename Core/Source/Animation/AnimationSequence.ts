@@ -18,7 +18,7 @@ namespace FudgeCore {
      */
     evaluate(_time: number): number {
       if (this.keys.length == 0)
-        return 0; //TODO: shouldn't return 0 but something indicating no change, like null. probably needs to be changed in Node as well to ignore non-numeric values in the applyAnimation function
+        return undefined; //TODO: shouldn't return 0 but something indicating no change, like null. probably needs to be changed in Node as well to ignore non-numeric values in the applyAnimation function
       if (this.keys.length == 1 || this.keys[0].time >= _time)
         return this.keys[0].value;
 

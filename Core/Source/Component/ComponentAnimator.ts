@@ -12,7 +12,7 @@ namespace FudgeCore {
     //TODO: add functionality to blend from one animation to another.
     public animation: Animation;
     public playmode: ANIMATION_PLAYMODE;
-    public playback: ANIMATION_PLAYBACK;
+    public playback: ANIMATION_QUANTIZATION;
     public scaleWithGameTime: boolean = true;
     public animateInEditor: boolean = false;
 
@@ -20,7 +20,7 @@ namespace FudgeCore {
     #timeLocal: Time;
     #previous: number = 0;
 
-    constructor(_animation?: Animation, _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _playback: ANIMATION_PLAYBACK = ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
+    constructor(_animation?: Animation, _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _playback: ANIMATION_QUANTIZATION = ANIMATION_QUANTIZATION.CONTINOUS) {
       super();
       this.playmode = _playmode;
       this.playback = _playback;
@@ -131,7 +131,7 @@ namespace FudgeCore {
       if (types.playmode)
         types.playmode = ANIMATION_PLAYMODE;
       if (types.playback)
-        types.playback = ANIMATION_PLAYBACK;
+        types.playback = ANIMATION_QUANTIZATION;
       return types;
     }
     //#endregion
@@ -157,7 +157,7 @@ namespace FudgeCore {
       if (this.animation.totalTime == 0) return null;
 
       let time: number = _time || _time === 0 ? _time : this.#timeLocal.get();
-      if (this.playback == ANIMATION_PLAYBACK.FRAMEBASED) {
+      if (this.playback == ANIMATION_QUANTIZATION.FRAMES) {
         time = this.#previous + (1000 / this.animation.fps);
       }
       let direction: number = this.animation.calculateDirection(time, this.playmode);

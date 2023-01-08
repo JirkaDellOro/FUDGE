@@ -417,7 +417,7 @@ declare namespace FudgeCore {
         radius: number;
         private parent;
         private children;
-        private components;
+        private  components;
         private listeners;
         private captures;
         private active;
@@ -1425,19 +1425,19 @@ declare namespace FudgeCore {
         /**Causes the animation not to play at all. Useful for jumping to various positions in the animation without proceeding in the animation.*/
         STOP = 4
     }
-    enum ANIMATION_PLAYBACK {
+    enum ANIMATION_QUANTIZATION {
         /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
-        TIMEBASED_CONTINOUS = 0,
+        CONTINOUS = 0,
         /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
-        TIMEBASED_RASTERED_TO_FPS = 1,
+        DISCRETE = 1,
         /** Advances the time each frame according to the FPS value of the animation, ignoring the actual duration of the frames. Doesn't skip any frames.*/
-        FRAMEBASED = 2
+        FRAMES = 2
     }
     /**
      * Animation Class to hold all required Objects that are part of an Animation.
      * Also holds functions to play said Animation.
      * Can be added to a Node and played through {@link ComponentAnimator}.
-     * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
+     * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021-2023
      */
     class Animation extends Mutable implements SerializableResource {
         idResource: string;
@@ -1460,16 +1460,13 @@ declare namespace FudgeCore {
          * @param _playback The playbackmode the animation is supposed to be calculated with.
          * @returns a "Mutator" to apply.
          */
-        getMutated(_time: number, _direction: number, _playback: ANIMATION_PLAYBACK): Mutator;
+        getMutated(_time: number, _direction: number, _playback: ANIMATION_QUANTIZATION): Mutator;
         /**
-         * Returns a list of the names of the events the {@link ComponentAnimator} needs to fire between _min and _max.
-         * @param _min The minimum time (inclusive) to check between
-         * @param _max The maximum time (exclusive) to check between
-         * @param _playback The playback mode to check in. Has an effect on when the Events are fired.
+         * Returns a list of the names of the events the {@link ComponentAnimator} needs to fire between _min and _max input values.
          * @param _direction The direction the animation is supposed to run in. >0 == forward, 0 == stop, <0 == backwards
          * @returns a list of strings with the names of the custom events to fire.
          */
-        getEventsToFire(_min: number, _max: number, _playback: ANIMATION_PLAYBACK, _direction: number): string[];
+        getEventsToFire(_min: number, _max: number, _quantization: ANIMATION_QUANTIZATION, _direction: number): string[];
         /**
          * Adds an Event to the List of events.
          * @param _name The name of the event (needs to be unique per Animation).
@@ -1803,10 +1800,10 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         animation: Animation;
         playmode: ANIMATION_PLAYMODE;
-        playback: ANIMATION_PLAYBACK;
+        playback: ANIMATION_QUANTIZATION;
         scaleWithGameTime: boolean;
         animateInEditor: boolean;
-        constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_PLAYBACK);
+        constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_QUANTIZATION);
         set scale(_scale: number);
         get scale(): number;
         /**

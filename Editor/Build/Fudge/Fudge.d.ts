@@ -226,7 +226,7 @@ declare namespace Fudge {
         updatePropertyList(_mutator: ƒ.Mutator): void;
         updateSequence(_time: number, _element: ƒui.CustomElement): void;
         nextKey(_time: number, _direction: "forward" | "backward"): number;
-        addProperty(_path: string[]): void;
+        addProperty(_path: string[], _node: ƒ.Node, _time: number): void;
         deleteProperty(_element: HTMLElement): void;
         private getSelectedSequences;
         private deletePath;

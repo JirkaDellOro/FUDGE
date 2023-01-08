@@ -71,21 +71,21 @@ namespace FudgeCore {
     //TODO: add an INHERIT and a PINGPONG mode
   }
 
-  export enum ANIMATION_PLAYBACK {
+  export enum ANIMATION_QUANTIZATION {
     //TODO: add an in-depth description of what happens to the animation (and events) depending on the Playback. Use Graphs to explain.
     /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
-    TIMEBASED_CONTINOUS,
+    CONTINOUS,
     /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
-    TIMEBASED_RASTERED_TO_FPS,
+    DISCRETE,
     /** Advances the time each frame according to the FPS value of the animation, ignoring the actual duration of the frames. Doesn't skip any frames.*/
-    FRAMEBASED
+    FRAMES
   }
 
   /**
    * Animation Class to hold all required Objects that are part of an Animation.
    * Also holds functions to play said Animation.
    * Can be added to a Node and played through {@link ComponentAnimator}.
-   * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
+   * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021-2023
    */
   export class Animation extends Mutable implements SerializableResource {
     public idResource: string = undefined;
@@ -134,11 +134,11 @@ namespace FudgeCore {
      * @param _playback The playbackmode the animation is supposed to be calculated with.
      * @returns a "Mutator" to apply.
      */
-    getMutated(_time: number, _direction: number, _playback: ANIMATION_PLAYBACK): Mutator {     //TODO: find a better name for this
+    getMutated(_time: number, _direction: number, _playback: ANIMATION_QUANTIZATION): Mutator {     //TODO: find a better name for this
       let m: Mutator = {};
       let animationStructure: ANIMATION_STRUCTURE_TYPE;
 
-      if (_playback == ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS)
+      if (_playback == ANIMATION_QUANTIZATION.CONTINOUS)
         animationStructure = _direction < 0 ? ANIMATION_STRUCTURE_TYPE.REVERSE : ANIMATION_STRUCTURE_TYPE.NORMAL;
       else
         animationStructure = _direction < 0 ? ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE : ANIMATION_STRUCTURE_TYPE.RASTERED;
@@ -148,14 +148,11 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a list of the names of the events the {@link ComponentAnimator} needs to fire between _min and _max. 
-     * @param _min The minimum time (inclusive) to check between
-     * @param _max The maximum time (exclusive) to check between
-     * @param _playback The playback mode to check in. Has an effect on when the Events are fired. 
+     * Returns a list of the names of the events the {@link ComponentAnimator} needs to fire between _min and _max input values.
      * @param _direction The direction the animation is supposed to run in. >0 == forward, 0 == stop, <0 == backwards
      * @returns a list of strings with the names of the custom events to fire.
      */
-    getEventsToFire(_min: number, _max: number, _playback: ANIMATION_PLAYBACK, _direction: number): string[] {
+    getEventsToFire(_min: number, _max: number, _quantization: ANIMATION_QUANTIZATION, _direction: number): string[] {
       let eventList: string[] = [];
       let minSection: number = Math.floor(_min / this.totalTime);
       let maxSection: number = Math.floor(_max / this.totalTime);
@@ -163,7 +160,7 @@ namespace FudgeCore {
       _max = _max % this.totalTime;
 
       while (minSection <= maxSection) {
-        let eventTriggers: AnimationEventTrigger = this.getCorrectEventList(_direction, _playback);
+        let eventTriggers: AnimationEventTrigger = this.getCorrectEventList(_direction, _quantization);
         if (minSection == maxSection) {
           eventList = eventList.concat(this.checkEventsBetween(eventTriggers, _min, _max));
         } else {
@@ -346,8 +343,8 @@ namespace FudgeCore {
      * @param _playback The playbackmode the animation is playing in.
      * @returns The correct AnimationEventTrigger Object to use
      */
-    private getCorrectEventList(_direction: number, _playback: ANIMATION_PLAYBACK): AnimationEventTrigger {
-      if (_playback != ANIMATION_PLAYBACK.FRAMEBASED) {
+    private getCorrectEventList(_direction: number, _playback: ANIMATION_QUANTIZATION): AnimationEventTrigger {
+      if (_playback != ANIMATION_QUANTIZATION.FRAMES) {
         if (_direction >= 0) {
           return this.getProcessedEventTrigger(ANIMATION_STRUCTURE_TYPE.NORMAL);
         } else {

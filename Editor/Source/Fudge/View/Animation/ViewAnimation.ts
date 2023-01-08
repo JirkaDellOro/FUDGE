@@ -11,13 +11,13 @@ namespace Fudge {
     private cmpAnimator: ƒ.ComponentAnimator;
     private animation: ƒ.Animation;
     private playbackTime: number = 0;
-    
+
     private propertyList: HTMLDivElement;
     private controller: ControllerAnimation;
 
     private toolbar: HTMLDivElement;
     private frameInput: HTMLInputElement;
-    
+
     private time: ƒ.Time = new ƒ.Time();
     private idInterval: number;
 
@@ -25,7 +25,7 @@ namespace Fudge {
       super(_container, _state);
       this.setAnimation(null);
       this.createToolbar();
-      
+
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
@@ -73,7 +73,7 @@ namespace Fudge {
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       let choice: CONTEXTMENU = Number(_item.id);
       ƒ.Debug.fudge(`MenuSelect | id: ${CONTEXTMENU[_item.id]} | event: ${_event}`);
-        
+
       switch (choice) {
         case CONTEXTMENU.ADD_PROPERTY:
           // defined in getMutatorSubmenu, this seems to be the only way to keep the path associated with the menu item, attaching anything to item
@@ -100,7 +100,7 @@ namespace Fudge {
           if (mutator && Object.keys(mutator).length > 0) {
             let item: Electron.MenuItem;
             item = new remote.MenuItem(
-              { label: component.type, submenu: this.getMutatorSubmenu(mutator, path, _callback)}
+              { label: component.type, submenu: this.getMutatorSubmenu(mutator, path, _callback) }
             );
             menu.append(item);
           }
@@ -113,7 +113,7 @@ namespace Fudge {
         path.push(child.name);
         let item: Electron.MenuItem;
         item = new remote.MenuItem(
-          { label: child.name, submenu: this.getNodeSubmenu(child, path, _callback)}
+          { label: child.name, submenu: this.getNodeSubmenu(child, path, _callback) }
         );
         menu.append(item);
       }
@@ -133,11 +133,13 @@ namespace Fudge {
           );
         } else {
           item = new remote.MenuItem(
-            { label: property, id: String(CONTEXTMENU.ADD_PROPERTY), click: () => {
-              this.controller.addProperty(path);
-              this.createPropertyList();
-              this.animate();
-            } }
+            {
+              label: property, id: String(CONTEXTMENU.ADD_PROPERTY), click: () => {
+                this.controller.addProperty(path, this.node, this.playbackTime);
+                this.createPropertyList();
+                this.animate();
+              }
+            }
           );
         }
         menu.append(item);
@@ -195,7 +197,7 @@ namespace Fudge {
           }
           break;
         case EVENT_EDITOR.MODIFY:
-          if (_event.detail.view instanceof ViewAnimationSheet) 
+          if (_event.detail.view instanceof ViewAnimationSheet)
             this.pause();
 
           this.playbackTime = _event.detail.data;
@@ -263,7 +265,7 @@ namespace Fudge {
             this.idInterval = window.setInterval(() => {
               this.playbackTime = this.time.get() % this.animation.totalTime;
               this.animate();
-            },                                   1000 / this.animation.fps);
+            }, 1000 / this.animation.fps);
           }
           break;
         case "pause":

@@ -858,15 +858,17 @@ var Fudge;
             else
                 return _time;
         }
-        addProperty(_path) {
-            let value = this.animation.animationStructure;
+        addProperty(_path, _node, _time) {
+            let structure = this.animation.animationStructure;
             for (let i = 0; i < _path.length - 1; i++) {
                 let key = _path[i];
-                if (!(key in value))
-                    value[key] = {};
-                value = value[key];
+                if (!(key in structure))
+                    structure[key] = {};
+                structure = structure[key];
             }
-            value[_path[_path.length - 1]] = new ƒ.AnimationSequence();
+            let sequence = new ƒ.AnimationSequence();
+            sequence.addKey(new ƒ.AnimationKey(_time, 0));
+            structure[_path[_path.length - 1]] = sequence;
         }
         deleteProperty(_element) {
             if (!this.propertyList.contains(_element))
@@ -2730,11 +2732,13 @@ var Fudge;
                     item = new Fudge.remote.MenuItem({ label: property, submenu: this.getMutatorSubmenu(_mutator[property], path, _callback) });
                 }
                 else {
-                    item = new Fudge.remote.MenuItem({ label: property, id: String(Fudge.CONTEXTMENU.ADD_PROPERTY), click: () => {
-                            this.controller.addProperty(path);
+                    item = new Fudge.remote.MenuItem({
+                        label: property, id: String(Fudge.CONTEXTMENU.ADD_PROPERTY), click: () => {
+                            this.controller.addProperty(path, this.node, this.playbackTime);
                             this.createPropertyList();
                             this.animate();
-                        } });
+                        }
+                    });
                 }
                 menu.append(item);
             }
@@ -3046,6 +3050,10 @@ var Fudge;
                     break;
                 case "Delete Key":
                     let sequence = this.sequences.find(_sequence => _sequence.data.getKeys().includes(targetKey.data)).data;
+                    if (sequence.length < 2) {
+                        ƒ.Debug.warn("Only one key left in sequence. Delete property instead.");
+                        break;
+                    }
                     sequence.removeKey(targetKey.data);
                     this.animate();
                     break;

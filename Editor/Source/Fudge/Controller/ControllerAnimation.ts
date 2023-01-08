@@ -2,7 +2,7 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
-  export class ControllerAnimation  {
+  export class ControllerAnimation {
     private static readonly PROPERTY_COLORS: string[] = [
       "Red",
       "Lime",
@@ -36,10 +36,10 @@ namespace Fudge {
           let element: ƒui.CustomElement = <ƒui.CustomElement>ƒui.Controller.findChildElementByKey(_propertyList, key);
           if (!element)
             continue;
-            
+
           let value: ƒ.General = _mutator[key];
           let structureOrSequence: Object = _animationStructure[key];
-          
+
           if (element instanceof ƒui.CustomElement && structureOrSequence instanceof ƒ.AnimationSequence) {
             element.style.setProperty("--color-animation-property", getNextColor());
             element.setMutatorValue(value);
@@ -62,7 +62,7 @@ namespace Fudge {
     public updateSequence(_time: number, _element: ƒui.CustomElement): void {
       let sequence: ƒ.AnimationSequence = Reflect.get(_element, "animationSequence");
       if (!sequence) return;
-      
+
       let time: number = ƒ.AnimationKey.toKeyTime(_time);
       let key: ƒ.AnimationKey = sequence.getKeys().find(_key => _key.time == time);
       if (!key)
@@ -82,16 +82,18 @@ namespace Fudge {
       else
         return _time;
     }
-    
-    public addProperty(_path: string[]): void {
-      let value: Object = this.animation.animationStructure;
+
+    public addProperty(_path: string[], _node: ƒ.Node, _time: number): void {
+      let structure: ƒ.AnimationSequence | ƒ.AnimationStructure = this.animation.animationStructure;
       for (let i: number = 0; i < _path.length - 1; i++) {
         let key: string = _path[i];
-        if (!(key in value)) 
-          value[key] = {};
-        value = value[key];
+        if (!(key in structure))
+          structure[key] = {};
+        structure = structure[key];
       }
-      value[_path[_path.length - 1]] = new ƒ.AnimationSequence();
+      let sequence: ƒ.AnimationSequence = new ƒ.AnimationSequence();
+      sequence.addKey(new ƒ.AnimationKey(_time, 0));
+      structure[_path[_path.length - 1]] = sequence;
     }
 
     public deleteProperty(_element: HTMLElement): void {
@@ -100,7 +102,7 @@ namespace Fudge {
       let path: string[] = [];
       let element: HTMLElement = _element;
       while (element !== this.propertyList) {
-        if (element instanceof ƒui.CustomElement || element instanceof ƒui.Details) 
+        if (element instanceof ƒui.CustomElement || element instanceof ƒui.Details)
           path.unshift(element.getAttribute("key"));
 
         element = element.parentElement;
@@ -135,7 +137,7 @@ namespace Fudge {
 
     private deletePath(_path: string[]): void {
       let value: Object = this.animation.animationStructure;
-      for (let i: number = 0; i < _path.length - 1; i++) 
+      for (let i: number = 0; i < _path.length - 1; i++)
         value = value[_path[i]];
       delete value[_path[_path.length - 1]];
 
@@ -144,7 +146,7 @@ namespace Fudge {
       function deleteEmptyPathsRecursive(_object: Object): Object {
         for (const key in _object) {
           if (_object[key] instanceof ƒ.AnimationSequence) continue;
-  
+
           let value: Object = deleteEmptyPathsRecursive(_object[key]);
           if (Object.keys(value).length == 0) {
             delete _object[key];
@@ -152,7 +154,7 @@ namespace Fudge {
             _object[key] = value;
           }
         }
-  
+
         return _object;
       }
     }
@@ -161,15 +163,15 @@ namespace Fudge {
       switch (_event.type) {
         case ƒui.EVENT.CLICK:
           if (!(_event.target instanceof HTMLElement) || !this.animation || _event.target instanceof HTMLButtonElement) break;
-        
+
           let target: HTMLElement = _event.target;
-          if (target.parentElement instanceof ƒui.Details) 
+          if (target.parentElement instanceof ƒui.Details)
             target = target.parentElement;
-          if (target instanceof ƒui.CustomElement || target instanceof ƒui.Details) 
+          if (target instanceof ƒui.CustomElement || target instanceof ƒui.Details)
             this.sequences = this.getSelectedSequences(target);
           else if (target == this.propertyList)
             this.sequences = this.getSelectedSequences();
-          
+
           this.view.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.sequences } });
           break;
       }
