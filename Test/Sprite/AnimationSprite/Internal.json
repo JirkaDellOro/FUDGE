@@ -36,15 +36,34 @@
                       {
                         "time": 0,
                         "value": 0,
-                        "slopeIn": 0.0009947177816240515,
-                        "slopeOut": 0.0009947177816240515,
+                        "slopeIn": 0.001,
+                        "slopeOut": 0.001,
                         "constant": false
                       },
                       {
                         "time": 1000,
                         "value": 1,
-                        "slopeIn": 0.0010080472973473037,
-                        "slopeOut": 0.0010080472973473037,
+                        "slopeIn": 0.001,
+                        "slopeOut": 0.001,
+                        "constant": false
+                      }
+                    ],
+                    "animationSequence": true
+                  },
+                  "y": {
+                    "keys": [
+                      {
+                        "time": 0,
+                        "value": 0,
+                        "slopeIn": 0.001,
+                        "slopeOut": 0.001,
+                        "constant": false
+                      },
+                      {
+                        "time": 1000,
+                        "value": 1,
+                        "slopeIn": 0.001,
+                        "slopeOut": 0.001,
                         "constant": false
                       }
                     ],
@@ -104,7 +123,7 @@
               },
               "idAnimation": "Animation|2023-01-08T11:24:34.193Z|38529",
               "playmode": 0,
-              "playback": 0,
+              "playback": 1,
               "scale": 1,
               "scaleWithGameTime": true,
               "animateInEditor": false
