@@ -2757,26 +2757,12 @@ var Fudge;
             })
                 .forEach(_button => this.toolbar.appendChild(_button));
             this.frameInput = document.createElement("input");
-            this.frameInput.type = "text";
+            this.frameInput.type = "number";
             this.frameInput.id = "frameinput";
-            this.frameInput.onfocus = () => Reflect.set(this.frameInput, "previousValue", this.frameInput.value);
-            this.frameInput.onkeydown = _event => {
-                if (_event.key.length == 1 && !/\d/.test(_event.key)) {
-                    _event.preventDefault();
-                    return;
-                }
-                if (_event.key == ƒ.KEYBOARD_CODE.ENTER || _event.key == ƒ.KEYBOARD_CODE.NUMPAD_ENTER) {
-                    this.frameInput.blur();
-                    this.frameInput.focus();
-                }
-            };
-            this.frameInput.onblur = () => {
-                if (this.frameInput.value.length == 0)
-                    this.frameInput.value = Reflect.get(this.frameInput, "previousValue");
-                this.frameInput.value = this.frameInput.value.match(/[1-9]\d*|0$/)[0];
+            this.frameInput.addEventListener("input", (_event) => {
                 this.playbackTime = Number.parseInt(this.frameInput.value) * 1000 / this.animation.fps;
                 this.animate();
-            };
+            });
             this.toolbar.appendChild(this.frameInput);
         }
         hndEvent = (_event) => {

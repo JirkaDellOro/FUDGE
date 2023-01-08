@@ -16,6 +16,11 @@ div[view=ViewAnimation] #frameinput {
   width: 40px;
   text-align: end;
 }
+div[view=ViewAnimation] #frameinput::-webkit-outer-spin-button,
+div[view=ViewAnimation] #frameinput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
 div[view=ViewAnimation] button {
   border: none;
