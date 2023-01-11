@@ -45,9 +45,11 @@ namespace FudgeCore {
      * by updating the inverse bind matrices
      */
     public setDefaultPose(): void {
-      for (const boneName in this.bones) {
-        this.calculateMtxWorld(this.bones[boneName]);
-        this.mtxBindInverses[boneName] = this.bones[boneName].mtxWorldInverse;
+      for (const node of this) {
+        if (node == this || !(node.name in this.mtxBindInverses))
+          continue;
+        this.calculateMtxWorld(node);
+        this.mtxBindInverses[node.name] = node.mtxWorldInverse;
       }
     }
 
@@ -85,6 +87,7 @@ namespace FudgeCore {
         Matrix4x4.MULTIPLICATION(_node.getParent().mtxWorld, _node.mtxLocal) :
         _node.getParent().mtxWorld
       );
+      _node.mtxWorldInverse.set(Matrix4x4.INVERSION(_node.mtxWorld));
     }
 
     /**

@@ -3920,12 +3920,18 @@ declare namespace FudgeCore {
      * Mesh loaded from a GLTF-file
      * @author Matthias Roming, HFU, 2022
      */
-    class MeshGLTF extends Mesh {
-        private uriGLTF;
+    class MeshFromFile extends Mesh {
+        private uri;
+        private filetype;
+        private uid?;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        load(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF>;
-        private createVerticesAndFaces;
+        loadFromGLTF(_loader: GLTFLoader, _gltfMesh: GLTF.Mesh): Promise<MeshFromFile>;
+        loadFromFBX(_loader: FBXLoader, _fbxMesh: FBX.Geometry): Promise<MeshFromFile>;
+        private deserializeGLTF;
+        private deserializeFBX;
+        private createVerticesFromRenderMesh;
+        private createFacesFromRenderMesh;
     }
 }
 declare namespace FudgeCore {
@@ -4086,8 +4092,9 @@ declare namespace FudgeCore {
      * Mesh influenced by a skeleton
      * @author Matthias Roming, HFU, 2022
      */
-    class MeshSkin extends MeshGLTF {
-        load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
+    class MeshSkin extends MeshFromFile {
+        loadFromGLTF(_loader: GLTFLoader, _gltfMesh: GLTF.Mesh): Promise<MeshSkin>;
+        loadFromFBX(_loader: FBXLoader, _fbxMesh: FBX.Geometry): Promise<MeshSkin>;
         useRenderBuffers(_shader: ShaderInterface, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
         protected reduceMutator(_mutator: Mutator): void;
         private createBones;
@@ -5697,119 +5704,210 @@ declare namespace FudgeCore.FBX {
         getFloat32(_offset?: number): number;
         getFloat64(_offset?: number): number;
         getString(_length: number, _offset?: number): string;
-        getIterable(_getter: () => number, _length: number, _offset?: number): Iterable<number>;
+        getSequence(_getter: () => number, _length: number, _offset?: number): Generator<number>;
     }
 }
 declare namespace FudgeCore.FBX {
-    interface Document {
+    export interface FBX {
+        documents: Document[];
+        definitions?: Definitions;
+        objects: {
+            all: Object[];
+            models: Model[];
+            geometries: Geometry[];
+            poses: Object[];
+            materials: Material[];
+            textures: Texture[];
+            animStacks: Object[];
+        };
+        connections: Connection[];
+    }
+    interface ObjectBase {
         uid: number;
         name: string;
-        sourceObject: Object;
-        activeAnimStackName: string;
-        rootNode: number;
+        type?: string;
+        subtype?: string;
+        children?: Object[];
+        parent?: Object;
+        loaded: boolean;
+        load: () => Object;
     }
-    interface Definitions {
-        version: number;
-        objectTypes: ObjectType[];
+    export interface Object extends ObjectBase {
+        [name: string]: NodeProperty | {
+            [name: string]: NodeProperty;
+        } | Property70 | Object | Object[] | (() => Object);
     }
-    interface ObjectType {
-        name: string;
-        count: number;
-        propertyTemplate: PropertyTemplate;
+    export interface Document extends ObjectBase {
+        SourceObject?: undefined;
+        ActiveAnimation?: string;
+        RootNode?: number;
     }
-    interface PropertyTemplate {
-        name: string;
-        [propertyName: string]: Property;
+    export interface NodeAttribute extends ObjectBase {
+        TypeFlags?: string;
     }
-    interface Object {
-        uid: number;
-        name: string;
-        type: string;
-        subtype: string;
+    export interface Geometry extends ObjectBase {
+        GeometryVersion?: number;
+        Vertices?: Float32Array;
+        PolygonVertexIndex?: Int32Array;
+        LayerElementNormal?: LayerElementNormal;
+        LayerElementUV?: LayerElementUV | LayerElementUV[];
+        LayerElementMaterial?: LayerElementMaterial;
     }
-    interface Mesh extends Object {
-        version: number;
-        vertices: Float32Array;
-        indices: Uint16Array;
-        edges?: Uint16Array;
-        layerElementNormal: LayerElementNormal;
-        layerElementUV: LayerElementUV;
-        layerElementMaterial: LayerElementMaterial;
+    export interface Model extends ObjectBase {
+        Version?: number;
+        LclTranslation?: number | Vector3 | AnimCurveNode;
+        LclRotation?: number | Vector3 | AnimCurveNode;
+        LclScaling?: number | Vector3 | AnimCurveNode;
+        PreRotation?: Vector3;
+        currentUVSet?: string;
     }
-    interface Material extends Object {
-        version: number;
-        shadingModel: string;
-        multiLayer: boolean;
-        emissive: Vector3;
-        ambient: Vector3;
-        diffuse: Vector3;
-        specular: Vector3;
-        shininess: number;
-        opacity: number;
-        reflectivity: number;
+    export interface Material extends ObjectBase {
+        Version?: number;
+        ShadingModel?: string;
+        Diffuse?: Vector3;
+        DiffuseColor?: Texture;
+        DiffuseFactor?: number;
+        Ambient?: Vector3;
+        AmbientColor?: Vector3 | Texture;
+        Shininess?: number;
+        ShininessExponent?: Vector3 | Texture;
+        Specular?: Vector3;
+        SpecularColor?: Vector3 | Texture;
+        Reflectivity?: number;
+        ReflectionFactor?: number;
+        Opacity?: number;
+        TransparencyFactor?: number;
+        Emissive?: Vector3;
+        NormalMap?: Texture;
     }
-    interface LayerElement {
-        name: string;
-        version: number;
-        mapping: MappingInformationType;
-        referencing: ReferenceInformationType;
+    export interface Deformer extends ObjectBase {
+        Version?: number;
+        SkinningType?: string;
     }
-    interface LayerElementNormal extends LayerElement {
-        normals: Float32Array;
+    export interface SubDeformer extends ObjectBase {
+        Version?: number;
+        Transform?: Float32Array;
+        TransformLink?: Float32Array;
+        Indexes?: Uint16Array;
+        Weights?: Float32Array;
     }
-    interface LayerElementUV extends LayerElement {
-        uvs?: Float32Array;
-        uvIndices?: Uint16Array;
+    export interface Texture extends ObjectBase {
+        FileName?: string;
+        RelativeFilename?: string;
+        ModelUVScaling?: number;
+        ModelUVTranslation?: number;
+        UVSet?: string;
     }
-    interface LayerElementMaterial extends LayerElement {
-        materials?: number;
+    export interface Video extends ObjectBase {
+        FileName?: string;
+        RelativeFilename?: string;
+        UseMipMap?: number;
+        Content?: Uint8Array;
     }
-    enum MappingInformationType {
+    export interface AnimCurveNode extends ObjectBase {
+        dX?: number | AnimCurve;
+        dY?: number | AnimCurve;
+        dZ?: number | AnimCurve;
+    }
+    export interface AnimCurve extends ObjectBase {
+        KeyVer?: number;
+        Default?: number;
+        KeyTime?: Uint16Array;
+        KeyValueFloat?: Float32Array;
+    }
+    export interface LayerElement {
+        Name: string;
+        Version: number;
+        MappingInformationType: string;
+        ReferenceInformationType: string;
+    }
+    export interface LayerElementNormal extends LayerElement {
+        Normals: Float32Array;
+        NormalsW: Float32Array;
+    }
+    export interface LayerElementUV extends LayerElement {
+        UV?: Float32Array;
+        UVIndex?: Uint16Array;
+    }
+    export interface LayerElementMaterial extends LayerElement {
+        Materials?: number;
+    }
+    export enum MappingInformationType {
         ByVertex = 0,
         ByPolygon = 1,
         ByPolygonVertex = 2,
         ByEdge = 3,
         AllSame = 4
     }
-    enum ReferenceInformationType {
+    export enum ReferenceInformationType {
         Direct = 0,
         IndexToDirect = 1
     }
-    interface Connection {
+    export interface Connection {
         parentUID: number;
         childUID: number;
         propertyName: string;
     }
-    type Property = boolean | number | string | Vector3;
-    interface Node {
+    export interface Definitions {
+        version: number;
+        objectTypes: ObjectType[];
+    }
+    export interface ObjectType {
         name: string;
-        properties: NodeProperty[];
-        children: Node[];
+        count: number;
+        propertyTemplate: PropertyTemplate;
     }
-    type NodeProperty = boolean | number | string | Uint8Array | Uint16Array | Float32Array;
-    const binaryStartChars: Uint8Array;
-    enum ArrayEncoding {
-        UNCOMPRESSED = 0,
-        COMPRESSED = 1
+    export interface PropertyTemplate {
+        name: string;
+        [propertyName: string]: Property70;
     }
+    export {};
 }
 declare namespace FudgeCore {
     class FBXLoader {
         #private;
         private static loaders;
+        readonly fbx: FBX.FBX;
         readonly nodes: FBX.Node[];
         readonly uri: string;
         constructor(_buffer: ArrayBuffer, _uri: string);
+        private static get defaultMaterial();
+        private static get defaultSkinMaterial();
         static LOAD(_uri: string): Promise<FBXLoader>;
-        getObjects(): FBX.Object[];
-        private loadObject;
-        private loadLayerElement;
-        private getNode;
-        private getPropertyValue;
+        getScene(_index?: number): Promise<GraphInstance>;
+        getNode(_index: number): Promise<Node>;
+        getMesh(_index: number): Promise<MeshFromFile>;
+        getMaterial(_index: number): Promise<Material>;
+        getTexture(_index: number): Promise<Texture>;
+        /**
+         * Retriefs the skeleton containing the given limb node.
+         */
+        getSkeleton(_fbxLimbNode: FBX.Model): Promise<Skeleton>;
+        private getTransformVector;
     }
 }
 declare namespace FudgeCore.FBX {
-    function parseNodesFromBinary(_buffer: ArrayBuffer): FBX.Node[];
+    class Node {
+        #private;
+        name: string;
+        private loadProperties;
+        private loadChildren;
+        constructor(_name: string, _loadProperties: () => NodeProperty[], _loadChildren: () => Node[]);
+        get properties(): NodeProperty[];
+        get children(): Node[];
+    }
+    type Property70 = boolean | number | string | Vector3;
+    type NodeProperty = boolean | number | string | Uint8Array | Uint16Array | Float32Array;
+    enum ArrayEncoding {
+        UNCOMPRESSED = 0,
+        COMPRESSED = 1
+    }
+}
+declare namespace FudgeCore.FBX {
+    function loadFromNodes(_nodes: Node[]): FBX;
+}
+declare namespace FudgeCore.FBX {
+    function parseNodesFromBinary(_buffer: ArrayBuffer): Node[];
 }
 declare namespace GLTF {
     type GlTfId = number;
@@ -6515,8 +6613,8 @@ declare namespace FudgeCore {
         getCameraByIndex(_iCamera: number): Promise<ComponentCamera>;
         getAnimation(_name: string): Promise<Animation>;
         getAnimationByIndex(_iAnimation: number): Promise<Animation>;
-        getMesh(_name: string): Promise<MeshGLTF>;
-        getMeshByIndex(_iMesh: number): Promise<MeshGLTF>;
+        getMesh(_name: string): Promise<MeshFromFile>;
+        getMeshByIndex(_iMesh: number): Promise<MeshFromFile>;
         getSkeleton(_name: string): Promise<SkeletonInstance>;
         getSkeletonByIndex(_iSkeleton: number): Promise<SkeletonInstance>;
         getUint8Array(_iAccessor: number): Promise<Uint8Array>;
@@ -6601,6 +6699,13 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    abstract class ShaderFlatTexturedSkin extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
     abstract class ShaderGouraud extends Shader {
         static readonly iSubclass: number;
         static define: string[];
@@ -6622,13 +6727,33 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    abstract class ShaderGouraudTexturedSkin extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
     abstract class ShaderLit extends Shader {
         static readonly iSubclass: number;
         static define: string[];
     }
 }
 declare namespace FudgeCore {
+    abstract class ShaderLitSkin extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+    }
+}
+declare namespace FudgeCore {
     abstract class ShaderLitTextured extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderLitTexturedSkin extends Shader {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
@@ -6661,6 +6786,22 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     abstract class ShaderPhongSkin extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderPhongTextured extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderPhongTexturedSkin extends Shader {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;

@@ -1,3 +1,4 @@
+// Modified copy from https://github.com/picode7/binary-reader
 namespace FudgeCore.FBX {
   export class BufferReader {
     public offset: number;
@@ -57,10 +58,10 @@ namespace FudgeCore.FBX {
     }
 
     public getString(_length: number, _offset: number = this.offset): string {
-      return String.fromCharCode(...this.getIterable(this.getUint8, _length, _offset));
+      return String.fromCharCode(...this.getSequence(this.getUint8, _length, _offset));
     }
 
-    public *getIterable(_getter: () => number, _length: number, _offset: number = this.offset): Iterable<number> {
+    public *getSequence(_getter: () => number, _length: number, _offset: number = this.offset): Generator<number> {
       this.offset = _offset;
       for (let i: number = 0; i < _length; i++) {
         yield _getter.call(this);

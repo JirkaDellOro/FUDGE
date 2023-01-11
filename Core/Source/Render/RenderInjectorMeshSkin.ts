@@ -52,7 +52,7 @@ namespace FudgeCore {
         crc3.vertexAttribPointer(aWeight, 4, WebGL2RenderingContext.FLOAT, false, 0, 0);
       }
 
-      _mtxBones.forEach((mtxBone, iBone) => {
+      _mtxBones?.forEach((mtxBone, iBone) => {
         const uMtxBone: WebGLUniformLocation = _shader.uniforms[`u_bones[${iBone}].matrix`];
         if (uMtxBone)
           crc3.uniformMatrix4fv(uMtxBone, false, mtxBone.get());

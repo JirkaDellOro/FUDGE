@@ -1,18 +1,37 @@
 ///<reference path="./../Render/RenderInjectorMeshSkin.ts"/>
+///<reference path="./MeshImport.ts"/>
 namespace FudgeCore {
   /**
    * Mesh influenced by a skeleton
    * @author Matthias Roming, HFU, 2022
    */
   @RenderInjectorMeshSkin.decorate
-  export class MeshSkin extends MeshGLTF {
+  export class MeshSkin extends MeshImport {
 
-    public async load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin> {
-      await super.load(_loader, _iMesh);
-      const gltfMesh: GLTF.Mesh = _loader.gltf.meshes[_iMesh];
-      Reflect.set(this.renderMesh, "ƒiBones", await _loader.getUint8Array(gltfMesh.primitives[0].attributes.JOINTS_0));
-      Reflect.set(this.renderMesh, "ƒweights", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.WEIGHTS_0));
+    public async loadFromGLTF(_loader: GLTFLoader, _gltfMesh: GLTF.Mesh): Promise<MeshSkin> {
+      await super.loadFromGLTF(_loader, _gltfMesh);
+      Reflect.set(this.renderMesh, "ƒiBones", await _loader.getUint8Array(_gltfMesh.primitives[0].attributes.JOINTS_0));
+      Reflect.set(this.renderMesh, "ƒweights", await _loader.getFloat32Array(_gltfMesh.primitives[0].attributes.WEIGHTS_0));
       this.createBones();
+      return this;
+    }
+
+    public async loadFromFBX(_loader: FBXLoader, _fbxMesh: FBX.Geometry): Promise<MeshSkin> {
+      await super.loadFromFBX(_loader, _fbxMesh);
+      const fbxDeformer: FBX.Deformer = _fbxMesh.children[0];
+      const skeleton: Skeleton = await _loader.getSkeleton(fbxDeformer.children[0].children[0]); // Deformer.SubDeformer.LimbNode
+      for (const fbxSubDeformer of fbxDeformer.children as FBX.SubDeformer[]) {
+        fbxSubDeformer.load();
+        if (fbxSubDeformer.Indexes)
+          for (let iBoneInfluence: number = 0; iBoneInfluence < fbxSubDeformer.Indexes.length; iBoneInfluence++) {
+            const iVertex: number = fbxSubDeformer.Indexes[iBoneInfluence];
+            if (this.vertices[iVertex])
+              (this.vertices[iVertex].bones || (this.vertices[iVertex].bones = [])).push({
+                index: skeleton.indexOfBone(fbxSubDeformer.children[0].name),
+                weight: fbxSubDeformer.Weights[iBoneInfluence] || 1
+              });
+          }
+      }
       return this;
     }
 

@@ -31,12 +31,16 @@ namespace FudgeCore {
     public bindSkeleton(_skeleton: SkeletonInstance): void {
       this.#skeleton = _skeleton;
 
-      if (!this.skeleton && !this.node)
+      if (_skeleton.getParent())
+        return;
+      
+      if (!this.node)
         this.addEventListener(EVENT.COMPONENT_ADD, (_event: Event) => {
-          if (_event.target != this) return;
+          if (_event.target != this)
+            return;
           this.node.addChild(this.skeleton);
         });
-      else if (this.node)
+      else
         this.node.addChild(this.skeleton);
     }
 

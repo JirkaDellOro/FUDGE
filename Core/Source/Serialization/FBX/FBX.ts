@@ -1,77 +1,151 @@
 namespace FudgeCore.FBX {
 
-  export interface Document {
+  export interface FBX {
+    documents: Document[];
+    definitions?: Definitions;
+    objects: {
+      all: Object[];
+      models: Model[];
+      geometries: Geometry[];
+      poses: Object[];
+      materials: Material[];
+      textures: Texture[];
+      animStacks: Object[];
+    };
+    connections: Connection[];
+  }
+
+  interface ObjectBase {
     uid: number;
     name: string;
-    sourceObject: Object;
-    activeAnimStackName: string;
-    rootNode: number;
+    type?: string;
+    subtype?: string;
+    children?: Object[];
+    parent?: Object;
+
+    loaded: boolean;
+    load: () => Object;
   }
 
-  export interface Definitions {
-    version: number;
-    objectTypes: ObjectType[];
+  export interface Object extends ObjectBase {
+    [name: string]: NodeProperty | { [name: string]: NodeProperty } | Property70 | Object | Object[] | (() => Object);
   }
 
-  export interface ObjectType {
-    name: string;
-    count: number;
-    propertyTemplate: PropertyTemplate;
+  export interface Document extends ObjectBase {
+    SourceObject?: undefined;
+    ActiveAnimation?: string;
+    RootNode?: number;
   }
 
-  export interface PropertyTemplate {
-    name: string;
-    [propertyName: string]: Property;
+  export interface NodeAttribute extends ObjectBase {
+    TypeFlags?: string;
   }
 
-  export interface Object {
-    uid: number;
-    name: string;
-    type: string;
-    subtype: string;
+  export interface Geometry extends ObjectBase {
+    GeometryVersion?: number; 
+    Vertices?: Float32Array;
+    PolygonVertexIndex?: Int32Array;
+    LayerElementNormal?: LayerElementNormal;
+    LayerElementUV?: LayerElementUV | LayerElementUV[];
+    LayerElementMaterial?: LayerElementMaterial;
   }
 
-  export interface Mesh extends Object {
-    version: number;
-    vertices: Float32Array;
-    indices: Uint16Array;
-    edges?: Uint16Array;
-    layerElementNormal: LayerElementNormal;
-    layerElementUV: LayerElementUV;
-    layerElementMaterial: LayerElementMaterial;
+  export interface Model extends ObjectBase {
+    Version?: number;
+    LclTranslation?: number | Vector3 | AnimCurveNode;
+    LclRotation?: number | Vector3 | AnimCurveNode;
+    LclScaling?: number | Vector3 | AnimCurveNode;
+    PreRotation?: Vector3;
+    currentUVSet?: string;
   }
 
-  export interface Material extends Object {
-    version: number;
-    shadingModel: string;
-    multiLayer: boolean;
-    emissive: Vector3;
-    ambient: Vector3;
-    diffuse: Vector3;
-    specular: Vector3;
-    shininess: number;
-    opacity: number;
-    reflectivity: number;
+  export interface Material extends ObjectBase {
+    Version?: number;
+    ShadingModel?: string;
+
+    Diffuse?: Vector3;
+    DiffuseColor?: Texture;
+    DiffuseFactor?: number;
+
+    Ambient?: Vector3;
+    AmbientColor?: Vector3 | Texture;
+
+    Shininess?: number;
+    ShininessExponent?: Vector3 | Texture;
+
+    Specular?: Vector3;
+    SpecularColor?: Vector3 | Texture;
+
+    Reflectivity?: number;
+    ReflectionFactor?: number;
+
+    Opacity?: number;
+    TransparencyFactor?: number;
+    
+    Emissive?: Vector3;
+    NormalMap?: Texture;
+  }
+
+  export interface Deformer extends ObjectBase {
+    Version?: number;
+    SkinningType?: string;
+  }
+
+  export interface SubDeformer extends ObjectBase {
+    Version?: number;
+    Transform?: Float32Array;
+    TransformLink?: Float32Array;
+    Indexes?: Uint16Array;
+    Weights?: Float32Array;
+  }
+
+  export interface Texture extends ObjectBase {
+    FileName?: string;
+    RelativeFilename?: string;
+    ModelUVScaling?: number;
+    ModelUVTranslation?: number;
+    UVSet?: string;
+  }
+
+  export interface Video extends ObjectBase {
+    FileName?: string;
+    RelativeFilename?: string;
+    UseMipMap?:  number;
+    Content?: Uint8Array;
+  }
+
+  export interface AnimCurveNode extends ObjectBase {
+    dX?: number | AnimCurve;
+    dY?: number | AnimCurve;
+    dZ?: number | AnimCurve;
+  }
+
+  export interface AnimCurve extends ObjectBase {
+    KeyVer?: number;
+    Default?: number;
+    KeyTime?: Uint16Array;
+    KeyValueFloat?: Float32Array;
   }
 
   export interface LayerElement {
-    name: string;
-    version: number;
-    mapping: string;
-    referencing: string;
+    Name: string;
+    Version: number;
+    MappingInformationType: string;
+    ReferenceInformationType: string;
   }
 
   export interface LayerElementNormal extends LayerElement {
-    normals: Float32Array;
+    Normals: Float32Array;
+    NormalsW: Float32Array;
   }
 
   export interface LayerElementUV extends LayerElement {
-    uvs?: Float32Array;
-    uvIndices?: Uint16Array;
+    UV?: Float32Array;
+    UVIndex?: Uint16Array;
   }
 
   export interface LayerElementMaterial extends LayerElement {
-    materials?: number;
+    Materials?: number;
   }
 
   export enum MappingInformationType {
@@ -88,21 +162,20 @@ namespace FudgeCore.FBX {
     propertyName: string;
   }
 
-  export type Property = boolean | number | string | Vector3;
-
-  export interface Node {
-    name: string;
-    properties: NodeProperty[];
-    children: Node[];
+  export interface Definitions {
+    version: number;
+    objectTypes: ObjectType[];
   }
 
-  export type NodeProperty = boolean | number | string | Uint8Array | Uint16Array | Float32Array;
+  export interface ObjectType {
+    name: string;
+    count: number;
+    propertyTemplate: PropertyTemplate;
+  }
 
-  export const binaryStartChars: Uint8Array
-    = Uint8Array.from("Kaydara FBX Binary\x20\x20\x00\x1a\x00".split(""), (v) => v.charCodeAt(0));
-
-  export enum ArrayEncoding {
-    UNCOMPRESSED, COMPRESSED
+  export interface PropertyTemplate {
+    name: string;
+    [propertyName: string]: Property70;
   }
 
 }

@@ -30,7 +30,7 @@ namespace FudgeCore {
     #nodes: Node[];
     #cameras: ComponentCamera[];
     #animations: Animation[];
-    #meshes: MeshGLTF[];
+    #meshes: MeshImport[];
     #skeletons: Skeleton[];
     #buffers: ArrayBuffer[];
 
@@ -68,7 +68,7 @@ namespace FudgeCore {
         Project.register(scene);
         this.#scenes[_iScene] = scene;
       }
-      return Project.createGraphInstance(this.#scenes[_iScene]);
+      return await Project.createGraphInstance(this.#scenes[_iScene]);
     }
 
     public async getNode(_name: string): Promise<Node> {
@@ -219,23 +219,23 @@ namespace FudgeCore {
       return this.#animations[_iAnimation];
     }
 
-    public async getMesh(_name: string): Promise<MeshGLTF> {
+    public async getMesh(_name: string): Promise<MeshImport> {
       const iMesh: number = this.gltf.meshes.findIndex(mesh => mesh.name == _name);
       if (iMesh == -1)
         throw new Error(`Couldn't find name ${_name} in gltf meshes.`);
       return await this.getMeshByIndex(iMesh);
     }
 
-    public async getMeshByIndex(_iMesh: number): Promise<MeshGLTF> {
+    public async getMeshByIndex(_iMesh: number): Promise<MeshImport> {
       if (!this.#meshes)
         this.#meshes = [];
       if (!this.#meshes[_iMesh]) {
         const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
         this.#meshes[_iMesh] = await (
           gltfMesh.primitives[0].attributes.JOINTS_0 != undefined ?
-          new MeshSkin().load(this, _iMesh) :
-          new MeshGLTF().load(this, _iMesh)
-        );
+            new MeshSkin() :
+            new MeshImport()
+        ).loadFromGLTF(this, gltfMesh);
       }
       return this.#meshes[_iMesh];
     }
