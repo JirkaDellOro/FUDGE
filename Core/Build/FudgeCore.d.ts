@@ -3920,18 +3920,12 @@ declare namespace FudgeCore {
      * Mesh loaded from a GLTF-file
      * @author Matthias Roming, HFU, 2022
      */
-    class MeshFromFile extends Mesh {
+    class MeshImport extends Mesh {
         private uri;
-        private filetype;
-        private uid?;
+        private loader;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        loadFromGLTF(_loader: GLTFLoader, _gltfMesh: GLTF.Mesh): Promise<MeshFromFile>;
-        loadFromFBX(_loader: FBXLoader, _fbxMesh: FBX.Geometry): Promise<MeshFromFile>;
-        private deserializeGLTF;
-        private deserializeFBX;
-        private createVerticesFromRenderMesh;
-        private createFacesFromRenderMesh;
+        load(_loader?: typeof MeshLoader, _uri?: RequestInfo, _data?: Object): Promise<MeshImport>;
     }
 }
 declare namespace FudgeCore {
@@ -4092,12 +4086,9 @@ declare namespace FudgeCore {
      * Mesh influenced by a skeleton
      * @author Matthias Roming, HFU, 2022
      */
-    class MeshSkin extends MeshFromFile {
-        loadFromGLTF(_loader: GLTFLoader, _gltfMesh: GLTF.Mesh): Promise<MeshSkin>;
-        loadFromFBX(_loader: FBXLoader, _fbxMesh: FBX.Geometry): Promise<MeshSkin>;
+    class MeshSkin extends MeshImport {
         useRenderBuffers(_shader: ShaderInterface, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
         protected reduceMutator(_mutator: Mutator): void;
-        private createBones;
     }
 }
 declare namespace FudgeCore {
@@ -4224,6 +4215,21 @@ declare namespace FudgeCore {
          * returns the position associated with the vertex addressed, resolving references between vertices
          */
         bones(_index: number): Bone[];
+    }
+}
+declare namespace FudgeCore {
+    abstract class MeshLoader {
+        static load(_mesh: MeshImport | MeshSkin, _data?: Object): Promise<MeshImport>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshLoaderFBX extends MeshLoader {
+        static load(_mesh: MeshImport | MeshSkin, _data: FBX.Geometry): Promise<MeshImport>;
+    }
+}
+declare namespace FudgeCore {
+    class MeshLoaderGLTF extends MeshLoader {
+        static load(_mesh: MeshImport | MeshSkin, _data?: GLTF.Mesh): Promise<MeshImport>;
     }
 }
 declare namespace FudgeCore {
@@ -5728,7 +5734,7 @@ declare namespace FudgeCore.FBX {
         type?: string;
         subtype?: string;
         children?: Object[];
-        parent?: Object;
+        parents?: Object[];
         loaded: boolean;
         load: () => Object;
     }
@@ -5876,7 +5882,7 @@ declare namespace FudgeCore {
         static LOAD(_uri: string): Promise<FBXLoader>;
         getScene(_index?: number): Promise<GraphInstance>;
         getNode(_index: number): Promise<Node>;
-        getMesh(_index: number): Promise<MeshFromFile>;
+        getMesh(_index: number): Promise<MeshImport>;
         getMaterial(_index: number): Promise<Material>;
         getTexture(_index: number): Promise<Texture>;
         /**
@@ -6613,8 +6619,8 @@ declare namespace FudgeCore {
         getCameraByIndex(_iCamera: number): Promise<ComponentCamera>;
         getAnimation(_name: string): Promise<Animation>;
         getAnimationByIndex(_iAnimation: number): Promise<Animation>;
-        getMesh(_name: string): Promise<MeshFromFile>;
-        getMeshByIndex(_iMesh: number): Promise<MeshFromFile>;
+        getMesh(_name: string): Promise<MeshImport>;
+        getMeshByIndex(_iMesh: number): Promise<MeshImport>;
         getSkeleton(_name: string): Promise<SkeletonInstance>;
         getSkeletonByIndex(_iSkeleton: number): Promise<SkeletonInstance>;
         getUint8Array(_iAccessor: number): Promise<Uint8Array>;

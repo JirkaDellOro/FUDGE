@@ -1,10 +1,9 @@
-// Modified copy from https://github.com/picode7/fbx-parser
 namespace FudgeCore.FBX {
-  const binaryStartChars: Uint8Array
-    = Uint8Array.from("Kaydara FBX Binary\x20\x20\x00\x1a\x00".split(""), (v) => v.charCodeAt(0));
-
-  const nullCountAtNodeEnd: number = 13;
-
+  /**
+   * Parses fbx-nodes array from a binary fbx-file.
+   * despite the lazy node implementation it is mostly a copy of the reference: https://github.com/picode7/fbx-parser
+   * @author Matthias Roming, HFU, 2023
+   */
   export function parseNodesFromBinary(_buffer: ArrayBuffer): Node[] {
     if (_buffer.byteLength < binaryStartChars.length)
       throw "Not a binary FBX file";
@@ -112,5 +111,10 @@ namespace FudgeCore.FBX {
 
     return iterable;
   }
+
+  const binaryStartChars: Uint8Array
+    = Uint8Array.from("Kaydara FBX Binary\x20\x20\x00\x1a\x00".split(""), (v) => v.charCodeAt(0));
+
+  const nullCountAtNodeEnd: number = 13;
 
 }

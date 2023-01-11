@@ -1,30 +1,16 @@
 namespace FudgeCore {
-  enum ComponentType {
-    BYTE = 5120,
-    UNSIGNED_BYTE = 5121,
-    SHORT = 5122,
-    UNSIGNED_SHORT = 5123,
-    INT = 5124,
-    UNSIGNED_INT = 5125,
-    FLOAT = 5126
-  }
-
-  type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Int32Array | Float32Array | Float64Array;
-
-  interface GLTFLoaderList {
-    [uri: string]: GLTFLoader;
-  }
-
-  type TransformationType = "rotation" | "scale" | "translation";
-
+  /**
+   * Asset loader for gl Transfer Format files.
+   * @author Matthias Roming, HFU, 2022
+   */
   export class GLTFLoader {
 
-    private static loaders: GLTFLoaderList;
+    private static loaders: { [url: string]: GLTFLoader};
     private static defaultMaterial: Material;
     private static defaultSkinMaterial: Material;
 
     public readonly gltf: GLTF.GlTf;
-    public readonly uri: string;
+    public readonly url: string;
 
     #scenes: Graph[];
     #nodes: Node[];
@@ -34,20 +20,20 @@ namespace FudgeCore {
     #skeletons: Skeleton[];
     #buffers: ArrayBuffer[];
 
-    private constructor(_gltf: GLTF.GlTf, _uri: string) {
+    private constructor(_gltf: GLTF.GlTf, _url: string) {
       this.gltf = _gltf;
-      this.uri = _uri;
+      this.url = _url;
     }
 
-    public static async LOAD(_uri: string): Promise<GLTFLoader> {
+    public static async LOAD(_url: string): Promise<GLTFLoader> {
       if (!this.loaders)
         this.loaders = {};
-      if (!this.loaders[_uri]) {      
-        const response: Response = await fetch(_uri);
+      if (!this.loaders[_url]) {      
+        const response: Response = await fetch(_url);
         const gltf: GLTF.GlTf = await response.json();
-        this.loaders[_uri] = new GLTFLoader(gltf, _uri);
+        this.loaders[_url] = new GLTFLoader(gltf, _url);
       }
-      return this.loaders[_uri];
+      return this.loaders[_url];
     }
 
     public async getScene(_name?: string): Promise<GraphInstance> {
@@ -235,7 +221,7 @@ namespace FudgeCore {
           gltfMesh.primitives[0].attributes.JOINTS_0 != undefined ?
             new MeshSkin() :
             new MeshImport()
-        ).loadFromGLTF(this, gltfMesh);
+        ).load(MeshLoaderGLTF, this.url, gltfMesh);
       }
       return this.#meshes[_iMesh];
     }
@@ -404,4 +390,18 @@ namespace FudgeCore {
     }
 
   }
+
+  enum ComponentType {
+    BYTE = 5120,
+    UNSIGNED_BYTE = 5121,
+    SHORT = 5122,
+    UNSIGNED_SHORT = 5123,
+    INT = 5124,
+    UNSIGNED_INT = 5125,
+    FLOAT = 5126
+  }
+
+  type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Int32Array | Float32Array | Float64Array;
+
+  type TransformationType = "rotation" | "scale" | "translation";
 }

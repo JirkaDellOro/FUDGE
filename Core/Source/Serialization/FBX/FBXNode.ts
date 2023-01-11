@@ -1,5 +1,9 @@
 namespace FudgeCore.FBX {
-
+  /**
+   * Interface to represent fbx-nodes containing its name, children and properties.
+   * Children and properites are lazy.
+   * @author Matthias Roming, HFU, 2023
+   */
   export class Node {
     public name: string;
 

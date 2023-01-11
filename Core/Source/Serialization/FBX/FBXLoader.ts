@@ -1,4 +1,8 @@
 namespace FudgeCore {
+  /**
+   * Asset loader for Filmbox files.
+   * @author Matthias Roming, HFU, 2023
+   */
   export class FBXLoader {
 
     static #defaultMaterial: Material;
@@ -19,6 +23,7 @@ namespace FudgeCore {
     #skeletons: Skeleton[];
 
     public constructor(_buffer: ArrayBuffer, _uri: string) {
+      this.uri = _uri;
       this.nodes = FBX.parseNodesFromBinary(_buffer);
       console.log(this.nodes);
       this.fbx = FBX.loadFromNodes(this.nodes);
@@ -128,7 +133,7 @@ namespace FudgeCore {
           this.fbx.objects.geometries[_index].children?.[0].type == "Deformer" ?
             new MeshSkin() :
             new MeshImport()
-        ).loadFromFBX(this, this.fbx.objects.geometries[_index]);
+        ).load(MeshLoaderFBX, this.uri, this.fbx.objects.geometries[_index]);
       return this.#meshes[_index];
     }
 
@@ -186,8 +191,8 @@ namespace FudgeCore {
       return this.#skeletons.find(skeleton => _fbxLimbNode.name in skeleton.bones) || await (async() => {
         const skeleton: Skeleton = new Skeleton();
         let rootNode: FBX.Model = _fbxLimbNode;
-        while (rootNode.parent && rootNode.parent.subtype == "LimbNode")
-          rootNode = rootNode.parent;
+        while (rootNode.parents && rootNode.parents.some(parent => parent.subtype == "LimbNode"))
+          rootNode = rootNode.parents.find(parent => parent.subtype == "LimbNode");
         const iNode: number = this.fbx.objects.models.findIndex(model => model.name == rootNode.name);
         skeleton.addChild(await this.getNode(iNode));
         for (const node of skeleton) {

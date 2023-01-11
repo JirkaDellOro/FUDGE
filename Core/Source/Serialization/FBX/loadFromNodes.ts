@@ -1,5 +1,8 @@
 namespace FudgeCore.FBX {
-
+  /**
+   * Loads an fbx file from its fbx-node array which may be retrieved by parseNodesFromBinary.
+   * @author Matthias Roming, HFU, 2023
+   */
   export function loadFromNodes(_nodes: Node[]): FBX {
     const fbx: FBX = {
       documents: undefined,
@@ -99,9 +102,8 @@ namespace FudgeCore.FBX {
           break;
       }
       if (connection.propertyName == null) {
-        ((parent.children || (parent.children = [])) as Object[]).push(child);
-        if (parent.type == child.type)
-          child.parent = parent;
+        (parent.children || (parent.children = [])).push(child);
+        (child.parents || (child.parents = [])).push(parent);
       }
       else
         (parent as Object)[formatPropertyName(connection.propertyName)] = child;

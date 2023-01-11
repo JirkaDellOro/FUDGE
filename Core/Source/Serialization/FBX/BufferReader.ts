@@ -1,5 +1,10 @@
-// Modified copy from https://github.com/picode7/binary-reader
 namespace FudgeCore.FBX {
+  /**
+   * Reader to read data from an array buffer more conveniently.
+   * It saves a current offset which is updated when data is readed due to its bytelength.
+   * despite getSequence it is mostly a copy of the reference: https://github.com/picode7/binary-reader
+   * @author Matthias Roming, HFU, 2023
+   */
   export class BufferReader {
     public offset: number;
     public readonly view: DataView;

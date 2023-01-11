@@ -1,5 +1,9 @@
 namespace FudgeCore.FBX {
-
+  /**
+   * Interface to represent fbx files containing its documents, definitions, objects and connections.
+   * Its objects are devided in all and the different object types.
+   * @author Matthias Roming, HFU, 2023
+   */
   export interface FBX {
     documents: Document[];
     definitions?: Definitions;
@@ -21,12 +25,17 @@ namespace FudgeCore.FBX {
     type?: string;
     subtype?: string;
     children?: Object[];
-    parent?: Object;
+    parents?: Object[];
 
     loaded: boolean;
     load: () => Object;
   }
 
+  /**
+   * Interface to represent fbx-objects.
+   * All fields other than uid, name, type, subtype, children and parents are loaded with the load-method.
+   * @author Matthias Roming, HFU, 2023
+   */
   export interface Object extends ObjectBase {
     [name: string]: NodeProperty | { [name: string]: NodeProperty } | Property70 | Object | Object[] | (() => Object);
   }
