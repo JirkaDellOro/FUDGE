@@ -26,12 +26,12 @@ namespace Fudge {
       this.view = _view;
     }
 
-    public updatePropertyList(_mutator: ƒ.Mutator): void {
+    public updatePropertyList(_mutator: ƒ.Mutator, _time?: number): void {
       let colorIndex: number = 0;
 
-      updatePropertyListRecursive(this.propertyList, _mutator, this.animation.animationStructure);
+      updatePropertyListRecursive(this.propertyList, _mutator, this.animation.animationStructure, _time);
 
-      function updatePropertyListRecursive(_propertyList: HTMLElement, _mutator: ƒ.Mutator, _animationStructure: ƒ.AnimationStructure): void {
+      function updatePropertyListRecursive(_propertyList: HTMLElement, _mutator: ƒ.Mutator, _animationStructure: ƒ.AnimationStructure, _time: number): void {
         for (const key in _mutator) {
           let element: ƒui.CustomElement = <ƒui.CustomElement>ƒui.Controller.findChildElementByKey(_propertyList, key);
           if (!element)
@@ -41,12 +41,15 @@ namespace Fudge {
           let structureOrSequence: Object = _animationStructure[key];
 
           if (element instanceof ƒui.CustomElement && structureOrSequence instanceof ƒ.AnimationSequence) {
+            let key: ƒ.AnimationKey = structureOrSequence.findKey(_time);
+            if (key) // key found at exactly the given time, take its value
+              value = key.value;
             element.style.setProperty("--color-animation-property", getNextColor());
             element.setMutatorValue(value);
             Reflect.set(element, "animationSequence", structureOrSequence);
           }
           else {
-            updatePropertyListRecursive(element, value, <ƒ.AnimationStructure>structureOrSequence);
+            updatePropertyListRecursive(element, value, <ƒ.AnimationStructure>structureOrSequence, _time);
           }
         }
       }

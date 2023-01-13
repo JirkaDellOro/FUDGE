@@ -190,7 +190,7 @@ namespace Fudge {
           this.frameInput.value = (Math.trunc(this.playbackTime / 1000 * this.animation.fps)).toString();
 
           let nodeMutator: ƒ.Mutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
-          this.controller?.updatePropertyList(nodeMutator);
+          this.controller?.updatePropertyList(nodeMutator, this.playbackTime);
           break;
         case ƒui.EVENT.INPUT:
           if (_event.target instanceof ƒui.CustomElement) {

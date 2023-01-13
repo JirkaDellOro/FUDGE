@@ -10,7 +10,7 @@ namespace FudgeCore {
     get length(): number {
       return this.keys.length;
     }
-    
+
     /**
      * Evaluates the sequence at the given point in time.
      * @param _time the point in time at which to evaluate the sequence in milliseconds.
@@ -69,6 +69,16 @@ namespace FudgeCore {
     }
 
     /**
+     * Find a key in the sequence exactly matching the given time.
+     */
+    findKey(_time: number): AnimationKey {
+      for (let key of this.keys)
+        if (key.time == _time)
+          return key;
+      return null;
+    }
+
+    /**
      * Removes the Animation Key at the given index from the keys.
      * @param _index the zero-based index at which to remove the key
      * @returns the removed AnimationKey if successful, null otherwise.
@@ -109,7 +119,7 @@ namespace FudgeCore {
       }
       return s;
     }
-    
+
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       for (let i: number = 0; i < _serialization.keys.length; i++) {
         // this.keys.push(<AnimationKey>Serializer.deserialize(_serialization.keys[i]));

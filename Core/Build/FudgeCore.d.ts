@@ -1690,6 +1690,10 @@ declare namespace FudgeCore {
          */
         removeKey(_key: AnimationKey): void;
         /**
+         * Find a key in the sequence exactly matching the given time.
+         */
+        findKey(_time: number): AnimationKey;
+        /**
          * Removes the Animation Key at the given index from the keys.
          * @param _index the zero-based index at which to remove the key
          * @returns the removed AnimationKey if successful, null otherwise.

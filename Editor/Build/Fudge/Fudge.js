@@ -809,10 +809,10 @@ var Fudge;
             this.propertyList.addEventListener("click" /* CLICK */, this.hndEvent);
             this.view = _view;
         }
-        updatePropertyList(_mutator) {
+        updatePropertyList(_mutator, _time) {
             let colorIndex = 0;
-            updatePropertyListRecursive(this.propertyList, _mutator, this.animation.animationStructure);
-            function updatePropertyListRecursive(_propertyList, _mutator, _animationStructure) {
+            updatePropertyListRecursive(this.propertyList, _mutator, this.animation.animationStructure, _time);
+            function updatePropertyListRecursive(_propertyList, _mutator, _animationStructure, _time) {
                 for (const key in _mutator) {
                     let element = ƒui.Controller.findChildElementByKey(_propertyList, key);
                     if (!element)
@@ -820,12 +820,15 @@ var Fudge;
                     let value = _mutator[key];
                     let structureOrSequence = _animationStructure[key];
                     if (element instanceof ƒui.CustomElement && structureOrSequence instanceof ƒ.AnimationSequence) {
+                        let key = structureOrSequence.findKey(_time);
+                        if (key) // key found at exactly the given time, take its value
+                            value = key.value;
                         element.style.setProperty("--color-animation-property", getNextColor());
                         element.setMutatorValue(value);
                         Reflect.set(element, "animationSequence", structureOrSequence);
                     }
                     else {
-                        updatePropertyListRecursive(element, value, structureOrSequence);
+                        updatePropertyListRecursive(element, value, structureOrSequence, _time);
                     }
                 }
             }
@@ -2781,7 +2784,7 @@ var Fudge;
                     this.playbackTime = _event.detail.data;
                     this.frameInput.value = (Math.trunc(this.playbackTime / 1000 * this.animation.fps)).toString();
                     let nodeMutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
-                    this.controller?.updatePropertyList(nodeMutator);
+                    this.controller?.updatePropertyList(nodeMutator, this.playbackTime);
                     break;
                 case "input" /* INPUT */:
                     if (_event.target instanceof ƒui.CustomElement) {
