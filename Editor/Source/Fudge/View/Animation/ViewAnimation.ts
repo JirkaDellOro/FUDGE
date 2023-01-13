@@ -164,6 +164,7 @@ namespace Fudge {
 
       this.frameInput = document.createElement("input");
       this.frameInput.type = "number";
+      this.frameInput.min = "0";
       this.frameInput.id = "frameinput";
       this.frameInput.addEventListener("input", (_event: InputEvent) => {
         this.playbackTime = Number.parseInt(this.frameInput.value) * 1000 / this.animation.fps;

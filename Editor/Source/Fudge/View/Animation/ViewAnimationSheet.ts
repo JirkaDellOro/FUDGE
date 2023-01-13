@@ -688,6 +688,8 @@ namespace Fudge {
               case "key":
                 this.selectedKey = selected;
                 this.scrollContainer.onpointermove = this.hndPointerMoveDragKey;
+                this.playbackTime = this.selectedKey.data.time;
+                this.animate();
                 break;
             }
             this.draw();
@@ -740,6 +742,7 @@ namespace Fudge {
       let sequence: ƒ.AnimationSequence = this.sequences.find(_sequence => _sequence.data.getKeys().includes(key)).data;
       sequence.modifyKey(key, translation.x, this.mode == SHEET_MODE.DOPE || _event.shiftKey ? null : translation.y);
       this.animation.calculateTotalTime();
+      this.playbackTime = key.time;
       this.animate();
     }
 

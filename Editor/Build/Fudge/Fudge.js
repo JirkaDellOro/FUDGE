@@ -2761,6 +2761,7 @@ var Fudge;
                 .forEach(_button => this.toolbar.appendChild(_button));
             this.frameInput = document.createElement("input");
             this.frameInput.type = "number";
+            this.frameInput.min = "0";
             this.frameInput.id = "frameinput";
             this.frameInput.addEventListener("input", (_event) => {
                 this.playbackTime = Number.parseInt(this.frameInput.value) * 1000 / this.animation.fps;
@@ -3446,6 +3447,8 @@ var Fudge;
                                 case "key":
                                     this.selectedKey = selected;
                                     this.scrollContainer.onpointermove = this.hndPointerMoveDragKey;
+                                    this.playbackTime = this.selectedKey.data.time;
+                                    this.animate();
                                     break;
                             }
                         this.draw();
@@ -3493,6 +3496,7 @@ var Fudge;
             let sequence = this.sequences.find(_sequence => _sequence.data.getKeys().includes(key)).data;
             sequence.modifyKey(key, translation.x, this.mode == SHEET_MODE.DOPE || _event.shiftKey ? null : translation.y);
             this.animation.calculateTotalTime();
+            this.playbackTime = key.time;
             this.animate();
         };
         hndPointerMoveDragEvent = (_event) => {
