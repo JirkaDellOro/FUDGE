@@ -67,9 +67,9 @@ namespace AnimatorControleTest {
     animation.labels["jump"] = parseInt((<HTMLInputElement>form.querySelector("input[name=label]")).value);
 
     let playmode: string = String(formData.get("mode"));
-    let playback: string = String(formData.get("back"));
+    let quantization: string = String(formData.get("back"));
 
-    let cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE[playmode], ƒ.ANIMATION_PLAYBACK[playback]);
+    let cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE[playmode], ƒ.ANIMATION_QUANTIZATION[quantization]);
     cmpAnimator.scale = 1;
     cmpAnimator.addEventListener("event", (_event: Event) => {
       let time: number = (<ƒ.ComponentAnimator>_event.target).time;

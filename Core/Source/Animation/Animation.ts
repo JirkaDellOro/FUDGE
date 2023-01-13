@@ -72,7 +72,7 @@ namespace FudgeCore {
   }
 
   export enum ANIMATION_QUANTIZATION {
-    //TODO: add an in-depth description of what happens to the animation (and events) depending on the Playback. Use Graphs to explain.
+    //TODO: add an in-depth description of what happens to the animation (and events) depending on the quantization. Use Graphs to explain.
     /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
     CONTINOUS,
     /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
@@ -131,24 +131,20 @@ namespace FudgeCore {
       this.#animationStructuresProcessed.clear();
     }
 
-
     /**
-     * Generates a new Mutator with the information to apply to the {@link Node} the {@link ComponentAnimator} is attached to with {@link Node.applyAnimation}.
-     * @param _time The time at which the animation currently is at
-     * @param _direction The direction in which the animation is supposed to be playing back. >0 == forward, 0 == stop, <0 == backwards
-     * @param _playback The playbackmode the animation is supposed to be calculated with.
-     * @returns a "Mutator" to apply.
+     * Generates and returns a {@link Mutator} with the information to apply to the {@link Node} to animate
+     * in the state the animation is in at the given time, direction and quantization
      */
-    getMutated(_time: number, _direction: number, _playback: ANIMATION_QUANTIZATION): Mutator {     //TODO: find a better name for this
+    getState(_time: number, _direction: number, _quantization: ANIMATION_QUANTIZATION): Mutator { 
       let m: Mutator = {};
       let animationStructure: ANIMATION_STRUCTURE_TYPE;
 
-      if (_playback == ANIMATION_QUANTIZATION.CONTINOUS)
+      if (_quantization == ANIMATION_QUANTIZATION.CONTINOUS)
         animationStructure = _direction < 0 ? ANIMATION_STRUCTURE_TYPE.REVERSE : ANIMATION_STRUCTURE_TYPE.NORMAL;
       else
         animationStructure = _direction < 0 ? ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE : ANIMATION_STRUCTURE_TYPE.RASTERED;
 
-      m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(animationStructure), _time);
+        m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(animationStructure), _time);
       return m;
     }
 
@@ -343,13 +339,10 @@ namespace FudgeCore {
     //#endregion
 
     /**
-     * Finds the list of events to be used with these settings.
-     * @param _direction The direction the animation is playing in.
-     * @param _playback The playbackmode the animation is playing in.
-     * @returns The correct AnimationEventTrigger Object to use
+     * Finds and returns the list of events to be used with these settings.
      */
-    private getCorrectEventList(_direction: number, _playback: ANIMATION_QUANTIZATION): AnimationEventTrigger {
-      if (_playback != ANIMATION_QUANTIZATION.FRAMES) {
+    private getCorrectEventList(_direction: number, _quantization: ANIMATION_QUANTIZATION): AnimationEventTrigger {
+      if (_quantization != ANIMATION_QUANTIZATION.FRAMES) {
         if (_direction >= 0) {
           return this.getProcessedEventTrigger(ANIMATION_STRUCTURE_TYPE.NORMAL);
         } else {
@@ -365,10 +358,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Traverses an AnimationStructure to turn it into the "Mutator" to return to the Component.
-     * @param _structure The strcuture to traverse
-     * @param _time the point in time to write the animation numbers into.
-     * @returns The "Mutator" filled with the correct values at the given time. 
+     * Traverses an {@link AnimationStructure} and returns a {@link Mutator} describing the state at the given time
      */
     private traverseStructureForMutator(_structure: AnimationStructure, _time: number): Mutator {
       let newMutator: Mutator = {};

@@ -1455,13 +1455,10 @@ declare namespace FudgeCore {
         set fps(_fps: number);
         clearCache(): void;
         /**
-         * Generates a new Mutator with the information to apply to the {@link Node} the {@link ComponentAnimator} is attached to with {@link Node.applyAnimation}.
-         * @param _time The time at which the animation currently is at
-         * @param _direction The direction in which the animation is supposed to be playing back. >0 == forward, 0 == stop, <0 == backwards
-         * @param _playback The playbackmode the animation is supposed to be calculated with.
-         * @returns a "Mutator" to apply.
+         * Generates and returns a {@link Mutator} with the information to apply to the {@link Node} to animate
+         * in the state the animation is in at the given time, direction and quantization
          */
-        getMutated(_time: number, _direction: number, _playback: ANIMATION_QUANTIZATION): Mutator;
+        getState(_time: number, _direction: number, _quantization: ANIMATION_QUANTIZATION): Mutator;
         /**
          * Returns a list of the names of the events the {@link ComponentAnimator} needs to fire between _min and _max input values.
          * @param _direction The direction the animation is supposed to run in. >0 == forward, 0 == stop, <0 == backwards
@@ -1510,17 +1507,11 @@ declare namespace FudgeCore {
          */
         private traverseStructureForDeserialization;
         /**
-         * Finds the list of events to be used with these settings.
-         * @param _direction The direction the animation is playing in.
-         * @param _playback The playbackmode the animation is playing in.
-         * @returns The correct AnimationEventTrigger Object to use
+         * Finds and returns the list of events to be used with these settings.
          */
         private getCorrectEventList;
         /**
-         * Traverses an AnimationStructure to turn it into the "Mutator" to return to the Component.
-         * @param _structure The strcuture to traverse
-         * @param _time the point in time to write the animation numbers into.
-         * @returns The "Mutator" filled with the correct values at the given time.
+         * Traverses an {@link AnimationStructure} and returns a {@link Mutator} describing the state at the given time
          */
         private traverseStructureForMutator;
         /**
@@ -1797,7 +1788,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Holds a reference to an {@link Animation} and controls it. Controls playback and playmode as well as speed.
+     * Holds a reference to an {@link Animation} and controls it. Controls quantization and playmode as well as speed.
      * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2022
      */
     class ComponentAnimator extends Component {
@@ -1805,10 +1796,10 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         animation: Animation;
         playmode: ANIMATION_PLAYMODE;
-        playback: ANIMATION_QUANTIZATION;
+        quantization: ANIMATION_QUANTIZATION;
         scaleWithGameTime: boolean;
         animateInEditor: boolean;
-        constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_QUANTIZATION);
+        constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _quantization?: ANIMATION_QUANTIZATION);
         set scale(_scale: number);
         get scale(): number;
         /**

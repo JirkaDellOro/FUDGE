@@ -2813,7 +2813,7 @@ var Fudge;
             }
         }
         createPropertyList() {
-            let nodeMutator = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback) || {};
+            let nodeMutator = this.animation.getState(this.playbackTime, 0, this.cmpAnimator.quantization) || {};
             let newPropertyList = ƒui.Generator.createInterfaceFromMutator(nodeMutator);
             if (this.dom.contains(this.propertyList))
                 this.dom.replaceChild(newPropertyList, this.propertyList);

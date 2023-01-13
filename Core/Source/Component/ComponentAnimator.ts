@@ -4,7 +4,7 @@
 namespace FudgeCore {
 
   /**
-   * Holds a reference to an {@link Animation} and controls it. Controls playback and playmode as well as speed.
+   * Holds a reference to an {@link Animation} and controls it. Controls quantization and playmode as well as speed.
    * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2022
    */
   export class ComponentAnimator extends Component {
@@ -12,7 +12,7 @@ namespace FudgeCore {
     //TODO: add functionality to blend from one animation to another.
     public animation: Animation;
     public playmode: ANIMATION_PLAYMODE;
-    public playback: ANIMATION_QUANTIZATION;
+    public quantization: ANIMATION_QUANTIZATION;
     public scaleWithGameTime: boolean = true;
     public animateInEditor: boolean = false;
 
@@ -20,10 +20,10 @@ namespace FudgeCore {
     #timeLocal: Time;
     #previous: number = 0;
 
-    constructor(_animation?: Animation, _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _playback: ANIMATION_QUANTIZATION = ANIMATION_QUANTIZATION.CONTINOUS) {
+    constructor(_animation?: Animation, _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _quantization: ANIMATION_QUANTIZATION = ANIMATION_QUANTIZATION.CONTINOUS) {
       super();
       this.playmode = _playmode;
-      this.playback = _playback;
+      this.quantization = _quantization;
       this.animation = _animation;
 
       this.#timeLocal = new Time();
@@ -69,7 +69,7 @@ namespace FudgeCore {
       this.#timeLocal.set(_time);
       this.#previous = _time;
       _time = _time % this.animation.totalTime;
-      let mutator: Mutator = this.animation.getMutated(_time, this.animation.calculateDirection(_time, this.playmode), this.playback);
+      let mutator: Mutator = this.animation.getState(_time, this.animation.calculateDirection(_time, this.playmode), this.quantization);
       this.node.applyAnimation(mutator);
     }
 
@@ -98,7 +98,7 @@ namespace FudgeCore {
       serialization[super.constructor.name] = super.serialize();
       serialization.idAnimation = this.animation.idResource;
       serialization.playmode = this.playmode;
-      serialization.playback = this.playback;
+      serialization.quantization = this.quantization;
       serialization.scale = this.scale;
       serialization.scaleWithGameTime = this.scaleWithGameTime;
       serialization.animateInEditor = this.animateInEditor;
@@ -110,7 +110,7 @@ namespace FudgeCore {
       await super.deserialize(_serialization[super.constructor.name]);
       this.animation = <Animation>await Project.getResource(_serialization.idAnimation);
       this.playmode = _serialization.playmode;
-      this.playback = _serialization.playback;
+      this.quantization = _serialization.quantization;
       this.scale = _serialization.scale;
       this.scaleWithGameTime = _serialization.scaleWithGameTime;
       this.animateInEditor = _serialization.animateInEditor;
@@ -130,8 +130,8 @@ namespace FudgeCore {
       let types: MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
       if (types.playmode)
         types.playmode = ANIMATION_PLAYMODE;
-      if (types.playback)
-        types.playback = ANIMATION_QUANTIZATION;
+      if (types.quantization)
+        types.quantization = ANIMATION_QUANTIZATION;
       return types;
     }
     //#endregion
@@ -157,17 +157,17 @@ namespace FudgeCore {
       if (this.animation.totalTime == 0) return null;
 
       let time: number = _time || _time === 0 ? _time : this.#timeLocal.get();
-      if (this.playback == ANIMATION_QUANTIZATION.FRAMES) {
+      if (this.quantization == ANIMATION_QUANTIZATION.FRAMES) {
         time = this.#previous + (1000 / this.animation.fps);
       }
       let direction: number = this.animation.calculateDirection(time, this.playmode);
       time = this.animation.getModalTime(time, this.playmode, this.#timeLocal.getOffset());
-      this.executeEvents(this.animation.getEventsToFire(this.#previous, time, this.playback, direction));
+      this.executeEvents(this.animation.getEventsToFire(this.#previous, time, this.quantization, direction));
 
       if (this.#previous != time) {
         this.#previous = time;
         time = time % this.animation.totalTime;
-        let mutator: Mutator = this.animation.getMutated(time, direction, this.playback);
+        let mutator: Mutator = this.animation.getState(time, direction, this.quantization);
         if (this.node) {
           this.node.applyAnimation(mutator);
         }

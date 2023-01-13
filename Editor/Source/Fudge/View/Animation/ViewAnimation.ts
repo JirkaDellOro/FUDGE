@@ -220,7 +220,7 @@ namespace Fudge {
     }
 
     private createPropertyList(): void {
-      let nodeMutator: ƒ.Mutator = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback) || {};
+      let nodeMutator: ƒ.Mutator = this.animation.getState(this.playbackTime, 0, this.cmpAnimator.quantization) || {};
 
       let newPropertyList: HTMLDivElement = ƒui.Generator.createInterfaceFromMutator(nodeMutator);
       if (this.dom.contains(this.propertyList))
