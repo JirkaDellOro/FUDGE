@@ -1440,6 +1440,7 @@ declare namespace FudgeCore {
      * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021-2023
      */
     class Animation extends Mutable implements SerializableResource {
+        #private;
         idResource: string;
         name: string;
         totalTime: number;
@@ -1448,13 +1449,13 @@ declare namespace FudgeCore {
         events: AnimationEventTrigger;
         private framesPerSecond;
         private eventsProcessed;
-        private animationStructuresProcessed;
         constructor(_name?: string, _animStructure?: AnimationStructure, _fps?: number);
         get getLabels(): Enumerator;
         get fps(): number;
         set fps(_fps: number);
+        clearCache(): void;
         /**
-         * Generates a new "Mutator" with the information to apply to the {@link Node} the {@link ComponentAnimator} is attached to with {@link Node.applyAnimation}.
+         * Generates a new Mutator with the information to apply to the {@link Node} the {@link ComponentAnimator} is attached to with {@link Node.applyAnimation}.
          * @param _time The time at which the animation currently is at
          * @param _direction The direction in which the animation is supposed to be playing back. >0 == forward, 0 == stop, <0 == backwards
          * @param _playback The playbackmode the animation is supposed to be calculated with.

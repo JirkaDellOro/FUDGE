@@ -2783,6 +2783,7 @@ var Fudge;
                         this.pause();
                     this.playbackTime = _event.detail.data;
                     this.frameInput.value = (Math.trunc(this.playbackTime / 1000 * this.animation.fps)).toString();
+                    this.animation.clearCache();
                     let nodeMutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
                     this.controller?.updatePropertyList(nodeMutator, this.playbackTime);
                     break;

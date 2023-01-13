@@ -91,7 +91,7 @@ namespace FudgeCore {
     public idResource: string = undefined;
     public name: string;
     public totalTime: number = 0;
-    public labels: AnimationLabel = {}; // TODO: labels seem to be kind of useless since they can only be jumped to which also works with a time...
+    public labels: AnimationLabel = {}; // a label marks a specific time to conveniently jump to using a text identifier
     // stepsPerSecond: number = 10;
     public animationStructure: AnimationStructure;
     public events: AnimationEventTrigger = {};
@@ -99,36 +99,41 @@ namespace FudgeCore {
 
     // processed eventlist and animation strucutres for playback.
     private eventsProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
-    private animationStructuresProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
+    #animationStructuresProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
 
-    constructor(_name: string = Animation.name, _animStructure: AnimationStructure = {}, _fps: number = 60) {
+    public constructor(_name: string = Animation.name, _animStructure: AnimationStructure = {}, _fps: number = 60) {
       super();
       this.name = _name;
       this.animationStructure = _animStructure;
-      this.animationStructuresProcessed.set(ANIMATION_STRUCTURE_TYPE.NORMAL, _animStructure);
+      this.#animationStructuresProcessed.set(ANIMATION_STRUCTURE_TYPE.NORMAL, _animStructure);
       this.framesPerSecond = _fps;
       this.calculateTotalTime();
       Project.register(this);
     }
 
-    get getLabels(): Enumerator {
+    public get getLabels(): Enumerator {
       //TODO: this actually needs testing
       let en: Enumerator = new Enumerator(this.labels);
       return en;
     }
 
-    get fps(): number {
+    public get fps(): number {
       return this.framesPerSecond;
     }
 
-    set fps(_fps: number) {
+    public set fps(_fps: number) {
       this.framesPerSecond = _fps;
       this.eventsProcessed.clear();
-      this.animationStructuresProcessed.clear();
+      this.clearCache();
+    }
+    
+    public clearCache(): void {
+      this.#animationStructuresProcessed.clear();
     }
 
+
     /**
-     * Generates a new "Mutator" with the information to apply to the {@link Node} the {@link ComponentAnimator} is attached to with {@link Node.applyAnimation}.
+     * Generates a new Mutator with the information to apply to the {@link Node} the {@link ComponentAnimator} is attached to with {@link Node.applyAnimation}.
      * @param _time The time at which the animation currently is at
      * @param _direction The direction in which the animation is supposed to be playing back. >0 == forward, 0 == stop, <0 == backwards
      * @param _playback The playbackmode the animation is supposed to be calculated with.
@@ -283,7 +288,7 @@ namespace FudgeCore {
 
       this.animationStructure = await this.traverseStructureForDeserialization(_serialization.animationStructure);
 
-      this.animationStructuresProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
+      this.#animationStructuresProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
 
       this.calculateTotalTime();
       return this;
@@ -401,7 +406,7 @@ namespace FudgeCore {
      * @returns the requested {@link AnimationStructure]]
      */
     private getProcessedAnimationStructure(_type: ANIMATION_STRUCTURE_TYPE): AnimationStructure {
-      if (!this.animationStructuresProcessed.has(_type)) {
+      if (!this.#animationStructuresProcessed.has(_type)) {
         this.calculateTotalTime();
         let ae: AnimationStructure = {};
         switch (_type) {
@@ -420,9 +425,9 @@ namespace FudgeCore {
           default:
             return {};
         }
-        this.animationStructuresProcessed.set(_type, ae);
+        this.#animationStructuresProcessed.set(_type, ae);
       }
-      return this.animationStructuresProcessed.get(_type);
+      return this.#animationStructuresProcessed.get(_type);
     }
 
     /**
