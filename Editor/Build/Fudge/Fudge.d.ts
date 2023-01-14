@@ -224,7 +224,7 @@ declare namespace Fudge {
         private sequences;
         constructor(_animation: ƒ.Animation, _propertyList: HTMLElement, _view: ViewAnimation);
         updatePropertyList(_mutator: ƒ.Mutator, _time?: number): void;
-        updateSequence(_time: number, _element: ƒui.CustomElement): void;
+        updateSequence(_time: number, _element: ƒui.CustomElement, _add?: boolean): void;
         nextKey(_time: number, _direction: "forward" | "backward"): number;
         addProperty(_path: string[], _node: ƒ.Node, _time: number): void;
         deleteProperty(_element: HTMLElement): void;

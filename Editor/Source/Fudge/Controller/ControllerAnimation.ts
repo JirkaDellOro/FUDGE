@@ -67,16 +67,21 @@ namespace Fudge {
     }
 
     // modify or add key
-    public updateSequence(_time: number, _element: ƒui.CustomElement): void {
+    public updateSequence(_time: number, _element: ƒui.CustomElement, _add: boolean = false): void {
       let sequence: ƒ.AnimationSequence = Reflect.get(_element, "animationSequence");
       if (!sequence) return;
 
       let time: number = ƒ.AnimationKey.toKeyTime(_time);
       let key: ƒ.AnimationKey = sequence.getKeys().find(_key => _key.time == time);
-      if (!key)
-        sequence.addKey(new ƒ.AnimationKey(time, <number>_element.getMutatorValue()));
+      if (!key) {
+        if (_add) {
+          key = new ƒ.AnimationKey(time, <number>_element.getMutatorValue())
+          sequence.addKey(key);
+        }
+      }
       else
         sequence.modifyKey(key, null, <number>_element.getMutatorValue());
+      this.view.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: key } });
       this.animation.calculateTotalTime();
     }
 

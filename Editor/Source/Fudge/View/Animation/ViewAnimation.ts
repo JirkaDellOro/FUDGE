@@ -32,6 +32,7 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.INPUT, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.FOCUS_IN, this.hndEvent);
     }
 
     protected hndDragOver(_event: DragEvent, _viewSource: View): void {
@@ -177,7 +178,7 @@ namespace Fudge {
     private hndEvent = (_event: EditorEvent): void => {
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
-          if (_event.detail.view instanceof ViewAnimationSheet) {
+          if (_event.detail.data instanceof ƒ.AnimationKey) {
             this.keySelected = _event.detail.data;
             break;
           }
@@ -200,11 +201,10 @@ namespace Fudge {
           this.controller?.updatePropertyList(nodeMutator, this.playbackTime);
           break;
         case ƒui.EVENT.INPUT:
+        case ƒui.EVENT.FOCUS_IN:
           if (_event.target instanceof ƒui.CustomElement) {
-            this.controller.updateSequence(this.playbackTime, _event.target);
-            this.animate();
+            this.controller.updateSequence(this.playbackTime, _event.target, _event.type == ƒui.EVENT.INPUT);
           }
-          break;
         case ƒui.EVENT.CLICK:
           this.animate();
           break;

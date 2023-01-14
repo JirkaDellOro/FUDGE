@@ -641,10 +641,17 @@ namespace Fudge {
         case EVENT_EDITOR.SELECT:
           if (_event.detail.view == this)
             break;
+
           if (_event.detail.node != null) {
             this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
             this.resetView();
             this.draw(true);
+          }
+
+          if (_event.detail.data instanceof ƒ.AnimationKey) {
+            this.selectedKey = this.keys.find(_key => _key.data == _event.detail.data);
+            this.draw();
+            break;
           }
 
           if (_event.detail.data != null) {

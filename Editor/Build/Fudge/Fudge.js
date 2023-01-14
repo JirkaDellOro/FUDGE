@@ -844,16 +844,21 @@ var Fudge;
             }
         }
         // modify or add key
-        updateSequence(_time, _element) {
+        updateSequence(_time, _element, _add = false) {
             let sequence = Reflect.get(_element, "animationSequence");
             if (!sequence)
                 return;
             let time = ƒ.AnimationKey.toKeyTime(_time);
             let key = sequence.getKeys().find(_key => _key.time == time);
-            if (!key)
-                sequence.addKey(new ƒ.AnimationKey(time, _element.getMutatorValue()));
+            if (!key) {
+                if (_add) {
+                    key = new ƒ.AnimationKey(time, _element.getMutatorValue());
+                    sequence.addKey(key);
+                }
+            }
             else
                 sequence.modifyKey(key, null, _element.getMutatorValue());
+            this.view.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: key } });
             this.animation.calculateTotalTime();
         }
         nextKey(_time, _direction) {
@@ -2658,6 +2663,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("input" /* INPUT */, this.hndEvent);
+            this.dom.addEventListener("focusin" /* FOCUS_IN */, this.hndEvent);
         }
         hndDragOver(_event, _viewSource) {
             _event.dataTransfer.dropEffect = "none";
@@ -2778,7 +2784,7 @@ var Fudge;
         hndEvent = (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
-                    if (_event.detail.view instanceof Fudge.ViewAnimationSheet) {
+                    if (_event.detail.data instanceof ƒ.AnimationKey) {
                         this.keySelected = _event.detail.data;
                         break;
                     }
@@ -2799,11 +2805,10 @@ var Fudge;
                     this.controller?.updatePropertyList(nodeMutator, this.playbackTime);
                     break;
                 case "input" /* INPUT */:
+                case "focusin" /* FOCUS_IN */:
                     if (_event.target instanceof ƒui.CustomElement) {
-                        this.controller.updateSequence(this.playbackTime, _event.target);
-                        this.animate();
+                        this.controller.updateSequence(this.playbackTime, _event.target, _event.type == "input" /* INPUT */);
                     }
-                    break;
                 case "click" /* CLICK */:
                     this.animate();
                     break;
@@ -3414,6 +3419,11 @@ var Fudge;
                         this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
                         this.resetView();
                         this.draw(true);
+                    }
+                    if (_event.detail.data instanceof ƒ.AnimationKey) {
+                        this.selectedKey = this.keys.find(_key => _key.data == _event.detail.data);
+                        this.draw();
+                        break;
                     }
                     if (_event.detail.data != null) {
                         this.sequences = _event.detail.data;
