@@ -505,11 +505,13 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     /**
      * View and edit the animatable properties of a node with an attached component animation.
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimation extends View {
+        keySelected: ƒ.AnimationKey;
         private node;
         private cmpAnimator;
         private animation;

@@ -7,6 +7,7 @@ namespace Fudge {
    * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
   export class ViewAnimation extends View {
+    public keySelected: ƒ.AnimationKey;
     private node: ƒ.Node;
     private cmpAnimator: ƒ.ComponentAnimator;
     private animation: ƒ.Animation;
@@ -176,6 +177,10 @@ namespace Fudge {
     private hndEvent = (_event: EditorEvent): void => {
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
+          if (_event.detail.view instanceof ViewAnimationSheet) {
+            this.keySelected = _event.detail.data;
+            break;
+          }
           if (_event.detail.node != null) {
             this.node = _event.detail.node;
             this.cmpAnimator = this.node?.getComponent(ƒ.ComponentAnimator);

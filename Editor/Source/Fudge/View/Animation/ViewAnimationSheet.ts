@@ -1,7 +1,7 @@
 namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
- 
+
   enum SHEET_MODE {
     DOPE = "Dopesheet",
     CURVES = "Curves"
@@ -38,19 +38,19 @@ namespace Fudge {
     private static readonly PIXEL_PER_VALUE: number = 100; // at scaling 1
     private static readonly MINIMUM_PIXEL_PER_STEP: number = 60; // at any scaling, for both x and y
     private static readonly STANDARD_ANIMATION_LENGTH: number = 1000; // in miliseconds, used when animation length is falsy
-    
+
     #mode: SHEET_MODE;
 
     private animation: ƒ.Animation;
     private playbackTime: number = 0;
-    
+
     private canvas: HTMLCanvasElement = document.createElement("canvas");
     private crc2: CanvasRenderingContext2D = this.canvas.getContext("2d");
     private eventInput: HTMLInputElement = document.createElement("input");
     private scrollContainer: HTMLDivElement = document.createElement("div");
     private scrollBody: HTMLDivElement = document.createElement("div");
     private mtxWorldToScreen: ƒ.Matrix3x3 = new ƒ.Matrix3x3();
-    
+
     private selectedKey: ViewAnimationKey;
     private selectedEvent: ViewAnimationEvent;
     private keys: ViewAnimationKey[] = [];
@@ -59,10 +59,10 @@ namespace Fudge {
     private slopeHooks: Path2D[] = [];
 
     private documentStyle: CSSStyleDeclaration = window.getComputedStyle(document.documentElement);
-    
+
     private posPanStart: ƒ.Vector2 = new ƒ.Vector2();
     private posRightClick: ƒ.Vector2 = new ƒ.Vector2();
-    
+
     constructor(_container: ComponentContainer, _state: Object) {
       super(_container, _state);
 
@@ -134,7 +134,7 @@ namespace Fudge {
     protected openContextMenuSheet = (_event: Event): void => {
       this.contextMenu.items.forEach(_item => _item.visible = false);
       if (this.posRightClick.y > ViewAnimationSheet.TIMELINE_HEIGHT && this.posRightClick.y < ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT) { // click on events
-        let deleteEvent: ViewAnimationEvent = 
+        let deleteEvent: ViewAnimationEvent =
           this.events.find(_object => this.crc2.isPointInPath(_object.path2D, this.posRightClick.x, this.posRightClick.y));
         if (deleteEvent) {
           if (deleteEvent.type == "event")
@@ -167,21 +167,21 @@ namespace Fudge {
       const menu: Electron.Menu = new remote.Menu();
 
       let item: Electron.MenuItem;
-      item = new remote.MenuItem({ id: SHEET_MODE.DOPE, label: SHEET_MODE.DOPE, click: () => this.mode = SHEET_MODE.DOPE});
+      item = new remote.MenuItem({ id: SHEET_MODE.DOPE, label: SHEET_MODE.DOPE, click: () => this.mode = SHEET_MODE.DOPE });
       menu.append(item);
-      item = new remote.MenuItem({ id: SHEET_MODE.CURVES, label: SHEET_MODE.CURVES, click: () => this.mode = SHEET_MODE.CURVES});
+      item = new remote.MenuItem({ id: SHEET_MODE.CURVES, label: SHEET_MODE.CURVES, click: () => this.mode = SHEET_MODE.CURVES });
       menu.append(item);
-      item = new remote.MenuItem({ id: "Add Event", label: "Add Event", click: _callback});
+      item = new remote.MenuItem({ id: "Add Event", label: "Add Event", click: _callback });
       menu.append(item);
-      item = new remote.MenuItem({ id: "Delete Event", label: "Delete Event", click: _callback});
+      item = new remote.MenuItem({ id: "Delete Event", label: "Delete Event", click: _callback });
       menu.append(item);
-      item = new remote.MenuItem({ id: "Add Label", label: "Add Label", click: _callback});
+      item = new remote.MenuItem({ id: "Add Label", label: "Add Label", click: _callback });
       menu.append(item);
-      item = new remote.MenuItem({ id: "Delete Label", label: "Delete Label", click: _callback});
+      item = new remote.MenuItem({ id: "Delete Label", label: "Delete Label", click: _callback });
       menu.append(item);
-      item = new remote.MenuItem({ id: "Delete Key", label: "Delete Key", click: _callback});
+      item = new remote.MenuItem({ id: "Delete Key", label: "Delete Key", click: _callback });
       menu.append(item);
-      
+
       return menu;
     }
 
@@ -192,7 +192,7 @@ namespace Fudge {
       let targetKey: ViewAnimationKey = Reflect.get(this.contextMenu, "targetKey");
       let targetEvent: ViewAnimationEvent = Reflect.get(this.contextMenu, "targetEvent");
       let targetTime: number = Reflect.get(this.contextMenu, "targetTime");
-        
+
       switch (choice) {
         case "Add Event":
           let eventName: string = `${this.animation.name}Event${Object.keys(this.animation.events).length}`;
@@ -216,7 +216,7 @@ namespace Fudge {
           break;
         case "Delete Key":
           let sequence: ƒ.AnimationSequence = this.sequences.find(_sequence => _sequence.data.getKeys().includes(targetKey.data)).data;
-          if (sequence.length < 2){
+          if (sequence.length < 2) {
             ƒ.Debug.warn("Only one key left in sequence. Delete property instead.");
             break;
           }
@@ -231,11 +231,11 @@ namespace Fudge {
     private draw(_scroll: boolean = false): void {
       this.canvas.width = this.dom.clientWidth;
       this.canvas.height = this.dom.clientHeight;
-      
+
       let translation: ƒ.Vector2 = this.mtxWorldToScreen.translation;
       translation.x = Math.min(ViewAnimationSheet.SCALE_WIDTH, translation.x);
       this.mtxWorldToScreen.translation = translation;
-      
+
       if (this.animation) {
         this.generateKeys();
         this.drawTimeline();
@@ -246,7 +246,7 @@ namespace Fudge {
         this.drawCursor();
         this.drawHighlight();
       }
-      
+
       if (_scroll) {
         let leftWidth: number = -this.mtxWorldToScreen.translation.x + ViewAnimationSheet.SCALE_WIDTH;
         let screenWidth: number = this.canvas.width + leftWidth;
@@ -257,7 +257,7 @@ namespace Fudge {
     }
 
     private generateKeys(): void {
-      this.keys = this.sequences.flatMap((_sequence, _iSequence) => 
+      this.keys = this.sequences.flatMap((_sequence, _iSequence) =>
         _sequence.data.getKeys().map((_key) => {
           let viewKey: ViewAnimationKey = {
             data: _key,
@@ -271,10 +271,10 @@ namespace Fudge {
           };
           return viewKey;
         }
-      ));
+        ));
 
       if (this.selectedKey)
-        this.selectedKey = this.keys.find( _key => _key.data == this.selectedKey.data );
+        this.selectedKey = this.keys.find(_key => _key.data == this.selectedKey.data);
     }
 
     private generateKey(_position: ƒ.Vector2, _w: number, _h: number): Path2D {
@@ -290,12 +290,12 @@ namespace Fudge {
     private drawTimeline(): void {
       this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-background-main");
       this.crc2.fillRect(0, 0, this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
-      
-      let animationStart: number = Math.min(...this.keys.map(_key => _key.data.time )) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
-      let animationEnd: number = Math.max(...this.keys.map(_key => _key.data.time )) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+
+      let animationStart: number = Math.min(...this.keys.map(_key => _key.data.time)) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
+      let animationEnd: number = Math.max(...this.keys.map(_key => _key.data.time)) * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x;
       this.crc2.fillStyle = "rgba(100, 100, 255, 0.2)";
       this.crc2.fillRect(animationStart, 0, animationEnd - animationStart, ViewAnimationSheet.TIMELINE_HEIGHT);
-      
+
       this.crc2.beginPath();
       this.crc2.moveTo(0, ViewAnimationSheet.TIMELINE_HEIGHT);
       this.crc2.lineTo(this.canvas.width, ViewAnimationSheet.TIMELINE_HEIGHT);
@@ -344,7 +344,7 @@ namespace Fudge {
           }
         }
       }
-      
+
       let gridLines: Path2D = new Path2D();
       let timeSteps: Path2D = new Path2D();
 
@@ -361,9 +361,9 @@ namespace Fudge {
         timeSteps.lineTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT - 20);
         gridLines.moveTo(xStep, ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT);
         gridLines.lineTo(xStep, this.canvas.height);
-       let time: number = iStep  * framesPerStep / fps;
+        let time: number = iStep * framesPerStep / fps;
         this.crc2.fillText(
-          `${time.toFixed(2)}`, 
+          `${time.toFixed(2)}`,
           xStep + 3,
           ViewAnimationSheet.TIMELINE_HEIGHT - 20);
 
@@ -392,7 +392,7 @@ namespace Fudge {
       this.crc2.lineWidth = 1;
       this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
       this.crc2.stroke();
-      
+
       this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-text");
 
       this.events = [];
@@ -412,7 +412,7 @@ namespace Fudge {
         this.crc2.stroke(viewEvent.path2D);
       }
 
-      this.selectedEvent =  this.events.find(_event => _event.data == this.selectedEvent?.data);
+      this.selectedEvent = this.events.find(_event => _event.data == this.selectedEvent?.data);
       this.eventInput.hidden = this.selectedEvent == null;
       if (this.selectedEvent) {
         this.crc2.fill(this.selectedEvent.path2D);
@@ -450,13 +450,13 @@ namespace Fudge {
 
     private drawScale(): void {
       if (this.mode != SHEET_MODE.CURVES) return;
-      
+
       let center: number = this.round(this.mtxWorldToScreen.translation.y);
       this.crc2.beginPath();
       this.crc2.moveTo(0, center);
       this.crc2.lineTo(this.canvas.width, center);
       this.crc2.lineWidth = 1;
-      this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text"); 
+      this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
       this.crc2.stroke();
 
       let pixelPerStep: number = -this.mtxWorldToScreen.scaling.y;
@@ -483,7 +483,7 @@ namespace Fudge {
       this.crc2.fillStyle = this.documentStyle.getPropertyValue("--color-highlight");
       this.crc2.textBaseline = "bottom";
       this.crc2.textAlign = "right";
-      
+
       let steps: number = 1 + this.canvas.height / pixelPerStep;
       let stepOffset: number = Math.floor(-this.mtxWorldToScreen.translation.y / pixelPerStep);
       for (let iStep: number = stepOffset; iStep < steps + stepOffset; iStep++) {
@@ -493,8 +493,8 @@ namespace Fudge {
         this.crc2.lineTo(ViewAnimationSheet.SCALE_WIDTH - 5, yStep);
         let value: number = -iStep * valuePerStep;
         this.crc2.fillText(
-          valuePerStep >= 1 ? value.toFixed(0) : value.toFixed(1), 
-          33, 
+          valuePerStep >= 1 ? value.toFixed(0) : value.toFixed(1),
+          33,
           yStep);
         this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
         this.crc2.stroke();
@@ -519,9 +519,9 @@ namespace Fudge {
         sequence.data.getKeys()
           .map((_key, _index, _keys) => [_key, _keys[_index + 1]])
           .filter(([_keyStart, _keyEnd]) => _keyStart && _keyEnd)
-          .map (([_keyStart, _keyEnd]) => getBezierPoints(_keyStart.functionOut, _keyStart, _keyEnd))
+          .map(([_keyStart, _keyEnd]) => getBezierPoints(_keyStart.functionOut, _keyStart, _keyEnd))
           .forEach((_bezierPoints) => {
-            _bezierPoints.forEach( _point => _point.transform(this.mtxWorldToScreen));
+            _bezierPoints.forEach(_point => _point.transform(this.mtxWorldToScreen));
             let curve: Path2D = new Path2D();
             curve.moveTo(_bezierPoints[0].x, _bezierPoints[0].y);
             curve.bezierCurveTo(
@@ -530,7 +530,7 @@ namespace Fudge {
               _bezierPoints[3].x, _bezierPoints[3].y
             );
             this.crc2.stroke(curve);
-            _bezierPoints.forEach( _point => ƒ.Recycler.store(_point) );
+            _bezierPoints.forEach(_point => ƒ.Recycler.store(_point));
           });
       }
 
@@ -547,13 +547,13 @@ namespace Fudge {
         let xStart: number = _keyStart.time;
         let xEnd: number = _keyEnd.time;
         let offsetTimeEnd: number = xEnd - xStart;
-  
+
         let points: ƒ.Vector2[] = new Array(4).fill(0).map(() => ƒ.Recycler.get(ƒ.Vector2));
         points[0].set(xStart, polarForm(0, 0, 0));
         points[1].set(xStart + offsetTimeEnd * 1 / 3, polarForm(0, 0, offsetTimeEnd));
         points[2].set(xStart + offsetTimeEnd * 2 / 3, polarForm(0, offsetTimeEnd, offsetTimeEnd));
         points[3].set(xStart + offsetTimeEnd, polarForm(offsetTimeEnd, offsetTimeEnd, offsetTimeEnd));
-  
+
         return points;
       }
     }
@@ -561,7 +561,7 @@ namespace Fudge {
     private drawKeys(): void {
       // draw unselected keys
       this.crc2.lineWidth = 4;
-      this.keys.forEach( _key => {
+      this.keys.forEach(_key => {
         if (_key == this.selectedKey) return;
 
         this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-text");
@@ -572,7 +572,7 @@ namespace Fudge {
 
       // draw selected key
       if (!this.selectedKey) return;
-      
+
       this.crc2.strokeStyle = this.documentStyle.getPropertyValue("--color-signal");
       this.crc2.fillStyle = this.selectedKey.color;
       this.crc2.stroke(this.selectedKey.path2D);
@@ -601,7 +601,7 @@ namespace Fudge {
       path.lineTo(right.x, right.y);
       this.crc2.stroke(path);
       this.slopeHooks = [this.generateKey(left, 5, 5), this.generateKey(right, 5, 5)];
-      this.slopeHooks.forEach( _hook => this.crc2.fill(_hook) );
+      this.slopeHooks.forEach(_hook => this.crc2.fill(_hook));
 
       ƒ.Recycler.store(left);
       ƒ.Recycler.store(right);
@@ -639,12 +639,14 @@ namespace Fudge {
     private hndEvent = (_event: EditorEvent): void => {
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
+          if (_event.detail.view == this)
+            break;
           if (_event.detail.node != null) {
             this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
             this.resetView();
             this.draw(true);
           }
-    
+
           if (_event.detail.data != null) {
             this.sequences = _event.detail.data;
             this.draw();
@@ -653,7 +655,7 @@ namespace Fudge {
         case EVENT_EDITOR.MODIFY:
           this.playbackTime = _event.detail.data;
           this.draw();
-          this.dispatch(EVENT_EDITOR.ANIMATE, {bubbles: true});
+          this.dispatch(EVENT_EDITOR.ANIMATE, { bubbles: true });
           break;
       }
     }
@@ -679,6 +681,7 @@ namespace Fudge {
             if (!selected) {
               this.selectedKey = null;
               this.selectedEvent = null;
+              this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: null } });
             } else switch (selected.type) {
               case "label":
               case "event":
@@ -688,6 +691,7 @@ namespace Fudge {
               case "key":
                 this.selectedKey = selected;
                 this.scrollContainer.onpointermove = this.hndPointerMoveDragKey;
+                this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.selectedKey.data } });
                 this.playbackTime = this.selectedKey.data.time;
                 this.animate();
                 break;
@@ -771,7 +775,7 @@ namespace Fudge {
       if (_event.buttons != 0) return;
       let zoomFactor: number = _event.deltaY < 0 ? 1.05 : 0.95;
       let posCursorWorld: ƒ.Vector2 = this.screenToWorldPoint(_event.offsetX, _event.offsetY);
-      
+
       let x: number = _event.shiftKey ? 1 : zoomFactor;
       let y: number = _event.ctrlKey || this.mode == SHEET_MODE.DOPE ? 1 : zoomFactor;
 
@@ -846,7 +850,7 @@ namespace Fudge {
     private round(_value: number): number { // this is needed for lines to be displayed crisp on the canvas
       if (Math.trunc(this.crc2.lineWidth) % 2 == 0)
         return Math.round(_value); // even line width
-      else 
+      else
         return Math.round(_value) + 0.5; // odd line width
     }
   }

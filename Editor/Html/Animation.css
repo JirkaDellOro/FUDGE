@@ -40,3 +40,8 @@ div[view=ViewAnimation] #propertylist {
   padding-top: 30px;
   flex-grow: 1;
 }
+
+div[view=ViewAnimation] #propertylist .selected {
+  color: var(--color-highlight);
+  font-weight: bold;
+}

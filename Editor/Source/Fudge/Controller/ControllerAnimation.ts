@@ -28,6 +28,7 @@ namespace Fudge {
 
     public updatePropertyList(_mutator: ƒ.Mutator, _time?: number): void {
       let colorIndex: number = 0;
+      let keySelected = this.view.keySelected;
 
       updatePropertyListRecursive(this.propertyList, _mutator, this.animation.animationStructure, _time);
 
@@ -41,9 +42,13 @@ namespace Fudge {
           let structureOrSequence: Object = _animationStructure[key];
 
           if (element instanceof ƒui.CustomElement && structureOrSequence instanceof ƒ.AnimationSequence) {
+            element.classList.remove("selected");
             let key: ƒ.AnimationKey = structureOrSequence.findKey(_time);
-            if (key) // key found at exactly the given time, take its value
+            if (key) {// key found at exactly the given time, take its value
               value = key.value;
+              if (key == keySelected)
+                element.classList.add("selected");
+            }
             element.style.setProperty("--color-animation-property", getNextColor());
             element.setMutatorValue(value);
             Reflect.set(element, "animationSequence", structureOrSequence);

@@ -811,6 +811,7 @@ var Fudge;
         }
         updatePropertyList(_mutator, _time) {
             let colorIndex = 0;
+            let keySelected = this.view.keySelected;
             updatePropertyListRecursive(this.propertyList, _mutator, this.animation.animationStructure, _time);
             function updatePropertyListRecursive(_propertyList, _mutator, _animationStructure, _time) {
                 for (const key in _mutator) {
@@ -820,9 +821,13 @@ var Fudge;
                     let value = _mutator[key];
                     let structureOrSequence = _animationStructure[key];
                     if (element instanceof ƒui.CustomElement && structureOrSequence instanceof ƒ.AnimationSequence) {
+                        element.classList.remove("selected");
                         let key = structureOrSequence.findKey(_time);
-                        if (key) // key found at exactly the given time, take its value
+                        if (key) { // key found at exactly the given time, take its value
                             value = key.value;
+                            if (key == keySelected)
+                                element.classList.add("selected");
+                        }
                         element.style.setProperty("--color-animation-property", getNextColor());
                         element.setMutatorValue(value);
                         Reflect.set(element, "animationSequence", structureOrSequence);
@@ -2633,6 +2638,7 @@ var Fudge;
      * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class ViewAnimation extends Fudge.View {
+        keySelected;
         node;
         cmpAnimator;
         animation;
@@ -2772,6 +2778,10 @@ var Fudge;
         hndEvent = (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
+                    if (_event.detail.view instanceof Fudge.ViewAnimationSheet) {
+                        this.keySelected = _event.detail.data;
+                        break;
+                    }
                     if (_event.detail.node != null) {
                         this.node = _event.detail.node;
                         this.cmpAnimator = this.node?.getComponent(ƒ.ComponentAnimator);
@@ -3398,6 +3408,8 @@ var Fudge;
         hndEvent = (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
+                    if (_event.detail.view == this)
+                        break;
                     if (_event.detail.node != null) {
                         this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
                         this.resetView();
@@ -3436,6 +3448,7 @@ var Fudge;
                         if (!selected) {
                             this.selectedKey = null;
                             this.selectedEvent = null;
+                            this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: null } });
                         }
                         else
                             switch (selected.type) {
@@ -3447,6 +3460,7 @@ var Fudge;
                                 case "key":
                                     this.selectedKey = selected;
                                     this.scrollContainer.onpointermove = this.hndPointerMoveDragKey;
+                                    this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.selectedKey.data } });
                                     this.playbackTime = this.selectedKey.data.time;
                                     this.animate();
                                     break;
