@@ -22,8 +22,12 @@
     "ƒ.Animation": {
       "idResource": "Animation|2023-01-08T11:24:34.193Z|38529",
       "name": "Animation",
-      "labels": {},
-      "events": {},
+      "labels": {
+        "Walk": 228.69954655700658
+      },
+      "events": {
+        "Step": 430.4932641073065
+      },
       "fps": 10,
       "animationStructure": {
         "components": {
@@ -123,7 +127,6 @@
               },
               "idAnimation": "Animation|2023-01-08T11:24:34.193Z|38529",
               "playmode": 0,
-              "playback": 1,
               "scale": 1,
               "scaleWithGameTime": true,
               "animateInEditor": false

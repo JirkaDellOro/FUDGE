@@ -3226,7 +3226,10 @@ var Fudge;
             if (this.selectedEvent) {
                 this.crc2.fill(this.selectedEvent.path2D);
                 this.eventInput.style.left = `${(this.selectedEvent.type == "event" ? this.animation.events : this.animation.labels)[this.selectedEvent.data] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x + 10}px`;
-                this.eventInput.style.top = `${ViewAnimationSheet.TIMELINE_HEIGHT}px`;
+                if (this.selectedEvent.type == "label")
+                    this.eventInput.style.top = `${ViewAnimationSheet.TIMELINE_HEIGHT}px`;
+                else
+                    this.eventInput.style.top = `${ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT / 2 - 2}px`;
                 this.eventInput.value = this.selectedEvent.data;
             }
             this.crc2.save();
@@ -3234,22 +3237,23 @@ var Fudge;
             this.crc2.clip();
             function generateEvent(_x) {
                 let path = new Path2D;
-                path.moveTo(_x - 3, totalHeight - 26);
-                path.lineTo(_x - 3, totalHeight - 7);
+                path.moveTo(_x, totalHeight - 26);
                 path.lineTo(_x, totalHeight - 4);
-                path.lineTo(_x + 3, totalHeight - 7);
-                path.lineTo(_x + 3, totalHeight - 26);
-                path.closePath();
+                path.lineTo(_x, totalHeight - 10);
+                path.lineTo(_x + 8, totalHeight - 16);
+                path.lineTo(_x + 8, totalHeight - 4);
+                path.lineTo(_x, totalHeight - 10);
+                // path.closePath();
                 return path;
             }
             function generateLabel(_x) {
                 let path = new Path2D;
-                path.moveTo(_x - 3, totalHeight - 26);
-                path.lineTo(_x - 3, totalHeight - 4);
-                path.lineTo(_x + 3, totalHeight - 4);
-                path.lineTo(_x + 3, totalHeight - 23);
+                path.moveTo(_x, totalHeight - 4);
                 path.lineTo(_x, totalHeight - 26);
-                path.closePath();
+                path.lineTo(_x + 8, totalHeight - 20);
+                path.lineTo(_x, totalHeight - 14);
+                // path.lineTo(_x, totalHeight - 26);
+                // path.closePath();
                 return path;
             }
         }
