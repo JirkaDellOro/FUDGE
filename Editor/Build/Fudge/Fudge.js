@@ -2806,10 +2806,12 @@ var Fudge;
                     break;
                 case "input" /* INPUT */:
                 case "focusin" /* FOCUS_IN */:
-                    if (_event.target instanceof ƒui.CustomElement) {
-                        this.controller.updateSequence(this.playbackTime, _event.target, _event.type == "input" /* INPUT */);
+                    let target = _event.target;
+                    if (target instanceof ƒui.CustomElementDigit)
+                        target = target.parentElement;
+                    if (target instanceof ƒui.CustomElementStepper) {
+                        this.controller.updateSequence(this.playbackTime, target, _event.type == "input" /* INPUT */);
                     }
-                case "click" /* CLICK */:
                     this.animate();
                     break;
             }

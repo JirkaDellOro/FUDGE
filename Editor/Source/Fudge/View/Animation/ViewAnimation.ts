@@ -202,10 +202,12 @@ namespace Fudge {
           break;
         case ƒui.EVENT.INPUT:
         case ƒui.EVENT.FOCUS_IN:
-          if (_event.target instanceof ƒui.CustomElement) {
-            this.controller.updateSequence(this.playbackTime, _event.target, _event.type == ƒui.EVENT.INPUT);
+          let target: HTMLElement = <HTMLElement>_event.target;
+          if (target instanceof ƒui.CustomElementDigit)
+            target = target.parentElement;
+          if (target instanceof ƒui.CustomElementStepper) {
+            this.controller.updateSequence(this.playbackTime, target, _event.type == ƒui.EVENT.INPUT);
           }
-        case ƒui.EVENT.CLICK:
           this.animate();
           break;
       }
