@@ -133,12 +133,21 @@
               "animateInEditor": false
             }
           }
-        ],
-        "ComponentCamera": []
+        ]
       },
       "children": [],
       "idResource": "Graph|2023-01-08T11:23:10.539Z|92636",
       "type": "Graph"
+    }
+  },
+  "AnimationSprite|2023-01-15T12:57:19.544Z|93143": {
+    "ƒ.AnimationSprite": {
+      "idResource": "AnimationSprite|2023-01-15T12:57:19.544Z|93143",
+      "name": "AnimationSprite",
+      "labels": {},
+      "events": {},
+      "fps": 15,
+      "animationStructure": {}
     }
   }
 }

@@ -67,7 +67,8 @@ async function startInteractiveViewport(_graphId)/* : void */ {
 
   // draw viewport once for immediate feedback
   ƒ.Render.prepare(cameraOrbit);
-  viewport.draw();
+  ƒ.Loop.addEventListener("loopFrame", () =>  viewport.draw());
+  ƒ.Loop.start();
 
   // dispatch event to signal startup done
   canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));

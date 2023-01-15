@@ -1710,6 +1710,19 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class AnimationSprite extends Animation {
+        static readonly iSubclass: number;
+        private resolution;
+        private frames;
+        private grid;
+        private start;
+        private size;
+        private next;
+        private wrap;
+        constructor(_name?: string, _fps?: number);
+    }
+}
+declare namespace FudgeCore {
     /**
      * Extension of AudioBuffer with a load method that creates a buffer in the {@link AudioManager}.default to be used with {@link ComponentAudio}
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
