@@ -59,33 +59,33 @@ namespace FudgeCore {
    */
   export enum ANIMATION_PLAYMODE {
     /**Plays animation in a loop: it restarts once it hit the end.*/
-    LOOP,
+    LOOP = "loop",
     /**Plays animation once and stops at the last key/frame*/
-    PLAYONCE,
+    PLAY_ONCE = "playOnce",
     /**Plays animation once and stops on the first key/frame */
-    PLAYONCESTOPAFTER,
+    PLAY_ONCE_RESET = "playOnceReset",
     /**Plays animation like LOOP, but backwards.*/
-    REVERSELOOP,
+    REVERSE_LOOP = "reverseLoop",
     /**Causes the animation not to play at all. Useful for jumping to various positions in the animation without proceeding in the animation.*/
-    STOP
+    STOP = "stop"
     //TODO: add an INHERIT and a PINGPONG mode
   }
 
   export enum ANIMATION_QUANTIZATION {
     //TODO: add an in-depth description of what happens to the animation (and events) depending on the quantization. Use Graphs to explain.
     /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
-    CONTINOUS,
+    CONTINOUS = "continous",
     /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
-    DISCRETE,
+    DISCRETE = "discrete",
     /** Advances the time each frame according to the FPS value of the animation, ignoring the actual duration of the frames. Doesn't skip any frames.*/
-    FRAMES
+    FRAMES = "frames"
   }
 
   /**
-   * Animation Class to hold all required Objects that are part of an Animation.
-   * Also holds functions to play said Animation.
-   * Can be added to a Node and played through {@link ComponentAnimator}.
-   * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021-2023
+   * Describes and controls and animation by yielding mutators 
+   * according to the stored {@link AnimationStructure} and {@link AnimationSequence}s
+   * Applied to a {@link Node} directly via script or {@link ComponentAnimator}.
+   * @author Lukas Scheuerle, HFU, 21019 | Jirka Dell'Oro-Friedl, HFU, 2021-2023
    */
   export class Animation extends Mutable implements SerializableResource {
     public idResource: string = undefined;
@@ -210,10 +210,10 @@ namespace FudgeCore {
         case ANIMATION_PLAYMODE.STOP:
           // return this.localTime.getOffset();
           return _timeStop;
-        case ANIMATION_PLAYMODE.PLAYONCE:
+        case ANIMATION_PLAYMODE.PLAY_ONCE:
           if (_time >= this.totalTime)
             return this.totalTime - 0.01;     //TODO: this might cause some issues
-        case ANIMATION_PLAYMODE.PLAYONCESTOPAFTER:
+        case ANIMATION_PLAYMODE.PLAY_ONCE_RESET:
           if (_time >= this.totalTime)
             // TODO: return _timeStop instead?
             return this.totalTime + 0.01;     //TODO: this might cause some issues
@@ -235,10 +235,10 @@ namespace FudgeCore {
         //     return 1;
         //   else
         //     return -1;
-        case ANIMATION_PLAYMODE.REVERSELOOP:
+        case ANIMATION_PLAYMODE.REVERSE_LOOP:
           return -1;
-        case ANIMATION_PLAYMODE.PLAYONCE:
-        case ANIMATION_PLAYMODE.PLAYONCESTOPAFTER:
+        case ANIMATION_PLAYMODE.PLAY_ONCE:
+        case ANIMATION_PLAYMODE.PLAY_ONCE_RESET:
           if (_time >= this.totalTime) {
             return 0;
           }
@@ -289,9 +289,11 @@ namespace FudgeCore {
       this.calculateTotalTime();
       return this;
     }
-    public getMutator(): Mutator {
-      return this.serialize();
-    }
+    
+    // public getMutator(): Mutator {
+    //   return this.serialize();
+    // }
+
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.totalTime;
     }

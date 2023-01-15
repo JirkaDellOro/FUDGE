@@ -1415,29 +1415,29 @@ declare namespace FudgeCore {
      */
     enum ANIMATION_PLAYMODE {
         /**Plays animation in a loop: it restarts once it hit the end.*/
-        LOOP = 0,
+        LOOP = "loop",
         /**Plays animation once and stops at the last key/frame*/
-        PLAYONCE = 1,
+        PLAY_ONCE = "playOnce",
         /**Plays animation once and stops on the first key/frame */
-        PLAYONCESTOPAFTER = 2,
+        PLAY_ONCE_RESET = "playOnceReset",
         /**Plays animation like LOOP, but backwards.*/
-        REVERSELOOP = 3,
+        REVERSE_LOOP = "reverseLoop",
         /**Causes the animation not to play at all. Useful for jumping to various positions in the animation without proceeding in the animation.*/
-        STOP = 4
+        STOP = "stop"
     }
     enum ANIMATION_QUANTIZATION {
         /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
-        CONTINOUS = 0,
+        CONTINOUS = "continous",
         /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
-        DISCRETE = 1,
+        DISCRETE = "discrete",
         /** Advances the time each frame according to the FPS value of the animation, ignoring the actual duration of the frames. Doesn't skip any frames.*/
-        FRAMES = 2
+        FRAMES = "frames"
     }
     /**
-     * Animation Class to hold all required Objects that are part of an Animation.
-     * Also holds functions to play said Animation.
-     * Can be added to a Node and played through {@link ComponentAnimator}.
-     * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021-2023
+     * Describes and controls and animation by yielding mutators
+     * according to the stored {@link AnimationStructure} and {@link AnimationSequence}s
+     * Applied to a {@link Node} directly via script or {@link ComponentAnimator}.
+     * @author Lukas Scheuerle, HFU, 21019 | Jirka Dell'Oro-Friedl, HFU, 2021-2023
      */
     class Animation extends Mutable implements SerializableResource {
         #private;
@@ -1492,7 +1492,6 @@ declare namespace FudgeCore {
         calculateDirection(_time: number, _playmode: ANIMATION_PLAYMODE): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
         /**
          * Traverses an AnimationStructure and returns the Serialization of said Structure.
