@@ -1441,6 +1441,8 @@ declare namespace FudgeCore {
      */
     class Animation extends Mutable implements SerializableResource {
         #private;
+        static readonly subclasses: typeof Animation[];
+        static readonly iSubclass: number;
         idResource: string;
         name: string;
         totalTime: number;
@@ -1450,6 +1452,7 @@ declare namespace FudgeCore {
         private framesPerSecond;
         private eventsProcessed;
         constructor(_name?: string, _animStructure?: AnimationStructure, _fps?: number);
+        protected static registerSubclass(_subClass: typeof Animation): number;
         get getLabels(): Enumerator;
         get fps(): number;
         set fps(_fps: number);

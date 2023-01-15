@@ -88,6 +88,11 @@ namespace FudgeCore {
    * @author Lukas Scheuerle, HFU, 21019 | Jirka Dell'Oro-Friedl, HFU, 2021-2023
    */
   export class Animation extends Mutable implements SerializableResource {
+    // /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
+    // public static readonly baseClass: typeof Animation = Animation;
+    // /** list of all the subclasses derived from this class, if they registered properly*/
+    public static readonly subclasses: typeof Animation[] = [];
+    public static readonly iSubclass: number = Animation.registerSubclass(Animation);
     public idResource: string = undefined;
     public name: string;
     public totalTime: number = 0;
@@ -110,6 +115,8 @@ namespace FudgeCore {
       this.calculateTotalTime();
       Project.register(this);
     }
+
+    protected static registerSubclass(_subClass: typeof Animation): number { return Animation.subclasses.push(_subClass) - 1; }
 
     public get getLabels(): Enumerator {
       //TODO: this actually needs testing
