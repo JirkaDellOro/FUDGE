@@ -1712,14 +1712,14 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class AnimationSprite extends Animation {
         static readonly iSubclass: number;
-        private resolution;
         private frames;
-        private grid;
+        private wrapAfter;
         private start;
         private size;
         private next;
         private wrap;
-        constructor(_name?: string, _fps?: number);
+        constructor(_name?: string);
+        create(_frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2): void;
     }
 }
 declare namespace FudgeCore {
