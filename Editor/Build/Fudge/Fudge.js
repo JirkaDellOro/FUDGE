@@ -2950,7 +2950,6 @@ var Fudge;
             this.scrollContainer.appendChild(this.scrollBody);
             this.eventInput.type = "text";
             this.eventInput.hidden = true;
-            this.eventInput.style.position = "absolute";
             this.eventInput.onfocus = () => this.scrollContainer.onpointerdown = undefined;
             this.eventInput.onblur = () => {
                 if (this.selectedEvent.type == "event") {
@@ -3225,11 +3224,12 @@ var Fudge;
             this.eventInput.hidden = this.selectedEvent == null;
             if (this.selectedEvent) {
                 this.crc2.fill(this.selectedEvent.path2D);
-                this.eventInput.style.left = `${(this.selectedEvent.type == "event" ? this.animation.events : this.animation.labels)[this.selectedEvent.data] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x + 10}px`;
-                if (this.selectedEvent.type == "label")
-                    this.eventInput.style.top = `${ViewAnimationSheet.TIMELINE_HEIGHT}px`;
-                else
-                    this.eventInput.style.top = `${ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT / 2 - 2}px`;
+                this.eventInput.style.left = `${(this.selectedEvent.type == "event" ? this.animation.events : this.animation.labels)[this.selectedEvent.data] * this.mtxWorldToScreen.scaling.x + this.mtxWorldToScreen.translation.x + 12}px`;
+                this.eventInput.className = this.selectedEvent.type;
+                // if (this.selectedEvent.type == "label")
+                //   this.eventInput.style.top = `${ViewAnimationSheet.TIMELINE_HEIGHT}px`;
+                // else
+                //   this.eventInput.style.top = `${ViewAnimationSheet.TIMELINE_HEIGHT + ViewAnimationSheet.EVENTS_HEIGHT / 2 - 2}px`;
                 this.eventInput.value = this.selectedEvent.data;
             }
             this.crc2.save();

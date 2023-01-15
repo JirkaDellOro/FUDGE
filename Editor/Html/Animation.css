@@ -45,3 +45,12 @@ div[view=ViewAnimation] #propertylist .selected {
   color: var(--color-highlight);
   font-weight: bold;
 }
+
+div[view=ViewAnimationSheet] input.label {
+  position: absolute;
+  top: 30.5px;
+}
+div[view=ViewAnimationSheet] input.event {
+  position: absolute;
+  top:42.5px;
+}
