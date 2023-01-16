@@ -730,7 +730,6 @@ declare namespace Fudge {
     class ViewProperties extends View {
         private resource;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
-        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         private fillContent;
         private hndEvent;
     }

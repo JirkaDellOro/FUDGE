@@ -1717,6 +1717,7 @@ declare namespace FudgeCore {
         private wrap;
         constructor(_name?: string);
         create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2): void;
+        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
     }
 }
 declare namespace FudgeCore {
