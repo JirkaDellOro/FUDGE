@@ -1301,6 +1301,7 @@ var Fudge;
         ParticleSystemOnComponentParticleSystem: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentParticleSystem, ofType: ƒ.ParticleSystem, dropEffect: "link" },
         // MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
         TextureOnMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
+        TextureOnAnimationSprite: { fromViews: [Fudge.ViewInternal], onType: ƒ.AnimationSprite, ofType: ƒ.Texture, dropEffect: "link" },
         TextureOnMeshRelief: { fromViews: [Fudge.ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
     };
     class ControllerComponent extends ƒUi.Controller {
@@ -1367,6 +1368,9 @@ var Fudge;
             // Texture on MeshRelief
             if (this.filterDragDrop(_event, filter.TextureOnMeshRelief))
                 return;
+            // Texture on AnimationSprite
+            if (this.filterDragDrop(_event, filter.TextureOnAnimationSprite))
+                return;
             // Animation of ComponentAnimation
             if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator))
                 return;
@@ -1411,6 +1415,11 @@ var Fudge;
                 this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
+            let setSpriteTexture = (_sources) => {
+                this.mutable["texture"] = _sources[0];
+                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                return true;
+            };
             let setHeightMap = (_sources) => {
                 // this.mutable["texture"] = _sources[0];
                 let mutator = this.mutable.getMutator();
@@ -1451,6 +1460,9 @@ var Fudge;
                 return;
             // Texture on MeshRelief
             if (this.filterDragDrop(_event, filter.TextureOnMeshRelief, setHeightMap))
+                return;
+            // Texture on AnimationSprite
+            if (this.filterDragDrop(_event, filter.TextureOnAnimationSprite, setSpriteTexture))
                 return;
             // Animation on ComponentAnimator
             if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator, setAnimation))
@@ -4525,6 +4537,11 @@ var Fudge;
                     let img = this.resource.image;
                     img.style.border = "1px solid black";
                     this.dom.appendChild(img);
+                    break;
+                case "AnimationSprite":
+                    let imgSprite = this.resource.texture.image;
+                    imgSprite.style.border = "1px solid black";
+                    this.dom.appendChild(imgSprite);
                     break;
                 case "Audio":
                     let entry = new Fudge.DirectoryEntry(this.resource.path, "", null, null);

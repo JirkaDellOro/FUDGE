@@ -149,5 +149,16 @@
       "fps": 15,
       "animationStructure": {}
     }
+  },
+  "TextureImage|2023-01-16T14:08:04.970Z|41098": {
+    "ƒ.TextureImage": {
+      "url": "Image\\TextureFUDGE.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-01-16T14:08:04.970Z|41098",
+        "name": "Image\\TextureFUDGE.png",
+        "mipmap": "CRISP"
+      }
+    }
   }
 }

@@ -1712,7 +1712,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class AnimationSprite extends Animation {
         static readonly iSubclass: number;
-        private texture;
+        texture: Texture;
         private frames;
         private wrapAfter;
         private start;

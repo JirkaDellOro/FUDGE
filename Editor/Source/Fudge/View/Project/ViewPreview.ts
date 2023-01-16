@@ -141,13 +141,18 @@ namespace Fudge {
           img.style.border = "1px solid black";
           this.dom.appendChild(img);
           break;
+        case "AnimationSprite":
+          let imgSprite: HTMLImageElement = (<ƒ.TextureImage>(<ƒ.AnimationSprite>this.resource).texture).image;
+          imgSprite.style.border = "1px solid black";
+          this.dom.appendChild(imgSprite);
+          break;
         case "Audio":
           let entry: DirectoryEntry = new DirectoryEntry((<ƒ.Audio>this.resource).path, "", null, null);
           this.dom.appendChild(this.createAudioPreview(entry));
           break;
         default: break;
       }
-      
+
       this.setTitle(`Preview | ${this.resource.name}`);
     }
 

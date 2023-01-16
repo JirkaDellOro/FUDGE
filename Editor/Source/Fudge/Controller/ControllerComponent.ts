@@ -25,6 +25,7 @@ namespace Fudge {
     ParticleSystemOnComponentParticleSystem: { fromViews: [ViewInternal], onType: ƒ.ComponentParticleSystem, ofType: ƒ.ParticleSystem, dropEffect: "link" },
     // MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
     TextureOnMaterial: { fromViews: [ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
+    TextureOnAnimationSprite: { fromViews: [ViewInternal], onType: ƒ.AnimationSprite, ofType: ƒ.Texture, dropEffect: "link" },
     TextureOnMeshRelief: { fromViews: [ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
   };
 
@@ -90,6 +91,8 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.TextureOnMaterial)) return;
       // Texture on MeshRelief
       if (this.filterDragDrop(_event, filter.TextureOnMeshRelief)) return;
+      // Texture on AnimationSprite
+      if (this.filterDragDrop(_event, filter.TextureOnAnimationSprite)) return;
       // Animation of ComponentAnimation
       if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator)) return;
       // ParticleSystem of ComponentParticleSystem
@@ -134,6 +137,11 @@ namespace Fudge {
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };
+      let setSpriteTexture: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
+        this.mutable["texture"] = _sources[0];
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+        return true;
+      };
       let setHeightMap: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
         // this.mutable["texture"] = _sources[0];
         let mutator: ƒ.Mutator = this.mutable.getMutator();
@@ -170,6 +178,8 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.TextureOnMaterial, setTexture)) return;
       // Texture on MeshRelief
       if (this.filterDragDrop(_event, filter.TextureOnMeshRelief, setHeightMap)) return;
+      // Texture on AnimationSprite
+      if (this.filterDragDrop(_event, filter.TextureOnAnimationSprite, setSpriteTexture)) return;
       // Animation on ComponentAnimator
       if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator, setAnimation)) return;
       // ParticleSystem on ComponentParticleSystem

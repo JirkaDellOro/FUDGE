@@ -3,7 +3,7 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Animation.registerSubclass(AnimationSprite);
     // private resolution: number = 80;
     // private origin: ORIGIN2D = ORIGIN2D.BOTTOMCENTER;
-    private texture: Texture = TextureDefault.texture;
+    public texture: Texture = TextureDefault.texture;
     private frames: number = 25;
     private wrapAfter: number = 5;
     private start: Vector2 = new Vector2(0, 0);
