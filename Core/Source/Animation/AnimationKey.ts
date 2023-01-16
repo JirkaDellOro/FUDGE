@@ -3,7 +3,7 @@
 
 namespace FudgeCore {
   /**
-   * Holds information about discrete points in time (rounded to 2 digits after decimal point, use {@link toKeyTime} to convert continous value to discrete), their accompanying values as well as their slopes. 
+   * Holds information about continous points in time their accompanying values as well as their slopes. 
    * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
    * Saved inside an {@link AnimationSequence}.
    * @author Lukas Scheuerle, HFU, 2019
@@ -46,19 +46,12 @@ namespace FudgeCore {
       return _a.time - _b.time;
     }
 
-    /**
-     * Round a continous value to a discrete key time 
-     */
-    public static toKeyTime(_time: number): number {
-      return Number(_time.toFixed(2));
-    }
-    
     get time(): number {
-      return this.#time;
+      return this.#time; 
     }
 
     set time(_time: number) {
-      this.#time = AnimationKey.toKeyTime(_time);
+      this.#time = _time;
       this.functionIn.calculate();
       this.functionOut.calculate();
     }

@@ -1613,7 +1613,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Holds information about discrete points in time (rounded to 2 digits after decimal point, use {@link toKeyTime} to convert continous value to discrete), their accompanying values as well as their slopes.
+     * Holds information about continous points in time their accompanying values as well as their slopes.
      * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
      * Saved inside an {@link AnimationSequence}.
      * @author Lukas Scheuerle, HFU, 2019
@@ -1633,10 +1633,6 @@ declare namespace FudgeCore {
          * @returns >0 if a>b, 0 if a=b, <0 if a<b
          */
         static compare(_a: AnimationKey, _b: AnimationKey): number;
-        /**
-         * Round a continous value to a discrete key time
-         */
-        static toKeyTime(_time: number): number;
         get time(): number;
         set time(_time: number);
         get value(): number;

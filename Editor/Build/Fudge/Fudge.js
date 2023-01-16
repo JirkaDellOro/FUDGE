@@ -848,11 +848,10 @@ var Fudge;
             let sequence = Reflect.get(_element, "animationSequence");
             if (!sequence)
                 return;
-            let time = ƒ.AnimationKey.toKeyTime(_time);
-            let key = sequence.getKeys().find(_key => _key.time == time);
+            let key = sequence.findKey(_time);
             if (!key) {
                 if (_add) {
-                    key = new ƒ.AnimationKey(time, _element.getMutatorValue());
+                    key = new ƒ.AnimationKey(_time, _element.getMutatorValue());
                     sequence.addKey(key);
                 }
             }
