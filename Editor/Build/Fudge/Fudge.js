@@ -4538,8 +4538,22 @@ var Fudge;
                     this.dom.appendChild(img);
                     break;
                 case "AnimationSprite":
-                    let imgSprite = this.resource.texture.image;
-                    this.dom.appendChild(imgSprite);
+                    let animationSprite = this.resource;
+                    let div = document.createElement("div");
+                    let imgSprite = animationSprite.texture.image;
+                    this.dom.appendChild(div);
+                    div.appendChild(imgSprite);
+                    let positions = animationSprite.getPositions();
+                    let mutator = animationSprite.getMutator();
+                    for (let position of positions) {
+                        let rect = document.createElement("span");
+                        rect.className = "rectSprite";
+                        rect.style.left = position.x + 1 + "px";
+                        rect.style.top = position.y + 1 + "px";
+                        rect.style.width = mutator.size.x - 2 + "px";
+                        rect.style.height = mutator.size.y - 2 + "px";
+                        div.appendChild(rect);
+                    }
                     break;
                 case "Audio":
                     let entry = new Fudge.DirectoryEntry(this.resource.path, "", null, null);
@@ -4618,6 +4632,8 @@ var Fudge;
                         this.resource instanceof ƒ.AnimationSprite)
                         this.fillContent();
                 case "mutate" /* MUTATE */:
+                    if (this.resource instanceof ƒ.AnimationSprite)
+                        this.fillContent();
                     this.redraw();
                     break;
                 default:

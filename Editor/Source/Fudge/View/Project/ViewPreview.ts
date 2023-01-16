@@ -141,8 +141,22 @@ namespace Fudge {
           this.dom.appendChild(img);
           break;
         case "AnimationSprite":
-          let imgSprite: HTMLImageElement = (<ƒ.TextureImage>(<ƒ.AnimationSprite>this.resource).texture).image;
-          this.dom.appendChild(imgSprite);
+          let animationSprite: ƒ.AnimationSprite = <ƒ.AnimationSprite>this.resource;
+          let div: HTMLDivElement = document.createElement("div");
+          let imgSprite: HTMLImageElement = (<ƒ.TextureImage>animationSprite.texture).image;
+          this.dom.appendChild(div);
+          div.appendChild(imgSprite);
+          let positions: ƒ.Vector2[] = animationSprite.getPositions();
+          let mutator: ƒ.Mutator = animationSprite.getMutator();
+          for (let position of positions) {
+            let rect: HTMLSpanElement = document.createElement("span");
+            rect.className = "rectSprite";
+            rect.style.left = position.x + 1 + "px";
+            rect.style.top = position.y + 1 + "px";
+            rect.style.width = mutator.size.x - 2 + "px";
+            rect.style.height = mutator.size.y - 2 + "px";
+            div.appendChild(rect);
+          }
           break;
         case "Audio":
           let entry: DirectoryEntry = new DirectoryEntry((<ƒ.Audio>this.resource).path, "", null, null);
@@ -229,8 +243,10 @@ namespace Fudge {
           if (this.resource instanceof ƒ.Audio ||
             this.resource instanceof ƒ.Texture ||
             this.resource instanceof ƒ.AnimationSprite)
-          this.fillContent();
+            this.fillContent();
         case ƒUi.EVENT.MUTATE:
+          if (this.resource instanceof ƒ.AnimationSprite)
+            this.fillContent();
           this.redraw();
           break;
         default:

@@ -54,3 +54,8 @@ div[view=ViewAnimationSheet] input.event {
   position: absolute;
   top:42.5px;
 }
+
+span.rectSprite {
+  position:absolute;
+  border: 1px dotted var(--color-signal);
+}

@@ -26,31 +26,39 @@ namespace FudgeCore {
       this.next = _next;
       this.wrap = _wrap;
 
-      // TODO: texture size must be calculated from material attached to node
-      let sizeTexture: Vector2 = new Vector2(400, 400);
-      let scale: Vector2 = new Vector2(this.size.x / sizeTexture.x, this.size.y / sizeTexture.y);
-      let iNext: number = 0;
-      let iWrap: number = 0;
-
-      console.log(scale.toString());
-      console.log(this.texture.texImageSource.width, this.texture.texImageSource.height);
-
-      for (let frame: number = 0; frame < this.frames; frame++) {
-        let x: number = this.start.x + iNext * this.next.x + iWrap * this.wrap.x;
-        let y: number = this.start.y + iNext * this.next.y + iWrap * this.wrap.y;
-        iNext++
-        if (iNext >= this.wrapAfter) {
-          iNext = 0;
-          iWrap++;
-        }
-
-        console.log(x / sizeTexture.x, y / sizeTexture.y);
-      }
+      let positions: Vector2[] = this.getPositions();
+      let scale: Vector2 = this.getScale();
     }
 
     public async mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void> {
       super.mutate(_mutator);
       this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap);
+    }
+
+    public getScale(): Vector2 {
+      return new Vector2(
+        this.size.x / this.texture.texImageSource.width,
+        this.size.y / this.texture.texImageSource.height
+      );
+    }
+
+    public getPositions(): Vector2[] {
+      let iNext: number = 0;
+      let iWrap: number = 0;
+      let positions: Vector2[] = [];
+      for (let frame: number = 0; frame < this.frames; frame++) {
+        positions.push(new Vector2(
+          this.start.x + iNext * this.next.x + iWrap * this.wrap.x,
+          this.start.y + iNext * this.next.y + iWrap * this.wrap.y
+        ));
+
+        iNext++
+        if (iNext >= this.wrapAfter) {
+          iNext = 0;
+          iWrap++;
+        }
+      }
+      return positions;
     }
   }
 }

@@ -33,7 +33,7 @@ div[panel] .lm_close {
 }
 
 img {
-  border: 1px solid var(--color-text);
+  border: 1px dashed var(--color-text);
 }
 
 .lm_splitter:hover {
