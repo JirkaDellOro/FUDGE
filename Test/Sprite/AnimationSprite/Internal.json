@@ -160,5 +160,16 @@
         "mipmap": "CRISP"
       }
     }
+  },
+  "TextureImage|2023-01-16T14:41:22.268Z|03995": {
+    "ƒ.TextureImage": {
+      "url": "Image\\Mario_Spritesheet.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-01-16T14:41:22.268Z|03995",
+        "name": "Image\\Mario_Spritesheet.png",
+        "mipmap": "CRISP"
+      }
+    }
   }
 }

@@ -228,8 +228,10 @@ namespace Fudge {
         //   break;
         case ƒUi.EVENT.CHANGE:
         case EVENT_EDITOR.MODIFY:
-          if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture /*  || this.resource instanceof ƒ.Material */)
-            this.fillContent();
+          if (this.resource instanceof ƒ.Audio ||
+            this.resource instanceof ƒ.Texture ||
+            this.resource instanceof ƒ.AnimationSprite) /*  || this.resource instanceof ƒ.Material */)
+          this.fillContent();
         case ƒUi.EVENT.MUTATE:
           this.redraw();
           break;

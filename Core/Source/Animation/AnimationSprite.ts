@@ -47,5 +47,10 @@ namespace FudgeCore {
         console.log(x / sizeTexture.x, y / sizeTexture.y);
       }
     }
+
+    public async mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void> {
+      super.mutate(_mutator);
+      this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap);
+    }
   }
 }
