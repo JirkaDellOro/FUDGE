@@ -14,6 +14,7 @@ namespace Fudge {
     private viewport: ƒ.Viewport;
     private cmrOrbit: ƒAid.CameraOrbit;
     private previewNode: ƒ.Node;
+    private mtxImage: ƒ.Matrix3x3 = ƒ.Matrix3x3.IDENTITY();
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
@@ -35,9 +36,38 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent, true);
-      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
-      // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
+      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+      this.dom.addEventListener("wheel", this.hndMouse);
+      this.dom.addEventListener("mousemove", this.hndMouse);
+    }
+
+    private hndMouse = (_event: WheelEvent) => {
+      let div: HTMLDivElement = this.dom.querySelector("div#image");
+      if (!div)
+        return;
+      _event.preventDefault();
+      switch (_event.type) {
+        case "mousemove":
+          if (_event.buttons != 2)
+            return;
+          this.mtxImage.translateX(_event.movementX)
+          this.mtxImage.translateY(_event.movementY)
+          break;
+        case "wheel":
+          let zoom: number = Math.exp(-_event.deltaY / 1000)
+          this.mtxImage.scaleX(zoom);
+          this.mtxImage.scaleY(zoom);
+          break;
+      }
+      this.setTransform(div);
+    }
+
+    private setTransform(_div: HTMLDivElement): void {
+      let transform: Float32Array = this.mtxImage.get();
+      transform = transform.copyWithin(5, 6);
+      transform = transform.copyWithin(2, 3);
+      _div.style.transform = `matrix(${transform.slice(0, 6).join()})`;
     }
 
     private static createStandardMaterial(): ƒ.Material {
@@ -137,26 +167,31 @@ namespace Fudge {
           this.redraw();
           break;
         case "TextureImage":
-          let img: HTMLImageElement = (<ƒ.TextureImage>this.resource).image;
-          this.dom.appendChild(img);
-          break;
         case "AnimationSprite":
-          let animationSprite: ƒ.AnimationSprite = <ƒ.AnimationSprite>this.resource;
           let div: HTMLDivElement = document.createElement("div");
-          let imgSprite: HTMLImageElement = (<ƒ.TextureImage>animationSprite.texture).image;
-          this.dom.appendChild(div);
-          div.appendChild(imgSprite);
-          let positions: ƒ.Vector2[] = animationSprite.getPositions();
-          let mutator: ƒ.Mutator = animationSprite.getMutator();
-          for (let position of positions) {
-            let rect: HTMLSpanElement = document.createElement("span");
-            rect.className = "rectSprite";
-            rect.style.left = position.x + 1 + "px";
-            rect.style.top = position.y + 1 + "px";
-            rect.style.width = mutator.size.x - 2 + "px";
-            rect.style.height = mutator.size.y - 2 + "px";
-            div.appendChild(rect);
+          div.id = "image"
+          let img: HTMLImageElement;
+          if (type == "TextureImage") {
+            img = (<ƒ.TextureImage>this.resource).image;
+            div.appendChild(img);
+          } else {
+            let animationSprite: ƒ.AnimationSprite = <ƒ.AnimationSprite>this.resource;
+            img = (<ƒ.TextureImage>animationSprite.texture).image;
+            div.appendChild(img);
+            let positions: ƒ.Vector2[] = animationSprite.getPositions();
+            let mutator: ƒ.Mutator = animationSprite.getMutator();
+            for (let position of positions) {
+              let rect: HTMLSpanElement = document.createElement("span");
+              rect.className = "rectSprite";
+              rect.style.left = position.x + 1 + "px";
+              rect.style.top = position.y + 1 + "px";
+              rect.style.width = mutator.size.x - 2 + "px";
+              rect.style.height = mutator.size.y - 2 + "px";
+              div.appendChild(rect);
+            }
           }
+          this.dom.appendChild(div);
+          this.setTransform(div);
           break;
         case "Audio":
           let entry: DirectoryEntry = new DirectoryEntry((<ƒ.Audio>this.resource).path, "", null, null);
@@ -242,8 +277,10 @@ namespace Fudge {
         case EVENT_EDITOR.MODIFY:
           if (this.resource instanceof ƒ.Audio ||
             this.resource instanceof ƒ.Texture ||
-            this.resource instanceof ƒ.AnimationSprite)
+            this.resource instanceof ƒ.AnimationSprite) {
+            this.mtxImage.reset();
             this.fillContent();
+          }
         case ƒUi.EVENT.MUTATE:
           if (this.resource instanceof ƒ.AnimationSprite)
             this.fillContent();

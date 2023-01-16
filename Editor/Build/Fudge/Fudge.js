@@ -4427,6 +4427,7 @@ var Fudge;
         viewport;
         cmrOrbit;
         previewNode;
+        mtxImage = ƒ.Matrix3x3.IDENTITY();
         constructor(_container, _state) {
             super(_container, _state);
             // create viewport for 3D-resources
@@ -4444,9 +4445,36 @@ var Fudge;
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent, true);
-            // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
-            // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+            this.dom.addEventListener("wheel", this.hndMouse);
+            this.dom.addEventListener("mousemove", this.hndMouse);
+        }
+        hndMouse = (_event) => {
+            let div = this.dom.querySelector("div#image");
+            if (!div)
+                return;
+            _event.preventDefault();
+            switch (_event.type) {
+                case "mousemove":
+                    if (_event.buttons != 2)
+                        return;
+                    this.mtxImage.translateX(_event.movementX);
+                    this.mtxImage.translateY(_event.movementY);
+                    break;
+                case "wheel":
+                    let zoom = Math.exp(-_event.deltaY / 1000);
+                    this.mtxImage.scaleX(zoom);
+                    this.mtxImage.scaleY(zoom);
+                    break;
+            }
+            this.setTransform(div);
+        };
+        setTransform(_div) {
+            let transform = this.mtxImage.get();
+            transform = transform.copyWithin(5, 6);
+            transform = transform.copyWithin(2, 3);
+            _div.style.transform = `matrix(${transform.slice(0, 6).join()})`;
         }
         static createStandardMaterial() {
             let mtrStandard = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("white")));
@@ -4533,26 +4561,32 @@ var Fudge;
                     this.redraw();
                     break;
                 case "TextureImage":
-                    let img = this.resource.image;
-                    this.dom.appendChild(img);
-                    break;
                 case "AnimationSprite":
-                    let animationSprite = this.resource;
                     let div = document.createElement("div");
-                    let imgSprite = animationSprite.texture.image;
-                    this.dom.appendChild(div);
-                    div.appendChild(imgSprite);
-                    let positions = animationSprite.getPositions();
-                    let mutator = animationSprite.getMutator();
-                    for (let position of positions) {
-                        let rect = document.createElement("span");
-                        rect.className = "rectSprite";
-                        rect.style.left = position.x + 1 + "px";
-                        rect.style.top = position.y + 1 + "px";
-                        rect.style.width = mutator.size.x - 2 + "px";
-                        rect.style.height = mutator.size.y - 2 + "px";
-                        div.appendChild(rect);
+                    div.id = "image";
+                    let img;
+                    if (type == "TextureImage") {
+                        img = this.resource.image;
+                        div.appendChild(img);
                     }
+                    else {
+                        let animationSprite = this.resource;
+                        img = animationSprite.texture.image;
+                        div.appendChild(img);
+                        let positions = animationSprite.getPositions();
+                        let mutator = animationSprite.getMutator();
+                        for (let position of positions) {
+                            let rect = document.createElement("span");
+                            rect.className = "rectSprite";
+                            rect.style.left = position.x + 1 + "px";
+                            rect.style.top = position.y + 1 + "px";
+                            rect.style.width = mutator.size.x - 2 + "px";
+                            rect.style.height = mutator.size.y - 2 + "px";
+                            div.appendChild(rect);
+                        }
+                    }
+                    this.dom.appendChild(div);
+                    this.setTransform(div);
                     break;
                 case "Audio":
                     let entry = new Fudge.DirectoryEntry(this.resource.path, "", null, null);
@@ -4628,8 +4662,10 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.MODIFY:
                     if (this.resource instanceof ƒ.Audio ||
                         this.resource instanceof ƒ.Texture ||
-                        this.resource instanceof ƒ.AnimationSprite)
+                        this.resource instanceof ƒ.AnimationSprite) {
+                        this.mtxImage.reset();
                         this.fillContent();
+                    }
                 case "mutate" /* MUTATE */:
                     if (this.resource instanceof ƒ.AnimationSprite)
                         this.fillContent();

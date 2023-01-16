@@ -703,7 +703,10 @@ declare namespace Fudge {
         private viewport;
         private cmrOrbit;
         private previewNode;
+        private mtxImage;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        private hndMouse;
+        private setTransform;
         private static createStandardMaterial;
         private static createStandardMesh;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
