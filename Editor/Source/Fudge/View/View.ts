@@ -19,7 +19,7 @@ namespace Fudge {
     constructor(_container: ComponentContainer, _state: JsonValue) {
       this.dom = document.createElement("div");
       this.dom.style.height = "100%";
-      this.dom.style.overflow = "auto";
+      // this.dom.style.overflow = "auto";
       this.dom.setAttribute("view", this.constructor.name);
 
       //_container.getElement().append(this.dom); //old

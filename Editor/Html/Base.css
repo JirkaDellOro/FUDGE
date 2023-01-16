@@ -26,10 +26,12 @@ div[panel] .lm_close {
 *[view] {
   padding: 0.5em;
   padding-bottom: 0em;
+  overflow: auto;
 }
 
 *[view="ViewRender"], *[view="ViewPreview"] {
   padding: 0em;
+  overflow: hidden;
 }
 
 img {
