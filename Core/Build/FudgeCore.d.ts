@@ -1712,6 +1712,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class AnimationSprite extends Animation {
         static readonly iSubclass: number;
+        private texture;
         private frames;
         private wrapAfter;
         private start;
@@ -1719,7 +1720,7 @@ declare namespace FudgeCore {
         private next;
         private wrap;
         constructor(_name?: string);
-        create(_frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2): void;
+        create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2): void;
     }
 }
 declare namespace FudgeCore {
