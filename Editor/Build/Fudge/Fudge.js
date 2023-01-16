@@ -4535,12 +4535,10 @@ var Fudge;
                     break;
                 case "TextureImage":
                     let img = this.resource.image;
-                    img.style.border = "1px solid black";
                     this.dom.appendChild(img);
                     break;
                 case "AnimationSprite":
                     let imgSprite = this.resource.texture.image;
-                    imgSprite.style.border = "1px solid black";
                     this.dom.appendChild(imgSprite);
                     break;
                 case "Audio":
@@ -4618,8 +4616,7 @@ var Fudge;
                     if (this.resource instanceof ƒ.Audio ||
                         this.resource instanceof ƒ.Texture ||
                         this.resource instanceof ƒ.AnimationSprite)
-                        ; /*  || this.resource instanceof ƒ.Material */
-                    this.fillContent();
+                        this.fillContent();
                 case "mutate" /* MUTATE */:
                     this.redraw();
                     break;

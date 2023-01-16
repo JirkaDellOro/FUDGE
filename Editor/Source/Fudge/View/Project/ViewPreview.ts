@@ -138,12 +138,10 @@ namespace Fudge {
           break;
         case "TextureImage":
           let img: HTMLImageElement = (<ƒ.TextureImage>this.resource).image;
-          img.style.border = "1px solid black";
           this.dom.appendChild(img);
           break;
         case "AnimationSprite":
           let imgSprite: HTMLImageElement = (<ƒ.TextureImage>(<ƒ.AnimationSprite>this.resource).texture).image;
-          imgSprite.style.border = "1px solid black";
           this.dom.appendChild(imgSprite);
           break;
         case "Audio":
@@ -230,7 +228,7 @@ namespace Fudge {
         case EVENT_EDITOR.MODIFY:
           if (this.resource instanceof ƒ.Audio ||
             this.resource instanceof ƒ.Texture ||
-            this.resource instanceof ƒ.AnimationSprite) /*  || this.resource instanceof ƒ.Material */)
+            this.resource instanceof ƒ.AnimationSprite)
           this.fillContent();
         case ƒUi.EVENT.MUTATE:
           this.redraw();

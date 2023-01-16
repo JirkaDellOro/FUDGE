@@ -32,6 +32,10 @@ div[panel] .lm_close {
   padding: 0em;
 }
 
+img {
+  border: 1px solid var(--color-text);
+}
+
 .lm_splitter:hover {
   background: var(--color-background-content);
 }
