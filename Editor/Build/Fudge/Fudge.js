@@ -4464,9 +4464,14 @@ var Fudge;
                     this.mtxImage.translateY(_event.movementY);
                     break;
                 case "wheel":
+                    let offset = new ƒ.Vector2(_event.offsetX - this.dom.clientWidth, _event.offsetY - this.dom.clientHeight / 2);
                     let zoom = Math.exp(-_event.deltaY / 1000);
+                    console.log(offset.toString());
                     this.mtxImage.scaleX(zoom);
                     this.mtxImage.scaleY(zoom);
+                    offset.scale(zoom - 1);
+                    this.mtxImage.translateX(-offset.x);
+                    this.mtxImage.translateY(-offset.y);
                     break;
             }
             this.setTransform(div);
@@ -4679,6 +4684,7 @@ var Fudge;
                         this.resource = _event.detail.data.script;
                     else
                         this.resource = _event.detail.data;
+                    this.mtxImage.reset();
                     this.fillContent();
                     break;
             }
