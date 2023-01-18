@@ -138,9 +138,8 @@ namespace Fudge {
         return true;
       };
       let setSpriteTexture: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
-        let mutator: ƒ.Mutator = {};
-        mutator.texture = _sources[0];
-        this.mutable.mutate(mutator);
+        this.mutable["texture"] = _sources[0];
+        this.mutable.mutate({}); // force recreation using new texture
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };

@@ -55,11 +55,7 @@ namespace Fudge {
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
-        // case EVENT_EDITOR.SET_PROJECT:
-        //   this.resource = undefined;
-        //   break;
         case ƒui.EVENT.SELECT:
-          // let detail: EventDetail = <EventDetail>_event.detail;
           this.resource = <ƒ.SerializableResource>(_event.detail.data);
           break;
         default:

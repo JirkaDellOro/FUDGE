@@ -1415,9 +1415,8 @@ var Fudge;
                 return true;
             };
             let setSpriteTexture = (_sources) => {
-                let mutator = {};
-                mutator.texture = _sources[0];
-                this.mutable.mutate(mutator);
+                this.mutable["texture"] = _sources[0];
+                this.mutable.mutate({}); // force recreation using new texture
                 this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
@@ -4765,11 +4764,7 @@ var Fudge;
         }
         hndEvent = (_event) => {
             switch (_event.type) {
-                // case EVENT_EDITOR.SET_PROJECT:
-                //   this.resource = undefined;
-                //   break;
                 case "itemselect" /* SELECT */:
-                    // let detail: EventDetail = <EventDetail>_event.detail;
                     this.resource = (_event.detail.data);
                     break;
                 default:
