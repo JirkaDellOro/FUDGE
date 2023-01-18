@@ -313,7 +313,7 @@ namespace Fudge {
     }
 
     private setTimeScale(_timeScale: number) {
-      _timeScale = parseFloat(_timeScale.toPrecision(15));
+      _timeScale = parseFloat(_timeScale.toFixed(15)); // round so forward and backward button don't miss zero
       if (_timeScale != 0)
         this.timeScalePlay = _timeScale;
       this.time.setScale(_timeScale);
