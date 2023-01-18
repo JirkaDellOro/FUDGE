@@ -11,6 +11,9 @@ namespace Fudge {
     public static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[] = ["x", "y", "z"];
     public static readonly COLOR_KEYS: (keyof ƒ.ParticleData.Color)[] = ["r", "g", "b", "a"];
 
+    private time: ƒ.Time;
+    private timeScalePlay: number;
+
     private particleSystem: ƒ.ParticleSystem;
     private data: ƒ.ParticleData.System;
 
@@ -206,8 +209,8 @@ namespace Fudge {
 
       let source: Object = _viewSource.getDragDropSources()[0];
       if (source instanceof ƒ.Node)
-        source = source.getComponent(ƒ.ComponentParticleSystem)?.particleSystem;
-      if (!(source instanceof ƒ.ParticleSystem))
+        source = source.getComponent(ƒ.ComponentParticleSystem)
+      if (!(source instanceof ƒ.ComponentParticleSystem))
         return;
 
       _viewSource.getDragDropSources()[0] = source;
@@ -217,8 +220,9 @@ namespace Fudge {
     }
 
     protected hndDrop(_event: DragEvent, _viewSource: View): void {
-      let source: Object = _viewSource.getDragDropSources()[0];
-      this.setParticleSystem(<ƒ.ParticleSystem>source);
+      let cmpParticleSystem = <ƒ.ComponentParticleSystem>_viewSource.getDragDropSources()[0];
+      this.time = cmpParticleSystem.time;
+      this.setParticleSystem(cmpParticleSystem.particleSystem);
     }
 
     private hndEvent = async (_event: EditorEvent): Promise<void> => {
@@ -265,17 +269,24 @@ namespace Fudge {
 
     private hndToolbarClick = (_event: MouseEvent) => {
       let target: HTMLInputElement = <HTMLInputElement>_event.target;
+      let timeScale: number = this.time.getScale();
       switch (target.id) {
         case "backward":
-
+          timeScale -= 0.2;
+          break;
+        case "play":
+          timeScale = this.timeScalePlay;
           break;
         case "pause":
-
+          this.timeScalePlay = timeScale;
+          timeScale = 0;
           break;
         case "forward":
-
+          timeScale += 0.2;
           break;
       }
+      this.setTimeScale(timeScale);
+      this.timeScaleStepper.setMutatorValue(timeScale);
     }
     //#endregion
 
@@ -293,22 +304,29 @@ namespace Fudge {
         })
         .forEach(_button => this.toolbar.appendChild(_button));
 
-      this.timeScaleStepper = <ƒui.CustomElementStepper>document.createElement("fudge-stepper");
+      this.timeScaleStepper = new ƒui.CustomElementStepper({key: "timeScale", label: "timeScale", value: "1"});
       this.timeScaleStepper.id = "timescale"
-      this.timeScaleStepper.setLabel("timeScaling");
-
-      // this.frameInput.addEventListener("input", (_event: InputEvent) => {
-      //   this.playbackTime = Number.parseInt(this.frameInput.value) * 1000 / this.animation.fps;
-      //   this.animate();
-      // });
+      this.timeScaleStepper.addEventListener("input", (_event: InputEvent) => {
+        this.setTimeScale(this.timeScaleStepper.getMutatorValue());
+      });
       this.toolbar.appendChild(this.timeScaleStepper);
+    }
+
+    private setTimeScale(_timeScale: number) {
+      _timeScale = parseFloat(_timeScale.toPrecision(15));
+      if (_timeScale != 0)
+        this.timeScalePlay = _timeScale;
+      this.time.setScale(_timeScale);
+
+      let playButton: Element = this.toolbar.querySelector("#play") || this.toolbar.querySelector("#pause");
+      playButton.id = _timeScale == 0 ? "play" : "pause";
     }
 
     private setParticleSystem(_particleSystem: ƒ.ParticleSystem): void {
       if (!_particleSystem) {
         this.particleSystem = undefined;
         this.tree = undefined;
-        this.dom.innerHTML = "Drop a particle system here to edit";
+        this.dom.innerHTML = "Drop a node with an attached component particle system here to edit";
         return;
       }
 

@@ -485,6 +485,8 @@ declare namespace Fudge {
         static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[];
         static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[];
         static readonly COLOR_KEYS: (keyof ƒ.ParticleData.Color)[];
+        private time;
+        private timeScalePlay;
         private particleSystem;
         private data;
         private toolbar;
@@ -502,6 +504,7 @@ declare namespace Fudge {
         private hndEvent;
         private hndToolbarClick;
         private createToolbar;
+        private setTimeScale;
         private setParticleSystem;
         private validateData;
         private enableSave;

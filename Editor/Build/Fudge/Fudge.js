@@ -2361,6 +2361,8 @@ var Fudge;
         static PROPERTY_KEYS = ["variables", "mtxLocal", "mtxWorld", "color"];
         static TRANSFORMATION_KEYS = ["x", "y", "z"];
         static COLOR_KEYS = ["r", "g", "b", "a"];
+        time;
+        timeScalePlay;
         particleSystem;
         data;
         toolbar;
@@ -2528,8 +2530,8 @@ var Fudge;
             _event.dataTransfer.dropEffect = "none";
             let source = _viewSource.getDragDropSources()[0];
             if (source instanceof ƒ.Node)
-                source = source.getComponent(ƒ.ComponentParticleSystem)?.particleSystem;
-            if (!(source instanceof ƒ.ParticleSystem))
+                source = source.getComponent(ƒ.ComponentParticleSystem);
+            if (!(source instanceof ƒ.ComponentParticleSystem))
                 return;
             _viewSource.getDragDropSources()[0] = source;
             _event.dataTransfer.dropEffect = "link";
@@ -2537,8 +2539,9 @@ var Fudge;
             _event.stopPropagation();
         }
         hndDrop(_event, _viewSource) {
-            let source = _viewSource.getDragDropSources()[0];
-            this.setParticleSystem(source);
+            let cmpParticleSystem = _viewSource.getDragDropSources()[0];
+            this.time = cmpParticleSystem.time;
+            this.setParticleSystem(cmpParticleSystem.particleSystem);
         }
         hndEvent = async (_event) => {
             _event.stopPropagation();
@@ -2585,14 +2588,24 @@ var Fudge;
         };
         hndToolbarClick = (_event) => {
             let target = _event.target;
+            let timeScale = this.time.getScale();
             switch (target.id) {
                 case "backward":
+                    timeScale -= 0.2;
+                    break;
+                case "play":
+                    timeScale = this.timeScalePlay;
                     break;
                 case "pause":
+                    this.timeScalePlay = timeScale;
+                    timeScale = 0;
                     break;
                 case "forward":
+                    timeScale += 0.2;
                     break;
             }
+            this.setTimeScale(timeScale);
+            this.timeScaleStepper.setMutatorValue(timeScale);
         };
         //#endregion
         createToolbar() {
@@ -2607,20 +2620,26 @@ var Fudge;
                 return button;
             })
                 .forEach(_button => this.toolbar.appendChild(_button));
-            this.timeScaleStepper = document.createElement("fudge-stepper");
+            this.timeScaleStepper = new ƒui.CustomElementStepper({ key: "timeScale", label: "timeScale", value: "1" });
             this.timeScaleStepper.id = "timescale";
-            this.timeScaleStepper.setLabel("timeScaling");
-            // this.frameInput.addEventListener("input", (_event: InputEvent) => {
-            //   this.playbackTime = Number.parseInt(this.frameInput.value) * 1000 / this.animation.fps;
-            //   this.animate();
-            // });
+            this.timeScaleStepper.addEventListener("input", (_event) => {
+                this.setTimeScale(this.timeScaleStepper.getMutatorValue());
+            });
             this.toolbar.appendChild(this.timeScaleStepper);
+        }
+        setTimeScale(_timeScale) {
+            _timeScale = parseFloat(_timeScale.toPrecision(15));
+            if (_timeScale != 0)
+                this.timeScalePlay = _timeScale;
+            this.time.setScale(_timeScale);
+            let playButton = this.toolbar.querySelector("#play") || this.toolbar.querySelector("#pause");
+            playButton.id = _timeScale == 0 ? "play" : "pause";
         }
         setParticleSystem(_particleSystem) {
             if (!_particleSystem) {
                 this.particleSystem = undefined;
                 this.tree = undefined;
-                this.dom.innerHTML = "Drop a particle system here to edit";
+                this.dom.innerHTML = "Drop a node with an attached component particle system here to edit";
                 return;
             }
             this.particleSystem = _particleSystem;
