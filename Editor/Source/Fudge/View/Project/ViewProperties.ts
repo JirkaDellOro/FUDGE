@@ -27,7 +27,7 @@ namespace Fudge {
         this.setTitle("Properties | " + this.resource.name);
         if (this.resource instanceof ƒ.Mutable) {
           let fieldset: ƒui.Details = ƒui.Generator.createDetailsFromMutable(this.resource);
-          let uiMutable: ControllerComponent = new ControllerComponent(this.resource, fieldset);
+          let uiMutable: ControllerDetail = new ControllerDetail(this.resource, fieldset);
           content = uiMutable.domElement;
         } else if (this.resource instanceof DirectoryEntry && this.resource.stats) {
           content.innerHTML += "Size: " + (this.resource.stats["size"] / 1024).toFixed(2) + " KiB<br/>";

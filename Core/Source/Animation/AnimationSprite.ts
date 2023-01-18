@@ -4,6 +4,7 @@ namespace FudgeCore {
     // private resolution: number = 80;
     // private origin: ORIGIN2D = ORIGIN2D.BOTTOMCENTER;
     public texture: Texture = TextureDefault.texture;
+    private idTexture: string;
     private frames: number = 25;
     private wrapAfter: number = 5;
     private start: Vector2 = new Vector2(0, 0);
@@ -19,6 +20,7 @@ namespace FudgeCore {
 
     public create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2) {
       this.texture = _texture;
+      this.idTexture = _texture.idResource;
       this.frames = _frames;
       this.wrapAfter = _wrapAfter;
       this.start = _start;
@@ -28,11 +30,6 @@ namespace FudgeCore {
 
       let positions: Vector2[] = this.getPositions();
       let scale: Vector2 = this.getScale();
-    }
-
-    public async mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void> {
-      super.mutate(_mutator);
-      this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap);
     }
 
     public getScale(): Vector2 {
@@ -60,5 +57,40 @@ namespace FudgeCore {
       }
       return positions;
     }
+
+    //#region transfer
+    public async mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void> {
+      super.mutate(_mutator);
+      // if (_mutator.idTexture && _mutator.idTexture)
+      // this.texture = <Texture>await Project.getResource(_s.idTexture);
+      this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap);
+    }
+
+    public serialize(): Serialization {
+      let animationsStructure: AnimationStructure = this.animationStructure;
+      this.animationStructure = {}; // no need to serialize structure
+      let serialization: Serialization = super.serialize();
+      this.animationStructure = animationsStructure; // restore existent structure
+      serialization.idTexture = this.idTexture;
+      serialization.frames = this.frames;
+      serialization.wrapAfter = this.wrapAfter;
+      for (let name of ["start", "size", "next", "wrap"])
+        serialization[name] = (<Vector2>Reflect.get(this, name)).serialize();
+      return serialization;
+    }
+
+    public async deserialize(_s: Serialization): Promise<Serializable> {
+      await super.deserialize(_s);
+      if (_s.idTexture)
+        this.texture = <Texture>await Project.getResource(_s.idTexture);
+      else
+        this.texture = TextureDefault.texture;
+
+      for (let name of ["start", "size", "next", "wrap"])
+        (<Vector2>Reflect.get(this, name)).deserialize(_s[name]);
+      this.create(this.texture, _s.frames, _s.wrapAfter, this.start, this.size, this.next, this.wrap);
+      return this;
+    }
+    //#endregion
   }
 }

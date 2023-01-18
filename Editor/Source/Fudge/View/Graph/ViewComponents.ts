@@ -90,7 +90,7 @@ namespace Fudge {
             return;
           do {
             console.log(element.tagName);
-            let controller: ControllerComponent = Reflect.get(element, "controller");
+            let controller: ControllerDetail = Reflect.get(element, "controller");
             if (element.tagName == "DETAILS" && controller) {
               this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.DELETE, { detail: { mutable: controller.getMutable() } }));
               break;
@@ -176,7 +176,7 @@ namespace Fudge {
 
       for (let component of components) {
         let details: ƒUi.Details = ƒUi.Generator.createDetailsFromMutable(component);
-        let controller: ControllerComponent = new ControllerComponent(component, details);
+        let controller: ControllerDetail = new ControllerDetail(component, details);
         Reflect.set(details, "controller", controller); // insert a link back to the controller
         details.expand(this.expanded[component.type]);
         this.dom.append(details);
@@ -261,7 +261,7 @@ namespace Fudge {
       if (!this.getSelected())
         return;
 
-      let controller: ControllerComponent = Reflect.get(this.getSelected(), "controller");
+      let controller: ControllerDetail = Reflect.get(this.getSelected(), "controller");
       let component: ƒ.Component = <ƒ.Component>controller.getMutable();
       let mtxTransform: ƒ.Matrix4x4 = Reflect.get(component, "mtxLocal") || Reflect.get(component, "mtxPivot");
       if (!mtxTransform)

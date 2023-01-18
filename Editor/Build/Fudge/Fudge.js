@@ -1303,7 +1303,7 @@ var Fudge;
         TextureOnAnimationSprite: { fromViews: [Fudge.ViewInternal], onType: ƒ.AnimationSprite, ofType: ƒ.Texture, dropEffect: "link" },
         TextureOnMeshRelief: { fromViews: [Fudge.ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
     };
-    class ControllerComponent extends ƒUi.Controller {
+    class ControllerDetail extends ƒUi.Controller {
         constructor(_mutable, _domElement) {
             super(_mutable, _domElement);
             this.domElement.addEventListener("input" /* INPUT */, this.mutateOnInput, true); // this should be obsolete
@@ -1415,7 +1415,9 @@ var Fudge;
                 return true;
             };
             let setSpriteTexture = (_sources) => {
-                this.mutable["texture"] = _sources[0];
+                let mutator = {};
+                mutator.texture = _sources[0];
+                this.mutable.mutate(mutator);
                 this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
@@ -1506,7 +1508,7 @@ var Fudge;
             return null;
         }
     }
-    Fudge.ControllerComponent = ControllerComponent;
+    Fudge.ControllerDetail = ControllerDetail;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -3800,7 +3802,7 @@ var Fudge;
             }
             for (let component of components) {
                 let details = ƒUi.Generator.createDetailsFromMutable(component);
-                let controller = new Fudge.ControllerComponent(component, details);
+                let controller = new Fudge.ControllerDetail(component, details);
                 Reflect.set(details, "controller", controller); // insert a link back to the controller
                 details.expand(this.expanded[component.type]);
                 this.dom.append(details);
@@ -4733,7 +4735,7 @@ var Fudge;
                 this.setTitle("Properties | " + this.resource.name);
                 if (this.resource instanceof ƒ.Mutable) {
                     let fieldset = ƒui.Generator.createDetailsFromMutable(this.resource);
-                    let uiMutable = new Fudge.ControllerComponent(this.resource, fieldset);
+                    let uiMutable = new Fudge.ControllerDetail(this.resource, fieldset);
                     content = uiMutable.domElement;
                 }
                 else if (this.resource instanceof Fudge.DirectoryEntry && this.resource.stats) {

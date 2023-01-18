@@ -1449,7 +1449,7 @@ declare namespace FudgeCore {
         labels: AnimationLabel;
         animationStructure: AnimationStructure;
         events: AnimationEventTrigger;
-        private framesPerSecond;
+        protected framesPerSecond: number;
         private eventsProcessed;
         constructor(_name?: string, _animStructure?: AnimationStructure, _fps?: number);
         protected static registerSubclass(_subClass: typeof Animation): number;
@@ -1709,6 +1709,7 @@ declare namespace FudgeCore {
     class AnimationSprite extends Animation {
         static readonly iSubclass: number;
         texture: Texture;
+        private idTexture;
         private frames;
         private wrapAfter;
         private start;
@@ -1717,9 +1718,11 @@ declare namespace FudgeCore {
         private wrap;
         constructor(_name?: string);
         create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2): void;
-        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
         getScale(): Vector2;
         getPositions(): Vector2[];
+        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
+        serialize(): Serialization;
+        deserialize(_s: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {

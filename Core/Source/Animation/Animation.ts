@@ -100,7 +100,7 @@ namespace FudgeCore {
     // stepsPerSecond: number = 10;
     public animationStructure: AnimationStructure;
     public events: AnimationEventTrigger = {};
-    private framesPerSecond: number = 60; // TODO: change this and its accessors to #framesPerSecond?
+    protected framesPerSecond: number = 60; // TODO: change this and its accessors to #framesPerSecond?
 
     // processed eventlist and animation strucutres for playback.
     private eventsProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();

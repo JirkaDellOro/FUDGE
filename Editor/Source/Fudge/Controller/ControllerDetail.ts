@@ -29,7 +29,7 @@ namespace Fudge {
     TextureOnMeshRelief: { fromViews: [ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
   };
 
-  export class ControllerComponent extends ƒUi.Controller {
+  export class ControllerDetail extends ƒUi.Controller {
     public constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
       super(_mutable, _domElement);
       this.domElement.addEventListener(ƒUi.EVENT.INPUT, this.mutateOnInput, true); // this should be obsolete
@@ -97,7 +97,7 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator)) return;
       // ParticleSystem of ComponentParticleSystem
       if (this.filterDragDrop(_event, filter.ParticleSystemOnComponentParticleSystem)) return;
-      
+
 
       function checkMimeType(_mime: MIME): (_sources: Object[]) => boolean {
         return (_sources: Object[]): boolean => {
@@ -138,7 +138,9 @@ namespace Fudge {
         return true;
       };
       let setSpriteTexture: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
-        this.mutable["texture"] = _sources[0];
+        let mutator: ƒ.Mutator = {};
+        mutator.texture = _sources[0];
+        this.mutable.mutate(mutator);
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };

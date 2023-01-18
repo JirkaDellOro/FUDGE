@@ -147,7 +147,14 @@
       "labels": {},
       "events": {},
       "fps": 15,
-      "animationStructure": {}
+      "animationStructure": {},
+      "idTexture": "TextureImage|2023-01-16T14:41:22.268Z|03995",
+      "frames": 25,
+      "wrapAfter": 5,
+      "start": "[0, 0]",
+      "size": "[80, 80]",
+      "next": "[80, 0]",
+      "wrap": "[0, 80]"
     }
   },
   "TextureImage|2023-01-16T14:08:04.970Z|41098": {
