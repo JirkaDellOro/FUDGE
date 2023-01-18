@@ -258,7 +258,7 @@ details[key^=particleSystem]>summary::after, details[key^=ParticleSystem]>summar
   -webkit-mask: url(../Html/Icon/Particles.svg);
 }
 
-/* Button */
+/* Playback */
 .buttonIcon::before {
   margin: 0;
   vertical-align: middle;
@@ -274,7 +274,11 @@ details[key^=particleSystem]>summary::after, details[key^=ParticleSystem]>summar
   -webkit-mask: url(../Html/Icon/Backward.svg);
 }
 
-.buttonIcon[id="forward"]::before,
+.buttonIcon[id="forward"]::before {
+  mask: url(../Html/Icon/Forward.svg);
+  -webkit-mask: url(../Html/Icon/Forward.svg);
+}
+
 .buttonIcon[id="play"]::before {
   mask: url(../Html/Icon/Play.svg);
   -webkit-mask: url(../Html/Icon/Play.svg);

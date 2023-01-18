@@ -26,9 +26,9 @@
   <path
      style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke-width:0.536084;stroke-dasharray:none;paint-order:markers fill stroke"
      id="path1857"
-     d="M 0,2.1166667 2.1166667,0 v 4.2333333 z" />
+     d="M 2.1166667,2.1166666 0,4.2333333 V 0 Z" />
   <path
      style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke-width:0.536084;stroke-dasharray:none;paint-order:markers fill stroke"
      id="path1857-6"
-     d="M 2.1166667,2.1166665 4.2333334,1e-7 v 4.2333331 z" />
+     d="M 4.2333334,2.1166667 2.1166667,4.2333332 V 0 Z" />
 </svg>
