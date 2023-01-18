@@ -4659,22 +4659,16 @@ var Fudge;
             return pre;
         }
         hndEvent = (_event) => {
-            // console.log(_event.type);
             switch (_event.type) {
-                // case EVENT_EDITOR.SET_PROJECT:
-                //   this.resource = undefined;
-                //   break;
                 case "change" /* CHANGE */:
                 case Fudge.EVENT_EDITOR.MODIFY:
+                case "mutate" /* MUTATE */:
                     if (this.resource instanceof ƒ.Audio ||
                         this.resource instanceof ƒ.Texture ||
                         this.resource instanceof ƒ.AnimationSprite) {
                         this.mtxImage.reset();
                         this.fillContent();
                     }
-                case "mutate" /* MUTATE */:
-                    if (this.resource instanceof ƒ.AnimationSprite)
-                        this.fillContent();
                     this.redraw();
                     break;
                 default:

@@ -274,22 +274,16 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      // console.log(_event.type);
       switch (_event.type) {
-        // case EVENT_EDITOR.SET_PROJECT:
-        //   this.resource = undefined;
-        //   break;
         case ƒUi.EVENT.CHANGE:
         case EVENT_EDITOR.MODIFY:
+        case ƒUi.EVENT.MUTATE:
           if (this.resource instanceof ƒ.Audio ||
             this.resource instanceof ƒ.Texture ||
             this.resource instanceof ƒ.AnimationSprite) {
             this.mtxImage.reset();
             this.fillContent();
           }
-        case ƒUi.EVENT.MUTATE:
-          if (this.resource instanceof ƒ.AnimationSprite)
-            this.fillContent();
           this.redraw();
           break;
         default:
