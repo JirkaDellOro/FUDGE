@@ -265,6 +265,43 @@ option {
   color: var(--color-text);
 }
 
+/* Button */
+
+.buttonIcon {
+  border: none;
+  border-right: 2px solid var(--color-background-content);
+  background-color: var(--color-background-main);
+  padding: 2px;
+  min-width: 20px;
+  width: 50px;
+  cursor: pointer;
+}
+
+.buttonIcon:focus {
+  outline: none;
+}
+
+/* ViewParticleSystem */
+
+div[view=ViewParticleSystem] {
+  display: flex;
+  gap: 0.5em;
+  flex-flow: column;
+}
+
+div[view=ViewParticleSystem] #toolbar {
+  background-color: var(--color-background-main);
+  display: flex;
+  gap: 2px;
+  flex-grow: 0;
+}
+
+div[view=ViewParticleSystem] #timescale {
+  background-color: var(--color-background-content);
+  margin: 2px;
+  margin-left: auto;
+}
+
 /* standard fudge elements */
 
 fudge-boolean, fudge-color, fudge-textinput, fudge-stepper, fudge-select {

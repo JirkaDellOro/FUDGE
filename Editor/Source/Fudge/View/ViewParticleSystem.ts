@@ -14,6 +14,8 @@ namespace Fudge {
     private particleSystem: ƒ.ParticleSystem;
     private data: ƒ.ParticleData.System;
 
+    private toolbar: HTMLDivElement;
+    private timeScaleStepper: ƒui.CustomElementStepper;
     private tree: ƒui.CustomTree<ƒ.ParticleData.Recursive>;
     private controller: ControllerTreeParticleSystem;
 
@@ -22,6 +24,7 @@ namespace Fudge {
 
     constructor(_container: ComponentContainer, _state: Object) {
         super(_container, _state);
+        this.createToolbar();
         this.setParticleSystem(null);
         this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
         this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
@@ -259,7 +262,47 @@ namespace Fudge {
           break;
       }
     }
+
+    private hndToolbarClick = (_event: MouseEvent) => {
+      let target: HTMLInputElement = <HTMLInputElement>_event.target;
+      switch (target.id) {
+        case "backward":
+
+          break;
+        case "pause":
+
+          break;
+        case "forward":
+
+          break;
+      }
+    }
     //#endregion
+
+    private createToolbar(): void {
+      this.toolbar = document.createElement("div");
+      this.toolbar.id = "toolbar";
+
+      ["backward", "pause", "forward"]
+        .map(_id => {
+          let button: HTMLButtonElement = document.createElement("button");
+          button.id = _id;
+          button.classList.add("buttonIcon");
+          button.onclick = this.hndToolbarClick;
+          return button;
+        })
+        .forEach(_button => this.toolbar.appendChild(_button));
+
+      this.timeScaleStepper = <ƒui.CustomElementStepper>document.createElement("fudge-stepper");
+      this.timeScaleStepper.id = "timescale"
+      this.timeScaleStepper.setLabel("timeScaling");
+
+      // this.frameInput.addEventListener("input", (_event: InputEvent) => {
+      //   this.playbackTime = Number.parseInt(this.frameInput.value) * 1000 / this.animation.fps;
+      //   this.animate();
+      // });
+      this.toolbar.appendChild(this.timeScaleStepper);
+    }
 
     private setParticleSystem(_particleSystem: ƒ.ParticleSystem): void {
       if (!_particleSystem) {
@@ -277,10 +320,9 @@ namespace Fudge {
       this.variables.id = "variables";
       this.dom.appendChild(this.variables);
       this.refreshVariables();
+      this.dom.appendChild(this.toolbar);
       this.controller = new ControllerTreeParticleSystem(this.data);
-      let newTree: ƒui.CustomTree<ƒ.ParticleData.Recursive> = new ƒui.CustomTree<ƒ.ParticleData.Recursive>(this.controller, this.data);
-      this.dom.appendChild(newTree);
-      this.tree = newTree;
+      this.tree = new ƒui.CustomTree<ƒ.ParticleData.Recursive>(this.controller, this.data);
       this.tree.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
@@ -288,6 +330,7 @@ namespace Fudge {
       this.tree.addEventListener(ƒui.EVENT.PASTE, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      this.dom.appendChild(this.tree);
       this.dom.title = `● Right click on "${ƒ.ParticleSystem.name}" to add properties.\n● Right click on properties to add transformations/expressions.\n● Right click on transformations/expressions to add expressions.\n● Use Copy/Cut/Paste to duplicate data.`;
       this.tree.title = this.dom.title;
     }

@@ -487,6 +487,8 @@ declare namespace Fudge {
         static readonly COLOR_KEYS: (keyof ƒ.ParticleData.Color)[];
         private particleSystem;
         private data;
+        private toolbar;
+        private timeScaleStepper;
         private tree;
         private controller;
         private errors;
@@ -498,6 +500,8 @@ declare namespace Fudge {
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private hndEvent;
+        private hndToolbarClick;
+        private createToolbar;
         private setParticleSystem;
         private validateData;
         private enableSave;

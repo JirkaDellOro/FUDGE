@@ -2363,12 +2363,15 @@ var Fudge;
         static COLOR_KEYS = ["r", "g", "b", "a"];
         particleSystem;
         data;
+        toolbar;
+        timeScaleStepper;
         tree;
         controller;
         errors = [];
         variables;
         constructor(_container, _state) {
             super(_container, _state);
+            this.createToolbar();
             this.setParticleSystem(null);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
@@ -2580,7 +2583,39 @@ var Fudge;
                     break;
             }
         };
+        hndToolbarClick = (_event) => {
+            let target = _event.target;
+            switch (target.id) {
+                case "backward":
+                    break;
+                case "pause":
+                    break;
+                case "forward":
+                    break;
+            }
+        };
         //#endregion
+        createToolbar() {
+            this.toolbar = document.createElement("div");
+            this.toolbar.id = "toolbar";
+            ["backward", "pause", "forward"]
+                .map(_id => {
+                let button = document.createElement("button");
+                button.id = _id;
+                button.classList.add("buttonIcon");
+                button.onclick = this.hndToolbarClick;
+                return button;
+            })
+                .forEach(_button => this.toolbar.appendChild(_button));
+            this.timeScaleStepper = document.createElement("fudge-stepper");
+            this.timeScaleStepper.id = "timescale";
+            this.timeScaleStepper.setLabel("timeScaling");
+            // this.frameInput.addEventListener("input", (_event: InputEvent) => {
+            //   this.playbackTime = Number.parseInt(this.frameInput.value) * 1000 / this.animation.fps;
+            //   this.animate();
+            // });
+            this.toolbar.appendChild(this.timeScaleStepper);
+        }
         setParticleSystem(_particleSystem) {
             if (!_particleSystem) {
                 this.particleSystem = undefined;
@@ -2596,10 +2631,9 @@ var Fudge;
             this.variables.id = "variables";
             this.dom.appendChild(this.variables);
             this.refreshVariables();
+            this.dom.appendChild(this.toolbar);
             this.controller = new Fudge.ControllerTreeParticleSystem(this.data);
-            let newTree = new ƒui.CustomTree(this.controller, this.data);
-            this.dom.appendChild(newTree);
-            this.tree = newTree;
+            this.tree = new ƒui.CustomTree(this.controller, this.data);
             this.tree.addEventListener("rename" /* RENAME */, this.hndEvent);
             this.tree.addEventListener("drop" /* DROP */, this.hndEvent);
             this.tree.addEventListener("delete" /* DELETE */, this.hndEvent);
@@ -2607,6 +2641,7 @@ var Fudge;
             this.tree.addEventListener("paste" /* PASTE */, this.hndEvent);
             this.tree.addEventListener("drop" /* DROP */, this.hndEvent);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
+            this.dom.appendChild(this.tree);
             this.dom.title = `● Right click on "${ƒ.ParticleSystem.name}" to add properties.\n● Right click on properties to add transformations/expressions.\n● Right click on transformations/expressions to add expressions.\n● Use Copy/Cut/Paste to duplicate data.`;
             this.tree.title = this.dom.title;
         }
@@ -2786,6 +2821,7 @@ var Fudge;
                 .map(_id => {
                 let button = document.createElement("button");
                 button.id = _id;
+                button.className = "buttonIcon";
                 button.onclick = this.hndToolbarClick;
                 return button;
             })
