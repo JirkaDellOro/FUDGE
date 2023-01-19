@@ -2367,11 +2367,6 @@ var Fudge;
         data;
         toolbar;
         toolbarIntervalId;
-        timeScaleStepper;
-        timeSlider;
-        timeSliderSteps;
-        timeStepper;
-        durationStepper;
         tree;
         controller;
         errors = [];
@@ -2530,7 +2525,7 @@ var Fudge;
             }
         }
         //#endregion
-        //#region  event handling
+        //#region event handling
         hndDragOver(_event, _viewSource) {
             _event.dataTransfer.dropEffect = "none";
             let source = _viewSource.getDragDropSources()[0];
@@ -2594,25 +2589,6 @@ var Fudge;
                     break;
             }
         };
-        hndToolbarClick = (_event) => {
-            let timeScale = this.time.getScale();
-            switch (_event.target.id) {
-                case "backward":
-                    timeScale -= 0.2;
-                    break;
-                case "play":
-                    timeScale = this.timeScalePlay;
-                    break;
-                case "pause":
-                    this.timeScalePlay = timeScale;
-                    timeScale = 0;
-                    break;
-                case "forward":
-                    timeScale += 0.2;
-                    break;
-            }
-            this.setTimeScale(timeScale);
-        };
         //#endregion
         createToolbar() {
             this.toolbar = document.createElement("div");
@@ -2625,59 +2601,80 @@ var Fudge;
                 let button = document.createElement("button");
                 button.id = _id;
                 button.classList.add("buttonIcon");
-                button.onclick = this.hndToolbarClick;
+                button.onclick = (_event) => {
+                    let timeScale = this.time.getScale();
+                    switch (_event.target.id) {
+                        case "backward":
+                            timeScale -= 0.2;
+                            break;
+                        case "play":
+                            timeScale = this.timeScalePlay;
+                            break;
+                        case "pause":
+                            this.timeScalePlay = timeScale;
+                            timeScale = 0;
+                            break;
+                        case "forward":
+                            timeScale += 0.2;
+                            break;
+                    }
+                    this.setTimeScale(timeScale);
+                };
                 return button;
             })
                 .forEach(_button => buttons.appendChild(_button));
             this.toolbar.appendChild(buttons);
-            this.timeScaleStepper = new ƒui.CustomElementStepper({ key: "timeScale", label: "timeScale" });
-            this.timeScaleStepper.id = "timescale";
-            this.timeScaleStepper.oninput = () => {
-                this.setTimeScale(this.timeScaleStepper.getMutatorValue());
+            let timeScaleStepper = new ƒui.CustomElementStepper({ key: "timeScale", label: "timeScale" });
+            timeScaleStepper.id = "timescale";
+            timeScaleStepper.oninput = () => {
+                this.setTimeScale(timeScaleStepper.getMutatorValue());
             };
-            this.toolbar.appendChild(this.timeScaleStepper);
-            this.timeStepper = new ƒui.CustomElementStepper({ key: "time", label: "time", value: "0" });
-            this.timeStepper.id = "time";
-            this.timeStepper.title = "The time (in seconds) of the particle system";
-            this.timeStepper.oninput = () => {
-                this.setTime(this.timeStepper.getMutatorValue());
+            this.toolbar.appendChild(timeScaleStepper);
+            let timeStepper = new ƒui.CustomElementStepper({ key: "time", label: "time", value: "0" });
+            timeStepper.id = "time";
+            timeStepper.title = "The time (in seconds) of the particle system";
+            timeStepper.oninput = () => {
+                this.setTime(timeStepper.getMutatorValue());
             };
-            this.toolbar.appendChild(this.timeStepper);
-            this.durationStepper = new ƒui.CustomElementStepper({ key: "duration", label: "duration", value: "1" });
-            this.durationStepper.id = "duration";
-            this.durationStepper.title = "The duration (in seconds) of the particle effect you want to examine. Set this yourself";
-            this.durationStepper.oninput = () => {
-                let duration = this.durationStepper.getMutatorValue();
-                this.timeSlider.max = (duration * 1.1).toString();
-                this.timeSliderSteps.innerHTML = [0, 0.25, 0.5, 0.75, 1]
+            this.toolbar.appendChild(timeStepper);
+            let durationStepper = new ƒui.CustomElementStepper({ key: "duration", label: "duration", value: "1" });
+            durationStepper.id = "duration";
+            durationStepper.title = "The duration (in seconds) of the particle effect you want to examine. Set this yourself";
+            durationStepper.oninput = () => {
+                let duration = durationStepper.getMutatorValue();
+                timeSlider.max = (duration * 1.1).toString();
+                timeSliderSteps.innerHTML = [0, 0.25, 0.5, 0.75, 1]
                     .map(_factor => duration * _factor)
                     .map(_value => `<span data-label="${_value.toFixed(2)}"></span>`).join("");
             };
-            this.toolbar.appendChild(this.durationStepper);
-            this.timeSliderSteps = document.createElement("div");
-            this.timeSliderSteps.id = "timeslidersteps";
-            this.toolbar.appendChild(this.timeSliderSteps);
-            this.timeSlider = document.createElement("input");
-            this.timeSlider.id = "timeslider";
-            // this.timeSlider.setAttribute("list", "timeslidersteps");
-            this.timeSlider.type = "range";
-            this.timeSlider.value = "0";
-            this.timeSlider.min = "0";
-            this.timeSlider.max = this.durationStepper.getMutatorValue().toString();
-            this.timeSlider.step = "any";
-            this.timeSlider.oninput = () => {
-                this.setTime(parseFloat(this.timeSlider.value));
+            this.toolbar.appendChild(durationStepper);
+            let timeSliderSteps = document.createElement("div");
+            timeSliderSteps.id = "timeslidersteps";
+            this.toolbar.appendChild(timeSliderSteps);
+            let timeSlider = document.createElement("input");
+            timeSlider.id = "timeslider";
+            timeSlider.type = "range";
+            timeSlider.value = "0";
+            timeSlider.min = "0";
+            timeSlider.max = durationStepper.getMutatorValue().toString();
+            timeSlider.step = "any";
+            timeSlider.oninput = () => {
+                this.setTime(parseFloat(timeSlider.value));
             };
-            this.toolbar.appendChild(this.timeSlider);
-            this.durationStepper.oninput(null);
+            this.toolbar.appendChild(timeSlider);
+            durationStepper.oninput(null);
             this.toolbarIntervalId = window.setInterval(() => {
                 if (this.time) {
                     let timeInSeconds = this.time.get() / 1000;
-                    this.timeScaleStepper.setMutatorValue(this.time.getScale());
-                    this.timeStepper.setMutatorValue(timeInSeconds);
-                    this.timeSlider.value = timeInSeconds.toString();
+                    timeScaleStepper.setMutatorValue(this.time.getScale());
+                    timeStepper.setMutatorValue(timeInSeconds);
+                    timeSlider.value = timeInSeconds.toString();
                 }
             }, 1000 / 20);
+        }
+        setTime(_timeInSeconds) {
+            this.setTimeScale(0);
+            this.time.set(_timeInSeconds * 1000);
         }
         setTimeScale(_timeScale) {
             _timeScale = parseFloat(_timeScale.toFixed(15)); // round so forward and backward button don't miss zero
@@ -2686,10 +2683,6 @@ var Fudge;
             this.time.setScale(_timeScale);
             let playButton = this.toolbar.querySelector("#play") || this.toolbar.querySelector("#pause");
             playButton.id = _timeScale == 0 ? "play" : "pause";
-        }
-        setTime(_timeInSeconds) {
-            this.setTimeScale(0);
-            this.time.set(_timeInSeconds * 1000);
         }
         setParticleSystem(_particleSystem) {
             if (!_particleSystem) {

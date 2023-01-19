@@ -19,15 +19,9 @@ namespace Fudge {
 
     private toolbar: HTMLDivElement;
     private toolbarIntervalId: number;
-    private timeScaleStepper: ƒui.CustomElementStepper;
-    private timeSlider: HTMLInputElement;
-    private timeSliderSteps: HTMLDivElement;
-    private timeStepper: ƒui.CustomElementStepper;
-    private durationStepper: ƒui.CustomElementStepper;
 
     private tree: ƒui.CustomTree<ƒ.ParticleData.Recursive>;
     private controller: ControllerTreeParticleSystem;
-
     private errors: [ƒ.ParticleData.Expression, string][] = [];
     private variables: HTMLDataListElement;
 
@@ -209,7 +203,7 @@ namespace Fudge {
     }
     //#endregion
 
-    //#region  event handling
+    //#region event handling
     protected hndDragOver(_event: DragEvent, _viewSource: View): void {
       _event.dataTransfer.dropEffect = "none";
 
@@ -275,26 +269,6 @@ namespace Fudge {
           break;
       }
     }
-
-    private hndToolbarClick = (_event: MouseEvent) => {
-      let timeScale: number = this.time.getScale();
-      switch ((<HTMLInputElement>_event.target).id) {
-        case "backward":
-          timeScale -= 0.2;
-          break;
-        case "play":
-          timeScale = this.timeScalePlay;
-          break;
-        case "pause":
-          this.timeScalePlay = timeScale;
-          timeScale = 0;
-          break;
-        case "forward":
-          timeScale += 0.2;
-          break;
-      }
-      this.setTimeScale(timeScale);
-    }
     //#endregion
 
     private createToolbar(): void {
@@ -309,65 +283,87 @@ namespace Fudge {
           let button: HTMLButtonElement = document.createElement("button");
           button.id = _id;
           button.classList.add("buttonIcon");
-          button.onclick = this.hndToolbarClick;
+          button.onclick = (_event: MouseEvent) => {
+            let timeScale: number = this.time.getScale();
+            switch ((<HTMLInputElement>_event.target).id) {
+              case "backward":
+                timeScale -= 0.2;
+                break;
+              case "play":
+                timeScale = this.timeScalePlay;
+                break;
+              case "pause":
+                this.timeScalePlay = timeScale;
+                timeScale = 0;
+                break;
+              case "forward":
+                timeScale += 0.2;
+                break;
+            }
+            this.setTimeScale(timeScale);
+          };
           return button;
         })
         .forEach(_button => buttons.appendChild(_button));
         this.toolbar.appendChild(buttons);
 
-      this.timeScaleStepper = new ƒui.CustomElementStepper({key: "timeScale", label: "timeScale"});
-      this.timeScaleStepper.id = "timescale"
-      this.timeScaleStepper.oninput = () => {
-        this.setTimeScale(this.timeScaleStepper.getMutatorValue());
+      let timeScaleStepper: ƒui.CustomElementStepper = new ƒui.CustomElementStepper({key: "timeScale", label: "timeScale"});
+      timeScaleStepper.id = "timescale"
+      timeScaleStepper.oninput = () => {
+        this.setTimeScale(timeScaleStepper.getMutatorValue());
       };
-      this.toolbar.appendChild(this.timeScaleStepper);
+      this.toolbar.appendChild(timeScaleStepper);
 
-      this.timeStepper = new ƒui.CustomElementStepper({key: "time", label: "time", value: "0"});
-      this.timeStepper.id = "time";
-      this.timeStepper.title = "The time (in seconds) of the particle system";
-      this.timeStepper.oninput = () => {
-        this.setTime(this.timeStepper.getMutatorValue());
+      let timeStepper: ƒui.CustomElementStepper = new ƒui.CustomElementStepper({key: "time", label: "time", value: "0"});
+      timeStepper.id = "time";
+      timeStepper.title = "The time (in seconds) of the particle system";
+      timeStepper.oninput = () => {
+        this.setTime(timeStepper.getMutatorValue());
       };
-      this.toolbar.appendChild(this.timeStepper);
-      
-      this.durationStepper = new ƒui.CustomElementStepper({key: "duration", label: "duration", value: "1"});
-      this.durationStepper.id = "duration";
-      this.durationStepper.title = "The duration (in seconds) of the particle effect you want to examine. Set this yourself";
-      this.durationStepper.oninput = () => {
-        let duration: number = this.durationStepper.getMutatorValue();
-        this.timeSlider.max = (duration * 1.1).toString();
-        this.timeSliderSteps.innerHTML = [0, 0.25, 0.5, 0.75, 1]
+      this.toolbar.appendChild(timeStepper);
+
+      let durationStepper: ƒui.CustomElementStepper = new ƒui.CustomElementStepper({key: "duration", label: "duration", value: "1"});
+      durationStepper.id = "duration";
+      durationStepper.title = "The duration (in seconds) of the particle effect you want to examine. Set this yourself";
+      durationStepper.oninput = () => {
+        let duration: number = durationStepper.getMutatorValue();
+        timeSlider.max = (duration * 1.1).toString();
+        timeSliderSteps.innerHTML = [0, 0.25, 0.5, 0.75, 1]
           .map(_factor => duration * _factor)
           .map(_value => `<span data-label="${_value.toFixed(2)}"></span>`).join("");
       };
-      this.toolbar.appendChild(this.durationStepper);
+      this.toolbar.appendChild(durationStepper);
 
-      this.timeSliderSteps = document.createElement("div");
-      this.timeSliderSteps.id = "timeslidersteps";
-      this.toolbar.appendChild(this.timeSliderSteps);
+      let timeSliderSteps: HTMLDivElement = document.createElement("div");
+      timeSliderSteps.id = "timeslidersteps";
+      this.toolbar.appendChild(timeSliderSteps);
 
-      this.timeSlider = document.createElement("input");
-      this.timeSlider.id = "timeslider";
-      // this.timeSlider.setAttribute("list", "timeslidersteps");
-      this.timeSlider.type = "range";
-      this.timeSlider.value = "0";
-      this.timeSlider.min = "0";
-      this.timeSlider.max = this.durationStepper.getMutatorValue().toString();
-      this.timeSlider.step = "any";
-      this.timeSlider.oninput = () => {
-        this.setTime(parseFloat(this.timeSlider.value));
+      let timeSlider: HTMLInputElement = document.createElement("input");
+      timeSlider.id = "timeslider";
+      timeSlider.type = "range";
+      timeSlider.value = "0";
+      timeSlider.min = "0";
+      timeSlider.max = durationStepper.getMutatorValue().toString();
+      timeSlider.step = "any";
+      timeSlider.oninput = () => {
+        this.setTime(parseFloat(timeSlider.value));
       };
-      this.toolbar.appendChild(this.timeSlider);
+      this.toolbar.appendChild(timeSlider);
 
-      this.durationStepper.oninput(null);
+      durationStepper.oninput(null);
       this.toolbarIntervalId = window.setInterval(() => {
         if (this.time) {
           let timeInSeconds: number = this.time.get() / 1000;
-          this.timeScaleStepper.setMutatorValue(this.time.getScale());
-          this.timeStepper.setMutatorValue(timeInSeconds);
-          this.timeSlider.value = timeInSeconds.toString();
+          timeScaleStepper.setMutatorValue(this.time.getScale());
+          timeStepper.setMutatorValue(timeInSeconds);
+          timeSlider.value = timeInSeconds.toString();
         }
       }, 1000 / 20);
+    }
+    
+    private setTime(_timeInSeconds: number) {
+      this.setTimeScale(0);
+      this.time.set(_timeInSeconds * 1000);
     }
 
     private setTimeScale(_timeScale: number) {
@@ -378,11 +374,6 @@ namespace Fudge {
 
       let playButton: Element = this.toolbar.querySelector("#play") || this.toolbar.querySelector("#pause");
       playButton.id = _timeScale == 0 ? "play" : "pause";
-    }
-
-    private setTime(_timeInSeconds: number) {
-      this.setTimeScale(0);
-      this.time.set(_timeInSeconds * 1000);
     }
 
     private setParticleSystem(_particleSystem: ƒ.ParticleSystem): void {
