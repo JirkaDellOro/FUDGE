@@ -149,12 +149,12 @@
       "fps": 15,
       "animationStructure": {},
       "idTexture": "TextureImage|2023-01-16T14:41:22.268Z|03995",
-      "frames": 25,
-      "wrapAfter": 5,
+      "frames": 10,
+      "wrapAfter": 6,
       "start": "[0, 0]",
-      "size": "[80, 80]",
-      "next": "[80, 0]",
-      "wrap": "[0, 80]"
+      "size": "[16, 24]",
+      "next": "[16, 0]",
+      "wrap": "[0, 24]"
     }
   },
   "TextureImage|2023-01-16T14:41:22.268Z|03995": {

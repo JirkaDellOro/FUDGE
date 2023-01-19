@@ -4662,13 +4662,13 @@ var Fudge;
             switch (_event.type) {
                 case "change" /* CHANGE */:
                 case Fudge.EVENT_EDITOR.MODIFY:
+                    this.mtxImage.reset();
                 case "mutate" /* MUTATE */:
+                    // if ([ƒ.Audio, ƒ.Texture, ƒ.AnimationSprite].some((_type) => this.resource instanceof _type)) {
                     if (this.resource instanceof ƒ.Audio ||
                         this.resource instanceof ƒ.Texture ||
-                        this.resource instanceof ƒ.AnimationSprite) {
-                        this.mtxImage.reset();
+                        this.resource instanceof ƒ.AnimationSprite)
                         this.fillContent();
-                    }
                     this.redraw();
                     break;
                 default:

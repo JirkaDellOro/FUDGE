@@ -59,8 +59,10 @@ div[view=ViewAnimationSheet] input.event {
 span.rectSprite {
   position:absolute;
   border: 1px dotted var(--color-signal);
+  /* opacity: 0.5; */
   pointer-events: none;
 }
 div#image, div#image>img{
+  image-rendering: pixelated;
   pointer-events: none;
 }
