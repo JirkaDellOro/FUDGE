@@ -28,7 +28,7 @@
       "events": {
         "StepX": 666.6666559441381
       },
-      "fps": 10,
+      "framesPerSecond": 15,
       "animationStructure": {
         "components": {
           "ComponentMaterial": [
@@ -108,7 +108,7 @@
               "clrPrimary": "[1, 1, 1, 1]",
               "clrSecondary": "[1, 1, 1, 1]",
               "pivot": {
-                "translation": "[0.4000000059604645, 0.4000000059604645]",
+                "translation": "[0.699999988079071, 0.699999988079071]",
                 "rotation": 0,
                 "scaling": "[0.49999991059303284, 0.49999991059303284]"
               },
@@ -125,7 +125,7 @@
               "Component": {
                 "active": true
               },
-              "idAnimation": "Animation|2023-01-08T11:24:34.193Z|38529",
+              "idAnimation": "AnimationSprite|2023-01-16T06:49:14.910Z|04212",
               "playmode": "loop",
               "quantization": "discrete",
               "scale": 1,
@@ -146,7 +146,7 @@
       "name": "AnimationSprite",
       "labels": {},
       "events": {},
-      "fps": 15,
+      "framesPerSecond": 15,
       "animationStructure": {},
       "idTexture": "TextureImage|2023-01-16T14:41:22.268Z|03995",
       "frames": 10,

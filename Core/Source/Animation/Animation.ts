@@ -261,7 +261,7 @@ namespace FudgeCore {
         name: this.name,
         labels: {},
         events: {},
-        fps: this.framesPerSecond,
+        framesPerSecond: this.framesPerSecond,
         // sps: this.stepsPerSecond
       };
       for (let name in this.labels) {
@@ -277,7 +277,7 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       Project.register(this, _serialization.idResource);
       this.name = _serialization.name;
-      this.framesPerSecond = _serialization.fps;
+      this.framesPerSecond = _serialization.framesPerSecond;
       // this.stepsPerSecond = _serialization.sps;
       this.labels = {};
       for (let name in _serialization.labels) {

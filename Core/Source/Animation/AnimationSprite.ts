@@ -14,22 +14,50 @@ namespace FudgeCore {
 
     // TODO: fps should be a parameter too
     constructor(_name: string = "AnimationSprite") { //}, _fps: number = 15) {
-      super(_name, {}, 15);
-      this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap);
+      super(_name, {}, 1);
+      this.framesPerSecond = this.frames;
+      this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond);
     }
 
-    public create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2) {
+    public setTexture(_texture: Texture): void {
       this.texture = _texture;
       this.idTexture = _texture.idResource;
+    }
+
+    public create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2, _framesPerSecond: number) {
+      this.setTexture(_texture);
       this.frames = _frames;
       this.wrapAfter = _wrapAfter;
       this.start = _start;
       this.size = _size;
       this.next = _next;
       this.wrap = _wrap;
+      this.framesPerSecond = _framesPerSecond;
 
-      let positions: Vector2[] = this.getPositions();
       let scale: Vector2 = this.getScale();
+      let positions: Vector2[] = this.getPositions();
+
+      let xSequence: AnimationSequence = new AnimationSequence();
+      let ySequence: AnimationSequence = new AnimationSequence();
+
+      for (let frame: number = 0; frame < this.frames; frame++) {
+        let time: number = frame / this.framesPerSecond;
+        xSequence.addKey(new AnimationKey(time, positions[frame].x, 0, 0, true))
+        ySequence.addKey(new AnimationKey(time, positions[frame].y, 0, 0, true))
+      }
+
+      this.animationStructure = {
+        "components": {
+          "ComponentMaterial": [{
+            "mtxPivot": {
+              "translation": {
+                x: xSequence,
+                y: ySequence,
+              }
+            }
+          }]
+        }
+      }
     }
 
     public getScale(): Vector2 {
@@ -61,9 +89,7 @@ namespace FudgeCore {
     //#region transfer
     public async mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void> {
       super.mutate(_mutator);
-      // if (_mutator.idTexture && _mutator.idTexture)
-      // this.texture = <Texture>await Project.getResource(_s.idTexture);
-      this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap);
+      this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond);
     }
 
     public serialize(): Serialization {
@@ -88,7 +114,7 @@ namespace FudgeCore {
 
       for (let name of ["start", "size", "next", "wrap"])
         (<Vector2>Reflect.get(this, name)).deserialize(_s[name]);
-      this.create(this.texture, _s.frames, _s.wrapAfter, this.start, this.size, this.next, this.wrap);
+      this.create(this.texture, _s.frames, _s.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond);
       return this;
     }
     //#endregion

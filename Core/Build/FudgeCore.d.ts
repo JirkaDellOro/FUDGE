@@ -1614,8 +1614,9 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Holds information about continous points in time their accompanying values as well as their slopes.
-     * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
-     * Saved inside an {@link AnimationSequence}.
+     * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides.
+     * The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
+     * If the property constant is true, the value does not change and wil not be interpolated between this and the next key in a sequence
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationKey extends Mutable implements Serializable {
@@ -1717,7 +1718,8 @@ declare namespace FudgeCore {
         private next;
         private wrap;
         constructor(_name?: string);
-        create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2): void;
+        setTexture(_texture: Texture): void;
+        create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2, _framesPerSecond: number): void;
         getScale(): Vector2;
         getPositions(): Vector2[];
         mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
