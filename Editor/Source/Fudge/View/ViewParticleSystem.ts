@@ -13,12 +13,16 @@ namespace Fudge {
 
     private time: ƒ.Time;
     private timeScalePlay: number;
-
+    
     private particleSystem: ƒ.ParticleSystem;
     private data: ƒ.ParticleData.System;
 
     private toolbar: HTMLDivElement;
     private timeScaleStepper: ƒui.CustomElementStepper;
+    private timeSlider: HTMLInputElement;
+    private timeStepper: ƒui.CustomElementStepper;
+    private durationStepper: ƒui.CustomElementStepper;
+
     private tree: ƒui.CustomTree<ƒ.ParticleData.Recursive>;
     private controller: ControllerTreeParticleSystem;
 
@@ -222,6 +226,8 @@ namespace Fudge {
     protected hndDrop(_event: DragEvent, _viewSource: View): void {
       let cmpParticleSystem = <ƒ.ComponentParticleSystem>_viewSource.getDragDropSources()[0];
       this.time = cmpParticleSystem.time;
+      this.timeScalePlay = this.time.getScale();
+      this.setTime(0);
       this.setParticleSystem(cmpParticleSystem.particleSystem);
     }
 
@@ -268,9 +274,8 @@ namespace Fudge {
     }
 
     private hndToolbarClick = (_event: MouseEvent) => {
-      let target: HTMLInputElement = <HTMLInputElement>_event.target;
       let timeScale: number = this.time.getScale();
-      switch (target.id) {
+      switch ((<HTMLInputElement>_event.target).id) {
         case "backward":
           timeScale -= 0.2;
           break;
@@ -286,15 +291,17 @@ namespace Fudge {
           break;
       }
       this.setTimeScale(timeScale);
-      this.timeScaleStepper.setMutatorValue(timeScale);
     }
     //#endregion
 
     private createToolbar(): void {
       this.toolbar = document.createElement("div");
       this.toolbar.id = "toolbar";
+      this.toolbar.title = "● Control the playback of the selected particle system\n● Right click render view to activate continous rendering";
 
-      ["backward", "pause", "forward"]
+      let buttons: HTMLDivElement = document.createElement("div");
+      buttons.id = "buttons";
+      ["backward", "play", "forward"]
         .map(_id => {
           let button: HTMLButtonElement = document.createElement("button");
           button.id = _id;
@@ -302,14 +309,52 @@ namespace Fudge {
           button.onclick = this.hndToolbarClick;
           return button;
         })
-        .forEach(_button => this.toolbar.appendChild(_button));
+        .forEach(_button => buttons.appendChild(_button));
+        this.toolbar.appendChild(buttons);
 
-      this.timeScaleStepper = new ƒui.CustomElementStepper({key: "timeScale", label: "timeScale", value: "1"});
+      this.timeScaleStepper = new ƒui.CustomElementStepper({key: "timeScale", label: "timeScale"});
       this.timeScaleStepper.id = "timescale"
       this.timeScaleStepper.addEventListener("input", (_event: InputEvent) => {
         this.setTimeScale(this.timeScaleStepper.getMutatorValue());
       });
       this.toolbar.appendChild(this.timeScaleStepper);
+
+      this.timeStepper = new ƒui.CustomElementStepper({key: "time", label: "time", value: "0"});
+      this.timeStepper.id = "time";
+      this.timeStepper.title = "The time (milliseconds) of the particle system";
+      this.timeStepper.addEventListener("input", (_event: InputEvent) => {
+        this.setTime(this.timeStepper.getMutatorValue());
+      });
+      this.toolbar.appendChild(this.timeStepper);
+      
+      this.durationStepper = new ƒui.CustomElementStepper({key: "duration", label: "duration", value: "10000"});
+      this.durationStepper.id = "duration";
+      this.durationStepper.title = "The duration (milliseconds) of the particle effect you want to examine. Set this yourself";
+      this.durationStepper.addEventListener("input", (_event: InputEvent) => {
+        this.timeSlider.max = this.durationStepper.getMutatorValue().toString();
+      });
+      this.toolbar.appendChild(this.durationStepper);
+
+      this.timeSlider = document.createElement("input");
+      this.timeSlider.id = "timeslider";
+      this.timeSlider.type = "range";
+      this.timeSlider.value = "0";
+      this.timeSlider.min = "0";
+      this.timeSlider.max = this.durationStepper.getMutatorValue().toString();
+      this.timeSlider.step = "any";
+      this.timeSlider.addEventListener("input", (_event: InputEvent) => {
+        this.setTime(parseFloat(this.timeSlider.value));
+      });
+      this.toolbar.appendChild(this.timeSlider);
+
+      window.setInterval(() => {
+        if (this.time) {
+          let time: number = this.time.get();
+          this.timeScaleStepper.setMutatorValue(this.time.getScale());
+          this.timeStepper.setMutatorValue(time);
+          this.timeSlider.value = time.toString();
+        }
+      }, 1000 / 20);
     }
 
     private setTimeScale(_timeScale: number) {
@@ -320,6 +365,11 @@ namespace Fudge {
 
       let playButton: Element = this.toolbar.querySelector("#play") || this.toolbar.querySelector("#pause");
       playButton.id = _timeScale == 0 ? "play" : "pause";
+    }
+
+    private setTime(_time: number) {
+      this.setTimeScale(0);
+      this.time.set(_time);
     }
 
     private setParticleSystem(_particleSystem: ƒ.ParticleSystem): void {

@@ -42,7 +42,7 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
       this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move
-      window.setInterval(() => {
+      window.setInterval(() => { // TODO: remove interval when view closes
         if (this.contextMenu.getMenuItemById(String(CONTEXTMENU.RENDER_CONTINUOUSLY)).checked)
           this.redraw();
       }, 1000 / 30);

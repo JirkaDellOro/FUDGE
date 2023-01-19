@@ -491,6 +491,9 @@ declare namespace Fudge {
         private data;
         private toolbar;
         private timeScaleStepper;
+        private timeSlider;
+        private timeStepper;
+        private durationStepper;
         private tree;
         private controller;
         private errors;
@@ -505,6 +508,7 @@ declare namespace Fudge {
         private hndToolbarClick;
         private createToolbar;
         private setTimeScale;
+        private setTime;
         private setParticleSystem;
         private validateData;
         private enableSave;
