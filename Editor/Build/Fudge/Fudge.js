@@ -2366,8 +2366,10 @@ var Fudge;
         particleSystem;
         data;
         toolbar;
+        toolbarIntervalId;
         timeScaleStepper;
         timeSlider;
+        timeSliderSteps;
         timeStepper;
         durationStepper;
         tree;
@@ -2552,6 +2554,7 @@ var Fudge;
             _event.stopPropagation();
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.CLOSE:
+                    window.clearInterval(this.toolbarIntervalId);
                     document.removeEventListener("keydown" /* KEY_DOWN */, this.hndEvent);
                     this.enableSave(true);
                     break;
@@ -2629,41 +2632,50 @@ var Fudge;
             this.toolbar.appendChild(buttons);
             this.timeScaleStepper = new ƒui.CustomElementStepper({ key: "timeScale", label: "timeScale" });
             this.timeScaleStepper.id = "timescale";
-            this.timeScaleStepper.addEventListener("input", (_event) => {
+            this.timeScaleStepper.oninput = () => {
                 this.setTimeScale(this.timeScaleStepper.getMutatorValue());
-            });
+            };
             this.toolbar.appendChild(this.timeScaleStepper);
             this.timeStepper = new ƒui.CustomElementStepper({ key: "time", label: "time", value: "0" });
             this.timeStepper.id = "time";
-            this.timeStepper.title = "The time (milliseconds) of the particle system";
-            this.timeStepper.addEventListener("input", (_event) => {
+            this.timeStepper.title = "The time (in seconds) of the particle system";
+            this.timeStepper.oninput = () => {
                 this.setTime(this.timeStepper.getMutatorValue());
-            });
+            };
             this.toolbar.appendChild(this.timeStepper);
-            this.durationStepper = new ƒui.CustomElementStepper({ key: "duration", label: "duration", value: "10000" });
+            this.durationStepper = new ƒui.CustomElementStepper({ key: "duration", label: "duration", value: "1" });
             this.durationStepper.id = "duration";
-            this.durationStepper.title = "The duration (milliseconds) of the particle effect you want to examine. Set this yourself";
-            this.durationStepper.addEventListener("input", (_event) => {
-                this.timeSlider.max = this.durationStepper.getMutatorValue().toString();
-            });
+            this.durationStepper.title = "The duration (in seconds) of the particle effect you want to examine. Set this yourself";
+            this.durationStepper.oninput = () => {
+                let duration = this.durationStepper.getMutatorValue();
+                this.timeSlider.max = (duration * 1.1).toString();
+                this.timeSliderSteps.innerHTML = [0, 0.25, 0.5, 0.75, 1]
+                    .map(_factor => duration * _factor)
+                    .map(_value => `<span data-label="${_value.toFixed(2)}"></span>`).join("");
+            };
             this.toolbar.appendChild(this.durationStepper);
+            this.timeSliderSteps = document.createElement("div");
+            this.timeSliderSteps.id = "timeslidersteps";
+            this.toolbar.appendChild(this.timeSliderSteps);
             this.timeSlider = document.createElement("input");
             this.timeSlider.id = "timeslider";
+            // this.timeSlider.setAttribute("list", "timeslidersteps");
             this.timeSlider.type = "range";
             this.timeSlider.value = "0";
             this.timeSlider.min = "0";
             this.timeSlider.max = this.durationStepper.getMutatorValue().toString();
             this.timeSlider.step = "any";
-            this.timeSlider.addEventListener("input", (_event) => {
+            this.timeSlider.oninput = () => {
                 this.setTime(parseFloat(this.timeSlider.value));
-            });
+            };
             this.toolbar.appendChild(this.timeSlider);
-            window.setInterval(() => {
+            this.durationStepper.oninput(null);
+            this.toolbarIntervalId = window.setInterval(() => {
                 if (this.time) {
-                    let time = this.time.get();
+                    let timeInSeconds = this.time.get() / 1000;
                     this.timeScaleStepper.setMutatorValue(this.time.getScale());
-                    this.timeStepper.setMutatorValue(time);
-                    this.timeSlider.value = time.toString();
+                    this.timeStepper.setMutatorValue(timeInSeconds);
+                    this.timeSlider.value = timeInSeconds.toString();
                 }
             }, 1000 / 20);
         }
@@ -2675,9 +2687,9 @@ var Fudge;
             let playButton = this.toolbar.querySelector("#play") || this.toolbar.querySelector("#pause");
             playButton.id = _timeScale == 0 ? "play" : "pause";
         }
-        setTime(_time) {
+        setTime(_timeInSeconds) {
             this.setTimeScale(0);
-            this.time.set(_time);
+            this.time.set(_timeInSeconds * 1000);
         }
         setParticleSystem(_particleSystem) {
             if (!_particleSystem) {

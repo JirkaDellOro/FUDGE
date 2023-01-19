@@ -490,8 +490,10 @@ declare namespace Fudge {
         private particleSystem;
         private data;
         private toolbar;
+        private toolbarIntervalId;
         private timeScaleStepper;
         private timeSlider;
+        private timeSliderSteps;
         private timeStepper;
         private durationStepper;
         private tree;
