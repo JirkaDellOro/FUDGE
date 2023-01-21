@@ -391,7 +391,7 @@ namespace FudgeCore {
           let sequence: AnimationSequence = <AnimationSequence>_structure[n];
           if (sequence.length > 0) {
             let sequenceTime: number = sequence.getKey(sequence.length - 1).time;
-            this.totalTime = sequenceTime > this.totalTime ? sequenceTime : this.totalTime;
+            this.totalTime = Math.max(sequenceTime, this.totalTime);
           }
         } else {
           this.traverseStructureForTime(<AnimationStructure>_structure[n]);

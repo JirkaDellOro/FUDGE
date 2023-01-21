@@ -34,16 +34,17 @@ namespace FudgeCore {
       this.wrap = _wrap;
       this.framesPerSecond = _framesPerSecond;
 
-      let scale: Vector2 = this.getScale();
+      // let scale: Vector2 = this.getScale();
       let positions: Vector2[] = this.getPositions();
 
       let xSequence: AnimationSequence = new AnimationSequence();
       let ySequence: AnimationSequence = new AnimationSequence();
 
-      for (let frame: number = 0; frame < this.frames; frame++) {
-        let time: number = frame / this.framesPerSecond;
-        xSequence.addKey(new AnimationKey(time, positions[frame].x, 0, 0, true))
-        ySequence.addKey(new AnimationKey(time, positions[frame].y, 0, 0, true))
+      for (let frame: number = 0; frame <= this.frames; frame++) {
+        let time: number = 1000 * frame / this.framesPerSecond;
+        let position: Vector2 = positions[Math.min(frame, this.frames - 1)]; //repeat the last key to give the last frame some time
+        xSequence.addKey(new AnimationKey(time, position.x / this.texture.texImageSource.width));//, 0, 0, true))
+        ySequence.addKey(new AnimationKey(time, position.y / this.texture.texImageSource.height));//, 0, 0, true))
       }
 
       this.animationStructure = {
@@ -58,6 +59,9 @@ namespace FudgeCore {
           }]
         }
       }
+
+      this.calculateTotalTime();
+      console.log(this);
     }
 
     public getScale(): Vector2 {
@@ -93,20 +97,24 @@ namespace FudgeCore {
     }
 
     public serialize(): Serialization {
-      let animationsStructure: AnimationStructure = this.animationStructure;
-      this.animationStructure = {}; // no need to serialize structure
-      let serialization: Serialization = super.serialize();
-      this.animationStructure = animationsStructure; // restore existent structure
+      let serialization: Serialization = {};
+      serialization.idResource = this.idResource;
       serialization.idTexture = this.idTexture;
       serialization.frames = this.frames;
       serialization.wrapAfter = this.wrapAfter;
       for (let name of ["start", "size", "next", "wrap"])
         serialization[name] = (<Vector2>Reflect.get(this, name)).serialize();
+
+      let animationsStructure: AnimationStructure = this.animationStructure;
+      this.animationStructure = {}; // no need to serialize structure
+      // let serialization: Serialization = super.serialize();
+      serialization[super.constructor.name] = super.serialize();
+      this.animationStructure = animationsStructure; // restore existent structure
       return serialization;
     }
 
     public async deserialize(_s: Serialization): Promise<Serializable> {
-      await super.deserialize(_s);
+      await super.deserialize(_s[super.constructor.name]);
       if (_s.idTexture)
         this.texture = <Texture>await Project.getResource(_s.idTexture);
       else
