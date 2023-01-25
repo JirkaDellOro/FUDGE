@@ -1710,7 +1710,6 @@ declare namespace FudgeCore {
     class AnimationSprite extends Animation {
         static readonly iSubclass: number;
         texture: Texture;
-        private resolution;
         private idTexture;
         private frames;
         private wrapAfter;
@@ -1720,7 +1719,7 @@ declare namespace FudgeCore {
         private wrap;
         constructor(_name?: string);
         setTexture(_texture: Texture): void;
-        create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2, _framesPerSecond: number, _resolution: number): void;
+        create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2, _framesPerSecond: number): void;
         getScale(): Vector2;
         getPositions(): Vector2[];
         mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;

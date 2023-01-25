@@ -1,9 +1,7 @@
 namespace FudgeCore {
   export class AnimationSprite extends Animation {
     public static readonly iSubclass: number = Animation.registerSubclass(AnimationSprite);
-    // private origin: ORIGIN2D = ORIGIN2D.BOTTOMCENTER;
     public texture: Texture = TextureDefault.texture;
-    private resolution: number = 80;
     private idTexture: string;
     private frames: number = 25;
     private wrapAfter: number = 5;
@@ -16,7 +14,7 @@ namespace FudgeCore {
     constructor(_name: string = "AnimationSprite") { //}, _fps: number = 15) {
       super(_name, {}, 1);
       this.framesPerSecond = this.frames;
-      this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond, this.resolution);
+      this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond);
     }
 
     public setTexture(_texture: Texture): void {
@@ -24,7 +22,7 @@ namespace FudgeCore {
       this.idTexture = _texture.idResource;
     }
 
-    public create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2, _framesPerSecond: number, _resolution: number) {
+    public create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2, _framesPerSecond: number) {
       this.setTexture(_texture);
       this.frames = _frames;
       this.wrapAfter = _wrapAfter;
@@ -33,7 +31,6 @@ namespace FudgeCore {
       this.next = _next;
       this.wrap = _wrap;
       this.framesPerSecond = _framesPerSecond;
-      this.resolution = _resolution;
 
       let scale: Vector2 = this.getScale();
       let positions: Vector2[] = this.getPositions();
@@ -44,10 +41,6 @@ namespace FudgeCore {
       let yScale: AnimationSequence = new AnimationSequence();
       xScale.addKey(new AnimationKey(0, scale.x));
       yScale.addKey(new AnimationKey(0, scale.y));
-      let xScaleMesh: AnimationSequence = new AnimationSequence();
-      let yScaleMesh: AnimationSequence = new AnimationSequence();
-      xScaleMesh.addKey(new AnimationKey(0, this.size.x / this.resolution));
-      yScaleMesh.addKey(new AnimationKey(0, this.size.y / this.resolution));
 
       for (let frame: number = 0; frame <= this.frames; frame++) {
         let time: number = 1000 * frame / this.framesPerSecond;
@@ -69,17 +62,10 @@ namespace FudgeCore {
                 y: yScale,
               }
             }
-          }],
-          "ComponentMesh": [{
-            "mtxPivot": {
-              "scaling": {
-                x: xScaleMesh,
-                y: yScaleMesh,
-              }
-            }
           }]
         }
       }
+
       this.calculateTotalTime();
       console.log(this);
     }
@@ -113,7 +99,7 @@ namespace FudgeCore {
     //#region transfer
     public async mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void> {
       super.mutate(_mutator);
-      this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond, this.resolution);
+      this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond);
     }
 
     public serialize(): Serialization {
@@ -142,7 +128,7 @@ namespace FudgeCore {
 
       for (let name of ["start", "size", "next", "wrap"])
         (<Vector2>Reflect.get(this, name)).deserialize(_s[name]);
-      this.create(this.texture, _s.frames, _s.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond, this.resolution);
+      this.create(this.texture, _s.frames, _s.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond);
       return this;
     }
     //#endregion
