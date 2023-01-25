@@ -148,6 +148,7 @@ namespace Fudge {
     //#region Page-Events from DOM
     private static setupPageListeners(): void {
       document.addEventListener(EVENT_EDITOR.SELECT, Page.hndEvent);
+      //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
       document.addEventListener(ƒui.EVENT.MUTATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.CLOSE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.ANIMATE, Page.hndEvent);

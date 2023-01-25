@@ -66,11 +66,10 @@ namespace Fudge {
 
       this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
 
-      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+      //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
-      // this.dom.addEventListener(EVENT_EDITOR.REFRES, this.hndEvent);
 
       this.setTitle("Project | " + project.name);
       this.broadcastEvent(new EditorEvent(EVENT_EDITOR.SELECT, {}));

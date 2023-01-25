@@ -680,6 +680,7 @@ var Fudge;
         //#region Page-Events from DOM
         static setupPageListeners() {
             document.addEventListener(Fudge.EVENT_EDITOR.SELECT, Page.hndEvent);
+            //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
             document.addEventListener("mutate" /* MUTATE */, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, Page.hndEvent);
@@ -2147,6 +2148,7 @@ var Fudge;
             };
             this.goldenLayout.addItemAtLocation(config, [{ typeId: 7 /* Root */ }]);
             // this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+            //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
@@ -2331,11 +2333,10 @@ var Fudge;
                     }]
             };
             this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: 7 /* Root */ }]);
-            // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+            //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
-            // this.dom.addEventListener(EVENT_EDITOR.REFRES, this.hndEvent);
             this.setTitle("Project | " + Fudge.project.name);
             this.broadcastEvent(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, {}));
         }
@@ -2660,7 +2661,7 @@ var Fudge;
     var ƒui = FudgeUserInterface;
     /**
      * View and edit the animatable properties of a node with an attached component animation.
-     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022 | Jirka Dell'Oro-Friedl, HFU, 2023
      */
     class ViewAnimation extends Fudge.View {
         keySelected;
@@ -4721,6 +4722,7 @@ var Fudge;
             super(_container, _state);
             this.fillContent();
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
+            // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent, true);
             // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
         }

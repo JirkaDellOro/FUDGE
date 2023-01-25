@@ -13,7 +13,8 @@
       "shader": "ShaderLitTextured",
       "coat": {
         "ƒ.CoatTextured": {
-          "color": "[1, 1, 1, 1]"
+          "color": "[1, 1, 1, 1]",
+          "idTexture": "TextureImage|2023-01-16T14:41:22.268Z|03995"
         }
       }
     }
@@ -122,9 +123,9 @@
             "ƒ.ComponentMesh": {
               "idMesh": "MeshSprite|2023-01-08T11:22:54.261Z|98107",
               "pivot": {
-                "translation": "[0, 0, 0]",
+                "translation": "[0, 0.75, 0]",
                 "rotation": "[0, 0, 0]",
-                "scaling": "[1, 1, 1]"
+                "scaling": "[1, 1.5, 1]"
               },
               "Component": {
                 "active": true
@@ -139,7 +140,7 @@
               "clrPrimary": "[1, 1, 1, 1]",
               "clrSecondary": "[1, 1, 1, 1]",
               "pivot": {
-                "translation": "[0, 0]",
+                "translation": "[0.5, 0]",
                 "rotation": 0,
                 "scaling": "[0.1666666716337204, 0.5]"
               },
@@ -166,7 +167,50 @@
           }
         ]
       },
-      "children": [],
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "Cube",
+            "active": true,
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshCube|2023-01-25T18:52:17.765Z|10476",
+                    "pivot": {
+                      "translation": "[0, -0.5, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-01-25T18:52:25.854Z|15054"
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        }
+      ],
       "idResource": "Graph|2023-01-08T11:23:10.539Z|92636",
       "type": "Graph"
     }
@@ -179,6 +223,25 @@
         "idResource": "TextureImage|2023-01-16T14:08:04.970Z|41098",
         "name": "Image\\TextureFUDGE.png",
         "mipmap": "CRISP"
+      }
+    }
+  },
+  "MeshCube|2023-01-25T18:52:17.765Z|10476": {
+    "ƒ.MeshCube": {
+      "idResource": "MeshCube|2023-01-25T18:52:17.765Z|10476",
+      "name": "MeshCube",
+      "type": "MeshCube"
+    }
+  },
+  "Material|2023-01-25T18:52:25.854Z|15054": {
+    "ƒ.Material": {
+      "name": "ShaderLit",
+      "idResource": "Material|2023-01-25T18:52:25.854Z|15054",
+      "shader": "ShaderLit",
+      "coat": {
+        "ƒ.CoatColored": {
+          "color": "[1, 1, 1, 0.47]"
+        }
       }
     }
   }
