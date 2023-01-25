@@ -19,6 +19,17 @@
       }
     }
   },
+  "TextureImage|2023-01-16T14:41:22.268Z|03995": {
+    "ƒ.TextureImage": {
+      "url": "Image\\Mario_Spritesheet.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-01-16T14:41:22.268Z|03995",
+        "name": "Image\\Mario_Spritesheet.png",
+        "mipmap": "CRISP"
+      }
+    }
+  },
   "Animation|2023-01-08T11:24:34.193Z|38529": {
     "ƒ.Animation": {
       "idResource": "Animation|2023-01-08T11:24:34.193Z|38529",
@@ -82,17 +93,6 @@
       }
     }
   },
-  "TextureImage|2023-01-16T14:41:22.268Z|03995": {
-    "ƒ.TextureImage": {
-      "url": "Image\\Mario_Spritesheet.png",
-      "type": "TextureImage",
-      "Texture": {
-        "idResource": "TextureImage|2023-01-16T14:41:22.268Z|03995",
-        "name": "Image\\Mario_Spritesheet.png",
-        "mipmap": "CRISP"
-      }
-    }
-  },
   "AnimationSprite|2023-01-20T13:15:02.775Z|75740": {
     "ƒ.AnimationSprite": {
       "idResource": "AnimationSprite|2023-01-20T13:15:02.775Z|75740",
@@ -110,6 +110,25 @@
         "events": {},
         "framesPerSecond": 4,
         "animationStructure": {}
+      }
+    }
+  },
+  "MeshCube|2023-01-25T18:52:17.765Z|10476": {
+    "ƒ.MeshCube": {
+      "idResource": "MeshCube|2023-01-25T18:52:17.765Z|10476",
+      "name": "MeshCube",
+      "type": "MeshCube"
+    }
+  },
+  "Material|2023-01-25T18:52:25.854Z|15054": {
+    "ƒ.Material": {
+      "name": "ShaderLit",
+      "idResource": "Material|2023-01-25T18:52:25.854Z|15054",
+      "shader": "ShaderLit",
+      "coat": {
+        "ƒ.CoatColored": {
+          "color": "[1, 1, 1, 0.6]"
+        }
       }
     }
   },
@@ -223,25 +242,6 @@
         "idResource": "TextureImage|2023-01-16T14:08:04.970Z|41098",
         "name": "Image\\TextureFUDGE.png",
         "mipmap": "CRISP"
-      }
-    }
-  },
-  "MeshCube|2023-01-25T18:52:17.765Z|10476": {
-    "ƒ.MeshCube": {
-      "idResource": "MeshCube|2023-01-25T18:52:17.765Z|10476",
-      "name": "MeshCube",
-      "type": "MeshCube"
-    }
-  },
-  "Material|2023-01-25T18:52:25.854Z|15054": {
-    "ƒ.Material": {
-      "name": "ShaderLit",
-      "idResource": "Material|2023-01-25T18:52:25.854Z|15054",
-      "shader": "ShaderLit",
-      "coat": {
-        "ƒ.CoatColored": {
-          "color": "[1, 1, 1, 0.47]"
-        }
       }
     }
   }
