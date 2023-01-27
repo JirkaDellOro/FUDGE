@@ -1725,6 +1725,7 @@ declare namespace FudgeCore {
         mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
         serialize(): Serialization;
         deserialize(_s: Serialization): Promise<Serializable>;
+        convertToAnimation(): Animation;
     }
 }
 declare namespace FudgeCore {

@@ -67,6 +67,9 @@ namespace Fudge {
 
         item = new remote.MenuItem({ label: "Delete Property", id: String(CONTEXTMENU.DELETE_PROPERTY), click: _callback, accelerator: "D" });
         menu.append(item);
+
+        item = new remote.MenuItem({ label: "Convert to Animation", id: String(CONTEXTMENU.CONVERT_ANIMATION), click: _callback, accelerator: "C" });
+        menu.append(item);
       }
 
       return menu;
@@ -85,7 +88,12 @@ namespace Fudge {
           this.controller.deleteProperty(document.activeElement);
           this.createPropertyList();
           this.animate();
-          return;
+          break;
+        case CONTEXTMENU.CONVERT_ANIMATION:
+          if (this.animation instanceof ƒ.AnimationSprite) {
+            let animation: ƒ.Animation = this.animation.convertToAnimation();
+            console.log(animation);
+          }
       }
     }
 

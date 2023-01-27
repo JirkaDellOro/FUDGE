@@ -131,5 +131,10 @@ namespace FudgeCore {
       return this;
     }
     //#endregion
+
+    public convertToAnimation(): Animation {
+      let animation: Animation = new Animation(this.name, this.animationStructure, this.framesPerSecond);
+      return animation;
+    }
   }
 }
