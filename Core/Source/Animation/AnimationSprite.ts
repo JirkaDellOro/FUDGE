@@ -67,7 +67,6 @@ namespace FudgeCore {
       }
 
       this.calculateTotalTime();
-      console.log(this);
     }
 
     public getScale(): Vector2 {

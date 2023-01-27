@@ -648,6 +648,10 @@ namespace Fudge {
 
           if (_event.detail.node != null) {
             this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
+            // this.animation.removeEventListener(ƒ.EVENT.MUTATE, () => this.resetView);
+            this.animation.addEventListener(ƒ.EVENT.MUTATE, () => {
+              this.resetView(); this.animate(); this.draw(true);
+            });
             this.resetView();
             this.draw(true);
           }

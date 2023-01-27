@@ -808,6 +808,7 @@ var Fudge;
             this.animation = _animation;
             this.propertyList = _propertyList;
             this.propertyList.addEventListener("click" /* CLICK */, this.hndEvent);
+            this.propertyList.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.view = _view;
         }
         updatePropertyList(_mutator, _time) {
@@ -942,6 +943,7 @@ var Fudge;
         hndEvent = (_event) => {
             switch (_event.type) {
                 case "click" /* CLICK */:
+                case Fudge.EVENT_EDITOR.MODIFY:
                     if (!(_event.target instanceof HTMLElement) || !this.animation || _event.target instanceof HTMLButtonElement)
                         break;
                     let target = _event.target;
@@ -2824,6 +2826,7 @@ var Fudge;
                     this.animation.clearCache();
                     let nodeMutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
                     this.controller?.updatePropertyList(nodeMutator, this.playbackTime);
+                    this.propertyList.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.MODIFY));
                     break;
                 case "input" /* INPUT */:
                 case "focusin" /* FOCUS_IN */:
@@ -2861,7 +2864,9 @@ var Fudge;
             this.propertyList.id = "propertylist";
             this.controller = new Fudge.ControllerAnimation(this.animation, this.propertyList, this);
             this.controller.updatePropertyList(nodeMutator);
-            this.propertyList.dispatchEvent(new CustomEvent("click" /* CLICK */));
+            // ƒui-EVENT must not be dispatched!
+            // this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.CLICK));
+            this.propertyList.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.MODIFY));
         }
         animate() {
             this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true, detail: { data: this.playbackTime } });
@@ -3444,6 +3449,12 @@ var Fudge;
                         break;
                     if (_event.detail.node != null) {
                         this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
+                        // this.animation.removeEventListener(ƒ.EVENT.MUTATE, () => this.resetView);
+                        this.animation.addEventListener("mutate" /* MUTATE */, () => {
+                            this.resetView();
+                            this.animate();
+                            this.draw(true);
+                        });
                         this.resetView();
                         this.draw(true);
                     }

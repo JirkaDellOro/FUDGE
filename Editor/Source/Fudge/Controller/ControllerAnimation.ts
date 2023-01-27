@@ -23,6 +23,7 @@ namespace Fudge {
       this.animation = _animation;
       this.propertyList = _propertyList;
       this.propertyList.addEventListener(ƒui.EVENT.CLICK, this.hndEvent);
+      this.propertyList.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.view = _view;
     }
 
@@ -70,7 +71,7 @@ namespace Fudge {
     public updateSequence(_time: number, _element: ƒui.CustomElement, _add: boolean = false): void {
       let sequence: ƒ.AnimationSequence = Reflect.get(_element, "animationSequence");
       if (!sequence) return;
-      
+
       let key: ƒ.AnimationKey = sequence.findKey(_time);
       if (!key) {
         if (_add) {
@@ -174,6 +175,7 @@ namespace Fudge {
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
         case ƒui.EVENT.CLICK:
+        case EVENT_EDITOR.MODIFY:
           if (!(_event.target instanceof HTMLElement) || !this.animation || _event.target instanceof HTMLButtonElement) break;
 
           let target: HTMLElement = _event.target;
