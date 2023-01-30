@@ -2067,6 +2067,7 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
     /**
      * TODO: add
      * @authors Jonas Plotzky, HFU, 2022
@@ -2105,6 +2106,10 @@ var Fudge;
         }
         hndEvent = async (_event) => {
             switch (_event.type) {
+                case Fudge.EVENT_EDITOR.SELECT:
+                    let name = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation?.name;
+                    if (name)
+                        this.setTitle("Animation | " + name);
             }
             this.broadcastEvent(_event);
             _event.stopPropagation();
@@ -2823,7 +2828,10 @@ var Fudge;
                         this.node = _event.detail.node;
                         this.cmpAnimator = this.node?.getComponent(ƒ.ComponentAnimator);
                         this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-                        this.setAnimation(this.cmpAnimator?.animation);
+                        if (this.cmpAnimator?.animation != this.animation)
+                            this.setAnimation(this.cmpAnimator?.animation);
+                        else
+                            _event.stopPropagation();
                     }
                     break;
                 case Fudge.EVENT_EDITOR.MODIFY:

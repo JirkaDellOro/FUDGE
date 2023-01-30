@@ -194,7 +194,10 @@ namespace Fudge {
             this.node = _event.detail.node;
             this.cmpAnimator = this.node?.getComponent(ƒ.ComponentAnimator);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-            this.setAnimation(this.cmpAnimator?.animation);
+            if (this.cmpAnimator?.animation != this.animation)
+              this.setAnimation(this.cmpAnimator?.animation);
+            else
+              _event.stopPropagation();
           }
           break;
         case EVENT_EDITOR.MODIFY:
