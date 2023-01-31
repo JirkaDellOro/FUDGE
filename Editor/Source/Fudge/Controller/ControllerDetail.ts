@@ -153,7 +153,8 @@ namespace Fudge {
       };
       let setAnimation: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
         this.mutable["animation"] = _sources[0];
-        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+        // this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+        this.domElement.dispatchEvent(new CustomEvent(EVENT_EDITOR.MODIFY, { bubbles: true, detail: this }));
         return true;
       };
       let setParticleSystem: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {

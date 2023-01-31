@@ -1434,7 +1434,8 @@ var Fudge;
             };
             let setAnimation = (_sources) => {
                 this.mutable["animation"] = _sources[0];
-                this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                // this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+                this.domElement.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true, detail: this }));
                 return true;
             };
             let setParticleSystem = (_sources) => {
@@ -2192,10 +2193,20 @@ var Fudge;
             _event.stopPropagation();
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
-                    this.setGraph(_event.detail.graph);
                 case Fudge.EVENT_EDITOR.MODIFY:
-                    // TODO: meaningful difference between update and setgraph
+                    // switched animation in a ComponentAnimator
+                    if (_event.detail.mutable instanceof ƒ.ComponentAnimator) {
+                        if (_event.detail.view != this) {
+                            _event = new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, {
+                                bubbles: true, detail: { mutable: _event.detail.mutable, node: _event.detail.mutable.node, view: this }
+                            });
+                            this.dom.parentElement.dispatchEvent(_event);
+                        }
+                        return;
+                    }
+                    // selected a graph or a node
                     if (this.graph) {
+                        this.setGraph(_event.detail.graph);
                         let newGraph = await ƒ.Project.getResource(this.graph.idResource);
                         if (this.graph != newGraph)
                             _event = new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });

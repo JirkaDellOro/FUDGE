@@ -86,10 +86,20 @@ namespace Fudge {
       _event.stopPropagation();
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
-          this.setGraph(_event.detail.graph);
         case EVENT_EDITOR.MODIFY:
-          // TODO: meaningful difference between update and setgraph
+          // switched animation in a ComponentAnimator
+          if (_event.detail.mutable instanceof ƒ.ComponentAnimator) {
+            if (_event.detail.view != this) {
+              _event = new EditorEvent(EVENT_EDITOR.SELECT, {
+                bubbles: true, detail: { mutable: _event.detail.mutable, node: _event.detail.mutable.node, view: this }
+              });
+              this.dom.parentElement.dispatchEvent(_event);
+            }
+            return;
+          }
+          // selected a graph or a node
           if (this.graph) {
+            this.setGraph(_event.detail.graph);
             let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
             if (this.graph != newGraph)
               _event = new EditorEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
