@@ -19,9 +19,10 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.REMOVE_CHILD, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
     public listResources(): void {
@@ -205,8 +206,12 @@ namespace Fudge {
           this.listResources();
           break;
         case ƒui.EVENT.REMOVE_CHILD:
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+        case ƒui.EVENT.MUTATE:
+        case ƒui.EVENT.DELETE:
+          this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
           break;
+        case ƒui.EVENT.SELECT:
+          this.dispatch(EVENT_EDITOR.TEST, {});
       }
     }
   }

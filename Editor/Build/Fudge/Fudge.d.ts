@@ -115,14 +115,23 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     enum EVENT_EDITOR {
+        /** An entity gets created, is not dispatched so far */
         CREATE = "EDITOR_CREATE",
+        /** An entity gets selected and it is necessary to switch contents in the views */
         SELECT = "EDITOR_SELECT",
+        /** An entity gets modified and it is necessary to updated information in views */
         MODIFY = "EDITOR_MODIFY",
+        /** An entity gets deleted */
         DELETE = "EDITOR_DELETE",
+        /** A view or panel closes */
         CLOSE = "EDITOR_CLOSE",
+        /** A transform matrix gets adjusted interactively */
         TRANSFORM = "EDITOR_TRANSFORM",
+        /** An entity recieves focus and can be manipulated using the keyboard */
         FOCUS = "EDITOR_FOCUS",
-        ANIMATE = "EDITOR_ANIMATE"
+        /** An animation is running and modifies entities, which updates views */
+        ANIMATE = "EDITOR_ANIMATE",
+        TEST = "EDITOR_TEST"
     }
     interface EventDetail {
         node?: ƒ.Node;
@@ -132,6 +141,7 @@ declare namespace Fudge {
         transform?: Object;
         view?: View;
         data?: ƒ.General;
+        path?: View[];
     }
     /**
      * Extension of CustomEvent that supports a detail field with the type EventDetail
@@ -220,11 +230,11 @@ declare namespace Fudge {
     class ControllerAnimation {
         private static readonly PROPERTY_COLORS;
         private animation;
-        private propertyList;
+        private dom;
         private view;
         private sequences;
-        constructor(_animation: ƒ.Animation, _propertyList: HTMLElement, _view: ViewAnimation);
-        updatePropertyList(_mutator: ƒ.Mutator, _time?: number): void;
+        constructor(_animation: ƒ.Animation, _dom: HTMLElement, _view: ViewAnimation);
+        update(_mutator: ƒ.Mutator, _time?: number): void;
         updateSequence(_time: number, _element: ƒui.CustomElement, _add?: boolean): void;
         nextKey(_time: number, _direction: "forward" | "backward"): number;
         addProperty(_path: string[], _node: ƒ.Node, _time: number): void;

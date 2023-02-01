@@ -15,7 +15,6 @@ namespace Fudge {
 
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
-      // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
     public listScripts(): void {

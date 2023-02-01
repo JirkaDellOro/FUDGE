@@ -33,11 +33,10 @@ namespace Fudge {
       this.fillContent();
 
       _container.on("resize", this.redraw);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent, true);
       this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent, true);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
-      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener("wheel", this.hndMouse);
       this.dom.addEventListener("mousemove", this.hndMouse);
     }

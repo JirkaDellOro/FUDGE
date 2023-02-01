@@ -209,7 +209,7 @@ namespace Fudge {
 
           this.animation.clearCache();
           let nodeMutator: ƒ.Mutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
-          this.controller?.updatePropertyList(nodeMutator, this.playbackTime);
+          this.controller?.update(nodeMutator, this.playbackTime);
           this.propertyList.dispatchEvent(new CustomEvent(EVENT_EDITOR.MODIFY));
           break;
         case ƒui.EVENT.INPUT:
@@ -250,7 +250,7 @@ namespace Fudge {
       this.propertyList.id = "propertylist";
 
       this.controller = new ControllerAnimation(this.animation, this.propertyList, this);
-      this.controller.updatePropertyList(nodeMutator);
+      this.controller.update(nodeMutator);
       // ƒui-EVENT must not be dispatched!
       // this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.CLICK));
       this.propertyList.dispatchEvent(new CustomEvent(EVENT_EDITOR.MODIFY));

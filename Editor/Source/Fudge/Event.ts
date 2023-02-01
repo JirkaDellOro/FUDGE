@@ -15,7 +15,8 @@ namespace Fudge {
     /** An entity recieves focus and can be manipulated using the keyboard */
     FOCUS = "EDITOR_FOCUS",
     /** An animation is running and modifies entities, which updates views */
-    ANIMATE = "EDITOR_ANIMATE"
+    ANIMATE = "EDITOR_ANIMATE",
+    TEST = "EDITOR_TEST"
   }
 
   export interface EventDetail {
@@ -26,6 +27,7 @@ namespace Fudge {
     transform?: Object;
     view?: View;
     data?: ƒ.General;
+    path?: View[];
   }
 
   /**

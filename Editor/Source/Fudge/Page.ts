@@ -153,6 +153,7 @@ namespace Fudge {
       document.addEventListener(EVENT_EDITOR.CLOSE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.ANIMATE, Page.hndEvent);
       document.addEventListener("keyup", Page.hndKey);
+      document.addEventListener(EVENT_EDITOR.TEST, ()=>console.log("Test"), true);
     }
 
     /** Send custom copies of the given event to the views */

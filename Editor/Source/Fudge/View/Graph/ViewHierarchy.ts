@@ -37,8 +37,6 @@ namespace Fudge {
       // this.selectedNode = null;
 
       this.tree = new ƒUi.Tree<ƒ.Node>(new ControllerTreeHierarchy(), this.graph);
-      // this.listController.listRoot.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
-      //TODO: examine if tree should fire common UI-EVENT for selection instead
       this.tree.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
@@ -163,7 +161,8 @@ namespace Fudge {
           let node: ƒ.Node = _event.detail["data"];
           if (this.#selectionPrevious.includes(node) && this.getSelection().includes(node))
             this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: node, view: this } });
-          this.#selectionPrevious = this.getSelection().slice(0);
+            this.#selectionPrevious = this.getSelection().slice(0);
+          this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: node, view: this } });
           break;
         case EVENT_EDITOR.SELECT:
           if (_event.detail.node) {
