@@ -1,12 +1,20 @@
 namespace Fudge {
   export enum EVENT_EDITOR {
+    /** An entity gets created, is not dispatched so far */
     CREATE = "EDITOR_CREATE",
+    /** An entity gets selected and it is necessary to switch contents in the views */
     SELECT = "EDITOR_SELECT",
+    /** An entity gets modified and it is necessary to updated information in views */
     MODIFY = "EDITOR_MODIFY",
+    /** An entity gets deleted */
     DELETE = "EDITOR_DELETE",
+    /** A view or panel closes */
     CLOSE = "EDITOR_CLOSE",
+    /** A transform matrix gets adjusted interactively */
     TRANSFORM = "EDITOR_TRANSFORM",
+    /** An entity recieves focus and can be manipulated using the keyboard */
     FOCUS = "EDITOR_FOCUS",
+    /** An animation is running and modifies entities, which updates views */
     ANIMATE = "EDITOR_ANIMATE"
   }
 
