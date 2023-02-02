@@ -36,7 +36,7 @@ namespace Fudge {
       }
 
       private hndEvent = async (_event: EditorEvent): Promise<void> => {
-        this.broadcastEvent(_event);
+        this.broadcast(_event);
         _event.stopPropagation();
       }
     }

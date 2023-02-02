@@ -33,9 +33,8 @@ namespace Fudge {
       this.fillContent();
 
       _container.on("resize", this.redraw);
-      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent, true);
-      this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
-      this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("wheel", this.hndMouse);
       this.dom.addEventListener("mousemove", this.hndMouse);
@@ -57,7 +56,7 @@ namespace Fudge {
           let offset: ƒ.Vector2 = new ƒ.Vector2(
             _event.offsetX - this.dom.clientWidth, _event.offsetY - this.dom.clientHeight / 2)
           let zoom: number = Math.exp(-_event.deltaY / 1000)
-          console.log(offset.toString());
+          // console.log(offset.toString());
           this.mtxImage.scaleX(zoom);
           this.mtxImage.scaleY(zoom);
           offset.scale(zoom - 1);
@@ -274,10 +273,7 @@ namespace Fudge {
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
-        case ƒUi.EVENT.CHANGE:
         case EVENT_EDITOR.MODIFY:
-          this.mtxImage.reset();
-        case ƒUi.EVENT.MUTATE:
           // if ([ƒ.Audio, ƒ.Texture, ƒ.AnimationSprite].some((_type) => this.resource instanceof _type)) {
           if (this.resource instanceof ƒ.Audio ||
             this.resource instanceof ƒ.Texture ||

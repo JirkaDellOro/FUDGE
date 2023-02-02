@@ -134,6 +134,7 @@ declare namespace Fudge {
         TEST = "EDITOR_TEST"
     }
     interface EventDetail {
+        broadcast?: boolean;
         node?: ƒ.Node;
         graph?: ƒ.Graph;
         resource?: ƒ.SerializableResource;
@@ -141,13 +142,11 @@ declare namespace Fudge {
         transform?: Object;
         view?: View;
         data?: ƒ.General;
-        path?: View[];
     }
     /**
      * Extension of CustomEvent that supports a detail field with the type EventDetail
      */
     class EditorEvent extends CustomEvent<EventDetail> {
-        constructor(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>);
         static dispatch(_target: EventTarget, _type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
     }
 }
@@ -264,7 +263,7 @@ declare namespace Fudge {
         setTitle(_title: string): void;
         getDragDropSources(): Object[];
         dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
-        dispatchToPanel(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
+        dispatchToParent(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
@@ -417,7 +416,7 @@ declare namespace Fudge {
         protected views: View[];
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         /** Send custom copies of the given event to the views */
-        broadcastEvent: (_event: EditorEvent) => void;
+        broadcast: (_event: EditorEvent) => void;
         abstract getState(): PanelState;
         private addViewComponent;
     }
@@ -479,7 +478,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Display the project structure and offer functions for creation, deletion and adjustment of resources
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2020
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2020- 2023
      */
     class PanelProject extends Panel {
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
@@ -754,7 +753,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * List the scripts loaded
-     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020-23
      */
     class ViewScript extends View {
         private table;

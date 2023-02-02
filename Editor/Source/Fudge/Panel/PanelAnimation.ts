@@ -54,7 +54,7 @@ namespace Fudge {
           this.setTitle("Animation | " + name);
       }
 
-      this.broadcastEvent(_event);
+      this.broadcast(_event);
       _event.stopPropagation();
     }
   }

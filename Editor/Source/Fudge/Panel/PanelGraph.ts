@@ -111,7 +111,7 @@ namespace Fudge {
         //   break;
       }
 
-      this.broadcastEvent(_event);
+      this.broadcast(_event);
     }
   }
 }
