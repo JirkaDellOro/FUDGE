@@ -18,6 +18,7 @@ namespace Fudge {
 
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
@@ -208,10 +209,21 @@ namespace Fudge {
         case ƒui.EVENT.REMOVE_CHILD:
         case ƒui.EVENT.MUTATE:
         case ƒui.EVENT.DELETE:
-          this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
+          // this.dispatch(EVENT_EDITOR.MODIFY, {});
+          // this.dom.parentElement.dispatchEvent(new EditorEvent(EVENT_EDITOR.MODIFY, {bubbles: true}));
+          // EditorEvent.dispatch(this.dom.parentElement, EVENT_EDITOR.MODIFY, {bubbles: true});
+          this.dispatchToPanel(EVENT_EDITOR.MODIFY, {});
           break;
         case ƒui.EVENT.SELECT:
-          this.dispatch(EVENT_EDITOR.TEST, {});
+          // this.dispatch(EVENT_EDITOR.TEST, {});
+          // EditorEvent.dispatch(document, EVENT_EDITOR.TEST, { detail: { view: this } });
+          console.log(_event);
+          document.dispatchEvent(new EditorEvent(EVENT_EDITOR.TEST, { detail: { view: this } }));
+          _event.stopPropagation();
+          break;
+        case EVENT_EDITOR.TEST:
+          console.log("TestView", _event);
+          break;
       }
     }
   }

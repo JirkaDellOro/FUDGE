@@ -214,6 +214,16 @@ var Fudge;
      * Extension of CustomEvent that supports a detail field with the type EventDetail
      */
     class EditorEvent extends CustomEvent {
+        constructor(_type, _init) {
+            super(_type, {
+                detail: _init.detail || {},
+                cancelable: _init.cancelable || true,
+                bubbles: _init.bubbles || false
+            });
+        }
+        static dispatch(_target, _type, _init) {
+            _target.dispatchEvent(new EditorEvent(_type, _init));
+        }
     }
     Fudge.EditorEvent = EditorEvent;
 })(Fudge || (Fudge = {}));
@@ -695,9 +705,9 @@ var Fudge;
             document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
-            document.addEventListener(Fudge.EVENT_EDITOR.TEST, () => console.log("Test"), true);
+            document.addEventListener(Fudge.EVENT_EDITOR.TEST, Page.hndEvent);
         }
-        /** Send custom copies of the given event to the views */
+        /** Send custom copies of the given event to the panels */
         static broadcastEvent(_event) {
             for (let panel of Page.panels)
                 panel.dispatch(_event.type, { detail: _event.detail });
@@ -1034,10 +1044,16 @@ var Fudge;
         }
         dispatch(_type, _init) {
             _init.detail = _init.detail || {};
-            _init.bubbles = _init.bubbles || false;
-            _init.cancelable = _init.cancelable || true;
+            // _init.bubbles = _init.bubbles || false;
+            // _init.cancelable = _init.cancelable || true;
             _init.detail.view = _init.detail.view || this;
             this.dom.dispatchEvent(new Fudge.EditorEvent(_type, _init));
+        }
+        dispatchToPanel(_type, _init) {
+            _init.detail = _init.detail || {};
+            _init.bubbles = true;
+            _init.detail.view = _init.detail.view || this;
+            this.dom.parentElement.dispatchEvent(new Fudge.EditorEvent(_type, _init));
         }
         //#region  ContextMenu
         openContextMenu = (_event) => {
@@ -1126,6 +1142,7 @@ var Fudge;
             super(_container, _state);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.TEST, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
@@ -1290,10 +1307,21 @@ var Fudge;
                 case "removeChild" /* REMOVE_CHILD */:
                 case "mutate" /* MUTATE */:
                 case "delete" /* DELETE */:
-                    this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
+                    // this.dispatch(EVENT_EDITOR.MODIFY, {});
+                    // this.dom.parentElement.dispatchEvent(new EditorEvent(EVENT_EDITOR.MODIFY, {bubbles: true}));
+                    // EditorEvent.dispatch(this.dom.parentElement, EVENT_EDITOR.MODIFY, {bubbles: true});
+                    this.dispatchToPanel(Fudge.EVENT_EDITOR.MODIFY, {});
                     break;
                 case "itemselect" /* SELECT */:
-                    this.dispatch(Fudge.EVENT_EDITOR.TEST, {});
+                    // this.dispatch(EVENT_EDITOR.TEST, {});
+                    // EditorEvent.dispatch(document, EVENT_EDITOR.TEST, { detail: { view: this } });
+                    console.log(_event);
+                    document.dispatchEvent(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.TEST, { detail: { view: this } }));
+                    _event.stopPropagation();
+                    break;
+                case Fudge.EVENT_EDITOR.TEST:
+                    console.log("TestView", _event);
+                    break;
             }
         };
     }
@@ -2372,6 +2400,7 @@ var Fudge;
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.TEST, this.hndEvent);
             this.setTitle("Project | " + Fudge.project.name);
             this.broadcastEvent(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, {}));
         }

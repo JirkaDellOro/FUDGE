@@ -81,10 +81,17 @@ namespace Fudge {
 
     public dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void {
       _init.detail = _init.detail || {};
-      _init.bubbles = _init.bubbles || false;
-      _init.cancelable = _init.cancelable || true;
+      // _init.bubbles = _init.bubbles || false;
+      // _init.cancelable = _init.cancelable || true;
       _init.detail.view = _init.detail.view || this;
       this.dom.dispatchEvent(new EditorEvent(_type, _init));
+    }
+
+    public dispatchToPanel(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void {
+      _init.detail = _init.detail || {};
+      _init.bubbles = true;
+      _init.detail.view = _init.detail.view || this;
+      this.dom.parentElement.dispatchEvent(new EditorEvent(_type, _init));
     }
 
     //#region  ContextMenu

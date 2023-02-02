@@ -34,5 +34,16 @@ namespace Fudge {
    * Extension of CustomEvent that supports a detail field with the type EventDetail
    */
   export class EditorEvent extends CustomEvent<EventDetail> {
+    constructor(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>) {
+      super(_type, {
+        detail: _init.detail || {},
+        cancelable: _init.cancelable || true,
+        bubbles: _init.bubbles || false
+      });
+    }
+
+    public static dispatch(_target: EventTarget, _type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void {
+      _target.dispatchEvent(new EditorEvent(_type, _init));
+    }
   }
 }

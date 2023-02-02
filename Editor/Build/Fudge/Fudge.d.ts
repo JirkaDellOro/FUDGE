@@ -147,6 +147,8 @@ declare namespace Fudge {
      * Extension of CustomEvent that supports a detail field with the type EventDetail
      */
     class EditorEvent extends CustomEvent<EventDetail> {
+        constructor(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>);
+        static dispatch(_target: EventTarget, _type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
     }
 }
 declare namespace Fudge {
@@ -215,7 +217,7 @@ declare namespace Fudge {
         private static generateID;
         private static loadLayout;
         private static setupPageListeners;
-        /** Send custom copies of the given event to the views */
+        /** Send custom copies of the given event to the panels */
         private static broadcastEvent;
         private static hndKey;
         private static hndEvent;
@@ -262,6 +264,7 @@ declare namespace Fudge {
         setTitle(_title: string): void;
         getDragDropSources(): Object[];
         dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
+        dispatchToPanel(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
