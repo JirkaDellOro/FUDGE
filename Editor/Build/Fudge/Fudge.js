@@ -2236,6 +2236,8 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.SELECT:
                     this.setGraph(_event.detail.graph);
                 case Fudge.EVENT_EDITOR.MODIFY:
+                    if (!_event.detail)
+                        break;
                     // switched animation in a ComponentAnimator
                     if (_event.detail.mutable instanceof ƒ.ComponentAnimator) {
                         if (_event.detail.view != this) {
@@ -4435,13 +4437,13 @@ var Fudge;
                         this.setGraph(_event.detail.graph);
                     break;
                 // break;
-                case "mutate" /* MUTATE */:
-                case "delete" /* DELETE */:
-                case Fudge.EVENT_EDITOR.MODIFY:
-                case Fudge.EVENT_EDITOR.ANIMATE:
-                case Fudge.EVENT_EDITOR.UPDATE:
-                    this.redraw();
+                // case ƒUi.EVENT.MUTATE:
+                // case ƒUi.EVENT.DELETE:
+                // case EVENT_EDITOR.MODIFY:
+                // case EVENT_EDITOR.ANIMATE:
+                // case EVENT_EDITOR.UPDATE:
             }
+            this.redraw();
         };
         hndPick = (_event) => {
             let picked = _event.detail.node;

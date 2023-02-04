@@ -248,7 +248,7 @@ namespace Fudge {
           let cmpRigidbody: ƒ.ComponentRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
           if (cmpRigidbody)
             cmpRigidbody.initialize();
-          this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true, detail: { node: this.node } });
+          this.dispatch(EVENT_EDITOR.UPDATE, { bubbles: true, detail: { node: this.node } });
         default:
           break;
       }

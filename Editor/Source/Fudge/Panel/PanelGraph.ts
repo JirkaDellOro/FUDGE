@@ -88,6 +88,8 @@ namespace Fudge {
         case EVENT_EDITOR.SELECT:
           this.setGraph(_event.detail.graph);
         case EVENT_EDITOR.MODIFY:
+          if (!_event.detail)
+            break;
           // switched animation in a ComponentAnimator
           if (_event.detail.mutable instanceof ƒ.ComponentAnimator) {
             if (_event.detail.view != this) {

@@ -225,13 +225,13 @@ namespace Fudge {
             this.setGraph(_event.detail.graph);
           break;
         // break;
-        case ƒUi.EVENT.MUTATE:
-        case ƒUi.EVENT.DELETE:
-        case EVENT_EDITOR.MODIFY:
-        case EVENT_EDITOR.ANIMATE:
-        case EVENT_EDITOR.UPDATE:
-          this.redraw();
+        // case ƒUi.EVENT.MUTATE:
+        // case ƒUi.EVENT.DELETE:
+        // case EVENT_EDITOR.MODIFY:
+        // case EVENT_EDITOR.ANIMATE:
+        // case EVENT_EDITOR.UPDATE:
       }
+      this.redraw();
     }
 
     private hndPick = (_event: EditorEvent): void => {
