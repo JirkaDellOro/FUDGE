@@ -3955,7 +3955,7 @@ var Fudge;
                     let cmpRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
                     if (cmpRigidbody)
                         cmpRigidbody.initialize();
-                    this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true, detail: { node: this.node } });
+                    this.dispatch(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true, detail: { node: this.node } });
                 default:
                     break;
             }
