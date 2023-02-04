@@ -85,6 +85,7 @@ namespace Fudge {
       _event.stopPropagation();
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
+          this.setGraph(_event.detail.graph);
         case EVENT_EDITOR.MODIFY:
           // switched animation in a ComponentAnimator
           if (_event.detail.mutable instanceof ƒ.ComponentAnimator) {

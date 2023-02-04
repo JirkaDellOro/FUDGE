@@ -2232,6 +2232,7 @@ var Fudge;
             _event.stopPropagation();
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
+                    this.setGraph(_event.detail.graph);
                 case Fudge.EVENT_EDITOR.MODIFY:
                     // switched animation in a ComponentAnimator
                     if (_event.detail.mutable instanceof ƒ.ComponentAnimator) {
