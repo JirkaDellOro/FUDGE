@@ -47,9 +47,11 @@ namespace Fudge {
     /** Send custom copies of the given event to the views */
     public broadcast = (_event: EditorEvent): void => {
       let detail: EventDetail = _event.detail || {};
-      detail.broadcast = true;
+      let target: View = detail.view;
+      detail.sender = this;
       for (let view of this.views)
-        view.dispatch(<EVENT_EDITOR>_event.type, { detail: _event.detail });
+        if (view != target) // don't send back to original target view
+          view.dispatch(<EVENT_EDITOR>_event.type, { detail: detail });
     }
 
     public abstract getState(): PanelState;

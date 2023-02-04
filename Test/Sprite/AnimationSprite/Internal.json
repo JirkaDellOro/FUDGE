@@ -2,18 +2,18 @@
   "MeshSprite|2023-01-08T11:22:54.261Z|98107": {
     "ƒ.MeshSprite": {
       "idResource": "MeshSprite|2023-01-08T11:22:54.261Z|98107",
-      "name": "MeshSprite",
+      "name": "Quad",
       "type": "MeshSprite"
     }
   },
   "Material|2023-01-08T11:23:45.480Z|92509": {
     "ƒ.Material": {
-      "name": "ShaderLitTextured",
+      "name": "Mario",
       "idResource": "Material|2023-01-08T11:23:45.480Z|92509",
       "shader": "ShaderLitTextured",
       "coat": {
         "ƒ.CoatTextured": {
-          "color": "[1, 1, 1, 1]",
+          "color": "[0.7333333333333333, 0.6666666666666666, 0.6666666666666666, 0.91]",
           "idTexture": "TextureImage|2023-01-16T14:41:22.268Z|03995"
         }
       }
@@ -25,7 +25,7 @@
       "type": "TextureImage",
       "Texture": {
         "idResource": "TextureImage|2023-01-16T14:41:22.268Z|03995",
-        "name": "Image\\Mario_Spritesheet.png",
+        "name": "Mario",
         "mipmap": "CRISP"
       }
     }
@@ -33,7 +33,7 @@
   "Animation|2023-01-08T11:24:34.193Z|38529": {
     "ƒ.Animation": {
       "idResource": "Animation|2023-01-08T11:24:34.193Z|38529",
-      "name": "Animation",
+      "name": "Interpol",
       "labels": {
         "Walk": 228.69954655700658
       },
@@ -105,7 +105,7 @@
       "wrap": "[0, 24]",
       "Animation": {
         "idResource": "AnimationSprite|2023-01-20T13:15:02.775Z|75740",
-        "name": "AnimationSprite",
+        "name": "Sprite",
         "labels": {},
         "events": {},
         "framesPerSecond": 4,
@@ -116,13 +116,13 @@
   "MeshCube|2023-01-25T18:52:17.765Z|10476": {
     "ƒ.MeshCube": {
       "idResource": "MeshCube|2023-01-25T18:52:17.765Z|10476",
-      "name": "MeshCube",
+      "name": "Cube",
       "type": "MeshCube"
     }
   },
   "Material|2023-01-25T18:52:25.854Z|15054": {
     "ƒ.Material": {
-      "name": "ShaderLit",
+      "name": "Grey",
       "idResource": "Material|2023-01-25T18:52:25.854Z|15054",
       "shader": "ShaderLit",
       "coat": {
@@ -240,7 +240,7 @@
       "type": "TextureImage",
       "Texture": {
         "idResource": "TextureImage|2023-01-16T14:08:04.970Z|41098",
-        "name": "Image\\TextureFUDGE.png",
+        "name": "FUDGE",
         "mipmap": "CRISP"
       }
     }

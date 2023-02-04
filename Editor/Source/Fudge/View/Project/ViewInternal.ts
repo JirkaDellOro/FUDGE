@@ -16,12 +16,12 @@ namespace Fudge {
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
+      this.dom.addEventListener(EVENT_EDITOR.OPEN, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.REMOVE_CHILD, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
@@ -200,17 +200,23 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
+      if (_event.detail?.sender && _event.type != EVENT_EDITOR.OPEN)
+        return;
+
       switch (_event.type) {
+        case EVENT_EDITOR.OPEN:
         case EVENT_EDITOR.SELECT:
         case EVENT_EDITOR.MODIFY:
-          // case ƒui.EVENT.MUTATE:
           this.listResources();
           break;
-        case ƒui.EVENT.REMOVE_CHILD:
         case ƒui.EVENT.MUTATE:
-        case ƒui.EVENT.DELETE:
           _event.stopPropagation();
           this.dispatchToParent(EVENT_EDITOR.MODIFY, {});
+          break;
+        case ƒui.EVENT.REMOVE_CHILD:
+          _event.stopPropagation();
+          this.dispatchToParent(EVENT_EDITOR.DELETE, {});
+          this.listResources();
           break;
       }
     }

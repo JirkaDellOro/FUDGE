@@ -10,23 +10,26 @@ namespace Fudge {
     DELETE = "EDITOR_DELETE",
     /** A view or panel closes */
     CLOSE = "EDITOR_CLOSE",
-    /** A transform matrix gets adjusted interactively */
+    /** A view or panel opens */
+    OPEN = "OPEN"
+    /** A transform matrix gets adjusted interactively */,
     TRANSFORM = "EDITOR_TRANSFORM",
     /** An entity recieves focus and can be manipulated using the keyboard */
     FOCUS = "EDITOR_FOCUS",
     /** An animation is running and modifies entities, which updates views */
     ANIMATE = "EDITOR_ANIMATE",
+    /** Test the message pump without side effects */
     TEST = "EDITOR_TEST"
   }
 
   export interface EventDetail {
-    broadcast?: boolean;
+    view?: View;
+    sender?: Panel | Page;
     node?: ƒ.Node;
     graph?: ƒ.Graph;
     resource?: ƒ.SerializableResource;
     mutable?: ƒ.Mutable;
     transform?: Object;
-    view?: View;
     data?: ƒ.General;
     // path?: View[];
   }

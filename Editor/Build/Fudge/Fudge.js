@@ -202,12 +202,14 @@ var Fudge;
         EVENT_EDITOR["DELETE"] = "EDITOR_DELETE";
         /** A view or panel closes */
         EVENT_EDITOR["CLOSE"] = "EDITOR_CLOSE";
-        /** A transform matrix gets adjusted interactively */
+        /** A view or panel opens */
+        EVENT_EDITOR["OPEN"] = "OPEN";
         EVENT_EDITOR["TRANSFORM"] = "EDITOR_TRANSFORM";
         /** An entity recieves focus and can be manipulated using the keyboard */
         EVENT_EDITOR["FOCUS"] = "EDITOR_FOCUS";
         /** An animation is running and modifies entities, which updates views */
         EVENT_EDITOR["ANIMATE"] = "EDITOR_ANIMATE";
+        /** Test the message pump without side effects */
         EVENT_EDITOR["TEST"] = "EDITOR_TEST";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     /**
@@ -693,6 +695,7 @@ var Fudge;
         //#region Page-Events from DOM
         static setupPageListeners() {
             document.addEventListener(Fudge.EVENT_EDITOR.SELECT, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.MODIFY, Page.hndEvent);
             //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
             document.addEventListener("mutate" /* MUTATE */, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
@@ -701,9 +704,14 @@ var Fudge;
             document.addEventListener(Fudge.EVENT_EDITOR.TEST, Page.hndEvent);
         }
         /** Send custom copies of the given event to the panels */
-        static broadcastEvent(_event) {
-            for (let panel of Page.panels)
-                panel.dispatch(_event.type, { detail: _event.detail });
+        static broadcast(_event) {
+            let detail = _event.detail;
+            let sender = detail.sender;
+            detail.sender = Page;
+            for (let panel of Page.panels) {
+                if (panel != sender) // don't send back to original sender
+                    panel.dispatch(_event.type, { detail: detail });
+            }
         }
         static hndKey = (_event) => {
             document.exitPointerLock();
@@ -729,7 +737,7 @@ var Fudge;
                     console.log("Panels", Page.panels);
                     break;
                 default:
-                    Page.broadcastEvent(_event);
+                    Page.broadcast(_event);
                     break;
             }
         }
@@ -1132,12 +1140,12 @@ var Fudge;
         table;
         constructor(_container, _state) {
             super(_container, _state);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.OPEN, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TEST, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
-            this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.dom.addEventListener("removeChild" /* REMOVE_CHILD */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
         }
@@ -1290,17 +1298,22 @@ var Fudge;
             this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
         }
         hndEvent = (_event) => {
+            if (_event.detail?.sender && _event.type != Fudge.EVENT_EDITOR.OPEN)
+                return;
             switch (_event.type) {
+                case Fudge.EVENT_EDITOR.OPEN:
                 case Fudge.EVENT_EDITOR.SELECT:
                 case Fudge.EVENT_EDITOR.MODIFY:
-                    // case ƒui.EVENT.MUTATE:
                     this.listResources();
                     break;
-                case "removeChild" /* REMOVE_CHILD */:
                 case "mutate" /* MUTATE */:
-                case "delete" /* DELETE */:
                     _event.stopPropagation();
                     this.dispatchToParent(Fudge.EVENT_EDITOR.MODIFY, {});
+                    break;
+                case "removeChild" /* REMOVE_CHILD */:
+                    _event.stopPropagation();
+                    this.dispatchToParent(Fudge.EVENT_EDITOR.DELETE, {});
+                    this.listResources();
                     break;
             }
         };
@@ -2077,9 +2090,11 @@ var Fudge;
         /** Send custom copies of the given event to the views */
         broadcast = (_event) => {
             let detail = _event.detail || {};
-            detail.broadcast = true;
+            let target = detail.view;
+            detail.sender = this;
             for (let view of this.views)
-                view.dispatch(_event.type, { detail: _event.detail });
+                if (view != target) // don't send back to original target view
+                    view.dispatch(_event.type, { detail: detail });
         };
         addViewComponent = (_event) => {
             // adjustmens for GoldenLayout 2
@@ -2373,18 +2388,18 @@ var Fudge;
             };
             this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: 7 /* Root */ }]);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
-            // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TEST, this.hndEvent);
             this.setTitle("Project | " + Fudge.project.name);
-            this.broadcast(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, {}));
+            this.broadcast(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.OPEN, {}));
         }
         getState() {
             // TODO: iterate over views and collect their states for reconstruction 
             return {};
         }
         hndEvent = (_event) => {
-            _event.stopPropagation();
+            if (_event.type != Fudge.EVENT_EDITOR.MODIFY) // may travel further
+                _event.stopPropagation();
             this.setTitle("Project | " + Fudge.project.name);
             if (_event.type == "itemselect" /* SELECT */) {
                 this.broadcast(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, { detail: _event.detail }));
@@ -4251,8 +4266,6 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
-            // this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
-            // this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("pointermove", this.hndPointer);
             this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move

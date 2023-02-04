@@ -60,12 +60,11 @@ namespace Fudge {
       this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
 
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
-      // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
 
       this.setTitle("Project | " + project.name);
-      this.broadcast(new EditorEvent(EVENT_EDITOR.SELECT, {}));
+      this.broadcast(new EditorEvent(EVENT_EDITOR.OPEN, {}));
     }
 
     public getState(): { [key: string]: string } {
@@ -74,10 +73,11 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      _event.stopPropagation();
+      if (_event.type != EVENT_EDITOR.MODIFY) // may travel further
+        _event.stopPropagation();
       this.setTitle("Project | " + project.name);
       if (_event.type == ƒui.EVENT.SELECT) {
-        this.broadcast(new EditorEvent(EVENT_EDITOR.SELECT,  { detail: _event.detail }));
+        this.broadcast(new EditorEvent(EVENT_EDITOR.SELECT, { detail: _event.detail }));
       }
       else
         this.broadcast(_event);
