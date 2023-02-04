@@ -196,18 +196,20 @@ var Fudge;
         EVENT_EDITOR["CREATE"] = "EDITOR_CREATE";
         /** An entity gets selected and it is necessary to switch contents in the views */
         EVENT_EDITOR["SELECT"] = "EDITOR_SELECT";
-        /** An entity gets modified and it is necessary to updated information in views */
+        /** An entity gets modified structurally and it is necessary to update views */
         EVENT_EDITOR["MODIFY"] = "EDITOR_MODIFY";
+        /** Values of an entity change and it is necessary to update views */
+        EVENT_EDITOR["UPDATE"] = "EDITOR_UPDATE";
         /** An entity gets deleted */
         EVENT_EDITOR["DELETE"] = "EDITOR_DELETE";
         /** A view or panel closes */
         EVENT_EDITOR["CLOSE"] = "EDITOR_CLOSE";
         /** A view or panel opens */
-        EVENT_EDITOR["OPEN"] = "OPEN";
+        EVENT_EDITOR["OPEN"] = "EDITOR_OPEN";
         EVENT_EDITOR["TRANSFORM"] = "EDITOR_TRANSFORM";
         /** An entity recieves focus and can be manipulated using the keyboard */
         EVENT_EDITOR["FOCUS"] = "EDITOR_FOCUS";
-        /** An animation is running and modifies entities, which updates views */
+        /** TODO: replace with UPDATE. An animation is running and modifies entities, which updates views */
         EVENT_EDITOR["ANIMATE"] = "EDITOR_ANIMATE";
         /** Test the message pump without side effects */
         EVENT_EDITOR["TEST"] = "EDITOR_TEST";
@@ -326,6 +328,235 @@ var Fudge;
         Fudge.watcher.unref();
         Fudge.watcher.close();
     }
+})(Fudge || (Fudge = {}));
+///<reference types="../../../node_modules/electron/Electron"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+///<reference path="Definition.ts"/>
+var Fudge;
+///<reference types="../../../node_modules/electron/Electron"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+///<reference path="Definition.ts"/>
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    Fudge.ipcRenderer = require("electron").ipcRenderer; // Replace with:
+    Fudge.remote = require("electron").remote;
+    /**
+     * The uppermost container for all panels controlling data flow between.
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class Page {
+        static goldenLayoutModule = globalThis.goldenLayout; // ƒ.General is synonym for any... hack to get GoldenLayout to work
+        static modeTransform = Fudge.TRANSFORM.TRANSLATE;
+        static idCounter = 0;
+        static goldenLayout;
+        static panels = [];
+        static physics = {};
+        static setDefaultProject() {
+            console.log("Set default project in local storage", Fudge.project);
+            if (Fudge.project)
+                localStorage.setItem("project", Fudge.project.base.toString());
+        }
+        static getPanelInfo() {
+            let panelInfos = [];
+            for (let panel of Page.panels)
+                panelInfos.push({ type: panel.constructor.name, state: panel.getState() });
+            return JSON.stringify(panelInfos);
+        }
+        static setPanelInfo(_panelInfos) {
+            Page.goldenLayout.clear();
+            Page.panels = [];
+            let panelInfos = JSON.parse(_panelInfos);
+            for (let panelInfo of panelInfos)
+                Page.add(Fudge[panelInfo.type], panelInfo.state);
+        }
+        static setTransform(_mode) {
+            Page.modeTransform = _mode;
+            ƒ.Debug.fudge(`Transform mode: ${_mode}`);
+        }
+        static getPhysics(_graph) {
+            return Page.physics[_graph.idResource] || (Page.physics[_graph.idResource] = new ƒ.Physics());
+        }
+        // called by windows load-listener
+        static async start() {
+            // ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL | ƒ.DEBUG_FILTER.SOURCE);
+            console.log("LocalStorage", localStorage);
+            Page.setupGoldenLayout();
+            ƒ.Project.mode = ƒ.MODE.EDITOR;
+            Page.setupMainListeners();
+            Page.setupPageListeners();
+            // for testing:
+            // ipcRenderer.emit(MENU.PANEL_PROJECT_OPEN);
+            // ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
+            // ipcRenderer.emit(MENU.PROJECT_LOAD);
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: false });
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: false });
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: false });
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_HELP_OPEN, on: true });
+            if (localStorage.project) {
+                console.log("Load project referenced in local storage", localStorage.project);
+                await Page.loadProject(new URL(localStorage.project));
+            }
+        }
+        static setupGoldenLayout() {
+            Page.goldenLayout = new Page.goldenLayoutModule.GoldenLayout(); // GoldenLayout 2 as UMD-Module
+            Page.goldenLayout.on("itemCreated", Page.hndPanelCreated);
+            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.PROJECT, Fudge.PanelProject);
+            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.GRAPH, Fudge.PanelGraph);
+            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.HELP, Fudge.PanelHelp);
+            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.ANIMATION, Fudge.PanelAnimation);
+            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.PARTICLE_SYSTEM, Fudge.PanelParticleSystem);
+            Page.loadLayout();
+        }
+        static add(_panel, _state) {
+            const panelConfig = {
+                type: "row",
+                content: [
+                    {
+                        type: "component",
+                        componentType: _panel.name,
+                        componentState: _state,
+                        title: "Panel",
+                        id: Page.generateID(_panel.name)
+                    }
+                ]
+            };
+            if (!Page.goldenLayout.rootItem) // workaround because golden Layout loses rootItem...
+                Page.loadLayout(); // TODO: these two lines appear to be obsolete, the condition is not met
+            Page.goldenLayout.rootItem.layoutManager.addItemAtLocation(panelConfig, [{ typeId: 7 /* Root */ }]);
+        }
+        static find(_type) {
+            let result = [];
+            result = Page.panels.filter((_panel) => { return _panel instanceof _type; });
+            return result;
+        }
+        static generateID(_name) {
+            return _name + Page.idCounter++;
+        }
+        static loadLayout() {
+            let config = {
+                settings: { showPopoutIcon: false, showMaximiseIcon: true },
+                root: {
+                    type: "row",
+                    isClosable: false,
+                    content: []
+                }
+            };
+            Page.goldenLayout.loadLayout(config);
+        }
+        //#region Page-Events from DOM
+        static setupPageListeners() {
+            document.addEventListener(Fudge.EVENT_EDITOR.SELECT, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.MODIFY, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, Page.hndEvent);
+            document.addEventListener("keyup", Page.hndKey);
+            document.addEventListener(Fudge.EVENT_EDITOR.TEST, Page.hndEvent);
+        }
+        /** Send custom copies of the given event to the panels */
+        static broadcast(_event) {
+            let detail = _event.detail;
+            let sender = detail.sender;
+            detail.sender = Page;
+            for (let panel of Page.panels) {
+                if (panel != sender) // don't send back to original sender
+                    panel.dispatch(_event.type, { detail: detail });
+            }
+        }
+        static hndKey = (_event) => {
+            document.exitPointerLock();
+            switch (_event.code) {
+                case ƒ.KEYBOARD_CODE.T:
+                    Page.setTransform(Fudge.TRANSFORM.TRANSLATE);
+                    break;
+                case ƒ.KEYBOARD_CODE.R:
+                    Page.setTransform(Fudge.TRANSFORM.ROTATE);
+                    break;
+                case ƒ.KEYBOARD_CODE.E:
+                    // TODO: don't switch to scale mode when using fly-camera and pressing E
+                    Page.setTransform(Fudge.TRANSFORM.SCALE);
+                    break;
+            }
+        };
+        static hndEvent(_event) {
+            switch (_event.type) {
+                case Fudge.EVENT_EDITOR.CLOSE:
+                    let view = _event.detail.view;
+                    if (view instanceof Fudge.Panel)
+                        Page.panels.splice(Page.panels.indexOf(view), 1);
+                    console.log("Panels", Page.panels);
+                    break;
+                default:
+                    Page.broadcast(_event);
+                    break;
+            }
+        }
+        //#endregion
+        static hndPanelCreated = (_event) => {
+            let target = _event.target;
+            if (target instanceof Page.goldenLayoutModule.ComponentItem) {
+                Page.panels.push(target.component);
+            }
+        };
+        static async loadProject(_url) {
+            await Fudge.loadProject(_url);
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_ANIMATION_OPEN, on: true });
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PARTICLE_SYSTEM_OPEN, on: true });
+        }
+        //#region Main-Events from Electron
+        static setupMainListeners() {
+            Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_NEW, async (_event, _args) => {
+                ƒ.Project.clear();
+                await Fudge.newProject();
+                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
+                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
+                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
+                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_ANIMATION_OPEN, on: true });
+                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PARTICLE_SYSTEM_OPEN, on: true });
+            });
+            Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_SAVE, async (_event, _args) => {
+                if (await Fudge.saveProject())
+                    Page.setDefaultProject();
+            });
+            Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_LOAD, async (_event, _args) => {
+                let url = await Fudge.promptLoadProject();
+                if (!url)
+                    return;
+                await Page.loadProject(url);
+            });
+            Fudge.ipcRenderer.on(Fudge.MENU.PANEL_GRAPH_OPEN, (_event, _args) => {
+                Page.add(Fudge.PanelGraph, null);
+            });
+            Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PROJECT_OPEN, (_event, _args) => {
+                Page.add(Fudge.PanelProject, null);
+            });
+            Fudge.ipcRenderer.on(Fudge.MENU.PANEL_HELP_OPEN, (_event, _args) => {
+                Page.add(Fudge.PanelHelp, null);
+            });
+            Fudge.ipcRenderer.on(Fudge.MENU.QUIT, (_event, _args) => {
+                Page.setDefaultProject();
+            });
+            Fudge.ipcRenderer.on(Fudge.MENU.PANEL_ANIMATION_OPEN, (_event, _args) => {
+                Page.add(Fudge.PanelAnimation, null);
+                // let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
+                // PanelManager.instance.addPanel(panel);
+            });
+            Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PARTICLE_SYSTEM_OPEN, (_event, _args) => {
+                Page.add(Fudge.PanelParticleSystem, null);
+                // let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
+                // PanelManager.instance.addPanel(panel);
+            });
+        }
+    }
+    Fudge.Page = Page;
+    // function welcome(container: GoldenLayout.Container, state: Object): void {
+    //   container.getElement().html("<div>Welcome</div>");
+    // }
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -575,236 +806,6 @@ var Fudge;
         }
     }
     Fudge.Project = Project;
-})(Fudge || (Fudge = {}));
-///<reference types="../../../node_modules/electron/Electron"/>
-///<reference types="../../../Aid/Build/FudgeAid"/>
-///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
-///<reference path="Project.ts"/>
-var Fudge;
-///<reference types="../../../node_modules/electron/Electron"/>
-///<reference types="../../../Aid/Build/FudgeAid"/>
-///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
-///<reference path="Project.ts"/>
-(function (Fudge) {
-    var ƒ = FudgeCore;
-    Fudge.ipcRenderer = require("electron").ipcRenderer; // Replace with:
-    Fudge.remote = require("electron").remote;
-    /**
-     * The uppermost container for all panels controlling data flow between.
-     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    class Page {
-        static goldenLayoutModule = globalThis.goldenLayout; // ƒ.General is synonym for any... hack to get GoldenLayout to work
-        static modeTransform = Fudge.TRANSFORM.TRANSLATE;
-        static idCounter = 0;
-        static goldenLayout;
-        static panels = [];
-        static physics = {};
-        static setDefaultProject() {
-            console.log("Set default project in local storage", Fudge.project);
-            if (Fudge.project)
-                localStorage.setItem("project", Fudge.project.base.toString());
-        }
-        static getPanelInfo() {
-            let panelInfos = [];
-            for (let panel of Page.panels)
-                panelInfos.push({ type: panel.constructor.name, state: panel.getState() });
-            return JSON.stringify(panelInfos);
-        }
-        static setPanelInfo(_panelInfos) {
-            Page.goldenLayout.clear();
-            Page.panels = [];
-            let panelInfos = JSON.parse(_panelInfos);
-            for (let panelInfo of panelInfos)
-                Page.add(Fudge[panelInfo.type], panelInfo.state);
-        }
-        static setTransform(_mode) {
-            Page.modeTransform = _mode;
-            ƒ.Debug.fudge(`Transform mode: ${_mode}`);
-        }
-        static getPhysics(_graph) {
-            return Page.physics[_graph.idResource] || (Page.physics[_graph.idResource] = new ƒ.Physics());
-        }
-        // called by windows load-listener
-        static async start() {
-            // ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL | ƒ.DEBUG_FILTER.SOURCE);
-            console.log("LocalStorage", localStorage);
-            Page.setupGoldenLayout();
-            ƒ.Project.mode = ƒ.MODE.EDITOR;
-            Page.setupMainListeners();
-            Page.setupPageListeners();
-            // for testing:
-            // ipcRenderer.emit(MENU.PANEL_PROJECT_OPEN);
-            // ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
-            // ipcRenderer.emit(MENU.PROJECT_LOAD);
-            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: false });
-            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: false });
-            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: false });
-            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_HELP_OPEN, on: true });
-            if (localStorage.project) {
-                console.log("Load project referenced in local storage", localStorage.project);
-                await Page.loadProject(new URL(localStorage.project));
-            }
-        }
-        static setupGoldenLayout() {
-            Page.goldenLayout = new Page.goldenLayoutModule.GoldenLayout(); // GoldenLayout 2 as UMD-Module
-            Page.goldenLayout.on("itemCreated", Page.hndPanelCreated);
-            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.PROJECT, Fudge.PanelProject);
-            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.GRAPH, Fudge.PanelGraph);
-            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.HELP, Fudge.PanelHelp);
-            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.ANIMATION, Fudge.PanelAnimation);
-            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.PARTICLE_SYSTEM, Fudge.PanelParticleSystem);
-            Page.loadLayout();
-        }
-        static add(_panel, _state) {
-            const panelConfig = {
-                type: "row",
-                content: [
-                    {
-                        type: "component",
-                        componentType: _panel.name,
-                        componentState: _state,
-                        title: "Panel",
-                        id: Page.generateID(_panel.name)
-                    }
-                ]
-            };
-            if (!Page.goldenLayout.rootItem) // workaround because golden Layout loses rootItem...
-                Page.loadLayout(); // TODO: these two lines appear to be obsolete, the condition is not met
-            Page.goldenLayout.rootItem.layoutManager.addItemAtLocation(panelConfig, [{ typeId: 7 /* Root */ }]);
-        }
-        static find(_type) {
-            let result = [];
-            result = Page.panels.filter((_panel) => { return _panel instanceof _type; });
-            return result;
-        }
-        static generateID(_name) {
-            return _name + Page.idCounter++;
-        }
-        static loadLayout() {
-            let config = {
-                settings: { showPopoutIcon: false, showMaximiseIcon: true },
-                root: {
-                    type: "row",
-                    isClosable: false,
-                    content: []
-                }
-            };
-            Page.goldenLayout.loadLayout(config);
-        }
-        //#region Page-Events from DOM
-        static setupPageListeners() {
-            document.addEventListener(Fudge.EVENT_EDITOR.SELECT, Page.hndEvent);
-            document.addEventListener(Fudge.EVENT_EDITOR.MODIFY, Page.hndEvent);
-            //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
-            document.addEventListener("mutate" /* MUTATE */, Page.hndEvent);
-            document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
-            document.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, Page.hndEvent);
-            document.addEventListener("keyup", Page.hndKey);
-            document.addEventListener(Fudge.EVENT_EDITOR.TEST, Page.hndEvent);
-        }
-        /** Send custom copies of the given event to the panels */
-        static broadcast(_event) {
-            let detail = _event.detail;
-            let sender = detail.sender;
-            detail.sender = Page;
-            for (let panel of Page.panels) {
-                if (panel != sender) // don't send back to original sender
-                    panel.dispatch(_event.type, { detail: detail });
-            }
-        }
-        static hndKey = (_event) => {
-            document.exitPointerLock();
-            switch (_event.code) {
-                case ƒ.KEYBOARD_CODE.T:
-                    Page.setTransform(Fudge.TRANSFORM.TRANSLATE);
-                    break;
-                case ƒ.KEYBOARD_CODE.R:
-                    Page.setTransform(Fudge.TRANSFORM.ROTATE);
-                    break;
-                case ƒ.KEYBOARD_CODE.E:
-                    // TODO: don't switch to scale mode when using fly-camera and pressing E
-                    Page.setTransform(Fudge.TRANSFORM.SCALE);
-                    break;
-            }
-        };
-        static hndEvent(_event) {
-            switch (_event.type) {
-                case Fudge.EVENT_EDITOR.CLOSE:
-                    let view = _event.detail.view;
-                    if (view instanceof Fudge.Panel)
-                        Page.panels.splice(Page.panels.indexOf(view), 1);
-                    console.log("Panels", Page.panels);
-                    break;
-                default:
-                    Page.broadcast(_event);
-                    break;
-            }
-        }
-        //#endregion
-        static hndPanelCreated = (_event) => {
-            let target = _event.target;
-            if (target instanceof Page.goldenLayoutModule.ComponentItem) {
-                Page.panels.push(target.component);
-            }
-        };
-        static async loadProject(_url) {
-            await Fudge.loadProject(_url);
-            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
-            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
-            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_ANIMATION_OPEN, on: true });
-            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PARTICLE_SYSTEM_OPEN, on: true });
-        }
-        //#region Main-Events from Electron
-        static setupMainListeners() {
-            Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_NEW, async (_event, _args) => {
-                ƒ.Project.clear();
-                await Fudge.newProject();
-                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
-                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
-                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_ANIMATION_OPEN, on: true });
-                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PARTICLE_SYSTEM_OPEN, on: true });
-            });
-            Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_SAVE, async (_event, _args) => {
-                if (await Fudge.saveProject())
-                    Page.setDefaultProject();
-            });
-            Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_LOAD, async (_event, _args) => {
-                let url = await Fudge.promptLoadProject();
-                if (!url)
-                    return;
-                await Page.loadProject(url);
-            });
-            Fudge.ipcRenderer.on(Fudge.MENU.PANEL_GRAPH_OPEN, (_event, _args) => {
-                Page.add(Fudge.PanelGraph, null);
-            });
-            Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PROJECT_OPEN, (_event, _args) => {
-                Page.add(Fudge.PanelProject, null);
-            });
-            Fudge.ipcRenderer.on(Fudge.MENU.PANEL_HELP_OPEN, (_event, _args) => {
-                Page.add(Fudge.PanelHelp, null);
-            });
-            Fudge.ipcRenderer.on(Fudge.MENU.QUIT, (_event, _args) => {
-                Page.setDefaultProject();
-            });
-            Fudge.ipcRenderer.on(Fudge.MENU.PANEL_ANIMATION_OPEN, (_event, _args) => {
-                Page.add(Fudge.PanelAnimation, null);
-                // let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
-                // PanelManager.instance.addPanel(panel);
-            });
-            Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PARTICLE_SYSTEM_OPEN, (_event, _args) => {
-                Page.add(Fudge.PanelParticleSystem, null);
-                // let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
-                // PanelManager.instance.addPanel(panel);
-            });
-        }
-    }
-    Fudge.Page = Page;
-    // function welcome(container: GoldenLayout.Container, state: Object): void {
-    //   container.getElement().html("<div>Welcome</div>");
-    // }
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1142,7 +1143,7 @@ var Fudge;
             super(_container, _state);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.OPEN, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TEST, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
@@ -1303,7 +1304,7 @@ var Fudge;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.OPEN:
                 case Fudge.EVENT_EDITOR.SELECT:
-                case Fudge.EVENT_EDITOR.MODIFY:
+                    // case EVENT_EDITOR.MODIFY:
                     this.listResources();
                     break;
                 case "mutate" /* MUTATE */:
@@ -2202,6 +2203,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndEvent);
@@ -2388,7 +2390,7 @@ var Fudge;
             };
             this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: 7 /* Root */ }]);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TEST, this.hndEvent);
             this.setTitle("Project | " + Fudge.project.name);
@@ -2399,9 +2401,9 @@ var Fudge;
             return {};
         }
         hndEvent = (_event) => {
-            if (_event.type != Fudge.EVENT_EDITOR.MODIFY) // may travel further
+            if (_event.type != Fudge.EVENT_EDITOR.UPDATE)
                 _event.stopPropagation();
-            this.setTitle("Project | " + Fudge.project.name);
+            this.setTitle("Project | " + Fudge.project.name); //why here and everytime?
             if (_event.type == "itemselect" /* SELECT */) {
                 this.broadcast(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, { detail: _event.detail }));
             }
@@ -4263,6 +4265,7 @@ var Fudge;
             this.dom.tabIndex = 0;
             _container.on("resize", this.redraw);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndEvent);
@@ -4436,6 +4439,7 @@ var Fudge;
                 case "delete" /* DELETE */:
                 case Fudge.EVENT_EDITOR.MODIFY:
                 case Fudge.EVENT_EDITOR.ANIMATE:
+                case Fudge.EVENT_EDITOR.UPDATE:
                     this.redraw();
             }
         };
@@ -4518,7 +4522,7 @@ var Fudge;
             this.fillContent();
             _container.on("resize", this.redraw);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("wheel", this.hndMouse);
@@ -4734,6 +4738,7 @@ var Fudge;
         hndEvent = (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.MODIFY:
+                case Fudge.EVENT_EDITOR.UPDATE:
                     // if ([ƒ.Audio, ƒ.Texture, ƒ.AnimationSprite].some((_type) => this.resource instanceof _type)) {
                     if (this.resource instanceof ƒ.Audio ||
                         this.resource instanceof ƒ.Texture ||
@@ -4841,10 +4846,10 @@ var Fudge;
                     this.fillContent();
                     break;
                 case "mutate" /* MUTATE */:
-                    this.dispatchToParent(Fudge.EVENT_EDITOR.MODIFY, {});
+                    this.dispatchToParent(Fudge.EVENT_EDITOR.UPDATE, {});
                     break;
-                case Fudge.EVENT_EDITOR.MODIFY: // let modify pass
-                    return;
+                // case EVENT_EDITOR.MODIFY: // let modify pass
+                //   return;
                 default:
                     break;
             }

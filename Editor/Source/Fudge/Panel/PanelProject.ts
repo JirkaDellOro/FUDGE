@@ -60,7 +60,7 @@ namespace Fudge {
       this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
 
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
 
@@ -74,9 +74,9 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      if (_event.type != EVENT_EDITOR.MODIFY) // may travel further
+      if (_event.type != EVENT_EDITOR.UPDATE)
         _event.stopPropagation();
-      this.setTitle("Project | " + project.name);
+      this.setTitle("Project | " + project.name); //why here and everytime?
       if (_event.type == ƒui.EVENT.SELECT) {
         this.broadcast(new EditorEvent(EVENT_EDITOR.SELECT, { detail: _event.detail }));
       }

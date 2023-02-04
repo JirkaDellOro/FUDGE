@@ -1,7 +1,7 @@
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
-///<reference path="Project.ts"/>
+///<reference path="Definition.ts"/>
 
 namespace Fudge {
   import ƒ = FudgeCore;
@@ -149,8 +149,7 @@ namespace Fudge {
     private static setupPageListeners(): void {
       document.addEventListener(EVENT_EDITOR.SELECT, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.MODIFY, Page.hndEvent);
-      //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
-      document.addEventListener(ƒui.EVENT.MUTATE, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.UPDATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.CLOSE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.ANIMATE, Page.hndEvent);
       document.addEventListener("keyup", Page.hndKey);

@@ -119,19 +119,21 @@ declare namespace Fudge {
         CREATE = "EDITOR_CREATE",
         /** An entity gets selected and it is necessary to switch contents in the views */
         SELECT = "EDITOR_SELECT",
-        /** An entity gets modified and it is necessary to updated information in views */
+        /** An entity gets modified structurally and it is necessary to update views */
         MODIFY = "EDITOR_MODIFY",
+        /** Values of an entity change and it is necessary to update views */
+        UPDATE = "EDITOR_UPDATE",
         /** An entity gets deleted */
         DELETE = "EDITOR_DELETE",
         /** A view or panel closes */
         CLOSE = "EDITOR_CLOSE",
         /** A view or panel opens */
-        OPEN = "OPEN"
+        OPEN = "EDITOR_OPEN"
         /** A transform matrix gets adjusted interactively */ ,
         TRANSFORM = "EDITOR_TRANSFORM",
         /** An entity recieves focus and can be manipulated using the keyboard */
         FOCUS = "EDITOR_FOCUS",
-        /** An animation is running and modifies entities, which updates views */
+        /** TODO: replace with UPDATE. An animation is running and modifies entities, which updates views */
         ANIMATE = "EDITOR_ANIMATE",
         /** Test the message pump without side effects */
         TEST = "EDITOR_TEST"
@@ -159,33 +161,6 @@ declare namespace Fudge {
     function saveProject(_new?: boolean): Promise<boolean>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class Project extends ƒ.Mutable {
-        #private;
-        base: URL;
-        name: string;
-        fileIndex: string;
-        fileInternal: string;
-        fileScript: string;
-        fileStyles: string;
-        private graphAutoView;
-        constructor(_base: URL);
-        openDialog(): Promise<boolean>;
-        hndChange: (_event: Event) => void;
-        load(htmlContent: string): Promise<void>;
-        getProjectJSON(): string;
-        getProjectCSS(): string;
-        getProjectHTML(_title: string): string;
-        getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
-        protected reduceMutator(_mutator: ƒ.Mutator): void;
-        private getGraphs;
-        private createProjectHTML;
-        private settingsStringify;
-        private panelsStringify;
-        private stringifyHTML;
-    }
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
@@ -226,6 +201,33 @@ declare namespace Fudge {
         private static hndPanelCreated;
         private static loadProject;
         private static setupMainListeners;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class Project extends ƒ.Mutable {
+        #private;
+        base: URL;
+        name: string;
+        fileIndex: string;
+        fileInternal: string;
+        fileScript: string;
+        fileStyles: string;
+        private graphAutoView;
+        constructor(_base: URL);
+        openDialog(): Promise<boolean>;
+        hndChange: (_event: Event) => void;
+        load(htmlContent: string): Promise<void>;
+        getProjectJSON(): string;
+        getProjectCSS(): string;
+        getProjectHTML(_title: string): string;
+        getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+        private getGraphs;
+        private createProjectHTML;
+        private settingsStringify;
+        private panelsStringify;
+        private stringifyHTML;
     }
 }
 declare namespace Fudge {

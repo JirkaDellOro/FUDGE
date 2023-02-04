@@ -18,7 +18,7 @@ namespace Fudge {
 
       this.dom.addEventListener(EVENT_EDITOR.OPEN, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
@@ -206,7 +206,7 @@ namespace Fudge {
       switch (_event.type) {
         case EVENT_EDITOR.OPEN:
         case EVENT_EDITOR.SELECT:
-        case EVENT_EDITOR.MODIFY:
+        // case EVENT_EDITOR.MODIFY:
           this.listResources();
           break;
         case ƒui.EVENT.MUTATE:

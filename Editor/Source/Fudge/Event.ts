@@ -4,19 +4,21 @@ namespace Fudge {
     CREATE = "EDITOR_CREATE",
     /** An entity gets selected and it is necessary to switch contents in the views */
     SELECT = "EDITOR_SELECT",
-    /** An entity gets modified and it is necessary to updated information in views */
+    /** An entity gets modified structurally and it is necessary to update views */
     MODIFY = "EDITOR_MODIFY",
+    /** Values of an entity change and it is necessary to update views */
+    UPDATE = "EDITOR_UPDATE",
     /** An entity gets deleted */
     DELETE = "EDITOR_DELETE",
     /** A view or panel closes */
     CLOSE = "EDITOR_CLOSE",
     /** A view or panel opens */
-    OPEN = "OPEN"
+    OPEN = "EDITOR_OPEN"
     /** A transform matrix gets adjusted interactively */,
     TRANSFORM = "EDITOR_TRANSFORM",
     /** An entity recieves focus and can be manipulated using the keyboard */
     FOCUS = "EDITOR_FOCUS",
-    /** An animation is running and modifies entities, which updates views */
+    /** TODO: replace with UPDATE. An animation is running and modifies entities, which updates views */
     ANIMATE = "EDITOR_ANIMATE",
     /** Test the message pump without side effects */
     TEST = "EDITOR_TEST"
