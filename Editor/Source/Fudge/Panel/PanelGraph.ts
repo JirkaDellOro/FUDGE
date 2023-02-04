@@ -48,10 +48,9 @@ namespace Fudge {
       //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
-      // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
-      // this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndEvent);
 

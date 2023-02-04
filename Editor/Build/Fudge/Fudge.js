@@ -2200,10 +2200,9 @@ var Fudge;
             //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
-            // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
-            // this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndEvent);
             if (_state["graph"])
@@ -2389,6 +2388,7 @@ var Fudge;
             this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: 7 /* Root */ }]);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TEST, this.hndEvent);
             this.setTitle("Project | " + Fudge.project.name);
             this.broadcast(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.OPEN, {}));
@@ -4516,8 +4516,9 @@ var Fudge;
             this.previewNode = this.createStandardGraph();
             this.fillContent();
             _container.on("resize", this.redraw);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("wheel", this.hndMouse);
             this.dom.addEventListener("mousemove", this.hndMouse);
@@ -4788,9 +4789,10 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.fillContent();
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
         }
         fillContent() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -4833,6 +4835,7 @@ var Fudge;
         hndEvent = (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
+                case Fudge.EVENT_EDITOR.DELETE:
                     this.resource = (_event.detail.data);
                     this.fillContent();
                     break;

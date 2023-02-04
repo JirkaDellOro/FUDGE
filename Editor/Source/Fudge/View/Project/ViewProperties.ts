@@ -13,9 +13,10 @@ namespace Fudge {
       super(_container, _state);
       this.fillContent();
 
-      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
     }
 
     private fillContent(): void {
@@ -56,6 +57,7 @@ namespace Fudge {
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
+        case EVENT_EDITOR.DELETE:
           this.resource = <ƒ.SerializableResource>(_event.detail.data);
           this.fillContent();
           break;
