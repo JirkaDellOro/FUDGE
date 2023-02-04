@@ -43,9 +43,9 @@ var SkeletonTest;
     async function loadAnimatedArm() {
         const loader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
         const arm = await loader.getNode("ArmModel");
-        const meshSerialization = ƒ.Serializer.serialize(arm.getComponent(ƒ.ComponentMesh).mesh);
-        console.log(meshSerialization);
-        arm.getComponent(ƒ.ComponentMesh).mesh = await ƒ.Serializer.deserialize(meshSerialization);
+        // const meshSerialization: ƒ.Serialization = ƒ.Serializer.serialize(arm.getComponent(ƒ.ComponentMesh).mesh);
+        // console.log(meshSerialization);
+        // arm.getComponent(ƒ.ComponentMesh).mesh = await ƒ.Serializer.deserialize(meshSerialization) as ƒ.MeshSkin;
         arm.addComponent(new ƒ.ComponentTransform());
         arm.mtxLocal.translateY(-2);
         return arm;

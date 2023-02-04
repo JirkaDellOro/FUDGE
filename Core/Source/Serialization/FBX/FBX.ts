@@ -34,6 +34,9 @@ namespace FudgeCore.FBX {
   /**
    * Interface to represent fbx-objects.
    * All fields other than uid, name, type, subtype, children and parents are loaded with the load-method.
+   * Each object can be interpreted as an explicit fbx object type defined in FudgeCore.FBX. Explicit types have been defined
+   * with the help of following reference:
+   * https://archive.blender.org/wiki/index.php/User:Mont29/Foundation/FBX_File_Structure/#Some_Specific_Property_Types
    * @author Matthias Roming, HFU, 2023
    */
   export interface Object extends ObjectBase {
@@ -42,7 +45,7 @@ namespace FudgeCore.FBX {
 
   export interface Document extends ObjectBase {
     SourceObject?: undefined;
-    ActiveAnimation?: string;
+    ActiveAnimStackName?: string;
     RootNode?: number;
   }
 
@@ -132,7 +135,7 @@ namespace FudgeCore.FBX {
   export interface AnimCurve extends ObjectBase {
     KeyVer?: number;
     Default?: number;
-    KeyTime?: Uint16Array;
+    KeyTime?: BigInt64Array;
     KeyValueFloat?: Float32Array;
   }
 

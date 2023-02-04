@@ -1384,9 +1384,9 @@ declare namespace FudgeCore {
         [attribute: string]: AnimationStructure[] | AnimationStructure | AnimationSequence;
     }
     interface AnimationStructureVector3 extends AnimationStructure {
-        x: AnimationSequence;
-        y: AnimationSequence;
-        z: AnimationSequence;
+        x?: AnimationSequence;
+        y?: AnimationSequence;
+        z?: AnimationSequence;
     }
     interface AnimationStructureMatrix4x4 extends AnimationStructure {
         rotation?: AnimationStructureVector3;
@@ -1532,13 +1532,13 @@ declare namespace FudgeCore {
         /**
          * Ensures the existance of the requested {@link AnimationStrcuture} and returns it.
          * @param _type the type of the structure to get
-         * @returns the requested {@link AnimationStructure]]
+         * @returns the requested [[@link AnimationStructure]]
          */
         private getProcessedAnimationStructure;
         /**
          * Ensures the existance of the requested {@link AnimationEventTrigger} and returns it.
          * @param _type The type of AnimationEventTrigger to get
-         * @returns the requested {@link AnimationEventTrigger]]
+         * @returns the requested {@link AnimationEventTrigger}
          */
         private getProcessedEventTrigger;
         /**
@@ -3917,30 +3917,15 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Mesh loaded from a GLTF-file
-     * @author Matthias Roming, HFU, 2022
+     * Mesh loaded from a file
+     * @author Matthias Roming, HFU, 2022-2023
      */
     class MeshImport extends Mesh {
-        private uri;
+        url: RequestInfo;
         private loader;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        load(_loader?: typeof MeshLoader, _uri?: RequestInfo, _data?: Object): Promise<MeshImport>;
-    }
-}
-declare namespace FudgeCore {
-    class MeshObj extends Mesh {
-        static readonly iSubclass: number;
-        url: RequestInfo;
-        constructor(_name?: string, _url?: RequestInfo);
-        /**
-             * Asynchronously loads the image from the given url
-             */
-        load(_url: RequestInfo): Promise<void>;
-        /** Splits up the obj string into separate arrays for each datatype */
-        parseObj(data: string): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
+        load(_loader?: typeof MeshLoader, _url?: RequestInfo, _data?: Object): Promise<MeshImport>;
         mutate(_mutator: Mutator): Promise<void>;
     }
 }
@@ -4083,8 +4068,8 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Mesh influenced by a skeleton
-     * @author Matthias Roming, HFU, 2022
+     * Mesh influenced by a skeleton and loaded from a file
+     * @author Matthias Roming, HFU, 2022-2023
      */
     class MeshSkin extends MeshImport {
         useRenderBuffers(_shader: ShaderInterface, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
@@ -4218,18 +4203,42 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Base class for MeshImport-loaders
+     * @author Matthias Roming, HFU, 2023
+     */
     abstract class MeshLoader {
         static load(_mesh: MeshImport | MeshSkin, _data?: Object): Promise<MeshImport>;
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Filmbox mesh import
+     * @author Matthias Roming, HFU, 2023
+     */
     class MeshLoaderFBX extends MeshLoader {
         static load(_mesh: MeshImport | MeshSkin, _data: FBX.Geometry): Promise<MeshImport>;
     }
 }
 declare namespace FudgeCore {
+    /**
+     * gl Transfer Format mesh import
+     * @author Matthias Roming, HFU, 2022-2023
+     */
     class MeshLoaderGLTF extends MeshLoader {
         static load(_mesh: MeshImport | MeshSkin, _data?: GLTF.Mesh): Promise<MeshImport>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
+     * static LOAD Method. Currently only works with triangulated Meshes
+     * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
+     * @todo UVs, Load Materials, Support Quads
+     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Matthias Roming, HFU, 2023
+     */
+    class MeshLoaderOBJ extends MeshLoader {
+        static load(_mesh: MeshImport): Promise<MeshImport>;
     }
 }
 declare namespace FudgeCore {
@@ -5695,6 +5704,12 @@ declare namespace FudgeCore {
     export {};
 }
 declare namespace FudgeCore.FBX {
+    /**
+     * Reader to read data from an array buffer more conveniently.
+     * It saves a current offset which is updated when data is readed due to its bytelength.
+     * despite getSequence it is mostly a copy of the reference: https://github.com/picode7/binary-reader
+     * @author Matthias Roming, HFU, 2023
+     */
     class BufferReader {
         offset: number;
         readonly view: DataView;
@@ -5703,17 +5718,22 @@ declare namespace FudgeCore.FBX {
         getBool(_offset?: number): boolean;
         getUint8(_offset?: number): number;
         getUint32(_offset?: number): number;
-        getUint64(_offset?: number): number;
+        getUint64(_offset?: number): bigint;
         getInt16(_offset?: number): number;
         getInt32(_offset?: number): number;
-        getInt64(_offset?: number): number;
+        getInt64(_offset?: number): bigint;
         getFloat32(_offset?: number): number;
         getFloat64(_offset?: number): number;
         getString(_length: number, _offset?: number): string;
-        getSequence(_getter: () => number, _length: number, _offset?: number): Generator<number>;
+        getSequence<T extends number | bigint>(_getter: () => T, _length: number, _offset?: number): Generator<T>;
     }
 }
 declare namespace FudgeCore.FBX {
+    /**
+     * Interface to represent fbx files containing its documents, definitions, objects and connections.
+     * Its objects are devided in all and the different object types.
+     * @author Matthias Roming, HFU, 2023
+     */
     export interface FBX {
         documents: Document[];
         definitions?: Definitions;
@@ -5738,6 +5758,14 @@ declare namespace FudgeCore.FBX {
         loaded: boolean;
         load: () => Object;
     }
+    /**
+     * Interface to represent fbx-objects.
+     * All fields other than uid, name, type, subtype, children and parents are loaded with the load-method.
+     * Each object can be interpreted as an explicit fbx object type defined in FudgeCore.FBX. Explicit types have been defined
+     * with the help of following reference:
+     * https://archive.blender.org/wiki/index.php/User:Mont29/Foundation/FBX_File_Structure/#Some_Specific_Property_Types
+     * @author Matthias Roming, HFU, 2023
+     */
     export interface Object extends ObjectBase {
         [name: string]: NodeProperty | {
             [name: string]: NodeProperty;
@@ -5745,7 +5773,7 @@ declare namespace FudgeCore.FBX {
     }
     export interface Document extends ObjectBase {
         SourceObject?: undefined;
-        ActiveAnimation?: string;
+        ActiveAnimStackName?: string;
         RootNode?: number;
     }
     export interface NodeAttribute extends ObjectBase {
@@ -5818,7 +5846,7 @@ declare namespace FudgeCore.FBX {
     export interface AnimCurve extends ObjectBase {
         KeyVer?: number;
         Default?: number;
-        KeyTime?: Uint16Array;
+        KeyTime?: BigInt64Array;
         KeyValueFloat?: Float32Array;
     }
     export interface LayerElement {
@@ -5870,6 +5898,10 @@ declare namespace FudgeCore.FBX {
     export {};
 }
 declare namespace FudgeCore {
+    /**
+     * Asset loader for Filmbox files.
+     * @author Matthias Roming, HFU, 2023
+     */
     class FBXLoader {
         #private;
         private static loaders;
@@ -5881,7 +5913,7 @@ declare namespace FudgeCore {
         private static get defaultSkinMaterial();
         static LOAD(_uri: string): Promise<FBXLoader>;
         getScene(_index?: number): Promise<GraphInstance>;
-        getNode(_index: number): Promise<Node>;
+        getNode(_index: number, _root?: Node): Promise<Node>;
         getMesh(_index: number): Promise<MeshImport>;
         getMaterial(_index: number): Promise<Material>;
         getTexture(_index: number): Promise<Texture>;
@@ -5889,10 +5921,17 @@ declare namespace FudgeCore {
          * Retriefs the skeleton containing the given limb node.
          */
         getSkeleton(_fbxLimbNode: FBX.Model): Promise<Skeleton>;
+        getAnimation(_index: number): Promise<Animation>;
         private getTransformVector;
+        private getAnimationVector3;
     }
 }
 declare namespace FudgeCore.FBX {
+    /**
+     * Interface to represent fbx-nodes containing its name, children and properties.
+     * Children and properites are lazy.
+     * @author Matthias Roming, HFU, 2023
+     */
     class Node {
         #private;
         name: string;
@@ -5910,9 +5949,18 @@ declare namespace FudgeCore.FBX {
     }
 }
 declare namespace FudgeCore.FBX {
+    /**
+     * Loads an fbx file from its fbx-node array which may be retrieved by parseNodesFromBinary.
+     * @author Matthias Roming, HFU, 2023
+     */
     function loadFromNodes(_nodes: Node[]): FBX;
 }
 declare namespace FudgeCore.FBX {
+    /**
+     * Parses fbx-nodes array from a binary fbx-file.
+     * despite the lazy node implementation it is mostly a copy of the reference: https://github.com/picode7/fbx-parser
+     * @author Matthias Roming, HFU, 2023
+     */
     function parseNodesFromBinary(_buffer: ArrayBuffer): Node[];
 }
 declare namespace GLTF {
@@ -6602,15 +6650,19 @@ declare namespace GLTF {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Asset loader for gl Transfer Format files.
+     * @author Matthias Roming, HFU, 2022
+     */
     class GLTFLoader {
         #private;
         private static loaders;
         private static defaultMaterial;
         private static defaultSkinMaterial;
         readonly gltf: GLTF.GlTf;
-        readonly uri: string;
+        readonly url: string;
         private constructor();
-        static LOAD(_uri: string): Promise<GLTFLoader>;
+        static LOAD(_url: string): Promise<GLTFLoader>;
         getScene(_name?: string): Promise<GraphInstance>;
         getSceneByIndex(_iScene?: number): Promise<GraphInstance>;
         getNode(_name: string): Promise<Node>;

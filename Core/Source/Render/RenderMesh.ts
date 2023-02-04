@@ -110,7 +110,9 @@ namespace FudgeCore {
     public get textureUVs(): Float32Array {
       return this.ƒtextureUVs || ( // return cache or ...
         // ... flatten all uvs from the clous into a typed array
-        this.ƒtextureUVs = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex) => [..._vertex.uv.get()])
+        this.ƒtextureUVs = new Float32Array(this.mesh.vertices
+          .filter(_vertex => _vertex.uv)
+          .flatMap((_vertex: Vertex) => [..._vertex.uv.get()])
         ));
     }
 

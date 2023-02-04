@@ -10,9 +10,9 @@ namespace FudgeCore {
   }
 
   export interface AnimationStructureVector3 extends AnimationStructure {
-    x: AnimationSequence;
-    y: AnimationSequence;
-    z: AnimationSequence;
+    x?: AnimationSequence;
+    y?: AnimationSequence;
+    z?: AnimationSequence;
   }
 
   export interface AnimationStructureMatrix4x4 extends AnimationStructure {
@@ -401,7 +401,7 @@ namespace FudgeCore {
     /**
      * Ensures the existance of the requested {@link AnimationStrcuture} and returns it.
      * @param _type the type of the structure to get
-     * @returns the requested {@link AnimationStructure]]
+     * @returns the requested [[@link AnimationStructure]]
      */
     private getProcessedAnimationStructure(_type: ANIMATION_STRUCTURE_TYPE): AnimationStructure {
       if (!this.animationStructuresProcessed.has(_type)) {
@@ -431,7 +431,7 @@ namespace FudgeCore {
     /**
      * Ensures the existance of the requested {@link AnimationEventTrigger} and returns it.
      * @param _type The type of AnimationEventTrigger to get
-     * @returns the requested {@link AnimationEventTrigger]]
+     * @returns the requested {@link AnimationEventTrigger}
      */
     private getProcessedEventTrigger(_type: ANIMATION_STRUCTURE_TYPE): AnimationEventTrigger {
       if (!this.eventsProcessed.has(_type)) {

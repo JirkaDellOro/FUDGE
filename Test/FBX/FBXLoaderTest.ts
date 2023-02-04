@@ -12,6 +12,7 @@ namespace SkeletonTest {
 
   async function init(): Promise<void> {
     const canvas: HTMLCanvasElement = document.querySelector("canvas") as HTMLCanvasElement;
+    // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./animated_arm.fbx");
     const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./Unarmed Walk Forward.fbx");
     // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./TriangularPrism.fbx");
 
@@ -26,15 +27,6 @@ namespace SkeletonTest {
 
     // load scene
     const scene: ƒ.Node = await loader.getScene(0);
-    for (const node of scene) {
-      if (node.getComponent(ƒ.ComponentMaterial))
-        node.getComponent(ƒ.ComponentMaterial).material.setShader(ƒ.ShaderPhong);
-    }
-    // const scene: ƒ.Node = new ƒ.Node("Scene");
-    // scene.addComponent(new ƒ.ComponentMesh(await loader.getMesh(0)));
-    // scene.addComponent(new ƒ.ComponentMaterial(
-    //   new ƒ.Material("Material", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("white")))
-    // ));
     console.log(scene);
     
     // test loading all documents and objects
@@ -56,7 +48,7 @@ namespace SkeletonTest {
     camera.addComponent(new ƒ.ComponentCamera());
     camera.addComponent(new ƒ.ComponentTransform());
     camera.getComponent(ƒ.ComponentCamera).clrBackground.setHex("4472C4FF");
-    camera.mtxLocal.translateY(80);  // 0
+    camera.mtxLocal.translateY(0);  // 80
     camera.mtxLocal.translateZ(300); // 30
     camera.mtxLocal.lookAt(ƒ.Vector3.Y(camera.mtxLocal.translation.y), camera.mtxLocal.getY());
     rotatorY.addChild(camera);
@@ -81,6 +73,9 @@ namespace SkeletonTest {
     ƒ.Loop.start();
   }
 
+  let gPressed: boolean = false;
+  let iShader: number = 0;
+  const shaders: typeof ƒ.Shader[] = [ƒ.ShaderFlatSkin, ƒ.ShaderGouraudSkin, ƒ.ShaderPhongSkin];
   function update(_viewport: ƒ.Viewport, _mtxRotatorX: ƒ.Matrix4x4, _mtxRotatorY: ƒ.Matrix4x4, _mtxCamera: ƒ.Matrix4x4): void {
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT])) _mtxRotatorY.rotateY(3);
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_UP])) _mtxRotatorX.rotateX(-3);
@@ -100,6 +95,20 @@ namespace SkeletonTest {
       // _mtxCamera.translateY(mouse.position.y / _mtxCamera.translation.z);
       _mtxCamera.translateZ(-_mtxCamera.translation.z * 0.1);
     }
+    const setShader: (_shader: typeof ƒ.Shader) => void = _shader => {
+      for (const node of _viewport.getBranch()) {
+        if (node.getComponent(ƒ.ComponentMaterial))
+          node.getComponent(ƒ.ComponentMaterial).material.setShader(_shader);
+      }
+    };
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.G])) {
+      if (!gPressed) {
+        gPressed = true;
+        setShader(shaders[iShader = (iShader + 1) % shaders.length]);
+      }
+    }
+    else gPressed = false;
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H])) setShader(ƒ.ShaderPhong);
     _viewport.draw();
   }
 }

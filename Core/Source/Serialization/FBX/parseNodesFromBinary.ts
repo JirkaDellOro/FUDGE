@@ -29,12 +29,12 @@ namespace FudgeCore.FBX {
   }
 
   function readNode(_data: BufferReader, _attributesAsUint64: boolean): Node {
-    const endOffset: number = _attributesAsUint64 ? _data.getUint64() : _data.getUint32();
+    const endOffset: number = _attributesAsUint64 ? Number(_data.getUint64()) : _data.getUint32();
     if (endOffset == 0)
       return null;
 
-    const propertiesLength: number = _attributesAsUint64 ? _data.getUint64() : _data.getUint32();
-    const propertiesByteLength: number = _attributesAsUint64 ? _data.getUint64() : _data.getUint32();
+    const propertiesLength: number = _attributesAsUint64 ? Number(_data.getUint64()) : _data.getUint32();
+    const propertiesByteLength: number = _attributesAsUint64 ? Number(_data.getUint64()) : _data.getUint32();
     const nameLength: number = _data.getUint8();
     const name: string = _data.getString(nameLength);
     const propertiesOffset: number = _data.offset;
@@ -82,7 +82,7 @@ namespace FudgeCore.FBX {
       r: () => new Uint8Array(readArray(_data, _data.getUint8)),
       b: () => new Uint8Array(readArray(_data, _data.getUint8)),
       i: () => new Int32Array(readArray(_data, _data.getInt32)),
-      l: () => new Int32Array(readArray(_data, _data.getInt64)),
+      l: () => new BigInt64Array(readArray(_data, _data.getInt64)),
       f: () => new Float32Array(readArray(_data, _data.getFloat32)),
       d: () => new Float32Array(readArray(_data, _data.getFloat64))
     }[typeCode]?.call(_data);
@@ -93,13 +93,13 @@ namespace FudgeCore.FBX {
     return value;
   }
 
-  function readArray(_data: BufferReader, _getter: () => number): Generator<number> {
+  function readArray<T extends number | bigint>(_data: BufferReader, _getter: () => T): Generator<T> {
     const length: number = _data.getUint32();
     const encoding: FBX.ArrayEncoding = _data.getUint32();
     const byteLength: number = _data.getUint32();
     const endOffset: number = _data.offset + byteLength;
 
-    const iterable: Generator<number> = encoding == FBX.ArrayEncoding.COMPRESSED ?
+    const iterable: Generator<T> = encoding == FBX.ArrayEncoding.COMPRESSED ?
       (() => {
         const arrayData: Uint8Array = new Uint8Array(_data.view.buffer, _data.offset, byteLength);
         const inflatedData: Uint8Array = (Reflect.get(globalThis, "pako") ? pako.inflate : fflate.inflateSync)(arrayData);

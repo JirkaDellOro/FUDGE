@@ -21,6 +21,7 @@ namespace FudgeCore {
     #skinMaterials: Material[] = [];
     #textures: Texture[];
     #skeletons: Skeleton[];
+    #animations: Animation[];
 
     public constructor(_buffer: ArrayBuffer, _uri: string) {
       this.uri = _uri;
@@ -57,15 +58,23 @@ namespace FudgeCore {
       if (!this.#scenes)
         this.#scenes = [];
       if (!this.#scenes[_index]) {
-        const documentFBX: FBX.Model = this.fbx.documents[_index].load();
+        const documentFBX: FBX.Document = this.fbx.documents[_index].load();
         const scene: Graph = new Graph(documentFBX.name);
-        for (const objectFBX of documentFBX.children) {
-          if (objectFBX.type == "Model") {
-            if (objectFBX.subtype == "LimbNode")
-              await this.getSkeleton(objectFBX);
+        for (const childFBX of documentFBX.children) {
+          if (childFBX.type == "Model") {
+            if (childFBX.subtype == "LimbNode")
+              scene.addChild(await SkeletonInstance.CREATE(await this.getSkeleton(childFBX)));
             else
-              scene.addChild(await this.getNode(this.fbx.objects.models.indexOf(objectFBX)));
+              scene.addChild(await this.getNode(this.fbx.objects.models.indexOf(childFBX), scene));
           }
+        }
+        const animation: Animation = await this.getAnimation(documentFBX.ActiveAnimStackName.length > 0 ?
+          this.fbx.objects.animStacks.findIndex(animStack => animStack.name == documentFBX.ActiveAnimStackName) : 0);
+        for (const child of scene) {
+          if (child.name == "Skeleton0")
+            child.getParent().addComponent(new ComponentAnimator(
+              animation, ANIMATION_PLAYMODE.LOOP, ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS
+            ));
         }
         Project.register(scene);
         this.#scenes[_index] = scene;
@@ -73,7 +82,7 @@ namespace FudgeCore {
       return await Project.createGraphInstance(this.#scenes[_index]);
     }
 
-    public async getNode(_index: number): Promise<Node> {
+    public async getNode(_index: number, _root?: Node): Promise<Node> {
       if (!this.#nodes)
         this.#nodes = [];
       if (!this.#nodes[_index]) {
@@ -89,16 +98,25 @@ namespace FudgeCore {
         }
         if (modelFBX.children) for (const childFBX of modelFBX.children) {
           if (childFBX.type == "Model") {
-            node.addChild(await this.getNode(this.fbx.objects.models.indexOf(childFBX)));
+            if (_root && childFBX.subtype == "LimbNode") {
+              const skeleton: Skeleton = await this.getSkeleton(childFBX);
+              let skeletonInstance: SkeletonInstance;
+              for (const child of _root) {
+                if (child instanceof SkeletonInstance && child.idSource == skeleton.idResource)
+                  skeletonInstance = child;
+              }
+              node.addChild(skeletonInstance || await SkeletonInstance.CREATE(skeleton));
+            }
+            else
+              node.addChild(await this.getNode(this.fbx.objects.models.indexOf(childFBX)));
           }
           else if (childFBX.type == "Geometry") {
             const mesh: MeshImport = await this.getMesh(this.fbx.objects.geometries.indexOf(childFBX));
             const cmpMesh: ComponentMesh = new ComponentMesh(mesh);
             node.addComponent(new ComponentMaterial(FBXLoader.defaultMaterial));
             if (mesh instanceof MeshSkin) {
-              cmpMesh.bindSkeleton(await SkeletonInstance.CREATE(
-                await this.getSkeleton(childFBX.children[0].children[0].children[0]) // Model.Deformer.SubDeformer.LimbNode
-              ));
+              const skeleton: Skeleton = await this.getSkeleton(childFBX.children[0].children[0].children[0]); // Model.Deformer.SubDeformer.LimbNode
+              cmpMesh.bindSkeleton(_root?.getChild(0) as SkeletonInstance || await SkeletonInstance.CREATE(skeleton));
               node.getComponent(ComponentMaterial).material = FBXLoader.defaultSkinMaterial;
             }
             node.addComponent(cmpMesh);
@@ -106,18 +124,15 @@ namespace FudgeCore {
           else if (childFBX.type == "Material") {
             const iMaterial: number = this.fbx.objects.materials.indexOf(childFBX);
             const material: Material = await this.getMaterial(iMaterial);
-            if (node.getComponent(ComponentMesh).mesh instanceof MeshSkin) {
-              node.getComponent(ComponentMaterial).material = this.#skinMaterials[iMaterial] || (
-                this.#skinMaterials[iMaterial] = new Material(
-                  material.name,
-                  material.getShader() == ShaderPhong ?
-                    ShaderPhongSkin :
-                    ShaderPhongTexturedSkin,
-                  material.coat
-                )
-              );
-            }
-            node.getComponent(ComponentMaterial).material = material;
+            node.getComponent(ComponentMaterial).material = node.getComponent(ComponentMesh).mesh instanceof MeshSkin ?
+              this.#skinMaterials[iMaterial] || (this.#skinMaterials[iMaterial] = new Material(
+                material.name,
+                material.getShader() == ShaderPhong ?
+                  ShaderPhongSkin :
+                  ShaderPhongTexturedSkin,
+                material.coat
+              )) :
+              material;
           }
         }
         this.#nodes[_index] = node;
@@ -189,7 +204,7 @@ namespace FudgeCore {
       if (!this.#skeletons)
         this.#skeletons = [];
       return this.#skeletons.find(skeleton => _fbxLimbNode.name in skeleton.bones) || await (async() => {
-        const skeleton: Skeleton = new Skeleton();
+        const skeleton: Skeleton = new Skeleton(`Skeleton${this.#skeletons.length}`);
         let rootNode: FBX.Model = _fbxLimbNode;
         while (rootNode.parents && rootNode.parents.some(parent => parent.subtype == "LimbNode"))
           rootNode = rootNode.parents.find(parent => parent.subtype == "LimbNode");
@@ -204,6 +219,35 @@ namespace FudgeCore {
         this.#skeletons.push(skeleton);
         return skeleton;
       })();
+    }
+
+    public async getAnimation(_index: number): Promise<Animation> {
+      if (!this.#animations)
+        this.#animations = [];
+      if (!this.#animations[_index]) {
+        const animStack: FBX.Object = this.fbx.objects.animStacks[_index];
+        const animNodesFBX: FBX.AnimCurveNode[] = animStack.children[0].children;
+        const animStructure: {
+          children: {
+            [childName: string]: {
+              mtxBoneLocals: {
+                [boneName: string]: AnimationStructureMatrix4x4
+              }
+            }
+          }
+        } = { children: { "Skeleton0": { mtxBoneLocals: {} } } };
+        for (const animNodeFBX of animNodesFBX) {
+          const target: FBX.Object = animNodeFBX.parents.find(parent => parent.type != "AnimLayer");
+          (animStructure.children.Skeleton0.mtxBoneLocals[target.name] ||
+            (animStructure.children.Skeleton0.mtxBoneLocals[target.name] = {}))[{
+            T: "translation",
+            R: "rotation",
+            S: "scale"
+          }[animNodeFBX.name]] = this.getAnimationVector3(animNodeFBX);
+        }
+        this.#animations[_index] = new Animation(animStack.name, animStructure);
+      }
+      return this.#animations[_index];
     }
 
     private getTransformVector(_vector: number | Vector3 | FBX.AnimCurveNode, _default: () => Vector3): Vector3 {
@@ -226,6 +270,23 @@ namespace FudgeCore {
               (_vector.dZ.load() as FBX.AnimCurve).Default
           )
       );
+    }
+
+    private getAnimationVector3(_animNode: FBX.AnimCurveNode): AnimationStructureVector3 {
+      const vectorSequence: AnimationStructureVector3 = {};
+      for (const valueName in _animNode) if (valueName == "dX" || valueName == "dY" || valueName == "dZ") {
+        const value: FBX.AnimCurve | number = _animNode[valueName];
+        if (typeof value != "number") {
+          const sequence: AnimationSequence = new AnimationSequence();
+          for (let i: number = 0; i < value.KeyTime.length; ++i) {
+            // According to the reference time is defined as a signed int64, unit being 1/46186158000 seconds
+            // ref: https://archive.blender.org/wiki/index.php/User:Mont29/Foundation/FBX_File_Structure/#Some_Specific_Property_Types
+            sequence.addKey(new AnimationKey(Number((value.KeyTime[i] - value.KeyTime.reduce((min, v) => v < min ? v : min)) / BigInt("46186158")), value.KeyValueFloat[i]));
+          }
+          vectorSequence[valueName[1].toLowerCase()] = sequence;
+        }
+      }
+      return vectorSequence;
     }
 
   }

@@ -9,6 +9,7 @@ var SkeletonTest;
     window.addEventListener("load", init);
     async function init() {
         const canvas = document.querySelector("canvas");
+        // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./animated_arm.fbx");
         const loader = await ƒ.FBXLoader.LOAD("./Unarmed Walk Forward.fbx");
         // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./TriangularPrism.fbx");
         // track mouse position relative to canvas center
@@ -20,15 +21,6 @@ var SkeletonTest;
         console.log(await loader.getMesh(0));
         // load scene
         const scene = await loader.getScene(0);
-        for (const node of scene) {
-            if (node.getComponent(ƒ.ComponentMaterial))
-                node.getComponent(ƒ.ComponentMaterial).material.setShader(ƒ.ShaderPhong);
-        }
-        // const scene: ƒ.Node = new ƒ.Node("Scene");
-        // scene.addComponent(new ƒ.ComponentMesh(await loader.getMesh(0)));
-        // scene.addComponent(new ƒ.ComponentMaterial(
-        //   new ƒ.Material("Material", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("white")))
-        // ));
         console.log(scene);
         // test loading all documents and objects
         // loader.fbx.documents.forEach(_document => _document.load());
@@ -46,7 +38,7 @@ var SkeletonTest;
         camera.addComponent(new ƒ.ComponentCamera());
         camera.addComponent(new ƒ.ComponentTransform());
         camera.getComponent(ƒ.ComponentCamera).clrBackground.setHex("4472C4FF");
-        camera.mtxLocal.translateY(80); // 0
+        camera.mtxLocal.translateY(0); // 80
         camera.mtxLocal.translateZ(300); // 30
         camera.mtxLocal.lookAt(ƒ.Vector3.Y(camera.mtxLocal.translation.y), camera.mtxLocal.getY());
         rotatorY.addChild(camera);
@@ -65,6 +57,9 @@ var SkeletonTest;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal, camera.mtxLocal));
         ƒ.Loop.start();
     }
+    let gPressed = false;
+    let iShader = 0;
+    const shaders = [ƒ.ShaderFlatSkin, ƒ.ShaderGouraudSkin, ƒ.ShaderPhongSkin];
     function update(_viewport, _mtxRotatorX, _mtxRotatorY, _mtxCamera) {
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT]))
             _mtxRotatorY.rotateY(3);
@@ -88,6 +83,22 @@ var SkeletonTest;
             // _mtxCamera.translateY(mouse.position.y / _mtxCamera.translation.z);
             _mtxCamera.translateZ(-_mtxCamera.translation.z * 0.1);
         }
+        const setShader = _shader => {
+            for (const node of _viewport.getBranch()) {
+                if (node.getComponent(ƒ.ComponentMaterial))
+                    node.getComponent(ƒ.ComponentMaterial).material.setShader(_shader);
+            }
+        };
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.G])) {
+            if (!gPressed) {
+                gPressed = true;
+                setShader(shaders[iShader = (iShader + 1) % shaders.length]);
+            }
+        }
+        else
+            gPressed = false;
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H]))
+            setShader(ƒ.ShaderPhong);
         _viewport.draw();
     }
 })(SkeletonTest || (SkeletonTest = {}));

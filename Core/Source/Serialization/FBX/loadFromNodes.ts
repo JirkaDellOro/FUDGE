@@ -101,10 +101,10 @@ namespace FudgeCore.FBX {
         if (parent != undefined && child != undefined)
           break;
       }
-      if (connection.propertyName == null) {
-        (parent.children || (parent.children = [])).push(child);
+      if (child)
         (child.parents || (child.parents = [])).push(parent);
-      }
+      if (connection.propertyName == null)
+        (parent.children || (parent.children = [])).push(child);
       else
         (parent as Object)[formatPropertyName(connection.propertyName)] = child;
     }

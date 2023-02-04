@@ -32,9 +32,9 @@ namespace FudgeCore.FBX {
       return this.view.getUint32(_offset, true);
     }
 
-    public getUint64(_offset: number = this.offset): number {
+    public getUint64(_offset: number = this.offset): bigint {
       this.offset = _offset + 8;
-      return Number(this.view.getBigUint64(_offset, true));
+      return this.view.getBigUint64(_offset, true);
     }
 
     public getInt16(_offset: number = this.offset): number {
@@ -47,9 +47,9 @@ namespace FudgeCore.FBX {
       return this.view.getInt32(_offset, true);
     }
 
-    public getInt64(_offset: number = this.offset): number {
+    public getInt64(_offset: number = this.offset): bigint {
       this.offset = _offset + 8;
-      return Number(this.view.getBigInt64(_offset, true));
+      return this.view.getBigInt64(_offset, true);
     }
 
     public getFloat32(_offset: number = this.offset): number {
@@ -66,7 +66,7 @@ namespace FudgeCore.FBX {
       return String.fromCharCode(...this.getSequence(this.getUint8, _length, _offset));
     }
 
-    public *getSequence(_getter: () => number, _length: number, _offset: number = this.offset): Generator<number> {
+    public *getSequence<T extends number | bigint>(_getter: () => T, _length: number, _offset: number = this.offset): Generator<T> {
       this.offset = _offset;
       for (let i: number = 0; i < _length; i++) {
         yield _getter.call(this);
