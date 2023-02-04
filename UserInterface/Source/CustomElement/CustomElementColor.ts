@@ -38,7 +38,7 @@ namespace FudgeUserInterface {
       slider.max = "1";
       slider.step = "0.01";
       this.appendChild(slider);
-      slider.addEventListener(EVENT.WHEEL, this.hndWheel);
+      slider.addEventListener(EVENT.WHEEL, this.hndWheel, {passive: true});
     }
 
     /**

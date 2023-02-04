@@ -58,7 +58,7 @@ namespace FudgeUserInterface {
       input.addEventListener(EVENT.BLUR, this.hndInput);
       this.addEventListener(EVENT.BLUR, this.hndFocus);
       this.addEventListener(EVENT.KEY_DOWN, this.hndKey);
-      this.addEventListener(EVENT.WHEEL, this.hndWheel);
+      this.addEventListener(EVENT.WHEEL, this.hndWheel, {passive: true});
       this.display();
     }
 

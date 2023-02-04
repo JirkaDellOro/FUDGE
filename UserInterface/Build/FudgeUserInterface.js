@@ -462,7 +462,7 @@ var FudgeUserInterface;
             slider.max = "1";
             slider.step = "0.01";
             this.appendChild(slider);
-            slider.addEventListener("wheel" /* WHEEL */, this.hndWheel);
+            slider.addEventListener("wheel" /* WHEEL */, this.hndWheel, { passive: true });
         }
         /**
          * Retrieves the values of picker and slider as ƒ.Mutator
@@ -804,7 +804,7 @@ var FudgeUserInterface;
             input.addEventListener("blur" /* BLUR */, this.hndInput);
             this.addEventListener("blur" /* BLUR */, this.hndFocus);
             this.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
-            this.addEventListener("wheel" /* WHEEL */, this.hndWheel);
+            this.addEventListener("wheel" /* WHEEL */, this.hndWheel, { passive: true });
             this.display();
         }
         /**

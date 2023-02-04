@@ -59,7 +59,7 @@ namespace FudgeUserInterface {
 
     private create(_filter: TABLE[]): void {
       for (let entry of _filter) {
-        let value: string = Reflect.get(this.data, entry.key);
+        let value: string = <string>Reflect.get(this.data, entry.key);
         let td: HTMLTableCellElement = document.createElement("td");
         let input: HTMLInputElement = document.createElement("input");
         input.type = "text";
