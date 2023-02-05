@@ -82,7 +82,10 @@ var RaySceneVR;
                 this.computeRay();
                 if (this.hasObject) {
                     let interpolatedDiff = f.Vector3.DIFFERENCE(this.lastPosCntrl, this.controller.cmpTransform.mtxLocal.translation).z;
-                    this.pick.mtxLocal.translation = new f.Vector3(0, 0, -this.node.getComponent(f.ComponentMesh).mtxPivot.scaling.y + (interpolatedDiff * 25));
+                    if (this.lastPosCntrl.z < 0)
+                        this.pick.mtxLocal.translation = new f.Vector3(0, 0, -this.node.getComponent(f.ComponentMesh).mtxPivot.scaling.y + (interpolatedDiff * 25));
+                    else
+                        this.pick.mtxLocal.translation = new f.Vector3(0, 0, -this.node.getComponent(f.ComponentMesh).mtxPivot.scaling.y + (-interpolatedDiff * 25));
                     this.pick.mtxLocal.rotation = this.controller.cmpTransform.mtxLocal.rotation;
                 }
             }
