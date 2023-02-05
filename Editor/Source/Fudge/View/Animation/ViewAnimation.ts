@@ -201,6 +201,12 @@ namespace Fudge {
           }
           break;
         case EVENT_EDITOR.MODIFY:
+          if (_event.detail.mutable instanceof ƒ.ComponentAnimator) {
+            // switched animation in a ComponentAnimator
+            if (this.node == _event.detail.mutable.node)
+              this.dispatch(EVENT_EDITOR.SELECT, { detail: { node: _event.detail.mutable.node } });
+            break;
+          }
           if (_event.detail.view instanceof ViewAnimationSheet)
             this.pause();
 

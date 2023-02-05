@@ -1223,6 +1223,7 @@ var Fudge;
                 return;
             }
             switch (choice) {
+                //TODO: dispatch CREATE instead of MODIFY!
                 case Fudge.CONTEXTMENU.CREATE_MESH:
                     let typeMesh = ƒ.Mesh.subclasses[iSubclass];
                     //@ts-ignore
@@ -2154,6 +2155,7 @@ var Fudge;
                     let name = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation?.name;
                     if (name)
                         this.setTitle("Animation | " + name);
+                    break;
             }
             this.broadcast(_event);
             _event.stopPropagation();
@@ -2233,7 +2235,7 @@ var Fudge;
             // TODO: iterate over views and collect their states for reconstruction 
         }
         hndEvent = async (_event) => {
-            if (_event.type != Fudge.EVENT_EDITOR.UPDATE)
+            if (_event.type != Fudge.EVENT_EDITOR.UPDATE && _event.type != Fudge.EVENT_EDITOR.MODIFY)
                 _event.stopPropagation();
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
@@ -2241,28 +2243,14 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.MODIFY:
                     if (!_event.detail)
                         break;
-                    // switched animation in a ComponentAnimator
-                    if (_event.detail.mutable instanceof ƒ.ComponentAnimator) {
-                        if (_event.detail.view != this) {
-                            _event = new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, {
-                                bubbles: true, detail: { mutable: _event.detail.mutable, node: _event.detail.mutable.node, view: this }
-                            });
-                            this.dom.parentElement.dispatchEvent(_event);
-                        }
-                        return;
-                    }
                     // selected a graph or a node
                     if (this.graph) {
-                        this.setGraph(_event.detail.graph);
+                        this.setGraph(_event.detail.graph); // TODO: examine, why this is supposed to happen any time...
                         let newGraph = await ƒ.Project.getResource(this.graph.idResource);
-                        if (this.graph != newGraph)
+                        if (this.graph != newGraph) // TODO: examine, when this is actually true...
                             _event = new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
                     }
                     break;
-                //TODO: ƒui-Event only in views
-                // case ƒui.EVENT.SELECT:
-                //   _event = new EditorEvent(EVENT_EDITOR.SELECT, { bubbles: false, detail: { node: _event.detail.data, view: this } });
-                //   break;
             }
             this.broadcast(_event);
         };
@@ -2894,6 +2882,12 @@ var Fudge;
                     }
                     break;
                 case Fudge.EVENT_EDITOR.MODIFY:
+                    if (_event.detail.mutable instanceof ƒ.ComponentAnimator) {
+                        // switched animation in a ComponentAnimator
+                        if (this.node == _event.detail.mutable.node)
+                            this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { node: _event.detail.mutable.node } });
+                        break;
+                    }
                     if (_event.detail.view instanceof Fudge.ViewAnimationSheet)
                         this.pause();
                     this.playbackTime = _event.detail.data;

@@ -116,6 +116,7 @@ namespace Fudge {
       }
 
       switch (choice) {
+        //TODO: dispatch CREATE instead of MODIFY!
         case CONTEXTMENU.CREATE_MESH:
           let typeMesh: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
           //@ts-ignore

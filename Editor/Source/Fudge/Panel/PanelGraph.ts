@@ -83,7 +83,7 @@ namespace Fudge {
     }
 
     private hndEvent = async (_event: EditorEvent | CustomEvent): Promise<void> => {
-      if (_event.type != EVENT_EDITOR.UPDATE)
+      if (_event.type != EVENT_EDITOR.UPDATE && _event.type != EVENT_EDITOR.MODIFY)
         _event.stopPropagation();
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
@@ -91,28 +91,14 @@ namespace Fudge {
         case EVENT_EDITOR.MODIFY:
           if (!_event.detail)
             break;
-          // switched animation in a ComponentAnimator
-          if (_event.detail.mutable instanceof ƒ.ComponentAnimator) {
-            if (_event.detail.view != this) {
-              _event = new EditorEvent(EVENT_EDITOR.SELECT, {
-                bubbles: true, detail: { mutable: _event.detail.mutable, node: _event.detail.mutable.node, view: this }
-              });
-              this.dom.parentElement.dispatchEvent(_event);
-            }
-            return;
-          }
           // selected a graph or a node
           if (this.graph) {
-            this.setGraph(_event.detail.graph);
+            this.setGraph(_event.detail.graph); // TODO: examine, why this is supposed to happen any time...
             let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
-            if (this.graph != newGraph)
+            if (this.graph != newGraph) // TODO: examine, when this is actually true...
               _event = new EditorEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
           }
           break;
-        //TODO: ƒui-Event only in views
-        // case ƒui.EVENT.SELECT:
-        //   _event = new EditorEvent(EVENT_EDITOR.SELECT, { bubbles: false, detail: { node: _event.detail.data, view: this } });
-        //   break;
       }
 
       this.broadcast(_event);

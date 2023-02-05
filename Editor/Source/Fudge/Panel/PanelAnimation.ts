@@ -51,7 +51,9 @@ namespace Fudge {
         case EVENT_EDITOR.SELECT:
           let name: string = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation?.name;
           if (name)
-          this.setTitle("Animation | " + name);
+            this.setTitle("Animation | " + name);
+
+          break;
       }
 
       this.broadcast(_event);
