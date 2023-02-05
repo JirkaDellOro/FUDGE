@@ -37,6 +37,7 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
@@ -267,7 +268,8 @@ namespace Fudge {
       let data: Object = {
         transform: Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera, inverted: _event.shiftKey
       };
-      this.dispatch(EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: { transform: data } });
+      this.dispatchToParent(EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: { transform: data } });
+      this.dispatchToParent(EVENT_EDITOR.UPDATE, {});
       this.redraw();
     }
 

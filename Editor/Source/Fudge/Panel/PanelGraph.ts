@@ -83,7 +83,8 @@ namespace Fudge {
     }
 
     private hndEvent = async (_event: EditorEvent | CustomEvent): Promise<void> => {
-      _event.stopPropagation();
+      if (_event.type != EVENT_EDITOR.UPDATE)
+        _event.stopPropagation();
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
           this.setGraph(_event.detail.graph);
@@ -108,7 +109,7 @@ namespace Fudge {
               _event = new EditorEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
           }
           break;
-          //TODO: ƒui-Event only in views
+        //TODO: ƒui-Event only in views
         // case ƒui.EVENT.SELECT:
         //   _event = new EditorEvent(EVENT_EDITOR.SELECT, { bubbles: false, detail: { node: _event.detail.data, view: this } });
         //   break;

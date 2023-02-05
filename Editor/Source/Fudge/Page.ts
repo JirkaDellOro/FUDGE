@@ -151,7 +151,9 @@ namespace Fudge {
       document.addEventListener(EVENT_EDITOR.MODIFY, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.UPDATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.CLOSE, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.UPDATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.ANIMATE, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.TRANSFORM, Page.hndEvent);
       document.addEventListener("keyup", Page.hndKey);
       document.addEventListener(EVENT_EDITOR.TEST, Page.hndEvent);
     }

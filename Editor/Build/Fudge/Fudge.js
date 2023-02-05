@@ -451,7 +451,9 @@ var Fudge;
             document.addEventListener(Fudge.EVENT_EDITOR.MODIFY, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
             document.addEventListener(Fudge.EVENT_EDITOR.TEST, Page.hndEvent);
         }
@@ -2231,7 +2233,8 @@ var Fudge;
             // TODO: iterate over views and collect their states for reconstruction 
         }
         hndEvent = async (_event) => {
-            _event.stopPropagation();
+            if (_event.type != Fudge.EVENT_EDITOR.UPDATE)
+                _event.stopPropagation();
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
                     this.setGraph(_event.detail.graph);
@@ -3811,7 +3814,7 @@ var Fudge;
                         console.log(element.tagName);
                         let controller = Reflect.get(element, "controller");
                         if (element.tagName == "DETAILS" && controller) {
-                            this.dom.dispatchEvent(new CustomEvent("delete" /* DELETE */, { detail: { mutable: controller.getMutable() } }));
+                            this.dispatch(Fudge.EVENT_EDITOR.DELETE, { detail: { mutable: controller.getMutable() } });
                             break;
                         }
                         element = element.parentElement;
@@ -3833,8 +3836,8 @@ var Fudge;
                 }
             ƒ.Debug.info(cmpNew.type, cmpNew);
             this.node.addComponent(cmpNew);
-            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
-            this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.node } }));
+            this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
+            this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.node } });
         }
         //#endregion
         hndDragOver(_event, _viewSource) {
@@ -3862,7 +3865,7 @@ var Fudge;
                 this.node.addComponent(cmpNew);
                 this.expanded[cmpNew.type] = true;
             }
-            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+            this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
         }
         fillContent() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -3927,7 +3930,7 @@ var Fudge;
                 case "delete" /* DELETE */:
                     let component = _event.detail.mutable;
                     this.node.removeComponent(component);
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
                     break;
                 case "keydown" /* KEY_DOWN */:
                 case "click" /* CLICK */:
@@ -4271,6 +4274,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("pointermove", this.hndPointer);
@@ -4472,7 +4476,8 @@ var Fudge;
             let data = {
                 transform: Fudge.Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera, inverted: _event.shiftKey
             };
-            this.dispatch(Fudge.EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: { transform: data } });
+            this.dispatchToParent(Fudge.EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: { transform: data } });
+            this.dispatchToParent(Fudge.EVENT_EDITOR.UPDATE, {});
             this.redraw();
         };
         activeViewport = (_event) => {

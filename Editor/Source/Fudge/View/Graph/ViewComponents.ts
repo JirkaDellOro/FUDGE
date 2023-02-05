@@ -92,7 +92,7 @@ namespace Fudge {
             console.log(element.tagName);
             let controller: ControllerDetail = Reflect.get(element, "controller");
             if (element.tagName == "DETAILS" && controller) {
-              this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.DELETE, { detail: { mutable: controller.getMutable() } }));
+              this.dispatch(EVENT_EDITOR.DELETE, { detail: { mutable: <ƒ.Mutable>controller.getMutable() } });
               break;
             }
             element = element.parentElement;
@@ -116,8 +116,8 @@ namespace Fudge {
       ƒ.Debug.info(cmpNew.type, cmpNew);
 
       this.node.addComponent(cmpNew);
-      this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
-      this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: this.node } }));
+      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
+      this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.node } });
     }
     //#endregion
 
@@ -149,7 +149,7 @@ namespace Fudge {
         this.node.addComponent(cmpNew);
         this.expanded[cmpNew.type] = true;
       }
-      this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
     }
 
     private fillContent(): void {
@@ -219,7 +219,7 @@ namespace Fudge {
         case ƒUi.EVENT.DELETE:
           let component: ƒ.Component = <ƒ.Component>_event.detail.mutable;
           this.node.removeComponent(component);
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
           break;
         case ƒUi.EVENT.KEY_DOWN:
         case ƒUi.EVENT.CLICK:
