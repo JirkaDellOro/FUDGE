@@ -142,7 +142,7 @@
             "ƒ.ComponentMesh": {
               "idMesh": "MeshSprite|2023-01-08T11:22:54.261Z|98107",
               "pivot": {
-                "translation": "[0, 0.75, 0]",
+                "translation": "[0, 1.75, 0]",
                 "rotation": "[0, 0, 0]",
                 "scaling": "[1, 1.5, 1]"
               },
@@ -184,6 +184,61 @@
               "animateInEditor": false
             }
           }
+        ],
+        "ComponentTransform": [
+          {
+            "ƒ.ComponentTransform": {
+              "local": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "Component": {
+                "active": true
+              }
+            }
+          }
+        ],
+        "ComponentRigidbody": [
+          {
+            "ƒ.ComponentRigidbody": {
+              "initialization": "TO_MESH",
+              "friction": 0.2,
+              "restitution": 0.2,
+              "mass": 1,
+              "dampTranslation": 0.1,
+              "dampRotation": 0.1,
+              "effectGravity": -1,
+              "typeBody": "DYNAMIC",
+              "typeCollider": "CUBE",
+              "isTrigger": false,
+              "id": 0,
+              "pivot": {
+                "translation": "[0, 1.75, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1.5, 1]"
+              },
+              "Component": {
+                "active": true
+              }
+            }
+          }
+        ],
+        "JointWelding": [
+          {
+            "ƒ.JointWelding": {
+              "Joint": {
+                "nameChildToConnect": "Cube",
+                "internalCollision": false,
+                "breakForce": 100,
+                "breakTorque": 100,
+                "anchor": "[-1, 0, 0]",
+                "Component": {
+                  "active": true
+                }
+              }
+            }
+          }
         ]
       },
       "children": [
@@ -222,6 +277,45 @@
                       "active": true
                     },
                     "idMaterial": "Material|2023-01-25T18:52:25.854Z|15054"
+                  }
+                }
+              ],
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentRigidbody": [
+                {
+                  "ƒ.ComponentRigidbody": {
+                    "initialization": "TO_MESH",
+                    "friction": 0.2,
+                    "restitution": 0.2,
+                    "mass": 1,
+                    "dampTranslation": 0.1,
+                    "dampRotation": 0.1,
+                    "effectGravity": 1,
+                    "typeBody": "DYNAMIC",
+                    "typeCollider": "CUBE",
+                    "isTrigger": false,
+                    "id": 1,
+                    "pivot": {
+                      "translation": "[0, -0.5, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
                   }
                 }
               ]
