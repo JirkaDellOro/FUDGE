@@ -216,6 +216,14 @@
                           }
                         }
                       }
+                    ],
+                    "GrabbableObject": [
+                      {
+                        "RaySceneVR.GrabbableObject": {
+                          "active": true,
+                          "isGrabbed": false
+                        }
+                      }
                     ]
                   },
                   "children": []
@@ -270,6 +278,14 @@
                           "Component": {
                             "active": true
                           }
+                        }
+                      }
+                    ],
+                    "GrabbableObject": [
+                      {
+                        "RaySceneVR.GrabbableObject": {
+                          "active": true,
+                          "isGrabbed": false
                         }
                       }
                     ]
@@ -328,6 +344,14 @@
                           }
                         }
                       }
+                    ],
+                    "GrabbableObject": [
+                      {
+                        "RaySceneVR.GrabbableObject": {
+                          "active": true,
+                          "isGrabbed": false
+                        }
+                      }
                     ]
                   },
                   "children": []
@@ -382,6 +406,14 @@
                           "Component": {
                             "active": true
                           }
+                        }
+                      }
+                    ],
+                    "GrabbableObject": [
+                      {
+                        "RaySceneVR.GrabbableObject": {
+                          "active": true,
+                          "isGrabbed": false
                         }
                       }
                     ]
@@ -440,6 +472,14 @@
                           }
                         }
                       }
+                    ],
+                    "GrabbableObject": [
+                      {
+                        "RaySceneVR.GrabbableObject": {
+                          "active": true,
+                          "isGrabbed": false
+                        }
+                      }
                     ]
                   },
                   "children": []
@@ -494,6 +534,14 @@
                           "Component": {
                             "active": true
                           }
+                        }
+                      }
+                    ],
+                    "GrabbableObject": [
+                      {
+                        "RaySceneVR.GrabbableObject": {
+                          "active": true,
+                          "isGrabbed": false
                         }
                       }
                     ]
@@ -552,6 +600,14 @@
                           }
                         }
                       }
+                    ],
+                    "GrabbableObject": [
+                      {
+                        "RaySceneVR.GrabbableObject": {
+                          "active": true,
+                          "isGrabbed": false
+                        }
+                      }
                     ]
                   },
                   "children": []
@@ -606,6 +662,14 @@
                           "Component": {
                             "active": true
                           }
+                        }
+                      }
+                    ],
+                    "GrabbableObject": [
+                      {
+                        "RaySceneVR.GrabbableObject": {
+                          "active": true,
+                          "isGrabbed": false
                         }
                       }
                     ]

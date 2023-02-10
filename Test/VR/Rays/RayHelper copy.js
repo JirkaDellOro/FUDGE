@@ -96,17 +96,15 @@ var RaySceneVR;
             }
         };
         onSelectStart = (_event) => {
-            if (this.pick && !this.pick.getComponent(RaySceneVR.GrabbableObject).isGrabbed) {
+            if (this.pick) {
                 this.node.addChild(this.pick);
                 this.lastPosCntrl = this.controller.cmpTransform.mtxLocal.translation;
-                this.pick.getComponent(RaySceneVR.GrabbableObject).isGrabbed = true;
                 this.hasObject = true;
             }
         };
         onSelectEnd = (_event) => {
             if (this.pick) {
                 this.hasObject = false;
-                this.pick.getComponent(RaySceneVR.GrabbableObject).isGrabbed = false;
                 this.cubeContainer.addChild(this.pick);
                 this.pick.mtxLocal.translation = new f.Vector3(this.pick.mtxWorld.translation.x, this.pick.mtxWorld.translation.y, this.pick.mtxWorld.translation.z);
                 this.pick.mtxLocal.rotation = new f.Vector3(this.pick.mtxWorld.rotation.x, this.pick.mtxWorld.rotation.y, this.pick.mtxWorld.rotation.z);
@@ -115,4 +113,4 @@ var RaySceneVR;
     }
     RaySceneVR.RayHelper = RayHelper;
 })(RaySceneVR || (RaySceneVR = {}));
-//# sourceMappingURL=RayHelper.js.map
+//# sourceMappingURL=RayHelper%20copy.js.map

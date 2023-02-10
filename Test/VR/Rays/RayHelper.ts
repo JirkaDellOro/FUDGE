@@ -106,9 +106,10 @@ namespace RaySceneVR {
             }
         }
         private onSelectStart = (_event: XRInputSourceEvent): void => {
-            if (this.pick) {
+            if (this.pick && !this.pick.getComponent(GrabbableObject).isGrabbed) {
                 this.node.addChild(this.pick);
                 this.lastPosCntrl = this.controller.cmpTransform.mtxLocal.translation;
+                this.pick.getComponent(GrabbableObject).isGrabbed = true;
                 this.hasObject = true;
             }
 
@@ -117,6 +118,7 @@ namespace RaySceneVR {
         private onSelectEnd = (_event: XRInputSourceEvent): void => {
             if (this.pick) {
                 this.hasObject = false;
+                this.pick.getComponent(GrabbableObject).isGrabbed = false;
                 this.cubeContainer.addChild(this.pick);
                 this.pick.mtxLocal.translation = new f.Vector3(this.pick.mtxWorld.translation.x, this.pick.mtxWorld.translation.y, this.pick.mtxWorld.translation.z);
                 this.pick.mtxLocal.rotation = new f.Vector3(this.pick.mtxWorld.rotation.x, this.pick.mtxWorld.rotation.y, this.pick.mtxWorld.rotation.z);
