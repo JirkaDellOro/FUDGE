@@ -203,6 +203,8 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
+      if (_event.detail?.sender && _event.type != EVENT_EDITOR.OPEN)
+        return;
       switch (_event.type) {
         case EVENT_EDITOR.OPEN:
         case EVENT_EDITOR.SELECT:

@@ -1305,6 +1305,8 @@ var Fudge;
             this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
         }
         hndEvent = (_event) => {
+            if (_event.detail?.sender && _event.type != Fudge.EVENT_EDITOR.OPEN)
+                return;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.OPEN:
                 case Fudge.EVENT_EDITOR.SELECT:
