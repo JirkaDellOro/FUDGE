@@ -62,6 +62,7 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
+      document.addEventListener(EVENT_EDITOR.CREATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
 
       this.setTitle("Project | " + project.name);
@@ -74,7 +75,7 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      if (_event.type != EVENT_EDITOR.UPDATE)
+      if (_event.type != EVENT_EDITOR.UPDATE && _event.type != EVENT_EDITOR.CREATE)
         _event.stopPropagation();
       this.setTitle("Project | " + project.name); //why here and everytime?
       if (_event.type == ƒui.EVENT.SELECT) {

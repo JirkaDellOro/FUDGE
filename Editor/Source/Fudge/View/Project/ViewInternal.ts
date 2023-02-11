@@ -18,8 +18,9 @@ namespace Fudge {
 
       this.dom.addEventListener(EVENT_EDITOR.OPEN, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.CREATE, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
+      // this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.REMOVE_CHILD, this.hndEvent);
@@ -121,7 +122,8 @@ namespace Fudge {
           let typeMesh: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
           //@ts-ignore
           let meshNew: ƒ.Mesh = new typeMesh();
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          // this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
           this.table.selectInterval(meshNew, meshNew);
           break;
         case CONTEXTMENU.CREATE_MATERIAL:
@@ -201,13 +203,10 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      if (_event.detail?.sender && _event.type != EVENT_EDITOR.OPEN)
-        return;
-
       switch (_event.type) {
         case EVENT_EDITOR.OPEN:
         case EVENT_EDITOR.SELECT:
-        // case EVENT_EDITOR.MODIFY:
+        case EVENT_EDITOR.CREATE:
           this.listResources();
           break;
         case ƒui.EVENT.MUTATE:

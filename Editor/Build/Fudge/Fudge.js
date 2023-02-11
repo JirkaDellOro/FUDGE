@@ -453,6 +453,7 @@ var Fudge;
             document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.CREATE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
             document.addEventListener(Fudge.EVENT_EDITOR.TEST, Page.hndEvent);
@@ -1145,8 +1146,9 @@ var Fudge;
             super(_container, _state);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.OPEN, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.CREATE, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.TEST, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("removeChild" /* REMOVE_CHILD */, this.hndEvent);
@@ -1228,7 +1230,8 @@ var Fudge;
                     let typeMesh = ƒ.Mesh.subclasses[iSubclass];
                     //@ts-ignore
                     let meshNew = new typeMesh();
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    // this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
                     this.table.selectInterval(meshNew, meshNew);
                     break;
                 case Fudge.CONTEXTMENU.CREATE_MATERIAL:
@@ -1302,12 +1305,10 @@ var Fudge;
             this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
         }
         hndEvent = (_event) => {
-            if (_event.detail?.sender && _event.type != Fudge.EVENT_EDITOR.OPEN)
-                return;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.OPEN:
                 case Fudge.EVENT_EDITOR.SELECT:
-                    // case EVENT_EDITOR.MODIFY:
+                case Fudge.EVENT_EDITOR.CREATE:
                     this.listResources();
                     break;
                 case "mutate" /* MUTATE */:
@@ -2385,6 +2386,7 @@ var Fudge;
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.CREATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TEST, this.hndEvent);
             this.setTitle("Project | " + Fudge.project.name);
             this.broadcast(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.OPEN, {}));
@@ -2394,7 +2396,7 @@ var Fudge;
             return {};
         }
         hndEvent = (_event) => {
-            if (_event.type != Fudge.EVENT_EDITOR.UPDATE)
+            if (_event.type != Fudge.EVENT_EDITOR.UPDATE && _event.type != Fudge.EVENT_EDITOR.CREATE)
                 _event.stopPropagation();
             this.setTitle("Project | " + Fudge.project.name); //why here and everytime?
             if (_event.type == "itemselect" /* SELECT */) {

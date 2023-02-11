@@ -40,10 +40,10 @@
       "events": {
         "StepX": 666.6666559441381
       },
-      "framesPerSecond": 15,
+      "framesPerSecond": 30,
       "animationStructure": {
         "components": {
-          "ComponentMaterial": [
+          "ComponentMesh": [
             {
               "mtxPivot": {
                 "translation": {
@@ -52,34 +52,42 @@
                       {
                         "time": 0,
                         "value": 0,
-                        "slopeIn": 0.001,
-                        "slopeOut": 0.001,
+                        "slopeIn": 0,
+                        "slopeOut": 0,
                         "constant": false
                       },
                       {
-                        "time": 1000,
+                        "time": 992.5310225546342,
                         "value": 1,
-                        "slopeIn": 0.001,
-                        "slopeOut": 0.001,
+                        "slopeIn": 0,
+                        "slopeOut": 0,
                         "constant": false
                       }
                     ],
                     "animationSequence": true
-                  },
+                  }
+                }
+              }
+            }
+          ],
+          "ComponentTransform": [
+            {
+              "mtxLocal": {
+                "rotation": {
                   "y": {
                     "keys": [
                       {
                         "time": 0,
                         "value": 0,
-                        "slopeIn": 0.001,
-                        "slopeOut": 0.001,
+                        "slopeIn": 0,
+                        "slopeOut": 0,
                         "constant": false
                       },
                       {
-                        "time": 1000,
-                        "value": 1,
-                        "slopeIn": 0.001,
-                        "slopeOut": 0.001,
+                        "time": 992.5310225546342,
+                        "value": 60,
+                        "slopeIn": 0,
+                        "slopeOut": 0,
                         "constant": false
                       }
                     ],
@@ -159,7 +167,7 @@
               "clrPrimary": "[1, 1, 1, 1]",
               "clrSecondary": "[1, 1, 1, 1]",
               "pivot": {
-                "translation": "[0.1666666716337204, 0]",
+                "translation": "[0.3333333432674408, 0.5]",
                 "rotation": 0,
                 "scaling": "[0.1666666716337204, 0.5]"
               },
@@ -252,7 +260,7 @@
                   "ƒ.ComponentMesh": {
                     "idMesh": "MeshCube|2023-01-25T18:52:17.765Z|10476",
                     "pivot": {
-                      "translation": "[0, -0.5, 0]",
+                      "translation": "[0.0762845054268837, -0.5, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -269,7 +277,7 @@
                     "clrPrimary": "[1, 1, 1, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
-                      "translation": "[0, 0]",
+                      "translation": "[0.6730769276618958, 0.6730769276618958]",
                       "rotation": 0,
                       "scaling": "[1, 1]"
                     },
@@ -285,7 +293,7 @@
                   "ƒ.ComponentTransform": {
                     "local": {
                       "translation": "[0, 0, 0]",
-                      "rotation": "[0, 0, 0]",
+                      "rotation": "[0, 4.577070236206055, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -314,8 +322,23 @@
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
-                      "active": true
+                      "active": false
                     }
+                  }
+                }
+              ],
+              "ComponentAnimator": [
+                {
+                  "ƒ.ComponentAnimator": {
+                    "Component": {
+                      "active": true
+                    },
+                    "idAnimation": "Animation|2023-01-08T11:24:34.193Z|38529",
+                    "playmode": "loop",
+                    "quantization": "continous",
+                    "scale": 1,
+                    "scaleWithGameTime": false,
+                    "animateInEditor": false
                   }
                 }
               ]
