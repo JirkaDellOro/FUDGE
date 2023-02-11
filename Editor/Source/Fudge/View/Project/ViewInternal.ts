@@ -122,35 +122,34 @@ namespace Fudge {
           let typeMesh: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
           //@ts-ignore
           let meshNew: ƒ.Mesh = new typeMesh();
-          // this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
           this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
           this.table.selectInterval(meshNew, meshNew);
           break;
         case CONTEXTMENU.CREATE_MATERIAL:
           let typeShader: typeof ƒ.Shader = ƒ.Shader.subclasses[iSubclass];
           let mtrNew: ƒ.Material = new ƒ.Material(typeShader.name, typeShader);
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
           this.table.selectInterval(mtrNew, mtrNew);
           break;
         case CONTEXTMENU.CREATE_GRAPH:
           let graph: ƒ.Graph = await ƒ.Project.registerAsGraph(new ƒ.Node("NewGraph"));
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
           this.table.selectInterval(graph, graph);
           break;
         case CONTEXTMENU.CREATE_ANIMATION:
           let typeAnimation: typeof ƒ.Animation = ƒ.Animation.subclasses[iSubclass];
           let animation: ƒ.Animation = new typeAnimation();
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
           this.table.selectInterval(animation, animation);
           break;
         case CONTEXTMENU.CREATE_PARTICLE_EFFECT:
           let particleSystem: ƒ.ParticleSystem = new ƒ.ParticleSystem();
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
           this.table.selectInterval(particleSystem, particleSystem);
           break;
         case CONTEXTMENU.DELETE_RESOURCE:
           await this.table.controller.delete([this.table.getFocussed()]);
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
           break;
       }
     }

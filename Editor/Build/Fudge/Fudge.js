@@ -1230,35 +1230,34 @@ var Fudge;
                     let typeMesh = ƒ.Mesh.subclasses[iSubclass];
                     //@ts-ignore
                     let meshNew = new typeMesh();
-                    // this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
                     this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
                     this.table.selectInterval(meshNew, meshNew);
                     break;
                 case Fudge.CONTEXTMENU.CREATE_MATERIAL:
                     let typeShader = ƒ.Shader.subclasses[iSubclass];
                     let mtrNew = new ƒ.Material(typeShader.name, typeShader);
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
                     this.table.selectInterval(mtrNew, mtrNew);
                     break;
                 case Fudge.CONTEXTMENU.CREATE_GRAPH:
                     let graph = await ƒ.Project.registerAsGraph(new ƒ.Node("NewGraph"));
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
                     this.table.selectInterval(graph, graph);
                     break;
                 case Fudge.CONTEXTMENU.CREATE_ANIMATION:
                     let typeAnimation = ƒ.Animation.subclasses[iSubclass];
                     let animation = new typeAnimation();
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
                     this.table.selectInterval(animation, animation);
                     break;
                 case Fudge.CONTEXTMENU.CREATE_PARTICLE_EFFECT:
                     let particleSystem = new ƒ.ParticleSystem();
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
                     this.table.selectInterval(particleSystem, particleSystem);
                     break;
                 case Fudge.CONTEXTMENU.DELETE_RESOURCE:
                     await this.table.controller.delete([this.table.getFocussed()]);
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+                    this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
                     break;
             }
         }
