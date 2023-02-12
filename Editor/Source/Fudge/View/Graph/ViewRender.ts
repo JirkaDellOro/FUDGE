@@ -281,8 +281,8 @@ namespace Fudge {
     private redraw = () => {
       try {
         ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
-        this.viewport.draw();
         ƒ.Physics.connectJoints();
+        this.viewport.draw();
       } catch (_error: unknown) {
         // console.error(_error);
         //nop

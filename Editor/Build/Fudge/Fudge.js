@@ -4484,8 +4484,8 @@ var Fudge;
         redraw = () => {
             try {
                 ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
-                this.viewport.draw();
                 ƒ.Physics.connectJoints();
+                this.viewport.draw();
             }
             catch (_error) {
                 // console.error(_error);
