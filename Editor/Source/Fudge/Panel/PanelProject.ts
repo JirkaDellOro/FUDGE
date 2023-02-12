@@ -63,7 +63,6 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
       document.addEventListener(EVENT_EDITOR.CREATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
 
       this.setTitle("Project | " + project.name);
       this.broadcast(new EditorEvent(EVENT_EDITOR.OPEN, {}));

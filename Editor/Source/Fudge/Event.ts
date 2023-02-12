@@ -17,11 +17,7 @@ namespace Fudge {
     /** A transform matrix gets adjusted interactively */,
     TRANSFORM = "EDITOR_TRANSFORM",
     /** An entity recieves focus and can be manipulated using the keyboard */
-    FOCUS = "EDITOR_FOCUS",
-    /** TODO: replace with UPDATE. An animation is running and modifies entities, which updates views */
-    ANIMATE = "EDITOR_ANIMATE",
-    /** Test the message pump without side effects */
-    TEST = "EDITOR_TEST"
+    FOCUS = "EDITOR_FOCUS"
   }
 
   export interface EventDetail {

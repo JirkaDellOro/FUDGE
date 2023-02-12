@@ -53,7 +53,6 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndEvent);
 
       if (_state["graph"])
         ƒ.Project.getResource(_state["graph"]).then((_graph: ƒ.Graph) => {

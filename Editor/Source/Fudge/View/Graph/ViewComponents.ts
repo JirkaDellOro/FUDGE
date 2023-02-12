@@ -33,7 +33,6 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndTransform);
-      // this.dom.addEventListener(ƒUi.EVENT.RENAME, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.EXPAND, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.COLLAPSE, this.hndEvent);

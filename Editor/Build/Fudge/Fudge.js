@@ -209,10 +209,6 @@ var Fudge;
         EVENT_EDITOR["TRANSFORM"] = "EDITOR_TRANSFORM";
         /** An entity recieves focus and can be manipulated using the keyboard */
         EVENT_EDITOR["FOCUS"] = "EDITOR_FOCUS";
-        /** TODO: replace with UPDATE. An animation is running and modifies entities, which updates views */
-        EVENT_EDITOR["ANIMATE"] = "EDITOR_ANIMATE";
-        /** Test the message pump without side effects */
-        EVENT_EDITOR["TEST"] = "EDITOR_TEST";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     /**
      * Extension of CustomEvent that supports a detail field with the type EventDetail
@@ -452,11 +448,9 @@ var Fudge;
             document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
-            document.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CREATE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
-            document.addEventListener(Fudge.EVENT_EDITOR.TEST, Page.hndEvent);
         }
         /** Send custom copies of the given event to the panels */
         static broadcast(_event) {
@@ -2212,7 +2206,6 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndEvent);
             if (_state["graph"])
                 ƒ.Project.getResource(_state["graph"]).then((_graph) => {
                     this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: _graph } });
@@ -2388,7 +2381,6 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CREATE, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.TEST, this.hndEvent);
             this.setTitle("Project | " + Fudge.project.name);
             this.broadcast(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.OPEN, {}));
         }
@@ -3543,7 +3535,7 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.MODIFY:
                     this.playbackTime = _event.detail.data;
                     this.draw();
-                    this.dispatch(Fudge.EVENT_EDITOR.ANIMATE, { bubbles: true });
+                    this.dispatch(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true });
                     break;
             }
         };
@@ -3757,7 +3749,6 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndTransform);
-            // this.dom.addEventListener(ƒUi.EVENT.RENAME, this.hndEvent);
             this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.dom.addEventListener("expand" /* EXPAND */, this.hndEvent);
             this.dom.addEventListener("collapse" /* COLLAPSE */, this.hndEvent);
@@ -4270,7 +4261,6 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
@@ -4437,12 +4427,6 @@ var Fudge;
                     else
                         this.setGraph(_event.detail.graph);
                     break;
-                // break;
-                // case ƒUi.EVENT.MUTATE:
-                // case ƒUi.EVENT.DELETE:
-                // case EVENT_EDITOR.MODIFY:
-                // case EVENT_EDITOR.ANIMATE:
-                // case EVENT_EDITOR.UPDATE:
             }
             this.redraw();
         };
