@@ -282,7 +282,7 @@ namespace Fudge {
       try {
         ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
         this.viewport.draw();
-        // ƒ.Physics.connectJoints();
+        ƒ.Physics.connectJoints();
       } catch (_error: unknown) {
         // console.error(_error);
         //nop
