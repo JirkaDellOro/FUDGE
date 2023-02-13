@@ -167,7 +167,10 @@ namespace Fudge {
         case EVENT_EDITOR.SELECT:
           if (_event.detail.node) {
             this.showNode(_event.detail.node);
-            this.tree.displaySelection([_event.detail.node]);
+            if (_event.detail.view != this) {
+              this.tree.displaySelection([_event.detail.node]);
+              this.#selectionPrevious = this.getSelection().slice(0);
+            }
           }
           else {
             this.setGraph(_event.detail.graph);
