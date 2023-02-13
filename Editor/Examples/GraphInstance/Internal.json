@@ -171,6 +171,20 @@
               "idMaterial": "Material|2022-03-21T10:06:45.579Z|58150"
             }
           }
+        ],
+        "ComponentTransform": [
+          {
+            "ƒ.ComponentTransform": {
+              "local": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "Component": {
+                "active": true
+              }
+            }
+          }
         ]
       },
       "children": [],
