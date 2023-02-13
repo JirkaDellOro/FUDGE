@@ -2235,17 +2235,17 @@ var Fudge;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
                     this.setGraph(_event.detail.graph);
-                case Fudge.EVENT_EDITOR.MODIFY:
-                    if (!_event.detail)
-                        break;
-                    // selected a graph or a node
-                    if (this.graph) {
-                        this.setGraph(_event.detail.graph); // TODO: examine, why this is supposed to happen any time...
-                        let newGraph = await ƒ.Project.getResource(this.graph.idResource);
-                        if (this.graph != newGraph) // TODO: examine, when this is actually true...
-                            _event = new Fudge.EditorEvent(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
-                    }
-                    break;
+                // case EVENT_EDITOR.MODIFY:
+                //   if (!_event.detail)
+                //     break;
+                //   // selected a graph or a node
+                //   if (this.graph) {
+                //     this.setGraph(_event.detail.graph); // TODO: examine, why this is supposed to happen any time...
+                //     let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
+                //     if (this.graph != newGraph) // TODO: examine, when this is actually true...
+                //       _event = new EditorEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
+                //   }
+                //   break;
             }
             this.broadcast(_event);
         };
@@ -3825,7 +3825,7 @@ var Fudge;
             ƒ.Debug.info(cmpNew.type, cmpNew);
             this.node.addComponent(cmpNew);
             this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
-            this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.node } });
+            // this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.node } });
         }
         //#endregion
         hndDragOver(_event, _viewSource) {
@@ -4760,7 +4760,6 @@ var Fudge;
         }
         redraw = () => {
             try {
-                console.log("Redraw");
                 if (this.resource instanceof ƒ.Graph)
                     ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);
                 this.viewport.draw();

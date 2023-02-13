@@ -87,17 +87,17 @@ namespace Fudge {
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
           this.setGraph(_event.detail.graph);
-        case EVENT_EDITOR.MODIFY:
-          if (!_event.detail)
-            break;
-          // selected a graph or a node
-          if (this.graph) {
-            this.setGraph(_event.detail.graph); // TODO: examine, why this is supposed to happen any time...
-            let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
-            if (this.graph != newGraph) // TODO: examine, when this is actually true...
-              _event = new EditorEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
-          }
-          break;
+        // case EVENT_EDITOR.MODIFY:
+        //   if (!_event.detail)
+        //     break;
+        //   // selected a graph or a node
+        //   if (this.graph) {
+        //     this.setGraph(_event.detail.graph); // TODO: examine, why this is supposed to happen any time...
+        //     let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
+        //     if (this.graph != newGraph) // TODO: examine, when this is actually true...
+        //       _event = new EditorEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
+        //   }
+        //   break;
       }
 
       this.broadcast(_event);

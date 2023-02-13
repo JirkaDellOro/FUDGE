@@ -313,7 +313,6 @@ namespace Fudge {
 
     private redraw = () => {
       try {
-        console.log("Redraw");
         if (this.resource instanceof ƒ.Graph)
           ƒ.Physics.activeInstance = Page.getPhysics(this.resource);
         this.viewport.draw();

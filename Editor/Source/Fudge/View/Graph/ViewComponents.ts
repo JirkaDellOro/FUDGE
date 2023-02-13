@@ -116,7 +116,7 @@ namespace Fudge {
 
       this.node.addComponent(cmpNew);
       this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
-      this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.node } });
+      // this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.node } });
     }
     //#endregion
 
