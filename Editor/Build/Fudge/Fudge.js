@@ -1295,7 +1295,7 @@ var Fudge;
                     }
                 }
             }
-            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+            this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
         }
         hndEvent = (_event) => {
             if (_event.detail?.sender && _event.type != Fudge.EVENT_EDITOR.OPEN && _event.type != Fudge.EVENT_EDITOR.CREATE)
@@ -4138,7 +4138,7 @@ var Fudge;
             let target = this.tree.controller.dragDrop.target;
             target.appendChild(instance);
             this.tree.findVisible(target).expand(true);
-            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
+            this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
         }
         //#region  ContextMenu
         getContextMenu(_callback) {
