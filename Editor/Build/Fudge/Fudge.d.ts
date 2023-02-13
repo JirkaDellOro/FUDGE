@@ -718,6 +718,7 @@ declare namespace Fudge {
         private cmrOrbit;
         private previewNode;
         private mtxImage;
+        private timeoutDefer;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         private hndMouse;
         private setTransform;
@@ -737,6 +738,7 @@ declare namespace Fudge {
         private hndEvent;
         private resetCamera;
         private redraw;
+        private defer;
     }
 }
 declare namespace Fudge {

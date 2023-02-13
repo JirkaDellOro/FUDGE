@@ -126,6 +126,7 @@ namespace FudgeCore {
 
       this.#sync = SYNC.GRAPH_SYNCED; // do not sync again, since mutation is already a synchronization
       await this.reflectMutation(_event, <Graph>_event.currentTarget, this, _event.detail.path);
+      this.dispatchEvent(new Event(EVENT.MUTATE_INSTANCE, {bubbles: false}))
     }
 
     /**

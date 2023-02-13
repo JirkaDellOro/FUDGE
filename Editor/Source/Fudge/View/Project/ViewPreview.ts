@@ -15,6 +15,7 @@ namespace Fudge {
     private cmrOrbit: ƒAid.CameraOrbit;
     private previewNode: ƒ.Node;
     private mtxImage: ƒ.Matrix3x3 = ƒ.Matrix3x3.IDENTITY();
+    private timeoutDefer: number;
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
@@ -167,7 +168,7 @@ namespace Fudge {
           ƒ.Physics.activeInstance = Page.getPhysics(<ƒ.Graph>this.resource);
           this.setViewObject(previewObject);
           previewObject.addEventListener(ƒ.EVENT.MUTATE, (_event: Event) => {
-            this.redraw();
+            this.defer(() => this.dispatch(EVENT_EDITOR.UPDATE, { bubbles: true }));
           });
           this.redraw();
           break;
@@ -312,12 +313,22 @@ namespace Fudge {
 
     private redraw = () => {
       try {
+        console.log("Redraw");
         if (this.resource instanceof ƒ.Graph)
           ƒ.Physics.activeInstance = Page.getPhysics(this.resource);
         this.viewport.draw();
       } catch (_error: unknown) {
         //nop
       }
+    }
+
+    private defer(_function: Function): void {
+      if (this.timeoutDefer)
+        return;
+      this.timeoutDefer = window.setTimeout(() => {
+        _function();
+        this.timeoutDefer = undefined;
+      }, 100);
     }
   }
 }

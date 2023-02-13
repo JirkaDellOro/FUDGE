@@ -108,7 +108,7 @@ namespace Fudge {
         }
       if (cmpNew instanceof ƒ.ComponentGraphFilter)
         if (!(this.node instanceof ƒ.Graph || this.node instanceof ƒ.GraphInstance)) {
-          alert("Attach ComponentSyncGraph only to GraphInstances or Graph");
+          alert("Attach ComponentGraphFilter only to GraphInstances or Graph");
           console.log(this.node);
           return;
         }

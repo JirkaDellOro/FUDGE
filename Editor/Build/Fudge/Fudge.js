@@ -3818,7 +3818,7 @@ var Fudge;
                 }
             if (cmpNew instanceof ƒ.ComponentGraphFilter)
                 if (!(this.node instanceof ƒ.Graph || this.node instanceof ƒ.GraphInstance)) {
-                    alert("Attach ComponentSyncGraph only to GraphInstances or Graph");
+                    alert("Attach ComponentGraphFilter only to GraphInstances or Graph");
                     console.log(this.node);
                     return;
                 }
@@ -4495,6 +4495,7 @@ var Fudge;
         cmrOrbit;
         previewNode;
         mtxImage = ƒ.Matrix3x3.IDENTITY();
+        timeoutDefer;
         constructor(_container, _state) {
             super(_container, _state);
             // create viewport for 3D-resources
@@ -4627,7 +4628,7 @@ var Fudge;
                     ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);
                     this.setViewObject(previewObject);
                     previewObject.addEventListener("mutate" /* MUTATE */, (_event) => {
-                        this.redraw();
+                        this.defer(() => this.dispatch(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     });
                     this.redraw();
                     break;
@@ -4759,6 +4760,7 @@ var Fudge;
         }
         redraw = () => {
             try {
+                console.log("Redraw");
                 if (this.resource instanceof ƒ.Graph)
                     ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);
                 this.viewport.draw();
@@ -4767,6 +4769,14 @@ var Fudge;
                 //nop
             }
         };
+        defer(_function) {
+            if (this.timeoutDefer)
+                return;
+            this.timeoutDefer = window.setTimeout(() => {
+                _function();
+                this.timeoutDefer = undefined;
+            }, 100);
+        }
     }
     Fudge.ViewPreview = ViewPreview;
 })(Fudge || (Fudge = {}));
