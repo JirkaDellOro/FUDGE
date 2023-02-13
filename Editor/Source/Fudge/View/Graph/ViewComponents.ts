@@ -76,6 +76,9 @@ namespace Fudge {
       let iSubclass: number = _item["iSubclass"];
       let component: typeof ƒ.Component;
 
+      if (this.protectGraphInstance())
+        return;
+
       switch (Number(_item.id)) {
         case CONTEXTMENU.ADD_COMPONENT:
           component = ƒ.Component.subclasses[iSubclass];
@@ -137,18 +140,37 @@ namespace Fudge {
           return;
       }
 
+      // if (this.protectGraphInstance())
+      //   return;
+
       _event.dataTransfer.dropEffect = "link";
       _event.preventDefault();
       _event.stopPropagation();
     }
 
     protected hndDrop(_event: DragEvent, _viewSource: View): void {
+      if (this.protectGraphInstance())
+        return;
       for (let source of _viewSource.getDragDropSources()) {
         let cmpNew: ƒ.Component = this.createComponent(source);
         this.node.addComponent(cmpNew);
         this.expanded[cmpNew.type] = true;
       }
       this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
+    }
+
+    private protectGraphInstance(): boolean {
+      // inhibit structural changes to a GraphInstance
+      let check: ƒ.Node = this.node;
+      do {
+        if (check instanceof ƒ.GraphInstance) {
+          alert(`Edit the graph "${check.name}" to make changes to its structure and then reload the project`);
+          return true;
+        }
+        check = check.getParent();
+      } while (check);
+
+      return false;
     }
 
     private fillContent(): void {
@@ -216,6 +238,8 @@ namespace Fudge {
           this.fillContent();
           break;
         case ƒUi.EVENT.DELETE:
+          if (this.protectGraphInstance())
+            return;
           let component: ƒ.Component = <ƒ.Component>_event.detail.mutable;
           this.node.removeComponent(component);
           this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });

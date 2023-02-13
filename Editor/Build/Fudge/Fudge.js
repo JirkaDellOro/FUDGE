@@ -3787,6 +3787,8 @@ var Fudge;
             ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
             let iSubclass = _item["iSubclass"];
             let component;
+            if (this.protectGraphInstance())
+                return;
             switch (Number(_item.id)) {
                 case Fudge.CONTEXTMENU.ADD_COMPONENT:
                     component = ƒ.Component.subclasses[iSubclass];
@@ -3843,17 +3845,33 @@ var Fudge;
                 else if (!this.findComponentType(source))
                     return;
             }
+            // if (this.protectGraphInstance())
+            //   return;
             _event.dataTransfer.dropEffect = "link";
             _event.preventDefault();
             _event.stopPropagation();
         }
         hndDrop(_event, _viewSource) {
+            if (this.protectGraphInstance())
+                return;
             for (let source of _viewSource.getDragDropSources()) {
                 let cmpNew = this.createComponent(source);
                 this.node.addComponent(cmpNew);
                 this.expanded[cmpNew.type] = true;
             }
             this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
+        }
+        protectGraphInstance() {
+            // inhibit structural changes to a GraphInstance
+            let check = this.node;
+            do {
+                if (check instanceof ƒ.GraphInstance) {
+                    alert(`Edit the graph "${check.name}" to make changes to its structure and then reload the project`);
+                    return true;
+                }
+                check = check.getParent();
+            } while (check);
+            return false;
         }
         fillContent() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -3916,6 +3934,8 @@ var Fudge;
                     this.fillContent();
                     break;
                 case "delete" /* DELETE */:
+                    if (this.protectGraphInstance())
+                        return;
                     let component = _event.detail.mutable;
                     this.node.removeComponent(component);
                     this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
