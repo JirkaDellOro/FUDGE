@@ -111,5 +111,5 @@ Standalone state machine and ComponentStateMachine running parallel.
   Test the immersion in VR.
 - [Physics in VR](VR/Physics/PhysicsTest.html)  
   Test the physics in VR.
-- [Rays in VR](VR/Audio/RayTest.html)  
+- [Rays in VR](VR/Rays/RayTest.html)  
   Test the rays and the capabilities (Grabbing and Teleportation) of it in VR.
