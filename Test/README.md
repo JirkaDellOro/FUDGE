@@ -105,11 +105,11 @@ Standalone state machine and ComponentStateMachine running parallel.
 
 - [Audio in VR](VR/Audio/AudioTest.html)  
   Test the spatial Audio in VR.
-- [Controller in VR](VR/Audio/ControllerTest.html)  
+- [Controller in VR](VR/Controller/ControllerTest.html)  
   Test the capabilities of controller mapping in VR.
-- [Immersive in VR](VR/Audio/ImmersiveTest.html)  
+- [Immersive in VR](VR/Immersive/ImmersiveTest.html)  
   Test the immersion in VR.
-- [Physics in VR](VR/Audio/PhysicsTest.html)  
+- [Physics in VR](VR/Physics/PhysicsTest.html)  
   Test the physics in VR.
 - [Rays in VR](VR/Audio/RayTest.html)  
   Test the rays and the capabilities (Grabbing and Teleportation) of it in VR.
