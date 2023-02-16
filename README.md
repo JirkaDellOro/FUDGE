@@ -1,4 +1,4 @@
-# Bachelor Arbeit - Schmidberger Valentin,, 263249
+# Bachelor Arbeit - Schmidberger Valentin, 263249 | Hochschule Furtwangen University
 Thema: Integration der WebXR Schnittstelle zur Erstellung von Virtual Reality Umgebungen in der Game Engine FUDGE
 
 
