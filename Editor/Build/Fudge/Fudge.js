@@ -4327,7 +4327,8 @@ var Fudge;
             ƒ.Physics.connectJoints();
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             this.viewport.setBranch(this.graph);
-            this.redraw();
+            this.dispatch(Fudge.EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: this.graph } });
+            // this.redraw();
         }
         //#region  ContextMenu
         getContextMenu(_callback) {
@@ -4436,19 +4437,19 @@ var Fudge;
             this.graph.addEventListener("renderPrepareEnd" /* RENDER_PREPARE_END */, switchLight);
         };
         hndEvent = (_event) => {
+            let detail = _event.detail;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
-                case Fudge.EVENT_EDITOR.FOCUS:
-                    let detail = _event.detail;
                     if (detail.node) {
                         if (detail.view == this)
                             return;
-                        if (_event.type == Fudge.EVENT_EDITOR.FOCUS)
-                            this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
-                        ƒ.Render.prepare(this.cmrOrbit);
                     }
                     else
                         this.setGraph(_event.detail.graph);
+                    break;
+                case Fudge.EVENT_EDITOR.FOCUS:
+                    this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
+                    ƒ.Render.prepare(this.cmrOrbit);
                     break;
             }
             this.redraw();

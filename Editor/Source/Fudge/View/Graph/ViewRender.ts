@@ -87,7 +87,8 @@ namespace Fudge {
       ƒ.Physics.connectJoints();
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       this.viewport.setBranch(this.graph);
-      this.redraw();
+      this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: this.graph } });
+      // this.redraw();
     }
 
     //#region  ContextMenu
@@ -211,18 +212,18 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: EditorEvent): void => {
+      let detail: EventDetail = <EventDetail>_event.detail;
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
-        case EVENT_EDITOR.FOCUS:
-          let detail: EventDetail = <EventDetail>_event.detail;
           if (detail.node) {
             if (detail.view == this)
               return;
-            if (_event.type == EVENT_EDITOR.FOCUS)
-              this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
-            ƒ.Render.prepare(this.cmrOrbit);
           } else
             this.setGraph(_event.detail.graph);
+          break;
+        case EVENT_EDITOR.FOCUS:
+          this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
+          ƒ.Render.prepare(this.cmrOrbit);
           break;
       }
       this.redraw();
