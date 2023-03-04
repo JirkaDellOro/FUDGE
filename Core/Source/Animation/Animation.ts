@@ -6,7 +6,19 @@ namespace FudgeCore {
    * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
    */
   export interface AnimationStructure {
-    [attribute: string]: Serialization | AnimationSequence;
+    [attribute: string]: AnimationStructure[] | AnimationStructure | AnimationSequence;
+  }
+
+  export interface AnimationStructureVector3 extends AnimationStructure {
+    x: AnimationSequence;
+    y: AnimationSequence;
+    z: AnimationSequence;
+  }
+
+  export interface AnimationStructureMatrix4x4 extends AnimationStructure {
+    rotation?: AnimationStructureVector3;
+    scale?: AnimationStructureVector3;
+    translation?: AnimationStructureVector3;
   }
 
   /**
@@ -47,103 +59,108 @@ namespace FudgeCore {
    */
   export enum ANIMATION_PLAYMODE {
     /**Plays animation in a loop: it restarts once it hit the end.*/
-    LOOP,
+    LOOP = "loop",
     /**Plays animation once and stops at the last key/frame*/
-    PLAYONCE,
+    PLAY_ONCE = "playOnce",
     /**Plays animation once and stops on the first key/frame */
-    PLAYONCESTOPAFTER,
+    PLAY_ONCE_RESET = "playOnceReset",
     /**Plays animation like LOOP, but backwards.*/
-    REVERSELOOP,
+    REVERSE_LOOP = "reverseLoop",
     /**Causes the animation not to play at all. Useful for jumping to various positions in the animation without proceeding in the animation.*/
-    STOP
+    STOP = "stop"
     //TODO: add an INHERIT and a PINGPONG mode
   }
 
-  export enum ANIMATION_PLAYBACK {
-    //TODO: add an in-depth description of what happens to the animation (and events) depending on the Playback. Use Graphs to explain.
+  export enum ANIMATION_QUANTIZATION {
+    //TODO: add an in-depth description of what happens to the animation (and events) depending on the quantization. Use Graphs to explain.
     /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
-    TIMEBASED_CONTINOUS,
+    CONTINOUS = "continous",
     /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
-    TIMEBASED_RASTERED_TO_FPS,
+    DISCRETE = "discrete",
     /** Advances the time each frame according to the FPS value of the animation, ignoring the actual duration of the frames. Doesn't skip any frames.*/
-    FRAMEBASED
+    FRAMES = "frames"
   }
 
   /**
-   * Animation Class to hold all required Objects that are part of an Animation.
-   * Also holds functions to play said Animation.
-   * Can be added to a Node and played through {@link ComponentAnimator}.
-   * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
+   * Describes and controls and animation by yielding mutators 
+   * according to the stored {@link AnimationStructure} and {@link AnimationSequence}s
+   * Applied to a {@link Node} directly via script or {@link ComponentAnimator}.
+   * @author Lukas Scheuerle, HFU, 21019 | Jirka Dell'Oro-Friedl, HFU, 2021-2023
    */
   export class Animation extends Mutable implements SerializableResource {
-    idResource: string;
-    name: string;
-    totalTime: number = 0;
-    labels: AnimationLabel = {};
+    // /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
+    // public static readonly baseClass: typeof Animation = Animation;
+    // /** list of all the subclasses derived from this class, if they registered properly*/
+    public static readonly subclasses: typeof Animation[] = [];
+    public static readonly iSubclass: number = Animation.registerSubclass(Animation);
+    public idResource: string = undefined;
+    public name: string;
+    public totalTime: number = 0;
+    public labels: AnimationLabel = {}; // a label marks a specific time to conveniently jump to using a text identifier
     // stepsPerSecond: number = 10;
-    animationStructure: AnimationStructure;
-    events: AnimationEventTrigger = {};
-    private framesPerSecond: number = 60;
+    public animationStructure: AnimationStructure;
+    public events: AnimationEventTrigger = {};
+    protected framesPerSecond: number = 60; // TODO: change this and its accessors to #framesPerSecond?
 
     // processed eventlist and animation strucutres for playback.
     private eventsProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
-    private animationStructuresProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
+    #animationStructuresProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
 
-    constructor(_name: string, _animStructure: AnimationStructure = {}, _fps: number = 60) {
+    public constructor(_name: string = Animation.name, _animStructure: AnimationStructure = {}, _fps: number = 60) {
       super();
       this.name = _name;
       this.animationStructure = _animStructure;
-      this.animationStructuresProcessed.set(ANIMATION_STRUCTURE_TYPE.NORMAL, _animStructure);
+      this.#animationStructuresProcessed.set(ANIMATION_STRUCTURE_TYPE.NORMAL, _animStructure);
       this.framesPerSecond = _fps;
       this.calculateTotalTime();
       Project.register(this);
     }
 
-    get getLabels(): Enumerator {
+    protected static registerSubclass(_subClass: typeof Animation): number { return Animation.subclasses.push(_subClass) - 1; }
+
+    public get getLabels(): Enumerator {
       //TODO: this actually needs testing
       let en: Enumerator = new Enumerator(this.labels);
       return en;
     }
 
-    get fps(): number {
+    public get fps(): number {
       return this.framesPerSecond;
     }
 
-    set fps(_fps: number) {
+    public set fps(_fps: number) {
       this.framesPerSecond = _fps;
       this.eventsProcessed.clear();
-      this.animationStructuresProcessed.clear();
+      this.clearCache();
+    }
+    
+    public clearCache(): void {
+      this.#animationStructuresProcessed.clear();
     }
 
     /**
-     * Generates a new "Mutator" with the information to apply to the {@link Node} the {@link ComponentAnimator} is attached to with {@link Node.applyAnimation}.
-     * @param _time The time at which the animation currently is at
-     * @param _direction The direction in which the animation is supposed to be playing back. >0 == forward, 0 == stop, <0 == backwards
-     * @param _playback The playbackmode the animation is supposed to be calculated with.
-     * @returns a "Mutator" to apply.
+     * Generates and returns a {@link Mutator} with the information to apply to the {@link Node} to animate
+     * in the state the animation is in at the given time, direction and quantization
      */
-    getMutated(_time: number, _direction: number, _playback: ANIMATION_PLAYBACK): Mutator {     //TODO: find a better name for this
+    getState(_time: number, _direction: number, _quantization: ANIMATION_QUANTIZATION): Mutator { 
       let m: Mutator = {};
       let animationStructure: ANIMATION_STRUCTURE_TYPE;
 
-      if (_playback == ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS)
+      if (_quantization == ANIMATION_QUANTIZATION.CONTINOUS)
         animationStructure = _direction < 0 ? ANIMATION_STRUCTURE_TYPE.REVERSE : ANIMATION_STRUCTURE_TYPE.NORMAL;
       else
         animationStructure = _direction < 0 ? ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE : ANIMATION_STRUCTURE_TYPE.RASTERED;
 
-      m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(animationStructure), _time);
+        m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(animationStructure), _time);
       return m;
     }
 
     /**
-     * Returns a list of the names of the events the {@link ComponentAnimator} needs to fire between _min and _max. 
-     * @param _min The minimum time (inclusive) to check between
-     * @param _max The maximum time (exclusive) to check between
-     * @param _playback The playback mode to check in. Has an effect on when the Events are fired. 
+     * Returns a list of the names of the events the {@link ComponentAnimator} needs to fire between _min and _max input values.
      * @param _direction The direction the animation is supposed to run in. >0 == forward, 0 == stop, <0 == backwards
      * @returns a list of strings with the names of the custom events to fire.
      */
-    getEventsToFire(_min: number, _max: number, _playback: ANIMATION_PLAYBACK, _direction: number): string[] {
+    getEventsToFire(_min: number, _max: number, _quantization: ANIMATION_QUANTIZATION, _direction: number): string[] {
       let eventList: string[] = [];
       let minSection: number = Math.floor(_min / this.totalTime);
       let maxSection: number = Math.floor(_max / this.totalTime);
@@ -151,7 +168,7 @@ namespace FudgeCore {
       _max = _max % this.totalTime;
 
       while (minSection <= maxSection) {
-        let eventTriggers: AnimationEventTrigger = this.getCorrectEventList(_direction, _playback);
+        let eventTriggers: AnimationEventTrigger = this.getCorrectEventList(_direction, _quantization);
         if (minSection == maxSection) {
           eventList = eventList.concat(this.checkEventsBetween(eventTriggers, _min, _max));
         } else {
@@ -200,10 +217,10 @@ namespace FudgeCore {
         case ANIMATION_PLAYMODE.STOP:
           // return this.localTime.getOffset();
           return _timeStop;
-        case ANIMATION_PLAYMODE.PLAYONCE:
+        case ANIMATION_PLAYMODE.PLAY_ONCE:
           if (_time >= this.totalTime)
             return this.totalTime - 0.01;     //TODO: this might cause some issues
-        case ANIMATION_PLAYMODE.PLAYONCESTOPAFTER:
+        case ANIMATION_PLAYMODE.PLAY_ONCE_RESET:
           if (_time >= this.totalTime)
             // TODO: return _timeStop instead?
             return this.totalTime + 0.01;     //TODO: this might cause some issues
@@ -225,10 +242,10 @@ namespace FudgeCore {
         //     return 1;
         //   else
         //     return -1;
-        case ANIMATION_PLAYMODE.REVERSELOOP:
+        case ANIMATION_PLAYMODE.REVERSE_LOOP:
           return -1;
-        case ANIMATION_PLAYMODE.PLAYONCE:
-        case ANIMATION_PLAYMODE.PLAYONCESTOPAFTER:
+        case ANIMATION_PLAYMODE.PLAY_ONCE:
+        case ANIMATION_PLAYMODE.PLAY_ONCE_RESET:
           if (_time >= this.totalTime) {
             return 0;
           }
@@ -244,7 +261,7 @@ namespace FudgeCore {
         name: this.name,
         labels: {},
         events: {},
-        fps: this.framesPerSecond,
+        framesPerSecond: this.framesPerSecond,
         // sps: this.stepsPerSecond
       };
       for (let name in this.labels) {
@@ -253,14 +270,14 @@ namespace FudgeCore {
       for (let name in this.events) {
         s.events[name] = this.events[name];
       }
-      s.animationStructure = this.traverseStructureForSerialisation(this.animationStructure);
+      s.animationStructure = this.traverseStructureForSerialization(this.animationStructure);
       return s;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.idResource = _serialization.idResource;
+      Project.register(this, _serialization.idResource);
       this.name = _serialization.name;
-      this.framesPerSecond = _serialization.fps;
+      this.framesPerSecond = _serialization.framesPerSecond;
       // this.stepsPerSecond = _serialization.sps;
       this.labels = {};
       for (let name in _serialization.labels) {
@@ -272,16 +289,18 @@ namespace FudgeCore {
       }
       this.eventsProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
 
-      this.animationStructure = await this.traverseStructureForDeserialisation(_serialization.animationStructure);
+      this.animationStructure = await this.traverseStructureForDeserialization(_serialization.animationStructure);
 
-      this.animationStructuresProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
+      this.#animationStructuresProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
 
       this.calculateTotalTime();
       return this;
     }
-    public getMutator(): Mutator {
-      return this.serialize();
-    }
+    
+    // public getMutator(): Mutator {
+    //   return this.serialize();
+    // }
+
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.totalTime;
     }
@@ -290,44 +309,49 @@ namespace FudgeCore {
      * @param _structure The Animation Structure at the current level to transform into the Serialization.
      * @returns the filled Serialization.
      */
-    private traverseStructureForSerialisation(_structure: AnimationStructure): Serialization {
-      let newSerialization: Serialization = {};
-      for (let n in _structure) {
-        if (_structure[n] instanceof AnimationSequence) {
-          newSerialization[n] = _structure[n].serialize();
+    private traverseStructureForSerialization(_structure: Object): Serialization {
+      let serialization: Serialization = {};
+      for (const property in _structure) {
+        let structureOrSequence: Object = (<General>_structure)[property];
+        if (structureOrSequence instanceof AnimationSequence) {
+          serialization[property] = structureOrSequence.serialize();
         } else {
-          newSerialization[n] = this.traverseStructureForSerialisation(<AnimationStructure>_structure[n]);
+          if (Component.subclasses.some(type => type.name == property)) {
+            serialization[property] = [];
+            for (const i in structureOrSequence) {
+              (<Serialization[]>serialization[property]).push(this.traverseStructureForSerialization((<General>structureOrSequence)[i]));
+            }
+          } else {
+            serialization[property] = this.traverseStructureForSerialization(structureOrSequence);
+          }
         }
       }
-      return newSerialization;
+      return serialization;
     }
     /**
      * Traverses a Serialization to create a new AnimationStructure.
      * @param _serialization The serialization to transfer into an AnimationStructure
      * @returns the newly created AnimationStructure.
      */
-    private async traverseStructureForDeserialisation(_serialization: Serialization): Promise<AnimationStructure> {
-      let newStructure: AnimationStructure = {};
+    private async traverseStructureForDeserialization(_serialization: Serialization): Promise<AnimationStructure> {
+      let structure: AnimationStructure = {};
       for (let n in _serialization) {
         if (_serialization[n].animationSequence) {
           let animSeq: AnimationSequence = new AnimationSequence();
-          newStructure[n] = await animSeq.deserialize(_serialization[n]);
+          structure[n] = <AnimationSequence>(await animSeq.deserialize(_serialization[n]));
         } else {
-          newStructure[n] = await this.traverseStructureForDeserialisation(_serialization[n]);
+          structure[n] = await this.traverseStructureForDeserialization(_serialization[n]);
         }
       }
-      return newStructure;
+      return structure;
     }
     //#endregion
 
     /**
-     * Finds the list of events to be used with these settings.
-     * @param _direction The direction the animation is playing in.
-     * @param _playback The playbackmode the animation is playing in.
-     * @returns The correct AnimationEventTrigger Object to use
+     * Finds and returns the list of events to be used with these settings.
      */
-    private getCorrectEventList(_direction: number, _playback: ANIMATION_PLAYBACK): AnimationEventTrigger {
-      if (_playback != ANIMATION_PLAYBACK.FRAMEBASED) {
+    private getCorrectEventList(_direction: number, _quantization: ANIMATION_QUANTIZATION): AnimationEventTrigger {
+      if (_quantization != ANIMATION_QUANTIZATION.FRAMES) {
         if (_direction >= 0) {
           return this.getProcessedEventTrigger(ANIMATION_STRUCTURE_TYPE.NORMAL);
         } else {
@@ -343,10 +367,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Traverses an AnimationStructure to turn it into the "Mutator" to return to the Component.
-     * @param _structure The strcuture to traverse
-     * @param _time the point in time to write the animation numbers into.
-     * @returns The "Mutator" filled with the correct values at the given time. 
+     * Traverses an {@link AnimationStructure} and returns a {@link Mutator} describing the state at the given time
      */
     private traverseStructureForMutator(_structure: AnimationStructure, _time: number): Mutator {
       let newMutator: Mutator = {};
@@ -369,8 +390,8 @@ namespace FudgeCore {
         if (_structure[n] instanceof AnimationSequence) {
           let sequence: AnimationSequence = <AnimationSequence>_structure[n];
           if (sequence.length > 0) {
-            let sequenceTime: number = sequence.getKey(sequence.length - 1).Time;
-            this.totalTime = sequenceTime > this.totalTime ? sequenceTime : this.totalTime;
+            let sequenceTime: number = sequence.getKey(sequence.length - 1).time;
+            this.totalTime = Math.max(sequenceTime, this.totalTime);
           }
         } else {
           this.traverseStructureForTime(<AnimationStructure>_structure[n]);
@@ -384,7 +405,7 @@ namespace FudgeCore {
      * @returns the requested {@link AnimationStructure]]
      */
     private getProcessedAnimationStructure(_type: ANIMATION_STRUCTURE_TYPE): AnimationStructure {
-      if (!this.animationStructuresProcessed.has(_type)) {
+      if (!this.#animationStructuresProcessed.has(_type)) {
         this.calculateTotalTime();
         let ae: AnimationStructure = {};
         switch (_type) {
@@ -403,9 +424,9 @@ namespace FudgeCore {
           default:
             return {};
         }
-        this.animationStructuresProcessed.set(_type, ae);
+        this.#animationStructuresProcessed.set(_type, ae);
       }
-      return this.animationStructuresProcessed.get(_type);
+      return this.#animationStructuresProcessed.get(_type);
     }
 
     /**
@@ -465,7 +486,7 @@ namespace FudgeCore {
       let seq: AnimationSequence = new AnimationSequence();
       for (let i: number = 0; i < _sequence.length; i++) {
         let oldKey: AnimationKey = _sequence.getKey(i);
-        let key: AnimationKey = new AnimationKey(this.totalTime - oldKey.Time, oldKey.Value, oldKey.SlopeOut, oldKey.SlopeIn, oldKey.Constant);
+        let key: AnimationKey = new AnimationKey(this.totalTime - oldKey.time, oldKey.value, oldKey.slopeOut, oldKey.slopeIn, oldKey.constant);
         seq.addKey(key);
       }
       return seq;

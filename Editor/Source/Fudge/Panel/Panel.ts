@@ -17,7 +17,7 @@ namespace Fudge {
   // extends view vorrübergehend entfernt
   export abstract class Panel extends View {
     protected goldenLayout: GoldenLayout;
-    private views: View[] = [];
+    protected views: View[] = [];
     //public dom; // muss vielleicht weg
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
@@ -45,9 +45,13 @@ namespace Fudge {
     }
 
     /** Send custom copies of the given event to the views */
-    public broadcastEvent = (_event: EditorEvent): void => {
+    public broadcast = (_event: EditorEvent): void => {
+      let detail: EventDetail = _event.detail || {};
+      let target: View = detail.view;
+      detail.sender = this;
       for (let view of this.views)
-        view.dispatch(<EVENT_EDITOR>_event.type, { detail: _event.detail });
+        if (view != target) // don't send back to original target view
+          view.dispatch(<EVENT_EDITOR>_event.type, { detail: detail });
     }
 
     public abstract getState(): PanelState;

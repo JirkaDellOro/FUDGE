@@ -29,24 +29,23 @@ namespace AnimatorComponentTest {
       components: {
         ComponentTransform: [
           {
-            "ƒ.ComponentTransform": {
-              mtxLocal: {
-                rotation: {
-                  x: animseq,
-                  y: animseq
-                }
+            mtxLocal: {
+              rotation: {
+                x: animseq,
+                y: animseq
               }
             }
           }
         ]
       }
     };
+    
     let animation: ƒ.Animation = new ƒ.Animation("testAnimation", animStructure, 1);
     animation.labels["test"] = 2000;
     animation.setEvent("event", 3000);
 
 
-    let cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
+    let cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP, ƒ.ANIMATION_QUANTIZATION.CONTINOUS);
     cmpAnimator.scale = 2;
 
     // #region serialisation
@@ -54,7 +53,7 @@ namespace AnimatorComponentTest {
     let serialisation: ƒ.Serialization = animation.serialize();
     console.log("Animation", ƒ.Serializer.stringify(serialisation));
     console.groupEnd();
-    
+
     console.groupCollapsed("Serialization");
     console.log(cmpAnimator);
     serialisation = cmpAnimator.serialize();

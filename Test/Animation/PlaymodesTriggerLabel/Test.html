@@ -54,7 +54,7 @@
       Act: [
         "adjust point of time and value of the animation keys.",
         "adjust fps, the input-value of the event trigger and the time the label references.",
-        "select the animation mode and the type of playback",
+        "select the animation mode and the type of quantization",
         "click the button to jump to the label"
       ],
       Observe: [
@@ -68,10 +68,10 @@
         - PLAYONCESTOPAFTER plays animation once and stops on the first key/frame <br> \
         - REVERSELOOP plays animation like LOOP, but backwards <br>\
         - STOP causes the animation not to play at all",
-        "<strong>playback</strong>  <br>\
-        - TIMEBASED_CONTINOUS a loop of the animation lasts as long as the specified value of the second key <br> \
-        - TIMEBASED_RASTERED_TO_FPS the animation depends on the specified fps, the animation is updated per frame <br> \
-        - FRAMEBASED Advances the time each frame according to the FPS value of the animation, ignoring the actual duration of the frames. Doesn't skip any frames"
+        "<strong>quantization</strong>  <br>\
+        - CONTINOUS a loop of the animation lasts as long as the specified value of the second key <br> \
+        - RASTERED_TO_FPS the animation depends on the specified fps, the animation is updated per frame <br> \
+        - FRAMES Advances the time each frame according to the FPS value of the animation, ignoring the actual duration of the frames. Doesn't skip any frames"
       ]
     });
   </script>
@@ -87,10 +87,12 @@
     <fieldset id="animation">
       <legend>Animation</legend>
       <input type="number" name="fps" min="1" max="60" step="1" value="30"> fps (the number of frames defined per
-      second for animations with discrete steps, e.g. sprite images) <br/>
-      <input type="number" name="event" min="0" step="1" value="1000"> time for an event to fire <br/>
-      <input type="number" name="label" min="0" step="1" value="500"> time at which the label is placed <button type="button" id="jump">Jump</button><br/>
-      <sub>The animation structure is hardcoded in this test and maps the sequence onto the x- and y-rotation of the cubes transform component</sub>
+      second for animations with discrete steps, e.g. sprite images) <br />
+      <input type="number" name="event" min="0" step="1" value="1000"> time for an event to fire <br />
+      <input type="number" name="label" min="0" step="1" value="500"> time at which the label is placed <button
+        type="button" id="jump">Jump</button><br />
+      <sub>The animation structure is hardcoded in this test and maps the sequence onto the x- and y-rotation of the
+        cubes transform component</sub>
     </fieldset>
 
     <fieldset id="component">
@@ -105,11 +107,11 @@
         <option value="STOP">STOP</option>
       </select> playmode</br>
 
-      <select name="back" value="TIMEBASED_CONTINOUS">
-        <option value="TIMEBASED_CONTINOUS">TIMEBASED_CONTINOUS</option>
-        <option value="TIMEBASED_RASTERED_TO_FPS">TIMEBASED_RASTERED_TO_FPS</option>
-        <option value="FRAMEBASED">FRAMEBASED</option>
-      </select> playback</br>
+      <select name="quantization value=" CONTINOUS">
+        <option value="TIMEBASED_CONTINOUS">CONTINOUS</option>
+        <option value="TIMEBASED_RASTERED_TO_FPS">DISCRETE</option>
+        <option value="FRAMEBASED">FRAMES</option>
+      </select> quantization</br>
     </fieldset>
   </form>
 </body>

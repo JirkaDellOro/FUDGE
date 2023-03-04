@@ -6,6 +6,7 @@ namespace FudgeUserInterface {
 
     public constructor(_legend: string = "", _type: string) {
       super();
+      // TODO: check if this should be removed after changing animation structure to look more like a mutator
       this.setAttribute("key", _legend);
       this.setAttribute("type", _type);
       this.open = true;
@@ -22,6 +23,8 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT.FOCUS_PREVIOUS, this.hndFocus);
       this.addEventListener(EVENT.FOCUS_SET, this.hndFocus);
       this.addEventListener(EVENT.TOGGLE, this.hndToggle);
+
+
     }
 
 

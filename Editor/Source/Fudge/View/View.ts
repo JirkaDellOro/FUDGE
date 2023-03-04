@@ -19,14 +19,14 @@ namespace Fudge {
     constructor(_container: ComponentContainer, _state: JsonValue) {
       this.dom = document.createElement("div");
       this.dom.style.height = "100%";
-      this.dom.style.overflow = "auto";
+      // this.dom.style.overflow = "auto";
       this.dom.setAttribute("view", this.constructor.name);
 
       //_container.getElement().append(this.dom); //old
       _container.element.appendChild(this.dom);
       this.container = _container;
 
-      this.container.on("destroy", () => this.dispatch(EVENT_EDITOR.CLOSE, { bubbles: true, detail: { view: this } }));
+      this.container.on("destroy", () => this.dispatch(EVENT_EDITOR.CLOSE, { bubbles: true }));
 
       // console.log(this.contextMenuCallback);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
@@ -81,10 +81,15 @@ namespace Fudge {
 
     public dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void {
       _init.detail = _init.detail || {};
-      _init.bubbles = _init.bubbles || false;
-      _init.cancelable = _init.cancelable || true;
       _init.detail.view = _init.detail.view || this;
       this.dom.dispatchEvent(new EditorEvent(_type, _init));
+    }
+
+    public dispatchToParent(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void {
+      _init.detail = _init.detail || {};
+      _init.bubbles = true;
+      _init.detail.view = _init.detail.view || this;
+      this.dom.parentElement.dispatchEvent(new EditorEvent(_type, _init));
     }
 
     //#region  ContextMenu

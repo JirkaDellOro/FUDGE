@@ -1,0 +1,68 @@
+div[view=ViewAnimation] {
+  display: flex;
+  flex-flow: column;
+}
+
+div[view=ViewAnimation] #toolbar {
+  background-color: var(--color-background-main);
+  display: flex;
+  flex-grow: 0;
+}
+
+div[view=ViewAnimation] #frameinput {
+  margin: 2px;
+  margin-left: auto;
+  min-width: 20px;
+  width: 40px;
+  text-align: end;
+}
+div[view=ViewAnimation] #frameinput::-webkit-outer-spin-button,
+div[view=ViewAnimation] #frameinput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+div[view=ViewAnimation] button {
+  border: none;
+  border-right: 2px solid var(--color-background-content);
+  background-color: var(--color-background-main);
+  padding: 2px;
+  min-width: 20px;
+  width: 50px;
+  cursor: pointer;
+}
+
+div[view=ViewAnimation] button:focus {
+  outline: none;
+}
+
+div[view=ViewAnimation] #propertylist {
+  padding-top: 30px;
+  flex-grow: 1;
+}
+
+div[view=ViewAnimation] #propertylist .selected {
+  color: var(--color-highlight);
+  font-weight: bold;
+}
+
+div[view=ViewAnimationSheet] input.label {
+  position: absolute;
+  top: 30.5px;
+}
+div[view=ViewAnimationSheet] input.event {
+  position: absolute;
+  top:42.5px;
+}
+
+/* disable pointer events to enable zooming and panning in ViewPreview */
+span.rectSprite {
+  position:absolute;
+  border: 1px dotted var(--color-signal);
+  /* opacity: 0.5; */
+  pointer-events: none;
+}
+div#image, div#image>img{
+  image-rendering: pixelated;
+  pointer-events: none;
+}

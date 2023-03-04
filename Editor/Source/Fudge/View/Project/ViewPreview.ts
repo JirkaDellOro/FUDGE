@@ -14,6 +14,8 @@ namespace Fudge {
     private viewport: ƒ.Viewport;
     private cmrOrbit: ƒAid.CameraOrbit;
     private previewNode: ƒ.Node;
+    private mtxImage: ƒ.Matrix3x3 = ƒ.Matrix3x3.IDENTITY();
+    private timeoutDefer: number;
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
@@ -32,12 +34,46 @@ namespace Fudge {
       this.fillContent();
 
       _container.on("resize", this.redraw);
-      this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
-      this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent, true);
-      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
-      // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
+      this.dom.addEventListener("wheel", this.hndMouse);
+      this.dom.addEventListener("mousemove", this.hndMouse);
+    }
+
+    private hndMouse = (_event: WheelEvent) => {
+      let div: HTMLDivElement = this.dom.querySelector("div#image");
+      if (!div)
+        return;
+      _event.preventDefault();
+      switch (_event.type) {
+        case "mousemove":
+          if (_event.buttons != 2)
+            return;
+          this.mtxImage.translateX(_event.movementX)
+          this.mtxImage.translateY(_event.movementY)
+          break;
+        case "wheel":
+          let offset: ƒ.Vector2 = new ƒ.Vector2(
+            _event.offsetX - this.dom.clientWidth, _event.offsetY - this.dom.clientHeight / 2)
+          let zoom: number = Math.exp(-_event.deltaY / 1000)
+          // console.log(offset.toString());
+          this.mtxImage.scaleX(zoom);
+          this.mtxImage.scaleY(zoom);
+          offset.scale(zoom - 1);
+          this.mtxImage.translateX(-offset.x)
+          this.mtxImage.translateY(-offset.y)
+          break;
+      }
+      this.setTransform(div);
+    }
+
+    private setTransform(_div: HTMLDivElement): void {
+      let transform: Float32Array = this.mtxImage.get();
+      transform = transform.copyWithin(5, 6);
+      transform = transform.copyWithin(2, 3);
+      _div.style.transform = `matrix(${transform.slice(0, 6).join()})`;
     }
 
     private static createStandardMaterial(): ƒ.Material {
@@ -132,14 +168,36 @@ namespace Fudge {
           ƒ.Physics.activeInstance = Page.getPhysics(<ƒ.Graph>this.resource);
           this.setViewObject(previewObject);
           previewObject.addEventListener(ƒ.EVENT.MUTATE, (_event: Event) => {
-            this.redraw();
+            this.defer(() => this.dispatch(EVENT_EDITOR.UPDATE, { bubbles: true }));
           });
           this.redraw();
           break;
         case "TextureImage":
-          let img: HTMLImageElement = (<ƒ.TextureImage>this.resource).image;
-          img.style.border = "1px solid black";
-          this.dom.appendChild(img);
+        case "AnimationSprite":
+          let div: HTMLDivElement = document.createElement("div");
+          div.id = "image"
+          let img: HTMLImageElement;
+          if (type == "TextureImage") {
+            img = (<ƒ.TextureImage>this.resource).image;
+            div.appendChild(img);
+          } else {
+            let animationSprite: ƒ.AnimationSprite = <ƒ.AnimationSprite>this.resource;
+            img = (<ƒ.TextureImage>animationSprite.texture).image;
+            div.appendChild(img);
+            let positions: ƒ.Vector2[] = animationSprite.getPositions();
+            let mutator: ƒ.Mutator = animationSprite.getMutator();
+            for (let position of positions) {
+              let rect: HTMLSpanElement = document.createElement("span");
+              rect.className = "rectSprite";
+              rect.style.left = position.x + 1 + "px";
+              rect.style.top = position.y + 1 + "px";
+              rect.style.width = mutator.size.x - 2 + "px";
+              rect.style.height = mutator.size.y - 2 + "px";
+              div.appendChild(rect);
+            }
+          }
+          this.dom.appendChild(div);
+          this.setTransform(div);
           break;
         case "Audio":
           let entry: DirectoryEntry = new DirectoryEntry((<ƒ.Audio>this.resource).path, "", null, null);
@@ -147,7 +205,7 @@ namespace Fudge {
           break;
         default: break;
       }
-      
+
       this.setTitle(`Preview | ${this.resource.name}`);
     }
 
@@ -216,16 +274,14 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      // console.log(_event.type);
       switch (_event.type) {
-        // case EVENT_EDITOR.SET_PROJECT:
-        //   this.resource = undefined;
-        //   break;
-        case ƒUi.EVENT.CHANGE:
         case EVENT_EDITOR.MODIFY:
-          if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture /*  || this.resource instanceof ƒ.Material */)
+        case EVENT_EDITOR.UPDATE:
+          // if ([ƒ.Audio, ƒ.Texture, ƒ.AnimationSprite].some((_type) => this.resource instanceof _type)) {
+          if (this.resource instanceof ƒ.Audio ||
+            this.resource instanceof ƒ.Texture ||
+            this.resource instanceof ƒ.AnimationSprite)
             this.fillContent();
-        case ƒUi.EVENT.MUTATE:
           this.redraw();
           break;
         default:
@@ -236,6 +292,7 @@ namespace Fudge {
           else
             this.resource = _event.detail.data;
 
+          this.mtxImage.reset();
           this.fillContent();
           break;
       }
@@ -262,6 +319,15 @@ namespace Fudge {
       } catch (_error: unknown) {
         //nop
       }
+    }
+
+    private defer(_function: Function): void {
+      if (this.timeoutDefer)
+        return;
+      this.timeoutDefer = window.setTimeout(() => {
+        _function();
+        this.timeoutDefer = undefined;
+      }, 100);
     }
   }
 }

@@ -37,8 +37,6 @@ namespace Fudge {
       // this.selectedNode = null;
 
       this.tree = new ƒUi.Tree<ƒ.Node>(new ControllerTreeHierarchy(), this.graph);
-      // this.listController.listRoot.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
-      //TODO: examine if tree should fire common UI-EVENT for selection instead
       this.tree.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
@@ -105,7 +103,7 @@ namespace Fudge {
       target.appendChild(instance);
       this.tree.findVisible(target).expand(true);
 
-      this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
     }
 
     //#region  ContextMenu
@@ -164,11 +162,15 @@ namespace Fudge {
           if (this.#selectionPrevious.includes(node) && this.getSelection().includes(node))
             this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: node, view: this } });
           this.#selectionPrevious = this.getSelection().slice(0);
+          this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: node, view: this } });
           break;
         case EVENT_EDITOR.SELECT:
           if (_event.detail.node) {
             this.showNode(_event.detail.node);
-            this.tree.displaySelection([_event.detail.node]);
+            if (_event.detail.view != this) {
+              this.tree.displaySelection([_event.detail.node]);
+              this.#selectionPrevious = this.getSelection().slice(0);
+            }
           }
           else {
             this.setGraph(_event.detail.graph);

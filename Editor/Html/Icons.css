@@ -5,6 +5,8 @@ details>summary::after,
 .lm_controls .lm_close::before,
 .lm_controls .lm_maximise::before,
 .lm_maximised .lm_controls .lm_maximise::before,
+div[view^=ViewAnimation] fudge-stepper::after,
+div[view^=ViewAnimation] button::before,
 fudge-boolean input[type="checkbox"]::before {
   width: 16px;
   height: 16px;
@@ -90,6 +92,16 @@ tr[icon^=Texture]>td:first-child::before {
   -webkit-mask: url(../Html/Icon/Texture.svg);
 }
 
+tr[icon^=Animation]>td:first-child::before {
+  mask: url(../Html/Icon/Animation.svg);
+  -webkit-mask: url(../Html/Icon/Animation.svg);
+}
+
+tr[icon^=ParticleSystem]>td:first-child::before {
+  mask: url(../Html/Icon/Particles.svg);
+  -webkit-mask: url(../Html/Icon/Particles.svg);
+}
+
 /* Panel titles */
 
 div.lm_tab[title^="Graph"]::before {
@@ -105,6 +117,16 @@ div.lm_tab[title^="Project"]::before {
 div.lm_tab[title^="Help"]::before {
   mask: url(../Html/Icon/Help.svg);
   -webkit-mask: url(../Html/Icon/Help.svg);
+}
+
+div.lm_tab[title^="Animation"]::before {
+  mask: url(../Html/Icon/Animation.svg);
+  -webkit-mask: url(../Html/Icon/Animation.svg);
+}
+
+div.lm_tab[title^="ParticleSystem"]::before {
+  mask: url(../Html/Icon/Particles.svg);
+  -webkit-mask: url(../Html/Icon/Particles.svg);
 }
 
 
@@ -147,6 +169,16 @@ div.lm_tab[title^="Hierarchy"]::before {
 div.lm_tab[title^="Components"]::before {
   mask: url(../Html/Icon/Components.svg);
   -webkit-mask: url(../Html/Icon/Components.svg);
+}
+
+div.lm_tab[title^="Dopesheet"]::before {
+  mask: url(../Html/Icon/Dopesheet.svg);
+  -webkit-mask: url(../Html/Icon/Dopesheet.svg);
+}
+
+div.lm_tab[title^="Curves"]::before {
+  mask: url(../Html/Icon/Curves.svg);
+  -webkit-mask: url(../Html/Icon/Curves.svg);
 }
 
 /* Properties */
@@ -214,4 +246,54 @@ details[key^=ComponentCamera]>summary::after {
 details[key^=shape]>summary::after {
   mask: url(../Html/Icon/Shape.svg);
   -webkit-mask: url(../Html/Icon/Shape.svg);
+}
+
+details[key^=animation]>summary::after, details[key^=Animation]>summary::after, details[key^=ComponentAnimator]>summary::after {
+  mask: url(../Html/Icon/Animation.svg);
+  -webkit-mask: url(../Html/Icon/Animation.svg);
+}
+
+details[key^=particleSystem]>summary::after, details[key^=ParticleSystem]>summary::after, details[key^=ComponentParticleSystem]>summary::after {
+  mask: url(../Html/Icon/Particles.svg);
+  -webkit-mask: url(../Html/Icon/Particles.svg);
+}
+
+/* Animation */
+div[view=ViewAnimation] fudge-stepper {
+  --color-animation-property: var(--color-background-content);
+  /* will be overriten by ControllerAnimation code */
+}
+
+div[view=ViewAnimation] fudge-stepper::after {
+  margin-right: 0px;
+  margin-left: 5px;
+  background: var(--color-animation-property);
+  vertical-align: middle;
+  mask: url(../Html/Icon/AnimationKey.svg);
+  -webkit-mask: url(../Html/Icon/AnimationKey.svg);
+}
+
+div[view=ViewAnimation] button::before {
+  margin: 0;
+  vertical-align: middle;
+}
+
+div[view=ViewAnimation] button[id="previous"]::before {
+  mask: url(../Html/Icon/Previous.svg);
+  -webkit-mask: url(../Html/Icon/Previous.svg);
+}
+
+div[view=ViewAnimation] button[id="play"]::before {
+  mask: url(../Html/Icon/Play.svg);
+  -webkit-mask: url(../Html/Icon/Play.svg);
+}
+
+div[view=ViewAnimation] button[id="pause"]::before {
+  mask: url(../Html/Icon/Pause.svg);
+  -webkit-mask: url(../Html/Icon/Pause.svg);
+}
+
+div[view=ViewAnimation] button[id="next"]::before {
+  mask: url(../Html/Icon/Next.svg);
+  -webkit-mask: url(../Html/Icon/Next.svg);
 }

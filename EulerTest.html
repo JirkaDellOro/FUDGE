@@ -12,8 +12,8 @@
 <body>
   <script>
     let mtx = new FudgeCore.Matrix4x4();
-    mtx.scaleX(0.5);
-    // mtx.rotateZ(90);
+    mtx.scaleX(-1);
+    mtx.rotateZ(90);
     console.table(mtx.get().toString());
     console.log(mtx.scaling.toString());
     console.log(mtx.getEulerAngles().toString());

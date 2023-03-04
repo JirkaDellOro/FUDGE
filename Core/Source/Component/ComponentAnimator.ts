@@ -4,31 +4,32 @@
 namespace FudgeCore {
 
   /**
-   * Holds a reference to an {@link Animation} and controls it. Controls playback and playmode as well as speed.
-   * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
+   * Holds a reference to an {@link Animation} and controls it. Controls quantization and playmode as well as speed.
+   * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2022
    */
   export class ComponentAnimator extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentAnimator);
     //TODO: add functionality to blend from one animation to another.
-    animation: Animation;
-    playmode: ANIMATION_PLAYMODE;
-    playback: ANIMATION_PLAYBACK;
-    scaleWithGameTime: boolean = true;
+    public animation: Animation;
+    public playmode: ANIMATION_PLAYMODE;
+    public quantization: ANIMATION_QUANTIZATION;
+    public scaleWithGameTime: boolean = true;
+    public animateInEditor: boolean = false;
 
     #scale: number = 1;
     #timeLocal: Time;
     #previous: number = 0;
 
-    constructor(_animation: Animation = new Animation(""), _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _playback: ANIMATION_PLAYBACK = ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
+    constructor(_animation?: Animation, _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _quantization: ANIMATION_QUANTIZATION = ANIMATION_QUANTIZATION.CONTINOUS) {
       super();
-      this.animation = _animation;
       this.playmode = _playmode;
-      this.playback = _playback;
+      this.quantization = _quantization;
+      this.animation = _animation;
 
       this.#timeLocal = new Time();
 
       //TODO: update animation total time when loading a different animation?
-      this.animation.calculateTotalTime();
+      this.animation?.calculateTotalTime();
 
       this.addEventListener(EVENT.COMPONENT_REMOVE, () => this.activate(false));
       this.addEventListener(EVENT.COMPONENT_ADD, () => {
@@ -58,14 +59,7 @@ namespace FudgeCore {
       if (!this.node)
         return;
 
-      if (_on) {
-        Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale);
-        this.node.addEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
-      }
-      else {
-        Time.game.removeEventListener(EVENT.TIME_SCALED, this.updateScale);
-        this.node.removeEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
-      }
+      this.activateListeners(_on);
     }
 
     /**
@@ -75,7 +69,7 @@ namespace FudgeCore {
       this.#timeLocal.set(_time);
       this.#previous = _time;
       _time = _time % this.animation.totalTime;
-      let mutator: Mutator = this.animation.getMutated(_time, this.animation.calculateDirection(_time, this.playmode), this.playback);
+      let mutator: Mutator = this.animation.getState(_time, this.animation.calculateDirection(_time, this.playmode), this.quantization);
       this.node.applyAnimation(mutator);
     }
 
@@ -91,21 +85,23 @@ namespace FudgeCore {
     /**
      * Forces an update of the animation from outside. Used in the ViewAnimation. Shouldn't be used during the game.
      * @param _time the (unscaled) time to update the animation with.
-     * @returns a Tupel containing the Mutator for Animation and the playmode corrected time. 
+     * @returns the Mutator for Animation. 
      */
-    public updateAnimation(_time: number): [Mutator, number] {
+    public updateAnimation(_time: number): Mutator {
+      this.#previous = undefined;
       return this.updateAnimationLoop(null, _time);
     }
 
     //#region transfer
     public serialize(): Serialization {
-      let serialization: Serialization = super.serialize();
+      let serialization: Serialization = {};
+      serialization[super.constructor.name] = super.serialize();
       serialization.idAnimation = this.animation.idResource;
       serialization.playmode = this.playmode;
-      serialization.playback = this.playback;
+      serialization.quantization = this.quantization;
       serialization.scale = this.scale;
       serialization.scaleWithGameTime = this.scaleWithGameTime;
-      serialization[super.constructor.name] = super.serialize();
+      serialization.animateInEditor = this.animateInEditor;
 
       return serialization;
     }
@@ -113,43 +109,71 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization[super.constructor.name]);
       this.animation = <Animation>await Project.getResource(_serialization.idAnimation);
-      this.playback = _serialization.playback;
       this.playmode = _serialization.playmode;
+      this.quantization = _serialization.quantization;
       this.scale = _serialization.scale;
       this.scaleWithGameTime = _serialization.scaleWithGameTime;
+      this.animateInEditor = _serialization.animateInEditor;
 
       return this;
     }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      await super.mutate(_mutator);
+      if (typeof (_mutator.animateInEditor) !== "undefined") {
+        this.updateAnimation(0);
+        this.activateListeners(this.active);
+      }
+    }
+
+    public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
+      let types: MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
+      if (types.playmode)
+        types.playmode = ANIMATION_PLAYMODE;
+      if (types.quantization)
+        types.quantization = ANIMATION_QUANTIZATION;
+      return types;
+    }
     //#endregion
+
+    private activateListeners(_on: boolean): void {
+      if (_on && (Project.mode != MODE.EDITOR || Project.mode == MODE.EDITOR && this.animateInEditor)) {
+        Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale);
+        this.node.addEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
+      }
+      else {
+        Time.game.removeEventListener(EVENT.TIME_SCALED, this.updateScale);
+        this.node.removeEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
+      }
+    }
 
     //#region updateAnimation
     /**
      * Updates the Animation.
-     * Gets called every time the Loop fires the LOOP_FRAME Event.
      * Uses the built-in time unless a different time is specified.
      * May also be called from updateAnimation().
      */
-    private updateAnimationLoop = (_e: Event, _time?: number): [Mutator, number] => {
-      if (this.animation.totalTime == 0)
-        return [null, 0];
-      let time: number = _time || this.#timeLocal.get();
-      if (this.playback == ANIMATION_PLAYBACK.FRAMEBASED) {
+    private updateAnimationLoop = (_e: Event, _time?: number): Mutator => {
+      if (this.animation.totalTime == 0) return null;
+
+      let time: number = _time || _time === 0 ? _time : this.#timeLocal.get();
+      if (this.quantization == ANIMATION_QUANTIZATION.FRAMES) {
         time = this.#previous + (1000 / this.animation.fps);
       }
       let direction: number = this.animation.calculateDirection(time, this.playmode);
       time = this.animation.getModalTime(time, this.playmode, this.#timeLocal.getOffset());
-      this.executeEvents(this.animation.getEventsToFire(this.#previous, time, this.playback, direction));
+      this.executeEvents(this.animation.getEventsToFire(this.#previous, time, this.quantization, direction));
 
       if (this.#previous != time) {
         this.#previous = time;
         time = time % this.animation.totalTime;
-        let mutator: Mutator = this.animation.getMutated(time, direction, this.playback);
+        let mutator: Mutator = this.animation.getState(time, direction, this.quantization);
         if (this.node) {
           this.node.applyAnimation(mutator);
         }
-        return [mutator, time];
+        return mutator;
       }
-      return [null, time];
+      return null;
     }
 
     /**

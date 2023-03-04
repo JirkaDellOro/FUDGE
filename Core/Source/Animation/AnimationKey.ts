@@ -3,9 +3,10 @@
 
 namespace FudgeCore {
   /**
-   * Holds information about set points in time, their accompanying values as well as their slopes. 
-   * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
-   * Saved inside an {@link AnimationSequence}.
+   * Holds information about continous points in time their accompanying values as well as their slopes. 
+   * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. 
+   * The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
+   * If the property constant is true, the value does not change and wil not be interpolated between this and the next key in a sequence
    * @author Lukas Scheuerle, HFU, 2019
    */
   export class AnimationKey extends Mutable implements Serializable {
@@ -17,20 +18,20 @@ namespace FudgeCore {
     
     broken: boolean;
 
-    private time: number;
-    private value: number;
-    private constant: boolean = false;
+    #time: number;
+    #value: number;
+    #constant: boolean = false;
 
-    private slopeIn: number = 0;
-    private slopeOut: number = 0;
+    #slopeIn: number = 0;
+    #slopeOut: number = 0;
 
     constructor(_time: number = 0, _value: number = 0, _slopeIn: number = 0, _slopeOut: number = 0, _constant: boolean = false) {
       super();
-      this.time = _time;
-      this.value = _value;
-      this.slopeIn = _slopeIn;
-      this.slopeOut = _slopeOut;
-      this.constant = _constant;
+      this.#time = _time;
+      this.#value = _value;
+      this.#slopeIn = _slopeIn;
+      this.#slopeOut = _slopeOut;
+      this.#constant = _constant;
 
       this.broken = this.slopeIn != -this.slopeOut;
       this.functionOut = new AnimationFunction(this, null);
@@ -42,76 +43,76 @@ namespace FudgeCore {
      * @param _b the animation key to check against
      * @returns >0 if a>b, 0 if a=b, <0 if a<b
      */
-    static compare(_a: AnimationKey, _b: AnimationKey): number {
+    public static compare(_a: AnimationKey, _b: AnimationKey): number {
       return _a.time - _b.time;
     }
-    
-    get Time(): number {
-      return this.time;
+
+    get time(): number {
+      return this.#time; 
     }
 
-    set Time(_time: number) {
-      this.time = _time;
+    set time(_time: number) {
+      this.#time = _time;
       this.functionIn.calculate();
       this.functionOut.calculate();
     }
 
-    get Value(): number {
-      return this.value;
+    get value(): number {
+      return this.#value;
     }
 
-    set Value(_value: number) {
-      this.value = _value;
+    set value(_value: number) {
+      this.#value = _value;
       this.functionIn.calculate();
       this.functionOut.calculate();
     }
     
-    get Constant(): boolean {
-      return this.constant;
+    get constant(): boolean {
+      return this.#constant;
     }
 
-    set Constant(_constant: boolean) {
-      this.constant = _constant;
+    set constant(_constant: boolean) {
+      this.#constant = _constant;
       this.functionIn.calculate();
       this.functionOut.calculate();
     }
 
-    get SlopeIn(): number {
-      return this.slopeIn;
+    get slopeIn(): number {
+      return this.#slopeIn;
     }
     
-    set SlopeIn(_slope: number) {
-      this.slopeIn = _slope;
+    set slopeIn(_slope: number) {
+      this.#slopeIn = _slope;
       this.functionIn.calculate();
     }
 
-    get SlopeOut(): number {
-      return this.slopeOut;
+    get slopeOut(): number {
+      return this.#slopeOut;
     }
 
-    set SlopeOut(_slope: number) {
-      this.slopeOut = _slope;
+    set slopeOut(_slope: number) {
+      this.#slopeOut = _slope;
       this.functionOut.calculate();
     }
 
 
     //#region transfer
     serialize(): Serialization {
-      let s: Serialization = {};
-      s.time = this.time;
-      s.value = this.value;
-      s.slopeIn = this.slopeIn;
-      s.slopeOut = this.slopeOut;
-      s.constant = this.constant;
-      return s;
+      let serialization: Serialization = {};
+      serialization.time = this.#time;
+      serialization.value = this.#value;
+      serialization.slopeIn = this.#slopeIn;
+      serialization.slopeOut = this.#slopeOut;
+      serialization.constant = this.#constant;
+      return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.time = _serialization.time;
-      this.value = _serialization.value;
-      this.slopeIn = _serialization.slopeIn;
-      this.slopeOut = _serialization.slopeOut;
-      this.constant = _serialization.constant;
+      this.#time = _serialization.time;
+      this.#value = _serialization.value;
+      this.#slopeIn = _serialization.slopeIn;
+      this.#slopeOut = _serialization.slopeOut;
+      this.#constant = _serialization.constant;
 
       this.broken = this.slopeIn != -this.slopeOut;
 

@@ -13,7 +13,7 @@ namespace Fudge {
     private viewport: ƒ.Viewport;
     private canvas: HTMLCanvasElement;
     private graph: ƒ.Graph;
-    private nodeLight: ƒ.Node = new ƒ.Node("Illumination"); // keeps light components for dark graphs 
+    private nodeLight: ƒ.Node = new ƒ.Node("Illumination"); // keeps light components for dark graphs
 
     constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
@@ -33,14 +33,18 @@ namespace Fudge {
 
       _container.on("resize", this.redraw);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
-      // this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
-      // this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
       this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move
+      window.setInterval(() => {
+        if (this.contextMenu.getMenuItemById(String(CONTEXTMENU.RENDER_CONTINUOUSLY)).checked)
+          this.redraw();
+      }, 1000 / 30);
     }
 
     createUserInterface(): void {
@@ -83,7 +87,8 @@ namespace Fudge {
       ƒ.Physics.connectJoints();
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       this.viewport.setBranch(this.graph);
-      this.redraw();
+      this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: this.graph } });
+      // this.redraw();
     }
 
     //#region  ContextMenu
@@ -110,6 +115,9 @@ namespace Fudge {
       menu.append(item);
 
       item = new remote.MenuItem({ label: "Orthographic Camera", id: String(CONTEXTMENU.ORTHGRAPHIC_CAMERA), type: "checkbox", click: _callback, accelerator: process.platform == "darwin" ? "O" : "O" });
+      menu.append(item);
+
+      item = new remote.MenuItem({ label: "Render Continuously", id: String(CONTEXTMENU.RENDER_CONTINUOUSLY), type: "checkbox", click: _callback });
       menu.append(item);
 
       return menu;
@@ -204,18 +212,18 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: EditorEvent): void => {
+      let detail: EventDetail = <EventDetail>_event.detail;
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
-        case EVENT_EDITOR.FOCUS:
-          let detail: EventDetail = <EventDetail>_event.detail;
           if (detail.node) {
             if (detail.view == this)
               return;
-            if (_event.type == EVENT_EDITOR.FOCUS)
-              this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
-            ƒ.Render.prepare(this.cmrOrbit);
           } else
             this.setGraph(_event.detail.graph);
+          break;
+        case EVENT_EDITOR.FOCUS:
+          this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
+          ƒ.Render.prepare(this.cmrOrbit);
           break;
       }
       this.redraw();
@@ -254,7 +262,8 @@ namespace Fudge {
       let data: Object = {
         transform: Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera, inverted: _event.shiftKey
       };
-      this.dispatch(EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: { transform: data } });
+      this.dispatchToParent(EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: { transform: data } });
+      this.dispatchToParent(EVENT_EDITOR.UPDATE, {});
       this.redraw();
     }
 
@@ -266,8 +275,8 @@ namespace Fudge {
     private redraw = () => {
       try {
         ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
+        ƒ.Physics.connectJoints();
         this.viewport.draw();
-        // ƒ.Physics.connectJoints();
       } catch (_error: unknown) {
         // console.error(_error);
         //nop

@@ -4,7 +4,7 @@ namespace Fudge {
 
   /**
    * List the scripts loaded
-   * @author Jirka Dell'Oro-Friedl, HFU, 2020  
+   * @author Jirka Dell'Oro-Friedl, HFU, 2020-23
    */
   export class ViewScript extends View {
     // TODO: consider script namespaces ƒ.ScriptNamespaces to find all scripts not just ComponentScripts
@@ -14,8 +14,7 @@ namespace Fudge {
       super(_container, _state);
 
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
-      // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
     }
 
     public listScripts(): void {
@@ -55,12 +54,9 @@ namespace Fudge {
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
-        case EVENT_EDITOR.MODIFY:
-          this.listScripts();
+          if (!_event.detail.data)
+            this.listScripts();
           break;
-        // case ƒui.EVENT.SELECT:
-        //   console.log(_event.detail.data);
-        //   break;
       }
     }
   }

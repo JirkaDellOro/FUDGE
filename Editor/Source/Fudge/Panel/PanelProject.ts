@@ -4,19 +4,12 @@ namespace Fudge {
 
   /**
    * Display the project structure and offer functions for creation, deletion and adjustment of resources
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2020
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2020- 2023
    */
   export class PanelProject extends Panel {
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
-
-      //old registercomponent
-      // this.goldenLayout.registerComponent(VIEW.INTERNAL, ViewInternal);
-      // this.goldenLayout.registerComponent(VIEW.EXTERNAL, ViewExternal);
-      // this.goldenLayout.registerComponent(VIEW.PROPERTIES, ViewProperties);
-      // this.goldenLayout.registerComponent(VIEW.PREVIEW, ViewPreview);
-      // this.goldenLayout.registerComponent(VIEW.SCRIPT, ViewScript);
 
       this.goldenLayout.registerComponentConstructor(VIEW.INTERNAL, ViewInternal);
       this.goldenLayout.registerComponentConstructor(VIEW.EXTERNAL, ViewExternal);
@@ -66,14 +59,13 @@ namespace Fudge {
 
       this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
 
-      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
-      // this.dom.addEventListener(EVENT_EDITOR.REFRES, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
+      document.addEventListener(EVENT_EDITOR.CREATE, this.hndEvent);
 
       this.setTitle("Project | " + project.name);
-      this.broadcastEvent(new EditorEvent(EVENT_EDITOR.SELECT, {}));
+      this.broadcast(new EditorEvent(EVENT_EDITOR.OPEN, {}));
     }
 
     public getState(): { [key: string]: string } {
@@ -82,8 +74,14 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      this.setTitle("Project | " + project.name);
-      this.broadcastEvent(_event);
+      if (_event.type != EVENT_EDITOR.UPDATE && _event.type != EVENT_EDITOR.CREATE)
+        _event.stopPropagation();
+      this.setTitle("Project | " + project.name); //why here and everytime?
+      if (_event.type == ƒui.EVENT.SELECT) {
+        this.broadcast(new EditorEvent(EVENT_EDITOR.SELECT, { detail: _event.detail }));
+      }
+      else
+        this.broadcast(_event);
     }
   }
 }

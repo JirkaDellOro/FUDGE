@@ -26,10 +26,16 @@ div[panel] .lm_close {
 *[view] {
   padding: 0.5em;
   padding-bottom: 0em;
+  overflow: auto;
 }
 
 *[view="ViewRender"], *[view="ViewPreview"] {
   padding: 0em;
+  overflow: hidden;
+}
+
+img {
+  border: 1px dashed var(--color-text);
 }
 
 .lm_splitter:hover {
@@ -72,6 +78,10 @@ ul.tree {
   list-style: none;
 }
 
+ul.tree form {
+  display: inline;
+}
+
 ul.tree li {
   white-space: nowrap;
 }
@@ -79,6 +89,7 @@ ul.tree li {
 ul.tree li[attributes~="inactive"]>input {
   text-decoration: line-through;
 }
+
 ul.tree li[attributes~="GraphInstance"]>input {
   font-style: italic;
 }
@@ -106,6 +117,7 @@ ul.tree input[type="checkbox"]:checked~ul {
 ul.tree input[type="checkbox"]~ul {
   display: none;
 }
+
 
 /* Table */
 
@@ -166,12 +178,18 @@ ul.tree .selected>input {
   font-weight: bold;
 }
 
+ul.tree .selected>:not(ul.tree) * {
+  color: var(--color-highlight);
+  font-weight: bold;
+}
+
 /* Components */
 
 input {
   background-color: var(--color-background-content);
   color: var(--color-text);
   border: none;
+  flex: 2;
 }
 
 *:focus {
@@ -250,8 +268,11 @@ option {
 
 /* standard fudge elements */
 
-fudge-boolean, fudge-color, fudge-textinput, fudge-stepper, fudge-select {
+fudge-boolean, fudge-color, fudge-stepper, fudge-select {
   display: block;
+}
+fudge-textinput {
+  display: flex;
 }
 
 fudge-digit {

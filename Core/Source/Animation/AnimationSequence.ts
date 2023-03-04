@@ -2,7 +2,7 @@ namespace FudgeCore {
   /**
    * A sequence of {@link AnimationKey}s that is mapped to an attribute of a {@link Node} or its {@link Component}s inside the {@link Animation}.
    * Provides functions to modify said keys
-   * @author Lukas Scheuerle, HFU, 2019
+   * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
   export class AnimationSequence extends Mutable implements Serializable {
     private keys: AnimationKey[] = [];
@@ -10,25 +10,25 @@ namespace FudgeCore {
     get length(): number {
       return this.keys.length;
     }
-    
+
     /**
      * Evaluates the sequence at the given point in time.
      * @param _time the point in time at which to evaluate the sequence in milliseconds.
-     * @returns the value of the sequence at the given time. 0 if there are no keys.
+     * @returns the value of the sequence at the given time. undefined if there are no keys.
      */
     evaluate(_time: number): number {
       if (this.keys.length == 0)
-        return 0; //TODO: shouldn't return 0 but something indicating no change, like null. probably needs to be changed in Node as well to ignore non-numeric values in the applyAnimation function
-      if (this.keys.length == 1 || this.keys[0].Time >= _time)
-        return this.keys[0].Value;
+        return undefined; //TODO: shouldn't return 0 but something indicating no change, like null. probably needs to be changed in Node as well to ignore non-numeric values in the applyAnimation function
+      if (this.keys.length == 1 || this.keys[0].time >= _time)
+        return this.keys[0].value;
 
 
       for (let i: number = 0; i < this.keys.length - 1; i++) {
-        if (this.keys[i].Time <= _time && this.keys[i + 1].Time > _time) {
+        if (this.keys[i].time <= _time && this.keys[i + 1].time > _time) {
           return this.keys[i].functionOut.evaluate(_time);
         }
       }
-      return this.keys[this.keys.length - 1].Value;
+      return this.keys[this.keys.length - 1].value;
     }
 
     /**
@@ -37,6 +37,19 @@ namespace FudgeCore {
      */
     addKey(_key: AnimationKey): void {
       this.keys.push(_key);
+      this.keys.sort(AnimationKey.compare);
+      this.regenerateFunctions();
+    }
+
+    /**
+     * Modifys a given key in the sequence.
+     * @param _key the key to add
+     */
+    modifyKey(_key: AnimationKey, _time?: number, _value?: number): void {
+      if (_time != null)
+        _key.time = _time;
+      if (_value != null)
+        _key.value = _value;
       this.keys.sort(AnimationKey.compare);
       this.regenerateFunctions();
     }
@@ -53,6 +66,16 @@ namespace FudgeCore {
           return;
         }
       }
+    }
+
+    /**
+     * Find a key in the sequence exactly matching the given time.
+     */
+    findKey(_time: number): AnimationKey {
+      for (let key of this.keys)
+        if (key.time == _time)
+          return key;
+      return null;
     }
 
     /**
@@ -81,6 +104,9 @@ namespace FudgeCore {
       return this.keys[_index];
     }
 
+    getKeys(): AnimationKey[] {
+      return this.keys;
+    }
 
     //#region transfer
     serialize(): Serialization {
@@ -93,6 +119,7 @@ namespace FudgeCore {
       }
       return s;
     }
+
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       for (let i: number = 0; i < _serialization.keys.length; i++) {
         // this.keys.push(<AnimationKey>Serializer.deserialize(_serialization.keys[i]));

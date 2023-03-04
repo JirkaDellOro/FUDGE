@@ -13,13 +13,13 @@ namespace Fudge {
       super(_container, _state);
 
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
     }
 
     public setProject(): void {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
       let path: string = new URL(".", ƒ.Project.baseURL).pathname;
-      if (navigator.platform == "Win32" || navigator.platform == "Win64" ) {
+      if (navigator.platform == "Win32" || navigator.platform == "Win64") {
         path = path.substr(1); // strip leading slash
       }
       let root: DirectoryEntry = DirectoryEntry.createRoot(path);
@@ -33,13 +33,14 @@ namespace Fudge {
     public getSelection(): DirectoryEntry[] {
       return this.tree.controller.selection;
     }
-    
+
     public getDragDropSources(): DirectoryEntry[] {
       return this.tree.controller.dragDrop.sources;
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      this.setProject();
+      if (!_event.detail.data) // nothing actually selected...
+        this.setProject();
     }
   }
 }

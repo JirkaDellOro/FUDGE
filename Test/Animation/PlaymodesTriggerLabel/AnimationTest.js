@@ -38,12 +38,10 @@ var AnimatorControleTest;
             components: {
                 ComponentTransform: [
                     {
-                        "ƒ.ComponentTransform": {
-                            mtxLocal: {
-                                rotation: {
-                                    x: animseq,
-                                    y: animseq
-                                }
+                        mtxLocal: {
+                            rotation: {
+                                x: animseq,
+                                y: animseq
                             }
                         }
                     }
@@ -56,8 +54,8 @@ var AnimatorControleTest;
         animation.setEvent("event", parseInt(form.querySelector("input[name=event]").value));
         animation.labels["jump"] = parseInt(form.querySelector("input[name=label]").value);
         let playmode = String(formData.get("mode"));
-        let playback = String(formData.get("back"));
-        let cmpAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE[playmode], ƒ.ANIMATION_PLAYBACK[playback]);
+        let quantization = String(formData.get("back"));
+        let cmpAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE[playmode], ƒ.ANIMATION_QUANTIZATION[quantization]);
         cmpAnimator.scale = 1;
         cmpAnimator.addEventListener("event", (_event) => {
             let time = _event.target.time;

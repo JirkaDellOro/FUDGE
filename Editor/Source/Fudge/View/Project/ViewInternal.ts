@@ -16,12 +16,15 @@ namespace Fudge {
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
+      this.dom.addEventListener(EVENT_EDITOR.OPEN, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.CREATE, this.hndEvent);
+      // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      // this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
-      this.dom.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.REMOVE_CHILD, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
     public listResources(): void {
@@ -62,6 +65,9 @@ namespace Fudge {
       let item: Electron.MenuItem;
 
 
+      item = new remote.MenuItem({ label: "Create Graph", id: String(CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
+      menu.append(item);
+
       item = new remote.MenuItem({
         label: "Create Mesh",
         submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.CREATE_MESH, ƒ.Mesh, _callback)
@@ -74,7 +80,20 @@ namespace Fudge {
       });
       menu.append(item);
 
-      item = new remote.MenuItem({ label: "Create Graph", id: String(CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
+      item = new remote.MenuItem({
+        label: "Create Animation",
+        submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.CREATE_ANIMATION, ƒ.Animation, _callback)
+      });
+      menu.append(item);
+
+
+      // item = new remote.MenuItem({ label: `Create ${ƒ.Animation.name}`, id: String(CONTEXTMENU.CREATE_ANIMATION), click: _callback });
+      // menu.append(item);
+
+      // item = new remote.MenuItem({ label: `Create ${ƒ.AnimationSprite.name}`, id: String(CONTEXTMENU.CREATE_ANIMATION), click: _callback });
+      // menu.append(item);
+
+      item = new remote.MenuItem({ label: `Create ${ƒ.ParticleSystem.name}`, id: String(CONTEXTMENU.CREATE_PARTICLE_EFFECT), click: _callback });
       menu.append(item);
 
       item = new remote.MenuItem({ label: "Delete Resource", id: String(CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
@@ -98,27 +117,39 @@ namespace Fudge {
       }
 
       switch (choice) {
+        //TODO: dispatch CREATE instead of MODIFY!
         case CONTEXTMENU.CREATE_MESH:
           let typeMesh: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
           //@ts-ignore
           let meshNew: ƒ.Mesh = new typeMesh();
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
           this.table.selectInterval(meshNew, meshNew);
           break;
         case CONTEXTMENU.CREATE_MATERIAL:
           let typeShader: typeof ƒ.Shader = ƒ.Shader.subclasses[iSubclass];
           let mtrNew: ƒ.Material = new ƒ.Material(typeShader.name, typeShader);
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
           this.table.selectInterval(mtrNew, mtrNew);
           break;
         case CONTEXTMENU.CREATE_GRAPH:
           let graph: ƒ.Graph = await ƒ.Project.registerAsGraph(new ƒ.Node("NewGraph"));
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
           this.table.selectInterval(graph, graph);
+          break;
+        case CONTEXTMENU.CREATE_ANIMATION:
+          let typeAnimation: typeof ƒ.Animation = ƒ.Animation.subclasses[iSubclass];
+          let animation: ƒ.Animation = new typeAnimation();
+          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
+          this.table.selectInterval(animation, animation);
+          break;
+        case CONTEXTMENU.CREATE_PARTICLE_EFFECT:
+          let particleSystem: ƒ.ParticleSystem = new ƒ.ParticleSystem();
+          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
+          this.table.selectInterval(particleSystem, particleSystem);
           break;
         case CONTEXTMENU.DELETE_RESOURCE:
           await this.table.controller.delete([this.table.getFocussed()]);
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
           break;
       }
     }
@@ -167,18 +198,26 @@ namespace Fudge {
         }
       }
 
-      this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
     }
 
     private hndEvent = (_event: CustomEvent): void => {
+      if (_event.detail?.sender && _event.type != EVENT_EDITOR.OPEN && _event.type != EVENT_EDITOR.CREATE)
+        return;
       switch (_event.type) {
+        case EVENT_EDITOR.OPEN:
         case EVENT_EDITOR.SELECT:
-        case EVENT_EDITOR.MODIFY:
-          // case ƒui.EVENT.MUTATE:
+        case EVENT_EDITOR.CREATE:
           this.listResources();
           break;
+        case ƒui.EVENT.MUTATE:
+          _event.stopPropagation();
+          this.dispatchToParent(EVENT_EDITOR.MODIFY, {});
+          break;
         case ƒui.EVENT.REMOVE_CHILD:
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          _event.stopPropagation();
+          this.dispatchToParent(EVENT_EDITOR.DELETE, {});
+          this.listResources();
           break;
       }
     }

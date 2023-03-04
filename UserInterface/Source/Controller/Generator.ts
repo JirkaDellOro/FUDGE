@@ -66,10 +66,15 @@ namespace FudgeUserInterface {
       let div: HTMLDivElement = document.createElement("div");
       for (let key in _mutator) {
         let value: Object = Reflect.get(_mutator, key);
+        // if (value === undefined) // at this time (1/23) adding a property to an animation in the editor creates an empty keys list...
+        // {
+        //   div.appendChild(this.createMutatorElement(key, Object, {})); 
+        //   continue;
+        // }
         if (value instanceof Object) {
           // let details: Details = Generator.createDetails(key, "Details");
           let details: Details = new Details(key, "Details");
-          details.content.appendChild(Generator.createInterfaceFromMutator(value));
+          details.setContent(Generator.createInterfaceFromMutator(value));
           div.appendChild(details);
         }
         else

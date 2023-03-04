@@ -14,7 +14,7 @@ uniform vec4 u_vctColor;
   #if defined(FLAT) 
 flat in vec4 v_vctColor;
   // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT)
+  #elif defined(LIGHT) || defined(PARTICLE_COLOR)
 in vec4 v_vctColor;
   #endif
 
@@ -31,7 +31,7 @@ void main() {
   vctFrag = u_vctColor;
 
     // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT)
+    #if defined(FLAT) || defined(LIGHT) || defined(PARTICLE_COLOR)
   vctFrag *= v_vctColor;
     #endif
 

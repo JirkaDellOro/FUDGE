@@ -152,10 +152,10 @@ declare namespace FudgeCore {
         CHILD_REMOVE = "childRemove",
         /** dispatched to a {@link Mutable} when it mutates */
         MUTATE = "mutate",
-        /** dispatched to a {@link GraphInstance} when the graph it connects to mutates */
+        /** dispatched by a {@link Graph} when it mutates, {@link GraphInstance}s connected to the graph listen */
         MUTATE_GRAPH = "mutateGraph",
-        /** dispatched to a {@link GraphInstance} after {@link MUTATE_GRAPH} to signal that all instances were informed*/
-        MUTATE_GRAPH_DONE = "mutateGraphDone",
+        /** dispatched by a {@link GraphInstance} when it reflected the mutation of the {@link Graph} it's connected to */
+        MUTATE_INSTANCE = "mutateGraphDone",
         /** dispatched to {@link Viewport} when it gets the focus to receive keyboard input */
         FOCUS_IN = "focusin",
         /** dispatched to {@link Viewport} when it loses the focus to receive keyboard input */
@@ -599,7 +599,7 @@ declare namespace FudgeCore {
         attachToNode(_container: Node | null): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        mutate(_mutator: Mutator): Promise<void>;
+        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -655,6 +655,61 @@ declare namespace FudgeCore {
         protected static getRenderBuffers(this: Mesh, _shader: typeof Shader): RenderBuffers;
         protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers;
         protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
+    }
+}
+declare namespace FudgeCore {
+    namespace ParticleData {
+        enum FUNCTION {
+            ADDITION = "addition",
+            SUBTRACTION = "subtraction",
+            MULTIPLICATION = "multiplication",
+            DIVISION = "division",
+            MODULO = "modulo",
+            POWER = "power",
+            POLYNOMIAL3 = "polynomial3",
+            SQUARE_ROOT = "squareRoot",
+            RANDOM = "random",
+            RANDOM_RANGE = "randomRange"
+        }
+        const FUNCTION_PARAMETER_NAMES: {
+            [key in ParticleData.FUNCTION]?: string[];
+        };
+        const FUNCTION_MINIMUM_PARAMETERS: {
+            [key in ParticleData.FUNCTION]: number;
+        };
+        const PREDEFINED_VARIABLES: {
+            [key: string]: string;
+        };
+    }
+    /**
+     * Compiles particle system shaders from shader universal derivates for WebGL
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
+        static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number;
+        static readonly FUNCTIONS: {
+            [key in ParticleData.FUNCTION]: Function;
+        };
+        static decorate(_constructor: Function): void;
+        static getVertexShaderSource(this: ShaderParticleSystem): string;
+        static getFragmentShaderSource(this: ShaderParticleSystem): string;
+        private static renameVariables;
+        private static generateVariables;
+        private static generateTransformations;
+        private static generateColor;
+        private static generateExpression;
+        private static generateFunction;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * buffers the random number data for the particle system into WebGL
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    class RenderInjectorComponentParticleSystem {
+        static decorate(_constructor: Function): void;
+        protected static useRenderData(this: ComponentParticleSystem): void;
+        protected static deleteRenderData(this: ComponentParticleSystem): void;
     }
 }
 declare namespace FudgeCore {
@@ -952,7 +1007,9 @@ declare namespace FudgeCore {
     enum BLEND {
         OPAQUE = 0,
         TRANSPARENT = 1,
-        PARTICLE = 2
+        ADDITIVE = 2,
+        SUBTRACTIVE = 3,
+        MODULATE = 4
     }
     interface BufferSpecification {
         size: number;
@@ -1035,11 +1092,12 @@ declare namespace FudgeCore {
         /**
          * Set light data in shaders
          */
-        protected static setLightsInShader(_shader: typeof Shader, _lights: MapLightTypeToLightList): void;
+        protected static setLightsInShader(_shader: ShaderInterface, _lights: MapLightTypeToLightList): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
+        protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
         private static calcMeshToView;
         private static getRenderBuffers;
     }
@@ -1324,7 +1382,17 @@ declare namespace FudgeCore {
      * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
      */
     interface AnimationStructure {
-        [attribute: string]: Serialization | AnimationSequence;
+        [attribute: string]: AnimationStructure[] | AnimationStructure | AnimationSequence;
+    }
+    interface AnimationStructureVector3 extends AnimationStructure {
+        x: AnimationSequence;
+        y: AnimationSequence;
+        z: AnimationSequence;
+    }
+    interface AnimationStructureMatrix4x4 extends AnimationStructure {
+        rotation?: AnimationStructureVector3;
+        scale?: AnimationStructureVector3;
+        translation?: AnimationStructureVector3;
     }
     /**
     * An associative array mapping names of lables to timestamps.
@@ -1347,61 +1415,59 @@ declare namespace FudgeCore {
      */
     enum ANIMATION_PLAYMODE {
         /**Plays animation in a loop: it restarts once it hit the end.*/
-        LOOP = 0,
+        LOOP = "loop",
         /**Plays animation once and stops at the last key/frame*/
-        PLAYONCE = 1,
+        PLAY_ONCE = "playOnce",
         /**Plays animation once and stops on the first key/frame */
-        PLAYONCESTOPAFTER = 2,
+        PLAY_ONCE_RESET = "playOnceReset",
         /**Plays animation like LOOP, but backwards.*/
-        REVERSELOOP = 3,
+        REVERSE_LOOP = "reverseLoop",
         /**Causes the animation not to play at all. Useful for jumping to various positions in the animation without proceeding in the animation.*/
-        STOP = 4
+        STOP = "stop"
     }
-    enum ANIMATION_PLAYBACK {
+    enum ANIMATION_QUANTIZATION {
         /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
-        TIMEBASED_CONTINOUS = 0,
+        CONTINOUS = "continous",
         /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
-        TIMEBASED_RASTERED_TO_FPS = 1,
+        DISCRETE = "discrete",
         /** Advances the time each frame according to the FPS value of the animation, ignoring the actual duration of the frames. Doesn't skip any frames.*/
-        FRAMEBASED = 2
+        FRAMES = "frames"
     }
     /**
-     * Animation Class to hold all required Objects that are part of an Animation.
-     * Also holds functions to play said Animation.
-     * Can be added to a Node and played through {@link ComponentAnimator}.
-     * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
+     * Describes and controls and animation by yielding mutators
+     * according to the stored {@link AnimationStructure} and {@link AnimationSequence}s
+     * Applied to a {@link Node} directly via script or {@link ComponentAnimator}.
+     * @author Lukas Scheuerle, HFU, 21019 | Jirka Dell'Oro-Friedl, HFU, 2021-2023
      */
     class Animation extends Mutable implements SerializableResource {
+        #private;
+        static readonly subclasses: typeof Animation[];
+        static readonly iSubclass: number;
         idResource: string;
         name: string;
         totalTime: number;
         labels: AnimationLabel;
         animationStructure: AnimationStructure;
         events: AnimationEventTrigger;
-        private framesPerSecond;
+        protected framesPerSecond: number;
         private eventsProcessed;
-        private animationStructuresProcessed;
-        constructor(_name: string, _animStructure?: AnimationStructure, _fps?: number);
+        constructor(_name?: string, _animStructure?: AnimationStructure, _fps?: number);
+        protected static registerSubclass(_subClass: typeof Animation): number;
         get getLabels(): Enumerator;
         get fps(): number;
         set fps(_fps: number);
+        clearCache(): void;
         /**
-         * Generates a new "Mutator" with the information to apply to the {@link Node} the {@link ComponentAnimator} is attached to with {@link Node.applyAnimation}.
-         * @param _time The time at which the animation currently is at
-         * @param _direction The direction in which the animation is supposed to be playing back. >0 == forward, 0 == stop, <0 == backwards
-         * @param _playback The playbackmode the animation is supposed to be calculated with.
-         * @returns a "Mutator" to apply.
+         * Generates and returns a {@link Mutator} with the information to apply to the {@link Node} to animate
+         * in the state the animation is in at the given time, direction and quantization
          */
-        getMutated(_time: number, _direction: number, _playback: ANIMATION_PLAYBACK): Mutator;
+        getState(_time: number, _direction: number, _quantization: ANIMATION_QUANTIZATION): Mutator;
         /**
-         * Returns a list of the names of the events the {@link ComponentAnimator} needs to fire between _min and _max.
-         * @param _min The minimum time (inclusive) to check between
-         * @param _max The maximum time (exclusive) to check between
-         * @param _playback The playback mode to check in. Has an effect on when the Events are fired.
+         * Returns a list of the names of the events the {@link ComponentAnimator} needs to fire between _min and _max input values.
          * @param _direction The direction the animation is supposed to run in. >0 == forward, 0 == stop, <0 == backwards
          * @returns a list of strings with the names of the custom events to fire.
          */
-        getEventsToFire(_min: number, _max: number, _playback: ANIMATION_PLAYBACK, _direction: number): string[];
+        getEventsToFire(_min: number, _max: number, _quantization: ANIMATION_QUANTIZATION, _direction: number): string[];
         /**
          * Adds an Event to the List of events.
          * @param _name The name of the event (needs to be unique per Animation).
@@ -1429,32 +1495,25 @@ declare namespace FudgeCore {
         calculateDirection(_time: number, _playmode: ANIMATION_PLAYMODE): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
         /**
          * Traverses an AnimationStructure and returns the Serialization of said Structure.
          * @param _structure The Animation Structure at the current level to transform into the Serialization.
          * @returns the filled Serialization.
          */
-        private traverseStructureForSerialisation;
+        private traverseStructureForSerialization;
         /**
          * Traverses a Serialization to create a new AnimationStructure.
          * @param _serialization The serialization to transfer into an AnimationStructure
          * @returns the newly created AnimationStructure.
          */
-        private traverseStructureForDeserialisation;
+        private traverseStructureForDeserialization;
         /**
-         * Finds the list of events to be used with these settings.
-         * @param _direction The direction the animation is playing in.
-         * @param _playback The playbackmode the animation is playing in.
-         * @returns The correct AnimationEventTrigger Object to use
+         * Finds and returns the list of events to be used with these settings.
          */
         private getCorrectEventList;
         /**
-         * Traverses an AnimationStructure to turn it into the "Mutator" to return to the Component.
-         * @param _structure The strcuture to traverse
-         * @param _time the point in time to write the animation numbers into.
-         * @returns The "Mutator" filled with the correct values at the given time.
+         * Traverses an {@link AnimationStructure} and returns a {@link Mutator} describing the state at the given time
          */
         private traverseStructureForMutator;
         /**
@@ -1530,14 +1589,20 @@ declare namespace FudgeCore {
         private keyIn;
         private keyOut;
         constructor(_keyIn: AnimationKey, _keyOut?: AnimationKey);
+        set setKeyIn(_keyIn: AnimationKey);
+        set setKeyOut(_keyOut: AnimationKey);
+        getParameters(): {
+            a: number;
+            b: number;
+            c: number;
+            d: number;
+        };
         /**
          * Calculates the value of the function at the given time.
          * @param _time the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.
          * @returns the value at the given time
          */
         evaluate(_time: number): number;
-        set setKeyIn(_keyIn: AnimationKey);
-        set setKeyOut(_keyOut: AnimationKey);
         /**
          * (Re-)Calculates the parameters of the cubic function.
          * See https://math.stackexchange.com/questions/3173469/calculate-cubic-equation-from-two-points-and-two-slopes-variably
@@ -1548,22 +1613,19 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Holds information about set points in time, their accompanying values as well as their slopes.
-     * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
-     * Saved inside an {@link AnimationSequence}.
+     * Holds information about continous points in time their accompanying values as well as their slopes.
+     * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides.
+     * The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
+     * If the property constant is true, the value does not change and wil not be interpolated between this and the next key in a sequence
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationKey extends Mutable implements Serializable {
+        #private;
         /**Don't modify this unless you know what you're doing.*/
         functionIn: AnimationFunction;
         /**Don't modify this unless you know what you're doing.*/
         functionOut: AnimationFunction;
         broken: boolean;
-        private time;
-        private value;
-        private constant;
-        private slopeIn;
-        private slopeOut;
         constructor(_time?: number, _value?: number, _slopeIn?: number, _slopeOut?: number, _constant?: boolean);
         /**
          * Static comparation function to use in an array sort function to sort the keys by their time.
@@ -1572,16 +1634,16 @@ declare namespace FudgeCore {
          * @returns >0 if a>b, 0 if a=b, <0 if a<b
          */
         static compare(_a: AnimationKey, _b: AnimationKey): number;
-        get Time(): number;
-        set Time(_time: number);
-        get Value(): number;
-        set Value(_value: number);
-        get Constant(): boolean;
-        set Constant(_constant: boolean);
-        get SlopeIn(): number;
-        set SlopeIn(_slope: number);
-        get SlopeOut(): number;
-        set SlopeOut(_slope: number);
+        get time(): number;
+        set time(_time: number);
+        get value(): number;
+        set value(_value: number);
+        get constant(): boolean;
+        set constant(_constant: boolean);
+        get slopeIn(): number;
+        set slopeIn(_slope: number);
+        get slopeOut(): number;
+        set slopeOut(_slope: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
@@ -1592,7 +1654,7 @@ declare namespace FudgeCore {
     /**
      * A sequence of {@link AnimationKey}s that is mapped to an attribute of a {@link Node} or its {@link Component}s inside the {@link Animation}.
      * Provides functions to modify said keys
-     * @author Lukas Scheuerle, HFU, 2019
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
      */
     class AnimationSequence extends Mutable implements Serializable {
         private keys;
@@ -1600,7 +1662,7 @@ declare namespace FudgeCore {
         /**
          * Evaluates the sequence at the given point in time.
          * @param _time the point in time at which to evaluate the sequence in milliseconds.
-         * @returns the value of the sequence at the given time. 0 if there are no keys.
+         * @returns the value of the sequence at the given time. undefined if there are no keys.
          */
         evaluate(_time: number): number;
         /**
@@ -1609,10 +1671,19 @@ declare namespace FudgeCore {
          */
         addKey(_key: AnimationKey): void;
         /**
+         * Modifys a given key in the sequence.
+         * @param _key the key to add
+         */
+        modifyKey(_key: AnimationKey, _time?: number, _value?: number): void;
+        /**
          * Removes a given key from the sequence.
          * @param _key the key to remove
          */
         removeKey(_key: AnimationKey): void;
+        /**
+         * Find a key in the sequence exactly matching the given time.
+         */
+        findKey(_time: number): AnimationKey;
         /**
          * Removes the Animation Key at the given index from the keys.
          * @param _index the zero-based index at which to remove the key
@@ -1625,6 +1696,7 @@ declare namespace FudgeCore {
          * @returns the AnimationKey at the index if it exists, null otherwise.
          */
         getKey(_index: number): AnimationKey;
+        getKeys(): AnimationKey[];
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
@@ -1632,6 +1704,28 @@ declare namespace FudgeCore {
          * Utility function that (re-)generates all functions in the sequence.
          */
         private regenerateFunctions;
+    }
+}
+declare namespace FudgeCore {
+    class AnimationSprite extends Animation {
+        static readonly iSubclass: number;
+        texture: Texture;
+        private idTexture;
+        private frames;
+        private wrapAfter;
+        private start;
+        private size;
+        private next;
+        private wrap;
+        constructor(_name?: string);
+        setTexture(_texture: Texture): void;
+        create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2, _framesPerSecond: number): void;
+        getScale(): Vector2;
+        getPositions(): Vector2[];
+        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
+        serialize(): Serialization;
+        deserialize(_s: Serialization): Promise<Serializable>;
+        convertToAnimation(): Animation;
     }
 }
 declare namespace FudgeCore {
@@ -1715,17 +1809,18 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Holds a reference to an {@link Animation} and controls it. Controls playback and playmode as well as speed.
-     * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
+     * Holds a reference to an {@link Animation} and controls it. Controls quantization and playmode as well as speed.
+     * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2022
      */
     class ComponentAnimator extends Component {
         #private;
         static readonly iSubclass: number;
         animation: Animation;
         playmode: ANIMATION_PLAYMODE;
-        playback: ANIMATION_PLAYBACK;
+        quantization: ANIMATION_QUANTIZATION;
         scaleWithGameTime: boolean;
-        constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_PLAYBACK);
+        animateInEditor: boolean;
+        constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _quantization?: ANIMATION_QUANTIZATION);
         set scale(_scale: number);
         get scale(): number;
         /**
@@ -1744,14 +1839,16 @@ declare namespace FudgeCore {
         /**
          * Forces an update of the animation from outside. Used in the ViewAnimation. Shouldn't be used during the game.
          * @param _time the (unscaled) time to update the animation with.
-         * @returns a Tupel containing the Mutator for Animation and the playmode corrected time.
+         * @returns the Mutator for Animation.
          */
-        updateAnimation(_time: number): [Mutator, number];
+        updateAnimation(_time: number): Mutator;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        private activateListeners;
         /**
          * Updates the Animation.
-         * Gets called every time the Loop fires the LOOP_FRAME Event.
          * Uses the built-in time unless a different time is specified.
          * May also be called from updateAnimation().
          */
@@ -2099,6 +2196,7 @@ declare namespace FudgeCore {
         clrSecondary: Color;
         mtxPivot: Matrix3x3;
         material: Material;
+        /** support sorting of objects with transparency when rendering, render objects in the back first. Should be enabled when {@link ComponentParticleSystem.prototype.depthMask} is disabled */
         sortForAlpha: boolean;
         constructor(_material?: Material);
         serialize(): Serialization;
@@ -2123,6 +2221,43 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Attaches a {@link ParticleSystem} to the node.
+     * Works in conjunction with {@link ComponentMesh} and {@link ComponentMaterial} to create a shader particle system.
+     * Additionally a {@link ComponentFaceCamera} can be attached to make the particles face the camera.
+     * @author Jonas Plotzky, HFU, 2022
+     */
+    class ComponentParticleSystem extends Component {
+        #private;
+        static readonly iSubclass: number;
+        /** A texture filed with random numbers. Used by particle shader */
+        renderData: unknown;
+        /** When disabled try enabling {@link ComponentMaterial.prototype.sortForAlpha} */
+        depthMask: boolean;
+        blendMode: BLEND;
+        particleSystem: ParticleSystem;
+        readonly time: Time;
+        constructor(_particleSystem?: ParticleSystem, _size?: number);
+        /**
+         * Get the number of particles
+         */
+        get size(): number;
+        /**
+         * Set the number of particles. Caution: Setting this will reinitialize the random numbers array(texture) used in the shader.
+         */
+        set size(_size: number);
+        useRenderData(): void;
+        deleteRenderData(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(_extendable?: boolean): Mutator;
+        getMutatorForUserInterface(): MutatorForUserInterface;
+        getMutatorForAnimation(): MutatorForAnimation;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -2691,7 +2826,7 @@ declare namespace FudgeCore {
         protected renderData: {
             [key: string]: unknown;
         };
-        useRenderData(_shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        useRenderData(_shader: ShaderInterface, _cmpMaterial: ComponentMaterial): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
@@ -2977,6 +3112,11 @@ declare namespace FudgeCore {
          */
         static SCALING(_scalar: Vector2): Matrix3x3;
         static MULTIPLICATION(_mtxLeft: Matrix3x3, _mtxRight: Matrix3x3): Matrix3x3;
+        /**
+         * Computes and returns the inverse of a passed matrix.
+         * @param _mtx The matrix to compute the inverse of.
+         */
+        static INVERSION(_mtx: Matrix3x3): Matrix3x3;
         /**
          * - get: return a vector representation of the translation {@link Vector2}.
          * **Caution!** Use immediately, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate.
@@ -3702,9 +3842,9 @@ declare namespace FudgeCore {
         get type(): string;
         get boundingBox(): Box;
         get radius(): number;
-        useRenderBuffers(_shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers;
-        getRenderBuffers(_shader: typeof Shader): RenderBuffers;
-        deleteRenderBuffers(_shader: typeof Shader): void;
+        useRenderBuffers(_shader: ShaderInterface, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers;
+        getRenderBuffers(_shader: ShaderInterface): RenderBuffers;
+        deleteRenderBuffers(_shader: ShaderInterface): void;
         clear(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -3965,7 +4105,7 @@ declare namespace FudgeCore {
      */
     class MeshSkin extends MeshGLTF {
         load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
-        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
+        useRenderBuffers(_shader: ShaderInterface, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -4093,6 +4233,93 @@ declare namespace FudgeCore {
          * returns the position associated with the vertex addressed, resolving references between vertices
          */
         bones(_index: number): Bone[];
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * The namesapce for handling the particle data
+     */
+    namespace ParticleData {
+        interface System {
+            variables?: {
+                [name: string]: Expression;
+            };
+            color?: Color;
+            mtxLocal?: Transformation[];
+            mtxWorld?: Transformation[];
+        }
+        type Recursive = System | System["variables"] | Color | System["mtxLocal"] | Transformation | Expression;
+        interface Color {
+            r?: Expression;
+            g?: Expression;
+            b?: Expression;
+            a?: Expression;
+        }
+        type Expression = Function | Variable | Constant;
+        interface Function {
+            function: FUNCTION;
+            parameters: Expression[];
+        }
+        interface Variable {
+            value: string;
+        }
+        interface Constant {
+            value: number;
+        }
+        interface Transformation {
+            transformation: "translate" | "rotate" | "scale";
+            x?: Expression;
+            y?: Expression;
+            z?: Expression;
+        }
+        function isExpression(_data: Recursive): _data is Expression;
+        function isFunction(_data: Recursive): _data is Function;
+        function isVariable(_data: Recursive): _data is Variable;
+        function isConstant(_data: Recursive): _data is Constant;
+        function isTransformation(_data: Recursive): _data is Transformation;
+    }
+    /**
+     * Holds information on how to mutate the particles of a particle system.
+     * A full particle system is composed by attaching a {@link ComponentParticleSystem}, {@link ComponentMesh} and {@link ComponentMaterial} to the same {@link Node}.
+     * Additionally a {@link ComponentFaceCamera} can be attached to make the particles face the camera.
+     * @authors Jonas Plotzky, HFU, 2022
+     */
+    class ParticleSystem extends Mutable implements SerializableResource {
+        #private;
+        name: string;
+        idResource: string;
+        /** Map of shader universal derivates to corresponding computed {@link ShaderParticleSystem}.
+         * This way each particle system resource can be used in conjunction with all shader universal derivates */
+        private shaderToShaderParticleSystem;
+        constructor(_name?: string, _data?: ParticleData.System);
+        get data(): ParticleData.System;
+        set data(_data: ParticleData.System);
+        getShaderFrom(_source: ShaderInterface): ShaderParticleSystem;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutatorForUserInterface(): MutatorForUserInterface;
+        getMutator(): Mutator;
+        protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace FudgeCore {
+    class ShaderParticleSystem implements ShaderInterface {
+        data: ParticleData.System;
+        define: string[];
+        vertexShaderSource: string;
+        fragmentShaderSource: string;
+        program: WebGLProgram;
+        attributes: {
+            [name: string]: number;
+        };
+        uniforms: {
+            [name: string]: WebGLUniformLocation;
+        };
+        getVertexShaderSource(): string;
+        getFragmentShaderSource(): string;
+        deleteProgram(): void;
+        useProgram(): void;
+        createProgram(): void;
     }
 }
 declare namespace FudgeCore {
@@ -4915,8 +5142,8 @@ declare namespace FudgeCore {
         */
         static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _debugDraw?: boolean, _group?: COLLISION_GROUP): RayHitInfo;
         /**
-        * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms.
-        * A frame timing can't be smaller than 1/30 of a second, or else it will be set to 30 frames, to have more consistent frame calculations.
+        * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is about 17ms (assuming 60 frames per second).
+        * The maximum value is 1/30 of a second, to have more consistent frame calculations.
         */
         static simulate(_deltaTime?: number): void;
         /**
@@ -5153,7 +5380,7 @@ declare namespace FudgeCore {
          * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
          * render passes.
          */
-        static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _shadersUsed?: (typeof Shader)[]): void;
+        static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _shadersUsed?: (ShaderInterface)[]): void;
         static addLights(cmpLights: ComponentLight[]): void;
         /**
          * Used with a {@link Picker}-camera, this method renders one pixel with picking information
@@ -5222,11 +5449,6 @@ declare namespace FudgeCore {
         protected createVerticesFlat(): Float32Array;
         protected createNormalsFlat(): Float32Array;
         protected createTextureUVsFlat(): Float32Array;
-    }
-}
-declare namespace FudgeCore {
-    abstract class RenderParticles extends Render {
-        static drawParticles(): void;
     }
 }
 declare namespace FudgeCore {
@@ -6203,6 +6425,21 @@ declare namespace FudgeCore {
     };
 }
 declare namespace FudgeCore {
+    interface ShaderInterface {
+        define: string[];
+        program: WebGLProgram;
+        attributes: {
+            [name: string]: number;
+        };
+        uniforms: {
+            [name: string]: WebGLUniformLocation;
+        };
+        getVertexShaderSource(): string;
+        getFragmentShaderSource(): string;
+        deleteProgram(this: ShaderInterface): void;
+        useProgram(this: ShaderInterface): void;
+        createProgram(this: ShaderInterface): void;
+    }
     /**
      * Static superclass for the representation of WebGl shaderprograms.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -6291,6 +6528,16 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderParticle extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {

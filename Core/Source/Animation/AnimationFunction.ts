@@ -23,18 +23,6 @@ namespace FudgeCore {
       this.calculate();
     }
 
-    /**
-     * Calculates the value of the function at the given time.
-     * @param _time the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.
-     * @returns the value at the given time
-     */
-    evaluate(_time: number): number {
-      _time -= this.keyIn.Time;
-      let time2: number = _time * _time;
-      let time3: number = time2 * _time;
-      return this.a * time3 + this.b * time2 + this.c * _time + this.d;
-    }
-
     set setKeyIn(_keyIn: AnimationKey) {
       this.keyIn = _keyIn;
       this.calculate();
@@ -43,6 +31,22 @@ namespace FudgeCore {
     set setKeyOut(_keyOut: AnimationKey) {
       this.keyOut = _keyOut;
       this.calculate();
+    }
+
+    public getParameters(): {a: number, b: number, c: number , d: number}  {
+      return {a: this.a, b: this.b, c: this.c, d: this.d};
+    }
+
+    /**
+     * Calculates the value of the function at the given time.
+     * @param _time the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.
+     * @returns the value at the given time
+     */
+    evaluate(_time: number): number {
+      _time -= this.keyIn.time;
+      let time2: number = _time * _time;
+      let time3: number = time2 * _time;
+      return this.a * time3 + this.b * time2 + this.c * _time + this.d;
     }
 
     /**
@@ -55,20 +59,21 @@ namespace FudgeCore {
         this.d = this.c = this.b = this.a = 0;
         return;
       }
-      if (!this.keyOut || this.keyIn.Constant) {
-        this.d = this.keyIn.Value;
+      if (!this.keyOut || this.keyIn.constant) {
+        this.d = this.keyIn.value;
         this.c = this.b = this.a = 0;
         return;
       }
 
-      let x1: number = this.keyOut.Time - this.keyIn.Time;
+      let x1: number = this.keyOut.time - this.keyIn.time;
 
-      this.d = this.keyIn.Value;
-      this.c = this.keyIn.SlopeOut;
+      this.d = this.keyIn.value;
+      this.c = this.keyIn.slopeOut;
 
-      this.a = (-x1 * (this.keyIn.SlopeOut + this.keyOut.SlopeIn) - 2 * this.keyIn.Value + 2 * this.keyOut.Value) / -Math.pow(x1, 3);
-      this.b = (this.keyOut.SlopeIn - this.keyIn.SlopeOut - 3 * this.a * Math.pow(x1, 2)) / (2 * x1);
+      this.a = (-x1 * (this.keyIn.slopeOut + this.keyOut.slopeIn) - 2 * this.keyIn.value + 2 * this.keyOut.value) / -Math.pow(x1, 3);
+      this.b = (this.keyOut.slopeIn - this.keyIn.slopeOut - 3 * this.a * Math.pow(x1, 2)) / (2 * x1);
     }
+    
   }
 
 }

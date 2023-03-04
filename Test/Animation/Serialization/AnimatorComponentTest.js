@@ -25,12 +25,10 @@ var AnimatorComponentTest;
             components: {
                 ComponentTransform: [
                     {
-                        "ƒ.ComponentTransform": {
-                            mtxLocal: {
-                                rotation: {
-                                    x: animseq,
-                                    y: animseq
-                                }
+                        mtxLocal: {
+                            rotation: {
+                                x: animseq,
+                                y: animseq
                             }
                         }
                     }
@@ -40,7 +38,7 @@ var AnimatorComponentTest;
         let animation = new ƒ.Animation("testAnimation", animStructure, 1);
         animation.labels["test"] = 2000;
         animation.setEvent("event", 3000);
-        let cmpAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
+        let cmpAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP, ƒ.ANIMATION_QUANTIZATION.CONTINOUS);
         cmpAnimator.scale = 2;
         // #region serialisation
         console.groupCollapsed("Animation");
