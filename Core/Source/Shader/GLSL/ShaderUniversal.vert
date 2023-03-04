@@ -4,6 +4,9 @@
 * @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
 */
 
+precision mediump float;
+precision highp int;
+
   // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxMeshToView;
 in vec3 a_vctPosition;
@@ -100,7 +103,7 @@ uniform Bone u_bones[MAX_BONES];
   // FLAT: outbuffer is flat
   #if defined(FLAT)
 flat out vec4 v_vctColor;
-  #else
+  #elif defined(LIGHT)
   // regular if not FLAT
 out vec4 v_vctColor;
   #endif
@@ -195,5 +198,7 @@ void main() {
     #endif
 
     // always full opacity for now...
+    #if defined(LIGHT)
   v_vctColor.a = 1.0;
+    #endif
 }

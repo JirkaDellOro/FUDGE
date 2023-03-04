@@ -153,7 +153,9 @@ namespace FudgeCore {
     /**
      * Performs a pick on all {@link ComponentPick}s in the branch of this viewport
      * using a ray from its camera through the client coordinates given in the event.
-     * Dispatches the event to all nodes hit.
+     * Dispatches the event to all nodes hit.  
+     * If {@link PICK.CAMERA} was chosen as the method to pick, a pick property gets added to the event, 
+     * which holds the detailed information, but is overwritten for each node.
      */
     public dispatchPointerEvent(_event: PointerEvent): void {
       let posClient: Vector2 = new Vector2(_event.clientX, _event.clientY);
@@ -166,8 +168,10 @@ namespace FudgeCore {
 
       if (cameraPicks.length) {
         let picks: Pick[] = Picker.pickCamera(cameraPicks, this.camera, this.pointClientToProjection(posClient));
-        for (let pick of picks)
-          pick.node.dispatchEvent(_event);
+        for (let pick of picks) {
+          Reflect.set(_event, "pick", pick);
+          pick.node.dispatchEvent(_event); 
+        }
       }
 
       for (let cmpPick of otherPicks) {

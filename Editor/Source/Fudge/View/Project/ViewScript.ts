@@ -10,7 +10,7 @@ namespace Fudge {
     // TODO: consider script namespaces ƒ.ScriptNamespaces to find all scripts not just ComponentScripts
     private table: ƒui.Table<ScriptInfo>;
 
-   constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
@@ -25,7 +25,8 @@ namespace Fudge {
       for (let namespace in ƒ.Project.scriptNamespaces) {
         for (let index in ƒ.Project.scriptNamespaces[namespace]) {
           let script: Function = ƒ.Project.scriptNamespaces[namespace][index];
-          scriptinfos.push(new ScriptInfo(script, namespace));
+          if (script.name)
+            scriptinfos.push(new ScriptInfo(script, namespace));
         }
       }
       this.table = new ƒui.Table<ScriptInfo>(new ControllerTableScript(), scriptinfos);

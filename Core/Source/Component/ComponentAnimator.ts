@@ -63,7 +63,7 @@ namespace FudgeCore {
         this.node.addEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
       }
       else {
-        Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale);
+        Time.game.removeEventListener(EVENT.TIME_SCALED, this.updateScale);
         this.node.removeEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
       }
     }

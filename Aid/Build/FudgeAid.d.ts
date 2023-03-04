@@ -161,6 +161,7 @@ declare namespace FudgeAid {
          */
         get getCurrentFrame(): number;
         setAnimation(_animation: SpriteSheetAnimation): void;
+        stopAnimation(): void;
         /**
          * Show a specific frame of the sequence
          */

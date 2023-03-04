@@ -104,7 +104,8 @@ namespace FudgeCore {
           return reconstruct;
         }
       } catch (_error) {
-        throw new Error(`Deserialization of ${path}, ${Reflect.get(reconstruct, "idResource")} failed: ` + _error);
+        let message: string = `Deserialization of ${path}, ${reconstruct ? Reflect.get(reconstruct, "idResource") : ""} failed: ` + _error;
+        throw new Error(message);
       }
       return null;
     }
