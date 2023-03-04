@@ -2783,7 +2783,7 @@ var FudgeCore;
                 name: this.name,
                 labels: {},
                 events: {},
-                fps: this.framesPerSecond,
+                framesPerSecond: this.framesPerSecond,
             };
             for (let name in this.labels) {
                 s.labels[name] = this.labels[name];
@@ -2797,7 +2797,7 @@ var FudgeCore;
         async deserialize(_serialization) {
             FudgeCore.Project.register(this, _serialization.idResource);
             this.name = _serialization.name;
-            this.framesPerSecond = _serialization.fps;
+            this.framesPerSecond = _serialization.framesPerSecond;
             this.labels = {};
             for (let name in _serialization.labels) {
                 this.labels[name] = _serialization.labels[name];
@@ -2885,7 +2885,7 @@ var FudgeCore;
                     let sequence = _structure[n];
                     if (sequence.length > 0) {
                         let sequenceTime = sequence.getKey(sequence.length - 1).time;
-                        this.totalTime = sequenceTime > this.totalTime ? sequenceTime : this.totalTime;
+                        this.totalTime = Math.max(sequenceTime, this.totalTime);
                     }
                 }
                 else {
@@ -3244,7 +3244,7 @@ var FudgeCore;
 (function (FudgeCore) {
     class AnimationSprite extends FudgeCore.Animation {
         constructor(_name = "AnimationSprite") {
-            super(_name, {}, 15);
+            super(_name, {}, 1);
             this.texture = FudgeCore.TextureDefault.texture;
             this.frames = 25;
             this.wrapAfter = 5;
@@ -3252,32 +3252,103 @@ var FudgeCore;
             this.size = new FudgeCore.Vector2(80, 80);
             this.next = new FudgeCore.Vector2(80, 0);
             this.wrap = new FudgeCore.Vector2(0, 80);
-            this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap);
+            this.framesPerSecond = this.frames;
+            this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond);
         }
-        create(_texture, _frames, _wrapAfter, _start, _size, _next, _wrap) {
+        setTexture(_texture) {
             this.texture = _texture;
+            this.idTexture = _texture.idResource;
+        }
+        create(_texture, _frames, _wrapAfter, _start, _size, _next, _wrap, _framesPerSecond) {
+            this.setTexture(_texture);
             this.frames = _frames;
             this.wrapAfter = _wrapAfter;
             this.start = _start;
             this.size = _size;
             this.next = _next;
             this.wrap = _wrap;
-            let sizeTexture = new FudgeCore.Vector2(400, 400);
-            let scale = new FudgeCore.Vector2(this.size.x / sizeTexture.x, this.size.y / sizeTexture.y);
+            this.framesPerSecond = _framesPerSecond;
+            let scale = this.getScale();
+            let positions = this.getPositions();
+            let xTranslation = new FudgeCore.AnimationSequence();
+            let yTranslation = new FudgeCore.AnimationSequence();
+            let xScale = new FudgeCore.AnimationSequence();
+            let yScale = new FudgeCore.AnimationSequence();
+            xScale.addKey(new FudgeCore.AnimationKey(0, scale.x));
+            yScale.addKey(new FudgeCore.AnimationKey(0, scale.y));
+            for (let frame = 0; frame <= this.frames; frame++) {
+                let time = 1000 * frame / this.framesPerSecond;
+                let position = positions[Math.min(frame, this.frames - 1)];
+                xTranslation.addKey(new FudgeCore.AnimationKey(time, position.x / this.texture.texImageSource.width));
+                yTranslation.addKey(new FudgeCore.AnimationKey(time, position.y / this.texture.texImageSource.height));
+            }
+            this.animationStructure = {
+                "components": {
+                    "ComponentMaterial": [{
+                            "mtxPivot": {
+                                "translation": {
+                                    x: xTranslation,
+                                    y: yTranslation,
+                                },
+                                "scaling": {
+                                    x: xScale,
+                                    y: yScale,
+                                }
+                            }
+                        }]
+                }
+            };
+            this.calculateTotalTime();
+        }
+        getScale() {
+            return new FudgeCore.Vector2(this.size.x / this.texture.texImageSource.width, this.size.y / this.texture.texImageSource.height);
+        }
+        getPositions() {
             let iNext = 0;
             let iWrap = 0;
-            console.log(scale.toString());
-            console.log(this.texture.texImageSource.width, this.texture.texImageSource.height);
+            let positions = [];
             for (let frame = 0; frame < this.frames; frame++) {
-                let x = this.start.x + iNext * this.next.x + iWrap * this.wrap.x;
-                let y = this.start.y + iNext * this.next.y + iWrap * this.wrap.y;
+                positions.push(new FudgeCore.Vector2(this.start.x + iNext * this.next.x + iWrap * this.wrap.x, this.start.y + iNext * this.next.y + iWrap * this.wrap.y));
                 iNext++;
                 if (iNext >= this.wrapAfter) {
                     iNext = 0;
                     iWrap++;
                 }
-                console.log(x / sizeTexture.x, y / sizeTexture.y);
             }
+            return positions;
+        }
+        async mutate(_mutator, _selection, _dispatchMutate) {
+            super.mutate(_mutator);
+            this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond);
+        }
+        serialize() {
+            let serialization = {};
+            serialization.idResource = this.idResource;
+            serialization.idTexture = this.idTexture;
+            serialization.frames = this.frames;
+            serialization.wrapAfter = this.wrapAfter;
+            for (let name of ["start", "size", "next", "wrap"])
+                serialization[name] = Reflect.get(this, name).serialize();
+            let animationsStructure = this.animationStructure;
+            this.animationStructure = {};
+            serialization[super.constructor.name] = super.serialize();
+            this.animationStructure = animationsStructure;
+            return serialization;
+        }
+        async deserialize(_s) {
+            await super.deserialize(_s[super.constructor.name]);
+            if (_s.idTexture)
+                this.texture = await FudgeCore.Project.getResource(_s.idTexture);
+            else
+                this.texture = FudgeCore.TextureDefault.texture;
+            for (let name of ["start", "size", "next", "wrap"])
+                Reflect.get(this, name).deserialize(_s[name]);
+            this.create(this.texture, _s.frames, _s.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond);
+            return this;
+        }
+        convertToAnimation() {
+            let animation = new FudgeCore.Animation(this.name, this.animationStructure, this.framesPerSecond);
+            return animation;
         }
     }
     AnimationSprite.iSubclass = FudgeCore.Animation.registerSubclass(AnimationSprite);
@@ -5054,7 +5125,6 @@ var FudgeCore;
             this.hndMutate = async (_event) => {
                 _event.detail.path = Reflect.get(_event, "path");
                 this.dispatchEvent(new CustomEvent("mutateGraph", { detail: _event.detail }));
-                this.dispatchEvent(new Event("mutateGraphDone"));
             };
             this.addEventListener("mutate", this.hndMutate);
         }
@@ -5098,6 +5168,7 @@ var FudgeCore;
                     return;
                 this.#sync = SYNC.GRAPH_SYNCED;
                 await this.reflectMutation(_event, _event.currentTarget, this, _event.detail.path);
+                this.dispatchEvent(new Event("mutateGraphDone", { bubbles: false }));
             };
             this.hndMutationInstance = async (_event) => {
                 if (this.#sync != SYNC.READY) {
