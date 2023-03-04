@@ -359,7 +359,8 @@ var FudgeCore;
                 }
             }
             catch (_error) {
-                throw new Error(`Deserialization of ${path}, ${Reflect.get(reconstruct, "idResource")} failed: ` + _error);
+                let message = `Deserialization of ${path}, ${reconstruct ? Reflect.get(reconstruct, "idResource") : ""} failed: ` + _error;
+                throw new Error(message);
             }
             return null;
         }
@@ -1303,6 +1304,9 @@ var FudgeCore;
         }
         recycle() {
             this.data.set([0, 0]);
+        }
+        copy(_original) {
+            this.data.set(_original.data);
         }
         equals(_compare, _tolerance = Number.EPSILON) {
             if (Math.abs(this.x - _compare.x) > _tolerance)
@@ -2956,7 +2960,7 @@ var FudgeCore;
                 this.cmpListener = _cmpListener;
             };
             this.update = () => {
-                this.graph.broadcastEvent(new Event("updateAudioGraph"));
+                this.graph.broadcastEvent(AudioManager.eventUpdate);
                 if (this.cmpListener)
                     this.cmpListener.update(this.listener);
             };
@@ -2971,6 +2975,7 @@ var FudgeCore;
         }
     }
     AudioManager.default = new AudioManager({ latencyHint: "interactive", sampleRate: 44100 });
+    AudioManager.eventUpdate = new Event("updateAudioGraph");
     FudgeCore.AudioManager = AudioManager;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -3041,7 +3046,7 @@ var FudgeCore;
                 this.node.addEventListener("renderPrepare", this.updateAnimationLoop);
             }
             else {
-                FudgeCore.Time.game.addEventListener("timeScaled", this.updateScale);
+                FudgeCore.Time.game.removeEventListener("timeScaled", this.updateScale);
                 this.node.removeEventListener("renderPrepare", this.updateAnimationLoop);
             }
         }
@@ -3337,6 +3342,8 @@ var FudgeCore;
             }
             FudgeCore.Recycler.store(forward);
             FudgeCore.Recycler.store(up);
+            if (this.node)
+                FudgeCore.Recycler.store(mtxResult);
         }
     }
     ComponentAudioListener.iSubclass = FudgeCore.Component.registerSubclass(ComponentAudioListener);
@@ -5757,7 +5764,7 @@ var FudgeCore;
                 this.vectors.translation = this.#vectors.translation;
                 this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
             }
-            return this.vectors.translation;
+            return this.vectors.translation.clone;
         }
         get rotation() {
             if (!this.vectors.rotation)
@@ -6609,6 +6616,9 @@ var FudgeCore;
         }
         recycle() {
             this.data.set([0, 0, 0]);
+        }
+        copy(_original) {
+            this.data.set(_original.data);
         }
         equals(_compare, _tolerance = Number.EPSILON) {
             if (Math.abs(this.x - _compare.x) > _tolerance)
@@ -10250,8 +10260,10 @@ var FudgeCore;
                 cmpPick.pick == FudgeCore.PICK.CAMERA ? cameraPicks.push(cmpPick.node) : otherPicks.push(cmpPick);
             if (cameraPicks.length) {
                 let picks = FudgeCore.Picker.pickCamera(cameraPicks, this.camera, this.pointClientToProjection(posClient));
-                for (let pick of picks)
+                for (let pick of picks) {
+                    Reflect.set(_event, "pick", pick);
                     pick.node.dispatchEvent(_event);
+                }
             }
             for (let cmpPick of otherPicks) {
                 cmpPick.pickAndDispatch(ray, _event);
@@ -10949,7 +10961,8 @@ var FudgeCore;
 * @authors Jirka Dell'Oro-Friedl, HFU, 2022
 */
 
-precision highp float;
+precision mediump float;
+precision highp int;
 
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
@@ -11120,6 +11133,7 @@ void main() {
 */
 
 precision mediump float;
+precision highp int;
 
   // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;
@@ -11164,6 +11178,9 @@ void main() {
 * Universal Shader as base for many others. Controlled by compiler directives
 * @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
 */
+
+precision mediump float;
+precision highp int;
 
   // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxMeshToView;
@@ -11261,7 +11278,7 @@ uniform Bone u_bones[MAX_BONES];
   // FLAT: outbuffer is flat
   #if defined(FLAT)
 flat out vec4 v_vctColor;
-  #else
+  #elif defined(LIGHT)
   // regular if not FLAT
 out vec4 v_vctColor;
   #endif
@@ -11356,7 +11373,9 @@ void main() {
     #endif
 
     // always full opacity for now...
+    #if defined(LIGHT)
   v_vctColor.a = 1.0;
+    #endif
 }`;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
