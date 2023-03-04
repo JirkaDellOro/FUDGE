@@ -30,7 +30,6 @@ A collection of various other documents and resources, including unmaintained ex
 - Cameratransformation, Axonometry
 - Diegetic User-Interface
 - Grapheditor/Wiring for Shader and Animation
-- Light and Shadow
 - Importer for standard file formats
 - Runtime-Recording for Replay
 - Undo/Rollback
@@ -42,12 +41,10 @@ A collection of various other documents and resources, including unmaintained ex
 
 ## In Progress
 - Pathfinding System
-- glTF Importer
 - Skeletal Animation
 - Procedural 3D-Assets
 - VR Components
-- Particle Editor
-- Animation Editor
+- Light and Shadow
 
 ## Done  
 
@@ -68,5 +65,5 @@ A collection of various other documents and resources, including unmaintained ex
 | Luis Keck          | Shader-System                     |
 | Marius König       | Integration Golden Layout 2       |
 | Moritz Beaugrand   | Terrain                           |
-| Matthias Roming    | Skeleton System                   |
-
+| Matthias Roming    | Skeleton System & glTF Importer   |
+| Jonas Plotzky      | Particle & Animation Editor       |
