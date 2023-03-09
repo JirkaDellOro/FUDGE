@@ -1,4 +1,12 @@
 namespace FudgeCore {
+  // Dictionary to all uniform blocks
+  const UNIFORM_BLOCKS = {
+    SKIN: {
+      NAME: "Skin",
+      BINDING: 0
+    }
+  };
+
   export class RenderInjectorMeshSkin extends RenderInjectorMesh {
 
     public static decorate(_constructor: Function): void {
@@ -23,13 +31,28 @@ namespace FudgeCore {
         iBones = this.renderMesh.iBonesFlat;
         weights = this.renderMesh.weightsFlat;
       }
-      renderBuffers.iBones = RenderWebGL.assert(crc3.createBuffer());
-      crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.iBones);
-      crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, iBones, WebGL2RenderingContext.STATIC_DRAW);
 
-      renderBuffers.weights = RenderWebGL.assert(crc3.createBuffer());
-      crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.weights);
-      crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, weights, WebGL2RenderingContext.STATIC_DRAW);
+      if (!renderBuffers.iBones) {
+        renderBuffers.iBones = RenderWebGL.assert(crc3.createBuffer());
+        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.iBones);
+        crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, iBones, WebGL2RenderingContext.STATIC_DRAW);
+      }
+
+      if (!renderBuffers.weights) {
+        renderBuffers.weights = RenderWebGL.assert(crc3.createBuffer());
+        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.weights);
+        crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, weights, WebGL2RenderingContext.STATIC_DRAW);
+      }
+
+      if (!renderBuffers.mtxBones) {
+        const bones: number = crc3.getUniformBlockIndex(_shader.program, UNIFORM_BLOCKS.SKIN.NAME);
+        const bonesSize: number = crc3.getActiveUniformBlockParameter(_shader.program, bones, crc3.UNIFORM_BLOCK_DATA_SIZE);
+        
+        renderBuffers.mtxBones = crc3.createBuffer();
+        crc3.bindBufferBase(crc3.UNIFORM_BUFFER, UNIFORM_BLOCKS.SKIN.BINDING, renderBuffers.mtxBones);
+        crc3.bufferData(crc3.UNIFORM_BUFFER, bonesSize, crc3.DYNAMIC_DRAW);
+        crc3.uniformBlockBinding(_shader.program, bones, UNIFORM_BLOCKS.SKIN.BINDING);
+      }
 
       return renderBuffers;
     }
@@ -52,11 +75,12 @@ namespace FudgeCore {
         crc3.vertexAttribPointer(aWeight, 4, WebGL2RenderingContext.FLOAT, false, 0, 0);
       }
 
-      _mtxBones?.forEach((mtxBone, iBone) => {
-        const uMtxBone: WebGLUniformLocation = _shader.uniforms[`u_bones[${iBone}].matrix`];
-        if (uMtxBone)
-          crc3.uniformMatrix4fv(uMtxBone, false, mtxBone.get());
-      });
+      if (_mtxBones) {
+        const skin: number = crc3.getUniformBlockIndex(_shader.program, UNIFORM_BLOCKS.SKIN.NAME);
+        crc3.uniformBlockBinding(_shader.program, skin, UNIFORM_BLOCKS.SKIN.BINDING);
+        crc3.bindBuffer(crc3.UNIFORM_BUFFER, renderBuffers.mtxBones);
+        crc3.bufferSubData(crc3.UNIFORM_BUFFER, 0, new Float32Array(iterableFrom(_mtxBones)));
+      }
 
       return renderBuffers;
     }
@@ -69,8 +93,15 @@ namespace FudgeCore {
         crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
         crc3.deleteBuffer(_renderBuffers.iBones);
         crc3.deleteBuffer(_renderBuffers.weights);
+        crc3.deleteBuffer(_renderBuffers.mtxBones);
       }
     }
 
+  }
+
+  function* iterableFrom(matrices: Matrix4x4[]): Iterable<number> {
+    for (const matrix of matrices)
+      for (const value of matrix.get())
+        yield value;
   }
 }

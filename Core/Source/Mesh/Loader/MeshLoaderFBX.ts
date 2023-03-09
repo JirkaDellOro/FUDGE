@@ -16,13 +16,13 @@ namespace FudgeCore {
       
 
       // Create vertices
-      for (let i: number = 0; i < geometryFBX.Vertices.length; i += 3) {
-        _mesh.vertices.push(new Vertex(new Vector3(
-          geometryFBX.Vertices[i + 0],
-          geometryFBX.Vertices[i + 1],
-          geometryFBX.Vertices[i + 2]
-        )));
-      }
+      // for (let i: number = 0; i < geometryFBX.Vertices.length; i += 3) {
+      //   _mesh.vertices.push(new Vertex(new Vector3(
+      //     geometryFBX.Vertices[i + 0],
+      //     geometryFBX.Vertices[i + 1],
+      //     geometryFBX.Vertices[i + 2]
+      //   )));
+      // }
 
       // Create vertices and faces
       // map from old vertex index to new vertex indices
@@ -30,19 +30,18 @@ namespace FudgeCore {
       for (let iPolygonVertexIndex: number = 0, indices: number[] = [];
           iPolygonVertexIndex < geometryFBX.PolygonVertexIndex.length; iPolygonVertexIndex++) {
         // Check if polygon end is not yet reached
-        // Each polygon in fbx ends with a binary negated index (-index - 1),
+        // Each polygon in fbx ends with a negative index (bit shifted: index ^ - 1 or -index - 1),
         // so poligons with more points than a triangle are possible
         if (geometryFBX.PolygonVertexIndex[iPolygonVertexIndex] >= 0)
           indices.push(geometryFBX.PolygonVertexIndex[iPolygonVertexIndex]);
         else {
           // Reached end of polygon
-          indices.push(-(geometryFBX.PolygonVertexIndex[iPolygonVertexIndex] + 1));
+          indices.push(geometryFBX.PolygonVertexIndex[iPolygonVertexIndex] ^ - 1);
           // To make ByPolygonVertex work properly, new vertices are created for each face,
           // instead of just copying the existing arrays (vertex, uv, normal)
-          // for (const index of indices) newVertexIndices[index] = [index];
-          //setNewVertexIndices(indices, iPolygonVertexIndex - indices.length + 1, newVertexIndices);
-          //_mesh.vertices.push(...getVertices(geometryFBX, indices, _mesh.faces.length, iPolygonVertexIndex - indices.length + 1));
-          _mesh.faces.push(...getFaces(indices, _mesh.vertices, true));
+          setNewVertexIndices(indices, iPolygonVertexIndex - indices.length + 1, newVertexIndices);
+          _mesh.vertices.push(...getVertices(geometryFBX, indices, _mesh.faces.length, iPolygonVertexIndex - indices.length + 1));
+          try { _mesh.faces.push(...getFaces(indices, _mesh.vertices)); } catch {}
           indices.length = 0;
         }
       }
@@ -50,7 +49,7 @@ namespace FudgeCore {
       if (_mesh instanceof MeshSkin) {
         const fbxDeformer: FBX.Deformer = geometryFBX.children[0];
         const skeleton: Skeleton = await loader.getSkeleton(fbxDeformer.children[0].children[0]); // Deformer.SubDeformer.LimbNode
-        createBones(fbxDeformer, skeleton, _mesh.vertices/*, newVertexIndices*/);
+        createBones(fbxDeformer, skeleton, _mesh.vertices, newVertexIndices);
       }
       return _mesh;
     }

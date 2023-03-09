@@ -9,6 +9,7 @@ namespace FudgeCore {
     normals?: WebGLBuffer;
     iBones?: WebGLBuffer;
     weights?: WebGLBuffer;
+    mtxBones?: WebGLBuffer;
     nIndices?: number;
   }
 

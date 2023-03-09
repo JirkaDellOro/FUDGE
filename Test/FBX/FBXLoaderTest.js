@@ -1,6 +1,6 @@
+"use strict";
 ///<reference path="./../../Core/Build/FudgeCore.d.ts"/>
 var SkeletonTest;
-///<reference path="./../../Core/Build/FudgeCore.d.ts"/>
 (function (SkeletonTest) {
     var ƒ = FudgeCore;
     const mouse = {
@@ -9,9 +9,9 @@ var SkeletonTest;
     window.addEventListener("load", init);
     async function init() {
         const canvas = document.querySelector("canvas");
-        // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./animated_arm.fbx");
-        const loader = await ƒ.FBXLoader.LOAD("./Unarmed Walk Forward.fbx");
         // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./TriangularPrism.fbx");
+        const loader1 = await ƒ.FBXLoader.LOAD("./animated_arm.fbx");
+        const loader = await ƒ.FBXLoader.LOAD("./Unarmed Walk Forward.fbx");
         // track mouse position relative to canvas center
         window.addEventListener("mousemove", (_event) => {
             mouse.position.x = _event.clientX - canvas.width / 2;
@@ -22,6 +22,19 @@ var SkeletonTest;
         // load scene
         const scene = await loader.getScene(0);
         console.log(scene);
+        const skeleton = scene.getChildrenByName("Skeleton0")[0];
+        const meshBone = new ƒ.MeshRotation("bone", [
+            new ƒ.Vector2(1, 0),
+            new ƒ.Vector2(0, 0.2),
+            new ƒ.Vector2(0, 0)
+        ]);
+        const materialBone = new ƒ.Material("bone");
+        for (const bone of skeleton) {
+            if (bone != skeleton) {
+                bone.addComponent(new ƒ.ComponentMesh(meshBone));
+                bone.addComponent(new ƒ.ComponentMaterial(materialBone));
+            }
+        }
         // test loading all documents and objects
         // loader.fbx.documents.forEach(_document => _document.load());
         // loader.fbx.objects.all.forEach(_object => _object.load());
@@ -102,4 +115,3 @@ var SkeletonTest;
         _viewport.draw();
     }
 })(SkeletonTest || (SkeletonTest = {}));
-//# sourceMappingURL=FBXLoaderTest.js.map

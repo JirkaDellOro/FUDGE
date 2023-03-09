@@ -5409,6 +5409,7 @@ declare namespace FudgeCore {
         normals?: WebGLBuffer;
         iBones?: WebGLBuffer;
         weights?: WebGLBuffer;
+        mtxBones?: WebGLBuffer;
         nIndices?: number;
     }
     class RenderMesh {
@@ -6931,6 +6932,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class SkeletonInstance extends GraphInstance {
         #private;
+        bindPose: BoneMatrixList;
         private skeletonSource;
         static CREATE(_skeleton: Skeleton): Promise<SkeletonInstance>;
         get bones(): BoneList;
@@ -6943,6 +6945,7 @@ declare namespace FudgeCore {
          * Set this skeleton instance to be a recreation of the {@link Skeleton} given
          */
         set(_skeleton: Skeleton): Promise<void>;
+        serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /**
          * Resets this skeleton instance to its default pose

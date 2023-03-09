@@ -117,6 +117,11 @@ namespace FudgeCore {
             if (mesh instanceof MeshSkin) {
               const skeleton: Skeleton = await this.getSkeleton(childFBX.children[0].children[0].children[0]); // Model.Deformer.SubDeformer.LimbNode
               cmpMesh.bindSkeleton(_root?.getChild(0) as SkeletonInstance || await SkeletonInstance.CREATE(skeleton));
+              if (!cmpMesh.skeleton.bindPose) cmpMesh.skeleton.bindPose = {};
+              for (const subDeformerFBX of childFBX.children[0].children as FBX.SubDeformer[]) {
+                (cmpMesh.skeleton.bindPose[subDeformerFBX.children[0].name] = new Matrix4x4()).set(subDeformerFBX.TransformLink);
+                skeleton.mtxBindInverses[subDeformerFBX.children[0].name].set(subDeformerFBX.Transform);
+              }
               node.getComponent(ComponentMaterial).material = FBXLoader.defaultSkinMaterial;
             }
             node.addComponent(cmpMesh);
@@ -208,8 +213,8 @@ namespace FudgeCore {
         let rootNode: FBX.Model = _fbxLimbNode;
         while (rootNode.parents && rootNode.parents.some(parent => parent.subtype == "LimbNode"))
           rootNode = rootNode.parents.find(parent => parent.subtype == "LimbNode");
-        const iNode: number = this.fbx.objects.models.findIndex(model => model.name == rootNode.name);
-        skeleton.addChild(await this.getNode(iNode));
+        const iRootNode: number = this.fbx.objects.models.findIndex(model => model.name == rootNode.name);
+        skeleton.addChild(await this.getNode(iRootNode));
         for (const node of skeleton) {
           if (node != skeleton && this.fbx.objects.models[this.#nodes.indexOf(node)].subtype == "LimbNode")
             skeleton.registerBone(node);
