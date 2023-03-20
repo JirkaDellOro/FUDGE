@@ -1094,7 +1094,7 @@ var Fudge;
         tree;
         constructor(_container, _state) {
             super(_container, _state);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.OPEN, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
         }
         setProject() {

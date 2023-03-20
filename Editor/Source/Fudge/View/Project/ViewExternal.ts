@@ -12,7 +12,7 @@ namespace Fudge {
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
-      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.OPEN, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
     }
 
