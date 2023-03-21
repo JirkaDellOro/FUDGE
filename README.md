@@ -1,4 +1,7 @@
-<img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="document.querySelector('h1').style.visibility='hidden'"/>  
+<img src="https://rolandheer.github.io/FUDGE_LightAndShadow/Miscellaneous/Logo/FudgeLightAndShadow.png" onload="document.querySelector('h1').style.visibility='hidden'"/>  
+
+# ! Disclamer !
+This is a fork of the original FUDGE repository. It is used to work on the graphical capabilities of FUDGE and will specifically tackle Effects regarding Light and Shadow.
 
 # Welcome!  
 This repository contains the source code, the documentation and the full development history of FUDGE. If you want to create using FUDGE, visit the repository [FUDGE_Runtime](https://github.com/JirkaDellOro/FUDGE_Runtime), which contains an excerpt with all you need to get going.
