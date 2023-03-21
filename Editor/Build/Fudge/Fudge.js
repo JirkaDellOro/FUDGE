@@ -1295,7 +1295,7 @@ var Fudge;
                     }
                 }
             }
-            this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
+            this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
         }
         hndEvent = (_event) => {
             if (_event.detail?.sender && _event.type != Fudge.EVENT_EDITOR.OPEN && _event.type != Fudge.EVENT_EDITOR.CREATE)

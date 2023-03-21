@@ -198,7 +198,7 @@ namespace Fudge {
         }
       }
 
-      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
+      this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
     }
 
     private hndEvent = (_event: CustomEvent): void => {
