@@ -1,6 +1,6 @@
 <img src="https://rolandheer.github.io/FUDGE_LightAndShadow/Miscellaneous/Logo/FudgeLightAndShadow.png" onload="document.querySelector('h1').style.visibility='hidden'"/>  
 
-# ! Disclamer !
+# ! Disclaimer !
 This is a fork of the original FUDGE repository. It is used to work on the graphical capabilities of FUDGE and will specifically tackle Effects regarding Light and Shadow.
 
 # Welcome!  
