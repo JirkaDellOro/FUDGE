@@ -9,9 +9,7 @@
       "program": "${workspaceFolder}/Network/Server/Server.js",
       "request": "launch",
       "args": ["WebSocket", "8080"],
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
+      "skipFiles": ["<node_internals>/**"],
       "type": "pwa-node"
     },
     {

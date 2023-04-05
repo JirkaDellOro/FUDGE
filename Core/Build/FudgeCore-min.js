@@ -958,6 +958,7 @@ var FudgeCore;
                 crc3.compileShader(webGLShader);
                 let error = FudgeCore.RenderWebGL.assert(crc3.getShaderInfoLog(webGLShader));
                 if (error !== "") {
+                    console.log(_shaderCode);
                     throw new Error("Error compiling shader: " + error);
                 }
                 if (!crc3.getShaderParameter(webGLShader, WebGL2RenderingContext.COMPILE_STATUS)) {
@@ -981,18 +982,53 @@ var FudgeCore;
             function detectUniforms() {
                 let detectedUniforms = {};
                 let uniformCount = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
+                let oldLength = RenderInjectorShader.uboInfos.length;
                 for (let i = 0; i < uniformCount; i++) {
                     let info = FudgeCore.RenderWebGL.assert(crc3.getActiveUniform(program, i));
                     if (!info) {
                         break;
                     }
-                    detectedUniforms[info.name] = FudgeCore.RenderWebGL.assert(crc3.getUniformLocation(program, info.name));
+                    if (crc3.getUniformLocation(program, info.name) != null)
+                        detectedUniforms[info.name] = FudgeCore.RenderWebGL.assert(crc3.getUniformLocation(program, info.name));
+                    else if (!RenderInjectorShader.uboInfos.includes(info.name))
+                        RenderInjectorShader.uboInfos.push(info.name);
                 }
+                if (oldLength < RenderInjectorShader.uboInfos.length)
+                    setUniformInfosInUBO();
                 return detectedUniforms;
+            }
+            function setUniformInfosInUBO() {
+                initializeUBO();
+                let uboVariableIndices = crc3.getUniformIndices(program, RenderInjectorShader.uboInfos);
+                let uboVariableOffsets = crc3.getActiveUniforms(program, uboVariableIndices, crc3.UNIFORM_OFFSET);
+                RenderInjectorShader.uboInfos.forEach((name, index) => {
+                    RenderInjectorShader.uboLightsInfo[name] = new UboLightStrucure(uboVariableIndices[index], uboVariableOffsets[index]);
+                });
+            }
+            function initializeUBO() {
+                let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
+                const blockIndex = crc3.getUniformBlockIndex(program, "UNIFORMS_LIGHT");
+                const blockSize = crc3.getActiveUniformBlockParameter(program, blockIndex, crc3.UNIFORM_BLOCK_DATA_SIZE);
+                const uboBuffer = crc3.createBuffer();
+                crc3.bindBuffer(crc3.UNIFORM_BUFFER, uboBuffer);
+                crc3.bufferData(crc3.UNIFORM_BUFFER, blockSize, crc3.DYNAMIC_DRAW);
+                crc3.bindBuffer(crc3.UNIFORM_BUFFER, null);
+                crc3.uniformBlockBinding(program, blockIndex, 0);
+                crc3.bindBufferBase(crc3.UNIFORM_BUFFER, 0, uboBuffer);
             }
         }
     }
+    RenderInjectorShader.uboLightsInfo = {};
+    RenderInjectorShader.uboInfos = new Array();
     FudgeCore.RenderInjectorShader = RenderInjectorShader;
+    class UboLightStrucure {
+        constructor(_index, _offset) {
+            this.index = {};
+            this.offset = {};
+            this.index = _index;
+            this.offset = _offset;
+        }
+    }
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -1894,8 +1930,8 @@ var FudgeCore;
             RenderWebGL.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
             RenderWebGL.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
         }
-        static resetFrameBuffer(_color = null) {
-            RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
+        static resetFrameBuffer(_frameBuffer = null) {
+            RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, _frameBuffer);
         }
         static getRenderRectangle() {
             return RenderWebGL.rectRender;
@@ -2021,21 +2057,26 @@ var FudgeCore;
             fillLightBuffers(FudgeCore.LightPoint, "u_nLightsPoint", "u_point");
             fillLightBuffers(FudgeCore.LightSpot, "u_nLightsSpot", "u_spot");
             function fillLightBuffers(_type, _uniNumber, _uniStruct) {
+                let uni = FudgeCore.RenderInjectorShader.uboLightsInfo;
                 let uniLights = uni[_uniNumber];
                 if (uniLights) {
-                    RenderWebGL.crc3.uniform1ui(uniLights, 0);
+                    let zeroOut = new Uint8Array([0]);
+                    ;
+                    RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uniLights.offset, zeroOut);
                     let cmpLights = _lights.get(_type);
                     if (cmpLights) {
                         let n = cmpLights.length;
-                        RenderWebGL.crc3.uniform1ui(uniLights, n);
+                        let nLightsAmount = new Uint8Array([n]);
+                        ;
+                        RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uniLights.offset, nLightsAmount);
                         let i = 0;
                         for (let cmpLight of cmpLights) {
-                            RenderWebGL.crc3.uniform4fv(uni[`${_uniStruct}[${i}].vctColor`], cmpLight.light.color.getArray());
+                            RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uni[`${_uniStruct}[${i}].vctColor`].offset, cmpLight.light.color.getArray());
                             let mtxTotal = FudgeCore.Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
-                            RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShape`], false, mtxTotal.get());
+                            RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uni[`${_uniStruct}[${i}].mtxShape`].offset, mtxTotal.get());
                             if (_type != FudgeCore.LightDirectional) {
                                 let mtxInverse = mtxTotal.inverse();
-                                RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShapeInverse`], false, mtxInverse.get());
+                                RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uni[`${_uniStruct}[${i}].mtxShapeInverse`].offset, mtxInverse.get());
                                 FudgeCore.Recycler.store(mtxInverse);
                             }
                             FudgeCore.Recycler.store(mtxTotal);
@@ -3867,8 +3908,8 @@ var FudgeCore;
             super(...arguments);
             this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
             this.clrBackground = new FudgeCore.Color(0, 0, 0, 1);
+            this.#mtxProjection = new FudgeCore.Matrix4x4;
             this.projection = PROJECTION.CENTRAL;
-            this.mtxProjection = new FudgeCore.Matrix4x4;
             this.fieldOfView = 45;
             this.aspectRatio = 1.0;
             this.direction = FIELD_OF_VIEW.DIAGONAL;
@@ -3878,6 +3919,7 @@ var FudgeCore;
         }
         #mtxWorldToView;
         #mtxCameraInverse;
+        #mtxProjection;
         get mtxWorld() {
             let mtxCamera = this.mtxPivot.clone;
             try {
@@ -3890,7 +3932,7 @@ var FudgeCore;
         get mtxWorldToView() {
             if (this.#mtxWorldToView)
                 return this.#mtxWorldToView;
-            this.#mtxWorldToView = FudgeCore.Matrix4x4.MULTIPLICATION(this.mtxProjection, this.mtxCameraInverse);
+            this.#mtxWorldToView = FudgeCore.Matrix4x4.MULTIPLICATION(this.#mtxProjection, this.mtxCameraInverse);
             return this.#mtxWorldToView;
         }
         get mtxCameraInverse() {
@@ -3898,6 +3940,12 @@ var FudgeCore;
                 return this.#mtxCameraInverse;
             this.#mtxCameraInverse = FudgeCore.Matrix4x4.INVERSION(this.mtxWorld);
             return this.#mtxCameraInverse;
+        }
+        get mtxProjection() {
+            if (this.#mtxProjection)
+                return this.#mtxProjection;
+            this.#mtxProjection = new FudgeCore.Matrix4x4;
+            return this.#mtxProjection;
         }
         resetWorldToView() {
             if (this.#mtxWorldToView)
@@ -3935,11 +3983,11 @@ var FudgeCore;
             this.projection = PROJECTION.CENTRAL;
             this.near = _near;
             this.far = _far;
-            this.mtxProjection = FudgeCore.Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction);
+            this.#mtxProjection = FudgeCore.Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction);
         }
         projectOrthographic(_left = -FudgeCore.Render.getCanvas().clientWidth / 2, _right = FudgeCore.Render.getCanvas().clientWidth / 2, _bottom = FudgeCore.Render.getCanvas().clientHeight / 2, _top = -FudgeCore.Render.getCanvas().clientHeight / 2) {
             this.projection = PROJECTION.ORTHOGRAPHIC;
-            this.mtxProjection = FudgeCore.Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400);
+            this.#mtxProjection = FudgeCore.Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400);
         }
         getProjectionRectangle() {
             let tanFov = Math.tan(Math.PI * this.fieldOfView / 360);
@@ -4483,6 +4531,63 @@ var FudgeCore;
     }
     ComponentTransform.iSubclass = FudgeCore.Component.registerSubclass(ComponentTransform);
     FudgeCore.ComponentTransform = ComponentTransform;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class VRController {
+        constructor() {
+            this.cmpTransform = null;
+            this.gamePad = null;
+            this.thumbstickX = null;
+            this.thumbstickY = null;
+        }
+    }
+    FudgeCore.VRController = VRController;
+    class ComponentVRDevice extends FudgeCore.ComponentCamera {
+        constructor() {
+            super();
+            this.rightCntrl = new VRController();
+            this.leftCntrl = new VRController();
+            this.addEventListener("componentAdd", this.getMtxLocalFromCmpTransform);
+        }
+        #mtxLocal;
+        get mtxLocal() {
+            return this.#mtxLocal;
+        }
+        set translation(_newPos) {
+            let invTranslation = FudgeCore.Vector3.SCALE(FudgeCore.Vector3.DIFFERENCE(_newPos, this.#mtxLocal.translation), -1);
+            FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
+            this.#mtxLocal.translation = _newPos;
+        }
+        translate(_by) {
+            let invTranslation = FudgeCore.Vector3.SCALE(_by, -1);
+            FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
+            this.#mtxLocal.translate(_by);
+        }
+        set rotation(_newRot) {
+            let newRot = FudgeCore.Vector3.SCALE(FudgeCore.Vector3.SCALE(FudgeCore.Vector3.SUM(_newRot, this.#mtxLocal.rotation), -1), Math.PI / 180);
+            let orientation = new FudgeCore.Quaternion();
+            orientation.setFromVector3(newRot.x, newRot.y, newRot.z);
+            FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(FudgeCore.Vector3.DIFFERENCE(this.#mtxLocal.translation, FudgeCore.Vector3.ZERO())));
+            FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(FudgeCore.Vector3.ZERO(), orientation));
+            FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(FudgeCore.Vector3.DIFFERENCE(FudgeCore.Vector3.ZERO(), this.#mtxLocal.translation)));
+            this.#mtxLocal.rotation = FudgeCore.Vector3.SCALE(_newRot, -1);
+        }
+        rotate(_by) {
+            let rotAmount = FudgeCore.Vector3.SCALE(FudgeCore.Vector3.SCALE(_by, -1), Math.PI / 180);
+            let orientation = new FudgeCore.Quaternion();
+            orientation.setFromVector3(rotAmount.x, rotAmount.y, rotAmount.z);
+            FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(FudgeCore.Vector3.DIFFERENCE(this.#mtxLocal.translation, FudgeCore.Vector3.ZERO())));
+            FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(FudgeCore.Vector3.ZERO(), orientation));
+            FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(FudgeCore.Vector3.DIFFERENCE(FudgeCore.Vector3.ZERO(), this.#mtxLocal.translation)));
+            this.#mtxLocal.rotate(FudgeCore.Vector3.SCALE(_by, -1));
+        }
+        getMtxLocalFromCmpTransform() {
+            this.#mtxLocal = this.node.getComponent(FudgeCore.ComponentTransform).mtxLocal;
+        }
+    }
+    ComponentVRDevice.iSubclass = FudgeCore.Component.registerSubclass(ComponentVRDevice);
+    FudgeCore.ComponentVRDevice = ComponentVRDevice;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -10654,8 +10759,9 @@ var FudgeCore;
             }
             if (firstLevel) {
                 _branch.dispatchEvent(new Event("renderPrepareEnd"));
-                for (let shader of _shadersUsed)
+                for (let shader of _shadersUsed) {
                     Render.setLightsInShader(shader, Render.lights);
+                }
             }
         }
         static addLights(cmpLights) {
@@ -10919,6 +11025,16 @@ var FudgeCore;
             return this.#branch;
         }
         draw(_calculateTransforms = true) {
+            this.computeDrawing(_calculateTransforms);
+            if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
+                FudgeCore.Render.draw(this.camera);
+            if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.NONE) {
+                FudgeCore.Physics.draw(this.camera, this.physicsDebugMode);
+            }
+            this.#crc2.imageSmoothingEnabled = false;
+            this.#crc2.drawImage(FudgeCore.Render.getCanvas(), this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
+        }
+        computeDrawing(_calculateTransforms = true) {
             if (!this.#branch)
                 return;
             FudgeCore.Render.resetFrameBuffer();
@@ -10931,19 +11047,13 @@ var FudgeCore;
             if (_calculateTransforms)
                 this.calculateTransforms();
             FudgeCore.Render.clear(this.camera.clrBackground);
-            if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
-                FudgeCore.Render.draw(this.camera);
-            if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.NONE) {
-                FudgeCore.Physics.draw(this.camera, this.physicsDebugMode);
-            }
-            this.#crc2.imageSmoothingEnabled = false;
-            this.#crc2.drawImage(FudgeCore.Render.getCanvas(), this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
         }
         calculateTransforms() {
             let mtxRoot = FudgeCore.Matrix4x4.IDENTITY();
             if (this.#branch.getParent())
                 mtxRoot = this.#branch.getParent().mtxWorld;
             this.dispatchEvent(new Event("renderPrepareStart"));
+            this.adjustFrames();
             FudgeCore.Render.prepare(this.#branch, null, mtxRoot);
             this.dispatchEvent(new Event("renderPrepareEnd"));
             this.componentsPick = FudgeCore.Render.componentsPick;
@@ -11046,6 +11156,133 @@ var FudgeCore;
         }
     }
     FudgeCore.Viewport = Viewport;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    let XR_SESSION_MODE;
+    (function (XR_SESSION_MODE) {
+        XR_SESSION_MODE["IMMERSIVE_VR"] = "immersive-vr";
+    })(XR_SESSION_MODE = FudgeCore.XR_SESSION_MODE || (FudgeCore.XR_SESSION_MODE = {}));
+    let XR_REFERENCE_SPACE;
+    (function (XR_REFERENCE_SPACE) {
+        XR_REFERENCE_SPACE["VIEWER"] = "viewer";
+        XR_REFERENCE_SPACE["LOCAL"] = "local";
+    })(XR_REFERENCE_SPACE = FudgeCore.XR_REFERENCE_SPACE || (FudgeCore.XR_REFERENCE_SPACE = {}));
+    class XRViewport extends FudgeCore.Viewport {
+        constructor() {
+            super();
+            this.vrDevice = null;
+            this.session = null;
+            this.referenceSpace = null;
+            this.useVRController = false;
+            this.crc3 = null;
+            this.poseMtx = new FudgeCore.Matrix4x4();
+            XRViewport.xrViewportInstance = this;
+            this.crc3 = FudgeCore.RenderWebGL.getRenderingContext();
+        }
+        static get default() {
+            return this.xrViewportInstance;
+        }
+        initialize(_name, _branch, _cameraXR, _canvas) {
+            super.initialize(_name, _branch, _cameraXR, _canvas);
+            this.camera = _cameraXR;
+        }
+        async initializeVR(_vrSessionMode = XR_SESSION_MODE.IMMERSIVE_VR, _vrReferenceSpaceType = XR_REFERENCE_SPACE.LOCAL, _vrController = false) {
+            let session = await navigator.xr.requestSession(_vrSessionMode);
+            this.referenceSpace = await session.requestReferenceSpace(_vrReferenceSpaceType);
+            await this.crc3.makeXRCompatible();
+            let nativeScaleFactor = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
+            await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3, { framebufferScaleFactor: nativeScaleFactor }) });
+            this.vrDevice = this.camera;
+            this.initializevrDeviceTransform(this.camera.mtxWorld);
+            this.useVRController = _vrController;
+            if (_vrController) {
+                this.vrDevice.rightCntrl.cmpTransform = new FudgeCore.ComponentTransform();
+                this.vrDevice.leftCntrl.cmpTransform = new FudgeCore.ComponentTransform();
+            }
+            this.session = session;
+            this.calculateTransforms();
+        }
+        async initializeAR(_arSessionMode = null, _arReferenceSpaceType = null) {
+            FudgeCore.Debug.error("NOT IMPLEMENTED YET! Check out initializeVR!");
+        }
+        initializevrDeviceTransform(_newMtx) {
+            let newRot = FudgeCore.Vector3.SCALE(new FudgeCore.Vector3(_newMtx.rotation.x, _newMtx.rotation.y - 180, _newMtx.rotation.z), Math.PI / 180);
+            let orientation = new FudgeCore.Quaternion();
+            orientation.setFromVector3(newRot.x, newRot.y, newRot.z);
+            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(FudgeCore.Vector3.ZERO(), orientation));
+            this.camera.mtxPivot.rotateY(180);
+            let invTranslation = FudgeCore.Vector3.SCALE(FudgeCore.Vector3.DIFFERENCE(_newMtx.translation, FudgeCore.Vector3.ZERO()), -1);
+            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
+            this.vrDevice.mtxLocal.translation = this.camera.mtxWorld.translation;
+            this.camera.mtxPivot.translation = FudgeCore.Vector3.ZERO();
+        }
+        draw(_calculateTransforms = true, _xrFrame = null) {
+            if (!this.session)
+                super.draw(_calculateTransforms);
+            if (_xrFrame) {
+                super.computeDrawing(_calculateTransforms);
+                let pose = _xrFrame.getViewerPose(this.referenceSpace);
+                let glLayer = this.session.renderState.baseLayer;
+                FudgeCore.Render.resetFrameBuffer(glLayer.framebuffer);
+                FudgeCore.Render.clear(this.camera.clrBackground);
+                this.poseMtx.set(pose.transform.matrix);
+                this.poseMtx.rotateY(180);
+                this.vrDevice.mtxLocal.set(this.poseMtx);
+                if (pose) {
+                    for (let view of pose.views) {
+                        let viewport = glLayer.getViewport(view);
+                        this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+                        if (this.useVRController)
+                            this.setControllerConfigs(_xrFrame);
+                        this.camera.mtxProjection.set(view.projectionMatrix);
+                        this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
+                        if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
+                            FudgeCore.Render.draw(this.camera);
+                        if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.NONE) {
+                            FudgeCore.Physics.draw(this.camera, this.physicsDebugMode);
+                        }
+                    }
+                    FudgeCore.Render.setRenderRectangle(FudgeCore.Render.getRenderRectangle());
+                }
+            }
+        }
+        setControllerConfigs(_xrFrame) {
+            if (_xrFrame) {
+                if (XRViewport.default.session.inputSources.length > 0) {
+                    XRViewport.default.session.inputSources.forEach(controller => {
+                        try {
+                            switch (controller.handedness) {
+                                case ("right"):
+                                    this.vrDevice.rightCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
+                                    if (!this.vrDevice.rightCntrl.gamePad)
+                                        this.vrDevice.rightCntrl.gamePad = controller.gamepad;
+                                    else {
+                                        this.vrDevice.rightCntrl.thumbstickX = controller.gamepad.axes[2];
+                                        this.vrDevice.rightCntrl.thumbstickY = controller.gamepad.axes[3];
+                                    }
+                                    break;
+                                case ("left"):
+                                    this.vrDevice.leftCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
+                                    if (!this.vrDevice.leftCntrl.gamePad)
+                                        this.vrDevice.leftCntrl.gamePad = controller.gamepad;
+                                    else {
+                                        this.vrDevice.leftCntrl.thumbstickX = controller.gamepad.axes[2];
+                                        this.vrDevice.leftCntrl.thumbstickY = controller.gamepad.axes[3];
+                                    }
+                                    break;
+                            }
+                        }
+                        catch (e) {
+                            FudgeCore.Debug.info("Input Sources Error: " + e);
+                        }
+                    });
+                }
+            }
+        }
+    }
+    XRViewport.xrViewportInstance = null;
+    FudgeCore.XRViewport = XRViewport;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -11775,18 +12012,24 @@ struct Light {
   mat4 mtxShape;
   mat4 mtxShapeInverse;
 };
-
-const uint MAX_LIGHTS_DIRECTIONAL = 10u;
-const uint MAX_LIGHTS_POINT = 50u;
-const uint MAX_LIGHTS_SPOT = 50u;
-
 uniform Light u_ambient;
+
+const uint MAX_LIGHTS_DIRECTIONAL = 5u;
+const uint MAX_LIGHTS_POINT = 40u;
+const uint MAX_LIGHTS_SPOT = 40u;
+
+ layout(std140) uniform UNIFORMS_LIGHT
+{
 uniform uint u_nLightsDirectional;
-uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
 uniform uint u_nLightsPoint;
-uniform Light u_point[MAX_LIGHTS_POINT];
 uniform uint u_nLightsSpot;
+uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+uniform Light u_point[MAX_LIGHTS_POINT];
 uniform Light u_spot[MAX_LIGHTS_SPOT];
+
+} ;
+
+
 
 float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
   if(_fSpecular <= 0.0)
@@ -12006,23 +12249,34 @@ uniform mat4 u_mtxNormalMeshToWorld;
 in vec3 a_vctNormal;
 uniform float u_fDiffuse;
 
-struct Light {
+  struct Light {
   vec4 vctColor;
   mat4 mtxShape;
   mat4 mtxShapeInverse;
 };
 
-const uint MAX_LIGHTS_DIRECTIONAL = 10u;
-const uint MAX_LIGHTS_POINT = 50u;
-const uint MAX_LIGHTS_SPOT = 50u;
 
 uniform Light u_ambient;
+
+#if !defined(PHONG)
+
+const uint MAX_LIGHTS_DIRECTIONAL = 5u;
+const uint MAX_LIGHTS_POINT = 40u;
+const uint MAX_LIGHTS_SPOT = 40u;
+
+ layout(std140) uniform UNIFORMS_LIGHT
+{
 uniform uint u_nLightsDirectional;
-uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
 uniform uint u_nLightsPoint;
-uniform Light u_point[MAX_LIGHTS_POINT];
 uniform uint u_nLightsSpot;
+uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+uniform Light u_point[MAX_LIGHTS_POINT];
 uniform Light u_spot[MAX_LIGHTS_SPOT];
+
+} ;
+
+  #endif
+
 
 vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _vctView, float _fSpecular) {
   vec4 vctResult = vec4(0, 0, 0, 1);
@@ -12184,6 +12438,7 @@ void main() {
       continue;
     v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
   }
+
   // calculate spot light effect
   for(uint i = 0u; i < u_nLightsSpot; i++) {
     vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
@@ -12721,6 +12976,7 @@ var FudgeCore;
     let LOOP_MODE;
     (function (LOOP_MODE) {
         LOOP_MODE["FRAME_REQUEST"] = "frameRequest";
+        LOOP_MODE["FRAME_REQUEST_XR"] = "frameRequestXR";
         LOOP_MODE["TIME_GAME"] = "timeGame";
         LOOP_MODE["TIME_REAL"] = "timeReal";
     })(LOOP_MODE = FudgeCore.LOOP_MODE || (FudgeCore.LOOP_MODE = {}));
@@ -12753,6 +13009,9 @@ var FudgeCore;
                 case LOOP_MODE.FRAME_REQUEST:
                     Loop.loopFrame();
                     break;
+                case LOOP_MODE.FRAME_REQUEST_XR:
+                    Loop.loopFrameXR();
+                    break;
                 case LOOP_MODE.TIME_REAL:
                     Loop.idIntervall = window.setInterval(Loop.loopTime, 1000 / Loop.fpsDesired);
                     Loop.loopTime();
@@ -12772,6 +13031,10 @@ var FudgeCore;
             switch (Loop.mode) {
                 case LOOP_MODE.FRAME_REQUEST:
                     window.cancelAnimationFrame(Loop.idRequest);
+                    break;
+                case LOOP_MODE.FRAME_REQUEST_XR:
+                    FudgeCore.XRViewport.default.session.cancelAnimationFrame(Loop.idRequest);
+                    FudgeCore.XRViewport.default.session = null;
                     break;
                 case LOOP_MODE.TIME_REAL:
                     window.clearInterval(Loop.idIntervall);
@@ -12809,6 +13072,11 @@ var FudgeCore;
         static loopFrame() {
             Loop.loop();
             Loop.idRequest = window.requestAnimationFrame(Loop.loopFrame);
+        }
+        static loopFrameXR(_time = null, _xrFrame = null) {
+            Loop.loop();
+            FudgeCore.XRViewport.default.draw(true, _xrFrame);
+            Loop.idRequest = FudgeCore.XRViewport.default.session.requestAnimationFrame(Loop.loopFrameXR);
         }
         static loopTime() {
             if (Loop.syncWithAnimationFrame)

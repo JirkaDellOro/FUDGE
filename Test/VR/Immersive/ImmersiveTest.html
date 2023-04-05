@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>VR_Immersion</title>
+<meta charset="utf-8" />
+<!-- Important: check out styling for XR Button, if you do not style XR Button it will not appear -->
+<link rel="stylesheet" href="../vr_style.css" />
+
+<!--Editor settings of this project-->
+<meta type="settings" autoview="Graph|2022-11-29T08:25:35.990Z|27463" project="{'name':'VR_Immersion','graphAutoView':'Graph|2022-11-29T08:25:35.990Z|27463'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2022-11-29T08:25:35.990Z|27463'}}]" />
+
+
+
+<!--Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks-->
+<script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
+
+
+
+<!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
+<link type="resources" src="Internal.json" />
+
+<!--Load custom scripts-->
+<script type="text/javascript" src="Main.js" editor="true"></script>
+
+
+
+</head>
+<body>
+<script src="../../dialog-polyfill.min.js"></script>
+<script src="../../TestInstructions.js"></script>
+<script>
+    TestInstructions.display({
+      Name: "VR Immersive Scene",
+      Test: [
+        "Discover the immersive sourroundings.",
+        
+      ],
+      Setup: [
+        "Built in FUDGE editor with object files (.obj), exported from Blender.",
+      ],
+      Act: [
+        "Start your VR-Device and explore the immersive scene",
+      ],
+   
+      Expect: [
+        "Just be amazed."
+      ]
+    });
+  </script>
+<!--Canvas for FUDGE to render to-->
+<canvas class="fullscreen">
+</canvas>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

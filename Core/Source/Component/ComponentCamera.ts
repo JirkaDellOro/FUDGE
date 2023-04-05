@@ -26,8 +26,9 @@ namespace FudgeCore {
     //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
     #mtxWorldToView: Matrix4x4;
     #mtxCameraInverse: Matrix4x4;
+    #mtxProjection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
+
     private projection: PROJECTION = PROJECTION.CENTRAL;
-    private mtxProjection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
     private fieldOfView: number = 45; // The camera's sensorangle.
     private aspectRatio: number = 1.0;
     private direction: FIELD_OF_VIEW = FIELD_OF_VIEW.DIAGONAL;
@@ -54,7 +55,7 @@ namespace FudgeCore {
         return this.#mtxWorldToView;
 
       //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
-      this.#mtxWorldToView = Matrix4x4.MULTIPLICATION(this.mtxProjection, this.mtxCameraInverse);
+      this.#mtxWorldToView = Matrix4x4.MULTIPLICATION(this.#mtxProjection, this.mtxCameraInverse);
       return this.#mtxWorldToView;
     }
 
@@ -66,7 +67,14 @@ namespace FudgeCore {
       this.#mtxCameraInverse = Matrix4x4.INVERSION(this.mtxWorld);
       return this.#mtxCameraInverse;
     }
+    public get mtxProjection(): Matrix4x4 {
+      if (this.#mtxProjection)
+        return this.#mtxProjection;
 
+      //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
+      this.#mtxProjection = new Matrix4x4;
+      return this.#mtxProjection;
+    }
     public resetWorldToView(): void {
       if (this.#mtxWorldToView) Recycler.store(this.#mtxWorldToView);
       if (this.#mtxCameraInverse) Recycler.store(this.#mtxCameraInverse);
@@ -114,7 +122,7 @@ namespace FudgeCore {
       this.projection = PROJECTION.CENTRAL;
       this.near = _near;
       this.far = _far;
-      this.mtxProjection = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction); // TODO: remove magic numbers
+      this.#mtxProjection = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction); // TODO: remove magic numbers
     }
     /**
      * Set the camera to orthographic projection. Default values are derived the canvas client dimensions
@@ -125,7 +133,7 @@ namespace FudgeCore {
      */
     public projectOrthographic(_left: number = -Render.getCanvas().clientWidth / 2, _right: number = Render.getCanvas().clientWidth / 2, _bottom: number = Render.getCanvas().clientHeight / 2, _top: number = -Render.getCanvas().clientHeight / 2): void {
       this.projection = PROJECTION.ORTHOGRAPHIC;
-      this.mtxProjection = Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
+      this.#mtxProjection = Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
     }
 
     /**

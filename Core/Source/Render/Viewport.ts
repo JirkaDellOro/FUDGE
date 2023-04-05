@@ -12,7 +12,6 @@ namespace FudgeCore {
 
     public name: string = "Viewport"; // The name to call this viewport by.
     public camera: ComponentCamera = null; // The camera representing the view parameters to render the branch.
-
     public rectSource: Rectangle;
     public rectDestination: Rectangle;
 
@@ -108,6 +107,24 @@ namespace FudgeCore {
      * Pass `false` if calculation was already done for this frame 
      */
     public draw(_calculateTransforms: boolean = true): void {
+      this.computeDrawing(_calculateTransforms);
+      if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
+        Render.draw(this.camera);
+      if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
+        Physics.draw(this.camera, this.physicsDebugMode);
+      }
+
+      this.#crc2.imageSmoothingEnabled = false;
+      this.#crc2.drawImage(
+        Render.getCanvas(),
+        this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
+        this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
+      );
+    }
+    /**
+    * The transforms in the branch are recalculated here.
+    */
+    public computeDrawing(_calculateTransforms: boolean = true) {
       if (!this.#branch)
         return;
       Render.resetFrameBuffer();
@@ -122,21 +139,7 @@ namespace FudgeCore {
         this.calculateTransforms();
 
       Render.clear(this.camera.clrBackground);
-
-      if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
-        Render.draw(this.camera);
-      if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
-        Physics.draw(this.camera, this.physicsDebugMode);
-      }
-
-      this.#crc2.imageSmoothingEnabled = false;
-      this.#crc2.drawImage(
-        Render.getCanvas(),
-        this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
-        this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
-      );
     }
-
     /**
      * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh}es 
      */
@@ -145,6 +148,7 @@ namespace FudgeCore {
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
       this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
+      this.adjustFrames();
       Render.prepare(this.#branch, null, mtxRoot);
       this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
       this.componentsPick = Render.componentsPick;
@@ -212,6 +216,7 @@ namespace FudgeCore {
       Recycler.store(rectCanvas);
       Recycler.store(rectRender);
     }
+
     /**
      * Adjust the camera parameters to fit the rendering into the render vieport
      */
