@@ -7,6 +7,8 @@ namespace FudgeCore {
   export enum LOOP_MODE {
     /** Loop cycles controlled by window.requestAnimationFrame */
     FRAME_REQUEST = "frameRequest",
+    /** Loop cycles controlled by xrSession.requestAnimationFrame */
+    FRAME_REQUEST_XR = "frameRequestXR",
     /** Loop cycles with the given framerate in {@link Time.game} */
     TIME_GAME = "timeGame",
     /** Loop cycles with the given framerate in realtime, independent of {@link Time.game} */
@@ -84,6 +86,9 @@ namespace FudgeCore {
         case LOOP_MODE.FRAME_REQUEST:
           Loop.loopFrame();
           break;
+        case LOOP_MODE.FRAME_REQUEST_XR:
+          Loop.loopFrameXR();
+          break;
         case LOOP_MODE.TIME_REAL:
           Loop.idIntervall = window.setInterval(Loop.loopTime, 1000 / Loop.fpsDesired);
           Loop.loopTime();
@@ -109,6 +114,10 @@ namespace FudgeCore {
       switch (Loop.mode) {
         case LOOP_MODE.FRAME_REQUEST:
           window.cancelAnimationFrame(Loop.idRequest);
+          break;
+        case LOOP_MODE.FRAME_REQUEST_XR:
+          XRViewport.default.session.cancelAnimationFrame(Loop.idRequest);
+          XRViewport.default.session = null;
           break;
         case LOOP_MODE.TIME_REAL:
           window.clearInterval(Loop.idIntervall);
@@ -156,7 +165,11 @@ namespace FudgeCore {
       Loop.loop();
       Loop.idRequest = window.requestAnimationFrame(Loop.loopFrame);
     }
-
+    private static loopFrameXR(_time: number = null, _xrFrame: XRFrame = null): void {
+      Loop.loop();
+      XRViewport.default.draw(true, _xrFrame);
+      Loop.idRequest = XRViewport.default.session.requestAnimationFrame(Loop.loopFrameXR);
+    }
     private static loopTime(): void {
       if (Loop.syncWithAnimationFrame)
         Loop.idRequest = window.requestAnimationFrame(Loop.loop);
@@ -164,5 +177,4 @@ namespace FudgeCore {
         Loop.loop();
     }
   }
-
 }

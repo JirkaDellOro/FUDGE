@@ -87,7 +87,6 @@ namespace FudgeCore {
           shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
         if (_shadersUsed.indexOf(shader) < 0)
           _shadersUsed.push(shader);
-
         _branch.radius = cmpMesh.radius;
         if (cmpMaterial.sortForAlpha)
           Render.nodesAlpha.push(_branch); // add this node to render list
@@ -107,16 +106,22 @@ namespace FudgeCore {
       }
 
       if (firstLevel) {
+
+
         _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
-        for (let shader of _shadersUsed)
+        for (let shader of _shadersUsed) {
           Render.setLightsInShader(shader, Render.lights);
+
+        }
       }
     }
 
     public static addLights(cmpLights: ComponentLight[]): void {
+
       for (let cmpLight of cmpLights) {
         if (!cmpLight.isActive)
           continue;
+
         let type: TypeOfLight = cmpLight.light.getType();
         let lightsOfType: RecycableArray<ComponentLight> = Render.lights.get(type);
         if (!lightsOfType) {
@@ -164,6 +169,7 @@ namespace FudgeCore {
       Render.drawList(_cmpCamera, this.nodesSimple);
       Render.drawListAlpha(_cmpCamera);
     }
+
 
     private static drawListAlpha(_cmpCamera: ComponentCamera): void {
       function sort(_a: Node, _b: Node): number {
@@ -215,6 +221,6 @@ namespace FudgeCore {
       Recycler.store(mtxWorld);
       Recycler.store(mtxLocal);
     }
+    //#endregion
   }
-  //#endregion
 }
