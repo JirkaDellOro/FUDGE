@@ -37,6 +37,8 @@ var ControllerSceneVR;
         let enterXRButton = document.createElement("button");
         enterXRButton.id = "xrButton";
         enterXRButton.innerHTML = "Enter VR";
+        enterXRButton.style.position = "absolute";
+        enterXRButton.style.zIndex = "1000";
         document.body.appendChild(enterXRButton);
         enterXRButton.addEventListener("click", async function () {
             //initalizes xr session 

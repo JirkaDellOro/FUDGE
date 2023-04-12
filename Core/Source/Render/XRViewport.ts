@@ -70,7 +70,7 @@ namespace FudgeCore {
       this.vrDevice = <ComponentVRDevice>this.camera;
 
 
-      this.initializevrDeviceTransform(this.camera.mtxWorld);
+      this.initializeVRDeviceTransform(this.camera.mtxWorld);
       this.useVRController = _vrController;
       if (_vrController) {
         this.vrDevice.rightCntrl.cmpTransform = new ComponentTransform();
@@ -90,16 +90,16 @@ namespace FudgeCore {
     }
 
     // sets the rotation & position of the inital camera  of cmpVRDevice and adding 180 degree, because the XR Rig is looking in the direction of negative z 
-    private initializevrDeviceTransform(_newMtx: Matrix4x4) {
+    private initializeVRDeviceTransform(_newMtx: Matrix4x4) {
+      let invTranslation: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(_newMtx.translation, Vector3.ZERO()), -1);
+      this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
+
+      //rotate xr rig
       let newRot: Vector3 = Vector3.SCALE(new Vector3(_newMtx.rotation.x, _newMtx.rotation.y - 180, _newMtx.rotation.z), Math.PI / 180);
       let orientation: Quaternion = new Quaternion();
       orientation.setFromVector3(newRot.x, newRot.y, newRot.z);
-      //rotate xr rig in origin
-      XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
-      this.camera.mtxPivot.rotateY(180);
-
-      let invTranslation: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(_newMtx.translation, Vector3.ZERO()), -1);
-      XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
+      this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
+      
       this.vrDevice.mtxLocal.translation = this.camera.mtxWorld.translation;
       this.camera.mtxPivot.translation = Vector3.ZERO();
     }
@@ -120,9 +120,7 @@ namespace FudgeCore {
         Render.resetFrameBuffer(glLayer.framebuffer);
         Render.clear(this.camera.clrBackground);
 
-        this.poseMtx.set(pose.transform.matrix);
-        this.poseMtx.rotateY(180);
-        this.vrDevice.mtxLocal.set(this.poseMtx);
+        this.vrDevice.mtxLocal.set(pose.transform.matrix);
 
         if (pose) {
           for (let view of pose.views) {

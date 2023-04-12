@@ -47,9 +47,10 @@ namespace ImmersiveSceneVR {
     enterXRButton.addEventListener("click", async function () {
       //initalizes xr session 
       if (!xrViewport.session) {
-        await xrViewport.initializeVR(f.XR_SESSION_MODE.IMMERSIVE_VR, f.XR_REFERENCE_SPACE.LOCAL, false);
+        await xrViewport.initializeVR(f.XR_SESSION_MODE.IMMERSIVE_VR, f.XR_REFERENCE_SPACE.LOCAL, true);
         xrViewport.session.addEventListener("end", onEndSession);
       }
+
       //stop normal loop of winodws.animationFrame
       f.Loop.stop();
       //starts xr-session.animationFrame instead of window.animationFrame, your xr-session is ready to go!
@@ -60,6 +61,18 @@ namespace ImmersiveSceneVR {
 
   function update(_event: Event): void {
     // f.Physics.simulate();  // if physics is included and used
+    // allow height adjustment
+    if (xrViewport.session) {
+      try {
+        let leftCntrl = xrViewport.vrDevice.leftCntrl;
+          if (leftCntrl.gamePad.buttons[0].pressed)
+            cmpVRDevice.translate(new f.Vector3 (0, 1/60));
+          if (leftCntrl.gamePad.buttons[1].pressed)
+            cmpVRDevice.translate(new f.Vector3 (0, -1/60));
+      } catch (error) {
+          f.Debug.error("Mapped Buttons are not initialized correctly!")
+      }
+    }
     xrViewport.draw();
   }
   function onEndSession(): void {

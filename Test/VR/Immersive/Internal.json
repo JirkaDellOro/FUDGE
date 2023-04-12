@@ -3865,12 +3865,11 @@
             "name": "Camera",
             "active": true,
             "components": {
-              "ComponentCamera": [],
               "ComponentTransform": [
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[0, 0, 0]",
+                      "translation": "[-4, 1, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -3895,7 +3894,40 @@
                     "direction": "diagonal",
                     "aspect": 1,
                     "pivot": {
-                      "translation": "[-5, 1, 0]",
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2022-11-30T10:54:25.936Z|01925"
+                  }
+                }
+              ],
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshQuad|2022-12-06T13:10:19.182Z|26075",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -3961,7 +3993,6 @@
       "name": "",
       "labels": {},
       "events": {},
-      "fps": 60,
       "animationStructure": {}
     }
   }

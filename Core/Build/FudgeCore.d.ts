@@ -5685,7 +5685,7 @@ declare namespace FudgeCore {
          * The AR session could be initialized here. Up till now not implemented.
          */
         initializeAR(_arSessionMode?: XR_SESSION_MODE, _arReferenceSpaceType?: XR_REFERENCE_SPACE): Promise<void>;
-        private initializevrDeviceTransform;
+        private initializeVRDeviceTransform;
         /**
          * Draw the xr viewport displaying its branch. By default, the transforms in the branch are recalculated first.
          * Pass `false` if calculation was already done for this frame
