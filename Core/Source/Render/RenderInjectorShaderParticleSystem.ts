@@ -36,8 +36,9 @@ namespace FudgeCore {
     };
 
     export const PREDEFINED_VARIABLES: { [key: string]: string } = {
-      systemTime: "u_fParticleSystemTime",
+      systemDuration: "u_fParticleSystemDuration",
       systemSize: "u_fParticleSystemSize",
+      systemTime: "u_fParticleSystemTime",
       particleId: "fParticleId"
     };
   }

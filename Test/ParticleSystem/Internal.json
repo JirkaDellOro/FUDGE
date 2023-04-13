@@ -550,6 +550,219 @@
       "latitudes": 8
     }
   },
+  "ParticleSystem|2023-04-13T07:59:42.001Z|13329": {
+    "ƒ.ParticleSystem": {
+      "idResource": "ParticleSystem|2023-04-13T07:59:42.001Z|13329",
+      "name": "NewFlame",
+      "data": {
+        "variables": {
+          "velocity": {
+            "function": "randomRange",
+            "parameters": [
+              {
+                "value": "particleId"
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1.5
+              }
+            ]
+          },
+          "systemTimeSeconds": {
+            "function": "division",
+            "parameters": [
+              {
+                "value": "systemTime"
+              },
+              {
+                "value": 1000
+              }
+            ]
+          },
+          "systemDurationSeconds": {
+            "function": "division",
+            "parameters": [
+              {
+                "value": "systemDuration"
+              },
+              {
+                "value": 1000
+              }
+            ]
+          },
+          "particleTime": {
+            "function": "modulo",
+            "parameters": [
+              {
+                "function": "addition",
+                "parameters": [
+                  {
+                    "function": "randomRange",
+                    "parameters": [
+                      {
+                        "function": "addition",
+                        "parameters": [
+                          {
+                            "value": "particleId"
+                          },
+                          {
+                            "value": 1
+                          }
+                        ]
+                      },
+                      {
+                        "value": 0
+                      },
+                      {
+                        "value": "systemDurationSeconds"
+                      }
+                    ]
+                  },
+                  {
+                    "value": "systemTimeSeconds"
+                  }
+                ]
+              },
+              {
+                "value": "systemDurationSeconds"
+              }
+            ]
+          },
+          "colorNormalized": {
+            "function": "subtraction",
+            "parameters": [
+              {
+                "value": 1
+              },
+              {
+                "function": "multiplication",
+                "parameters": [
+                  {
+                    "value": "particleTime"
+                  },
+                  {
+                    "function": "division",
+                    "parameters": [
+                      {
+                        "value": 1
+                      },
+                      {
+                        "value": "systemDurationSeconds"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "mtxLocal": [
+          {
+            "transformation": "rotate",
+            "y": {
+              "function": "randomRange",
+              "parameters": [
+                {
+                  "function": "addition",
+                  "parameters": [
+                    {
+                      "value": "particleId"
+                    },
+                    {
+                      "value": 2
+                    }
+                  ]
+                },
+                {
+                  "value": 0
+                },
+                {
+                  "value": 360
+                }
+              ]
+            }
+          },
+          {
+            "transformation": "translate",
+            "x": {
+              "function": "randomRange",
+              "parameters": [
+                {
+                  "function": "addition",
+                  "parameters": [
+                    {
+                      "value": "particleId"
+                    },
+                    {
+                      "value": 3
+                    }
+                  ]
+                },
+                {
+                  "value": 0
+                },
+                {
+                  "value": 0.5
+                }
+              ]
+            }
+          },
+          {
+            "transformation": "rotate",
+            "z": {
+              "function": "randomRange",
+              "parameters": [
+                {
+                  "function": "addition",
+                  "parameters": [
+                    {
+                      "value": "particleId"
+                    },
+                    {
+                      "value": 4
+                    }
+                  ]
+                },
+                {
+                  "value": 0
+                },
+                {
+                  "value": -5
+                }
+              ]
+            }
+          },
+          {
+            "transformation": "translate",
+            "y": {
+              "function": "multiplication",
+              "parameters": [
+                {
+                  "value": "velocity"
+                },
+                {
+                  "value": "particleTime"
+                }
+              ]
+            }
+          }
+        ],
+        "color": {
+          "a": {
+            "value": "colorNormalized"
+          },
+          "g": {
+            "value": "colorNormalized"
+          },
+          "b": {
+            "value": "colorNormalized"
+          }
+        }
+      }
+    }
+  },
   "Graph|2022-10-12T15:22:44.800Z|84622": {
     "ƒ.Graph": {
       "name": "Graph",
@@ -559,7 +772,7 @@
         {
           "ƒ.Node": {
             "name": "Flame",
-            "active": true,
+            "active": false,
             "components": {
               "ComponentMesh": [
                 {
@@ -866,6 +1079,84 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Flame2",
+            "active": true,
+            "components": {
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": true,
+                    "clrPrimary": "[1, 0.6588235294117647, 0.1803921568627451, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2022-10-12T15:20:29.381Z|54955"
+                  }
+                }
+              ],
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshQuad|2022-10-12T15:19:01.992Z|13651",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentParticleSystem": [
+                {
+                  "ƒ.ComponentParticleSystem": {
+                    "Component": {
+                      "active": true
+                    },
+                    "idParticleSystem": "ParticleSystem|2023-04-13T07:59:42.001Z|13329",
+                    "depthMask": false,
+                    "blendMode": 2,
+                    "playMode": 0,
+                    "duration": 2000,
+                    "size": 110
+                  }
+                }
+              ],
+              "ComponentFaceCamera": [
+                {
+                  "ƒ.ComponentFaceCamera": {
+                    "active": true
+                  }
+                }
+              ]
+            },
+            "children": []
           }
         }
       ],

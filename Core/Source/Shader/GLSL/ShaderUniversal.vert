@@ -113,6 +113,7 @@ out vec4 v_vctColor;
 
   #if defined(PARTICLE)
 uniform mat4 u_mtxWorldToView;
+uniform float u_fParticleSystemDuration;
 uniform float u_fParticleSystemSize;
 uniform float u_fParticleSystemTime;
 uniform sampler2D u_fParticleSystemRandomNumbers;
