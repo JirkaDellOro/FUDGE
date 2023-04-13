@@ -485,12 +485,12 @@ declare namespace Fudge {
         static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[];
         static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[];
         static readonly COLOR_KEYS: (keyof ƒ.ParticleData.Color)[];
-        private time;
-        private timeScalePlay;
+        private cmpParticleSystem;
         private particleSystem;
         private data;
         private toolbar;
         private toolbarIntervalId;
+        private timeScalePlay;
         private tree;
         private controller;
         private errors;

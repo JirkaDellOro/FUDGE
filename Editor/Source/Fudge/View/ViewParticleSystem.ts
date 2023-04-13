@@ -10,16 +10,15 @@ namespace Fudge {
     public static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[] = ["variables", "mtxLocal", "mtxWorld", "color"];
     public static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[] = ["x", "y", "z"];
     public static readonly COLOR_KEYS: (keyof ƒ.ParticleData.Color)[] = ["r", "g", "b", "a"];
-
-    private time: ƒ.Time;
-    private timeScalePlay: number;
     
+    private cmpParticleSystem: ƒ.ComponentParticleSystem;
     private particleSystem: ƒ.ParticleSystem;
     private data: ƒ.ParticleData.System;
-
+    
     private toolbar: HTMLDivElement;
     private toolbarIntervalId: number;
-
+    private timeScalePlay: number;
+    
     private tree: ƒui.CustomTree<ƒ.ParticleData.Recursive>;
     private controller: ControllerTreeParticleSystem;
     private errors: [ƒ.ParticleData.Expression, string][] = [];
@@ -220,11 +219,10 @@ namespace Fudge {
     }
 
     protected hndDrop(_event: DragEvent, _viewSource: View): void {
-      let cmpParticleSystem = <ƒ.ComponentParticleSystem>_viewSource.getDragDropSources()[0];
-      this.time = cmpParticleSystem.time;
-      this.timeScalePlay = this.time.getScale();
+      this.cmpParticleSystem = <ƒ.ComponentParticleSystem>_viewSource.getDragDropSources()[0];
+      this.timeScalePlay = this.cmpParticleSystem.timeScale;
       this.setTime(0);
-      this.setParticleSystem(cmpParticleSystem.particleSystem);
+      this.setParticleSystem(this.cmpParticleSystem.particleSystem);
     }
 
     private hndEvent = async (_event: EditorEvent): Promise<void> => {
@@ -284,7 +282,7 @@ namespace Fudge {
           button.id = _id;
           button.classList.add("buttonIcon");
           button.onclick = (_event: MouseEvent) => {
-            let timeScale: number = this.time.getScale();
+            let timeScale: number = this.cmpParticleSystem.timeScale;
             switch ((<HTMLInputElement>_event.target).id) {
               case "backward":
                 timeScale -= 0.2;
@@ -322,18 +320,6 @@ namespace Fudge {
       };
       this.toolbar.appendChild(timeStepper);
 
-      let durationStepper: ƒui.CustomElementStepper = new ƒui.CustomElementStepper({key: "duration", label: "duration", value: "1"});
-      durationStepper.id = "duration";
-      durationStepper.title = "The duration (in seconds) of the particle effect you want to examine. Set this yourself";
-      durationStepper.oninput = () => {
-        let duration: number = durationStepper.getMutatorValue();
-        timeSlider.max = (duration * 1.1).toString();
-        timeSliderSteps.innerHTML = [0, 0.25, 0.5, 0.75, 1]
-          .map(_factor => duration * _factor)
-          .map(_value => `<span data-label="${_value.toFixed(2)}"></span>`).join("");
-      };
-      this.toolbar.appendChild(durationStepper);
-
       let timeSliderSteps: HTMLDivElement = document.createElement("div");
       timeSliderSteps.id = "timeslidersteps";
       this.toolbar.appendChild(timeSliderSteps);
@@ -343,34 +329,41 @@ namespace Fudge {
       timeSlider.type = "range";
       timeSlider.value = "0";
       timeSlider.min = "0";
-      timeSlider.max = durationStepper.getMutatorValue().toString();
+      timeSlider.max = "1";
       timeSlider.step = "any";
       timeSlider.oninput = () => {
         this.setTime(parseFloat(timeSlider.value));
       };
       this.toolbar.appendChild(timeSlider);
 
-      durationStepper.oninput(null);
       this.toolbarIntervalId = window.setInterval(() => {
-        if (this.time) {
-          let timeInSeconds: number = this.time.get() / 1000;
-          timeScaleStepper.setMutatorValue(this.time.getScale());
+        if (this.cmpParticleSystem) {
+          let timeInSeconds: number = this.cmpParticleSystem.time / 1000;
+          timeScaleStepper.setMutatorValue(this.cmpParticleSystem.timeScale);
           timeStepper.setMutatorValue(timeInSeconds);
+          
+          let duration: number = this.cmpParticleSystem.duration / 1000;
+          if (parseFloat(timeSlider.max) != duration * 1.1) { // value has changed
+            timeSlider.max = (duration * 1.1).toString();
+            timeSliderSteps.innerHTML = [0, 0.25, 0.5, 0.75, 1]
+              .map(_factor => duration * _factor)
+              .map(_value => `<span data-label="${_value.toFixed(2)}"></span>`).join("");
+          }
           timeSlider.value = timeInSeconds.toString();
         }
-      }, 1000 / 20);
+      }, 1000 / 30);
     }
     
     private setTime(_timeInSeconds: number) {
       this.setTimeScale(0);
-      this.time.set(_timeInSeconds * 1000);
+      this.cmpParticleSystem.time = _timeInSeconds * 1000;
     }
 
     private setTimeScale(_timeScale: number) {
       _timeScale = parseFloat(_timeScale.toFixed(15)); // round so forward and backward button don't miss zero
       if (_timeScale != 0)
         this.timeScalePlay = _timeScale;
-      this.time.setScale(_timeScale);
+        this.cmpParticleSystem.timeScale = _timeScale;
 
       let playButton: Element = this.toolbar.querySelector("#play") || this.toolbar.querySelector("#pause");
       playButton.id = _timeScale == 0 ? "play" : "pause";

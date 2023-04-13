@@ -2218,6 +2218,12 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum PARTICLE_SYSTEM_PLAYMODE {
+        /**Plays particle system in a loop: it restarts once it hit the end.*/
+        LOOP = 0,
+        /**Plays particle system once and stops at the last point in time.*/
+        PLAY_ONCE = 1
+    }
     /**
      * Attaches a {@link ParticleSystem} to the node.
      * Works in conjunction with {@link ComponentMesh} and {@link ComponentMaterial} to create a shader particle system.
@@ -2229,12 +2235,13 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         /** A texture filed with random numbers. Used by particle shader */
         renderData: unknown;
+        particleSystem: ParticleSystem;
         /** When disabled try enabling {@link ComponentMaterial.prototype.sortForAlpha} */
         depthMask: boolean;
         blendMode: BLEND;
-        particleSystem: ParticleSystem;
-        readonly time: Time;
-        constructor(_particleSystem?: ParticleSystem, _size?: number);
+        playMode: PARTICLE_SYSTEM_PLAYMODE;
+        duration: number;
+        constructor(_particleSystem?: ParticleSystem);
         /**
          * Get the number of particles
          */
@@ -2243,6 +2250,10 @@ declare namespace FudgeCore {
          * Set the number of particles. Caution: Setting this will reinitialize the random numbers array(texture) used in the shader.
          */
         set size(_size: number);
+        get time(): number;
+        set time(_time: number);
+        get timeScale(): number;
+        set timeScale(_scale: number);
         useRenderData(): void;
         deleteRenderData(): void;
         serialize(): Serialization;
@@ -2252,6 +2263,9 @@ declare namespace FudgeCore {
         getMutatorForAnimation(): MutatorForAnimation;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
+        hndEvent: (_event: Event) => void;
+        private update;
+        private updateTimeScale;
     }
 }
 declare namespace FudgeCore {

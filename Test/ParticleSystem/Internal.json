@@ -597,9 +597,11 @@
                       "active": true
                     },
                     "idParticleSystem": "ParticleSystem|2022-10-12T15:23:20.913Z|28937",
-                    "size": 160,
+                    "depthMask": false,
                     "blendMode": 2,
-                    "depthMask": false
+                    "playMode": 0,
+                    "duration": 1000,
+                    "size": 160
                   }
                 }
               ],
@@ -697,9 +699,11 @@
                             "active": true
                           },
                           "idParticleSystem": "ParticleSystem|2022-10-13T20:55:33.532Z|40614",
-                          "size": 10000,
+                          "depthMask": false,
                           "blendMode": 1,
-                          "depthMask": false
+                          "playMode": 0,
+                          "duration": 1000,
+                          "size": 10000
                         }
                       }
                     ],
@@ -846,9 +850,11 @@
                                   "active": true
                                 },
                                 "idParticleSystem": "ParticleSystem|2022-10-12T16:59:31.988Z|08886",
-                                "size": 100000,
+                                "depthMask": true,
                                 "blendMode": 0,
-                                "depthMask": true
+                                "playMode": 0,
+                                "duration": 1000,
+                                "size": 100000
                               }
                             }
                           ]
