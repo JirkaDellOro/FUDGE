@@ -7,7 +7,6 @@ namespace FudgeCore {
       DIVISION = "division",
       MODULO = "modulo",
       POWER = "power",
-      // LINEAR = "linear",
       POLYNOMIAL3 = "polynomial3",
       SQUARE_ROOT = "squareRoot",
       RANDOM = "random",
@@ -15,7 +14,6 @@ namespace FudgeCore {
     }
 
     export const FUNCTION_PARAMETER_NAMES: { [key in ParticleData.FUNCTION]?: string[] } = {
-      // [ParticleData.FUNCTION.LINEAR]: ["x", "xStart", "yStart", "xEnd", "yEnd"],
       [ParticleData.FUNCTION.POLYNOMIAL3]: ["x", "a", "b", "c", "d"],
       [ParticleData.FUNCTION.RANDOM]: ["index"],
       [ParticleData.FUNCTION.RANDOM_RANGE]: ["index", "min", "max"]
@@ -28,7 +26,6 @@ namespace FudgeCore {
       [ParticleData.FUNCTION.DIVISION]: 2,
       [ParticleData.FUNCTION.MODULO]: 2,
       [ParticleData.FUNCTION.POWER]: 2,
-      // [ParticleData.FUNCTION.LINEAR]: 5,
       [ParticleData.FUNCTION.POLYNOMIAL3]: 5,
       [ParticleData.FUNCTION.SQUARE_ROOT]: 1,
       [ParticleData.FUNCTION.RANDOM]: 1,
@@ -48,7 +45,6 @@ namespace FudgeCore {
    * @authors Jonas Plotzky, HFU, 2022
    */
   export class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
-    public static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number = 1000;
     public static readonly FUNCTIONS: { [key in ParticleData.FUNCTION]: Function } = {
       [ParticleData.FUNCTION.ADDITION]: (_parameters: string[]) => {
         return `(${_parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} + ${_value}`)})`;
@@ -68,14 +64,6 @@ namespace FudgeCore {
       [ParticleData.FUNCTION.POWER]: (_parameters: string[]) => {
         return `pow(${_parameters[0]}, ${_parameters[1]})`;
       },
-      // [ParticleData.FUNCTION.LINEAR]: (_parameters: string[]) => {
-      //   let x: string = _parameters[0];
-      //   let xStart: string = _parameters[1];
-      //   let yStart: string = _parameters[2];
-      //   let xEnd: string = _parameters[3];
-      //   let yEnd: string = _parameters[4];
-      //   return `(${yStart} + (${x} - ${xStart}) * (${yEnd} - ${yStart}) / (${xEnd} - ${xStart}))`;
-      // },
       [ParticleData.FUNCTION.POLYNOMIAL3]: (_parameters: string[]) => {
         let x: string = _parameters[0];
         let a: string = _parameters[1];
@@ -89,8 +77,7 @@ namespace FudgeCore {
         return `sqrt(${x})`;
       },
       [ParticleData.FUNCTION.RANDOM]: (_parameters: string[]) => {
-        const maxWidth: string = RenderInjectorShaderParticleSystem.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH.toString() + ".0";
-        return `texelFetch(u_fParticleSystemRandomNumbers, ivec2(mod(${_parameters[0]}, ${maxWidth}), ${_parameters[0]} / ${maxWidth}), 0).r`;
+        return `fetchRandomNumber(int(${_parameters[0]}), iTextureSize, iRandomNumbersLength)`
       },
       [ParticleData.FUNCTION.RANDOM_RANGE]: (_parameters: string[]) => {
         return `(${RenderInjectorShaderParticleSystem.FUNCTIONS["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]})`;

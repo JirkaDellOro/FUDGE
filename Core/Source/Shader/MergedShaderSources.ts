@@ -453,6 +453,11 @@ mat4 lookAt(vec3 _vctTranslation, vec3 _vctTarget) {
     _vctTranslation.x,  _vctTranslation.y,  _vctTranslation.z, 1.0
   );
 }
+
+float fetchRandomNumber(int _iIndex, int _iTextureSize, int _iRandomNumbersLength) {
+  _iIndex = _iIndex % _iRandomNumbersLength;
+  return texelFetch(u_fParticleSystemRandomNumbers, ivec2(_iIndex % _iTextureSize, _iIndex / _iTextureSize), 0).r;
+}
   #endif
 
 void main() {
@@ -464,6 +469,8 @@ void main() {
 
     #if defined(PARTICLE)
   float fParticleId = float(gl_InstanceID);
+  int iTextureSize = textureSize(u_fParticleSystemRandomNumbers, 0).x;
+  int iRandomNumbersLength = iTextureSize * iTextureSize;
   /*$variables*/
   /*$mtxLocal*/
   /*$mtxWorld*/

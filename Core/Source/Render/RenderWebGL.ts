@@ -29,6 +29,7 @@ namespace FudgeCore {
    */
   export abstract class RenderWebGL extends EventTargetStatic {
     protected static crc3: WebGL2RenderingContext = RenderWebGL.initialize();
+    public static readonly maxTextureSize: number = RenderWebGL.crc3.getParameter(RenderWebGL.crc3.MAX_TEXTURE_SIZE);
     protected static ƒpicked: Pick[];
     private static rectRender: Rectangle = RenderWebGL.getCanvasRect();
     private static sizePick: number;

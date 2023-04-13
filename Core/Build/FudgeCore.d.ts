@@ -686,7 +686,6 @@ declare namespace FudgeCore {
      * @authors Jonas Plotzky, HFU, 2022
      */
     class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
-        static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number;
         static readonly FUNCTIONS: {
             [key in ParticleData.FUNCTION]: Function;
         };
@@ -1024,6 +1023,7 @@ declare namespace FudgeCore {
      */
     abstract class RenderWebGL extends EventTargetStatic {
         protected static crc3: WebGL2RenderingContext;
+        static readonly maxTextureSize: number;
         protected static ƒpicked: Pick[];
         private static rectRender;
         private static sizePick;
