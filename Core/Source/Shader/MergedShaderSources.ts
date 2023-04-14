@@ -454,9 +454,9 @@ mat4 lookAt(vec3 _vctTranslation, vec3 _vctTarget) {
   );
 }
 
-float fetchRandomNumber(int _iIndex, int _iTextureSize, int _iRandomNumbersLength) {
-  _iIndex = _iIndex % _iRandomNumbersLength;
-  return texelFetch(u_fParticleSystemRandomNumbers, ivec2(_iIndex % _iTextureSize, _iIndex / _iTextureSize), 0).r;
+float fetchRandomNumber(int _iIndex, int _iParticleSystemRandomNumbersSize, int _iParticleSystemRandomNumbersLength) {
+  _iIndex = _iIndex % _iParticleSystemRandomNumbersLength;
+  return texelFetch(u_fParticleSystemRandomNumbers, ivec2(_iIndex % _iParticleSystemRandomNumbersSize, _iIndex / _iParticleSystemRandomNumbersSize), 0).r;
 }
   #endif
 
@@ -469,8 +469,8 @@ void main() {
 
     #if defined(PARTICLE)
   float fParticleId = float(gl_InstanceID);
-  int iTextureSize = textureSize(u_fParticleSystemRandomNumbers, 0).x;
-  int iRandomNumbersLength = iTextureSize * iTextureSize;
+  int iParticleSystemRandomNumbersSize = textureSize(u_fParticleSystemRandomNumbers, 0).x; // the dimension of the quadratic texture
+  int iParticleSystemRandomNumbersLength = iParticleSystemRandomNumbersSize * iParticleSystemRandomNumbersSize; // the total number of texels in the texture
   /*$variables*/
   /*$mtxLocal*/
   /*$mtxWorld*/

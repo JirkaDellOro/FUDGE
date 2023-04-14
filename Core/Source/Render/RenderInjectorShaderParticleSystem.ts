@@ -77,7 +77,7 @@ namespace FudgeCore {
         return `sqrt(${x})`;
       },
       [ParticleData.FUNCTION.RANDOM]: (_parameters: string[]) => {
-        return `fetchRandomNumber(int(${_parameters[0]}), iTextureSize, iRandomNumbersLength)`
+        return `fetchRandomNumber(int(${_parameters[0]}), iParticleSystemRandomNumbersSize, iParticleSystemRandomNumbersLength)`
       },
       [ParticleData.FUNCTION.RANDOM_RANGE]: (_parameters: string[]) => {
         return `(${RenderInjectorShaderParticleSystem.FUNCTIONS["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]})`;
