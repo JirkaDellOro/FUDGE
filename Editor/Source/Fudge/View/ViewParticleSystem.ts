@@ -100,7 +100,7 @@ namespace Fudge {
       
       options = [...ViewParticleSystem.TRANSFORMATION_KEYS, ...ViewParticleSystem.COLOR_KEYS];
       item = new remote.MenuItem({ 
-        label: "Add Variable/Constant", 
+        label: "Add Value", 
         id: String(CONTEXTMENU.ADD_PARTICLE_CONSTANT_NAMED), 
         submenu: generateSubMenu(options, String(CONTEXTMENU.ADD_PARTICLE_CONSTANT), _callback)
       });
@@ -113,7 +113,7 @@ namespace Fudge {
       });
       menu.append(item);
 
-      item = new remote.MenuItem({ label: "Add Variable/Constant", id: String(CONTEXTMENU.ADD_PARTICLE_CONSTANT), click: _callback });
+      item = new remote.MenuItem({ label: "Add Value", id: String(CONTEXTMENU.ADD_PARTICLE_CONSTANT), click: _callback });
       menu.append(item);
       item = new remote.MenuItem({ label: "Add Function", id: String(CONTEXTMENU.ADD_PARTICLE_FUNCTION), click: _callback });
       menu.append(item);

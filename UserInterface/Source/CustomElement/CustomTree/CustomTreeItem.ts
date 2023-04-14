@@ -84,7 +84,10 @@ namespace FudgeUserInterface {
       else
         this.appendChild(_content);
       this.#content = _content;
-      this.#content.onsubmit = () => false;
+      this.#content.onsubmit = (_event) => {
+        _event.preventDefault();
+        return false;
+      };    
     }
 
     public refreshContent(): void {

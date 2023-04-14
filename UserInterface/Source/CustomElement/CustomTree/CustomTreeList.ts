@@ -45,7 +45,7 @@ namespace FudgeUserInterface {
       for (let item of _tree.getItems()) {
         let found: CustomTreeItem<T> = this.findItem(item.data);
         if (found) {
-          found.content = item.content;
+          // found.content = item.content;
           found.hasChildren = item.hasChildren;
           if (!found.hasChildren)
             found.expand(false);

@@ -1500,7 +1500,7 @@ var FudgeUserInterface;
             for (let item of _tree.getItems()) {
                 let found = this.findItem(item.data);
                 if (found) {
-                    found.content = item.content;
+                    // found.content = item.content;
                     found.hasChildren = item.hasChildren;
                     if (!found.hasChildren)
                         found.expand(false);
@@ -1905,7 +1905,10 @@ var FudgeUserInterface;
             else
                 this.appendChild(_content);
             this.#content = _content;
-            this.#content.onsubmit = () => false;
+            this.#content.onsubmit = (_event) => {
+                _event.preventDefault();
+                return false;
+            };
         }
         refreshContent() {
             this.content = this.controller.createContent(this.data);
