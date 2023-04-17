@@ -14,6 +14,7 @@ namespace Fudge {
     private canvas: HTMLCanvasElement;
     private graph: ƒ.Graph;
     private nodeLight: ƒ.Node = new ƒ.Node("Illumination"); // keeps light components for dark graphs
+    private redrawId: number;
 
     constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
@@ -36,16 +37,13 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       // this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       // this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
       this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move
-      window.setInterval(() => { // TODO: remove interval when view closes
-        if (this.contextMenu.getMenuItemById(String(CONTEXTMENU.RENDER_CONTINUOUSLY)).checked)
-          this.redraw();
-      }, 1000 / 30);
     }
 
     createUserInterface(): void {
@@ -57,11 +55,15 @@ namespace Fudge {
       container.style.borderWidth = "0px";
       document.body.appendChild(this.canvas);
 
+
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
-      this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+      try {
+        this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+      } catch (_error: unknown) {}; // view should load even if rendering fails...
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       this.viewport.addEventListener(ƒ.EVENT.RENDER_PREPARE_START, this.hndPrepare);
+
 
       this.setGraph(null);
 
@@ -144,6 +146,9 @@ namespace Fudge {
         case String(CONTEXTMENU.ORTHGRAPHIC_CAMERA):
           let on: boolean = this.contextMenu.getMenuItemById(String(CONTEXTMENU.ORTHGRAPHIC_CAMERA)).checked;
           this.setCameraOrthographic(on);
+          break;
+        case String(CONTEXTMENU.RENDER_CONTINUOUSLY):
+          this.setRenderContinously(this.contextMenu.getMenuItemById(String(CONTEXTMENU.RENDER_CONTINUOUSLY)).checked)
           break;
       }
     }
@@ -231,6 +236,10 @@ namespace Fudge {
         case EVENT_EDITOR.MODIFY:
         case EVENT_EDITOR.ANIMATE:
           this.redraw();
+          break;
+        case EVENT_EDITOR.CLOSE:
+          this.setRenderContinously(false);
+          break;
       }
     }
 
@@ -282,9 +291,22 @@ namespace Fudge {
         this.viewport.draw();
         // ƒ.Physics.connectJoints();
       } catch (_error: unknown) {
+        this.setRenderContinously(false);
         // console.error(_error);
         //nop
       }
+    }
+
+    private setRenderContinously(_on: boolean) {
+      if (_on) {
+        this.redrawId = window.setInterval(() => {
+          this.redraw();
+        }, 1000 / 30);
+      } else {
+        window.clearInterval(this.redrawId);
+        this.redrawId = null;
+      }
+      this.contextMenu.getMenuItemById(String(CONTEXTMENU.RENDER_CONTINUOUSLY)).checked = _on;
     }
   }
 }
