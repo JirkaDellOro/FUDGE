@@ -80,8 +80,41 @@ div[view=ViewParticleSystem] ul.tree li[attributes~="variable"]>form>input:first
   font-style: italic;
 }
 
+
 div[view=ViewParticleSystem] ul.tree li.invalid {
   outline: 1px outset yellow; /* maybe add this to theme vars */
+}
+
+div[view=ViewParticleSystem] li[attributes~="randomRange"] > ul.tree > li:nth-of-type(1) > form::before {
+  content: "index: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="transformation"] > ul.tree > li:nth-of-type(1) > form::before {
+  content: "x: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="transformation"] > ul.tree > li:nth-of-type(2) > form::before {
+  content: "y: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="transformation"] > ul.tree > li:nth-of-type(3) > form::before {
+  content: "z: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="color"] > ul.tree > li:nth-of-type(1) > form::before {
+  content: "r: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="color"] > ul.tree > li:nth-of-type(2) > form::before {
+  content: "g: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="color"] > ul.tree > li:nth-of-type(3) > form::before {
+  content: "b: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="color"] > ul.tree > li:nth-of-type(4) > form::before {
+  content: "a: ";
 }
 
 div[view=ViewParticleSystem] form input {

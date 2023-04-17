@@ -671,9 +671,6 @@ declare namespace FudgeCore {
             RANDOM = "random",
             RANDOM_RANGE = "randomRange"
         }
-        const FUNCTION_PARAMETER_NAMES: {
-            [key in ParticleData.FUNCTION]?: string[];
-        };
         const FUNCTION_MINIMUM_PARAMETERS: {
             [key in ParticleData.FUNCTION]: number;
         };
@@ -4252,17 +4249,11 @@ declare namespace FudgeCore {
             variables?: {
                 [name: string]: Expression;
             };
-            color?: Color;
+            color?: Expression[];
             mtxLocal?: Transformation[];
             mtxWorld?: Transformation[];
         }
-        type Recursive = System | System["variables"] | Color | System["mtxLocal"] | Transformation | Expression;
-        interface Color {
-            r?: Expression;
-            g?: Expression;
-            b?: Expression;
-            a?: Expression;
-        }
+        type Recursive = System | System["variables"] | Expression[] | Transformation[] | Transformation | Expression;
         type Expression = Function | Variable | Constant;
         interface Function {
             function: FUNCTION;
@@ -4276,9 +4267,7 @@ declare namespace FudgeCore {
         }
         interface Transformation {
             transformation: "translate" | "rotate" | "scale";
-            x?: Expression;
-            y?: Expression;
-            z?: Expression;
+            parameters: Expression[];
         }
         function isExpression(_data: Recursive): _data is Expression;
         function isFunction(_data: Recursive): _data is Function;

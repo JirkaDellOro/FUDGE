@@ -7,19 +7,12 @@ namespace FudgeCore {
 
     export interface System {
       variables?: { [name: string]: Expression };
-      color?: Color;
+      color?: Expression[];
       mtxLocal?: Transformation[];
       mtxWorld?: Transformation[];
     }
     
-    export type Recursive = System | System["variables"] | Color | System["mtxLocal"] | Transformation | Expression;
-    
-    export interface Color {
-      r?: Expression;
-      g?: Expression; 
-      b?: Expression; 
-      a?: Expression;
-    }
+    export type Recursive = System | System["variables"] | Expression[] | Transformation[] | Transformation | Expression;
 
     export type Expression = Function | Variable | Constant;
 
@@ -38,9 +31,7 @@ namespace FudgeCore {
   
     export interface Transformation {
       transformation: "translate" | "rotate" | "scale";
-      x?: Expression;
-      y?: Expression;
-      z?: Expression;
+      parameters: Expression[];
     }
 
     export function isExpression(_data: Recursive): _data is Expression {

@@ -1,6 +1,7 @@
 namespace FudgeCore {
   export namespace ParticleData {
     export enum FUNCTION {
+      // VALUE = "value",
       ADDITION = "addition",
       SUBTRACTION = "subtraction",
       MULTIPLICATION = "multiplication",
@@ -13,13 +14,8 @@ namespace FudgeCore {
       RANDOM_RANGE = "randomRange"
     }
 
-    export const FUNCTION_PARAMETER_NAMES: { [key in ParticleData.FUNCTION]?: string[] } = {
-      [ParticleData.FUNCTION.POLYNOMIAL3]: ["x", "a", "b", "c", "d"],
-      [ParticleData.FUNCTION.RANDOM]: ["index"],
-      [ParticleData.FUNCTION.RANDOM_RANGE]: ["index", "min", "max"]
-    };
-
     export const FUNCTION_MINIMUM_PARAMETERS: { [key in ParticleData.FUNCTION]: number } = {
+      // [ParticleData.FUNCTION.VALUE]: 1,
       [ParticleData.FUNCTION.ADDITION]: 2,
       [ParticleData.FUNCTION.SUBTRACTION]: 2,
       [ParticleData.FUNCTION.MULTIPLICATION]: 2,
@@ -46,6 +42,9 @@ namespace FudgeCore {
    */
   export class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
     public static readonly FUNCTIONS: { [key in ParticleData.FUNCTION]: Function } = {
+      // [ParticleData.FUNCTION.VALUE]: (_parameters: string[]) => {
+      //   return `(${_parameters[0]})`;
+      // },
       [ParticleData.FUNCTION.ADDITION]: (_parameters: string[]) => {
         return `(${_parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} + ${_value}`)})`;
       },
@@ -160,7 +159,7 @@ namespace FudgeCore {
       let transformations: [ParticleData.Transformation["transformation"], string, string, string][] = _transformations
         .map(_data => {
           let isScale: boolean = _data.transformation === "scale";
-          let [x, y, z] = [_data.x, _data.y, _data.z]
+          let [x, y, z] = [_data.parameters[0], _data.parameters[1], _data.parameters[2]]
             .map((_value) => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : (isScale ? "1.0" : "0.0")) as [string, string, string];
 
           return [_data.transformation, x, y, z];
@@ -223,13 +222,14 @@ namespace FudgeCore {
       return code;
     }
 
-    private static generateColor(_color: ParticleData.Color): string {
+    private static generateColor(_color: ParticleData.Expression[]): string {
       if (!_color) return "";
       
-      let [r, g, b, a]: [string, string, string, string] = [_color.r, _color.g, _color.b, _color.a]
-        .map((_value): string => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : "1.0") as [string, string, string, string];
-
-      return `vec4(${r}, ${g}, ${b}, ${a});`;
+      let rgba: string = [_color[0], _color[1], _color[2], _color[3]]
+        .map((_value): string => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : "1.0")
+        .join(", ");
+      
+      return `vec4(${rgba});`;
     }
 
     private static generateExpression(_expression: ParticleData.Expression): string {

@@ -38,11 +38,9 @@ declare namespace Fudge {
         DELETE_PROPERTY = 19,
         ADD_PARTICLE_PROPERTY = 20,
         ADD_PARTICLE_FUNCTION = 21,
-        ADD_PARTICLE_FUNCTION_NAMED = 22,
-        ADD_PARTICLE_CONSTANT = 23,
-        ADD_PARTICLE_CONSTANT_NAMED = 24,
-        ADD_PARTICLE_TRANSFORMATION = 25,
-        DELETE_PARTICLE_DATA = 26
+        ADD_PARTICLE_CONSTANT = 22,
+        ADD_PARTICLE_TRANSFORMATION = 23,
+        DELETE_PARTICLE_DATA = 24
     }
     enum MENU {
         QUIT = "quit",
@@ -483,8 +481,6 @@ declare namespace Fudge {
      */
     class ViewParticleSystem extends View {
         static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[];
-        static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[];
-        static readonly COLOR_KEYS: (keyof ƒ.ParticleData.Color)[];
         private cmpParticleSystem;
         private particleSystem;
         private data;

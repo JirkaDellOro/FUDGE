@@ -38,33 +38,6 @@ namespace Fudge {
         content.appendChild(spanName);
       }
 
-      if (ƒ.ParticleData.isExpression(_data) && parentData != this.data.variables) {
-        let seperator: HTMLSpanElement = document.createElement("span");
-        seperator.innerText = ": ";
-        if (ƒ.ParticleData.isFunction(parentData)) {
-          let names: string[] = ƒ.ParticleData.FUNCTION_PARAMETER_NAMES[parentData.function];
-          if (names) {
-            let name: HTMLSpanElement = document.createElement("span");
-            name.innerText = names[key] != null ? names[key] : key;
-            content.appendChild(name);
-            content.appendChild(seperator);
-          }
-        } else {
-          let options: string[] = ƒ.ParticleData.isTransformation(parentData) ? ViewParticleSystem.TRANSFORMATION_KEYS : ViewParticleSystem.COLOR_KEYS;
-          let select: HTMLSelectElement = document.createElement("select");
-          options.forEach((_option, _index) => {
-            let entry: HTMLOptionElement = document.createElement("option");
-            entry.text = _option;
-            entry.value = _option;
-            select.add(entry);
-          });
-          select.value = key;
-          select.id = ID.KEY;
-          content.appendChild(select);
-          content.appendChild(seperator);
-        }
-      }
-
       if (ƒ.ParticleData.isExpression(_data)) {
         if (ƒ.ParticleData.isFunction(_data)) {
           let select: HTMLSelectElement = document.createElement("select");
@@ -106,6 +79,12 @@ namespace Fudge {
       let attributes: string[] = [];
       if (ƒ.ParticleData.isVariable(_data) || this.childToParent.get(_data) == this.data.variables) 
         attributes.push("variable");
+      if (ƒ.ParticleData.isFunction(_data))
+        attributes.push(_data.function);
+      if (_data == this.data.color)
+        attributes.push("color");
+      if (ƒ.ParticleData.isTransformation(_data)) 
+        attributes.push("transformation");
 
       return attributes.join(" ");
     }
@@ -172,16 +151,12 @@ namespace Fudge {
         return [];
 
       let children: ƒ.ParticleData.Recursive[] = [];
-      let subData: Object = ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data;
+      let subData: Object = ƒ.ParticleData.isFunction(_data) || ƒ.ParticleData.isTransformation(_data) ? _data.parameters : _data;
       let subKeys: string[] = Object.keys(subData);
 
       // sort keys for root, color and vector e.g. ("r", "g", "b", "a")
       if (_data == this.data)
         subKeys = ViewParticleSystem.PROPERTY_KEYS.filter(_key => subKeys.includes(_key));
-      if (ƒ.ParticleData.isTransformation(_data))
-        subKeys = ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => subKeys.includes(_key));
-      if (_data == this.data.color)
-        subKeys = ViewParticleSystem.COLOR_KEYS.filter(_key => subKeys.includes(_key));
 
       subKeys.forEach(_key => {
         let child: ƒ.ParticleData.Recursive = subData[_key];
@@ -209,11 +184,11 @@ namespace Fudge {
     public addChildren(_children: ƒ.ParticleData.Recursive[], _target: ƒ.ParticleData.Recursive, _at?: number): ƒ.ParticleData.Recursive[] {
       let move: ƒ.ParticleData.Expression[] = [];
       let container: Object;
-      if (ƒ.ParticleData.isFunction(_target) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
+      if ((ƒ.ParticleData.isFunction(_target) || ƒ.ParticleData.isTransformation(_target)) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
         container = _target.parameters;
       else if (Array.isArray(_target) && _children.every(_data => ƒ.ParticleData.isTransformation(_data)))
         container = _target;
-      else if ((ƒ.ParticleData.isTransformation(_target) || _target == this.data.color || _target == this.data.variables) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
+      else if ((_target == this.data.color || _target == this.data.variables) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
         container = _target;
 
       if (!container) 
@@ -240,11 +215,7 @@ namespace Fudge {
         for (let data of (<ƒ.ParticleData.Expression[]>_children)) {
           let usedKeys: string[] = Object.keys(_target);
           let newKey: string;
-          if (ƒ.ParticleData.isTransformation(_target))
-            newKey = ViewParticleSystem.TRANSFORMATION_KEYS.filter(_key => !usedKeys.includes(_key)).shift();
-          else if (_target == this.data.color)
-            newKey = ViewParticleSystem.COLOR_KEYS.filter(_key => !usedKeys.includes(_key)).shift();
-          else if (_target == this.data.variables && this.getKey(data, _target) == null) 
+          if (_target == this.data.variables && this.getKey(data, _target) == null) 
             newKey = `variable${usedKeys.length}`;
           if (newKey == null) 
             continue;
@@ -277,7 +248,7 @@ namespace Fudge {
     private getKey(_data: ƒ.ParticleData.Recursive, _parentData: ƒ.ParticleData.Recursive): string {
       let key: string;
       if (!_parentData) return null;
-      if (ƒ.ParticleData.isExpression(_data) && ƒ.ParticleData.isFunction(_parentData)) {
+      if (ƒ.ParticleData.isExpression(_data) && (ƒ.ParticleData.isFunction(_parentData) || ƒ.ParticleData.isTransformation(_parentData))) {
         key = _parentData.parameters.indexOf(_data).toString();
       } else {
         key = Object.entries(_parentData).find(entry => entry[1] == _data)?.shift();
@@ -303,7 +274,7 @@ namespace Fudge {
         return false;
       }
 
-      if (ƒ.ParticleData.isFunction(parentData)) 
+      if (ƒ.ParticleData.isFunction(parentData) || ƒ.ParticleData.isTransformation(parentData)) 
         parentData.parameters.splice(index, 1);
       else if (Array.isArray(parentData)) 
         parentData.splice(index, 1);

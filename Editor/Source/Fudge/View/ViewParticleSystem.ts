@@ -8,8 +8,6 @@ namespace Fudge {
    */
   export class ViewParticleSystem extends View {
     public static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[] = ["variables", "mtxLocal", "mtxWorld", "color"];
-    public static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[] = ["x", "y", "z"];
-    public static readonly COLOR_KEYS: (keyof ƒ.ParticleData.Color)[] = ["r", "g", "b", "a"];
     
     private cmpParticleSystem: ƒ.ComponentParticleSystem;
     private particleSystem: ƒ.ParticleSystem;
@@ -51,22 +49,7 @@ namespace Fudge {
         popup = true;
       }
       
-      if (focus == this.data.color || ƒ.ParticleData.isTransformation(focus)) {
-        [
-          this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_CONSTANT_NAMED)),
-          this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_FUNCTION_NAMED))
-        ].forEach(_item => {
-          _item.visible = true;
-          _item.submenu.items.forEach(_subItem => _subItem.visible = false);
-          let labels: string[] = focus == this.data.color ? ViewParticleSystem.COLOR_KEYS : ViewParticleSystem.TRANSFORMATION_KEYS;
-          labels
-            .filter(_value => !Object.keys(focus).includes(_value))
-            .forEach(_label => _item.submenu.items.find(_item => _item.label == _label).visible = true);
-        });
-        popup = true;
-      }
-
-      if (focus == this.data.variables || ƒ.ParticleData.isFunction(focus)) {
+      if (focus == this.data.variables || ƒ.ParticleData.isFunction(focus) || focus == this.data.color || ƒ.ParticleData.isTransformation(focus)) {
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_CONSTANT)).visible = true;
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_FUNCTION)).visible = true;
         popup = true;
@@ -95,21 +78,6 @@ namespace Fudge {
         label: "Add Property", 
         id: String(CONTEXTMENU.ADD_PARTICLE_PROPERTY), 
         submenu: generateSubMenu(options, String(CONTEXTMENU.ADD_PARTICLE_PROPERTY), _callback)
-      });
-      menu.append(item);
-      
-      options = [...ViewParticleSystem.TRANSFORMATION_KEYS, ...ViewParticleSystem.COLOR_KEYS];
-      item = new remote.MenuItem({ 
-        label: "Add Value", 
-        id: String(CONTEXTMENU.ADD_PARTICLE_CONSTANT_NAMED), 
-        submenu: generateSubMenu(options, String(CONTEXTMENU.ADD_PARTICLE_CONSTANT), _callback)
-      });
-      menu.append(item);
-
-      item = new remote.MenuItem({ 
-        label: "Add Function", 
-        id: String(CONTEXTMENU.ADD_PARTICLE_FUNCTION_NAMED), 
-        submenu: generateSubMenu(options, String(CONTEXTMENU.ADD_PARTICLE_FUNCTION), _callback)
       });
       menu.append(item);
 
@@ -156,7 +124,7 @@ namespace Fudge {
         case CONTEXTMENU.ADD_PARTICLE_FUNCTION:
           switch (Number(_item.id)) {
             case CONTEXTMENU.ADD_PARTICLE_PROPERTY:
-              child = _item.label == "mtxWorld" || _item.label == "mtxLocal" ? [] : {};
+              child = []; // _item.label == "mtxWorld" || _item.label == "mtxLocal" ? [] : {};
               break;
             case CONTEXTMENU.ADD_PARTICLE_CONSTANT:
               child = { value: 1 };
@@ -166,12 +134,14 @@ namespace Fudge {
               break;
           }
 
-          if (ƒ.ParticleData.isFunction(focus))
+          if (ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus))
             focus.parameters.push(<ƒ.ParticleData.Expression>child);
-          else if (ƒ.ParticleData.isTransformation(focus) || focus == this.data.color || focus == this.data) 
+          else if (focus == this.data) 
             focus[_item.label] = child;
           else if (focus == this.data.variables) 
             focus[`variable${Object.keys(focus).length}`] = child;
+          else if (focus == this.data.color)
+            this.data.color.push(<ƒ.ParticleData.Expression>child);
 
           this.controller.childToParent.set(child, focus);
           this.tree.findVisible(focus).expand(true);
@@ -182,8 +152,8 @@ namespace Fudge {
           break;
         case CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION:
           if (Array.isArray(focus)) {
-            child = { transformation: <ƒ.ParticleData.Transformation["transformation"]>_item.label };
-            focus.push(child);
+            child = { transformation: <ƒ.ParticleData.Transformation["transformation"]>_item.label, parameters: [] };
+            (<ƒ.ParticleData.Transformation[]>focus).push(child);
 
             this.tree.findVisible(focus).expand(true);
             this.tree.findVisible(child).focus();
