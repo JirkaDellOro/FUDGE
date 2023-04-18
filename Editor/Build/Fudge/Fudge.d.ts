@@ -677,6 +677,7 @@ declare namespace Fudge {
         private canvas;
         private graph;
         private nodeLight;
+        private redrawId;
         constructor(_container: ComponentContainer, _state: JsonValue);
         createUserInterface(): void;
         setGraph(_node: ƒ.Graph): void;
@@ -692,6 +693,7 @@ declare namespace Fudge {
         private hndPointer;
         private activeViewport;
         private redraw;
+        private setRenderContinously;
     }
 }
 declare namespace Fudge {

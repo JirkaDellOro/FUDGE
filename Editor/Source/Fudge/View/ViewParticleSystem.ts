@@ -49,7 +49,7 @@ namespace Fudge {
         popup = true;
       }
       
-      if (focus == this.data.variables || ƒ.ParticleData.isFunction(focus) || focus == this.data.color || ƒ.ParticleData.isTransformation(focus)) {
+      if (focus == this.data.variables || focus == this.data.color || ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus)) {
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_CONSTANT)).visible = true;
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_FUNCTION)).visible = true;
         popup = true;
@@ -124,7 +124,7 @@ namespace Fudge {
         case CONTEXTMENU.ADD_PARTICLE_FUNCTION:
           switch (Number(_item.id)) {
             case CONTEXTMENU.ADD_PARTICLE_PROPERTY:
-              child = []; // _item.label == "mtxWorld" || _item.label == "mtxLocal" ? [] : {};
+              child = [];
               break;
             case CONTEXTMENU.ADD_PARTICLE_CONSTANT:
               child = { value: 1 };
@@ -136,10 +136,15 @@ namespace Fudge {
 
           if (ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus))
             focus.parameters.push(<ƒ.ParticleData.Expression>child);
-          else if (focus == this.data) 
+          else if (focus == this.data) {
             focus[_item.label] = child;
-          else if (focus == this.data.variables) 
-            focus[`variable${Object.keys(focus).length}`] = child;
+            if (_item.label == "variables")
+              this.data.variableNames = [];
+          }
+          else if (focus == this.data.variables) {
+            this.data.variables.push(<ƒ.ParticleData.Expression>child);
+            this.data.variableNames.push(`variable${this.data.variables.length}`)
+          }
           else if (focus == this.data.color)
             this.data.color.push(<ƒ.ParticleData.Expression>child);
 
@@ -239,6 +244,7 @@ namespace Fudge {
     }
     //#endregion
 
+    //#region toolbar
     private createToolbar(): void {
       this.toolbar = document.createElement("div");
       this.toolbar.id = "toolbar";
@@ -339,6 +345,8 @@ namespace Fudge {
       playButton.id = _timeScale == 0 ? "play" : "pause";
     }
 
+    //#endregion
+
     private setParticleSystem(_particleSystem: ƒ.ParticleSystem): void {
       if (!_particleSystem) {
         this.particleSystem = undefined;
@@ -411,7 +419,7 @@ namespace Fudge {
     private refreshVariables(): void {
       let options: string[] = Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES);
       if (this.data.variables)
-        options.push(...Object.keys(this.data.variables));
+        options.push(...this.data.variableNames);
       this.variables.innerHTML = options.map(_name => `<option value="${_name}">`).join("");
     }
   }

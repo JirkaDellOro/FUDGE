@@ -6,13 +6,14 @@ namespace FudgeCore {
   export namespace ParticleData {
 
     export interface System {
-      variables?: { [name: string]: Expression };
+      variableNames?: string[];
+      variables?: Expression[]; //{ [name: string]: Expression };
       color?: Expression[];
       mtxLocal?: Transformation[];
       mtxWorld?: Transformation[];
     }
     
-    export type Recursive = System | System["variables"] | Expression[] | Transformation[] | Transformation | Expression;
+    export type Recursive = System | Expression[] | Transformation[] | Transformation | Expression;
 
     export type Expression = Function | Variable | Constant;
 
@@ -39,19 +40,19 @@ namespace FudgeCore {
     }
 
     export function isFunction(_data: Recursive): _data is Function {
-      return "function" in _data;
+      return typeof _data == "object" && "function" in _data;
     }
 
     export function isVariable(_data: Recursive): _data is Variable {
-      return "value" in _data && typeof _data.value == "string";
+      return typeof _data == "object" && "value" in _data && typeof _data.value == "string";
     }
 
     export function isConstant(_data: Recursive): _data is Constant {
-      return "value" in _data && typeof _data.value == "number";
+      return typeof _data == "object" && "value" in _data && typeof _data.value == "number";
     }
 
     export function isTransformation(_data: Recursive): _data is Transformation {
-      return "transformation" in _data;
+      return typeof _data == "object" && "transformation" in _data;
     }
   }
 

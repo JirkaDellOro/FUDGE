@@ -689,7 +689,6 @@ declare namespace FudgeCore {
         static decorate(_constructor: Function): void;
         static getVertexShaderSource(this: ShaderParticleSystem): string;
         static getFragmentShaderSource(this: ShaderParticleSystem): string;
-        private static renameVariables;
         private static generateVariables;
         private static generateTransformations;
         private static generateColor;
@@ -4246,14 +4245,13 @@ declare namespace FudgeCore {
      */
     namespace ParticleData {
         interface System {
-            variables?: {
-                [name: string]: Expression;
-            };
+            variableNames?: string[];
+            variables?: Expression[];
             color?: Expression[];
             mtxLocal?: Transformation[];
             mtxWorld?: Transformation[];
         }
-        type Recursive = System | System["variables"] | Expression[] | Transformation[] | Transformation | Expression;
+        type Recursive = System | Expression[] | Transformation[] | Transformation | Expression;
         type Expression = Function | Variable | Constant;
         interface Function {
             function: FUNCTION;

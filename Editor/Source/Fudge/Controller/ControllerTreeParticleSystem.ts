@@ -3,7 +3,7 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
 
   const enum ID {
-    KEY = "key",
+    NAME = "name",
     FUNCTION = "function",
     VALUE = "value",
     TRANSFORMATION = "transformation"
@@ -27,8 +27,8 @@ namespace Fudge {
         let input: HTMLInputElement = document.createElement("input");
         input.type = "text";
         input.disabled = true;
-        input.value = key;
-        input.id = ID.KEY;
+        input.value = this.data.variableNames[key];
+        input.id = ID.NAME;
         content.appendChild(input);
       }
 
@@ -92,32 +92,23 @@ namespace Fudge {
     public rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): void {
       let inputAsNumber: number = Number.parseFloat(_new);
 
-      if (_id == ID.KEY && ƒ.ParticleData.isExpression(_data)) {
-        let parentData: ƒ.ParticleData.Recursive = this.childToParent.get(_data);
-        let key: string = this.getKey(_data, parentData);
-        let target: Object = ƒ.ParticleData.isFunction(parentData) ? parentData.parameters : parentData;
-        
-        if (parentData == this.data.variables) {
-          let errors: string[] = [];
-          if (this.isReferenced(key))
-            errors.push(`variable "${key}" is still referenced`);
-          if (this.data.variables[_new])
-            errors.push(`variable "${_new}" already exists`);
-          if (ƒ.ParticleData.PREDEFINED_VARIABLES[_new])
-            errors.push(`variable "${_new}" is a predefined variable and can not be redeclared. Predefined variables: [${Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES).join(", ")}]`);
-          if (errors.length > 0) {
-            ƒui.Warning.display(errors, "Unable to rename", "Please resolve the errors and try again" );
-            return;
-          }
+      if (_id == ID.NAME && ƒ.ParticleData.isExpression(_data)) {
+        let index: number = this.data.variables.findIndex(_variable => _data);
+        let name: string = this.data.variableNames[index];
+        let errors: string[] = [];
+        if (this.isReferenced(name))
+          errors.push(`variable "${name}" is still referenced`);
+        if (this.data.variables.find(_variable => name == _new))
+          errors.push(`variable "${_new}" already exists`);
+        if (ƒ.ParticleData.PREDEFINED_VARIABLES[_new])
+          errors.push(`variable "${_new}" is a predefined variable and can not be redeclared. Predefined variables: [${Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES).join(", ")}]`);
+        if (errors.length > 0) {
+          ƒui.Warning.display(errors, "Unable to rename", "Please resolve the errors and try again" );
+          return;
         }
-
-        if (target[_new])
-          target[key] = target[_new];
-        else 
-          delete target[key];
-        target[_new] = _data;
-
-        return;
+        
+        this.data.variableNames[index] = _new;
+        return
       }
 
       if (_id == ID.FUNCTION && ƒ.ParticleData.isFunction(_data)) {
@@ -132,7 +123,7 @@ namespace Fudge {
 
       if (_id == ID.VALUE && (ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data))) {
         let input: string | number = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
-        if (typeof input == "string" && !ƒ.ParticleData.PREDEFINED_VARIABLES[input] && (this.data.variables && !this.data.variables[input])) 
+        if (typeof input == "string" && !ƒ.ParticleData.PREDEFINED_VARIABLES[input] && this.data.variableNames && !this.data.variableNames.includes(input)) 
           return;
         _data.value = input;
 
@@ -151,21 +142,20 @@ namespace Fudge {
         return [];
 
       let children: ƒ.ParticleData.Recursive[] = [];
-      let subData: Object = ƒ.ParticleData.isFunction(_data) || ƒ.ParticleData.isTransformation(_data) ? _data.parameters : _data;
-      let subKeys: string[] = Object.keys(subData);
+      let data: Object = "parameters" in _data ? _data.parameters : _data;
+      let keys: string[] = Object.keys(data);
 
-      // sort keys for root, color and vector e.g. ("r", "g", "b", "a")
-      if (_data == this.data)
-        subKeys = ViewParticleSystem.PROPERTY_KEYS.filter(_key => subKeys.includes(_key));
+      if (data == this.data)
+        keys = ViewParticleSystem.PROPERTY_KEYS.filter(_key => keys.includes(_key));
 
-      subKeys.forEach(_key => {
-        let child: ƒ.ParticleData.Recursive = subData[_key];
+      keys.forEach(_key => {
+        let child: ƒ.ParticleData.Recursive = data[_key];
         if (ƒ.ParticleData.isExpression(child) || typeof child == "object") {
           children.push(child);
-          this.childToParent.set(subData[_key], _data);
+          this.childToParent.set(data[_key], _data);
         }
       });
-
+  
       return children;
     }
 
@@ -182,22 +172,24 @@ namespace Fudge {
     }
 
     public addChildren(_children: ƒ.ParticleData.Recursive[], _target: ƒ.ParticleData.Recursive, _at?: number): ƒ.ParticleData.Recursive[] {
-      let move: ƒ.ParticleData.Expression[] = [];
+      let move: ƒ.ParticleData.Recursive[] = [];
       let container: Object;
+
       if ((ƒ.ParticleData.isFunction(_target) || ƒ.ParticleData.isTransformation(_target)) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
         container = _target.parameters;
-      else if (Array.isArray(_target) && _children.every(_data => ƒ.ParticleData.isTransformation(_data)))
+      else if ((_target == this.data.mtxLocal || _target == this.data.mtxWorld) && _children.every(_data => ƒ.ParticleData.isTransformation(_data)))
         container = _target;
-      else if ((_target == this.data.color || _target == this.data.variables) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
+      else if ((_target == this.data.variables || _target == this.data.color) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
         container = _target;
 
       if (!container) 
         return move;
 
-      if (Array.isArray(container)) 
-        for (let data of (<ƒ.ParticleData.Expression[]>_children)) {
+      if (Array.isArray(container))
+        for (let data of _children) {
           let index: number = container.indexOf(data); // _at needs to be corrected if we are moving within same parent
           let hasParent: boolean = this.childToParent.has(data);
+          let name: string = this.data.variableNames[index];
           if (hasParent && !this.deleteData(data)) continue;
           if (!hasParent)
             data = JSON.parse(JSON.stringify(data));
@@ -206,29 +198,15 @@ namespace Fudge {
           this.childToParent.set(data, _target);
           if (index > -1 && _at > index)
             _at -= 1;
-          if (_at == null) 
+          if (_at == null) {
             container.push(data);
-          else 
+            if (container == this.data.variables)
+              this.data.variableNames.push(`variable${this.data.variables.length}`);
+          } else {
             container.splice(_at + _children.indexOf(data), 0, data);
-        } 
-      else
-        for (let data of (<ƒ.ParticleData.Expression[]>_children)) {
-          let usedKeys: string[] = Object.keys(_target);
-          let newKey: string;
-          if (_target == this.data.variables && this.getKey(data, _target) == null) 
-            newKey = `variable${usedKeys.length}`;
-          if (newKey == null) 
-            continue;
-
-          let hasParent: boolean = this.childToParent.has(data);
-          if (hasParent && !this.deleteData(data)) 
-            continue;
-          if (!hasParent)
-            data = JSON.parse(JSON.stringify(data));
-
-          _target[newKey] = data;
-          move.push(data);
-          this.childToParent.set(data, _target);
+            if (container == this.data.variables)
+              this.data.variableNames.splice(_at + _children.indexOf(data), 0, name);
+          }
         }
       return move;
     }
@@ -269,15 +247,19 @@ namespace Fudge {
         return false;
       }
 
-      if (parentData == this.data.variables && this.isReferenced(key)) {
-        ƒui.Warning.display([`variable "${key}" is still referenced`], "Unable to delete", "Please resolve the errors and try again");
+      let name: string = this.data.variableNames[key];
+      if (parentData == this.data.variables && this.isReferenced(name)) {
+        ƒui.Warning.display([`variable "${name}" is still referenced`], "Unable to delete", "Please resolve the errors and try again");
         return false;
       }
 
       if (ƒ.ParticleData.isFunction(parentData) || ƒ.ParticleData.isTransformation(parentData)) 
         parentData.parameters.splice(index, 1);
-      else if (Array.isArray(parentData)) 
+      else if (Array.isArray(parentData)) {
         parentData.splice(index, 1);
+        if (parentData == this.data.variables)
+          this.data.variableNames.splice(index, 1);
+      }
       else 
         delete parentData[key];
       
@@ -288,7 +270,8 @@ namespace Fudge {
     private isReferenced(_name: string, _data: ƒ.ParticleData.Recursive = this.data): boolean {
       if (ƒ.ParticleData.isVariable(_data) && _data.value == _name) 
         return true;
-      for (const subData of Object.values(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data)) 
+      
+      for (const subData of Object.values("parameters" in _data ? _data.parameters : _data)) 
         if (typeof subData == "object" && this.isReferenced(_name, subData))
           return true;
         

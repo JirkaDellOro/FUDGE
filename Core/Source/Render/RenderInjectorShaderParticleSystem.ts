@@ -94,13 +94,13 @@ namespace FudgeCore {
     }
 
     public static getVertexShaderSource(this: ShaderParticleSystem): string {
-      let data: ParticleData.System = RenderInjectorShaderParticleSystem.renameVariables(this.data);
+      let data: ParticleData.System = this.data;
       let mtxLocal: ParticleData.Transformation[] = data?.mtxLocal;
       let mtxWorld: ParticleData.Transformation[] = data?.mtxWorld;
 
       let source: string = this.vertexShaderSource
         .replace("#version 300 es", `#version 300 es\n#define ${this.define[0]}${data.color ? "\n#define PARTICLE_COLOR" : ""}`)
-        .replace("/*$variables*/", RenderInjectorShaderParticleSystem.generateVariables(data?.variables))
+        .replace("/*$variables*/", RenderInjectorShaderParticleSystem.generateVariables(data?.variables, data?.variableNames))
         .replace("/*$mtxLocal*/", RenderInjectorShaderParticleSystem.generateTransformations(mtxLocal, "Local"))
         .replace("/*$mtxLocal*/", mtxLocal && mtxLocal.length > 0 ? "* mtxLocal" : "")
         .replace("/*$mtxWorld*/", RenderInjectorShaderParticleSystem.generateTransformations(mtxWorld, "World"))
@@ -114,42 +114,13 @@ namespace FudgeCore {
     }
     
     //#region code generation
-    private static renameVariables(_data: ParticleData.System): ParticleData.System {
-      let variableMap: {[key: string]: string} = {};
-      if (_data.variables)
-        Object.keys(_data.variables).forEach((_variableName, _index) => {
-          if (ParticleData.PREDEFINED_VARIABLES[_variableName])
-            throw `Error in ${ParticleSystem.name}: "${_variableName}" is a predefined variable and can not be redeclared`;
-          else
-            return variableMap[_variableName] = `fVariable${_index}`; 
-        });
 
-      let dataRenamed: ParticleData.System = JSON.parse(JSON.stringify(_data));
-      if (_data.variables)
-        dataRenamed.variables = Object.fromEntries(Object.entries(dataRenamed.variables).map(([_name, _exrpession]) => [variableMap[_name], _exrpession]));
-      renameRecursive(dataRenamed);
-      return dataRenamed;
-
-      function renameRecursive(_data: ParticleData.Recursive): void {
-        if (ParticleData.isVariable(_data)) {
-          let newName: string = ParticleData.PREDEFINED_VARIABLES[_data.value] || variableMap[_data.value];
-          if (newName)
-            _data.value = newName;
-          else
-            throw `Error in ${ParticleSystem.name}: "${newName}" is not a defined variable`;
-        } else 
-          for (const subData of Object.values(ParticleData.isFunction(_data) ? _data.parameters : _data)) 
-            if (typeof subData == "object")
-              renameRecursive(subData);
-      }
-    } 
-
-    private static generateVariables(_variables: {[name: string]: ParticleData.Expression}): string {
+    private static generateVariables(_variables: ParticleData.System["variables"], _variableNames: ParticleData.System["variableNames"]): string {
       if (!_variables) return "";
       
-      return Object.entries(_variables)
-        .map(([_variableName, _expressionTree]): [string, string] => [_variableName, RenderInjectorShaderParticleSystem.generateExpression(_expressionTree)])
-        .map(([_variableName, _code]): string => `float ${_variableName} = ${_code};`)
+      return _variables
+        .map((_variable, _index) => ({ name: "fParticleSystemVariable_" + _variableNames[_index], value: RenderInjectorShaderParticleSystem.generateExpression(_variable)}))
+        .map(_variable => `float ${_variable.name} = ${_variable.value};`)
         .reduce((_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "");
     }
 
@@ -242,7 +213,7 @@ namespace FudgeCore {
       }
   
       if (ParticleData.isVariable(_expression)) {
-        return _expression.value;
+        return "fParticleSystemVariable_" + _expression.value;
       } 
   
       if (ParticleData.isConstant(_expression)) {

@@ -1744,8 +1744,8 @@ var Fudge;
                 let input = document.createElement("input");
                 input.type = "text";
                 input.disabled = true;
-                input.value = key;
-                input.id = "key" /* KEY */;
+                input.value = this.data.variableNames[key];
+                input.id = "name" /* NAME */;
                 content.appendChild(input);
             }
             if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) {
@@ -1804,28 +1804,21 @@ var Fudge;
         }
         rename(_data, _id, _new) {
             let inputAsNumber = Number.parseFloat(_new);
-            if (_id == "key" /* KEY */ && ƒ.ParticleData.isExpression(_data)) {
-                let parentData = this.childToParent.get(_data);
-                let key = this.getKey(_data, parentData);
-                let target = ƒ.ParticleData.isFunction(parentData) ? parentData.parameters : parentData;
-                if (parentData == this.data.variables) {
-                    let errors = [];
-                    if (this.isReferenced(key))
-                        errors.push(`variable "${key}" is still referenced`);
-                    if (this.data.variables[_new])
-                        errors.push(`variable "${_new}" already exists`);
-                    if (ƒ.ParticleData.PREDEFINED_VARIABLES[_new])
-                        errors.push(`variable "${_new}" is a predefined variable and can not be redeclared. Predefined variables: [${Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES).join(", ")}]`);
-                    if (errors.length > 0) {
-                        ƒui.Warning.display(errors, "Unable to rename", "Please resolve the errors and try again");
-                        return;
-                    }
+            if (_id == "name" /* NAME */ && ƒ.ParticleData.isExpression(_data)) {
+                let index = this.data.variables.findIndex(_variable => _data);
+                let name = this.data.variableNames[index];
+                let errors = [];
+                if (this.isReferenced(name))
+                    errors.push(`variable "${name}" is still referenced`);
+                if (this.data.variables.find(_variable => name == _new))
+                    errors.push(`variable "${_new}" already exists`);
+                if (ƒ.ParticleData.PREDEFINED_VARIABLES[_new])
+                    errors.push(`variable "${_new}" is a predefined variable and can not be redeclared. Predefined variables: [${Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES).join(", ")}]`);
+                if (errors.length > 0) {
+                    ƒui.Warning.display(errors, "Unable to rename", "Please resolve the errors and try again");
+                    return;
                 }
-                if (target[_new])
-                    target[key] = target[_new];
-                else
-                    delete target[key];
-                target[_new] = _data;
+                this.data.variableNames[index] = _new;
                 return;
             }
             if (_id == "function" /* FUNCTION */ && ƒ.ParticleData.isFunction(_data)) {
@@ -1838,7 +1831,7 @@ var Fudge;
             }
             if (_id == "value" /* VALUE */ && (ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data))) {
                 let input = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
-                if (typeof input == "string" && !ƒ.ParticleData.PREDEFINED_VARIABLES[input] && (this.data.variables && !this.data.variables[input]))
+                if (typeof input == "string" && !ƒ.ParticleData.PREDEFINED_VARIABLES[input] && this.data.variableNames && !this.data.variableNames.includes(input))
                     return;
                 _data.value = input;
                 return;
@@ -1853,16 +1846,15 @@ var Fudge;
             if (ƒ.ParticleData.isConstant(_data) || ƒ.ParticleData.isVariable(_data))
                 return [];
             let children = [];
-            let subData = ƒ.ParticleData.isFunction(_data) || ƒ.ParticleData.isTransformation(_data) ? _data.parameters : _data;
-            let subKeys = Object.keys(subData);
-            // sort keys for root, color and vector e.g. ("r", "g", "b", "a")
-            if (_data == this.data)
-                subKeys = Fudge.ViewParticleSystem.PROPERTY_KEYS.filter(_key => subKeys.includes(_key));
-            subKeys.forEach(_key => {
-                let child = subData[_key];
+            let data = "parameters" in _data ? _data.parameters : _data;
+            let keys = Object.keys(data);
+            if (data == this.data)
+                keys = Fudge.ViewParticleSystem.PROPERTY_KEYS.filter(_key => keys.includes(_key));
+            keys.forEach(_key => {
+                let child = data[_key];
                 if (ƒ.ParticleData.isExpression(child) || typeof child == "object") {
                     children.push(child);
-                    this.childToParent.set(subData[_key], _data);
+                    this.childToParent.set(data[_key], _data);
                 }
             });
             return children;
@@ -1883,9 +1875,9 @@ var Fudge;
             let container;
             if ((ƒ.ParticleData.isFunction(_target) || ƒ.ParticleData.isTransformation(_target)) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
                 container = _target.parameters;
-            else if (Array.isArray(_target) && _children.every(_data => ƒ.ParticleData.isTransformation(_data)))
+            else if ((_target == this.data.mtxLocal || _target == this.data.mtxWorld) && _children.every(_data => ƒ.ParticleData.isTransformation(_data)))
                 container = _target;
-            else if ((_target == this.data.color || _target == this.data.variables) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
+            else if ((_target == this.data.variables || _target == this.data.color) && _children.every(_data => ƒ.ParticleData.isExpression(_data)))
                 container = _target;
             if (!container)
                 return move;
@@ -1893,6 +1885,7 @@ var Fudge;
                 for (let data of _children) {
                     let index = container.indexOf(data); // _at needs to be corrected if we are moving within same parent
                     let hasParent = this.childToParent.has(data);
+                    let name = this.data.variableNames[index];
                     if (hasParent && !this.deleteData(data))
                         continue;
                     if (!hasParent)
@@ -1901,27 +1894,16 @@ var Fudge;
                     this.childToParent.set(data, _target);
                     if (index > -1 && _at > index)
                         _at -= 1;
-                    if (_at == null)
+                    if (_at == null) {
                         container.push(data);
-                    else
+                        if (container == this.data.variables)
+                            this.data.variableNames.push(`variable${this.data.variables.length}`);
+                    }
+                    else {
                         container.splice(_at + _children.indexOf(data), 0, data);
-                }
-            else
-                for (let data of _children) {
-                    let usedKeys = Object.keys(_target);
-                    let newKey;
-                    if (_target == this.data.variables && this.getKey(data, _target) == null)
-                        newKey = `variable${usedKeys.length}`;
-                    if (newKey == null)
-                        continue;
-                    let hasParent = this.childToParent.has(data);
-                    if (hasParent && !this.deleteData(data))
-                        continue;
-                    if (!hasParent)
-                        data = JSON.parse(JSON.stringify(data));
-                    _target[newKey] = data;
-                    move.push(data);
-                    this.childToParent.set(data, _target);
+                        if (container == this.data.variables)
+                            this.data.variableNames.splice(_at + _children.indexOf(data), 0, name);
+                    }
                 }
             return move;
         }
@@ -1956,14 +1938,18 @@ var Fudge;
                 ƒui.Warning.display([`property "${key}" still has children`], "Unable to delete", "Please resolve the errors and try again");
                 return false;
             }
-            if (parentData == this.data.variables && this.isReferenced(key)) {
-                ƒui.Warning.display([`variable "${key}" is still referenced`], "Unable to delete", "Please resolve the errors and try again");
+            let name = this.data.variableNames[key];
+            if (parentData == this.data.variables && this.isReferenced(name)) {
+                ƒui.Warning.display([`variable "${name}" is still referenced`], "Unable to delete", "Please resolve the errors and try again");
                 return false;
             }
             if (ƒ.ParticleData.isFunction(parentData) || ƒ.ParticleData.isTransformation(parentData))
                 parentData.parameters.splice(index, 1);
-            else if (Array.isArray(parentData))
+            else if (Array.isArray(parentData)) {
                 parentData.splice(index, 1);
+                if (parentData == this.data.variables)
+                    this.data.variableNames.splice(index, 1);
+            }
             else
                 delete parentData[key];
             this.childToParent.delete(_data);
@@ -1972,7 +1958,7 @@ var Fudge;
         isReferenced(_name, _data = this.data) {
             if (ƒ.ParticleData.isVariable(_data) && _data.value == _name)
                 return true;
-            for (const subData of Object.values(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data))
+            for (const subData of Object.values("parameters" in _data ? _data.parameters : _data))
                 if (typeof subData == "object" && this.isReferenced(_name, subData))
                     return true;
             return false;
@@ -2362,7 +2348,7 @@ var Fudge;
                     .forEach(_label => item.submenu.items.find(_item => _item.label == _label).visible = true);
                 popup = true;
             }
-            if (focus == this.data.variables || ƒ.ParticleData.isFunction(focus) || focus == this.data.color || ƒ.ParticleData.isTransformation(focus)) {
+            if (focus == this.data.variables || focus == this.data.color || ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus)) {
                 this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT)).visible = true;
                 this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION)).visible = true;
                 popup = true;
@@ -2423,7 +2409,7 @@ var Fudge;
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION:
                     switch (Number(_item.id)) {
                         case Fudge.CONTEXTMENU.ADD_PARTICLE_PROPERTY:
-                            child = []; // _item.label == "mtxWorld" || _item.label == "mtxLocal" ? [] : {};
+                            child = [];
                             break;
                         case Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT:
                             child = { value: 1 };
@@ -2434,10 +2420,15 @@ var Fudge;
                     }
                     if (ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus))
                         focus.parameters.push(child);
-                    else if (focus == this.data)
+                    else if (focus == this.data) {
                         focus[_item.label] = child;
-                    else if (focus == this.data.variables)
-                        focus[`variable${Object.keys(focus).length}`] = child;
+                        if (_item.label == "variables")
+                            this.data.variableNames = [];
+                    }
+                    else if (focus == this.data.variables) {
+                        this.data.variables.push(child);
+                        this.data.variableNames.push(`variable${this.data.variables.length}`);
+                    }
                     else if (focus == this.data.color)
                         this.data.color.push(child);
                     this.controller.childToParent.set(child, focus);
@@ -2531,6 +2522,7 @@ var Fudge;
             }
         };
         //#endregion
+        //#region toolbar
         createToolbar() {
             this.toolbar = document.createElement("div");
             this.toolbar.id = "toolbar";
@@ -2620,6 +2612,7 @@ var Fudge;
             let playButton = this.toolbar.querySelector("#play") || this.toolbar.querySelector("#pause");
             playButton.id = _timeScale == 0 ? "play" : "pause";
         }
+        //#endregion
         setParticleSystem(_particleSystem) {
             if (!_particleSystem) {
                 this.particleSystem = undefined;
@@ -2686,7 +2679,7 @@ var Fudge;
         refreshVariables() {
             let options = Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES);
             if (this.data.variables)
-                options.push(...Object.keys(this.data.variables));
+                options.push(...this.data.variableNames);
             this.variables.innerHTML = options.map(_name => `<option value="${_name}">`).join("");
         }
     }
@@ -4211,6 +4204,7 @@ var Fudge;
         canvas;
         graph;
         nodeLight = new ƒ.Node("Illumination"); // keeps light components for dark graphs
+        redrawId;
         constructor(_container, _state) {
             super(_container, _state);
             this.graph = ƒ.Project.resources[_state["graph"]];
@@ -4229,16 +4223,13 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.ANIMATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             // this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
             // this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("pointermove", this.hndPointer);
             this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move
-            window.setInterval(() => {
-                if (this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.RENDER_CONTINUOUSLY)).checked)
-                    this.redraw();
-            }, 1000 / 30);
         }
         createUserInterface() {
             ƒAid.addStandardLightComponents(this.nodeLight);
@@ -4249,7 +4240,11 @@ var Fudge;
             document.body.appendChild(this.canvas);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
-            this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+            try {
+                this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+            }
+            catch (_error) { }
+            ; // view should load even if rendering fails...
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             this.viewport.addEventListener("renderPrepareStart" /* RENDER_PREPARE_START */, this.hndPrepare);
             this.setGraph(null);
@@ -4322,6 +4317,9 @@ var Fudge;
                 case String(Fudge.CONTEXTMENU.ORTHGRAPHIC_CAMERA):
                     let on = this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ORTHGRAPHIC_CAMERA)).checked;
                     this.setCameraOrthographic(on);
+                    break;
+                case String(Fudge.CONTEXTMENU.RENDER_CONTINUOUSLY):
+                    this.setRenderContinously(this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.RENDER_CONTINUOUSLY)).checked);
                     break;
             }
         }
@@ -4402,6 +4400,10 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.MODIFY:
                 case Fudge.EVENT_EDITOR.ANIMATE:
                     this.redraw();
+                    break;
+                case Fudge.EVENT_EDITOR.CLOSE:
+                    this.setRenderContinously(false);
+                    break;
             }
         };
         hndPick = (_event) => {
@@ -4445,10 +4447,23 @@ var Fudge;
                 // ƒ.Physics.connectJoints();
             }
             catch (_error) {
+                this.setRenderContinously(false);
                 // console.error(_error);
                 //nop
             }
         };
+        setRenderContinously(_on) {
+            if (_on) {
+                this.redrawId = window.setInterval(() => {
+                    this.redraw();
+                }, 1000 / 30);
+            }
+            else {
+                window.clearInterval(this.redrawId);
+                this.redrawId = null;
+            }
+            this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.RENDER_CONTINUOUSLY)).checked = _on;
+        }
     }
     Fudge.ViewRender = ViewRender;
 })(Fudge || (Fudge = {}));
