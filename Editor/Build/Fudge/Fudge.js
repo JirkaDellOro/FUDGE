@@ -2496,6 +2496,7 @@ var Fudge;
                 case "cut" /* CUT */: // TODO: customs trees cut is async, this should happen after cut is finished
                 case "paste" /* PASTE */:
                     this.refreshVariables();
+                case "expand" /* EXPAND */:
                     let invalid = this.validateData(this.data);
                     this.errors
                         .filter(_error => !invalid.includes(_error))
@@ -2513,6 +2514,8 @@ var Fudge;
                     else {
                         this.errors.forEach(([_data, _error]) => {
                             let item = this.tree.findVisible(_data);
+                            if (!item)
+                                return;
                             item.classList.add("invalid");
                             item.title = _error;
                         });
@@ -2636,7 +2639,7 @@ var Fudge;
             this.tree.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.tree.addEventListener("cut" /* CUT */, this.hndEvent);
             this.tree.addEventListener("paste" /* PASTE */, this.hndEvent);
-            this.tree.addEventListener("drop" /* DROP */, this.hndEvent);
+            this.tree.addEventListener("expand" /* EXPAND */, this.hndEvent);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.appendChild(this.tree);
             this.dom.title = `● Right click on "${ƒ.ParticleSystem.name}" to add properties.\n● Right click on properties to add transformations/expressions.\n● Right click on transformations/expressions to add expressions.\n● Use Copy/Cut/Paste to duplicate data.`;

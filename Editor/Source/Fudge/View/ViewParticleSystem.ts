@@ -219,6 +219,7 @@ namespace Fudge {
         case ƒui.EVENT.CUT: // TODO: customs trees cut is async, this should happen after cut is finished
         case ƒui.EVENT.PASTE:
           this.refreshVariables();
+        case ƒui.EVENT.EXPAND:
           let invalid: [ƒ.ParticleData.Expression, string][] = this.validateData(this.data);
           this.errors
             .filter(_error => !invalid.includes(_error))
@@ -234,6 +235,7 @@ namespace Fudge {
           } else {
             this.errors.forEach(([_data, _error]) => {
               let item: ƒui.CustomTreeItem<ƒ.ParticleData.Recursive> = this.tree.findVisible(_data);
+              if (!item) return;
               item.classList.add("invalid");
               item.title = _error;
             });
@@ -371,7 +373,7 @@ namespace Fudge {
       this.tree.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.CUT, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.PASTE, this.hndEvent);
-      this.tree.addEventListener(ƒui.EVENT.DROP, this.hndEvent);
+      this.tree.addEventListener(ƒui.EVENT.EXPAND, this.hndEvent);
       this.tree.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.appendChild(this.tree);
       this.dom.title = `● Right click on "${ƒ.ParticleSystem.name}" to add properties.\n● Right click on properties to add transformations/expressions.\n● Right click on transformations/expressions to add expressions.\n● Use Copy/Cut/Paste to duplicate data.`;

@@ -225,6 +225,8 @@ namespace FudgeCore {
     }
   
     private static generateFunction(_function: ParticleData.FUNCTION, _parameters: string[]): string {
+      if (_parameters.length < ParticleData.FUNCTION_MINIMUM_PARAMETERS[_function])
+        throw `Error in ${ParticleSystem.name}: "${_function}" needs at least ${ParticleData.FUNCTION_MINIMUM_PARAMETERS[_function]} parameters`;
       if (Object.values(ParticleData.FUNCTION).includes(_function))
         return RenderInjectorShaderParticleSystem.FUNCTIONS[_function](_parameters);
       else
