@@ -12412,6 +12412,23 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    class ShaderPhongTextured extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatRemissiveTextured; }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
+        }
+    }
+    ShaderPhongTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderPhongTextured);
+    ShaderPhongTextured.define = [
+        "LIGHT",
+        "TEXTURE",
+        "CAMERA",
+        "PHONG"
+    ];
+    FudgeCore.ShaderPhongTextured = ShaderPhongTextured;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
     class ShaderPick extends FudgeCore.Shader {
         static getVertexShaderSource() {
             return this.insertDefines(FudgeCore.shaderSources["ShaderPick.vert"], this.define);
