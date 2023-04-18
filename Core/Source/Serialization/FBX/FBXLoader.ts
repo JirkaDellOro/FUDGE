@@ -86,16 +86,22 @@ namespace FudgeCore {
       if (!this.#nodes)
         this.#nodes = [];
       if (!this.#nodes[_index]) {
+        // create node with transform
         const modelFBX: FBX.Model = this.fbx.objects.models[_index].load();
         const node: Node = new Node(modelFBX.name);
-        node.addComponent(new ComponentTransform(Matrix4x4.CONSTRUCTION({
-          translation: this.getTransformVector(modelFBX.LclTranslation, Vector3.ZERO),
-          rotation: this.getTransformVector(modelFBX.LclRotation, Vector3.ZERO),
-          scaling: this.getTransformVector(modelFBX.LclScaling, Vector3.ONE)
-        })));
-        if (modelFBX.PreRotation != undefined) {
-          node.mtxLocal.rotate(modelFBX.PreRotation);
-        }
+        await this.generateTransform(modelFBX, node);
+        // node.addComponent(new ComponentTransform(Matrix4x4.CONSTRUCTION({
+        //   translation: this.getTransformVector(modelFBX.LclTranslation, Vector3.ZERO),
+        //   rotation: this.getTransformVector(modelFBX.LclRotation, Vector3.ZERO),
+        //   scaling: this.getTransformVector(modelFBX.LclScaling, Vector3.ONE)
+        // })));
+        // if (modelFBX.PreRotation)
+        //   node.mtxLocal.multiply(Matrix4x4.ROTATION(modelFBX.PreRotation), true);
+        // if (modelFBX.PostRotation)
+        //   node.mtxLocal.multiply(Matrix4x4.ROTATION(modelFBX.PostRotation));
+        this.#nodes[_index] = node;
+
+        // attach children and components
         if (modelFBX.children) for (const childFBX of modelFBX.children) {
           if (childFBX.type == "Model") {
             if (_root && childFBX.subtype == "LimbNode") {
@@ -117,10 +123,11 @@ namespace FudgeCore {
             if (mesh instanceof MeshSkin) {
               const skeleton: Skeleton = await this.getSkeleton(childFBX.children[0].children[0].children[0]); // Model.Deformer.SubDeformer.LimbNode
               cmpMesh.bindSkeleton(_root?.getChild(0) as SkeletonInstance || await SkeletonInstance.CREATE(skeleton));
-              if (!cmpMesh.skeleton.bindPose) cmpMesh.skeleton.bindPose = {};
               for (const subDeformerFBX of childFBX.children[0].children as FBX.SubDeformer[]) {
-                (cmpMesh.skeleton.bindPose[subDeformerFBX.children[0].name] = new Matrix4x4()).set(subDeformerFBX.TransformLink);
-                skeleton.mtxBindInverses[subDeformerFBX.children[0].name].set(subDeformerFBX.Transform);
+                const bone: Node = cmpMesh.skeleton.bones[subDeformerFBX.children[0].name];
+                bone.mtxLocal.set(subDeformerFBX.TransformLink);
+                if (bone.getParent())
+                  bone.mtxLocal.multiply(bone.getParent().mtxWorldInverse);
               }
               node.getComponent(ComponentMaterial).material = FBXLoader.defaultSkinMaterial;
             }
@@ -140,7 +147,6 @@ namespace FudgeCore {
               material;
           }
         }
-        this.#nodes[_index] = node;
       }
       return this.#nodes[_index];
     }
@@ -242,27 +248,144 @@ namespace FudgeCore {
           }
         } = { children: { "Skeleton0": { mtxBoneLocals: {} } } };
         for (const animNodeFBX of animNodesFBX) {
-          const target: FBX.Object = animNodeFBX.parents.find(parent => parent.type != "AnimLayer");
+          //if (animNodeFBX.name == "R") continue;
+          const target: FBX.Model = animNodeFBX.parents.find(parent => parent.type != "AnimLayer");
           (animStructure.children.Skeleton0.mtxBoneLocals[target.name] ||
             (animStructure.children.Skeleton0.mtxBoneLocals[target.name] = {}))[{
             T: "translation",
             R: "rotation",
             S: "scale"
-          }[animNodeFBX.name]] = this.getAnimationVector3(animNodeFBX);
+          }[animNodeFBX.name]] = this.getAnimationVector3(animNodeFBX, target);
         }
         this.#animations[_index] = new Animation(animStack.name, animStructure);
       }
       return this.#animations[_index];
     }
 
-    private getTransformVector(_vector: number | Vector3 | FBX.AnimCurveNode, _default: () => Vector3): Vector3 {
+    /**
+     * fetched from three.js, adapted to FUDGE and optimized
+     * https://github.com/mrdoob/three.js/blob/dev/examples/jsm/loaders/FBXLoader.js
+     * line 3950
+     */
+    private async generateTransform(_modelFBX: FBX.Model, _node: Node): Promise<void> {
+      const parentIndex: number = this.fbx.objects.models.indexOf(_modelFBX.parents.find(parent => parent.type == "Model"));
+      const parent: Node = parentIndex >= 0 ? await this.getNode(parentIndex) : undefined;
+      
+      const mtxLocalRotation: Matrix4x4 = _modelFBX.PreRotation || _modelFBX.LclRotation || _modelFBX.PostRotation ?
+        Matrix4x4.IDENTITY() :
+        undefined;
+      if (_modelFBX.PreRotation) {
+        mtxLocalRotation.rotate(this.getOrdered(_modelFBX.PreRotation, _modelFBX));
+      }
+      if (_modelFBX.LclRotation) {
+        mtxLocalRotation.rotate(this.getOrdered(this.getTransformVector(_modelFBX.LclRotation, Vector3.ZERO), _modelFBX));
+      }
+      if (_modelFBX.PostRotation) {
+        let mtxPostRotationInverse: Matrix4x4 = Matrix4x4.ROTATION(this.getOrdered(_modelFBX.PostRotation , _modelFBX));
+        mtxPostRotationInverse = Matrix4x4.INVERSION(mtxPostRotationInverse);
+        mtxLocalRotation.multiply(mtxPostRotationInverse);
+      }
+
+      const mtxLocalScaling: Matrix4x4 = _modelFBX.LclScaling ?
+        Matrix4x4.SCALING(this.getTransformVector(_modelFBX.LclScaling, Vector3.ONE)) :
+        undefined;
+
+      const mtxParentWorldRotation: Matrix4x4 = parent ? Matrix4x4.ROTATION(parent.mtxWorld.rotation) : undefined;
+
+      const mtxParentWorldScale: Matrix4x4 = parent ? (() => {
+        const mtxParentWorldScale: Matrix4x4 = Matrix4x4.INVERSION(mtxParentWorldRotation);
+        mtxParentWorldScale.translate(Vector3.SCALE(parent.mtxWorld.translation, -1));
+        mtxParentWorldScale.multiply(parent.mtxWorld);
+        return mtxParentWorldScale;
+      })() : undefined;
+
+      const mtxWorldRotationScale: Matrix4x4 = parent || mtxLocalRotation || mtxLocalScaling ? Matrix4x4.IDENTITY() : undefined;
+      if (parent || mtxLocalRotation || mtxLocalScaling) {
+        const inheritType: number = _modelFBX.InheritType || 0;
+        if (inheritType == 0) {
+          if (parent)
+            mtxWorldRotationScale.multiply(mtxParentWorldRotation);
+          if (mtxLocalRotation)
+            mtxWorldRotationScale.multiply(mtxLocalRotation);
+          if (parent)
+            mtxWorldRotationScale.multiply(mtxParentWorldScale);
+          if (mtxLocalScaling)
+            mtxWorldRotationScale.multiply(mtxLocalScaling);
+        } else if (inheritType == 1) {
+          if (parent) {
+            mtxWorldRotationScale.multiply(mtxParentWorldRotation);
+            mtxWorldRotationScale.multiply(mtxParentWorldScale);
+          }
+          if (mtxLocalRotation)
+            mtxWorldRotationScale.multiply(mtxLocalRotation);
+          if (mtxLocalScaling)
+            mtxWorldRotationScale.multiply(mtxLocalScaling);
+        } else {
+          if (parent)
+            mtxWorldRotationScale.multiply(mtxParentWorldRotation);
+          if (mtxLocalRotation)
+            mtxWorldRotationScale.multiply(mtxLocalRotation);
+          if (parent) {
+            mtxWorldRotationScale.multiply(mtxParentWorldScale);
+            let mtxParentLocalScalingInverse: Matrix4x4 = Matrix4x4.SCALING(parent.mtxLocal.scaling);
+            mtxParentLocalScalingInverse = Matrix4x4.INVERSION(mtxParentLocalScalingInverse);
+            mtxWorldRotationScale.multiply(mtxParentLocalScalingInverse);
+          }
+          if (mtxLocalScaling)
+            mtxWorldRotationScale.multiply(mtxLocalScaling);
+        }
+      }
+
+      // Calculate the local transform matrix
+      let translation: Vector3;
+      translation = Vector3.ZERO();
+      if (_modelFBX.LclTranslation)
+        translation.add(this.getTransformVector(_modelFBX.LclTranslation, Vector3.ZERO));
+      if (_modelFBX.RotationOffset)
+        translation.add(_modelFBX.RotationOffset);
+      if (_modelFBX.RotationPivot)
+        translation.add(_modelFBX.RotationPivot);
+      
+      const mtxTransform: Matrix4x4 = Matrix4x4.TRANSLATION(translation);
+      if (mtxLocalRotation)
+        mtxTransform.multiply(mtxLocalRotation);
+      
+      translation = Vector3.ZERO();
+      if (_modelFBX.RotationPivot)
+        translation.subtract(_modelFBX.RotationPivot);
+      if (_modelFBX.ScalingOffset)
+        translation.add(_modelFBX.ScalingOffset);
+      if (_modelFBX.ScalingPivot)
+        translation.add(_modelFBX.ScalingPivot);
+      mtxTransform.translate(translation);
+
+      if (mtxLocalScaling)
+        mtxTransform.multiply(mtxLocalScaling);
+      if (_modelFBX.ScalingPivot)
+        mtxTransform.translate(Vector3.SCALE(_modelFBX.ScalingPivot, -1));
+
+      const mtxWorldTranslation: Matrix4x4 = parent ?
+        Matrix4x4.TRANSLATION(Matrix4x4.MULTIPLICATION(
+          parent.mtxWorld,
+          Matrix4x4.TRANSLATION(mtxTransform.translation)
+        ).translation) :
+        Matrix4x4.TRANSLATION(mtxTransform.translation);
+
+      mtxTransform.set(mtxWorldTranslation);
+      mtxTransform.multiply(mtxWorldRotationScale);
+      _node.mtxWorld.set(mtxTransform);
+
+      if (parent)
+        mtxTransform.multiply(Matrix4x4.INVERSION(parent.mtxWorld), true);
+      _node.addComponent(new ComponentTransform(mtxTransform));
+    }
+
+    private getTransformVector(_vector: Vector3 | FBX.AnimCurveNode, _default: () => Vector3): Vector3 {
       return (
         _vector == undefined ?
           _default() :
         _vector instanceof Vector3 ?
           _vector :
-        typeof _vector == "number" ?
-          Vector3.ONE(_vector) :
           new Vector3(
             typeof (_vector = _vector.load()).dX == "number" ?
               _vector.dX :
@@ -277,7 +400,7 @@ namespace FudgeCore {
       );
     }
 
-    private getAnimationVector3(_animNode: FBX.AnimCurveNode): AnimationStructureVector3 {
+    private getAnimationVector3(_animNode: FBX.AnimCurveNode, _target: FBX.Model): AnimationStructureVector3 {
       const vectorSequence: AnimationStructureVector3 = {};
       for (const valueName in _animNode) if (valueName == "dX" || valueName == "dY" || valueName == "dZ") {
         const value: FBX.AnimCurve | number = _animNode[valueName];
@@ -286,12 +409,59 @@ namespace FudgeCore {
           for (let i: number = 0; i < value.KeyTime.length; ++i) {
             // According to the reference time is defined as a signed int64, unit being 1/46186158000 seconds
             // ref: https://archive.blender.org/wiki/index.php/User:Mont29/Foundation/FBX_File_Structure/#Some_Specific_Property_Types
-            sequence.addKey(new AnimationKey(Number((value.KeyTime[i] - value.KeyTime.reduce((min, v) => v < min ? v : min)) / BigInt("46186158")), value.KeyValueFloat[i]));
+            sequence.addKey(new AnimationKey(
+              Number((value.KeyTime[i] - value.KeyTime.reduce((min, v) => v < min ? v : min)) / BigInt("46186158")),
+              value.KeyValueFloat[i]
+            ));
           }
           vectorSequence[valueName[1].toLowerCase()] = sequence;
         }
       }
+
+      if (_animNode.name == "R" && (_target.PreRotation || _target.PostRotation)) {
+        const eulerOrder: string = _target.EulerOrder || "ZYX";
+        let preRotation: Quaternion;
+        if (_target.PreRotation) {
+          preRotation = Quaternion.FROM_EULER_ANGLES(_target.PreRotation, eulerOrder);
+        }
+        let postRotation: Quaternion;
+        if (_target.PostRotation) {
+          postRotation = Quaternion.FROM_EULER_ANGLES(_target.PostRotation, eulerOrder);
+        }
+        for (const componentName in vectorSequence) {
+          for (const key of (vectorSequence[componentName] as AnimationSequence).getKeys()) {
+            const rotation: Vector3 = Recycler.get(Vector3);
+            rotation.set(
+              vectorSequence.x?.evaluate(key.time) || 0,
+              vectorSequence.y?.evaluate(key.time) || 0,
+              vectorSequence.z?.evaluate(key.time) || 0
+            );
+            const q: Quaternion = Quaternion.FROM_EULER_ANGLES(rotation, eulerOrder);
+            if (_target.PreRotation)
+              q.multiply(preRotation, true);
+            if (_target.PostRotation)
+              q.multiply(postRotation);
+            // key.value = key.value + _target.PreRotation[componentName as "x"|"y"|"z"];
+            key.value = q.getEulerAngles(eulerOrder)[componentName as "x"|"y"|"z"];
+          }
+        }
+      }
+
       return vectorSequence;
+    }
+
+    private getOrdered(_rotation: Vector3, _modelFBX: FBX.Model): Vector3 {
+      if (!_modelFBX.EulerOrder)
+        return _rotation;
+      
+      const data: Float32Array = _rotation.get();
+      const result: Vector3 = Recycler.get(Vector3);
+      result.set(
+        data[_modelFBX.EulerOrder.indexOf("Z")],
+        data[_modelFBX.EulerOrder.indexOf("Y")],
+        data[_modelFBX.EulerOrder.indexOf("X")]
+      );
+      return result;
     }
 
   }

@@ -64,10 +64,17 @@ namespace FudgeCore.FBX {
 
   export interface Model extends ObjectBase {
     Version?: number;
-    LclTranslation?: number | Vector3 | AnimCurveNode;
-    LclRotation?: number | Vector3 | AnimCurveNode;
-    LclScaling?: number | Vector3 | AnimCurveNode;
+    LclTranslation?: Vector3 | AnimCurveNode;
+    LclRotation?: Vector3 | AnimCurveNode;
+    LclScaling?: Vector3 | AnimCurveNode;
     PreRotation?: Vector3;
+    PostRotation?: Vector3;
+    ScalingOffset?: Vector3;
+    ScalingPivot?: Vector3;
+    RotationOffset?: Vector3;
+    RotationPivot?: Vector3;
+    InheritType?: number;
+    EulerOrder?: string;
     currentUVSet?: string;
   }
 

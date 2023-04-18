@@ -306,7 +306,7 @@ namespace FudgeCore {
      */
     public getRotation(): Vector3 {
       let orientation: OIMO.Quat = this.#rigidbody.getOrientation();
-      let tmpQuat: Quaternion = new Quaternion(orientation.x, orientation.y, orientation.z, orientation.w);
+      let tmpQuat: PhysicsQuaternion = new PhysicsQuaternion(orientation.x, orientation.y, orientation.z, orientation.w);
       return tmpQuat.toDegrees();
     }
 

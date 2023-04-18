@@ -374,7 +374,7 @@ namespace FudgeCore {
       for (let i: number = 0; i < input.length; ++i) {
         const vector: { x: number, y: number, z: number } =
           _transformationType == "rotation" ?
-          new Quaternion(output[i * 4 + 0], output[i * 4 + 1], output[i * 4 + 2], output[i * 4 + 3]).toDegrees() :
+          new PhysicsQuaternion(output[i * 4 + 0], output[i * 4 + 1], output[i * 4 + 2], output[i * 4 + 3]).toDegrees() :
           { x: output[i * 3 + 0], y: output[i * 3 + 1], z: output[i * 3 + 2] };
 
         sequenceX.addKey(new AnimationKey(millisPerSecond * input[i], vector.x));

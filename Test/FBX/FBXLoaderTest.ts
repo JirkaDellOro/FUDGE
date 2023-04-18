@@ -13,7 +13,7 @@ namespace SkeletonTest {
   async function init(): Promise<void> {
     const canvas: HTMLCanvasElement = document.querySelector("canvas") as HTMLCanvasElement;
     // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./TriangularPrism.fbx");
-    const loader1: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./animated_arm.fbx");
+    // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./animated_arm.fbx");
     const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./Unarmed Walk Forward.fbx");
 
     // track mouse position relative to canvas center
@@ -29,18 +29,33 @@ namespace SkeletonTest {
     const scene: ƒ.Node = await loader.getScene(0);
     console.log(scene);
 
-    // const skeleton: ƒ.Node = scene.getChildrenByName("Skeleton0")[0];
-    // const meshBone: ƒ.Mesh = new ƒ.MeshRotation("bone", [
-    //   new ƒ.Vector2(1, 0),
-    //   new ƒ.Vector2(0, 0.2),
-    //   new ƒ.Vector2(0, 0)
-    // ]);
-    // const materialBone: ƒ.Material = new ƒ.Material("bone");
+    // let skeleton: ƒ.Node = scene;
+    // for (const node of scene)
+    //   if (node != scene && node.name == "Skeleton0")
+    //     skeleton = node;
+    // const meshBone: ƒ.Mesh = new ƒ.MeshRotation(
+    //   "bone",
+    //   [
+    //     new ƒ.Vector2(0, 5),
+    //     new ƒ.Vector2(1, 0),
+    //     new ƒ.Vector2(0, 0)
+    //   ],
+    //   3
+    // );
+    // const materialBone: ƒ.Material = new ƒ.Material("bone", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("green")));
     // for (const bone of skeleton) {
     //   if (bone != skeleton) {
     //     bone.addComponent(new ƒ.ComponentMesh(meshBone));
     //     bone.addComponent(new ƒ.ComponentMaterial(materialBone));
+    //     if (bone.getChild(0) /*&& bone.getChild(0).mtxLocal.translation.y >
+    //         Math.abs(bone.getChild(0).mtxLocal.translation.x) + Math.abs(bone.getChild(0).mtxLocal.translation.z)*/)
+    //       bone.getComponent(ƒ.ComponentMesh).mtxPivot.scaleY(bone.getChild(0).mtxLocal.translation.y);
     //   }
+    // }
+    // for (const node of scene) {
+    //   const cmpMaterial: ƒ.ComponentMaterial = node.getComponent(ƒ.ComponentMaterial);
+    //   if (cmpMaterial && cmpMaterial.material.name != "bone")
+    //     cmpMaterial.activate(false);
     // }
     
     // test loading all documents and objects
@@ -62,7 +77,7 @@ namespace SkeletonTest {
     camera.addComponent(new ƒ.ComponentCamera());
     camera.addComponent(new ƒ.ComponentTransform());
     camera.getComponent(ƒ.ComponentCamera).clrBackground.setHex("4472C4FF");
-    camera.mtxLocal.translateY(0);  // 80
+    rotatorX.mtxLocal.translateY(80);  // 80
     camera.mtxLocal.translateZ(300); // 30
     camera.mtxLocal.lookAt(ƒ.Vector3.Y(camera.mtxLocal.translation.y), camera.mtxLocal.getY());
     rotatorY.addChild(camera);

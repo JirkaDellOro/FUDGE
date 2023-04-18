@@ -3402,7 +3402,7 @@ declare namespace FudgeCore {
         /**
          * Sets the elements of this matrix to the values of the given matrix
          */
-        set(_mtxTo: Matrix4x4 | Float32Array): void;
+        set(_mtxTo: Matrix4x4 | ArrayLike<number>): void;
         toString(): string;
         /**
          * Return the elements of this matrix as a Float32Array
@@ -3519,6 +3519,97 @@ declare namespace FudgeCore {
         private static gradient;
         constructor(_random?: Function);
         sample: (_x: number, _y: number, _z: number, _w: number) => number;
+    }
+}
+declare namespace FudgeCore {
+    /**
+      * Storing and manipulating rotations in the form of quaternions.
+      * Constructed out of the 4 components: (x, y, z, w). Mathematical notation: w + xi + yj + zk.
+      * A Quaternion can be described with an axis and angle: (x, y, z) = sin(angle)*axis; w = cos(angle).
+      * roll: x, pitch: y, yaw: z. Note that operations are adapted to work with vectors where y is up and z is forward.
+      * @authors Matthias Roming, HFU, 2023
+      */
+    class Quaternion extends Mutable implements Serializable, Recycable {
+        #private;
+        private data;
+        private mutator;
+        constructor();
+        /**
+         * Retrieve a new identity quaternion
+         */
+        static IDENTITY(): Quaternion;
+        /**
+         * Constructs a new quaternion from the euler angles given
+         */
+        static FROM_EULER_ANGLES(_eulerAngles: Vector3, _order?: string): Quaternion;
+        /**
+         * Computes and returns the product of two passed quaternions.
+         * @param _mtxLeft The matrix to multiply.
+         * @param _mtxRight The matrix to multiply by.
+         */
+        static MULTIPLICATION(_qLeft: Quaternion, _qRight: Quaternion): Quaternion;
+        /**
+         * Computes and returns the inverse of a passed quaternion.
+         * @param _mtx The quaternion to compute the inverse of.
+         */
+        static INVERSION(_q: Quaternion): Quaternion;
+        /**
+         * Computes and returns the conjugate of a passed quaternion.
+         * @param _mtx The quaternion to compute the conjugate of.
+         */
+        static CONJUGATION(_q: Quaternion): Quaternion;
+        /**
+         * Experimental: Creates and returns a vector through transformation of the given vector by the given quaternion
+         */
+        static TRANSFORM_VECTOR(_v: Vector3, _q: Quaternion): Vector3;
+        /**
+         * Experimental: Converts the quaternion to a Matrix4x4
+         */
+        static QUATERNION_TO_MATRIX(_q: Quaternion): Matrix4x4;
+        /**
+         * Calculates and returns the euler-angles in degrees.
+         */
+        getEulerAngles(_order?: string): Vector3;
+        setFromEulerAngles(_eulerAngles: Vector3, _order?: string): void;
+        /**
+         * Return a copy of this
+         */
+        get clone(): Quaternion;
+        /**
+         * Resets the quaternion to the identity-quaternion and clears cache. Used by the recycler to reset.
+         */
+        recycle(): void;
+        /**
+         * Resets the quaternion to the identity-quaternion and clears cache.
+         */
+        reset(): void;
+        /**
+         * Inverse this quaternion
+         */
+        inverse(): void;
+        /**
+         * Conjugate this quaternion
+         */
+        conjugate(): void;
+        /**
+         * Multiply this quaternion with the given quaternion
+         */
+        multiply(_other: Quaternion, _fromLeft?: boolean): void;
+        /**
+         * Sets the elements of this quaternion to the values of the given quaternion
+         */
+        set(_qTo: Quaternion | ArrayLike<number>): void;
+        toString(): string;
+        /**
+         * Return the elements of this quaternion as a Float32Array
+         */
+        get(): Float32Array;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
+        mutate(_mutator: Mutator): Promise<void>;
+        protected reduceMutator(_mutator: Mutator): void;
+        private resetCache;
     }
 }
 declare namespace FudgeCore {
@@ -5214,7 +5305,7 @@ declare namespace FudgeCore {
       * Class mostly used internally to bridge the in FUDGE commonly used angles in degree to OimoPhysics quaternion system.
       * @authors Marko Fehrenbach, HFU, 2020
       */
-    class Quaternion extends Mutable {
+    class PhysicsQuaternion extends Mutable {
         private x;
         private y;
         private z;
@@ -5232,6 +5323,7 @@ declare namespace FudgeCore {
         /** Get/Set the Y component of the Quaternion. Imaginary Part */
         get W(): number;
         set W(_w: number);
+        multiply(_other: PhysicsQuaternion, _fromLeft?: boolean): void;
         /**
          * Create quaternion from vector3 angles in degree
          */
@@ -5790,10 +5882,17 @@ declare namespace FudgeCore.FBX {
     }
     export interface Model extends ObjectBase {
         Version?: number;
-        LclTranslation?: number | Vector3 | AnimCurveNode;
-        LclRotation?: number | Vector3 | AnimCurveNode;
-        LclScaling?: number | Vector3 | AnimCurveNode;
+        LclTranslation?: Vector3 | AnimCurveNode;
+        LclRotation?: Vector3 | AnimCurveNode;
+        LclScaling?: Vector3 | AnimCurveNode;
         PreRotation?: Vector3;
+        PostRotation?: Vector3;
+        ScalingOffset?: Vector3;
+        ScalingPivot?: Vector3;
+        RotationOffset?: Vector3;
+        RotationPivot?: Vector3;
+        InheritType?: number;
+        EulerOrder?: string;
         currentUVSet?: string;
     }
     export interface Material extends ObjectBase {
@@ -5923,8 +6022,15 @@ declare namespace FudgeCore {
          */
         getSkeleton(_fbxLimbNode: FBX.Model): Promise<Skeleton>;
         getAnimation(_index: number): Promise<Animation>;
+        /**
+         * fetched from three.js, adapted to FUDGE and optimized
+         * https://github.com/mrdoob/three.js/blob/dev/examples/jsm/loaders/FBXLoader.js
+         * line 3950
+         */
+        private generateTransform;
         private getTransformVector;
         private getAnimationVector3;
+        private getOrdered;
     }
 }
 declare namespace FudgeCore.FBX {

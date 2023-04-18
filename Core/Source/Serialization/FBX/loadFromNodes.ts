@@ -150,9 +150,30 @@ namespace FudgeCore.FBX {
   }
 
   function getProperty70Value(_node: Node): Property70 {
-    return _node.properties[1] as string == "Vector3D"
-      ? new Vector3(..._node.properties.slice(4, 6) as number[])
-      : _node.properties[4] as string | number | boolean;
+    switch (_node.properties[1] as string) {
+      case "bool":
+        return _node.properties[4] as boolean;
+
+      case "int":
+      case "enum":
+      case "ULongLong":
+      case "double":
+      case "Number":
+      case "FieldOfView":
+        return _node.properties[4] as number;
+
+      case "Color":
+      case "ColorRGB":
+      case "Vector3D":
+      case "Lcl Translation":
+      case "Lcl Rotation":
+      case "Lcl Scaling":
+        return new Vector3(..._node.properties.slice(4, 7) as number[]);
+      
+      case "KString":
+      default:
+        return _node.properties[4] as string;
+    }
   }
 
   function formatPropertyName(_name: string): string {
