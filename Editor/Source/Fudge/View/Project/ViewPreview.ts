@@ -3,9 +3,6 @@ namespace Fudge {
   import ƒUi = FudgeUserInterface;
   import ƒAid = FudgeAid;
 
-  enum CONTEXTMENU {
-    ILLUMINATE = "Illuminate"
-  }
   /**
    * Preview a resource
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
@@ -37,8 +34,8 @@ namespace Fudge {
       _container.on("resize", this.redraw);
       this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent, true);
-      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent, true);
+      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
     }
@@ -60,8 +57,8 @@ namespace Fudge {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
 
-      item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU.ILLUMINATE, checked: true, type: "checkbox", click: _callback });
-      menu.append(item);
+      // item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU[CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
+      // menu.append(item);
       return menu;
     }
 
@@ -69,9 +66,9 @@ namespace Fudge {
       ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
 
       switch (_item.id) {
-        case CONTEXTMENU.ILLUMINATE:
-          this.illuminateGraph();
-          break;
+        // case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
+        //   this.illuminateGraph();
+        //   break;
       }
     }
 
@@ -85,7 +82,8 @@ namespace Fudge {
         return;
       }
 
-      this.setTitle("Preview | " + this.resource.name);
+      let lightsPresent: boolean = true;
+
       //@ts-ignore
       let type: string = this.resource.type || "Function";
       if (this.resource instanceof ƒ.Mesh)
@@ -109,17 +107,33 @@ namespace Fudge {
           previewObject.addComponent(new ƒ.ComponentMesh(<ƒ.Mesh>this.resource));
           previewObject.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
           this.setViewObject(previewObject);
+          this.resetCamera();
           this.redraw();
           break;
         case "Material":
           previewObject.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
           previewObject.addComponent(new ƒ.ComponentMaterial(<ƒ.Material>this.resource));
           this.setViewObject(previewObject);
+          this.resetCamera();
           this.redraw();
           break;
         case "Graph":
-          previewObject.appendChild(<ƒ.Graph>this.resource);
+          ƒ.Project.createGraphInstance(<ƒ.Graph>this.resource).then(
+            (_instance: ƒ.GraphInstance) => {
+              previewObject.appendChild(_instance);
+              ƒ.Render.prepare(_instance);
+              lightsPresent = false;
+              ƒ.Render.lights.forEach((_array: ƒ.RecycableArray<ƒ.ComponentLight>) => lightsPresent ||= _array.length > 0);
+              this.illuminate(!lightsPresent);
+              this.setTitle(`${lightsPresent ? "PREVIEW" : "Preview"} | ${this.resource.name}`);
+              this.redraw();
+            }
+          );
+          ƒ.Physics.activeInstance = Page.getPhysics(<ƒ.Graph>this.resource);
           this.setViewObject(previewObject);
+          previewObject.addEventListener(ƒ.EVENT.MUTATE, (_event: Event) => {
+            this.redraw();
+          });
           this.redraw();
           break;
         case "TextureImage":
@@ -133,17 +147,19 @@ namespace Fudge {
           break;
         default: break;
       }
+      
+      this.setTitle(`Preview | ${this.resource.name}`);
     }
 
     private createStandardGraph(): ƒ.Node {
       let graph: ƒ.Node = new ƒ.Node("PreviewScene");
-      this.viewport.setBranch(graph);      
+      this.viewport.setBranch(graph);
 
       let nodeLight: ƒ.Node = new ƒ.Node("PreviewIllumination");
       graph.addChild(nodeLight);
       ƒAid.addStandardLightComponents(nodeLight);
 
-      this.dom.appendChild(this.viewport.getCanvas());
+      this.dom.appendChild(this.viewport.canvas);
 
       let previewNode: ƒ.Node = new ƒ.Node("PreviewNode");
       graph.addChild(previewNode);
@@ -153,17 +169,14 @@ namespace Fudge {
     private setViewObject(_node: ƒ.Node, _graphIllumination: boolean = false): void {
       this.previewNode.removeAllChildren();
       this.previewNode.addChild(_node);
-      if (_graphIllumination) // otherwise, light is always on!
-        this.illuminateGraph();
-      this.dom.appendChild(this.viewport.getCanvas());
+      this.illuminate(true);
+      this.dom.appendChild(this.viewport.canvas);
     }
 
-    private illuminateGraph(): void {
+    private illuminate(_on: boolean): void {
       let nodeLight: ƒ.Node = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
-      if (nodeLight) {
-        nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU.ILLUMINATE).checked);
-        this.redraw();
-      }
+      nodeLight.activate(_on);
+      this.redraw();
     }
 
     private createFilePreview(_entry: DirectoryEntry): HTMLElement {
@@ -209,10 +222,10 @@ namespace Fudge {
         //   this.resource = undefined;
         //   break;
         case ƒUi.EVENT.CHANGE:
-        case ƒUi.EVENT.MUTATE:
-        case EVENT_EDITOR.UPDATE:
-          if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
+        case EVENT_EDITOR.MODIFY:
+          if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture /*  || this.resource instanceof ƒ.Material */)
             this.fillContent();
+        case ƒUi.EVENT.MUTATE:
           this.redraw();
           break;
         default:
@@ -243,7 +256,8 @@ namespace Fudge {
 
     private redraw = () => {
       try {
-        this.resetCamera();
+        if (this.resource instanceof ƒ.Graph)
+          ƒ.Physics.activeInstance = Page.getPhysics(this.resource);
         this.viewport.draw();
       } catch (_error: unknown) {
         //nop

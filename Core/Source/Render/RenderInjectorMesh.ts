@@ -1,5 +1,4 @@
 namespace FudgeCore {
-  //Feeds WebGL Buffers with data calculated from the {@link Mesh]]
   export class RenderInjectorMesh {
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor.prototype, "useRenderBuffers", {

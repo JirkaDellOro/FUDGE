@@ -3,17 +3,31 @@ namespace Fudge {
     // SKETCH = ViewSketch,
     ADD_NODE,
     ACTIVATE_NODE,
+    DELETE_NODE,
     ADD_COMPONENT,
+    DELETE_COMPONENT,
     ADD_COMPONENT_SCRIPT,
     EDIT,
     CREATE_MESH,
     CREATE_MATERIAL,
     CREATE_GRAPH,
+    CREATE_ANIMATION,
+    CREATE_PARTICLE_EFFECT,
+    SYNC_INSTANCES,
     REMOVE_COMPONENT,
     ADD_JOINT,
-    TRANSLATE,
-    ROTATE,
-    SCALE
+    DELETE_RESOURCE,
+    ORTHGRAPHIC_CAMERA,
+    RENDER_CONTINUOUSLY,
+    ADD_PROPERTY,
+    DELETE_PROPERTY,
+    ADD_PARTICLE_PROPERTY,
+    ADD_PARTICLE_FUNCTION,
+    ADD_PARTICLE_FUNCTION_NAMED,
+    ADD_PARTICLE_CONSTANT,
+    ADD_PARTICLE_CONSTANT_NAMED,
+    ADD_PARTICLE_TRANSFORMATION,
+    DELETE_PARTICLE_DATA
   }
 
 
@@ -27,32 +41,23 @@ namespace Fudge {
     PANEL_ANIMATION_OPEN = "panelAnimationOpen",
     PANEL_PROJECT_OPEN = "panelProjectOpen",
     PANEL_HELP_OPEN = "panelHelpOpen",
+    PANEL_PARTICLE_SYSTEM_OPEN = "panelParticleSystemOpen",
     FULLSCREEN = "fullscreen"
   }
-
-
-  export enum EVENT_EDITOR {
-    SET_GRAPH = "setGraph",
-    FOCUS_NODE = "focusNode",
-    SET_PROJECT = "setProject",
-    UPDATE = "update",
-    REFRESH = "refresh",
-    DESTROY = "destroy",
-    CLEAR_PROJECT = "clearProject",
-    TRANSFORM = "transform"
-  }
-
 
   export enum PANEL {
     GRAPH = "PanelGraph",
     PROJECT = "PanelProject",
-    HELP = "PanelHelp"
-  }
+    HELP = "PanelHelp",
+    ANIMATION = "PanelAnimation",
+    PARTICLE_SYSTEM = "PanelParticleSystem"
 
+  }
 
   export enum VIEW {
     HIERARCHY = "ViewHierarchy",
     ANIMATION = "ViewAnimation",
+    ANIMATION_SHEET = "ViewAnimationSheet",
     RENDER = "ViewRender",
     COMPONENTS = "ViewComponents",
     CAMERA = "ViewCamera",
@@ -60,8 +65,8 @@ namespace Fudge {
     EXTERNAL = "ViewExternal",
     PROPERTIES = "ViewProperties",
     PREVIEW = "ViewPreview",
-    SCRIPT = "ViewScript"
-    
+    SCRIPT = "ViewScript",
+    PARTICLE_SYSTEM = "ViewParticleSystem"
     // SKETCH = ViewSketch,
     // MESH = ViewMesh,
   }

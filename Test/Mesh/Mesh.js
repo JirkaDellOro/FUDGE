@@ -59,11 +59,8 @@ var Mesh;
         const canvas = document.querySelector("canvas");
         viewport.initialize("Viewport", graph, cmpCamera, canvas);
         // setup event handling
-        viewport.setFocus(true);
-        viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
-        viewport.activateWheelEvent("\u0192wheel" /* WHEEL */, true);
-        viewport.addEventListener("\u0192pointermove" /* MOVE */, hndPointerMove);
-        viewport.addEventListener("\u0192wheel" /* WHEEL */, hndWheelMove);
+        viewport.canvas.addEventListener("pointermove", hndPointerMove);
+        viewport.canvas.addEventListener("wheel", hndWheelMove);
         //window.addEventListener("keypress", hndKeyboard);
         canvas.addEventListener("mousedown", canvas.requestPointerLock);
         canvas.addEventListener("mouseup", () => document.exitPointerLock());
@@ -84,8 +81,7 @@ var Mesh;
         camera.distance += _event.deltaY * speedCameraTranslation;
     }
     function startInteraction(_viewport) {
-        _viewport.activateKeyboardEvent("\u0192keydown" /* DOWN */, true);
-        _viewport.addEventListener("\u0192keydown" /* DOWN */, move);
+        _viewport.canvas.addEventListener("keydown", move);
         function move(_event) {
             mtxTranslator.translateZ(0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.W ? -1 :

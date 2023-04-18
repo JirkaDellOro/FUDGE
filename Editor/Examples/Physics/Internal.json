@@ -29,188 +29,17 @@
     "ƒ.Graph": {
       "name": "Scene",
       "active": true,
-      "components": {},
-      "children": [
-        {
-          "ƒ.GraphInstance": {
-            "name": "Pyramid",
-            "active": true,
-            "components": {
-              "ComponentMesh": [
-                {
-                  "ƒ.ComponentMesh": {
-                    "idMesh": "MeshPyramid|2021-09-16T16:20:36.681Z|23832",
-                    "pivot": {
-                      "translation": "[0, 0, 0]",
-                      "rotation": "[0, 0, 0]",
-                      "scaling": "[1, 1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    }
-                  }
-                }
-              ],
-              "ComponentMaterial": [
-                {
-                  "ƒ.ComponentMaterial": {
-                    "sortForAlpha": false,
-                    "clrPrimary": "[0.3176470588235294, 1, 0, 0.28]",
-                    "clrSecondary": "[1, 1, 1, 1]",
-                    "pivot": {
-                      "translation": "[0, 0]",
-                      "rotation": 0,
-                      "scaling": "[1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    },
-                    "idMaterial": "Material|2021-09-16T16:20:39.493Z|82601"
-                  }
-                }
-              ],
-              "ComponentTransform": [
-                {
-                  "ƒ.ComponentTransform": {
-                    "local": {
-                      "translation": "[0, 0, 0]",
-                      "rotation": "[-45, 0, 0]",
-                      "scaling": "[1, 1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    }
-                  }
-                }
-              ],
-              "ComponentRigidbody": [
-                {
-                  "ƒ.ComponentRigidbody": {
-                    "initialization": "TO_NODE",
-                    "friction": 0.2,
-                    "restitution": 0.2,
-                    "mass": 2,
-                    "dampTranslation": 0.1,
-                    "dampRotation": 0,
-                    "effectGravity": 1,
-                    "typeBody": "DYNAMIC",
-                    "typeCollider": "CYLINDER",
-                    "isTrigger": false,
-                    "id": 0,
-                    "pivot": {
-                      "translation": "[0, 0, 0]",
-                      "rotation": "[0, 0, 0]",
-                      "scaling": "[1, 1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    }
-                  }
-                }
-              ],
-              "JointWelding": [
-                {
-                  "ƒ.JointWelding": {
-                    "Joint": {
-                      "nameChildToConnect": "Box",
-                      "internalCollision": false,
-                      "breakForce": 0,
-                      "breakTorque": 0,
-                      "anchor": "[0, 0, 0]",
-                      "Component": {
-                        "active": true
-                      }
-                    }
-                  }
-                }
-              ]
-            },
-            "children": [
-              {
-                "ƒ.Node": {
-                  "name": "Box",
-                  "active": false,
-                  "components": {
-                    "ComponentMesh": [
-                      {
-                        "ƒ.ComponentMesh": {
-                          "idMesh": "MeshCube|2021-09-16T16:30:20.263Z|92125",
-                          "pivot": {
-                            "translation": "[-1, 0.6000000238418579, 0]",
-                            "rotation": "[0, 0, 0]",
-                            "scaling": "[0.2999999225139618, 0.2999999225139618, 0.2999999225139618]"
-                          },
-                          "Component": {
-                            "active": true
-                          }
-                        }
-                      }
-                    ],
-                    "ComponentMaterial": [
-                      {
-                        "ƒ.ComponentMaterial": {
-                          "sortForAlpha": false,
-                          "clrPrimary": "[1, 1, 1, 1]",
-                          "clrSecondary": "[1, 1, 1, 1]",
-                          "pivot": {
-                            "translation": "[0, 0]",
-                            "rotation": 0,
-                            "scaling": "[1, 1]"
-                          },
-                          "Component": {
-                            "active": true
-                          },
-                          "idMaterial": "Material|2021-09-16T16:20:39.493Z|82601"
-                        }
-                      }
-                    ],
-                    "ComponentRigidbody": [
-                      {
-                        "ƒ.ComponentRigidbody": {
-                          "initialization": "TO_MESH",
-                          "friction": 0.2,
-                          "restitution": 0.2,
-                          "mass": 0.5000000000000001,
-                          "dampTranslation": 0.1,
-                          "dampRotation": 0.1,
-                          "effectGravity": -1,
-                          "typeBody": "DYNAMIC",
-                          "typeCollider": "CUBE",
-                          "isTrigger": false,
-                          "id": 2,
-                          "pivot": {
-                            "translation": "[-1, 0.6000000238418579, 0]",
-                            "rotation": "[0, 0, 0]",
-                            "scaling": "[0.2999999225139618, 0.2999999225139618, 0.2999999225139618]"
-                          },
-                          "Component": {
-                            "active": true
-                          }
-                        }
-                      }
-                    ],
-                    "ComponentTransform": [
-                      {
-                        "ƒ.ComponentTransform": {
-                          "local": {
-                            "translation": "[0, 0, 0]",
-                            "rotation": "[0, 0, 0]",
-                            "scaling": "[1, 1, 1]"
-                          },
-                          "Component": {
-                            "active": true
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  "children": []
-                }
-              }
-            ],
-            "idSource": "Graph|2022-03-05T18:27:09.459Z|47242"
+      "components": {
+        "CustomComponentScript": [
+          {
+            "Script.CustomComponentScript": {
+              "active": true,
+              "message": "CustomComponentScript added to "
+            }
           }
-        },
+        ]
+      },
+      "children": [
         {
           "ƒ.Node": {
             "name": "Floor",
@@ -255,7 +84,7 @@
                     "local": {
                       "translation": "[0, -2, 0]",
                       "rotation": "[0, 0, 0]",
-                      "scaling": "[1, 1, 1]"
+                      "scaling": "[3, 1, 1]"
                     },
                     "Component": {
                       "active": true
@@ -293,113 +122,24 @@
           }
         },
         {
-          "ƒ.GraphInstance": {
-            "name": "Pyramid",
-            "active": false,
-            "components": {
-              "ComponentMesh": [
-                {
-                  "ƒ.ComponentMesh": {
-                    "idMesh": "MeshPyramid|2021-09-16T16:20:36.681Z|23832",
-                    "pivot": {
-                      "translation": "[0, 0, 0]",
-                      "rotation": "[0, 0, 0]",
-                      "scaling": "[1, 1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    }
-                  }
-                }
-              ],
-              "ComponentMaterial": [
-                {
-                  "ƒ.ComponentMaterial": {
-                    "sortForAlpha": false,
-                    "clrPrimary": "[0.3176470588235294, 1, 0, 0.28]",
-                    "clrSecondary": "[1, 1, 1, 1]",
-                    "pivot": {
-                      "translation": "[0, 0]",
-                      "rotation": 0,
-                      "scaling": "[1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    },
-                    "idMaterial": "Material|2021-09-16T16:20:39.493Z|82601"
-                  }
-                }
-              ],
-              "ComponentTransform": [
-                {
-                  "ƒ.ComponentTransform": {
-                    "local": {
-                      "translation": "[2, 0, 0]",
-                      "rotation": "[-45, 0, 0]",
-                      "scaling": "[1, 1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    }
-                  }
-                }
-              ],
-              "ComponentRigidbody": [
-                {
-                  "ƒ.ComponentRigidbody": {
-                    "initialization": "TO_NODE",
-                    "friction": 0.2,
-                    "restitution": 0.2,
-                    "mass": 2,
-                    "dampTranslation": 0.1,
-                    "dampRotation": 0,
-                    "effectGravity": 1,
-                    "typeBody": "DYNAMIC",
-                    "typeCollider": "CYLINDER",
-                    "isTrigger": false,
-                    "id": 0,
-                    "pivot": {
-                      "translation": "[0, 0, 0]",
-                      "rotation": "[0, 0, 0]",
-                      "scaling": "[1, 1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    }
-                  }
-                }
-              ],
-              "JointWelding": [
-                {
-                  "ƒ.JointWelding": {
-                    "Joint": {
-                      "nameChildToConnect": "Box",
-                      "internalCollision": false,
-                      "breakForce": 0,
-                      "breakTorque": 0,
-                      "anchor": "[0, 0, 0]",
-                      "Component": {
-                        "active": true
-                      }
-                    }
-                  }
-                }
-              ]
-            },
+          "ƒ.Node": {
+            "name": "Pyramid_0",
+            "active": true,
+            "components": {},
             "children": [
               {
-                "ƒ.Node": {
-                  "name": "Box",
+                "ƒ.GraphInstance": {
+                  "name": "Pyramid",
                   "active": true,
                   "components": {
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshCube|2021-09-16T16:30:20.263Z|92125",
+                          "idMesh": "MeshPyramid|2021-09-16T16:20:36.681Z|23832",
                           "pivot": {
-                            "translation": "[-1, 0.6000000238418579, 0]",
+                            "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
-                            "scaling": "[0.2999999225139618, 0.2999999225139618, 0.2999999225139618]"
+                            "scaling": "[1, 1, 1]"
                           },
                           "Component": {
                             "active": true
@@ -411,7 +151,7 @@
                       {
                         "ƒ.ComponentMaterial": {
                           "sortForAlpha": false,
-                          "clrPrimary": "[1, 1, 1, 1]",
+                          "clrPrimary": "[0.3176470588235294, 1, 0, 0.28]",
                           "clrSecondary": "[1, 1, 1, 1]",
                           "pivot": {
                             "translation": "[0, 0]",
@@ -425,24 +165,13 @@
                         }
                       }
                     ],
-                    "ComponentRigidbody": [
+                    "ComponentTransform": [
                       {
-                        "ƒ.ComponentRigidbody": {
-                          "initialization": "TO_MESH",
-                          "friction": 0.2,
-                          "restitution": 0.2,
-                          "mass": 0.5000000000000001,
-                          "dampTranslation": 0.1,
-                          "dampRotation": 0.1,
-                          "effectGravity": 0,
-                          "typeBody": "DYNAMIC",
-                          "typeCollider": "CUBE",
-                          "isTrigger": false,
-                          "id": 2,
-                          "pivot": {
-                            "translation": "[-1, 0.6000000238418579, 0]",
-                            "rotation": "[0, 0, 0]",
-                            "scaling": "[0.2999999225139618, 0.2999999225139618, 0.2999999225139618]"
+                        "ƒ.ComponentTransform": {
+                          "local": {
+                            "translation": "[0, 0, 0]",
+                            "rotation": "[-45, 0, 0]",
+                            "scaling": "[1.100000023841858, 1, 1]"
                           },
                           "Component": {
                             "active": true
@@ -450,10 +179,21 @@
                         }
                       }
                     ],
-                    "ComponentTransform": [
+                    "ComponentRigidbody": [
                       {
-                        "ƒ.ComponentTransform": {
-                          "local": {
+                        "ƒ.ComponentRigidbody": {
+                          "initialization": "TO_NODE",
+                          "friction": 0.2,
+                          "restitution": 0.2,
+                          "mass": 2,
+                          "dampTranslation": 0.1,
+                          "dampRotation": 0,
+                          "effectGravity": 1,
+                          "typeBody": "DYNAMIC",
+                          "typeCollider": "CYLINDER",
+                          "isTrigger": false,
+                          "id": 0,
+                          "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
                             "scaling": "[1, 1, 1]"
@@ -463,13 +203,307 @@
                           }
                         }
                       }
+                    ],
+                    "JointCylindrical": [
+                      {
+                        "ƒ.JointCylindrical": {
+                          "motorForce": 0,
+                          "springDampingRotation": 0,
+                          "springFrequencyRotation": 0,
+                          "maxRotor": 360,
+                          "minRotor": 0,
+                          "rotorTorque": 0,
+                          "rotorSpeed": 0,
+                          "JointAxial": {
+                            "springDamping": 0,
+                            "springFrequency": 0,
+                            "maxMotor": 10,
+                            "minMotor": -10,
+                            "motorSpeed": 0,
+                            "axis": "[0.49999991059303284, 0, 0]",
+                            "Joint": {
+                              "nameChildToConnect": "Box",
+                              "internalCollision": false,
+                              "breakForce": 5,
+                              "breakTorque": 5,
+                              "anchor": "[0, 0, 0]",
+                              "Component": {
+                                "active": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "ComponentGraphFilter": [
+                      {
+                        "ƒ.ComponentGraphFilter": {
+                          "active": true
+                        }
+                      }
                     ]
                   },
-                  "children": []
+                  "children": [
+                    {
+                      "ƒ.Node": {
+                        "name": "Box",
+                        "active": true,
+                        "components": {
+                          "ComponentMesh": [
+                            {
+                              "ƒ.ComponentMesh": {
+                                "idMesh": "MeshCube|2021-09-16T16:30:20.263Z|92125",
+                                "pivot": {
+                                  "translation": "[-1, 0.6000000238418579, 0]",
+                                  "rotation": "[0, 0, 0]",
+                                  "scaling": "[0.2999999225139618, 0.2999999225139618, 0.2999999225139618]"
+                                },
+                                "Component": {
+                                  "active": true
+                                }
+                              }
+                            }
+                          ],
+                          "ComponentMaterial": [
+                            {
+                              "ƒ.ComponentMaterial": {
+                                "sortForAlpha": false,
+                                "clrPrimary": "[1, 1, 1, 1]",
+                                "clrSecondary": "[1, 1, 1, 1]",
+                                "pivot": {
+                                  "translation": "[0, 0]",
+                                  "rotation": 0,
+                                  "scaling": "[1, 1]"
+                                },
+                                "Component": {
+                                  "active": true
+                                },
+                                "idMaterial": "Material|2021-09-16T16:20:39.493Z|82601"
+                              }
+                            }
+                          ],
+                          "ComponentRigidbody": [
+                            {
+                              "ƒ.ComponentRigidbody": {
+                                "initialization": "TO_MESH",
+                                "friction": 0.2,
+                                "restitution": 0.2,
+                                "mass": 0.5000000000000001,
+                                "dampTranslation": 0.1,
+                                "dampRotation": 0.1,
+                                "effectGravity": 1,
+                                "typeBody": "DYNAMIC",
+                                "typeCollider": "CUBE",
+                                "isTrigger": false,
+                                "id": 2,
+                                "pivot": {
+                                  "translation": "[-1, 0.6000000238418579, 0]",
+                                  "rotation": "[0, 0, 0]",
+                                  "scaling": "[0.2999999225139618, 0.2999999225139618, 0.2999999225139618]"
+                                },
+                                "Component": {
+                                  "active": true
+                                }
+                              }
+                            }
+                          ],
+                          "ComponentTransform": [
+                            {
+                              "ƒ.ComponentTransform": {
+                                "local": {
+                                  "translation": "[0.5099912285804749, 3.0362472534179688, 0]",
+                                  "rotation": "[0, 0, 0]",
+                                  "scaling": "[1, 1, 1]"
+                                },
+                                "Component": {
+                                  "active": true
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "children": []
+                      }
+                    }
+                  ]
                 }
               }
-            ],
-            "idSource": "Graph|2022-03-05T18:27:09.459Z|47242"
+            ]
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Pyramid_1",
+            "active": true,
+            "components": {
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[2, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": [
+              {
+                "ƒ.GraphInstance": {
+                  "deserializeFromSource": true,
+                  "name": "Pyramid",
+                  "idSource": "Graph|2022-03-05T18:27:09.459Z|47242"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "CylinderUnscaled",
+            "active": true,
+            "components": {
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[-2, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentRigidbody": [
+                {
+                  "ƒ.ComponentRigidbody": {
+                    "initialization": "TO_PIVOT",
+                    "friction": 0.2,
+                    "restitution": 0.2,
+                    "mass": 10,
+                    "dampTranslation": 0.1,
+                    "dampRotation": 0.1,
+                    "effectGravity": 1,
+                    "typeBody": "DYNAMIC",
+                    "typeCollider": "CYLINDER",
+                    "isTrigger": false,
+                    "id": 1,
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[-30, 0, 0]",
+                      "scaling": "[0.09999992698431015, 0.20000000298023224, 0.20000000298023224]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "CylinderScaledUp",
+            "active": true,
+            "components": {
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[-2.499999761581421, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[0.09999992698431015, 0.10000000149011612, 0.10000000149011612]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentRigidbody": [
+                {
+                  "ƒ.ComponentRigidbody": {
+                    "initialization": "TO_PIVOT",
+                    "friction": 0.2,
+                    "restitution": 0.2,
+                    "mass": 10,
+                    "dampTranslation": 0.1,
+                    "dampRotation": 0.1,
+                    "effectGravity": 1,
+                    "typeBody": "DYNAMIC",
+                    "typeCollider": "CYLINDER",
+                    "isTrigger": false,
+                    "id": 1,
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[-30, 0, 0]",
+                      "scaling": "[1, 2, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "CylinderScaledDown",
+            "active": true,
+            "components": {
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[-3, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[10, 10, 10]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentRigidbody": [
+                {
+                  "ƒ.ComponentRigidbody": {
+                    "initialization": "TO_PIVOT",
+                    "friction": 0.2,
+                    "restitution": 0.2,
+                    "mass": 10,
+                    "dampTranslation": 0.1,
+                    "dampRotation": 0.1,
+                    "effectGravity": 1,
+                    "typeBody": "DYNAMIC",
+                    "typeCollider": "CYLINDER",
+                    "isTrigger": false,
+                    "id": 1,
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[-30, 0, 0]",
+                      "scaling": "[0.009999999776482582, 0.019999999552965164, 0.009999999776482582]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": []
           }
         }
       ],
@@ -619,7 +653,7 @@
                     "mass": 0.5000000000000001,
                     "dampTranslation": 0.1,
                     "dampRotation": 0.1,
-                    "effectGravity": -1,
+                    "effectGravity": 1,
                     "typeBody": "DYNAMIC",
                     "typeCollider": "CUBE",
                     "isTrigger": false,
@@ -639,7 +673,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[0, 0, 0]",
+                      "translation": "[0.8353768587112427, 1.3750553131103516, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },

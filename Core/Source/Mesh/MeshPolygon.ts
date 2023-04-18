@@ -85,7 +85,7 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       await super.mutate(_mutator);
-      this.create(this.shape, _mutator.fitTexture);
+      this.create(this.shape, this.fitTexture);
       this.dispatchEvent(new Event(EVENT.MUTATE));
     }
 

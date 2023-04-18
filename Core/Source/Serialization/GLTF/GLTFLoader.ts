@@ -1,65 +1,39 @@
 namespace FudgeCore {
-  enum ComponentType {
-    BYTE = 5120,
-    UNSIGNED_BYTE = 5121,
-    SHORT = 5122,
-    UNSIGNED_SHORT = 5123,
-    INT = 5124,
-    UNSIGNED_INT = 5125,
-    FLOAT = 5126
-  }
-
-  type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Int32Array | Float32Array | Float64Array;
-
-  interface GLTFLoaderList {
-    [uri: string]: GLTFLoader;
-  }
-
-  interface AnimationStructureVector3 {
-    x: AnimationSequence;
-    y: AnimationSequence;
-    z: AnimationSequence;
-  }
-
-  interface AnimationStructureMatrix4x4 {
-    rotation?: AnimationStructureVector3;
-    scale?: AnimationStructureVector3;
-    translation?: AnimationStructureVector3;
-  }
-
-  type TransformationType = "rotation" | "scale" | "translation";
-
+  /**
+   * Asset loader for gl Transfer Format files.
+   * @author Matthias Roming, HFU, 2022
+   */
   export class GLTFLoader {
 
-    private static loaders: GLTFLoaderList;
+    private static loaders: { [url: string]: GLTFLoader};
     private static defaultMaterial: Material;
     private static defaultSkinMaterial: Material;
 
     public readonly gltf: GLTF.GlTf;
-    public readonly uri: string;
+    public readonly url: string;
 
     #scenes: Graph[];
     #nodes: Node[];
     #cameras: ComponentCamera[];
     #animations: Animation[];
-    #meshes: MeshGLTF[];
+    #meshes: MeshImport[];
     #skeletons: Skeleton[];
     #buffers: ArrayBuffer[];
 
-    private constructor(_gltf: GLTF.GlTf, _uri: string) {
+    private constructor(_gltf: GLTF.GlTf, _url: string) {
       this.gltf = _gltf;
-      this.uri = _uri;
+      this.url = _url;
     }
 
-    public static async LOAD(_uri: string): Promise<GLTFLoader> {
+    public static async LOAD(_url: string): Promise<GLTFLoader> {
       if (!this.loaders)
         this.loaders = {};
-      if (!this.loaders[_uri]) {      
-        const response: Response = await fetch(_uri);
+      if (!this.loaders[_url]) {      
+        const response: Response = await fetch(_url);
         const gltf: GLTF.GlTf = await response.json();
-        this.loaders[_uri] = new GLTFLoader(gltf, _uri);
+        this.loaders[_url] = new GLTFLoader(gltf, _url);
       }
-      return this.loaders[_uri];
+      return this.loaders[_url];
     }
 
     public async getScene(_name?: string): Promise<GraphInstance> {
@@ -80,7 +54,7 @@ namespace FudgeCore {
         Project.register(scene);
         this.#scenes[_iScene] = scene;
       }
-      return Project.createGraphInstance(this.#scenes[_iScene]);
+      return await Project.createGraphInstance(this.#scenes[_iScene]);
     }
 
     public async getNode(_name: string): Promise<Node> {
@@ -111,7 +85,7 @@ namespace FudgeCore {
           }
           else {
             if (gltfNode.rotation)
-              node.mtxLocal.rotate(new Vector3(...gltfNode.rotation.map(rotation => rotation * 180 / Math.PI)));
+              node.mtxLocal.rotate(new Vector3(...gltfNode.rotation.map(rotation => rotation * Calc.rad2deg)));
             if (gltfNode.scale)
               node.mtxLocal.scale(new Vector3(...gltfNode.scale));
             if (gltfNode.translation)
@@ -172,7 +146,7 @@ namespace FudgeCore {
         if (gltfCamera.perspective)
           camera.projectCentral(
             gltfCamera.perspective.aspectRatio,
-            gltfCamera.perspective.yfov * 180 / Math.PI,
+            gltfCamera.perspective.yfov * Calc.rad2deg,
             null,
             gltfCamera.perspective.znear,
             gltfCamera.perspective.zfar
@@ -231,23 +205,23 @@ namespace FudgeCore {
       return this.#animations[_iAnimation];
     }
 
-    public async getMesh(_name: string): Promise<MeshGLTF> {
+    public async getMesh(_name: string): Promise<MeshImport> {
       const iMesh: number = this.gltf.meshes.findIndex(mesh => mesh.name == _name);
       if (iMesh == -1)
         throw new Error(`Couldn't find name ${_name} in gltf meshes.`);
       return await this.getMeshByIndex(iMesh);
     }
 
-    public async getMeshByIndex(_iMesh: number): Promise<MeshGLTF> {
+    public async getMeshByIndex(_iMesh: number): Promise<MeshImport> {
       if (!this.#meshes)
         this.#meshes = [];
       if (!this.#meshes[_iMesh]) {
         const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
         this.#meshes[_iMesh] = await (
           gltfMesh.primitives[0].attributes.JOINTS_0 != undefined ?
-          new MeshSkin().load(this, _iMesh) :
-          new MeshGLTF().load(this, _iMesh)
-        );
+            new MeshSkin() :
+            new MeshImport()
+        ).load(MeshLoaderGLTF, this.url, gltfMesh);
       }
       return this.#meshes[_iMesh];
     }
@@ -340,8 +314,7 @@ namespace FudgeCore {
         this.#buffers = [];
       if (!this.#buffers[gltfBufferView.buffer]) {
         const response: Response = await fetch(gltfBuffer.uri);
-        const blob: Blob = await response.blob();
-        this.#buffers[gltfBufferView.buffer] = await blob.arrayBuffer();
+        this.#buffers[gltfBufferView.buffer] = await response.arrayBuffer();
       }
 
       const buffer: ArrayBuffer = this.#buffers[gltfBufferView.buffer];
@@ -401,7 +374,7 @@ namespace FudgeCore {
       for (let i: number = 0; i < input.length; ++i) {
         const vector: { x: number, y: number, z: number } =
           _transformationType == "rotation" ?
-          new Quaternion(output[i * 4 + 0], output[i * 4 + 1], output[i * 4 + 2], output[i * 4 + 3]).toDegrees() :
+          new PhysicsQuaternion(output[i * 4 + 0], output[i * 4 + 1], output[i * 4 + 2], output[i * 4 + 3]).toDegrees() :
           { x: output[i * 3 + 0], y: output[i * 3 + 1], z: output[i * 3 + 2] };
 
         sequenceX.addKey(new AnimationKey(millisPerSecond * input[i], vector.x));
@@ -417,4 +390,18 @@ namespace FudgeCore {
     }
 
   }
+
+  enum ComponentType {
+    BYTE = 5120,
+    UNSIGNED_BYTE = 5121,
+    SHORT = 5122,
+    UNSIGNED_SHORT = 5123,
+    INT = 5124,
+    UNSIGNED_INT = 5125,
+    FLOAT = 5126
+  }
+
+  type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Int32Array | Float32Array | Float64Array;
+
+  type TransformationType = "rotation" | "scale" | "translation";
 }

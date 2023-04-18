@@ -27,9 +27,6 @@ namespace FudgeUserInterface {
       if (_attributes)
         for (let name in _attributes) {
           this.setAttribute(name, _attributes[name]);
-          if (name == "key" && !isNaN(Number(_attributes[name])))
-            // if key is a number, as with arrays, prefix with "ƒ", since numbers are not allowed as attributes for querySelector
-            this.setAttribute(name, "ƒ" + _attributes[name]);
         }
     }
 

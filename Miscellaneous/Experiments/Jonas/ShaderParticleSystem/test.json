@@ -1,0 +1,138 @@
+{
+  "storage": {
+    "system": {
+      "particleOffset": {
+        "type": "function",
+        "function": "division",
+        "parameters": [
+          {
+            "type": "constant",
+            "value": 1
+          },
+          {
+            "type": "variable",
+            "value": "size"
+          }
+        ]
+      }
+    },
+    "update": {
+      "scaledTime":  {
+        "type": "function",
+        "function": "division",
+        "parameters": [
+          {
+            "type": "variable",
+            "value": "time"
+          },
+          {
+            "type": "constant",
+            "value": 1000
+          }
+        ]
+      }
+    },
+    "particle": {
+      "particleTime": {
+        "type": "function",
+        "function": "modulo",
+        "parameters": [
+          {
+            "type": "function",
+            "function": "addition",
+            "parameters": [
+              {
+                "type": "function",
+                "function": "multiplication",
+                "parameters": [
+                  {
+                    "type": "variable",
+                    "value": "index"
+                  },
+                  {
+                    "type": "variable",
+                    "value": "particleOffset"
+                  }
+                ]
+              },
+              {
+                "type": "variable",
+                "value": "scaledTime"
+              }
+            ]
+          },
+          {
+            "type": "constant",
+            "value": 1
+          }
+        ]
+      },
+      "inverseParticleTime": {
+        "type": "function",
+        "function": "subtraction",
+        "parameters": [
+          {
+            "type": "constant",
+            "value": 1
+          },
+          {
+            "type": "variable",
+            "value": "particleTime"
+          }
+        ]
+      }
+    }
+  },
+  "transformations": {
+    "local": {
+      "translate": {
+        "x": {
+          "type": "function",
+          "function": "multiplication",
+          "parameters": [
+            {
+              "type": "constant",
+              "value": 8
+            },
+            {
+              "type": "variable",
+              "value": "particleTime"
+            }
+          ]
+        }
+      },
+      "rotate": {
+        "x": {
+          "type": "function",
+          "function": "multiplication",
+          "parameters": [
+            {
+              "type": "constant",
+              "value": 2
+            },
+            {
+              "type": "variable",
+              "value": "particleTime"
+            }
+          ]
+        }
+      },
+      "scale": {
+        "y": {
+          "type": "constant",
+          "value": 2
+        }
+      }
+    }
+  },
+  "components": {
+    "ComponentMaterial": {
+      "clrPrimary": {
+        "a": {
+          "type": "variable",
+          "value": "inverseParticleTime"
+        }
+      }
+    }
+  }
+}

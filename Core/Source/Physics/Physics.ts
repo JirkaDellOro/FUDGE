@@ -27,15 +27,19 @@ namespace FudgeCore {
         return null;
       }
       this.oimoWorld = new OIMO.World();
-      this.#debugDraw = new PhysicsDebugDraw();  //Create a Fudge Physics debugging handling object
+      this.#debugDraw = new PhysicsDebugDraw();  //Create a FUDGE Physics debugging handling object
       this.oimoWorld.setDebugDraw(this.#debugDraw.oimoDebugDraw); //Tell OimoPhysics where to debug to and how it will be handled
     }
-
     /**
      * Define the currently active Physics instance
      */
     public static set activeInstance(_physics: Physics) {
       Physics.ƒactive = _physics;
+    }
+
+    /** Get the currently active Physics instance */
+    public static get activeInstance(): Physics {
+      return Physics.ƒactive;
     }
 
     public static get debugDraw(): PhysicsDebugDraw {
@@ -101,7 +105,7 @@ namespace FudgeCore {
         Physics.connectJoints(); //Connect joints if anything has happened between the last call to any of the two paired rigidbodies
       if (Time.game.getScale() != 0) { //If time is stopped do not simulate to avoid misbehaviour
         _deltaTime = _deltaTime > 1 / 30 ? 1 / 30 : _deltaTime; //If instead of a fixed rate the game framerate is used, make sure irregular timings are fixed to 30fps
-        Physics.ƒactive.oimoWorld.step(_deltaTime * Time.game.getScale());  //Update the simulation by the given deltaTime and the Fudge internal TimeScale
+        Physics.ƒactive.oimoWorld.step(_deltaTime * Time.game.getScale());  //Update the simulation by the given deltaTime and the FUDGE internal TimeScale
       }
     }
 
@@ -181,7 +185,11 @@ namespace FudgeCore {
       * Remove the OIMO Joint/Constraint to the active instance, happens automatically when removing a FUDGE Joint Component
       */
     public static removeJoint(_cmpJoint: Joint): void {
-      Physics.ƒactive.oimoWorld.removeJoint(_cmpJoint.getOimoJoint());
+      try {
+        Physics.ƒactive.oimoWorld.removeJoint(_cmpJoint.getOimoJoint());
+      } catch (_error: unknown) {
+        Debug.fudge(_error);
+      }
     }
 
     /** Returns all the ComponentRigidbodies that are known to the active instance. */
@@ -212,17 +220,14 @@ namespace FudgeCore {
      * if any of the two paired ComponentRigidbodies change.
      */
     public static connectJoints(): void { //Try to connect dirty joints until they are connected
-      // let jointsToConnect: ComponentJoint[] = new Array(); //Copy original Array because removing/readding in the connecting process
-      // this.jointList.forEach(function (value: ComponentJoint): void {
-      //   jointsToConnect.push(value);
-      // });
-      // this.jointList.splice(0, this.jointList.length);
       let jointsToConnect: Joint[] = Physics.ƒactive.jointList;
       Physics.ƒactive.jointList = [];
       jointsToConnect.forEach((_joint: Joint): void => {
-        if (_joint.isConnected() == false) {
-          _joint.connect();
-        }
+        if (_joint.isConnected() == false)
+          if (_joint.isActive)
+            _joint.connect();
+          else
+            Physics.ƒactive.jointList.push(_joint);
       });
     }
 
@@ -237,7 +242,8 @@ namespace FudgeCore {
           body.isInitialized = false;
         Physics.ƒactive.jointList = new Array(); // TODO: see if it would be smarter, do use these arrays. Definitely more intuitive...
         for (let i: number = 0; i < jointsWorld; i++) {
-          oimoWorld.removeJoint(Physics.ƒactive.oimoWorld.getJointList());
+          let oimoJoint: OIMO.Joint = Physics.ƒactive.oimoWorld.getJointList();
+          oimoWorld.removeJoint(oimoJoint);
         }
         for (let i: number = 0; i < bodiesWorld; i++) {
           let oimoBody: OIMO.RigidBody = oimoWorld.getRigidBodyList();
@@ -245,11 +251,6 @@ namespace FudgeCore {
         }
       }
     }
-
-    // /** Returns the actual used world of the OIMO physics engine. No user interaction needed.*/
-    // private static getOimoWorld(): OIMO.World {
-    //   return Physics.#activePhysics.oimoWorld;
-    // }
 
     // /** Returns the ComponentRigidbody with the given id. Used internally to reconnect joints on loading in the editor. */
     // private static getBodyByID(_id: number): ComponentRigidbody {
@@ -285,20 +286,11 @@ namespace FudgeCore {
       return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 
-    // /**
-    // * Getting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
-    // */
-    // private getSolverIterations(): number {
-    //   return this.oimoWorld.getNumPositionIterations();
-    // }
 
-    // /**
-    // * Setting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
-    // */
-    // private setSolverIterations(_value: number): void {
-    //   this.oimoWorld.setNumPositionIterations(_value);
-    //   this.oimoWorld.setNumVelocityIterations(_value);
-    // }
+    // /** Returns the actual used world of the OIMO physics engine. No user interaction needed - Only for advanced users that need to access it directly */
+    public getOimoWorld(): OIMO.World {
+      return Physics.ƒactive.oimoWorld;
+    }
 
     // /** Updates all {@link Rigidbodies} known to the Physics.world to match their containers or meshes transformations */
     // private updateWorldFromWorldMatrix(_toMesh: boolean = false): void {

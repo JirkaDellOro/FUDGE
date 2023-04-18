@@ -15,12 +15,12 @@ namespace RectangleCollision {
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     viewport.initialize("Viewport", null, null, canvas);
-    viewport.addEventListener(ƒ.EVENT_POINTER.MOVE, update);
-    viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
+    viewport.canvas.addEventListener("pointermove", update);
+    // viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
 
-    function update(_event: ƒ.EventPointer): void {
+    function update(_event: PointerEvent): void {
       crc2.clearRect(0, 0, canvas.width, canvas.height);
-      let pointer: ƒ.Vector2 = new ƒ.Vector2(_event.pointerX, _event.pointerY);
+      let pointer: ƒ.Vector2 = new ƒ.Vector2(_event.offsetX, _event.offsetY);
       rect1.position = pointer;
       rect1.position.subtract(ƒ.Vector2.SCALE(rect1.size, 0.5));
 

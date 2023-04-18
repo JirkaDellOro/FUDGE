@@ -2,17 +2,31 @@ declare namespace Fudge {
     enum CONTEXTMENU {
         ADD_NODE = 0,
         ACTIVATE_NODE = 1,
-        ADD_COMPONENT = 2,
-        ADD_COMPONENT_SCRIPT = 3,
-        EDIT = 4,
-        CREATE_MESH = 5,
-        CREATE_MATERIAL = 6,
-        CREATE_GRAPH = 7,
-        REMOVE_COMPONENT = 8,
-        ADD_JOINT = 9,
-        TRANSLATE = 10,
-        ROTATE = 11,
-        SCALE = 12
+        DELETE_NODE = 2,
+        ADD_COMPONENT = 3,
+        DELETE_COMPONENT = 4,
+        ADD_COMPONENT_SCRIPT = 5,
+        EDIT = 6,
+        CREATE_MESH = 7,
+        CREATE_MATERIAL = 8,
+        CREATE_GRAPH = 9,
+        CREATE_ANIMATION = 10,
+        CREATE_PARTICLE_EFFECT = 11,
+        SYNC_INSTANCES = 12,
+        REMOVE_COMPONENT = 13,
+        ADD_JOINT = 14,
+        DELETE_RESOURCE = 15,
+        ORTHGRAPHIC_CAMERA = 16,
+        RENDER_CONTINUOUSLY = 17,
+        ADD_PROPERTY = 18,
+        DELETE_PROPERTY = 19,
+        ADD_PARTICLE_PROPERTY = 20,
+        ADD_PARTICLE_FUNCTION = 21,
+        ADD_PARTICLE_FUNCTION_NAMED = 22,
+        ADD_PARTICLE_CONSTANT = 23,
+        ADD_PARTICLE_CONSTANT_NAMED = 24,
+        ADD_PARTICLE_TRANSFORMATION = 25,
+        DELETE_PARTICLE_DATA = 26
     }
     enum MENU {
         QUIT = "quit",
@@ -24,26 +38,20 @@ declare namespace Fudge {
         PANEL_ANIMATION_OPEN = "panelAnimationOpen",
         PANEL_PROJECT_OPEN = "panelProjectOpen",
         PANEL_HELP_OPEN = "panelHelpOpen",
+        PANEL_PARTICLE_SYSTEM_OPEN = "panelParticleSystemOpen",
         FULLSCREEN = "fullscreen"
-    }
-    enum EVENT_EDITOR {
-        SET_GRAPH = "setGraph",
-        FOCUS_NODE = "focusNode",
-        SET_PROJECT = "setProject",
-        UPDATE = "update",
-        REFRESH = "refresh",
-        DESTROY = "destroy",
-        CLEAR_PROJECT = "clearProject",
-        TRANSFORM = "transform"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
         PROJECT = "PanelProject",
-        HELP = "PanelHelp"
+        HELP = "PanelHelp",
+        ANIMATION = "PanelAnimation",
+        PARTICLE_SYSTEM = "PanelParticleSystem"
     }
     enum VIEW {
         HIERARCHY = "ViewHierarchy",
         ANIMATION = "ViewAnimation",
+        ANIMATION_SHEET = "ViewAnimationSheet",
         RENDER = "ViewRender",
         COMPONENTS = "ViewComponents",
         CAMERA = "ViewCamera",
@@ -51,7 +59,8 @@ declare namespace Fudge {
         EXTERNAL = "ViewExternal",
         PROPERTIES = "ViewProperties",
         PREVIEW = "ViewPreview",
-        SCRIPT = "ViewScript"
+        SCRIPT = "ViewScript",
+        PARTICLE_SYSTEM = "ViewParticleSystem"
     }
     enum TRANSFORM {
         TRANSLATE = "translate",

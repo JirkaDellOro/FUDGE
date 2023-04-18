@@ -3,12 +3,13 @@
 ///<reference path="../../../Core/Build/FudgeCore.d.ts"/>
 namespace FudgeNet {
   import ƒ = FudgeCore;
+  let idRoom: string = "abc";
 
   /**
    * Manages a websocket connection to a FudgeServer and multiple rtc-connections to other FudgeClients.  
    * Processes messages from in the format {@link FudgeNet.Message} according to the controlling
    * fields {@link FudgeNet.ROUTE} and {@link FudgeNet.COMMAND}.  
-   * @author Falco Böhnke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
+   * @author Falco Böhnke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021-2022
    */
   export class FudgeClient extends EventTarget {
     public id!: string;
@@ -19,6 +20,8 @@ namespace FudgeNet {
     // TODO: examine, if server should know about connected peers and send this information also
     public clientsInfoFromServer: { [id: string]: { name?: string, isHost?: boolean } } = {};
     public idHost!: string;
+    // start is the servers lobby
+    public idRoom: string = "Lobby";
 
     constructor() {
       super();
@@ -39,7 +42,7 @@ namespace FudgeNet {
     public loginToServer = (_name: string): void => {
       try {
         let message: FudgeNet.Message = {
-          command: FudgeNet.COMMAND.LOGIN_REQUEST, route: FudgeNet.ROUTE.SERVER, content: { name: _name }
+          idRoom: idRoom, command: FudgeNet.COMMAND.LOGIN_REQUEST, route: FudgeNet.ROUTE.SERVER, content: { name: _name }
         };
         this.dispatch(message);
       } catch (error) {
@@ -99,6 +102,7 @@ namespace FudgeNet {
     public dispatch(_message: FudgeNet.Message): void {
       _message.timeSender = Date.now();
       _message.idSource = this.id;
+      _message.idRoom = this.idRoom;
       let message: string = JSON.stringify(_message);
       try {
         if (_message.route == FudgeNet.ROUTE.HOST) {
@@ -126,19 +130,20 @@ namespace FudgeNet {
      * to establish RTC-peer-connections between all clients
      */
     public createMesh(): void {
-      this.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
+      // TODO: add idRoom in dispatch method
+      this.dispatch({ idRoom: idRoom, command: FudgeNet.COMMAND.DISCONNECT_PEERS });
       this.disconnectPeers();
-      this.dispatch({ command: FudgeNet.COMMAND.CREATE_MESH, route: FudgeNet.ROUTE.SERVER });
+      this.dispatch({ idRoom: idRoom, command: FudgeNet.COMMAND.CREATE_MESH, route: FudgeNet.ROUTE.SERVER });
     }
     /**
      * Sends out a disconnect message to all peers, disconnects from all peers and sends a CONNECT_HOST-command to the server,
      * to establish RTC-peer-connections between this client and all others, making this the host
      */
     public becomeHost(): void {
-      this.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
+      this.dispatch({ idRoom: idRoom, command: FudgeNet.COMMAND.DISCONNECT_PEERS });
       this.disconnectPeers();
       console.log("createHost", this.id);
-      this.dispatch({ command: FudgeNet.COMMAND.CONNECT_HOST, route: FudgeNet.ROUTE.SERVER });
+      this.dispatch({ idRoom: idRoom, command: FudgeNet.COMMAND.CONNECT_HOST, route: FudgeNet.ROUTE.SERVER });
     }
 
     public hndMessage = (_event: MessageEvent): void => {
@@ -173,6 +178,9 @@ namespace FudgeNet {
         case FudgeNet.COMMAND.DISCONNECT_PEERS:
           let ids: string[] = message.content?.peers;
           this.disconnectPeers(ids);
+          break;
+        case FudgeNet.COMMAND.ROOM_ENTER:
+          this.idRoom = message.idRoom!;
           break;
         case FudgeNet.COMMAND.SERVER_HEARTBEAT:
           //@ts-ignore
@@ -238,7 +246,7 @@ namespace FudgeNet {
           throw (new Error("id undefined"));
         this.id = _id;
         // this.sendToServer(new Messages.IdAssigned(_id));
-        let message: FudgeNet.Message = { command: FudgeNet.COMMAND.ASSIGN_ID, route: FudgeNet.ROUTE.SERVER };
+        let message: FudgeNet.Message = { idRoom: idRoom, command: FudgeNet.COMMAND.ASSIGN_ID, route: FudgeNet.ROUTE.SERVER };
         this.dispatch(message);
       } catch (error) {
         console.info("Unexpected Error: Sending ID Confirmation", error);
@@ -281,7 +289,7 @@ namespace FudgeNet {
       let localDescription: RTCSessionDescriptionInit = await rtc.createOffer({ iceRestart: true });
       await rtc.setLocalDescription(localDescription);
       const offerMessage: FudgeNet.Message = {
-        route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_OFFER, idTarget: _idRemote, content: { offer: rtc.localDescription }
+        idRoom: idRoom, route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_OFFER, idTarget: _idRemote, content: { offer: rtc.localDescription }
       };
       this.dispatch(offerMessage);
       console.info("Caller: send offer, expected 'have-local-offer', got:  ", this.peers[_idRemote].signalingState);
@@ -304,7 +312,7 @@ namespace FudgeNet {
       // rtc.setupDataChannel(this, _message.idSource!);
 
       const answerMessage: FudgeNet.Message = {
-        route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _message.idSource, content: { answer: rtc.localDescription }
+        idRoom: idRoom, route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _message.idSource, content: { answer: rtc.localDescription }
       };
       console.info("Callee: send answer to server ", answerMessage);
       this.dispatch(answerMessage);
@@ -336,7 +344,7 @@ namespace FudgeNet {
       let pc: RTCPeerConnection = <RTCPeerConnection>_event.currentTarget;
       console.info("Caller: send ICECandidates to server", _event.candidate);
       let message: FudgeNet.Message = {
-        route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate, states: [pc.connectionState, pc.iceConnectionState, pc.iceGatheringState] }
+        idRoom: idRoom, route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate, states: [pc.connectionState, pc.iceConnectionState, pc.iceGatheringState] }
       };
       this.dispatch(message);
     }

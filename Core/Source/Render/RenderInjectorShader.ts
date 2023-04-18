@@ -26,6 +26,7 @@ namespace FudgeCore {
         crc3.deleteProgram(this.program);
         delete this.attributes;
         delete this.uniforms;
+        delete this.program;
       }
     }
 
@@ -89,7 +90,9 @@ namespace FudgeCore {
           if (!info) {
             break;
           }
-          detectedUniforms[info.name] = RenderWebGL.assert<WebGLUniformLocation>(crc3.getUniformLocation(program, info.name));
+          let location: WebGLUniformLocation = crc3.getUniformLocation(program, info.name);
+          if (location)
+            detectedUniforms[info.name] = RenderWebGL.assert<WebGLUniformLocation>(location);
         }
         return detectedUniforms;
       }

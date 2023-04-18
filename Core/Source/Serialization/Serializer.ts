@@ -99,13 +99,12 @@ namespace FudgeCore {
       try {
         // loop constructed solely to access type-property. Only one expected!
         for (path in _serialization) {
-          // reconstruct = new (<General>Fudge)[typeName];
           reconstruct = Serializer.reconstruct(path);
           reconstruct = await reconstruct.deserialize(_serialization[path]);
           return reconstruct;
         }
       } catch (_error) {
-        throw new Error(`Deserialization of ${path} failed: ` + _error);
+        throw new Error(`Deserialization of ${path}, ${Reflect.get(reconstruct, "idResource")} failed: ` + _error);
       }
       return null;
     }

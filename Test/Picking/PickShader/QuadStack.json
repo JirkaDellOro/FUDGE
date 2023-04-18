@@ -1,12 +1,14 @@
 {
   "Graph|2021-02-03T16:20:47.935Z|07303": {
     "ƒ.Graph": {
+      "active": true,
       "name": "QuadStack",
       "components": {},
       "children": [
         {
           "ƒ.GraphInstance": {
             "name": "red",
+            "active": true,
             "components": {
               "ComponentMesh": [
                 {
@@ -48,6 +50,7 @@
         {
           "ƒ.GraphInstance": {
             "name": "green",
+            "active": true,
             "components": {
               "ComponentMesh": [
                 {
@@ -89,6 +92,7 @@
         {
           "ƒ.GraphInstance": {
             "name": "blue",
+            "active": true,
             "components": {
               "ComponentMesh": [
                 {
@@ -130,6 +134,7 @@
         {
           "ƒ.GraphInstance": {
             "name": "yellow",
+            "active": true,
             "components": {
               "ComponentMesh": [
                 {

@@ -2,8 +2,6 @@ var Random;
 (function (Random) {
     var ƒ = FudgeCore;
     class Result {
-        result;
-        comment;
     }
     let seed = parseFloat(location.search.slice(1)) || undefined;
     console.log("Seed = " + seed);

@@ -8,8 +8,10 @@ namespace Fudge {
     }
 
     public getAttributes(_node: ƒ.Node): string {
-      let attributes: string = _node.isActive ? "active" : "inactive";
-      return attributes;
+      let attributes: string[] = [_node.isActive ? "active" : "inactive"];
+      if (_node instanceof ƒ.GraphInstance)
+        attributes.push("GraphInstance");
+      return attributes.join(" ");
     }
     
     public rename(_node: ƒ.Node, _new: string): boolean {

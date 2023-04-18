@@ -45,6 +45,7 @@ namespace FudgeCore {
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
+      delete serialization.shape;
       serialization.latitudes = this.latitudes;
       return serialization;
     }
@@ -57,7 +58,7 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      this.create(_mutator.longitudes, _mutator.latitudes);
+      this.create(this.longitudes, this.latitudes);
     }
 
     protected reduceMutator(_mutator: Mutator): void {

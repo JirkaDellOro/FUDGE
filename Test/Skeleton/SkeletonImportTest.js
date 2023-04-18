@@ -12,18 +12,18 @@ var SkeletonTest;
         rotatorX.addComponent(new ƒ.ComponentTransform());
         const rotatorY = new ƒ.Node("RotatorY");
         rotatorY.addComponent(new ƒ.ComponentTransform());
-        const zylinder = await loadAnimatedArm();
-        console.log(zylinder);
+        const arm = await loadAnimatedArm();
+        console.log(arm);
         scene.addChild(rotatorX);
         rotatorX.addChild(rotatorY);
-        rotatorY.addChild(zylinder);
+        rotatorY.addChild(arm);
         // setup camera
         const camera = new ƒ.Node("Camera");
         camera.addComponent(new ƒ.ComponentCamera());
         camera.addComponent(new ƒ.ComponentTransform());
         camera.getComponent(ƒ.ComponentCamera).clrBackground.setHex("4472C4FF");
         camera.mtxLocal.translateZ(10);
-        camera.mtxLocal.showTo(ƒ.Vector3.ZERO(), camera.mtxLocal.getY());
+        camera.mtxLocal.lookAt(ƒ.Vector3.ZERO(), camera.mtxLocal.getY());
         scene.addChild(camera);
         // setup light
         const cmpLightDirectional = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0.5, 0.5, 0.5)));
@@ -37,20 +37,20 @@ var SkeletonTest;
         viewport.draw();
         console.log(viewport);
         // run loop
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal));
+        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal, arm.getComponent(ƒ.ComponentMaterial).material));
         ƒ.Loop.start();
     }
     async function loadAnimatedArm() {
         const loader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
         const arm = await loader.getNode("ArmModel");
-        const meshSerialization = ƒ.Serializer.serialize(arm.getComponent(ƒ.ComponentMesh).mesh);
-        console.log(meshSerialization);
-        arm.getComponent(ƒ.ComponentMesh).mesh = await ƒ.Serializer.deserialize(meshSerialization);
+        // const meshSerialization: ƒ.Serialization = ƒ.Serializer.serialize(arm.getComponent(ƒ.ComponentMesh).mesh);
+        // console.log(meshSerialization);
+        // arm.getComponent(ƒ.ComponentMesh).mesh = await ƒ.Serializer.deserialize(meshSerialization) as ƒ.MeshSkin;
         arm.addComponent(new ƒ.ComponentTransform());
         arm.mtxLocal.translateY(-2);
         return arm;
     }
-    function update(_viewport, _mtxRotatorX, _mtxRotatorY) {
+    function update(_viewport, _mtxRotatorX, _mtxRotatorY, _material) {
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT]))
             _mtxRotatorY.rotateY(3);
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_UP]))
@@ -63,6 +63,12 @@ var SkeletonTest;
             _mtxRotatorX.set(ƒ.Matrix4x4.IDENTITY());
             _mtxRotatorY.set(ƒ.Matrix4x4.IDENTITY());
         }
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F]))
+            _material.setShader(ƒ.ShaderFlatSkin);
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.G]))
+            _material.setShader(ƒ.ShaderGouraudSkin);
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H]))
+            _material.setShader(ƒ.ShaderPhongSkin);
         _viewport.draw();
     }
 })(SkeletonTest || (SkeletonTest = {}));

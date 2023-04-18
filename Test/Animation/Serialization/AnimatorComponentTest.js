@@ -25,12 +25,10 @@ var AnimatorComponentTest;
             components: {
                 ComponentTransform: [
                     {
-                        "ƒ.ComponentTransform": {
-                            mtxLocal: {
-                                rotation: {
-                                    x: animseq,
-                                    y: animseq
-                                }
+                        mtxLocal: {
+                            rotation: {
+                                x: animseq,
+                                y: animseq
                             }
                         }
                     }

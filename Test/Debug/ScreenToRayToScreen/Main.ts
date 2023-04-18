@@ -38,10 +38,8 @@ namespace ScreenToRayToScreen {
     ƒ.Debug.log("Viewport", viewport);
 
     // setup event handling
-    viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
-    viewport.activateWheelEvent(ƒ.EVENT_WHEEL.WHEEL, true);
-    viewport.addEventListener(ƒ.EVENT_POINTER.MOVE, hndPointerMove);
-    viewport.addEventListener(ƒ.EVENT_WHEEL.WHEEL, hndWheelMove);
+    viewport.canvas.addEventListener("pointermove", hndPointerMove);
+    viewport.canvas.addEventListener("wheel", hndWheelMove);
     // window.addEventListener("keydown", hndKeyDown);
 
 
@@ -50,7 +48,7 @@ namespace ScreenToRayToScreen {
     ƒ.Debug.log("Game", root);
   }
 
-  function hndPointerMove(_event: ƒ.EventPointer): void {
+  function hndPointerMove(_event: PointerEvent): void {
     if (document.pointerLockElement) {
       camera.rotateY(_event.movementX * speedCameraRotation);
       camera.rotateX(_event.movementY * speedCameraRotation);
@@ -58,7 +56,7 @@ namespace ScreenToRayToScreen {
       return;
     }
 
-    let posProjection: ƒ.Vector2 = viewport.pointClientToProjection(new ƒ.Vector2(_event.pointerX, _event.pointerY));
+    let posProjection: ƒ.Vector2 = viewport.pointClientToProjection(new ƒ.Vector2(_event.offsetX, _event.offsetY));
 
     ƒ.Debug.clear();
 
@@ -123,7 +121,7 @@ namespace ScreenToRayToScreen {
     cube.addComponent(cmpMesh);
 
     let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(
-      new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("RED")))
+      new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("RED")))
     );
     cube.addComponent(cmpMaterial);
 

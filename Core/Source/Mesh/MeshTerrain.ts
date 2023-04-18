@@ -150,11 +150,7 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      this.create(
-        new Vector2(_mutator.resolution.x, _mutator.resolution.y),
-        new Vector2(_mutator.scale.x, _mutator.scale.y),
-        _mutator.seed
-      );
+      this.create(this.resolution, this.scale, this.seed);
     }
     //#endregion
   }

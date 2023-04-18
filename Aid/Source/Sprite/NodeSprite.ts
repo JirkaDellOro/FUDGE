@@ -45,6 +45,8 @@ namespace FudgeAid {
      * Show a specific frame of the sequence
      */
     public showFrame(_index: number): void {
+      if (this.timer)
+        ƒ.Time.game.deleteTimer(this.timer);
       let spriteFrame: SpriteFrame = this.animation.frames[_index];
       this.cmpMesh.mtxPivot = spriteFrame.mtxPivot;
       this.cmpMaterial.mtxPivot = spriteFrame.mtxTexture;

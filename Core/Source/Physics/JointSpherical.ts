@@ -81,8 +81,7 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.springDamping = _mutator.springDamping;
-      this.springFrequency = _mutator.springFrequency;
+      this.mutateBase(_mutator, ["springDamping", "springFrequency"]);
       delete _mutator.springDamping;
       delete _mutator.springFrequency;
       super.mutate(_mutator);

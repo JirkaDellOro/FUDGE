@@ -4,7 +4,7 @@ var TestInstructions;
     // see: https://developer.github.com/v3/issues/#create-an-issue
     let dialog;
     let instructions;
-    function display(_instructions) {
+    function display(_instructions, _open = true) {
         instructions = _instructions;
         dialog = document.createElement("dialog");
         dialogPolyfill.registerDialog(dialog);
@@ -35,8 +35,9 @@ var TestInstructions;
             }
             document.body.appendChild(dialog);
             dialog.style.zIndex = "100";
-            //@ts-ignore
-            dialog.show();
+            if (_open)
+                //@ts-ignore
+                dialog.show();
         }
         dialog.className = "dialog";
     }

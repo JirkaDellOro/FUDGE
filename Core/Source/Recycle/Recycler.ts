@@ -4,7 +4,9 @@ namespace FudgeCore {
   }
   /**
    * Keeps a depot of objects that have been marked for reuse, sorted by type.  
-   * Using {@link Recycler} reduces load on the carbage collector and thus supports smooth performance
+   * Using {@link Recycler} reduces load on the carbage collector and thus supports smooth performance.
+   * @author Jirka Dell'Oro-Friedl, HFU, 2021
+   * @link https://github.com/JirkaDellOro/FUDGE/wiki/Recycler
    */
   export abstract class Recycler {
     private static depot: { [type: string]: Object[] } = {};
@@ -14,7 +16,7 @@ namespace FudgeCore {
      * If the depot for that type is empty it returns a new object of the requested type
      * @param _T The class identifier of the desired object
      */
-    public static get<T extends Recycable>(_T: new () => T): T {
+    public static get<T extends Recycable | RecycableArray<T>>(_T: new () => T): T {
       let key: string = _T.name;
       let instances: Object[] = Recycler.depot[key];
       if (instances && instances.length > 0) {

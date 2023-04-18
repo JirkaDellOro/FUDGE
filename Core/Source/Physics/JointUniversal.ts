@@ -135,7 +135,7 @@ namespace FudgeCore {
     }
     set maxRotorFirst(_value: number) {
       this.#maxRotorFirst = _value;
-      if (this.joint != null) this.joint.getLimitMotor1().upperLimit = _value * Math.PI / 180;
+      if (this.joint != null) this.joint.getLimitMotor1().upperLimit = _value * Calc.deg2rad;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
@@ -145,7 +145,7 @@ namespace FudgeCore {
     }
     set minRotorFirst(_value: number) {
       this.#minRotorFirst = _value;
-      if (this.joint != null) this.joint.getLimitMotor1().lowerLimit = _value * Math.PI / 180;
+      if (this.joint != null) this.joint.getLimitMotor1().lowerLimit = _value * Calc.deg2rad;
     }
     /**
       * The target rotational speed of the motor in m/s. 
@@ -176,7 +176,7 @@ namespace FudgeCore {
     }
     set maxRotorSecond(_value: number) {
       this.#maxRotorSecond = _value;
-      if (this.joint != null) this.joint.getLimitMotor2().upperLimit = _value * Math.PI / 180;
+      if (this.joint != null) this.joint.getLimitMotor2().upperLimit = _value * Calc.deg2rad;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
@@ -186,7 +186,7 @@ namespace FudgeCore {
     }
     set minRotorSecond(_value: number) {
       this.#minRotorSecond = _value;
-      if (this.joint != null) this.joint.getLimitMotor2().lowerLimit = _value * Math.PI / 180;
+      if (this.joint != null) this.joint.getLimitMotor2().lowerLimit = _value * Calc.deg2rad;
     }
     /**
       * The target rotational speed of the motor in m/s. 
@@ -233,8 +233,10 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.axisFirst = new Vector3(...<number[]>(Object.values(_mutator.axisFirst)));
-      this.axisSecond = new Vector3(...<number[]>(Object.values(_mutator.axisSecond)));
+      if (typeof (_mutator.axisFirst) !== "undefined")
+        this.axisFirst = new Vector3(...<number[]>(Object.values(_mutator.axisFirst)));
+      if (typeof (_mutator.axisSecond) !== "undefined")
+        this.axisSecond = new Vector3(...<number[]>(Object.values(_mutator.axisSecond)));
       delete _mutator.axisFirst;
       delete _mutator.axisSecond;
       this.#mutate(_mutator);
@@ -269,18 +271,11 @@ namespace FudgeCore {
     }
 
     #mutate = (_mutator: Mutator): void => {
-      this.springDampingFirst = _mutator.springDampingFirst;
-      this.springFrequencyFirst = _mutator.springFrequencyFirst;
-      this.springDampingSecond = _mutator.springDampingSecond;
-      this.springFrequencySecond = _mutator.springFrequencySecond;
-      this.maxRotorFirst = _mutator.maxRotorFirst;
-      this.minRotorFirst = _mutator.minRotorFirst;
-      this.rotorSpeedFirst = _mutator.rotorSpeedFirst;
-      this.rotorTorqueFirst = _mutator.rotorTorqueFirst;
-      this.maxRotorSecond = _mutator.maxRotorSecond;
-      this.minRotorSecond = _mutator.minRotorSecond;
-      this.rotorSpeedSecond = _mutator.rotorSpeedSecond;
-      this.rotorTorqueSecond = _mutator.rotorTorqueSecond;
+      this.mutateBase(_mutator, [
+        "springDampingFirst", "springFrequencyFirst", "springDampingSecond", "springFrequencySecond",
+        "maxRotorFirst", "minRotorFirst", "rotorSpeedFirst", "rotorTorqueFirst",
+        "maxRotorSecond", "minRotorSecond", "rotorSpeedSecond", ".rotorTorqueSecond"]
+      );
     }
     //#endregion
 
@@ -288,9 +283,9 @@ namespace FudgeCore {
       this.#axisSpringDamperFirst = new OIMO.SpringDamper().setSpring(this.#springFrequencyFirst, this.#springDampingFirst);
       this.#axisSpringDamperSecond = new OIMO.SpringDamper().setSpring(this.#springFrequencySecond, this.#springDampingSecond);
 
-      this.#motorFirst = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Math.PI / 180, this.#maxRotorFirst * Math.PI / 180);
+      this.#motorFirst = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Calc.deg2rad, this.#maxRotorFirst * Calc.deg2rad);
       this.#motorFirst.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
-      this.#motorSecond = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Math.PI / 180, this.#maxRotorFirst * Math.PI / 180);
+      this.#motorSecond = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Calc.deg2rad, this.#maxRotorFirst * Calc.deg2rad);
       this.#motorSecond.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
 
       this.config = new OIMO.UniversalJointConfig();

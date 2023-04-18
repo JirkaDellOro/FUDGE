@@ -43,7 +43,7 @@ namespace FudgeCore {
    * The provided properties of the {@link Mutator} must match public properties or getters/setters of the object.
    * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
    */
-  export abstract class Mutable extends EventTargetƒ {
+  export abstract class Mutable extends EventTargetUnified {
     /**
      * Decorator allows to attach {@link Mutable} functionality to existing classes. 
      */
@@ -54,6 +54,17 @@ namespace FudgeCore {
     //     }
     //   });
     // }
+
+    public static getMutatorFromPath(_mutator: Mutator, _path: string[]): Mutator {
+      let key: string = _path[0];
+      let mutator: Mutator = {};
+      if (_mutator[key] == undefined) // if the path deviates from mutator structure, return the mutator
+        return _mutator;
+      mutator[key] = _mutator[key];
+      if (_path.length > 1)
+        mutator[key] = Mutable.getMutatorFromPath(mutator[key], _path.slice(1, _path.length));
+      return mutator;
+    }
 
     /**
      * Retrieves the type of this mutable subclass as the name of the runtime class
@@ -153,21 +164,38 @@ namespace FudgeCore {
       }
     }
     /**
-     * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
-     * @param _mutator
+     * Updates the attribute values of the instance according to the state of the mutator.
+     * The mutation may be restricted to a subset of the mutator and the event dispatching suppressed.
+     * Uses mutateBase, but can be overwritten in subclasses
      */
-    public async mutate(_mutator: Mutator): Promise<void> {
-      for (let attribute in _mutator) {
+    public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
+      await this.mutateBase(_mutator, _selection);
+      if (_dispatchMutate)
+        this.dispatchEvent(new CustomEvent(EVENT.MUTATE, {bubbles: true, detail: {mutator: _mutator}}));
+    }
+
+    /**
+     * Base method for mutation, always available to subclasses. Do not overwrite in subclasses!
+     */
+    protected async mutateBase(_mutator: Mutator, _selection?: string[]): Promise<void> {
+      let mutator: Mutator = {};
+      if (!_selection)
+        mutator = _mutator;
+      else
+        for (let attribute of _selection) // reduce the mutator to the selection
+          if (typeof (_mutator[attribute]) !== "undefined")
+            mutator[attribute] = _mutator[attribute];
+
+      for (let attribute in mutator) {
         if (!Reflect.has(this, attribute))
           continue;
         let mutant: Object = Reflect.get(this, attribute);
-        let value: Mutator = <Mutator>_mutator[attribute];
+        let value: Mutator = <Mutator>mutator[attribute];
         if (mutant instanceof MutableArray || mutant instanceof Mutable)
-          await mutant.mutate(value);
+          await mutant.mutate(value, null, false);
         else
           Reflect.set(this, attribute, value);
       }
-      this.dispatchEvent(new Event(EVENT.MUTATE));
     }
     /**
      * Reduces the attributes of the general mutator according to desired options for mutation. To be implemented in subclasses

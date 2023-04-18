@@ -85,11 +85,8 @@ namespace Mesh {
     viewport.initialize("Viewport", graph, cmpCamera, canvas);
 
     // setup event handling
-    viewport.setFocus(true);
-    viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
-    viewport.activateWheelEvent(ƒ.EVENT_WHEEL.WHEEL, true);
-    viewport.addEventListener(ƒ.EVENT_POINTER.MOVE, hndPointerMove);
-    viewport.addEventListener(ƒ.EVENT_WHEEL.WHEEL, hndWheelMove);
+    viewport.canvas.addEventListener("pointermove", hndPointerMove);
+    viewport.canvas.addEventListener("wheel", hndWheelMove);
 
     //window.addEventListener("keypress", hndKeyboard);
 
@@ -105,7 +102,7 @@ namespace Mesh {
     }
   }
 
-  function hndPointerMove(_event: ƒ.EventPointer): void {
+  function hndPointerMove(_event: PointerEvent): void {
     if (!_event.buttons)
       return;
     cntMouseX.setInput(_event.movementX);
@@ -118,10 +115,9 @@ namespace Mesh {
 
 
   function startInteraction(_viewport: ƒ.Viewport): void {
-    _viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
-    _viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, move);
+    _viewport.canvas.addEventListener("keydown", move);
 
-    function move(_event: ƒ.EventKeyboard): void {
+    function move(_event: KeyboardEvent): void {
       mtxTranslator.translateZ(0.1 *
         (_event.code == ƒ.KEYBOARD_CODE.W ? -1 :
           _event.code == ƒ.KEYBOARD_CODE.S ? 1 :

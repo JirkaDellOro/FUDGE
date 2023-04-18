@@ -59,9 +59,9 @@ namespace FudgeCore {
       return this.ƒradius;
     }
 
-    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): RenderBuffers { return null; /* injected by RenderInjector*/ }
-    public getRenderBuffers(_shader: typeof Shader): RenderBuffers { return null; /* injected by RenderInjector*/ }
-    public deleteRenderBuffers(_shader: typeof Shader): void {/* injected by RenderInjector*/ }
+    public useRenderBuffers(_shader: ShaderInterface, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers { return null; /* injected by RenderInjector*/ }
+    public getRenderBuffers(_shader: ShaderInterface): RenderBuffers { return null; /* injected by RenderInjector*/ }
+    public deleteRenderBuffers(_shader: ShaderInterface): void {/* injected by RenderInjector*/ }
 
     public clear(): void {
       this.ƒbox = undefined;
@@ -111,12 +111,7 @@ namespace FudgeCore {
       box.set();
       for (let i: number = 0; i < this.vertices.length; i ++) {
         let point: Vector3 = this.vertices.position(i);
-        box.min.x = Math.min(point.x, box.min.x);
-        box.max.x = Math.max(point.x, box.max.x);
-        box.min.y = Math.min(point.y, box.min.y);
-        box.max.y = Math.max(point.y, box.max.y);
-        box.min.z = Math.min(point.z, box.min.z);
-        box.max.z = Math.max(point.z, box.max.z);
+        box.expand(point);
       }
       return box;
     }
