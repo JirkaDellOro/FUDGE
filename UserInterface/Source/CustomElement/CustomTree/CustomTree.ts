@@ -63,13 +63,7 @@ namespace FudgeUserInterface {
         return;
 
       let branch: CustomTreeList<T> = this.createBranch(children);
-      let old: CustomTreeList<T> = item.getBranch();
-      item.hasChildren = true;
-      if (old)
-        old.restructure(branch);
-      else
-        item.setBranch(branch); 
-
+      item.setBranch(branch); 
       this.displaySelection(<T[]>this.controller.selection);
     }  
 
@@ -83,11 +77,11 @@ namespace FudgeUserInterface {
 
     // Callback / Eventhandler in Tree
     private hndRename(_event: Event): void {
-      let targetItem: CustomTreeItem<T> = <CustomTreeItem<T>>_event.target;
-      this.controller.rename(targetItem.data, (<CustomEvent>_event).detail.id, (<CustomEvent>_event).detail.value);
-      (<CustomTreeItem<T>>targetItem.parentElement?.parentElement)?.expand(true); // refresh parent since children might have changed their order
-      targetItem.refreshAttributes();
-      targetItem.focus();
+      let item: CustomTreeItem<T> = <CustomTreeItem<T>>_event.target;
+      let renamed: boolean = this.controller.rename(item.data, (<CustomEvent>_event).detail.id, (<CustomEvent>_event).detail.value);
+      if (!renamed)
+        item.refreshContent();
+      item.refreshAttributes();
     }
 
     private hndSelect(_event: Event): void {

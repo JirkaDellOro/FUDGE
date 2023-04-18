@@ -485,8 +485,8 @@ declare namespace FudgeUserInterface {
         abstract createContent(_object: T): HTMLFormElement;
         /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
         abstract getAttributes(_object: T): string;
-        /** Process the proposed new label */
-        abstract rename(_object: T, _key: string, _new: string): void;
+        /** Process the proposed new name */
+        abstract rename(_object: T, _id: string, _new: string): boolean;
         /** Return true if the object has children that must be shown when unfolding the tree item */
         abstract hasChildren(_object: T): boolean;
         /** Return the object's children to show when unfolding the tree item */
@@ -551,8 +551,8 @@ declare namespace FudgeUserInterface {
          * Set the content representing the attached {@link data}
          */
         set content(_content: HTMLFormElement);
-        refreshContent(): void;
         refreshAttributes(): void;
+        refreshContent(): void;
         /**
          * Tries to expanding the {@link CustomTreeList} of children, by dispatching {@link EVENT.EXPAND}.
          * The user of the tree needs to add an event listener to the tree

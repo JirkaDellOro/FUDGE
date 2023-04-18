@@ -1810,31 +1810,31 @@ var Fudge;
                 let errors = [];
                 if (this.isReferenced(name))
                     errors.push(`variable "${name}" is still referenced`);
-                if (this.data.variables.find(_variable => name == _new))
+                if (this.data.variableNames.includes(_new))
                     errors.push(`variable "${_new}" already exists`);
                 if (ƒ.ParticleData.PREDEFINED_VARIABLES[_new])
                     errors.push(`variable "${_new}" is a predefined variable and can not be redeclared. Predefined variables: [${Object.keys(ƒ.ParticleData.PREDEFINED_VARIABLES).join(", ")}]`);
                 if (errors.length > 0) {
                     ƒui.Warning.display(errors, "Unable to rename", "Please resolve the errors and try again");
-                    return;
+                    return false;
                 }
                 this.data.variableNames[index] = _new;
-                return;
+                return true;
             }
             if (_id == "function" /* FUNCTION */ && ƒ.ParticleData.isFunction(_data)) {
                 _data.function = _new;
-                return;
+                return true;
             }
             if (_id == "transformation" /* TRANSFORMATION */ && ƒ.ParticleData.isTransformation(_data)) {
                 _data.transformation = _new;
-                return;
+                return true;
             }
             if (_id == "value" /* VALUE */ && (ƒ.ParticleData.isVariable(_data) || ƒ.ParticleData.isConstant(_data))) {
                 let input = Number.isNaN(inputAsNumber) ? _new : inputAsNumber;
                 if (typeof input == "string" && !ƒ.ParticleData.PREDEFINED_VARIABLES[input] && this.data.variableNames && !this.data.variableNames.includes(input))
-                    return;
+                    return false;
                 _data.value = input;
-                return;
+                return true;
             }
         }
         hasChildren(_data) {
@@ -1897,7 +1897,7 @@ var Fudge;
                     if (_at == null) {
                         container.push(data);
                         if (container == this.data.variables)
-                            this.data.variableNames.push(`variable${this.data.variables.length}`);
+                            this.data.variableNames.push(name || `variable${this.data.variables.length}`);
                     }
                     else {
                         container.splice(_at + _children.indexOf(data), 0, data);
@@ -2644,17 +2644,7 @@ var Fudge;
         }
         validateData(_data) {
             let invalid = [];
-            let references = [];
             validateRecursive(_data);
-            references
-                .filter(([_data, _path]) => _path.includes("variables"))
-                .map(([_data, _path]) => [_path[1], _path[_path.length - 1], _data])
-                .filter(([_from, _to], _index, _references) => {
-                let indexFirstOccurence = _references.findIndex(([_from]) => _from == _to);
-                return indexFirstOccurence >= 0 && indexFirstOccurence >= _index;
-            })
-                .forEach(([_from, _to, _data]) => invalid.push([_data, `variable "${_to}" is used before its declaration`]));
-            invalid.forEach(([_data, _error]) => console.warn(`${ƒ.ParticleSystem.name}: ${_error}`));
             return invalid;
             function validateRecursive(_data, _path = []) {
                 if (ƒ.ParticleData.isFunction(_data)) {
@@ -2663,9 +2653,6 @@ var Fudge;
                         let error = `"${_path.join("/")}/${_data.function}" needs at least ${minParameters} parameters`;
                         invalid.push([_data, error]);
                     }
-                }
-                if (ƒ.ParticleData.isVariable(_data)) {
-                    references.push([_data, _path.concat(_data.value)]);
                 }
                 Object.entries(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data).forEach(([_key, _value]) => {
                     if (typeof _value == "object")

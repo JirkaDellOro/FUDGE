@@ -380,17 +380,7 @@ namespace Fudge {
 
     private validateData(_data: ƒ.ParticleData.Recursive): [ƒ.ParticleData.Expression, string][] {
       let invalid: [ƒ.ParticleData.Expression, string][] = [];
-      let references: [ƒ.ParticleData.Variable, string[]][] = [];
       validateRecursive(_data);
-      references
-        .filter(([_data, _path]) => _path.includes("variables"))
-        .map(([_data, _path]) => [_path[1], _path[_path.length - 1], _data] as [string, string, ƒ.ParticleData.Variable])
-        .filter(([_from, _to], _index, _references) => {
-          let indexFirstOccurence: number = _references.findIndex(([_from]) => _from == _to);
-          return indexFirstOccurence >= 0 && indexFirstOccurence >= _index;
-        })
-        .forEach(([_from, _to, _data]) => invalid.push([_data, `variable "${_to}" is used before its declaration`]));
-      invalid.forEach(([_data, _error]) => console.warn(`${ƒ.ParticleSystem.name}: ${_error}`));
       return invalid;
 
       function validateRecursive(_data: ƒ.ParticleData.Recursive, _path: string[] = []): void {
@@ -401,10 +391,7 @@ namespace Fudge {
             invalid.push([_data, error]);
           }
         }
-        if (ƒ.ParticleData.isVariable(_data)) {
-          references.push([_data, _path.concat(_data.value)]);
-        }
-        
+       
         Object.entries(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data).forEach(([_key, _value]) => {
           if (typeof _value == "object")
             validateRecursive(_value, _path.concat(_key));

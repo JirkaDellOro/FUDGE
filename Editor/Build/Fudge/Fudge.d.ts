@@ -375,7 +375,7 @@ declare namespace Fudge {
         constructor(_data: ƒ.ParticleData.System);
         createContent(_data: ƒ.ParticleData.Recursive): HTMLFormElement;
         getAttributes(_data: ƒ.ParticleData.Recursive): string;
-        rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): void;
+        rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): boolean;
         hasChildren(_data: ƒ.ParticleData.Recursive): boolean;
         getChildren(_data: ƒ.ParticleData.Recursive): ƒ.ParticleData.Recursive[];
         delete(_focused: (ƒ.ParticleData.Recursive)[]): (ƒ.ParticleData.Recursive)[];
