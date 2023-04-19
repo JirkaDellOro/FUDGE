@@ -213,7 +213,7 @@ namespace FudgeCore {
       }
   
       if (ParticleData.isVariable(_expression)) {
-        return "fParticleSystemVariable_" + _expression.value;
+        return ParticleData.PREDEFINED_VARIABLES[_expression.value] || "fParticleSystemVariable_" + _expression.value;
       } 
   
       if (ParticleData.isConstant(_expression)) {

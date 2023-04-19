@@ -10,7 +10,6 @@ namespace Fudge {
   }
 
   export class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.Recursive> {
-
     public childToParent: Map<ƒ.ParticleData.Recursive, ƒ.ParticleData.Recursive> = new Map();
     private data: ƒ.ParticleData.System;
     private view: ViewParticleSystem;
