@@ -13,10 +13,12 @@ namespace Fudge {
 
     public childToParent: Map<ƒ.ParticleData.Recursive, ƒ.ParticleData.Recursive> = new Map();
     private data: ƒ.ParticleData.System;
+    private view: ViewParticleSystem;
 
-    constructor(_data: ƒ.ParticleData.System) {
+    constructor(_data: ƒ.ParticleData.System, _view: ViewParticleSystem) {
       super();
       this.data = _data;
+      this.view = _view;
     }
 
     public createContent(_data: ƒ.ParticleData.Recursive): HTMLFormElement {
@@ -94,11 +96,9 @@ namespace Fudge {
       let inputAsNumber: number = Number.parseFloat(_new);
 
       if (_id == ID.NAME && ƒ.ParticleData.isExpression(_data)) {
-        let index: number = this.data.variables.findIndex(_variable => _data);
+        let index: number = this.data.variables.findIndex(_variable => _variable == _data);
         let name: string = this.data.variableNames[index];
         let errors: string[] = [];
-        if (this.isReferenced(name))
-          errors.push(`variable "${name}" is still referenced`);
         if (this.data.variableNames.includes(_new))
           errors.push(`variable "${_new}" already exists`);
         if (ƒ.ParticleData.PREDEFINED_VARIABLES[_new])
@@ -109,6 +109,7 @@ namespace Fudge {
         }
         
         this.data.variableNames[index] = _new;
+        this.renameVariable(name, _new);
         return true;
       }
 
@@ -202,7 +203,7 @@ namespace Fudge {
           if (_at == null) {
             container.push(data);
             if (container == this.data.variables)
-              this.data.variableNames.push(name || `variable${this.data.variables.length}`);
+              this.data.variableNames.push(name || this.generateNewVariableName());
           } else {
             container.splice(_at + _children.indexOf(data), 0, data);
             if (container == this.data.variables)
@@ -222,6 +223,16 @@ namespace Fudge {
 
     public override draggable(_target: ƒ.ParticleData.Recursive): boolean {
       return ƒ.ParticleData.isExpression(_target) || ƒ.ParticleData.isTransformation(_target);
+    }
+
+    public generateNewVariableName(): string {
+      let name: string = "newVariable";
+      let count: number = 1;
+      while (this.data.variableNames.includes(name)) {
+        name = "newVariable" + count
+        count++;
+      }
+      return name;
     }
 
     private getKey(_data: ƒ.ParticleData.Recursive, _parentData: ƒ.ParticleData.Recursive): string {
@@ -277,6 +288,17 @@ namespace Fudge {
           return true;
         
       return false;
+    }
+
+    private renameVariable(_name: string, _new: string, _data: ƒ.ParticleData.Recursive = this.data): void {
+      if (ƒ.ParticleData.isVariable(_data) && _data.value == _name) {
+        _data.value = _new;
+        this.view.dispatch(EVENT_EDITOR.MODIFY, { detail: { data: _data } })
+      }
+
+      for (const subData of Object.values("parameters" in _data ? _data.parameters : _data))
+        if (typeof subData == "object")
+          this.renameVariable(_name, _new, subData);
     }
   }
 }

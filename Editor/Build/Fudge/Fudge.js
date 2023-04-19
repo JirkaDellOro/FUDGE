@@ -1732,9 +1732,11 @@ var Fudge;
     class ControllerTreeParticleSystem extends ƒui.CustomTreeController {
         childToParent = new Map();
         data;
-        constructor(_data) {
+        view;
+        constructor(_data, _view) {
             super();
             this.data = _data;
+            this.view = _view;
         }
         createContent(_data) {
             let content = document.createElement("form");
@@ -1805,11 +1807,9 @@ var Fudge;
         rename(_data, _id, _new) {
             let inputAsNumber = Number.parseFloat(_new);
             if (_id == "name" /* NAME */ && ƒ.ParticleData.isExpression(_data)) {
-                let index = this.data.variables.findIndex(_variable => _data);
+                let index = this.data.variables.findIndex(_variable => _variable == _data);
                 let name = this.data.variableNames[index];
                 let errors = [];
-                if (this.isReferenced(name))
-                    errors.push(`variable "${name}" is still referenced`);
                 if (this.data.variableNames.includes(_new))
                     errors.push(`variable "${_new}" already exists`);
                 if (ƒ.ParticleData.PREDEFINED_VARIABLES[_new])
@@ -1819,6 +1819,7 @@ var Fudge;
                     return false;
                 }
                 this.data.variableNames[index] = _new;
+                this.renameVariable(name, _new);
                 return true;
             }
             if (_id == "function" /* FUNCTION */ && ƒ.ParticleData.isFunction(_data)) {
@@ -1897,7 +1898,7 @@ var Fudge;
                     if (_at == null) {
                         container.push(data);
                         if (container == this.data.variables)
-                            this.data.variableNames.push(name || `variable${this.data.variables.length}`);
+                            this.data.variableNames.push(name || this.generateNewVariableName());
                     }
                     else {
                         container.splice(_at + _children.indexOf(data), 0, data);
@@ -1915,6 +1916,15 @@ var Fudge;
         }
         draggable(_target) {
             return ƒ.ParticleData.isExpression(_target) || ƒ.ParticleData.isTransformation(_target);
+        }
+        generateNewVariableName() {
+            let name = "newVariable";
+            let count = 1;
+            while (this.data.variableNames.includes(name)) {
+                name = "newVariable" + count;
+                count++;
+            }
+            return name;
         }
         getKey(_data, _parentData) {
             let key;
@@ -1962,6 +1972,15 @@ var Fudge;
                 if (typeof subData == "object" && this.isReferenced(_name, subData))
                     return true;
             return false;
+        }
+        renameVariable(_name, _new, _data = this.data) {
+            if (ƒ.ParticleData.isVariable(_data) && _data.value == _name) {
+                _data.value = _new;
+                this.view.dispatch(Fudge.EVENT_EDITOR.MODIFY, { detail: { data: _data } });
+            }
+            for (const subData of Object.values("parameters" in _data ? _data.parameters : _data))
+                if (typeof subData == "object")
+                    this.renameVariable(_name, _new, subData);
         }
     }
     Fudge.ControllerTreeParticleSystem = ControllerTreeParticleSystem;
@@ -2328,6 +2347,8 @@ var Fudge;
             super(_container, _state);
             this.createToolbar();
             this.setParticleSystem(null);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.CREATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
             document.addEventListener("keydown" /* KEY_DOWN */, this.hndEvent);
@@ -2405,19 +2426,13 @@ var Fudge;
             let child;
             switch (Number(_item.id)) {
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_PROPERTY:
+                    child = [];
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT:
+                    if (!child)
+                        child = { value: 1 };
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION:
-                    switch (Number(_item.id)) {
-                        case Fudge.CONTEXTMENU.ADD_PARTICLE_PROPERTY:
-                            child = [];
-                            break;
-                        case Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT:
-                            child = { value: 1 };
-                            break;
-                        case Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION:
-                            child = { function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: [] };
-                            break;
-                    }
+                    if (!child)
+                        child = { function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: [] };
                     if (ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus))
                         focus.parameters.push(child);
                     else if (focus == this.data) {
@@ -2427,33 +2442,28 @@ var Fudge;
                     }
                     else if (focus == this.data.variables) {
                         this.data.variables.push(child);
-                        this.data.variableNames.push(`variable${this.data.variables.length}`);
+                        this.data.variableNames.push(this.controller.generateNewVariableName());
                     }
                     else if (focus == this.data.color)
                         this.data.color.push(child);
                     this.controller.childToParent.set(child, focus);
                     this.tree.findVisible(focus).expand(true);
                     this.tree.findVisible(child).focus();
-                    this.tree.clearSelection();
-                    this.tree.selectInterval(child, child);
-                    this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { detail: { data: focus } });
+                    this.dispatch(Fudge.EVENT_EDITOR.CREATE, {});
                     break;
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION:
-                    if (Array.isArray(focus)) {
-                        child = { transformation: _item.label, parameters: [] };
-                        focus.push(child);
-                        this.tree.findVisible(focus).expand(true);
-                        this.tree.findVisible(child).focus();
-                        this.tree.clearSelection();
-                        this.tree.selectInterval(child, child);
-                        this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { detail: { data: focus } });
-                    }
+                    child = { transformation: _item.label, parameters: [] };
+                    focus.push(child);
+                    this.controller.childToParent.set(child, focus);
+                    this.tree.findVisible(focus).expand(true);
+                    this.tree.findVisible(child).focus();
+                    this.dispatch(Fudge.EVENT_EDITOR.CREATE, {});
                     break;
                 case Fudge.CONTEXTMENU.DELETE_PARTICLE_DATA:
                     let remove = this.controller.delete([focus]);
                     this.tree.delete(remove);
                     this.tree.clearSelection();
-                    this.dispatch(Fudge.EVENT_EDITOR.MODIFY, {});
+                    this.dispatch(Fudge.EVENT_EDITOR.DELETE, {});
                     break;
             }
         }
@@ -2490,9 +2500,13 @@ var Fudge;
                         ƒui.Warning.display(this.errors.map(([_data, _error]) => _error), "Unable to save", `Project can't be saved while having unresolved errors`, "OK");
                     break;
                 case Fudge.EVENT_EDITOR.MODIFY:
+                    this.tree.findVisible(_event.detail.data)?.refreshContent();
+                    break;
+                case Fudge.EVENT_EDITOR.CREATE:
+                case Fudge.EVENT_EDITOR.DELETE:
+                case "rename" /* RENAME */:
                 case "delete" /* DELETE */:
                 case "drop" /* DROP */:
-                case "rename" /* RENAME */:
                 case "cut" /* CUT */: // TODO: customs trees cut is async, this should happen after cut is finished
                 case "paste" /* PASTE */:
                     this.refreshVariables();
@@ -2632,7 +2646,7 @@ var Fudge;
             this.dom.appendChild(this.variables);
             this.refreshVariables();
             this.dom.appendChild(this.toolbar);
-            this.controller = new Fudge.ControllerTreeParticleSystem(this.data);
+            this.controller = new Fudge.ControllerTreeParticleSystem(this.data, this);
             this.tree = new ƒui.CustomTree(this.controller, this.data);
             this.tree.addEventListener("rename" /* RENAME */, this.hndEvent);
             this.tree.addEventListener("drop" /* DROP */, this.hndEvent);

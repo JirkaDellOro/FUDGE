@@ -372,7 +372,8 @@ declare namespace Fudge {
     class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.Recursive> {
         childToParent: Map<ƒ.ParticleData.Recursive, ƒ.ParticleData.Recursive>;
         private data;
-        constructor(_data: ƒ.ParticleData.System);
+        private view;
+        constructor(_data: ƒ.ParticleData.System, _view: ViewParticleSystem);
         createContent(_data: ƒ.ParticleData.Recursive): HTMLFormElement;
         getAttributes(_data: ƒ.ParticleData.Recursive): string;
         rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): boolean;
@@ -382,9 +383,11 @@ declare namespace Fudge {
         addChildren(_children: ƒ.ParticleData.Recursive[], _target: ƒ.ParticleData.Recursive, _at?: number): ƒ.ParticleData.Recursive[];
         copy(_originals: ƒ.ParticleData.Recursive[]): Promise<ƒ.ParticleData.Recursive[]>;
         draggable(_target: ƒ.ParticleData.Recursive): boolean;
+        generateNewVariableName(): string;
         private getKey;
         private deleteData;
         private isReferenced;
+        private renameVariable;
     }
 }
 declare namespace Fudge {
