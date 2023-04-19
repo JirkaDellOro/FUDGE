@@ -1948,11 +1948,6 @@ var Fudge;
                 ƒui.Warning.display([`property "${key}" still has children`], "Unable to delete", "Please resolve the errors and try again");
                 return false;
             }
-            let name = this.data.variableNames[key];
-            if (parentData == this.data.variables && this.isReferenced(name)) {
-                ƒui.Warning.display([`variable "${name}" is still referenced`], "Unable to delete", "Please resolve the errors and try again");
-                return false;
-            }
             if (ƒ.ParticleData.isFunction(parentData) || ƒ.ParticleData.isTransformation(parentData))
                 parentData.parameters.splice(index, 1);
             else if (Array.isArray(parentData)) {
@@ -1964,14 +1959,6 @@ var Fudge;
                 delete parentData[key];
             this.childToParent.delete(_data);
             return true;
-        }
-        isReferenced(_name, _data = this.data) {
-            if (ƒ.ParticleData.isVariable(_data) && _data.value == _name)
-                return true;
-            for (const subData of Object.values("parameters" in _data ? _data.parameters : _data))
-                if (typeof subData == "object" && this.isReferenced(_name, subData))
-                    return true;
-            return false;
         }
         renameVariable(_name, _new, _data = this.data) {
             if (ƒ.ParticleData.isVariable(_data) && _data.value == _name) {

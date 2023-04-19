@@ -386,7 +386,6 @@ declare namespace Fudge {
         generateNewVariableName(): string;
         private getKey;
         private deleteData;
-        private isReferenced;
         private renameVariable;
     }
 }

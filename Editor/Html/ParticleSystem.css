@@ -85,8 +85,16 @@ div[view=ViewParticleSystem] ul.tree li.invalid {
   outline: 1px outset yellow; /* maybe add this to theme vars */
 }
 
-div[view=ViewParticleSystem] li[attributes~="randomRange"] > ul.tree > li:nth-of-type(1) > form::before {
+div[view=ViewParticleSystem] li[attributes~="random"] > ul.tree > li:nth-of-type(1) > form::before {
   content: "index: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="randomRange"] > ul.tree > li:nth-of-type(2) > form::before {
+  content: "min: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="randomRange"] > ul.tree > li:nth-of-type(3) > form::before {
+  content: "max: ";
 }
 
 div[view=ViewParticleSystem] li[attributes~="transformation"] > ul.tree > li:nth-of-type(1) > form::before {

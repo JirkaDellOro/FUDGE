@@ -614,20 +614,6 @@
       "data": {
         "variables": [
           {
-            "function": "randomRange",
-            "parameters": [
-              {
-                "value": "particleId"
-              },
-              {
-                "value": 1
-              },
-              {
-                "value": 1.5
-              }
-            ]
-          },
-          {
             "function": "division",
             "parameters": [
               {
@@ -646,6 +632,20 @@
               },
               {
                 "value": 1000
+              }
+            ]
+          },
+          {
+            "function": "randomRange",
+            "parameters": [
+              {
+                "value": "particleId"
+              },
+              {
+                "value": 1
+              },
+              {
+                "value": 1.5
               }
             ]
           },
@@ -844,9 +844,9 @@
           }
         ],
         "variableNames": [
-          "velocity",
           "systemTimeSeconds",
           "systemDurationSeconds",
+          "velocity",
           "particleTime",
           "timeNormalized"
         ]

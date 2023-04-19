@@ -258,12 +258,6 @@ namespace Fudge {
         return false;
       }
 
-      let name: string = this.data.variableNames[key];
-      if (parentData == this.data.variables && this.isReferenced(name)) {
-        ƒui.Warning.display([`variable "${name}" is still referenced`], "Unable to delete", "Please resolve the errors and try again");
-        return false;
-      }
-
       if (ƒ.ParticleData.isFunction(parentData) || ƒ.ParticleData.isTransformation(parentData)) 
         parentData.parameters.splice(index, 1);
       else if (Array.isArray(parentData)) {
@@ -276,17 +270,6 @@ namespace Fudge {
       
       this.childToParent.delete(_data);
       return true;
-    }
-
-    private isReferenced(_name: string, _data: ƒ.ParticleData.Recursive = this.data): boolean {
-      if (ƒ.ParticleData.isVariable(_data) && _data.value == _name) 
-        return true;
-      
-      for (const subData of Object.values("parameters" in _data ? _data.parameters : _data)) 
-        if (typeof subData == "object" && this.isReferenced(_name, subData))
-          return true;
-        
-      return false;
     }
 
     private renameVariable(_name: string, _new: string, _data: ƒ.ParticleData.Recursive = this.data): void {
