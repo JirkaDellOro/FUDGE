@@ -220,7 +220,8 @@ const uint MAX_LIGHTS_DIRECTIONAL = 10u;
 const uint MAX_LIGHTS_POINT = 50u;
 const uint MAX_LIGHTS_SPOT = 50u;
 
-const bool metallic = false;      //temporary toggle for switching between metallic and dialectric mode
+const bool metallic = false;              //temporary toggle for switching between metallic and dialectric mode
+const float specularIntensity = 0.2;      //temporary value for specular Intensity
 
 uniform Light u_ambient;
 uniform uint u_nLightsDirectional;
@@ -243,7 +244,7 @@ float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float 
   //BLINN-Phong Shading
   vec3 halfwayDir = normalize(-_vctLight + -_vctView);
   float factor = max(dot(-_vctLight, _vctNormal), 0.0);                             //Factor for smoothing out transition from surface facing the lightsource to surface facing away from the lightsource
-  return pow(max(dot(_vctNormal, halfwayDir), 0.0), _fSpecular * 16.0) * factor;
+  return pow(max(dot(_vctNormal, halfwayDir), 0.0), _fSpecular * 16.0) * factor * specularIntensity;
 
   //Standard Phong Shading
   //vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
