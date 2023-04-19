@@ -23,21 +23,21 @@ namespace Fudge {
     public createContent(_data: ƒ.ParticleData.Recursive): HTMLFormElement {
       let content: HTMLFormElement = document.createElement("form");
       let parentData: ƒ.ParticleData.Recursive = this.childToParent.get(_data);
-      let key: string = this.getKey(_data, parentData);
+      let key: string = this.getKey(_data);
       
-      if (parentData && parentData == this.data.variables) {
+      if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) {
+        let spanName: HTMLSpanElement = document.createElement("span");
+        spanName.innerText = parentData ? key : ƒ.ParticleSystem.name;
+        content.appendChild(spanName);
+      }
+
+      if (parentData == this.data.variables) {
         let input: HTMLInputElement = document.createElement("input");
         input.type = "text";
         input.disabled = true;
         input.value = this.data.variableNames[key];
         input.id = ID.NAME;
         content.appendChild(input);
-      }
-
-      if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) {
-        let spanName: HTMLSpanElement = document.createElement("span");
-        spanName.innerText = parentData ? key : ƒ.ParticleSystem.name;
-        content.appendChild(spanName);
       }
 
       if (ƒ.ParticleData.isExpression(_data)) {
@@ -95,8 +95,6 @@ namespace Fudge {
       let inputAsNumber: number = Number.parseFloat(_new);
 
       if (_id == ID.NAME && ƒ.ParticleData.isExpression(_data)) {
-        let index: number = this.data.variables.findIndex(_variable => _variable == _data);
-        let name: string = this.data.variableNames[index];
         let errors: string[] = [];
         if (this.data.variableNames.includes(_new))
           errors.push(`variable "${_new}" already exists`);
@@ -107,6 +105,8 @@ namespace Fudge {
           return false;
         }
         
+        let index: number = this.data.variables.indexOf(_data);
+        let name: string = this.data.variableNames[index];
         this.data.variableNames[index] = _new;
         this.renameVariable(name, _new);
         return true;
@@ -143,7 +143,7 @@ namespace Fudge {
         return [];
 
       let children: ƒ.ParticleData.Recursive[] = [];
-      let data: Object = "parameters" in _data ? _data.parameters : _data;
+      let data: Object = ƒ.ParticleData.isFunction(_data) || ƒ.ParticleData.isTransformation(_data) ? _data.parameters : _data;
       let keys: string[] = Object.keys(data);
 
       if (data == this.data)
@@ -191,7 +191,10 @@ namespace Fudge {
           let index: number = container.indexOf(data); // _at needs to be corrected if we are moving within same parent
           let hasParent: boolean = this.childToParent.has(data);
           let name: string = this.data.variableNames[index];
-          if (hasParent && !this.deleteData(data)) continue;
+
+          if (hasParent && !this.deleteData(data)) 
+            continue;
+
           if (!hasParent)
             data = JSON.parse(JSON.stringify(data));
 
@@ -199,6 +202,7 @@ namespace Fudge {
           this.childToParent.set(data, _target);
           if (index > -1 && _at > index)
             _at -= 1;
+
           if (_at == null) {
             container.push(data);
             if (container == this.data.variables)
@@ -234,39 +238,32 @@ namespace Fudge {
       return name;
     }
 
-    private getKey(_data: ƒ.ParticleData.Recursive, _parentData: ƒ.ParticleData.Recursive): string {
-      let key: string;
-      if (!_parentData) return null;
-      if (ƒ.ParticleData.isExpression(_data) && (ƒ.ParticleData.isFunction(_parentData) || ƒ.ParticleData.isTransformation(_parentData))) {
-        key = _parentData.parameters.indexOf(_data).toString();
-      } else {
-        key = Object.entries(_parentData).find(entry => entry[1] == _data)?.shift();
-      }
-      return key;
+    private getKey(_data: ƒ.ParticleData.Recursive): string { 
+      let parent: ƒ.ParticleData.Recursive = this.childToParent.get(_data) || {};
+      if (ƒ.ParticleData.isFunction(parent) || ƒ.ParticleData.isTransformation(parent))
+        parent = parent.parameters;
+
+      return Object.entries(parent).find(entry => entry[1] == _data)?.shift();
     }
 
     private deleteData(_data: ƒ.ParticleData.Recursive): boolean {
       if (_data == this.data)
         return false;
 
-      let parentData: ƒ.ParticleData.Recursive = this.childToParent.get(_data);
-      let key: string = this.getKey(_data, parentData);
-      let index: number = Number.parseInt(key);
+      let parent: ƒ.ParticleData.Recursive = this.childToParent.get(_data);
+      let key: string = this.getKey(_data);
 
-      if (parentData == this.data && Object.keys(_data).length > 0) {
-        ƒui.Warning.display([`property "${key}" still has children`], "Unable to delete", "Please resolve the errors and try again");
-        return false;
-      }
+      if (ƒ.ParticleData.isFunction(parent) || ƒ.ParticleData.isTransformation(parent))
+        parent = parent.parameters;
 
-      if (ƒ.ParticleData.isFunction(parentData) || ƒ.ParticleData.isTransformation(parentData)) 
-        parentData.parameters.splice(index, 1);
-      else if (Array.isArray(parentData)) {
-        parentData.splice(index, 1);
-        if (parentData == this.data.variables)
+      if (Array.isArray(parent)) {
+        let index: number = Number.parseInt(key);
+        parent.splice(index, 1);
+        if (parent == this.data.variables)
           this.data.variableNames.splice(index, 1);
+      } else {
+        delete parent[key];
       }
-      else 
-        delete parentData[key];
       
       this.childToParent.delete(_data);
       return true;

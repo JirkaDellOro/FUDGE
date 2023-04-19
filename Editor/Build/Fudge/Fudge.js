@@ -1741,19 +1741,19 @@ var Fudge;
         createContent(_data) {
             let content = document.createElement("form");
             let parentData = this.childToParent.get(_data);
-            let key = this.getKey(_data, parentData);
-            if (parentData && parentData == this.data.variables) {
+            let key = this.getKey(_data);
+            if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) {
+                let spanName = document.createElement("span");
+                spanName.innerText = parentData ? key : ƒ.ParticleSystem.name;
+                content.appendChild(spanName);
+            }
+            if (parentData == this.data.variables) {
                 let input = document.createElement("input");
                 input.type = "text";
                 input.disabled = true;
                 input.value = this.data.variableNames[key];
                 input.id = "name" /* NAME */;
                 content.appendChild(input);
-            }
-            if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) {
-                let spanName = document.createElement("span");
-                spanName.innerText = parentData ? key : ƒ.ParticleSystem.name;
-                content.appendChild(spanName);
             }
             if (ƒ.ParticleData.isExpression(_data)) {
                 if (ƒ.ParticleData.isFunction(_data)) {
@@ -1807,8 +1807,6 @@ var Fudge;
         rename(_data, _id, _new) {
             let inputAsNumber = Number.parseFloat(_new);
             if (_id == "name" /* NAME */ && ƒ.ParticleData.isExpression(_data)) {
-                let index = this.data.variables.findIndex(_variable => _variable == _data);
-                let name = this.data.variableNames[index];
                 let errors = [];
                 if (this.data.variableNames.includes(_new))
                     errors.push(`variable "${_new}" already exists`);
@@ -1818,6 +1816,8 @@ var Fudge;
                     ƒui.Warning.display(errors, "Unable to rename", "Please resolve the errors and try again");
                     return false;
                 }
+                let index = this.data.variables.indexOf(_data);
+                let name = this.data.variableNames[index];
                 this.data.variableNames[index] = _new;
                 this.renameVariable(name, _new);
                 return true;
@@ -1847,7 +1847,7 @@ var Fudge;
             if (ƒ.ParticleData.isConstant(_data) || ƒ.ParticleData.isVariable(_data))
                 return [];
             let children = [];
-            let data = "parameters" in _data ? _data.parameters : _data;
+            let data = ƒ.ParticleData.isFunction(_data) || ƒ.ParticleData.isTransformation(_data) ? _data.parameters : _data;
             let keys = Object.keys(data);
             if (data == this.data)
                 keys = Fudge.ViewParticleSystem.PROPERTY_KEYS.filter(_key => keys.includes(_key));
@@ -1926,37 +1926,28 @@ var Fudge;
             }
             return name;
         }
-        getKey(_data, _parentData) {
-            let key;
-            if (!_parentData)
-                return null;
-            if (ƒ.ParticleData.isExpression(_data) && (ƒ.ParticleData.isFunction(_parentData) || ƒ.ParticleData.isTransformation(_parentData))) {
-                key = _parentData.parameters.indexOf(_data).toString();
-            }
-            else {
-                key = Object.entries(_parentData).find(entry => entry[1] == _data)?.shift();
-            }
-            return key;
+        getKey(_data) {
+            let parent = this.childToParent.get(_data) || {};
+            if (ƒ.ParticleData.isFunction(parent) || ƒ.ParticleData.isTransformation(parent))
+                parent = parent.parameters;
+            return Object.entries(parent).find(entry => entry[1] == _data)?.shift();
         }
         deleteData(_data) {
             if (_data == this.data)
                 return false;
-            let parentData = this.childToParent.get(_data);
-            let key = this.getKey(_data, parentData);
-            let index = Number.parseInt(key);
-            if (parentData == this.data && Object.keys(_data).length > 0) {
-                ƒui.Warning.display([`property "${key}" still has children`], "Unable to delete", "Please resolve the errors and try again");
-                return false;
-            }
-            if (ƒ.ParticleData.isFunction(parentData) || ƒ.ParticleData.isTransformation(parentData))
-                parentData.parameters.splice(index, 1);
-            else if (Array.isArray(parentData)) {
-                parentData.splice(index, 1);
-                if (parentData == this.data.variables)
+            let parent = this.childToParent.get(_data);
+            let key = this.getKey(_data);
+            if (ƒ.ParticleData.isFunction(parent) || ƒ.ParticleData.isTransformation(parent))
+                parent = parent.parameters;
+            if (Array.isArray(parent)) {
+                let index = Number.parseInt(key);
+                parent.splice(index, 1);
+                if (parent == this.data.variables)
                     this.data.variableNames.splice(index, 1);
             }
-            else
-                delete parentData[key];
+            else {
+                delete parent[key];
+            }
             this.childToParent.delete(_data);
             return true;
         }
