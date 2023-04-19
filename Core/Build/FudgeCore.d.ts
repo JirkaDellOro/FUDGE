@@ -4252,7 +4252,7 @@ declare namespace FudgeCore {
             mtxWorld?: Transformation[];
         }
         type Recursive = System | Expression[] | Transformation[] | Transformation | Expression;
-        type Expression = Function | Variable | Constant;
+        type Expression = Function | Variable | Constant | Code;
         interface Function {
             function: FUNCTION;
             parameters: Expression[];
@@ -4263,6 +4263,9 @@ declare namespace FudgeCore {
         interface Constant {
             value: number;
         }
+        interface Code {
+            code: string;
+        }
         interface Transformation {
             transformation: "translate" | "rotate" | "scale";
             parameters: Expression[];
@@ -4271,6 +4274,7 @@ declare namespace FudgeCore {
         function isFunction(_data: Recursive): _data is Function;
         function isVariable(_data: Recursive): _data is Variable;
         function isConstant(_data: Recursive): _data is Constant;
+        function isCode(_data: Recursive): _data is Code;
         function isTransformation(_data: Recursive): _data is Transformation;
     }
     /**

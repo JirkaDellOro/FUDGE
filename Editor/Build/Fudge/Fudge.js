@@ -50,8 +50,9 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_PROPERTY"] = 20] = "ADD_PARTICLE_PROPERTY";
         CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION"] = 21] = "ADD_PARTICLE_FUNCTION";
         CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT"] = 22] = "ADD_PARTICLE_CONSTANT";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_TRANSFORMATION"] = 23] = "ADD_PARTICLE_TRANSFORMATION";
-        CONTEXTMENU[CONTEXTMENU["DELETE_PARTICLE_DATA"] = 24] = "DELETE_PARTICLE_DATA";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CODE"] = 23] = "ADD_PARTICLE_CODE";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_TRANSFORMATION"] = 24] = "ADD_PARTICLE_TRANSFORMATION";
+        CONTEXTMENU[CONTEXTMENU["DELETE_PARTICLE_DATA"] = 25] = "DELETE_PARTICLE_DATA";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -1773,8 +1774,13 @@ var Fudge;
                     input.type = "text";
                     input.disabled = true;
                     input.id = "value" /* VALUE */;
-                    input.setAttribute("list", "variables");
-                    input.value = _data.value.toString();
+                    if (ƒ.ParticleData.isCode(_data)) {
+                        input.value = _data.code;
+                    }
+                    else {
+                        input.value = _data.value.toString();
+                        input.setAttribute("list", "variables");
+                    }
                     content.appendChild(input);
                 }
             }
@@ -1835,6 +1841,10 @@ var Fudge;
                 if (typeof input == "string" && !ƒ.ParticleData.PREDEFINED_VARIABLES[input] && this.data.variableNames && !this.data.variableNames.includes(input))
                     return false;
                 _data.value = input;
+                return true;
+            }
+            if (_id == "value" /* VALUE */ && (ƒ.ParticleData.isCode(_data))) {
+                _data.code = _new;
                 return true;
             }
         }
@@ -2350,6 +2360,7 @@ var Fudge;
             if (focus == this.data.variables || focus == this.data.color || ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus)) {
                 this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT)).visible = true;
                 this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION)).visible = true;
+                this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.ADD_PARTICLE_CODE)).visible = true;
                 popup = true;
             }
             if (focus == this.data.mtxLocal || focus == this.data.mtxWorld) {
@@ -2376,6 +2387,8 @@ var Fudge;
             item = new Fudge.remote.MenuItem({ label: "Add Value", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_CONSTANT), click: _callback });
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Add Function", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION), click: _callback });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Add Code", id: String(Fudge.CONTEXTMENU.ADD_PARTICLE_CODE), click: _callback });
             menu.append(item);
             item = new Fudge.remote.MenuItem({
                 label: "Add Transformation",
@@ -2411,6 +2424,9 @@ var Fudge;
                 case Fudge.CONTEXTMENU.ADD_PARTICLE_FUNCTION:
                     if (!child)
                         child = { function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: [] };
+                case Fudge.CONTEXTMENU.ADD_PARTICLE_CODE:
+                    if (!child)
+                        child = { code: "1" };
                     if (ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus))
                         focus.parameters.push(child);
                     else if (focus == this.data) {

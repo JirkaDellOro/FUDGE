@@ -15,7 +15,7 @@ namespace FudgeCore {
     
     export type Recursive = System | Expression[] | Transformation[] | Transformation | Expression;
 
-    export type Expression = Function | Variable | Constant;
+    export type Expression = Function | Variable | Constant | Code;
 
     export interface Function {
       function: FUNCTION;
@@ -29,6 +29,10 @@ namespace FudgeCore {
     export interface Constant {
       value: number;
     }
+
+    export interface Code {
+      code: string;
+    }
   
     export interface Transformation {
       transformation: "translate" | "rotate" | "scale";
@@ -36,7 +40,7 @@ namespace FudgeCore {
     }
 
     export function isExpression(_data: Recursive): _data is Expression {
-      return isFunction(_data) || isVariable(_data) || isConstant(_data);
+      return isFunction(_data) || isVariable(_data) || isConstant(_data) || isCode(_data);
     }
 
     export function isFunction(_data: Recursive): _data is Function {
@@ -49,6 +53,10 @@ namespace FudgeCore {
 
     export function isConstant(_data: Recursive): _data is Constant {
       return typeof _data == "object" && "value" in _data && typeof _data.value == "number";
+    }
+
+    export function isCode(_data: Recursive): _data is Code {
+      return typeof _data == "object" && "code" in _data;
     }
 
     export function isTransformation(_data: Recursive): _data is Transformation {

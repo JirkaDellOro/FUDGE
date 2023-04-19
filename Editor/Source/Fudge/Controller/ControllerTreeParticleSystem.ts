@@ -57,8 +57,12 @@ namespace Fudge {
           input.type = "text";
           input.disabled = true;
           input.id = ID.VALUE;
-          input.setAttribute("list", "variables");
-          input.value = _data.value.toString();
+          if (ƒ.ParticleData.isCode(_data)) {
+            input.value = _data.code;
+          } else {
+            input.value = _data.value.toString();
+            input.setAttribute("list", "variables");
+          }
           content.appendChild(input);
         } 
       } else if (ƒ.ParticleData.isTransformation(_data)) {
@@ -128,6 +132,11 @@ namespace Fudge {
           return false;
         _data.value = input;
 
+        return true;
+      }
+
+      if (_id == ID.VALUE && (ƒ.ParticleData.isCode(_data))) {
+        _data.code = _new;
         return true;
       }
     }

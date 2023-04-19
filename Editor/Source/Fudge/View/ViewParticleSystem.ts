@@ -54,6 +54,7 @@ namespace Fudge {
       if (focus == this.data.variables || focus == this.data.color || ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus)) {
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_CONSTANT)).visible = true;
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_FUNCTION)).visible = true;
+        this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_CODE)).visible = true;
         popup = true;
       }
 
@@ -86,6 +87,8 @@ namespace Fudge {
       item = new remote.MenuItem({ label: "Add Value", id: String(CONTEXTMENU.ADD_PARTICLE_CONSTANT), click: _callback });
       menu.append(item);
       item = new remote.MenuItem({ label: "Add Function", id: String(CONTEXTMENU.ADD_PARTICLE_FUNCTION), click: _callback });
+      menu.append(item);
+      item = new remote.MenuItem({ label: "Add Code", id: String(CONTEXTMENU.ADD_PARTICLE_CODE), click: _callback });
       menu.append(item);
 
       item = new remote.MenuItem({ 
@@ -129,6 +132,9 @@ namespace Fudge {
         case CONTEXTMENU.ADD_PARTICLE_FUNCTION:
           if (!child)
             child = { function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: []};
+        case CONTEXTMENU.ADD_PARTICLE_CODE:
+          if (!child)
+            child = { code: "1" };
 
           if (ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus))
             focus.parameters.push(<ƒ.ParticleData.Expression>child);

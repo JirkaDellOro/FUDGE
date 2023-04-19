@@ -39,8 +39,9 @@ declare namespace Fudge {
         ADD_PARTICLE_PROPERTY = 20,
         ADD_PARTICLE_FUNCTION = 21,
         ADD_PARTICLE_CONSTANT = 22,
-        ADD_PARTICLE_TRANSFORMATION = 23,
-        DELETE_PARTICLE_DATA = 24
+        ADD_PARTICLE_CODE = 23,
+        ADD_PARTICLE_TRANSFORMATION = 24,
+        DELETE_PARTICLE_DATA = 25
     }
     enum MENU {
         QUIT = "quit",

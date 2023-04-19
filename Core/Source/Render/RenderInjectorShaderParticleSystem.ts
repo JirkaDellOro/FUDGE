@@ -220,6 +220,13 @@ namespace FudgeCore {
         let value: string = _expression.value.toString();
         return `${value}${value.includes(".") ? "" : ".0"}`;
       }
+
+      if (ParticleData.isCode(_expression)) {
+        let code: string = _expression.code
+          .replaceAll(/\b[a-zA-z]+\w*(?!\()\b/g, (_match) => ParticleData.PREDEFINED_VARIABLES[_match] || "fParticleSystemVariable_" + _match)
+          .replaceAll(/(?<!\.)\b\d+\b(?!\.)/g, (_match) => _match + ".0");
+        return code;
+      }
   
       throw `Error in ${ParticleSystem.name}: invalid node structure in particle system serialization`;
     }
