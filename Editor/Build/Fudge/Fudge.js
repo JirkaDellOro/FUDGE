@@ -2516,7 +2516,7 @@ var Fudge;
                         _item.title = "";
                     });
                     this.errors = invalid;
-                    if (this.errors.length == 0) {
+                    if (this.errors.length == 0 && _event.type != "expand" /* EXPAND */) {
                         this.particleSystem.data = JSON.parse(JSON.stringify(this.data)); // our working copy should only be used if it is valid 
                     }
                     else {
