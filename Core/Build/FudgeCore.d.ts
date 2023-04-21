@@ -694,6 +694,7 @@ declare namespace FudgeCore {
         private static generateColor;
         private static generateExpression;
         private static generateFunction;
+        private static replaceFunctions;
     }
 }
 declare namespace FudgeCore {

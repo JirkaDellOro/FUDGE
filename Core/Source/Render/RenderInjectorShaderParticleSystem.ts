@@ -225,6 +225,8 @@ namespace FudgeCore {
         let code: string = _expression.code
           .replaceAll(/\b[a-zA-z]+\w*(?!\()\b/g, (_match) => ParticleData.PREDEFINED_VARIABLES[_match] || "fParticleSystemVariable_" + _match)
           .replaceAll(/(?<!\.)\b\d+\b(?!\.)/g, (_match) => _match + ".0");
+        code = RenderInjectorShaderParticleSystem.replaceFunctions(code);
+
         return code;
       }
   
@@ -238,6 +240,45 @@ namespace FudgeCore {
         return RenderInjectorShaderParticleSystem.FUNCTIONS[_function](_parameters);
       else
         throw `Error in ${ParticleSystem.name}: "${_function}" is not an operation`;
+    }
+
+    private static replaceFunctions(_code: string): string {
+      let functionRegex: RegExp = /\b[a-zA-z_]+\w*\(/g;
+      let match: RegExpExecArray;
+      while ((match = functionRegex.exec(_code)) != null) {
+        let functionGenerator: Function = RenderInjectorShaderParticleSystem.FUNCTIONS[<ParticleData.FUNCTION>match[0].slice(0, -1)];
+        if (!functionGenerator)
+          continue;
+  
+        let commaIndices: number[] = [];
+        let openBrackets: number = 1;
+        let argumentsLastIndex: number = functionRegex.lastIndex;
+        while(openBrackets > 0) {
+          switch (_code[argumentsLastIndex]) {
+            case "(":
+              openBrackets++;
+              break;
+            case ")":
+              openBrackets--;
+              break;
+            case ",":
+              if (openBrackets == 1)
+                commaIndices.push(argumentsLastIndex);
+              break;
+          }
+          argumentsLastIndex++;
+        }
+  
+        let args: string[] = [functionRegex.lastIndex - 1, ...commaIndices, argumentsLastIndex - 1]
+          .reduce<string[]>((_accumulator, _position, _index, _positions) => 
+            _index == _positions.length - 1 ? 
+              _accumulator : 
+              _accumulator.concat(_code.slice(_position + 1, _positions[_index + 1]).trim()), 
+            []);
+  
+        _code =  `${_code.slice(0, match.index)}(${functionGenerator(args)})${_code.slice(argumentsLastIndex)}`;
+      }
+      return _code;
     }
     //#endregion
   }
