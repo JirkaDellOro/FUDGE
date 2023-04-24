@@ -91,6 +91,8 @@ namespace Fudge {
         attributes.push("color");
       if (ƒ.ParticleData.isTransformation(_data)) 
         attributes.push("transformation");
+      if (ƒ.ParticleData.isCode(_data))
+        attributes.push("code");
 
       return attributes.join(" ");
     }

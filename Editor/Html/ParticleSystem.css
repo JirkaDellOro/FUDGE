@@ -78,6 +78,7 @@ div[view=ViewParticleSystem] #timeslider::-webkit-slider-thumb {
 
 div[view=ViewParticleSystem] ul.tree li[attributes~="variable"]>form>input:first-of-type {
   font-style: italic;
+  padding-right: 0.5em;
 }
 
 
@@ -127,4 +128,8 @@ div[view=ViewParticleSystem] li[attributes~="color"] > ul.tree > li:nth-of-type(
 
 div[view=ViewParticleSystem] form input {
   width: 10em;
+}
+
+div[view=ViewParticleSystem] li[attributes~="code"] form input:focus {
+  width: 20em;
 }
