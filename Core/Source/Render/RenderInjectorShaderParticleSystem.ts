@@ -276,6 +276,7 @@ namespace FudgeCore {
               _accumulator.concat(_code.slice(_position + 1, _positions[_index + 1]).trim()), 
             []);
   
+        functionRegex.lastIndex = match.index;
         _code =  `${_code.slice(0, match.index)}(${functionGenerator(args)})${_code.slice(argumentsLastIndex)}`;
       }
       return _code;
