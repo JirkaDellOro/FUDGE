@@ -85,19 +85,18 @@ namespace FudgeCore {
      */
     public static QUATERNION_TO_MATRIX(_q: Quaternion): Matrix4x4 {
       const x = _q.data[0], y = _q.data[1], z = _q.data[2], w = _q.data[3];
-      const x2 = x + x,	y2 = y + y, z2 = z + z;
-      const xx = x * x2, xy = x * y2, xz = x * z2;
-      const yy = y * y2, yz = y * z2, zz = z * z2;
-      const wx = w * x2, wy = w * y2, wz = w * z2;
+      // From: https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm
+      const xx = x * x, xy = x * y, xz = x * z, xw = x * w;
+      const yy = y * y, yz = y * z, yw = y * w;
+      const zz = z * z, zw = z * w;
 
       const result: Matrix4x4 = Recycler.get(Matrix4x4);
       result.set([
-        1 -yy + zz, xy -wz,     xz + wy,     0,
-        xy + wz,     1 -xx + zz, yz -wx,     0,
-        xz -wy,     yz + wx,     1 -xx + yy, 0,
+        1 - 2 * ( yy + zz ), 2 * ( xy - zw ), 2 * ( xz + yw ), 0,
+        2 * ( xy + zw ), 1 - 2 * ( xx + zz ), 2 * ( yz - xw ), 0,
+        2 * ( xz - yw ), 2 * ( yz + xw ), 1 - 2 * ( xx + yy ), 0,
         0, 0, 0, 1
       ]);
-      result.transpose();
       return result;
     }
     //#endregion
@@ -219,9 +218,9 @@ namespace FudgeCore {
           break;
         case "ZYX":
           this.set([
-            sinX * cosY * cosZ -cosX * sinY * sinZ,
+            sinX * cosY * cosZ - cosX * sinY * sinZ,
             cosX * sinY * cosZ + sinX * cosY * sinZ,
-            cosX * cosY * sinZ -sinX * sinY * cosZ,
+            cosX * cosY * sinZ - sinX * sinY * cosZ,
             cosX * cosY * cosZ + sinX * sinY * sinZ
           ]);
           break;
@@ -295,6 +294,7 @@ namespace FudgeCore {
     public multiply(_other: Quaternion, _fromLeft: boolean = false): void {
       const a: Quaternion = _fromLeft ? _other : this;
       const b: Quaternion = _fromLeft ? this : _other;
+      // from: http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
       const ax: number = a.data[0];
       const ay: number = a.data[1];
       const az: number = a.data[2];
@@ -303,11 +303,12 @@ namespace FudgeCore {
       const by: number = b.data[1];
       const bz: number = b.data[2];
       const bw: number = b.data[3];
+    
       this.set([
-        aw * bx + ax * bw + ay * bz -az * by,
-        aw * by -ax * bz + ay * bw + az * bx,
-        aw * bz + ax * by -ay * bx + az * bw,
-        aw * bw -ax * bx -ay * by -az * bz
+        ax * bw + ay * bz - az * by + aw * bx,
+        -ax * bz + ay * bw + az * bx + aw * by,
+        ax * by - ay * bx + az * bw + aw * bz,
+        -ax * bx - ay * by - az * bz + aw * bw,
       ]);
     }
 
