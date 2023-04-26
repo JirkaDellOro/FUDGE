@@ -83,7 +83,7 @@ namespace FudgeCore.FBX {
     ShadingModel?: string;
 
     Diffuse?: Vector3;
-    DiffuseColor?: Texture;
+    DiffuseColor?: Vector3 | Texture;
     DiffuseFactor?: number;
 
     Ambient?: Vector3;
@@ -94,6 +94,7 @@ namespace FudgeCore.FBX {
 
     Specular?: Vector3;
     SpecularColor?: Vector3 | Texture;
+    SpecularFactor?: number;
 
     Reflectivity?: number;
     ReflectionFactor?: number;

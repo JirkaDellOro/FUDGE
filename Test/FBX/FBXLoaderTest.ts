@@ -146,7 +146,8 @@ namespace SkeletonTest {
     else gPressed = false;
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H])) setShader(ƒ.ShaderPhong);
     let cmpAnimator: ƒ.ComponentAnimator = _viewport.getBranch().getComponent(ƒ.ComponentAnimator);
-    timeSpan.innerText = cmpAnimator.time.toFixed(0);
+    if (cmpAnimator)
+      timeSpan.innerText = cmpAnimator.time.toFixed(0);
     _viewport.draw();
   }
 }

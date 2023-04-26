@@ -68,13 +68,15 @@ namespace FudgeCore {
               scene.addChild(await this.getNode(this.fbx.objects.models.indexOf(childFBX), scene));
           }
         }
-        const animation: Animation = await this.getAnimation(documentFBX.ActiveAnimStackName.length > 0 ?
-          this.fbx.objects.animStacks.findIndex(animStack => animStack.name == documentFBX.ActiveAnimStackName) : 0);
-        for (const child of scene) {
-          if (child.name == "Skeleton0")
-            child.getParent().addComponent(new ComponentAnimator(
-              animation, ANIMATION_PLAYMODE.LOOP, ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS
-            ));
+        if (this.fbx.objects.animStacks && this.fbx.objects.animStacks.length > 0) {
+          const animation: Animation = await this.getAnimation(documentFBX.ActiveAnimStackName.length > 0 ?
+            this.fbx.objects.animStacks.findIndex(animStack => animStack.name == documentFBX.ActiveAnimStackName) : 0);
+          for (const child of scene) {
+            if (child.name == "Skeleton0")
+              child.getParent().addComponent(new ComponentAnimator(
+                animation, ANIMATION_PLAYMODE.LOOP, ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS
+              ));
+          }
         }
         Project.register(scene);
         this.#scenes[_index] = scene;
@@ -168,29 +170,38 @@ namespace FudgeCore {
         this.#materials = [];
       if (!this.#materials[_index]) {
         const materialFBX: FBX.Material = this.fbx.objects.materials[_index].load();
-        materialFBX.DiffuseColor?.children[0].load();
-        // FBX supports lambert and phong shading, either way fudge has no lambert shader so we always use phong
-        // In DiffuseColor the texture of the material color is stored, if it's defined we use a texture shader
+        if (!(materialFBX.DiffuseColor instanceof Vector3))
+          materialFBX.DiffuseColor?.children[0].load();
+        // FBX supports lambert and phong shading, either way fudge has no lambert shader so we always use phong.
+        // In DiffuseColor the texture of the material color is stored, if it's defined we use a texture shader.
+        // TODO: materialFBX also contains additional values like shininess and reflectivity (and others) which are not suppported.
         this.#materials[_index] = new Material(
           materialFBX.name,
-          materialFBX.DiffuseColor ?
+          materialFBX.DiffuseColor && !(materialFBX.DiffuseColor instanceof Vector3) ?
             ShaderPhongTextured :
             ShaderPhong,
-          materialFBX.DiffuseColor ?
+          materialFBX.DiffuseColor && !(materialFBX.DiffuseColor instanceof Vector3) ?
             new CoatRemissiveTextured(
               new Color(...materialFBX.Diffuse.get()),
               await this.getTexture(this.fbx.objects.textures.indexOf(materialFBX.DiffuseColor)),
-              materialFBX.DiffuseFactor,
-              materialFBX.Specular.magnitude
+              materialFBX.DiffuseFactor ?? 1,
+              materialFBX.SpecularFactor ?? average(materialFBX.Specular?.get()) ?? 0
             ) :
             new CoatRemissive(
-              new Color(...materialFBX.Diffuse.get()),
-              materialFBX.DiffuseFactor,
-              materialFBX.Specular.magnitude
+              new Color(...(materialFBX.DiffuseColor as Vector3 ?? materialFBX.Diffuse).get()),
+              materialFBX.DiffuseFactor ?? 1,
+              materialFBX.SpecularFactor ?? average(materialFBX.Specular?.get()) ?? 0
             )
         );
       }
       return this.#materials[_index];
+
+      function average(_array: Float32Array): number { // TODO: specular factor vector (together with specular color texture) is not supported so we use the average of the vector to approximate a singular specular factor.
+        if (_array)
+          return _array.reduce((a, b) => a + b) / _array.length;
+        else
+          return undefined;
+      } 
     }
 
     public async getTexture(_index: number): Promise<Texture> {

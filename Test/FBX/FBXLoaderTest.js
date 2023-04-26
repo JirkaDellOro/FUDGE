@@ -11,7 +11,7 @@ var SkeletonTest;
     async function init() {
         const canvas = document.querySelector("canvas");
         timeSpan = document.querySelector("span");
-        // const loader = await ƒ.FBXLoader.LOAD("./TriangularPrism.fbx");
+        // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./TriangularPrism.fbx");
         // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./animated_arm.fbx");
         const loader = await ƒ.FBXLoader.LOAD("./Unarmed Walk Forward.fbx");
         // track mouse position relative to canvas center
@@ -137,7 +137,8 @@ var SkeletonTest;
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H]))
             setShader(ƒ.ShaderPhong);
         let cmpAnimator = _viewport.getBranch().getComponent(ƒ.ComponentAnimator);
-        timeSpan.innerText = cmpAnimator.time.toFixed(0);
+        if (cmpAnimator)
+            timeSpan.innerText = cmpAnimator.time.toFixed(0);
         _viewport.draw();
     }
 })(SkeletonTest || (SkeletonTest = {}));
