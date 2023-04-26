@@ -248,7 +248,8 @@ namespace FudgeCore {
           }
         } = { children: { "Skeleton0": { mtxBoneLocals: {} } } };
         for (const animNodeFBX of animNodesFBX) {
-          //if (animNodeFBX.name == "R") continue;
+          if (typeof animNodeFBX.dX == "number" && typeof animNodeFBX.dY == "number" && typeof animNodeFBX.dZ == "number") 
+            continue;
           const target: FBX.Model = animNodeFBX.parents.find(parent => parent.type != "AnimLayer");
           (animStructure.children.Skeleton0.mtxBoneLocals[target.name] ||
             (animStructure.children.Skeleton0.mtxBoneLocals[target.name] = {}))[{
