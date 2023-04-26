@@ -690,8 +690,7 @@ declare namespace FudgeCore {
         static readonly FUNCTIONS: {
             [key in ParticleData.FUNCTION]: Function;
         };
-        static override: any;
-        decorate(_constructor: Function): void;
+        static decorate(_constructor: Function): void;
         static getVertexShaderSource(this: ShaderParticleSystem): string;
         static getFragmentShaderSource(this: ShaderParticleSystem): string;
         protected static appendDefines(_shader: string, _defines: string[]): string;
@@ -3525,7 +3524,7 @@ declare namespace FudgeCore {
     /**
       * Storing and manipulating rotations in the form of quaternions.
       * Constructed out of the 4 components: (x, y, z, w). Mathematical notation: w + xi + yj + zk.
-      * A Quaternion can be described with an axis and angle: (x, y, z) = sin(angle)*axis; w = cos(angle).
+      * A Quaternion can be described with an axis and angle: (x, y, z) = sin(angle/2)*axis; w = cos(angle/2).
       * roll: x, pitch: y, yaw: z. Note that operations are adapted to work with vectors where y is up and z is forward.
       * @authors Matthias Roming, HFU, 2023
       */

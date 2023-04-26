@@ -419,32 +419,44 @@ namespace FudgeCore {
       }
 
       if (_animNode.name == "R" && (_target.PreRotation || _target.PostRotation)) {
-        const eulerOrder: string = _target.EulerOrder || "ZYX";
-        let preRotation: Quaternion;
-        if (_target.PreRotation) {
-          preRotation = Quaternion.FROM_EULER_ANGLES(_target.PreRotation, eulerOrder);
-        }
-        let postRotation: Quaternion;
-        if (_target.PostRotation) {
-          postRotation = Quaternion.FROM_EULER_ANGLES(_target.PostRotation, eulerOrder);
-        }
-        for (const componentName in vectorSequence) {
-          for (const key of (vectorSequence[componentName] as AnimationSequence).getKeys()) {
-            const rotation: Vector3 = Recycler.get(Vector3);
-            rotation.set(
-              vectorSequence.x?.evaluate(key.time) || 0,
-              vectorSequence.y?.evaluate(key.time) || 0,
-              vectorSequence.z?.evaluate(key.time) || 0
+        let preRototation: Matrix4x4;
+        if (_target.PreRotation) 
+          preRototation = Matrix4x4.ROTATION(_target.PreRotation);
+        let postRotation: Matrix4x4;
+        if (_target.PostRotation)
+          postRotation = Matrix4x4.ROTATION(_target.PostRotation);
+
+        [vectorSequence.x, vectorSequence.y, vectorSequence.z]
+          .flatMap(_seq => _seq?.getKeys())
+          .map(_key => _key?.time)
+          .sort((_timeA, _timeB) => _timeA - _timeB) // sort times
+          .filter((_time, _index, _times) => _time != _times[_index + 1]) // remove duplicates
+          .map(_time => { // find keys for all axes at time
+            return { x: findKey(vectorSequence.x), y: findKey(vectorSequence.y), z: findKey(vectorSequence.z) }
+            function findKey(_sequence: AnimationSequence): AnimationKey {
+              return _sequence?.getKeys().find(_key => _key.time == _time);
+            }
+          })
+          .forEach(_frame => {
+            let vctEulerAngles: Vector3 = Recycler.get(Vector3);
+            vctEulerAngles.set(
+              _frame.x?.value ?? 0,
+              _frame.y?.value ?? 0,
+              _frame.z?.value ?? 0
             );
-            const q: Quaternion = Quaternion.FROM_EULER_ANGLES(rotation, eulerOrder);
-            if (_target.PreRotation)
-              q.multiply(preRotation, true);
-            if (_target.PostRotation)
-              q.multiply(postRotation);
-            // key.value = key.value + _target.PreRotation[componentName as "x"|"y"|"z"];
-            key.value = q.getEulerAngles(eulerOrder)[componentName as "x"|"y"|"z"];
-          }
-        }
+            const mtxRotation: Matrix4x4 = Matrix4x4.ROTATION(vctEulerAngles);
+            if (preRototation)
+              mtxRotation.multiply(preRototation, true);
+            if (postRotation)
+              mtxRotation.multiply(postRotation);
+            vctEulerAngles = mtxRotation.getEulerAngles();
+            if (_frame.x)
+              _frame.x.value = vctEulerAngles.x;
+            if (_frame.y)
+              _frame.y.value = vctEulerAngles.y;
+            if (_frame.z)
+              _frame.z.value = vctEulerAngles.z;
+          })
       }
 
       return vectorSequence;

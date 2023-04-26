@@ -9,9 +9,11 @@ namespace SkeletonTest {
   };
 
   window.addEventListener("load", init);
+  let timeSpan: HTMLSpanElement;
 
   async function init(): Promise<void> {
     const canvas: HTMLCanvasElement = document.querySelector("canvas") as HTMLCanvasElement;
+    timeSpan = document.querySelector("span") as HTMLElement;
     // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./TriangularPrism.fbx");
     // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./animated_arm.fbx");
     const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./Unarmed Walk Forward.fbx");
@@ -95,9 +97,11 @@ namespace SkeletonTest {
     viewport.initialize("Viewport", scene, camera.getComponent(ƒ.ComponentCamera), canvas);
     viewport.draw();
     console.log(viewport);
+    
+    console.log(ƒ.Project.serialize());
 
     // run loop
-    ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, () =>
+    ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, () => 
       update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal, camera.mtxLocal));
     ƒ.Loop.start();
   }
@@ -106,6 +110,9 @@ namespace SkeletonTest {
   let iShader: number = 0;
   const shaders: typeof ƒ.Shader[] = [ƒ.ShaderFlatSkin, ƒ.ShaderGouraudSkin, ƒ.ShaderPhongSkin];
   function update(_viewport: ƒ.Viewport, _mtxRotatorX: ƒ.Matrix4x4, _mtxRotatorY: ƒ.Matrix4x4, _mtxCamera: ƒ.Matrix4x4): void {
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.P])) ƒ.Time.game.setScale(0);
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) ƒ.Time.game.setScale(0.1);
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) ƒ.Time.game.setScale(1);
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT])) _mtxRotatorY.rotateY(3);
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_UP])) _mtxRotatorX.rotateX(-3);
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_LEFT])) _mtxRotatorY.rotateY(-3);
@@ -138,6 +145,8 @@ namespace SkeletonTest {
     }
     else gPressed = false;
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H])) setShader(ƒ.ShaderPhong);
+    let cmpAnimator: ƒ.ComponentAnimator = _viewport.getBranch().getComponent(ƒ.ComponentAnimator);
+    timeSpan.innerText = cmpAnimator.time.toFixed(0);
     _viewport.draw();
   }
 }

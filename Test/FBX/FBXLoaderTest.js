@@ -1,15 +1,17 @@
-"use strict";
 ///<reference path="./../../Core/Build/FudgeCore.d.ts"/>
 var SkeletonTest;
+///<reference path="./../../Core/Build/FudgeCore.d.ts"/>
 (function (SkeletonTest) {
     var ƒ = FudgeCore;
     const mouse = {
         position: new ƒ.Vector2()
     };
     window.addEventListener("load", init);
+    let timeSpan;
     async function init() {
         const canvas = document.querySelector("canvas");
-        // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./TriangularPrism.fbx");
+        timeSpan = document.querySelector("span");
+        // const loader = await ƒ.FBXLoader.LOAD("./TriangularPrism.fbx");
         // const loader: ƒ.FBXLoader = await ƒ.FBXLoader.LOAD("./animated_arm.fbx");
         const loader = await ƒ.FBXLoader.LOAD("./Unarmed Walk Forward.fbx");
         // track mouse position relative to canvas center
@@ -81,6 +83,7 @@ var SkeletonTest;
         viewport.initialize("Viewport", scene, camera.getComponent(ƒ.ComponentCamera), canvas);
         viewport.draw();
         console.log(viewport);
+        console.log(ƒ.Project.serialize());
         // run loop
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal, camera.mtxLocal));
         ƒ.Loop.start();
@@ -89,6 +92,12 @@ var SkeletonTest;
     let iShader = 0;
     const shaders = [ƒ.ShaderFlatSkin, ƒ.ShaderGouraudSkin, ƒ.ShaderPhongSkin];
     function update(_viewport, _mtxRotatorX, _mtxRotatorY, _mtxCamera) {
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.P]))
+            ƒ.Time.game.setScale(0);
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W]))
+            ƒ.Time.game.setScale(0.1);
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S]))
+            ƒ.Time.game.setScale(1);
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT]))
             _mtxRotatorY.rotateY(3);
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_UP]))
@@ -127,6 +136,9 @@ var SkeletonTest;
             gPressed = false;
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H]))
             setShader(ƒ.ShaderPhong);
+        let cmpAnimator = _viewport.getBranch().getComponent(ƒ.ComponentAnimator);
+        timeSpan.innerText = cmpAnimator.time.toFixed(0);
         _viewport.draw();
     }
 })(SkeletonTest || (SkeletonTest = {}));
+//# sourceMappingURL=FBXLoaderTest.js.map
