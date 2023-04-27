@@ -2848,9 +2848,11 @@ declare namespace FudgeCore {
      * The simplest {@link Coat} providing just a color
      */
     class CoatRemissive extends CoatColored {
-        specular: number;
         diffuse: number;
-        constructor(_color?: Color, _diffuse?: number, _specular?: number);
+        metallic: number;
+        specular: number;
+        intensity: number;
+        constructor(_color?: Color, _diffuse?: number, _specular?: number, _metallic?: number, _intensity?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -2871,9 +2873,11 @@ declare namespace FudgeCore {
      * A {@link Coat} providing a texture and additional data for texturing
      */
     class CoatRemissiveTextured extends CoatTextured {
-        specular: number;
         diffuse: number;
-        constructor(_color?: Color, _texture?: Texture, _diffuse?: number, _specular?: number);
+        metallic: number;
+        specular: number;
+        intensity: number;
+        constructor(_color?: Color, _texture?: Texture, _diffuse?: number, _specular?: number, _metallic?: number, _intensity?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }

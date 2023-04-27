@@ -15,10 +15,14 @@ namespace FudgeCore {
     protected static injectCoatRemissive(this: CoatRemissive, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
       RenderInjectorCoat.injectCoatColored.call(this, _shader, _cmpMaterial);
       let uniform: WebGLUniformLocation;
-      uniform = _shader.uniforms["u_fSpecular"];
-      RenderWebGL.getRenderingContext().uniform1f(uniform, this.specular);
       uniform = _shader.uniforms["u_fDiffuse"];
       RenderWebGL.getRenderingContext().uniform1f(uniform, this.diffuse);
+      uniform = _shader.uniforms["u_fMetallic"];
+      RenderWebGL.getRenderingContext().uniform1f(uniform, this.metallic);
+      uniform = _shader.uniforms["u_fSpecular"];
+      RenderWebGL.getRenderingContext().uniform1f(uniform, this.specular);
+      uniform = _shader.uniforms["u_fIntensity"];
+      RenderWebGL.getRenderingContext().uniform1f(uniform, this.intensity);
     }
 
     protected static injectCoatTextured(this: CoatTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
