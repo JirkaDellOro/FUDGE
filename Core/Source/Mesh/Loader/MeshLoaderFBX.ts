@@ -152,21 +152,22 @@ namespace FudgeCore {
     }
   }
 
-  function mergeVertices(_mesh: Mesh, _newVertexIndices: number[][]): void {
-    const mergedVertices: Vertices = new Vertices();
-    for (const newVertexIndices of _newVertexIndices) {
-      for (const face of _mesh.faces) {
-        for (let i: number = 0; i < face.indices.length; i++) {
-          if (newVertexIndices.includes(face.indices[i]))
-            face.indices[i] = mergedVertices.length;
-        }
-      }
-      const mergedVertex: Vertex = new Vertex(_mesh.vertices[newVertexIndices[0]].position);
-      mergedVertex.normal = Vector3.SCALE(Vector3.SUM(...newVertexIndices.map(index => _mesh.vertices[index].normal)), 1 / newVertexIndices.length);
-      mergedVertex.uv = Vector2.SCALE(Vector2.SUM(...newVertexIndices.map(index => _mesh.vertices[index].uv)), 1 / newVertexIndices.length);
-      mergedVertex.bones = _mesh.vertices[newVertexIndices[0]].bones;
-      mergedVertices.push(mergedVertex);
-    }
-    _mesh.vertices = mergedVertices;
-  }
+  // TODO: "'mergeVertices' is declared but its value is never read." -> find out why
+  // function mergeVertices(_mesh: Mesh, _newVertexIndices: number[][]): void {
+  //   const mergedVertices: Vertices = new Vertices();
+  //   for (const newVertexIndices of _newVertexIndices) {
+  //     for (const face of _mesh.faces) {
+  //       for (let i: number = 0; i < face.indices.length; i++) {
+  //         if (newVertexIndices.includes(face.indices[i]))
+  //           face.indices[i] = mergedVertices.length;
+  //       }
+  //     }
+  //     const mergedVertex: Vertex = new Vertex(_mesh.vertices[newVertexIndices[0]].position);
+  //     mergedVertex.normal = Vector3.SCALE(Vector3.SUM(...newVertexIndices.map(index => _mesh.vertices[index].normal)), 1 / newVertexIndices.length);
+  //     mergedVertex.uv = Vector2.SCALE(Vector2.SUM(...newVertexIndices.map(index => _mesh.vertices[index].uv)), 1 / newVertexIndices.length);
+  //     mergedVertex.bones = _mesh.vertices[newVertexIndices[0]].bones;
+  //     mergedVertices.push(mergedVertex);
+  //   }
+  //   _mesh.vertices = mergedVertices;
+  // }
 }
