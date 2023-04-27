@@ -205,16 +205,20 @@ namespace FudgeCore {
     }
 
     public async getTexture(_index: number): Promise<Texture> {
-      if (!this.#textures)
-        this.#textures = [];
-      if (!this.#textures[_index]) {
+      return new Promise((resolve, reject) => {
+        if (!this.#textures)
+          this.#textures = [];
+        if (this.#textures[_index])
+          return resolve(this.#textures[_index]);
+
         const videoFBX: FBX.Video = this.fbx.objects.textures[_index].children[0];
         const texture: TextureImage = new TextureImage();
         texture.image = new Image();
+        texture.image.onload = () => resolve(texture);
+        texture.image.onerror = reject;
         texture.image.src = URL.createObjectURL(new Blob([videoFBX.Content], { type: "image/png" }));
         this.#textures[_index] = texture;
-      }
-      return this.#textures[_index];
+      });
     }
 
     // Problem: mehrere Deformer verweisen auf das selbe Skelett aber nutzen dabei nicht immer alle Knochen

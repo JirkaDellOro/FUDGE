@@ -78,7 +78,7 @@ namespace FudgeCore.FBX {
       D: _data.getFloat64,
       S: () => _data.getString(_data.getUint32()).replace("\x00\x01", "::"),
       s: () => _data.getString(_data.getUint32()).replace("\x00\x01", "::"),
-      R: () => new Uint8Array(readArray(_data, _data.getUint8)),
+      R: () => new Uint8Array(readRaw(_data, _data.getUint8)),
       r: () => new Uint8Array(readArray(_data, _data.getUint8)),
       b: () => new Uint8Array(readArray(_data, _data.getUint8)),
       i: () => new Int32Array(readArray(_data, _data.getInt32)),
@@ -110,6 +110,13 @@ namespace FudgeCore.FBX {
     _data.offset = endOffset;
 
     return iterable;
+  }
+
+  function readRaw<T extends number | bigint>(_data: BufferReader, _getter: () => T): Generator<T> {
+    // raw binary data needs to be interpreted in a special way see:
+    // https://code.blender.org/2013/08/fbx-binary-file-format-specification/
+    const length: number = _data.getUint32();
+    return _data.getSequence(_getter, length);;
   }
 
   const binaryStartChars: Uint8Array
