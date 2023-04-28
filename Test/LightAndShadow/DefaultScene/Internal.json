@@ -74,11 +74,23 @@
       "coat": {
         "ƒ.CoatRemissiveTextured": {
           "color": "[1, 1, 1, 1]",
+          "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767",
           "diffuse": 1,
           "specular": 1,
           "metallic": 1,
           "intensity": 0.5
         }
+      }
+    }
+  },
+  "TextureImage|2023-04-27T23:08:03.539Z|44767": {
+    "ƒ.TextureImage": {
+      "url": "tex\\monastery_stone_floor_nor_gl_2k.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-04-27T23:08:03.539Z|44767",
+        "name": "normalMap",
+        "mipmap": "CRISP"
       }
     }
   },
@@ -91,6 +103,7 @@
         "ƒ.CoatRemissiveTextured": {
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2023-04-27T15:13:24.776Z|64130",
+          "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767",
           "diffuse": 1,
           "specular": 1,
           "metallic": 0.5,
@@ -116,6 +129,7 @@
         "ƒ.CoatRemissiveTextured": {
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2023-04-18T00:42:31.220Z|29908",
+          "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767",
           "diffuse": 1,
           "specular": 1,
           "metallic": 1,

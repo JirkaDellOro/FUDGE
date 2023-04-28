@@ -5,6 +5,7 @@ namespace FudgeCore {
     public static define: string[] = [
       "LIGHT",
       "TEXTURE",
+      "NORMALMAP",
       "CAMERA",
       "PHONG"
     ];

@@ -253,9 +253,15 @@ uniform uint u_nLightsSpot;
 uniform Light u_spot[MAX_LIGHTS_SPOT];
 
 // TEXTURE: input UVs and texture
-#if defined(TEXTURE) || defined(MATCAP)
+#if defined(TEXTURE)
 in vec2 v_vctTexture;
 uniform sampler2D u_texture;
+#endif
+
+// NORMALMAP: input UVs and texture
+#if defined(NORMALMAP)
+in vec2 v_vctNormalMap;
+uniform sampler2D u_normalMap;
 #endif
 
 vec4 calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular, vec4 _vctColor) {
@@ -276,8 +282,9 @@ vec4 calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _
   //return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
 }
 
-vec4 illuminateDiffuse(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor) {
+vec4 illuminateDiffuse(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _normalMap) {
   vec4 vctResult = vec4(0, 0, 0, 1);
+  _vctNormal += 1.0 - (2.0 * _normalMap);
   float fIllumination = -dot(_vctNormal, _vctDirection);
   if(fIllumination > 0.0f) {
     vctResult += u_fDiffuse * fIllumination * _vctColor;
@@ -291,10 +298,17 @@ void main() {
   vec4 vctSpec = vec4(0, 0, 0, 1);
   vec3 vctView = normalize(vec3(u_mtxMeshToWorld * v_vctPosition) - u_vctCamera);
 
+  vec4 tempNormalMap = vec4(0);
+
+  #if defined(TEXTURE)
+  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+  tempNormalMap += vctColorTexture;
+  #endif
+
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = normalize(vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0)));
-    vctFrag += illuminateDiffuse(vctDirection, v_vctNormal, u_directional[i].vctColor);
+    vctFrag += illuminateDiffuse(vctDirection, v_vctNormal, u_directional[i].vctColor, tempNormalMap.xyz);
     vctSpec += calculateReflection(vctDirection, vctView, v_vctNormal, u_fSpecular, u_directional[i].vctColor);
   }
 
@@ -308,7 +322,7 @@ void main() {
 
     if(fIntensity < 0.0)
       continue;
-    vctFrag += illuminateDiffuse(vctDirection, v_vctNormal, fIntensity * u_point[i].vctColor);
+    vctFrag += illuminateDiffuse(vctDirection, v_vctNormal, fIntensity * u_point[i].vctColor, tempNormalMap.xyz);
   }
 
   // calculate spot light effect
@@ -327,15 +341,23 @@ void main() {
     fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);                                                 //Prevents harsh lighting artifacts at boundary of the given spotlight
     if(fIntensity < 0.0)
       continue;
-    vctFrag += illuminateDiffuse(vctDirection, v_vctNormal, fIntensity * u_spot[i].vctColor);
+    vctFrag += illuminateDiffuse(vctDirection, v_vctNormal, fIntensity * u_spot[i].vctColor, tempNormalMap.xyz);
   }
 
   vctFrag += vctSpec * fmetallic * 2.0;
+/*
   // TEXTURE: multiply with texel color
-  #if defined(TEXTURE) || defined(MATCAP)
+  #if defined(TEXTURE)
   vec4 vctColorTexture = texture(u_texture, v_vctTexture);
   vctFrag *= vctColorTexture;
   #endif
+  */
+  // NORMALMAP: multiply with texel color
+  #if defined(NORMALMAP)
+  vec4 vctNormalMapCol = texture(u_normalMap, v_vctNormalMap);
+  vctFrag *= vctNormalMapCol;
+  #endif
+
   vctFrag *= u_vctColor;
   vctFrag += vctSpec * (1.0 - fmetallic);
 }`;
@@ -543,6 +565,13 @@ in vec2 a_vctTexture;
 out vec2 v_vctTexture;
   #endif
 
+  // NORMALMAP: offer buffers for UVs and pivot matrix
+  #if defined(NORMALMAP)
+uniform mat3 u_mtxPivotN;
+in vec2 a_vctNormalMap;
+out vec2 v_vctNormalMap;
+  #endif
+
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
 in vec3 a_vctNormal;
 uniform mat4 u_mtxNormalMeshToWorld;
@@ -700,6 +729,11 @@ void main() {
     // TEXTURE: transform UVs
     #if defined(TEXTURE)
   v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+    #endif
+
+    // NORMALMAP: transform UVs
+    #if defined(NORMALMAP)
+  v_vctNormalMap = vec2(u_mtxPivotN * vec3(a_vctNormalMap, 1.0)).xy;
     #endif
 
     #if defined(MATCAP)

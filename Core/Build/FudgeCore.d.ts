@@ -2863,7 +2863,8 @@ declare namespace FudgeCore {
      */
     class CoatTextured extends CoatColored {
         texture: Texture;
-        constructor(_color?: Color, _texture?: Texture);
+        normalMap: Texture;
+        constructor(_color?: Color, _texture?: Texture, _normalMap?: Texture);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -2877,7 +2878,7 @@ declare namespace FudgeCore {
         metallic: number;
         specular: number;
         intensity: number;
-        constructor(_color?: Color, _texture?: Texture, _diffuse?: number, _specular?: number, _metallic?: number, _intensity?: number);
+        constructor(_color?: Color, _texture?: Texture, _normalMap?: Texture, _diffuse?: number, _specular?: number, _metallic?: number, _intensity?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }

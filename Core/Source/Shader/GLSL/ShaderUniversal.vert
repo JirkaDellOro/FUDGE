@@ -76,6 +76,13 @@ in vec2 a_vctTexture;
 out vec2 v_vctTexture;
   #endif
 
+  // NORMALMAP: offer buffers for UVs and pivot matrix
+  #if defined(NORMALMAP)
+uniform mat3 u_mtxPivotN;
+in vec2 a_vctNormalMap;
+out vec2 v_vctNormalMap;
+  #endif
+
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
 in vec3 a_vctNormal;
 uniform mat4 u_mtxNormalMeshToWorld;
@@ -233,6 +240,11 @@ void main() {
     // TEXTURE: transform UVs
     #if defined(TEXTURE)
   v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+    #endif
+
+    // NORMALMAP: transform UVs
+    #if defined(NORMALMAP)
+  v_vctNormalMap = vec2(u_mtxPivotN * vec3(a_vctNormalMap, 1.0)).xy;
     #endif
 
     #if defined(MATCAP)
