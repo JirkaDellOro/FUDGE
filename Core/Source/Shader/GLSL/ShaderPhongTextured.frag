@@ -69,7 +69,7 @@ vec4 calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _
 
 vec4 illuminateDiffuse(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _normalMap) {
   vec4 vctResult = vec4(0, 0, 0, 1);
-  _vctNormal += 1.0 - (2.0 * _normalMap);
+  //_vctNormal += 1.0 - (2.0 * _normalMap);
   float fIllumination = -dot(_vctNormal, _vctDirection);
   if(fIllumination > 0.0f) {
     vctResult += u_fDiffuse * fIllumination * _vctColor;
@@ -84,11 +84,6 @@ void main() {
   vec3 vctView = normalize(vec3(u_mtxMeshToWorld * v_vctPosition) - u_vctCamera);
 
   vec4 tempNormalMap = vec4(0);
-
-  #if defined(TEXTURE)
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  tempNormalMap += vctColorTexture;
-  #endif
 
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
@@ -130,19 +125,22 @@ void main() {
   }
 
   vctFrag += vctSpec * fmetallic * 2.0;
+
 /*
   // TEXTURE: multiply with texel color
   #if defined(TEXTURE)
   vec4 vctColorTexture = texture(u_texture, v_vctTexture);
   vctFrag *= vctColorTexture;
   #endif
-  */
+*/
+  
   // NORMALMAP: multiply with texel color
   #if defined(NORMALMAP)
   vec4 vctNormalMapCol = texture(u_normalMap, v_vctNormalMap);
   vctFrag *= vctNormalMapCol;
   #endif
 
-  vctFrag *= u_vctColor;
+
+  //vctFrag *= u_vctColor;
   vctFrag += vctSpec * (1.0 - fmetallic);
 }

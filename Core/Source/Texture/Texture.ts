@@ -19,7 +19,7 @@ namespace FudgeCore {
     }
 
     public abstract get texImageSource(): TexImageSource;
-    public useRenderData(): void {/* injected by RenderInjector*/ }
+    public useRenderData(_textureslot: number = 0): void {/* injected by RenderInjector*/ }
 
     public refresh(): void {
       this.renderData = null;

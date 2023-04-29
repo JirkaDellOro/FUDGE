@@ -1105,7 +1105,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class RenderInjectorTexture extends RenderInjector {
         static decorate(_constructor: Function): void;
-        protected static injectTexture(this: Texture): void;
+        protected static injectTexture(this: Texture, _textureslot?: number): void;
     }
 }
 declare namespace FudgeCore {
@@ -6667,7 +6667,7 @@ declare namespace FudgeCore {
         };
         constructor(_name?: string);
         abstract get texImageSource(): TexImageSource;
-        useRenderData(): void;
+        useRenderData(_textureslot?: number): void;
         refresh(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
