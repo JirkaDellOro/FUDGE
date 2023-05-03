@@ -58,7 +58,7 @@ namespace FudgeCore.FBX {
     Vertices?: Float32Array;
     PolygonVertexIndex?: Int32Array;
     LayerElementNormal?: LayerElementNormal;
-    LayerElementUV?: LayerElementUV | LayerElementUV[];
+    LayerElementUV?: LayerElementUV; // | LayerElementUV[]; // TODO: might need to readd this
     LayerElementMaterial?: LayerElementMaterial;
   }
 
@@ -157,6 +157,7 @@ namespace FudgeCore.FBX {
   export interface LayerElementNormal extends LayerElement {
     Normals: Float32Array;
     NormalsW: Float32Array;
+    NormalsIndex?: Uint16Array; // TODO: find an FBX file which uses normals index
   }
 
   export interface LayerElementUV extends LayerElement {

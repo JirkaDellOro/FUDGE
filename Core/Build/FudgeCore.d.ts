@@ -4304,7 +4304,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Filmbox mesh import
-     * @author Matthias Roming, HFU, 2023
+     * @authors Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
      */
     class MeshLoaderFBX extends MeshLoader {
         static load(_mesh: MeshImport | MeshSkin, _data: FBX.Geometry): Promise<MeshImport>;
@@ -5876,7 +5876,7 @@ declare namespace FudgeCore.FBX {
         Vertices?: Float32Array;
         PolygonVertexIndex?: Int32Array;
         LayerElementNormal?: LayerElementNormal;
-        LayerElementUV?: LayerElementUV | LayerElementUV[];
+        LayerElementUV?: LayerElementUV;
         LayerElementMaterial?: LayerElementMaterial;
     }
     export interface Model extends ObjectBase {
@@ -5958,6 +5958,7 @@ declare namespace FudgeCore.FBX {
     export interface LayerElementNormal extends LayerElement {
         Normals: Float32Array;
         NormalsW: Float32Array;
+        NormalsIndex?: Uint16Array;
     }
     export interface LayerElementUV extends LayerElement {
         UV?: Float32Array;

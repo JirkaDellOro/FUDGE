@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
    * Filmbox mesh import
-   * @author Matthias Roming, HFU, 2023
+   * @authors Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
    */
   export class MeshLoaderFBX extends MeshLoader {
     public static async load(_mesh: MeshImport | MeshSkin, _data: FBX.Geometry): Promise<MeshImport> {
@@ -14,37 +14,70 @@ namespace FudgeCore {
       if (_data)
         _mesh.name = _data.name.length > 0 ? _data.name : _data.parents[0].name;
       
+      let positions: Vector3[] = [];
+      let vertexBuffer: Float32Array = geometryFBX.Vertices;
+      for (let iVertex: number = 0; iVertex < vertexBuffer.length; iVertex += 3) {
+        positions.push(new Vector3(vertexBuffer[iVertex + 0], vertexBuffer[iVertex + 1], vertexBuffer[iVertex + 2]));
+      }
 
-      // Create vertices
-      // for (let i: number = 0; i < geometryFBX.Vertices.length; i += 3) {
-      //   _mesh.vertices.push(new Vertex(new Vector3(
-      //     geometryFBX.Vertices[i + 0],
-      //     geometryFBX.Vertices[i + 1],
-      //     geometryFBX.Vertices[i + 2]
-      //   )));
-      // }
-
-      // Create vertices and faces
-      // map from old vertex index to new vertex indices
-      const newVertexIndices: number[][] = [];
-      for (let iPolygonVertexIndex: number = 0, indices: number[] = [];
-          iPolygonVertexIndex < geometryFBX.PolygonVertexIndex.length; iPolygonVertexIndex++) {
-        // Check if polygon end is not yet reached
-        // Each polygon in fbx ends with a negative index (bit shifted: index ^ - 1 or -index - 1),
-        // so poligons with more points than a triangle are possible
-        if (geometryFBX.PolygonVertexIndex[iPolygonVertexIndex] >= 0)
-          indices.push(geometryFBX.PolygonVertexIndex[iPolygonVertexIndex]);
-        else {
-          // Reached end of polygon
-          indices.push(geometryFBX.PolygonVertexIndex[iPolygonVertexIndex] ^ - 1);
-          // To make ByPolygonVertex work properly, new vertices are created for each face,
-          // instead of just copying the existing arrays (vertex, uv, normal)
-          setNewVertexIndices(indices, iPolygonVertexIndex - indices.length + 1, newVertexIndices);
-          _mesh.vertices.push(...getVertices(geometryFBX, indices, _mesh.faces.length, iPolygonVertexIndex - indices.length + 1));
-          try { _mesh.faces.push(...getFaces(indices, _mesh.vertices)); } catch {}
-          indices.length = 0;
+      let uvs: Vector2[] = [];
+      if (geometryFBX.LayerElementUV) {
+        let uvBuffer: Float32Array = geometryFBX.LayerElementUV.UV;
+        for (let iuv: number = 0; iuv < uvBuffer.length; iuv += 2) {
+          uvs.push(new Vector2(uvBuffer[iuv], 1 - uvBuffer[iuv + 1]));
         }
       }
+
+      let normals: Vector3[] = [];
+      if (geometryFBX.LayerElementNormal) {
+        let normalBuffer: Float32Array = geometryFBX.LayerElementNormal.Normals;
+        for (let iNormal: number = 0; iNormal < normalBuffer.length; iNormal += 3) {
+          normals.push(new Vector3(normalBuffer[iNormal], normalBuffer[iNormal + 1], normalBuffer[iNormal + 2]));
+        }
+      }
+
+      let mapVertexToIndex: Map<string, number> = new Map();
+      let newVertexIndices: number[][] = [];
+      let iPolygon = 0;
+      let isEndOfPolygon: boolean = false;
+      let polygon: number[] = [];
+
+      geometryFBX.PolygonVertexIndex.forEach((_iVertex, _iPolygonVertex) => {
+        if (_iVertex < 0) {
+          _iVertex = _iVertex ^ - 1;
+          isEndOfPolygon = true;
+        }
+
+        let position: Vector3 = positions[_iVertex];
+        let uv: Vector2 = uvs[getDataIndex(geometryFBX.LayerElementUV, _iVertex, iPolygon, _iPolygonVertex)];
+
+        let vertexKey = position.toString() + uv.toString();
+        if (!mapVertexToIndex.has(vertexKey)) {
+          let normal: Vector3 = normals[getDataIndex(geometryFBX.LayerElementNormal, _iVertex, iPolygon, _iPolygonVertex)];
+        
+          _mesh.vertices.push(new Vertex(position, uv, normal));
+          mapVertexToIndex.set(vertexKey, _mesh.vertices.length - 1);
+          if (!newVertexIndices[_iVertex])
+            newVertexIndices[_iVertex] = [];
+          newVertexIndices[_iVertex].push(_mesh.vertices.length - 1);
+        }
+        polygon.push(mapVertexToIndex.get(vertexKey));
+        
+        if (isEndOfPolygon) {
+          if (polygon.length == 3) {
+            _mesh.faces.push(new Face(_mesh.vertices, polygon[0], polygon[1], polygon[2]));
+          } else if (polygon.length == 4) {
+            let quad: Quad = new Quad(_mesh.vertices, polygon[0], polygon[1], polygon[2], polygon[3], QUADSPLIT.AT_0);
+            _mesh.faces.push(...quad.faces);
+          } else {
+            // could add proper triangulation here
+            console.warn(`${MeshLoaderFBX.name}: Polygons with more than 4 vertices are not supported.`)
+          }
+          polygon = [];
+          isEndOfPolygon = false;
+          iPolygon++;
+        }        
+      })
 
       if (_mesh instanceof MeshSkin) {
         const fbxDeformer: FBX.Deformer = geometryFBX.children[0];
@@ -55,84 +88,46 @@ namespace FudgeCore {
     }
   }
 
-  function setNewVertexIndices(_indices: number[], _iFaceVertex: number, _newVertexIndices: number[][]): void {
-    for (let i: number = 0; i < _indices.length; i++)
-      (_newVertexIndices[_indices[i]] || (_newVertexIndices[_indices[i]] = [])).push(_iFaceVertex + i);
-  }
-
-  function* getVertices(_geometryFBX: FBX.Geometry, _indices: number[], _iFace: number, _iFaceVertex: number): Generator<Vertex> {
-    for (let i: number = 0; i < _indices.length; i++) {
-      const position: Vector3 = new Vector3(
-        _geometryFBX.Vertices[_indices[i] * 3 + 0],
-        _geometryFBX.Vertices[_indices[i] * 3 + 1],
-        _geometryFBX.Vertices[_indices[i] * 3 + 2]
-      );
-      yield new Vertex(
-        position,
-        getVertexData(
-          _geometryFBX.LayerElementUV instanceof Array ?
-            _geometryFBX.LayerElementUV[0] :
-            _geometryFBX.LayerElementUV,
-          _indices[i], _iFace, _iFaceVertex + i
-        ),
-        getVertexData(_geometryFBX.LayerElementNormal, _indices[i], _iFace, _iFaceVertex + i)
-      );
-    }
-  }
-
-  function* getFaces(_indices: number[], _vertices: Vertices, _mergedVertices: boolean = false): Generator<Face> {
-    if (_indices.length == 3)
-        yield new Face(
-          _vertices,
-          _mergedVertices ? _indices[0] : _vertices.length - 3,
-          _mergedVertices ? _indices[1] : _vertices.length - 2,
-          _mergedVertices ? _indices[2] : _vertices.length - 1
-        );
-    else if (_indices.length == 4)
-      for (const face of new Quad(
-            _vertices,
-            _mergedVertices ? _indices[0] : _vertices.length - 4,
-            _mergedVertices ? _indices[1] : _vertices.length - 3,
-            _mergedVertices ? _indices[2] : _vertices.length - 2,
-            _mergedVertices ? _indices[3] : _vertices.length - 1,
-            QUADSPLIT.AT_0
-          ).faces)
-        yield face;
-    else
-      for (let i: number = 2; i < _indices.length; i++) {
-        yield new Face(
-          _vertices,
-          _mergedVertices ? _indices[0] : _vertices.length - _indices.length,
-          _mergedVertices ? _indices[i - 1] : _vertices.length - _indices.length + i - 1,
-          _mergedVertices ? _indices[i - 0] : _vertices.length - _indices.length + i - 0
-        );
-      }
-  }
-
-  function getVertexData<T extends Vector2 | Vector3>(_layerElemet: FBX.LayerElementUV | FBX.LayerElementNormal, _iVertex: number, _iFace: number, _iFaceVertex: number): T {
-    const index: number =
-      _layerElemet.MappingInformationType == "ByPolygon" ?
-        _iFace :
-      _layerElemet.MappingInformationType == "ByVertex" ?
+  function getDataIndex(_layerElement: FBX.LayerElementUV | FBX.LayerElementNormal, _iVertex: number, _iPolygon: number, _iPolygonVertex: number): number {
+    let index: number =
+      _layerElement.MappingInformationType == "ByVertex" ?
         _iVertex :
-        _iFaceVertex;
-    return (_layerElemet as FBX.LayerElementUV)?.UV ?
+      _layerElement.MappingInformationType == "ByPolygon" ?
+        _iPolygon :
+        _iPolygonVertex;
+    
+    if (_layerElement.ReferenceInformationType === 'IndexToDirect' ) {
+      let indices: Uint16Array = (_layerElement as FBX.LayerElementUV).UVIndex || (_layerElement as FBX.LayerElementNormal).NormalsIndex;
+      index = indices[index];
+    }
+
+    return index;
+  }
+
+  function getVertexData<T extends Vector2 | Vector3>(_layerElement: FBX.LayerElementUV | FBX.LayerElementNormal, _iVertex: number, _iPolygon: number, _iPolygonVertex: number): T {
+    let index: number =
+      _layerElement.MappingInformationType == "ByVertex" ?
+        _iVertex :
+      _layerElement.MappingInformationType == "ByPolygon" ?
+        _iPolygon :
+        _iPolygonVertex;
+    
+    if (_layerElement.ReferenceInformationType === 'IndexToDirect' ) {
+      let indices: Uint16Array = (_layerElement as FBX.LayerElementUV).UVIndex || (_layerElement as FBX.LayerElementNormal).NormalsIndex;
+      index = indices[index];
+    }
+
+    let data: Float32Array = (_layerElement as FBX.LayerElementUV).UV || (_layerElement as FBX.LayerElementNormal).Normals;
+    
+    return (_layerElement as FBX.LayerElementUV).UV ?
       new Vector2(
-        (_layerElemet as FBX.LayerElementUV).UV[
-          _layerElemet.ReferenceInformationType == "Direct" ?
-            index * 2 + 0 :
-            (_layerElemet as FBX.LayerElementUV).UVIndex[index * 2 + 0]
-        ],
-        (_layerElemet as FBX.LayerElementUV).UV[
-          _layerElemet.ReferenceInformationType == "Direct" ?
-            index * 2 + 1 :
-            (_layerElemet as FBX.LayerElementUV).UVIndex[index * 2 + 1]
-        ]
+        data[index * 2 + 0],
+        1 - data[index * 2 + 1] // flip v
       ) as T :
       new Vector3(
-        (_layerElemet as FBX.LayerElementNormal).Normals[index * 3 + 0],
-        (_layerElemet as FBX.LayerElementNormal).Normals[index * 3 + 1],
-        (_layerElemet as FBX.LayerElementNormal).Normals[index * 3 + 2]
+        data[index * 3 + 0],
+        data[index * 3 + 1],
+        data[index * 3 + 2]
       ) as T;
   }
 
@@ -148,26 +143,8 @@ namespace FudgeCore {
               weight: fbxSubDeformer.Weights[iBoneInfluence] || 1
             });
           }
+
         }
     }
   }
-
-  // TODO: "'mergeVertices' is declared but its value is never read." -> find out why
-  // function mergeVertices(_mesh: Mesh, _newVertexIndices: number[][]): void {
-  //   const mergedVertices: Vertices = new Vertices();
-  //   for (const newVertexIndices of _newVertexIndices) {
-  //     for (const face of _mesh.faces) {
-  //       for (let i: number = 0; i < face.indices.length; i++) {
-  //         if (newVertexIndices.includes(face.indices[i]))
-  //           face.indices[i] = mergedVertices.length;
-  //       }
-  //     }
-  //     const mergedVertex: Vertex = new Vertex(_mesh.vertices[newVertexIndices[0]].position);
-  //     mergedVertex.normal = Vector3.SCALE(Vector3.SUM(...newVertexIndices.map(index => _mesh.vertices[index].normal)), 1 / newVertexIndices.length);
-  //     mergedVertex.uv = Vector2.SCALE(Vector2.SUM(...newVertexIndices.map(index => _mesh.vertices[index].uv)), 1 / newVertexIndices.length);
-  //     mergedVertex.bones = _mesh.vertices[newVertexIndices[0]].bones;
-  //     mergedVertices.push(mergedVertex);
-  //   }
-  //   _mesh.vertices = mergedVertices;
-  // }
 }

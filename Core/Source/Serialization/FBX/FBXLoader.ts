@@ -136,6 +136,7 @@ namespace FudgeCore {
             node.addComponent(cmpMesh);
           }
           else if (childFBX.type == "Material") {
+            // TODO: additional skin materials get created here, check if the original material is still needed
             const iMaterial: number = this.fbx.objects.materials.indexOf(childFBX);
             const material: Material = await this.getMaterial(iMaterial);
             node.getComponent(ComponentMaterial).material = node.getComponent(ComponentMesh).mesh instanceof MeshSkin ?
@@ -218,6 +219,7 @@ namespace FudgeCore {
         texture.image.onerror = reject;
         texture.image.src = URL.createObjectURL(new Blob([videoFBX.Content], { type: "image/png" }));
         this.#textures[_index] = texture;
+        // TODO: get and set mipmap information ???
       });
     }
 
