@@ -12,17 +12,15 @@ namespace FudgeCore {
         switch (_textureslot) {
           case 0:
             crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
-            crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
             break;
           case 2:
             crc3.activeTexture(WebGL2RenderingContext.TEXTURE2);
-            crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture2"]);
             break;
           default:
             console.log("there is no textureslot '" + _textureslot + "', textureslot '0' is used instead");
             crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
-            crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
         }
+        crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
       }
       else {
         this.renderData = {};
@@ -55,17 +53,8 @@ namespace FudgeCore {
             crc3.generateMipmap(crc3.TEXTURE_2D);
             break;
         }
-        switch (_textureslot) {
-          case 0:
-            this.renderData["texture0"] = texture;
-            break;
-          case 2:
-            this.renderData["texture2"] = texture;
-            break;
-          default:
-            console.log("there is no textureslot '" + _textureslot + "', textureslot '0' is used instead");
-            this.renderData["texture0"] = texture;
-        }
+
+        this.renderData["texture0"] = texture;
 
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
 

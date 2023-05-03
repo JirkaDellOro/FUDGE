@@ -69,17 +69,20 @@ vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec
 }
   #endif 
 
+// TEXTURE || NORMALMAP: texture coordinates for texturemaps
+#if defined(TEXTURE) || defined(NORMALMAP)
+in vec2 a_vctTexture;
+#endif
+
   // TEXTURE: offer buffers for UVs and pivot matrix
   #if defined(TEXTURE)
 uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
 out vec2 v_vctTexture;
   #endif
 
   // NORMALMAP: offer buffers for UVs and pivot matrix
   #if defined(NORMALMAP)
 uniform mat3 u_mtxPivotN;
-in vec2 a_vctNormalMap;
 out vec2 v_vctNormalMap;
   #endif
 
@@ -244,7 +247,7 @@ void main() {
 
     // NORMALMAP: transform UVs
     #if defined(NORMALMAP)
-  v_vctNormalMap = vec2(u_mtxPivotN * vec3(a_vctNormalMap, 1.0)).xy;
+  v_vctNormalMap = vec2(u_mtxPivotN * vec3(a_vctTexture, 1.0)).xy;
     #endif
 
     #if defined(MATCAP)

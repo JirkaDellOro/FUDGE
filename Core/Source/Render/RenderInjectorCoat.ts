@@ -29,7 +29,7 @@ namespace FudgeCore {
       RenderInjectorCoat.injectCoatColored.call(this, _shader, _cmpMaterial);
 
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      this.texture.useRenderData();
+      this.texture.useRenderData(0);
       crc3.uniform1i(_shader.uniforms["u_texture"], 0);
       crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, _cmpMaterial.mtxPivot.get());
     }
