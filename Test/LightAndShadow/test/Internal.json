@@ -1,0 +1,100 @@
+{
+  "MeshCube|2023-05-03T14:21:57.485Z|66020": {
+    "ƒ.MeshCube": {
+      "idResource": "MeshCube|2023-05-03T14:21:57.485Z|66020",
+      "name": "MeshCube",
+      "type": "MeshCube"
+    }
+  },
+  "Material|2023-05-03T14:22:06.933Z|35976": {
+    "ƒ.Material": {
+      "name": "ShaderPhong",
+      "idResource": "Material|2023-05-03T14:22:06.933Z|35976",
+      "shader": "ShaderPhong",
+      "coat": {
+        "ƒ.CoatRemissive": {
+          "color": "[1, 1, 1, 1]",
+          "diffuse": 1,
+          "metallic": 0,
+          "specular": 0,
+          "intensity": 0.5
+        }
+      }
+    }
+  },
+  "MeshObj|2023-05-03T17:12:51.252Z|84296": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-05-03T17:12:51.252Z|84296",
+      "name": "suzanne.obj",
+      "type": "MeshObj",
+      "url": "suzanne.obj"
+    }
+  },
+  "Graph|2023-05-03T14:21:43.739Z|38609": {
+    "ƒ.Graph": {
+      "name": "NewGraph",
+      "active": true,
+      "components": {
+        "ComponentTransform": [
+          {
+            "ƒ.ComponentTransform": {
+              "local": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "Component": {
+                "active": true
+              }
+            }
+          }
+        ],
+        "ComponentMesh": [
+          {
+            "ƒ.ComponentMesh": {
+              "idMesh": "MeshCube|2023-05-03T14:21:57.485Z|66020",
+              "pivot": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "Component": {
+                "active": true
+              }
+            }
+          }
+        ],
+        "ComponentMaterial": [
+          {
+            "ƒ.ComponentMaterial": {
+              "sortForAlpha": false,
+              "clrPrimary": "[1, 1, 1, 1]",
+              "clrSecondary": "[1, 1, 1, 1]",
+              "pivot": {
+                "translation": "[0, 0]",
+                "rotation": 0,
+                "scaling": "[1, 1]"
+              },
+              "Component": {
+                "active": true
+              },
+              "idMaterial": "Material|2023-05-03T14:22:06.933Z|35976"
+            }
+          }
+        ]
+      },
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "New Node",
+            "active": true,
+            "components": {},
+            "children": []
+          }
+        }
+      ],
+      "idResource": "Graph|2023-05-03T14:21:43.739Z|38609",
+      "type": "Graph"
+    }
+  }
+}

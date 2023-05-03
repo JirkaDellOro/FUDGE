@@ -35,6 +35,8 @@ namespace FudgeCore {
             indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indices),
             normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normalsVertex),
             textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVs),
+            tangents: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.tangentsVertex),
+            biTangents: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.bitangentsVertex),
             nIndices: this.renderMesh.indices.length
           };
         return this.renderMesh.smooth;
@@ -81,6 +83,8 @@ namespace FudgeCore {
 
       setBuffer("a_vctPosition", renderBuffers.vertices);
       setBuffer("a_vctNormal", renderBuffers.normals);
+      setBuffer("a_vctTangent", renderBuffers.tangents);
+      setBuffer("a_vctBitangent", renderBuffers.biTangents);
 
 
       // feed in texture coordinates if shader accepts a_vctTexture

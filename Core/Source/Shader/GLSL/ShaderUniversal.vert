@@ -34,6 +34,8 @@ float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float 
   #if defined(LIGHT)
 uniform mat4 u_mtxNormalMeshToWorld;
 in vec3 a_vctNormal;
+in vec3 a_vctTangent;
+in vec3 a_vctBitangent;
 uniform float u_fDiffuse;
 
 struct Light {
@@ -95,6 +97,8 @@ out vec2 v_vctTexture;
 
   #if defined(PHONG)
 out vec3 v_vctNormal;
+out vec3 v_vctTangent;
+out vec3 v_vctBitangent;
 out vec4 v_vctPosition;
   #endif
 
@@ -206,6 +210,8 @@ void main() {
   vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader
+  v_vctTangent = normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent);
+  v_vctBitangent = normalize(mat3(mtxNormalMeshToWorld) * a_vctBitangent);
   v_vctPosition = vctPosition;
       #endif  
 

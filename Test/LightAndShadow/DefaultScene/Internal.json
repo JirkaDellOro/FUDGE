@@ -76,8 +76,8 @@
           "color": "[1, 1, 1, 1]",
           "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767",
           "diffuse": 1,
-          "specular": 1,
-          "metallic": 1,
+          "specular": 0.30000000000000016,
+          "metallic": 0,
           "intensity": 0.5
         }
       }
@@ -101,13 +101,13 @@
       "shader": "ShaderPhongTextured",
       "coat": {
         "ƒ.CoatRemissiveTextured": {
-          "color": "[1, 1, 1, 1]",
+          "color": "[0.5411764705882353, 0.5411764705882353, 0.5411764705882353, 1]",
           "idTexture": "TextureImage|2023-04-27T15:13:24.776Z|64130",
           "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767",
-          "diffuse": 1,
-          "specular": 1,
-          "metallic": 0.5,
-          "intensity": 0.2100000000000001
+          "diffuse": 0.30000000000000004,
+          "specular": 1.3000000000000003,
+          "metallic": 0.9999999999999997,
+          "intensity": 0.11000000000000004
         }
       }
     }
@@ -133,7 +133,7 @@
           "diffuse": 1,
           "specular": 1,
           "metallic": 1,
-          "intensity": 0.5
+          "intensity": 0.7999999999999999
         }
       }
     }

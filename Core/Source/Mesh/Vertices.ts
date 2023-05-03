@@ -32,6 +32,22 @@ namespace FudgeCore {
     }
 
     /**
+     * returns the tangent associated with the vertex addressed, resolving references between vertices 
+     */
+    public tangent(_index: number): Vector3 {
+      let vertex: Vertex = this[_index];
+      return (vertex.referTo == undefined) ? vertex.tangent : this[vertex.referTo].tangent;
+    }
+
+    /**
+     * returns the bitangent associated with the vertex addressed, resolving references between vertices 
+     */
+    public bitangent(_index: number): Vector3 {
+      let vertex: Vertex = this[_index];
+      return (vertex.referTo == undefined) ? vertex.bitangent : this[vertex.referTo].bitangent;
+    }
+
+    /**
      * returns the uv-coordinates associated with the vertex addressed
      */
     public uv(_index: number): Vector2 {

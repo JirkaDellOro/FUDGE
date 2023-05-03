@@ -7,6 +7,8 @@ namespace FudgeCore {
     indices?: WebGLBuffer;
     textureUVs?: WebGLBuffer;
     normals?: WebGLBuffer;
+    tangents?: WebGLBuffer;
+    biTangents?: WebGLBuffer;
     iBones?: WebGLBuffer;
     weights?: WebGLBuffer;
     nIndices?: number;
@@ -25,6 +27,10 @@ namespace FudgeCore {
     protected ƒtextureUVs: Float32Array;
     /** vertex normals for smooth shading, interpolated between vertices during rendering */
     protected ƒnormalsVertex: Float32Array;
+    /** vertex tangents for normal mapping, based on the vertex normals and the UV coordinates */
+    protected ƒtangentsVertex: Float32Array;
+    /** vertex bitangents for normal mapping, based on the vertex normals and vertex tangents */
+    protected ƒbitangentsVertex: Float32Array;
     /** bones */
     protected ƒiBones: Uint8Array;
     protected ƒweights: Float32Array;
@@ -79,6 +85,7 @@ namespace FudgeCore {
       if (this.ƒnormalsVertex == null) {
         // sum up all unscaled normals of faces connected to one vertex...
         this.mesh.vertices.forEach(_vertex => _vertex.normal.set(0, 0, 0));
+
         for (let face of this.mesh.faces)
           for (let index of face.indices) {
             this.mesh.vertices.normal(index).add(face.normalUnscaled);
@@ -98,6 +105,81 @@ namespace FudgeCore {
       }
 
       return this.ƒnormalsVertex;
+    }
+
+    public get tangentsVertex(): Float32Array {
+      if (this.ƒtangentsVertex == null) {
+        this.mesh.vertices.forEach(_vertex => _vertex.tangent.set(0, 0, 0));
+        this.mesh.vertices.forEach(_vertex => _vertex.bitangent.set(0, 0, 0));
+        
+        for (let face of this.mesh.faces) {
+          //vertices surrounding one triangle
+          let v0: Vector3 = this.mesh.vertices[face.indices[0]].position;
+          let v1: Vector3 = this.mesh.vertices[face.indices[1]].position;
+          let v2: Vector3 = this.mesh.vertices[face.indices[2]].position;
+
+          if (typeof v0 === "undefined") {
+            v0 = new Vector3(0, 0, 0);
+          }
+          if (typeof v1 === "undefined") {
+            v1 = new Vector3(0, 0, 0);
+          }
+          if (typeof v2 === "undefined") {
+            v2 = new Vector3(0, 0, 0);
+          }
+
+          //their UVs
+          let uv0: Vector2 = this.mesh.vertices[face.indices[0]].uv;
+          let uv1: Vector2 = this.mesh.vertices[face.indices[1]].uv;
+          let uv2: Vector2 = this.mesh.vertices[face.indices[2]].uv;
+
+          //We compute the edges of the triangle...
+          let deltaPos1: Vector3 = Vector3.DIFFERENCE(v1, v0);
+          let deltaPos2: Vector3 = Vector3.DIFFERENCE(v2, v0);
+
+          //...and the edges of the triangles in UV space...
+          let deltaUV1: Vector2 = Vector2.DIFFERENCE(uv1, uv0);
+          let deltaUV2: Vector2 = Vector2.DIFFERENCE(uv2, uv0);
+
+          //...and compute the tangent
+          let r: number = 1 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+          let tempTangent: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(Vector3.SCALE(deltaPos1, deltaUV2.y), Vector3.SCALE(deltaPos2, deltaUV1.y)), r);
+          let tempBitangent: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(Vector3.SCALE(deltaPos2, deltaUV1.x), Vector3.SCALE(deltaPos1, deltaUV2.x)), r);
+
+          
+          tempBitangent.scale(-1);
+
+          this.mesh.vertices[face.indices[0]].tangent.add(tempTangent);
+          this.mesh.vertices[face.indices[1]].tangent.add(tempTangent);
+          this.mesh.vertices[face.indices[2]].tangent.add(tempTangent);
+
+          this.mesh.vertices[face.indices[0]].bitangent.add(tempBitangent);
+          this.mesh.vertices[face.indices[1]].bitangent.add(tempBitangent);
+          this.mesh.vertices[face.indices[2]].bitangent.add(tempBitangent);
+        }
+
+        //Now we orthagonalize the calculated tangents and bitangents to the vertex normal
+        this.mesh.vertices.forEach(_vertex => _vertex.tangent.add(Vector3.SCALE(_vertex.normal, - Vector3.DOT(_vertex.normal, _vertex.tangent))));
+        this.mesh.vertices.forEach(_vertex => _vertex.bitangent.add(Vector3.SCALE(_vertex.normal, - Vector3.DOT(_vertex.normal, _vertex.bitangent))));
+
+        //TODO: In some cases (when uvs are mirrored) the tangents would have to be flipped in order to work properly
+
+        //At last, all the tangents and bitangents are stored in their respective Float32Array
+        this.ƒtangentsVertex = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
+          return [...this.mesh.vertices.tangent(_index).get()];
+        }));
+        this.ƒbitangentsVertex = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
+          return [...this.mesh.vertices.bitangent(_index).get()];
+        }));
+      }
+      return this.ƒtangentsVertex;
+    }
+
+    public get bitangentsVertex(): Float32Array {
+      if (this.ƒbitangentsVertex == null) {
+        console.log("please calculate the tangents before calculating the bitangents");
+      }
+      return this.ƒbitangentsVertex;
     }
 
     public get textureUVs(): Float32Array {
@@ -141,6 +223,8 @@ namespace FudgeCore {
       this.ƒindices = undefined;
       this.ƒtextureUVs = undefined;
       this.ƒnormalsVertex = undefined;
+      this.ƒtangentsVertex = undefined;
+      this.ƒbitangentsVertex = undefined;
 
       // special buffers for flat shading
       this.ƒnormalsFlat = undefined;

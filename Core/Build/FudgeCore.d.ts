@@ -4200,15 +4200,17 @@ declare namespace FudgeCore {
         position: Vector3;
         uv: Vector2;
         normal: Vector3;
+        tangent: Vector3;
+        bitangent: Vector3;
         referTo: number;
         bones: Bone[];
         /**
-         * Represents a vertex of a mesh with extended information such as the uv coordinates and the vertex normal.
+         * Represents a vertex of a mesh with extended information such as the uv coordinates the vertex normal and its tangents.
          * It may refer to another vertex via an index into some array, in which case the position and the normal are stored there.
          * This way, vertex position and normal is a 1:1 association, vertex to texture coordinates a 1:n association.
        * @authors Jirka Dell'Oro-Friedl, HFU, 2022
          */
-        constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3);
+        constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3, _tangent?: Vector3, _bitangent?: Vector3);
     }
 }
 declare namespace FudgeCore {
@@ -4230,6 +4232,14 @@ declare namespace FudgeCore {
          * returns the normal associated with the vertex addressed, resolving references between vertices
          */
         normal(_index: number): Vector3;
+        /**
+         * returns the tangent associated with the vertex addressed, resolving references between vertices
+         */
+        tangent(_index: number): Vector3;
+        /**
+         * returns the bitangent associated with the vertex addressed, resolving references between vertices
+         */
+        bitangent(_index: number): Vector3;
         /**
          * returns the uv-coordinates associated with the vertex addressed
          */
@@ -5407,6 +5417,8 @@ declare namespace FudgeCore {
         indices?: WebGLBuffer;
         textureUVs?: WebGLBuffer;
         normals?: WebGLBuffer;
+        tangents?: WebGLBuffer;
+        biTangents?: WebGLBuffer;
         iBones?: WebGLBuffer;
         weights?: WebGLBuffer;
         nIndices?: number;
@@ -5423,6 +5435,10 @@ declare namespace FudgeCore {
         protected ƒtextureUVs: Float32Array;
         /** vertex normals for smooth shading, interpolated between vertices during rendering */
         protected ƒnormalsVertex: Float32Array;
+        /** vertex tangents for normal mapping, based on the vertex normals and the UV coordinates */
+        protected ƒtangentsVertex: Float32Array;
+        /** vertex bitangents for normal mapping, based on the vertex normals and vertex tangents */
+        protected ƒbitangentsVertex: Float32Array;
         /** bones */
         protected ƒiBones: Uint8Array;
         protected ƒweights: Float32Array;
@@ -5443,6 +5459,8 @@ declare namespace FudgeCore {
         get vertices(): Float32Array;
         get indices(): Uint16Array;
         get normalsVertex(): Float32Array;
+        get tangentsVertex(): Float32Array;
+        get bitangentsVertex(): Float32Array;
         get textureUVs(): Float32Array;
         get verticesFlat(): Float32Array;
         get indicesFlat(): Uint16Array;
