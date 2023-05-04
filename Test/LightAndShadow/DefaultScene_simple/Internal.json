@@ -17,8 +17,8 @@
       "idResource": "MeshSphere|2023-03-22T12:15:18.649Z|98176",
       "name": "sphere",
       "type": "MeshSphere",
-      "longitudes": 32,
-      "latitudes": 16
+      "longitudes": 64,
+      "latitudes": 32
     }
   },
   "Material|2023-03-22T12:37:10.666Z|96766": {
@@ -388,7 +388,7 @@
                             "scaling": "[5, 5, 3]"
                           },
                           "Component": {
-                            "active": false
+                            "active": true
                           }
                         }
                       }
@@ -423,7 +423,7 @@
                   "children": [
                     {
                       "ƒ.Node": {
-                        "name": "Cube",
+                        "name": "Object1",
                         "active": true,
                         "components": {
                           "ComponentTransform": [
@@ -443,7 +443,7 @@
                           "ComponentMesh": [
                             {
                               "ƒ.ComponentMesh": {
-                                "idMesh": "MeshObj|2023-04-27T20:06:46.872Z|06864",
+                                "idMesh": "MeshSphere|2023-03-22T12:15:18.649Z|98176",
                                 "pivot": {
                                   "translation": "[0, 0, 0]",
                                   "rotation": "[0, 0, 0]",

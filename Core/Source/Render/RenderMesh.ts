@@ -108,30 +108,25 @@ namespace FudgeCore {
     }
 
     public get tangentsVertex(): Float32Array {
+      
       if (this.ƒtangentsVertex == null) {
         this.mesh.vertices.forEach(_vertex => _vertex.tangent.set(0, 0, 0));
         this.mesh.vertices.forEach(_vertex => _vertex.bitangent.set(0, 0, 0));
         
         for (let face of this.mesh.faces) {
-          //vertices surrounding one triangle
-          let v0: Vector3 = this.mesh.vertices[face.indices[0]].position;
-          let v1: Vector3 = this.mesh.vertices[face.indices[1]].position;
-          let v2: Vector3 = this.mesh.vertices[face.indices[2]].position;
+          let i0: number = face.indices[0];
+          let i1: number = face.indices[1];
+          let i2: number = face.indices[2];
 
-          if (typeof v0 === "undefined") {
-            v0 = new Vector3(0, 0, 0);
-          }
-          if (typeof v1 === "undefined") {
-            v1 = new Vector3(0, 0, 0);
-          }
-          if (typeof v2 === "undefined") {
-            v2 = new Vector3(0, 0, 0);
-          }
+          //vertices surrounding one triangle
+          let v0: Vector3 = this.mesh.vertices.position(i0);
+          let v1: Vector3 = this.mesh.vertices.position(i1);
+          let v2: Vector3 = this.mesh.vertices.position(i2);
 
           //their UVs
-          let uv0: Vector2 = this.mesh.vertices[face.indices[0]].uv;
-          let uv1: Vector2 = this.mesh.vertices[face.indices[1]].uv;
-          let uv2: Vector2 = this.mesh.vertices[face.indices[2]].uv;
+          let uv0: Vector2 = this.mesh.vertices[i0].uv;
+          let uv1: Vector2 = this.mesh.vertices[i1].uv;
+          let uv2: Vector2 = this.mesh.vertices[i2].uv;
 
           //We compute the edges of the triangle...
           let deltaPos1: Vector3 = Vector3.DIFFERENCE(v1, v0);
@@ -149,13 +144,13 @@ namespace FudgeCore {
           
           tempBitangent.scale(-1);
 
-          this.mesh.vertices[face.indices[0]].tangent.add(tempTangent);
-          this.mesh.vertices[face.indices[1]].tangent.add(tempTangent);
-          this.mesh.vertices[face.indices[2]].tangent.add(tempTangent);
+          this.mesh.vertices[i0].tangent.add(tempTangent);
+          this.mesh.vertices[i1].tangent.add(tempTangent);
+          this.mesh.vertices[i2].tangent.add(tempTangent);
 
-          this.mesh.vertices[face.indices[0]].bitangent.add(tempBitangent);
-          this.mesh.vertices[face.indices[1]].bitangent.add(tempBitangent);
-          this.mesh.vertices[face.indices[2]].bitangent.add(tempBitangent);
+          this.mesh.vertices[i0].bitangent.add(tempBitangent);
+          this.mesh.vertices[i1].bitangent.add(tempBitangent);
+          this.mesh.vertices[i2].bitangent.add(tempBitangent);
         }
 
         //Now we orthagonalize the calculated tangents and bitangents to the vertex normal

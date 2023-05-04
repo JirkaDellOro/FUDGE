@@ -304,7 +304,6 @@ vec4 illuminateDiffuse(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor) {
 }
 
 void main() {
-
   float fmetallic = max(min(u_fMetallic, 1.0), 0.0);
   vctFrag += v_vctColor;
 
@@ -372,7 +371,7 @@ void main() {
   #endif
 */
 
-  //vctFrag = showVectorAsColor(normalize(vctNewNormal), true);
+  //vctFrag = showVectorAsColor(normalize(v_vctTangent), true);
   vctFrag *= u_vctColor;
   vctFrag += vctSpec * (1.0 - fmetallic);
 }`;

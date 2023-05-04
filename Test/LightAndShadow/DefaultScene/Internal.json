@@ -68,15 +68,16 @@
   },
   "Material|2023-04-27T20:04:46.034Z|15615": {
     "ƒ.Material": {
-      "name": "FudgeTest_Phong",
+      "name": "Stone_Phong",
       "idResource": "Material|2023-04-27T20:04:46.034Z|15615",
       "shader": "ShaderPhongTextured",
       "coat": {
         "ƒ.CoatRemissiveTextured": {
           "color": "[1, 1, 1, 1]",
+          "idTexture": "TextureImage|2023-05-04T21:59:51.010Z|42790",
           "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767",
           "diffuse": 1,
-          "specular": 0.30000000000000016,
+          "specular": 0.6000000000000001,
           "metallic": 0,
           "intensity": 0.5
         }
@@ -89,7 +90,7 @@
       "type": "TextureImage",
       "Texture": {
         "idResource": "TextureImage|2023-04-27T23:08:03.539Z|44767",
-        "name": "normalMap",
+        "name": "stonenormalMap",
         "mipmap": "CRISP"
       }
     }
@@ -101,13 +102,13 @@
       "shader": "ShaderPhongTextured",
       "coat": {
         "ƒ.CoatRemissiveTextured": {
-          "color": "[0.5411764705882353, 0.5411764705882353, 0.5411764705882353, 1]",
+          "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2023-04-27T15:13:24.776Z|64130",
           "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767",
-          "diffuse": 0.30000000000000004,
-          "specular": 1.3000000000000003,
-          "metallic": 0.9999999999999997,
-          "intensity": 0.11000000000000004
+          "diffuse": 0.2,
+          "specular": 1,
+          "metallic": 1,
+          "intensity": 0.7999999999999999
         }
       }
     }
@@ -131,9 +132,9 @@
           "idTexture": "TextureImage|2023-04-18T00:42:31.220Z|29908",
           "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767",
           "diffuse": 1,
-          "specular": 1,
-          "metallic": 1,
-          "intensity": 0.7999999999999999
+          "specular": 0.7000000000000001,
+          "metallic": 0,
+          "intensity": 0.7
         }
       }
     }
@@ -145,13 +146,21 @@
       "shader": "ShaderPhong",
       "coat": {
         "ƒ.CoatRemissive": {
-          "color": "[0.27450980392156865, 0.4745098039215686, 0.6274509803921569, 1]",
+          "color": "[0.27058823529411763, 0.41568627450980394, 0.5294117647058824, 1]",
           "diffuse": 0.5000000000000001,
-          "metallic": 0.4,
-          "specular": 4,
+          "metallic": 0.9999999999999999,
+          "specular": 0.40000000000000013,
           "intensity": 1.2000000000000008
         }
       }
+    }
+  },
+  "MeshObj|2023-05-04T21:50:31.857Z|24946": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-05-04T21:50:31.857Z|24946",
+      "name": "sphere.obj",
+      "type": "MeshObj",
+      "url": "obj\\sphere.obj"
     }
   },
   "Graph|2023-03-22T12:13:41.839Z|18963": {
@@ -407,7 +416,7 @@
                           "Component": {
                             "active": true
                           },
-                          "idMaterial": "Material|2023-04-27T20:50:09.603Z|35807"
+                          "idMaterial": "Material|2023-04-27T20:04:46.034Z|15615"
                         }
                       }
                     ]
@@ -469,7 +478,7 @@
                                 "Component": {
                                   "active": true
                                 },
-                                "idMaterial": "Material|2023-04-27T20:10:47.163Z|70545"
+                                "idMaterial": "Material|2023-04-27T20:50:09.603Z|35807"
                               }
                             }
                           ]
@@ -525,7 +534,7 @@
                                 "Component": {
                                   "active": true
                                 },
-                                "idMaterial": "Material|2023-04-27T20:04:46.034Z|15615"
+                                "idMaterial": "Material|2023-04-27T20:10:47.163Z|70545"
                               }
                             }
                           ]
@@ -588,6 +597,62 @@
                         },
                         "children": []
                       }
+                    },
+                    {
+                      "ƒ.Node": {
+                        "name": "Sphere OBJ",
+                        "active": true,
+                        "components": {
+                          "ComponentTransform": [
+                            {
+                              "ƒ.ComponentTransform": {
+                                "local": {
+                                  "translation": "[-0.75, 0.5, 0.7502812743186951]",
+                                  "rotation": "[0, 0, 0]",
+                                  "scaling": "[0.5, 0.49999991059303284, 0.49999991059303284]"
+                                },
+                                "Component": {
+                                  "active": true
+                                }
+                              }
+                            }
+                          ],
+                          "ComponentMesh": [
+                            {
+                              "ƒ.ComponentMesh": {
+                                "idMesh": "MeshObj|2023-05-04T21:50:31.857Z|24946",
+                                "pivot": {
+                                  "translation": "[0, 0, 0]",
+                                  "rotation": "[0, 0, 0]",
+                                  "scaling": "[1, 1, 1]"
+                                },
+                                "Component": {
+                                  "active": true
+                                }
+                              }
+                            }
+                          ],
+                          "ComponentMaterial": [
+                            {
+                              "ƒ.ComponentMaterial": {
+                                "sortForAlpha": false,
+                                "clrPrimary": "[1, 1, 1, 1]",
+                                "clrSecondary": "[1, 1, 1, 1]",
+                                "pivot": {
+                                  "translation": "[0, 0]",
+                                  "rotation": 0,
+                                  "scaling": "[1, 1]"
+                                },
+                                "Component": {
+                                  "active": true
+                                },
+                                "idMaterial": "Material|2023-04-27T20:10:47.163Z|70545"
+                              }
+                            }
+                          ]
+                        },
+                        "children": []
+                      }
                     }
                   ]
                 }
@@ -598,6 +663,17 @@
       ],
       "idResource": "Graph|2023-03-22T12:13:41.839Z|18963",
       "type": "Graph"
+    }
+  },
+  "TextureImage|2023-05-04T21:59:51.010Z|42790": {
+    "ƒ.TextureImage": {
+      "url": "tex\\monastery_stone_floor_diff_2k.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-05-04T21:59:51.010Z|42790",
+        "name": "stoneAlbedo",
+        "mipmap": "CRISP"
+      }
     }
   }
 }
