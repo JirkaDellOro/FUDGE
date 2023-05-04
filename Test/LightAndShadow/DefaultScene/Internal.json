@@ -84,6 +84,17 @@
       }
     }
   },
+  "TextureImage|2023-05-04T21:59:51.010Z|42790": {
+    "ƒ.TextureImage": {
+      "url": "tex\\monastery_stone_floor_diff_2k.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-05-04T21:59:51.010Z|42790",
+        "name": "stoneAlbedo",
+        "mipmap": "CRISP"
+      }
+    }
+  },
   "TextureImage|2023-04-27T23:08:03.539Z|44767": {
     "ƒ.TextureImage": {
       "url": "tex\\monastery_stone_floor_nor_gl_2k.png",
@@ -653,6 +664,62 @@
                         },
                         "children": []
                       }
+                    },
+                    {
+                      "ƒ.Node": {
+                        "name": "Torus",
+                        "active": true,
+                        "components": {
+                          "ComponentTransform": [
+                            {
+                              "ƒ.ComponentTransform": {
+                                "local": {
+                                  "translation": "[0.75, 0, -0.75]",
+                                  "rotation": "[0, 0, 0]",
+                                  "scaling": "[1.4999998807907104, 1.5000001192092896, 1.5000001192092896]"
+                                },
+                                "Component": {
+                                  "active": true
+                                }
+                              }
+                            }
+                          ],
+                          "ComponentMesh": [
+                            {
+                              "ƒ.ComponentMesh": {
+                                "idMesh": "MeshTorus|2023-05-04T22:14:37.208Z|79089",
+                                "pivot": {
+                                  "translation": "[0, 0, 0]",
+                                  "rotation": "[0, 0, 0]",
+                                  "scaling": "[1, 1, 1]"
+                                },
+                                "Component": {
+                                  "active": true
+                                }
+                              }
+                            }
+                          ],
+                          "ComponentMaterial": [
+                            {
+                              "ƒ.ComponentMaterial": {
+                                "sortForAlpha": false,
+                                "clrPrimary": "[1, 1, 1, 1]",
+                                "clrSecondary": "[1, 1, 1, 1]",
+                                "pivot": {
+                                  "translation": "[0, 0]",
+                                  "rotation": 0,
+                                  "scaling": "[1, 1]"
+                                },
+                                "Component": {
+                                  "active": true
+                                },
+                                "idMaterial": "Material|2023-04-27T20:04:46.034Z|15615"
+                              }
+                            }
+                          ]
+                        },
+                        "children": []
+                      }
                     }
                   ]
                 }
@@ -665,15 +732,35 @@
       "type": "Graph"
     }
   },
-  "TextureImage|2023-05-04T21:59:51.010Z|42790": {
-    "ƒ.TextureImage": {
-      "url": "tex\\monastery_stone_floor_diff_2k.png",
-      "type": "TextureImage",
-      "Texture": {
-        "idResource": "TextureImage|2023-05-04T21:59:51.010Z|42790",
-        "name": "stoneAlbedo",
-        "mipmap": "CRISP"
-      }
+  "MeshTorus|2023-05-04T22:14:37.208Z|79089": {
+    "ƒ.MeshTorus": {
+      "idResource": "MeshTorus|2023-05-04T22:14:37.208Z|79089",
+      "name": "MeshTorus",
+      "type": "MeshTorus",
+      "shape": {
+        "ƒ.Vector2": [
+          "[0.25, 0]",
+          "[0.25951504707336426, 0.04783542826771736]",
+          "[0.2866116464138031, 0.0883883461356163]",
+          "[0.32716456055641174, 0.11548493802547455]",
+          "[0.375, 0.125]",
+          "[0.42283543944358826, 0.11548493802547455]",
+          "[0.4633883535861969, 0.0883883461356163]",
+          "[0.49048495292663574, 0.04783542826771736]",
+          "[0.5, 1.5308085657314598e-17]",
+          "[0.49048495292663574, -0.04783542826771736]",
+          "[0.4633883535861969, -0.0883883461356163]",
+          "[0.42283543944358826, -0.11548493802547455]",
+          "[0.375, -0.125]",
+          "[0.32716456055641174, -0.11548493802547455]",
+          "[0.2866116464138031, -0.0883883461356163]",
+          "[0.25951504707336426, -0.04783542826771736]",
+          "[0.25, -3.0616171314629196e-17]"
+        ]
+      },
+      "longitudes": 64,
+      "latitudes": 16,
+      "size": 0.25
     }
   }
 }
