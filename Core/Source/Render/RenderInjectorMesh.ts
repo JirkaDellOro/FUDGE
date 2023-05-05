@@ -31,6 +31,7 @@ namespace FudgeCore {
       else {
         if (this.renderMesh.smooth == null)
           this.renderMesh.smooth = {
+            //TODO: The creation of the Buffers could be dependent on the shader given.
             vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.vertices),
             indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indices),
             normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normalsVertex),

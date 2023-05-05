@@ -89,7 +89,7 @@ vec4 illuminateDiffuse(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor) {
 }
 
 void main() {
-  float fmetallic = max(min(u_fMetallic, 1.0), 0.0);
+  float fMetallic = max(min(u_fMetallic, 1.0), 0.0);
   vctFrag += v_vctColor;
 
   // calculate NewNormal based on NormalMap
@@ -141,7 +141,7 @@ void main() {
     vctFrag += illuminateDiffuse(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor);
   }
 
-  vctFrag += vctSpec * fmetallic * 2.0;
+  vctFrag += vctSpec * fMetallic * 2.0;
 
   // TEXTURE: multiply with texel color
   #if defined(TEXTURE)
@@ -158,5 +158,5 @@ void main() {
 
   //vctFrag = showVectorAsColor(normalize(v_vctTangent), true);
   vctFrag *= u_vctColor;
-  vctFrag += vctSpec * (1.0 - fmetallic);
+  vctFrag += vctSpec * (1.0 - fMetallic);
 }
