@@ -104,33 +104,6 @@ namespace FudgeCore {
     return index;
   }
 
-  function getVertexData<T extends Vector2 | Vector3>(_layerElement: FBX.LayerElementUV | FBX.LayerElementNormal, _iVertex: number, _iPolygon: number, _iPolygonVertex: number): T {
-    let index: number =
-      _layerElement.MappingInformationType == "ByVertex" ?
-        _iVertex :
-      _layerElement.MappingInformationType == "ByPolygon" ?
-        _iPolygon :
-        _iPolygonVertex;
-    
-    if (_layerElement.ReferenceInformationType === 'IndexToDirect' ) {
-      let indices: Uint16Array = (_layerElement as FBX.LayerElementUV).UVIndex || (_layerElement as FBX.LayerElementNormal).NormalsIndex;
-      index = indices[index];
-    }
-
-    let data: Float32Array = (_layerElement as FBX.LayerElementUV).UV || (_layerElement as FBX.LayerElementNormal).Normals;
-    
-    return (_layerElement as FBX.LayerElementUV).UV ?
-      new Vector2(
-        data[index * 2 + 0],
-        1 - data[index * 2 + 1] // flip v
-      ) as T :
-      new Vector3(
-        data[index * 3 + 0],
-        data[index * 3 + 1],
-        data[index * 3 + 2]
-      ) as T;
-  }
-
   function createBones(_deformerFBX: FBX.Deformer, _skeleton: Skeleton, _vertices: Vertices, _newVertexIndices?: number[][]): void {
     for (const fbxSubDeformer of _deformerFBX.children as FBX.SubDeformer[]) {
       fbxSubDeformer.load();
