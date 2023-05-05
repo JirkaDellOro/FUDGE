@@ -101,6 +101,32 @@ namespace FudgeCore {
     }
     //#endregion
 
+    get x(): number {
+      return this.data[0];
+    }
+    get y(): number {
+      return this.data[1];
+    }
+    get z(): number {
+      return this.data[2];
+    }
+    get w(): number {
+      return this.data[3];
+    }
+
+    set x(_x: number) {
+      this.data[0] = _x;
+    }
+    set y(_y: number) {
+      this.data[1] = _y;
+    }
+    set z(_z: number) {
+      this.data[2] = _z;
+    }
+    set w(_w: number) {
+      this.data[3] = _w;
+    }
+
     /**
      * Calculates and returns the euler-angles in degrees.  
      */
