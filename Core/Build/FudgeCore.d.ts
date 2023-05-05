@@ -1387,8 +1387,14 @@ declare namespace FudgeCore {
         y?: AnimationSequence;
         z?: AnimationSequence;
     }
+    interface AnimationStructureQuaternion extends AnimationStructure {
+        x?: AnimationSequence;
+        y?: AnimationSequence;
+        z?: AnimationSequence;
+        w?: AnimationSequence;
+    }
     interface AnimationStructureMatrix4x4 extends AnimationStructure {
-        rotation?: AnimationStructureVector3;
+        rotation?: AnimationStructureVector3 | AnimationStructureQuaternion;
         scale?: AnimationStructureVector3;
         translation?: AnimationStructureVector3;
     }
@@ -3565,6 +3571,14 @@ declare namespace FudgeCore {
          * Experimental: Converts the quaternion to a Matrix4x4
          */
         static QUATERNION_TO_MATRIX(_q: Quaternion): Matrix4x4;
+        get x(): number;
+        get y(): number;
+        get z(): number;
+        get w(): number;
+        set x(_x: number);
+        set y(_y: number);
+        set z(_z: number);
+        set w(_w: number);
         /**
          * Calculates and returns the euler-angles in degrees.
          */

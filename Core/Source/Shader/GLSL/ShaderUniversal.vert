@@ -93,7 +93,7 @@ in uvec4 a_iBone;
 in vec4 a_fWeight;
 const uint MAX_BONES = 256u;
 struct Bone {
-  mat4 matrix;
+  mat4 matrix; // TODO: change name to mtx to conform with naming scheme
 };
 layout (std140) uniform Skin {
   Bone u_bones[MAX_BONES];

@@ -23,6 +23,7 @@ namespace FudgeCore {
     private constructor(_gltf: GLTF.GlTf, _url: string) {
       this.gltf = _gltf;
       this.url = _url;
+      // this.markJoints();
     }
 
     public static async LOAD(_url: string): Promise<GLTFLoader> {
@@ -74,7 +75,8 @@ namespace FudgeCore {
         // check for children
         if (gltfNode.children)
           for (const iNode of gltfNode.children)
-            node.addChild(await this.getNodeByIndex(iNode));
+            if (!this.gltf.nodes[iNode].isJointRoot)
+              node.addChild(await this.getNodeByIndex(iNode));
         
         // check for transformation
         if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation) {
@@ -117,10 +119,9 @@ namespace FudgeCore {
         if (gltfNode.skin != undefined) {
           const skeleton: SkeletonInstance = await this.getSkeletonByIndex(gltfNode.skin);
           node.addChild(skeleton);
-          if (node.getComponent(ComponentMesh))
-            node.getComponent(ComponentMesh).bindSkeleton(skeleton);
+          node.getComponent(ComponentMesh)?.bindSkeleton(skeleton);
           for (const iAnimation of this.findSkeletalAnimationIndices(gltfNode.skin)) {
-            skeleton.addComponent(new ComponentAnimator(await this.getAnimationByIndex(iAnimation)));
+            skeleton.addComponent(new ComponentAnimator(await this.getAnimationByIndex(iAnimation))); // TODO: ComponentAnimator can only be added once
           }
         }
 
@@ -240,6 +241,7 @@ namespace FudgeCore {
         const gltfSkeleton: GLTF.Skin = this.gltf.skins[_iSkeleton];
         const skeleton: Skeleton = new Skeleton(gltfSkeleton.name);
 
+        this.gltf.nodes[gltfSkeleton.joints[0]].isJointRoot = true; // mark the joint root, TODO: this is a confusing solution, look into Skeleton/SkeletonInstances and how they should be handled in importer, also see: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#skins
         // add all bones as children/descendants by adding the root bone
         skeleton.addChild(await this.getNodeByIndex(gltfSkeleton.joints[0]));
 
@@ -348,6 +350,10 @@ namespace FudgeCore {
       }
     }
 
+    // private markJoints(): void {
+    //   this.gltf.skins.forEach(_skin => _skin.joints.forEach(_joint => this.gltf.nodes[_joint].isJoint = true));
+    // }
+
     private isSkeletalAnimation(_animation: GLTF.Animation): boolean {
       return _animation.channels.every(channel => this.isBoneIndex(channel.target.node));
     }
@@ -362,31 +368,30 @@ namespace FudgeCore {
       return this.gltf.skins?.flatMap(gltfSkin => gltfSkin.joints).includes(_iNode);
     }
 
-    private async getAnimationSequenceVector3(_sampler: GLTF.Sampler, _transformationType: TransformationType): Promise<AnimationStructureVector3> {
+    private async getAnimationSequenceVector3(_sampler: GLTF.Sampler, _transformationType: TransformationType): Promise<AnimationStructureVector3 | AnimationStructureQuaternion> {
       const input: Float32Array = await this.getFloat32Array(_sampler.input);
       const output: Float32Array = await this.getFloat32Array(_sampler.output);
       const millisPerSecond: number = 1000;
+      const isRotation: boolean = _transformationType == "rotation";
 
-      const sequenceX: AnimationSequence = new AnimationSequence();
-      const sequenceY: AnimationSequence = new AnimationSequence();
-      const sequenceZ: AnimationSequence = new AnimationSequence();
+      const sequences: AnimationStructureVector3 | AnimationStructureQuaternion = {};
+      sequences.x = new AnimationSequence();
+      sequences.y = new AnimationSequence();
+      sequences.z = new AnimationSequence();
+      if (isRotation) 
+        sequences.w = new AnimationSequence();
 
-      for (let i: number = 0; i < input.length; ++i) {
-        const vector: { x: number, y: number, z: number } =
-          _transformationType == "rotation" ?
-          new PhysicsQuaternion(output[i * 4 + 0], output[i * 4 + 1], output[i * 4 + 2], output[i * 4 + 3]).toDegrees() :
-          { x: output[i * 3 + 0], y: output[i * 3 + 1], z: output[i * 3 + 2] };
-
-        sequenceX.addKey(new AnimationKey(millisPerSecond * input[i], vector.x));
-        sequenceY.addKey(new AnimationKey(millisPerSecond * input[i], vector.y));
-        sequenceZ.addKey(new AnimationKey(millisPerSecond * input[i], vector.z));
+      for (let iInput: number = 0; iInput < input.length; ++iInput) {
+        let iOutput: number = iInput * (_transformationType == "rotation" ? 4 : 3); // output buffer either contains data for quaternion or vector3
+        let time: number = millisPerSecond * input[iInput];
+        sequences.x.addKey(new AnimationKey(time, output[iOutput + 0]));
+        sequences.y.addKey(new AnimationKey(time, output[iOutput + 1]));
+        sequences.z.addKey(new AnimationKey(time, output[iOutput + 2]));
+        if (isRotation)
+          (<AnimationStructureQuaternion>sequences).w.addKey(new AnimationKey(time, output[iOutput + 3]))
       }
 
-      return {
-        x: sequenceX,
-        y: sequenceY,
-        z: sequenceZ
-      };
+      return sequences;
     }
 
   }

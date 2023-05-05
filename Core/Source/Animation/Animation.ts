@@ -15,8 +15,15 @@ namespace FudgeCore {
     z?: AnimationSequence;
   }
 
+  export interface AnimationStructureQuaternion extends AnimationStructure {
+    x?: AnimationSequence;
+    y?: AnimationSequence;
+    z?: AnimationSequence;
+    w?: AnimationSequence;
+  }
+
   export interface AnimationStructureMatrix4x4 extends AnimationStructure {
-    rotation?: AnimationStructureVector3;
+    rotation?: AnimationStructureVector3 | AnimationStructureQuaternion;
     scale?: AnimationStructureVector3;
     translation?: AnimationStructureVector3;
   }
