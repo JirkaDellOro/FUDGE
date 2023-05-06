@@ -46,13 +46,9 @@ vec4 calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _
   vec3 halfwayDir = normalize(-_vctLight - _vctView);
   float factor = max(dot(-_vctLight, _vctNormal), 0.0);       //Factor for smoothing out transition from surface facing the lightsource to surface facing away from the lightsource
   factor = 1.0 - (pow(factor - 1.0, 8.0));                            //The factor is altered In Order to clearly see the specular Highlight even at steep angles, while still preventing artifacts
-  vctResult += pow(max(dot(_vctNormal, halfwayDir), 0.0), _fSpecular * 16.0) * factor * u_fIntensity;
-  return vctResult * _vctColor;
 
-  //Standard Phong Shading
-  //vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  //float fHitCamera = dot(vctReflection, _vctView);
-  //return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
+  vctResult += pow(max(dot(_vctNormal, halfwayDir), 0.0), exp2(_fSpecular * 5.0)) * _fSpecular * u_fIntensity * factor;
+  return vctResult * _vctColor;
 }
 
 vec4 illuminateDiffuse(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor) {
@@ -65,10 +61,10 @@ vec4 illuminateDiffuse(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor) {
 }
 
 void main() {
-  float fmetallic = max(min(u_fMetallic, 1.0), 0.0);
-  vctFrag += v_vctColor;
+  float fMetallic = max(min(u_fMetallic, 1.0), 0.0);
   vec4 vctSpec = vec4(0, 0, 0, 1);
   vec3 vctView = normalize(vec3(u_mtxMeshToWorld * v_vctPosition) - u_vctCamera);
+  vctFrag += v_vctColor;
 
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
@@ -109,7 +105,7 @@ void main() {
     vctFrag += illuminateDiffuse(vctDirection, v_vctNormal, fIntensity * u_spot[i].vctColor);
   }
 
-  vctFrag += vctSpec * fmetallic * 2.0;
+  vctFrag += vctSpec * fMetallic * 2.0;
   vctFrag *= u_vctColor;
-  vctFrag += vctSpec * (1.0 - fmetallic);
+  vctFrag += vctSpec * (1.0 - fMetallic);
 }
