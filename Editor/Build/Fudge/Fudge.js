@@ -1450,7 +1450,20 @@ var Fudge;
                 return true;
             };
             let setTexture = (_sources) => {
-                this.mutable["coat"]["texture"] = _sources[0];
+                let event = _event; //.path does not exist on type DragEvent therefore it is set as any
+                let i = 0;
+                let key = "";
+                while (key == "") {
+                    let tempKey = event.path[i].getAttribute("key");
+                    if (tempKey == "texture" || tempKey == "normalMap") {
+                        key = tempKey;
+                    }
+                    else if (tempKey == "Material") {
+                        return false;
+                    }
+                    i++;
+                }
+                this.mutable["coat"][key] = _sources[0];
                 this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };

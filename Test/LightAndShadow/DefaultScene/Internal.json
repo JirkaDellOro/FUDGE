@@ -142,7 +142,7 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2023-04-18T00:42:31.220Z|29908",
           "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767",
-          "diffuse": 4,
+          "diffuse": 1,
           "specular": 0.7000000000000001,
           "metallic": 0,
           "intensity": 0.7
@@ -439,7 +439,7 @@
                             "scaling": "[5, 5, 3]"
                           },
                           "Component": {
-                            "active": false
+                            "active": true
                           }
                         }
                       }
@@ -501,7 +501,7 @@
                                   "scaling": "[1, 1, 1]"
                                 },
                                 "Component": {
-                                  "active": false
+                                  "active": true
                                 }
                               }
                             }
@@ -613,7 +613,7 @@
                                   "scaling": "[0.5999999642372131, 0.6000000238418579, 0.6000000238418579]"
                                 },
                                 "Component": {
-                                  "active": false
+                                  "active": true
                                 }
                               }
                             }
@@ -669,7 +669,7 @@
                                   "scaling": "[1, 1, 1]"
                                 },
                                 "Component": {
-                                  "active": false
+                                  "active": true
                                 }
                               }
                             }
@@ -725,7 +725,7 @@
                                   "scaling": "[1, 1, 1]"
                                 },
                                 "Component": {
-                                  "active": false
+                                  "active": true
                                 }
                               }
                             }
