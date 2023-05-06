@@ -123,6 +123,8 @@ namespace FudgeCore {
           let v1: Vector3 = this.mesh.vertices.position(i1);
           let v2: Vector3 = this.mesh.vertices.position(i2);
 
+          //console.log("v0: " + v0 + ", v1: " + v1 + ", v2: " + v2);
+
           //their UVs
           let uv0: Vector2 = this.mesh.vertices[i0].uv;
           let uv1: Vector2 = this.mesh.vertices[i1].uv;

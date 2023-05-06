@@ -17,8 +17,8 @@
       "idResource": "MeshSphere|2023-03-22T12:15:18.649Z|98176",
       "name": "sphere",
       "type": "MeshSphere",
-      "longitudes": 32,
-      "latitudes": 16
+      "longitudes": 3,
+      "latitudes": 2
     }
   },
   "Material|2023-03-22T12:37:10.666Z|96766": {
@@ -142,7 +142,7 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2023-04-18T00:42:31.220Z|29908",
           "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767",
-          "diffuse": 1,
+          "diffuse": 4,
           "specular": 0.7000000000000001,
           "metallic": 0,
           "intensity": 0.7
@@ -439,7 +439,7 @@
                             "scaling": "[5, 5, 3]"
                           },
                           "Component": {
-                            "active": true
+                            "active": false
                           }
                         }
                       }
@@ -501,7 +501,7 @@
                                   "scaling": "[1, 1, 1]"
                                 },
                                 "Component": {
-                                  "active": true
+                                  "active": false
                                 }
                               }
                             }
@@ -613,7 +613,7 @@
                                   "scaling": "[0.5999999642372131, 0.6000000238418579, 0.6000000238418579]"
                                 },
                                 "Component": {
-                                  "active": true
+                                  "active": false
                                 }
                               }
                             }
@@ -669,7 +669,7 @@
                                   "scaling": "[1, 1, 1]"
                                 },
                                 "Component": {
-                                  "active": true
+                                  "active": false
                                 }
                               }
                             }
@@ -725,7 +725,7 @@
                                   "scaling": "[1, 1, 1]"
                                 },
                                 "Component": {
-                                  "active": true
+                                  "active": false
                                 }
                               }
                             }
