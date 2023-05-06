@@ -11,8 +11,8 @@ namespace FudgeCore {
     public specular: number;
     public intensity: number;
 
-    constructor(_color: Color = new Color(), _texture: Texture = TextureDefault.texture, _normalMap: Texture = TextureDefault.texture, _diffuse: number = 1, _specular: number = 0, _metallic: number = 0.5, _intensity: number = 0.5) {
-      super(_color, _texture, _normalMap);
+    constructor(_color: Color = new Color(), _texture: Texture = TextureDefault.texture, _diffuse: number = 1, _specular: number = 0, _metallic: number = 0.5, _intensity: number = 0.5) {
+      super(_color, _texture);
       this.diffuse = _diffuse;
       this.metallic = _metallic;
       this.specular = _specular;

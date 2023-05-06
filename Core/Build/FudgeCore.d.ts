@@ -647,6 +647,7 @@ declare namespace FudgeCore {
         protected static injectCoatRemissive(this: CoatRemissive, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
         protected static injectCoatTextured(this: CoatTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
         protected static injectCoatRemissiveTextured(this: CoatRemissiveTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        protected static injectCoatRemissiveTexturedNormals(this: CoatRemissiveTexturedNormals, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
     }
 }
 declare namespace FudgeCore {
@@ -2863,8 +2864,7 @@ declare namespace FudgeCore {
      */
     class CoatTextured extends CoatColored {
         texture: Texture;
-        normalMap: Texture;
-        constructor(_color?: Color, _texture?: Texture, _normalMap?: Texture);
+        constructor(_color?: Color, _texture?: Texture);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -2878,6 +2878,17 @@ declare namespace FudgeCore {
         metallic: number;
         specular: number;
         intensity: number;
+        constructor(_color?: Color, _texture?: Texture, _diffuse?: number, _specular?: number, _metallic?: number, _intensity?: number);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * A {@link Coat} providing a texture and additional data for texturing
+     */
+    class CoatRemissiveTexturedNormals extends CoatRemissiveTextured {
+        normalMap: Texture;
         constructor(_color?: Color, _texture?: Texture, _normalMap?: Texture, _diffuse?: number, _specular?: number, _metallic?: number, _intensity?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -6741,6 +6752,12 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class TextureDefault extends TextureBase64 {
+        static texture: TextureBase64;
+        private static get;
+    }
+}
+declare namespace FudgeCore {
+    class TextureNormalDefault extends TextureBase64 {
         static texture: TextureBase64;
         private static get;
     }

@@ -10,7 +10,7 @@ namespace FudgeCore {
       "PHONG"
     ];
 
-    public static getCoat(): typeof Coat { return CoatRemissiveTextured; }
+    public static getCoat(): typeof Coat { return CoatRemissiveTexturedNormals; }
 
     public static getFragmentShaderSource(): string {
       return this.insertDefines(shaderSources["ShaderPhongTextured.frag"], this.define);

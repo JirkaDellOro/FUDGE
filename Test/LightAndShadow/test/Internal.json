@@ -1,100 +1,131 @@
 {
-  "MeshCube|2023-05-03T14:21:57.485Z|66020": {
-    "ƒ.MeshCube": {
-      "idResource": "MeshCube|2023-05-03T14:21:57.485Z|66020",
-      "name": "MeshCube",
-      "type": "MeshCube"
+  "MeshTorus|2023-05-06T20:57:05.809Z|45682": {
+    "ƒ.MeshTorus": {
+      "idResource": "MeshTorus|2023-05-06T20:57:05.809Z|45682",
+      "name": "MeshTorus",
+      "type": "MeshTorus",
+      "shape": {
+        "ƒ.Vector2": [
+          "[0.25, 0]",
+          "[0.25951504707336426, 0.04783542826771736]",
+          "[0.2866116464138031, 0.0883883461356163]",
+          "[0.32716456055641174, 0.11548493802547455]",
+          "[0.375, 0.125]",
+          "[0.42283543944358826, 0.11548493802547455]",
+          "[0.4633883535861969, 0.0883883461356163]",
+          "[0.49048495292663574, 0.04783542826771736]",
+          "[0.5, 1.5308085657314598e-17]",
+          "[0.49048495292663574, -0.04783542826771736]",
+          "[0.4633883535861969, -0.0883883461356163]",
+          "[0.42283543944358826, -0.11548493802547455]",
+          "[0.375, -0.125]",
+          "[0.32716456055641174, -0.11548493802547455]",
+          "[0.2866116464138031, -0.0883883461356163]",
+          "[0.25951504707336426, -0.04783542826771736]",
+          "[0.25, -3.0616171314629196e-17]"
+        ]
+      },
+      "longitudes": 64,
+      "latitudes": 16,
+      "size": 0.25
     }
   },
-  "Material|2023-05-03T14:22:06.933Z|35976": {
+  "Material|2023-05-06T20:56:08.597Z|61277": {
     "ƒ.Material": {
-      "name": "ShaderPhong",
-      "idResource": "Material|2023-05-03T14:22:06.933Z|35976",
-      "shader": "ShaderPhong",
+      "name": "ShaderPhongTextured",
+      "idResource": "Material|2023-05-06T20:56:08.597Z|61277",
+      "shader": "ShaderPhongTextured",
       "coat": {
-        "ƒ.CoatRemissive": {
+        "ƒ.CoatRemissiveTexturedNormals": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "metallic": 0,
           "specular": 0,
-          "intensity": 0.5
+          "metallic": 1,
+          "intensity": 0.5,
+          "idNormalMap": "TextureImage|2023-05-06T21:08:56.468Z|24652"
         }
       }
     }
   },
-  "MeshObj|2023-05-03T17:12:51.252Z|84296": {
-    "ƒ.MeshObj": {
-      "idResource": "MeshObj|2023-05-03T17:12:51.252Z|84296",
-      "name": "suzanne.obj",
-      "type": "MeshObj",
-      "url": "suzanne.obj"
+  "TextureImage|2023-05-06T21:08:56.468Z|24652": {
+    "ƒ.TextureImage": {
+      "url": "tex\\Normal.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-05-06T21:08:56.468Z|24652",
+        "name": "tex\\Normal.png",
+        "mipmap": "CRISP"
+      }
     }
   },
-  "Graph|2023-05-03T14:21:43.739Z|38609": {
+  "Graph|2023-05-06T20:40:35.733Z|02375": {
     "ƒ.Graph": {
       "name": "NewGraph",
       "active": true,
-      "components": {
-        "ComponentTransform": [
-          {
-            "ƒ.ComponentTransform": {
-              "local": {
-                "translation": "[0, 0, 0]",
-                "rotation": "[0, 0, 0]",
-                "scaling": "[1, 1, 1]"
-              },
-              "Component": {
-                "active": true
-              }
-            }
-          }
-        ],
-        "ComponentMesh": [
-          {
-            "ƒ.ComponentMesh": {
-              "idMesh": "MeshCube|2023-05-03T14:21:57.485Z|66020",
-              "pivot": {
-                "translation": "[0, 0, 0]",
-                "rotation": "[0, 0, 0]",
-                "scaling": "[1, 1, 1]"
-              },
-              "Component": {
-                "active": true
-              }
-            }
-          }
-        ],
-        "ComponentMaterial": [
-          {
-            "ƒ.ComponentMaterial": {
-              "sortForAlpha": false,
-              "clrPrimary": "[1, 1, 1, 1]",
-              "clrSecondary": "[1, 1, 1, 1]",
-              "pivot": {
-                "translation": "[0, 0]",
-                "rotation": 0,
-                "scaling": "[1, 1]"
-              },
-              "Component": {
-                "active": true
-              },
-              "idMaterial": "Material|2023-05-03T14:22:06.933Z|35976"
-            }
-          }
-        ]
-      },
+      "components": {},
       "children": [
         {
           "ƒ.Node": {
             "name": "New Node",
             "active": true,
-            "components": {},
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshTorus|2023-05-06T20:57:05.809Z|45682",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-05-06T20:56:08.597Z|61277"
+                  }
+                }
+              ]
+            },
             "children": []
           }
         }
       ],
-      "idResource": "Graph|2023-05-03T14:21:43.739Z|38609",
+      "idResource": "Graph|2023-05-06T20:40:35.733Z|02375",
       "type": "Graph"
+    }
+  },
+  "Material|2023-05-06T21:15:05.084Z|37369": {
+    "ƒ.Material": {
+      "name": "ShaderPhongTextured",
+      "idResource": "Material|2023-05-06T21:15:05.084Z|37369",
+      "shader": "ShaderPhongTextured",
+      "coat": {
+        "ƒ.CoatRemissiveTexturedNormals": {
+          "color": "[1, 1, 1, 1]",
+          "diffuse": 1,
+          "specular": 0,
+          "metallic": 0.5,
+          "intensity": 0.5,
+          "idNormalMap": "TextureImage|2023-05-06T21:08:56.468Z|24652"
+        }
+      }
     }
   }
 }
