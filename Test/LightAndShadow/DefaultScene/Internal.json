@@ -57,14 +57,14 @@
       "idResource": "Material|2023-04-27T20:04:46.034Z|15615",
       "shader": "ShaderPhongTextured",
       "coat": {
-        "ƒ.CoatRemissiveTextured": {
+        "ƒ.CoatRemissiveTexturedNormals": {
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2023-05-04T21:59:51.010Z|42790",
-          "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767",
           "diffuse": 1,
-          "specular": 0.6000000000000001,
+          "specular": 0.6,
           "metallic": 0,
-          "intensity": 0.5
+          "intensity": 0.5,
+          "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767"
         }
       }
     }
@@ -97,14 +97,14 @@
       "idResource": "Material|2023-04-27T20:09:22.884Z|29193",
       "shader": "ShaderPhongTextured",
       "coat": {
-        "ƒ.CoatRemissiveTextured": {
+        "ƒ.CoatRemissiveTexturedNormals": {
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2023-05-06T12:08:07.692Z|03709",
-          "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767",
           "diffuse": 0.2,
           "specular": 1,
           "metallic": 1,
-          "intensity": 0.5
+          "intensity": 0.5,
+          "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767"
         }
       }
     }
@@ -134,14 +134,14 @@
       "idResource": "Material|2023-04-27T20:10:47.163Z|70545",
       "shader": "ShaderPhongTextured",
       "coat": {
-        "ƒ.CoatRemissiveTextured": {
+        "ƒ.CoatRemissiveTexturedNormals": {
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2023-05-06T12:10:25.370Z|13576",
-          "idNormalMap": "TextureImage|2023-05-06T12:10:26.706Z|14819",
           "diffuse": 1,
-          "specular": 0.7000000000000001,
+          "specular": 0.7,
           "metallic": 0,
-          "intensity": 0.8999999999999999
+          "intensity": 0.9,
+          "idNormalMap": "TextureImage|2023-05-06T12:10:26.706Z|14819"
         }
       }
     }
@@ -178,7 +178,7 @@
           "color": "[0.8627450980392157, 0.6549019607843137, 0.2980392156862745, 1]",
           "diffuse": 0.20000000000000015,
           "metallic": 0.9999999999999999,
-          "specular": 2.0000000000000036,
+          "specular": 1.0000000000000036,
           "intensity": 0.7000000000000007
         }
       }
@@ -229,14 +229,14 @@
       "idResource": "Material|2023-05-06T12:15:24.432Z|50642",
       "shader": "ShaderPhongTextured",
       "coat": {
-        "ƒ.CoatRemissiveTextured": {
+        "ƒ.CoatRemissiveTexturedNormals": {
           "color": "[0.7607843137254902, 1, 0.996078431372549, 1]",
           "idTexture": "TextureImage|2023-05-06T12:15:39.923Z|04384",
-          "idNormalMap": "TextureImage|2023-05-06T12:15:42.376Z|22575",
-          "diffuse": 0.30000000000000004,
-          "specular": 0.7999999999999999,
-          "metallic": 0.9999999999999999,
-          "intensity": 0.8999999999999999
+          "diffuse": 0.3,
+          "specular": 0.8,
+          "metallic": 1,
+          "intensity": 0.9,
+          "idNormalMap": "TextureImage|2023-05-06T12:15:42.376Z|22575"
         }
       }
     }

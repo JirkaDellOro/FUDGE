@@ -111,10 +111,10 @@
       "type": "Graph"
     }
   },
-  "Material|2023-05-06T21:15:05.084Z|37369": {
+  "Material|2023-05-06T21:26:20.174Z|77317": {
     "ƒ.Material": {
       "name": "ShaderPhongTextured",
-      "idResource": "Material|2023-05-06T21:15:05.084Z|37369",
+      "idResource": "Material|2023-05-06T21:26:20.174Z|77317",
       "shader": "ShaderPhongTextured",
       "coat": {
         "ƒ.CoatRemissiveTexturedNormals": {
@@ -122,8 +122,39 @@
           "diffuse": 1,
           "specular": 0,
           "metallic": 0.5,
-          "intensity": 0.5,
-          "idNormalMap": "TextureImage|2023-05-06T21:08:56.468Z|24652"
+          "intensity": 0.5
+        }
+      }
+    }
+  },
+  "Material|2023-05-06T21:37:45.223Z|31482": {
+    "ƒ.Material": {
+      "name": "ShaderPhong",
+      "idResource": "Material|2023-05-06T21:37:45.223Z|31482",
+      "shader": "ShaderPhong",
+      "coat": {
+        "ƒ.CoatRemissive": {
+          "color": "[1, 1, 1, 1]",
+          "diffuse": 1,
+          "metallic": 0,
+          "specular": 0,
+          "intensity": 0.5
+        }
+      }
+    }
+  },
+  "Material|2023-05-06T21:39:22.639Z|68103": {
+    "ƒ.Material": {
+      "name": "ShaderGouraud",
+      "idResource": "Material|2023-05-06T21:39:22.639Z|68103",
+      "shader": "ShaderGouraud",
+      "coat": {
+        "ƒ.CoatRemissive": {
+          "color": "[1, 1, 1, 1]",
+          "diffuse": 1,
+          "metallic": 0,
+          "specular": 0,
+          "intensity": 0.5
         }
       }
     }

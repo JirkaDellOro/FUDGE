@@ -356,6 +356,7 @@ void main() {
   #endif
 
   vctFrag *= u_vctColor;
+  vctFrag = showVectorAsColor(v_vctTangent,true);
   vctFrag += vctSpec * (1.0 - fMetallic);
 }`;
   shaderSources["ShaderPick.frag"] = `#version 300 es
