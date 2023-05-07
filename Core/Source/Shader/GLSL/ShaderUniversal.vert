@@ -35,7 +35,6 @@ float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float 
 uniform mat4 u_mtxNormalMeshToWorld;
 in vec3 a_vctNormal;
 in vec3 a_vctTangent;
-in vec3 a_vctBitangent;
 uniform float u_fDiffuse;
 
 struct Light {
@@ -140,12 +139,7 @@ mat4 lookAt(vec3 _vctTranslation, vec3 _vctTarget) {
   vec3 yAxis = u_bParticleSystemRestrict ? vctUp : normalize(cross(zAxis, xAxis));
   zAxis = u_bParticleSystemRestrict ? normalize(cross(xAxis, vctUp)) : zAxis;
 
-  return mat4(
-    xAxis.x, xAxis.y, xAxis.z, 0.0,
-    yAxis.x, yAxis.y, yAxis.z, 0.0,
-    zAxis.x, zAxis.y, zAxis.z, 0.0,
-    _vctTranslation.x,  _vctTranslation.y,  _vctTranslation.z, 1.0
-  );
+  return mat4(xAxis.x, xAxis.y, xAxis.z, 0.0, yAxis.x, yAxis.y, yAxis.z, 0.0, zAxis.x, zAxis.y, zAxis.z, 0.0, _vctTranslation.x, _vctTranslation.y, _vctTranslation.z, 1.0);
 }
   #endif
 
@@ -162,15 +156,9 @@ void main() {
   /*$mtxLocal*/
   /*$mtxWorld*/
   mtxMeshToWorld = /*$mtxWorld*/ mtxMeshToWorld /*$mtxLocal*/;
-  if (u_bParticleSystemFaceCamera) 
-    mtxMeshToWorld = 
-      lookAt(vec3(mtxMeshToWorld[3][0], mtxMeshToWorld[3][1], mtxMeshToWorld[3][2]), u_vctCamera) * 
-      mat4(
-        length(vec3(mtxMeshToWorld[0][0], mtxMeshToWorld[1][0], mtxMeshToWorld[2][0])), 0.0, 0.0, 0.0,
-        0.0, length(vec3(mtxMeshToWorld[0][1], mtxMeshToWorld[1][1], mtxMeshToWorld[2][1])), 0.0, 0.0,
-        0.0, 0.0, length(vec3(mtxMeshToWorld[0][2], mtxMeshToWorld[1][2], mtxMeshToWorld[2][2])), 0.0,
-        0.0, 0.0, 0.0, 1.0
-      );
+  if(u_bParticleSystemFaceCamera)
+    mtxMeshToWorld = lookAt(vec3(mtxMeshToWorld[3][0], mtxMeshToWorld[3][1], mtxMeshToWorld[3][2]), u_vctCamera) *
+      mat4(length(vec3(mtxMeshToWorld[0][0], mtxMeshToWorld[1][0], mtxMeshToWorld[2][0])), 0.0, 0.0, 0.0, 0.0, length(vec3(mtxMeshToWorld[0][1], mtxMeshToWorld[1][1], mtxMeshToWorld[2][1])), 0.0, 0.0, 0.0, 0.0, length(vec3(mtxMeshToWorld[0][2], mtxMeshToWorld[1][2], mtxMeshToWorld[2][2])), 0.0, 0.0, 0.0, 0.0, 1.0);
   mat4 mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
     #else
   mat4 mtxMeshToView = u_mtxMeshToView;
@@ -187,7 +175,6 @@ void main() {
   v_vctColor = u_fDiffuse * u_ambient.vctColor;
       #endif
     #endif
-
 
     #if defined(SKIN)
   mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
@@ -210,8 +197,8 @@ void main() {
   vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader
-  v_vctTangent = normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent);
-  v_vctBitangent = normalize(mat3(mtxNormalMeshToWorld) * a_vctBitangent);
+  v_vctTangent = normalize(mat3(mtxMeshToWorld) * a_vctTangent);
+  v_vctBitangent = normalize(mat3(mtxMeshToWorld) * cross(vctNormal, a_vctTangent));
   v_vctPosition = vctPosition;
       #endif  
 
@@ -266,7 +253,7 @@ void main() {
 
   // adds correction for things being far and to the side, but distortion for things being close
   vctNormal = mat3(mtx_RotX * mtx_RotY) * vctNormal;
-  
+
   vec3 vctReflection = normalize(mat3(u_mtxWorldToCamera) * normalize(vctNormal));
   vctReflection.y = -vctReflection.y;
 
@@ -284,7 +271,7 @@ void main() {
     #else
     // always full opacity for now...
       #if defined(LIGHT)
-    v_vctColor.a = 1.0;
+  v_vctColor.a = 1.0;
       #endif
     #endif
 }

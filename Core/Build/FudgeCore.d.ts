@@ -5429,7 +5429,6 @@ declare namespace FudgeCore {
         textureUVs?: WebGLBuffer;
         normals?: WebGLBuffer;
         tangents?: WebGLBuffer;
-        biTangents?: WebGLBuffer;
         iBones?: WebGLBuffer;
         weights?: WebGLBuffer;
         nIndices?: number;
@@ -5448,8 +5447,6 @@ declare namespace FudgeCore {
         protected ƒnormalsVertex: Float32Array;
         /** vertex tangents for normal mapping, based on the vertex normals and the UV coordinates */
         protected ƒtangentsVertex: Float32Array;
-        /** vertex bitangents for normal mapping, based on the vertex normals and vertex tangents */
-        protected ƒbitangentsVertex: Float32Array;
         /** bones */
         protected ƒiBones: Uint8Array;
         protected ƒweights: Float32Array;
@@ -5471,7 +5468,6 @@ declare namespace FudgeCore {
         get indices(): Uint16Array;
         get normalsVertex(): Float32Array;
         get tangentsVertex(): Float32Array;
-        get bitangentsVertex(): Float32Array;
         get textureUVs(): Float32Array;
         get verticesFlat(): Float32Array;
         get indicesFlat(): Uint16Array;

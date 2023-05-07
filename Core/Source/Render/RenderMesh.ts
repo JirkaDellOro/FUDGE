@@ -8,7 +8,6 @@ namespace FudgeCore {
     textureUVs?: WebGLBuffer;
     normals?: WebGLBuffer;
     tangents?: WebGLBuffer;
-    biTangents?: WebGLBuffer;
     iBones?: WebGLBuffer;
     weights?: WebGLBuffer;
     nIndices?: number;
@@ -29,8 +28,6 @@ namespace FudgeCore {
     protected ƒnormalsVertex: Float32Array;
     /** vertex tangents for normal mapping, based on the vertex normals and the UV coordinates */
     protected ƒtangentsVertex: Float32Array;
-    /** vertex bitangents for normal mapping, based on the vertex normals and vertex tangents */
-    protected ƒbitangentsVertex: Float32Array;
     /** bones */
     protected ƒiBones: Uint8Array;
     protected ƒweights: Float32Array;
@@ -108,11 +105,9 @@ namespace FudgeCore {
     }
 
     public get tangentsVertex(): Float32Array {
-      
+
       if (this.ƒtangentsVertex == null) {
         this.mesh.vertices.forEach(_vertex => _vertex.tangent.set(0, 0, 0));
-        this.mesh.vertices.forEach(_vertex => _vertex.bitangent.set(0, 0, 0));
-        
         for (let face of this.mesh.faces) {
           let i0: number = face.indices[0];
           let i1: number = face.indices[1];
@@ -123,12 +118,10 @@ namespace FudgeCore {
           let v1: Vector3 = this.mesh.vertices.position(i1);
           let v2: Vector3 = this.mesh.vertices.position(i2);
 
-          //console.log("v0: " + v0 + ", v1: " + v1 + ", v2: " + v2);
-
           //their UVs
-          let uv0: Vector2 = this.mesh.vertices[i0].uv;
-          let uv1: Vector2 = this.mesh.vertices[i1].uv;
-          let uv2: Vector2 = this.mesh.vertices[i2].uv;
+          let uv0: Vector2 = this.mesh.vertices.uv(i0);
+          let uv1: Vector2 = this.mesh.vertices.uv(i1);
+          let uv2: Vector2 = this.mesh.vertices.uv(i2);
 
           //We compute the edges of the triangle...
           let deltaPos1: Vector3 = Vector3.DIFFERENCE(v1, v0);
@@ -141,42 +134,37 @@ namespace FudgeCore {
           //...and compute the tangent
           let r: number = 1 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
           let tempTangent: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(Vector3.SCALE(deltaPos1, deltaUV2.y), Vector3.SCALE(deltaPos2, deltaUV1.y)), r);
-          let tempBitangent: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(Vector3.SCALE(deltaPos2, deltaUV1.x), Vector3.SCALE(deltaPos1, deltaUV2.x)), r);
 
-          
-          tempBitangent.scale(-1);
-
-          this.mesh.vertices[i0].tangent.add(tempTangent);
-          this.mesh.vertices[i1].tangent.add(tempTangent);
-          this.mesh.vertices[i2].tangent.add(tempTangent);
-
-          this.mesh.vertices[i0].bitangent.add(tempBitangent);
-          this.mesh.vertices[i1].bitangent.add(tempBitangent);
-          this.mesh.vertices[i2].bitangent.add(tempBitangent);
+          this.mesh.vertices[i0].tangent = tempTangent;
+          this.mesh.vertices[i1].tangent = tempTangent;
+          this.mesh.vertices[i2].tangent = tempTangent;
         }
 
-        //Now we orthagonalize the calculated tangents and bitangents to the vertex normal
+        //Now we orthagonalize the calculated tangents to the vertex normal
         this.mesh.vertices.forEach(_vertex => _vertex.tangent.add(Vector3.SCALE(_vertex.normal, - Vector3.DOT(_vertex.normal, _vertex.tangent))));
-        this.mesh.vertices.forEach(_vertex => _vertex.bitangent.add(Vector3.SCALE(_vertex.normal, - Vector3.DOT(_vertex.normal, _vertex.bitangent))));
 
         //TODO: In some cases (when uvs are mirrored) the tangents would have to be flipped in order to work properly
 
-        //At last, all the tangents and bitangents are stored in their respective Float32Array
+        //At last, all the tangents are stored in their respective Float32Array
+
+        //All faces have their individual tangents, which leads to shading artifacts, which is accounted for here
+        for (let vertex of this.mesh.vertices) {
+          if (typeof vertex.referTo !== "undefined") {
+            if (vertex.uv.x == this.mesh.vertices[vertex.referTo].uv.x &&
+              vertex.uv.y == this.mesh.vertices[vertex.referTo].uv.y) {
+              //It would be ideal to compare all vertices first and average out the different tangents between the ones with the same position, UV-position and vertex-normal but this approach is taken for its lower computational impact
+              vertex.tangent = this.mesh.vertices[vertex.referTo].tangent;
+              //This however leeds to minor artifacts along UV-seams
+            }
+          }
+        }
+
         this.ƒtangentsVertex = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
-          return [...this.mesh.vertices.tangent(_index).get()];
+          return [...this.mesh.vertices[_index].tangent.get()];
         }));
-        this.ƒbitangentsVertex = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
-          return [...this.mesh.vertices.bitangent(_index).get()];
-        }));
+
       }
       return this.ƒtangentsVertex;
-    }
-
-    public get bitangentsVertex(): Float32Array {
-      if (this.ƒbitangentsVertex == null) {
-        console.log("please calculate the tangents before calculating the bitangents");
-      }
-      return this.ƒbitangentsVertex;
     }
 
     public get textureUVs(): Float32Array {
@@ -221,7 +209,6 @@ namespace FudgeCore {
       this.ƒtextureUVs = undefined;
       this.ƒnormalsVertex = undefined;
       this.ƒtangentsVertex = undefined;
-      this.ƒbitangentsVertex = undefined;
 
       // special buffers for flat shading
       this.ƒnormalsFlat = undefined;

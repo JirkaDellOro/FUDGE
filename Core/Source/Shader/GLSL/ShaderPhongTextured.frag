@@ -93,9 +93,9 @@ void main() {
   vec3 vctNormal = v_vctNormal;
   #if defined(NORMALMAP)
   mat3 tbn = mat3(v_vctTangent, v_vctBitangent, v_vctNormal);
+  //tbn = transpose(tbn);
   vctNormal = tbn * (2.0 * texture(u_normalMap, v_vctNormalMap).xyz - 1.0);
   #endif
-
 
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
@@ -142,9 +142,9 @@ void main() {
   #if defined(TEXTURE)
   vec4 vctColorTexture = texture(u_texture, v_vctTexture);
   vctFrag *= vctColorTexture;
-  #endif
-
+  #endif  
   vctFrag *= u_vctColor;
-  vctFrag = showVectorAsColor(v_vctTangent,true);
+
+  //vctFrag = showVectorAsColor(v_vctTangent, true);
   vctFrag += vctSpec * (1.0 - fMetallic);
 }
