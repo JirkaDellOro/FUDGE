@@ -51,7 +51,7 @@ in vec2 v_vctNormalMap;
 uniform sampler2D u_normalMap;
 #endif
 
-// Returns a vector for visualizing on model
+// Returns a vector for visualizing on model. Great for debugging
 vec4 showVectorAsColor(vec3 _vector, bool _clamp) {
   if(_clamp) {
     _vector *= 0.5;
@@ -90,9 +90,9 @@ void main() {
   vctFrag += v_vctColor;
 
   // calculate NewNormal based on NormalMap
-  vec3 vctNormal = v_vctNormal;
+  vec3 vctNormal = normalize(v_vctNormal);
   #if defined(NORMALMAP)
-  mat3 tbn = mat3(v_vctTangent, v_vctBitangent, v_vctNormal);
+  mat3 tbn = mat3(v_vctTangent, v_vctBitangent, vctNormal);
   //tbn = transpose(tbn);
   vctNormal = tbn * (2.0 * texture(u_normalMap, v_vctNormalMap).xyz - 1.0);
   #endif
@@ -136,15 +136,12 @@ void main() {
     vctFrag += illuminateDiffuse(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor);
   }
 
-  vctFrag += vctSpec * fMetallic * 2.0;
-
+  vctFrag += vctSpec * fMetallic;
   // TEXTURE: multiply with texel color
   #if defined(TEXTURE)
   vec4 vctColorTexture = texture(u_texture, v_vctTexture);
   vctFrag *= vctColorTexture;
   #endif  
   vctFrag *= u_vctColor;
-
-  //vctFrag = showVectorAsColor(v_vctTangent, true);
   vctFrag += vctSpec * (1.0 - fMetallic);
 }

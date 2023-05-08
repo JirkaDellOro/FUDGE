@@ -9,7 +9,7 @@ namespace FudgeCore {
     public specular: number;
     public intensity: number;
 
-    constructor(_color: Color = new Color(), _diffuse: number = 1, _specular: number = 0, _metallic: number = 0.0, _intensity: number = 0.5) {
+    constructor(_color: Color = new Color(), _diffuse: number = 1, _specular: number = 0.5, _metallic: number = 0.0, _intensity: number = 0.7) {
       super(_color);
       this.diffuse = _diffuse;
       this.metallic = _metallic;
