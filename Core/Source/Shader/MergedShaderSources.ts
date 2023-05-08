@@ -684,8 +684,8 @@ void main() {
   vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader
-  v_vctTangent = normalize(mat3(mtxMeshToWorld) * a_vctTangent);
-  v_vctBitangent = normalize(mat3(mtxMeshToWorld) * cross(vctNormal, a_vctTangent));
+  v_vctTangent = normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent);
+  v_vctBitangent = normalize(mat3(mtxNormalMeshToWorld) * cross(a_vctNormal, a_vctTangent));
   v_vctPosition = vctPosition;
       #endif  
 

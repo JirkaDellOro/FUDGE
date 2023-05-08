@@ -263,6 +263,14 @@
       }
     }
   },
+  "MeshObj|2023-05-07T23:06:14.173Z|78832": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-05-07T23:06:14.173Z|78832",
+      "name": "obj\\plane.obj",
+      "type": "MeshObj",
+      "url": "obj\\plane.obj"
+    }
+  },
   "Graph|2023-03-22T12:13:41.839Z|18963": {
     "ƒ.Graph": {
       "name": "DefaultScene",
@@ -497,7 +505,7 @@
                             "scaling": "[5, 5, 3]"
                           },
                           "Component": {
-                            "active": false
+                            "active": true
                           }
                         }
                       }
@@ -786,7 +794,7 @@
                             "scaling": "[1, 1, 1]"
                           },
                           "Component": {
-                            "active": true
+                            "active": false
                           }
                         }
                       }
@@ -819,14 +827,6 @@
       ],
       "idResource": "Graph|2023-03-22T12:13:41.839Z|18963",
       "type": "Graph"
-    }
-  },
-  "MeshObj|2023-05-07T23:06:14.173Z|78832": {
-    "ƒ.MeshObj": {
-      "idResource": "MeshObj|2023-05-07T23:06:14.173Z|78832",
-      "name": "obj\\plane.obj",
-      "type": "MeshObj",
-      "url": "obj\\plane.obj"
     }
   }
 }
