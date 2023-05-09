@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
    * Asset loader for gl Transfer Format files.
-   * @author Matthias Roming, HFU, 2022
+   * @authors Matthias Roming, HFU, 2022 | Jonas Plotzky, HFU, 2023
    */
   export class GLTFLoader {
 
@@ -20,10 +20,13 @@ namespace FudgeCore {
     #skeletons: Skeleton[];
     #buffers: ArrayBuffer[];
 
+    #parents: Number[] = [];
+
     private constructor(_gltf: GLTF.GlTf, _url: string) {
       this.gltf = _gltf;
       this.url = _url;
-      // this.markJoints();
+      this.gltf.skins.forEach(_skin => _skin.joints.forEach(_joint => this.gltf.nodes[_joint].isJoint = true));
+      this.gltf.nodes.forEach((_node, _index) => _node.children?.forEach(_iChild => this.#parents[_iChild] = _index))
     }
 
     public static async LOAD(_url: string): Promise<GLTFLoader> {
@@ -65,17 +68,16 @@ namespace FudgeCore {
       return await this.getNodeByIndex(iNode);
     }
 
-    public async getNodeByIndex(_iNode: number): Promise<Node> {
+    public async getNodeByIndex(_iNode: number, _skeleton: boolean = false): Promise<Node> {
       if (!this.#nodes)
         this.#nodes = [];
       if (!this.#nodes[_iNode]) {
         const gltfNode: GLTF.Node = this.gltf.nodes[_iNode];
         const node: Node = new Node(gltfNode.name);
-
+        
         // check for children
         if (gltfNode.children)
           for (const iNode of gltfNode.children)
-            if (!this.gltf.nodes[iNode].isJointRoot)
               node.addChild(await this.getNodeByIndex(iNode));
         
         // check for transformation
@@ -117,15 +119,29 @@ namespace FudgeCore {
 
         // check for skeleton        
         if (gltfNode.skin != undefined) {
-          const skeleton: SkeletonInstance = await this.getSkeletonByIndex(gltfNode.skin);
-          node.addChild(skeleton);
-          node.getComponent(ComponentMesh)?.bindSkeleton(skeleton);
-          for (const iAnimation of this.findSkeletalAnimationIndices(gltfNode.skin)) {
-            skeleton.addComponent(new ComponentAnimator(await this.getAnimationByIndex(iAnimation))); // TODO: ComponentAnimator can only be added once
-          }
+          let iSkeleton: number = this.gltf.skins[gltfNode.skin].joints[0];
+          node.getComponent(ComponentMesh).skeleton = <SkeletonInstance>await this.getNodeByIndex(iSkeleton);
         }
 
+        // check for animation
+        // let iAnimation: number = this.gltf.animations.findIndex(animation => 
+        //   animation.channels.some(channel => this.gltf.skins[iSkeleton].joints.includes(channel.target.node)));
+        // if (iAnimation >= 0)
+        //   skeletonInstance.addComponent(new ComponentAnimator(await this.getAnimationByIndex(iAnimation)));
+
         this.#nodes[_iNode] = node;
+
+        // check if node is a skeleton, replace it with skeleton instance
+        let iSkeleton: number = this.gltf.skins?.findIndex(skin => skin.joints[0] == _iNode);
+        if (iSkeleton >= 0) {
+          let skeletonInstance: SkeletonInstance = await SkeletonInstance.CREATE(await this.getSkeletonByIndex(iSkeleton));
+          // let iAnimation: number = this.gltf.animations.findIndex(animation => 
+          //   animation.channels.some(channel => this.gltf.skins[iSkeleton].joints.includes(channel.target.node)));
+          // if (iAnimation >= 0)
+          //   skeletonInstance.addComponent(new ComponentAnimator(await this.getAnimationByIndex(iAnimation)));
+          this.#nodes = this.#nodes.map(_node => skeletonInstance.bones[_node.name] || _node);
+          this.#nodes[_iNode] = skeletonInstance;
+        }
       }
       return this.#nodes[_iNode];
     }
@@ -178,30 +194,96 @@ namespace FudgeCore {
       if (!this.#animations[_iAnimation]) {
         const gltfAnimation: GLTF.Animation = this.gltf.animations[_iAnimation];
 
-        if (this.isSkeletalAnimation(gltfAnimation)) {
-          // map channels to an animation structure for animating the local bone matrices
-          const animationStructure: {
-            mtxBoneLocals: {
-              [boneName: string]: AnimationStructureMatrix4x4
-            }
-          } = { mtxBoneLocals: {} };
-          for (const gltfChannel of gltfAnimation.channels) {
-            const boneName: string = this.#nodes[gltfChannel.target.node].name;
-            
-            // create new 4 by 4 matrix animation structure if there is no entry for the bone name
-            if (!animationStructure.mtxBoneLocals[boneName]) animationStructure.mtxBoneLocals[boneName] = {};
+        let mapNodeToGltfChannels: Map<Node, GLTF.AnimationChannel[]> = new Map();
+        for (const gltfChannel of gltfAnimation.channels) {
+          if (gltfChannel.target.node == undefined)
+            continue;
+          const node: Node = await this.getNodeByIndex(gltfChannel.target.node);
+          if (!mapNodeToGltfChannels.has(node))
+            mapNodeToGltfChannels.set(node, []);
+          mapNodeToGltfChannels.get(node).push(gltfChannel);
+        }
+        // TODO: find a way to find the common ancestor before the node hierarchy is loaded...
+        // find the common ancestor of all nodes in animation, TODO: might need to create a common ancestor if none is found
+        let ancestor: Node = [...mapNodeToGltfChannels.keys()].reduce((_ancestor, _node) => {
+          let pathNode: Node[] = _node.getPath();
+          let pathAncestor: Node[] = _ancestor.getPath();
+          return pathAncestor.find(_n => pathNode.includes(_n));
+        });
 
-            // set the vector 3 animation structure of the entry refered by the channel target path
-            const transformationType: TransformationType = gltfChannel.target.path as TransformationType;
-            if (transformationType)
-              animationStructure.mtxBoneLocals[boneName][transformationType] =
-                await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], transformationType);
+        const generateAnimationStructure = async (_node: Node, _structure: AnimationStructure = {}) => {
+          if (_node instanceof SkeletonInstance) {
+            // don't recurse deeper into the hierarchy, instead use the #nodes to acces children directly
+            // map channels to an animation structure for animating the local bone matrices
+            const mtxBoneLocals: { [boneName: string]: AnimationStructureMatrix4x4 } = {};
+            for (const gltfChannel of gltfAnimation.channels) {
+              const boneName: string = this.#nodes[gltfChannel.target.node].name;
+              
+              // create new 4 by 4 matrix animation structure if there is no entry for the bone name
+              if (!mtxBoneLocals[boneName]) mtxBoneLocals[boneName] = {};
+  
+              // set the vector 3 animation structure of the entry refered by the channel target path
+              mtxBoneLocals[boneName][gltfChannel.target.path] =
+                await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
+            }
+            _structure.mtxBoneLocals = mtxBoneLocals;
+            
+            return _structure;
           }
 
-          this.#animations[_iAnimation] = new Animation(gltfAnimation.name, animationStructure);
+          const gltfChannels: GLTF.AnimationChannel[] = mapNodeToGltfChannels.get(_node);
+          if (gltfChannels) {
+            const mtxLocal: AnimationStructureMatrix4x4 = {};
+            for (const gltfChannel of gltfChannels)
+              mtxLocal[gltfChannel.target.path] = 
+                await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
+            _structure.components = {
+              ComponentTransform: [
+                { mtxLocal: mtxLocal }
+              ]
+            };
+          }
+
+          const children: Node[] = _node.getChildren();
+          if (children.length > 0) {
+            _structure.children = {};
+            for (const child of children) {
+              // recurse through all children since some nodes in our hierarchy might have no corresponding gltf animation node, e.g. animation could target a grand child
+              const structureChild: AnimationStructure = await generateAnimationStructure(child);
+              if (Object.keys(structureChild).length > 0)
+                _structure.children[child.name] = structureChild;
+            }
+          }
+
+          return _structure;
         }
-        else
-          throw new Error("Non-skeletal animations are not supported yet.");
+
+        this.#animations[_iAnimation] = new Animation(gltfAnimation.name, await generateAnimationStructure(ancestor, {}));
+        
+        // if (this.isSkeletalAnimation(gltfAnimation)) {
+        //   // map channels to an animation structure for animating the local bone matrices
+        //   const animationStructure: {
+        //     mtxBoneLocals: {
+        //       [boneName: string]: AnimationStructureMatrix4x4
+        //     }
+        //   } = { mtxBoneLocals: {} };
+        //   for (const gltfChannel of gltfAnimation.channels) {
+        //     const boneName: string = this.#nodes[gltfChannel.target.node].name;
+            
+        //     // create new 4 by 4 matrix animation structure if there is no entry for the bone name
+        //     if (!animationStructure.mtxBoneLocals[boneName]) animationStructure.mtxBoneLocals[boneName] = {};
+
+        //     // set the vector 3 animation structure of the entry refered by the channel target path
+        //     const transformation: GLTF.AnimationChannelTarget["path"] = gltfChannel.target.path;
+        //     if (transformation)
+        //       animationStructure.mtxBoneLocals[boneName][transformation] =
+        //         await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], transformation);
+        //   }
+
+        //   this.#animations[_iAnimation] = new Animation(gltfAnimation.name, animationStructure);
+        // }
+        // else
+        //   throw new Error("Non-skeletal animations are not supported yet.");
       }
       return this.#animations[_iAnimation];
     }
@@ -227,23 +309,22 @@ namespace FudgeCore {
       return this.#meshes[_iMesh];
     }
 
-    public async getSkeleton(_name: string): Promise<SkeletonInstance> {
+    public async getSkeleton(_name: string): Promise<Skeleton> {
       const iSkeleton: number = this.gltf.skins.findIndex(skeleton => skeleton.name == _name);
       if (iSkeleton == -1)
         throw new Error(`Couldn't find name ${_name} in gltf skins.`);
       return await this.getSkeletonByIndex(iSkeleton);
     }
 
-    public async getSkeletonByIndex(_iSkeleton: number): Promise<SkeletonInstance> {
+    public async getSkeletonByIndex(_iSkeleton: number): Promise<Skeleton> {
       if (!this.#skeletons)
         this.#skeletons = [];
       if (!this.#skeletons[_iSkeleton]) {
         const gltfSkeleton: GLTF.Skin = this.gltf.skins[_iSkeleton];
         const skeleton: Skeleton = new Skeleton(gltfSkeleton.name);
 
-        this.gltf.nodes[gltfSkeleton.joints[0]].isJointRoot = true; // mark the joint root, TODO: this is a confusing solution, look into Skeleton/SkeletonInstances and how they should be handled in importer, also see: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#skins
         // add all bones as children/descendants by adding the root bone
-        skeleton.addChild(await this.getNodeByIndex(gltfSkeleton.joints[0]));
+        skeleton.addChild(await this.getNodeByIndex(gltfSkeleton.joints[0], true));
 
         // convert float array to array of matrices and register bones
         const floatArray: Float32Array = await this.getFloat32Array(gltfSkeleton.inverseBindMatrices);
@@ -256,7 +337,7 @@ namespace FudgeCore {
         Project.register(skeleton);
         this.#skeletons[_iSkeleton] = skeleton;
       }
-      return await SkeletonInstance.CREATE(this.#skeletons[_iSkeleton]);
+      return this.#skeletons[_iSkeleton];
     }
 
     public async getUint8Array(_iAccessor: number): Promise<Uint8Array> {
@@ -350,31 +431,13 @@ namespace FudgeCore {
       }
     }
 
-    // private markJoints(): void {
-    //   this.gltf.skins.forEach(_skin => _skin.joints.forEach(_joint => this.gltf.nodes[_joint].isJoint = true));
-    // }
-
-    private isSkeletalAnimation(_animation: GLTF.Animation): boolean {
-      return _animation.channels.every(channel => this.isBoneIndex(channel.target.node));
-    }
-
-    private findSkeletalAnimationIndices(_iSkeleton: number): number[] {
-      return this.gltf.animations
-        .filter(animation => animation.channels.every(channel => this.gltf.skins[_iSkeleton].joints.includes(channel.target.node)))
-        .map((_, iAnimation) => iAnimation);
-    }
-
-    private isBoneIndex(_iNode: number): boolean {
-      return this.gltf.skins?.flatMap(gltfSkin => gltfSkin.joints).includes(_iNode);
-    }
-
-    private async getAnimationSequenceVector3(_sampler: GLTF.Sampler, _transformationType: TransformationType): Promise<AnimationStructureVector3 | AnimationStructureQuaternion> {
+    private async getAnimationSequenceVector3(_sampler: GLTF.AnimationSampler, _transformationType: GLTF.AnimationChannelTarget["path"]): Promise<AnimationStructureVector3 | AnimationStructureVector4> {
       const input: Float32Array = await this.getFloat32Array(_sampler.input);
       const output: Float32Array = await this.getFloat32Array(_sampler.output);
       const millisPerSecond: number = 1000;
       const isRotation: boolean = _transformationType == "rotation";
 
-      const sequences: AnimationStructureVector3 | AnimationStructureQuaternion = {};
+      const sequences: AnimationStructureVector3 | AnimationStructureVector4 = {};
       sequences.x = new AnimationSequence();
       sequences.y = new AnimationSequence();
       sequences.z = new AnimationSequence();
@@ -388,7 +451,7 @@ namespace FudgeCore {
         sequences.y.addKey(new AnimationKey(time, output[iOutput + 1]));
         sequences.z.addKey(new AnimationKey(time, output[iOutput + 2]));
         if (isRotation)
-          (<AnimationStructureQuaternion>sequences).w.addKey(new AnimationKey(time, output[iOutput + 3]))
+          (<AnimationStructureVector4>sequences).w.addKey(new AnimationKey(time, output[iOutput + 3]))
       }
 
       return sequences;
@@ -408,5 +471,5 @@ namespace FudgeCore {
 
   type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Int32Array | Float32Array | Float64Array;
 
-  type TransformationType = "rotation" | "scale" | "translation";
+  // type TransformationType = "rotation" | "scale" | "translation";
 }

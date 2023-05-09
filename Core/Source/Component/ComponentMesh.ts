@@ -8,40 +8,18 @@ namespace FudgeCore {
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public mesh: Mesh;
-
-    #skeleton: SkeletonInstance;
+    public skeleton: SkeletonInstance;
 
     public constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance) {
       super();
       this.mesh = _mesh;
-      if (_skeleton)
-        this.bindSkeleton(_skeleton);
+      this.skeleton = _skeleton;
     }
 
     public get radius(): number {
       let scaling: Vector3 = this.mtxWorld.scaling;
       let scale: number = Math.max(Math.abs(scaling.x), Math.abs(scaling.y), Math.abs(scaling.z));
       return this.mesh.radius * scale;
-    }
-
-    public get skeleton(): SkeletonInstance {
-      return this.#skeleton;
-    }
-
-    public bindSkeleton(_skeleton: SkeletonInstance): void {
-      this.#skeleton = _skeleton;
-
-      if (_skeleton.getParent())
-        return;
-      
-      if (!this.node)
-        this.addEventListener(EVENT.COMPONENT_ADD, (_event: Event) => {
-          if (_event.target != this)
-            return;
-          this.node.addChild(this.skeleton);
-        });
-      else
-        this.node.addChild(this.skeleton);
     }
 
     // /**
@@ -123,17 +101,17 @@ namespace FudgeCore {
             }
             for (const child of root) {
               if (child != root && child instanceof SkeletonInstance && child.idSource == _serialization.skeleton)
-                this.#skeleton = child;
+                this.skeleton = child;
             }
-            if (!this.#skeleton) {
+            if (!this.skeleton) {
               const trySetSkeletonOnChildAppend: (_event: Event) => void = _event => {
                 if (_event.target instanceof SkeletonInstance && _event.target.idSource == _serialization.skeleton)
-                  this.#skeleton = _event.target;
+                  this.skeleton = _event.target;
                 else {
                   trySetSkeleton();
                   root.removeEventListener(EVENT.CHILD_APPEND, trySetSkeletonOnChildAppend);
                 }
-                if (this.#skeleton)
+                if (this.skeleton)
                   root.removeEventListener(EVENT.CHILD_APPEND, trySetSkeletonOnChildAppend);
               };
               root.addEventListener(EVENT.CHILD_APPEND, trySetSkeletonOnChildAppend);

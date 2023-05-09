@@ -1387,14 +1387,14 @@ declare namespace FudgeCore {
         y?: AnimationSequence;
         z?: AnimationSequence;
     }
-    interface AnimationStructureQuaternion extends AnimationStructure {
+    interface AnimationStructureVector4 extends AnimationStructure {
         x?: AnimationSequence;
         y?: AnimationSequence;
         z?: AnimationSequence;
         w?: AnimationSequence;
     }
     interface AnimationStructureMatrix4x4 extends AnimationStructure {
-        rotation?: AnimationStructureVector3 | AnimationStructureQuaternion;
+        rotation?: AnimationStructureVector3 | AnimationStructureVector4;
         scale?: AnimationStructureVector3;
         translation?: AnimationStructureVector3;
     }
@@ -2185,15 +2185,13 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMesh extends Component {
-        #private;
         static readonly iSubclass: number;
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
         mesh: Mesh;
+        skeleton: SkeletonInstance;
         constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance);
         get radius(): number;
-        get skeleton(): SkeletonInstance;
-        bindSkeleton(_skeleton: SkeletonInstance): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
@@ -6199,7 +6197,7 @@ declare namespace GLTF {
         /**
          * The name of the node's TRS property to animate, or the `"weights"` of the Morph Targets it instantiates. For the `"translation"` property, the values that are provided by the sampler are the translation along the X, Y, and Z axes. For the `"rotation"` property, the values are a quaternion in the order (x, y, z, w), where w is the scalar. For the `"scale"` property, the values are the scaling factors along the X, Y, and Z axes.
          */
-        "path": any | any | any | any | string;
+        "path": "translation" | "rotation" | "scale" | "weights";
         "extensions"?: any;
         "extras"?: any;
         [k: string]: any;
@@ -6774,7 +6772,7 @@ declare namespace GLTF {
 declare namespace FudgeCore {
     /**
      * Asset loader for gl Transfer Format files.
-     * @author Matthias Roming, HFU, 2022
+     * @authors Matthias Roming, HFU, 2022 | Jonas Plotzky, HFU, 2023
      */
     class GLTFLoader {
         #private;
@@ -6788,23 +6786,20 @@ declare namespace FudgeCore {
         getScene(_name?: string): Promise<GraphInstance>;
         getSceneByIndex(_iScene?: number): Promise<GraphInstance>;
         getNode(_name: string): Promise<Node>;
-        getNodeByIndex(_iNode: number): Promise<Node>;
+        getNodeByIndex(_iNode: number, _skeleton?: boolean): Promise<Node>;
         getCamera(_name: string): Promise<ComponentCamera>;
         getCameraByIndex(_iCamera: number): Promise<ComponentCamera>;
         getAnimation(_name: string): Promise<Animation>;
         getAnimationByIndex(_iAnimation: number): Promise<Animation>;
         getMesh(_name: string): Promise<MeshImport>;
         getMeshByIndex(_iMesh: number): Promise<MeshImport>;
-        getSkeleton(_name: string): Promise<SkeletonInstance>;
-        getSkeletonByIndex(_iSkeleton: number): Promise<SkeletonInstance>;
+        getSkeleton(_name: string): Promise<Skeleton>;
+        getSkeletonByIndex(_iSkeleton: number): Promise<Skeleton>;
         getUint8Array(_iAccessor: number): Promise<Uint8Array>;
         getUint16Array(_iAccessor: number): Promise<Uint16Array>;
         getUint32Array(_iAccessor: number): Promise<Uint32Array>;
         getFloat32Array(_iAccessor: number): Promise<Float32Array>;
         private getBufferData;
-        private isSkeletalAnimation;
-        private findSkeletalAnimationIndices;
-        private isBoneIndex;
         private getAnimationSequenceVector3;
     }
 }

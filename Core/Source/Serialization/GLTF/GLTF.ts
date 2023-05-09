@@ -112,7 +112,7 @@ namespace GLTF {
     /**
      * The name of the node's TRS property to animate, or the `"weights"` of the Morph Targets it instantiates. For the `"translation"` property, the values that are provided by the sampler are the translation along the X, Y, and Z axes. For the `"rotation"` property, the values are a quaternion in the order (x, y, z, w), where w is the scalar. For the `"scale"` property, the values are the scaling factors along the X, Y, and Z axes.
      */
-    "path": any | any | any | any | string;
+    "path": "translation" | "rotation" | "scale" | "weights"; // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#animations
     "extensions"?: any;
     "extras"?: any;
     [k: string]: any;

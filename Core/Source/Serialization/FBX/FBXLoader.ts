@@ -124,7 +124,7 @@ namespace FudgeCore {
             node.addComponent(new ComponentMaterial(FBXLoader.defaultMaterial));
             if (mesh instanceof MeshSkin) {
               const skeleton: Skeleton = await this.getSkeleton(childFBX.children[0].children[0].children[0]); // Model.Deformer.SubDeformer.LimbNode
-              cmpMesh.bindSkeleton(_root?.getChild(0) as SkeletonInstance || await SkeletonInstance.CREATE(skeleton));
+              cmpMesh.skeleton = (_root?.getChild(0) as SkeletonInstance || await SkeletonInstance.CREATE(skeleton));
               for (const subDeformerFBX of childFBX.children[0].children as FBX.SubDeformer[]) {
                 const bone: Node = cmpMesh.skeleton.bones[subDeformerFBX.children[0].name];
                 bone.mtxLocal.set(subDeformerFBX.TransformLink);
