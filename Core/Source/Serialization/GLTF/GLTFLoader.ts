@@ -20,13 +20,9 @@ namespace FudgeCore {
     #skeletons: Skeleton[];
     #buffers: ArrayBuffer[];
 
-    #parents: Number[] = [];
-
     private constructor(_gltf: GLTF.GlTf, _url: string) {
       this.gltf = _gltf;
       this.url = _url;
-      this.gltf.skins.forEach(_skin => _skin.joints.forEach(_joint => this.gltf.nodes[_joint].isJoint = true));
-      this.gltf.nodes.forEach((_node, _index) => _node.children?.forEach(_iChild => this.#parents[_iChild] = _index))
     }
 
     public static async LOAD(_url: string): Promise<GLTFLoader> {
@@ -203,13 +199,15 @@ namespace FudgeCore {
             mapNodeToGltfChannels.set(node, []);
           mapNodeToGltfChannels.get(node).push(gltfChannel);
         }
-        // TODO: find a way to find the common ancestor before the node hierarchy is loaded...
         // find the common ancestor of all nodes in animation, TODO: might need to create a common ancestor if none is found
         let ancestor: Node = [...mapNodeToGltfChannels.keys()].reduce((_ancestor, _node) => {
           let pathNode: Node[] = _node.getPath();
           let pathAncestor: Node[] = _ancestor.getPath();
           return pathAncestor.find(_n => pathNode.includes(_n));
         });
+
+        if (ancestor == undefined)
+          Debug.warn(`${GLTFLoader.name}: Animation ${gltfAnimation.name}: No common ancestor found. FUDGE currently only supports animations which are rooted in a common ancestor`);
 
         const generateAnimationStructure = async (_node: Node, _structure: AnimationStructure = {}) => {
           if (_node instanceof SkeletonInstance) {
@@ -244,8 +242,8 @@ namespace FudgeCore {
             };
           }
 
-          const children: Node[] = _node.getChildren();
-          if (children.length > 0) {
+          const children: Node[] = _node?.getChildren();
+          if (children?.length > 0) {
             _structure.children = {};
             for (const child of children) {
               // recurse through all children since some nodes in our hierarchy might have no corresponding gltf animation node, e.g. animation could target a grand child
@@ -259,31 +257,6 @@ namespace FudgeCore {
         }
 
         this.#animations[_iAnimation] = new Animation(gltfAnimation.name, await generateAnimationStructure(ancestor, {}));
-        
-        // if (this.isSkeletalAnimation(gltfAnimation)) {
-        //   // map channels to an animation structure for animating the local bone matrices
-        //   const animationStructure: {
-        //     mtxBoneLocals: {
-        //       [boneName: string]: AnimationStructureMatrix4x4
-        //     }
-        //   } = { mtxBoneLocals: {} };
-        //   for (const gltfChannel of gltfAnimation.channels) {
-        //     const boneName: string = this.#nodes[gltfChannel.target.node].name;
-            
-        //     // create new 4 by 4 matrix animation structure if there is no entry for the bone name
-        //     if (!animationStructure.mtxBoneLocals[boneName]) animationStructure.mtxBoneLocals[boneName] = {};
-
-        //     // set the vector 3 animation structure of the entry refered by the channel target path
-        //     const transformation: GLTF.AnimationChannelTarget["path"] = gltfChannel.target.path;
-        //     if (transformation)
-        //       animationStructure.mtxBoneLocals[boneName][transformation] =
-        //         await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], transformation);
-        //   }
-
-        //   this.#animations[_iAnimation] = new Animation(gltfAnimation.name, animationStructure);
-        // }
-        // else
-        //   throw new Error("Non-skeletal animations are not supported yet.");
       }
       return this.#animations[_iAnimation];
     }
