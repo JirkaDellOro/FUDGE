@@ -156,7 +156,7 @@ namespace SkeletonTest {
     const mesh: ƒ.MeshSkin = new MeshSkinCylinder();
     const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
     cmpMesh.mtxPivot.translateY(-2);
-    cmpMesh.bindSkeleton(skeletonInstance);
+    cmpMesh.skeleton = skeletonInstance;
     cylinder.addComponent(cmpMesh);
 
     // setup component material 
