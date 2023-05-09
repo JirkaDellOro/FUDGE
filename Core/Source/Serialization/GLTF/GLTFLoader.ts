@@ -194,11 +194,19 @@ namespace FudgeCore {
         for (const gltfChannel of gltfAnimation.channels) {
           if (gltfChannel.target.node == undefined)
             continue;
-          const node: Node = await this.getNodeByIndex(gltfChannel.target.node);
+          let node: Node = await this.getNodeByIndex(gltfChannel.target.node);
+
+          // since the actual gltf skeleton root bone got replaced by a skeleton instance with the root bone as child, 
+          // the channels need to be correctly associated with said root bone
+          if (node instanceof SkeletonInstance)
+            node = node.getChild(0);
+
           if (!mapNodeToGltfChannels.has(node))
             mapNodeToGltfChannels.set(node, []);
+
           mapNodeToGltfChannels.get(node).push(gltfChannel);
         }
+        
         // find the common ancestor of all nodes in animation, TODO: might need to create a common ancestor if none is found
         let ancestor: Node = [...mapNodeToGltfChannels.keys()].reduce((_ancestor, _node) => {
           let pathNode: Node[] = _node.getPath();
@@ -211,18 +219,17 @@ namespace FudgeCore {
 
         const generateAnimationStructure = async (_node: Node, _structure: AnimationStructure = {}) => {
           if (_node instanceof SkeletonInstance) {
-            // don't recurse deeper into the hierarchy, instead use the #nodes to acces children directly
             // map channels to an animation structure for animating the local bone matrices
             const mtxBoneLocals: { [boneName: string]: AnimationStructureMatrix4x4 } = {};
-            for (const gltfChannel of gltfAnimation.channels) {
-              const boneName: string = this.#nodes[gltfChannel.target.node].name;
-              
+            
+            for (const boneName in _node.bones) {
               // create new 4 by 4 matrix animation structure if there is no entry for the bone name
               if (!mtxBoneLocals[boneName]) mtxBoneLocals[boneName] = {};
-  
-              // set the vector 3 animation structure of the entry refered by the channel target path
-              mtxBoneLocals[boneName][gltfChannel.target.path] =
-                await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
+
+              let gltfChannels: GLTF.AnimationChannel[] = mapNodeToGltfChannels.get(_node.bones[boneName]);
+              for (const gltfChannel of gltfChannels)
+                mtxBoneLocals[boneName][gltfChannel.target.path] =
+                  await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
             }
             _structure.mtxBoneLocals = mtxBoneLocals;
             
