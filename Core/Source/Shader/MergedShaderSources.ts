@@ -1,6 +1,6 @@
 namespace FudgeCore {
   export let shaderSources: {[source: string]: string} = {};
-  shaderSources["ShaderParticle.frag"] = `#version 300 es
+  shaderSources["ShaderParticle.frag"] = /*glsl*/ `#version 300 es
 /**
 * Particle shader similar to lit textured shader
 * @authors Jonas Plotzky, HFU, 2022
@@ -32,7 +32,7 @@ void main() {
   if(vctFrag.a < 0.01)
     discard;
 }`;
-  shaderSources["ShaderParticle.vert"] = `#version 300 es
+  shaderSources["ShaderParticle.vert"] = /*glsl*/ `#version 300 es
 /**
 * Particle shader similar to lit textured shader
 * @authors Jonas Plotzky, HFU, 2022
@@ -98,7 +98,7 @@ void main() {
   v_vctColor = /*$color*/;
     #endif
 }`;
-  shaderSources["ShaderPhong.frag"] = `#version 300 es
+  shaderSources["ShaderPhong.frag"] = /*glsl*/ `#version 300 es
 /**
 * Phong shading
 * @authors Jirka Dell'Oro-Friedl, HFU, 2022
@@ -190,7 +190,7 @@ void main() {
     vctFrag += illuminateDirected(vctDirection, v_vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
 }`;
-  shaderSources["ShaderPick.frag"] = `#version 300 es
+  shaderSources["ShaderPick.frag"] = /*glsl*/ `#version 300 es
 /**
 * Renders for Raycasting
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -214,7 +214,7 @@ void main() {
                 
     vctFrag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, 0, 0);
 }`;
-  shaderSources["ShaderPick.vert"] = `#version 300 es
+  shaderSources["ShaderPick.vert"] = /*glsl*/ `#version 300 es
 /**
 * Renders for Raycasting
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -225,7 +225,7 @@ uniform mat4 u_mtxMeshToView;
 void main() {   
     gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
 }`;
-  shaderSources["ShaderPickTextured.frag"] = `#version 300 es
+  shaderSources["ShaderPickTextured.frag"] = /*glsl*/ `#version 300 es
 /**
 * Renders for Raycasting
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -253,7 +253,7 @@ void main() {
   
   vctFrag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, floatBitsToInt(v_vctTexture.x), floatBitsToInt(v_vctTexture.y));
 }`;
-  shaderSources["ShaderPickTextured.vert"] = `#version 300 es
+  shaderSources["ShaderPickTextured.vert"] = /*glsl*/ `#version 300 es
 /**
 * Renders for Raycasting
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -269,7 +269,7 @@ void main() {
     gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
     v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
 }`;
-  shaderSources["ShaderUniversal.frag"] = `#version 300 es
+  shaderSources["ShaderUniversal.frag"] = /*glsl*/ `#version 300 es
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
 * @authors Jirka Dell'Oro-Friedl, HFU, 2021
@@ -316,7 +316,7 @@ void main() {
   if(vctFrag.a < 0.01)
     discard;
 }`;
-  shaderSources["ShaderUniversal.vert"] = `#version 300 es
+  shaderSources["ShaderUniversal.vert"] = /*glsl*/ `#version 300 es
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
 * @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021

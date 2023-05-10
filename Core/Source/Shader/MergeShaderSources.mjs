@@ -12,7 +12,7 @@ let files /*: string[] */ = fs.readdirSync("GLSL");
 let shaderStrings = `namespace FudgeCore {\n  export let shaderSources: {[source: string]: string} = {};\n`;
 for (let name of files) {
   let shaderString = fs.readFileSync("GLSL/" + name, { encoding: 'utf8' })
-  shaderStrings += `  shaderSources["${name}"] = \`${shaderString}\`;\n`
+  shaderStrings += `  shaderSources["${name}"] = /*glsl*/ \`${shaderString}\`;\n`
 }
 shaderStrings += `\n}`
 fs.writeFileSync("MergedShaderSources.ts", shaderStrings);
