@@ -1,9 +1,22 @@
 <img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="document.querySelector('h1').style.visibility='hidden'"/>  
 
 # Welcome!  
-This repository contains the source code, the documentation and the full development history of FUDGE. If you want to create using FUDGE, visit the repository [FUDGE_Runtime](https://github.com/JirkaDellOro/FUDGE_Runtime), which contains an excerpt with all you need to get going.
+This [repository](https://github.com/JirkaDellOro/FUDGE) contains the source code, the documentation and the full development history of FUDGE. If you want to create using FUDGE, visit the repository [FUDGE_Runtime](https://github.com/JirkaDellOro/FUDGE_Runtime), which contains an excerpt with all you need to get going.
 
 FUDGE is a lightweight open-source game engine and editor created for educating students in an academic environment in the field of design and development of games and highly interactive applications. It may also be used as a rapid prototyping tool to easly convey and evaluate ideas for applications and games and as a tool to create educational games.
+
+# Learn
+## Wiki
+To get started with FUDGE, please browse through the [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki) to learn about the core concepts and the inner workings of FUDGE. Doing so will grant you an intuitive understanding extremely helpful for further working with FUDGE.  
+## Test
+Browse through the tests, as they are also a good starting point to examine isolated functionalities of FUDGE and see code running. Run your local clone with a local server or visit [Test](https://JirkaDellOro.github.io/FUDGE/Test)  
+## References
+- [Core](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Core/modules/FudgeCore.html)
+- [UserInterface](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/UserInterface/modules/FudgeUserInterface.html) 
+- [Aid](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Aid/modules/FudgeAid.html)
+- [OIMO.js](https://github.com/lo-th/Oimo.js)
+- [FudgeServer](https://jirkadelloro.github.io/FUDGE/Documentation/Reference/Net/index.html)
+- [FudgeClient](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Net/modules/FudgeNet.html)  
 
 # Folders
 ## Core  
@@ -38,12 +51,10 @@ A collection of various other documents and resources, including unmaintained ex
 - Input-Manager  
 - Graphic Feedback/Feedforward in RenderView
 - Image-Tracking
+- Pathfinding System
+- Procedural 3D-Assets
 
 ## In Progress
-- Pathfinding System
-- Skeletal Animation
-- Procedural 3D-Assets
-- VR Components
 - Light and Shadow
 
 ## Done  
@@ -67,3 +78,5 @@ A collection of various other documents and resources, including unmaintained ex
 | Moritz Beaugrand   | Terrain                           |
 | Matthias Roming    | Skeleton System & glTF Importer   |
 | Jonas Plotzky      | Particle & Animation Editor       |
+| Matthias Roming      | Skeletal Animation |
+| Valentin Schnidtberger | VR Components |
