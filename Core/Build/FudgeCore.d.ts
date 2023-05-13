@@ -907,6 +907,11 @@ declare namespace FudgeCore {
          */
         toVector3(_z?: number): Vector3;
         toString(): string;
+        /**
+         * Uses the standard array.map functionality to perform the given function on all components of this vector
+         * and return a new vector with the results
+         */
+        map(_function: (value: number, index: number, array: Float32Array) => number): Vector2;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Vector2>;
         getMutator(): Mutator;
@@ -3788,6 +3793,7 @@ declare namespace FudgeCore {
         toString(): string;
         /**
          * Uses the standard array.map functionality to perform the given function on all components of this vector
+         * and return a new vector with the results
          */
         map(_function: (value: number, index: number, array: Float32Array) => number): Vector3;
         serialize(): Serialization;
@@ -4018,6 +4024,8 @@ declare namespace FudgeCore {
         positionFace: Vector3;
         /** the index of the face the position is inside */
         index: number;
+        /** the grid coordinates of the quad the face belongs to */
+        grid: Vector2;
     }
     /**
      * A terrain spreads out in the x-z-plane, y is the height derived from the heightmap function.
@@ -4040,6 +4048,8 @@ declare namespace FudgeCore {
          * If at hand, pass the inverse too to avoid unnecessary calculation.
          */
         getTerrainInfo(_position: Vector3, _mtxWorld?: Matrix4x4, _mtxInverse?: Matrix4x4): TerrainInfo;
+        getGridFromFaceIndex(_index: number): Vector2;
+        getFaceIndicesFromGrid(_grid: Vector2): number[];
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;

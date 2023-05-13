@@ -402,6 +402,7 @@ namespace FudgeCore {
 
     /**
      * Uses the standard array.map functionality to perform the given function on all components of this vector
+     * and return a new vector with the results
      */
     public map(_function: (value: number, index: number, array: Float32Array) => number): Vector3 {
       let copy: Vector3 = Recycler.get(Vector3);

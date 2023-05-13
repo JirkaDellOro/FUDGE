@@ -22,6 +22,8 @@ namespace FudgeCore {
     positionFace: Vector3;
     /** the index of the face the position is inside */
     index: number;
+    /** the grid coordinates of the quad the face belongs to */
+    grid: Vector2;
   }
 
   /**
@@ -127,8 +129,20 @@ namespace FudgeCore {
       terrainInfo.position = Vector3.TRANSFORMATION(point, _mtxWorld, true);
       terrainInfo.normal = Vector3.TRANSFORMATION(face.normal, Matrix4x4.TRANSPOSE(_mtxInverse), false);
       terrainInfo.distance = _position.y - terrainInfo.position.y;
-
+      terrainInfo.grid = this.getGridFromFaceIndex(index);
       return terrainInfo;
+    }
+
+    public getGridFromFaceIndex(_index: number): Vector2 {
+      let result: Vector2 = Recycler.get(Vector2);
+      let iQuad: number = Math.floor(_index / 2);
+      result.set(iQuad % this.resolution.y, Math.floor(iQuad / this.resolution.x));
+      return result;
+    }
+
+    public getFaceIndicesFromGrid(_grid: Vector2): number[] {
+      let iQuad: number = _grid.y * 2 * this.resolution.x + _grid.x * 2;
+      return [iQuad, iQuad + 1];
     }
 
     //#region Transfer
