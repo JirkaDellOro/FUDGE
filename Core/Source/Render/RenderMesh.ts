@@ -150,9 +150,8 @@ namespace FudgeCore {
         //All faces have their individual tangents, which leads to shading artifacts, which is accounted for here
         for (let vertex of this.mesh.vertices) {
           if (typeof vertex.referTo !== "undefined") {
-            if (vertex.uv.x == this.mesh.vertices[vertex.referTo].uv.x &&
-              vertex.uv.y == this.mesh.vertices[vertex.referTo].uv.y) {
-              //It would be ideal to compare all vertices first and average out the different tangents between the ones with the same position, UV-position and vertex-normal but this approach is taken for its lower computational impact
+            if (vertex.uv.equals(this.mesh.vertices[vertex.referTo].uv)) {
+              //TODO: It would be ideal to compare all vertices first and average out the different tangents between the ones with the same position, UV-position and vertex-normal but this approach is taken for its lower computational impact
               vertex.tangent = this.mesh.vertices[vertex.referTo].tangent;
               //This however leeds to minor artifacts along UV-seams
             }
