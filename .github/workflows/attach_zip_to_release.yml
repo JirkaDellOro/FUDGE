@@ -15,13 +15,13 @@ jobs:
           ref: development
 
       - name: Create Zip File
-        run: zip -r release.zip Core/Build/
+        run: zip -r fudge.zip Core/Build/
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: Release.zip
+          files: fudge.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
