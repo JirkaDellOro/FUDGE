@@ -19,12 +19,6 @@ jobs:
       - name: Install TypeScript
         run: npm install typescript@4.6.0-beta
 
-      - name: List contents of src physics
-        run: ls -R Core/Source/Physics
-
-      - name: List contents of Physics directory
-        run: ls -R Physics
-
       - name: Build
         run: npx tsc --project Core/Source/tsconfig.json # Compile TypeScript files
       
