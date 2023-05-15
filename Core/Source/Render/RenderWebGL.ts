@@ -346,9 +346,9 @@ namespace FudgeCore {
       let shader: ShaderInterface = cmpMaterial.material.getShader();
       if (drawParticles) shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
 
-      shader.useProgram();   
+      shader.useProgram();
       coat.useRenderData(shader, cmpMaterial);
-      
+
       let mtxMeshToView: Matrix4x4 = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
       let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
 
