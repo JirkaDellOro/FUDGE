@@ -314,6 +314,7 @@ namespace FudgeCore {
           mtxBindInverse.set(floatArray.subarray(iFloat, iFloat + span));
           skeleton.registerBone(this.#nodes[gltfSkeleton.joints[iBone]], mtxBindInverse);
         }
+        // skeleton.setDefaultPose(); // TODO: this destroys animation
         Project.register(skeleton);
         this.#skeletons[_iSkeleton] = skeleton;
       }

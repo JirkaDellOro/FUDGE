@@ -43,13 +43,13 @@ var SkeletonTest;
     }
     async function loadAnimatedArm() {
         // const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
-        const loader = await ƒ.GLTFLoader.LOAD("./arm_from_fbx.gltf");
+        // const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./arm_from_fbx.gltf");
         // const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./arm.gltf");
-        const arm = await loader.getNode("ArmModel");
+        // const arm: ƒ.Node = await loader.getNode("ArmModel");
+        const loader = await ƒ.GLTFLoader.LOAD("./unarmed_walk.gltf");
+        const arm = await loader.getNode("Armature");
         const anime = await loader.getAnimationByIndex(0);
         arm.addComponent(new ƒ.ComponentAnimator(anime));
-        // const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./unarmed_walk.gltf");
-        // const arm: ƒ.Node = await loader.getNode("Armature");
         console.log(loader);
         // const meshSerialization: ƒ.Serialization = ƒ.Serializer.serialize(arm.getComponent(ƒ.ComponentMesh).mesh);
         // console.log(meshSerialization);
