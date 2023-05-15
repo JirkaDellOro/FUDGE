@@ -1,0 +1,25 @@
+name: Create FUDGE Runtime
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: |
+          npm install
+          tsc --project Core/Source/tsconfig.json # Compile TypeScript files
+
+      - name: Create runtime zip
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-artifact
+          path: |
+            # List the files and directories that you want to include in the artifact
+            Core/Build/
