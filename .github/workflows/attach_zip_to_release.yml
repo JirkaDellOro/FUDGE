@@ -17,20 +17,12 @@ jobs:
       - name: Create Zip File
         run: zip -r fudge.zip Core/Build/
 
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: fudge.zip
+      - name: Upload Assets
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Upload Assets
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ github.event.release.upload_url }}
-      #     asset_path: ./release.zip
-      #     asset_name: release.zip
-      #     asset_content_type: application/zip       
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fudge.zip
+          asset_name: fudge.zip
+          asset_content_type: application/zip       
