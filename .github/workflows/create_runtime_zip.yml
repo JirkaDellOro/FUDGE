@@ -13,11 +13,13 @@ jobs:
         with:
           ref:
             "development"
+            
+      - name: Install TypeScript
+        run: npm install typescript@4.6.0-beta
 
       - name: Build
-        run: |
-          tsc --project Core/Source/tsconfig.json # Compile TypeScript files
-
+        run: npx tsc --project Core/Source/tsconfig.json # Compile TypeScript files
+      
       - name: Create runtime zip
         uses: actions/upload-artifact@v3
         with:
