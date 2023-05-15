@@ -56,5 +56,9 @@
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     "useDefineForClassFields": false
   },
+  "include": [
+    "./**/*",
+    "../../Physics/OimoPhysics.d.ts",
+  ],
   "exclude": ["./Shader/Shaders"]
 }
