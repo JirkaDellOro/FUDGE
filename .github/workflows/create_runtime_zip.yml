@@ -16,13 +16,12 @@ jobs:
 
       - name: Build
         run: |
-          npm install
           tsc --project Core/Source/tsconfig.json # Compile TypeScript files
 
       - name: Create runtime zip
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: build-artifact
+          name: fudge
           path: |
             # List the files and directories that you want to include in the artifact
             Core/Build/
