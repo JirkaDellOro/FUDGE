@@ -14,10 +14,16 @@ jobs:
         with:
           ref: development
 
-      - name: Create Zip File
+      - name: Install TypeScript
+        run: npm install typescript@4.6.0-beta
+  
+      - name: Compile TypeScript files
+        run: npx tsc --project Core/Source/tsconfig.json
+
+      - name: Create zip file
         run: zip -jr fudge.zip Core/Build/*
 
-      - name: Release
+      - name: Attach zip file to Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
