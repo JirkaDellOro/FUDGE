@@ -19,7 +19,10 @@ jobs:
         run: npm install -g typescript@4.6.0-beta
 
       - name: Install TypeDoc
-        run: npm install -g typedoc@0.22.4
+        run: |
+          npm install -g typedoc@0.22.4
+          npm install typedoc-plugin-merge-modules
+          typedoc --plugin typedoc-plugin-merge-modules
 
       - name: Compile code
         run: cmd /c CompileAll.bat
