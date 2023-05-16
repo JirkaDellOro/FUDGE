@@ -6,7 +6,7 @@ on:
       - published
 
 jobs:
-  build:
+  deploy:
     runs-on: windows-latest
     steps:
       - name: Checkout code
@@ -57,15 +57,8 @@ jobs:
           echo npm install > FUDGE_Runtime/Install.bat
           echo pause >> FUDGE_Runtime/Install.bat
       
-  deploy:
-    needs: build
-    runs-on: windows-latest
-    steps:
       - name: Create zip file
-        run: |
-          ls -l
-          powershell Compress-Archive -Path FUDGE_Runtime/* -DestinationPath fudge.zip
-        working-directory: ${{ github.workspace }}
+        run: powershell Compress-Archive -Path FUDGE_Runtime/* -DestinationPath fudge.zip
     
       - name: Attach zip file to release
         uses: softprops/action-gh-release@v1
