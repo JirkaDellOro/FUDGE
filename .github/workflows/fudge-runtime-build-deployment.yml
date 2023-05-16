@@ -16,10 +16,13 @@ jobs:
       
       # TODO: check if this is needed
       - name: Install TypeScript
-        run: npm install typescript@4.6.0-beta
-  
-      - name: Compile TypeScript files
-        run: npx tsc --project Core/Source/tsconfig.json
+        run: npm install -g typescript@4.6.0-beta
+
+      - name: Install TypeDoc
+        run: npm install -g typedoc@0.22
+
+      - name: Compile code
+        run: cmd /c CompileAll.bat
 
       - name: Create target file structure
         run: |
