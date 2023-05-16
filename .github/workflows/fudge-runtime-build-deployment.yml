@@ -62,7 +62,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Create zip file
-        run: powershell Compress-Archive -Path FUDGE_Runtime\* -DestinationPath ${{ github.workspace }}\fudge.zip
+        run: powershell Compress-Archive -Path "${{ github.workspace }}/FUDGE_Runtime/*" -DestinationPath fudge.zip
 
       - name: Attach zip file to release
         uses: softprops/action-gh-release@v1
