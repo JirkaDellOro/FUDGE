@@ -35,7 +35,7 @@ jobs:
           cp -R Editor/Html/* FUDGE_Runtime/Editor/Html
           cp -R Editor/Source/Template/* FUDGE_Runtime/Editor/Source/Template
           cp -R Editor/Themes/* FUDGE_Runtime/Editor/Themes
-          
+
       - name: Create and copy library
         run: |
           mkdir -p FUDGE_Runtime/Library/Aid
@@ -52,7 +52,7 @@ jobs:
           cp UserInterface/Build/* FUDGE_Runtime/Library/UserInterface
 
       - name: Create zip file
-        run: zip -r fudge.zip FUDGE_Runtime/*
+        run: powershell Compress-Archive -Path FUDGE_Runtime -DestinationPath fudge.zip
 
       - name: Attach zip file to Release
         uses: softprops/action-gh-release@v1
