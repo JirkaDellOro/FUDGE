@@ -11,10 +11,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          ref: development
       
-      # TODO: check if this is needed
       - name: Install TypeScript
         run: npm install -g typescript@4.6.0-beta
 
@@ -26,7 +23,7 @@ jobs:
       - name: Compile code
         run: cmd /c CompileAll.bat
 
-      - name: Create target file structure
+      - name: Bundle files
         run: |
           mkdir -p FUDGE_Runtime/Editor/Build
           mkdir -p FUDGE_Runtime/Editor/Electron
