@@ -1,0 +1,63 @@
+name: FUDGE runtime build and deployment
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: development
+      
+      # TODO: check if this is needed
+      - name: Install TypeScript
+        run: npm install typescript@4.6.0-beta
+  
+      - name: Compile TypeScript files
+        run: npx tsc --project Core/Source/tsconfig.json
+
+      - name: Create and copy editor
+        run: |
+          mkdir -p FUDGE_Runtime/Editor/Build
+          mkdir -p FUDGE_Runtime/Editor/Electron
+          mkdir -p FUDGE_Runtime/Editor/GoldenLayout
+          mkdir -p FUDGE_Runtime/Editor/Html
+          mkdir -p FUDGE_Runtime/Editor/Source/Template
+          mkdir -p FUDGE_Runtime/Editor/Themes
+          cp -R Editor/Build/* FUDGE_Runtime/Editor/Build
+          cp -R Editor/Electron/* FUDGE_Runtime/Editor/Electron
+          cp -R Editor/GoldenLayout/* FUDGE_Runtime/Editor/GoldenLayout
+          cp -R Editor/Html/* FUDGE_Runtime/Editor/Html
+          cp -R Editor/Source/Template/* FUDGE_Runtime/Editor/Source/Template
+          cp -R Editor/Themes/* FUDGE_Runtime/Editor/Themes
+          
+      - name: Create and copy library
+        run: |
+          mkdir -p FUDGE_Runtime/Library/Aid
+          mkdir -p FUDGE_Runtime/Library/Core
+          mkdir -p FUDGE_Runtime/Library/Net/Client
+          mkdir -p FUDGE_Runtime/Library/Net/Server
+          mkdir -p FUDGE_Runtime/Library/Physics
+          mkdir -p FUDGE_Runtime/Library/UserInterface
+          cp Aid/Build/* FUDGE_Runtime/Library/Aid
+          cp Core/Build/* FUDGE_Runtime/Library/Core
+          cp Net/Build/Client/* FUDGE_Runtime/Library/Net/Client
+          cp Net/Build/Server/* FUDGE_Runtime/Library/Net/Server
+          cp Physics/* FUDGE_Runtime/Library/Physics
+          cp UserInterface/Build/* FUDGE_Runtime/Library/UserInterface
+
+      - name: Create zip file
+        run: zip -r fudge.zip FUDGE_Runtime/*
+
+      - name: Attach zip file to Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: fudge.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
