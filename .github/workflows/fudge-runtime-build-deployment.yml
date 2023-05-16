@@ -6,7 +6,7 @@ on:
       - published
 
 jobs:
-  release:
+  build:
     runs-on: windows-latest
     steps:
       - name: Checkout code
@@ -21,7 +21,7 @@ jobs:
       - name: Compile TypeScript files
         run: npx tsc --project Core/Source/tsconfig.json
 
-      - name: Create and copy editor
+      - name: Create target file structure
         run: |
           mkdir -p FUDGE_Runtime/Editor/Build
           mkdir -p FUDGE_Runtime/Editor/Electron
@@ -36,8 +36,6 @@ jobs:
           cp -R Editor/Source/Template/* FUDGE_Runtime/Editor/Source/Template
           cp -R Editor/Themes/* FUDGE_Runtime/Editor/Themes
 
-      - name: Create and copy library
-        run: |
           mkdir -p FUDGE_Runtime/Library/Aid
           mkdir -p FUDGE_Runtime/Library/Core
           mkdir -p FUDGE_Runtime/Library/Net/Client
@@ -51,10 +49,22 @@ jobs:
           cp Physics/* FUDGE_Runtime/Library/Physics
           cp UserInterface/Build/* FUDGE_Runtime/Library/UserInterface
 
+          cp FUDGE.bat FUDGE_Runtime
+          cp package.json FUDGE_Runtime
+      
+      - name: Create Install.bat file
+        run: |
+          echo npm install > FUDGE_Runtime/Install.bat
+          echo pause >> FUDGE_Runtime/Install.bat
+      
+  deploy:
+    needs: build
+    runs-on: windows-latest
+    steps:
       - name: Create zip file
-        run: powershell Compress-Archive -Path FUDGE_Runtime -DestinationPath fudge.zip
+        run: powershell Compress-Archive -Path FUDGE_Runtime\* -DestinationPath fudge.zip
 
-      - name: Attach zip file to Release
+      - name: Attach zip file to release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
