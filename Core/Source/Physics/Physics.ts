@@ -1,4 +1,4 @@
-///<reference path="../../../Physics/OIMOPhysics.d.ts"/>
+///<reference types="../../../Physics/OIMOPhysics"/>
 
 namespace FudgeCore {
   /**
