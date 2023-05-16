@@ -22,22 +22,10 @@
   <script src="../GoldenLayout/golden-layout.js"></script>
   
   <!-- Fudge -->
-  <script type="text/javascript">
-    /** Adjust paths when loading from runtime environment */
-    function loadScriptFromRuntimeEnvironment(event) {
-      const path = event.target.src;
-      const script = document.createElement('script');
-      script.src = path
-        .replace("Build/", "")
-        .replace("../../", "../../Library/");;
-      document.head.appendChild(script);
-    }
-  </script>
-  
-  <script type="text/javascript" src="../../Physics/OimoPhysics.js" onerror="loadScriptFromRuntimeEnviroment(event)"></script>
-  <script type="text/javascript" src="../../Core/Build/FudgeCore.js" onerror="loadScriptFromRuntimeEnviroment(event)"></script>
-  <script type="text/javascript" src="../../Aid/Build/FudgeAid.js" onerror="loadScriptFromRuntimeEnviroment(event)"></script>
-  <script type="text/javascript" src="../../UserInterface/Build/FudgeUserInterface.js" onerror="loadScriptFromRuntimeEnviroment(event)"></script>
+  <script type="text/javascript" src="../../Physics/OimoPhysics.js"></script>
+  <script type="text/javascript" src="../../Core/Build/FudgeCore.js"></script>
+  <script type="text/javascript" src="../../Aid/Build/FudgeAid.js"></script>
+  <script type="text/javascript" src="../../UserInterface/Build/FudgeUserInterface.js"></script>
   
   
   <!-- Editor -->

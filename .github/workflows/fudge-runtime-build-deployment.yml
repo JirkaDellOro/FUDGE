@@ -52,14 +52,26 @@ jobs:
           cp FUDGE.bat FUDGE_Runtime
           cp package.json FUDGE_Runtime
       
+      - name: Replace source paths in fudge.html
+        run: |
+          $filePath = "FUDGE_Runtime/Editor/Html/Fudge.html"
+          $content = Get-Content -Path $filePath
+      
+          $content = $content -replace "../../Physics/OimoPhysics.js", "../../Library/Physics/OimoPhysics.js"
+          $content = $content -replace "../../Core/Build/FudgeCore.js", "../../Library/Core/FudgeCore.js"
+          $content = $content -replace "../../Aid/Build/FudgeAid.js", "../../Library/Aid/FudgeAid.js"
+          $content = $content -replace "../../UserInterface/Build/FudgeUserInterface.js", "../../Library/UserInterface/FudgeUserInterface.js"
+      
+          $content | Set-Content -Path $filePath
+
       - name: Create Install.bat file
         run: |
           echo "npm install" > FUDGE_Runtime/Install.bat
           echo "pause" >> FUDGE_Runtime/Install.bat
-      
+          
       - name: Create zip file
-        run: powershell Compress-Archive -Path FUDGE_Runtime/* -DestinationPath fudge.zip
-    
+        run: Compress-Archive -Path FUDGE_Runtime/* -DestinationPath fudge.zip
+
       - name: Attach zip file to release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
