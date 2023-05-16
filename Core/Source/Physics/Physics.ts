@@ -1,4 +1,4 @@
-///<reference types="../../../Physics/OIMOPhysics"/>
+/// <reference types="../../../Physics/OimoPhysics"/>
 
 namespace FudgeCore {
   /**
