@@ -1,4 +1,4 @@
-/// <reference types="../../../physics/oimophysics" />
+/// <reference path="../../Physics/OimoPhysics.d.ts" />
 declare namespace FudgeCore {
     /**
      * Base class for the different DebugTargets, mainly for technical purpose of inheritance
