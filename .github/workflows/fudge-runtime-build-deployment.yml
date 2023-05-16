@@ -19,7 +19,7 @@ jobs:
         run: npm install -g typescript@4.6.0-beta
 
       - name: Install TypeDoc
-        run: npm install -g typedoc@0.22
+        run: npm install -g typedoc@0.22.4
 
       - name: Compile code
         run: cmd /c CompileAll.bat
