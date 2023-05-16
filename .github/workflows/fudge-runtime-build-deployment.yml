@@ -6,7 +6,7 @@ on:
       - published
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: windows-latest
     steps:
       - name: Checkout code
@@ -54,8 +54,8 @@ jobs:
       
       - name: Create Install.bat file
         run: |
-          echo npm install > FUDGE_Runtime/Install.bat
-          echo pause >> FUDGE_Runtime/Install.bat
+          echo "npm install" > FUDGE_Runtime/Install.bat
+          echo "pause" >> FUDGE_Runtime/Install.bat
       
       - name: Create zip file
         run: powershell Compress-Archive -Path FUDGE_Runtime/* -DestinationPath fudge.zip
