@@ -123,7 +123,6 @@ namespace FudgeCore {
         this.adjustFrames();
       if (this.adjustingCamera)
         this.adjustCamera();
-
       if (_calculateTransforms)
         this.calculateTransforms();
 
