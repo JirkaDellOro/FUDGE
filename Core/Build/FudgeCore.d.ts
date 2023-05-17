@@ -1095,6 +1095,10 @@ declare namespace FudgeCore {
          */
         protected static setLightsInShader(_shader: ShaderInterface, _lights: MapLightTypeToLightList): void;
         /**
+         * Creates texture buffers to be used for PostFX
+         */
+        static initPostBuffers(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
+        /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
@@ -5395,6 +5399,8 @@ declare namespace FudgeCore {
     abstract class Render extends RenderWebGL {
         static rectClip: Rectangle;
         static pickBuffer: Int32Array;
+        static mistFBO: WebGLFramebuffer;
+        static mistTexture: WebGLTexture;
         static nodesPhysics: RecycableArray<Node>;
         static componentsPick: RecycableArray<ComponentPick>;
         static lights: MapLightTypeToLightList;
@@ -5505,6 +5511,7 @@ declare namespace FudgeCore {
         adjustingCamera: boolean;
         physicsDebugMode: PHYSICS_DEBUGMODE;
         componentsPick: RecycableArray<ComponentPick>;
+        private postEffects;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */

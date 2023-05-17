@@ -334,6 +334,71 @@ namespace FudgeCore {
     }
     //#endregion
 
+    //#region Post
+    /**
+     * Creates texture buffers to be used for PostFX
+     */
+    public static initPostBuffers(_mist: boolean = false, _ao: boolean = false, _bloom: boolean = false): void {
+      let tempSize: number = 256;
+      if (_mist) {
+        let framebuffer: WebGLFramebuffer; 
+        let texture:RenderTexture;
+        let depthBuffer: WebGLRenderbuffer;
+        let error = function (): void {
+          if(framebuffer) Render.crc3.deleteFramebuffer(framebuffer);
+          if (texture) Render.crc3.deleteTexture(texture);
+          if (depthBuffer) Render.crc3.deleteRenderbuffer(depthBuffer);
+          return null;
+        }
+
+        //Create FBO
+        framebuffer = RenderWebGL.crc3.createFramebuffer();
+        if (!framebuffer){
+          console.log("Failed to create FBO");
+          return error();
+        }
+
+        //Create Texture Object
+        texture = Render.crc3.createTexture();
+        if(!texture){
+          console.log("Failed to create Texture Oject");
+          return error();
+        }
+        Render.crc3.bindTexture(Render.crc3.TEXTURE_2D, texture);
+        Render.crc3.texImage2D(Render.crc3.TEXTURE_2D, 0, Render.crc3.RGBA, tempSize, tempSize, 0, Render.crc3.RGBA, Render.crc3.UNSIGNED_BYTE, null);
+        Render.crc3.texParameteri(Render.crc3.TEXTURE_2D, Render.crc3.TEXTURE_MIN_FILTER, Render.crc3.LINEAR);
+        Render.mistTexture = texture;
+
+        //Create renderbuffer 
+        depthBuffer = Render.crc3.createRenderbuffer();
+        if(!depthBuffer){
+          console.log("Failed to create render buffer object");
+          return error();
+        }
+        Render.crc3.bindRenderbuffer(Render.crc3.RENDERBUFFER, depthBuffer);
+        Render.crc3.renderbufferStorage(Render.crc3.RENDERBUFFER, Render.crc3.DEPTH_COMPONENT16, tempSize, tempSize);
+
+        //Attach texture and render buffer object to the FBO
+        Render.crc3.bindFramebuffer(Render.crc3.FRAMEBUFFER, framebuffer);
+        Render.crc3.framebufferTexture2D(Render.crc3.FRAMEBUFFER, Render.crc3.COLOR_ATTACHMENT0, Render.crc3.TEXTURE_2D, texture, 0);
+        Render.crc3.framebufferRenderbuffer(Render.crc3.FRAMEBUFFER, Render.crc3.DEPTH_ATTACHMENT, Render.crc3.RENDERBUFFER, depthBuffer);
+
+        //Check if FBO is configured correctly
+        let e: number = Render.crc3.checkFramebufferStatus(Render.crc3.FRAMEBUFFER);
+        if(Render.crc3.FRAMEBUFFER_COMPLETE !== e){
+          console.log("FBO is incomplete: " + e.toString());
+          return error();
+        }
+
+        //Unbind the buffer object
+        Render.crc3.bindFramebuffer(Render.crc3.FRAMEBUFFER, null);
+        Render.crc3.bindTexture(Render.crc3.TEXTURE_2D, null);
+        Render.crc3.bindRenderbuffer(Render.crc3.RENDERBUFFER, null);
+
+        Render.mistFBO = framebuffer;
+      }
+    }//#endregion
+
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
      */
@@ -346,9 +411,9 @@ namespace FudgeCore {
       let shader: ShaderInterface = cmpMaterial.material.getShader();
       if (drawParticles) shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
 
-      shader.useProgram();   
+      shader.useProgram();
       coat.useRenderData(shader, cmpMaterial);
-      
+
       let mtxMeshToView: Matrix4x4 = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
       let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
 

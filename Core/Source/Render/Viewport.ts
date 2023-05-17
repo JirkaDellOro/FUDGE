@@ -30,6 +30,8 @@ namespace FudgeCore {
 
     public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
 
+    private postEffects: boolean = true;
+
     #branch: Node = null; // The to render with all its descendants.
     #crc2: CanvasRenderingContext2D = null;
     #canvas: HTMLCanvasElement = null;
@@ -68,6 +70,10 @@ namespace FudgeCore {
 
       this.rectSource = Render.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
+
+      if (this.postEffects) {
+        Render.initPostBuffers();
+      }
 
       this.setBranch(_branch);
     }
@@ -170,7 +176,7 @@ namespace FudgeCore {
         let picks: Pick[] = Picker.pickCamera(cameraPicks, this.camera, this.pointClientToProjection(posClient));
         for (let pick of picks) {
           Reflect.set(_event, "pick", pick);
-          pick.node.dispatchEvent(_event); 
+          pick.node.dispatchEvent(_event);
         }
       }
 

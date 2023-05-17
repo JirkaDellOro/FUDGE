@@ -11,6 +11,10 @@ namespace FudgeCore {
   export abstract class Render extends RenderWebGL {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
     public static pickBuffer: Int32Array;
+
+    public static mistFBO: WebGLFramebuffer;
+    public static mistTexture: WebGLTexture;
+
     public static nodesPhysics: RecycableArray<Node> = new RecycableArray();
     public static componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
     public static lights: MapLightTypeToLightList = new Map();
