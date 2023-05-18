@@ -332,20 +332,23 @@ namespace FudgeCore {
         }
       }
     }
-    //#endregion
+    //#endregionF
 
     //#region Post
     /**
      * Creates texture buffers to be used for PostFX
      */
     public static initPostBuffers(_mist: boolean = false, _ao: boolean = false, _bloom: boolean = false): void {
-      let tempSize: number = 256;
+      this.initQuadVAO();
+
+      let tempSizeX: number = Render.crc3.canvas.width; //To be removed later; Probably dont need this... or rather: this should be based on the current Framing. Further it probably should get updated when Chaning the Framing
+      let tempSizeY: number = Render.crc3.canvas.height;
       if (_mist) {
-        let framebuffer: WebGLFramebuffer; 
-        let texture:RenderTexture;
+        let framebuffer: WebGLFramebuffer;
+        let texture: RenderTexture;
         let depthBuffer: WebGLRenderbuffer;
         let error = function (): void {
-          if(framebuffer) Render.crc3.deleteFramebuffer(framebuffer);
+          if (framebuffer) Render.crc3.deleteFramebuffer(framebuffer);
           if (texture) Render.crc3.deleteTexture(texture);
           if (depthBuffer) Render.crc3.deleteRenderbuffer(depthBuffer);
           return null;
@@ -353,39 +356,39 @@ namespace FudgeCore {
 
         //Create FBO
         framebuffer = RenderWebGL.crc3.createFramebuffer();
-        if (!framebuffer){
+        if (!framebuffer) {
           console.log("Failed to create FBO");
           return error();
         }
 
         //Create Texture Object
         texture = Render.crc3.createTexture();
-        if(!texture){
+        if (!texture) {
           console.log("Failed to create Texture Oject");
           return error();
         }
         Render.crc3.bindTexture(Render.crc3.TEXTURE_2D, texture);
-        Render.crc3.texImage2D(Render.crc3.TEXTURE_2D, 0, Render.crc3.RGBA, tempSize, tempSize, 0, Render.crc3.RGBA, Render.crc3.UNSIGNED_BYTE, null);
+        Render.crc3.texImage2D(Render.crc3.TEXTURE_2D, 0, Render.crc3.RGBA, tempSizeX, tempSizeY, 0, Render.crc3.RGBA, Render.crc3.UNSIGNED_BYTE, null);
         Render.crc3.texParameteri(Render.crc3.TEXTURE_2D, Render.crc3.TEXTURE_MIN_FILTER, Render.crc3.LINEAR);
         Render.mistTexture = texture;
 
         //Create renderbuffer 
         depthBuffer = Render.crc3.createRenderbuffer();
-        if(!depthBuffer){
+        if (!depthBuffer) {
           console.log("Failed to create render buffer object");
           return error();
         }
         Render.crc3.bindRenderbuffer(Render.crc3.RENDERBUFFER, depthBuffer);
-        Render.crc3.renderbufferStorage(Render.crc3.RENDERBUFFER, Render.crc3.DEPTH_COMPONENT16, tempSize, tempSize);
+        Render.crc3.renderbufferStorage(Render.crc3.RENDERBUFFER, Render.crc3.DEPTH_COMPONENT16, tempSizeX, tempSizeY);
 
         //Attach texture and render buffer object to the FBO
         Render.crc3.bindFramebuffer(Render.crc3.FRAMEBUFFER, framebuffer);
-        Render.crc3.framebufferTexture2D(Render.crc3.FRAMEBUFFER, Render.crc3.COLOR_ATTACHMENT0, Render.crc3.TEXTURE_2D, texture, 0);
+        Render.crc3.framebufferTexture2D(Render.crc3.FRAMEBUFFER, Render.crc3.COLOR_ATTACHMENT1, Render.crc3.TEXTURE_2D, texture, 0);
         Render.crc3.framebufferRenderbuffer(Render.crc3.FRAMEBUFFER, Render.crc3.DEPTH_ATTACHMENT, Render.crc3.RENDERBUFFER, depthBuffer);
 
         //Check if FBO is configured correctly
         let e: number = Render.crc3.checkFramebufferStatus(Render.crc3.FRAMEBUFFER);
-        if(Render.crc3.FRAMEBUFFER_COMPLETE !== e){
+        if (Render.crc3.FRAMEBUFFER_COMPLETE !== e) {
           console.log("FBO is incomplete: " + e.toString());
           return error();
         }
@@ -397,7 +400,19 @@ namespace FudgeCore {
 
         Render.mistFBO = framebuffer;
       }
-    }//#endregion
+    }
+
+    private static initQuadVAO() {
+      let tmpQuad: MeshQuad = new MeshQuad();
+      let cmpMesh: ComponentMesh = new ComponentMesh(tmpQuad);
+      let cmpMat: ComponentMaterial = new ComponentMaterial(new Material("screenShaderMaterial", ShaderScreen));
+      
+      Render.screenQuad = new Node("screenQuad");
+      Render.screenQuad.addComponent(cmpMesh);
+      Render.screenQuad.addComponent(cmpMat);
+    }
+
+    //#endregion
 
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
@@ -436,6 +451,33 @@ namespace FudgeCore {
       } else {
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       }
+    }
+
+    public static drawMist(_cmpCamera: ComponentCamera): void {
+      let cmpMesh: ComponentMesh = Render.screenQuad.getComponent(ComponentMesh);
+      let cmpMaterial: ComponentMaterial = Render.screenQuad.getComponent(ComponentMaterial);
+      let coat: Coat = cmpMaterial.material.coat;
+      let shader: ShaderInterface = ShaderScreen;
+
+      shader.useProgram();
+      coat.useRenderData(shader, cmpMaterial);
+
+      RenderWebGL.crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
+      RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, Render.mistTexture);
+      RenderWebGL.crc3.uniform1i(shader.uniforms["u_texture"], 0);
+
+      let mtxMeshToView: Matrix4x4 = this.calcMeshToView(Render.screenQuad, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
+      let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
+
+      RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+    }
+
+    public static drawAO(): void {
+
+    }
+
+    public static drawBloom(): void {
+
     }
 
     protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void {

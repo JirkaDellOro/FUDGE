@@ -1098,10 +1098,14 @@ declare namespace FudgeCore {
          * Creates texture buffers to be used for PostFX
          */
         static initPostBuffers(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
+        private static initQuadVAO;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
+        static drawMist(_cmpCamera: ComponentCamera): void;
+        static drawAO(): void;
+        static drawBloom(): void;
         protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
         private static calcMeshToView;
         private static getRenderBuffers;
@@ -5399,6 +5403,7 @@ declare namespace FudgeCore {
     abstract class Render extends RenderWebGL {
         static rectClip: Rectangle;
         static pickBuffer: Int32Array;
+        static screenQuad: Node;
         static mistFBO: WebGLFramebuffer;
         static mistTexture: WebGLTexture;
         static nodesPhysics: RecycableArray<Node>;
@@ -5422,6 +5427,9 @@ declare namespace FudgeCore {
         static draw(_cmpCamera: ComponentCamera): void;
         private static drawListAlpha;
         private static drawList;
+        static calcMist(_cmpCamera: ComponentCamera): void;
+        static calcAO(_cmpCamera: ComponentCamera): void;
+        static calcBloom(_cmpCamera: ComponentCamera): void;
         private static transformByPhysics;
     }
 }
@@ -5511,7 +5519,9 @@ declare namespace FudgeCore {
         adjustingCamera: boolean;
         physicsDebugMode: PHYSICS_DEBUGMODE;
         componentsPick: RecycableArray<ComponentPick>;
-        private postEffects;
+        private mist;
+        private ao;
+        private bloom;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
@@ -6603,6 +6613,15 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     abstract class ShaderPickTextured extends Shader {
         static define: string[];
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderScreen extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }

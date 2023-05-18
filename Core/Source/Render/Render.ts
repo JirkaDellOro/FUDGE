@@ -12,6 +12,7 @@ namespace FudgeCore {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
     public static pickBuffer: Int32Array;
 
+    public static screenQuad: Node;
     public static mistFBO: WebGLFramebuffer;
     public static mistTexture: WebGLTexture;
 
@@ -80,14 +81,14 @@ namespace FudgeCore {
 
       let cmpMesh: ComponentMesh = _branch.getComponent(ComponentMesh);
       let cmpMaterial: ComponentMaterial = _branch.getComponent(ComponentMaterial);
-      
+
       if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
         let mtxWorldMesh: Matrix4x4 = Matrix4x4.MULTIPLICATION(_branch.mtxWorld, cmpMesh.mtxPivot);
         cmpMesh.mtxWorld.set(mtxWorldMesh);
         Recycler.store(mtxWorldMesh); // TODO: examine, why recycling this causes meshes to be misplaced...
         let shader: ShaderInterface = cmpMaterial.material.getShader();
         let cmpParticleSystem: ComponentParticleSystem = _branch.getComponent(ComponentParticleSystem);
-        if (cmpParticleSystem && cmpParticleSystem.isActive && cmpParticleSystem.particleSystem != null) 
+        if (cmpParticleSystem && cmpParticleSystem.isActive && cmpParticleSystem.particleSystem != null)
           shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
         if (_shadersUsed.indexOf(shader) < 0)
           _shadersUsed.push(shader);
@@ -167,6 +168,7 @@ namespace FudgeCore {
       _cmpCamera.resetWorldToView();
       Render.drawList(_cmpCamera, this.nodesSimple);
       Render.drawListAlpha(_cmpCamera);
+      //TODO: Draw FBO on top of canvas
     }
 
     private static drawListAlpha(_cmpCamera: ComponentCamera): void {
@@ -185,6 +187,36 @@ namespace FudgeCore {
         Render.drawNode(node, _cmpCamera);
       }
     }
+    //#endregion
+
+    //#region PostFX
+    public static calcMist(_cmpCamera: ComponentCamera): void {
+      _cmpCamera.resetWorldToView();
+
+      Render.crc3.bindFramebuffer(Render.crc3.FRAMEBUFFER, Render.mistFBO);
+      Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+
+      Render.crc3.clearColor(0.2, 0.2, 0.4, 1.0);
+      Render.crc3.clear(Render.crc3.COLOR_BUFFER_BIT | Render.crc3.DEPTH_BUFFER_BIT);
+
+      Render.drawList(_cmpCamera, this.nodesSimple);
+      Render.drawListAlpha(_cmpCamera);
+
+      //Reset to main color buffer
+      Render.crc3.bindFramebuffer(Render.crc3.FRAMEBUFFER, null);
+      Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+    }
+
+    public static calcAO(_cmpCamera: ComponentCamera): void {
+      
+    }
+    
+    public static calcBloom(_cmpCamera: ComponentCamera): void {
+
+    }
+
+
+    //#endregion
 
     //#region Physics
     private static transformByPhysics(_node: Node, _cmpRigidbody: ComponentRigidbody): void {

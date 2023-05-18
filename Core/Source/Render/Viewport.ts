@@ -30,7 +30,9 @@ namespace FudgeCore {
 
     public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
 
-    private postEffects: boolean = true;
+    private mist: boolean = true;
+    private ao: boolean = false;
+    private bloom: boolean = false;
 
     #branch: Node = null; // The to render with all its descendants.
     #crc2: CanvasRenderingContext2D = null;
@@ -71,7 +73,7 @@ namespace FudgeCore {
       this.rectSource = Render.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
 
-      if (this.postEffects) {
+      if (this.mist) {
         Render.initPostBuffers();
       }
 
@@ -126,13 +128,31 @@ namespace FudgeCore {
       if (_calculateTransforms)
         this.calculateTransforms();
 
-      Render.clear(this.camera.clrBackground);
+      Render.setDepthTest(true);
+      if (this.ao) {
+        Render.calcMist(this.camera);
+        Render.calcAO(this.camera);
+      } else if (this.mist) {
+        Render.calcMist(this.camera);
+      }
 
+      Render.clear(this.camera.clrBackground);
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
         Physics.draw(this.camera, this.physicsDebugMode);
       }
+
+      Render.setDepthTest(false);
+      if (this.mist)
+        Render.drawMist(this.camera);
+      if (this.ao)
+        Render.drawAO();
+      if (this.bloom) {
+        Render.calcBloom(this.camera);
+        Render.drawBloom();
+      }
+      Render.setDepthTest(true);
 
       this.#crc2.imageSmoothingEnabled = false;
       this.#crc2.drawImage(
