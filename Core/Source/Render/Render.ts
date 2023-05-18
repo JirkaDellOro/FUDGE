@@ -191,16 +191,17 @@ namespace FudgeCore {
 
     //#region PostFX
     public static calcMist(_cmpCamera: ComponentCamera): void {
-      _cmpCamera.resetWorldToView();
-
+      
       Render.crc3.bindFramebuffer(Render.crc3.FRAMEBUFFER, Render.mistFBO);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
-
+      
       Render.crc3.clearColor(0.2, 0.2, 0.4, 1.0);
       Render.crc3.clear(Render.crc3.COLOR_BUFFER_BIT | Render.crc3.DEPTH_BUFFER_BIT);
+      
+      _cmpCamera.resetWorldToView();
 
-      Render.drawList(_cmpCamera, this.nodesSimple);
-      Render.drawListAlpha(_cmpCamera);
+      //Render.drawList(_cmpCamera, this.nodesSimple);
+      //Render.drawListAlpha(_cmpCamera);
 
       //Reset to main color buffer
       Render.crc3.bindFramebuffer(Render.crc3.FRAMEBUFFER, null);

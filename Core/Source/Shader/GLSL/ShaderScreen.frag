@@ -12,5 +12,5 @@ uniform sampler2D u_texture;
 out vec4 vctFrag;
 
 void main() {
-    vctFrag = 0.5 * texture(u_texture, v_vctTexture);
+    vctFrag = texture(u_texture, v_vctTexture);
 }

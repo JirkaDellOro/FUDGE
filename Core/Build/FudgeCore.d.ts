@@ -1098,7 +1098,7 @@ declare namespace FudgeCore {
          * Creates texture buffers to be used for PostFX
          */
         static initPostBuffers(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
-        private static initQuadVAO;
+        private static initScreenQuad;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */

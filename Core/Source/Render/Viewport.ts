@@ -73,8 +73,8 @@ namespace FudgeCore {
       this.rectSource = Render.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
 
-      if (this.mist) {
-        Render.initPostBuffers();
+      if (this.mist || this.ao || this.bloom) {
+        Render.initPostBuffers(this.mist, this.ao, this.bloom);
       }
 
       this.setBranch(_branch);

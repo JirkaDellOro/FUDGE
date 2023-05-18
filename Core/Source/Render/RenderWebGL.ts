@@ -339,10 +339,11 @@ namespace FudgeCore {
      * Creates texture buffers to be used for PostFX
      */
     public static initPostBuffers(_mist: boolean = false, _ao: boolean = false, _bloom: boolean = false): void {
-      this.initQuadVAO();
+      this.initScreenQuad();
 
-      let tempSizeX: number = Render.crc3.canvas.width; //To be removed later; Probably dont need this... or rather: this should be based on the current Framing. Further it probably should get updated when Chaning the Framing
+      let tempSizeX: number = Render.crc3.canvas.width; //this should be based on the current Framing. Further it probably should get updated when Chaning the Framing
       let tempSizeY: number = Render.crc3.canvas.height;
+
       if (_mist) {
         let framebuffer: WebGLFramebuffer;
         let texture: RenderTexture;
@@ -402,7 +403,7 @@ namespace FudgeCore {
       }
     }
 
-    private static initQuadVAO() {
+    private static initScreenQuad() {
       let tmpQuad: MeshQuad = new MeshQuad();
       let cmpMesh: ComponentMesh = new ComponentMesh(tmpQuad);
       let cmpMat: ComponentMaterial = new ComponentMaterial(new Material("screenShaderMaterial", ShaderScreen));
