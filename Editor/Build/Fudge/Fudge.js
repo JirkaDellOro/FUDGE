@@ -4892,7 +4892,9 @@ var Fudge;
         table;
         constructor(_container, _state) {
             super(_container, _state);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.OPEN, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
         }
         listScripts() {
@@ -4927,7 +4929,8 @@ var Fudge;
         //#endregion
         hndEvent = (_event) => {
             switch (_event.type) {
-                case Fudge.EVENT_EDITOR.SELECT:
+                case Fudge.EVENT_EDITOR.UPDATE:
+                case Fudge.EVENT_EDITOR.OPEN:
                     if (!_event.detail.data)
                         this.listScripts();
                     break;
