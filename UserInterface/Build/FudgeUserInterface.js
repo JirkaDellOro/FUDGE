@@ -1154,7 +1154,8 @@ var FudgeUserInterface;
             }
         };
         hndKey = (_event) => {
-            _event.stopPropagation();
+            if (_event.code != ƒ.KEYBOARD_CODE.DELETE)
+                _event.stopPropagation();
             // let target: HTMLElement = <HTMLElement>_event.target;
             switch (_event.code) {
                 case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
@@ -1226,7 +1227,7 @@ var FudgeUserInterface;
             _child.addEventListener("dragstart" /* DRAG_START */, this.hndDragStart);
             _child.addEventListener("drop" /* DROP */, this.hndDrop);
             _child.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
-            _child.addEventListener("keydown" /* KEY_DOWN */, this.hndkey, true);
+            _child.addEventListener("keydown" /* KEY_DOWN */, this.hndKeySpecial);
             _child.tabIndex = 0;
         }
         rearrange(_focus = undefined) {
@@ -1282,10 +1283,10 @@ var FudgeUserInterface;
             this.addEventListeners(drag);
             drag.focus();
         };
-        hndkey = (_event) => {
+        hndKeySpecial = (_event) => {
             let item = _event.currentTarget;
             // only work on items of list, not their children
-            if (_event.target != item)
+            if (_event.target != item && _event.code != ƒ.KEYBOARD_CODE.DELETE)
                 return;
             let focus = parseInt(item.getAttribute("label"));
             let sibling = item;

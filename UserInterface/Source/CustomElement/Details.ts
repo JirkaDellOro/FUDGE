@@ -86,7 +86,8 @@ namespace FudgeUserInterface {
     }
 
     private hndKey = (_event: KeyboardEvent): void => {
-      _event.stopPropagation();
+      if (_event.code != ƒ.KEYBOARD_CODE.DELETE)
+        _event.stopPropagation();
       // let target: HTMLElement = <HTMLElement>_event.target;
 
       switch (_event.code) {

@@ -349,7 +349,7 @@ declare namespace FudgeUserInterface {
         private hndDragStart;
         private hndDragOver;
         private hndDrop;
-        private hndkey;
+        private hndKeySpecial;
     }
 }
 declare namespace FudgeUserInterface {

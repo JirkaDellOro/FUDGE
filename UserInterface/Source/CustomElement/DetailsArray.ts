@@ -28,7 +28,7 @@ namespace FudgeUserInterface {
       _child.addEventListener(EVENT.DRAG_START, this.hndDragStart);
       _child.addEventListener(EVENT.DROP, this.hndDrop);
       _child.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
-      _child.addEventListener(EVENT.KEY_DOWN, this.hndkey, true);
+      _child.addEventListener(EVENT.KEY_DOWN, this.hndKeySpecial);
       _child.tabIndex = 0;
     }
 
@@ -44,7 +44,7 @@ namespace FudgeUserInterface {
       for (let child of this.content.children as HTMLCollectionOf<CustomElement>) {
         child.setAttribute("label", count.toString());
         child.setAttribute("key", count.toString());
-        if (child.setLabel) 
+        if (child.setLabel)
           child.setLabel(count.toString());
         console.log(child.tabIndex);
         count++;
@@ -94,11 +94,11 @@ namespace FudgeUserInterface {
       drag.focus();
     }
 
-    private hndkey = (_event: KeyboardEvent): void => {
+    private hndKeySpecial = (_event: KeyboardEvent): void => {
       let item: HTMLElement = <HTMLElement>_event.currentTarget;
 
       // only work on items of list, not their children
-      if ((<HTMLElement>_event.target) != item)
+      if ((<HTMLElement>_event.target) != item && _event.code != ƒ.KEYBOARD_CODE.DELETE)
         return;
 
       let focus: number = parseInt(item.getAttribute("label"));
