@@ -1089,6 +1089,7 @@ var FudgeUserInterface;
             super();
             // TODO: check if this should be removed after changing animation structure to look more like a mutator
             this.setAttribute("key", _legend);
+            this.setAttribute("label", _legend);
             this.setAttribute("type", _type);
             this.open = true;
             let lblSummary = document.createElement("summary");
@@ -1239,7 +1240,8 @@ var FudgeUserInterface;
             for (let child of this.content.children) {
                 child.setAttribute("label", count.toString());
                 child.setAttribute("key", count.toString());
-                child.setLabel(count.toString());
+                if (child.setLabel)
+                    child.setLabel(count.toString());
                 console.log(child.tabIndex);
                 count++;
             }

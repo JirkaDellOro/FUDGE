@@ -3758,7 +3758,7 @@ var Fudge;
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent, true);
         }
         getDragDropSources() {
-            return [this.drag];
+            return this.drag ? [this.drag] : [];
         }
         //#region  ContextMenu
         getContextMenu(_callback) {

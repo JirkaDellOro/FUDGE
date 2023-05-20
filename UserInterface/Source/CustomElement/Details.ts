@@ -8,6 +8,7 @@ namespace FudgeUserInterface {
       super();
       // TODO: check if this should be removed after changing animation structure to look more like a mutator
       this.setAttribute("key", _legend);
+      this.setAttribute("label", _legend);
       this.setAttribute("type", _type);
       this.open = true;
       let lblSummary: HTMLElement = document.createElement("summary");

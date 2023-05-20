@@ -44,7 +44,8 @@ namespace FudgeUserInterface {
       for (let child of this.content.children as HTMLCollectionOf<CustomElement>) {
         child.setAttribute("label", count.toString());
         child.setAttribute("key", count.toString());
-        child.setLabel(count.toString());
+        if (child.setLabel) 
+          child.setLabel(count.toString());
         console.log(child.tabIndex);
         count++;
       }
