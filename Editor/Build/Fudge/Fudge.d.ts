@@ -313,6 +313,7 @@ declare namespace Fudge {
     class ControllerDetail extends ƒUi.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
         protected mutateOnInput: (_event: Event) => Promise<void>;
+        private hndInsert;
         private hndKey;
         private hndDragOver;
         private hndDrop;

@@ -1154,14 +1154,20 @@ var FudgeUserInterface;
             }
         };
         hndKey = (_event) => {
-            if (_event.code != ƒ.KEYBOARD_CODE.DELETE)
-                _event.stopPropagation();
+            let passEvent = false;
             // let target: HTMLElement = <HTMLElement>_event.target;
             switch (_event.code) {
+                case ƒ.KEYBOARD_CODE.INSERT:
+                    console.log("INSERT at Details");
+                    this.dispatchEvent(new CustomEvent("insert" /* INSERT */, { bubbles: true, detail: this }));
+                    break;
+                case ƒ.KEYBOARD_CODE.DELETE:
+                    passEvent = true;
+                    break;
                 case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
                     if (!this.isExpanded) {
                         this.expand(true);
-                        return;
+                        break;
                     }
                 case ƒ.KEYBOARD_CODE.ARROW_DOWN:
                     let next = this;
@@ -1180,7 +1186,7 @@ var FudgeUserInterface;
                 case ƒ.KEYBOARD_CODE.ARROW_LEFT:
                     if (this.isExpanded) {
                         this.expand(false);
-                        return;
+                        break;
                     }
                 case ƒ.KEYBOARD_CODE.ARROW_UP:
                     let previous = this;
@@ -1196,6 +1202,8 @@ var FudgeUserInterface;
                         this.parentElement.dispatchEvent(new KeyboardEvent("focusSet" /* FOCUS_SET */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                     break;
             }
+            if (!passEvent)
+                _event.stopPropagation();
         };
     }
     FudgeUserInterface.Details = Details;
@@ -1228,6 +1236,7 @@ var FudgeUserInterface;
             _child.addEventListener("drop" /* DROP */, this.hndDrop);
             _child.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             _child.addEventListener("keydown" /* KEY_DOWN */, this.hndKeySpecial);
+            _child.addEventListener("insert" /* INSERT */, this.hndInsert);
             _child.tabIndex = 0;
         }
         rearrange(_focus = undefined) {
@@ -1252,7 +1261,8 @@ var FudgeUserInterface;
             if (_focus == undefined)
                 return;
             _focus = Math.max(0, Math.min(_focus, this.content.children.length - 1));
-            this.content.children[_focus].focus();
+            let child = this.content.children[_focus];
+            child?.focus();
         }
         hndDragStart = (_event) => {
             // _event.preventDefault; 
@@ -1283,6 +1293,9 @@ var FudgeUserInterface;
             this.addEventListeners(drag);
             drag.focus();
         };
+        hndInsert = (_event) => {
+            console.log("hndInsert");
+        };
         hndKeySpecial = (_event) => {
             let item = _event.currentTarget;
             // only work on items of list, not their children
@@ -1297,6 +1310,10 @@ var FudgeUserInterface;
                     item.parentNode.removeChild(item);
                     this.rearrange(focus);
                     break;
+                // case ƒ.KEYBOARD_CODE.INSERT:
+                //   passEvent = true;
+                //   console.log("INSERT at DetailsArray");
+                //   break;
                 case ƒ.KEYBOARD_CODE.ARROW_UP:
                     if (!_event.altKey) {
                         this.setFocus(--focus);

@@ -36,6 +36,7 @@ namespace Fudge {
       this.domElement.addEventListener(ƒUi.EVENT.DRAG_OVER, this.hndDragOver);
       this.domElement.addEventListener(ƒUi.EVENT.DROP, this.hndDrop);
       this.domElement.addEventListener(ƒUi.EVENT.KEY_DOWN, this.hndKey);
+      this.domElement.addEventListener(ƒUi.EVENT.INSERT, this.hndInsert);
     }
 
     protected mutateOnInput = async (_event: Event) => {
@@ -60,6 +61,14 @@ namespace Fudge {
     }
     //#endregion
 
+    private hndInsert = (_event: CustomEvent): void => {
+      console.log("INSERT at ControllerDetail");
+      console.log(_event.detail);
+      let mutable: ƒ.Mutable = this.mutable[_event.detail.getAttribute("key")];
+      console.log(mutable.type);
+      if (mutable instanceof ƒ.MutableArray)
+        mutable.push(new mutable.type());
+    }
     private hndKey = (_event: KeyboardEvent): void => {
       _event.stopPropagation();
       switch (_event.code) {

@@ -29,6 +29,7 @@ namespace FudgeUserInterface {
       _child.addEventListener(EVENT.DROP, this.hndDrop);
       _child.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
       _child.addEventListener(EVENT.KEY_DOWN, this.hndKeySpecial);
+      _child.addEventListener(EVENT.INSERT, this.hndInsert);
       _child.tabIndex = 0;
     }
 
@@ -57,7 +58,8 @@ namespace FudgeUserInterface {
       if (_focus == undefined)
         return;
       _focus = Math.max(0, Math.min(_focus, this.content.children.length - 1));
-      (<HTMLElement>this.content.children[_focus]).focus();
+      let child: HTMLElement = <HTMLElement>this.content.children[_focus];
+      child?.focus();
     }
 
     private hndDragStart = (_event: DragEvent): void => {
@@ -94,6 +96,11 @@ namespace FudgeUserInterface {
       drag.focus();
     }
 
+
+    private hndInsert = (_event: Event): void => {
+      console.log("hndInsert");
+    }
+
     private hndKeySpecial = (_event: KeyboardEvent): void => {
       let item: HTMLElement = <HTMLElement>_event.currentTarget;
 
@@ -111,6 +118,10 @@ namespace FudgeUserInterface {
           item.parentNode.removeChild(item);
           this.rearrange(focus);
           break;
+        // case ƒ.KEYBOARD_CODE.INSERT:
+        //   passEvent = true;
+        //   console.log("INSERT at DetailsArray");
+        //   break;
         case ƒ.KEYBOARD_CODE.ARROW_UP:
           if (!_event.altKey) {
             this.setFocus(--focus);

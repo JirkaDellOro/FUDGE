@@ -349,6 +349,7 @@ declare namespace FudgeUserInterface {
         private hndDragStart;
         private hndDragOver;
         private hndDrop;
+        private hndInsert;
         private hndKeySpecial;
     }
 }
@@ -944,6 +945,7 @@ declare namespace FudgeUserInterface {
         INPUT = "input",
         REARRANGE_ARRAY = "rearrangeArray",
         TOGGLE = "toggle",
-        POINTER_MOVE = "pointermove"
+        POINTER_MOVE = "pointermove",
+        INSERT = "insert"
     }
 }

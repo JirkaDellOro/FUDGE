@@ -24,8 +24,6 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT.FOCUS_PREVIOUS, this.hndFocus);
       this.addEventListener(EVENT.FOCUS_SET, this.hndFocus);
       this.addEventListener(EVENT.TOGGLE, this.hndToggle);
-
-
     }
 
 
@@ -86,15 +84,21 @@ namespace FudgeUserInterface {
     }
 
     private hndKey = (_event: KeyboardEvent): void => {
-      if (_event.code != ƒ.KEYBOARD_CODE.DELETE)
-        _event.stopPropagation();
+      let passEvent: boolean = false;
       // let target: HTMLElement = <HTMLElement>_event.target;
 
       switch (_event.code) {
+        case ƒ.KEYBOARD_CODE.INSERT:
+          console.log("INSERT at Details");
+          this.dispatchEvent(new CustomEvent(EVENT.INSERT, { bubbles: true, detail: this }));
+          break;
+        case ƒ.KEYBOARD_CODE.DELETE:
+          passEvent = true;
+          break;
         case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
           if (!this.isExpanded) {
             this.expand(true);
-            return;
+            break;
           }
         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
           let next: HTMLElement = this;
@@ -114,7 +118,7 @@ namespace FudgeUserInterface {
         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
           if (this.isExpanded) {
             this.expand(false);
-            return;
+            break;
           }
         case ƒ.KEYBOARD_CODE.ARROW_UP:
           let previous: HTMLElement = this;
@@ -131,6 +135,9 @@ namespace FudgeUserInterface {
             this.parentElement.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_SET, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
           break;
       }
+
+      if (!passEvent)
+        _event.stopPropagation();
     }
   }
   // TODO: use CustomElement.register?
