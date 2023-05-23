@@ -1350,6 +1350,7 @@ var Fudge;
             this.domElement.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             this.domElement.addEventListener("drop" /* DROP */, this.hndDrop);
             this.domElement.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
+            this.domElement.addEventListener("insert" /* INSERT */, this.hndInsert);
         }
         mutateOnInput = async (_event) => {
             // TODO: move this to Ui.Controller as a general optimization to only mutate what has been changed...!
@@ -1371,6 +1372,14 @@ var Fudge;
             };
         };
         //#endregion
+        hndInsert = (_event) => {
+            console.log("INSERT at ControllerDetail");
+            console.log(_event.detail);
+            let mutable = this.mutable[_event.detail.getAttribute("key")];
+            console.log(mutable.type);
+            if (mutable instanceof ƒ.MutableArray)
+                mutable.push(new mutable.type());
+        };
         hndKey = (_event) => {
             _event.stopPropagation();
             switch (_event.code) {
@@ -3758,7 +3767,7 @@ var Fudge;
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent, true);
         }
         getDragDropSources() {
-            return [this.drag];
+            return this.drag ? [this.drag] : [];
         }
         //#region  ContextMenu
         getContextMenu(_callback) {
@@ -4892,7 +4901,9 @@ var Fudge;
         table;
         constructor(_container, _state) {
             super(_container, _state);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.OPEN, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
         }
         listScripts() {
@@ -4927,7 +4938,8 @@ var Fudge;
         //#endregion
         hndEvent = (_event) => {
             switch (_event.type) {
-                case Fudge.EVENT_EDITOR.SELECT:
+                case Fudge.EVENT_EDITOR.UPDATE:
+                case Fudge.EVENT_EDITOR.OPEN:
                     if (!_event.detail.data)
                         this.listScripts();
                     break;

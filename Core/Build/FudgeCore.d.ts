@@ -5606,6 +5606,9 @@ declare namespace FudgeCore {
      * @author Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class MutableArray<T extends Mutable> extends Array<T> {
+        #private;
+        constructor(_type: new () => T, ..._args: T[]);
+        get type(): new () => T;
         rearrange(_sequence: number[]): void;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         getMutator(): Mutator;

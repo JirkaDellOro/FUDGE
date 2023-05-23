@@ -43,7 +43,7 @@ namespace Fudge {
     }
 
     public getDragDropSources(): ƒ.ComponentCamera[] {
-      return [this.drag];
+      return this.drag ? [this.drag] : [];
     }
 
     //#region  ContextMenu
