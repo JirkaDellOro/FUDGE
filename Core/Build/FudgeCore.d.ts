@@ -2904,6 +2904,17 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * A {@link Coat} providing a texture and additional data for texturing
+     */
+    class CoatWebGlTextured extends CoatColored {
+        texture: Texture;
+        constructor(_color?: Color, _texture?: Texture);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
      */
     class Color extends Mutable implements Serializable {

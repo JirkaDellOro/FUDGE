@@ -7,7 +7,7 @@ namespace FudgeCore {
         "CAMERA"
       ];
   
-      public static getCoat(): typeof Coat { return CoatTextured; }
+      public static getCoat(): typeof Coat { return CoatWebGlTextured; }
 
       public static getVertexShaderSource(): string {
           return this.insertDefines(shaderSources["ShaderScreen.vert"], this.define);

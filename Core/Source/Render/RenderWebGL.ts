@@ -464,7 +464,7 @@ namespace FudgeCore {
       coat.useRenderData(shader, cmpMaterial);
 
       RenderWebGL.crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
-      RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, Render.mistTexture);
+      //RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, Render.mistTexture);
       RenderWebGL.crc3.uniform1i(shader.uniforms["u_texture"], 0);
 
       let mtxMeshToView: Matrix4x4 = this.calcMeshToView(Render.screenQuad, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
