@@ -1,7 +1,7 @@
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
-///<reference path="Project.ts"/>
+///<reference path="Definition.ts"/>
 
 namespace Fudge {
   import ƒ = FudgeCore;
@@ -148,16 +148,24 @@ namespace Fudge {
     //#region Page-Events from DOM
     private static setupPageListeners(): void {
       document.addEventListener(EVENT_EDITOR.SELECT, Page.hndEvent);
-      document.addEventListener(ƒui.EVENT.MUTATE, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.MODIFY, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.UPDATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.CLOSE, Page.hndEvent);
-      document.addEventListener(EVENT_EDITOR.ANIMATE, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.UPDATE, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.CREATE, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.TRANSFORM, Page.hndEvent);
       document.addEventListener("keyup", Page.hndKey);
     }
 
-    /** Send custom copies of the given event to the views */
-    private static broadcastEvent(_event: EditorEvent): void {
-      for (let panel of Page.panels)
-        panel.dispatch(<EVENT_EDITOR>_event.type, { detail: _event.detail });
+    /** Send custom copies of the given event to the panels */
+    private static broadcast(_event: EditorEvent): void {
+      let detail: EventDetail = _event.detail;
+      let sender: Panel | Page = detail.sender;
+      detail.sender = Page;
+      for (let panel of Page.panels) {
+        if (panel != sender) // don't send back to original sender
+          panel.dispatch(<EVENT_EDITOR>_event.type, { detail: detail });
+      }
     }
 
     private static hndKey = (_event: KeyboardEvent): void => {
@@ -186,7 +194,7 @@ namespace Fudge {
           console.log("Panels", Page.panels);
           break;
         default:
-          Page.broadcastEvent(_event);
+          Page.broadcast(_event);
           break;
       }
     }
@@ -249,13 +257,13 @@ namespace Fudge {
       });
 
       ipcRenderer.on(MENU.PANEL_ANIMATION_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        Page.add(PanelAnimation, null);  
+        Page.add(PanelAnimation, null);
         // let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
         // PanelManager.instance.addPanel(panel);
       });
 
       ipcRenderer.on(MENU.PANEL_PARTICLE_SYSTEM_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        Page.add(PanelParticleSystem, null);  
+        Page.add(PanelParticleSystem, null);
         // let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
         // PanelManager.instance.addPanel(panel);
       });

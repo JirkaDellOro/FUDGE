@@ -29,13 +29,14 @@ namespace Fudge {
     TextureOnMeshRelief: { fromViews: [ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
   };
 
-  export class ControllerComponent extends ƒUi.Controller {
+  export class ControllerDetail extends ƒUi.Controller {
     public constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
       super(_mutable, _domElement);
       this.domElement.addEventListener(ƒUi.EVENT.INPUT, this.mutateOnInput, true); // this should be obsolete
       this.domElement.addEventListener(ƒUi.EVENT.DRAG_OVER, this.hndDragOver);
       this.domElement.addEventListener(ƒUi.EVENT.DROP, this.hndDrop);
       this.domElement.addEventListener(ƒUi.EVENT.KEY_DOWN, this.hndKey);
+      this.domElement.addEventListener(ƒUi.EVENT.INSERT, this.hndInsert);
     }
 
     protected mutateOnInput = async (_event: Event) => {
@@ -60,6 +61,14 @@ namespace Fudge {
     }
     //#endregion
 
+    private hndInsert = (_event: CustomEvent): void => {
+      console.log("INSERT at ControllerDetail");
+      console.log(_event.detail);
+      let mutable: ƒ.Mutable = this.mutable[_event.detail.getAttribute("key")];
+      console.log(mutable.type);
+      if (mutable instanceof ƒ.MutableArray)
+        mutable.push(new mutable.type());
+    }
     private hndKey = (_event: KeyboardEvent): void => {
       _event.stopPropagation();
       switch (_event.code) {
@@ -97,7 +106,7 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator)) return;
       // ParticleSystem of ComponentParticleSystem
       if (this.filterDragDrop(_event, filter.ParticleSystemOnComponentParticleSystem)) return;
-      
+
 
       function checkMimeType(_mime: MIME): (_sources: Object[]) => boolean {
         return (_sources: Object[]): boolean => {
@@ -139,6 +148,7 @@ namespace Fudge {
       };
       let setSpriteTexture: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
         this.mutable["texture"] = _sources[0];
+        this.mutable.mutate({}); // force recreation using new texture
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };
@@ -152,7 +162,8 @@ namespace Fudge {
       };
       let setAnimation: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
         this.mutable["animation"] = _sources[0];
-        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+        // this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+        this.domElement.dispatchEvent(new CustomEvent(EVENT_EDITOR.MODIFY, { bubbles: true, detail: this }));
         return true;
       };
       let setParticleSystem: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {

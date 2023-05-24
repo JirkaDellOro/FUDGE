@@ -38,7 +38,7 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
 
-      this.setTitle("Animation | " );
+      this.setTitle("Animation | ");
     }
 
     public getState(): { [key: string]: string } {
@@ -48,10 +48,15 @@ namespace Fudge {
 
     private hndEvent = async (_event: EditorEvent): Promise<void> => {
       switch (_event.type) {
+        case EVENT_EDITOR.SELECT:
+          let name: string = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation?.name;
+          if (name)
+            this.setTitle("Animation | " + name);
 
+          break;
       }
 
-      this.broadcastEvent(_event);
+      this.broadcast(_event);
       _event.stopPropagation();
     }
   }

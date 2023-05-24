@@ -4,8 +4,9 @@
 namespace FudgeCore {
   /**
    * Holds information about continous points in time their accompanying values as well as their slopes. 
-   * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
-   * Saved inside an {@link AnimationSequence}.
+   * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. 
+   * The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
+   * If the property constant is true, the value does not change and wil not be interpolated between this and the next key in a sequence
    * @author Lukas Scheuerle, HFU, 2019
    */
   export class AnimationKey extends Mutable implements Serializable {

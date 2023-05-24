@@ -1,0 +1,83 @@
+name: FUDGE runtime build and deployment
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Install TypeScript
+        run: npm install -g typescript@4.6.0-beta
+
+      - name: Install TypeDoc
+        run: |
+          npm install -g typedoc@0.22.4
+          npm install -g typedoc-plugin-merge-modules
+
+      - name: Compile code
+        run: cmd /c CompileAll.bat
+
+      - name: Bundle files
+        run: |
+          mkdir -p FUDGE_Runtime/Editor/Build
+          mkdir -p FUDGE_Runtime/Editor/Electron
+          mkdir -p FUDGE_Runtime/Editor/GoldenLayout
+          mkdir -p FUDGE_Runtime/Editor/Html
+          mkdir -p FUDGE_Runtime/Editor/Source/Template
+          mkdir -p FUDGE_Runtime/Editor/Themes
+          cp -R Editor/Build/* FUDGE_Runtime/Editor/Build
+          cp -R Editor/Electron/* FUDGE_Runtime/Editor/Electron
+          cp -R Editor/GoldenLayout/* FUDGE_Runtime/Editor/GoldenLayout
+          cp -R Editor/Html/* FUDGE_Runtime/Editor/Html
+          cp -R Editor/Source/Template/* FUDGE_Runtime/Editor/Source/Template
+          cp -R Editor/Themes/* FUDGE_Runtime/Editor/Themes
+
+          mkdir -p FUDGE_Runtime/Library/Aid
+          mkdir -p FUDGE_Runtime/Library/Core
+          mkdir -p FUDGE_Runtime/Library/Net/Client
+          mkdir -p FUDGE_Runtime/Library/Net/Server
+          mkdir -p FUDGE_Runtime/Library/Physics
+          mkdir -p FUDGE_Runtime/Library/UserInterface
+          cp Aid/Build/* FUDGE_Runtime/Library/Aid
+          cp Core/Build/* FUDGE_Runtime/Library/Core
+          cp Net/Build/Client/* FUDGE_Runtime/Library/Net/Client
+          cp Net/Build/Server/* FUDGE_Runtime/Library/Net/Server
+          cp Physics/* FUDGE_Runtime/Library/Physics
+          cp UserInterface/Build/* FUDGE_Runtime/Library/UserInterface
+
+          cp FUDGE.bat FUDGE_Runtime
+          cp package.json FUDGE_Runtime
+      
+      - name: Replace source paths in fudge.html
+        run: |
+          $filePath = "FUDGE_Runtime/Editor/Html/Fudge.html"
+          $content = Get-Content -Path $filePath
+      
+          $content = $content -replace "../../Physics/OimoPhysics.js", "../../Library/Physics/OimoPhysics.js"
+          $content = $content -replace "../../Core/Build/FudgeCore.js", "../../Library/Core/FudgeCore.js"
+          $content = $content -replace "../../Aid/Build/FudgeAid.js", "../../Library/Aid/FudgeAid.js"
+          $content = $content -replace "../../UserInterface/Build/FudgeUserInterface.js", "../../Library/UserInterface/FudgeUserInterface.js"
+      
+          $content | Set-Content -Path $filePath
+
+      - name: Create Install.bat file
+        run: |
+          echo "npm install --omit=dev" > FUDGE_Runtime/Install.bat
+          echo "pause" >> FUDGE_Runtime/Install.bat
+          
+      - name: Create zip file
+        run: Compress-Archive -Path FUDGE_Runtime/* -DestinationPath fudge.zip
+
+      - name: Attach zip file to release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: fudge.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -13,9 +13,10 @@ namespace Fudge {
       super(_container, _state);
       this.fillContent();
 
-      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent, true);
-      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
     }
 
     private fillContent(): void {
@@ -27,7 +28,7 @@ namespace Fudge {
         this.setTitle("Properties | " + this.resource.name);
         if (this.resource instanceof ƒ.Mutable) {
           let fieldset: ƒui.Details = ƒui.Generator.createDetailsFromMutable(this.resource);
-          let uiMutable: ControllerComponent = new ControllerComponent(this.resource, fieldset);
+          let uiMutable: ControllerDetail = new ControllerDetail(this.resource, fieldset);
           content = uiMutable.domElement;
         } else if (this.resource instanceof DirectoryEntry && this.resource.stats) {
           content.innerHTML += "Size: " + (this.resource.stats["size"] / 1024).toFixed(2) + " KiB<br/>";
@@ -55,17 +56,20 @@ namespace Fudge {
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
-        // case EVENT_EDITOR.SET_PROJECT:
-        //   this.resource = undefined;
-        //   break;
-        case ƒui.EVENT.SELECT:
-          // let detail: EventDetail = <EventDetail>_event.detail;
+        case EVENT_EDITOR.SELECT:
+        case EVENT_EDITOR.DELETE:
           this.resource = <ƒ.SerializableResource>(_event.detail.data);
+          this.fillContent();
           break;
+        case ƒui.EVENT.MUTATE:
+          this.dispatchToParent(EVENT_EDITOR.UPDATE, {});
+          break;
+        // case EVENT_EDITOR.MODIFY: // let modify pass
+        //   return;
         default:
           break;
       }
-      this.fillContent();
+      _event.stopPropagation();
     }
   }
 }

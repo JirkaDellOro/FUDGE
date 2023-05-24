@@ -1,4 +1,4 @@
-/// <reference path="../../Physics/OIMOPhysics.d.ts" />
+/// <reference path="../../Physics/OimoPhysics.d.ts" />
 declare namespace FudgeCore {
     /**
      * Base class for the different DebugTargets, mainly for technical purpose of inheritance
@@ -152,10 +152,10 @@ declare namespace FudgeCore {
         CHILD_REMOVE = "childRemove",
         /** dispatched to a {@link Mutable} when it mutates */
         MUTATE = "mutate",
-        /** dispatched to a {@link GraphInstance} when the graph it connects to mutates */
+        /** dispatched by a {@link Graph} when it mutates, {@link GraphInstance}s connected to the graph listen */
         MUTATE_GRAPH = "mutateGraph",
-        /** dispatched to a {@link GraphInstance} after {@link MUTATE_GRAPH} to signal that all instances were informed*/
-        MUTATE_GRAPH_DONE = "mutateGraphDone",
+        /** dispatched by a {@link GraphInstance} when it reflected the mutation of the {@link Graph} it's connected to */
+        MUTATE_INSTANCE = "mutateGraphDone",
         /** dispatched to {@link Viewport} when it gets the focus to receive keyboard input */
         FOCUS_IN = "focusin",
         /** dispatched to {@link Viewport} when it loses the focus to receive keyboard input */
@@ -903,6 +903,11 @@ declare namespace FudgeCore {
          */
         toVector3(_z?: number): Vector3;
         toString(): string;
+        /**
+         * Uses the standard array.map functionality to perform the given function on all components of this vector
+         * and return a new vector with the results
+         */
+        map(_function: (value: number, index: number, array: Float32Array) => number): Vector2;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Vector2>;
         getMutator(): Mutator;
@@ -1446,7 +1451,7 @@ declare namespace FudgeCore {
         labels: AnimationLabel;
         animationStructure: AnimationStructure;
         events: AnimationEventTrigger;
-        private framesPerSecond;
+        protected framesPerSecond: number;
         private eventsProcessed;
         constructor(_name?: string, _animStructure?: AnimationStructure, _fps?: number);
         protected static registerSubclass(_subClass: typeof Animation): number;
@@ -1611,8 +1616,9 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Holds information about continous points in time their accompanying values as well as their slopes.
-     * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
-     * Saved inside an {@link AnimationSequence}.
+     * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides.
+     * The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
+     * If the property constant is true, the value does not change and wil not be interpolated between this and the next key in a sequence
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationKey extends Mutable implements Serializable {
@@ -1706,6 +1712,7 @@ declare namespace FudgeCore {
     class AnimationSprite extends Animation {
         static readonly iSubclass: number;
         texture: Texture;
+        private idTexture;
         private frames;
         private wrapAfter;
         private start;
@@ -1713,10 +1720,14 @@ declare namespace FudgeCore {
         private next;
         private wrap;
         constructor(_name?: string);
-        create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2): void;
-        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
+        setTexture(_texture: Texture): void;
+        create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2, _framesPerSecond: number): void;
         getScale(): Vector2;
         getPositions(): Vector2[];
+        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
+        serialize(): Serialization;
+        deserialize(_s: Serialization): Promise<Serializable>;
+        convertToAnimation(): Animation;
     }
 }
 declare namespace FudgeCore {
@@ -3793,6 +3804,7 @@ declare namespace FudgeCore {
         toString(): string;
         /**
          * Uses the standard array.map functionality to perform the given function on all components of this vector
+         * and return a new vector with the results
          */
         map(_function: (value: number, index: number, array: Float32Array) => number): Vector3;
         serialize(): Serialization;
@@ -4023,6 +4035,8 @@ declare namespace FudgeCore {
         positionFace: Vector3;
         /** the index of the face the position is inside */
         index: number;
+        /** the grid coordinates of the quad the face belongs to */
+        grid: Vector2;
     }
     /**
      * A terrain spreads out in the x-z-plane, y is the height derived from the heightmap function.
@@ -4045,6 +4059,8 @@ declare namespace FudgeCore {
          * If at hand, pass the inverse too to avoid unnecessary calculation.
          */
         getTerrainInfo(_position: Vector3, _mtxWorld?: Matrix4x4, _mtxInverse?: Matrix4x4): TerrainInfo;
+        getGridFromFaceIndex(_index: number): Vector2;
+        getFaceIndicesFromGrid(_grid: Vector2): number[];
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
@@ -5142,8 +5158,8 @@ declare namespace FudgeCore {
         */
         static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _debugDraw?: boolean, _group?: COLLISION_GROUP): RayHitInfo;
         /**
-        * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms.
-        * A frame timing can't be smaller than 1/30 of a second, or else it will be set to 30 frames, to have more consistent frame calculations.
+        * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is about 17ms (assuming 60 frames per second).
+        * The maximum value is 1/30 of a second, to have more consistent frame calculations.
         */
         static simulate(_deltaTime?: number): void;
         /**
@@ -5596,6 +5612,9 @@ declare namespace FudgeCore {
      * @author Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class MutableArray<T extends Mutable> extends Array<T> {
+        #private;
+        constructor(_type: new () => T, ..._args: T[]);
+        get type(): new () => T;
         rearrange(_sequence: number[]): void;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         getMutator(): Mutator;

@@ -15,10 +15,9 @@ uniform sampler2D u_texture;
 out ivec4 vctFrag;
 
 void main() {
-    float id = float(u_id); 
-    float pixel = trunc(gl_FragCoord.x) + u_vctSize.x * trunc(gl_FragCoord.y);
+    int pixel = int(trunc(gl_FragCoord.x) + u_vctSize.x * trunc(gl_FragCoord.y));
 
-    if (pixel != id)
+    if (pixel != u_id)
       discard;
     
     vec4 vctColor = u_vctColor * texture(u_texture, v_vctTexture);

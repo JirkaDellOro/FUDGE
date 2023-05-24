@@ -15,26 +15,27 @@ namespace Fudge {
       "CornflowerBlue"
     ];
     private animation: ƒ.Animation;
-    private propertyList: HTMLElement;
+    private dom: HTMLElement;
     private view: ViewAnimation;
     private sequences: ViewAnimationSequence[];
 
-    constructor(_animation: ƒ.Animation, _propertyList: HTMLElement, _view: ViewAnimation) {
+    constructor(_animation: ƒ.Animation, _dom: HTMLElement, _view: ViewAnimation) {
       this.animation = _animation;
-      this.propertyList = _propertyList;
-      this.propertyList.addEventListener(ƒui.EVENT.CLICK, this.hndEvent);
+      this.dom = _dom;
+      this.dom.addEventListener(ƒui.EVENT.CLICK, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.view = _view;
     }
 
-    public updatePropertyList(_mutator: ƒ.Mutator, _time?: number): void {
+    public update(_mutator: ƒ.Mutator, _time?: number): void {
       let colorIndex: number = 0;
       let keySelected = this.view.keySelected;
 
-      updatePropertyListRecursive(this.propertyList, _mutator, this.animation.animationStructure, _time);
+      updateRecursive(this.dom, _mutator, this.animation.animationStructure, _time);
 
-      function updatePropertyListRecursive(_propertyList: HTMLElement, _mutator: ƒ.Mutator, _animationStructure: ƒ.AnimationStructure, _time: number): void {
+      function updateRecursive(_dom: HTMLElement, _mutator: ƒ.Mutator, _animationStructure: ƒ.AnimationStructure, _time: number): void {
         for (const key in _mutator) {
-          let element: ƒui.CustomElement = <ƒui.CustomElement>ƒui.Controller.findChildElementByKey(_propertyList, key);
+          let element: ƒui.CustomElement = <ƒui.CustomElement>ƒui.Controller.findChildElementByKey(_dom, key);
           if (!element)
             continue;
 
@@ -54,7 +55,7 @@ namespace Fudge {
             Reflect.set(element, "animationSequence", structureOrSequence);
           }
           else {
-            updatePropertyListRecursive(element, value, <ƒ.AnimationStructure>structureOrSequence, _time);
+            updateRecursive(element, value, <ƒ.AnimationStructure>structureOrSequence, _time);
           }
         }
       }
@@ -70,7 +71,7 @@ namespace Fudge {
     public updateSequence(_time: number, _element: ƒui.CustomElement, _add: boolean = false): void {
       let sequence: ƒ.AnimationSequence = Reflect.get(_element, "animationSequence");
       if (!sequence) return;
-      
+
       let key: ƒ.AnimationKey = sequence.findKey(_time);
       if (!key) {
         if (_add) {
@@ -109,11 +110,11 @@ namespace Fudge {
     }
 
     public deleteProperty(_element: HTMLElement): void {
-      if (!this.propertyList.contains(_element)) return;
+      if (!this.dom.contains(_element)) return;
 
       let path: string[] = [];
       let element: HTMLElement = _element;
-      while (element !== this.propertyList) {
+      while (element !== this.dom) {
         if (element instanceof ƒui.CustomElement || element instanceof ƒui.Details)
           path.unshift(element.getAttribute("key"));
 
@@ -124,12 +125,12 @@ namespace Fudge {
 
     private getSelectedSequences(_selectedProperty?: HTMLElement): ViewAnimationSequence[] {
       let sequences: ViewAnimationSequence[] = [];
-      collectSelectedSequencesRecursive(this.propertyList, this.animation.animationStructure, sequences, _selectedProperty == null);
+      collectSelectedSequencesRecursive(this.dom, this.animation.animationStructure, sequences, _selectedProperty == null);
       return sequences;
 
-      function collectSelectedSequencesRecursive(_propertyList: HTMLElement, _animationStructure: ƒ.AnimationStructure, _sequences: ViewAnimationSequence[], _isSelectedDescendant: boolean): void {
+      function collectSelectedSequencesRecursive(_dom: HTMLElement, _animationStructure: ƒ.AnimationStructure, _sequences: ViewAnimationSequence[], _isSelectedDescendant: boolean): void {
         for (const key in _animationStructure) {
-          let element: HTMLElement = ƒui.Controller.findChildElementByKey(_propertyList, key);
+          let element: HTMLElement = ƒui.Controller.findChildElementByKey(_dom, key);
           let isSelectedDescendant: boolean = _isSelectedDescendant || element == _selectedProperty;
           if (element == null)
             continue;
@@ -174,6 +175,7 @@ namespace Fudge {
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
         case ƒui.EVENT.CLICK:
+        case EVENT_EDITOR.MODIFY:
           if (!(_event.target instanceof HTMLElement) || !this.animation || _event.target instanceof HTMLButtonElement) break;
 
           let target: HTMLElement = _event.target;
@@ -181,7 +183,7 @@ namespace Fudge {
             target = target.parentElement;
           if (target instanceof ƒui.CustomElement || target instanceof ƒui.Details)
             this.sequences = this.getSelectedSequences(target);
-          else if (target == this.propertyList)
+          else if (target == this.dom)
             this.sequences = this.getSelectedSequences();
 
           this.view.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.sequences } });

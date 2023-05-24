@@ -1,4 +1,4 @@
-///<reference path="../../../Physics/OIMOPhysics.d.ts"/>
+/// <reference path="../../../Physics/OimoPhysics.d.ts"/>
 
 namespace FudgeCore {
   /**
@@ -97,8 +97,8 @@ namespace FudgeCore {
 
 
     /**
-    * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms.
-    * A frame timing can't be smaller than 1/30 of a second, or else it will be set to 30 frames, to have more consistent frame calculations.
+    * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is about 17ms (assuming 60 frames per second).
+    * The maximum value is 1/30 of a second, to have more consistent frame calculations.
     */
     public static simulate(_deltaTime: number = 1 / 60): void {
       if (Physics.ƒactive.jointList.length > 0)

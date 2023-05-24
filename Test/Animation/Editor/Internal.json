@@ -30,7 +30,7 @@
       "events": {
         "green-cat": 7100.000000000001
       },
-      "fps": 60,
+      "framesPerSecond": 60,
       "animationStructure": {
         "components": {
           "ComponentTransform": [

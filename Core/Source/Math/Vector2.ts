@@ -229,7 +229,7 @@ namespace FudgeCore {
       this.transform(Matrix3x3.ROTATION(_geo.angle));
     }
     //#endregion
-    
+
     public recycle(): void {
       this.data.set([0, 0]);
     }
@@ -314,7 +314,7 @@ namespace FudgeCore {
       this.x = Math.max(this.x, _compare.x);
       this.y = Math.max(this.y, _compare.y);
     }
-    
+
     /**
      * Adds a z-component of the given magnitude (default=0) to the vector and returns a new Vector3
      */
@@ -325,6 +325,15 @@ namespace FudgeCore {
     public toString(): string {
       let result: string = `(${this.x.toPrecision(5)}, ${this.y.toPrecision(5)})`;
       return result;
+    }
+    /**
+     * Uses the standard array.map functionality to perform the given function on all components of this vector
+     * and return a new vector with the results
+     */
+    public map(_function: (value: number, index: number, array: Float32Array) => number): Vector2 {
+      let copy: Vector2 = Recycler.get(Vector2);
+      copy.data = this.data.map(_function);
+      return copy;
     }
 
     //#region Transfer

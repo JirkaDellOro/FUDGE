@@ -4,6 +4,17 @@ namespace FudgeCore {
    * @author Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class MutableArray<T extends Mutable> extends Array<T> {
+    #type: new () => T;
+
+    public constructor(_type: new () => T, ..._args: T[]) {
+      super(..._args);
+      this.#type = _type;
+    }
+    
+    public get type(): new () => T {
+      return this.#type;
+    }
+
     public rearrange(_sequence: number[]): void {
       let length: number = this.length;
       for (let index of _sequence) {

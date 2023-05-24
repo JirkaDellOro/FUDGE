@@ -4,7 +4,7 @@ namespace Fudge {
 
   /**
    * View and edit the animatable properties of a node with an attached component animation.
-   * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+   * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022 | Jirka Dell'Oro-Friedl, HFU, 2023
    */
   export class ViewAnimation extends View {
     public keySelected: ƒ.AnimationKey;
@@ -67,6 +67,9 @@ namespace Fudge {
 
         item = new remote.MenuItem({ label: "Delete Property", id: String(CONTEXTMENU.DELETE_PROPERTY), click: _callback, accelerator: "D" });
         menu.append(item);
+
+        item = new remote.MenuItem({ label: "Convert to Animation", id: String(CONTEXTMENU.CONVERT_ANIMATION), click: _callback, accelerator: "C" });
+        menu.append(item);
       }
 
       return menu;
@@ -85,7 +88,12 @@ namespace Fudge {
           this.controller.deleteProperty(document.activeElement);
           this.createPropertyList();
           this.animate();
-          return;
+          break;
+        case CONTEXTMENU.CONVERT_ANIMATION:
+          if (this.animation instanceof ƒ.AnimationSprite) {
+            let animation: ƒ.Animation = this.animation.convertToAnimation();
+            console.log(animation);
+          }
       }
     }
 
@@ -187,10 +195,19 @@ namespace Fudge {
             this.node = _event.detail.node;
             this.cmpAnimator = this.node?.getComponent(ƒ.ComponentAnimator);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-            this.setAnimation(this.cmpAnimator?.animation);
+            if (this.cmpAnimator?.animation != this.animation)
+              this.setAnimation(this.cmpAnimator?.animation);
+            else
+              _event.stopPropagation();
           }
           break;
         case EVENT_EDITOR.MODIFY:
+          if (_event.detail.mutable instanceof ƒ.ComponentAnimator) {
+            // switched animation in a ComponentAnimator
+            if (this.node == _event.detail.mutable.node)
+              this.dispatch(EVENT_EDITOR.SELECT, { detail: { node: _event.detail.mutable.node } });
+            break;
+          }
           if (_event.detail.view instanceof ViewAnimationSheet)
             this.pause();
 
@@ -199,7 +216,8 @@ namespace Fudge {
 
           this.animation.clearCache();
           let nodeMutator: ƒ.Mutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
-          this.controller?.updatePropertyList(nodeMutator, this.playbackTime);
+          this.controller?.update(nodeMutator, this.playbackTime);
+          this.propertyList.dispatchEvent(new CustomEvent(EVENT_EDITOR.MODIFY));
           break;
         case ƒui.EVENT.INPUT:
         case ƒui.EVENT.FOCUS_IN:
@@ -239,8 +257,10 @@ namespace Fudge {
       this.propertyList.id = "propertylist";
 
       this.controller = new ControllerAnimation(this.animation, this.propertyList, this);
-      this.controller.updatePropertyList(nodeMutator);
-      this.propertyList.dispatchEvent(new CustomEvent(ƒui.EVENT.CLICK));
+      this.controller.update(nodeMutator);
+      // ƒui-EVENT must not be dispatched!
+      // this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.CLICK));
+      this.propertyList.dispatchEvent(new CustomEvent(EVENT_EDITOR.MODIFY));
     }
 
     private animate(): void {

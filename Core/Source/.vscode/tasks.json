@@ -28,7 +28,7 @@
         "cwd": "Shader/"
       },
       "runOptions": {
-        "runOn": "folderOpen"
+        //"runOn": "folderOpen"
       }
     },
     {

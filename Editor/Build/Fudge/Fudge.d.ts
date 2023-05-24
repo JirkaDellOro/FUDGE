@@ -36,12 +36,13 @@ declare namespace Fudge {
         RENDER_CONTINUOUSLY = 17,
         ADD_PROPERTY = 18,
         DELETE_PROPERTY = 19,
-        ADD_PARTICLE_PROPERTY = 20,
-        ADD_PARTICLE_FUNCTION = 21,
-        ADD_PARTICLE_CONSTANT = 22,
-        ADD_PARTICLE_CODE = 23,
-        ADD_PARTICLE_TRANSFORMATION = 24,
-        DELETE_PARTICLE_DATA = 25
+        CONVERT_ANIMATION = 20,
+        ADD_PARTICLE_PROPERTY = 21,
+        ADD_PARTICLE_FUNCTION = 22,
+        ADD_PARTICLE_CONSTANT = 23,
+        ADD_PARTICLE_CODE = 24,
+        ADD_PARTICLE_TRANSFORMATION = 25,
+        DELETE_PARTICLE_DATA = 26
     }
     enum MENU {
         QUIT = "quit",
@@ -113,28 +114,40 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     enum EVENT_EDITOR {
+        /** An entity gets created, is not dispatched so far */
         CREATE = "EDITOR_CREATE",
+        /** An entity gets selected and it is necessary to switch contents in the views */
         SELECT = "EDITOR_SELECT",
+        /** An entity gets modified structurally and it is necessary to update views */
         MODIFY = "EDITOR_MODIFY",
+        /** Values of an entity change and it is necessary to update views */
+        UPDATE = "EDITOR_UPDATE",
+        /** An entity gets deleted */
         DELETE = "EDITOR_DELETE",
+        /** A view or panel closes */
         CLOSE = "EDITOR_CLOSE",
+        /** A view or panel opens */
+        OPEN = "EDITOR_OPEN"
+        /** A transform matrix gets adjusted interactively */ ,
         TRANSFORM = "EDITOR_TRANSFORM",
-        FOCUS = "EDITOR_FOCUS",
-        ANIMATE = "EDITOR_ANIMATE"
+        /** An entity recieves focus and can be manipulated using the keyboard */
+        FOCUS = "EDITOR_FOCUS"
     }
     interface EventDetail {
+        view?: View;
+        sender?: Panel | Page;
         node?: ƒ.Node;
         graph?: ƒ.Graph;
         resource?: ƒ.SerializableResource;
         mutable?: ƒ.Mutable;
         transform?: Object;
-        view?: View;
         data?: ƒ.General;
     }
     /**
      * Extension of CustomEvent that supports a detail field with the type EventDetail
      */
     class EditorEvent extends CustomEvent<EventDetail> {
+        static dispatch(_target: EventTarget, _type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
     }
 }
 declare namespace Fudge {
@@ -143,33 +156,6 @@ declare namespace Fudge {
     function saveProject(_new?: boolean): Promise<boolean>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class Project extends ƒ.Mutable {
-        #private;
-        base: URL;
-        name: string;
-        fileIndex: string;
-        fileInternal: string;
-        fileScript: string;
-        fileStyles: string;
-        private graphAutoView;
-        constructor(_base: URL);
-        openDialog(): Promise<boolean>;
-        hndChange: (_event: Event) => void;
-        load(htmlContent: string): Promise<void>;
-        getProjectJSON(): string;
-        getProjectCSS(): string;
-        getProjectHTML(_title: string): string;
-        getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
-        protected reduceMutator(_mutator: ƒ.Mutator): void;
-        private getGraphs;
-        private createProjectHTML;
-        private settingsStringify;
-        private panelsStringify;
-        private stringifyHTML;
-    }
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
@@ -203,8 +189,8 @@ declare namespace Fudge {
         private static generateID;
         private static loadLayout;
         private static setupPageListeners;
-        /** Send custom copies of the given event to the views */
-        private static broadcastEvent;
+        /** Send custom copies of the given event to the panels */
+        private static broadcast;
         private static hndKey;
         private static hndEvent;
         private static hndPanelCreated;
@@ -214,15 +200,42 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    class Project extends ƒ.Mutable {
+        #private;
+        base: URL;
+        name: string;
+        fileIndex: string;
+        fileInternal: string;
+        fileScript: string;
+        fileStyles: string;
+        private graphAutoView;
+        constructor(_base: URL);
+        openDialog(): Promise<boolean>;
+        hndChange: (_event: Event) => void;
+        load(htmlContent: string): Promise<void>;
+        getProjectJSON(): string;
+        getProjectCSS(): string;
+        getProjectHTML(_title: string): string;
+        getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+        private getGraphs;
+        private createProjectHTML;
+        private settingsStringify;
+        private panelsStringify;
+        private stringifyHTML;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
     class ControllerAnimation {
         private static readonly PROPERTY_COLORS;
         private animation;
-        private propertyList;
+        private dom;
         private view;
         private sequences;
-        constructor(_animation: ƒ.Animation, _propertyList: HTMLElement, _view: ViewAnimation);
-        updatePropertyList(_mutator: ƒ.Mutator, _time?: number): void;
+        constructor(_animation: ƒ.Animation, _dom: HTMLElement, _view: ViewAnimation);
+        update(_mutator: ƒ.Mutator, _time?: number): void;
         updateSequence(_time: number, _element: ƒui.CustomElement, _add?: boolean): void;
         nextKey(_time: number, _direction: "forward" | "backward"): number;
         addProperty(_path: string[], _node: ƒ.Node, _time: number): void;
@@ -250,6 +263,7 @@ declare namespace Fudge {
         setTitle(_title: string): void;
         getDragDropSources(): Object[];
         dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
+        dispatchToParent(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
@@ -295,9 +309,10 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒUi = FudgeUserInterface;
-    class ControllerComponent extends ƒUi.Controller {
+    class ControllerDetail extends ƒUi.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
         protected mutateOnInput: (_event: Event) => Promise<void>;
+        private hndInsert;
         private hndKey;
         private hndDragOver;
         private hndDrop;
@@ -404,7 +419,7 @@ declare namespace Fudge {
         protected views: View[];
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         /** Send custom copies of the given event to the views */
-        broadcastEvent: (_event: EditorEvent) => void;
+        broadcast: (_event: EditorEvent) => void;
         abstract getState(): PanelState;
         private addViewComponent;
     }
@@ -466,7 +481,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Display the project structure and offer functions for creation, deletion and adjustment of resources
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2020
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2020- 2023
      */
     class PanelProject extends Panel {
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
@@ -514,7 +529,7 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     /**
      * View and edit the animatable properties of a node with an attached component animation.
-     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
+     * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022 | Jirka Dell'Oro-Friedl, HFU, 2023
      */
     class ViewAnimation extends View {
         keySelected: ƒ.AnimationKey;
@@ -633,6 +648,7 @@ declare namespace Fudge {
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
+        private protectGraphInstance;
         private fillContent;
         private hndEvent;
         private hndTransform;
@@ -668,7 +684,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    import ƒ = FudgeCore;
     /**
      * View the rendering of a graph in a viewport with an independent camera
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -682,13 +697,13 @@ declare namespace Fudge {
         private nodeLight;
         private redrawId;
         constructor(_container: ComponentContainer, _state: JsonValue);
-        createUserInterface(): void;
-        setGraph(_node: ƒ.Graph): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
+        private createUserInterface;
+        private setGraph;
         private setCameraOrthographic;
         private hndPrepare;
         private hndEvent;
@@ -712,6 +727,7 @@ declare namespace Fudge {
         private cmrOrbit;
         private previewNode;
         private mtxImage;
+        private timeoutDefer;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         private hndMouse;
         private setTransform;
@@ -731,6 +747,7 @@ declare namespace Fudge {
         private hndEvent;
         private resetCamera;
         private redraw;
+        private defer;
     }
 }
 declare namespace Fudge {
@@ -748,7 +765,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * List the scripts loaded
-     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020-23
      */
     class ViewScript extends View {
         private table;

@@ -33,7 +33,6 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndTransform);
-      // this.dom.addEventListener(ƒUi.EVENT.RENAME, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.EXPAND, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.COLLAPSE, this.hndEvent);
@@ -44,7 +43,7 @@ namespace Fudge {
     }
 
     public getDragDropSources(): ƒ.ComponentCamera[] {
-      return [this.drag];
+      return this.drag ? [this.drag] : [];
     }
 
     //#region  ContextMenu
@@ -77,6 +76,9 @@ namespace Fudge {
       let iSubclass: number = _item["iSubclass"];
       let component: typeof ƒ.Component;
 
+      if (this.protectGraphInstance())
+        return;
+
       switch (Number(_item.id)) {
         case CONTEXTMENU.ADD_COMPONENT:
           component = ƒ.Component.subclasses[iSubclass];
@@ -90,9 +92,9 @@ namespace Fudge {
             return;
           do {
             console.log(element.tagName);
-            let controller: ControllerComponent = Reflect.get(element, "controller");
+            let controller: ControllerDetail = Reflect.get(element, "controller");
             if (element.tagName == "DETAILS" && controller) {
-              this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.DELETE, { detail: { mutable: controller.getMutable() } }));
+              this.dispatch(EVENT_EDITOR.DELETE, { detail: { mutable: <ƒ.Mutable>controller.getMutable() } });
               break;
             }
             element = element.parentElement;
@@ -109,15 +111,15 @@ namespace Fudge {
         }
       if (cmpNew instanceof ƒ.ComponentGraphFilter)
         if (!(this.node instanceof ƒ.Graph || this.node instanceof ƒ.GraphInstance)) {
-          alert("Attach ComponentSyncGraph only to GraphInstances or Graph");
+          alert("Attach ComponentGraphFilter only to GraphInstances or Graph");
           console.log(this.node);
           return;
         }
       ƒ.Debug.info(cmpNew.type, cmpNew);
 
       this.node.addComponent(cmpNew);
-      this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
-      this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: this.node } }));
+      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
+      // this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.node } });
     }
     //#endregion
 
@@ -138,18 +140,37 @@ namespace Fudge {
           return;
       }
 
+      // if (this.protectGraphInstance())
+      //   return;
+
       _event.dataTransfer.dropEffect = "link";
       _event.preventDefault();
       _event.stopPropagation();
     }
 
     protected hndDrop(_event: DragEvent, _viewSource: View): void {
+      if (this.protectGraphInstance())
+        return;
       for (let source of _viewSource.getDragDropSources()) {
         let cmpNew: ƒ.Component = this.createComponent(source);
         this.node.addComponent(cmpNew);
         this.expanded[cmpNew.type] = true;
       }
-      this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
+    }
+
+    private protectGraphInstance(): boolean {
+      // inhibit structural changes to a GraphInstance
+      let check: ƒ.Node = this.node;
+      do {
+        if (check instanceof ƒ.GraphInstance) {
+          alert(`Edit the graph "${check.name}" to make changes to its structure and then reload the project`);
+          return true;
+        }
+        check = check.getParent();
+      } while (check);
+
+      return false;
     }
 
     private fillContent(): void {
@@ -176,7 +197,7 @@ namespace Fudge {
 
       for (let component of components) {
         let details: ƒUi.Details = ƒUi.Generator.createDetailsFromMutable(component);
-        let controller: ControllerComponent = new ControllerComponent(component, details);
+        let controller: ControllerDetail = new ControllerDetail(component, details);
         Reflect.set(details, "controller", controller); // insert a link back to the controller
         details.expand(this.expanded[component.type]);
         this.dom.append(details);
@@ -211,17 +232,17 @@ namespace Fudge {
 
     private hndEvent = (_event: EditorEvent): void => {
       switch (_event.type) {
-        // case ƒui.EVENT.RENAME: break;
         case EVENT_EDITOR.SELECT:
-        // case EVENT_EDITOR.FOCUS:
           this.node = _event.detail.graph || _event.detail.node;
         case EVENT_EDITOR.MODIFY:
           this.fillContent();
           break;
         case ƒUi.EVENT.DELETE:
+          if (this.protectGraphInstance())
+            return;
           let component: ƒ.Component = <ƒ.Component>_event.detail.mutable;
           this.node.removeComponent(component);
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+          this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
           break;
         case ƒUi.EVENT.KEY_DOWN:
         case ƒUi.EVENT.CLICK:
@@ -248,10 +269,9 @@ namespace Fudge {
           break;
         case ƒUi.EVENT.MUTATE:
           let cmpRigidbody: ƒ.ComponentRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
-          if (cmpRigidbody) {
+          if (cmpRigidbody)
             cmpRigidbody.initialize();
-            // this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: this.node } });
-          }
+          this.dispatch(EVENT_EDITOR.UPDATE, { bubbles: true, detail: { node: this.node } });
         default:
           break;
       }
@@ -261,7 +281,7 @@ namespace Fudge {
       if (!this.getSelected())
         return;
 
-      let controller: ControllerComponent = Reflect.get(this.getSelected(), "controller");
+      let controller: ControllerDetail = Reflect.get(this.getSelected(), "controller");
       let component: ƒ.Component = <ƒ.Component>controller.getMutable();
       let mtxTransform: ƒ.Matrix4x4 = Reflect.get(component, "mtxLocal") || Reflect.get(component, "mtxPivot");
       if (!mtxTransform)

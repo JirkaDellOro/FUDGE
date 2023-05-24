@@ -100,7 +100,7 @@ namespace FudgeCore {
     // stepsPerSecond: number = 10;
     public animationStructure: AnimationStructure;
     public events: AnimationEventTrigger = {};
-    private framesPerSecond: number = 60; // TODO: change this and its accessors to #framesPerSecond?
+    protected framesPerSecond: number = 60; // TODO: change this and its accessors to #framesPerSecond?
 
     // processed eventlist and animation strucutres for playback.
     private eventsProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
@@ -261,7 +261,7 @@ namespace FudgeCore {
         name: this.name,
         labels: {},
         events: {},
-        fps: this.framesPerSecond,
+        framesPerSecond: this.framesPerSecond,
         // sps: this.stepsPerSecond
       };
       for (let name in this.labels) {
@@ -277,7 +277,7 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       Project.register(this, _serialization.idResource);
       this.name = _serialization.name;
-      this.framesPerSecond = _serialization.fps;
+      this.framesPerSecond = _serialization.framesPerSecond;
       // this.stepsPerSecond = _serialization.sps;
       this.labels = {};
       for (let name in _serialization.labels) {
@@ -391,7 +391,7 @@ namespace FudgeCore {
           let sequence: AnimationSequence = <AnimationSequence>_structure[n];
           if (sequence.length > 0) {
             let sequenceTime: number = sequence.getKey(sequence.length - 1).time;
-            this.totalTime = sequenceTime > this.totalTime ? sequenceTime : this.totalTime;
+            this.totalTime = Math.max(sequenceTime, this.totalTime);
           }
         } else {
           this.traverseStructureForTime(<AnimationStructure>_structure[n]);

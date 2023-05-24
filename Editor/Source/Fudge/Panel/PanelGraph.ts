@@ -9,7 +9,7 @@ namespace Fudge {
   export class PanelGraph extends Panel {
     private graph: ƒ.Graph;
 
-    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
       this.goldenLayout.registerComponentConstructor(VIEW.RENDER, ViewRender);
@@ -45,15 +45,15 @@ namespace Fudge {
       this.goldenLayout.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
       // this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
 
-
+      //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.ANIMATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
 
       if (_state["graph"])
         ƒ.Project.getResource(_state["graph"]).then((_graph: ƒ.Graph) => {
@@ -83,24 +83,25 @@ namespace Fudge {
     }
 
     private hndEvent = async (_event: EditorEvent | CustomEvent): Promise<void> => {
-      _event.stopPropagation();
+      if (_event.type != EVENT_EDITOR.UPDATE && _event.type != EVENT_EDITOR.MODIFY)
+        _event.stopPropagation();
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
           this.setGraph(_event.detail.graph);
-        case EVENT_EDITOR.MODIFY:
-          // TODO: meaningful difference between update and setgraph
-          if (this.graph) {
-            let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
-            if (this.graph != newGraph)
-              _event = new EditorEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
-          }
-          break;
-        case ƒui.EVENT.SELECT:
-          _event = new EditorEvent(EVENT_EDITOR.SELECT, { bubbles: false, detail: { node: _event.detail.data, view: this } });
-          break;
+        // case EVENT_EDITOR.MODIFY:
+        //   if (!_event.detail)
+        //     break;
+        //   // selected a graph or a node
+        //   if (this.graph) {
+        //     this.setGraph(_event.detail.graph); // TODO: examine, why this is supposed to happen any time...
+        //     let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
+        //     if (this.graph != newGraph) // TODO: examine, when this is actually true...
+        //       _event = new EditorEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
+        //   }
+        //   break;
       }
 
-      this.broadcastEvent(_event);
-    }
+      this.broadcast(_event);
+    };
   }
 }

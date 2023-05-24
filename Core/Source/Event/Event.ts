@@ -27,10 +27,10 @@ namespace FudgeCore {
     CHILD_REMOVE = "childRemove",
     /** dispatched to a {@link Mutable} when it mutates */
     MUTATE = "mutate",
-    /** dispatched to a {@link GraphInstance} when the graph it connects to mutates */
+    /** dispatched by a {@link Graph} when it mutates, {@link GraphInstance}s connected to the graph listen */
     MUTATE_GRAPH = "mutateGraph",
-    /** dispatched to a {@link GraphInstance} after {@link MUTATE_GRAPH} to signal that all instances were informed*/
-    MUTATE_GRAPH_DONE = "mutateGraphDone",
+    /** dispatched by a {@link GraphInstance} when it reflected the mutation of the {@link Graph} it's connected to */
+    MUTATE_INSTANCE = "mutateGraphDone",
     /** dispatched to {@link Viewport} when it gets the focus to receive keyboard input */
     FOCUS_IN = "focusin",
     /** dispatched to {@link Viewport} when it loses the focus to receive keyboard input */

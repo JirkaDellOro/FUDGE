@@ -189,6 +189,7 @@ input {
   background-color: var(--color-background-content);
   color: var(--color-text);
   border: none;
+  flex: 2;
 }
 
 *:focus {
@@ -284,8 +285,11 @@ option {
 
 /* standard fudge elements */
 
-fudge-boolean, fudge-color, fudge-textinput, fudge-stepper, fudge-select {
+fudge-boolean, fudge-color, fudge-stepper, fudge-select {
   display: block;
+}
+fudge-textinput {
+  display: flex;
 }
 
 fudge-digit {

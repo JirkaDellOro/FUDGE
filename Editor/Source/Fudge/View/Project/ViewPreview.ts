@@ -15,6 +15,7 @@ namespace Fudge {
     private cmrOrbit: ƒAid.CameraOrbit;
     private previewNode: ƒ.Node;
     private mtxImage: ƒ.Matrix3x3 = ƒ.Matrix3x3.IDENTITY();
+    private timeoutDefer: number;
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
@@ -33,11 +34,10 @@ namespace Fudge {
       this.fillContent();
 
       _container.on("resize", this.redraw);
-      this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
-      this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent, true);
+      this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
-      // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener("wheel", this.hndMouse);
       this.dom.addEventListener("mousemove", this.hndMouse);
     }
@@ -55,9 +55,15 @@ namespace Fudge {
           this.mtxImage.translateY(_event.movementY)
           break;
         case "wheel":
+          let offset: ƒ.Vector2 = new ƒ.Vector2(
+            _event.offsetX - this.dom.clientWidth, _event.offsetY - this.dom.clientHeight / 2)
           let zoom: number = Math.exp(-_event.deltaY / 1000)
+          // console.log(offset.toString());
           this.mtxImage.scaleX(zoom);
           this.mtxImage.scaleY(zoom);
+          offset.scale(zoom - 1);
+          this.mtxImage.translateX(-offset.x)
+          this.mtxImage.translateY(-offset.y)
           break;
       }
       this.setTransform(div);
@@ -162,7 +168,7 @@ namespace Fudge {
           ƒ.Physics.activeInstance = Page.getPhysics(<ƒ.Graph>this.resource);
           this.setViewObject(previewObject);
           previewObject.addEventListener(ƒ.EVENT.MUTATE, (_event: Event) => {
-            this.redraw();
+            this.defer(() => this.dispatch(EVENT_EDITOR.UPDATE, { bubbles: true }));
           });
           this.redraw();
           break;
@@ -268,21 +274,13 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      // console.log(_event.type);
       switch (_event.type) {
-        // case EVENT_EDITOR.SET_PROJECT:
-        //   this.resource = undefined;
-        //   break;
-        case ƒUi.EVENT.CHANGE:
         case EVENT_EDITOR.MODIFY:
+        case EVENT_EDITOR.UPDATE:
+          // if ([ƒ.Audio, ƒ.Texture, ƒ.AnimationSprite].some((_type) => this.resource instanceof _type)) {
           if (this.resource instanceof ƒ.Audio ||
             this.resource instanceof ƒ.Texture ||
-            this.resource instanceof ƒ.AnimationSprite) {
-            this.mtxImage.reset();
-            this.fillContent();
-          }
-        case ƒUi.EVENT.MUTATE:
-          if (this.resource instanceof ƒ.AnimationSprite)
+            this.resource instanceof ƒ.AnimationSprite)
             this.fillContent();
           this.redraw();
           break;
@@ -294,6 +292,7 @@ namespace Fudge {
           else
             this.resource = _event.detail.data;
 
+          this.mtxImage.reset();
           this.fillContent();
           break;
       }
@@ -320,6 +319,15 @@ namespace Fudge {
       } catch (_error: unknown) {
         //nop
       }
+    }
+
+    private defer(_function: Function): void {
+      if (this.timeoutDefer)
+        return;
+      this.timeoutDefer = window.setTimeout(() => {
+        _function();
+        this.timeoutDefer = undefined;
+      }, 100);
     }
   }
 }
