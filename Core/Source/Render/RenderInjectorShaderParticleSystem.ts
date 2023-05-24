@@ -1,34 +1,27 @@
 namespace FudgeCore {
   export namespace ParticleData {
     export enum FUNCTION {
+      // VALUE = "value",
       ADDITION = "addition",
       SUBTRACTION = "subtraction",
       MULTIPLICATION = "multiplication",
       DIVISION = "division",
       MODULO = "modulo",
       POWER = "power",
-      // LINEAR = "linear",
       POLYNOMIAL3 = "polynomial3",
       SQUARE_ROOT = "squareRoot",
       RANDOM = "random",
       RANDOM_RANGE = "randomRange"
     }
 
-    export const FUNCTION_PARAMETER_NAMES: { [key in ParticleData.FUNCTION]?: string[] } = {
-      // [ParticleData.FUNCTION.LINEAR]: ["x", "xStart", "yStart", "xEnd", "yEnd"],
-      [ParticleData.FUNCTION.POLYNOMIAL3]: ["x", "a", "b", "c", "d"],
-      [ParticleData.FUNCTION.RANDOM]: ["index"],
-      [ParticleData.FUNCTION.RANDOM_RANGE]: ["index", "min", "max"]
-    };
-
     export const FUNCTION_MINIMUM_PARAMETERS: { [key in ParticleData.FUNCTION]: number } = {
+      // [ParticleData.FUNCTION.VALUE]: 1,
       [ParticleData.FUNCTION.ADDITION]: 2,
       [ParticleData.FUNCTION.SUBTRACTION]: 2,
       [ParticleData.FUNCTION.MULTIPLICATION]: 2,
       [ParticleData.FUNCTION.DIVISION]: 2,
       [ParticleData.FUNCTION.MODULO]: 2,
       [ParticleData.FUNCTION.POWER]: 2,
-      // [ParticleData.FUNCTION.LINEAR]: 5,
       [ParticleData.FUNCTION.POLYNOMIAL3]: 5,
       [ParticleData.FUNCTION.SQUARE_ROOT]: 1,
       [ParticleData.FUNCTION.RANDOM]: 1,
@@ -36,8 +29,9 @@ namespace FudgeCore {
     };
 
     export const PREDEFINED_VARIABLES: { [key: string]: string } = {
-      systemTime: "u_fParticleSystemTime",
+      systemDuration: "u_fParticleSystemDuration",
       systemSize: "u_fParticleSystemSize",
+      systemTime: "u_fParticleSystemTime",
       particleId: "fParticleId"
     };
   }
@@ -47,8 +41,10 @@ namespace FudgeCore {
    * @authors Jonas Plotzky, HFU, 2022
    */
   export class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
-    public static readonly RANDOM_NUMBERS_TEXTURE_MAX_WIDTH: number = 1000;
     public static readonly FUNCTIONS: { [key in ParticleData.FUNCTION]: Function } = {
+      // [ParticleData.FUNCTION.VALUE]: (_parameters: string[]) => {
+      //   return `(${_parameters[0]})`;
+      // },
       [ParticleData.FUNCTION.ADDITION]: (_parameters: string[]) => {
         return `(${_parameters.reduce((_accumulator: string, _value: string) => `${_accumulator} + ${_value}`)})`;
       },
@@ -67,14 +63,6 @@ namespace FudgeCore {
       [ParticleData.FUNCTION.POWER]: (_parameters: string[]) => {
         return `pow(${_parameters[0]}, ${_parameters[1]})`;
       },
-      // [ParticleData.FUNCTION.LINEAR]: (_parameters: string[]) => {
-      //   let x: string = _parameters[0];
-      //   let xStart: string = _parameters[1];
-      //   let yStart: string = _parameters[2];
-      //   let xEnd: string = _parameters[3];
-      //   let yEnd: string = _parameters[4];
-      //   return `(${yStart} + (${x} - ${xStart}) * (${yEnd} - ${yStart}) / (${xEnd} - ${xStart}))`;
-      // },
       [ParticleData.FUNCTION.POLYNOMIAL3]: (_parameters: string[]) => {
         let x: string = _parameters[0];
         let a: string = _parameters[1];
@@ -88,8 +76,7 @@ namespace FudgeCore {
         return `sqrt(${x})`;
       },
       [ParticleData.FUNCTION.RANDOM]: (_parameters: string[]) => {
-        const maxWidth: string = RenderInjectorShaderParticleSystem.RANDOM_NUMBERS_TEXTURE_MAX_WIDTH.toString() + ".0";
-        return `texelFetch(u_fParticleSystemRandomNumbers, ivec2(mod(${_parameters[0]}, ${maxWidth}), ${_parameters[0]} / ${maxWidth}), 0).r`;
+        return `fetchRandomNumber(int(${_parameters[0]}), iParticleSystemRandomNumbersSize, iParticleSystemRandomNumbersLength)`
       },
       [ParticleData.FUNCTION.RANDOM_RANGE]: (_parameters: string[]) => {
         return `(${RenderInjectorShaderParticleSystem.FUNCTIONS["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]})`;
@@ -107,13 +94,13 @@ namespace FudgeCore {
     }
 
     public static getVertexShaderSource(this: ShaderParticleSystem): string {
-      let data: ParticleData.System = RenderInjectorShaderParticleSystem.renameVariables(this.data);
+      let data: ParticleData.System = this.data;
       let mtxLocal: ParticleData.Transformation[] = data?.mtxLocal;
       let mtxWorld: ParticleData.Transformation[] = data?.mtxWorld;
 
       let source: string = this.vertexShaderSource
         .replace("#version 300 es", `#version 300 es\n#define ${this.define[0]}${data.color ? "\n#define PARTICLE_COLOR" : ""}`)
-        .replace("/*$variables*/", RenderInjectorShaderParticleSystem.generateVariables(data?.variables))
+        .replace("/*$variables*/", RenderInjectorShaderParticleSystem.generateVariables(data?.variables, data?.variableNames))
         .replace("/*$mtxLocal*/", RenderInjectorShaderParticleSystem.generateTransformations(mtxLocal, "Local"))
         .replace("/*$mtxLocal*/", mtxLocal && mtxLocal.length > 0 ? "* mtxLocal" : "")
         .replace("/*$mtxWorld*/", RenderInjectorShaderParticleSystem.generateTransformations(mtxWorld, "World"))
@@ -127,42 +114,13 @@ namespace FudgeCore {
     }
     
     //#region code generation
-    private static renameVariables(_data: ParticleData.System): ParticleData.System {
-      let variableMap: {[key: string]: string} = {};
-      if (_data.variables)
-        Object.keys(_data.variables).forEach((_variableName, _index) => {
-          if (ParticleData.PREDEFINED_VARIABLES[_variableName])
-            throw `Error in ${ParticleSystem.name}: "${_variableName}" is a predefined variable and can not be redeclared`;
-          else
-            return variableMap[_variableName] = `fVariable${_index}`; 
-        });
 
-      let dataRenamed: ParticleData.System = JSON.parse(JSON.stringify(_data));
-      if (_data.variables)
-        dataRenamed.variables = Object.fromEntries(Object.entries(dataRenamed.variables).map(([_name, _exrpession]) => [variableMap[_name], _exrpession]));
-      renameRecursive(dataRenamed);
-      return dataRenamed;
-
-      function renameRecursive(_data: ParticleData.Recursive): void {
-        if (ParticleData.isVariable(_data)) {
-          let newName: string = ParticleData.PREDEFINED_VARIABLES[_data.value] || variableMap[_data.value];
-          if (newName)
-            _data.value = newName;
-          else
-            throw `Error in ${ParticleSystem.name}: "${newName}" is not a defined variable`;
-        } else 
-          for (const subData of Object.values(ParticleData.isFunction(_data) ? _data.parameters : _data)) 
-            if (typeof subData == "object")
-              renameRecursive(subData);
-      }
-    } 
-
-    private static generateVariables(_variables: {[name: string]: ParticleData.Expression}): string {
+    private static generateVariables(_variables: ParticleData.System["variables"], _variableNames: ParticleData.System["variableNames"]): string {
       if (!_variables) return "";
       
-      return Object.entries(_variables)
-        .map(([_variableName, _expressionTree]): [string, string] => [_variableName, RenderInjectorShaderParticleSystem.generateExpression(_expressionTree)])
-        .map(([_variableName, _code]): string => `float ${_variableName} = ${_code};`)
+      return _variables
+        .map((_variable, _index) => ({ name: "fParticleSystemVariable_" + _variableNames[_index], value: RenderInjectorShaderParticleSystem.generateExpression(_variable)}))
+        .map(_variable => `float ${_variable.name} = ${_variable.value};`)
         .reduce((_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "");
     }
 
@@ -172,7 +130,7 @@ namespace FudgeCore {
       let transformations: [ParticleData.Transformation["transformation"], string, string, string][] = _transformations
         .map(_data => {
           let isScale: boolean = _data.transformation === "scale";
-          let [x, y, z] = [_data.x, _data.y, _data.z]
+          let [x, y, z] = [_data.parameters[0], _data.parameters[1], _data.parameters[2]]
             .map((_value) => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : (isScale ? "1.0" : "0.0")) as [string, string, string];
 
           return [_data.transformation, x, y, z];
@@ -235,13 +193,14 @@ namespace FudgeCore {
       return code;
     }
 
-    private static generateColor(_color: ParticleData.Color): string {
+    private static generateColor(_color: ParticleData.Expression[]): string {
       if (!_color) return "";
       
-      let [r, g, b, a]: [string, string, string, string] = [_color.r, _color.g, _color.b, _color.a]
-        .map((_value): string => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : "1.0") as [string, string, string, string];
-
-      return `vec4(${r}, ${g}, ${b}, ${a});`;
+      let rgba: string = [_color[0], _color[1], _color[2], _color[3]]
+        .map((_value): string => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : "1.0")
+        .join(", ");
+      
+      return `vec4(${rgba});`;
     }
 
     private static generateExpression(_expression: ParticleData.Expression): string {
@@ -254,22 +213,73 @@ namespace FudgeCore {
       }
   
       if (ParticleData.isVariable(_expression)) {
-        return _expression.value;
+        return ParticleData.PREDEFINED_VARIABLES[_expression.value] || "fParticleSystemVariable_" + _expression.value;
       } 
   
       if (ParticleData.isConstant(_expression)) {
         let value: string = _expression.value.toString();
         return `${value}${value.includes(".") ? "" : ".0"}`;
       }
+
+      if (ParticleData.isCode(_expression)) {
+        let code: string = _expression.code
+          .replaceAll(/\b[a-zA-z]+\w*(?!\()\b/g, (_match) => ParticleData.PREDEFINED_VARIABLES[_match] || "fParticleSystemVariable_" + _match)
+          .replaceAll(/(?<!\.)\b\d+\b(?!\.)/g, (_match) => _match + ".0");
+        code = RenderInjectorShaderParticleSystem.replaceFunctions(code);
+
+        return code;
+      }
   
       throw `Error in ${ParticleSystem.name}: invalid node structure in particle system serialization`;
     }
   
     private static generateFunction(_function: ParticleData.FUNCTION, _parameters: string[]): string {
+      if (_parameters.length < ParticleData.FUNCTION_MINIMUM_PARAMETERS[_function])
+        throw `Error in ${ParticleSystem.name}: "${_function}" needs at least ${ParticleData.FUNCTION_MINIMUM_PARAMETERS[_function]} parameters`;
       if (Object.values(ParticleData.FUNCTION).includes(_function))
         return RenderInjectorShaderParticleSystem.FUNCTIONS[_function](_parameters);
       else
         throw `Error in ${ParticleSystem.name}: "${_function}" is not an operation`;
+    }
+
+    private static replaceFunctions(_code: string): string {
+      let functionRegex: RegExp = /\b[a-zA-z_]+\w*\(/g;
+      let match: RegExpExecArray;
+      while ((match = functionRegex.exec(_code)) != null) {
+        let functionGenerator: Function = RenderInjectorShaderParticleSystem.FUNCTIONS[<ParticleData.FUNCTION>match[0].slice(0, -1)];
+        if (!functionGenerator)
+          continue;
+  
+        let commaIndices: number[] = [];
+        let openBrackets: number = 1;
+        let argumentsLastIndex: number = functionRegex.lastIndex;
+        while(openBrackets > 0) {
+          switch (_code[argumentsLastIndex]) {
+            case "(":
+              openBrackets++;
+              break;
+            case ")":
+              openBrackets--;
+              break;
+            case ",":
+              if (openBrackets == 1)
+                commaIndices.push(argumentsLastIndex);
+              break;
+          }
+          argumentsLastIndex++;
+        }
+  
+        let args: string[] = [functionRegex.lastIndex - 1, ...commaIndices, argumentsLastIndex - 1]
+          .reduce<string[]>((_accumulator, _position, _index, _positions) => 
+            _index == _positions.length - 1 ? 
+              _accumulator : 
+              _accumulator.concat(_code.slice(_position + 1, _positions[_index + 1]).trim()), 
+            []);
+  
+        functionRegex.lastIndex = match.index;
+        _code =  `${_code.slice(0, match.index)}(${functionGenerator(args)})${_code.slice(argumentsLastIndex)}`;
+      }
+      return _code;
     }
     //#endregion
   }

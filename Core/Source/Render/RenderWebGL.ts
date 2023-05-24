@@ -29,6 +29,7 @@ namespace FudgeCore {
    */
   export abstract class RenderWebGL extends EventTargetStatic {
     protected static crc3: WebGL2RenderingContext = RenderWebGL.initialize();
+    public static readonly maxTextureSize: number = RenderWebGL.crc3.getParameter(RenderWebGL.crc3.MAX_TEXTURE_SIZE);
     protected static ƒpicked: Pick[];
     private static rectRender: Rectangle = RenderWebGL.getCanvasRect();
     private static sizePick: number;
@@ -378,8 +379,9 @@ namespace FudgeCore {
       RenderWebGL.setBlendMode(_cmpParticleSystem.blendMode);
       _cmpParticleSystem.useRenderData();
 
+      RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemDuration"], _cmpParticleSystem.duration);
       RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemSize"], _cmpParticleSystem.size);
-      RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemTime"], _cmpParticleSystem.time.get());
+      RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemTime"], _cmpParticleSystem.time);
       RenderWebGL.crc3.uniform1i(_shader.uniforms["u_fParticleSystemRandomNumbers"], 1); // ATTENTION!: changing this id (the second argument) requires changing of corresponding texture id in component particle system render injector
 
       let faceCamera: boolean = _cmpFaceCamera && _cmpFaceCamera.isActive;

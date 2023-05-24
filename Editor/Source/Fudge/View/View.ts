@@ -16,7 +16,7 @@ namespace Fudge {
     private container: ComponentContainer;
     private id: number;
 
-    constructor(_container: ComponentContainer, _state: JsonValue) {
+    public constructor(_container: ComponentContainer, _state: JsonValue) {
       this.dom = document.createElement("div");
       this.dom.style.height = "100%";
       // this.dom.style.overflow = "auto";
@@ -95,7 +95,7 @@ namespace Fudge {
     //#region  ContextMenu
     protected openContextMenu = (_event: Event): void => {
       this.contextMenu.popup();
-    }
+    };
 
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
@@ -123,7 +123,7 @@ namespace Fudge {
       //     this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
       //     break;
       // }
-    }
+    };
     //#endregion
 
   }

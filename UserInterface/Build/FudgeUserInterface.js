@@ -1520,7 +1520,8 @@ var FudgeUserInterface;
             for (let item of _tree.getItems()) {
                 let found = this.findItem(item.data);
                 if (found) {
-                    found.content = item.content;
+                    // found.content = item.content;
+                    // found.refreshContent();
                     found.hasChildren = item.hasChildren;
                     if (!found.hasChildren)
                         found.expand(false);
@@ -1584,21 +1585,11 @@ var FudgeUserInterface;
         delete(_data) {
             let items = this.querySelectorAll("li");
             let deleted = [];
-            let parents = [];
             for (let item of items)
                 if (_data.indexOf(item.data) > -1) {
-                    // item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
                     item.dispatchEvent(new Event("removeChild" /* REMOVE_CHILD */, { bubbles: true }));
-                    let parent = item.parentElement;
-                    deleted.push(parent.removeChild(item));
-                    if (parents.indexOf(parent) == -1) // siblings might need to refresh their content i.e. if they display their own index
-                        parents.push(parent);
+                    deleted.push(item.parentNode.removeChild(item));
                 }
-            for (let parent of parents) {
-                parent.getItems()
-                    .filter(_element => _element instanceof FudgeUserInterface.CustomTreeItem)
-                    .forEach(_sibling => _sibling.refreshContent());
-            }
             return deleted;
         }
         findVisible(_data) {
@@ -1692,12 +1683,7 @@ var FudgeUserInterface;
             if (!children || children.length == 0)
                 return;
             let branch = this.createBranch(children);
-            let old = item.getBranch();
-            item.hasChildren = true;
-            if (old)
-                old.restructure(branch);
-            else
-                item.setBranch(branch);
+            item.setBranch(branch);
             this.displaySelection(this.controller.selection);
         }
         createBranch(_data) {
@@ -1709,11 +1695,11 @@ var FudgeUserInterface;
         }
         // Callback / Eventhandler in Tree
         hndRename(_event) {
-            let targetItem = _event.target;
-            this.controller.rename(targetItem.data, _event.detail.id, _event.detail.value);
-            targetItem.parentElement?.parentElement?.expand(true); // refresh parent since children might have changed their order
-            targetItem.refreshAttributes();
-            targetItem.focus();
+            let item = _event.target;
+            let renamed = this.controller.rename(item.data, _event.detail.id, _event.detail.value);
+            if (!renamed)
+                item.refreshContent();
+            item.refreshAttributes();
         }
         hndSelect(_event) {
             // _event.stopPropagation();
@@ -1861,8 +1847,8 @@ var FudgeUserInterface;
         classes = [];
         data = null;
         controller;
-        #content;
         checkbox;
+        #content;
         constructor(_controller, _data) {
             super();
             this.controller = _controller;
@@ -1925,13 +1911,16 @@ var FudgeUserInterface;
             else
                 this.appendChild(_content);
             this.#content = _content;
-            this.#content.onsubmit = () => false;
-        }
-        refreshContent() {
-            this.content = this.controller.createContent(this.data);
+            this.#content.onsubmit = (_event) => {
+                _event.preventDefault();
+                return false;
+            };
         }
         refreshAttributes() {
             this.setAttribute("attributes", this.controller.getAttributes(this.data));
+        }
+        refreshContent() {
+            this.content = this.controller.createContent(this.data);
         }
         /**
          * Tries to expanding the {@link CustomTreeList} of children, by dispatching {@link EVENT.EXPAND}.
@@ -2040,22 +2029,22 @@ var FudgeUserInterface;
                     this.dispatchEvent(new Event("delete" /* DELETE */, { bubbles: true }));
                     break;
                 case ƒ.KEYBOARD_CODE.C:
-                    if (!_event.ctrlKey)
-                        break;
-                    _event.preventDefault();
-                    this.dispatchEvent(new Event("copy" /* COPY */, { bubbles: true }));
+                    if (_event.ctrlKey || _event.metaKey) {
+                        _event.preventDefault();
+                        this.dispatchEvent(new Event("copy" /* COPY */, { bubbles: true }));
+                    }
                     break;
                 case ƒ.KEYBOARD_CODE.V:
-                    if (!_event.ctrlKey)
-                        break;
-                    _event.preventDefault();
-                    this.dispatchEvent(new Event("paste" /* PASTE */, { bubbles: true }));
+                    if (_event.ctrlKey || _event.metaKey) {
+                        _event.preventDefault();
+                        this.dispatchEvent(new Event("paste" /* PASTE */, { bubbles: true }));
+                    }
                     break;
                 case ƒ.KEYBOARD_CODE.X:
-                    if (!_event.ctrlKey)
-                        break;
-                    _event.preventDefault();
-                    this.dispatchEvent(new Event("cut" /* CUT */, { bubbles: true }));
+                    if (_event.ctrlKey || _event.metaKey) {
+                        _event.preventDefault();
+                        this.dispatchEvent(new Event("cut" /* CUT */, { bubbles: true }));
+                    }
                     break;
             }
         };
@@ -2069,12 +2058,12 @@ var FudgeUserInterface;
         }
         hndDblClick = (_event) => {
             _event.stopPropagation();
-            if (_event.target == this.checkbox)
-                return;
-            this.startTypingInput(_event.target);
+            if (_event.target != this.checkbox)
+                this.startTypingInput(_event.target);
         };
         hndChange = (_event) => {
             let target = _event.target;
+            let item = target.form?.parentNode;
             _event.stopPropagation();
             if (target instanceof HTMLInputElement) {
                 switch (target.type) {
@@ -2083,6 +2072,7 @@ var FudgeUserInterface;
                         break;
                     case "text":
                         target.disabled = true;
+                        item.focus();
                         this.dispatchEvent(new CustomEvent("rename" /* RENAME */, { bubbles: true, detail: { id: target.id, value: target.value } }));
                         break;
                     case "default":

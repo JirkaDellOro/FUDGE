@@ -17,6 +17,7 @@ out vec2 v_vctTexture;
 out vec4 v_vctColor;
   #endif
 
+uniform float u_fParticleSystemDuration;
 uniform float u_fParticleSystemSize;
 uniform float u_fParticleSystemTime;
 uniform sampler2D u_fParticleSystemRandomNumbers;

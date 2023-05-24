@@ -8,20 +8,21 @@ namespace Fudge {
    * @author Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class ViewRender extends View {
-    #pointerMoved: boolean = false;
     private cmrOrbit: ƒAid.CameraOrbit;
     private viewport: ƒ.Viewport;
     private canvas: HTMLCanvasElement;
     private graph: ƒ.Graph;
     private nodeLight: ƒ.Node = new ƒ.Node("Illumination"); // keeps light components for dark graphs
+    private redrawId: number;
+    #pointerMoved: boolean = false;
 
-    constructor(_container: ComponentContainer, _state: JsonValue) {
+    public constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
       this.graph = <ƒ.Graph>ƒ.Project.resources[_state["graph"]];
 
       this.createUserInterface();
 
-      let title: string = `● Drop a graph from "Internal" here.\n`;
+      let title: string = "● Drop a graph from \"Internal\" here.\n";
       title += "● Use mousebuttons and ctrl-, shift- or alt-key to navigate editor camera.\n";
       title += "● Drop camera component here to see through that camera.\n";
       title += "● Manipulate transformations in this view:\n";
@@ -37,58 +38,11 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
       this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move
-      window.setInterval(() => {
-        if (this.contextMenu.getMenuItemById(String(CONTEXTMENU.RENDER_CONTINUOUSLY)).checked)
-          this.redraw();
-      }, 1000 / 30);
-    }
-
-    createUserInterface(): void {
-      ƒAid.addStandardLightComponents(this.nodeLight);
-
-      let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-      this.canvas = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
-      let container: HTMLDivElement = document.createElement("div");
-      container.style.borderWidth = "0px";
-      document.body.appendChild(this.canvas);
-
-      this.viewport = new ƒ.Viewport();
-      this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
-      this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
-      this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-      this.viewport.addEventListener(ƒ.EVENT.RENDER_PREPARE_START, this.hndPrepare);
-
-      this.setGraph(null);
-
-      this.canvas.addEventListener("pointerdown", this.activeViewport);
-      this.canvas.addEventListener("pick", this.hndPick);
-    }
-
-    public setGraph(_node: ƒ.Graph): void {
-      if (!_node) {
-        this.graph = undefined;
-        this.dom.innerHTML = "Drop a graph here to edit";
-        return;
-      }
-      if (!this.graph) {
-        this.dom.innerHTML = "";
-        this.dom.appendChild(this.canvas);
-      }
-
-      this.graph = _node;
-
-      ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
-      ƒ.Physics.cleanup();
-      this.graph.broadcastEvent(new Event(ƒ.EVENT.DISCONNECT_JOINT));
-      ƒ.Physics.connectJoints();
-      this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-      this.viewport.setBranch(this.graph);
-      this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: this.graph } });
-      // this.redraw();
     }
 
     //#region  ContextMenu
@@ -145,6 +99,9 @@ namespace Fudge {
           let on: boolean = this.contextMenu.getMenuItemById(String(CONTEXTMENU.ORTHGRAPHIC_CAMERA)).checked;
           this.setCameraOrthographic(on);
           break;
+        case String(CONTEXTMENU.RENDER_CONTINUOUSLY):
+          this.setRenderContinously(this.contextMenu.getMenuItemById(String(CONTEXTMENU.RENDER_CONTINUOUSLY)).checked);
+          break;
       }
     }
 
@@ -152,7 +109,7 @@ namespace Fudge {
       if (!this.#pointerMoved)
         this.contextMenu.popup();
       this.#pointerMoved = false;
-    }
+    };
     //#endregion
 
     protected hndDragOver(_event: DragEvent, _viewSource: View): void {
@@ -178,9 +135,56 @@ namespace Fudge {
         this.setCameraOrthographic(false);
         this.viewport.camera = source;
         this.redraw();
-      }
-      else
+      } else
         this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: <ƒ.Graph>source } });
+    }
+
+    private createUserInterface(): void {
+      ƒAid.addStandardLightComponents(this.nodeLight);
+
+      let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+      this.canvas = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
+      let container: HTMLDivElement = document.createElement("div");
+      container.style.borderWidth = "0px";
+      document.body.appendChild(this.canvas);
+
+
+      this.viewport = new ƒ.Viewport();
+      this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+      try {
+        this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+      } catch (_error: unknown) { }; // view should load even if rendering fails...
+      this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+      this.viewport.addEventListener(ƒ.EVENT.RENDER_PREPARE_START, this.hndPrepare);
+
+
+      this.setGraph(null);
+
+      this.canvas.addEventListener("pointerdown", this.activeViewport);
+      this.canvas.addEventListener("pick", this.hndPick);
+    }
+
+    private setGraph(_node: ƒ.Graph): void {
+      if (!_node) {
+        this.graph = undefined;
+        this.dom.innerHTML = "Drop a graph here to edit";
+        return;
+      }
+      if (!this.graph) {
+        this.dom.innerHTML = "";
+        this.dom.appendChild(this.canvas);
+      }
+
+      this.graph = _node;
+
+      ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
+      ƒ.Physics.cleanup();
+      this.graph.broadcastEvent(new Event(ƒ.EVENT.DISCONNECT_JOINT));
+      ƒ.Physics.connectJoints();
+      this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+      this.viewport.setBranch(this.graph);
+      this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: this.graph } });
+      // this.redraw();
     }
 
     private setCameraOrthographic(_on: boolean = false): void {
@@ -209,7 +213,7 @@ namespace Fudge {
         this.graph.removeEventListener(ƒ.EVENT.RENDER_PREPARE_END, switchLight);
       };
       this.graph.addEventListener(ƒ.EVENT.RENDER_PREPARE_END, switchLight);
-    }
+    };
 
     private hndEvent = (_event: EditorEvent): void => {
       let detail: EventDetail = <EventDetail>_event.detail;
@@ -225,9 +229,11 @@ namespace Fudge {
           this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
           ƒ.Render.prepare(this.cmrOrbit);
           break;
+        case EVENT_EDITOR.CLOSE:
+          this.setRenderContinously(false);
       }
       this.redraw();
-    }
+    };
 
     private hndPick = (_event: EditorEvent): void => {
       let picked: ƒ.Node = _event.detail.node;
@@ -235,7 +241,7 @@ namespace Fudge {
       //TODO: watch out, two selects
       this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: picked } });
       // this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: picked } }));
-    }
+    };
 
     // private animate = (_e: Event) => {
     //   this.viewport.setGraph(this.graph);
@@ -265,22 +271,35 @@ namespace Fudge {
       this.dispatchToParent(EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: { transform: data } });
       this.dispatchToParent(EVENT_EDITOR.UPDATE, {});
       this.redraw();
-    }
+    };
 
     private activeViewport = (_event: MouseEvent): void => {
       ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
       _event.cancelBubble = true;
-    }
+    };
 
-    private redraw = () => {
+    private redraw = (): void => {
       try {
         ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
         ƒ.Physics.connectJoints();
         this.viewport.draw();
       } catch (_error: unknown) {
+        this.setRenderContinously(false);
         // console.error(_error);
         //nop
       }
+    };
+
+    private setRenderContinously(_on: boolean): void {
+      if (_on) {
+        this.redrawId = window.setInterval(() => {
+          this.redraw();
+        }, 1000 / 30);
+      } else {
+        window.clearInterval(this.redrawId);
+        this.redrawId = null;
+      }
+      this.contextMenu.getMenuItemById(String(CONTEXTMENU.RENDER_CONTINUOUSLY)).checked = _on;
     }
   }
 }
