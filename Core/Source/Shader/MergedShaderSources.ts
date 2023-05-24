@@ -459,7 +459,7 @@ uniform sampler2D u_texture;
 out vec4 vctFrag;
 
 void main() {
-    vctFrag = texture(u_texture, v_vctTexture);
+    vctFrag = 0.0*texture(u_texture, v_vctTexture);
 }
 `;
   shaderSources["ShaderScreen.vert"] = `#version 300 es

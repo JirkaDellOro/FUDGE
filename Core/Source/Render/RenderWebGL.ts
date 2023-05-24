@@ -371,7 +371,6 @@ namespace FudgeCore {
         Render.crc3.bindTexture(Render.crc3.TEXTURE_2D, texture);
         Render.crc3.texImage2D(Render.crc3.TEXTURE_2D, 0, Render.crc3.RGBA, tempSizeX, tempSizeY, 0, Render.crc3.RGBA, Render.crc3.UNSIGNED_BYTE, null);
         Render.crc3.texParameteri(Render.crc3.TEXTURE_2D, Render.crc3.TEXTURE_MIN_FILTER, Render.crc3.LINEAR);
-        Render.mistTexture = texture;
 
         //Create renderbuffer 
         depthBuffer = Render.crc3.createRenderbuffer();
@@ -400,6 +399,7 @@ namespace FudgeCore {
         Render.crc3.bindRenderbuffer(Render.crc3.RENDERBUFFER, null);
 
         Render.mistFBO = framebuffer;
+        Render.mistTexture = texture;
       }
     }
 
