@@ -33,6 +33,15 @@ namespace FudgeCore {
       crc3.uniform1i(_shader.uniforms["u_texture"], 0);
       crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, _cmpMaterial.mtxPivot.get());
     }
+    protected static injectCoatWebGlTextured(this: CoatTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+
+      this.texture.useRenderData(0);
+      //crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
+      //crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, coat.texture);
+      crc3.uniform1i(_shader.uniforms["u_texture"], 0);
+      crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, _cmpMaterial.mtxPivot.get());
+    }
     protected static injectCoatRemissiveTextured(this: CoatRemissiveTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
       RenderInjectorCoat.injectCoatRemissive.call(this, _shader, _cmpMaterial);
 
@@ -43,7 +52,7 @@ namespace FudgeCore {
     }
     protected static injectCoatRemissiveTexturedNormals(this: CoatRemissiveTexturedNormals, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
       RenderInjectorCoat.injectCoatRemissiveTextured.call(this, _shader, _cmpMaterial);
-      
+
       //Since the texture slot 0 is reserved for albedo textures, and the texture slot 1 is already utilized by the particle System, the texture slot 2 is used for normal maps
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       this.normalMap.useRenderData(2);

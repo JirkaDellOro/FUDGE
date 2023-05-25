@@ -646,6 +646,7 @@ declare namespace FudgeCore {
         protected static injectCoatColored(this: CoatColored, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
         protected static injectCoatRemissive(this: CoatRemissive, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
         protected static injectCoatTextured(this: CoatTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        protected static injectCoatWebGlTextured(this: CoatTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
         protected static injectCoatRemissiveTextured(this: CoatRemissiveTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
         protected static injectCoatRemissiveTexturedNormals(this: CoatRemissiveTexturedNormals, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
     }
@@ -1098,7 +1099,6 @@ declare namespace FudgeCore {
          * Creates texture buffers to be used for PostFX
          */
         static initPostBuffers(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
-        private static initScreenQuad;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
@@ -2904,13 +2904,11 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * A {@link Coat} providing a texture and additional data for texturing
+     * A {@link Coat} providing only a texture
      */
-    class CoatWebGlTextured extends CoatColored {
-        texture: Texture;
-        constructor(_color?: Color, _texture?: Texture);
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
+    class CoatWebGlTextured extends Coat {
+        texture: WebGLTexture;
+        constructor(_texture?: WebGLTexture);
     }
 }
 declare namespace FudgeCore {
@@ -5414,9 +5412,11 @@ declare namespace FudgeCore {
     abstract class Render extends RenderWebGL {
         static rectClip: Rectangle;
         static pickBuffer: Int32Array;
-        static screenQuad: Node;
         static mistFBO: WebGLFramebuffer;
         static mistTexture: WebGLTexture;
+        static screenQuad: Float32Array;
+        static screenQuadTex: Float32Array;
+        static screenQuadCmpMat: ComponentMaterial;
         static nodesPhysics: RecycableArray<Node>;
         static componentsPick: RecycableArray<ComponentPick>;
         static lights: MapLightTypeToLightList;
@@ -5441,6 +5441,8 @@ declare namespace FudgeCore {
         static calcMist(_cmpCamera: ComponentCamera): void;
         static calcAO(_cmpCamera: ComponentCamera): void;
         static calcBloom(_cmpCamera: ComponentCamera): void;
+        static initScreenQuad(_texture: WebGLTexture): void;
+        static useScreenQuadRenderData(_shader: typeof Shader): void;
         private static transformByPhysics;
     }
 }

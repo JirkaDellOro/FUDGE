@@ -12,9 +12,11 @@ namespace FudgeCore {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
     public static pickBuffer: Int32Array;
 
-    public static screenQuad: Node;
     public static mistFBO: WebGLFramebuffer;
     public static mistTexture: WebGLTexture;
+    public static screenQuad: Float32Array;
+    public static screenQuadTex: Float32Array;
+    public static screenQuadCmpMat: ComponentMaterial;
 
     public static nodesPhysics: RecycableArray<Node> = new RecycableArray();
     public static componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
@@ -191,31 +193,83 @@ namespace FudgeCore {
 
     //#region PostFX
     public static calcMist(_cmpCamera: ComponentCamera): void {
-      
-      Render.crc3.bindFramebuffer(Render.crc3.FRAMEBUFFER, Render.mistFBO);
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mistFBO);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
-      
+
       Render.crc3.clearColor(0.2, 0.2, 0.4, 1.0);
-      Render.crc3.clear(Render.crc3.COLOR_BUFFER_BIT | Render.crc3.DEPTH_BUFFER_BIT);
-      
+      Render.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
+
       _cmpCamera.resetWorldToView();
 
-      //Render.drawList(_cmpCamera, this.nodesSimple);
-      //Render.drawListAlpha(_cmpCamera);
+      Render.drawList(_cmpCamera, this.nodesSimple);
+      Render.drawListAlpha(_cmpCamera);
 
       //Reset to main color buffer
-      Render.crc3.bindFramebuffer(Render.crc3.FRAMEBUFFER, null);
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
     }
 
     public static calcAO(_cmpCamera: ComponentCamera): void {
-      
+
     }
-    
+
     public static calcBloom(_cmpCamera: ComponentCamera): void {
 
     }
 
+    public static initScreenQuad(_texture: WebGLTexture): void {
+      Render.screenQuad = new Float32Array([
+        //Vertex coordinates (no third dimension needed);
+        -1.0, 1.0,
+        -1.0, -1.0,
+        1.0, 1.0,
+        1.0, -1.0,
+      ]);
+      Render.screenQuadTex = new Float32Array([
+        //Texture coordinates 
+        0.0, 1.0,
+        0.0, 0.0,
+        1.0, 1.0,
+        1.0, 0.0,
+      ]);
+      let tempCoat: CoatWebGlTextured = new CoatWebGlTextured(_texture)
+      Render.screenQuadCmpMat = new ComponentMaterial(new Material("screenQuadMat", ShaderScreen, tempCoat));
+    }
+
+    public static useScreenQuadRenderData(_shader: typeof Shader): void {
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+      let coat: CoatWebGlTextured = <CoatWebGlTextured> Render.screenQuadCmpMat.material.coat;
+
+      function createBuffer(_type: GLenum, _array: Float32Array): WebGLBuffer {
+        let buffer: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
+        crc3.bindBuffer(_type, buffer);
+        crc3.bufferData(_type, _array, WebGL2RenderingContext.STATIC_DRAW);
+        return buffer;
+      }
+
+      //feed in vertex coordinates if shader accepts a_vctPosition
+      let attribute: number = _shader.attributes["a_vctPosition"];
+      if (attribute) {
+        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, Render.screenQuad));
+        crc3.enableVertexAttribArray(attribute);
+        RenderWebGL.setAttributeStructure(
+          attribute,
+          { size: 2, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 }
+        );
+      }
+      // feed in texture coordinates if shader accepts a_vctTexture
+      let texAttribute: number = _shader.attributes["a_vctTexture"];
+      if (texAttribute) {
+        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, Render.screenQuadTex));
+        crc3.enableVertexAttribArray(texAttribute); 
+        crc3.vertexAttribPointer(texAttribute, 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
+      }
+      //feed texture and uniform matrix
+      crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
+      crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, coat.texture);
+      crc3.uniform1i(_shader.uniforms["u_texture"], 0);
+      crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, Render.screenQuadCmpMat.mtxPivot.get());
+    }
 
     //#endregion
 
