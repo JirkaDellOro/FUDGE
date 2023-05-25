@@ -61,18 +61,6 @@ namespace ImmersiveSceneVR {
 
   function update(_event: Event): void {
     // f.Physics.simulate();  // if physics is included and used
-    // allow height adjustment
-    if (xrViewport.session) {
-      try {
-        let leftCntrl = xrViewport.vrDevice.leftCntrl;
-          if (leftCntrl.gamePad.buttons[0].pressed)
-            cmpVRDevice.translate(new f.Vector3 (0, 1/60));
-          if (leftCntrl.gamePad.buttons[1].pressed)
-            cmpVRDevice.translate(new f.Vector3 (0, -1/60));
-      } catch (error) {
-          f.Debug.error("Mapped Buttons are not initialized correctly!")
-      }
-    }
     xrViewport.draw();
   }
   function onEndSession(): void {

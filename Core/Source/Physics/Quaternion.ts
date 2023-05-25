@@ -6,52 +6,52 @@ namespace FudgeCore {
     * @authors Marko Fehrenbach, HFU, 2020
     */
   export class Quaternion extends Mutable {
-    private x: number;
-    private y: number;
-    private z: number;
-    private w: number;
+    #x: number;
+    #y: number;
+    #z: number;
+    #w: number;
 
     public constructor(_x: number = 0, _y: number = 0, _z: number = 0, _w: number = 0) {
       super();
-      this.x = _x;
-      this.y = _y;
-      this.z = _z;
-      this.w = _w;
+      this.#x = _x;
+      this.#y = _y;
+      this.#z = _z;
+      this.#w = _w;
     }
 
     /** Get/Set the X component of the Quaternion. Real Part */
-    get X(): number {
-      return this.x;
+    get x(): number {
+      return this.#x;
     }
-    set X(_x: number) {
-      this.x = _x;
+    set x(_x: number) {
+      this.#x = _x;
     }
     /** Get/Set the Y component of the Quaternion. Real Part */
-    get Y(): number {
-      return this.y;
+    get y(): number {
+      return this.#y;
     }
-    set Y(_y: number) {
-      this.y = _y;
+    set y(_y: number) {
+      this.#y = _y;
     }
 
     /** Get/Set the Z component of the Quaternion. Real Part */
-    get Z(): number {
-      return this.z;
+    get z(): number {
+      return this.#z;
     }
-    set Z(_z: number) {
-      this.z = _z;
+    set z(_z: number) {
+      this.#z = _z;
     }
 
     /** Get/Set the Y component of the Quaternion. Imaginary Part */
-    get W(): number {
-      return this.w;
+    get w(): number {
+      return this.#w;
     }
-    set W(_w: number) {
-      this.w = _w;
+    set w(_w: number) {
+      this.#w = _w;
     }
 
     /**
-     * Create quaternion from vector3 angles in degree
+     * Create quaternion from vector3 angles in radians
      */
     public setFromVector3(rollX: number, pitchY: number, yawZ: number): void {
       let cy: number = Math.cos(yawZ * 0.5);
@@ -61,10 +61,10 @@ namespace FudgeCore {
       let cr: number = Math.cos(rollX * 0.5);
       let sr: number = Math.sin(rollX * 0.5);
 
-      this.w = cr * cp * cy + sr * sp * sy;
-      this.x = sr * cp * cy - cr * sp * sy;
-      this.y = cr * sp * cy + sr * cp * sy;
-      this.z = cr * cp * sy - sr * sp * cy;
+      this.#w = cr * cp * cy + sr * sp * sy;
+      this.#x = sr * cp * cy - cr * sp * sy;
+      this.#y = cr * sp * cy + sr * cp * sy;
+      this.#z = cr * cp * sy - sr * sp * cy;
     }
 
     /**
@@ -74,20 +74,20 @@ namespace FudgeCore {
       let angles: Vector3 = new Vector3();
 
       // roll (x-axis rotation)
-      let sinrcosp: number = 2 * (this.w * this.x + this.y * this.z);
-      let cosrcosp: number = 1 - 2 * (this.x * this.x + this.y * this.y);
+      let sinrcosp: number = 2 * (this.#w * this.#x + this.#y * this.#z);
+      let cosrcosp: number = 1 - 2 * (this.#x * this.#x + this.#y * this.#y);
       angles.x = Math.atan2(sinrcosp, cosrcosp);
 
       // pitch (y-axis rotation)
-      let sinp: number = 2 * (this.w * this.y - this.z * this.x);
+      let sinp: number = 2 * (this.#w * this.#y - this.#z * this.#x);
       if (Math.abs(sinp) >= 1)
         angles.y = this.copysign(Math.PI / 2, sinp); // use 90 degrees if out of range
       else
         angles.y = Math.asin(sinp);
 
       // yaw (z-axis rotation)
-      let sinycosp: number = 2 * (this.w * this.z + this.x * this.y);
-      let cosycosp: number = 1 - 2 * (this.y * this.y + this.z * this.z);
+      let sinycosp: number = 2 * (this.#w * this.#z + this.#x * this.#y);
+      let cosycosp: number = 1 - 2 * (this.#y * this.#y + this.#z * this.#z);
       angles.z = Math.atan2(sinycosp, cosycosp);
 
       return angles;
@@ -106,7 +106,7 @@ namespace FudgeCore {
 
     public getMutator(): Mutator {
       let mutator: Mutator = {
-        x: this.x, y: this.y, z: this.z, w: this.w
+        x: this.#x, y: this.#y, z: this.#z, w: this.#w
       };
       return mutator;
     }

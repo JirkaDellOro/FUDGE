@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
-   * @author Valentin Schmidberger, HFU, 2022
    * Different xr session modes available. Could be expand with more modes in the future.
+   * @authors Valentin Schmidberger, HFU, 2022 | Jonas Plotzky, HFU, 2023
    */
   export enum XR_SESSION_MODE {
     IMMERSIVE_VR = "immersive-vr",
@@ -32,7 +32,7 @@ namespace FudgeCore {
     private useVRController: boolean = false;
     private crc3: WebGL2RenderingContext = null;
 
-    private poseMtx: Matrix4x4 = new Matrix4x4();
+    // private poseMtx: Matrix4x4 = new Matrix4x4();
     constructor() {
       super();
       XRViewport.xrViewportInstance = this;
@@ -68,9 +68,8 @@ namespace FudgeCore {
       await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3, { framebufferScaleFactor: nativeScaleFactor }) });
 
       this.vrDevice = <ComponentVRDevice>this.camera;
+      this.initializeReferenceSpace();
 
-
-      this.initializeVRDeviceTransform(this.camera.mtxWorld);
       this.useVRController = _vrController;
       if (_vrController) {
         this.vrDevice.rightCntrl.cmpTransform = new ComponentTransform();
@@ -89,19 +88,21 @@ namespace FudgeCore {
       Debug.error("NOT IMPLEMENTED YET! Check out initializeVR!");
     }
 
-    // sets the rotation & position of the inital camera  of cmpVRDevice and adding 180 degree, because the XR Rig is looking in the direction of negative z 
-    private initializeVRDeviceTransform(_newMtx: Matrix4x4) {
-      let invTranslation: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(_newMtx.translation, Vector3.ZERO()), -1);
-      this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
+    /**
+     * Move the reference space to set the initial position/orientation of the vr device in accordance to the node the vr device is attached to.
+     */
+    private initializeReferenceSpace() {
+      let mtxWorld: Matrix4x4 = this.vrDevice.node?.mtxWorld;
+      if (!mtxWorld)
+        return;
 
-      //rotate xr rig
-      let newRot: Vector3 = Vector3.SCALE(new Vector3(_newMtx.rotation.x, _newMtx.rotation.y - 180, _newMtx.rotation.z), Math.PI / 180);
-      let orientation: Quaternion = new Quaternion();
-      orientation.setFromVector3(newRot.x, newRot.y, newRot.z);
-      this.referenceSpace = this.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
-      
-      this.vrDevice.mtxLocal.translation = this.camera.mtxWorld.translation;
-      this.camera.mtxPivot.translation = Vector3.ZERO();
+      mtxWorld = mtxWorld.clone;
+      mtxWorld.rotateY(180); // rotate because the XR Rig is looking in the direction of negative z
+      let invMtxTransfom: Matrix4x4 = mtxWorld.inverse(); // inverse because we are moving the reference space
+      let invRotation: Vector3 = Vector3.SCALE(invMtxTransfom.rotation, Math.PI / 180); // TODO: in the future quaternion rotation might get added to Matrix4x4
+      let invOrientation: Quaternion = new Quaternion();
+      invOrientation.setFromVector3(invRotation.x, invRotation.y, invRotation.z);
+      XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invMtxTransfom.translation, invOrientation));
     }
 
     /**
@@ -110,38 +111,38 @@ namespace FudgeCore {
      * Called from loop method {@link Loop} again with the xrFrame parameter handover, as soon as FRAME_REQUEST_XR is called from creator.
      */
     public draw(_calculateTransforms: boolean = true, _xrFrame: XRFrame = null): void {
-      if (!this.session)
+      if (!this.session) {
         super.draw(_calculateTransforms);
+        return;
+      }
 
-      if (_xrFrame) {
-        super.computeDrawing(_calculateTransforms);
-        let pose: XRViewerPose = _xrFrame.getViewerPose(this.referenceSpace);
-        let glLayer: XRWebGLLayer = this.session.renderState.baseLayer;
-        Render.resetFrameBuffer(glLayer.framebuffer);
-        Render.clear(this.camera.clrBackground);
+      let pose: XRViewerPose = _xrFrame?.getViewerPose(this.referenceSpace);
+      if (!pose)
+        return;
 
-        this.vrDevice.mtxLocal.set(pose.transform.matrix);
+      this.vrDevice.mtxLocal.set(pose.transform.matrix);
+      super.computeDrawing(_calculateTransforms);
 
-        if (pose) {
-          for (let view of pose.views) {
-            let viewport: globalThis.XRViewport = glLayer.getViewport(view);
-            this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+      let glLayer: XRWebGLLayer = this.session.renderState.baseLayer;
+      Render.resetFrameBuffer(glLayer.framebuffer);
+      Render.clear(this.camera.clrBackground);
+      for (let view of pose.views) {
+        let viewport: globalThis.XRViewport = glLayer.getViewport(view);
+        this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
 
-            if (this.useVRController)
-              this.setControllerConfigs(_xrFrame);
-            this.camera.mtxProjection.set(view.projectionMatrix);
-            this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
+        if (this.useVRController)
+          this.setControllerConfigs(_xrFrame);
+        this.camera.mtxProjection.set(view.projectionMatrix);
+        this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
 
 
-            if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
-              Render.draw(this.camera);
-            if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
-              Physics.draw(this.camera, this.physicsDebugMode);
-            }
-          }
-          Render.setRenderRectangle(Render.getRenderRectangle());
+        if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
+          Render.draw(this.camera);
+        if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
+          Physics.draw(this.camera, this.physicsDebugMode);
         }
       }
+      Render.setRenderRectangle(Render.getRenderRectangle());
     }
 
     //Sets controller matrices and thumbsticks movements.
@@ -180,4 +181,3 @@ namespace FudgeCore {
     }
   }
 }
-

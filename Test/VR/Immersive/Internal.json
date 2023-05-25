@@ -3869,8 +3869,8 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[-4, 1, 0]",
-                      "rotation": "[0, 0, 0]",
+                      "translation": "[-5, 1, 0]",
+                      "rotation": "[0, 45, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -3904,41 +3904,53 @@
                   }
                 }
               ],
-              "ComponentMaterial": [
-                {
-                  "ƒ.ComponentMaterial": {
-                    "sortForAlpha": false,
-                    "clrPrimary": "[1, 1, 1, 1]",
-                    "clrSecondary": "[1, 1, 1, 1]",
-                    "pivot": {
-                      "translation": "[0, 0]",
-                      "rotation": 0,
-                      "scaling": "[1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    },
-                    "idMaterial": "Material|2022-11-30T10:54:25.936Z|01925"
-                  }
-                }
-              ],
-              "ComponentMesh": [
-                {
-                  "ƒ.ComponentMesh": {
-                    "idMesh": "MeshQuad|2022-12-06T13:10:19.182Z|26075",
-                    "pivot": {
-                      "translation": "[0, 0, 0]",
-                      "rotation": "[0, 0, 0]",
-                      "scaling": "[1, 1, 1]"
-                    },
-                    "Component": {
-                      "active": true
-                    }
-                  }
-                }
-              ]
+              "ComponentMaterial": [],
+              "ComponentMesh": []
             },
-            "children": []
+            "children": [
+              {
+                "ƒ.Node": {
+                  "name": "Gizmo",
+                  "active": true,
+                  "components": {
+                    "ComponentMesh": [
+                      {
+                        "ƒ.ComponentMesh": {
+                          "idMesh": "MeshPyramid|2023-05-25T10:34:46.081Z|89614",
+                          "pivot": {
+                            "translation": "[0, 0, 0]",
+                            "rotation": "[90, 0, 0]",
+                            "scaling": "[0.19999992847442627, 0.4999999701976776, 0.19999992847442627]"
+                          },
+                          "Component": {
+                            "active": true
+                          }
+                        }
+                      }
+                    ],
+                    "ComponentMaterial": [
+                      {
+                        "ƒ.ComponentMaterial": {
+                          "sortForAlpha": false,
+                          "clrPrimary": "[1, 0, 0, 1]",
+                          "clrSecondary": "[1, 1, 1, 1]",
+                          "pivot": {
+                            "translation": "[0, 0]",
+                            "rotation": 0,
+                            "scaling": "[1, 1]"
+                          },
+                          "Component": {
+                            "active": true
+                          },
+                          "idMaterial": "Material|2023-05-25T10:35:16.277Z|02854"
+                        }
+                      }
+                    ]
+                  },
+                  "children": []
+                }
+              }
+            ]
           }
         }
       ],
@@ -3994,6 +4006,25 @@
       "labels": {},
       "events": {},
       "animationStructure": {}
+    }
+  },
+  "MeshPyramid|2023-05-25T10:34:46.081Z|89614": {
+    "ƒ.MeshPyramid": {
+      "idResource": "MeshPyramid|2023-05-25T10:34:46.081Z|89614",
+      "name": "Gizmo",
+      "type": "MeshPyramid"
+    }
+  },
+  "Material|2023-05-25T10:35:16.277Z|02854": {
+    "ƒ.Material": {
+      "name": "Gizmo",
+      "idResource": "Material|2023-05-25T10:35:16.277Z|02854",
+      "shader": "ShaderLit",
+      "coat": {
+        "ƒ.CoatColored": {
+          "color": "[1, 1, 1, 1]"
+        }
+      }
     }
   }
 }

@@ -5272,25 +5272,22 @@ declare namespace FudgeCore {
       * @authors Marko Fehrenbach, HFU, 2020
       */
     class Quaternion extends Mutable {
-        private x;
-        private y;
-        private z;
-        private w;
+        #private;
         constructor(_x?: number, _y?: number, _z?: number, _w?: number);
         /** Get/Set the X component of the Quaternion. Real Part */
-        get X(): number;
-        set X(_x: number);
+        get x(): number;
+        set x(_x: number);
         /** Get/Set the Y component of the Quaternion. Real Part */
-        get Y(): number;
-        set Y(_y: number);
+        get y(): number;
+        set y(_y: number);
         /** Get/Set the Z component of the Quaternion. Real Part */
-        get Z(): number;
-        set Z(_z: number);
+        get z(): number;
+        set z(_z: number);
         /** Get/Set the Y component of the Quaternion. Imaginary Part */
-        get W(): number;
-        set W(_w: number);
+        get w(): number;
+        set w(_w: number);
         /**
-         * Create quaternion from vector3 angles in degree
+         * Create quaternion from vector3 angles in radians
          */
         setFromVector3(rollX: number, pitchY: number, yawZ: number): void;
         /**
@@ -5642,8 +5639,8 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * @author Valentin Schmidberger, HFU, 2022
      * Different xr session modes available. Could be expand with more modes in the future.
+     * @authors Valentin Schmidberger, HFU, 2022 | Jonas Plotzky, HFU, 2023
      */
     enum XR_SESSION_MODE {
         IMMERSIVE_VR = "immersive-vr"
@@ -5666,7 +5663,6 @@ declare namespace FudgeCore {
         referenceSpace: XRReferenceSpace;
         private useVRController;
         private crc3;
-        private poseMtx;
         constructor();
         /**
          * To retrieve private static instance of xr viewport, readonly.
@@ -5685,7 +5681,10 @@ declare namespace FudgeCore {
          * The AR session could be initialized here. Up till now not implemented.
          */
         initializeAR(_arSessionMode?: XR_SESSION_MODE, _arReferenceSpaceType?: XR_REFERENCE_SPACE): Promise<void>;
-        private initializeVRDeviceTransform;
+        /**
+         * Move the reference space to set the initial position/orientation of the vr device in accordance to the node the vr device is attached to.
+         */
+        private initializeReferenceSpace;
         /**
          * Draw the xr viewport displaying its branch. By default, the transforms in the branch are recalculated first.
          * Pass `false` if calculation was already done for this frame
