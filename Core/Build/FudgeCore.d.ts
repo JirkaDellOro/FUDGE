@@ -162,7 +162,7 @@ declare namespace FudgeCore {
         FOCUS_OUT = "focusout",
         /** dispatched to {@link Node} when it's done serializing */
         NODE_SERIALIZED = "nodeSerialized",
-        /** dispatched to {@link Node} when it's done deserializing, so all components, children and attributes are available */
+        /** dispatched to {@link Node} and all its {@link Component}s when it's done deserializing, so all components, children and attributes are available */
         NODE_DESERIALIZED = "nodeDeserialized",
         /** dispatched to {@link GraphInstance} when it's content is set according to a serialization of a {@link Graph}  */
         GRAPH_INSTANTIATED = "graphInstantiated",
