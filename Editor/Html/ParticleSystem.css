@@ -1,14 +1,135 @@
-/* View Particle System */
+div[view=ViewParticleSystem] {
+  display: flex;
+  gap: 0.5em;
+  flex-flow: column;
+}
 
+div[view=ViewParticleSystem] #toolbar {
+  display: grid;
+  grid-template-columns: auto max-content;
+  grid-template-rows: 1fr 1fr;
+  align-items: center;
+  row-gap: 2px;
+}
+
+
+div[view=ViewParticleSystem] #buttons {
+  grid-column: 1 / 2;
+  display: flex;
+  gap: 2px;
+}
+
+div[view=ViewParticleSystem] #timescale,
+div[view=ViewParticleSystem] #duration {
+  justify-self: end;
+}
+
+div[view=ViewParticleSystem] #duration {
+  grid-column: 2 / 3;
+}
+
+div[view=ViewParticleSystem] #timeslidersteps {
+  background-color: var(--color-background-main);
+  color: var(--color-text);
+  grid-column: 1 / 3;
+  grid-row: 3 / 4;
+  padding-right: calc(100% - 100% / 1.1); /* Max of slider is actualy duration * 1.1 so that the last label fits in. This padding accommodates for this */
+  height: 100%;
+  align-self: end;
+  pointer-events: none;
+
+  display: flex;
+  justify-content: space-between;
+}
+
+div[view=ViewParticleSystem] #timeslidersteps span {
+  --height: 12px;
+
+  position: relative;
+  min-height: 0;
+  height: var(--height);
+  top: calc(100% - var(--height));
+  border-left: 1px solid var(--color-text);
+}
+
+div[view=ViewParticleSystem] #timeslidersteps span::after {
+  position: absolute; 
+  left: 2px;
+  top: -8px;
+  color: var(--color-text); 
+  content: attr(data-label);
+}
+
+div[view=ViewParticleSystem] #timeslider {
+  position: relative;
+  grid-column: 1 / 3;
+  grid-row: 3 / 4;
+  background-color: transparent;
+  appearance: none;
+  outline: none;
+}
+
+div[view=ViewParticleSystem] #timeslider::-webkit-slider-thumb {
+  background-color: var(--color-signal);
+  appearance: none;
+  width: 2px;
+  height: 25px;
+}
 
 div[view=ViewParticleSystem] ul.tree li[attributes~="variable"]>form>input:first-of-type {
   font-style: italic;
+  padding-right: 0.5em;
 }
+
 
 div[view=ViewParticleSystem] ul.tree li.invalid {
   outline: 1px outset yellow; /* maybe add this to theme vars */
 }
 
+div[view=ViewParticleSystem] li[attributes~="random"] > ul.tree > li:nth-of-type(1) > form::before {
+  content: "index: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="randomRange"] > ul.tree > li:nth-of-type(2) > form::before {
+  content: "min: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="randomRange"] > ul.tree > li:nth-of-type(3) > form::before {
+  content: "max: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="transformation"] > ul.tree > li:nth-of-type(1) > form::before {
+  content: "x: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="transformation"] > ul.tree > li:nth-of-type(2) > form::before {
+  content: "y: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="transformation"] > ul.tree > li:nth-of-type(3) > form::before {
+  content: "z: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="color"] > ul.tree > li:nth-of-type(1) > form::before {
+  content: "r: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="color"] > ul.tree > li:nth-of-type(2) > form::before {
+  content: "g: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="color"] > ul.tree > li:nth-of-type(3) > form::before {
+  content: "b: ";
+}
+
+div[view=ViewParticleSystem] li[attributes~="color"] > ul.tree > li:nth-of-type(4) > form::before {
+  content: "a: ";
+}
+
 div[view=ViewParticleSystem] form input {
   width: 10em;
+}
+
+div[view=ViewParticleSystem] li[attributes~="code"] form input:focus {
+  width: 20em;
 }

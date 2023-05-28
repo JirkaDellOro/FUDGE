@@ -39,11 +39,10 @@ declare namespace Fudge {
         CONVERT_ANIMATION = 20,
         ADD_PARTICLE_PROPERTY = 21,
         ADD_PARTICLE_FUNCTION = 22,
-        ADD_PARTICLE_FUNCTION_NAMED = 23,
-        ADD_PARTICLE_CONSTANT = 24,
-        ADD_PARTICLE_CONSTANT_NAMED = 25,
-        ADD_PARTICLE_TRANSFORMATION = 26,
-        DELETE_PARTICLE_DATA = 27
+        ADD_PARTICLE_CONSTANT = 23,
+        ADD_PARTICLE_CODE = 24,
+        ADD_PARTICLE_TRANSFORMATION = 25,
+        DELETE_PARTICLE_DATA = 26
     }
     enum MENU {
         QUIT = "quit",
@@ -389,19 +388,21 @@ declare namespace Fudge {
     class ControllerTreeParticleSystem extends ƒui.CustomTreeController<ƒ.ParticleData.Recursive> {
         childToParent: Map<ƒ.ParticleData.Recursive, ƒ.ParticleData.Recursive>;
         private data;
-        constructor(_data: ƒ.ParticleData.System);
+        private view;
+        constructor(_data: ƒ.ParticleData.System, _view: ViewParticleSystem);
         createContent(_data: ƒ.ParticleData.Recursive): HTMLFormElement;
         getAttributes(_data: ƒ.ParticleData.Recursive): string;
-        rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): void;
+        rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): boolean;
         hasChildren(_data: ƒ.ParticleData.Recursive): boolean;
         getChildren(_data: ƒ.ParticleData.Recursive): ƒ.ParticleData.Recursive[];
         delete(_focused: (ƒ.ParticleData.Recursive)[]): (ƒ.ParticleData.Recursive)[];
         addChildren(_children: ƒ.ParticleData.Recursive[], _target: ƒ.ParticleData.Recursive, _at?: number): ƒ.ParticleData.Recursive[];
         copy(_originals: ƒ.ParticleData.Recursive[]): Promise<ƒ.ParticleData.Recursive[]>;
         draggable(_target: ƒ.ParticleData.Recursive): boolean;
+        generateNewVariableName(): string;
         private getKey;
         private deleteData;
-        private isReferenced;
+        private renameVariable;
     }
 }
 declare namespace Fudge {
@@ -498,10 +499,12 @@ declare namespace Fudge {
      */
     class ViewParticleSystem extends View {
         static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[];
-        static readonly TRANSFORMATION_KEYS: (keyof ƒ.ParticleData.Transformation)[];
-        static readonly COLOR_KEYS: (keyof ƒ.ParticleData.Color)[];
+        private cmpParticleSystem;
         private particleSystem;
         private data;
+        private toolbar;
+        private toolbarIntervalId;
+        private timeScalePlay;
         private tree;
         private controller;
         private errors;
@@ -513,6 +516,9 @@ declare namespace Fudge {
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private hndEvent;
+        private createToolbar;
+        private setTime;
+        private setTimeScale;
         private setParticleSystem;
         private validateData;
         private enableSave;
@@ -678,7 +684,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    import ƒ = FudgeCore;
     /**
      * View the rendering of a graph in a viewport with an independent camera
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -690,14 +695,15 @@ declare namespace Fudge {
         private canvas;
         private graph;
         private nodeLight;
+        private redrawId;
         constructor(_container: ComponentContainer, _state: JsonValue);
-        createUserInterface(): void;
-        setGraph(_node: ƒ.Graph): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
+        private createUserInterface;
+        private setGraph;
         private setCameraOrthographic;
         private hndPrepare;
         private hndEvent;
@@ -705,6 +711,7 @@ declare namespace Fudge {
         private hndPointer;
         private activeViewport;
         private redraw;
+        private setRenderContinously;
     }
 }
 declare namespace Fudge {

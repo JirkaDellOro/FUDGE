@@ -11,8 +11,8 @@ namespace FudgeUserInterface {
     public data: T = null;
     public controller: CustomTreeController<T>;
     
-    #content: HTMLFormElement;
     private checkbox: HTMLInputElement;
+    #content: HTMLFormElement;
     
     public constructor(_controller: CustomTreeController<T>, _data: T) {
       super();
@@ -84,15 +84,18 @@ namespace FudgeUserInterface {
       else
         this.appendChild(_content);
       this.#content = _content;
-      this.#content.onsubmit = () => false;
-    }
-
-    public refreshContent(): void {
-      this.content = this.controller.createContent(this.data);
+      this.#content.onsubmit = (_event) => {
+        _event.preventDefault();
+        return false;
+      };    
     }
 
     public refreshAttributes(): void {
       this.setAttribute("attributes", this.controller.getAttributes(this.data));
+    }
+
+    public refreshContent(): void {
+      this.content = this.controller.createContent(this.data);
     }
 
     /**
@@ -214,22 +217,22 @@ namespace FudgeUserInterface {
           this.dispatchEvent(new Event(EVENT.DELETE, { bubbles: true }));
           break;
         case ƒ.KEYBOARD_CODE.C:
-          if (!_event.ctrlKey)
-            break;
-          _event.preventDefault();
-          this.dispatchEvent(new Event(EVENT.COPY, { bubbles: true }));
+          if (_event.ctrlKey || _event.metaKey) {
+            _event.preventDefault();
+            this.dispatchEvent(new Event(EVENT.COPY, { bubbles: true }));
+          }
           break;
         case ƒ.KEYBOARD_CODE.V:
-          if (!_event.ctrlKey)
-            break;
-          _event.preventDefault();
-          this.dispatchEvent(new Event(EVENT.PASTE, { bubbles: true }));
+          if (_event.ctrlKey || _event.metaKey) {
+            _event.preventDefault();
+            this.dispatchEvent(new Event(EVENT.PASTE, { bubbles: true }));
+          }
           break;
         case ƒ.KEYBOARD_CODE.X:
-          if (!_event.ctrlKey)
-            break;
-          _event.preventDefault();
-          this.dispatchEvent(new Event(EVENT.CUT, { bubbles: true }));
+          if (_event.ctrlKey || _event.metaKey) {
+            _event.preventDefault();
+            this.dispatchEvent(new Event(EVENT.CUT, { bubbles: true }));
+          }
           break;
       }
     }
@@ -244,13 +247,13 @@ namespace FudgeUserInterface {
 
     private hndDblClick = (_event: Event): void => {
       _event.stopPropagation();
-      if (_event.target == this.checkbox) return;
-      
-      this.startTypingInput(<HTMLElement>_event.target);
+      if (_event.target != this.checkbox)
+        this.startTypingInput(<HTMLElement>_event.target);
     }
 
     private hndChange = (_event: Event): void => {
-      let target: HTMLElement = <HTMLElement>_event.target;
+      let target: HTMLInputElement | HTMLSelectElement = <HTMLInputElement | HTMLSelectElement>_event.target;
+      let item: HTMLLIElement = <HTMLLIElement>target.form?.parentNode;
       _event.stopPropagation();
 
       if (target instanceof HTMLInputElement) {
@@ -260,6 +263,7 @@ namespace FudgeUserInterface {
             break;
           case "text":
             target.disabled = true;
+            item.focus();
             this.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { id: target.id, value: target.value }}));
             break;
           case "default":

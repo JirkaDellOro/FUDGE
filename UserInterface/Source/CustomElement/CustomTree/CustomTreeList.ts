@@ -45,7 +45,8 @@ namespace FudgeUserInterface {
       for (let item of _tree.getItems()) {
         let found: CustomTreeItem<T> = this.findItem(item.data);
         if (found) {
-          found.content = item.content;
+          // found.content = item.content;
+          // found.refreshContent();
           found.hasChildren = item.hasChildren;
           if (!found.hasChildren)
             found.expand(false);
@@ -117,24 +118,13 @@ namespace FudgeUserInterface {
     public delete(_data: T[]): CustomTreeItem<T>[] {
       let items: NodeListOf<CustomTreeItem<T>> = <NodeListOf<CustomTreeItem<T>>>this.querySelectorAll("li");
       let deleted: CustomTreeItem<T>[] = [];
-      let parents: CustomTreeList<T>[] = [];
 
       for (let item of items)
         if (_data.indexOf(item.data) > -1) {
-          // item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
           item.dispatchEvent(new Event(EVENT.REMOVE_CHILD, { bubbles: true }));
-          let parent: CustomTreeList<T> = <CustomTreeList<T>>item.parentElement;
-          deleted.push(parent.removeChild(item));
-          if (parents.indexOf(parent) == -1) // siblings might need to refresh their content i.e. if they display their own index
-            parents.push(parent);
+          deleted.push(item.parentNode.removeChild(item));
         }
       
-      for (let parent of parents) {
-        parent.getItems()
-          .filter(_element => _element instanceof CustomTreeItem)
-          .forEach(_sibling => (<CustomTreeItem<T>>_sibling).refreshContent()); 
-      }
-
       return deleted;
     }
 

@@ -6,22 +6,16 @@ namespace FudgeCore {
   export namespace ParticleData {
 
     export interface System {
-      variables?: { [name: string]: Expression };
-      color?: Color;
+      variableNames?: string[];
+      variables?: Expression[]; //{ [name: string]: Expression };
+      color?: Expression[];
       mtxLocal?: Transformation[];
       mtxWorld?: Transformation[];
     }
     
-    export type Recursive = System | System["variables"] | Color | System["mtxLocal"] | Transformation | Expression;
-    
-    export interface Color {
-      r?: Expression;
-      g?: Expression; 
-      b?: Expression; 
-      a?: Expression;
-    }
+    export type Recursive = System | Expression[] | Transformation[] | Transformation | Expression;
 
-    export type Expression = Function | Variable | Constant;
+    export type Expression = Function | Variable | Constant | Code;
 
     export interface Function {
       function: FUNCTION;
@@ -35,32 +29,38 @@ namespace FudgeCore {
     export interface Constant {
       value: number;
     }
+
+    export interface Code {
+      code: string;
+    }
   
     export interface Transformation {
       transformation: "translate" | "rotate" | "scale";
-      x?: Expression;
-      y?: Expression;
-      z?: Expression;
+      parameters: Expression[];
     }
 
     export function isExpression(_data: Recursive): _data is Expression {
-      return isFunction(_data) || isVariable(_data) || isConstant(_data);
+      return isFunction(_data) || isVariable(_data) || isConstant(_data) || isCode(_data);
     }
 
     export function isFunction(_data: Recursive): _data is Function {
-      return "function" in _data;
+      return typeof _data == "object" && "function" in _data;
     }
 
     export function isVariable(_data: Recursive): _data is Variable {
-      return "value" in _data && typeof _data.value == "string";
+      return typeof _data == "object" && "value" in _data && typeof _data.value == "string";
     }
 
     export function isConstant(_data: Recursive): _data is Constant {
-      return "value" in _data && typeof _data.value == "number";
+      return typeof _data == "object" && "value" in _data && typeof _data.value == "number";
+    }
+
+    export function isCode(_data: Recursive): _data is Code {
+      return typeof _data == "object" && "code" in _data;
     }
 
     export function isTransformation(_data: Recursive): _data is Transformation {
-      return "transformation" in _data;
+      return typeof _data == "object" && "transformation" in _data;
     }
   }
 

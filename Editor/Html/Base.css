@@ -266,6 +266,23 @@ option {
   color: var(--color-text);
 }
 
+/* Button */
+
+.buttonIcon {
+  border: none;
+  /* border-right: 2px solid var(--color-background-content); */
+  background-color: var(--color-background-main);
+  /* padding: 2px; */
+  min-width: 30px;
+  width: 60px;
+  height: 25px;
+  cursor: pointer;
+}
+
+.buttonIcon:focus {
+  outline: none;
+}
+
 /* standard fudge elements */
 
 fudge-boolean, fudge-color, fudge-stepper, fudge-select {

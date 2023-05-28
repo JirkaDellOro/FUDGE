@@ -68,7 +68,7 @@ jobs:
 
       - name: Create Install.bat file
         run: |
-          echo "npm install" > FUDGE_Runtime/Install.bat
+          echo "npm install --omit=dev" > FUDGE_Runtime/Install.bat
           echo "pause" >> FUDGE_Runtime/Install.bat
           
       - name: Create zip file

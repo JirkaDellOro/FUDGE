@@ -20,8 +20,8 @@ namespace FudgeUserInterface {
     /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
     public abstract getAttributes(_object: T): string;
 
-    /** Process the proposed new label */
-    public abstract rename(_object: T, _key: string, _new: string): void;
+    /** Process the proposed new name */
+    public abstract rename(_object: T, _id: string, _new: string): boolean;
 
     /** Return true if the object has children that must be shown when unfolding the tree item */
     public abstract hasChildren(_object: T): boolean;
