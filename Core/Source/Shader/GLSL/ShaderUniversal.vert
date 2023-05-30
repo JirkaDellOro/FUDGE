@@ -42,17 +42,22 @@ struct Light {
   mat4 mtxShapeInverse;
 };
 
-const uint MAX_LIGHTS_DIRECTIONAL = 10u;
-const uint MAX_LIGHTS_POINT = 50u;
-const uint MAX_LIGHTS_SPOT = 50u;
-
 uniform Light u_ambient;
-uniform uint u_nLightsDirectional;
-uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
-uniform uint u_nLightsPoint;
-uniform Light u_point[MAX_LIGHTS_POINT];
-uniform uint u_nLightsSpot;
-uniform Light u_spot[MAX_LIGHTS_SPOT];
+
+  #if !defined(PHONG)
+const uint MAX_LIGHTS_DIRECTIONAL = 15u;
+const uint MAX_LIGHTS_POINT = 100u;
+const uint MAX_LIGHTS_SPOT = 100u;
+
+layout(std140) uniform UNIFORMS_LIGHT {
+  uniform uint u_nLightsDirectional;
+  uniform uint u_nLightsPoint;
+  uniform uint u_nLightsSpot;
+  uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+  uniform Light u_point[MAX_LIGHTS_POINT];
+  uniform Light u_spot[MAX_LIGHTS_SPOT];
+};
+  #endif
 
 vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _vctView, float _fSpecular) {
   vec4 vctResult = vec4(0, 0, 0, 1);
@@ -222,6 +227,7 @@ void main() {
       continue;
     v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
   }
+
   // calculate spot light effect
   for(uint i = 0u; i < u_nLightsSpot; i++) {
     vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));

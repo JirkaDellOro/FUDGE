@@ -1,4 +1,5 @@
 /// <reference path="../../Physics/OimoPhysics.d.ts" />
+/// <reference types="webxr" />
 declare namespace FudgeCore {
     /**
      * Base class for the different DebugTargets, mainly for technical purpose of inheritance
@@ -633,12 +634,30 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    class RenderInjectorShader {
+    export class RenderInjectorShader {
+        static uboLightsInfo: {
+            [key: string]: UboLightStrucure;
+        };
+        private static uboInfos;
         static decorate(_constructor: Function): void;
         static useProgram(this: typeof Shader): void;
         static deleteProgram(this: typeof Shader): void;
         protected static createProgram(this: typeof Shader): void;
     }
+    class UboLightStrucure {
+        index: {
+            [key: string]: number;
+        };
+        offset: {
+            [key: string]: number;
+        };
+        constructor(_index: {
+            [key: string]: number;
+        }, _offset: {
+            [key: string]: number;
+        });
+    }
+    export {};
 }
 declare namespace FudgeCore {
     class RenderInjectorCoat extends RenderInjector {
@@ -1073,7 +1092,7 @@ declare namespace FudgeCore {
         /**
          * Reset the offscreen framebuffer to the original RenderingContext
          */
-        static resetFrameBuffer(_color?: Color): void;
+        static resetFrameBuffer(_frameBuffer?: WebGLFramebuffer): void;
         /**
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
@@ -2020,7 +2039,6 @@ declare namespace FudgeCore {
         mtxPivot: Matrix4x4;
         clrBackground: Color;
         private projection;
-        private mtxProjection;
         private fieldOfView;
         private aspectRatio;
         private direction;
@@ -2034,6 +2052,7 @@ declare namespace FudgeCore {
          */
         get mtxWorldToView(): Matrix4x4;
         get mtxCameraInverse(): Matrix4x4;
+        get mtxProjection(): Matrix4x4;
         resetWorldToView(): void;
         getProjection(): PROJECTION;
         getBackgroundEnabled(): boolean;
@@ -2335,6 +2354,49 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
+    * @author Valentin Schmidberger, HFU, 2022
+    * VR Component Class, for Session Management, Controller Management and Reference Space Management.
+    */
+    class VRController {
+        cmpTransform: ComponentTransform;
+        gamePad: Gamepad;
+        thumbstickX: number;
+        thumbstickY: number;
+    }
+    class ComponentVRDevice extends ComponentCamera {
+        #private;
+        static readonly iSubclass: number;
+        rightCntrl: VRController;
+        leftCntrl: VRController;
+        constructor();
+        /**
+         * Returns the actual matrix of the vr - device.
+         * Creators should use this for readonly purposes.
+         */
+        get mtxLocal(): Matrix4x4;
+        /**
+         * Sets a Vector3 as Position of the reference space.
+         */
+        set translation(_newPos: Vector3);
+        /**
+         * Adds a Vector3 in Position of the reference space.
+         */
+        translate(_by: Vector3): void;
+        /**
+         * Sets Vector3 Rotation of the reference space.
+         * Rotation needs to be set in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
+         */
+        set rotation(_newRot: Vector3);
+        /**
+         * Adds a Vector3 in Rotation of the reference space.
+         * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
+         */
+        rotate(_by: Vector3): void;
+        private getMtxLocalFromCmpTransform;
     }
 }
 declare namespace FudgeCore {
@@ -5226,25 +5288,22 @@ declare namespace FudgeCore {
       * @authors Marko Fehrenbach, HFU, 2020
       */
     class Quaternion extends Mutable {
-        private x;
-        private y;
-        private z;
-        private w;
+        #private;
         constructor(_x?: number, _y?: number, _z?: number, _w?: number);
         /** Get/Set the X component of the Quaternion. Real Part */
-        get X(): number;
-        set X(_x: number);
+        get x(): number;
+        set x(_x: number);
         /** Get/Set the Y component of the Quaternion. Real Part */
-        get Y(): number;
-        set Y(_y: number);
+        get y(): number;
+        set y(_y: number);
         /** Get/Set the Z component of the Quaternion. Real Part */
-        get Z(): number;
-        set Z(_z: number);
+        get z(): number;
+        set z(_z: number);
         /** Get/Set the Y component of the Quaternion. Imaginary Part */
-        get W(): number;
-        set W(_w: number);
+        get w(): number;
+        set w(_w: number);
         /**
-         * Create quaternion from vector3 angles in degree
+         * Create quaternion from vector3 angles in radians
          */
         setFromVector3(rollX: number, pitchY: number, yawZ: number): void;
         /**
@@ -5529,6 +5588,10 @@ declare namespace FudgeCore {
          */
         draw(_calculateTransforms?: boolean): void;
         /**
+        * The transforms in the branch are recalculated here.
+        */
+        computeDrawing(_calculateTransforms?: boolean): void;
+        /**
          * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh}es
          */
         calculateTransforms(): void;
@@ -5588,6 +5651,63 @@ declare namespace FudgeCore {
          * Returns a point in the browser page matching the given point of the viewport
          */
         pointClientToScreen(_client: Vector2): Vector2;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Different xr session modes available. Could be expand with more modes in the future.
+     * @authors Valentin Schmidberger, HFU, 2022 | Jonas Plotzky, HFU, 2023
+     */
+    enum XR_SESSION_MODE {
+        IMMERSIVE_VR = "immersive-vr"
+    }
+    /**
+     * Different reference vr-spaces available, creator has to check if the space is supported with its device.
+     * Could be expand with more available space types in the future.
+     */
+    enum XR_REFERENCE_SPACE {
+        VIEWER = "viewer",
+        LOCAL = "local"
+    }
+    /**
+     * XRViewport (webXR)-extension of Viewport, to displaying its branch on Head Mounted and AR (not implemted yet) Devices
+     */
+    class XRViewport extends Viewport {
+        private static xrViewportInstance;
+        vrDevice: ComponentVRDevice;
+        session: XRSession;
+        referenceSpace: XRReferenceSpace;
+        private useVRController;
+        private crc3;
+        constructor();
+        /**
+         * To retrieve private static instance of xr viewport, readonly.
+         */
+        static get default(): XRViewport;
+        /**
+          * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
+          */
+        initialize(_name: string, _branch: Node, _cameraXR: ComponentVRDevice, _canvas: HTMLCanvasElement): void;
+        /**
+         * The VR Session is initialized here, also VR - Controller are initialized, if boolean is true.
+         * Creator has to call FrameRequestXR after this Method to run the viewport in virtual reality.
+         */
+        initializeVR(_vrSessionMode?: XR_SESSION_MODE, _vrReferenceSpaceType?: XR_REFERENCE_SPACE, _vrController?: boolean): Promise<void>;
+        /**
+         * The AR session could be initialized here. Up till now not implemented.
+         */
+        initializeAR(_arSessionMode?: XR_SESSION_MODE, _arReferenceSpaceType?: XR_REFERENCE_SPACE): Promise<void>;
+        /**
+         * Move the reference space to set the initial position/orientation of the vr device in accordance to the node the vr device is attached to.
+         */
+        private initializeReferenceSpace;
+        /**
+         * Draw the xr viewport displaying its branch. By default, the transforms in the branch are recalculated first.
+         * Pass `false` if calculation was already done for this frame
+         * Called from loop method {@link Loop} again with the xrFrame parameter handover, as soon as FRAME_REQUEST_XR is called from creator.
+         */
+        draw(_calculateTransforms?: boolean, _xrFrame?: XRFrame): void;
+        private setControllerConfigs;
     }
 }
 declare namespace FudgeCore {
@@ -6740,6 +6860,8 @@ declare namespace FudgeCore {
     enum LOOP_MODE {
         /** Loop cycles controlled by window.requestAnimationFrame */
         FRAME_REQUEST = "frameRequest",
+        /** Loop cycles controlled by xrSession.requestAnimationFrame */
+        FRAME_REQUEST_XR = "frameRequestXR",
         /** Loop cycles with the given framerate in {@link Time.game} */
         TIME_GAME = "timeGame",
         /** Loop cycles with the given framerate in realtime, independent of {@link Time.game} */
@@ -6800,6 +6922,7 @@ declare namespace FudgeCore {
         static continue(): void;
         private static loop;
         private static loopFrame;
+        private static loopFrameXR;
         private static loopTime;
     }
 }

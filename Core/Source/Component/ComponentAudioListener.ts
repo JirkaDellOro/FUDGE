@@ -20,7 +20,6 @@ namespace FudgeCore {
       let position: Vector3 = mtxResult.translation;
       let forward: Vector3 = Vector3.TRANSFORMATION(Vector3.Z(1), mtxResult, false);
       let up: Vector3 = Vector3.TRANSFORMATION(Vector3.Y(), mtxResult, false);
-
       if (_listener.positionX != undefined) {
         _listener.positionX.value = position.x;
         _listener.positionY.value = position.y;

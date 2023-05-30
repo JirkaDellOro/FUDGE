@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>RayInteraction</title>
+<meta charset="utf-8" />
+<!-- Important: check out styling for XR Button, if you do not style XR Button it will not appear -->
+
+<link rel="stylesheet" href="../vr_style.css" />
+
+<!--Editor settings of this project-->
+<meta type="settings" autoview="Graph|2022-12-01T12:38:45.569Z|77314" project="{'name':'RayInteraction','graphAutoView':'Graph|2022-12-01T12:38:45.569Z|77314'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2022-12-01T12:38:45.569Z|77314'}}]" />
+
+<!--Activate the following line to include the FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!-->
+<!--<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js"></script>-->
+
+<!--Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks-->
+<script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
+
+
+<!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
+<link type="resources" src="Internal.json" />
+
+<!--Load custom scripts-->
+<script type="text/javascript" src="Main.js" editor="true"></script>
+<script type="text/javascript" src="Controller.js" editor="true"></script>
+</head>
+<body>
+<!--Dialog shown at startup only-->
+<dialog>
+<p>FUDGE Autoview</p>
+<h1>Title (will be replaced by Autoview)</h1>
+<p>click to start</p>
+</dialog>
+<script src="../../dialog-polyfill.min.js"></script>
+<script src="../../TestInstructions.js"></script>
+<script>
+    TestInstructions.display({
+      Name: "Controller VR Scene",
+      Test: [
+        "Check out the controller and the capabilities of it.",
+      ],
+      Setup: [
+        "Built with Blender and OBJ FUDGE Importer.",
+      ],
+      Act: [
+        "Start your VR-Device and explore the controller scene",
+        "Check out the mapping of the buttons."
+      ],
+   
+      Expect: [
+        "Working with all buttons of the Ccontroller, the Creator has a lot of possibilities to extend his game/software.",
+        "This particular scene will only work 100% correctly with an Oculus headset. Because the mapping of the buttons is different for each headset."
+      ]
+    });
+  </script>
+<canvas class="fullscreen">
+</canvas>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -3856,9 +3856,9 @@ var Fudge;
             }
             //@ts-ignore
             let cmpNew = new component();
-            if (cmpNew instanceof ƒ.ComponentRigidbody)
+            if (cmpNew instanceof ƒ.ComponentRigidbody || cmpNew instanceof ƒ.ComponentVRDevice)
                 if (!this.node.cmpTransform) {
-                    alert("To attach ComponentRigidbody, first attach ComponentTransform!");
+                    alert("To attach this Component, first attach ComponentTransform!");
                     return;
                 }
             if (cmpNew instanceof ƒ.ComponentGraphFilter)

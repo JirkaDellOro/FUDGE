@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>AudioScene</title>
+<meta charset="utf-8" />
+<!-- Important: check out styling for XR Button, if you do not style XR Button it will not appear -->
+
+<link rel="stylesheet" href="../vr_style.css" />
+
+<!--Editor settings of this project-->
+<meta type="settings" autoview="Graph|2022-12-14T14:00:48.574Z|80970" project="{'name':'AudioScene','graphAutoView':'Graph|2022-12-14T14:00:48.574Z|80970'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2022-12-14T14:00:48.574Z|80970'}}]" />
+
+<!--Activate the following line to include the FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!-->
+<!--<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js"></script>-->
+
+<!--Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks-->
+<script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
+
+
+<!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
+<link type="resources" src="Internal.json" />
+
+<!--Load custom scripts-->
+<script type="text/javascript" src="Main.js"></script>
+<script type="text/javascript" src="Translator.js" editor="true"></script>
+
+</head>
+<body>
+<!--Dialog shown at startup only-->
+<dialog>
+<p>FUDGE Autoview</p>
+<h1>Title (will be replaced by Autoview)</h1>
+<p>click to start</p>
+</dialog>
+<script src="../../dialog-polyfill.min.js"></script>
+<script src="../../TestInstructions.js"></script>
+<script>
+    TestInstructions.display({
+      Name: "Audio VR Scene",
+      Test: [
+        "Check out the positional audio in VR.",
+      ],
+      Setup: [
+        "Built with FUDGE editor.",
+      ],
+      Act: [
+        "Start your VR-Device and explore the audio scene with your ears. ",
+        "Start and stop the output audio source with your select trigger on the controller.",
+        "Start and stop translation of the audio sources by pressing the squeeze trigger."
+      ],
+   
+      Expect: [
+        "Different positional audio outputs mapped to the VR headset."
+      ]
+    });
+  </script>
+<canvas class="fullscreen">
+</canvas>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
