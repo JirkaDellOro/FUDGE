@@ -86,12 +86,15 @@ namespace FudgeCore {
             node.mtxLocal.set(Float32Array.from(gltfNode.matrix));
           }
           else {
-            if (gltfNode.rotation)
-              node.mtxLocal.rotate(new Vector3(...gltfNode.rotation.map(rotation => rotation * Calc.rad2deg)));
-            if (gltfNode.scale)
-              node.mtxLocal.scale(new Vector3(...gltfNode.scale));
             if (gltfNode.translation)
               node.mtxLocal.translate(new Vector3(...gltfNode.translation));
+            if (gltfNode.rotation) {
+              const rotation: Quaternion = new Quaternion();
+              rotation.set(gltfNode.rotation);
+              node.mtxLocal.rotate(rotation.getEulerAngles());
+            }
+            if (gltfNode.scale)
+              node.mtxLocal.scale(new Vector3(...gltfNode.scale));
           }
         }
 
@@ -311,7 +314,7 @@ namespace FudgeCore {
         if (gltfTextureInfo) {
           const texture: Texture = await this.getTextureByIndex(gltfTextureInfo.index);
           material.coat = new CoatRemissiveTextured(
-            new Color(),
+            new Color(...gltfMaterial.pbrMetallicRoughness.baseColorFactor || [1, 1, 1, 1]), // TODO: check if shader should multiply baseColorTexture values with baseColorFactor
             texture,
             1,
             1
@@ -332,14 +335,14 @@ namespace FudgeCore {
         const gltfImage: GLTF.Image = this.gltf.images[gltfTexture.source];
 
         if (gltfSampler.wrapS != undefined || gltfSampler.wrapT != undefined)
-          console.warn(`Texture ${_iTexture} in '${this.url}' has a wrapS and wrapT of '${getWebGLParameterName(gltfSampler.wrapS)}' and '${getWebGLParameterName(gltfSampler.wrapT)}' respectively. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`)
+          console.warn(`${GLTFLoader.name}: Texture ${_iTexture} in '${this.url}' has a wrapS and wrapT of '${getWebGLParameterName(gltfSampler.wrapS)}' and '${getWebGLParameterName(gltfSampler.wrapT)}' respectively. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`)
 
         let url: string = gltfImage.uri;
         if (!gltfImage.uri && gltfImage.bufferView) {
           // TODO: this is duplicate code from getBufferData, maybe refactor getBufferData to handle bufferViewIndex input
           const gltfBufferView: GLTF.BufferView = this.gltf.bufferViews[gltfImage.bufferView];
 
-          const buffer: ArrayBuffer = await this.getBuffer(gltfBufferView.buffer);;
+          const buffer: ArrayBuffer = await this.getBuffer(gltfBufferView.buffer);
           const byteOffset: number = gltfBufferView.byteOffset || 0;
           const byteLength: number = gltfBufferView.byteLength || 0;
 
@@ -357,9 +360,9 @@ namespace FudgeCore {
           texture.mipmap = MIPMAP.MEDIUM;
         else if (gltfSampler.magFilter == WebGL2RenderingContext.LINEAR && gltfSampler.minFilter == WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR)
           texture.mipmap = MIPMAP.BLURRY;
-        else if (gltfSampler.magFilter != undefined && gltfSampler.minFilter != undefined) 
-          throw new Error(`Texture ${_iTexture} in '${this.url}' has a magFilter and minFilter of '${getWebGLParameterName(gltfSampler.magFilter)}' and '${getWebGLParameterName(gltfSampler.minFilter)}' respectively. FUDGE only supports the following combinations: NEAREST and NEAREST | NEAREST and NEAREST_MIPMAP_LINEAR | LINEAR and LINEAR_MIPMAP_LINEAR.`);
-        
+        else if (gltfSampler.magFilter != undefined && gltfSampler.minFilter != undefined)
+          throw new Error(`${GLTFLoader.name}: Texture ${_iTexture} in '${this.url}' has a magFilter and minFilter of '${getWebGLParameterName(gltfSampler.magFilter)}' and '${getWebGLParameterName(gltfSampler.minFilter)}' respectively. FUDGE only supports the following combinations: NEAREST and NEAREST | NEAREST and NEAREST_MIPMAP_LINEAR | LINEAR and LINEAR_MIPMAP_LINEAR.`);
+
         this.#textures[_iTexture] = texture;
       }
 
@@ -391,10 +394,10 @@ namespace FudgeCore {
           mtxBindInverse.set(floatArray.subarray(iFloat, iFloat + span));
           skeleton.registerBone(this.#nodes[gltfSkeleton.joints[iBone]], mtxBindInverse);
         }
-        // skeleton.setDefaultPose(); // TODO: this destroys animation
         Project.register(skeleton);
         this.#skeletons[_iSkeleton] = skeleton;
       }
+
       return this.#skeletons[_iSkeleton];
     }
 

@@ -56,12 +56,12 @@ namespace SkeletonTest {
 
   async function loadAnimatedArm(): Promise<ƒ.Node> {
     // const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
-    // const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./arm_from_fbx.gltf");
+    const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./arm_from_fbx.gltf");
     // const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./arm.gltf");
-    // const arm: ƒ.Node = await loader.getNode("ArmModel");
-    const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./untitled.gltf");
+    const arm: ƒ.Node = await loader.getNode("ArmModel");
+    // const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./unarmed_walk.gltf");
     // const arm: ƒ.Node = await loader.getNodeByIndex(0);
-    const arm: ƒ.Node = await loader.getNode("Armature");
+    // const arm: ƒ.Node = await loader.getNode("Armature");
     const anime = await loader.getAnimationByIndex(0);
     arm.addComponent(new ƒ.ComponentAnimator(anime));
     
