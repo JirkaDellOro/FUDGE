@@ -11,8 +11,10 @@ namespace FudgeCore {
       _mesh.name = _data.name;
       Reflect.set(renderMesh, "ƒindices", await loader.getUint16Array(meshGLTF.primitives[0].indices));
       Reflect.set(renderMesh, "ƒvertices", await loader.getFloat32Array(meshGLTF.primitives[0].attributes.POSITION));
-      Reflect.set(renderMesh, "ƒnormalsVertex", await loader.getFloat32Array(meshGLTF.primitives[0].attributes.NORMAL));
-      Reflect.set(renderMesh, "ƒtextureUVs", await loader.getFloat32Array(meshGLTF.primitives[0].attributes.TEXCOORD_0));
+      if (meshGLTF.primitives[0].attributes.NORMAL)
+        Reflect.set(renderMesh, "ƒnormalsVertex", await loader.getFloat32Array(meshGLTF.primitives[0].attributes.NORMAL));
+      if (meshGLTF.primitives[0].attributes.TEXCOORD_0)
+        Reflect.set(renderMesh, "ƒtextureUVs", await loader.getFloat32Array(meshGLTF.primitives[0].attributes.TEXCOORD_0));
       _mesh.vertices.push(...getVertices(renderMesh));
       _mesh.faces.push(...getFaces(renderMesh, _mesh.vertices));
       if (_mesh instanceof MeshSkin) {
@@ -26,7 +28,7 @@ namespace FudgeCore {
 
   function* getVertices(_renderMesh: RenderMesh): Generator<Vertex> {
     for (let iVertex: number = 0, iTextureUV: number = 0; iVertex < _renderMesh.vertices.length;
-         iVertex += 3, iTextureUV += 2) {
+      iVertex += 3, iTextureUV += 2) {
       yield new Vertex(
         new Vector3(
           _renderMesh.vertices[iVertex + 0],

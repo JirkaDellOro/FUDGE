@@ -6623,20 +6623,20 @@ declare namespace GLTF {
         /**
          * Magnification filter.
          */
-        "magFilter"?: number | number | number;
+        "magFilter"?: WebGL2RenderingContext["NEAREST"] | WebGL2RenderingContext["LINEAR"];
         /**
          * Minification filter.
          */
-        "minFilter"?: number | number | number | number | number | number | number;
+        "minFilter"?: WebGL2RenderingContext["NEAREST"] | WebGL2RenderingContext["LINEAR"] | WebGL2RenderingContext["NEAREST_MIPMAP_NEAREST"] | WebGL2RenderingContext["LINEAR_MIPMAP_NEAREST"] | WebGL2RenderingContext["NEAREST_MIPMAP_LINEAR"] | WebGL2RenderingContext["LINEAR_MIPMAP_LINEAR"];
         /**
          * S (U) wrapping mode.
          */
-        "wrapS"?: number | number | number | number;
+        "wrapS"?: WebGL2RenderingContext["CLAMP_TO_EDGE"] | WebGL2RenderingContext["MIRRORED_REPEAT"] | WebGL2RenderingContext["REPEAT"];
         /**
          * T (V) wrapping mode.
          */
-        "wrapT"?: number | number | number | number;
-        "name"?: any;
+        "wrapT"?: WebGL2RenderingContext["CLAMP_TO_EDGE"] | WebGL2RenderingContext["MIRRORED_REPEAT"] | WebGL2RenderingContext["REPEAT"];
+        "name"?: string;
         "extensions"?: any;
         "extras"?: any;
         [k: string]: any;
@@ -6793,6 +6793,8 @@ declare namespace FudgeCore {
         getAnimationByIndex(_iAnimation: number): Promise<Animation>;
         getMesh(_name: string): Promise<MeshImport>;
         getMeshByIndex(_iMesh: number): Promise<MeshImport>;
+        getMaterialByIndex(_iMaterial: number): Promise<Material>;
+        getTextureByIndex(_iTexture: number): Promise<Texture>;
         getSkeleton(_name: string): Promise<Skeleton>;
         getSkeletonByIndex(_iSkeleton: number): Promise<Skeleton>;
         getUint8Array(_iAccessor: number): Promise<Uint8Array>;
@@ -6800,6 +6802,7 @@ declare namespace FudgeCore {
         getUint32Array(_iAccessor: number): Promise<Uint32Array>;
         getFloat32Array(_iAccessor: number): Promise<Float32Array>;
         private getBufferData;
+        private getBuffer;
         private getAnimationSequenceVector3;
     }
 }

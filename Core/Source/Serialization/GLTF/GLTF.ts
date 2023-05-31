@@ -538,20 +538,20 @@ namespace GLTF {
     /**
      * Magnification filter.
      */
-    "magFilter"?: number | number | number;
+    "magFilter"?: WebGL2RenderingContext["NEAREST"] | WebGL2RenderingContext["LINEAR"];
     /**
      * Minification filter.
      */
-    "minFilter"?: number | number | number | number | number | number | number;
+    "minFilter"?: WebGL2RenderingContext["NEAREST"] | WebGL2RenderingContext["LINEAR"] | WebGL2RenderingContext["NEAREST_MIPMAP_NEAREST"] | WebGL2RenderingContext["LINEAR_MIPMAP_NEAREST"] | WebGL2RenderingContext["NEAREST_MIPMAP_LINEAR"] | WebGL2RenderingContext["LINEAR_MIPMAP_LINEAR"];
     /**
      * S (U) wrapping mode.
      */
-    "wrapS"?: number | number | number | number;
+    "wrapS"?: WebGL2RenderingContext["CLAMP_TO_EDGE"] | WebGL2RenderingContext["MIRRORED_REPEAT"] | WebGL2RenderingContext["REPEAT"];
     /**
      * T (V) wrapping mode.
      */
-    "wrapT"?: number | number | number | number;
-    "name"?: any;
+    "wrapT"?: WebGL2RenderingContext["CLAMP_TO_EDGE"] | WebGL2RenderingContext["MIRRORED_REPEAT"] | WebGL2RenderingContext["REPEAT"];
+    "name"?: string;
     "extensions"?: any;
     "extras"?: any;
     [k: string]: any;
