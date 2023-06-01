@@ -459,9 +459,8 @@ uniform sampler2D u_texture;
 out vec4 vctFrag;
 
 void main() {
-    vctFrag = 0.9 * texture(u_texture, v_vctTexture);
-    vctFrag = vec4(vctFrag.r, vctFrag.r, vctFrag.r, 1.0);
-    vctFrag = vec4(0.5, 0.5, 1.0, 1.0);
+    vec4 tex = texture(u_texture, v_vctTexture);
+    vctFrag = vec4(1.0 - tex.r, 1.0 - tex.g, 1.0 - tex.r, 1.0);
 }
 `;
   shaderSources["ShaderScreen.vert"] = `#version 300 es
@@ -477,7 +476,7 @@ out vec2 v_vctTexture;
 
 void main() {
     gl_Position = vec4(a_vctPosition, 0.0, 1.0);
-    v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+    v_vctTexture = a_vctTexture;
 }
 `;
   shaderSources["ShaderUniversal.frag"] = `#version 300 es

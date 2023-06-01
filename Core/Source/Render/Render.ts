@@ -194,9 +194,10 @@ namespace FudgeCore {
     //#region PostFX
     public static calcMist(_cmpCamera: ComponentCamera): void {
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mistFBO);
-      Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+      //Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+      Render.crc3.viewport(0, 0, 1024, 1024);
 
-      Render.crc3.clearColor(0.2, 0.2, 0.4, 1.0);
+      Render.crc3.clearColor(0, 0, 0, 1);
       Render.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
 
       _cmpCamera.resetWorldToView();
@@ -249,14 +250,12 @@ namespace FudgeCore {
 
       //feed in vertex coordinates if shader accepts a_vctPosition
       let attribute: number = _shader.attributes["a_vctPosition"];
-      if (attribute) {
+      if (typeof attribute !== "undefined") {
         crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, Render.screenQuad));
         crc3.enableVertexAttribArray(attribute);
-        RenderWebGL.setAttributeStructure(
-          attribute,
-          { size: 2, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 }
-        );
+        crc3.vertexAttribPointer(attribute, 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
       }
+
       // feed in texture coordinates if shader accepts a_vctTexture
       let texAttribute: number = _shader.attributes["a_vctTexture"];
       if (texAttribute) {
@@ -264,6 +263,7 @@ namespace FudgeCore {
         crc3.enableVertexAttribArray(texAttribute); 
         crc3.vertexAttribPointer(texAttribute, 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
       }
+
       //feed texture and uniform matrix
       crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
       crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, coat.texture);

@@ -11,5 +11,5 @@ out vec2 v_vctTexture;
 
 void main() {
     gl_Position = vec4(a_vctPosition, 0.0, 1.0);
-    v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+    v_vctTexture = a_vctTexture;
 }

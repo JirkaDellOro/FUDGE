@@ -885,5 +885,25 @@
       "idResource": "Graph|2023-03-22T12:13:41.839Z|18963",
       "type": "Graph"
     }
+  },
+  "Material|2023-06-01T09:25:17.640Z|94344": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-01T09:25:17.640Z|94344",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-01T09:25:17.704Z|15631": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-01T09:25:17.704Z|15631",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
   }
 }

@@ -342,6 +342,8 @@ namespace FudgeCore {
       let tempSizeX: number = RenderWebGL.crc3.canvas.width; //this should be based on the current Framing. Further it probably should get updated when Chaning the Framing
       let tempSizeY: number = RenderWebGL.crc3.canvas.height;
 
+      tempSizeX = 1024;
+      tempSizeY = 1024;
       if (_mist) {
         let framebuffer: WebGLFramebuffer;
         let texture: RenderTexture;
@@ -447,7 +449,7 @@ namespace FudgeCore {
       let shader: ShaderInterface = Render.screenQuadCmpMat.material.getShader();
       shader.useProgram();
       Render.useScreenQuadRenderData(Render.screenQuadCmpMat.material.getShader());
-      RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, 6, WebGL2RenderingContext.UNSIGNED_SHORT, 6);
+      RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
     }
 
     public static drawAO(): void {
