@@ -43,21 +43,21 @@ var SkeletonTest;
     }
     async function loadAnimatedArm() {
         // const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
-        const loader = await ƒ.GLTFLoader.LOAD("./arm_from_fbx.gltf");
+        // const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./arm_from_fbx.gltf");
         // const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./arm.gltf");
-        const arm = await loader.getNode("ArmModel");
-        // const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./unarmed_walk.gltf");
+        // const arm: ƒ.Node = await loader.getNode("ArmModel");
+        const loader = await ƒ.GLTFLoader.LOAD("./unarmed_walk.gltf");
         // const arm: ƒ.Node = await loader.getNodeByIndex(0);
         // const arm: ƒ.Node = await loader.getNode("Armature");
-        const anime = await loader.getAnimationByIndex(0);
-        arm.addComponent(new ƒ.ComponentAnimator(anime));
+        // const anime = await loader.getAnimationByIndex(0);
+        // arm.addComponent(new ƒ.ComponentAnimator(anime));
         console.log(loader);
         // const meshSerialization: ƒ.Serialization = ƒ.Serializer.serialize(arm.getComponent(ƒ.ComponentMesh).mesh);
         // console.log(meshSerialization);
         // arm.getComponent(ƒ.ComponentMesh).mesh = await ƒ.Serializer.deserialize(meshSerialization) as ƒ.MeshSkin;
         // arm.addComponent(new ƒ.ComponentTransform());
         // arm.mtxLocal.translateY(-2);
-        return arm;
+        return await loader.getScene();
     }
     function update(_viewport, _mtxRotatorX, _mtxRotatorY) {
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT]))

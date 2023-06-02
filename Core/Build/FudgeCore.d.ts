@@ -1380,6 +1380,7 @@ declare namespace FudgeCore {
      * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
      */
     interface AnimationStructure {
+        children?: AnimationStructure;
         [attribute: string]: AnimationStructure[] | AnimationStructure | AnimationSequence;
     }
     interface AnimationStructureVector3 extends AnimationStructure {
@@ -6786,7 +6787,7 @@ declare namespace FudgeCore {
         getScene(_name?: string): Promise<GraphInstance>;
         getSceneByIndex(_iScene?: number): Promise<GraphInstance>;
         getNode(_name: string): Promise<Node>;
-        getNodeByIndex(_iNode: number, _skeleton?: boolean): Promise<Node>;
+        getNodeByIndex(_iNode: number): Promise<Node>;
         getCamera(_name: string): Promise<ComponentCamera>;
         getCameraByIndex(_iCamera: number): Promise<ComponentCamera>;
         getAnimation(_name: string): Promise<Animation>;
@@ -7023,7 +7024,7 @@ declare namespace FudgeCore {
          * @param _mtxInit initial local matrix
          * @param _parentName name of the parent node, that must be registered as a bone
          */
-        addBone(_bone: Node, _mtxInit?: Matrix4x4, _parentName?: string): void;
+        addBone(_bone: Node, _parentName: string, _mtxInit?: Matrix4x4): void;
         /**
          * Registers a node as a bone with its bind inverse matrix
          * @param _bone the node to be registered, that should be a descendant of this skeleton

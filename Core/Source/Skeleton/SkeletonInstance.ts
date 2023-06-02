@@ -97,10 +97,10 @@ namespace FudgeCore {
       for (const boneName in this.bones) {
         // bone matrix T = N^-1 * B_delta * B_0^-1 * S
         const mtxBone: Matrix4x4 = this.getParent()?.mtxWorldInverse.clone || Matrix4x4.IDENTITY();
-        //mtxBone.multiply(this.bindPose ? this.bindPose[boneName] : this.bones[boneName].getParent().mtxWorld);
+        // if (this.mtxPivot) mtxBone.multiply(this.mtxPivot);
         mtxBone.multiply(this.bones[boneName].mtxWorld);
         mtxBone.multiply(this.skeletonSource.mtxBindInverses[boneName]);
-        if (this.cmpTransform) mtxBone.multiply(Matrix4x4.INVERSION(this.mtxLocal));
+        // if (this.mtxPivot) mtxBone.multiply(Matrix4x4.INVERSION(this.mtxPivot));
 
         this.#mtxBones.push(mtxBone);
       }

@@ -6,6 +6,7 @@ namespace FudgeCore {
    * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
    */
   export interface AnimationStructure {
+    children?: AnimationStructure,
     [attribute: string]: AnimationStructure[] | AnimationStructure | AnimationSequence;
   }
 

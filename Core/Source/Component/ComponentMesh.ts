@@ -93,26 +93,24 @@ namespace FudgeCore {
       if (_serialization.skeleton)
         this.addEventListener(EVENT.COMPONENT_ADD, (_event: Event) => {
           if (_event.target != this) return;
-          // find root node
           const trySetSkeleton: () => void = () => {
+            // find root node
             let root: Node = this.node;
             while (root.getParent()) {
               root = root.getParent();
             }
-            for (const child of root) {
-              if (child != root && child instanceof SkeletonInstance && child.idSource == _serialization.skeleton)
-                this.skeleton = child;
+            for (const node of root) {
+              if (node instanceof SkeletonInstance && node.idSource == _serialization.skeleton)
+                this.skeleton = node;
             }
             if (!this.skeleton) {
               const trySetSkeletonOnChildAppend: (_event: Event) => void = _event => {
+                root.removeEventListener(EVENT.CHILD_APPEND, trySetSkeletonOnChildAppend);
                 if (_event.target instanceof SkeletonInstance && _event.target.idSource == _serialization.skeleton)
                   this.skeleton = _event.target;
                 else {
                   trySetSkeleton();
-                  root.removeEventListener(EVENT.CHILD_APPEND, trySetSkeletonOnChildAppend);
                 }
-                if (this.skeleton)
-                  root.removeEventListener(EVENT.CHILD_APPEND, trySetSkeletonOnChildAppend);
               };
               root.addEventListener(EVENT.CHILD_APPEND, trySetSkeletonOnChildAppend);
             }
