@@ -33,7 +33,7 @@ namespace FudgeCore {
       if (!this.loaders[_url]) {
         const response: Response = await fetch(_url);
         const gltf: GLTF.GlTf = await response.json();
-        gltf.nodes.forEach((_node, _iNode) =>
+        gltf.nodes.forEach((_node, _iNode) => // mark parents of nodes
           _node.children?.forEach(_iChild => gltf.nodes[_iChild].parent = _iNode));
         this.loaders[_url] = new GLTFLoader(gltf, _url);
       }
@@ -200,6 +200,7 @@ namespace FudgeCore {
       if (!this.#animations[_iAnimation]) {
         const gltfAnimation: GLTF.Animation = this.gltf.animations[_iAnimation];
 
+        // TODO: maybe refactor this to iterate over channels directly and remove this map
         const mapiNodeToGltfChannel: GLTF.AnimationChannel[][] = [];
         for (const gltfChannel of gltfAnimation.channels) {
           if (gltfChannel.target.node == undefined)
@@ -291,6 +292,7 @@ namespace FudgeCore {
         this.#materials = [];
       if (!this.#materials[_iMaterial]) {
         const gltfMaterial: GLTF.Material = this.gltf.materials[_iMaterial];
+        // TODO: in the future create an appropriate shader based on the gltf material properties
         const material: Material = new Material(gltfMaterial.name, ShaderPhongTexturedSkin);
         const gltfTextureInfo: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
         if (gltfTextureInfo) {
