@@ -332,7 +332,17 @@
     "ƒ.Graph": {
       "name": "DefaultScene",
       "active": true,
-      "components": {},
+      "components": {
+        "ComponentPostFX": [
+          {
+            "ƒ.ComponentPostFX": {
+              "mist": false,
+              "ao": false,
+              "bloom": false
+            }
+          }
+        ]
+      },
       "children": [
         {
           "ƒ.Node": {
@@ -900,6 +910,66 @@
     "ƒ.Material": {
       "name": "screenQuadMat",
       "idResource": "Material|2023-06-01T09:25:17.704Z|15631",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-02T14:21:25.175Z|45631": {
+    "ƒ.Material": {
+      "name": "mistMat",
+      "idResource": "Material|2023-06-02T14:21:25.175Z|45631",
+      "shader": "ShaderMist",
+      "coat": {
+        "ƒ.Coat": {}
+      }
+    }
+  },
+  "Material|2023-06-02T14:21:25.175Z|34582": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-02T14:21:25.175Z|34582",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-02T14:21:25.440Z|14793": {
+    "ƒ.Material": {
+      "name": "mistMat",
+      "idResource": "Material|2023-06-02T14:21:25.440Z|14793",
+      "shader": "ShaderMist",
+      "coat": {
+        "ƒ.Coat": {}
+      }
+    }
+  },
+  "Material|2023-06-02T14:21:25.440Z|72041": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-02T14:21:25.440Z|72041",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-02T14:21:25.458Z|37403": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-02T14:21:25.458Z|37403",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-02T14:21:35.094Z|41569": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-02T14:21:35.094Z|41569",
       "shader": "ShaderScreen",
       "coat": {
         "ƒ.CoatWebGlTextured": {}

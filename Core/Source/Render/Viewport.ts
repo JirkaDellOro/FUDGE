@@ -12,6 +12,7 @@ namespace FudgeCore {
 
     public name: string = "Viewport"; // The name to call this viewport by.
     public camera: ComponentCamera = null; // The camera representing the view parameters to render the branch.
+    public postFX: ComponentPostFX = null; // The post-fx component representing the post parameters.
 
     public rectSource: Rectangle;
     public rectDestination: Rectangle;
@@ -27,6 +28,7 @@ namespace FudgeCore {
     public adjustingFrames: boolean = true;
     public adjustingCamera: boolean = true;
     public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
+    private lastRectRenderSize: Vector2 = new Vector2(0,0);
 
     public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
 
@@ -74,7 +76,7 @@ namespace FudgeCore {
       this.rectDestination = this.getClientRectangle();
 
       if (this.mist || this.ao || this.bloom) {
-        Render.initPostBuffers(this.mist, this.ao, this.bloom);
+        Render.setPostBuffers(this.mist, this.ao, this.bloom);
       }
 
       this.setBranch(_branch);
@@ -232,6 +234,11 @@ namespace FudgeCore {
       Render.setRenderRectangle(rectRender);
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
       Render.setCanvasSize(rectRender.width, rectRender.height);
+      // setting the new canvas size on the post-fx textures
+      if (rectRender.size.x != this.lastRectRenderSize.x || rectRender.size.y != this.lastRectRenderSize.y) {
+        Render.adjustPostBuffers(rectRender.size, this.mist, this.ao, this.bloom);
+        this.lastRectRenderSize.set(rectRender.size.x, rectRender.size.y);
+      }
 
       Recycler.store(rectClient);
       Recycler.store(rectCanvas);

@@ -1020,6 +1020,10 @@ declare namespace FudgeCore {
         stride: number;
         offset: number;
     }
+    interface PostBufferdata {
+        fbo: WebGLFramebuffer;
+        texture: WebGLTexture;
+    }
     /**
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
      * Methods and attributes of this class should not be called directly, only through {@link Render}
@@ -1096,13 +1100,21 @@ declare namespace FudgeCore {
          */
         protected static setLightsInShader(_shader: ShaderInterface, _lights: MapLightTypeToLightList): void;
         /**
-         * Creates texture buffers to be used for PostFX
+         * Creates and stores texture buffers to be used for PostFX
          */
-        static initPostBuffers(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
+        static setPostBuffers(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
         /**
-         * Draw a mesh buffer using the given infos and the complete projection matrix
+         * updates texture and renderbuffersize for given postFX buffers
          */
-        protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
+        static adjustPostBuffers(_newSize: Vector2, _mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
+        /**
+         * Sets up and configures framebuffers and textures for post-fx
+         */
+        protected static setupPostBuffer(_fbo?: WebGLFramebuffer): PostBufferdata;
+        /**
+         * Draw a mesh buffer using the given infos and the complete projection matrix. A shader can be passed to calculate every object with the same shader
+         */
+        protected static drawNode(_node: Node, _cmpCamera: ComponentCamera, _cmpMat?: ComponentMaterial): void;
         static drawMist(_cmpCamera: ComponentCamera): void;
         static drawAO(): void;
         static drawBloom(): void;
@@ -2286,6 +2298,21 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Attaches a {@link Material} to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
+     */
+    class ComponentPostFX extends Component {
+        static readonly iSubclass: number;
+        mist: boolean;
+        ao: boolean;
+        bloom: boolean;
+        constructor(_mist?: boolean, _ao?: boolean, _bloom?: boolean);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -5414,8 +5441,13 @@ declare namespace FudgeCore {
         static pickBuffer: Int32Array;
         static mistFBO: WebGLFramebuffer;
         static mistTexture: WebGLTexture;
+        static cmpMistMaterial: ComponentMaterial;
+        static aoFBO: WebGLFramebuffer;
+        static aoTexture: WebGLTexture;
+        static bloomFBO: WebGLFramebuffer;
+        static bloomTexture: WebGLTexture;
         static screenQuad: Float32Array;
-        static screenQuadTex: Float32Array;
+        static screenQuadUV: Float32Array;
         static screenQuadCmpMat: ComponentMaterial;
         static nodesPhysics: RecycableArray<Node>;
         static componentsPick: RecycableArray<ComponentPick>;
@@ -5437,6 +5469,9 @@ declare namespace FudgeCore {
         static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera): Pick[];
         static draw(_cmpCamera: ComponentCamera): void;
         private static drawListAlpha;
+        /**
+         * Draws a given list of nodes. A @param _cmpMat can be passed to render every node of the list with the same Material (useful for PostFX)
+         */
         private static drawList;
         static calcMist(_cmpCamera: ComponentCamera): void;
         static calcAO(_cmpCamera: ComponentCamera): void;
@@ -5522,6 +5557,7 @@ declare namespace FudgeCore {
         private static focus;
         name: string;
         camera: ComponentCamera;
+        postFX: ComponentPostFX;
         rectSource: Rectangle;
         rectDestination: Rectangle;
         frameClientToCanvas: FramingScaled;
@@ -5531,6 +5567,7 @@ declare namespace FudgeCore {
         adjustingFrames: boolean;
         adjustingCamera: boolean;
         physicsDebugMode: PHYSICS_DEBUGMODE;
+        private lastRectRenderSize;
         componentsPick: RecycableArray<ComponentPick>;
         private mist;
         private ao;
@@ -6588,6 +6625,14 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderMist extends ShaderLit {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {

@@ -6,12 +6,12 @@
 precision mediump float;
 precision highp int;
 
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
+uniform vec3 u_vctCamera;
+in vec3 v_vctPositionView;
 
 out vec4 vctFrag;
 
 void main() {
-    vec4 tex = texture(u_texture, v_vctTexture);
-    vctFrag = 0.7 * tex;
+    vctFrag = vec4(u_vctCamera, 1.0);
+    //vctFrag = vec4(1.0);
 }

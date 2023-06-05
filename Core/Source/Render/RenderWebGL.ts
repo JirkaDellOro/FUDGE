@@ -23,6 +23,12 @@ namespace FudgeCore {
     offset: number; // Index of the element to begin with.
   }
 
+  // Interface for transfering needed buffer data
+  export interface PostBufferdata {
+    fbo: WebGLFramebuffer;
+    texture: WebGLTexture;
+  }
+
   /**
    * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
    * Methods and attributes of this class should not be called directly, only through {@link Render}
@@ -336,82 +342,132 @@ namespace FudgeCore {
 
     //#region Post
     /**
-     * Creates texture buffers to be used for PostFX
+     * Creates and stores texture buffers to be used for PostFX
      */
-    public static initPostBuffers(_mist: boolean = false, _ao: boolean = false, _bloom: boolean = false): void {
-      let tempSizeX: number = RenderWebGL.crc3.canvas.width; //this should be based on the current Framing. Further it probably should get updated when Chaning the Framing
-      let tempSizeY: number = RenderWebGL.crc3.canvas.height;
-
-      tempSizeX = 1024;
-      tempSizeY = 1024;
+    public static setPostBuffers(_mist: boolean = false, _ao: boolean = false, _bloom: boolean = false): void {
       if (_mist) {
-        let framebuffer: WebGLFramebuffer;
-        let texture: RenderTexture;
-        let depthBuffer: WebGLRenderbuffer;
-        let error = function (): void {
-          if (framebuffer) RenderWebGL.crc3.deleteFramebuffer(framebuffer);
-          if (texture) RenderWebGL.crc3.deleteTexture(texture);
-          if (depthBuffer) RenderWebGL.crc3.deleteRenderbuffer(depthBuffer);
-          return null;
-        }
+        let mistBufferData: PostBufferdata = RenderWebGL.setupPostBuffer();
+        Render.mistFBO = mistBufferData.fbo;
+        Render.mistTexture = mistBufferData.texture;
+        Render.cmpMistMaterial = new ComponentMaterial(new Material("mistMat", ShaderMist));
+        Render.initScreenQuad(Render.mistTexture);
+      }
+      if (_ao) {
+        let aoBufferData: PostBufferdata = RenderWebGL.setupPostBuffer();
+        Render.aoFBO = aoBufferData.fbo;
+        Render.aoTexture = aoBufferData.texture;
+      }
+      if (_bloom) {
+        let bloomBufferData: PostBufferdata = RenderWebGL.setupPostBuffer();
+        Render.bloomFBO = bloomBufferData.fbo;
+        Render.bloomTexture = bloomBufferData.texture;
+      }
+    }
 
-        //Create FBO
+    /**
+     * updates texture and renderbuffersize for given postFX buffers
+     */
+    public static adjustPostBuffers(_newSize: Vector2, _mist: boolean = false, _ao: boolean = false, _bloom: boolean = false): void {
+      if (_newSize.x > 0 && _newSize.y > 0) {
+        if (_mist) {
+          let mistBufferData: PostBufferdata = RenderWebGL.setupPostBuffer(Render.mistFBO);
+          Render.mistTexture = mistBufferData.texture;
+          Render.initScreenQuad(Render.mistTexture);
+        }
+        if (_ao) {
+          let aoBufferData: PostBufferdata = RenderWebGL.setupPostBuffer(Render.aoFBO);
+          Render.aoTexture = aoBufferData.texture;
+          //TODO: ScreenQuad missing
+        }
+        if (_bloom) {
+          let bloomBufferData: PostBufferdata = RenderWebGL.setupPostBuffer(Render.bloomFBO);
+          Render.bloomTexture = bloomBufferData.texture;
+          //TODO: ScreenQuad missing
+        }
+      }
+    }
+
+    /**
+     * Sets up and configures framebuffers and textures for post-fx
+     */
+    protected static setupPostBuffer(_fbo: WebGLFramebuffer = null): PostBufferdata {
+      let postBufferData: PostBufferdata;
+      let sizeX: number = RenderWebGL.crc3.canvas.width; //this should be based on the current Framing. Further it probably should get updated when Chaning the Framing
+      let sizeY: number = RenderWebGL.crc3.canvas.height;
+      let framebuffer: WebGLFramebuffer;
+      let texture: RenderTexture;
+      let depthBuffer: WebGLRenderbuffer;
+
+      let error = function (): PostBufferdata {
+        if (framebuffer) RenderWebGL.crc3.deleteFramebuffer(framebuffer);
+        if (texture) RenderWebGL.crc3.deleteTexture(texture);
+        if (depthBuffer) RenderWebGL.crc3.deleteRenderbuffer(depthBuffer);
+        return null;
+      }
+
+      //Create FBO or use existing
+      if (_fbo == null) {
         framebuffer = RenderWebGL.crc3.createFramebuffer();
         if (!framebuffer) {
           console.log("Failed to create FBO");
           return error();
         }
-
-        //Create Texture Object
-        texture = RenderWebGL.crc3.createTexture();
-        if (!texture) {
-          console.log("Failed to create Texture Oject");
-          return error();
-        }
-        RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
-        RenderWebGL.crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, tempSizeX, tempSizeY, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, null);
-        RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR);
-        Render.mistTexture = texture;
-
-        //Create renderbuffer 
-        depthBuffer = RenderWebGL.crc3.createRenderbuffer();
-        if (!depthBuffer) {
-          console.log("Failed to create render buffer object");
-          return error();
-        }
-        RenderWebGL.crc3.bindRenderbuffer(WebGL2RenderingContext.RENDERBUFFER, depthBuffer);
-        RenderWebGL.crc3.renderbufferStorage(WebGL2RenderingContext.RENDERBUFFER, WebGL2RenderingContext.DEPTH_COMPONENT16, tempSizeX, tempSizeY);
-
-        //Attach texture and render buffer object to the FBO
-        RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
-        RenderWebGL.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, texture, 0);
-        RenderWebGL.crc3.framebufferRenderbuffer(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.DEPTH_ATTACHMENT, WebGL2RenderingContext.RENDERBUFFER, depthBuffer);
-
-        //Check if FBO is configured correctly
-        let e: number = RenderWebGL.crc3.checkFramebufferStatus(WebGL2RenderingContext.FRAMEBUFFER);
-        if (WebGL2RenderingContext.FRAMEBUFFER_COMPLETE !== e) {
-          console.log("FBO is incomplete: " + e.toString());
-          return error();
-        }
-
-        //Unbind the buffer object
-        RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
-        RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
-        RenderWebGL.crc3.bindRenderbuffer(WebGL2RenderingContext.RENDERBUFFER, null);
-
-        Render.mistFBO = framebuffer;
-        Render.initScreenQuad(texture);
+      } else {
+        framebuffer = _fbo;
       }
+
+      //Create Texture Object
+      texture = RenderWebGL.crc3.createTexture();
+      if (!texture) {
+        console.log("Failed to create Texture Oject");
+        return error();
+      }
+      RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
+      RenderWebGL.crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, sizeX, sizeY, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, null);
+      RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR);
+
+      //Create renderbuffer 
+      depthBuffer = RenderWebGL.crc3.createRenderbuffer();
+      if (!depthBuffer) {
+        console.log("Failed to create render buffer object");
+        return error();
+      }
+      RenderWebGL.crc3.bindRenderbuffer(WebGL2RenderingContext.RENDERBUFFER, depthBuffer);
+      RenderWebGL.crc3.renderbufferStorage(WebGL2RenderingContext.RENDERBUFFER, WebGL2RenderingContext.DEPTH_COMPONENT16, sizeX, sizeY);
+
+      //Attach texture and render buffer object to the FBO
+      RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
+      RenderWebGL.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, texture, 0);
+      RenderWebGL.crc3.framebufferRenderbuffer(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.DEPTH_ATTACHMENT, WebGL2RenderingContext.RENDERBUFFER, depthBuffer);
+
+      //Check if FBO is configured correctly
+      let e: number = RenderWebGL.crc3.checkFramebufferStatus(WebGL2RenderingContext.FRAMEBUFFER);
+      if (WebGL2RenderingContext.FRAMEBUFFER_COMPLETE !== e) {
+        console.log("FBO is incomplete: " + e.toString());
+        return error();
+      }
+
+      //Unbind the buffer object
+      RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
+      RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
+      RenderWebGL.crc3.bindRenderbuffer(WebGL2RenderingContext.RENDERBUFFER, null);
+      postBufferData = { fbo: framebuffer, texture: texture };
+      return postBufferData;
     }
 
     //#endregion
 
     /**
-     * Draw a mesh buffer using the given infos and the complete projection matrix
+     * Draw a mesh buffer using the given infos and the complete projection matrix. A shader can be passed to calculate every object with the same shader
      */
-    protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void {
+    protected static drawNode(_node: Node, _cmpCamera: ComponentCamera, _cmpMat?: ComponentMaterial): void {
       let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-      let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
+      let cmpMaterial: ComponentMaterial
+      if (_cmpMat == null) {
+        cmpMaterial = _node.getComponent(ComponentMaterial);
+      } else {
+        cmpMaterial = _cmpMat;
+      }
       let coat: Coat = cmpMaterial.material.coat;
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       let drawParticles: boolean = cmpParticleSystem && cmpParticleSystem.isActive;

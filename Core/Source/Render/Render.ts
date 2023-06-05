@@ -14,8 +14,16 @@ namespace FudgeCore {
 
     public static mistFBO: WebGLFramebuffer;
     public static mistTexture: WebGLTexture;
+    public static cmpMistMaterial: ComponentMaterial;
+
+    public static aoFBO: WebGLFramebuffer;
+    public static aoTexture: WebGLTexture;
+
+    public static bloomFBO: WebGLFramebuffer;
+    public static bloomTexture: WebGLTexture;
+
     public static screenQuad: Float32Array;
-    public static screenQuadTex: Float32Array;
+    public static screenQuadUV: Float32Array;
     public static screenQuadCmpMat: ComponentMaterial;
 
     public static nodesPhysics: RecycableArray<Node> = new RecycableArray();
@@ -183,10 +191,12 @@ namespace FudgeCore {
       let sorted: Node[] = Render.nodesAlpha.getSorted(sort);
       Render.drawList(_cmpCamera, sorted);
     }
-
-    private static drawList(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>): void {
+    /**
+     * Draws a given list of nodes. A @param _cmpMat can be passed to render every node of the list with the same Material (useful for PostFX)
+     */
+    private static drawList(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpMat?: ComponentMaterial): void {
       for (let node of _list) {
-        Render.drawNode(node, _cmpCamera);
+        Render.drawNode(node, _cmpCamera, _cmpMat);
       }
     }
     //#endregion
@@ -194,15 +204,14 @@ namespace FudgeCore {
     //#region PostFX
     public static calcMist(_cmpCamera: ComponentCamera): void {
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mistFBO);
-      //Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
-      Render.crc3.viewport(0, 0, 1024, 1024);
+      Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
 
       Render.crc3.clearColor(0, 0, 0, 1);
       Render.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
 
       _cmpCamera.resetWorldToView();
 
-      Render.drawList(_cmpCamera, this.nodesSimple);
+      Render.drawList(_cmpCamera, this.nodesSimple, Render.cmpMistMaterial);
       Render.drawListAlpha(_cmpCamera);
 
       //Reset to main color buffer
@@ -226,7 +235,7 @@ namespace FudgeCore {
         1.0, 1.0,
         1.0, -1.0,
       ]);
-      Render.screenQuadTex = new Float32Array([
+      Render.screenQuadUV = new Float32Array([
         //Texture coordinates 
         0.0, 1.0,
         0.0, 0.0,
@@ -239,7 +248,7 @@ namespace FudgeCore {
 
     public static useScreenQuadRenderData(_shader: typeof Shader): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      let coat: CoatWebGlTextured = <CoatWebGlTextured> Render.screenQuadCmpMat.material.coat;
+      let coat: CoatWebGlTextured = <CoatWebGlTextured>Render.screenQuadCmpMat.material.coat;
 
       function createBuffer(_type: GLenum, _array: Float32Array): WebGLBuffer {
         let buffer: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
@@ -259,8 +268,8 @@ namespace FudgeCore {
       // feed in texture coordinates if shader accepts a_vctTexture
       let texAttribute: number = _shader.attributes["a_vctTexture"];
       if (texAttribute) {
-        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, Render.screenQuadTex));
-        crc3.enableVertexAttribArray(texAttribute); 
+        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, Render.screenQuadUV));
+        crc3.enableVertexAttribArray(texAttribute);
         crc3.vertexAttribPointer(texAttribute, 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
       }
 

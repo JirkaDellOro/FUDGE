@@ -1,5 +1,23 @@
 namespace FudgeCore {
   export let shaderSources: {[source: string]: string} = {};
+  shaderSources["ShaderMist.frag"] = `#version 300 es
+/**
+*Renders Framebuffer on to Renderbuffer
+*@authors Roland Heer, HFU, 2023
+*/
+precision mediump float;
+precision highp int;
+
+uniform vec3 u_vctCamera;
+in vec3 v_vctPositionView;
+
+out vec4 vctFrag;
+
+void main() {
+    vctFrag = vec4(u_vctCamera, 1.0);
+    //vctFrag = vec4(1.0);
+}
+`;
   shaderSources["ShaderParticle.frag"] = `#version 300 es
 /**
 * Particle shader similar to lit textured shader
@@ -460,7 +478,7 @@ out vec4 vctFrag;
 
 void main() {
     vec4 tex = texture(u_texture, v_vctTexture);
-    vctFrag = vec4(1.0 - tex.r, 1.0 - tex.g, 1.0 - tex.r, 1.0);
+    vctFrag = 0.7 * tex;
 }
 `;
   shaderSources["ShaderScreen.vert"] = `#version 300 es
@@ -629,6 +647,10 @@ out vec3 v_vctBitangent;
 out vec4 v_vctPosition;
   #endif
 
+  #if defined(MIST)
+out vec3 v_vctPositionView;
+  #endif
+
   #if defined(SKIN)
 // uniform mat4 u_mtxMeshToWorld;
 // Bones
@@ -725,10 +747,13 @@ void main() {
   vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader
-  v_vctTangent = normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent);  
+  v_vctTangent = normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent);
   v_vctBitangent = normalize(mat3(mtxNormalMeshToWorld) * cross(a_vctNormal, a_vctTangent));
   v_vctPosition = vctPosition;
       #endif  
+      #if defined(MIST)
+  v_vctPositionView = (u_mtxMeshToView * vctPosition).xyz;;
+      #endif
 
     #if !defined(PHONG)
   // calculate directional light effect

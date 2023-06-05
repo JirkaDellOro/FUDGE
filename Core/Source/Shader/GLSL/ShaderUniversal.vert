@@ -101,6 +101,10 @@ out vec3 v_vctBitangent;
 out vec4 v_vctPosition;
   #endif
 
+  #if defined(MIST)
+out vec3 v_vctPositionView;
+  #endif
+
   #if defined(SKIN)
 // uniform mat4 u_mtxMeshToWorld;
 // Bones
@@ -197,10 +201,13 @@ void main() {
   vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader
-  v_vctTangent = normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent);  
+  v_vctTangent = normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent);
   v_vctBitangent = normalize(mat3(mtxNormalMeshToWorld) * cross(a_vctNormal, a_vctTangent));
   v_vctPosition = vctPosition;
       #endif  
+      #if defined(MIST)
+  v_vctPositionView = (u_mtxMeshToView * vctPosition).xyz;;
+      #endif
 
     #if !defined(PHONG)
   // calculate directional light effect
