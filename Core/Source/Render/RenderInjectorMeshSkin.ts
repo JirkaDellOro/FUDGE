@@ -1,12 +1,4 @@
 namespace FudgeCore {
-  // Dictionary to all uniform blocks
-  const UNIFORM_BLOCKS = {
-    SKIN: {
-      NAME: "Skin",
-      BINDING: 0
-    }
-  };
-
   export class RenderInjectorMeshSkin extends RenderInjectorMesh {
 
     public static decorate(_constructor: Function): void {
@@ -99,8 +91,8 @@ namespace FudgeCore {
 
   }
 
-  function* iterableFrom(matrices: Matrix4x4[]): Iterable<number> {
-    for (const matrix of matrices)
+  function* iterableFrom(_matrices: Matrix4x4[]): Iterable<number> {
+    for (const matrix of _matrices)
       for (const value of matrix.get())
         yield value;
   }

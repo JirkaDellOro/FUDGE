@@ -32,7 +32,7 @@ namespace Fudge {
       this.table = new ƒui.Table<ƒ.SerializableResource>(new ControllerTableResource(), Object.values(ƒ.Project.resources), "type");
       this.dom.appendChild(this.table);
       this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
-      this.table.title = `● Select to edit in "Properties"\n●  Drag to "Properties" or "Components" to use if applicable.`;
+      this.table.title = "● Select to edit in \"Properties\"\n●  Drag to \"Properties\" or \"Components\" to use if applicable.";
 
       for (let tr of this.table.querySelectorAll("tr")) {
         let tds: NodeListOf<HTMLTableCellElement> = tr.querySelectorAll("td");
@@ -192,7 +192,7 @@ namespace Fudge {
               console.log(new ƒ.TextureImage(source.pathRelative));
               break;
             case MIME.MESH:
-              console.log(new ƒ.MeshObj(null, source.pathRelative));
+              console.log(await new ƒ.MeshImport().load(ƒ.MeshLoaderOBJ, source.pathRelative));
               break;
           }
         }
@@ -220,6 +220,6 @@ namespace Fudge {
           this.listResources();
           break;
       }
-    }
+    };
   }
 }

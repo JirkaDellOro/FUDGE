@@ -23,13 +23,23 @@ namespace FudgeCore {
     offset: number; // Index of the element to begin with.
   }
 
+  export const UNIFORM_BLOCKS: { [block: string]: { NAME: string; BINDING: number } } = {
+    LIGHTS: {
+      NAME: "Lights",
+      BINDING: 0
+    },
+    SKIN: {
+      NAME: "Skin",
+      BINDING: 1
+    }
+  };
+
   /**
    * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
    * Methods and attributes of this class should not be called directly, only through {@link Render}
    */
   export abstract class RenderWebGL extends EventTargetStatic {
     protected static crc3: WebGL2RenderingContext = RenderWebGL.initialize();
-    public static readonly maxTextureSize: number = RenderWebGL.crc3.getParameter(RenderWebGL.crc3.MAX_TEXTURE_SIZE);
     protected static ƒpicked: Pick[];
     private static rectRender: Rectangle = RenderWebGL.getCanvasRect();
     private static sizePick: number;
@@ -432,9 +442,9 @@ namespace FudgeCore {
       let shader: ShaderInterface = cmpMaterial.material.getShader();
       if (drawParticles) shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
 
-      shader.useProgram();   
+      shader.useProgram();
       coat.useRenderData(shader, cmpMaterial);
-      
+
       let mtxMeshToView: Matrix4x4 = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
       let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
 

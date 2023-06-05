@@ -17,8 +17,8 @@ namespace FudgeCore {
   }
 
   /** Splits up the obj string into separate arrays for each datatype */
-  function parseObj(data: string, _mesh: MeshImport): void {
-    const lines: string[] = data.split("\n");
+  function parseObj(_data: string, _mesh: MeshImport): void {
+    const lines: string[] = _data.split("\n");
 
     let positions: Vector3[] = [];
     let uvs: Vector2[] = [];
@@ -51,22 +51,22 @@ namespace FudgeCore {
             iNormal: +parts[i].split("/")[2] - 1
           });
         }
+    }
 
-      _mesh.vertices = new Vertices(...positions.map((_p: Vector3) => new Vertex(_p)));
-      for (let i: number = 0; i < faceInfo.length; i += 3) {
-        let indices: number[] = [];
-        for (let v: number = 0; v < 3; v++) {
-          let info: FaceInfo = faceInfo[i + v];
-          let index: number = info.iPosition;
-          if (_mesh.vertices[index].uv) {
-            index = _mesh.vertices.length;
-            _mesh.vertices.push(new Vertex(info.iPosition));
-          }
-          _mesh.vertices[index].uv = uvs[info.iUV];
-          indices.push(index);
+    _mesh.vertices = new Vertices(...positions.map((_p: Vector3) => new Vertex(_p)));
+    for (let i: number = 0; i < faceInfo.length; i += 3) {
+      let indices: number[] = [];
+      for (let v: number = 0; v < 3; v++) {
+        let info: FaceInfo = faceInfo[i + v];
+        let index: number = info.iPosition;
+        if (_mesh.vertices[index].uv) {
+          index = _mesh.vertices.length;
+          _mesh.vertices.push(new Vertex(info.iPosition));
         }
-        _mesh.faces.push(new Face(_mesh.vertices, indices[0], indices[1], indices[2]));
+        _mesh.vertices[index].uv = uvs[info.iUV];
+        indices.push(index);
       }
+      _mesh.faces.push(new Face(_mesh.vertices, indices[0], indices[1], indices[2]));
     }
   }
 

@@ -1,10 +1,11 @@
 {
   "MeshObj|2022-06-11T00:59:19.284Z|12741": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-06-11T00:59:19.284Z|12741",
       "name": "OBJ",
       "type": "MeshObj",
-      "url": "obj\\sphere.obj"
+      "url": "obj\\sphere.obj",
+      "filetype": "OBJ"
     }
   },
   "Material|2022-06-11T01:01:46.407Z|77550": {

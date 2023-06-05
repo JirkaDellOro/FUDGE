@@ -1038,13 +1038,18 @@ declare namespace FudgeCore {
         stride: number;
         offset: number;
     }
+    const UNIFORM_BLOCKS: {
+        [block: string]: {
+            NAME: string;
+            BINDING: number;
+        };
+    };
     /**
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
      * Methods and attributes of this class should not be called directly, only through {@link Render}
      */
     abstract class RenderWebGL extends EventTargetStatic {
         protected static crc3: WebGL2RenderingContext;
-        static readonly maxTextureSize: number;
         protected static ƒpicked: Pick[];
         private static rectRender;
         private static sizePick;
@@ -2388,14 +2393,14 @@ declare namespace FudgeCore {
          */
         set translation(_newPos: Vector3);
         /**
-         * Adds a Vector3 in Position of the reference space.
-         */
-        translate(_by: Vector3): void;
-        /**
          * Sets Vector3 Rotation of the reference space.
          * Rotation needs to be set in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
          */
         set rotation(_newRot: Vector3);
+        /**
+         * Adds a Vector3 in Position of the reference space.
+         */
+        translate(_by: Vector3): void;
         /**
          * Adds a Vector3 in Rotation of the reference space.
          * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
@@ -5415,7 +5420,7 @@ declare namespace FudgeCore {
       * Class mostly used internally to bridge the in FUDGE commonly used angles in degree to OimoPhysics quaternion system.
       * @authors Marko Fehrenbach, HFU, 2020
       */
-    class Quaternion extends Mutable {
+    class PhysicsQuaternion extends Mutable {
         #private;
         constructor(_x?: number, _y?: number, _z?: number, _w?: number);
         /** Get/Set the X component of the Quaternion. Real Part */
@@ -5430,8 +5435,9 @@ declare namespace FudgeCore {
         /** Get/Set the Y component of the Quaternion. Imaginary Part */
         get w(): number;
         set w(_w: number);
+        multiply(_other: PhysicsQuaternion, _fromLeft?: boolean): void;
         /**
-         * Create quaternion from vector3 angles in radians
+         * Create quaternion from vector3 angles in degree
          */
         setFromVector3(rollX: number, pitchY: number, yawZ: number): void;
         /**
@@ -5827,15 +5833,15 @@ declare namespace FudgeCore {
          */
         initializeAR(_arSessionMode?: XR_SESSION_MODE, _arReferenceSpaceType?: XR_REFERENCE_SPACE): Promise<void>;
         /**
-         * Move the reference space to set the initial position/orientation of the vr device in accordance to the node the vr device is attached to.
-         */
-        private initializeReferenceSpace;
-        /**
          * Draw the xr viewport displaying its branch. By default, the transforms in the branch are recalculated first.
          * Pass `false` if calculation was already done for this frame
          * Called from loop method {@link Loop} again with the xrFrame parameter handover, as soon as FRAME_REQUEST_XR is called from creator.
          */
         draw(_calculateTransforms?: boolean, _xrFrame?: XRFrame): void;
+        /**
+         * Move the reference space to set the initial position/orientation of the vr device in accordance to the node the vr device is attached to.
+         */
+        private initializeReferenceSpace;
         private setControllerConfigs;
     }
 }
@@ -6183,9 +6189,9 @@ declare namespace FudgeCore {
         readonly nodes: FBX.Node[];
         readonly uri: string;
         constructor(_buffer: ArrayBuffer, _uri: string);
+        static LOAD(_uri: string): Promise<FBXLoader>;
         private static get defaultMaterial();
         private static get defaultSkinMaterial();
-        static LOAD(_uri: string): Promise<FBXLoader>;
         getScene(_index?: number): Promise<GraphInstance>;
         getNode(_index: number, _root?: Node): Promise<Node>;
         getMesh(_index: number): Promise<MeshImport>;

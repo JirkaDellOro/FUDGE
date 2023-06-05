@@ -1153,7 +1153,7 @@ var Fudge;
             this.table = new ƒui.Table(new Fudge.ControllerTableResource(), Object.values(ƒ.Project.resources), "type");
             this.dom.appendChild(this.table);
             this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
-            this.table.title = `● Select to edit in "Properties"\n●  Drag to "Properties" or "Components" to use if applicable.`;
+            this.table.title = "● Select to edit in \"Properties\"\n●  Drag to \"Properties\" or \"Components\" to use if applicable.";
             for (let tr of this.table.querySelectorAll("tr")) {
                 let tds = tr.querySelectorAll("td");
                 if (!tds.length)
@@ -1289,7 +1289,7 @@ var Fudge;
                             console.log(new ƒ.TextureImage(source.pathRelative));
                             break;
                         case Fudge.MIME.MESH:
-                            console.log(new ƒ.MeshObj(null, source.pathRelative));
+                            console.log(await new ƒ.MeshImport().load(ƒ.MeshLoaderOBJ, source.pathRelative));
                             break;
                     }
                 }

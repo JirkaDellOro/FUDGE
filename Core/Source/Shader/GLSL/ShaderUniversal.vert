@@ -49,7 +49,7 @@ const uint MAX_LIGHTS_DIRECTIONAL = 15u;
 const uint MAX_LIGHTS_POINT = 100u;
 const uint MAX_LIGHTS_SPOT = 100u;
 
-layout(std140) uniform UNIFORMS_LIGHT {
+layout(std140) uniform Lights {
   uniform uint u_nLightsDirectional;
   uniform uint u_nLightsPoint;
   uniform uint u_nLightsSpot;

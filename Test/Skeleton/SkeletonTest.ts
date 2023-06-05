@@ -1,4 +1,3 @@
-///<reference path="./../../Core/Build/FudgeCore.d.ts"/>
 namespace SkeletonTest {
   import ƒ = FudgeCore;
 
@@ -55,7 +54,7 @@ namespace SkeletonTest {
   class MeshSkinCylinder extends ƒ.MeshSkin {
     private static ƒskeleton: ƒ.Skeleton;
 
-    constructor() {
+    public constructor() {
       super();
       const meshSource: ƒ.Mesh = new ƒ.MeshRotation(
         "MeshRotation",
@@ -88,8 +87,8 @@ namespace SkeletonTest {
       if (!this.ƒskeleton) {
         // setup skeleton with a skeleton transform test
         this.ƒskeleton = new ƒ.Skeleton("SkeletonCylinder");
-        this.ƒskeleton.addBone(new ƒ.Node("LowerBone"), ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0)));
-        this.ƒskeleton.addBone(new ƒ.Node("UpperBone"), ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(1)), "LowerBone");
+        this.ƒskeleton.addBone(new ƒ.Node("LowerBone"), this.ƒskeleton.name, ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0)));
+        this.ƒskeleton.addBone(new ƒ.Node("UpperBone"), "LowerBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(1)));
         this.ƒskeleton.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2))));
       }
       return this.ƒskeleton;

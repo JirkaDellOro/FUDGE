@@ -1,138 +1,155 @@
 {
   "MeshObj|2022-11-29T08:27:28.149Z|19233": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:27:28.149Z|19233",
-      "name": "objs\\chairtrippy.obj",
-      "type": "MeshObj",
-      "url": "objs\\chairtrippy.obj"
+      "name": "chairtrippy.obj",
+      "type": "MeshImport",
+      "url": "objs\\chairtrippy.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T08:27:28.149Z|81090": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:27:28.149Z|81090",
-      "name": "objs\\cookingfront.obj",
-      "type": "MeshObj",
-      "url": "objs\\cookingfront.obj"
+      "name": "cookingfront.obj",
+      "type": "MeshImport",
+      "url": "objs\\cookingfront.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T08:27:28.150Z|59657": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:27:28.150Z|59657",
-      "name": "objs\\crazyhighbottles.obj",
-      "type": "MeshObj",
-      "url": "objs\\crazyhighbottles.obj"
+      "name": "crazyhighbottles.obj",
+      "type": "MeshImport",
+      "url": "objs\\crazyhighbottles.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T08:27:28.150Z|21206": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:27:28.150Z|21206",
-      "name": "objs\\dampfabzug.obj",
-      "type": "MeshObj",
-      "url": "objs\\dampfabzug.obj"
+      "name": "dampfabzug.obj",
+      "type": "MeshImport",
+      "url": "objs\\dampfabzug.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T08:27:28.151Z|20749": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:27:28.151Z|20749",
-      "name": "objs\\lamptop.obj",
-      "type": "MeshObj",
-      "url": "objs\\lamptop.obj"
+      "name": "lamptop.obj",
+      "type": "MeshImport",
+      "url": "objs\\lamptop.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T08:27:28.152Z|43348": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:27:28.152Z|43348",
-      "name": "objs\\sofa01.obj",
-      "type": "MeshObj",
-      "url": "objs\\sofa01.obj"
+      "name": "sofa01.obj",
+      "type": "MeshImport",
+      "url": "objs\\sofa01.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T08:27:28.153Z|39311": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:27:28.153Z|39311",
-      "name": "objs\\sofa_pillow.obj",
-      "type": "MeshObj",
-      "url": "objs\\sofa_pillow.obj"
+      "name": "sofa_pillow.obj",
+      "type": "MeshImport",
+      "url": "objs\\sofa_pillow.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T08:27:28.153Z|57538": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:27:28.153Z|57538",
-      "name": "objs\\tv.obj",
-      "type": "MeshObj",
-      "url": "objs\\tv.obj"
+      "name": "tv.obj",
+      "type": "MeshImport",
+      "url": "objs\\tv.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T08:27:28.154Z|81543": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:27:28.154Z|81543",
-      "name": "objs\\vase_blender.obj",
-      "type": "MeshObj",
-      "url": "objs\\vase_blender.obj"
+      "name": "vase_blender.obj",
+      "type": "MeshImport",
+      "url": "objs\\vase_blender.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T08:27:28.155Z|86045": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:27:28.155Z|86045",
-      "name": "objs\\wooden_cube.obj",
-      "type": "MeshObj",
-      "url": "objs\\wooden_cube.obj"
+      "name": "wooden_cube.obj",
+      "type": "MeshImport",
+      "url": "objs\\wooden_cube.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T08:47:44.602Z|75216": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:47:44.602Z|75216",
-      "name": "objs\\tvFront.obj",
-      "type": "MeshObj",
-      "url": "objs\\tvFront.obj"
+      "name": "tvFront.obj",
+      "type": "MeshImport",
+      "url": "objs\\tvFront.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T08:50:05.953Z|51783": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:50:05.953Z|51783",
-      "name": "objs\\backpillow_sofa.obj",
-      "type": "MeshObj",
-      "url": "objs\\backpillow_sofa.obj"
+      "name": "backpillow_sofa.obj",
+      "type": "MeshImport",
+      "url": "objs\\backpillow_sofa.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T08:51:20.045Z|75128": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:51:20.045Z|75128",
-      "name": "objs\\cooking_space.obj",
-      "type": "MeshObj",
-      "url": "objs\\cooking_space.obj"
+      "name": "cooking_space.obj",
+      "type": "MeshImport",
+      "url": "objs\\cooking_space.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T08:57:39.794Z|02727": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T08:57:39.794Z|02727",
-      "name": "objs\\cooking_interior.obj",
-      "type": "MeshObj",
-      "url": "objs\\cooking_interior.obj"
+      "name": "cooking_interior.obj",
+      "type": "MeshImport",
+      "url": "objs\\cooking_interior.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T09:00:42.254Z|78108": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T09:00:42.254Z|78108",
-      "name": "objs\\floor.obj",
-      "type": "MeshObj",
-      "url": "objs\\floor.obj"
+      "name": "floor.obj",
+      "type": "MeshImport",
+      "url": "objs\\floor.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T09:02:49.211Z|53790": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T09:02:49.211Z|53790",
-      "name": "objs\\table.obj",
-      "type": "MeshObj",
-      "url": "objs\\table.obj"
+      "name": "table.obj",
+      "type": "MeshImport",
+      "url": "objs\\table.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T09:05:59.249Z|33773": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T09:05:59.249Z|33773",
-      "name": "objs\\curtain.obj",
-      "type": "MeshObj",
-      "url": "objs\\curtain.obj"
+      "name": "curtain.obj",
+      "type": "MeshImport",
+      "url": "objs\\curtain.obj",
+      "filetype": "OBJ"
     }
   },
   "Material|2022-11-29T09:49:24.859Z|40573": {
@@ -150,19 +167,21 @@
     }
   },
   "MeshObj|2022-11-29T09:47:05.308Z|51663": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T09:47:05.308Z|51663",
-      "name": "objs\\faucet.obj",
-      "type": "MeshObj",
-      "url": "objs\\faucet.obj"
+      "name": "faucet.obj",
+      "type": "MeshImport",
+      "url": "objs\\faucet.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T09:58:36.888Z|09564": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T09:58:36.888Z|09564",
-      "name": "objs\\cooking_inline.obj",
-      "type": "MeshObj",
-      "url": "objs\\cooking_inline.obj"
+      "name": "cooking_inline.obj",
+      "type": "MeshImport",
+      "url": "objs\\cooking_inline.obj",
+      "filetype": "OBJ"
     }
   },
   "Material|2022-11-29T10:04:46.080Z|68749": {
@@ -206,11 +225,12 @@
     }
   },
   "MeshObj|2022-11-29T10:01:52.289Z|37393": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T10:01:52.289Z|37393",
-      "name": "objs\\cooking_downpart.obj",
-      "type": "MeshObj",
-      "url": "objs\\cooking_downpart.obj"
+      "name": "cooking_downpart.obj",
+      "type": "MeshImport",
+      "url": "objs\\cooking_downpart.obj",
+      "filetype": "OBJ"
     }
   },
   "Material|2022-11-29T10:21:53.096Z|13145": {
@@ -240,11 +260,12 @@
     }
   },
   "MeshObj|2022-11-29T10:16:48.218Z|62813": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T10:16:48.218Z|62813",
-      "name": "objs\\cooking_washing.obj",
-      "type": "MeshObj",
-      "url": "objs\\cooking_washing.obj"
+      "name": "cooking_washing.obj",
+      "type": "MeshImport",
+      "url": "objs\\cooking_washing.obj",
+      "filetype": "OBJ"
     }
   },
   "Material|2022-11-29T10:33:43.348Z|09665": {
@@ -385,27 +406,30 @@
     }
   },
   "MeshObj|2022-11-29T12:50:20.197Z|73863": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T12:50:20.197Z|73863",
-      "name": "objs\\house.obj",
-      "type": "MeshObj",
-      "url": "objs\\house.obj"
+      "name": "house.obj",
+      "type": "MeshImport",
+      "url": "objs\\house.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T12:52:49.155Z|25966": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T12:52:49.155Z|25966",
-      "name": "objs\\window.obj",
-      "type": "MeshObj",
-      "url": "objs\\window.obj"
+      "name": "window.obj",
+      "type": "MeshImport",
+      "url": "objs\\window.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T13:14:26.221Z|58407": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T13:14:26.221Z|58407",
-      "name": "objs\\table.obj",
-      "type": "MeshObj",
-      "url": "objs\\table.obj"
+      "name": "table.obj",
+      "type": "MeshImport",
+      "url": "objs\\table.obj",
+      "filetype": "OBJ"
     }
   },
   "Material|2022-11-29T13:04:38.325Z|77167": {
@@ -423,11 +447,12 @@
     }
   },
   "MeshObj|2022-11-29T13:11:22.163Z|97222": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T13:11:22.163Z|97222",
-      "name": "objs\\lightskitchen.obj",
-      "type": "MeshObj",
-      "url": "objs\\lightskitchen.obj"
+      "name": "lightskitchen.obj",
+      "type": "MeshImport",
+      "url": "objs\\lightskitchen.obj",
+      "filetype": "OBJ"
     }
   },
   "Material|2022-11-29T13:28:39.441Z|33083": {
@@ -509,27 +534,30 @@
     }
   },
   "MeshObj|2022-11-29T13:20:57.844Z|47808": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T13:20:57.844Z|47808",
-      "name": "objs\\firstLivingroomTable.obj",
-      "type": "MeshObj",
-      "url": "objs\\firstLivingroomTable.obj"
+      "name": "firstLivingroomTable.obj",
+      "type": "MeshImport",
+      "url": "objs\\firstLivingroomTable.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T13:21:46.499Z|65302": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T13:21:46.499Z|65302",
-      "name": "objs\\secondLivingroomTable.obj",
-      "type": "MeshObj",
-      "url": "objs\\secondLivingroomTable.obj"
+      "name": "secondLivingroomTable.obj",
+      "type": "MeshImport",
+      "url": "objs\\secondLivingroomTable.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T13:30:56.683Z|85792": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T13:30:56.683Z|85792",
-      "name": "objs\\sofarightpillow.obj",
-      "type": "MeshObj",
-      "url": "objs\\sofarightpillow.obj"
+      "name": "sofarightpillow.obj",
+      "type": "MeshImport",
+      "url": "objs\\sofarightpillow.obj",
+      "filetype": "OBJ"
     }
   },
   "Material|2022-11-29T13:44:11.264Z|62265": {
@@ -574,27 +602,30 @@
     }
   },
   "MeshObj|2022-11-29T13:49:30.957Z|06519": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T13:49:30.957Z|06519",
-      "name": "objs\\woodenchair.obj",
-      "type": "MeshObj",
-      "url": "objs\\woodenchair.obj"
+      "name": "woodenchair.obj",
+      "type": "MeshImport",
+      "url": "objs\\woodenchair.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T13:55:53.778Z|73434": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T13:55:53.778Z|73434",
-      "name": "objs\\bowl_livingroom.obj",
-      "type": "MeshObj",
-      "url": "objs\\bowl_livingroom.obj"
+      "name": "bowl_livingroom.obj",
+      "type": "MeshImport",
+      "url": "objs\\bowl_livingroom.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-11-29T14:04:27.940Z|82033": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T14:04:27.940Z|82033",
-      "name": "objs\\door.obj",
-      "type": "MeshObj",
-      "url": "objs\\door.obj"
+      "name": "door.obj",
+      "type": "MeshImport",
+      "url": "objs\\door.obj",
+      "filetype": "OBJ"
     }
   },
   "Material|2022-11-30T10:54:25.936Z|01925": {
@@ -666,6 +697,25 @@
         "idResource": "TextureImage|2022-12-14T13:31:40.277Z|98724",
         "name": "textures\\whiteBricks.png",
         "mipmap": "CRISP"
+      }
+    }
+  },
+  "MeshPyramid|2023-05-25T10:34:46.081Z|89614": {
+    "ƒ.MeshPyramid": {
+      "idResource": "MeshPyramid|2023-05-25T10:34:46.081Z|89614",
+      "name": "Gizmo",
+      "type": "MeshPyramid"
+    }
+  },
+  "Material|2023-05-25T10:35:16.277Z|02854": {
+    "ƒ.Material": {
+      "name": "Gizmo",
+      "idResource": "Material|2023-05-25T10:35:16.277Z|02854",
+      "shader": "ShaderLit",
+      "coat": {
+        "ƒ.CoatColored": {
+          "color": "[1, 1, 1, 1]"
+        }
       }
     }
   },
@@ -3903,9 +3953,7 @@
                     }
                   }
                 }
-              ],
-              "ComponentMaterial": [],
-              "ComponentMesh": []
+              ]
             },
             "children": [
               {
@@ -3959,11 +4007,12 @@
     }
   },
   "MeshObj|2022-11-29T09:04:15.779Z|05631": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2022-11-29T09:04:15.779Z|05631",
-      "name": "objs\\woodenchair.obj",
-      "type": "MeshObj",
-      "url": "objs\\woodenchair.obj"
+      "name": "woodenchair.obj",
+      "type": "MeshImport",
+      "url": "objs\\woodenchair.obj",
+      "filetype": "OBJ"
     }
   },
   "TextureImage|2022-11-29T10:51:42.049Z|68862": {
@@ -4006,25 +4055,6 @@
       "labels": {},
       "events": {},
       "animationStructure": {}
-    }
-  },
-  "MeshPyramid|2023-05-25T10:34:46.081Z|89614": {
-    "ƒ.MeshPyramid": {
-      "idResource": "MeshPyramid|2023-05-25T10:34:46.081Z|89614",
-      "name": "Gizmo",
-      "type": "MeshPyramid"
-    }
-  },
-  "Material|2023-05-25T10:35:16.277Z|02854": {
-    "ƒ.Material": {
-      "name": "Gizmo",
-      "idResource": "Material|2023-05-25T10:35:16.277Z|02854",
-      "shader": "ShaderLit",
-      "coat": {
-        "ƒ.CoatColored": {
-          "color": "[1, 1, 1, 1]"
-        }
-      }
     }
   }
 }

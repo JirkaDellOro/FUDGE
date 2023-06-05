@@ -20,14 +20,13 @@ namespace FudgeCore {
         // buffers exist
         crc3.activeTexture(WebGL2RenderingContext.TEXTURE1); // ATTENTION!: changing this id requires changing of corresponding id in particle render method, use ctrl + shift + f search!
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData);
-      }
-      else {
+      } else {
         this.renderData = {};
         const texture: WebGLTexture = Render.assert<WebGLTexture>(crc3.createTexture());
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
 
         let textureSize: number = Math.ceil(Math.sqrt(this.size));
-        textureSize = Math.min(textureSize, RenderWebGL.maxTextureSize)
+        textureSize = Math.min(textureSize, crc3.getParameter(crc3.MAX_TEXTURE_SIZE));
 
         let randomNumbers: number[] = [];
         for (let i: number = 0; i < textureSize * textureSize; i++) {

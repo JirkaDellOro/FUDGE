@@ -4,7 +4,7 @@ namespace FudgeCore {
    * @authors Valentin Schmidberger, HFU, 2022 | Jonas Plotzky, HFU, 2023
    */
   export enum XR_SESSION_MODE {
-    IMMERSIVE_VR = "immersive-vr",
+    IMMERSIVE_VR = "immersive-vr"
     //IMMERSIVE_AR = "immersive-ar",
     //INLINE = "inline"
   }
@@ -15,7 +15,7 @@ namespace FudgeCore {
    */
   export enum XR_REFERENCE_SPACE {
     VIEWER = "viewer",
-    LOCAL = "local",
+    LOCAL = "local"
     // LOCAL_FLOOR = "local-floor",
     // BOUNDED_FLOOR = "bounded-floor",
     // UNBOUNDED = "unbounded"
@@ -33,7 +33,7 @@ namespace FudgeCore {
     private crc3: WebGL2RenderingContext = null;
 
     // private poseMtx: Matrix4x4 = new Matrix4x4();
-    constructor() {
+    public constructor() {
       super();
       XRViewport.xrViewportInstance = this;
       this.crc3 = RenderWebGL.getRenderingContext();
@@ -59,11 +59,11 @@ namespace FudgeCore {
      * Creator has to call FrameRequestXR after this Method to run the viewport in virtual reality.
      */
     public async initializeVR(_vrSessionMode: XR_SESSION_MODE = XR_SESSION_MODE.IMMERSIVE_VR, _vrReferenceSpaceType: XR_REFERENCE_SPACE = XR_REFERENCE_SPACE.LOCAL,
-      _vrController: boolean = false): Promise<void> {
+                              _vrController: boolean = false): Promise<void> {
       let session: XRSession = await navigator.xr.requestSession(_vrSessionMode);
       this.referenceSpace = await session.requestReferenceSpace(_vrReferenceSpaceType);
       await this.crc3.makeXRCompatible();
-      let nativeScaleFactor = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
+      let nativeScaleFactor: number = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
       //TODO:  Field of view könnte an der Stelle noch verändert werden.
       await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3, { framebufferScaleFactor: nativeScaleFactor }) });
 
@@ -87,24 +87,7 @@ namespace FudgeCore {
     public async initializeAR(_arSessionMode: XR_SESSION_MODE = null, _arReferenceSpaceType: XR_REFERENCE_SPACE = null): Promise<void> {
       Debug.error("NOT IMPLEMENTED YET! Check out initializeVR!");
     }
-
-    /**
-     * Move the reference space to set the initial position/orientation of the vr device in accordance to the node the vr device is attached to.
-     */
-    private initializeReferenceSpace() {
-      let mtxWorld: Matrix4x4 = this.vrDevice.node?.mtxWorld;
-      if (!mtxWorld)
-        return;
-
-      mtxWorld = mtxWorld.clone;
-      mtxWorld.rotateY(180); // rotate because the XR Rig is looking in the direction of negative z
-      let invMtxTransfom: Matrix4x4 = mtxWorld.inverse(); // inverse because we are moving the reference space
-      let invRotation: Vector3 = Vector3.SCALE(invMtxTransfom.rotation, Math.PI / 180); // TODO: in the future quaternion rotation might get added to Matrix4x4
-      let invOrientation: Quaternion = new Quaternion();
-      invOrientation.setFromVector3(invRotation.x, invRotation.y, invRotation.z);
-      XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invMtxTransfom.translation, invOrientation));
-    }
-
+    
     /**
      * Draw the xr viewport displaying its branch. By default, the transforms in the branch are recalculated first.
      * Pass `false` if calculation was already done for this frame 
@@ -145,30 +128,47 @@ namespace FudgeCore {
       Render.setRenderRectangle(Render.getRenderRectangle());
     }
 
+    /**
+     * Move the reference space to set the initial position/orientation of the vr device in accordance to the node the vr device is attached to.
+     */
+    private initializeReferenceSpace(): void {
+      let mtxWorld: Matrix4x4 = this.vrDevice.node?.mtxWorld;
+      if (!mtxWorld)
+        return;
+
+      mtxWorld = mtxWorld.clone;
+      mtxWorld.rotateY(180); // rotate because the XR Rig is looking in the direction of negative z
+      let invMtxTransfom: Matrix4x4 = mtxWorld.inverse(); // inverse because we are moving the reference space
+      let invRotation: Vector3 = Vector3.SCALE(invMtxTransfom.rotation, Math.PI / 180); // TODO: in the future quaternion rotation might get added to Matrix4x4
+      let invOrientation: PhysicsQuaternion = new PhysicsQuaternion();
+      invOrientation.setFromVector3(invRotation.x, invRotation.y, invRotation.z);
+      XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invMtxTransfom.translation, invOrientation));
+    }
+
     //Sets controller matrices and thumbsticks movements.
     private setControllerConfigs(_xrFrame: XRFrame): void {
       if (_xrFrame) {
         if (XRViewport.default.session.inputSources.length > 0) {
-          XRViewport.default.session.inputSources.forEach(controller => {
+          XRViewport.default.session.inputSources.forEach(_controller => {
             try {
-              switch (controller.handedness) {
+              switch (_controller.handedness) {
                 case ("right"):
-                  this.vrDevice.rightCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
+                  this.vrDevice.rightCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(_controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
                   if (!this.vrDevice.rightCntrl.gamePad)
-                    this.vrDevice.rightCntrl.gamePad = controller.gamepad;
+                    this.vrDevice.rightCntrl.gamePad = _controller.gamepad;
                   else {
-                    this.vrDevice.rightCntrl.thumbstickX = controller.gamepad.axes[2];
-                    this.vrDevice.rightCntrl.thumbstickY = controller.gamepad.axes[3];
+                    this.vrDevice.rightCntrl.thumbstickX = _controller.gamepad.axes[2];
+                    this.vrDevice.rightCntrl.thumbstickY = _controller.gamepad.axes[3];
                   }
                   break;
                 case ("left"):
-                  this.vrDevice.leftCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
+                  this.vrDevice.leftCntrl.cmpTransform.mtxLocal.set(_xrFrame.getPose(_controller.targetRaySpace, XRViewport.default.referenceSpace).transform.matrix);
 
                   if (!this.vrDevice.leftCntrl.gamePad)
-                    this.vrDevice.leftCntrl.gamePad = controller.gamepad;
+                    this.vrDevice.leftCntrl.gamePad = _controller.gamepad;
                   else {
-                    this.vrDevice.leftCntrl.thumbstickX = controller.gamepad.axes[2];
-                    this.vrDevice.leftCntrl.thumbstickY = controller.gamepad.axes[3];
+                    this.vrDevice.leftCntrl.thumbstickX = _controller.gamepad.axes[2];
+                    this.vrDevice.leftCntrl.thumbstickY = _controller.gamepad.axes[3];
                   }
                   break;
               }

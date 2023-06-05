@@ -1,6 +1,4 @@
-///<reference path="./../../Core/Build/FudgeCore.d.ts"/>
 var SkeletonTest;
-///<reference path="./../../Core/Build/FudgeCore.d.ts"/>
 (function (SkeletonTest) {
     var ƒ = FudgeCore;
     window.addEventListener("load", init);
@@ -68,8 +66,8 @@ var SkeletonTest;
             if (!this.ƒskeleton) {
                 // setup skeleton with a skeleton transform test
                 this.ƒskeleton = new ƒ.Skeleton("SkeletonCylinder");
-                this.ƒskeleton.addBone(new ƒ.Node("LowerBone"), ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0)));
-                this.ƒskeleton.addBone(new ƒ.Node("UpperBone"), ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(1)), "LowerBone");
+                this.ƒskeleton.addBone(new ƒ.Node("LowerBone"), this.ƒskeleton.name, ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0)));
+                this.ƒskeleton.addBone(new ƒ.Node("UpperBone"), "LowerBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(1)));
                 this.ƒskeleton.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2))));
             }
             return this.ƒskeleton;

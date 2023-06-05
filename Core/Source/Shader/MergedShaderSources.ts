@@ -132,11 +132,11 @@ struct Light {
 };
 uniform Light u_ambient;
 
-const uint MAX_LIGHTS_DIRECTIONAL = 5u;
-const uint MAX_LIGHTS_POINT = 40u;
-const uint MAX_LIGHTS_SPOT = 40u;
+const uint MAX_LIGHTS_DIRECTIONAL = 15u;
+const uint MAX_LIGHTS_POINT = 100u;
+const uint MAX_LIGHTS_SPOT = 100u;
 
- layout(std140) uniform UNIFORMS_LIGHT
+layout(std140) uniform Lights
 {
 uniform uint u_nLightsDirectional;
 uniform uint u_nLightsPoint;
@@ -144,7 +144,6 @@ uniform uint u_nLightsSpot;
 uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
 uniform Light u_point[MAX_LIGHTS_POINT];
 uniform Light u_spot[MAX_LIGHTS_SPOT];
-
 } ;
 
 
@@ -223,10 +222,9 @@ uniform vec4 u_vctColor;
 out ivec4 vctFrag;
 
 void main() {
-    float id = float(u_id); 
-    float pixel = trunc(gl_FragCoord.x) + u_vctSize.x * trunc(gl_FragCoord.y);
+    int pixel = int(trunc(gl_FragCoord.x) + u_vctSize.x * trunc(gl_FragCoord.y));
 
-    if (pixel != id)
+    if (pixel != u_id)
       discard;
 
     uint icolor = uint(u_vctColor.r * 255.0) << 24 | uint(u_vctColor.g * 255.0) << 16 | uint(u_vctColor.b * 255.0) << 8 | uint(u_vctColor.a * 255.0);
@@ -261,10 +259,9 @@ uniform sampler2D u_texture;
 out ivec4 vctFrag;
 
 void main() {
-    float id = float(u_id); 
-    float pixel = trunc(gl_FragCoord.x) + u_vctSize.x * trunc(gl_FragCoord.y);
+    int pixel = int(trunc(gl_FragCoord.x) + u_vctSize.x * trunc(gl_FragCoord.y));
 
-    if (pixel != id)
+    if (pixel != u_id)
       discard;
     
     vec4 vctColor = u_vctColor * texture(u_texture, v_vctTexture);
@@ -373,34 +370,28 @@ uniform mat4 u_mtxNormalMeshToWorld;
 in vec3 a_vctNormal;
 uniform float u_fDiffuse;
 
-  struct Light {
+struct Light {
   vec4 vctColor;
   mat4 mtxShape;
   mat4 mtxShapeInverse;
 };
 
-
 uniform Light u_ambient;
 
-#if !defined(PHONG)
+  #if !defined(PHONG)
+const uint MAX_LIGHTS_DIRECTIONAL = 15u;
+const uint MAX_LIGHTS_POINT = 100u;
+const uint MAX_LIGHTS_SPOT = 100u;
 
-const uint MAX_LIGHTS_DIRECTIONAL = 5u;
-const uint MAX_LIGHTS_POINT = 40u;
-const uint MAX_LIGHTS_SPOT = 40u;
-
- layout(std140) uniform UNIFORMS_LIGHT
-{
-uniform uint u_nLightsDirectional;
-uniform uint u_nLightsPoint;
-uniform uint u_nLightsSpot;
-uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
-uniform Light u_point[MAX_LIGHTS_POINT];
-uniform Light u_spot[MAX_LIGHTS_SPOT];
-
-} ;
-
+layout(std140) uniform Lights {
+  uniform uint u_nLightsDirectional;
+  uniform uint u_nLightsPoint;
+  uniform uint u_nLightsSpot;
+  uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+  uniform Light u_point[MAX_LIGHTS_POINT];
+  uniform Light u_spot[MAX_LIGHTS_SPOT];
+};
   #endif
-
 
 vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _vctView, float _fSpecular) {
   vec4 vctResult = vec4(0, 0, 0, 1);
@@ -444,7 +435,7 @@ in uvec4 a_iBone;
 in vec4 a_fWeight;
 const uint MAX_BONES = 256u;
 struct Bone {
-  mat4 matrix;
+  mat4 matrix; // TODO: change name to mtx to conform with naming scheme
 };
 layout (std140) uniform Skin {
   Bone u_bones[MAX_BONES];
