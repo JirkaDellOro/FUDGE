@@ -7,6 +7,12 @@
 precision mediump float;
 precision highp int;
 
+  // TEXTURE: input UVs and texture
+  #if defined(TEXTURE)
+in vec2 v_vctTexture;
+uniform sampler2D u_texture;
+  #endif
+
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
 uniform float u_fSpecular;
@@ -95,4 +101,10 @@ void main() {
       continue;
     vctFrag += illuminateDirected(vctDirection, v_vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
+
+  // TEXTURE: multiply with texel color
+    #if defined(TEXTURE)
+  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+  vctFrag *= vctColorTexture;
+    #endif
 }

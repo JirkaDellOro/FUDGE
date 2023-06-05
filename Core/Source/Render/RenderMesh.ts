@@ -9,6 +9,7 @@ namespace FudgeCore {
     normals?: WebGLBuffer;
     iBones?: WebGLBuffer;
     weights?: WebGLBuffer;
+    mtxBones?: WebGLBuffer;
     nIndices?: number;
   }
 
@@ -47,16 +48,23 @@ namespace FudgeCore {
 
     public get iBones(): Uint8Array {
       return this.ƒiBones || ( // return cache or ...
-        this.ƒiBones = new Uint8Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
-          return [...this.mesh.vertices.bones(_index).map(_bone => _bone.index)];
-        })));
+        this.ƒiBones = this.mesh.vertices.some(_vertex => _vertex.bones) ?
+          new Uint8Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
+            const bones: Bone[] = this.mesh.vertices.bones(_index);
+            return [bones?.[0]?.index || 0, bones?.[1]?.index || 0, bones?.[2]?.index || 0, bones?.[3]?.index || 0];
+          })) :
+        undefined
+      );
     }
 
     public get weights(): Float32Array {
       return this.ƒweights || ( // return cache or ...
-        this.ƒweights = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
-          return [...this.mesh.vertices.bones(_index).map(_bone => _bone.weight)];
-        }))
+        this.ƒweights = this.mesh.vertices.some(_vertex => _vertex.bones) ?
+          new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
+            const bones: Bone[] = this.mesh.vertices.bones(_index);
+            return [bones?.[0]?.weight || 0, bones?.[1]?.weight || 0, bones?.[2]?.weight || 0, bones?.[3]?.weight || 0];
+          })) :
+        undefined
       );
     }
 
@@ -103,7 +111,9 @@ namespace FudgeCore {
     public get textureUVs(): Float32Array {
       return this.ƒtextureUVs || ( // return cache or ...
         // ... flatten all uvs from the clous into a typed array
-        this.ƒtextureUVs = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex) => [..._vertex.uv.get()])
+        this.ƒtextureUVs = new Float32Array(this.mesh.vertices
+          .filter(_vertex => _vertex.uv)
+          .flatMap((_vertex: Vertex) => [..._vertex.uv.get()])
         ));
     }
 

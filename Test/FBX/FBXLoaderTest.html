@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FBX Loader Test</title>
+    <!--Load FUDGE-->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+    <!-- <script src="https://unpkg.com/fflate"></script> -->
+    <script type="text/javascript" src="../../Core/Build/FudgeCore.js"></script>
+    <script type="text/javascript" src="../../Aid/Build/FudgeAid.js"></script>
+    <!--Load scripts-->
+    <script src="FBXLoaderTest.js" editor="true"></script>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+      canvas.fullscreen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw; 
+        height: 100vh; 
+      }
+      span#time {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!--Canvas for FUDGE to render to-->
+    <canvas class="fullscreen" width="800" height="640"></canvas>
+    <span id="time"></span>
+  </body>
+</html>

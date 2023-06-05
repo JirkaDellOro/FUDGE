@@ -894,11 +894,11 @@ namespace FudgeCore {
     /**
      * Sets the elements of this matrix to the values of the given matrix
      */
-    public set(_mtxTo: Matrix4x4 | Float32Array): void {
-      if (_mtxTo instanceof Float32Array)
-        this.data.set(_mtxTo);
-      else
+    public set(_mtxTo: Matrix4x4 | ArrayLike<number>): void {
+      if (_mtxTo instanceof Matrix4x4)
         this.data.set(_mtxTo.data);
+      else
+        this.data.set(_mtxTo);
       this.resetCache();
     }
 

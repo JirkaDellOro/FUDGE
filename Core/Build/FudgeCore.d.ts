@@ -1403,15 +1403,22 @@ declare namespace FudgeCore {
      * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
      */
     interface AnimationStructure {
+        children?: AnimationStructure;
         [attribute: string]: AnimationStructure[] | AnimationStructure | AnimationSequence;
     }
     interface AnimationStructureVector3 extends AnimationStructure {
-        x: AnimationSequence;
-        y: AnimationSequence;
-        z: AnimationSequence;
+        x?: AnimationSequence;
+        y?: AnimationSequence;
+        z?: AnimationSequence;
+    }
+    interface AnimationStructureVector4 extends AnimationStructure {
+        x?: AnimationSequence;
+        y?: AnimationSequence;
+        z?: AnimationSequence;
+        w?: AnimationSequence;
     }
     interface AnimationStructureMatrix4x4 extends AnimationStructure {
-        rotation?: AnimationStructureVector3;
+        rotation?: AnimationStructureVector3 | AnimationStructureVector4;
         scale?: AnimationStructureVector3;
         translation?: AnimationStructureVector3;
     }
@@ -1545,13 +1552,13 @@ declare namespace FudgeCore {
         /**
          * Ensures the existance of the requested {@link AnimationStrcuture} and returns it.
          * @param _type the type of the structure to get
-         * @returns the requested {@link AnimationStructure]]
+         * @returns the requested [[@link AnimationStructure]]
          */
         private getProcessedAnimationStructure;
         /**
          * Ensures the existance of the requested {@link AnimationEventTrigger} and returns it.
          * @param _type The type of AnimationEventTrigger to get
-         * @returns the requested {@link AnimationEventTrigger]]
+         * @returns the requested {@link AnimationEventTrigger}
          */
         private getProcessedEventTrigger;
         /**
@@ -2230,15 +2237,13 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMesh extends Component {
-        #private;
         static readonly iSubclass: number;
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
         mesh: Mesh;
+        skeleton: SkeletonInstance;
         constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance);
         get radius(): number;
-        get skeleton(): SkeletonInstance;
-        bindSkeleton(_skeleton: SkeletonInstance): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
@@ -3495,7 +3500,7 @@ declare namespace FudgeCore {
         /**
          * Sets the elements of this matrix to the values of the given matrix
          */
-        set(_mtxTo: Matrix4x4 | Float32Array): void;
+        set(_mtxTo: Matrix4x4 | ArrayLike<number>): void;
         toString(): string;
         /**
          * Return the elements of this matrix as a Float32Array
@@ -3612,6 +3617,105 @@ declare namespace FudgeCore {
         private static gradient;
         constructor(_random?: Function);
         sample: (_x: number, _y: number, _z: number, _w: number) => number;
+    }
+}
+declare namespace FudgeCore {
+    /**
+      * Storing and manipulating rotations in the form of quaternions.
+      * Constructed out of the 4 components: (x, y, z, w). Mathematical notation: w + xi + yj + zk.
+      * A Quaternion can be described with an axis and angle: (x, y, z) = sin(angle/2)*axis; w = cos(angle/2).
+      * roll: x, pitch: y, yaw: z. Note that operations are adapted to work with vectors where y is up and z is forward.
+      * @authors Matthias Roming, HFU, 2023
+      */
+    class Quaternion extends Mutable implements Serializable, Recycable {
+        #private;
+        private data;
+        private mutator;
+        constructor();
+        /**
+         * Retrieve a new identity quaternion
+         */
+        static IDENTITY(): Quaternion;
+        /**
+         * Constructs a new quaternion from the euler angles given
+         */
+        static FROM_EULER_ANGLES(_eulerAngles: Vector3, _order?: string): Quaternion;
+        /**
+         * Computes and returns the product of two passed quaternions.
+         * @param _mtxLeft The matrix to multiply.
+         * @param _mtxRight The matrix to multiply by.
+         */
+        static MULTIPLICATION(_qLeft: Quaternion, _qRight: Quaternion): Quaternion;
+        /**
+         * Computes and returns the inverse of a passed quaternion.
+         * @param _mtx The quaternion to compute the inverse of.
+         */
+        static INVERSION(_q: Quaternion): Quaternion;
+        /**
+         * Computes and returns the conjugate of a passed quaternion.
+         * @param _mtx The quaternion to compute the conjugate of.
+         */
+        static CONJUGATION(_q: Quaternion): Quaternion;
+        /**
+         * Experimental: Creates and returns a vector through transformation of the given vector by the given quaternion
+         */
+        static TRANSFORM_VECTOR(_v: Vector3, _q: Quaternion): Vector3;
+        /**
+         * Experimental: Converts the quaternion to a Matrix4x4
+         */
+        static QUATERNION_TO_MATRIX(_q: Quaternion): Matrix4x4;
+        get x(): number;
+        get y(): number;
+        get z(): number;
+        get w(): number;
+        set x(_x: number);
+        set y(_y: number);
+        set z(_z: number);
+        set w(_w: number);
+        /**
+         * Calculates and returns the euler-angles in degrees.
+         */
+        getEulerAngles(_order?: string): Vector3;
+        setFromEulerAngles(_eulerAngles: Vector3, _order?: string): void;
+        /**
+         * Return a copy of this
+         */
+        get clone(): Quaternion;
+        /**
+         * Resets the quaternion to the identity-quaternion and clears cache. Used by the recycler to reset.
+         */
+        recycle(): void;
+        /**
+         * Resets the quaternion to the identity-quaternion and clears cache.
+         */
+        reset(): void;
+        /**
+         * Inverse this quaternion
+         */
+        inverse(): void;
+        /**
+         * Conjugate this quaternion
+         */
+        conjugate(): void;
+        /**
+         * Multiply this quaternion with the given quaternion
+         */
+        multiply(_other: Quaternion, _fromLeft?: boolean): void;
+        /**
+         * Sets the elements of this quaternion to the values of the given quaternion
+         */
+        set(_qTo: Quaternion | ArrayLike<number>): void;
+        toString(): string;
+        /**
+         * Return the elements of this quaternion as a Float32Array
+         */
+        get(): Float32Array;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
+        mutate(_mutator: Mutator): Promise<void>;
+        protected reduceMutator(_mutator: Mutator): void;
+        private resetCache;
     }
 }
 declare namespace FudgeCore {
@@ -4014,29 +4118,15 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Mesh loaded from a GLTF-file
-     * @author Matthias Roming, HFU, 2022
+     * Mesh loaded from a file
+     * @author Matthias Roming, HFU, 2022-2023
      */
-    class MeshGLTF extends Mesh {
-        private uriGLTF;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        load(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF>;
-    }
-}
-declare namespace FudgeCore {
-    class MeshObj extends Mesh {
-        static readonly iSubclass: number;
+    class MeshImport extends Mesh {
         url: RequestInfo;
-        constructor(_name?: string, _url?: RequestInfo);
-        /**
-             * Asynchronously loads the image from the given url
-             */
-        load(_url: RequestInfo): Promise<void>;
-        /** Splits up the obj string into separate arrays for each datatype */
-        parseObj(data: string): void;
+        private loader;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        load(_loader?: typeof MeshLoader, _url?: RequestInfo, _data?: Object): Promise<MeshImport>;
         mutate(_mutator: Mutator): Promise<void>;
     }
 }
@@ -4183,11 +4273,10 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Mesh influenced by a skeleton
-     * @author Matthias Roming, HFU, 2022
+     * Mesh influenced by a skeleton and loaded from a file
+     * @author Matthias Roming, HFU, 2022-2023
      */
-    class MeshSkin extends MeshGLTF {
-        load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
+    class MeshSkin extends MeshImport {
         useRenderBuffers(_shader: ShaderInterface, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -4316,6 +4405,45 @@ declare namespace FudgeCore {
          * returns the position associated with the vertex addressed, resolving references between vertices
          */
         bones(_index: number): Bone[];
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Base class for MeshImport-loaders
+     * @author Matthias Roming, HFU, 2023
+     */
+    abstract class MeshLoader {
+        static load(_mesh: MeshImport | MeshSkin, _data?: Object): Promise<MeshImport>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Filmbox mesh import
+     * @authors Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
+     */
+    class MeshLoaderFBX extends MeshLoader {
+        static load(_mesh: MeshImport | MeshSkin, _data: FBX.Geometry): Promise<MeshImport>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * gl Transfer Format mesh import
+     * @author Matthias Roming, HFU, 2022-2023
+     */
+    class MeshLoaderGLTF extends MeshLoader {
+        static load(_mesh: MeshImport | MeshSkin, _data?: GLTF.Mesh): Promise<MeshImport>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
+     * static LOAD Method. Currently only works with triangulated Meshes
+     * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
+     * @todo UVs, Load Materials, Support Quads
+     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Matthias Roming, HFU, 2023
+     */
+    class MeshLoaderOBJ extends MeshLoader {
+        static load(_mesh: MeshImport): Promise<MeshImport>;
     }
 }
 declare namespace FudgeCore {
@@ -5479,6 +5607,7 @@ declare namespace FudgeCore {
         normals?: WebGLBuffer;
         iBones?: WebGLBuffer;
         weights?: WebGLBuffer;
+        mtxBones?: WebGLBuffer;
         nIndices?: number;
     }
     class RenderMesh {
@@ -5839,6 +5968,282 @@ declare namespace FudgeCore {
     }
     export {};
 }
+declare namespace FudgeCore.FBX {
+    /**
+     * Reader to read data from an array buffer more conveniently.
+     * It saves a current offset which is updated when data is read due to its bytelength.
+     * despite getSequence it is mostly a copy of the reference: https://github.com/picode7/binary-reader
+     * @author Matthias Roming, HFU, 2023
+     */
+    class BufferReader {
+        offset: number;
+        readonly view: DataView;
+        constructor(_buffer: ArrayBuffer);
+        getChar(_offset?: number): string;
+        getBool(_offset?: number): boolean;
+        getUint8(_offset?: number): number;
+        getUint32(_offset?: number): number;
+        getUint64(_offset?: number): bigint;
+        getInt16(_offset?: number): number;
+        getInt32(_offset?: number): number;
+        getInt64(_offset?: number): bigint;
+        getFloat32(_offset?: number): number;
+        getFloat64(_offset?: number): number;
+        getString(_length: number, _offset?: number): string;
+        getSequence<T extends number | bigint>(_getter: () => T, _length: number, _offset?: number): Generator<T>;
+    }
+}
+declare namespace FudgeCore.FBX {
+    /**
+     * Interface to represent fbx files containing its documents, definitions, objects and connections.
+     * Its objects are devided in all and the different object types.
+     * @author Matthias Roming, HFU, 2023
+     */
+    export interface FBX {
+        documents: Document[];
+        definitions?: Definitions;
+        objects: {
+            all: Object[];
+            models: Model[];
+            geometries: Geometry[];
+            poses: Object[];
+            materials: Material[];
+            textures: Texture[];
+            animStacks: Object[];
+        };
+        connections: Connection[];
+    }
+    interface ObjectBase {
+        uid: number;
+        name: string;
+        type?: string;
+        subtype?: string;
+        children?: Object[];
+        parents?: Object[];
+        loaded: boolean;
+        load: () => Object;
+    }
+    /**
+     * Interface to represent fbx-objects.
+     * All fields other than uid, name, type, subtype, children and parents are loaded with the load-method.
+     * Each object can be interpreted as an explicit fbx object type defined in FudgeCore.FBX. Explicit types have been defined
+     * with the help of following reference:
+     * https://archive.blender.org/wiki/index.php/User:Mont29/Foundation/FBX_File_Structure/#Some_Specific_Property_Types
+     * @author Matthias Roming, HFU, 2023
+     */
+    export interface Object extends ObjectBase {
+        [name: string]: NodeProperty | {
+            [name: string]: NodeProperty;
+        } | Property70 | Object | Object[] | (() => Object);
+    }
+    export interface Document extends ObjectBase {
+        SourceObject?: undefined;
+        ActiveAnimStackName?: string;
+        RootNode?: number;
+    }
+    export interface NodeAttribute extends ObjectBase {
+        TypeFlags?: string;
+    }
+    export interface Geometry extends ObjectBase {
+        GeometryVersion?: number;
+        Vertices?: Float32Array;
+        PolygonVertexIndex?: Int32Array;
+        LayerElementNormal?: LayerElementNormal;
+        LayerElementUV?: LayerElementUV;
+        LayerElementMaterial?: LayerElementMaterial;
+    }
+    export interface Model extends ObjectBase {
+        Version?: number;
+        LclTranslation?: Vector3 | AnimCurveNode;
+        LclRotation?: Vector3 | AnimCurveNode;
+        LclScaling?: Vector3 | AnimCurveNode;
+        PreRotation?: Vector3;
+        PostRotation?: Vector3;
+        ScalingOffset?: Vector3;
+        ScalingPivot?: Vector3;
+        RotationOffset?: Vector3;
+        RotationPivot?: Vector3;
+        InheritType?: number;
+        EulerOrder?: string;
+        currentUVSet?: string;
+    }
+    export interface Material extends ObjectBase {
+        Version?: number;
+        ShadingModel?: string;
+        Diffuse?: Vector3;
+        DiffuseColor?: Vector3 | Texture;
+        DiffuseFactor?: number;
+        Ambient?: Vector3;
+        AmbientColor?: Vector3 | Texture;
+        Shininess?: number;
+        ShininessExponent?: Vector3 | Texture;
+        Specular?: Vector3;
+        SpecularColor?: Vector3 | Texture;
+        SpecularFactor?: number;
+        Reflectivity?: number;
+        ReflectionFactor?: number;
+        Opacity?: number;
+        TransparencyFactor?: number;
+        Emissive?: Vector3;
+        NormalMap?: Texture;
+    }
+    export interface Deformer extends ObjectBase {
+        Version?: number;
+        SkinningType?: string;
+    }
+    export interface SubDeformer extends ObjectBase {
+        Version?: number;
+        Transform?: Float32Array;
+        TransformLink?: Float32Array;
+        Indexes?: Uint16Array;
+        Weights?: Float32Array;
+    }
+    export interface Texture extends ObjectBase {
+        FileName?: string;
+        RelativeFilename?: string;
+        ModelUVScaling?: number;
+        ModelUVTranslation?: number;
+        UVSet?: string;
+    }
+    export interface Video extends ObjectBase {
+        FileName?: string;
+        RelativeFilename?: string;
+        UseMipMap?: number;
+        Content?: Uint8Array;
+    }
+    export interface AnimCurveNode extends ObjectBase {
+        dX?: number | AnimCurve;
+        dY?: number | AnimCurve;
+        dZ?: number | AnimCurve;
+    }
+    export interface AnimCurve extends ObjectBase {
+        KeyVer?: number;
+        Default?: number;
+        KeyTime?: BigInt64Array;
+        KeyValueFloat?: Float32Array;
+    }
+    export interface LayerElement {
+        Name: string;
+        Version: number;
+        MappingInformationType: string;
+        ReferenceInformationType: string;
+    }
+    export interface LayerElementNormal extends LayerElement {
+        Normals: Float32Array;
+        NormalsW: Float32Array;
+        NormalsIndex?: Uint16Array;
+    }
+    export interface LayerElementUV extends LayerElement {
+        UV?: Float32Array;
+        UVIndex?: Uint16Array;
+    }
+    export interface LayerElementMaterial extends LayerElement {
+        Materials?: number;
+    }
+    export enum MappingInformationType {
+        ByVertex = 0,
+        ByPolygon = 1,
+        ByPolygonVertex = 2,
+        ByEdge = 3,
+        AllSame = 4
+    }
+    export enum ReferenceInformationType {
+        Direct = 0,
+        IndexToDirect = 1
+    }
+    export interface Connection {
+        parentUID: number;
+        childUID: number;
+        propertyName: string;
+    }
+    export interface Definitions {
+        version: number;
+        objectTypes: ObjectType[];
+    }
+    export interface ObjectType {
+        name: string;
+        count: number;
+        propertyTemplate: PropertyTemplate;
+    }
+    export interface PropertyTemplate {
+        name: string;
+        [propertyName: string]: Property70;
+    }
+    export {};
+}
+declare namespace FudgeCore {
+    /**
+     * Asset loader for Filmbox files.
+     * @author Matthias Roming, HFU, 2023
+     */
+    class FBXLoader {
+        #private;
+        private static loaders;
+        readonly fbx: FBX.FBX;
+        readonly nodes: FBX.Node[];
+        readonly uri: string;
+        constructor(_buffer: ArrayBuffer, _uri: string);
+        private static get defaultMaterial();
+        private static get defaultSkinMaterial();
+        static LOAD(_uri: string): Promise<FBXLoader>;
+        getScene(_index?: number): Promise<GraphInstance>;
+        getNode(_index: number, _root?: Node): Promise<Node>;
+        getMesh(_index: number): Promise<MeshImport>;
+        getMaterial(_index: number): Promise<Material>;
+        getTexture(_index: number): Promise<Texture>;
+        /**
+         * Retriefs the skeleton containing the given limb node.
+         */
+        getSkeleton(_fbxLimbNode: FBX.Model): Promise<Skeleton>;
+        getAnimation(_index: number): Promise<Animation>;
+        /**
+         * fetched from three.js, adapted to FUDGE and optimized
+         * https://github.com/mrdoob/three.js/blob/dev/examples/jsm/loaders/FBXLoader.js
+         * line 3950
+         */
+        private generateTransform;
+        private getTransformVector;
+        private getAnimationVector3;
+        private getOrdered;
+    }
+}
+declare namespace FudgeCore.FBX {
+    /**
+     * Interface to represent fbx-nodes containing its name, children and properties.
+     * Children and properites are lazy.
+     * @author Matthias Roming, HFU, 2023
+     */
+    class Node {
+        #private;
+        name: string;
+        private loadProperties;
+        private loadChildren;
+        constructor(_name: string, _loadProperties: () => NodeProperty[], _loadChildren: () => Node[]);
+        get properties(): NodeProperty[];
+        get children(): Node[];
+    }
+    type Property70 = boolean | number | string | Vector3;
+    type NodeProperty = boolean | number | string | Uint8Array | Uint16Array | Float32Array;
+    enum ArrayEncoding {
+        UNCOMPRESSED = 0,
+        COMPRESSED = 1
+    }
+}
+declare namespace FudgeCore.FBX {
+    /**
+     * Loads an fbx file from its fbx-node array which may be retrieved by parseNodesFromBinary.
+     * @author Matthias Roming, HFU, 2023
+     */
+    function loadFromNodes(_nodes: Node[]): FBX;
+}
+declare namespace FudgeCore.FBX {
+    /**
+     * Parses fbx-nodes array from a binary fbx-file.
+     * despite the lazy node implementation it is mostly a copy of the reference: https://github.com/picode7/fbx-parser
+     * @author Matthias Roming, HFU, 2023
+     */
+    function parseNodesFromBinary(_buffer: ArrayBuffer): Node[];
+}
 declare namespace GLTF {
     type GlTfId = number;
     /**
@@ -5953,7 +6358,7 @@ declare namespace GLTF {
         /**
          * The name of the node's TRS property to animate, or the `"weights"` of the Morph Targets it instantiates. For the `"translation"` property, the values that are provided by the sampler are the translation along the X, Y, and Z axes. For the `"rotation"` property, the values are a quaternion in the order (x, y, z, w), where w is the scalar. For the `"scale"` property, the values are the scaling factors along the X, Y, and Z axes.
          */
-        "path": any | any | any | any | string;
+        "path": "translation" | "rotation" | "scale" | "weights";
         "extensions"?: any;
         "extras"?: any;
         [k: string]: any;
@@ -6379,20 +6784,20 @@ declare namespace GLTF {
         /**
          * Magnification filter.
          */
-        "magFilter"?: number | number | number;
+        "magFilter"?: WebGL2RenderingContext["NEAREST"] | WebGL2RenderingContext["LINEAR"];
         /**
          * Minification filter.
          */
-        "minFilter"?: number | number | number | number | number | number | number;
+        "minFilter"?: WebGL2RenderingContext["NEAREST"] | WebGL2RenderingContext["LINEAR"] | WebGL2RenderingContext["NEAREST_MIPMAP_NEAREST"] | WebGL2RenderingContext["LINEAR_MIPMAP_NEAREST"] | WebGL2RenderingContext["NEAREST_MIPMAP_LINEAR"] | WebGL2RenderingContext["LINEAR_MIPMAP_LINEAR"];
         /**
          * S (U) wrapping mode.
          */
-        "wrapS"?: number | number | number | number;
+        "wrapS"?: WebGL2RenderingContext["CLAMP_TO_EDGE"] | WebGL2RenderingContext["MIRRORED_REPEAT"] | WebGL2RenderingContext["REPEAT"];
         /**
          * T (V) wrapping mode.
          */
-        "wrapT"?: number | number | number | number;
-        "name"?: any;
+        "wrapT"?: WebGL2RenderingContext["CLAMP_TO_EDGE"] | WebGL2RenderingContext["MIRRORED_REPEAT"] | WebGL2RenderingContext["REPEAT"];
+        "name"?: string;
         "extensions"?: any;
         "extras"?: any;
         [k: string]: any;
@@ -6526,15 +6931,19 @@ declare namespace GLTF {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Asset loader for gl Transfer Format files.
+     * @authors Matthias Roming, HFU, 2022 | Jonas Plotzky, HFU, 2023
+     */
     class GLTFLoader {
         #private;
         private static loaders;
         private static defaultMaterial;
         private static defaultSkinMaterial;
         readonly gltf: GLTF.GlTf;
-        readonly uri: string;
+        readonly url: string;
         private constructor();
-        static LOAD(_uri: string): Promise<GLTFLoader>;
+        static LOAD(_url: string): Promise<GLTFLoader>;
         getScene(_name?: string): Promise<GraphInstance>;
         getSceneByIndex(_iScene?: number): Promise<GraphInstance>;
         getNode(_name: string): Promise<Node>;
@@ -6543,18 +6952,18 @@ declare namespace FudgeCore {
         getCameraByIndex(_iCamera: number): Promise<ComponentCamera>;
         getAnimation(_name: string): Promise<Animation>;
         getAnimationByIndex(_iAnimation: number): Promise<Animation>;
-        getMesh(_name: string): Promise<MeshGLTF>;
-        getMeshByIndex(_iMesh: number): Promise<MeshGLTF>;
-        getSkeleton(_name: string): Promise<SkeletonInstance>;
-        getSkeletonByIndex(_iSkeleton: number): Promise<SkeletonInstance>;
+        getMesh(_name: string): Promise<MeshImport>;
+        getMeshByIndex(_iMesh: number): Promise<MeshImport>;
+        getMaterialByIndex(_iMaterial: number): Promise<Material>;
+        getTextureByIndex(_iTexture: number): Promise<Texture>;
+        getSkeleton(_name: string): Promise<Skeleton>;
+        getSkeletonByIndex(_iSkeleton: number): Promise<Skeleton>;
         getUint8Array(_iAccessor: number): Promise<Uint8Array>;
         getUint16Array(_iAccessor: number): Promise<Uint16Array>;
         getUint32Array(_iAccessor: number): Promise<Uint32Array>;
         getFloat32Array(_iAccessor: number): Promise<Float32Array>;
         private getBufferData;
-        private isSkeletalAnimation;
-        private findSkeletalAnimationIndices;
-        private isBoneIndex;
+        private getBuffer;
         private getAnimationSequenceVector3;
     }
 }
@@ -6629,6 +7038,13 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    abstract class ShaderFlatTexturedSkin extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
     abstract class ShaderGouraud extends Shader {
         static readonly iSubclass: number;
         static define: string[];
@@ -6650,13 +7066,33 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    abstract class ShaderGouraudTexturedSkin extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
     abstract class ShaderLit extends Shader {
         static readonly iSubclass: number;
         static define: string[];
     }
 }
 declare namespace FudgeCore {
+    abstract class ShaderLitSkin extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+    }
+}
+declare namespace FudgeCore {
     abstract class ShaderLitTextured extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderLitTexturedSkin extends Shader {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
@@ -6681,6 +7117,30 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     abstract class ShaderPhong extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderPhongSkin extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderPhongTextured extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderPhongTexturedSkin extends Shader {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
@@ -6724,7 +7184,7 @@ declare namespace FudgeCore {
          * @param _mtxInit initial local matrix
          * @param _parentName name of the parent node, that must be registered as a bone
          */
-        addBone(_bone: Node, _mtxInit?: Matrix4x4, _parentName?: string): void;
+        addBone(_bone: Node, _parentName: string, _mtxInit?: Matrix4x4): void;
         /**
          * Registers a node as a bone with its bind inverse matrix
          * @param _bone the node to be registered, that should be a descendant of this skeleton
@@ -6752,6 +7212,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class SkeletonInstance extends GraphInstance {
         #private;
+        bindPose: BoneMatrixList;
         private skeletonSource;
         static CREATE(_skeleton: Skeleton): Promise<SkeletonInstance>;
         get bones(): BoneList;
@@ -6764,6 +7225,7 @@ declare namespace FudgeCore {
          * Set this skeleton instance to be a recreation of the {@link Skeleton} given
          */
         set(_skeleton: Skeleton): Promise<void>;
+        serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /**
          * Resets this skeleton instance to its default pose

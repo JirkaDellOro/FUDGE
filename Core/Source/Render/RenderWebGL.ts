@@ -492,9 +492,9 @@ namespace FudgeCore {
     }
 
     private static getRenderBuffers(_cmpMesh: ComponentMesh, _shader: ShaderInterface, _mtxMeshToView: Matrix4x4): RenderBuffers {
-      if (_cmpMesh.mesh instanceof MeshSkin)
+      if (_cmpMesh.mesh instanceof MeshSkin && (_shader.define.includes("SKIN")))
         // TODO: make mesh skin pickable
-        return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
+        return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton?.mtxBones);
       else
         return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView);
     }

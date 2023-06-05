@@ -108,6 +108,12 @@ void main() {
 precision mediump float;
 precision highp int;
 
+  // TEXTURE: input UVs and texture
+  #if defined(TEXTURE)
+in vec2 v_vctTexture;
+uniform sampler2D u_texture;
+  #endif
+
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
 uniform float u_fSpecular;
@@ -196,6 +202,12 @@ void main() {
       continue;
     vctFrag += illuminateDirected(vctDirection, v_vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
+
+  // TEXTURE: multiply with texel color
+    #if defined(TEXTURE)
+  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+  vctFrag *= vctColorTexture;
+    #endif
 }`;
   shaderSources["ShaderPick.frag"] = /*glsl*/ `#version 300 es
 /**
@@ -427,16 +439,16 @@ out vec4 v_vctPosition;
   #if defined(SKIN)
 // uniform mat4 u_mtxMeshToWorld;
 // Bones
+// https://github.com/mrdoob/three.js/blob/dev/src/renderers/shaders/ShaderChunk/skinning_pars_vertex.glsl.js
+in uvec4 a_iBone;
+in vec4 a_fWeight;
+const uint MAX_BONES = 256u;
 struct Bone {
   mat4 matrix;
 };
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
+layout (std140) uniform Skin {
+  Bone u_bones[MAX_BONES];
+};
   #endif
 
   // FLAT: outbuffer is flat

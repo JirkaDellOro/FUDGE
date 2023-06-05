@@ -1488,7 +1488,6 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    //Feeds WebGL Buffers with data calculated from the {@link Mesh]]
     class RenderInjectorMesh {
         static decorate(_constructor) {
             Object.defineProperty(_constructor.prototype, "useRenderBuffers", {
@@ -2928,9 +2927,9 @@ var FudgeCore;
             return FudgeCore.Matrix4x4.MULTIPLICATION(_mtxWorldToView, _cmpMesh.mtxWorld);
         }
         static getRenderBuffers(_cmpMesh, _shader, _mtxMeshToView) {
-            if (_cmpMesh.mesh instanceof FudgeCore.MeshSkin)
+            if (_cmpMesh.mesh instanceof FudgeCore.MeshSkin && (_shader.define.includes("SKIN")))
                 // TODO: make mesh skin pickable
-                return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
+                return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton?.mtxBones);
             else
                 return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView);
         }
@@ -3957,7 +3956,7 @@ var FudgeCore;
         /**
          * Ensures the existance of the requested {@link AnimationStrcuture} and returns it.
          * @param _type the type of the structure to get
-         * @returns the requested {@link AnimationStructure]]
+         * @returns the requested [[@link AnimationStructure]]
          */
         getProcessedAnimationStructure(_type) {
             if (!this.#animationStructuresProcessed.has(_type)) {
@@ -3986,7 +3985,7 @@ var FudgeCore;
         /**
          * Ensures the existance of the requested {@link AnimationEventTrigger} and returns it.
          * @param _type The type of AnimationEventTrigger to get
-         * @returns the requested {@link AnimationEventTrigger]]
+         * @returns the requested {@link AnimationEventTrigger}
          */
         getProcessedEventTrigger(_type) {
             if (!this.eventsProcessed.has(_type)) {
@@ -5773,28 +5772,12 @@ var FudgeCore;
             this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
             this.mtxWorld = FudgeCore.Matrix4x4.IDENTITY();
             this.mesh = _mesh;
-            if (_skeleton)
-                this.bindSkeleton(_skeleton);
+            this.skeleton = _skeleton;
         }
-        #skeleton;
         get radius() {
             let scaling = this.mtxWorld.scaling;
             let scale = Math.max(Math.abs(scaling.x), Math.abs(scaling.y), Math.abs(scaling.z));
             return this.mesh.radius * scale;
-        }
-        get skeleton() {
-            return this.#skeleton;
-        }
-        bindSkeleton(_skeleton) {
-            this.#skeleton = _skeleton;
-            if (!this.skeleton && !this.node)
-                this.addEventListener("componentAdd" /* COMPONENT_ADD */, (_event) => {
-                    if (_event.target != this)
-                        return;
-                    this.node.addChild(this.skeleton);
-                });
-            else if (this.node)
-                this.node.addChild(this.skeleton);
         }
         // /**
         //  * Calculates the position of a vertex transformed by the skeleton
@@ -5840,7 +5823,7 @@ var FudgeCore;
             else
                 serialization = { mesh: FudgeCore.Serializer.serialize(this.mesh) };
             if (this.skeleton)
-                serialization.skeleton = this.skeleton.name;
+                serialization.skeleton = this.skeleton.idSource;
             serialization.pivot = this.mtxPivot.serialize();
             serialization[super.constructor.name] = super.serialize();
             return serialization;
@@ -5856,10 +5839,29 @@ var FudgeCore;
                 this.addEventListener("componentAdd" /* COMPONENT_ADD */, (_event) => {
                     if (_event.target != this)
                         return;
-                    this.node.addEventListener("childAppend" /* CHILD_APPEND */, (_event) => {
-                        if (_event.target instanceof FudgeCore.SkeletonInstance && _event.target.name == _serialization.skeleton)
-                            this.#skeleton = _event.target;
-                    });
+                    const trySetSkeleton = () => {
+                        // find root node
+                        let root = this.node;
+                        while (root.getParent()) {
+                            root = root.getParent();
+                        }
+                        for (const node of root) {
+                            if (node instanceof FudgeCore.SkeletonInstance && node.idSource == _serialization.skeleton)
+                                this.skeleton = node;
+                        }
+                        if (!this.skeleton) {
+                            const trySetSkeletonOnChildAppend = _event => {
+                                root.removeEventListener("childAppend" /* CHILD_APPEND */, trySetSkeletonOnChildAppend);
+                                if (_event.target instanceof FudgeCore.SkeletonInstance && _event.target.idSource == _serialization.skeleton)
+                                    this.skeleton = _event.target;
+                                else {
+                                    trySetSkeleton();
+                                }
+                            };
+                            root.addEventListener("childAppend" /* CHILD_APPEND */, trySetSkeletonOnChildAppend);
+                        }
+                    };
+                    trySetSkeleton();
                 });
             await this.mtxPivot.deserialize(_serialization.pivot);
             await super.deserialize(_serialization[super.constructor.name]);
@@ -9121,10 +9123,10 @@ var FudgeCore;
          * Sets the elements of this matrix to the values of the given matrix
          */
         set(_mtxTo) {
-            if (_mtxTo instanceof Float32Array)
-                this.data.set(_mtxTo);
-            else
+            if (_mtxTo instanceof Matrix4x4)
                 this.data.set(_mtxTo.data);
+            else
+                this.data.set(_mtxTo);
             this.resetCache();
         }
         toString() {
@@ -9674,6 +9676,377 @@ var FudgeCore;
     Noise4.offset = (5.0 - Math.sqrt(5.0)) / 20.0;
     Noise4.gradient = [[0, 1, 1, 1], [0, 1, 1, -1], [0, 1, -1, 1], [0, 1, -1, -1], [0, -1, 1, 1], [0, -1, 1, -1], [0, -1, -1, 1], [0, -1, -1, -1], [1, 0, 1, 1], [1, 0, 1, -1], [1, 0, -1, 1], [1, 0, -1, -1], [-1, 0, 1, 1], [-1, 0, 1, -1], [-1, 0, -1, 1], [-1, 0, -1, -1], [1, 1, 0, 1], [1, 1, 0, -1], [1, -1, 0, 1], [1, -1, 0, -1], [-1, 1, 0, 1], [-1, 1, 0, -1], [-1, -1, 0, 1], [-1, -1, 0, -1], [1, 1, 1, 0], [1, 1, -1, 0], [1, -1, 1, 0], [1, -1, -1, 0], [-1, 1, 1, 0], [-1, 1, -1, 0], [-1, -1, 1, 0], [-1, -1, -1, 0]];
     FudgeCore.Noise4 = Noise4;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    /**
+      * Storing and manipulating rotations in the form of quaternions.
+      * Constructed out of the 4 components: (x, y, z, w). Mathematical notation: w + xi + yj + zk.
+      * A Quaternion can be described with an axis and angle: (x, y, z) = sin(angle/2)*axis; w = cos(angle/2).
+      * roll: x, pitch: y, yaw: z. Note that operations are adapted to work with vectors where y is up and z is forward.
+      * @authors Matthias Roming, HFU, 2023
+      */
+    class Quaternion extends FudgeCore.Mutable {
+        constructor() {
+            super();
+            this.data = new Float32Array(4); // The data of the quaternion (x, y, z, w).
+            this.mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
+            this.#eulerAngles = null; // euler angle representation of this quaternion in degrees.
+            this.recycle();
+        }
+        #eulerAngles; // euler angle representation of this quaternion in degrees.
+        //#region STATICS
+        /**
+         * Retrieve a new identity quaternion
+         */
+        static IDENTITY() {
+            const result = FudgeCore.Recycler.get(Quaternion);
+            return result;
+        }
+        /**
+         * Constructs a new quaternion from the euler angles given
+         */
+        static FROM_EULER_ANGLES(_eulerAngles, _order = "ZYX") {
+            const result = FudgeCore.Recycler.get(Quaternion);
+            result.setFromEulerAngles(_eulerAngles, _order);
+            return result;
+        }
+        /**
+         * Computes and returns the product of two passed quaternions.
+         * @param _mtxLeft The matrix to multiply.
+         * @param _mtxRight The matrix to multiply by.
+         */
+        static MULTIPLICATION(_qLeft, _qRight) {
+            const result = _qLeft.clone;
+            result.multiply(_qRight);
+            return result;
+        }
+        /**
+         * Computes and returns the inverse of a passed quaternion.
+         * @param _mtx The quaternion to compute the inverse of.
+         */
+        static INVERSION(_q) {
+            const result = _q.clone;
+            result.inverse();
+            return result;
+        }
+        /**
+         * Computes and returns the conjugate of a passed quaternion.
+         * @param _mtx The quaternion to compute the conjugate of.
+         */
+        static CONJUGATION(_q) {
+            const result = _q.clone;
+            result.conjugate();
+            return result;
+        }
+        /**
+         * Experimental: Creates and returns a vector through transformation of the given vector by the given quaternion
+         */
+        static TRANSFORM_VECTOR(_v, _q) {
+            // changed axis order might not be necessary, needs testing
+            const v = FudgeCore.Recycler.get(Quaternion);
+            v.set([0, _v.z, _v.x, _v.y]);
+            v.multiply(_q, true);
+            v.multiply(this.CONJUGATION(_q));
+            const result = FudgeCore.Recycler.get(FudgeCore.Vector3);
+            result.set(v.data[2], v.data[3], v.data[1]);
+            return result;
+        }
+        /**
+         * Experimental: Converts the quaternion to a Matrix4x4
+         */
+        static QUATERNION_TO_MATRIX(_q) {
+            const x = _q.data[0], y = _q.data[1], z = _q.data[2], w = _q.data[3];
+            // From: https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm
+            const xx = x * x, xy = x * y, xz = x * z, xw = x * w;
+            const yy = y * y, yz = y * z, yw = y * w;
+            const zz = z * z, zw = z * w;
+            const result = FudgeCore.Recycler.get(FudgeCore.Matrix4x4);
+            result.set([
+                1 - 2 * (yy + zz), 2 * (xy - zw), 2 * (xz + yw), 0,
+                2 * (xy + zw), 1 - 2 * (xx + zz), 2 * (yz - xw), 0,
+                2 * (xz - yw), 2 * (yz + xw), 1 - 2 * (xx + yy), 0,
+                0, 0, 0, 1
+            ]);
+            return result;
+        }
+        //#endregion
+        get x() {
+            return this.data[0];
+        }
+        get y() {
+            return this.data[1];
+        }
+        get z() {
+            return this.data[2];
+        }
+        get w() {
+            return this.data[3];
+        }
+        set x(_x) {
+            this.data[0] = _x;
+        }
+        set y(_y) {
+            this.data[1] = _y;
+        }
+        set z(_z) {
+            this.data[2] = _z;
+        }
+        set w(_w) {
+            this.data[3] = _w;
+        }
+        /**
+         * Calculates and returns the euler-angles in degrees.
+         */
+        getEulerAngles(_order = "ZYX") {
+            if (!this.#eulerAngles) {
+                const mtx = Quaternion.QUATERNION_TO_MATRIX(this);
+                const mtxData = mtx.get();
+                const m11 = mtxData[0], m12 = mtxData[1], m13 = mtxData[2];
+                const m21 = mtxData[4], m22 = mtxData[5], m23 = mtxData[6];
+                const m31 = mtxData[8], m32 = mtxData[9], m33 = mtxData[10];
+                this.#eulerAngles = FudgeCore.Recycler.get(FudgeCore.Vector3);
+                switch (_order) {
+                    case "XYZ":
+                        this.#eulerAngles.y = Math.asin(FudgeCore.Calc.clamp(m13, -1, 1));
+                        if (Math.abs(m13) < 0.9999999) {
+                            this.#eulerAngles.x = Math.atan2(-m23, m33);
+                            this.#eulerAngles.z = Math.atan2(-m12, m11);
+                        }
+                        else {
+                            this.#eulerAngles.x = Math.atan2(m32, m22);
+                            this.#eulerAngles.z = 0;
+                        }
+                        break;
+                    case "YXZ":
+                        this.#eulerAngles.x = Math.asin(-FudgeCore.Calc.clamp(m23, -1, 1));
+                        if (Math.abs(m23) < 0.9999999) {
+                            this.#eulerAngles.y = Math.atan2(m13, m33);
+                            this.#eulerAngles.z = Math.atan2(m21, m22);
+                        }
+                        else {
+                            this.#eulerAngles.y = Math.atan2(-m31, m11);
+                            this.#eulerAngles.z = 0;
+                        }
+                        break;
+                    case "ZXY":
+                        this.#eulerAngles.x = Math.asin(FudgeCore.Calc.clamp(m32, -1, 1));
+                        if (Math.abs(m32) < 0.9999999) {
+                            this.#eulerAngles.y = Math.atan2(-m31, m33);
+                            this.#eulerAngles.z = Math.atan2(-m12, m22);
+                        }
+                        else {
+                            this.#eulerAngles.y = 0;
+                            this.#eulerAngles.z = Math.atan2(m21, m11);
+                        }
+                        break;
+                    case "ZYX":
+                        this.#eulerAngles.y = Math.asin(-FudgeCore.Calc.clamp(m31, -1, 1));
+                        if (Math.abs(m31) < 0.9999999) {
+                            this.#eulerAngles.x = Math.atan2(m32, m33);
+                            this.#eulerAngles.z = Math.atan2(m21, m11);
+                        }
+                        else {
+                            this.#eulerAngles.x = 0;
+                            this.#eulerAngles.z = Math.atan2(-m12, m22);
+                        }
+                        break;
+                    case "YZX":
+                        this.#eulerAngles.z = Math.asin(FudgeCore.Calc.clamp(m21, -1, 1));
+                        if (Math.abs(m21) < 0.9999999) {
+                            this.#eulerAngles.x = Math.atan2(-m23, m22);
+                            this.#eulerAngles.y = Math.atan2(-m31, m11);
+                        }
+                        else {
+                            this.#eulerAngles.x = 0;
+                            this.#eulerAngles.y = Math.atan2(m13, m33);
+                        }
+                        break;
+                    case "XZY":
+                        this.#eulerAngles.z = Math.asin(-FudgeCore.Calc.clamp(m12, -1, 1));
+                        if (Math.abs(m12) < 0.9999999) {
+                            this.#eulerAngles.x = Math.atan2(m32, m22);
+                            this.#eulerAngles.y = Math.atan2(m13, m11);
+                        }
+                        else {
+                            this.#eulerAngles.x = Math.atan2(-m23, m33);
+                            this.#eulerAngles.y = 0;
+                        }
+                        break;
+                    default:
+                        console.warn("encountered an unknown order: " + _order);
+                }
+                this.#eulerAngles.scale(FudgeCore.Calc.rad2deg);
+            }
+            return this.#eulerAngles;
+        }
+        setFromEulerAngles(_eulerAngles, _order = "ZYX") {
+            const cosX = Math.cos(_eulerAngles.x * FudgeCore.Calc.deg2rad / 2);
+            const cosY = Math.cos(_eulerAngles.y * FudgeCore.Calc.deg2rad / 2);
+            const cosZ = Math.cos(_eulerAngles.z * FudgeCore.Calc.deg2rad / 2);
+            const sinX = Math.sin(_eulerAngles.x * FudgeCore.Calc.deg2rad / 2);
+            const sinY = Math.sin(_eulerAngles.y * FudgeCore.Calc.deg2rad / 2);
+            const sinZ = Math.sin(_eulerAngles.z * FudgeCore.Calc.deg2rad / 2);
+            switch (_order) {
+                case "XYZ":
+                    this.set([
+                        sinX * cosY * cosZ + cosX * sinY * sinZ,
+                        cosX * sinY * cosZ - sinX * cosY * sinZ,
+                        cosX * cosY * sinZ + sinX * sinY * cosZ,
+                        cosX * cosY * cosZ - sinX * sinY * sinZ
+                    ]);
+                    break;
+                case "YXZ":
+                    this.set([
+                        sinX * cosY * cosZ + cosX * sinY * sinZ,
+                        cosX * sinY * cosZ - sinX * cosY * sinZ,
+                        cosX * cosY * sinZ - sinX * sinY * cosZ,
+                        cosX * cosY * cosZ + sinX * sinY * sinZ
+                    ]);
+                    break;
+                case "ZXY":
+                    this.set([
+                        sinX * cosY * cosZ - cosX * sinY * sinZ,
+                        cosX * sinY * cosZ + sinX * cosY * sinZ,
+                        cosX * cosY * sinZ + sinX * sinY * cosZ,
+                        cosX * cosY * cosZ - sinX * sinY * sinZ
+                    ]);
+                    break;
+                case "ZYX":
+                    this.set([
+                        sinX * cosY * cosZ - cosX * sinY * sinZ,
+                        cosX * sinY * cosZ + sinX * cosY * sinZ,
+                        cosX * cosY * sinZ - sinX * sinY * cosZ,
+                        cosX * cosY * cosZ + sinX * sinY * sinZ
+                    ]);
+                    break;
+                case "YZX":
+                    this.set([
+                        sinX * cosY * cosZ + cosX * sinY * sinZ,
+                        cosX * sinY * cosZ + sinX * cosY * sinZ,
+                        cosX * cosY * sinZ - sinX * sinY * cosZ,
+                        cosX * cosY * cosZ - sinX * sinY * sinZ
+                    ]);
+                    break;
+                case "XZY":
+                    this.set([
+                        sinX * cosY * cosZ - cosX * sinY * sinZ,
+                        cosX * sinY * cosZ - sinX * cosY * sinZ,
+                        cosX * cosY * sinZ + sinX * sinY * cosZ,
+                        cosX * cosY * cosZ + sinX * sinY * sinZ
+                    ]);
+                    break;
+                default:
+                    console.warn("encountered an unknown order: " + _order);
+            }
+        }
+        /**
+         * Return a copy of this
+         */
+        get clone() {
+            let result = FudgeCore.Recycler.get(Quaternion);
+            result.set(this);
+            return result;
+        }
+        /**
+         * Resets the quaternion to the identity-quaternion and clears cache. Used by the recycler to reset.
+         */
+        recycle() {
+            this.data.set([0, 0, 0, 1]);
+            this.resetCache();
+        }
+        /**
+         * Resets the quaternion to the identity-quaternion and clears cache.
+         */
+        reset() {
+            this.recycle();
+        }
+        /**
+         * Inverse this quaternion
+         */
+        inverse() {
+            // quaternion is assumed to have unit length
+            this.conjugate();
+        }
+        /**
+         * Conjugate this quaternion
+         */
+        conjugate() {
+            this.data[0] *= -1;
+            this.data[1] *= -1;
+            this.data[2] *= -1;
+            this.resetCache();
+        }
+        /**
+         * Multiply this quaternion with the given quaternion
+         */
+        multiply(_other, _fromLeft = false) {
+            const a = _fromLeft ? _other : this;
+            const b = _fromLeft ? this : _other;
+            // from: http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
+            const ax = a.data[0];
+            const ay = a.data[1];
+            const az = a.data[2];
+            const aw = a.data[3];
+            const bx = b.data[0];
+            const by = b.data[1];
+            const bz = b.data[2];
+            const bw = b.data[3];
+            this.set([
+                ax * bw + ay * bz - az * by + aw * bx,
+                -ax * bz + ay * bw + az * bx + aw * by,
+                ax * by - ay * bx + az * bw + aw * bz,
+                -ax * bx - ay * by - az * bz + aw * bw,
+            ]);
+        }
+        /**
+         * Sets the elements of this quaternion to the values of the given quaternion
+         */
+        set(_qTo) {
+            if (_qTo instanceof Quaternion)
+                this.data.set(_qTo.data);
+            else
+                this.data.set(_qTo);
+            this.resetCache();
+        }
+        toString() {
+            return `ƒ.Quaternion(x: ${this.data[0]}, y: ${this.data[1]}, z: ${this.data[2]}, w: ${this.data[3]})`;
+        }
+        /**
+         * Return the elements of this quaternion as a Float32Array
+         */
+        get() {
+            // TODO: optimization, it shouldn"t always return a copy, since this bloats memory
+            return new Float32Array(this.data);
+        }
+        serialize() {
+            return this.getMutator();
+        }
+        async deserialize(_serialization) {
+            this.mutate(_serialization);
+            return this;
+        }
+        getMutator() {
+            if (!this.mutator)
+                this.mutator = {
+                    x: this.data[0], y: this.data[1], z: this.data[2], w: this.data[3]
+                };
+            return this.mutator;
+        }
+        async mutate(_mutator) {
+            this.data[0] = _mutator.x;
+            this.data[1] = _mutator.y;
+            this.data[2] = _mutator.z;
+            this.data[3] = _mutator.w;
+            this.resetCache();
+        }
+        reduceMutator(_mutator) { }
+        resetCache() {
+            this.#eulerAngles = null;
+            this.mutator = null;
+        }
+    }
+    FudgeCore.Quaternion = Quaternion;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -10577,136 +10950,37 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     /**
-     * Mesh loaded from a GLTF-file
-     * @author Matthias Roming, HFU, 2022
+     * Mesh loaded from a file
+     * @author Matthias Roming, HFU, 2022-2023
      */
-    class MeshGLTF extends FudgeCore.Mesh {
+    class MeshImport extends FudgeCore.Mesh {
         serialize() {
             const serialization = super.serialize();
-            serialization.uriGLTF = this.uriGLTF;
+            serialization.url = this.url.toString();
+            serialization.filetype = this.loader.toString().replace(FudgeCore.MeshLoader.toString(), "");
             return serialization;
         }
         async deserialize(_serialization) {
             super.deserialize(_serialization);
-            const loader = await FudgeCore.GLTFLoader.LOAD(_serialization.uriGLTF);
-            await this.load(loader, loader.gltf.meshes.findIndex(gltfMesh => gltfMesh.name == this.name));
-            return this;
+            this.url = _serialization.url;
+            this.loader = Reflect.get(FudgeCore, FudgeCore.MeshLoader.toString().concat(_serialization.filetype));
+            return this.load();
         }
-        async load(_loader, _iMesh) {
-            const gltfMesh = _loader.gltf.meshes[_iMesh];
-            this.name = gltfMesh.name;
-            this.renderMesh = new FudgeCore.RenderMesh(this);
-            Reflect.set(this.renderMesh, "ƒindices", await _loader.getUint16Array(gltfMesh.primitives[0].indices));
-            Reflect.set(this.renderMesh, "ƒvertices", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.POSITION));
-            Reflect.set(this.renderMesh, "ƒnormals", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.NORMAL));
-            Reflect.set(this.renderMesh, "ƒtextureUVs", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.TEXCOORD_0));
-            // let renderBuffers: RenderBuffers =  this.getRenderBuffers(ShaderFlat); // hotfix to create renderMesh
-            this.uriGLTF = _loader.uri;
-            return this;
-        }
-    }
-    FudgeCore.MeshGLTF = MeshGLTF;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    /**Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
-     * static LOAD Method. Currently only works with triangulated Meshes
-     * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
-     * @todo UVs, Load Materials, Support Quads
-     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 */
-    class MeshObj extends FudgeCore.Mesh {
-        // protected verts: number[] = [];
-        // protected uvs: number[] = [];
-        // protected inds: number[] = [];
-        // protected facenormals: number[] = [];
-        // protected facecrossproducts: number[] = [];
-        constructor(_name, _url) {
-            super(_name);
-            {
-                if (_url) {
-                    this.load(_url);
-                    if (!_name)
-                        _name = _url.toString().split("/").pop();
-                }
-                if (!_name)
-                    _name = "MeshObj";
-                this.name = _name;
-            }
-        }
-        /**
-             * Asynchronously loads the image from the given url
-             */
-        async load(_url) {
+        async load(_loader = this.loader, _url = this.url, _data) {
             this.url = _url;
-            let url = new URL(this.url.toString(), FudgeCore.Project.baseURL).toString();
-            let data = await (await fetch(url)).text();
-            this.parseObj(data);
-        }
-        /** Splits up the obj string into separate arrays for each datatype */
-        parseObj(data) {
+            this.loader = _loader;
+            if (!this.renderMesh)
+                this.renderMesh = new FudgeCore.RenderMesh(this);
             this.clear();
-            const lines = data.split("\n");
-            let positions = [];
-            let uvs = [];
-            let faceInfo = [];
-            for (let line of lines) {
-                line = line.trim();
-                if (!line || line.startsWith("#"))
-                    continue;
-                const parts = line.split(" ");
-                parts.shift();
-                //Vertex - example: v 0.70 -0.45 -0.52
-                if (line.startsWith("v "))
-                    positions.push(new FudgeCore.Vector3(...parts.map(_value => +_value)));
-                //Texcoord - example: vt 0.545454 0.472382
-                else if (line.startsWith("vt "))
-                    uvs.push(new FudgeCore.Vector2(...parts.map((_value, _index) => +_value * (_index == 1 ? -1 : 1))));
-                /*Face Indices - example: f 1/1/1 2/2/1 3/3/1 -->
-                vertex1/texcoord1/normal1 vertex2/texcoord2/normal2 vertex3/texcoord3/normal3*/
-                else if (line.startsWith("f "))
-                    for (let i = 0; i < 3; i++) {
-                        faceInfo.push({
-                            iPosition: +parts[i].split("/")[0] - 1,
-                            iUV: +parts[i].split("/")[1] - 1,
-                            iNormal: +parts[i].split("/")[2] - 1
-                        });
-                    }
-            }
-            this.vertices = new FudgeCore.Vertices(...positions.map((_p) => new FudgeCore.Vertex(_p)));
-            for (let i = 0; i < faceInfo.length; i += 3) {
-                let indices = [];
-                for (let v = 0; v < 3; v++) {
-                    let info = faceInfo[i + v];
-                    let index = info.iPosition;
-                    if (this.vertices[index].uv) {
-                        index = this.vertices.length;
-                        this.vertices.push(new FudgeCore.Vertex(info.iPosition));
-                    }
-                    this.vertices[index].uv = uvs[info.iUV];
-                    indices.push(index);
-                }
-                this.faces.push(new FudgeCore.Face(this.vertices, indices[0], indices[1], indices[2]));
-            }
-        }
-        //#region Transfer
-        serialize() {
-            let serialization = super.serialize();
-            serialization.url = this.url;
-            return serialization;
-        }
-        async deserialize(_serialization) {
-            await super.deserialize(_serialization);
-            this.load(_serialization.url);
-            return this;
+            return _loader.load(this, _data);
         }
         async mutate(_mutator) {
             super.mutate(_mutator);
             if (typeof (_mutator.url) !== "undefined")
-                this.load(_mutator.url);
+                this.load(this.loader, _mutator.url);
         }
     }
-    MeshObj.iSubclass = FudgeCore.Mesh.registerSubclass(MeshObj);
-    FudgeCore.MeshObj = MeshObj;
+    FudgeCore.MeshImport = MeshImport;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -11082,6 +11356,13 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    // Dictionary to all uniform blocks
+    const UNIFORM_BLOCKS = {
+        SKIN: {
+            NAME: "Skin",
+            BINDING: 0
+        }
+    };
     class RenderInjectorMeshSkin extends FudgeCore.RenderInjectorMesh {
         static decorate(_constructor) {
             Object.defineProperty(_constructor.prototype, "useRenderBuffers", {
@@ -11103,12 +11384,24 @@ var FudgeCore;
                 iBones = this.renderMesh.iBonesFlat;
                 weights = this.renderMesh.weightsFlat;
             }
-            renderBuffers.iBones = FudgeCore.RenderWebGL.assert(crc3.createBuffer());
-            crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.iBones);
-            crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, iBones, WebGL2RenderingContext.STATIC_DRAW);
-            renderBuffers.weights = FudgeCore.RenderWebGL.assert(crc3.createBuffer());
-            crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.weights);
-            crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, weights, WebGL2RenderingContext.STATIC_DRAW);
+            if (!renderBuffers.iBones) {
+                renderBuffers.iBones = FudgeCore.RenderWebGL.assert(crc3.createBuffer());
+                crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.iBones);
+                crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, iBones, WebGL2RenderingContext.STATIC_DRAW);
+            }
+            if (!renderBuffers.weights) {
+                renderBuffers.weights = FudgeCore.RenderWebGL.assert(crc3.createBuffer());
+                crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.weights);
+                crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, weights, WebGL2RenderingContext.STATIC_DRAW);
+            }
+            if (!renderBuffers.mtxBones) {
+                const bones = crc3.getUniformBlockIndex(_shader.program, UNIFORM_BLOCKS.SKIN.NAME);
+                const bonesSize = crc3.getActiveUniformBlockParameter(_shader.program, bones, crc3.UNIFORM_BLOCK_DATA_SIZE);
+                renderBuffers.mtxBones = crc3.createBuffer();
+                crc3.bindBufferBase(crc3.UNIFORM_BUFFER, UNIFORM_BLOCKS.SKIN.BINDING, renderBuffers.mtxBones);
+                crc3.bufferData(crc3.UNIFORM_BUFFER, bonesSize, crc3.DYNAMIC_DRAW);
+                crc3.uniformBlockBinding(_shader.program, bones, UNIFORM_BLOCKS.SKIN.BINDING);
+            }
             return renderBuffers;
         }
         static useRenderBuffers(_shader, _mtxMeshToWorld, _mtxMeshToView, _id, _mtxBones) {
@@ -11126,11 +11419,12 @@ var FudgeCore;
                 crc3.enableVertexAttribArray(aWeight);
                 crc3.vertexAttribPointer(aWeight, 4, WebGL2RenderingContext.FLOAT, false, 0, 0);
             }
-            _mtxBones.forEach((mtxBone, iBone) => {
-                const uMtxBone = _shader.uniforms[`u_bones[${iBone}].matrix`];
-                if (uMtxBone)
-                    crc3.uniformMatrix4fv(uMtxBone, false, mtxBone.get());
-            });
+            if (_mtxBones) {
+                const skin = crc3.getUniformBlockIndex(_shader.program, UNIFORM_BLOCKS.SKIN.NAME);
+                crc3.uniformBlockBinding(_shader.program, skin, UNIFORM_BLOCKS.SKIN.BINDING);
+                crc3.bindBuffer(crc3.UNIFORM_BUFFER, renderBuffers.mtxBones);
+                crc3.bufferSubData(crc3.UNIFORM_BUFFER, 0, new Float32Array(iterableFrom(_mtxBones)));
+            }
             return renderBuffers;
         }
         static deleteRenderBuffers(_renderBuffers) {
@@ -11140,28 +11434,28 @@ var FudgeCore;
                 crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
                 crc3.deleteBuffer(_renderBuffers.iBones);
                 crc3.deleteBuffer(_renderBuffers.weights);
+                crc3.deleteBuffer(_renderBuffers.mtxBones);
             }
         }
     }
     FudgeCore.RenderInjectorMeshSkin = RenderInjectorMeshSkin;
+    function* iterableFrom(matrices) {
+        for (const matrix of matrices)
+            for (const value of matrix.get())
+                yield value;
+    }
 })(FudgeCore || (FudgeCore = {}));
 ///<reference path="./../Render/RenderInjectorMeshSkin.ts"/>
+///<reference path="./MeshImport.ts"/>
 var FudgeCore;
 ///<reference path="./../Render/RenderInjectorMeshSkin.ts"/>
+///<reference path="./MeshImport.ts"/>
 (function (FudgeCore) {
     /**
-     * Mesh influenced by a skeleton
-     * @author Matthias Roming, HFU, 2022
+     * Mesh influenced by a skeleton and loaded from a file
+     * @author Matthias Roming, HFU, 2022-2023
      */
-    let MeshSkin = class MeshSkin extends FudgeCore.MeshGLTF {
-        async load(_loader, _iMesh) {
-            await super.load(_loader, _iMesh);
-            const gltfMesh = _loader.gltf.meshes[_iMesh];
-            this.renderMesh = new FudgeCore.RenderMesh(this);
-            Reflect.set(this.renderMesh, "ƒiBones", await _loader.getUint8Array(gltfMesh.primitives[0].attributes.JOINTS_0));
-            Reflect.set(this.renderMesh, "ƒweights", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.WEIGHTS_0));
-            return this;
-        }
+    let MeshSkin = class MeshSkin extends FudgeCore.MeshImport {
         useRenderBuffers(_shader, _mtxWorld, _mtxProjection, _id, _mtxBones) { return null; /* injected by RenderInjector*/ }
         reduceMutator(_mutator) {
             super.reduceMutator(_mutator);
@@ -11435,7 +11729,8 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     /**
-     * The namesapce for handling the particle data
+     * Base class for MeshImport-loaders
+     * @author Matthias Roming, HFU, 2023
      */
     let ParticleData;
     (function (ParticleData) {
@@ -11832,7 +12127,7 @@ var FudgeCore;
          */
         getRotation() {
             let orientation = this.#rigidbody.getOrientation();
-            let tmpQuat = new FudgeCore.Quaternion(orientation.x, orientation.y, orientation.z, orientation.w);
+            let tmpQuat = new FudgeCore.PhysicsQuaternion(orientation.x, orientation.y, orientation.z, orientation.w);
             return tmpQuat.toDegrees();
         }
         /**
@@ -14132,7 +14427,7 @@ var FudgeCore;
       * Class mostly used internally to bridge the in FUDGE commonly used angles in degree to OimoPhysics quaternion system.
       * @authors Marko Fehrenbach, HFU, 2020
       */
-    class Quaternion extends FudgeCore.Mutable {
+    class PhysicsQuaternion extends FudgeCore.Mutable {
         constructor(_x = 0, _y = 0, _z = 0, _w = 0) {
             super();
             this.#x = _x;
@@ -14171,6 +14466,18 @@ var FudgeCore;
         }
         set w(_w) {
             this.#w = _w;
+        }
+        multiply(_other, _fromLeft = false) {
+            const a = _fromLeft ? _other : this;
+            const b = _fromLeft ? this : _other;
+            const x = a.x * b.x - a.y * b.y - a.z * b.z - a.w * b.w;
+            const y = a.x * b.y + a.y * b.x + a.z * b.w - a.w * b.z;
+            const z = a.x * b.z - a.y * b.w + a.z * b.x + a.w * b.y;
+            const w = a.x * b.w + a.y * b.z - a.z * b.y + a.w * b.x;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.w = w;
         }
         /**
          * Create quaternion from vector3 angles in radians
@@ -14230,7 +14537,7 @@ var FudgeCore;
             return b < 0 ? -Math.abs(a) : Math.abs(a);
         }
     }
-    FudgeCore.Quaternion = Quaternion;
+    FudgeCore.PhysicsQuaternion = PhysicsQuaternion;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -14626,15 +14933,21 @@ var FudgeCore;
         }
         get iBones() {
             return this.ƒiBones || ( // return cache or ...
-            this.ƒiBones = new Uint8Array(this.mesh.vertices.flatMap((_vertex, _index) => {
-                return [...this.mesh.vertices.bones(_index).map(_bone => _bone.index)];
-            })));
+            this.ƒiBones = this.mesh.vertices.some(_vertex => _vertex.bones) ?
+                new Uint8Array(this.mesh.vertices.flatMap((_vertex, _index) => {
+                    const bones = this.mesh.vertices.bones(_index);
+                    return [bones?.[0]?.index || 0, bones?.[1]?.index || 0, bones?.[2]?.index || 0, bones?.[3]?.index || 0];
+                })) :
+                undefined);
         }
         get weights() {
             return this.ƒweights || ( // return cache or ...
-            this.ƒweights = new Float32Array(this.mesh.vertices.flatMap((_vertex, _index) => {
-                return [...this.mesh.vertices.bones(_index).map(_bone => _bone.weight)];
-            })));
+            this.ƒweights = this.mesh.vertices.some(_vertex => _vertex.bones) ?
+                new Float32Array(this.mesh.vertices.flatMap((_vertex, _index) => {
+                    const bones = this.mesh.vertices.bones(_index);
+                    return [bones?.[0]?.weight || 0, bones?.[1]?.weight || 0, bones?.[2]?.weight || 0, bones?.[3]?.weight || 0];
+                })) :
+                undefined);
         }
         get vertices() {
             return this.ƒvertices || ( // return cache or ...
@@ -14672,7 +14985,9 @@ var FudgeCore;
         get textureUVs() {
             return this.ƒtextureUVs || ( // return cache or ...
             // ... flatten all uvs from the clous into a typed array
-            this.ƒtextureUVs = new Float32Array(this.mesh.vertices.flatMap((_vertex) => [..._vertex.uv.get()])));
+            this.ƒtextureUVs = new Float32Array(this.mesh.vertices
+                .filter(_vertex => _vertex.uv)
+                .flatMap((_vertex) => [..._vertex.uv.get()])));
         }
         get verticesFlat() {
             return this.ƒverticesFlat || (this.ƒverticesFlat = this.createVerticesFlat());
@@ -15591,37 +15906,840 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    let ComponentType;
-    (function (ComponentType) {
-        ComponentType[ComponentType["BYTE"] = 5120] = "BYTE";
-        ComponentType[ComponentType["UNSIGNED_BYTE"] = 5121] = "UNSIGNED_BYTE";
-        ComponentType[ComponentType["SHORT"] = 5122] = "SHORT";
-        ComponentType[ComponentType["UNSIGNED_SHORT"] = 5123] = "UNSIGNED_SHORT";
-        ComponentType[ComponentType["INT"] = 5124] = "INT";
-        ComponentType[ComponentType["UNSIGNED_INT"] = 5125] = "UNSIGNED_INT";
-        ComponentType[ComponentType["FLOAT"] = 5126] = "FLOAT";
-    })(ComponentType || (ComponentType = {}));
-    class GLTFLoader {
-        constructor(_gltf, _uri) {
-            this.gltf = _gltf;
+    var FBX;
+    (function (FBX) {
+        /**
+         * Reader to read data from an array buffer more conveniently.
+         * It saves a current offset which is updated when data is read due to its bytelength.
+         * despite getSequence it is mostly a copy of the reference: https://github.com/picode7/binary-reader
+         * @author Matthias Roming, HFU, 2023
+         */
+        class BufferReader {
+            constructor(_buffer) {
+                this.view = new DataView(_buffer);
+                this.offset = 0;
+            }
+            getChar(_offset = this.offset) {
+                return String.fromCharCode(this.getUint8(_offset));
+            }
+            getBool(_offset = this.offset) {
+                return this.getUint8(_offset) != 0;
+            }
+            getUint8(_offset = this.offset) {
+                this.offset = _offset + 1;
+                return this.view.getUint8(_offset);
+            }
+            getUint32(_offset = this.offset) {
+                this.offset = _offset + 4;
+                return this.view.getUint32(_offset, true);
+            }
+            getUint64(_offset = this.offset) {
+                this.offset = _offset + 8;
+                return this.view.getBigUint64(_offset, true);
+            }
+            getInt16(_offset = this.offset) {
+                this.offset = _offset + 2;
+                return this.view.getInt16(_offset, true);
+            }
+            getInt32(_offset = this.offset) {
+                this.offset = _offset + 4;
+                return this.view.getInt32(_offset, true);
+            }
+            getInt64(_offset = this.offset) {
+                this.offset = _offset + 8;
+                return this.view.getBigInt64(_offset, true);
+            }
+            getFloat32(_offset = this.offset) {
+                this.offset = _offset + 4;
+                return this.view.getFloat32(_offset, true);
+            }
+            getFloat64(_offset = this.offset) {
+                this.offset = _offset + 8;
+                return this.view.getFloat64(_offset, true);
+            }
+            getString(_length, _offset = this.offset) {
+                return String.fromCharCode(...this.getSequence(this.getUint8, _length, _offset));
+            }
+            *getSequence(_getter, _length, _offset = this.offset) {
+                this.offset = _offset;
+                for (let i = 0; i < _length; i++) {
+                    yield _getter.call(this);
+                }
+            }
+        }
+        FBX.BufferReader = BufferReader;
+    })(FBX = FudgeCore.FBX || (FudgeCore.FBX = {}));
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    var FBX;
+    (function (FBX) {
+        let MappingInformationType;
+        (function (MappingInformationType) {
+            MappingInformationType[MappingInformationType["ByVertex"] = 0] = "ByVertex";
+            MappingInformationType[MappingInformationType["ByPolygon"] = 1] = "ByPolygon";
+            MappingInformationType[MappingInformationType["ByPolygonVertex"] = 2] = "ByPolygonVertex";
+            MappingInformationType[MappingInformationType["ByEdge"] = 3] = "ByEdge";
+            MappingInformationType[MappingInformationType["AllSame"] = 4] = "AllSame";
+        })(MappingInformationType = FBX.MappingInformationType || (FBX.MappingInformationType = {}));
+        let ReferenceInformationType;
+        (function (ReferenceInformationType) {
+            ReferenceInformationType[ReferenceInformationType["Direct"] = 0] = "Direct";
+            ReferenceInformationType[ReferenceInformationType["IndexToDirect"] = 1] = "IndexToDirect";
+        })(ReferenceInformationType = FBX.ReferenceInformationType || (FBX.ReferenceInformationType = {}));
+    })(FBX = FudgeCore.FBX || (FudgeCore.FBX = {}));
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    /**
+     * Asset loader for Filmbox files.
+     * @author Matthias Roming, HFU, 2023
+     */
+    class FBXLoader {
+        constructor(_buffer, _uri) {
+            this.#skinMaterials = [];
             this.uri = _uri;
+            this.nodes = FudgeCore.FBX.parseNodesFromBinary(_buffer);
+            console.log(this.nodes);
+            this.fbx = FudgeCore.FBX.loadFromNodes(this.nodes);
+            console.log(this.fbx);
+        }
+        static #defaultMaterial;
+        static #defaultSkinMaterial;
+        #scenes;
+        #nodes;
+        #meshes;
+        #materials;
+        #skinMaterials;
+        #textures;
+        #skeletons;
+        #animations;
+        static get defaultMaterial() {
+            return this.#defaultMaterial || (this.#defaultMaterial =
+                new FudgeCore.Material("FBXDefaultMaterial", FudgeCore.ShaderGouraud, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white"))));
+        }
+        static get defaultSkinMaterial() {
+            return this.#defaultSkinMaterial || (this.#defaultSkinMaterial =
+                new FudgeCore.Material("FBXDefaultSkinMaterial", FudgeCore.ShaderGouraudSkin, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white"))));
+        }
+        static async LOAD(_uri) {
+            if (!this.loaders)
+                this.loaders = {};
+            if (!this.loaders[_uri]) {
+                const response = await fetch(_uri);
+                const binary = await response.arrayBuffer();
+                this.loaders[_uri] = new FBXLoader(binary, _uri);
+            }
+            return this.loaders[_uri];
+        }
+        async getScene(_index = 0) {
+            if (!this.#scenes)
+                this.#scenes = [];
+            if (!this.#scenes[_index]) {
+                const documentFBX = this.fbx.documents[_index].load();
+                const scene = new FudgeCore.Graph(documentFBX.name);
+                for (const childFBX of documentFBX.children) {
+                    if (childFBX.type == "Model") {
+                        if (childFBX.subtype == "LimbNode")
+                            scene.addChild(await FudgeCore.SkeletonInstance.CREATE(await this.getSkeleton(childFBX)));
+                        else
+                            scene.addChild(await this.getNode(this.fbx.objects.models.indexOf(childFBX), scene));
+                    }
+                }
+                if (this.fbx.objects.animStacks && this.fbx.objects.animStacks.length > 0) {
+                    const animation = await this.getAnimation(documentFBX.ActiveAnimStackName.length > 0 ?
+                        this.fbx.objects.animStacks.findIndex(animStack => animStack.name == documentFBX.ActiveAnimStackName) : 0);
+                    for (const child of scene) {
+                        if (child.name == "Skeleton0")
+                            child.getParent().addComponent(new FudgeCore.ComponentAnimator(animation, FudgeCore.ANIMATION_PLAYMODE.LOOP, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS));
+                    }
+                }
+                FudgeCore.Project.register(scene);
+                this.#scenes[_index] = scene;
+            }
+            return await FudgeCore.Project.createGraphInstance(this.#scenes[_index]);
+        }
+        async getNode(_index, _root) {
+            if (!this.#nodes)
+                this.#nodes = [];
+            if (!this.#nodes[_index]) {
+                // create node with transform
+                const modelFBX = this.fbx.objects.models[_index].load();
+                const node = new FudgeCore.Node(modelFBX.name);
+                await this.generateTransform(modelFBX, node);
+                // node.addComponent(new ComponentTransform(Matrix4x4.CONSTRUCTION({
+                //   translation: this.getTransformVector(modelFBX.LclTranslation, Vector3.ZERO),
+                //   rotation: this.getTransformVector(modelFBX.LclRotation, Vector3.ZERO),
+                //   scaling: this.getTransformVector(modelFBX.LclScaling, Vector3.ONE)
+                // })));
+                // if (modelFBX.PreRotation)
+                //   node.mtxLocal.multiply(Matrix4x4.ROTATION(modelFBX.PreRotation), true);
+                // if (modelFBX.PostRotation)
+                //   node.mtxLocal.multiply(Matrix4x4.ROTATION(modelFBX.PostRotation));
+                this.#nodes[_index] = node;
+                // attach children and components
+                if (modelFBX.children)
+                    for (const childFBX of modelFBX.children) {
+                        if (childFBX.type == "Model") {
+                            if (_root && childFBX.subtype == "LimbNode") {
+                                const skeleton = await this.getSkeleton(childFBX);
+                                let skeletonInstance;
+                                for (const child of _root) {
+                                    if (child instanceof FudgeCore.SkeletonInstance && child.idSource == skeleton.idResource)
+                                        skeletonInstance = child;
+                                }
+                                node.addChild(skeletonInstance || await FudgeCore.SkeletonInstance.CREATE(skeleton));
+                            }
+                            else
+                                node.addChild(await this.getNode(this.fbx.objects.models.indexOf(childFBX)));
+                        }
+                        else if (childFBX.type == "Geometry") {
+                            const mesh = await this.getMesh(this.fbx.objects.geometries.indexOf(childFBX));
+                            const cmpMesh = new FudgeCore.ComponentMesh(mesh);
+                            node.addComponent(new FudgeCore.ComponentMaterial(FBXLoader.defaultMaterial));
+                            if (mesh instanceof FudgeCore.MeshSkin) {
+                                const skeleton = await this.getSkeleton(childFBX.children[0].children[0].children[0]); // Model.Deformer.SubDeformer.LimbNode
+                                cmpMesh.skeleton = (_root?.getChild(0) || await FudgeCore.SkeletonInstance.CREATE(skeleton));
+                                for (const subDeformerFBX of childFBX.children[0].children) {
+                                    const bone = cmpMesh.skeleton.bones[subDeformerFBX.children[0].name];
+                                    bone.mtxLocal.set(subDeformerFBX.TransformLink);
+                                    if (bone.getParent())
+                                        bone.mtxLocal.multiply(bone.getParent().mtxWorldInverse);
+                                }
+                                node.getComponent(FudgeCore.ComponentMaterial).material = FBXLoader.defaultSkinMaterial;
+                            }
+                            node.addComponent(cmpMesh);
+                        }
+                        else if (childFBX.type == "Material") {
+                            // TODO: additional skin materials get created here, check if the original material is still needed
+                            const iMaterial = this.fbx.objects.materials.indexOf(childFBX);
+                            const material = await this.getMaterial(iMaterial);
+                            node.getComponent(FudgeCore.ComponentMaterial).material = node.getComponent(FudgeCore.ComponentMesh).mesh instanceof FudgeCore.MeshSkin ?
+                                this.#skinMaterials[iMaterial] || (this.#skinMaterials[iMaterial] = new FudgeCore.Material(material.name, material.getShader() == FudgeCore.ShaderPhong ?
+                                    FudgeCore.ShaderPhongSkin :
+                                    FudgeCore.ShaderPhongTexturedSkin, material.coat)) :
+                                material;
+                        }
+                    }
+            }
+            return this.#nodes[_index];
+        }
+        async getMesh(_index) {
+            if (!this.#meshes)
+                this.#meshes = [];
+            if (!this.#meshes[_index])
+                this.#meshes[_index] = await (this.fbx.objects.geometries[_index].children?.[0].type == "Deformer" ?
+                    new FudgeCore.MeshSkin() :
+                    new FudgeCore.MeshImport()).load(FudgeCore.MeshLoaderFBX, this.uri, this.fbx.objects.geometries[_index]);
+            return this.#meshes[_index];
+        }
+        async getMaterial(_index) {
+            if (!this.#materials)
+                this.#materials = [];
+            if (!this.#materials[_index]) {
+                const materialFBX = this.fbx.objects.materials[_index].load();
+                if (!(materialFBX.DiffuseColor instanceof FudgeCore.Vector3))
+                    materialFBX.DiffuseColor?.children[0].load();
+                // FBX supports lambert and phong shading, either way fudge has no lambert shader so we always use phong.
+                // In DiffuseColor the texture of the material color is stored, if it's defined we use a texture shader.
+                // TODO: materialFBX also contains additional values like shininess and reflectivity (and others) which are not suppported.
+                this.#materials[_index] = new FudgeCore.Material(materialFBX.name, materialFBX.DiffuseColor && !(materialFBX.DiffuseColor instanceof FudgeCore.Vector3) ?
+                    FudgeCore.ShaderPhongTextured :
+                    FudgeCore.ShaderPhong, materialFBX.DiffuseColor && !(materialFBX.DiffuseColor instanceof FudgeCore.Vector3) ?
+                    new FudgeCore.CoatRemissiveTextured(new FudgeCore.Color(...materialFBX.Diffuse.get()), await this.getTexture(this.fbx.objects.textures.indexOf(materialFBX.DiffuseColor)), materialFBX.DiffuseFactor ?? 1, materialFBX.SpecularFactor ?? average(materialFBX.Specular?.get()) ?? 0) :
+                    new FudgeCore.CoatRemissive(new FudgeCore.Color(...(materialFBX.DiffuseColor ?? materialFBX.Diffuse).get()), materialFBX.DiffuseFactor ?? 1, materialFBX.SpecularFactor ?? average(materialFBX.Specular?.get()) ?? 0));
+            }
+            return this.#materials[_index];
+            function average(_array) {
+                if (_array)
+                    return _array.reduce((a, b) => a + b) / _array.length;
+                else
+                    return undefined;
+            }
+        }
+        async getTexture(_index) {
+            return new Promise((resolve, reject) => {
+                if (!this.#textures)
+                    this.#textures = [];
+                if (this.#textures[_index])
+                    return resolve(this.#textures[_index]);
+                const videoFBX = this.fbx.objects.textures[_index].children[0];
+                const texture = new FudgeCore.TextureImage();
+                texture.image = new Image();
+                texture.image.onload = () => resolve(texture);
+                texture.image.onerror = reject;
+                texture.image.src = URL.createObjectURL(new Blob([videoFBX.Content], { type: "image/png" }));
+                this.#textures[_index] = texture;
+                // TODO: get and set mipmap information ???
+            });
+        }
+        // Problem: mehrere Deformer verweisen auf das selbe Skelett aber nutzen dabei nicht immer alle Knochen
+        // => Problem besteht auch im GLTFLoader
+        /**
+         * Retriefs the skeleton containing the given limb node.
+         */
+        async getSkeleton(_fbxLimbNode) {
+            if (!this.#skeletons)
+                this.#skeletons = [];
+            return this.#skeletons.find(skeleton => _fbxLimbNode.name in skeleton.bones) || await (async () => {
+                const skeleton = new FudgeCore.Skeleton(`Skeleton${this.#skeletons.length}`);
+                let rootNode = _fbxLimbNode;
+                while (rootNode.parents && rootNode.parents.some(parent => parent.subtype == "LimbNode"))
+                    rootNode = rootNode.parents.find(parent => parent.subtype == "LimbNode");
+                const iRootNode = this.fbx.objects.models.findIndex(model => model.name == rootNode.name);
+                skeleton.addChild(await this.getNode(iRootNode));
+                for (const node of skeleton) {
+                    if (node != skeleton && this.fbx.objects.models[this.#nodes.indexOf(node)].subtype == "LimbNode")
+                        skeleton.registerBone(node);
+                }
+                skeleton.setDefaultPose();
+                FudgeCore.Project.register(skeleton);
+                this.#skeletons.push(skeleton);
+                return skeleton;
+            })();
+        }
+        async getAnimation(_index) {
+            if (!this.#animations)
+                this.#animations = [];
+            if (!this.#animations[_index]) {
+                const animStack = this.fbx.objects.animStacks[_index];
+                const animNodesFBX = animStack.children[0].children;
+                const animStructure = { children: { "Skeleton0": { mtxBoneLocals: {} } } };
+                for (const animNodeFBX of animNodesFBX) {
+                    if (typeof animNodeFBX.dX == "number" && typeof animNodeFBX.dY == "number" && typeof animNodeFBX.dZ == "number")
+                        continue;
+                    const target = animNodeFBX.parents.find(parent => parent.type != "AnimLayer");
+                    (animStructure.children.Skeleton0.mtxBoneLocals[target.name] ||
+                        (animStructure.children.Skeleton0.mtxBoneLocals[target.name] = {}))[{
+                        T: "translation",
+                        R: "rotation",
+                        S: "scale"
+                    }[animNodeFBX.name]] = this.getAnimationVector3(animNodeFBX, target);
+                }
+                this.#animations[_index] = new FudgeCore.Animation(animStack.name, animStructure);
+            }
+            return this.#animations[_index];
+        }
+        /**
+         * fetched from three.js, adapted to FUDGE and optimized
+         * https://github.com/mrdoob/three.js/blob/dev/examples/jsm/loaders/FBXLoader.js
+         * line 3950
+         */
+        async generateTransform(_modelFBX, _node) {
+            const parentIndex = this.fbx.objects.models.indexOf(_modelFBX.parents.find(parent => parent.type == "Model"));
+            const parent = parentIndex >= 0 ? await this.getNode(parentIndex) : undefined;
+            const mtxLocalRotation = _modelFBX.PreRotation || _modelFBX.LclRotation || _modelFBX.PostRotation ?
+                FudgeCore.Matrix4x4.IDENTITY() :
+                undefined;
+            if (_modelFBX.PreRotation) {
+                mtxLocalRotation.rotate(this.getOrdered(_modelFBX.PreRotation, _modelFBX));
+            }
+            if (_modelFBX.LclRotation) {
+                mtxLocalRotation.rotate(this.getOrdered(this.getTransformVector(_modelFBX.LclRotation, FudgeCore.Vector3.ZERO), _modelFBX));
+            }
+            if (_modelFBX.PostRotation) {
+                let mtxPostRotationInverse = FudgeCore.Matrix4x4.ROTATION(this.getOrdered(_modelFBX.PostRotation, _modelFBX));
+                mtxPostRotationInverse = FudgeCore.Matrix4x4.INVERSION(mtxPostRotationInverse);
+                mtxLocalRotation.multiply(mtxPostRotationInverse);
+            }
+            const mtxLocalScaling = _modelFBX.LclScaling ?
+                FudgeCore.Matrix4x4.SCALING(this.getTransformVector(_modelFBX.LclScaling, FudgeCore.Vector3.ONE)) :
+                undefined;
+            const mtxParentWorldRotation = parent ? FudgeCore.Matrix4x4.ROTATION(parent.mtxWorld.rotation) : undefined;
+            const mtxParentWorldScale = parent ? (() => {
+                const mtxParentWorldScale = FudgeCore.Matrix4x4.INVERSION(mtxParentWorldRotation);
+                mtxParentWorldScale.translate(FudgeCore.Vector3.SCALE(parent.mtxWorld.translation, -1));
+                mtxParentWorldScale.multiply(parent.mtxWorld);
+                return mtxParentWorldScale;
+            })() : undefined;
+            const mtxWorldRotationScale = parent || mtxLocalRotation || mtxLocalScaling ? FudgeCore.Matrix4x4.IDENTITY() : undefined;
+            if (parent || mtxLocalRotation || mtxLocalScaling) {
+                const inheritType = _modelFBX.InheritType || 0;
+                if (inheritType == 0) {
+                    if (parent)
+                        mtxWorldRotationScale.multiply(mtxParentWorldRotation);
+                    if (mtxLocalRotation)
+                        mtxWorldRotationScale.multiply(mtxLocalRotation);
+                    if (parent)
+                        mtxWorldRotationScale.multiply(mtxParentWorldScale);
+                    if (mtxLocalScaling)
+                        mtxWorldRotationScale.multiply(mtxLocalScaling);
+                }
+                else if (inheritType == 1) {
+                    if (parent) {
+                        mtxWorldRotationScale.multiply(mtxParentWorldRotation);
+                        mtxWorldRotationScale.multiply(mtxParentWorldScale);
+                    }
+                    if (mtxLocalRotation)
+                        mtxWorldRotationScale.multiply(mtxLocalRotation);
+                    if (mtxLocalScaling)
+                        mtxWorldRotationScale.multiply(mtxLocalScaling);
+                }
+                else {
+                    if (parent)
+                        mtxWorldRotationScale.multiply(mtxParentWorldRotation);
+                    if (mtxLocalRotation)
+                        mtxWorldRotationScale.multiply(mtxLocalRotation);
+                    if (parent) {
+                        mtxWorldRotationScale.multiply(mtxParentWorldScale);
+                        let mtxParentLocalScalingInverse = FudgeCore.Matrix4x4.SCALING(parent.mtxLocal.scaling);
+                        mtxParentLocalScalingInverse = FudgeCore.Matrix4x4.INVERSION(mtxParentLocalScalingInverse);
+                        mtxWorldRotationScale.multiply(mtxParentLocalScalingInverse);
+                    }
+                    if (mtxLocalScaling)
+                        mtxWorldRotationScale.multiply(mtxLocalScaling);
+                }
+            }
+            // Calculate the local transform matrix
+            let translation;
+            translation = FudgeCore.Vector3.ZERO();
+            if (_modelFBX.LclTranslation)
+                translation.add(this.getTransformVector(_modelFBX.LclTranslation, FudgeCore.Vector3.ZERO));
+            if (_modelFBX.RotationOffset)
+                translation.add(_modelFBX.RotationOffset);
+            if (_modelFBX.RotationPivot)
+                translation.add(_modelFBX.RotationPivot);
+            const mtxTransform = FudgeCore.Matrix4x4.TRANSLATION(translation);
+            if (mtxLocalRotation)
+                mtxTransform.multiply(mtxLocalRotation);
+            translation = FudgeCore.Vector3.ZERO();
+            if (_modelFBX.RotationPivot)
+                translation.subtract(_modelFBX.RotationPivot);
+            if (_modelFBX.ScalingOffset)
+                translation.add(_modelFBX.ScalingOffset);
+            if (_modelFBX.ScalingPivot)
+                translation.add(_modelFBX.ScalingPivot);
+            mtxTransform.translate(translation);
+            if (mtxLocalScaling)
+                mtxTransform.multiply(mtxLocalScaling);
+            if (_modelFBX.ScalingPivot)
+                mtxTransform.translate(FudgeCore.Vector3.SCALE(_modelFBX.ScalingPivot, -1));
+            const mtxWorldTranslation = parent ?
+                FudgeCore.Matrix4x4.TRANSLATION(FudgeCore.Matrix4x4.MULTIPLICATION(parent.mtxWorld, FudgeCore.Matrix4x4.TRANSLATION(mtxTransform.translation)).translation) :
+                FudgeCore.Matrix4x4.TRANSLATION(mtxTransform.translation);
+            mtxTransform.set(mtxWorldTranslation);
+            mtxTransform.multiply(mtxWorldRotationScale);
+            _node.mtxWorld.set(mtxTransform);
+            if (parent)
+                mtxTransform.multiply(FudgeCore.Matrix4x4.INVERSION(parent.mtxWorld), true);
+            _node.addComponent(new FudgeCore.ComponentTransform(mtxTransform));
+        }
+        getTransformVector(_vector, _default) {
+            return (_vector == undefined ?
+                _default() :
+                _vector instanceof FudgeCore.Vector3 ?
+                    _vector :
+                    new FudgeCore.Vector3(typeof (_vector = _vector.load()).dX == "number" ?
+                        _vector.dX :
+                        _vector.dX.load().Default, typeof _vector.dY == "number" ?
+                        _vector.dY :
+                        _vector.dY.load().Default, typeof _vector.dZ == "number" ?
+                        _vector.dZ :
+                        _vector.dZ.load().Default));
+        }
+        getAnimationVector3(_animNode, _target) {
+            const vectorSequence = {};
+            for (const valueName in _animNode)
+                if (valueName == "dX" || valueName == "dY" || valueName == "dZ") {
+                    const value = _animNode[valueName];
+                    if (typeof value != "number") {
+                        const sequence = new FudgeCore.AnimationSequence();
+                        for (let i = 0; i < value.KeyTime.length; ++i) {
+                            // According to the reference time is defined as a signed int64, unit being 1/46186158000 seconds
+                            // ref: https://archive.blender.org/wiki/index.php/User:Mont29/Foundation/FBX_File_Structure/#Some_Specific_Property_Types
+                            sequence.addKey(new FudgeCore.AnimationKey(Number((value.KeyTime[i] - value.KeyTime.reduce((min, v) => v < min ? v : min)) / BigInt("46186158")), value.KeyValueFloat[i]));
+                        }
+                        vectorSequence[valueName[1].toLowerCase()] = sequence;
+                    }
+                }
+            if (_animNode.name == "R" && (_target.PreRotation || _target.PostRotation)) {
+                let preRototation;
+                if (_target.PreRotation)
+                    preRototation = FudgeCore.Matrix4x4.ROTATION(_target.PreRotation);
+                let postRotation;
+                if (_target.PostRotation)
+                    postRotation = FudgeCore.Matrix4x4.ROTATION(_target.PostRotation);
+                [vectorSequence.x, vectorSequence.y, vectorSequence.z]
+                    .flatMap(_seq => _seq?.getKeys())
+                    .map(_key => _key?.time)
+                    .sort((_timeA, _timeB) => _timeA - _timeB) // sort times
+                    .filter((_time, _index, _times) => _time != _times[_index + 1]) // remove duplicates
+                    .map(_time => {
+                    return { x: findKey(vectorSequence.x), y: findKey(vectorSequence.y), z: findKey(vectorSequence.z) };
+                    function findKey(_sequence) {
+                        return _sequence?.getKeys().find(_key => _key.time == _time);
+                    }
+                })
+                    .forEach(_frame => {
+                    let vctEulerAngles = FudgeCore.Recycler.get(FudgeCore.Vector3);
+                    vctEulerAngles.set(_frame.x?.value ?? 0, _frame.y?.value ?? 0, _frame.z?.value ?? 0);
+                    const mtxRotation = FudgeCore.Matrix4x4.ROTATION(vctEulerAngles);
+                    if (preRototation)
+                        mtxRotation.multiply(preRototation, true);
+                    if (postRotation)
+                        mtxRotation.multiply(postRotation);
+                    vctEulerAngles = mtxRotation.getEulerAngles();
+                    if (_frame.x)
+                        _frame.x.value = vctEulerAngles.x;
+                    if (_frame.y)
+                        _frame.y.value = vctEulerAngles.y;
+                    if (_frame.z)
+                        _frame.z.value = vctEulerAngles.z;
+                });
+            }
+            return vectorSequence;
+        }
+        getOrdered(_rotation, _modelFBX) {
+            if (!_modelFBX.EulerOrder)
+                return _rotation;
+            const data = _rotation.get();
+            const result = FudgeCore.Recycler.get(FudgeCore.Vector3);
+            result.set(data[_modelFBX.EulerOrder.indexOf("Z")], data[_modelFBX.EulerOrder.indexOf("Y")], data[_modelFBX.EulerOrder.indexOf("X")]);
+            return result;
+        }
+    }
+    FudgeCore.FBXLoader = FBXLoader;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    var FBX;
+    (function (FBX) {
+        /**
+         * Interface to represent fbx-nodes containing its name, children and properties.
+         * Children and properites are lazy.
+         * @author Matthias Roming, HFU, 2023
+         */
+        class Node {
+            constructor(_name, _loadProperties, _loadChildren) {
+                this.name = _name;
+                this.loadProperties = _loadProperties;
+                this.loadChildren = _loadChildren;
+            }
+            #children;
+            #properties;
+            get properties() {
+                return this.#properties || (this.#properties = this.loadProperties());
+            }
+            get children() {
+                return this.#children || (this.#children = this.loadChildren());
+            }
+        }
+        FBX.Node = Node;
+        let ArrayEncoding;
+        (function (ArrayEncoding) {
+            ArrayEncoding[ArrayEncoding["UNCOMPRESSED"] = 0] = "UNCOMPRESSED";
+            ArrayEncoding[ArrayEncoding["COMPRESSED"] = 1] = "COMPRESSED";
+        })(ArrayEncoding = FBX.ArrayEncoding || (FBX.ArrayEncoding = {}));
+    })(FBX = FudgeCore.FBX || (FudgeCore.FBX = {}));
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    var FBX;
+    (function (FBX) {
+        /**
+         * Loads an fbx file from its fbx-node array which may be retrieved by parseNodesFromBinary.
+         * @author Matthias Roming, HFU, 2023
+         */
+        function loadFromNodes(_nodes) {
+            const fbx = {
+                documents: undefined,
+                objects: {
+                    all: undefined,
+                    models: [],
+                    geometries: [],
+                    materials: [],
+                    poses: [],
+                    textures: [],
+                    animStacks: []
+                },
+                connections: undefined
+            };
+            for (const node of _nodes) {
+                if (node.name == "Documents")
+                    fbx.documents = node.children
+                        .filter(_documentNode => _documentNode.name == "Document")
+                        .map(_documentNode => getDocument(_documentNode));
+                else if (node.name == "Objects")
+                    fbx.objects.all = node.children.map(_objectNode => getObject(_objectNode, fbx));
+                else if (node.name == "Connections")
+                    fbx.connections = node.children.map(_connectionNode => getConnection(_connectionNode));
+                if (fbx.documents && fbx.objects.all && fbx.connections)
+                    break;
+            }
+            groupObjects(fbx);
+            applyConnections(fbx.connections, fbx.documents, fbx.objects.all);
+            return fbx;
+        }
+        FBX.loadFromNodes = loadFromNodes;
+        function getDocument(_node) {
+            const document = {
+                uid: _node.properties[0],
+                name: _node.properties[2],
+                loaded: false,
+                load: () => loadObjectProperties(_node, document)
+            };
+            return document;
+        }
+        function getObject(_node, _fbx) {
+            const nameAndType = _node.properties[1].split("::");
+            const object = {
+                uid: _node.properties[0],
+                name: nameAndType[0],
+                type: nameAndType[1],
+                subtype: _node.properties[2],
+                loaded: false,
+                load: () => loadObjectProperties(_node, object)
+            };
+            return object;
+        }
+        function groupObjects(_fbx) {
+            for (const object of _fbx.objects.all) {
+                if (object.type == "Model")
+                    _fbx.objects.models.push(object);
+                else if (object.type == "Geometry")
+                    _fbx.objects.geometries.push(object);
+                else if (object.type == "Material")
+                    _fbx.objects.materials.push(object);
+                else if (object.type == "Pose")
+                    _fbx.objects.poses.push(object);
+                else if (object.type == "Texture")
+                    _fbx.objects.textures.push(object);
+                else if (object.type == "AnimStack")
+                    _fbx.objects.animStacks.push(object);
+            }
+        }
+        function getConnection(_node) {
+            if (!(_node.properties[0] == "OO" || _node.properties[0] == "OP")) {
+                console.warn(`Connection type ${_node.properties[0]} is not supported`);
+                return null;
+            }
+            return {
+                childUID: _node.properties[1],
+                parentUID: _node.properties[2],
+                propertyName: _node.properties[0] == "OP" ? _node.properties[3] : null
+            };
+        }
+        function applyConnections(_connections, _documents, _objects) {
+            for (const connection of _connections) {
+                let parent = _documents.find(_document => _document.load().RootNode == connection.parentUID);
+                let child;
+                for (const object of _objects) {
+                    if (parent == undefined && object.uid == connection.parentUID)
+                        parent = object;
+                    if (child == undefined && object.uid == connection.childUID)
+                        child = object;
+                    if (parent != undefined && child != undefined)
+                        break;
+                }
+                if (child)
+                    (child.parents || (child.parents = [])).push(parent);
+                if (connection.propertyName == null)
+                    (parent.children || (parent.children = [])).push(child);
+                else
+                    parent[formatPropertyName(connection.propertyName)] = child;
+            }
+        }
+        function loadObjectProperties(_node, _object) {
+            if (_object.loaded)
+                return _object;
+            for (const child of _node.children) {
+                if (child.name == "Properties70")
+                    for (const property70 of child.children) {
+                        const name = formatPropertyName(property70.properties[0]);
+                        if (!_object[name])
+                            _object[name] = getProperty70Value(property70);
+                    }
+                else {
+                    const name = formatPropertyName(child.name);
+                    if (!_object[name])
+                        _object[name] = getPropertyValue(child);
+                }
+            }
+            _object.loaded = true;
+            return _object;
+        }
+        function getPropertyValue(_node) {
+            return _node.children.length > 0
+                ? _node.children.reduce((_subProperties, _subProperty) => {
+                    const name = formatPropertyName(_subProperty.name);
+                    if (_subProperties[name] == undefined)
+                        _subProperties[name] = getPropertyValue(_subProperty);
+                    else {
+                        if (!(_subProperties[name] instanceof Array))
+                            _subProperties[name] = [_subProperties[name]];
+                        _subProperties[name].push(getPropertyValue(_subProperty));
+                    }
+                    return _subProperties;
+                }, {})
+                : _node.properties[0];
+        }
+        function getProperty70Value(_node) {
+            switch (_node.properties[1]) {
+                case "bool":
+                    return _node.properties[4];
+                case "int":
+                case "enum":
+                case "ULongLong":
+                case "double":
+                case "Number":
+                case "FieldOfView":
+                    return _node.properties[4];
+                case "Color":
+                case "ColorRGB":
+                case "Vector3D":
+                case "Lcl Translation":
+                case "Lcl Rotation":
+                case "Lcl Scaling":
+                    return new FudgeCore.Vector3(..._node.properties.slice(4, 7));
+                case "KString":
+                default:
+                    return _node.properties[4];
+            }
+        }
+        function formatPropertyName(_name) {
+            return _name.replace(/[^a-zA-Z]/, "");
+        }
+    })(FBX = FudgeCore.FBX || (FudgeCore.FBX = {}));
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    var FBX;
+    (function (FBX) {
+        /**
+         * Parses fbx-nodes array from a binary fbx-file.
+         * despite the lazy node implementation it is mostly a copy of the reference: https://github.com/picode7/fbx-parser
+         * @author Matthias Roming, HFU, 2023
+         */
+        function parseNodesFromBinary(_buffer) {
+            if (_buffer.byteLength < binaryStartChars.length)
+                throw "Not a binary FBX file";
+            const data = new FBX.BufferReader(_buffer);
+            const firstChars = new Uint8Array(data.getSequence(data.getUint8, binaryStartChars.length));
+            const matchesFBXBinaryFirstChars = firstChars.every((_value, _index) => _value == binaryStartChars[_index]);
+            if (!matchesFBXBinaryFirstChars)
+                throw "Not a binary FBX file";
+            const version = data.getUint32();
+            const nodeAttributesAsUInt64 = version >= 7500; // Warum >= 7500?
+            const nodes = [];
+            while (true) {
+                const node = readNode(data, nodeAttributesAsUInt64);
+                if (node == null)
+                    break;
+                nodes.push(node);
+            }
+            return nodes;
+        }
+        FBX.parseNodesFromBinary = parseNodesFromBinary;
+        function readNode(_data, _attributesAsUint64) {
+            const endOffset = _attributesAsUint64 ? Number(_data.getUint64()) : _data.getUint32();
+            if (endOffset == 0)
+                return null;
+            const propertiesLength = _attributesAsUint64 ? Number(_data.getUint64()) : _data.getUint32();
+            const propertiesByteLength = _attributesAsUint64 ? Number(_data.getUint64()) : _data.getUint32();
+            const nameLength = _data.getUint8();
+            const name = _data.getString(nameLength);
+            const propertiesOffset = _data.offset;
+            const childrenOffset = propertiesOffset + propertiesByteLength;
+            const node = new FBX.Node(name, () => {
+                _data.offset = propertiesOffset;
+                const properties = [];
+                for (let iProperty = 0; iProperty < propertiesLength; iProperty++) {
+                    properties.push(readProperty(_data));
+                }
+                return properties;
+            }, () => {
+                _data.offset = childrenOffset;
+                const children = [];
+                while (endOffset - _data.offset > nullCountAtNodeEnd) {
+                    const child = readNode(_data, _attributesAsUint64);
+                    if (child)
+                        children.push(child);
+                }
+                return children;
+            });
+            _data.offset = endOffset;
+            return node;
+        }
+        function readProperty(_data) {
+            const typeCode = _data.getChar();
+            const value = {
+                C: _data.getBool,
+                Y: _data.getInt16,
+                I: _data.getInt32,
+                L: _data.getInt64,
+                F: _data.getFloat32,
+                D: _data.getFloat64,
+                S: () => _data.getString(_data.getUint32()).replace("\x00\x01", "::"),
+                s: () => _data.getString(_data.getUint32()).replace("\x00\x01", "::"),
+                R: () => new Uint8Array(readRaw(_data, _data.getUint8)),
+                r: () => new Uint8Array(readArray(_data, _data.getUint8)),
+                b: () => new Uint8Array(readArray(_data, _data.getUint8)),
+                i: () => new Int32Array(readArray(_data, _data.getInt32)),
+                l: () => new BigInt64Array(readArray(_data, _data.getInt64)),
+                f: () => new Float32Array(readArray(_data, _data.getFloat32)),
+                d: () => new Float32Array(readArray(_data, _data.getFloat64))
+            }[typeCode]?.call(_data);
+            if (value == null)
+                FudgeCore.Debug.warn(`Unknown property type ${typeCode.charCodeAt(0)}`);
+            return value;
+        }
+        function readArray(_data, _getter) {
+            const length = _data.getUint32();
+            const encoding = _data.getUint32();
+            const byteLength = _data.getUint32();
+            const endOffset = _data.offset + byteLength;
+            const iterable = encoding == FBX.ArrayEncoding.COMPRESSED ?
+                (() => {
+                    const arrayData = new Uint8Array(_data.view.buffer, _data.offset, byteLength);
+                    const inflatedData = (Reflect.get(globalThis, "pako") ? pako.inflate : fflate.inflateSync)(arrayData);
+                    return new FBX.BufferReader(inflatedData.buffer).getSequence(_getter, length);
+                })() :
+                _data.getSequence(_getter, length);
+            _data.offset = endOffset;
+            return iterable;
+        }
+        function readRaw(_data, _getter) {
+            // raw binary data needs to be interpreted in a special way see:
+            // https://code.blender.org/2013/08/fbx-binary-file-format-specification/
+            const length = _data.getUint32();
+            return _data.getSequence(_getter, length);
+            ;
+        }
+        const binaryStartChars = Uint8Array.from("Kaydara FBX Binary\x20\x20\x00\x1a\x00".split(""), (v) => v.charCodeAt(0));
+        const nullCountAtNodeEnd = 13;
+    })(FBX = FudgeCore.FBX || (FudgeCore.FBX = {}));
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    /**
+     * Asset loader for gl Transfer Format files.
+     * @authors Matthias Roming, HFU, 2022 | Jonas Plotzky, HFU, 2023
+     */
+    class GLTFLoader {
+        constructor(_gltf, _url) {
+            this.gltf = _gltf;
+            this.url = _url;
         }
         #scenes;
         #nodes;
         #cameras;
         #animations;
         #meshes;
+        #materials;
+        #textures;
         #skeletons;
         #buffers;
-        static async LOAD(_uri) {
+        static async LOAD(_url) {
             if (!this.loaders)
                 this.loaders = {};
-            if (!this.loaders[_uri]) {
-                const response = await fetch(_uri);
+            if (!this.loaders[_url]) {
+                const response = await fetch(_url);
                 const gltf = await response.json();
-                this.loaders[_uri] = new GLTFLoader(gltf, _uri);
+                gltf.nodes.forEach((_node, _iNode) => // mark parents of nodes
+                 _node.children?.forEach(_iChild => gltf.nodes[_iChild].parent = _iNode));
+                this.loaders[_url] = new GLTFLoader(gltf, _url);
             }
-            return this.loaders[_uri];
+            return this.loaders[_url];
         }
         async getScene(_name) {
             const iScene = _name ? this.gltf.scenes.findIndex(scene => scene.name == _name) : this.gltf.scene;
@@ -15637,10 +16755,12 @@ var FudgeCore;
                 const scene = new FudgeCore.Graph(gltfScene.name);
                 for (const iNode of gltfScene.nodes)
                     scene.addChild(await this.getNodeByIndex(iNode));
+                if (this.gltf.animations?.length > 0)
+                    scene.addComponent(new FudgeCore.ComponentAnimator(await this.getAnimationByIndex(0)));
                 FudgeCore.Project.register(scene);
                 this.#scenes[_iScene] = scene;
             }
-            return FudgeCore.Project.createGraphInstance(this.#scenes[_iScene]);
+            return await FudgeCore.Project.createGraphInstance(this.#scenes[_iScene]);
         }
         async getNode(_name) {
             const iNode = this.gltf.nodes.findIndex(node => node.name == _name);
@@ -15653,7 +16773,8 @@ var FudgeCore;
                 this.#nodes = [];
             if (!this.#nodes[_iNode]) {
                 const gltfNode = this.gltf.nodes[_iNode];
-                const node = new FudgeCore.Node(gltfNode.name);
+                let iSkeleton = this.gltf.skins?.findIndex(skin => skin.joints[0] == _iNode);
+                const node = iSkeleton < 0 ? new FudgeCore.Node(gltfNode.name) : new FudgeCore.Skeleton(gltfNode.name);
                 // check for children
                 if (gltfNode.children)
                     for (const iNode of gltfNode.children)
@@ -15666,43 +16787,57 @@ var FudgeCore;
                         node.mtxLocal.set(Float32Array.from(gltfNode.matrix));
                     }
                     else {
-                        if (gltfNode.rotation)
-                            node.mtxLocal.rotate(new FudgeCore.Vector3(...gltfNode.rotation.map(rotation => rotation * FudgeCore.Calc.rad2deg)));
-                        if (gltfNode.scale)
-                            node.mtxLocal.scale(new FudgeCore.Vector3(...gltfNode.scale));
                         if (gltfNode.translation)
                             node.mtxLocal.translate(new FudgeCore.Vector3(...gltfNode.translation));
+                        if (gltfNode.rotation) {
+                            const rotation = new FudgeCore.Quaternion();
+                            rotation.set(gltfNode.rotation);
+                            node.mtxLocal.rotate(rotation.getEulerAngles());
+                        }
+                        if (gltfNode.scale)
+                            node.mtxLocal.scale(new FudgeCore.Vector3(...gltfNode.scale));
                     }
                 }
                 // check for camera
                 if (gltfNode.camera != undefined) {
                     node.addComponent(await this.getCameraByIndex(gltfNode.camera));
                 }
-                // check for mesh
+                // check for mesh and material
                 if (gltfNode.mesh != undefined) {
                     node.addComponent(new FudgeCore.ComponentMesh(await this.getMeshByIndex(gltfNode.mesh)));
-                    if (node.getComponent(FudgeCore.ComponentMesh).mesh instanceof FudgeCore.MeshSkin) {
-                        if (!GLTFLoader.defaultSkinMaterial)
-                            GLTFLoader.defaultSkinMaterial = new FudgeCore.Material("GLTFDefaultSkinMaterial", FudgeCore.ShaderGouraudSkin, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white")));
-                        node.addComponent(new FudgeCore.ComponentMaterial(GLTFLoader.defaultSkinMaterial));
+                    const gltfMesh = this.gltf.meshes?.[gltfNode.mesh];
+                    if (gltfMesh.primitives.length > 1)
+                        throw new Error(`Node ${gltfNode.name} has a mesh with more than one primitive attached to it. FUDGE currently only supports one primitive per mesh.`);
+                    const iMaterial = gltfMesh.primitives?.[0]?.material;
+                    if (iMaterial != undefined) {
+                        node.addComponent(new FudgeCore.ComponentMaterial(await this.getMaterialByIndex(iMaterial)));
                     }
                     else {
-                        if (!GLTFLoader.defaultMaterial)
-                            GLTFLoader.defaultMaterial = new FudgeCore.Material("GLTFDefaultMaterial", FudgeCore.ShaderGouraud, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white")));
-                        node.addComponent(new FudgeCore.ComponentMaterial(GLTFLoader.defaultMaterial));
+                        if (node.getComponent(FudgeCore.ComponentMesh).mesh instanceof FudgeCore.MeshSkin) {
+                            if (!GLTFLoader.defaultSkinMaterial)
+                                GLTFLoader.defaultSkinMaterial = new FudgeCore.Material("GLTFDefaultSkinMaterial", FudgeCore.ShaderGouraudSkin, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white")));
+                            node.addComponent(new FudgeCore.ComponentMaterial(GLTFLoader.defaultSkinMaterial));
+                        }
+                        else {
+                            if (!GLTFLoader.defaultMaterial)
+                                GLTFLoader.defaultMaterial = new FudgeCore.Material("GLTFDefaultMaterial", FudgeCore.ShaderGouraud, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white")));
+                            node.addComponent(new FudgeCore.ComponentMaterial(GLTFLoader.defaultMaterial));
+                        }
                     }
                 }
                 // check for skeleton        
                 if (gltfNode.skin != undefined) {
-                    const skeleton = await this.getSkeletonByIndex(gltfNode.skin);
-                    node.addChild(skeleton);
-                    if (node.getComponent(FudgeCore.ComponentMesh))
-                        node.getComponent(FudgeCore.ComponentMesh).bindSkeleton(skeleton);
-                    for (const iAnimation of this.findSkeletalAnimationIndices(gltfNode.skin)) {
-                        skeleton.addComponent(new FudgeCore.ComponentAnimator(await this.getAnimationByIndex(iAnimation)));
-                    }
+                    let iSkeleton = this.gltf.skins[gltfNode.skin].joints[0];
+                    node.getComponent(FudgeCore.ComponentMesh).skeleton = await this.getNodeByIndex(iSkeleton);
                 }
                 this.#nodes[_iNode] = node;
+                // replace skeleton with skeleton instance
+                if (iSkeleton >= 0) {
+                    let skeletonInstance = await FudgeCore.SkeletonInstance.CREATE(await this.getSkeletonByIndex(iSkeleton));
+                    // replace cached nodes from skeleton with skeleton instance bones
+                    this.#nodes = this.#nodes.map(_node => skeletonInstance.bones[_node.name] || _node);
+                    this.#nodes[_iNode] = skeletonInstance;
+                }
             }
             return this.#nodes[_iNode];
         }
@@ -15737,24 +16872,59 @@ var FudgeCore;
                 this.#animations = [];
             if (!this.#animations[_iAnimation]) {
                 const gltfAnimation = this.gltf.animations[_iAnimation];
-                if (this.isSkeletalAnimation(gltfAnimation)) {
-                    // map channels to an animation structure for animating the local bone matrices
-                    const animationStructure = { mtxBoneLocals: {} };
-                    for (const gltfChannel of gltfAnimation.channels) {
-                        const boneName = this.#nodes[gltfChannel.target.node].name;
-                        // create new 4 by 4 matrix animation structure if there is no entry for the bone name
-                        if (!animationStructure.mtxBoneLocals[boneName])
-                            animationStructure.mtxBoneLocals[boneName] = {};
-                        // set the vector 3 animation structure of the entry refered by the channel target path
-                        const transformationType = gltfChannel.target.path;
-                        if (transformationType)
-                            animationStructure.mtxBoneLocals[boneName][transformationType] =
-                                await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], transformationType);
-                    }
-                    this.#animations[_iAnimation] = new FudgeCore.Animation(gltfAnimation.name, animationStructure);
+                // TODO: maybe refactor this to iterate over channels directly and remove this map
+                const mapiNodeToGltfChannel = [];
+                for (const gltfChannel of gltfAnimation.channels) {
+                    if (gltfChannel.target.node == undefined)
+                        continue;
+                    if (!mapiNodeToGltfChannel[gltfChannel.target.node])
+                        mapiNodeToGltfChannel[gltfChannel.target.node] = [];
+                    mapiNodeToGltfChannel[gltfChannel.target.node].push(gltfChannel);
                 }
-                else
-                    throw new Error("Non-skeletal animations are not supported yet.");
+                const animationStructure = {};
+                for (const iNode in mapiNodeToGltfChannel) {
+                    const gltfChannels = mapiNodeToGltfChannel[iNode];
+                    const gltfNode = this.gltf.nodes[gltfChannels[0].target.node];
+                    const path = [];
+                    path.push(gltfChannels[0].target.node);
+                    let root = gltfNode;
+                    while (root.parent != undefined) { // parent of gltfNode is set when json is loaded
+                        path.push(root.parent);
+                        root = this.gltf.nodes[root.parent];
+                    }
+                    let currentStructure = animationStructure;
+                    for (const iPathNode of path.reverse()) {
+                        const pathNode = this.gltf.nodes[iPathNode];
+                        if (currentStructure.children == undefined)
+                            currentStructure.children = {};
+                        if (currentStructure.children[pathNode.name] == undefined)
+                            currentStructure.children[pathNode.name] = {};
+                        currentStructure = currentStructure.children[pathNode.name];
+                        let iSkin = this.gltf.skins?.findIndex(skin => skin.joints[0] == iPathNode);
+                        if (iSkin >= 0 && this.gltf.skins[iSkin].joints.includes(gltfChannels[0].target.node)) {
+                            const mtxBoneLocal = {};
+                            for (const gltfChannel of gltfChannels)
+                                mtxBoneLocal[gltfChannel.target.path] =
+                                    await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
+                            if (currentStructure.mtxBoneLocals == undefined)
+                                currentStructure.mtxBoneLocals = {};
+                            currentStructure.mtxBoneLocals[gltfNode.name] = mtxBoneLocal;
+                            break;
+                        }
+                        if (pathNode == gltfNode) {
+                            const mtxLocal = {};
+                            for (const gltfChannel of gltfChannels)
+                                mtxLocal[gltfChannel.target.path] =
+                                    await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
+                            currentStructure.components = {
+                                ComponentTransform: [
+                                    { mtxLocal: mtxLocal }
+                                ]
+                            };
+                        }
+                    }
+                }
+                this.#animations[_iAnimation] = new FudgeCore.Animation(gltfAnimation.name, animationStructure);
             }
             return this.#animations[_iAnimation];
         }
@@ -15770,10 +16940,59 @@ var FudgeCore;
             if (!this.#meshes[_iMesh]) {
                 const gltfMesh = this.gltf.meshes[_iMesh];
                 this.#meshes[_iMesh] = await (gltfMesh.primitives[0].attributes.JOINTS_0 != undefined ?
-                    new FudgeCore.MeshSkin().load(this, _iMesh) :
-                    new FudgeCore.MeshGLTF().load(this, _iMesh));
+                    new FudgeCore.MeshSkin() :
+                    new FudgeCore.MeshImport()).load(FudgeCore.MeshLoaderGLTF, this.url, gltfMesh);
             }
             return this.#meshes[_iMesh];
+        }
+        async getMaterialByIndex(_iMaterial) {
+            if (!this.#materials)
+                this.#materials = [];
+            if (!this.#materials[_iMaterial]) {
+                const gltfMaterial = this.gltf.materials[_iMaterial];
+                // TODO: in the future create an appropriate shader based on the gltf material properties
+                const material = new FudgeCore.Material(gltfMaterial.name, FudgeCore.ShaderPhongTexturedSkin);
+                const gltfTextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
+                if (gltfTextureInfo) {
+                    const texture = await this.getTextureByIndex(gltfTextureInfo.index);
+                    material.coat = new FudgeCore.CoatRemissiveTextured(new FudgeCore.Color(...gltfMaterial.pbrMetallicRoughness.baseColorFactor || [1, 1, 1, 1]), // TODO: check if shader should multiply baseColorTexture values with baseColorFactor
+                    texture, 1, 1);
+                }
+                this.#materials[_iMaterial] = material;
+            }
+            return this.#materials[_iMaterial];
+        }
+        async getTextureByIndex(_iTexture) {
+            if (!this.#textures)
+                this.#textures = [];
+            if (!this.#textures[_iTexture]) {
+                const gltfTexture = this.gltf.textures[_iTexture];
+                const gltfSampler = this.gltf.samplers[gltfTexture.sampler];
+                const gltfImage = this.gltf.images[gltfTexture.source];
+                if (gltfSampler.wrapS != undefined || gltfSampler.wrapT != undefined)
+                    console.warn(`${GLTFLoader.name}: Texture ${_iTexture} in '${this.url}' has a wrapS and wrapT of '${getWebGLParameterName(gltfSampler.wrapS)}' and '${getWebGLParameterName(gltfSampler.wrapT)}' respectively. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`);
+                let url = gltfImage.uri;
+                if (!gltfImage.uri && gltfImage.bufferView) {
+                    // TODO: this is duplicate code from getBufferData, maybe refactor getBufferData to handle bufferViewIndex input
+                    const gltfBufferView = this.gltf.bufferViews[gltfImage.bufferView];
+                    const buffer = await this.getBuffer(gltfBufferView.buffer);
+                    const byteOffset = gltfBufferView.byteOffset || 0;
+                    const byteLength = gltfBufferView.byteLength || 0;
+                    url = URL.createObjectURL(new Blob([new Uint8Array(buffer, byteOffset, byteLength / Uint8Array.BYTES_PER_ELEMENT)], { type: gltfImage.mimeType }));
+                }
+                const texture = new FudgeCore.TextureImage();
+                await texture.load(url);
+                if (gltfSampler.magFilter == WebGL2RenderingContext.NEAREST && gltfSampler.minFilter == WebGL2RenderingContext.NEAREST)
+                    texture.mipmap = FudgeCore.MIPMAP.CRISP;
+                else if (gltfSampler.magFilter == WebGL2RenderingContext.NEAREST && gltfSampler.minFilter == WebGL2RenderingContext.NEAREST_MIPMAP_LINEAR)
+                    texture.mipmap = FudgeCore.MIPMAP.MEDIUM;
+                else if (gltfSampler.magFilter == WebGL2RenderingContext.LINEAR && gltfSampler.minFilter == WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR)
+                    texture.mipmap = FudgeCore.MIPMAP.BLURRY;
+                else if (gltfSampler.magFilter != undefined && gltfSampler.minFilter != undefined)
+                    throw new Error(`${GLTFLoader.name}: Texture ${_iTexture} in '${this.url}' has a magFilter and minFilter of '${getWebGLParameterName(gltfSampler.magFilter)}' and '${getWebGLParameterName(gltfSampler.minFilter)}' respectively. FUDGE only supports the following combinations: NEAREST and NEAREST | NEAREST and NEAREST_MIPMAP_LINEAR | LINEAR and LINEAR_MIPMAP_LINEAR.`);
+                this.#textures[_iTexture] = texture;
+            }
+            return this.#textures[_iTexture];
         }
         async getSkeleton(_name) {
             const iSkeleton = this.gltf.skins.findIndex(skeleton => skeleton.name == _name);
@@ -15786,9 +17005,7 @@ var FudgeCore;
                 this.#skeletons = [];
             if (!this.#skeletons[_iSkeleton]) {
                 const gltfSkeleton = this.gltf.skins[_iSkeleton];
-                const skeleton = new FudgeCore.Skeleton(gltfSkeleton.name);
-                // add all bones as children/descendants by adding the root bone
-                skeleton.addChild(await this.getNodeByIndex(gltfSkeleton.joints[0]));
+                const skeleton = await this.getNodeByIndex(gltfSkeleton.joints[0]);
                 // convert float array to array of matrices and register bones
                 const floatArray = await this.getFloat32Array(gltfSkeleton.inverseBindMatrices);
                 const span = 16;
@@ -15800,7 +17017,7 @@ var FudgeCore;
                 FudgeCore.Project.register(skeleton);
                 this.#skeletons[_iSkeleton] = skeleton;
             }
-            return await FudgeCore.SkeletonInstance.CREATE(this.#skeletons[_iSkeleton]);
+            return this.#skeletons[_iSkeleton];
         }
         async getUint8Array(_iAccessor) {
             const array = await this.getBufferData(_iAccessor);
@@ -15845,17 +17062,8 @@ var FudgeCore;
             const gltfBufferView = this.gltf.bufferViews[gltfAccessor.bufferView];
             if (!gltfBufferView)
                 throw new Error("Couldn't find buffer view");
-            const gltfBuffer = this.gltf.buffers[gltfBufferView.buffer];
-            if (!gltfBuffer)
-                throw new Error("Couldn't find buffer");
-            if (!this.#buffers)
-                this.#buffers = [];
-            if (!this.#buffers[gltfBufferView.buffer]) {
-                const response = await fetch(gltfBuffer.uri);
-                const blob = await response.blob();
-                this.#buffers[gltfBufferView.buffer] = await blob.arrayBuffer();
-            }
-            const buffer = this.#buffers[gltfBufferView.buffer];
+            const buffer = await this.getBuffer(gltfBufferView.buffer);
+            ;
             const byteOffset = gltfBufferView.byteOffset || 0;
             const byteLength = gltfBufferView.byteLength || 0;
             switch (gltfAccessor.componentType) {
@@ -15877,40 +17085,56 @@ var FudgeCore;
                     throw new Error(`Unsupported component type: ${gltfAccessor.componentType}.`);
             }
         }
-        isSkeletalAnimation(_animation) {
-            return _animation.channels.every(channel => this.isBoneIndex(channel.target.node));
-        }
-        findSkeletalAnimationIndices(_iSkeleton) {
-            return this.gltf.animations
-                .filter(animation => animation.channels.every(channel => this.gltf.skins[_iSkeleton].joints.includes(channel.target.node)))
-                .map((_, iAnimation) => iAnimation);
-        }
-        isBoneIndex(_iNode) {
-            return this.gltf.skins?.flatMap(gltfSkin => gltfSkin.joints).includes(_iNode);
+        async getBuffer(_iBuffer) {
+            const gltfBuffer = this.gltf.buffers[_iBuffer];
+            if (!gltfBuffer)
+                throw new Error("Couldn't find buffer");
+            if (!this.#buffers)
+                this.#buffers = [];
+            if (!this.#buffers[_iBuffer]) {
+                const response = await fetch(gltfBuffer.uri);
+                this.#buffers[_iBuffer] = await response.arrayBuffer();
+            }
+            return this.#buffers[_iBuffer];
         }
         async getAnimationSequenceVector3(_sampler, _transformationType) {
             const input = await this.getFloat32Array(_sampler.input);
             const output = await this.getFloat32Array(_sampler.output);
             const millisPerSecond = 1000;
-            const sequenceX = new FudgeCore.AnimationSequence();
-            const sequenceY = new FudgeCore.AnimationSequence();
-            const sequenceZ = new FudgeCore.AnimationSequence();
-            for (let i = 0; i < input.length; ++i) {
-                const vector = _transformationType == "rotation" ?
-                    new FudgeCore.Quaternion(output[i * 4 + 0], output[i * 4 + 1], output[i * 4 + 2], output[i * 4 + 3]).toDegrees() :
-                    { x: output[i * 3 + 0], y: output[i * 3 + 1], z: output[i * 3 + 2] };
-                sequenceX.addKey(new FudgeCore.AnimationKey(millisPerSecond * input[i], vector.x));
-                sequenceY.addKey(new FudgeCore.AnimationKey(millisPerSecond * input[i], vector.y));
-                sequenceZ.addKey(new FudgeCore.AnimationKey(millisPerSecond * input[i], vector.z));
+            const isRotation = _transformationType == "rotation";
+            const sequences = {};
+            sequences.x = new FudgeCore.AnimationSequence();
+            sequences.y = new FudgeCore.AnimationSequence();
+            sequences.z = new FudgeCore.AnimationSequence();
+            if (isRotation)
+                sequences.w = new FudgeCore.AnimationSequence();
+            for (let iInput = 0; iInput < input.length; ++iInput) {
+                let iOutput = iInput * (_transformationType == "rotation" ? 4 : 3); // output buffer either contains data for quaternion or vector3
+                let time = millisPerSecond * input[iInput];
+                sequences.x.addKey(new FudgeCore.AnimationKey(time, output[iOutput + 0]));
+                sequences.y.addKey(new FudgeCore.AnimationKey(time, output[iOutput + 1]));
+                sequences.z.addKey(new FudgeCore.AnimationKey(time, output[iOutput + 2]));
+                if (isRotation)
+                    sequences.w.addKey(new FudgeCore.AnimationKey(time, output[iOutput + 3]));
             }
-            return {
-                x: sequenceX,
-                y: sequenceY,
-                z: sequenceZ
-            };
+            return sequences;
         }
     }
     FudgeCore.GLTFLoader = GLTFLoader;
+    function getWebGLParameterName(_value) {
+        return Object.keys(WebGL2RenderingContext).find(_key => Reflect.get(WebGL2RenderingContext, _key) == _value);
+    }
+    let ComponentType;
+    (function (ComponentType) {
+        ComponentType[ComponentType["BYTE"] = 5120] = "BYTE";
+        ComponentType[ComponentType["UNSIGNED_BYTE"] = 5121] = "UNSIGNED_BYTE";
+        ComponentType[ComponentType["SHORT"] = 5122] = "SHORT";
+        ComponentType[ComponentType["UNSIGNED_SHORT"] = 5123] = "UNSIGNED_SHORT";
+        ComponentType[ComponentType["INT"] = 5124] = "INT";
+        ComponentType[ComponentType["UNSIGNED_INT"] = 5125] = "UNSIGNED_INT";
+        ComponentType[ComponentType["FLOAT"] = 5126] = "FLOAT";
+    })(ComponentType || (ComponentType = {}));
+    // type TransformationType = "rotation" | "scale" | "translation";
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -16023,6 +17247,12 @@ void main() {
 precision mediump float;
 precision highp int;
 
+  // TEXTURE: input UVs and texture
+  #if defined(TEXTURE)
+in vec2 v_vctTexture;
+uniform sampler2D u_texture;
+  #endif
+
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
 uniform float u_fSpecular;
@@ -16111,6 +17341,12 @@ void main() {
       continue;
     vctFrag += illuminateDirected(vctDirection, v_vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
+
+  // TEXTURE: multiply with texel color
+    #if defined(TEXTURE)
+  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+  vctFrag *= vctColorTexture;
+    #endif
 }`;
     FudgeCore.shaderSources["ShaderPick.frag"] = /*glsl*/ `#version 300 es
 /**
@@ -16342,16 +17578,16 @@ out vec4 v_vctPosition;
   #if defined(SKIN)
 // uniform mat4 u_mtxMeshToWorld;
 // Bones
+// https://github.com/mrdoob/three.js/blob/dev/src/renderers/shaders/ShaderChunk/skinning_pars_vertex.glsl.js
+in uvec4 a_iBone;
+in vec4 a_fWeight;
+const uint MAX_BONES = 256u;
 struct Bone {
   mat4 matrix;
 };
-
-const uint MAX_BONES = 10u;
-
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-
-uniform Bone u_bones[MAX_BONES];
+layout (std140) uniform Skin {
+  Bone u_bones[MAX_BONES];
+};
   #endif
 
   // FLAT: outbuffer is flat
@@ -16613,6 +17849,21 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    class ShaderFlatTexturedSkin extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatRemissiveTextured; }
+    }
+    ShaderFlatTexturedSkin.iSubclass = FudgeCore.Shader.registerSubclass(FudgeCore.ShaderFlatTextured);
+    ShaderFlatTexturedSkin.define = [
+        "LIGHT",
+        "FLAT",
+        "TEXTURE",
+        "CAMERA",
+        "SKIN"
+    ];
+    FudgeCore.ShaderFlatTexturedSkin = ShaderFlatTexturedSkin;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
     class ShaderGouraud extends FudgeCore.Shader {
         static getCoat() { return FudgeCore.CoatRemissive; }
     }
@@ -16651,11 +17902,35 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    class ShaderGouraudTexturedSkin extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatRemissiveTextured; }
+    }
+    ShaderGouraudTexturedSkin.iSubclass = FudgeCore.Shader.registerSubclass(FudgeCore.ShaderGouraudTextured);
+    ShaderGouraudTexturedSkin.define = [
+        "LIGHT",
+        "TEXTURE",
+        "CAMERA",
+        "SKIN"
+    ];
+    FudgeCore.ShaderGouraudTexturedSkin = ShaderGouraudTexturedSkin;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
     class ShaderLit extends FudgeCore.Shader {
     }
     ShaderLit.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLit);
     ShaderLit.define = [];
     FudgeCore.ShaderLit = ShaderLit;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderLitSkin extends FudgeCore.Shader {
+    }
+    ShaderLitSkin.iSubclass = FudgeCore.Shader.registerSubclass(FudgeCore.ShaderLit);
+    ShaderLitSkin.define = [
+        "SKIN"
+    ];
+    FudgeCore.ShaderLitSkin = ShaderLitSkin;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -16667,6 +17942,18 @@ var FudgeCore;
         "TEXTURE"
     ];
     FudgeCore.ShaderLitTextured = ShaderLitTextured;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderLitTexturedSkin extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatTextured; }
+    }
+    ShaderLitTexturedSkin.iSubclass = FudgeCore.Shader.registerSubclass(FudgeCore.ShaderLitTextured);
+    ShaderLitTexturedSkin.define = [
+        "TEXTURE",
+        "SKIN"
+    ];
+    FudgeCore.ShaderLitTexturedSkin = ShaderLitTexturedSkin;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -16711,6 +17998,58 @@ var FudgeCore;
         "PHONG"
     ];
     FudgeCore.ShaderPhong = ShaderPhong;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderPhongSkin extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatRemissive; }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
+        }
+    }
+    ShaderPhongSkin.iSubclass = FudgeCore.Shader.registerSubclass(ShaderPhongSkin);
+    ShaderPhongSkin.define = [
+        "LIGHT",
+        "CAMERA",
+        "PHONG",
+        "SKIN"
+    ];
+    FudgeCore.ShaderPhongSkin = ShaderPhongSkin;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderPhongTextured extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatRemissiveTextured; }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
+        }
+    }
+    ShaderPhongTextured.iSubclass = FudgeCore.Shader.registerSubclass(FudgeCore.ShaderPhong);
+    ShaderPhongTextured.define = [
+        "LIGHT",
+        "CAMERA",
+        "PHONG",
+        "TEXTURE"
+    ];
+    FudgeCore.ShaderPhongTextured = ShaderPhongTextured;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderPhongTexturedSkin extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatRemissiveTextured; }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
+        }
+    }
+    ShaderPhongTexturedSkin.iSubclass = FudgeCore.Shader.registerSubclass(FudgeCore.ShaderPhong);
+    ShaderPhongTexturedSkin.define = [
+        "LIGHT",
+        "CAMERA",
+        "PHONG",
+        "TEXTURE",
+        "SKIN"
+    ];
+    FudgeCore.ShaderPhongTexturedSkin = ShaderPhongTexturedSkin;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -16760,6 +18099,7 @@ var FudgeCore;
                         delete this.mtxBindInverses[node.name];
                     }
             };
+            this.registerBone(this);
             this.addEventListener("childRemove" /* CHILD_REMOVE */, this.hndChildRemove);
         }
         /**
@@ -16767,7 +18107,7 @@ var FudgeCore;
          * @param _mtxInit initial local matrix
          * @param _parentName name of the parent node, that must be registered as a bone
          */
-        addBone(_bone, _mtxInit, _parentName) {
+        addBone(_bone, _parentName, _mtxInit) {
             if (_parentName)
                 this.bones[_parentName].addChild(_bone);
             else
@@ -16793,9 +18133,11 @@ var FudgeCore;
          * by updating the inverse bind matrices
          */
         setDefaultPose() {
-            for (const boneName in this.bones) {
-                this.calculateMtxWorld(this.bones[boneName]);
-                this.mtxBindInverses[boneName] = this.bones[boneName].mtxWorldInverse;
+            for (const node of this) {
+                if (!(node.name in this.mtxBindInverses))
+                    continue;
+                this.calculateMtxWorld(node);
+                this.mtxBindInverses[node.name] = node.mtxWorldInverse;
             }
         }
         indexOfBone(_boneName) {
@@ -16828,6 +18170,7 @@ var FudgeCore;
             _node.mtxWorld.set(_node.cmpTransform ?
                 FudgeCore.Matrix4x4.MULTIPLICATION(_node.getParent().mtxWorld, _node.mtxLocal) :
                 _node.getParent().mtxWorld);
+            _node.mtxWorldInverse.set(FudgeCore.Matrix4x4.INVERSION(_node.mtxWorld));
         }
     }
     FudgeCore.Skeleton = Skeleton;
@@ -16868,10 +18211,24 @@ var FudgeCore;
             this.skeletonSource = _skeleton;
             this.registerBones();
         }
+        serialize() {
+            const serialization = super.serialize();
+            if (this.bindPose) {
+                serialization.bindPose = {};
+                for (const boneName in this.bindPose)
+                    serialization.bindPose[boneName] = this.bindPose[boneName].serialize();
+            }
+            return serialization;
+        }
         async deserialize(_serialization) {
             await super.deserialize(_serialization);
             this.skeletonSource = FudgeCore.Project.resources[_serialization.idSource || _serialization.idResource];
             this.registerBones();
+            if (_serialization.bindPose) {
+                this.bindPose = {};
+                for (const boneName in _serialization.bindPose)
+                    this.bindPose[boneName] = await new FudgeCore.Matrix4x4().deserialize(_serialization.bindPose[boneName]);
+            }
             return this;
         }
         /**
@@ -16884,8 +18241,17 @@ var FudgeCore;
         applyAnimation(_mutator) {
             super.applyAnimation(_mutator);
             if (_mutator.mtxBoneLocals)
-                for (const boneName in _mutator.mtxBoneLocals)
-                    this.mtxBoneLocals[boneName]?.mutate(_mutator.mtxBoneLocals[boneName]);
+                for (const boneName in _mutator.mtxBoneLocals) {
+                    const mtxMutator = _mutator.mtxBoneLocals[boneName]; // a mutator for a Matrix
+                    /** TODO: creating Quaternion objects here doesn't seem to be very efficient,
+                     * maybe {@link Matrix4x4} should be able to handle quaternion rotations directly
+                     * see https://docs.unity3d.com/ScriptReference/Matrix4x4.Rotate.html
+                    */
+                    if (mtxMutator.rotation?.w != undefined) {
+                        mtxMutator.rotation = new FudgeCore.PhysicsQuaternion(mtxMutator.rotation.x, mtxMutator.rotation.y, mtxMutator.rotation.z, mtxMutator.rotation.w).toDegrees();
+                    }
+                    this.mtxBoneLocals[boneName]?.mutate(mtxMutator);
+                }
             if (_mutator.bones)
                 for (const boneName in _mutator.bones)
                     this.bones[boneName]?.applyAnimation(_mutator.bones[boneName]);
@@ -16895,10 +18261,10 @@ var FudgeCore;
             for (const boneName in this.bones) {
                 // bone matrix T = N^-1 * B_delta * B_0^-1 * S
                 const mtxBone = this.getParent()?.mtxWorldInverse.clone || FudgeCore.Matrix4x4.IDENTITY();
+                // if (this.mtxPivot) mtxBone.multiply(this.mtxPivot);
                 mtxBone.multiply(this.bones[boneName].mtxWorld);
                 mtxBone.multiply(this.skeletonSource.mtxBindInverses[boneName]);
-                if (this.cmpTransform)
-                    mtxBone.multiply(FudgeCore.Matrix4x4.INVERSION(this.mtxLocal));
+                // if (this.mtxPivot) mtxBone.multiply(Matrix4x4.INVERSION(this.mtxPivot));
                 this.#mtxBones.push(mtxBone);
             }
         }

@@ -47,7 +47,8 @@ namespace SkeletonTest {
     console.log(viewport);
 
     // run loop
-    ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal));
+    ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, () =>
+      update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal, cylinder.getComponent(ƒ.ComponentMaterial).material));
     ƒ.Loop.start();
   }
 
@@ -155,18 +156,18 @@ namespace SkeletonTest {
     const mesh: ƒ.MeshSkin = new MeshSkinCylinder();
     const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
     cmpMesh.mtxPivot.translateY(-2);
-    cmpMesh.bindSkeleton(skeletonInstance);
+    cmpMesh.skeleton = skeletonInstance;
     cylinder.addComponent(cmpMesh);
 
     // setup component material 
-    const material: ƒ.Material = new ƒ.Material("MaterialCylinder", ƒ.ShaderGouraudSkin, new ƒ.CoatRemissive(ƒ.Color.CSS("White")));
+    const material: ƒ.Material = new ƒ.Material("MaterialCylinder", ƒ.ShaderFlatSkin, new ƒ.CoatRemissive(ƒ.Color.CSS("White")));
     const cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(material);
     cylinder.addComponent(cmpMaterial);
 
     return cylinder;
   }
 
-  function update(_viewport: ƒ.Viewport, _mtxRotatorX: ƒ.Matrix4x4, _mtxRotatorY: ƒ.Matrix4x4): void {
+  function update(_viewport: ƒ.Viewport, _mtxRotatorX: ƒ.Matrix4x4, _mtxRotatorY: ƒ.Matrix4x4, _material: ƒ.Material): void {
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT])) _mtxRotatorY.rotateY(3);
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_UP])) _mtxRotatorX.rotateX(-3);
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_LEFT])) _mtxRotatorY.rotateY(-3);
@@ -175,6 +176,9 @@ namespace SkeletonTest {
       _mtxRotatorX.set(ƒ.Matrix4x4.IDENTITY());
       _mtxRotatorY.set(ƒ.Matrix4x4.IDENTITY());
     }
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) _material.setShader(ƒ.ShaderFlatSkin);
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.G])) _material.setShader(ƒ.ShaderGouraudSkin);
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H])) _material.setShader(ƒ.ShaderPhongSkin);
     _viewport.draw();
   }
 }

@@ -1,8 +1,8 @@
-///<reference path="./../../Core/Build/FudgeCore.d.ts"/>
 namespace SkeletonTest {
   import ƒ = FudgeCore;
 
   window.addEventListener("load", init);
+  let loadedScene: ƒ.Node;
 
   async function init(): Promise<void> {
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
@@ -16,12 +16,13 @@ namespace SkeletonTest {
     const rotatorY: ƒ.Node = new ƒ.Node("RotatorY");
     rotatorY.addComponent(new ƒ.ComponentTransform());
 
-    const zylinder: ƒ.Node = await loadAnimatedArm();
-    console.log(zylinder);
+    const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
+    loadedScene = await loader.getScene();
+    console.log(loadedScene);
 
     scene.addChild(rotatorX);
     rotatorX.addChild(rotatorY);
-    rotatorY.addChild(zylinder);
+    rotatorY.addChild(loadedScene);
 
     // setup camera
     const camera: ƒ.Node = new ƒ.Node("Camera");
@@ -47,22 +48,12 @@ namespace SkeletonTest {
     console.log(viewport);
 
     // run loop
-    ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal));
+    ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, () =>
+      update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal));
     ƒ.Loop.start();
   }
 
-  async function loadAnimatedArm(): Promise<ƒ.Node> {
-    const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
-    const arm: ƒ.Node = await loader.getNode("ArmModel");
-    const meshSerialization: ƒ.Serialization = ƒ.Serializer.serialize(arm.getComponent(ƒ.ComponentMesh).mesh);
-    console.log(meshSerialization);
-    arm.getComponent(ƒ.ComponentMesh).mesh = await ƒ.Serializer.deserialize(meshSerialization) as ƒ.MeshSkin;
-    arm.addComponent(new ƒ.ComponentTransform());
-    arm.mtxLocal.translateY(-2);
-    return arm;
-  }
-
-  function update(_viewport: ƒ.Viewport, _mtxRotatorX: ƒ.Matrix4x4, _mtxRotatorY: ƒ.Matrix4x4): void {
+  function update(_viewport: ƒ.Viewport, _mtxRotatorX: ƒ.Matrix4x4, _mtxRotatorY: ƒ.Matrix4x4, /*_material: ƒ.Material*/): void {
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT])) _mtxRotatorY.rotateY(3);
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_UP])) _mtxRotatorX.rotateX(-3);
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_LEFT])) _mtxRotatorY.rotateY(-3);
@@ -71,6 +62,9 @@ namespace SkeletonTest {
       _mtxRotatorX.set(ƒ.Matrix4x4.IDENTITY());
       _mtxRotatorY.set(ƒ.Matrix4x4.IDENTITY());
     }
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.P])) ƒ.Time.game.setScale(0);
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) ƒ.Time.game.setScale(0.1);
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) ƒ.Time.game.setScale(1);
     _viewport.draw();
   }
 }

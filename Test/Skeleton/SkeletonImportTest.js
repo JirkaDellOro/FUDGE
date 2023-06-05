@@ -1,9 +1,8 @@
-///<reference path="./../../Core/Build/FudgeCore.d.ts"/>
 var SkeletonTest;
-///<reference path="./../../Core/Build/FudgeCore.d.ts"/>
 (function (SkeletonTest) {
     var ƒ = FudgeCore;
     window.addEventListener("load", init);
+    let loadedScene;
     async function init() {
         const canvas = document.querySelector("canvas");
         // setup scene
@@ -12,11 +11,12 @@ var SkeletonTest;
         rotatorX.addComponent(new ƒ.ComponentTransform());
         const rotatorY = new ƒ.Node("RotatorY");
         rotatorY.addComponent(new ƒ.ComponentTransform());
-        const zylinder = await loadAnimatedArm();
-        console.log(zylinder);
+        const loader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
+        loadedScene = await loader.getScene();
+        console.log(loadedScene);
         scene.addChild(rotatorX);
         rotatorX.addChild(rotatorY);
-        rotatorY.addChild(zylinder);
+        rotatorY.addChild(loadedScene);
         // setup camera
         const camera = new ƒ.Node("Camera");
         camera.addComponent(new ƒ.ComponentCamera());
@@ -40,16 +40,6 @@ var SkeletonTest;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal));
         ƒ.Loop.start();
     }
-    async function loadAnimatedArm() {
-        const loader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
-        const arm = await loader.getNode("ArmModel");
-        const meshSerialization = ƒ.Serializer.serialize(arm.getComponent(ƒ.ComponentMesh).mesh);
-        console.log(meshSerialization);
-        arm.getComponent(ƒ.ComponentMesh).mesh = await ƒ.Serializer.deserialize(meshSerialization);
-        arm.addComponent(new ƒ.ComponentTransform());
-        arm.mtxLocal.translateY(-2);
-        return arm;
-    }
     function update(_viewport, _mtxRotatorX, _mtxRotatorY) {
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT]))
             _mtxRotatorY.rotateY(3);
@@ -63,6 +53,12 @@ var SkeletonTest;
             _mtxRotatorX.set(ƒ.Matrix4x4.IDENTITY());
             _mtxRotatorY.set(ƒ.Matrix4x4.IDENTITY());
         }
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.P]))
+            ƒ.Time.game.setScale(0);
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W]))
+            ƒ.Time.game.setScale(0.1);
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S]))
+            ƒ.Time.game.setScale(1);
         _viewport.draw();
     }
 })(SkeletonTest || (SkeletonTest = {}));

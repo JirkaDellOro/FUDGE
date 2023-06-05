@@ -37,7 +37,7 @@ var SkeletonTest;
         viewport.draw();
         console.log(viewport);
         // run loop
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal));
+        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal, cylinder.getComponent(ƒ.ComponentMaterial).material));
         ƒ.Loop.start();
     }
     class MeshSkinCylinder extends ƒ.MeshSkin {
@@ -132,15 +132,15 @@ var SkeletonTest;
         const mesh = new MeshSkinCylinder();
         const cmpMesh = new ƒ.ComponentMesh(mesh);
         cmpMesh.mtxPivot.translateY(-2);
-        cmpMesh.bindSkeleton(skeletonInstance);
+        cmpMesh.skeleton = skeletonInstance;
         cylinder.addComponent(cmpMesh);
         // setup component material 
-        const material = new ƒ.Material("MaterialCylinder", ƒ.ShaderGouraudSkin, new ƒ.CoatRemissive(ƒ.Color.CSS("White")));
+        const material = new ƒ.Material("MaterialCylinder", ƒ.ShaderFlatSkin, new ƒ.CoatRemissive(ƒ.Color.CSS("White")));
         const cmpMaterial = new ƒ.ComponentMaterial(material);
         cylinder.addComponent(cmpMaterial);
         return cylinder;
     }
-    function update(_viewport, _mtxRotatorX, _mtxRotatorY) {
+    function update(_viewport, _mtxRotatorX, _mtxRotatorY, _material) {
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT]))
             _mtxRotatorY.rotateY(3);
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_UP]))
@@ -153,6 +153,12 @@ var SkeletonTest;
             _mtxRotatorX.set(ƒ.Matrix4x4.IDENTITY());
             _mtxRotatorY.set(ƒ.Matrix4x4.IDENTITY());
         }
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F]))
+            _material.setShader(ƒ.ShaderFlatSkin);
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.G]))
+            _material.setShader(ƒ.ShaderGouraudSkin);
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H]))
+            _material.setShader(ƒ.ShaderPhongSkin);
         _viewport.draw();
     }
 })(SkeletonTest || (SkeletonTest = {}));

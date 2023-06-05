@@ -3,12 +3,13 @@ namespace FudgeCore {
 
     public readonly bones: BoneList = {};
     public readonly mtxBindInverses: BoneMatrixList = {};
-    
+
     /**
      * Creates a new skeleton with a name
      */
     constructor(_name: string = "Skeleton") {
       super(_name);
+      this.registerBone(this);
       this.addEventListener(EVENT.CHILD_REMOVE, this.hndChildRemove);
     }
 
@@ -17,7 +18,7 @@ namespace FudgeCore {
      * @param _mtxInit initial local matrix
      * @param _parentName name of the parent node, that must be registered as a bone
      */
-    public addBone(_bone: Node, _mtxInit?: Matrix4x4, _parentName?: string): void {
+    public addBone(_bone: Node, _parentName: string, _mtxInit?: Matrix4x4): void {
       if (_parentName)
         this.bones[_parentName].addChild(_bone);
       else
@@ -45,9 +46,11 @@ namespace FudgeCore {
      * by updating the inverse bind matrices
      */
     public setDefaultPose(): void {
-      for (const boneName in this.bones) {
-        this.calculateMtxWorld(this.bones[boneName]);
-        this.mtxBindInverses[boneName] = this.bones[boneName].mtxWorldInverse;
+      for (const node of this) {
+        if (!(node.name in this.mtxBindInverses))
+          continue;
+        this.calculateMtxWorld(node);
+        this.mtxBindInverses[node.name] = node.mtxWorldInverse;
       }
     }
 
@@ -82,9 +85,10 @@ namespace FudgeCore {
     private calculateMtxWorld(_node: Node): void {
       _node.mtxWorld.set(
         _node.cmpTransform ?
-        Matrix4x4.MULTIPLICATION(_node.getParent().mtxWorld, _node.mtxLocal) :
-        _node.getParent().mtxWorld
+          Matrix4x4.MULTIPLICATION(_node.getParent().mtxWorld, _node.mtxLocal) :
+          _node.getParent().mtxWorld
       );
+      _node.mtxWorldInverse.set(Matrix4x4.INVERSION(_node.mtxWorld));
     }
 
     /**
