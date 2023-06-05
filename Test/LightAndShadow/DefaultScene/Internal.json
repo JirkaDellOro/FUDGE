@@ -916,16 +916,6 @@
       }
     }
   },
-  "Material|2023-06-02T14:21:25.175Z|45631": {
-    "ƒ.Material": {
-      "name": "mistMat",
-      "idResource": "Material|2023-06-02T14:21:25.175Z|45631",
-      "shader": "ShaderMist",
-      "coat": {
-        "ƒ.Coat": {}
-      }
-    }
-  },
   "Material|2023-06-02T14:21:25.175Z|34582": {
     "ƒ.Material": {
       "name": "screenQuadMat",
@@ -933,16 +923,6 @@
       "shader": "ShaderScreen",
       "coat": {
         "ƒ.CoatWebGlTextured": {}
-      }
-    }
-  },
-  "Material|2023-06-02T14:21:25.440Z|14793": {
-    "ƒ.Material": {
-      "name": "mistMat",
-      "idResource": "Material|2023-06-02T14:21:25.440Z|14793",
-      "shader": "ShaderMist",
-      "coat": {
-        "ƒ.Coat": {}
       }
     }
   },
@@ -970,6 +950,70 @@
     "ƒ.Material": {
       "name": "screenQuadMat",
       "idResource": "Material|2023-06-02T14:21:35.094Z|41569",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-05T17:01:17.557Z|25213": {
+    "ƒ.Material": {
+      "name": "mistMat",
+      "idResource": "Material|2023-06-05T17:01:17.557Z|25213",
+      "shader": "ShaderMist",
+      "coat": {
+        "ƒ.CoatColored": {
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
+  "Material|2023-06-05T17:01:17.557Z|00278": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-05T17:01:17.557Z|00278",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-05T17:01:17.591Z|47335": {
+    "ƒ.Material": {
+      "name": "mistMat",
+      "idResource": "Material|2023-06-05T17:01:17.591Z|47335",
+      "shader": "ShaderMist",
+      "coat": {
+        "ƒ.CoatColored": {
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
+  "Material|2023-06-05T17:01:17.591Z|49615": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-05T17:01:17.591Z|49615",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-05T17:01:17.606Z|83435": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-05T17:01:17.606Z|83435",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-05T17:01:20.131Z|41017": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-05T17:01:20.131Z|41017",
       "shader": "ShaderScreen",
       "coat": {
         "ƒ.CoatWebGlTextured": {}

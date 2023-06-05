@@ -3,21 +3,44 @@ namespace FudgeCore {
   shaderSources["ShaderMist.frag"] = `#version 300 es
 /**
 *Renders Framebuffer on to Renderbuffer
-*@authors Roland Heer, HFU, 2023
+*@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
 precision mediump float;
 precision highp int;
 
+uniform mat4 u_mtxMeshToWorld;
 uniform vec3 u_vctCamera;
-in vec3 v_vctPositionView;
+
+in vec4 v_vctPosition;
 
 out vec4 vctFrag;
 
 void main() {
-    vctFrag = vec4(u_vctCamera, 1.0);
-    //vctFrag = vec4(1.0);
+    float vctDistCamera = length((u_mtxMeshToWorld * v_vctPosition).xyz - u_vctCamera) * 0.2;
+    vec3 col = vec3(0.0,0.0,0.0);
+    vctFrag = vec4(col, vctDistCamera);
 }
 `;
+  shaderSources["ShaderMist.vert"] = `#version 300 es
+
+/**
+* Mist Vertex - Shader. Sets Values for Mist Fragment - Shader
+* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
+*/
+
+uniform vec3 u_vctCamera;
+uniform mat4 u_mtxMeshToView;
+
+in vec3 a_vctPosition;
+
+out vec4 v_vctPosition;
+
+void main() {
+    vec4 vctPosition = vec4(a_vctPosition, 1.0);
+    mat4 mtxMeshToView = u_mtxMeshToView;
+    gl_Position = mtxMeshToView * vctPosition;
+    v_vctPosition = vctPosition;
+}`;
   shaderSources["ShaderParticle.frag"] = `#version 300 es
 /**
 * Particle shader similar to lit textured shader
@@ -478,7 +501,7 @@ out vec4 vctFrag;
 
 void main() {
     vec4 tex = texture(u_texture, v_vctTexture);
-    vctFrag = 0.7 * tex;
+    vctFrag = tex;
 }
 `;
   shaderSources["ShaderScreen.vert"] = `#version 300 es
@@ -647,10 +670,6 @@ out vec3 v_vctBitangent;
 out vec4 v_vctPosition;
   #endif
 
-  #if defined(MIST)
-out vec3 v_vctPositionView;
-  #endif
-
   #if defined(SKIN)
 // uniform mat4 u_mtxMeshToWorld;
 // Bones
@@ -751,10 +770,7 @@ void main() {
   v_vctBitangent = normalize(mat3(mtxNormalMeshToWorld) * cross(a_vctNormal, a_vctTangent));
   v_vctPosition = vctPosition;
       #endif  
-      #if defined(MIST)
-  v_vctPositionView = (u_mtxMeshToView * vctPosition).xyz;;
-      #endif
-
+    
     #if !defined(PHONG)
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {

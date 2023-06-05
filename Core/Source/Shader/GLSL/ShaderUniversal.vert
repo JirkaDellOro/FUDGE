@@ -101,10 +101,6 @@ out vec3 v_vctBitangent;
 out vec4 v_vctPosition;
   #endif
 
-  #if defined(MIST)
-out vec3 v_vctPositionView;
-  #endif
-
   #if defined(SKIN)
 // uniform mat4 u_mtxMeshToWorld;
 // Bones
@@ -205,10 +201,7 @@ void main() {
   v_vctBitangent = normalize(mat3(mtxNormalMeshToWorld) * cross(a_vctNormal, a_vctTangent));
   v_vctPosition = vctPosition;
       #endif  
-      #if defined(MIST)
-  v_vctPositionView = (u_mtxMeshToView * vctPosition).xyz;;
-      #endif
-
+    
     #if !defined(PHONG)
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {

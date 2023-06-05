@@ -6632,6 +6632,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
 }

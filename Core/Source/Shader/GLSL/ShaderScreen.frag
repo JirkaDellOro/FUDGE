@@ -13,5 +13,5 @@ out vec4 vctFrag;
 
 void main() {
     vec4 tex = texture(u_texture, v_vctTexture);
-    vctFrag = 0.7 * tex;
+    vctFrag = tex;
 }
