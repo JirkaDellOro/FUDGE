@@ -2308,9 +2308,11 @@ declare namespace FudgeCore {
     class ComponentPostFX extends Component {
         static readonly iSubclass: number;
         mist: boolean;
+        clrMist: Color;
         ao: boolean;
+        clrAO: Color;
         bloom: boolean;
-        constructor(_mist?: boolean, _ao?: boolean, _bloom?: boolean);
+        constructor(_mist?: boolean, _clrMist?: Color, _ao?: boolean, _clrAO?: Color, _bloom?: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }

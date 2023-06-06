@@ -1019,5 +1019,143 @@
         "ƒ.CoatWebGlTextured": {}
       }
     }
+  },
+  "Material|2023-06-06T07:59:10.576Z|46827": {
+    "ƒ.Material": {
+      "name": "mistMat",
+      "idResource": "Material|2023-06-06T07:59:10.576Z|46827",
+      "shader": "ShaderMist",
+      "coat": {
+        "ƒ.CoatColored": {
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
+  "Material|2023-06-06T07:59:10.576Z|77117": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-06T07:59:10.576Z|77117",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-06T07:59:10.741Z|38745": {
+    "ƒ.Material": {
+      "name": "mistMat",
+      "idResource": "Material|2023-06-06T07:59:10.741Z|38745",
+      "shader": "ShaderMist",
+      "coat": {
+        "ƒ.CoatColored": {
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
+  "Material|2023-06-06T07:59:10.741Z|40059": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-06T07:59:10.741Z|40059",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-06T07:59:10.754Z|60781": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-06T07:59:10.754Z|60781",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-06T07:59:17.940Z|79927": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-06T07:59:17.940Z|79927",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-06T08:19:40.234Z|84353": {
+    "ƒ.Material": {
+      "name": "mistMat",
+      "idResource": "Material|2023-06-06T08:19:40.234Z|84353",
+      "shader": "ShaderMist",
+      "coat": {
+        "ƒ.CoatColored": {
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
+  "Material|2023-06-06T08:19:40.234Z|39890": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-06T08:19:40.234Z|39890",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-06T08:19:40.420Z|39750": {
+    "ƒ.Material": {
+      "name": "mistMat",
+      "idResource": "Material|2023-06-06T08:19:40.420Z|39750",
+      "shader": "ShaderMist",
+      "coat": {
+        "ƒ.CoatColored": {
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
+  "Material|2023-06-06T08:19:40.420Z|55528": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-06T08:19:40.420Z|55528",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-06T08:19:40.436Z|39721": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-06T08:19:40.436Z|39721",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-06T08:19:48.818Z|41258": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-06T08:19:48.818Z|41258",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
+  },
+  "Material|2023-06-06T08:19:49.138Z|99995": {
+    "ƒ.Material": {
+      "name": "screenQuadMat",
+      "idResource": "Material|2023-06-06T08:19:49.138Z|99995",
+      "shader": "ShaderScreen",
+      "coat": {
+        "ƒ.CoatWebGlTextured": {}
+      }
+    }
   }
 }
