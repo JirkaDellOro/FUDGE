@@ -12,6 +12,7 @@ uniform sampler2D u_texture;
 out vec4 vctFrag;
 
 void main() {
-    vec4 tex = texture(u_texture, v_vctTexture);
-    vctFrag = tex;
+    vec4 mistTex = texture(u_texture, v_vctTexture);
+    vec3 mistCol = vec3(0.0);
+    vctFrag = vec4(mistCol,mistTex.r);
 }

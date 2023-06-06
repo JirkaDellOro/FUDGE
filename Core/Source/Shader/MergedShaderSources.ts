@@ -16,9 +16,9 @@ in vec4 v_vctPosition;
 out vec4 vctFrag;
 
 void main() {
-    float vctDistCamera = length((u_mtxMeshToWorld * v_vctPosition).xyz - u_vctCamera) * 0.2;
-    vec3 col = vec3(0.0,0.0,0.0);
-    vctFrag = vec4(col, vctDistCamera);
+    float vctDistCamera = length((u_mtxMeshToWorld * v_vctPosition).xyz - u_vctCamera) * 0.1;
+    vec3 vec = vec3(vctDistCamera);
+    vctFrag = vec4(vec, 1.0);
 }
 `;
   shaderSources["ShaderMist.vert"] = `#version 300 es
@@ -500,8 +500,9 @@ uniform sampler2D u_texture;
 out vec4 vctFrag;
 
 void main() {
-    vec4 tex = texture(u_texture, v_vctTexture);
-    vctFrag = tex;
+    vec4 mistTex = texture(u_texture, v_vctTexture);
+    vec3 mistCol = vec3(0.0);
+    vctFrag = vec4(mistCol,mistTex.r);
 }
 `;
   shaderSources["ShaderScreen.vert"] = `#version 300 es

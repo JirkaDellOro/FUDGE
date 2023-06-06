@@ -14,7 +14,7 @@ in vec4 v_vctPosition;
 out vec4 vctFrag;
 
 void main() {
-    float vctDistCamera = length((u_mtxMeshToWorld * v_vctPosition).xyz - u_vctCamera) * 0.2;
-    vec3 col = vec3(0.0,0.0,0.0);
-    vctFrag = vec4(col, vctDistCamera);
+    float vctDistCamera = length((u_mtxMeshToWorld * v_vctPosition).xyz - u_vctCamera) * 0.1;
+    vec3 vec = vec3(vctDistCamera);
+    vctFrag = vec4(vec, 1.0);
 }
