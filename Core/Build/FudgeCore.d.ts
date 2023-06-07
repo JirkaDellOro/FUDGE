@@ -6960,7 +6960,7 @@ declare namespace FudgeCore {
         getAnimationByIndex(_iAnimation: number): Promise<Animation>;
         getMesh(_name: string): Promise<MeshImport>;
         getMeshByIndex(_iMesh: number): Promise<MeshImport>;
-        getMaterialByIndex(_iMaterial: number): Promise<Material>;
+        getMaterialByIndex(_iMaterial: number, _skin?: boolean): Promise<Material>;
         getTextureByIndex(_iTexture: number): Promise<Texture>;
         getSkeleton(_name: string): Promise<Skeleton>;
         getSkeletonByIndex(_iSkeleton: number): Promise<Skeleton>;
