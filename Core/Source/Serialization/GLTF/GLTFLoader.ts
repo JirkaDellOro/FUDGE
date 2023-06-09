@@ -233,7 +233,7 @@ namespace FudgeCore {
               currentStructure.children[pathNode.name] = {};
             currentStructure = currentStructure.children[pathNode.name] as AnimationStructure;
 
-            let iSkin: number = this.gltf.skins?.findIndex(skin => skin.joints[0] == iPathNode);
+            let iSkin: number = this.gltf.skins?.findIndex(_skin => _skin.joints[0] == iPathNode);
             if (iSkin >= 0 && this.gltf.skins[iSkin].joints.includes(gltfChannels[0].target.node)) {
               const mtxBoneLocal: AnimationStructureMatrix4x4 = {};
               for (const gltfChannel of gltfChannels)
@@ -265,7 +265,7 @@ namespace FudgeCore {
     }
 
     public async getMesh(_name: string): Promise<MeshImport> {
-      const iMesh: number = this.gltf.meshes.findIndex(mesh => mesh.name == _name);
+      const iMesh: number = this.gltf.meshes.findIndex(_mesh => _mesh.name == _name);
       if (iMesh == -1)
         throw new Error(`Couldn't find name ${_name} in gltf meshes.`);
       return await this.getMeshByIndex(iMesh);
@@ -354,7 +354,7 @@ namespace FudgeCore {
     }
 
     public async getSkeleton(_name: string): Promise<Skeleton> {
-      const iSkeleton: number = this.gltf.skins.findIndex(skeleton => skeleton.name == _name);
+      const iSkeleton: number = this.gltf.skins.findIndex(_skeleton => _skeleton.name == _name);
       if (iSkeleton == -1)
         throw new Error(`Couldn't find name ${_name} in gltf skins.`);
       return await this.getSkeletonByIndex(iSkeleton);

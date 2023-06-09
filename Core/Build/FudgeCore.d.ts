@@ -634,30 +634,23 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    export class RenderInjectorShader {
-        static uboLightsInfo: {
-            [key: string]: UboLightStrucure;
+    /**
+     * Maps the names of the member variables inside our uniform block to their respective index and offset
+     */
+    interface MapUniformBlockInfo {
+        [_name: string]: {
+            index: number;
+            offset: number;
         };
+    }
+    class RenderInjectorShader {
+        static mapUniformBlockInfo: MapUniformBlockInfo;
         private static uboInfos;
         static decorate(_constructor: Function): void;
         static useProgram(this: typeof Shader): void;
         static deleteProgram(this: typeof Shader): void;
         protected static createProgram(this: typeof Shader): void;
     }
-    class UboLightStrucure {
-        index: {
-            [key: string]: number;
-        };
-        offset: {
-            [key: string]: number;
-        };
-        constructor(_index: {
-            [key: string]: number;
-        }, _offset: {
-            [key: string]: number;
-        });
-    }
-    export {};
 }
 declare namespace FudgeCore {
     class RenderInjectorCoat extends RenderInjector {

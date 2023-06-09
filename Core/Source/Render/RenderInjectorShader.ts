@@ -1,7 +1,18 @@
 namespace FudgeCore {
+
+  /**
+   * Maps the names of the member variables inside our uniform block to their respective index and offset
+   */
+  export interface MapUniformBlockInfo {
+    [_name: string]: { // name of the variable inside the Uniform Block
+      index: number;  // index of the variable inside the Uniform Block
+      offset: number; // in bytes
+    };
+  }
+
   //gives WebGL Buffer the data from the {@link Shader}
   export class RenderInjectorShader {
-    public static uboLightsInfo: { [key: string]: UboLightStrucure } = {};
+    public static mapUniformBlockInfo: MapUniformBlockInfo = {};
     private static uboInfos: string[] = new Array();
 
     public static decorate(_constructor: Function): void {
@@ -116,13 +127,13 @@ namespace FudgeCore {
 
       function setUniformInfosInUBO(): void {
         initializeUBO();
-        // Get the respective index of the member variables inside our Uniform Block
-        let uboVariableIndices: General = crc3.getUniformIndices(
+        // Get the respective index of the member variables inside our uniform block
+        let uboVariableIndices: number[] = <number[]>crc3.getUniformIndices(
           program,
           RenderInjectorShader.uboInfos
         );
-        // Get the offset of the member variables inside our Uniform Block in bytes
-        let uboVariableOffsets: General = crc3.getActiveUniforms(
+        // Get the offset of the member variables inside our uniform block in bytes
+        let uboVariableOffsets: number[] = crc3.getActiveUniforms(
           program,
           uboVariableIndices,
           crc3.UNIFORM_OFFSET
@@ -130,7 +141,7 @@ namespace FudgeCore {
 
         // Create an object to map each variable name to its respective index and offset
         RenderInjectorShader.uboInfos.forEach((_name, _index) => {
-          RenderInjectorShader.uboLightsInfo[_name] = new UboLightStrucure(uboVariableIndices[_index], uboVariableOffsets[_index]);
+          RenderInjectorShader.mapUniformBlockInfo[_name] = { index: uboVariableIndices[_index], offset: uboVariableOffsets[_index] };
         });
       }
 
@@ -152,12 +163,5 @@ namespace FudgeCore {
     }
   }
 
-  class UboLightStrucure {
-    public index: { [key: string]: number } = {};
-    public offset: { [key: string]: number } = {};
-    constructor(_index: { [key: string]: number }, _offset: { [key: string]: number }) {
-      this.index = _index;
-      this.offset = _offset;
-    }
-  }
+
 }

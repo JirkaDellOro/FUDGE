@@ -50,12 +50,12 @@ const uint MAX_LIGHTS_POINT = 100u;
 const uint MAX_LIGHTS_SPOT = 100u;
 
 layout(std140) uniform Lights {
-  uniform uint u_nLightsDirectional;
-  uniform uint u_nLightsPoint;
-  uniform uint u_nLightsSpot;
-  uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
-  uniform Light u_point[MAX_LIGHTS_POINT];
-  uniform Light u_spot[MAX_LIGHTS_SPOT];
+  uint u_nLightsDirectional;
+  uint u_nLightsPoint;
+  uint u_nLightsSpot;
+  Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+  Light u_point[MAX_LIGHTS_POINT];
+  Light u_spot[MAX_LIGHTS_SPOT];
 };
   #endif
 
@@ -100,11 +100,8 @@ out vec4 v_vctPosition;
 in uvec4 a_iBone;
 in vec4 a_fWeight;
 const uint MAX_BONES = 256u;
-struct Bone {
-  mat4 matrix; // TODO: change name to mtx to conform with naming scheme
-};
 layout (std140) uniform Skin {
-  Bone u_bones[MAX_BONES];
+  mat4 u_bones[MAX_BONES];
 };
   #endif
 
@@ -189,10 +186,10 @@ void main() {
 
 
     #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
+  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x] +
+    a_fWeight.y * u_bones[a_iBone.y] +
+    a_fWeight.z * u_bones[a_iBone.z] +
+    a_fWeight.w * u_bones[a_iBone.w];
 
   mtxMeshToView *= mtxSkin;
   mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld * mtxSkin));

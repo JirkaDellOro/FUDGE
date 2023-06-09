@@ -366,16 +366,16 @@ namespace FudgeCore {
       fillLightBuffers(LightPoint, "u_nLightsPoint", "u_point");
       fillLightBuffers(LightSpot, "u_nLightsSpot", "u_spot");
 
-      function fillLightBuffers(_type: TypeOfLight, _uniNumber: string, _uniStruct: string): void {
-        let uni: { [name: string]: any } = RenderInjectorShader.uboLightsInfo;
-        let uniLights: { [name: string]: any } = uni[_uniNumber];
-        if (uniLights) {
+      function fillLightBuffers(_type: TypeOfLight, _nLightsUniformName: string, _arrLightsUniformName: string): void {
+        let mapUniformBlockInfo: MapUniformBlockInfo = RenderInjectorShader.mapUniformBlockInfo;
+        let nLightsUniformInfo: MapUniformBlockInfo[""] = mapUniformBlockInfo[_nLightsUniformName];
+        if (mapUniformBlockInfo) {
 
           // RenderWebGL.crc3.uniform1ui(uniLights, 0);
           let zeroOut: ArrayBuffer = new Uint8Array([0]);;
           RenderWebGL.crc3.bufferSubData(
             RenderWebGL.crc3.UNIFORM_BUFFER,
-            uniLights.offset,
+            nLightsUniformInfo.offset,
             zeroOut
           );
 
@@ -387,16 +387,16 @@ namespace FudgeCore {
             let nLightsAmount: ArrayBuffer = new Uint8Array([n]);;
             RenderWebGL.crc3.bufferSubData(
               RenderWebGL.crc3.UNIFORM_BUFFER,
-              uniLights.offset,
+              nLightsUniformInfo.offset,
               nLightsAmount
             );
 
-            let i: number = 0;
+            let iLight: number = 0;
             for (let cmpLight of cmpLights) {
               //RenderWebGL.crc3.uniform4fv(uni[`${_uniStruct}[${i}].vctColor`], cmpLight.light.color.getArray());
               RenderWebGL.crc3.bufferSubData(
                 RenderWebGL.crc3.UNIFORM_BUFFER,
-                uni[`${_uniStruct}[${i}].vctColor`].offset,
+                mapUniformBlockInfo[`${_arrLightsUniformName}[${iLight}].vctColor`].offset,
                 cmpLight.light.color.getArray()
               );
               //TODO: could be optimized, no need to calculate for each shader
@@ -405,7 +405,7 @@ namespace FudgeCore {
               //   RenderWebGL.crc3.uniformMatrix4fv(uni[`${_uniStruct}[${i}].mtxShape`], false, mtxTotal.get());
               RenderWebGL.crc3.bufferSubData(
                 RenderWebGL.crc3.UNIFORM_BUFFER,
-                uni[`${_uniStruct}[${i}].mtxShape`].offset,
+                mapUniformBlockInfo[`${_arrLightsUniformName}[${iLight}].mtxShape`].offset,
                 mtxTotal.get()
               );
 
@@ -415,14 +415,14 @@ namespace FudgeCore {
                 let mtxInverse: Matrix4x4 = mtxTotal.inverse();
                 RenderWebGL.crc3.bufferSubData(
                   RenderWebGL.crc3.UNIFORM_BUFFER,
-                  uni[`${_uniStruct}[${i}].mtxShapeInverse`].offset,
+                  mapUniformBlockInfo[`${_arrLightsUniformName}[${iLight}].mtxShapeInverse`].offset,
                   mtxInverse.get()
                 );
 
                 Recycler.store(mtxInverse);
               }
               Recycler.store(mtxTotal);
-              i++;
+              iLight++;
             }
           }
         }
