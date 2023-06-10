@@ -349,7 +349,9 @@ namespace FudgeCore {
         let mistBufferData: PostBufferdata = RenderWebGL.setupPostBuffer();
         Render.mistFBO = mistBufferData.fbo;
         Render.mistTexture = mistBufferData.texture;
-        Render.cmpMistMaterial = new ComponentMaterial(new Material("mistMat", ShaderMist));
+        let tempMistMat: Material = new Material("mistMat", ShaderMist);
+        Render.cmpMistMaterial = new ComponentMaterial(tempMistMat);
+        Project.deregister(tempMistMat);
         Render.initScreenQuad(Render.mistTexture);
       }
       if (_ao) {

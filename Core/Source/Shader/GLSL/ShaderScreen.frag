@@ -13,6 +13,6 @@ out vec4 vctFrag;
 
 void main() {
     vec4 mistTex = texture(u_texture, v_vctTexture);
-    vec3 mistCol = vec3(0.0);
+    vec3 mistCol = vec3(1.0);
     vctFrag = vec4(mistCol,mistTex.r);
 }
