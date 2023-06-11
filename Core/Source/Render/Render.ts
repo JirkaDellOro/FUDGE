@@ -245,6 +245,7 @@ namespace FudgeCore {
       let tempCoat: CoatWebGlTextured = new CoatWebGlTextured(_texture);
       let tempMat: Material = new Material("screenQuadMat", ShaderScreen, tempCoat);
       Render.screenQuadCmpMat = new ComponentMaterial(tempMat);
+      Project.deregister(tempMat);  //Deregister this Material to prevent listing in the internal resources of the editor
     }
 
     public static useScreenQuadRenderData(_shader: typeof Shader): void {

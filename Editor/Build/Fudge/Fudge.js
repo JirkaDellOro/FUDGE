@@ -3837,6 +3837,11 @@ var Fudge;
                     console.log(this.node);
                     return;
                 }
+            if (cmpNew instanceof ƒ.ComponentPostFX)
+                if (this.node.getComponent(ƒ.ComponentCamera) == null) {
+                    alert("To attach ComponentPostFX, first attach ComponentCamera!");
+                    return;
+                }
             ƒ.Debug.info(cmpNew.type, cmpNew);
             this.node.addComponent(cmpNew);
             this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });

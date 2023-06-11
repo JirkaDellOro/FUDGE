@@ -12,7 +12,6 @@ namespace FudgeCore {
 
     public name: string = "Viewport"; // The name to call this viewport by.
     public camera: ComponentCamera = null; // The camera representing the view parameters to render the branch.
-    public postFX: ComponentPostFX = null; // The post-fx component representing the post parameters.
 
     public rectSource: Rectangle;
     public rectDestination: Rectangle;
@@ -28,7 +27,7 @@ namespace FudgeCore {
     public adjustingFrames: boolean = true;
     public adjustingCamera: boolean = true;
     public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
-    private lastRectRenderSize: Vector2 = new Vector2(0,0);
+    private lastRectRenderSize: Vector2 = new Vector2(0, 0);
 
     public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
 
@@ -118,6 +117,7 @@ namespace FudgeCore {
      * Pass `false` if calculation was already done for this frame 
      */
     public draw(_calculateTransforms: boolean = true): void {
+
       if (!this.#branch)
         return;
       Render.resetFrameBuffer();
@@ -131,13 +131,6 @@ namespace FudgeCore {
         this.calculateTransforms();
 
       Render.setDepthTest(true);
-      if (this.ao) {
-        Render.calcMist(this.camera);
-        Render.calcAO(this.camera);
-      } else if (this.mist) {
-        Render.calcMist(this.camera);
-      }
-
       Render.clear(this.camera.clrBackground);
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
@@ -145,16 +138,26 @@ namespace FudgeCore {
         Physics.draw(this.camera, this.physicsDebugMode);
       }
 
-      Render.setDepthTest(false);
-      if (this.mist)
-        Render.drawMist(this.camera);
-      if (this.ao)
-        Render.drawAO();
-      if (this.bloom) {
-        Render.calcBloom(this.camera);
-        Render.drawBloom();
+      let cmpPostFx: ComponentPostFX = this.getComponentPostFX(this.camera);
+      if (cmpPostFx != null) if (cmpPostFx.isActive) {
+        if (cmpPostFx.ao) {
+          Render.calcMist(this.camera);
+          Render.calcAO(this.camera);
+        } else if (cmpPostFx.mist) {
+          Render.calcMist(this.camera);
+        }
+
+        Render.setDepthTest(false);
+        if (cmpPostFx.mist)
+          Render.drawMist(this.camera, cmpPostFx.clrMist);
+        if (cmpPostFx.ao)
+          Render.drawAO();
+        if (cmpPostFx.bloom) {
+          Render.calcBloom(this.camera);
+          Render.drawBloom();
+        }
+        Render.setDepthTest(true);
       }
-      Render.setDepthTest(true);
 
       this.#crc2.imageSmoothingEnabled = false;
       this.#crc2.drawImage(
@@ -368,6 +371,14 @@ namespace FudgeCore {
     public pointClientToScreen(_client: Vector2): Vector2 {
       let screen: Vector2 = new Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
       return screen;
+    }
+
+    private getComponentPostFX(_camera: ComponentCamera): ComponentPostFX {
+      let camParentNode: Node = _camera.node;
+      if (camParentNode != null) {
+        return camParentNode.getComponent(ComponentPostFX);
+      }
+      return null;
     }
   }
 }

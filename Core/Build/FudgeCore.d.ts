@@ -1115,7 +1115,7 @@ declare namespace FudgeCore {
          * Draw a mesh buffer using the given infos and the complete projection matrix. A shader can be passed to calculate every object with the same shader
          */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera, _cmpMat?: ComponentMaterial): void;
-        static drawMist(_cmpCamera: ComponentCamera): void;
+        static drawMist(_cmpCamera: ComponentCamera, _clrMist?: Color): void;
         static drawAO(): void;
         static drawBloom(): void;
         protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
@@ -5559,7 +5559,6 @@ declare namespace FudgeCore {
         private static focus;
         name: string;
         camera: ComponentCamera;
-        postFX: ComponentPostFX;
         rectSource: Rectangle;
         rectDestination: Rectangle;
         frameClientToCanvas: FramingScaled;
@@ -5671,6 +5670,7 @@ declare namespace FudgeCore {
          * Returns a point in the browser page matching the given point of the viewport
          */
         pointClientToScreen(_client: Vector2): Vector2;
+        private getComponentPostFX;
     }
 }
 declare namespace FudgeCore {

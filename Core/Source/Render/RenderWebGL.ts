@@ -351,7 +351,7 @@ namespace FudgeCore {
         Render.mistTexture = mistBufferData.texture;
         let tempMistMat: Material = new Material("mistMat", ShaderMist);
         Render.cmpMistMaterial = new ComponentMaterial(tempMistMat);
-        Project.deregister(tempMistMat);
+        Project.deregister(tempMistMat);  //Deregister this Material to prevent listing in the internal resources of the editor
         Render.initScreenQuad(Render.mistTexture);
       }
       if (_ao) {
@@ -503,7 +503,7 @@ namespace FudgeCore {
       }
     }
 
-    public static drawMist(_cmpCamera: ComponentCamera): void {
+    public static drawMist(_cmpCamera: ComponentCamera, _clrMist: Color = new Color()): void {
       let shader: ShaderInterface = Render.screenQuadCmpMat.material.getShader();
       shader.useProgram();
       Render.useScreenQuadRenderData(Render.screenQuadCmpMat.material.getShader());
