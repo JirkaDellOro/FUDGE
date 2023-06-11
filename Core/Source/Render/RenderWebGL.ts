@@ -344,7 +344,7 @@ namespace FudgeCore {
     /**
      * Creates and stores texture buffers to be used for PostFX
      */
-    public static setPostBuffers(_mist: boolean = false, _ao: boolean = false, _bloom: boolean = false): void {
+    public static setPostBuffers(_mist: boolean = true, _ao: boolean = true, _bloom: boolean = true): void {
       if (_mist) {
         let mistBufferData: PostBufferdata = RenderWebGL.setupPostBuffer();
         Render.mistFBO = mistBufferData.fbo;
@@ -355,14 +355,17 @@ namespace FudgeCore {
         Render.initScreenQuad(Render.mistTexture);
       }
       if (_ao) {
+        /*
         let aoBufferData: PostBufferdata = RenderWebGL.setupPostBuffer();
         Render.aoFBO = aoBufferData.fbo;
-        Render.aoTexture = aoBufferData.texture;
+        Render.aoTexture = aoBufferData.texture;*/
       }
       if (_bloom) {
+        /*
         let bloomBufferData: PostBufferdata = RenderWebGL.setupPostBuffer();
         Render.bloomFBO = bloomBufferData.fbo;
         Render.bloomTexture = bloomBufferData.texture;
+        */
       }
     }
 
@@ -377,13 +380,9 @@ namespace FudgeCore {
           Render.initScreenQuad(Render.mistTexture);
         }
         if (_ao) {
-          let aoBufferData: PostBufferdata = RenderWebGL.setupPostBuffer(Render.aoFBO);
-          Render.aoTexture = aoBufferData.texture;
           //TODO: ScreenQuad missing
         }
         if (_bloom) {
-          let bloomBufferData: PostBufferdata = RenderWebGL.setupPostBuffer(Render.bloomFBO);
-          Render.bloomTexture = bloomBufferData.texture;
           //TODO: ScreenQuad missing
         }
       }
@@ -506,7 +505,7 @@ namespace FudgeCore {
     public static drawMist(_cmpCamera: ComponentCamera, _clrMist: Color = new Color()): void {
       let shader: ShaderInterface = Render.screenQuadCmpMat.material.getShader();
       shader.useProgram();
-      Render.useScreenQuadRenderData(Render.screenQuadCmpMat.material.getShader());
+      Render.useScreenQuadRenderData(Render.screenQuadCmpMat.material.getShader(), _clrMist);
       RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
     }
 

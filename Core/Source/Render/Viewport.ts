@@ -31,10 +31,6 @@ namespace FudgeCore {
 
     public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
 
-    private mist: boolean = true;
-    private ao: boolean = false;
-    private bloom: boolean = false;
-
     #branch: Node = null; // The to render with all its descendants.
     #crc2: CanvasRenderingContext2D = null;
     #canvas: HTMLCanvasElement = null;
@@ -74,9 +70,8 @@ namespace FudgeCore {
       this.rectSource = Render.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
 
-      if (this.mist || this.ao || this.bloom) {
-        Render.setPostBuffers(this.mist, this.ao, this.bloom);
-      }
+      //TODO: Only set PostBuffers if needed. This proofs a bit complicated because the initialization might happen before a ComponentCamera with a ComponentPostFX exists. Therefore Postbuffers are initialized regardless for now. 
+      Render.setPostBuffers();
 
       this.setBranch(_branch);
     }
@@ -239,8 +234,11 @@ namespace FudgeCore {
       Render.setCanvasSize(rectRender.width, rectRender.height);
       // setting the new canvas size on the post-fx textures
       if (rectRender.size.x != this.lastRectRenderSize.x || rectRender.size.y != this.lastRectRenderSize.y) {
-        Render.adjustPostBuffers(rectRender.size, this.mist, this.ao, this.bloom);
-        this.lastRectRenderSize.set(rectRender.size.x, rectRender.size.y);
+        let cmpPostFx: ComponentPostFX = this.getComponentPostFX(this.camera);
+        if (cmpPostFx != null) if (cmpPostFx.isActive) {
+          Render.adjustPostBuffers(rectRender.size, cmpPostFx.mist, cmpPostFx.ao, cmpPostFx.bloom);
+          this.lastRectRenderSize.set(rectRender.size.x, rectRender.size.y);
+        }
       }
 
       Recycler.store(rectClient);

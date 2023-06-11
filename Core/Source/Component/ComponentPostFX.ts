@@ -24,9 +24,9 @@ namespace FudgeCore {
     public serialize(): Serialization {
       let serialization: Serialization = {
         mist: this.mist,
-        clrMist: this.clrMist,
+        clrMist: this.clrMist.serialize(),
         ao: this.ao,
-        clrAO: this.clrAO,
+        clrAO: this.clrAO.serialize(),
         bloom: this.bloom
       };
 
@@ -35,9 +35,9 @@ namespace FudgeCore {
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.mist = _serialization.mist;
-      this.clrMist = _serialization.clrMist;
+      await this.clrMist.deserialize(_serialization.clrMist);
       this.ao = _serialization.ao;
-      this.clrAO = _serialization.clrAO;
+      await this.clrAO.deserialize(_serialization.clrAO);
       this.bloom = _serialization.bloom;
       return this;
     }

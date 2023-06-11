@@ -210,7 +210,6 @@ namespace FudgeCore {
       Render.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
 
       _cmpCamera.resetWorldToView();
-
       Render.drawList(_cmpCamera, this.nodesSimple, Render.cmpMistMaterial);
       Render.drawListAlpha(_cmpCamera);
 
@@ -248,7 +247,7 @@ namespace FudgeCore {
       Project.deregister(tempMat);  //Deregister this Material to prevent listing in the internal resources of the editor
     }
 
-    public static useScreenQuadRenderData(_shader: typeof Shader): void {
+    public static useScreenQuadRenderData(_shader: typeof Shader, _clr : Color = new Color(0,0,0,1)): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       let coat: CoatWebGlTextured = <CoatWebGlTextured>Render.screenQuadCmpMat.material.coat;
 
@@ -280,6 +279,10 @@ namespace FudgeCore {
       crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, coat.texture);
       crc3.uniform1i(_shader.uniforms["u_texture"], 0);
       crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, Render.screenQuadCmpMat.mtxPivot.get());
+
+      //feed in color information (fog color etc.)
+      let uniform: WebGLUniformLocation = _shader.uniforms["u_vctColor"];
+      RenderWebGL.getRenderingContext().uniform4fv(uniform, _clr.getArray());
     }
 
     //#endregion

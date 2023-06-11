@@ -5479,7 +5479,7 @@ declare namespace FudgeCore {
         static calcAO(_cmpCamera: ComponentCamera): void;
         static calcBloom(_cmpCamera: ComponentCamera): void;
         static initScreenQuad(_texture: WebGLTexture): void;
-        static useScreenQuadRenderData(_shader: typeof Shader): void;
+        static useScreenQuadRenderData(_shader: typeof Shader, _clr?: Color): void;
         private static transformByPhysics;
     }
 }
@@ -5570,9 +5570,6 @@ declare namespace FudgeCore {
         physicsDebugMode: PHYSICS_DEBUGMODE;
         private lastRectRenderSize;
         componentsPick: RecycableArray<ComponentPick>;
-        private mist;
-        private ao;
-        private bloom;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */

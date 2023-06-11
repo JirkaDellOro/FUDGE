@@ -8,11 +8,11 @@ precision highp int;
 
 in vec2 v_vctTexture;
 uniform sampler2D u_texture;
+uniform vec4 u_vctColor;
 
 out vec4 vctFrag;
 
 void main() {
     vec4 mistTex = texture(u_texture, v_vctTexture);
-    vec3 mistCol = vec3(1.0);
-    vctFrag = vec4(mistCol,mistTex.r);
+    vctFrag = vec4(u_vctColor.rgb, mistTex.r * u_vctColor.a);
 }

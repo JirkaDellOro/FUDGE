@@ -340,6 +340,14 @@
       }
     }
   },
+  "MeshObj|2023-06-11T10:00:00.759Z|12608": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-06-11T10:00:00.759Z|12608",
+      "name": "cubeFlippedNormals",
+      "type": "MeshObj",
+      "url": "obj\\cubeFlippedNormals.obj"
+    }
+  },
   "Graph|2023-03-22T12:13:41.839Z|18963": {
     "ƒ.Graph": {
       "name": "DefaultScene",
@@ -836,7 +844,7 @@
               },
               {
                 "ƒ.Node": {
-                  "name": "SkyBox",
+                  "name": "sky",
                   "active": true,
                   "components": {
                     "ComponentTransform": [
@@ -863,7 +871,7 @@
                             "scaling": "[1, 1, 1]"
                           },
                           "Component": {
-                            "active": true
+                            "active": false
                           }
                         }
                       }
@@ -903,7 +911,7 @@
                   "ƒ.ComponentTransform": {
                     "local": {
                       "translation": "[0, 0.4999997317790985, 0]",
-                      "rotation": "[0, -225, 0]",
+                      "rotation": "[0, 135, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -925,9 +933,9 @@
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
-                    "aspect": 1.5207006369426752,
+                    "aspect": 1.7118380062305296,
                     "pivot": {
-                      "translation": "[0, 0, -4.499998569488525]",
+                      "translation": "[0, 0, -5]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -941,19 +949,9 @@
                 {
                   "ƒ.ComponentPostFX": {
                     "mist": true,
-                    "clrMist": {
-                      "r": 1,
-                      "g": 1,
-                      "b": 1,
-                      "a": 1
-                    },
+                    "clrMist": "[0.011764705882352941, 0.10588235294117647, 0.18823529411764706, 0.66]",
                     "ao": false,
-                    "clrAO": {
-                      "r": 0,
-                      "g": 0,
-                      "b": 0,
-                      "a": 1
-                    },
+                    "clrAO": "[0, 0, 0, 1]",
                     "bloom": false
                   }
                 }
@@ -961,26 +959,10 @@
             },
             "children": []
           }
-        },
-        {
-          "ƒ.Node": {
-            "name": "test",
-            "active": true,
-            "components": {},
-            "children": []
-          }
         }
       ],
       "idResource": "Graph|2023-03-22T12:13:41.839Z|18963",
       "type": "Graph"
-    }
-  },
-  "MeshObj|2023-06-11T10:00:00.759Z|12608": {
-    "ƒ.MeshObj": {
-      "idResource": "MeshObj|2023-06-11T10:00:00.759Z|12608",
-      "name": "cubeFlippedNormals",
-      "type": "MeshObj",
-      "url": "obj\\cubeFlippedNormals.obj"
     }
   }
 }
