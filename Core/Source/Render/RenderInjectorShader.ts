@@ -1,19 +1,10 @@
 namespace FudgeCore {
-
-  /**
-   * Maps the names of the member variables inside our uniform block to their respective index and offset
-   */
-  export interface MapUniformBlockInfo {
-    [_name: string]: { // name of the variable inside the Uniform Block
-      index: number;  // index of the variable inside the Uniform Block
-      offset: number; // in bytes
-    };
-  }
-
   //gives WebGL Buffer the data from the {@link Shader}
   export class RenderInjectorShader {
-    public static mapUniformBlockInfo: MapUniformBlockInfo = {};
-    private static uboInfos: string[] = new Array();
+    public static uboLights: WebGLBuffer;
+    public static uboLightsVariableOffsets: { // Maps the names of the member variables inside our uniform block to their respective index and offset
+      [_name: string]: number;
+    };
 
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor, "useProgram", {
@@ -64,10 +55,20 @@ namespace FudgeCore {
         }
 
         this.program = program;
-
         this.attributes = detectAttributes();
-
         this.uniforms = detectUniforms();
+
+        if (!this.define.includes("LIGHT"))
+          return;
+
+        if (!RenderInjectorShader.uboLights)
+          RenderInjectorShader.uboLights = createUBOLights();
+        if (!RenderInjectorShader.uboLightsVariableOffsets)
+          RenderInjectorShader.uboLightsVariableOffsets = detectUBOVariableOffsets();
+
+        // bind lights UBO to shader program
+        const blockIndex: number = crc3.getUniformBlockIndex(program, UNIFORM_BLOCKS.LIGHTS.NAME);
+        crc3.uniformBlockBinding(program, blockIndex, UNIFORM_BLOCKS.LIGHTS.BINDING);
       } catch (_error) {
         Debug.error(_error);
         debugger;
@@ -109,59 +110,61 @@ namespace FudgeCore {
       function detectUniforms(): { [name: string]: WebGLUniformLocation } {
         let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
         let uniformCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
-        let oldLength: number = RenderInjectorShader.uboInfos.length;
         for (let i: number = 0; i < uniformCount; i++) {
           let info: WebGLActiveInfo = RenderWebGL.assert<WebGLActiveInfo>(crc3.getActiveUniform(program, i));
           if (!info) {
             break;
           }
-          if (crc3.getUniformLocation(program, info.name) != null)
-            detectedUniforms[info.name] = RenderWebGL.assert<WebGLRenderbuffer>(crc3.getUniformLocation(program, info.name));
-          else if (!RenderInjectorShader.uboInfos.includes(info.name))
-            RenderInjectorShader.uboInfos.push(info.name);
+          let location: WebGLUniformLocation = crc3.getUniformLocation(program, info.name);
+          if (location)
+            detectedUniforms[info.name] = RenderWebGL.assert<WebGLUniformLocation>(location);
         }
-        if (oldLength < RenderInjectorShader.uboInfos.length)
-          setUniformInfosInUBO();
         return detectedUniforms;
       }
 
-      function setUniformInfosInUBO(): void {
-        initializeUBO();
-        // Get the respective index of the member variables inside our uniform block
-        let uboVariableIndices: number[] = <number[]>crc3.getUniformIndices(
-          program,
-          RenderInjectorShader.uboInfos
-        );
-        // Get the offset of the member variables inside our uniform block in bytes
-        let uboVariableOffsets: number[] = crc3.getActiveUniforms(
-          program,
-          uboVariableIndices,
-          crc3.UNIFORM_OFFSET
-        );
-
-        // Create an object to map each variable name to its respective index and offset
-        RenderInjectorShader.uboInfos.forEach((_name, _index) => {
-          RenderInjectorShader.mapUniformBlockInfo[_name] = { index: uboVariableIndices[_index], offset: uboVariableOffsets[_index] };
-        });
-      }
-
-      function initializeUBO(): void {
-        let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+      function createUBOLights(): WebGLBuffer {
         const blockIndex: number = crc3.getUniformBlockIndex(program, UNIFORM_BLOCKS.LIGHTS.NAME);
         const blockSize: number = crc3.getActiveUniformBlockParameter(
           program,
           blockIndex,
           crc3.UNIFORM_BLOCK_DATA_SIZE
         );
-        const uboBuffer: WebGLBuffer = crc3.createBuffer();
-        crc3.bindBuffer(crc3.UNIFORM_BUFFER, uboBuffer);
+        const ubo: WebGLBuffer = crc3.createBuffer();
+        crc3.bindBuffer(crc3.UNIFORM_BUFFER, ubo);
         crc3.bufferData(crc3.UNIFORM_BUFFER, blockSize, crc3.DYNAMIC_DRAW);
         crc3.bindBuffer(crc3.UNIFORM_BUFFER, null);
-        crc3.uniformBlockBinding(program, blockIndex, UNIFORM_BLOCKS.LIGHTS.BINDING);
-        crc3.bindBufferBase(crc3.UNIFORM_BUFFER, UNIFORM_BLOCKS.LIGHTS.BINDING, uboBuffer);
+        crc3.bindBufferBase(crc3.UNIFORM_BUFFER, UNIFORM_BLOCKS.LIGHTS.BINDING, ubo);
+
+        return ubo;
+      }
+
+      function detectUBOVariableOffsets(): typeof RenderInjectorShader.uboLightsVariableOffsets {
+        const uboVariableNames: string[] = [];
+        const nUniforms: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
+        for (let i: number = 0; i < nUniforms; i++) {
+          const info: WebGLActiveInfo = RenderWebGL.assert<WebGLActiveInfo>(crc3.getActiveUniform(program, i));
+          if (!info)
+            break;
+          const location: WebGLUniformLocation = crc3.getUniformLocation(program, info.name);
+          if (!location)
+            uboVariableNames.push(info.name);
+        }
+
+        const uboVariableIndices: number[] = <number[]>crc3.getUniformIndices(
+          program,
+          uboVariableNames
+        );
+        const uboVariableOffsets: number[] = crc3.getActiveUniforms(
+          program,
+          uboVariableIndices,
+          crc3.UNIFORM_OFFSET
+        );
+
+        const uboVariableNameToOffset: typeof RenderInjectorShader.uboLightsVariableOffsets = {};
+        uboVariableNames.forEach((_name, _index) => uboVariableNameToOffset[_name] = uboVariableOffsets[_index]);
+
+        return uboVariableNameToOffset;
       }
     }
   }
-
-
 }
