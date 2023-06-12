@@ -205,16 +205,14 @@ namespace FudgeCore {
     public static calcMist(_cmpCamera: ComponentCamera, _cmpPostFX: ComponentPostFX): void {
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mistFBO);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+      Render.setDepthTest(true);
       Render.crc3.clearColor(0, 0, 0, 1);
       Render.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
-      
-      Render.setDepthTest(true);
 
       _cmpCamera.resetWorldToView();
       Render.drawNodesMist(_cmpCamera, this.nodesSimple, _cmpPostFX);
       //TODO: Implement alpha-mist-calculation. For now they are drawn fully opaque
       Render.drawNodesMist(_cmpCamera, this.nodesAlpha, _cmpPostFX);
-
 
       //Reset to main color buffer
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);

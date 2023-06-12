@@ -515,32 +515,33 @@ namespace FudgeCore {
 
         uniform = shader.uniforms["u_mtxWorldToView"];
         if (uniform) RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxWorldToView.get());
-
+        
+        /*Maybe useful for the AO Calculation
         uniform = shader.uniforms["u_mtxWorldToCamera"];
         if (uniform) RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
-
+        */
 
         uniform = shader.uniforms["u_nearPlane"];
         RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpPostFX.nearPlane);
         
         uniform = shader.uniforms["u_farPlane"];
         RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpPostFX.farPlane);
-
+        
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       }
     }
-
+    
     public static drawMist(_cmpCamera: ComponentCamera, _clrMist: Color = new Color()): void {
       let shader: ShaderInterface = Render.screenQuadCmpMat.material.getShader();
       shader.useProgram();
       Render.useScreenQuadRenderData(Render.screenQuadCmpMat.material.getShader(), _clrMist);
       RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
     }
-
+    
     public static drawAO(): void {
-
+      
     }
-
+    
     public static drawBloom(): void {
 
     }
