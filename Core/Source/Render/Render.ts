@@ -212,7 +212,9 @@ namespace FudgeCore {
 
       _cmpCamera.resetWorldToView();
       Render.drawNodesMist(_cmpCamera, this.nodesSimple, _cmpPostFX);
-      //TODO: Implement alpha-mist-calculation
+      //TODO: Implement alpha-mist-calculation. For now they are drawn fully opaque
+      Render.drawNodesMist(_cmpCamera, this.nodesAlpha, _cmpPostFX);
+
 
       //Reset to main color buffer
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
