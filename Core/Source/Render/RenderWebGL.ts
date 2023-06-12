@@ -461,14 +461,9 @@ namespace FudgeCore {
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix. A shader can be passed to calculate every object with the same shader
      */
-    protected static drawNode(_node: Node, _cmpCamera: ComponentCamera, _cmpMat?: ComponentMaterial): void {
+    protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void {
       let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-      let cmpMaterial: ComponentMaterial
-      if (_cmpMat == null) {
-        cmpMaterial = _node.getComponent(ComponentMaterial);
-      } else {
-        cmpMaterial = _cmpMat;
-      }
+      let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
       let coat: Coat = cmpMaterial.material.coat;
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       let drawParticles: boolean = cmpParticleSystem && cmpParticleSystem.isActive;
@@ -498,6 +493,39 @@ namespace FudgeCore {
       if (drawParticles) {
         RenderWebGL.drawParticles(cmpParticleSystem, shader, renderBuffers, _node.getComponent(ComponentFaceCamera), cmpMaterial.sortForAlpha);
       } else {
+        RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+      }
+    }
+
+    public static drawNodesMist(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpPostFX: ComponentPostFX): void {
+      let cmpMaterial: ComponentMaterial = Render.cmpMistMaterial;
+      let coat: Coat = cmpMaterial.material.coat;
+      let shader: ShaderInterface = cmpMaterial.material.getShader();
+
+      for (let node of _list) {
+        let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
+        shader.useProgram();
+        coat.useRenderData(shader, cmpMaterial);
+
+        let mtxMeshToView: Matrix4x4 = RenderWebGL.calcMeshToView(node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
+        let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
+
+        let uniform: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
+        if (uniform) RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
+
+        uniform = shader.uniforms["u_mtxWorldToView"];
+        if (uniform) RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxWorldToView.get());
+
+        uniform = shader.uniforms["u_mtxWorldToCamera"];
+        if (uniform) RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
+
+
+        uniform = shader.uniforms["u_nearPlane"];
+        RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpPostFX.nearPlane);
+        
+        uniform = shader.uniforms["u_farPlane"];
+        RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpPostFX.farPlane);
+
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       }
     }

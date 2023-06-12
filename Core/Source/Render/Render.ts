@@ -194,24 +194,25 @@ namespace FudgeCore {
     /**
      * Draws a given list of nodes. A @param _cmpMat can be passed to render every node of the list with the same Material (useful for PostFX)
      */
-    private static drawList(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpMat?: ComponentMaterial): void {
+    private static drawList(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>): void {
       for (let node of _list) {
-        Render.drawNode(node, _cmpCamera, _cmpMat);
+        Render.drawNode(node, _cmpCamera);
       }
     }
     //#endregion
 
     //#region PostFX
-    public static calcMist(_cmpCamera: ComponentCamera): void {
+    public static calcMist(_cmpCamera: ComponentCamera, _cmpPostFX: ComponentPostFX): void {
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mistFBO);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+      Render.setDepthTest(true);
 
       Render.crc3.clearColor(0, 0, 0, 1);
       Render.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
 
       _cmpCamera.resetWorldToView();
-      Render.drawList(_cmpCamera, this.nodesSimple, Render.cmpMistMaterial);
-      Render.drawListAlpha(_cmpCamera);
+      Render.drawNodesMist(_cmpCamera, this.nodesSimple, _cmpPostFX);
+      //TODO: Implement alpha-mist-calculation
 
       //Reset to main color buffer
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
@@ -247,7 +248,7 @@ namespace FudgeCore {
       Project.deregister(tempMat);  //Deregister this Material to prevent listing in the internal resources of the editor
     }
 
-    public static useScreenQuadRenderData(_shader: typeof Shader, _clr : Color = new Color(0,0,0,1)): void {
+    public static useScreenQuadRenderData(_shader: typeof Shader, _clr: Color = new Color(0, 0, 0, 1)): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       let coat: CoatWebGlTextured = <CoatWebGlTextured>Render.screenQuadCmpMat.material.coat;
 

@@ -1114,7 +1114,8 @@ declare namespace FudgeCore {
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix. A shader can be passed to calculate every object with the same shader
          */
-        protected static drawNode(_node: Node, _cmpCamera: ComponentCamera, _cmpMat?: ComponentMaterial): void;
+        protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
+        static drawNodesMist(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpPostFX: ComponentPostFX): void;
         static drawMist(_cmpCamera: ComponentCamera, _clrMist?: Color): void;
         static drawAO(): void;
         static drawBloom(): void;
@@ -2309,10 +2310,12 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         mist: boolean;
         clrMist: Color;
+        nearPlane: number;
+        farPlane: number;
         ao: boolean;
         clrAO: Color;
         bloom: boolean;
-        constructor(_mist?: boolean, _clrMist?: Color, _ao?: boolean, _clrAO?: Color, _bloom?: boolean);
+        constructor(_mist?: boolean, _clrMist?: Color, _nearPlane?: number, _farPlane?: number, _ao?: boolean, _clrAO?: Color, _bloom?: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -5475,7 +5478,7 @@ declare namespace FudgeCore {
          * Draws a given list of nodes. A @param _cmpMat can be passed to render every node of the list with the same Material (useful for PostFX)
          */
         private static drawList;
-        static calcMist(_cmpCamera: ComponentCamera): void;
+        static calcMist(_cmpCamera: ComponentCamera, _cmpPostFX: ComponentPostFX): void;
         static calcAO(_cmpCamera: ComponentCamera): void;
         static calcBloom(_cmpCamera: ComponentCamera): void;
         static initScreenQuad(_texture: WebGLTexture): void;

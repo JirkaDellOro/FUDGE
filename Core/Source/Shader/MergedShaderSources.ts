@@ -8,16 +8,21 @@ namespace FudgeCore {
 precision mediump float;
 precision highp int;
 
-uniform mat4 u_mtxMeshToWorld;
-uniform vec3 u_vctCamera;
+uniform float u_nearPlane;
+uniform float u_farPlane;
 
+in vec3 v_vctCamera;
+in mat4 v_mtxMeshToWorld;
 in vec4 v_vctPosition;
 
 out vec4 vctFrag;
 
 void main() {
-    float vctDistCamera = length((u_mtxMeshToWorld * v_vctPosition).xyz - u_vctCamera) * 0.01;
-    vec3 vec = vec3(vctDistCamera);
+    //vec3 vec = vec3(max(length((v_mtxMeshToWorld * v_vctPosition).xyz - v_vctCamera) * 0.2, 0.0));
+    float dist = length((v_mtxMeshToWorld * v_vctPosition).xyz - v_vctCamera);
+    float fogAmount = min(max((dist - u_nearPlane) / (u_farPlane - u_nearPlane), 0.0),1.0);
+    vec3 vec = vec3(-pow(fogAmount, 2.0) + (2.0 * fogAmount)); //lets Fog appear quicker and fall off slower results in a more gradual falloff
+    //vec3 vec = vec3(fogAmount);
     vctFrag = vec4(vec, 1.0);
 }
 `;
@@ -30,14 +35,18 @@ void main() {
 
 uniform vec3 u_vctCamera;
 uniform mat4 u_mtxMeshToView;
-
+uniform mat4 u_mtxMeshToWorld;
 in vec3 a_vctPosition;
 
 out vec4 v_vctPosition;
+out mat4 v_mtxMeshToWorld;
+out vec3 v_vctCamera;
 
 void main() {
     vec4 vctPosition = vec4(a_vctPosition, 1.0);
     mat4 mtxMeshToView = u_mtxMeshToView;
+    v_mtxMeshToWorld = u_mtxMeshToWorld;
+    v_vctCamera = u_vctCamera;
     gl_Position = mtxMeshToView * vctPosition;
     v_vctPosition = vctPosition;
 }`;

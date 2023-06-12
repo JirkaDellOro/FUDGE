@@ -136,10 +136,10 @@ namespace FudgeCore {
       let cmpPostFx: ComponentPostFX = this.getComponentPostFX(this.camera);
       if (cmpPostFx != null) if (cmpPostFx.isActive) {
         if (cmpPostFx.ao) {
-          Render.calcMist(this.camera);
+          Render.calcMist(this.camera, cmpPostFx);
           Render.calcAO(this.camera);
         } else if (cmpPostFx.mist) {
-          Render.calcMist(this.camera);
+          Render.calcMist(this.camera, cmpPostFx);
         }
 
         Render.setDepthTest(false);
