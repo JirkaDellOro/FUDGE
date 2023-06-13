@@ -1,11 +1,6 @@
 namespace FudgeCore {
   //gives WebGL Buffer the data from the {@link Shader}
   export class RenderInjectorShader {
-    public static uboLights: WebGLBuffer;
-    public static uboLightsVariableOffsets: { // Maps the names of the member variables inside our uniform block to their respective index and offset
-      [_name: string]: number;
-    };
-
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor, "useProgram", {
         value: RenderInjectorShader.useProgram
@@ -61,10 +56,10 @@ namespace FudgeCore {
         if (!this.define.includes("LIGHT"))
           return;
 
-        if (!RenderInjectorShader.uboLights)
-          RenderInjectorShader.uboLights = createUBOLights();
-        if (!RenderInjectorShader.uboLightsVariableOffsets)
-          RenderInjectorShader.uboLightsVariableOffsets = detectUBOVariableOffsets();
+        if (!RenderWebGL.uboLights)
+          RenderWebGL.uboLights = createUBOLights();
+        if (!RenderWebGL.uboLightsVariableOffsets)
+          RenderWebGL.uboLightsVariableOffsets = detectUBOLightsVariableOffsets();
 
         // bind lights UBO to shader program
         const blockIndex: number = crc3.getUniformBlockIndex(program, UNIFORM_BLOCKS.LIGHTS.NAME);
@@ -138,29 +133,27 @@ namespace FudgeCore {
         return ubo;
       }
 
-      function detectUBOVariableOffsets(): typeof RenderInjectorShader.uboLightsVariableOffsets {
-        const uboVariableNames: string[] = [];
-        const nUniforms: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
-        for (let i: number = 0; i < nUniforms; i++) {
-          const info: WebGLActiveInfo = RenderWebGL.assert<WebGLActiveInfo>(crc3.getActiveUniform(program, i));
-          if (!info)
-            break;
-          const location: WebGLUniformLocation = crc3.getUniformLocation(program, info.name);
-          if (!location)
-            uboVariableNames.push(info.name);
-        }
+      function detectUBOLightsVariableOffsets(): typeof RenderWebGL.uboLightsVariableOffsets {
+        const uboVariableNames: string[] = [
+          "u_nLightsDirectional",
+          "u_ambient.vctColor",
+          "u_directional[0].vctColor",
+          "u_point[0].vctColor",
+          "u_spot[0].vctColor"
+        ];
 
         const uboVariableIndices: number[] = <number[]>crc3.getUniformIndices(
           program,
           uboVariableNames
         );
+
         const uboVariableOffsets: number[] = crc3.getActiveUniforms(
           program,
           uboVariableIndices,
           crc3.UNIFORM_OFFSET
         );
 
-        const uboVariableNameToOffset: typeof RenderInjectorShader.uboLightsVariableOffsets = {};
+        const uboVariableNameToOffset: typeof RenderWebGL.uboLightsVariableOffsets = {};
         uboVariableNames.forEach((_name, _index) => uboVariableNameToOffset[_name] = uboVariableOffsets[_index]);
 
         return uboVariableNameToOffset;

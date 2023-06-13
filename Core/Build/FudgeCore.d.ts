@@ -635,10 +635,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class RenderInjectorShader {
-        static uboLights: WebGLBuffer;
-        static uboLightsVariableOffsets: {
-            [_name: string]: number;
-        };
         static decorate(_constructor: Function): void;
         static useProgram(this: typeof Shader): void;
         static deleteProgram(this: typeof Shader): void;
@@ -1035,6 +1031,10 @@ declare namespace FudgeCore {
      * Methods and attributes of this class should not be called directly, only through {@link Render}
      */
     abstract class RenderWebGL extends EventTargetStatic {
+        static uboLights: WebGLBuffer;
+        static uboLightsVariableOffsets: {
+            [_name: string]: number;
+        };
         protected static crc3: WebGL2RenderingContext;
         protected static ƒpicked: Pick[];
         private static rectRender;
@@ -1102,9 +1102,9 @@ declare namespace FudgeCore {
         */
         protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _cmpCamera: ComponentCamera): void;
         /**
-         * Set light data in shaders
+         * Buffer the data from the lights in the scenegraph into the lights ubo
          */
-        protected static setLightsInShader(_shader: ShaderInterface, _lights: MapLightTypeToLightList): void;
+        protected static fillLightsUBO(_lights: MapLightTypeToLightList): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
@@ -5573,7 +5573,7 @@ declare namespace FudgeCore {
          * render passes.
          */
         static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _shadersUsed?: (ShaderInterface)[]): void;
-        static addLights(cmpLights: ComponentLight[]): void;
+        static addLights(_cmpLights: ComponentLight[]): void;
         /**
          * Used with a {@link Picker}-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted {@link Pick}-array

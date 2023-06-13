@@ -41,8 +41,8 @@ namespace FudgeCore {
         const bonesSize: number = crc3.getActiveUniformBlockParameter(_shader.program, bones, crc3.UNIFORM_BLOCK_DATA_SIZE);
         
         renderBuffers.mtxBones = crc3.createBuffer();
-        crc3.bindBufferBase(crc3.UNIFORM_BUFFER, UNIFORM_BLOCKS.SKIN.BINDING, renderBuffers.mtxBones);
-        crc3.bufferData(crc3.UNIFORM_BUFFER, bonesSize, crc3.DYNAMIC_DRAW);
+        crc3.bindBufferBase(WebGL2RenderingContext.UNIFORM_BUFFER, UNIFORM_BLOCKS.SKIN.BINDING, renderBuffers.mtxBones);
+        crc3.bufferData(WebGL2RenderingContext.UNIFORM_BUFFER, bonesSize, WebGL2RenderingContext.DYNAMIC_DRAW);
         crc3.uniformBlockBinding(_shader.program, bones, UNIFORM_BLOCKS.SKIN.BINDING);
       }
 

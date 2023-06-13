@@ -42,9 +42,6 @@ struct Light {
   mat4 mtxShapeInverse;
 };
 
-uniform Light u_ambient;
-
-  #if !defined(PHONG)
 const uint MAX_LIGHTS_DIRECTIONAL = 15u;
 const uint MAX_LIGHTS_POINT = 100u;
 const uint MAX_LIGHTS_SPOT = 100u;
@@ -53,11 +50,11 @@ layout(std140) uniform Lights {
   uint u_nLightsDirectional;
   uint u_nLightsPoint;
   uint u_nLightsSpot;
+  Light u_ambient;
   Light u_directional[MAX_LIGHTS_DIRECTIONAL];
   Light u_point[MAX_LIGHTS_POINT];
   Light u_spot[MAX_LIGHTS_SPOT];
 };
-  #endif
 
 vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _vctView, float _fSpecular) {
   vec4 vctResult = vec4(0, 0, 0, 1);

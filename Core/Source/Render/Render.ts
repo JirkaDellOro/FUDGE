@@ -52,8 +52,7 @@ namespace FudgeCore {
         let mtxWorldBranch: Matrix4x4 = Matrix4x4.MULTIPLICATION(_mtxWorld, _branch.cmpTransform.mtxLocal);
         _branch.mtxWorld.set(mtxWorldBranch);
         Recycler.store(mtxWorldBranch);
-      }
-      else
+      } else
         _branch.mtxWorld.set(_mtxWorld); // overwrite readonly mtxWorld of the current node
 
 
@@ -76,14 +75,14 @@ namespace FudgeCore {
 
       let cmpMesh: ComponentMesh = _branch.getComponent(ComponentMesh);
       let cmpMaterial: ComponentMaterial = _branch.getComponent(ComponentMaterial);
-      
+
       if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
         let mtxWorldMesh: Matrix4x4 = Matrix4x4.MULTIPLICATION(_branch.mtxWorld, cmpMesh.mtxPivot);
         cmpMesh.mtxWorld.set(mtxWorldMesh);
         Recycler.store(mtxWorldMesh); // TODO: examine, why recycling this causes meshes to be misplaced...
         let shader: ShaderInterface = cmpMaterial.material.getShader();
         let cmpParticleSystem: ComponentParticleSystem = _branch.getComponent(ComponentParticleSystem);
-        if (cmpParticleSystem && cmpParticleSystem.isActive && cmpParticleSystem.particleSystem != null) 
+        if (cmpParticleSystem && cmpParticleSystem.isActive && cmpParticleSystem.particleSystem != null)
           shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
         if (_shadersUsed.indexOf(shader) < 0)
           _shadersUsed.push(shader);
@@ -106,19 +105,13 @@ namespace FudgeCore {
       }
 
       if (firstLevel) {
-
-
         _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
-        for (let shader of _shadersUsed) {
-          Render.setLightsInShader(shader, Render.lights);
-
-        }
+        Render.fillLightsUBO(Render.lights);
       }
     }
 
-    public static addLights(cmpLights: ComponentLight[]): void {
-
-      for (let cmpLight of cmpLights) {
+    public static addLights(_cmpLights: ComponentLight[]): void {
+      for (let cmpLight of _cmpLights) {
         if (!cmpLight.isActive)
           continue;
 
