@@ -1004,7 +1004,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    let fudgeConfig: General;
     type RenderTexture = WebGLTexture;
     enum BLEND {
         OPAQUE = 0,

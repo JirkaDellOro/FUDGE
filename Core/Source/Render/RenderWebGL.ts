@@ -7,7 +7,7 @@
 ///<reference path="../Math/Rectangle.ts"/>
 
 namespace FudgeCore {
-  export declare let fudgeConfig: General;
+  // export declare let fudgeConfig: General;
 
   export type RenderTexture = WebGLTexture;
 
@@ -51,7 +51,7 @@ namespace FudgeCore {
      * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
      */
     public static initialize(_antialias?: boolean, _alpha?: boolean): WebGL2RenderingContext {
-      fudgeConfig = fudgeConfig || {};
+      let fudgeConfig: General = Reflect.get(globalThis,"fudgeConfig") || {};
       let contextAttributes: WebGLContextAttributes = {
         alpha: (_alpha != undefined) ? _alpha : fudgeConfig.alpha || false,
         antialias: (_antialias != undefined) ? _antialias : fudgeConfig.antialias || false,
