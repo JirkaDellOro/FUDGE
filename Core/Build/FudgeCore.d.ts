@@ -6630,7 +6630,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    abstract class ShaderMist extends ShaderLit {
+    abstract class ShaderMist extends Shader {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;

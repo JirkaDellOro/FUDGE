@@ -501,47 +501,41 @@ namespace FudgeCore {
       let cmpMaterial: ComponentMaterial = Render.cmpMistMaterial;
       let coat: Coat = cmpMaterial.material.coat;
       let shader: ShaderInterface = cmpMaterial.material.getShader();
+      shader.useProgram();
+      coat.useRenderData(shader, cmpMaterial);
+
+      let uniform: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
+      RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
+      uniform = shader.uniforms["u_mtxWorldToView"];
+      RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxWorldToView.get());
+      uniform = shader.uniforms["u_nearPlane"];
+      RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpPostFX.nearPlane);
+      uniform = shader.uniforms["u_farPlane"];
+      RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpPostFX.farPlane);
 
       for (let node of _list) {
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
-        shader.useProgram();
-        coat.useRenderData(shader, cmpMaterial);
-
         let mtxMeshToView: Matrix4x4 = RenderWebGL.calcMeshToView(node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
         let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
-
-        let uniform: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
-        if (uniform) RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
-
-        uniform = shader.uniforms["u_mtxWorldToView"];
-        if (uniform) RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxWorldToView.get());
-        
-        /*Maybe useful for the AO Calculation
-        uniform = shader.uniforms["u_mtxWorldToCamera"];
-        if (uniform) RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
-        */
-
-        uniform = shader.uniforms["u_nearPlane"];
-        RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpPostFX.nearPlane);
-        
-        uniform = shader.uniforms["u_farPlane"];
-        RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpPostFX.farPlane);
-        
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       }
+      /*Maybe useful for the AO Calculation
+      uniform = shader.uniforms["u_mtxWorldToCamera"];
+      if (uniform) RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
+      */
     }
-    
+
     public static drawMist(_cmpCamera: ComponentCamera, _clrMist: Color = new Color()): void {
       let shader: ShaderInterface = Render.screenQuadCmpMat.material.getShader();
       shader.useProgram();
       Render.useScreenQuadRenderData(Render.screenQuadCmpMat.material.getShader(), _clrMist);
       RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
     }
-    
+
     public static drawAO(): void {
-      
+
     }
-    
+
     public static drawBloom(): void {
 
     }

@@ -1,5 +1,5 @@
 namespace FudgeCore {
-    export abstract class ShaderMist extends ShaderLit {
+    export abstract class ShaderMist extends Shader {
         public static readonly iSubclass: number = Shader.registerSubclass(ShaderMist);
 
         public static define: string[] = [
