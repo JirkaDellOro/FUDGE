@@ -941,7 +941,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[0.20000000298023224, 0.29999974370002747, 0]",
+                      "translation": "[0.20000000298023224, 0.399999737739563, 0]",
                       "rotation": "[0, 139, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -966,8 +966,8 @@
                     "direction": "diagonal",
                     "aspect": 1.7476635514018692,
                     "pivot": {
-                      "translation": "[0, 0, -4.329983711242676]",
-                      "rotation": "[-7.399999141693115, 0, 0]",
+                      "translation": "[0, 0, -3.3299827575683594]",
+                      "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -980,9 +980,9 @@
                 {
                   "ƒ.ComponentPostFX": {
                     "mist": true,
-                    "clrMist": "[0.5176470588235295, 0.40784313725490196, 0.30196078431372547, 1]",
+                    "clrMist": "[0, 0.2235294117647059, 0.2784313725490196, 1]",
                     "nearPlane": 0,
-                    "farPlane": 50,
+                    "farPlane": 10,
                     "ao": false,
                     "clrAO": "[0, 0, 0, 1]",
                     "bloom": false
