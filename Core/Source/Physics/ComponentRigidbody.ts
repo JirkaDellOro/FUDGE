@@ -85,7 +85,7 @@ namespace FudgeCore {
     // #physics: Physics; //TODO: keep a pointer to the physics instance used by this component
 
     /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
-    constructor(_mass: number = 1, _type: BODY_TYPE = BODY_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: COLLISION_GROUP = Physics.settings.defaultCollisionGroup, _mtxTransform: Matrix4x4 = null, _convexMesh: Float32Array = null) {
+    public constructor(_mass: number = 1, _type: BODY_TYPE = BODY_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: COLLISION_GROUP = Physics.settings.defaultCollisionGroup, _mtxTransform: Matrix4x4 = null, _convexMesh: Float32Array = null) {
       super();
       this.create(_mass, _type, _colliderType, _group, _mtxTransform, _convexMesh);
 
@@ -247,7 +247,7 @@ namespace FudgeCore {
           // this.node.addEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld, true); // use capture to react to broadcast!
           this.node.addEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld, true);
           if (!this.node.cmpTransform)
-            Debug.warn(`ComponentRigidbody attached to node missing ComponentTransform`, this.node);
+            Debug.warn("ComponentRigidbody attached to node missing ComponentTransform", this.node);
           break;
         case EVENT.COMPONENT_REMOVE:
           // this.removeEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
@@ -258,10 +258,10 @@ namespace FudgeCore {
           break;
         case EVENT.NODE_DESERIALIZED:
           if (!this.node.cmpTransform)
-            Debug.error(`ComponentRigidbody attached to node missing ComponentTransform`, this.node);
+            Debug.error("ComponentRigidbody attached to node missing ComponentTransform", this.node);
           break;
       }
-    }
+    };
 
     //#region Transformation
     /**
@@ -306,10 +306,9 @@ namespace FudgeCore {
      */
     public getRotation(): Vector3 {
       let orientation: OIMO.Quat = this.#rigidbody.getOrientation();
-      let tmpQuat: PhysicsQuaternion = new PhysicsQuaternion(orientation.x, orientation.y, orientation.z, orientation.w);
-      return tmpQuat.toDegrees();
+      let tmpQuat: Quaternion = new Quaternion(orientation.x, orientation.y, orientation.z, orientation.w);
+      return tmpQuat.eulerAngles;
     }
-
 
     /**
      * Sets the current ROTATION of the {@link Node} in the physical space, in degree.
@@ -533,10 +532,10 @@ namespace FudgeCore {
         if (objHit.getOimoRigidbody() != this.getOimoRigidbody() && this.collisions.indexOf(objHit) == -1) { //Fire, if the hit object is not the Body itself but another and it's not already fired.
           let colPos: OIMO.Vec3 = this.collisionCenterPoint(points, collisionManifold.getNumPoints()); //THE point of collision is the first touching point (EXTENSION: could be the center of all touching points combined)
           colPoint = new Vector3(colPos.x, colPos.y, colPos.z);
-          points.forEach((value: OIMO.ManifoldPoint): void => { //The impact of the collision involving all touching points
-            normalImpulse += value.getNormalImpulse();
-            binormalImpulse += value.getBinormalImpulse();
-            tangentImpulse += value.getTangentImpulse();
+          points.forEach((_value: OIMO.ManifoldPoint): void => { //The impact of the collision involving all touching points
+            normalImpulse += _value.getNormalImpulse();
+            binormalImpulse += _value.getBinormalImpulse();
+            tangentImpulse += _value.getTangentImpulse();
           });
           this.collisions.push(objHit); //Tell the object that the event for this object does not need to be fired again
           event = new EventPhysics(EVENT_PHYSICS.COLLISION_ENTER, objHit, normalImpulse, tangentImpulse, binormalImpulse, colPoint, new Vector3(normal.x, normal.y, normal.z)); //Building the actual event, with what object did collide and informations about it
@@ -545,10 +544,10 @@ namespace FudgeCore {
         if (objHit2 != this && this.collisions.indexOf(objHit2) == -1) { //Same as the above but for the case the SECOND hit object is not the body itself
           let colPos: OIMO.Vec3 = this.collisionCenterPoint(points, collisionManifold.getNumPoints());
           colPoint = new Vector3(colPos.x, colPos.y, colPos.z);
-          points.forEach((value: OIMO.ManifoldPoint): void => {
-            normalImpulse += value.getNormalImpulse();
-            binormalImpulse += value.getBinormalImpulse();
-            tangentImpulse += value.getTangentImpulse();
+          points.forEach((_value: OIMO.ManifoldPoint): void => {
+            normalImpulse += _value.getNormalImpulse();
+            binormalImpulse += _value.getBinormalImpulse();
+            tangentImpulse += _value.getTangentImpulse();
           });
 
           this.collisions.push(objHit2);
@@ -558,21 +557,21 @@ namespace FudgeCore {
         list = list.getNext(); //Start the same routine with the next collision in the list
       }
       //REMOVE OLD Collisions - That do not happen anymore
-      this.collisions.forEach((value: ComponentRigidbody) => { //Every Collider in the list is checked if the collision is still happening
+      this.collisions.forEach((_value: ComponentRigidbody) => { //Every Collider in the list is checked if the collision is still happening
         let isColliding: boolean = false;
         list = this.#rigidbody.getContactLinkList();
         for (let i: number = 0; i < this.#rigidbody.getNumContactLinks(); i++) {
           objHit = list.getContact().getShape1().userData;
           objHit2 = list.getContact().getShape2().userData;
-          if (value == objHit || value == objHit2) { //If the given object in the collisions list is still one of the objHit the collision is not CollisionEXIT
+          if (_value == objHit || _value == objHit2) { //If the given object in the collisions list is still one of the objHit the collision is not CollisionEXIT
             isColliding = true;
           }
           list = list.getNext();
         }
         if (isColliding == false) { //The collision is exiting but was in the collision list, then EXIT Event needs to be fired
-          let index: number = this.collisions.indexOf(value); //Find object in the array
+          let index: number = this.collisions.indexOf(_value); //Find object in the array
           this.collisions.splice(index); //remove it from the array
-          event = new EventPhysics(EVENT_PHYSICS.COLLISION_EXIT, value, 0, 0, 0);
+          event = new EventPhysics(EVENT_PHYSICS.COLLISION_EXIT, _value, 0, 0, 0);
           this.dispatchEvent(event);
         }
       });
@@ -846,13 +845,13 @@ namespace FudgeCore {
     private addRigidbodyToWorld = (): void => {
       if (!this.#rigidbody._world)
         Physics.addRigidbody(this);
-    }
+    };
 
     /** Removing this ComponentRigidbody from the Physiscs.world taking the informations from the oimoPhysics system */
     private removeRigidbodyFromWorld = (): void => {
       Physics.removeRigidbody(this);
       this.isInitialized = false;
-    }
+    };
 
 
     //#region private EVENT functions
@@ -863,12 +862,12 @@ namespace FudgeCore {
       let totalX: number = 0;
       let totalY: number = 0;
       let totalZ: number = 0;
-      _colPoints.forEach((value: OIMO.ManifoldPoint): void => {
+      _colPoints.forEach((_value: OIMO.ManifoldPoint): void => {
         if (totalPoints < _numPoints) {
           totalPoints++;
-          totalX += value.getPosition2().x;
-          totalY += value.getPosition2().y;
-          totalZ += value.getPosition2().z;
+          totalX += _value.getPosition2().x;
+          totalY += _value.getPosition2().y;
+          totalZ += _value.getPosition2().z;
         }
       });
       center = new OIMO.Vec3(totalX / _numPoints, totalY / _numPoints, totalZ / _numPoints);
@@ -882,20 +881,20 @@ namespace FudgeCore {
     * Since the event does not know which body is the trigger iniator, the event can be listened to
     * on either the trigger or the triggered. (This is only possible with the FUDGE OIMO Fork!)
     */
-    private triggerEnter(contact: OIMO.Contact): void {
+    private triggerEnter(_contact: OIMO.Contact): void {
       let objHit: ComponentRigidbody; //collision consisting of 2 bodies, so Hit1/2
       let objHit2: ComponentRigidbody;
       let event: EventPhysics;  //The event that will be send and the informations added to it
       let colPoint: Vector3;
 
       //ADD NEW Triggering - That just happened
-      let collisionManifold: OIMO.Manifold = contact.getManifold(); //Manifold = Additional informations about the contact
-      objHit = contact.getShape1().userData;  //Userdata is used to transfer the ƒ.ComponentRigidbody, it's an empty OimoPhysics Variable
+      let collisionManifold: OIMO.Manifold = _contact.getManifold(); //Manifold = Additional informations about the contact
+      objHit = _contact.getShape1().userData;  //Userdata is used to transfer the ƒ.ComponentRigidbody, it's an empty OimoPhysics Variable
       //Only register the collision on the actual touch, not on "shadowCollide", to register in the moment of impulse calculation
-      if (objHit == null || contact.isTouching() == false) // only act if the collision is actual touching, so right at the moment when a impulse is happening, not when shapes overlap
+      if (objHit == null || _contact.isTouching() == false) // only act if the collision is actual touching, so right at the moment when a impulse is happening, not when shapes overlap
         return;
-      objHit2 = contact.getShape2().userData;
-      if (objHit2 == null || contact.isTouching() == false)
+      objHit2 = _contact.getShape2().userData;
+      if (objHit2 == null || _contact.isTouching() == false)
         return;
       let points: OIMO.ManifoldPoint[] = collisionManifold.getPoints(); //All points in the collision where the two bodies are touching, used to calculate the full impact
       let normal: OIMO.Vec3 = collisionManifold.getNormal();
@@ -923,13 +922,13 @@ namespace FudgeCore {
     * Since the event does not know which body is the trigger iniator, the event can be listened to
     * on either the trigger or the triggered. (This is only possible with the FUDGE OIMO Fork!)
     */
-    private triggerExit(contact: OIMO.Contact): void {
+    private triggerExit(_contact: OIMO.Contact): void {
       //REMOVE OLD Triggering Body
       let objHit: ComponentRigidbody; //collision consisting of 2 bodies, so Hit1/2
       let objHit2: ComponentRigidbody;
       let event: EventPhysics;  //The event that will be send and the informations added to it
-      objHit = contact.getShape1().userData;
-      objHit2 = contact.getShape2().userData;
+      objHit = _contact.getShape1().userData;
+      objHit2 = _contact.getShape2().userData;
 
       // Remove both bodies in both cases, of self and other
       let index: number = objHit.triggerings.indexOf(objHit2); //Find object in the array

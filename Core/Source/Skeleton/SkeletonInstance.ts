@@ -76,17 +76,8 @@ namespace FudgeCore {
     public applyAnimation(_mutator: Mutator): void {
       super.applyAnimation(_mutator);
       if (_mutator.mtxBoneLocals)
-        for (const boneName in _mutator.mtxBoneLocals) {
-          const mtxMutator: Mutator = _mutator.mtxBoneLocals[boneName]; // a mutator for a Matrix
-          /** TODO: creating Quaternion objects here doesn't seem to be very efficient, 
-           * maybe {@link Matrix4x4} should be able to handle quaternion rotations directly
-           * see https://docs.unity3d.com/ScriptReference/Matrix4x4.Rotate.html
-          */
-          if (mtxMutator.rotation?.w != undefined) {
-            mtxMutator.rotation = new PhysicsQuaternion(mtxMutator.rotation.x, mtxMutator.rotation.y, mtxMutator.rotation.z, mtxMutator.rotation.w).toDegrees();
-          }
-          this.mtxBoneLocals[boneName]?.mutate(mtxMutator);
-        }
+        for (const boneName in _mutator.mtxBoneLocals) // shortcut to mutate the local matrix of a bone, bypassing the hierarchy
+          this.mtxBoneLocals[boneName]?.mutate(_mutator.mtxBoneLocals[boneName]);
       if (_mutator.bones)
         for (const boneName in _mutator.bones)
           this.bones[boneName]?.applyAnimation(_mutator.bones[boneName]);
