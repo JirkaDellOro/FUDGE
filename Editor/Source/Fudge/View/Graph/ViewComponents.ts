@@ -268,12 +268,14 @@ namespace Fudge {
           this.expanded[(<ƒUi.Details>_event.target).getAttribute("type")] = (_event.type == ƒUi.EVENT.EXPAND);
           break;
         case ƒUi.EVENT.MUTATE:
-          if (_event.target instanceof ƒUi.DetailsArray)
-            this.fillContent();
           let cmpRigidbody: ƒ.ComponentRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
           if (cmpRigidbody)
             cmpRigidbody.initialize();
           this.dispatch(EVENT_EDITOR.UPDATE, { bubbles: true, detail: { node: this.node } });
+          break;
+        case ƒUi.EVENT.REARRANGE_ARRAY:
+          this.fillContent();
+          break;
         default:
           break;
       }

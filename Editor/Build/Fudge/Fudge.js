@@ -4008,12 +4008,14 @@ var Fudge;
                     this.expanded[_event.target.getAttribute("type")] = (_event.type == "expand" /* EXPAND */);
                     break;
                 case "mutate" /* MUTATE */:
-                    if (_event.target instanceof ƒUi.DetailsArray)
-                        this.fillContent();
                     let cmpRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
                     if (cmpRigidbody)
                         cmpRigidbody.initialize();
                     this.dispatch(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true, detail: { node: this.node } });
+                    break;
+                case "rearrangeArray" /* REARRANGE_ARRAY */:
+                    this.fillContent();
+                    break;
                 default:
                     break;
             }
