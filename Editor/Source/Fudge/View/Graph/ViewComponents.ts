@@ -2,7 +2,7 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;
 
-  enum Menu {
+  enum MENU {
     COMPONENTMENU = "Add Components"
   }
 
@@ -25,7 +25,7 @@ namespace Fudge {
     private selected: string = "ComponentTransform";
     private drag: ƒ.ComponentCamera;
 
-    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
       this.fillContent();
 
@@ -268,6 +268,8 @@ namespace Fudge {
           this.expanded[(<ƒUi.Details>_event.target).getAttribute("type")] = (_event.type == ƒUi.EVENT.EXPAND);
           break;
         case ƒUi.EVENT.MUTATE:
+          if (_event.target instanceof ƒUi.DetailsArray)
+            this.fillContent();
           let cmpRigidbody: ƒ.ComponentRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
           if (cmpRigidbody)
             cmpRigidbody.initialize();
@@ -275,7 +277,7 @@ namespace Fudge {
         default:
           break;
       }
-    }
+    };
 
     private hndTransform = (_event: EditorEvent): void => {
       if (!this.getSelected())
@@ -306,7 +308,7 @@ namespace Fudge {
         this.transform2(dtl.transform, value.toVector2(), mtxTransform, 1);
 
       component.mutate(component.getMutator());
-    }
+    };
 
     private transform3(_transform: TRANSFORM, _value: ƒ.Vector3, _mtxTransform: ƒ.Matrix4x4, _distance: number): void {
       switch (_transform) {

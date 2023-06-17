@@ -1255,7 +1255,7 @@ var FudgeUserInterface;
                 console.log(child.tabIndex);
                 count++;
             }
-            this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
+            this.dispatchEvent(new Event("mutate" /* MUTATE */, { bubbles: true }));
         }
         setFocus(_focus = undefined) {
             if (_focus == undefined)
@@ -1282,9 +1282,11 @@ var FudgeUserInterface;
             let keyDrop = drop.getAttribute("key");
             let keyDrag = _event.dataTransfer.getData("index");
             let drag = this.querySelector(`[key="${keyDrag}"]`);
+            let labelDrag = drag.getAttribute("label");
             let position = keyDrag > keyDrop ? "beforebegin" : "afterend";
             if (_event.ctrlKey)
                 drag = drag.cloneNode(true);
+            drag.setAttribute("label", labelDrag);
             if (_event.shiftKey)
                 drag.parentNode.removeChild(drag);
             else
@@ -1321,6 +1323,7 @@ var FudgeUserInterface;
                     }
                     if (_event.shiftKey) {
                         insert = item.cloneNode(true);
+                        insert.setAttribute("label", item.getAttribute("label"));
                         this.addEventListeners(insert);
                     }
                     else
@@ -1336,6 +1339,7 @@ var FudgeUserInterface;
                     }
                     if (_event.shiftKey) {
                         insert = item.cloneNode(true);
+                        insert.setAttribute("label", item.getAttribute("label"));
                         this.addEventListeners(insert);
                     }
                     else

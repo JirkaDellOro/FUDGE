@@ -3764,10 +3764,10 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
-    let Menu;
-    (function (Menu) {
-        Menu["COMPONENTMENU"] = "Add Components";
-    })(Menu || (Menu = {}));
+    let MENU;
+    (function (MENU) {
+        MENU["COMPONENTMENU"] = "Add Components";
+    })(MENU || (MENU = {}));
     // TODO: examin problem with ƒ.Material when using "typeof ƒ.Mutable" as key to the map
     let resourceToComponent = new Map([
         [ƒ.Audio, ƒ.ComponentAudio],
@@ -4008,6 +4008,8 @@ var Fudge;
                     this.expanded[_event.target.getAttribute("type")] = (_event.type == "expand" /* EXPAND */);
                     break;
                 case "mutate" /* MUTATE */:
+                    if (_event.target instanceof ƒUi.DetailsArray)
+                        this.fillContent();
                     let cmpRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
                     if (cmpRigidbody)
                         cmpRigidbody.initialize();
