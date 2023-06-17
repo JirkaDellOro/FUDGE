@@ -4,16 +4,16 @@ namespace FudgeCore {
     * Constructed out of the 4 components: (x, y, z, w). Mathematical notation: w + xi + yj + zk.
     * A Quaternion can be described with an axis and angle: (x, y, z) = sin(angle/2)*axis; w = cos(angle/2).
     * roll: x, pitch: y, yaw: z. Note that operations are adapted to work with vectors where y is up and z is forward.
-    * @authors Matthias Roming, HFU, 2023
+    * @authors Matthias Roming, HFU, 2023 | Marko Fehrenbach, HFU, 2020 | Jonas Plotzky, HFU, 2023
     */
   export class Quaternion extends Mutable implements Serializable, Recycable {
     private data: Float32Array = new Float32Array(4); // The data of the quaternion (x, y, z, w).
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
     #eulerAngles: Vector3 = null; // euler angle representation of this quaternion in degrees.
 
-    public constructor() {
+    public constructor(_x: number = 0, _y: number = 0, _z: number = 0, _w: number = 1) {
       super();
-      this.recycle();
+      this.data.set([_x, _y, _z, _w]);
     }
 
     //#region STATICS
@@ -30,7 +30,7 @@ namespace FudgeCore {
      */
     public static FROM_EULER_ANGLES(_eulerAngles: Vector3, _order: string = "ZYX"): Quaternion {
       const result: Quaternion = Recycler.get(Quaternion);
-      result.setFromEulerAngles(_eulerAngles, _order);
+      result.eulerAngles = _eulerAngles;
       return result;
     }
 
@@ -84,191 +84,48 @@ namespace FudgeCore {
      * Experimental: Converts the quaternion to a Matrix4x4
      */
     public static QUATERNION_TO_MATRIX(_q: Quaternion): Matrix4x4 {
-      const x = _q.data[0], y = _q.data[1], z = _q.data[2], w = _q.data[3];
+      const x: number = _q.data[0], y: number = _q.data[1], z: number = _q.data[2], w: number = _q.data[3];
       // From: https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm
-      const xx = x * x, xy = x * y, xz = x * z, xw = x * w;
-      const yy = y * y, yz = y * z, yw = y * w;
-      const zz = z * z, zw = z * w;
+      const xx: number = x * x, xy: number = x * y, xz: number = x * z, xw: number = x * w;
+      const yy: number = y * y, yz: number = y * z, yw: number = y * w;
+      const zz: number = z * z, zw: number = z * w;
 
       const result: Matrix4x4 = Recycler.get(Matrix4x4);
       result.set([
-        1 - 2 * ( yy + zz ), 2 * ( xy - zw ), 2 * ( xz + yw ), 0,
-        2 * ( xy + zw ), 1 - 2 * ( xx + zz ), 2 * ( yz - xw ), 0,
-        2 * ( xz - yw ), 2 * ( yz + xw ), 1 - 2 * ( xx + yy ), 0,
+        1 - 2 * (yy + zz), 2 * (xy - zw), 2 * (xz + yw), 0,
+        2 * (xy + zw), 1 - 2 * (xx + zz), 2 * (yz - xw), 0,
+        2 * (xz - yw), 2 * (yz + xw), 1 - 2 * (xx + yy), 0,
         0, 0, 0, 1
       ]);
       return result;
     }
     //#endregion
 
-    get x(): number {
+    public get x(): number {
       return this.data[0];
     }
-    get y(): number {
+    public get y(): number {
       return this.data[1];
     }
-    get z(): number {
+    public get z(): number {
       return this.data[2];
     }
-    get w(): number {
+    public get w(): number {
       return this.data[3];
     }
 
-    set x(_x: number) {
+    // TODO: reset cache when setting x,y,z,w ?
+    public set x(_x: number) {
       this.data[0] = _x;
     }
-    set y(_y: number) {
+    public set y(_y: number) {
       this.data[1] = _y;
     }
-    set z(_z: number) {
+    public set z(_z: number) {
       this.data[2] = _z;
     }
-    set w(_w: number) {
+    public set w(_w: number) {
       this.data[3] = _w;
-    }
-
-    /**
-     * Calculates and returns the euler-angles in degrees.  
-     */
-    public getEulerAngles(_order = "ZYX"): Vector3 {
-      if (!this.#eulerAngles) {
-        const mtx: Matrix4x4 = Quaternion.QUATERNION_TO_MATRIX(this);
-        const mtxData = mtx.get();
-        const m11 = mtxData[0], m12 = mtxData[1], m13 = mtxData[2];
-        const m21 = mtxData[4], m22 = mtxData[5], m23 = mtxData[6];
-        const m31 = mtxData[8], m32 = mtxData[9], m33 = mtxData[10];
-        this.#eulerAngles = Recycler.get(Vector3);
-
-        switch (_order) {
-          case "XYZ":
-            this.#eulerAngles.y = Math.asin(Calc.clamp(m13, -1, 1));
-            if (Math.abs(m13) < 0.9999999) {
-              this.#eulerAngles.x = Math.atan2(-m23, m33);
-              this.#eulerAngles.z = Math.atan2(-m12, m11);
-            } else {
-              this.#eulerAngles.x = Math.atan2(m32, m22);
-              this.#eulerAngles.z = 0;
-            }
-            break;
-          case "YXZ":
-            this.#eulerAngles.x = Math.asin(-Calc.clamp(m23, -1, 1));
-            if (Math.abs(m23) < 0.9999999) {
-              this.#eulerAngles.y = Math.atan2(m13, m33);
-              this.#eulerAngles.z = Math.atan2(m21, m22);
-            } else {
-              this.#eulerAngles.y = Math.atan2(-m31, m11);
-              this.#eulerAngles.z = 0;
-            }
-            break;
-          case "ZXY":
-            this.#eulerAngles.x = Math.asin(Calc.clamp(m32, -1, 1));
-            if (Math.abs(m32) < 0.9999999) {
-              this.#eulerAngles.y = Math.atan2(-m31, m33);
-              this.#eulerAngles.z = Math.atan2(-m12, m22);
-            } else {
-              this.#eulerAngles.y = 0;
-              this.#eulerAngles.z = Math.atan2(m21, m11);
-            }
-            break;
-          case "ZYX":
-            this.#eulerAngles.y = Math.asin(-Calc.clamp(m31, -1, 1));
-            if (Math.abs(m31) < 0.9999999) {
-              this.#eulerAngles.x = Math.atan2(m32, m33);
-              this.#eulerAngles.z = Math.atan2(m21, m11);
-            } else {
-              this.#eulerAngles.x = 0;
-              this.#eulerAngles.z = Math.atan2(-m12, m22);
-            }
-            break;
-          case "YZX":
-            this.#eulerAngles.z = Math.asin(Calc.clamp(m21, -1, 1));
-            if (Math.abs(m21) < 0.9999999) {
-              this.#eulerAngles.x = Math.atan2(-m23, m22);
-              this.#eulerAngles.y = Math.atan2(-m31, m11);
-
-            } else {
-              this.#eulerAngles.x = 0;
-              this.#eulerAngles.y = Math.atan2(m13, m33);
-            }
-            break;
-          case "XZY":
-            this.#eulerAngles.z = Math.asin(-Calc.clamp(m12, -1, 1));
-            if (Math.abs(m12) < 0.9999999) {
-              this.#eulerAngles.x = Math.atan2(m32, m22);
-              this.#eulerAngles.y = Math.atan2(m13, m11);
-            } else {
-              this.#eulerAngles.x = Math.atan2(-m23, m33);
-              this.#eulerAngles.y = 0;
-            }
-            break;
-          default:
-            console.warn("encountered an unknown order: " + _order);
-        }
-        this.#eulerAngles.scale(Calc.rad2deg);
-      }
-      return this.#eulerAngles;
-    }
-
-    public setFromEulerAngles(_eulerAngles: Vector3, _order: string = "ZYX") {
-      const cosX = Math.cos(_eulerAngles.x * Calc.deg2rad / 2);
-      const cosY = Math.cos(_eulerAngles.y * Calc.deg2rad / 2);
-      const cosZ = Math.cos(_eulerAngles.z * Calc.deg2rad / 2);
-      const sinX = Math.sin(_eulerAngles.x * Calc.deg2rad / 2);
-      const sinY = Math.sin(_eulerAngles.y * Calc.deg2rad / 2);
-      const sinZ = Math.sin(_eulerAngles.z * Calc.deg2rad / 2);
-
-      switch (_order) {
-        case "XYZ":
-          this.set([
-            sinX * cosY * cosZ + cosX * sinY * sinZ,
-            cosX * sinY * cosZ -sinX * cosY * sinZ,
-            cosX * cosY * sinZ + sinX * sinY * cosZ,
-            cosX * cosY * cosZ -sinX * sinY * sinZ
-          ]);
-          break;
-        case "YXZ":
-          this.set([
-            sinX * cosY * cosZ + cosX * sinY * sinZ,
-            cosX * sinY * cosZ -sinX * cosY * sinZ,
-            cosX * cosY * sinZ -sinX * sinY * cosZ,
-            cosX * cosY * cosZ + sinX * sinY * sinZ
-          ]);
-          break;
-        case "ZXY":
-          this.set([
-            sinX * cosY * cosZ -cosX * sinY * sinZ,
-            cosX * sinY * cosZ + sinX * cosY * sinZ,
-            cosX * cosY * sinZ + sinX * sinY * cosZ,
-            cosX * cosY * cosZ -sinX * sinY * sinZ
-          ]);
-          break;
-        case "ZYX":
-          this.set([
-            sinX * cosY * cosZ - cosX * sinY * sinZ,
-            cosX * sinY * cosZ + sinX * cosY * sinZ,
-            cosX * cosY * sinZ - sinX * sinY * cosZ,
-            cosX * cosY * cosZ + sinX * sinY * sinZ
-          ]);
-          break;
-        case "YZX":
-          this.set([
-            sinX * cosY * cosZ + cosX * sinY * sinZ,
-            cosX * sinY * cosZ + sinX * cosY * sinZ,
-            cosX * cosY * sinZ -sinX * sinY * cosZ,
-            cosX * cosY * cosZ -sinX * sinY * sinZ
-          ]);
-          break;
-        case "XZY":
-          this.set([
-            sinX * cosY * cosZ -cosX * sinY * sinZ,
-            cosX * sinY * cosZ -sinX * cosY * sinZ,
-            cosX * cosY * sinZ + sinX * sinY * cosZ,
-            cosX * cosY * cosZ + sinX * sinY * sinZ
-          ]);
-          break;
-        default:
-          console.warn("encountered an unknown order: " + _order);
-      }
     }
 
     /**
@@ -278,6 +135,54 @@ namespace FudgeCore {
       let result: Quaternion = Recycler.get(Quaternion);
       result.set(this);
       return result;
+    }
+
+    /**
+     * - get: return the euler angle representation of the rotation in degrees.  
+     * - set: set the euler angle representation of the rotation in degrees.
+     */
+    public get eulerAngles(): Vector3 {
+      if (!this.#eulerAngles) {
+        this.#eulerAngles = Recycler.get(Vector3);
+
+        // roll (x-axis rotation)
+        let sinrcosp: number = 2 * (this.w * this.x + this.y * this.z);
+        let cosrcosp: number = 1 - 2 * (this.x * this.x + this.y * this.y);
+        this.#eulerAngles.x = Math.atan2(sinrcosp, cosrcosp);
+
+        // pitch (y-axis rotation)
+        let sinp: number = 2 * (this.w * this.y - this.z * this.x);
+        if (Math.abs(sinp) >= 1)
+          this.#eulerAngles.y = sinp < 0 ? -Math.abs(Math.PI / 2) : Math.abs(Math.PI / 2); // use 90 degrees if out of range
+        else
+          this.#eulerAngles.y = Math.asin(sinp);
+
+        // yaw (z-axis rotation)
+        let sinycosp: number = 2 * (this.w * this.z + this.x * this.y);
+        let cosycosp: number = 1 - 2 * (this.y * this.y + this.z * this.z);
+        this.#eulerAngles.z = Math.atan2(sinycosp, cosycosp);
+
+        this.#eulerAngles.scale(Calc.rad2deg);
+      }
+
+      return this.#eulerAngles;
+    }
+    
+    public set eulerAngles(_eulerAngles: Vector3) {
+      _eulerAngles.scale(Calc.deg2rad);
+      const cosX: number = Math.cos(_eulerAngles.x / 2);
+      const cosY: number = Math.cos(_eulerAngles.y / 2);
+      const cosZ: number = Math.cos(_eulerAngles.z / 2);
+      const sinX: number = Math.sin(_eulerAngles.x / 2);
+      const sinY: number = Math.sin(_eulerAngles.y / 2);
+      const sinZ: number = Math.sin(_eulerAngles.z / 2);
+
+      this.set([
+        sinX * cosY * cosZ - cosX * sinY * sinZ,
+        cosX * sinY * cosZ + sinX * cosY * sinZ,
+        cosX * cosY * sinZ - sinX * sinY * cosZ,
+        cosX * cosY * cosZ + sinX * sinY * sinZ
+      ]);
     }
 
     /**
@@ -295,7 +200,6 @@ namespace FudgeCore {
       this.recycle();
     }
 
-
     /**
      * Inverse this quaternion
      */
@@ -307,7 +211,7 @@ namespace FudgeCore {
     /**
      * Conjugate this quaternion
      */
-    conjugate(): void {
+    public conjugate(): void {
       this.data[0] *= -1;
       this.data[1] *= -1;
       this.data[2] *= -1;
@@ -329,12 +233,12 @@ namespace FudgeCore {
       const by: number = b.data[1];
       const bz: number = b.data[2];
       const bw: number = b.data[3];
-    
+
       this.set([
         ax * bw + ay * bz - az * by + aw * bx,
         -ax * bz + ay * bw + az * bx + aw * by,
         ax * by - ay * bx + az * bw + aw * bz,
-        -ax * bx - ay * by - az * bz + aw * bw,
+        -ax * bx - ay * by - az * bz + aw * bw
       ]);
     }
 
@@ -360,7 +264,7 @@ namespace FudgeCore {
       // TODO: optimization, it shouldn"t always return a copy, since this bloats memory
       return new Float32Array(this.data);
     }
-    
+
     public serialize(): Serialization {
       return this.getMutator();
     }
@@ -386,7 +290,7 @@ namespace FudgeCore {
       this.resetCache();
     }
 
-    protected reduceMutator(_mutator: Mutator): void {/** */}
+    protected reduceMutator(_mutator: Mutator): void {/** */ }
 
     private resetCache(): void {
       this.#eulerAngles = null;

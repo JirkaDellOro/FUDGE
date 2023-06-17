@@ -22,12 +22,12 @@ namespace FudgeCore {
    */
 
   export class Matrix4x4 extends Mutable implements Serializable, Recycable {
-    #eulerAngles: Vector3 = Vector3.ZERO();
-    #vectors: VectorRepresentation = { translation: Vector3.ZERO(), rotation: Vector3.ZERO(), scaling: Vector3.ZERO() };
-
     private data: Float32Array = new Float32Array(16); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
     private vectors: VectorRepresentation; // vector representation of this matrix
+
+    #eulerAngles: Vector3 = Vector3.ZERO();
+    #vectors: VectorRepresentation = { translation: Vector3.ZERO(), rotation: Vector3.ZERO(), scaling: Vector3.ZERO() };
 
     public constructor() {
       super();
@@ -405,8 +405,7 @@ namespace FudgeCore {
         _aspect = Math.sqrt(_aspect);
         mtxResult.data[0] = f / _aspect;
         mtxResult.data[5] = f * _aspect;
-      }
-      else if (_direction == FIELD_OF_VIEW.VERTICAL)
+      } else if (_direction == FIELD_OF_VIEW.VERTICAL)
         mtxResult.data[0] = f / _aspect;
       else //FOV_DIRECTION.HORIZONTAL
         mtxResult.data[5] = f * _aspect;
@@ -878,8 +877,7 @@ namespace FudgeCore {
           y1 = y2;
           z1 = z2;
         }
-      }
-      else {
+      } else {
         x1 = Math.atan2(-this.data[9] / scaling.z, this.data[5] / scaling.y);
         y1 = Math.atan2(-this.data[2] / scaling.x, sy);
         z1 = 0;
@@ -1014,9 +1012,11 @@ namespace FudgeCore {
       let oldTranslation: Vector3 = this.translation;
       let oldRotation: Vector3 = this.rotation;
       let oldScaling: Vector3 = this.scaling;
-      let newTranslation: Vector3 = <Vector3>_mutator["translation"];
-      let newRotation: Vector3 = <Vector3>_mutator["rotation"];
-      let newScaling: Vector3 = <Vector3>_mutator["scaling"];
+      // The new values are not necessarily Vector3 objects but could be simple mutator objects.
+      // They are only guaranteed to be instance of Vector3 when set by Matrix4x4 setters, but not when for example set by the animation system.
+      let newTranslation: Vector3 | Mutator = <Vector3 | Mutator>_mutator["translation"];
+      let newRotation: Vector3 | Mutator = <Vector3 | Mutator>_mutator["rotation"];
+      let newScaling: Vector3 | Mutator = <Vector3 | Mutator>_mutator["scaling"];
       let vectors: VectorRepresentation = { translation: oldTranslation, rotation: oldRotation, scaling: oldScaling };
       if (newTranslation) {
         vectors.translation = vectors.translation || this.#vectors.translation;
@@ -1027,6 +1027,14 @@ namespace FudgeCore {
         );
       }
       if (newRotation) {
+        if ("w" in newRotation) { 
+          // This rotation is a quaternion (mutator). Get the euler angles.
+          // TODO: maybe make Quaternion the standard for rotation
+          const rotation: Quaternion = Recycler.get(Quaternion);
+          rotation.set([newRotation.x, newRotation.y, newRotation.z, newRotation.w]);
+          newRotation = rotation.eulerAngles;
+          Recycler.store(rotation);
+        }
         vectors.rotation = vectors.rotation || this.#vectors.rotation;
         vectors.rotation.set(
           newRotation.x != undefined ? newRotation.x : oldRotation.x,

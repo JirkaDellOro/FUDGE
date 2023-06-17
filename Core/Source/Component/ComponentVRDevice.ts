@@ -48,8 +48,8 @@ namespace FudgeCore {
     public set rotation(_newRot: Vector3) {
       let newRot: Vector3 = Vector3.SCALE(Vector3.SCALE(Vector3.SUM(_newRot, this.#mtxLocal.rotation), -1), Math.PI / 180);
 
-      let orientation: PhysicsQuaternion = new PhysicsQuaternion();
-      orientation.setFromVector3(newRot.x, newRot.y, newRot.z);
+      let orientation: Quaternion = new Quaternion();
+      orientation.eulerAngles = newRot;
       //set xr - rig back to origin
       XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(this.#mtxLocal.translation, Vector3.ZERO())));
       //rotate xr rig in origin
@@ -75,8 +75,8 @@ namespace FudgeCore {
     public rotate(_by: Vector3): void {
       let rotAmount: Vector3 = Vector3.SCALE(Vector3.SCALE(_by, -1), Math.PI / 180);
 
-      let orientation: PhysicsQuaternion = new PhysicsQuaternion();
-      orientation.setFromVector3(rotAmount.x, rotAmount.y, rotAmount.z);
+      let orientation: Quaternion = new Quaternion();
+      orientation.eulerAngles = rotAmount;
       //set xr - rig back to origin
       XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(this.#mtxLocal.translation, Vector3.ZERO())));
       //rotate xr rig in origin

@@ -136,6 +136,8 @@ namespace FudgeCore {
       function detectUBOLightsVariableOffsets(): typeof RenderWebGL.uboLightsVariableOffsets {
         const uboVariableNames: string[] = [
           "u_nLightsDirectional",
+          "u_nLightsPoint",
+          "u_nLightsSpot",
           "u_ambient.vctColor",
           "u_directional[0].vctColor",
           "u_point[0].vctColor",

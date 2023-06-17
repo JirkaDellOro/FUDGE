@@ -305,13 +305,6 @@ namespace FudgeCore {
 
       RenderWebGL.crc3.bindBuffer(WebGL2RenderingContext.UNIFORM_BUFFER, RenderWebGL.uboLights);
 
-      // fill the buffer with the number of lights of each type
-      RenderWebGL.crc3.bufferSubData(
-        RenderWebGL.crc3.UNIFORM_BUFFER,
-        RenderWebGL.uboLightsVariableOffsets["u_nLightsDirectional"],
-        new Uint8Array([LightDirectional, LightPoint, LightSpot].map(_type => _lights.get(_type)?.length ?? 0))
-      );
-
       // fill the buffer with the ambient light color
       let cmpLights: RecycableArray<ComponentLight> = _lights.get(LightAmbient);
       if (cmpLights) {
@@ -321,21 +314,27 @@ namespace FudgeCore {
 
         RenderWebGL.crc3.bufferSubData(
           RenderWebGL.crc3.UNIFORM_BUFFER,
-          RenderWebGL.uboLightsVariableOffsets["u_ambient.vctColor"],
+          RenderWebGL.uboLightsVariableOffsets["u_ambient.vctColor"], // byte offset of the struct Light "u_ambient" inside the ubo
           new Float32Array(result.getArray())
         );
       }
 
       // fill the buffer with the light data for each light type
       // we are currently doing a maximum of 4 crc3.bufferSubData() calls, but we could do this in one call
-      fillLightBuffer(LightDirectional, "u_directional");
-      fillLightBuffer(LightPoint, "u_point");
-      fillLightBuffer(LightSpot, "u_spot");
+      fillLights(LightDirectional, "u_nLightsDirectional", "u_directional");
+      fillLights(LightPoint, "u_nLightsPoint", "u_point");
+      fillLights(LightSpot, "u_nLightsSpot", "u_spot");
 
       RenderWebGL.crc3.bindBuffer(WebGL2RenderingContext.UNIFORM_BUFFER, null);
 
-      function fillLightBuffer(_type: TypeOfLight, _uniStruct: string): void {
+      function fillLights(_type: TypeOfLight, _uniName: string, _uniStruct: string): void {
         const cmpLights: RecycableArray<ComponentLight> = _lights.get(_type);
+
+        RenderWebGL.crc3.bufferSubData(
+          RenderWebGL.crc3.UNIFORM_BUFFER,
+          RenderWebGL.uboLightsVariableOffsets[_uniName], // byte offset of the uint "u_nLightsDirectional" inside the ubo
+          new Uint8Array([cmpLights?.length ?? 0])
+        );
 
         if (!cmpLights)
           return;
@@ -367,7 +366,7 @@ namespace FudgeCore {
 
         RenderWebGL.crc3.bufferSubData(
           RenderWebGL.crc3.UNIFORM_BUFFER,
-          RenderWebGL.uboLightsVariableOffsets[`${_uniStruct}[0].vctColor`], // entry point of the struct Light array in the ubo
+          RenderWebGL.uboLightsVariableOffsets[`${_uniStruct}[0].vctColor`], // byte offset of the struct Light array inside the ubo
           lightsData
         );
       }

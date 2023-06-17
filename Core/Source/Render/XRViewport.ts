@@ -139,9 +139,8 @@ namespace FudgeCore {
       mtxWorld = mtxWorld.clone;
       mtxWorld.rotateY(180); // rotate because the XR Rig is looking in the direction of negative z
       let invMtxTransfom: Matrix4x4 = mtxWorld.inverse(); // inverse because we are moving the reference space
-      let invRotation: Vector3 = Vector3.SCALE(invMtxTransfom.rotation, Math.PI / 180); // TODO: in the future quaternion rotation might get added to Matrix4x4
-      let invOrientation: PhysicsQuaternion = new PhysicsQuaternion();
-      invOrientation.setFromVector3(invRotation.x, invRotation.y, invRotation.z);
+      let invOrientation: Quaternion = new Quaternion();
+      invOrientation.eulerAngles = invMtxTransfom.rotation;
       XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invMtxTransfom.translation, invOrientation));
     }
 

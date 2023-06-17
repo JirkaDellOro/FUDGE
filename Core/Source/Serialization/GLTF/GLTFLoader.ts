@@ -95,7 +95,7 @@ namespace FudgeCore {
             if (gltfNode.rotation) {
               const rotation: Quaternion = new Quaternion();
               rotation.set(gltfNode.rotation);
-              node.mtxLocal.rotate(rotation.getEulerAngles());
+              node.mtxLocal.rotate(rotation.eulerAngles);
             }
             if (gltfNode.scale)
               node.mtxLocal.scale(new Vector3(...gltfNode.scale));
