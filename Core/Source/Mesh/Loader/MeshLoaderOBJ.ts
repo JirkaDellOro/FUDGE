@@ -22,6 +22,7 @@ namespace FudgeCore {
 
     let positions: Vector3[] = [];
     let uvs: Vector2[] = [];
+    let normals: Vector3[] = [];
     let faceInfo: FaceInfo[] = [];
 
     for (let line of lines) {
@@ -37,6 +38,10 @@ namespace FudgeCore {
       if (line.startsWith("v "))
         positions.push(new Vector3(...parts.map(_value => +_value)));
 
+      //Normal - example: vn 0.00 0.00 1.00
+      if (line.startsWith("vn "))
+        normals.push(new Vector3(...parts.map(_value => +_value)));
+
       //Texcoord - example: vt 0.545454 0.472382
       else if (line.startsWith("vt "))
         uvs.push(new Vector2(...parts.map((_value, _index) => +_value * (_index == 1 ? -1 : 1))));
@@ -45,28 +50,31 @@ namespace FudgeCore {
       vertex1/texcoord1/normal1 vertex2/texcoord2/normal2 vertex3/texcoord3/normal3*/
       else if (line.startsWith("f "))
         for (let i: number = 0; i < 3; i++) {
+          const indices: string[] = parts[i].split("/");
           faceInfo.push({
-            iPosition: +parts[i].split("/")[0] - 1,
-            iUV: +parts[i].split("/")[1] - 1,
-            iNormal: +parts[i].split("/")[2] - 1
+            iPosition: +indices[0] - 1,
+            iUV: +indices[1] - 1,
+            iNormal: +indices[2] - 1
           });
         }
     }
 
-    _mesh.vertices = new Vertices(...positions.map((_p: Vector3) => new Vertex(_p)));
+    _mesh.vertices = new Vertices();
     for (let i: number = 0; i < faceInfo.length; i += 3) {
       let indices: number[] = [];
       for (let v: number = 0; v < 3; v++) {
         let info: FaceInfo = faceInfo[i + v];
-        let index: number = info.iPosition;
-        if (_mesh.vertices[index].uv) {
-          index = _mesh.vertices.length;
-          _mesh.vertices.push(new Vertex(info.iPosition));
-        }
-        _mesh.vertices[index].uv = uvs[info.iUV];
-        indices.push(index);
+        // A lot of vertices with duplicate positions are (probably) created here,
+        // since in obj files the face defines the connectivity of the vertices, UV coordinates, and normals (see above).
+        // However, in Fudge, each vertex has its own UV coordinates and normals directley associated with it.
+        _mesh.vertices.push(new Vertex(positions[info.iPosition], uvs[info.iUV], normals[info.iNormal]));
+        indices.push(_mesh.vertices.length - 1);
       }
-      _mesh.faces.push(new Face(_mesh.vertices, indices[0], indices[1], indices[2]));
+      try {
+        _mesh.faces.push(new Face(_mesh.vertices, indices[0], indices[1], indices[2]));
+      } catch (_e: unknown) {
+        Debug.fudge("Face excluded", (<Error>_e).message);
+      }
     }
   }
 
