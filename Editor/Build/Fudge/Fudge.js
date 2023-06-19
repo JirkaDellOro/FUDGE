@@ -3764,10 +3764,10 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
-    let Menu;
-    (function (Menu) {
-        Menu["COMPONENTMENU"] = "Add Components";
-    })(Menu || (Menu = {}));
+    let MENU;
+    (function (MENU) {
+        MENU["COMPONENTMENU"] = "Add Components";
+    })(MENU || (MENU = {}));
     // TODO: examin problem with ƒ.Material when using "typeof ƒ.Mutable" as key to the map
     let resourceToComponent = new Map([
         [ƒ.Audio, ƒ.ComponentAudio],
@@ -4012,6 +4012,10 @@ var Fudge;
                     if (cmpRigidbody)
                         cmpRigidbody.initialize();
                     this.dispatch(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true, detail: { node: this.node } });
+                    break;
+                case "rearrangeArray" /* REARRANGE_ARRAY */:
+                    this.fillContent();
+                    break;
                 default:
                     break;
             }
