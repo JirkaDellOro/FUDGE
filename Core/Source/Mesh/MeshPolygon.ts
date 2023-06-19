@@ -57,11 +57,11 @@ namespace FudgeCore {
 
       if (this.fitTexture) {
         for (let i: number = 0; i < shape.length; i++) {
-          let textureUV: Vector2 = Vector2.SUM(shape[i], min);
-          this.vertices[i].uv = new Vector2(textureUV.x / size.x, -textureUV.y / size.y);
+          let textureUV: Vector2 = Vector2.DIFFERENCE(shape[i], min);
+          this.vertices[i].uv = new Vector2(textureUV.x / size.x, 1 - textureUV.y / size.y);
         }
       } else {
-        _shape.forEach((_vertex, i) => this.vertices[i].uv = new Vector2(_vertex.x, -_vertex.y));
+        _shape.forEach((_vertex, _i) => this.vertices[_i].uv = new Vector2(_vertex.x, -_vertex.y));
       }
 
       this.faces = [];
