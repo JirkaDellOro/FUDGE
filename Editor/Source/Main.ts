@@ -7,9 +7,13 @@
 namespace Main {
   //#region Types and Data
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { app, BrowserWindow, Menu, ipcMain } = require("electron");
-  // TODO: use the following line in Electron version 14 and up
-  // require("@electron/remote/main").initialize();
+
+  // couldn't find type in electron d.ts file
+  const remote: { initialize: () => void; enable: (contents: Electron.WebContents) => void } = require("@electron/remote/main");
+
+  remote.initialize();
 
   let fudge: Electron.BrowserWindow;
   let defaultWidth: number = 800;
@@ -32,7 +36,8 @@ namespace Main {
 
   function quit(_event: Electron.Event | { type: string }): void {
     if (!saved) {
-      console.log("Trying to save state!", _event.type);
+      if ("type" in _event)
+        console.log("Trying to save state!", _event.type);
       // _event.preventDefault();
       send(fudge, Fudge.MENU.QUIT);
       saved = true;
@@ -57,17 +62,18 @@ namespace Main {
     fudge.on("close", quit);
   }
 
-  function addWindow(_url: string, width: number = defaultWidth, height: number = defaultHeight): Electron.BrowserWindow {
+  function addWindow(_url: string, _width: number = defaultWidth, _height: number = defaultHeight): Electron.BrowserWindow {
     let window: Electron.BrowserWindow = new BrowserWindow({
-      width: width,
-      height: height,
+      width: _width,
+      height: _height,
       // fullscreen: true,
       webPreferences: {        // preload: path.join(__dirname, "preload.js"),
         nodeIntegration: true,
-        enableRemoteModule: true,
         contextIsolation: false
       }
     });
+
+    remote.enable(window.webContents);
 
     window.webContents.openDevTools();
     window.loadFile(_url);

@@ -5,10 +5,10 @@ namespace FudgeAid {
    * Describes a single frame of a sprite animation
    */
   export class SpriteFrame {
-    rectTexture: ƒ.Rectangle;
-    mtxPivot: ƒ.Matrix4x4;
-    mtxTexture: ƒ.Matrix3x3;
-    timeScale: number;
+    public rectTexture: ƒ.Rectangle;
+    public mtxPivot: ƒ.Matrix4x4;
+    public mtxTexture: ƒ.Matrix3x3;
+    public timeScale: number;
   }
 
   /**
@@ -38,7 +38,7 @@ namespace FudgeAid {
     public name: string;
     public spritesheet: ƒ.CoatTextured;
 
-    constructor(_name: string, _spritesheet: ƒ.CoatTextured) {
+    public constructor(_name: string, _spritesheet: ƒ.CoatTextured) {
       this.name = _name;
       this.spritesheet = _spritesheet;
     }

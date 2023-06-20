@@ -160,7 +160,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     const ipcRenderer: Electron.IpcRenderer;
-    const remote: Electron.Remote;
+    const remote: Electron.RemoteMainInterface;
     let project: Project;
     interface PanelInfo {
         type: string;

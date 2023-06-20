@@ -53,7 +53,7 @@ var Picking;
         viewportPick.initialize("pick", graph, cameraPick, canvasPick);
         viewportPick.adjustingFrames = false;
         // viewportPick.adjustingCamera = false;
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
+        ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 30);
         // canvas.addEventListener("mousemove", update);
         // window.addEventListener("resize", viewport.createPickBuffers.bind(viewport));

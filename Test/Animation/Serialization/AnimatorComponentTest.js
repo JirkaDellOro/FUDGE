@@ -72,7 +72,7 @@ var AnimatorComponentTest;
             cmpAnimator.addEventListener("event", (_event) => cmpAnimator.jumpTo(animation.labels["test"]));
         node.addComponent(cmpAnimator);
         cmpAnimator.activate(true);
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, frame);
+        ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, frame);
         ƒ.Loop.start();
         if (formdata.get("destroy") == "detach")
             console.log(new ƒ.Timer(ƒ.Time.game, 8000, 1, () => node.removeComponent(cmpAnimator)));

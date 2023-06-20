@@ -1,8 +1,8 @@
-///<reference path="../../Core/Build/FudgeCore.d.ts"/>
-///<reference path="../../Aid/Build/FudgeAid.d.ts"/>
+/// <reference types="../../Core/Build/FudgeCore"/>
+///<reference types="../../Aid/Build/FudgeAid"/>
 var SkeletonTest;
-///<reference path="../../Core/Build/FudgeCore.d.ts"/>
-///<reference path="../../Aid/Build/FudgeAid.d.ts"/>
+/// <reference types="../../Core/Build/FudgeCore"/>
+///<reference types="../../Aid/Build/FudgeAid"/>
 (function (SkeletonTest) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
@@ -79,7 +79,7 @@ var SkeletonTest;
         let gPressed = false;
         let iShader = 0;
         const shaders = [ƒ.ShaderFlatSkin, ƒ.ShaderGouraudSkin, ƒ.ShaderPhongSkin];
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
+        ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start();
         function update(_event) {
             cmpLightDirectional.mtxPivot.rotation = new ƒ.Vector3(0, camera.rotationY + 180, 0);

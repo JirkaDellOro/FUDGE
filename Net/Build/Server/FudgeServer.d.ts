@@ -16,7 +16,7 @@ interface Room {
     };
     idHost: string | undefined;
 }
-declare type Rooms = {
+type Rooms = {
     [id: string]: Room;
 };
 /**

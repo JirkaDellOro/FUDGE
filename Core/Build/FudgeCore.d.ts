@@ -7175,6 +7175,8 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /** {@link TexImageSource} is a union type which as of now includes {@link VideoFrame}. All other parts of this union have a .width and .height property but VideoFrame does not. And since we only ever use {@link HTMLImageElement} and {@link OffscreenCanvas} currently VideoFrame can be excluded for convenience of accessing .width and .height */
+    type ImageSource = Exclude<TexImageSource, VideoFrame>;
     export enum MIPMAP {
         CRISP = 0,
         MEDIUM = 1,
@@ -7192,7 +7194,7 @@ declare namespace FudgeCore {
             [key: string]: unknown;
         };
         constructor(_name?: string);
-        abstract get texImageSource(): TexImageSource;
+        abstract get texImageSource(): ImageSource;
         useRenderData(): void;
         refresh(): void;
         serialize(): Serialization;
@@ -7207,7 +7209,7 @@ declare namespace FudgeCore {
         image: HTMLImageElement;
         url: RequestInfo;
         constructor(_url?: RequestInfo);
-        get texImageSource(): TexImageSource;
+        get texImageSource(): ImageSource;
         /**
          * Asynchronously loads the image from the given url
          */
@@ -7222,28 +7224,27 @@ declare namespace FudgeCore {
     export class TextureBase64 extends Texture {
         image: HTMLImageElement;
         constructor(_name: string, _base64: string, _mipmap?: MIPMAP);
-        get texImageSource(): TexImageSource;
+        get texImageSource(): ImageSource;
     }
     /**
      * Texture created from a canvas
      */
-    type OffscreenCanvasRenderingContext2D = General;
     export class TextureCanvas extends Texture {
         crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
         constructor(_name: string, _crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D);
-        get texImageSource(): TexImageSource;
+        get texImageSource(): ImageSource;
     }
     /**
      * Texture created from a FUDGE-Sketch
      */
     export class TextureSketch extends TextureCanvas {
-        get texImageSource(): TexImageSource;
+        get texImageSource(): ImageSource;
     }
     /**
      * Texture created from an HTML-page
      */
     export class TextureHTML extends TextureCanvas {
-        get texImageSource(): TexImageSource;
+        get texImageSource(): ImageSource;
     }
     export {};
 }

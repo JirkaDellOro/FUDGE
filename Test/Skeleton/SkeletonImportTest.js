@@ -41,7 +41,7 @@ var SkeletonTest;
         const shaders = [ƒ.ShaderFlatSkin, ƒ.ShaderGouraudSkin, ƒ.ShaderPhongSkin];
         let lastUpdateTime = 0;
         const updateInterval = 200;
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
+        ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start();
         function update(_event) {
             cmpLight.mtxPivot.rotation = new ƒ.Vector3(0, camera.rotationY + 180, 0);

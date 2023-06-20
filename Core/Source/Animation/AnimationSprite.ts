@@ -11,7 +11,7 @@ namespace FudgeCore {
     private wrap: Vector2 = new Vector2(0, 80);
 
     // TODO: fps should be a parameter too
-    constructor(_name: string = "AnimationSprite") { //}, _fps: number = 15) {
+    public constructor(_name: string = "AnimationSprite") { //}, _fps: number = 15) {
       super(_name, {}, 1);
       this.framesPerSecond = this.frames;
       this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond);
@@ -22,7 +22,7 @@ namespace FudgeCore {
       this.idTexture = _texture.idResource;
     }
 
-    public create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2, _framesPerSecond: number) {
+    public create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2, _framesPerSecond: number): void {
       this.setTexture(_texture);
       this.frames = _frames;
       this.wrapAfter = _wrapAfter;
@@ -55,16 +55,16 @@ namespace FudgeCore {
             "mtxPivot": {
               "translation": {
                 x: xTranslation,
-                y: yTranslation,
+                y: yTranslation
               },
               "scaling": {
                 x: xScale,
-                y: yScale,
+                y: yScale
               }
             }
           }]
         }
-      }
+      };
 
       this.calculateTotalTime();
     }
@@ -86,7 +86,7 @@ namespace FudgeCore {
           this.start.y + iNext * this.next.y + iWrap * this.wrap.y
         ));
 
-        iNext++
+        iNext++;
         if (iNext >= this.wrapAfter) {
           iNext = 0;
           iWrap++;
