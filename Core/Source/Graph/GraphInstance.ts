@@ -1,15 +1,15 @@
 namespace FudgeCore {
+
+  enum SYNC {
+    READY, GRAPH_SYNCED, GRAPH_DONE, INSTANCE
+  }
+
   /**
    * An instance of a {@link Graph}.  
    * This node keeps a reference to its resource an can thus optimize serialization
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
    */
-
-  enum SYNC {
-    READY, GRAPH_SYNCED, GRAPH_DONE, INSTANCE
-  }
-
   export class GraphInstance extends Node {
     /** id of the resource that instance was created from */
     // TODO: examine, if this should be a direct reference to the Graph, instead of the id
@@ -22,7 +22,7 @@ namespace FudgeCore {
      * To create an instance of the graph, call reset on this or set with a graph as parameter.
      * Prefer Project.createGraphInstance(_graph).
      */
-    constructor(_graph?: Graph) {
+    public constructor(_graph?: Graph) {
       super("GraphInstance");
       this.addEventListener(EVENT.MUTATE, this.hndMutationInstance, true);
 

@@ -1,16 +1,19 @@
 namespace FudgeCore {
-  /**
-  * @author Valentin Schmidberger, HFU, 2022
-  * VR Component Class, for Session Management, Controller Management and Reference Space Management. 
-  */
-  export class VRController {
 
+  /**
+   * Describes a VR Controller and its capabilities.
+   */
+  export class VRController {
     public cmpTransform: ComponentTransform = null;
     public gamePad: Gamepad = null;
     public thumbstickX: number = null;
     public thumbstickY: number = null;
   }
 
+  /**
+   * VR Component Class, for Session Management, Controller Management and Reference Space Management. 
+   * @author Valentin Schmidberger, HFU, 2022
+   */
   export class ComponentVRDevice extends ComponentCamera {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentVRDevice);
     public rightCntrl: VRController = new VRController();
@@ -30,7 +33,6 @@ namespace FudgeCore {
     public get mtxLocal(): Matrix4x4 {
       return this.#mtxLocal;
     }
-
 
     /**
      * Sets a Vector3 as Position of the reference space.
@@ -86,13 +88,10 @@ namespace FudgeCore {
       this.#mtxLocal.rotate(Vector3.SCALE(_by, -1));
     }
 
-
-
     private getMtxLocalFromCmpTransform(): void {
       this.#mtxLocal = this.node.getComponent(ComponentTransform).mtxLocal;
 
     }
-
   }
 }
 

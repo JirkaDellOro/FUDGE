@@ -1,5 +1,8 @@
 namespace FudgeCore {
 
+  /**
+   * A WebGL shaderprogramm for a particle system. Managed by a {@link ParticleSystem}. It uses {@link ParticleSystem.prototype.data} to generate and inject code into a shader universal derivate (GLSL) thus creating a shader particle system from a supplied {@link Shader}s vertex and fragment shader source code.
+   */
   @RenderInjectorShaderParticleSystem.decorate
   export class ShaderParticleSystem implements ShaderInterface {
     public data: ParticleData.System;

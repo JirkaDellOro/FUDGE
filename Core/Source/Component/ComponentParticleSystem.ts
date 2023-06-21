@@ -30,7 +30,7 @@ namespace FudgeCore {
     #timeScale: number = 1;
     readonly #time: Time;
 
-    constructor(_particleSystem: ParticleSystem = null) {
+    public constructor(_particleSystem: ParticleSystem = null) {
       super();     
       this.particleSystem = _particleSystem;
       this.depthMask = true;
@@ -143,7 +143,7 @@ namespace FudgeCore {
     }
     //#endregion
 
-    public hndEvent = (_event: Event): void => {
+    private hndEvent = (_event: Event): void => {
       switch (_event.type) {
         case EVENT.NODE_DESERIALIZED:
         case EVENT.COMPONENT_ADD:
@@ -154,9 +154,9 @@ namespace FudgeCore {
           Time.game.removeEventListener(EVENT.TIME_SCALED, this.updateTimeScale);
           this.node.removeEventListener(EVENT.RENDER_PREPARE, this.update);
       }
-    }
+    };
 
-    private update = () => {
+    private update = (): void => {
       if (this.time > this.duration)
         switch (this.playMode) {
           default:
@@ -168,11 +168,11 @@ namespace FudgeCore {
             this.timeScale = 0;
             break;
         }
-    }
+    };
 
     private updateTimeScale = (): void => {
       let timeScale: number = this.#timeScale * Time.game.getScale();
       this.#time.setScale(timeScale);
-    }
+    };
   }
 }
