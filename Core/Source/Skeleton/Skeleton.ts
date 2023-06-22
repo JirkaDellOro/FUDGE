@@ -1,13 +1,31 @@
 namespace FudgeCore {
-  export class Skeleton extends Graph {
 
+  /**
+   *  A list of all the bones in a {@link Skeleton}, addressed by their names.
+   */
+  export interface BoneList {
+    [boneName: string]: Node;
+  }
+
+  /**
+   * A list transformations, each corresponding to a bone by name.
+   */
+  export interface BoneMatrixList {
+    [boneName: string]: Matrix4x4;
+  }
+
+  /**
+   * A skeleton is an extension of {@link Graph}. The skeleton represents the root bone while its descendant {@link Node}s in the hierarchy make up the other bones.
+   * Like the Graph it serves as a template for {@link SkeletonInstance}s.
+   */
+  export class Skeleton extends Graph {
     public readonly bones: BoneList = {};
     public readonly mtxBindInverses: BoneMatrixList = {};
 
     /**
      * Creates a new skeleton with a name
      */
-    constructor(_name: string = "Skeleton") {
+    public constructor(_name: string = "Skeleton") {
       super(_name);
       this.registerBone(this);
       this.addEventListener(EVENT.CHILD_REMOVE, this.hndChildRemove);
@@ -94,13 +112,13 @@ namespace FudgeCore {
     /**
      * Deregisters all bones of a removed node
      */
-    private hndChildRemove = (_event: Event) => {
+    private hndChildRemove = (_event: Event): void => {
       if (_event.currentTarget != this) return;
       for (const node of _event.target as Node) if (this.bones[node.name]) {
         delete this.bones[node.name];
         delete this.mtxBindInverses[node.name];
       }
-    }
+    };
 
   }
 }

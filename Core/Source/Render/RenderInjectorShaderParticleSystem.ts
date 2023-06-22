@@ -76,7 +76,7 @@ namespace FudgeCore {
         return `sqrt(${x})`;
       },
       [ParticleData.FUNCTION.RANDOM]: (_parameters: string[]) => {
-        return `fetchRandomNumber(int(${_parameters[0]}), iParticleSystemRandomNumbersSize, iParticleSystemRandomNumbersLength)`
+        return `fetchRandomNumber(int(${_parameters[0]}), iParticleSystemRandomNumbersSize, iParticleSystemRandomNumbersLength)`;
       },
       [ParticleData.FUNCTION.RANDOM_RANGE]: (_parameters: string[]) => {
         return `(${RenderInjectorShaderParticleSystem.FUNCTIONS["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]})`;
@@ -106,20 +106,20 @@ namespace FudgeCore {
         .replace("/*$mtxWorld*/", RenderInjectorShaderParticleSystem.generateTransformations(mtxWorld, "World"))
         .replace("/*$mtxWorld*/", mtxWorld && mtxWorld.length > 0 ? "mtxWorld *" : "")
         .replaceAll("/*$color*/", RenderInjectorShaderParticleSystem.generateColor(data?.color));
-      return source; 
+      return source;
     }
 
     public static getFragmentShaderSource(this: ShaderParticleSystem): string {
       return this.fragmentShaderSource.replace("#version 300 es", `#version 300 es${this.data.color ? "\n#define PARTICLE_COLOR" : ""}`);
     }
-    
+
     //#region code generation
 
     private static generateVariables(_variables: ParticleData.System["variables"], _variableNames: ParticleData.System["variableNames"]): string {
       if (!_variables) return "";
-      
+
       return _variables
-        .map((_variable, _index) => ({ name: "fParticleSystemVariable_" + _variableNames[_index], value: RenderInjectorShaderParticleSystem.generateExpression(_variable)}))
+        .map((_variable, _index) => ({ name: "fParticleSystemVariable_" + _variableNames[_index], value: RenderInjectorShaderParticleSystem.generateExpression(_variable) }))
         .map(_variable => `float ${_variable.name} = ${_variable.value};`)
         .reduce((_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "");
     }
@@ -154,10 +154,10 @@ namespace FudgeCore {
           } else
             return "";
         })
-        .filter( (_transformation: string) => _transformation != "")
-        .reduce( (_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "" );
+        .filter((_transformation: string) => _transformation != "")
+        .reduce((_accumulator: string, _code: string) => `${_accumulator}\n${_code}`, "");
       code += "\n";
-      
+
       code += `mat4 mtx${_localOrWorld} = `;
       code += transformations
         .map(([_transformation, _x, _y, _z], _index: number) => {
@@ -184,7 +184,7 @@ namespace FudgeCore {
               0.0, 0.0, 0.0, 1.0
               )`;
             default:
-              throw `Error in ${ParticleSystem.name}: "${_transformation}" is not a transformation`;    
+              throw `Error in ${ParticleSystem.name}: "${_transformation}" is not a transformation`;
           }
         })
         .reduce((_accumulator: string, _code: string) => `${_accumulator} * \n${_code}`);
@@ -195,11 +195,11 @@ namespace FudgeCore {
 
     private static generateColor(_color: ParticleData.Expression[]): string {
       if (!_color) return "";
-      
+
       let rgba: string = [_color[0], _color[1], _color[2], _color[3]]
         .map((_value): string => _value ? RenderInjectorShaderParticleSystem.generateExpression(_value) : "1.0")
         .join(", ");
-      
+
       return `vec4(${rgba});`;
     }
 
@@ -211,11 +211,11 @@ namespace FudgeCore {
         }
         return RenderInjectorShaderParticleSystem.generateFunction(_expression.function, parameters);
       }
-  
+
       if (ParticleData.isVariable(_expression)) {
         return ParticleData.PREDEFINED_VARIABLES[_expression.value] || "fParticleSystemVariable_" + _expression.value;
-      } 
-  
+      }
+
       if (ParticleData.isConstant(_expression)) {
         let value: string = _expression.value.toString();
         return `${value}${value.includes(".") ? "" : ".0"}`;
@@ -229,10 +229,10 @@ namespace FudgeCore {
 
         return code;
       }
-  
+
       throw `Error in ${ParticleSystem.name}: invalid node structure in particle system serialization`;
     }
-  
+
     private static generateFunction(_function: ParticleData.FUNCTION, _parameters: string[]): string {
       if (_parameters.length < ParticleData.FUNCTION_MINIMUM_PARAMETERS[_function])
         throw `Error in ${ParticleSystem.name}: "${_function}" needs at least ${ParticleData.FUNCTION_MINIMUM_PARAMETERS[_function]} parameters`;
@@ -249,11 +249,11 @@ namespace FudgeCore {
         let functionGenerator: Function = RenderInjectorShaderParticleSystem.FUNCTIONS[<ParticleData.FUNCTION>match[0].slice(0, -1)];
         if (!functionGenerator)
           continue;
-  
+
         let commaIndices: number[] = [];
         let openBrackets: number = 1;
         let argumentsLastIndex: number = functionRegex.lastIndex;
-        while(openBrackets > 0) {
+        while (openBrackets > 0) {
           switch (_code[argumentsLastIndex]) {
             case "(":
               openBrackets++;
@@ -268,16 +268,16 @@ namespace FudgeCore {
           }
           argumentsLastIndex++;
         }
-  
-        let args: string[] = [functionRegex.lastIndex - 1, ...commaIndices, argumentsLastIndex - 1]
-          .reduce<string[]>((_accumulator, _position, _index, _positions) => 
-            _index == _positions.length - 1 ? 
-              _accumulator : 
-              _accumulator.concat(_code.slice(_position + 1, _positions[_index + 1]).trim()), 
-            []);
-  
+
+        let args: string[] =
+          [functionRegex.lastIndex - 1, ...commaIndices, argumentsLastIndex - 1].reduce<string[]>((_accumulator, _position, _index, _positions) => {
+            return _index == _positions.length - 1 ?
+              _accumulator :
+              _accumulator.concat(_code.slice(_position + 1, _positions[_index + 1]).trim());
+          }, []);
+
         functionRegex.lastIndex = match.index;
-        _code =  `${_code.slice(0, match.index)}(${functionGenerator(args)})${_code.slice(argumentsLastIndex)}`;
+        _code = `${_code.slice(0, match.index)}(${functionGenerator(args)})${_code.slice(argumentsLastIndex)}`;
       }
       return _code;
     }

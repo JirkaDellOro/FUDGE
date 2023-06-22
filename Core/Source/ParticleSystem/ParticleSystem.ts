@@ -97,6 +97,11 @@ namespace FudgeCore {
       this.#shaderToShaderParticleSystem.clear();
     }
 
+    /**
+     * Returns a corresponding {@link ShaderParticleSystem} for the given shader universal derivate.
+     * @param _source the shader universal derivate to use as a base for the particle system
+     * @returns the corresponding {@link ShaderParticleSystem}
+     */
     public getShaderFrom(_source: ShaderInterface): ShaderParticleSystem {
       if (!this.#shaderToShaderParticleSystem.has(_source)) {
         let particleShader: ShaderParticleSystem = new ShaderParticleSystem();
