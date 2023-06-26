@@ -1,6 +1,9 @@
 namespace FudgeCore {
 
-  //gives WebGL Buffer the data from the {@link Coat}
+  /**
+   * Gives WebGL Buffer the data from the {@link Coat}
+   * @internal
+   */
   export class RenderInjectorCoat extends RenderInjector {
     public static decorate(_constructor: Function): void {
       RenderInjector.inject(_constructor, RenderInjectorCoat);

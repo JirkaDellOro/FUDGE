@@ -54,7 +54,7 @@ namespace FudgeCore.FBX {
   }
 
   export interface Geometry extends ObjectBase {
-    GeometryVersion?: number; 
+    GeometryVersion?: number;
     Vertices?: Float32Array;
     PolygonVertexIndex?: Int32Array;
     LayerElementNormal?: LayerElementNormal;
@@ -101,7 +101,7 @@ namespace FudgeCore.FBX {
 
     Opacity?: number;
     TransparencyFactor?: number;
-    
+
     Emissive?: Vector3;
     NormalMap?: Texture;
   }
@@ -130,7 +130,7 @@ namespace FudgeCore.FBX {
   export interface Video extends ObjectBase {
     FileName?: string;
     RelativeFilename?: string;
-    UseMipMap?:  number;
+    UseMipMap?: number;
     Content?: Uint8Array;
   }
 
@@ -169,12 +169,12 @@ namespace FudgeCore.FBX {
     Materials?: number;
   }
 
-  export enum MappingInformationType {
-    ByVertex, ByPolygon, ByPolygonVertex, ByEdge, AllSame
+  export enum MAPPING_INFORMATION_TYPE {
+    BY_VERTEX, BY_POLYGON, BY_POLYGON_VERTEX, BY_EDGE, ALL_SAME
   }
 
-  export enum ReferenceInformationType {
-    Direct, IndexToDirect
+  export enum REFERENCE_INFORMATION_TYPE {
+    DIRECT, INDEX_TO_DIRECT
   }
 
   export interface Connection {
@@ -195,8 +195,7 @@ namespace FudgeCore.FBX {
   }
 
   export interface PropertyTemplate {
-    name: string;
     [propertyName: string]: Property70;
+    name: string;
   }
-
 }

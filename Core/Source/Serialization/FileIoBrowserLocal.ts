@@ -29,7 +29,7 @@ namespace FudgeCore {
     }
 
     // TODO: refactor to async function to be handled using promise, instead of using event target
-    public static save(_toSave: MapFilenameToContent, _type: string = "text/plain" ): Promise<MapFilenameToContent> {
+    public static save(_toSave: MapFilenameToContent, _type: string = "text/plain"): Promise<MapFilenameToContent> {
       for (let filename in _toSave) {
         let content: string = _toSave[filename];
         let blob: Blob = new Blob([content], { type: _type });

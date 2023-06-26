@@ -126,8 +126,8 @@ namespace FudgeCore {
 
       this.#sync = SYNC.GRAPH_SYNCED; // do not sync again, since mutation is already a synchronization
       await this.reflectMutation(_event, <Graph>_event.currentTarget, this, _event.detail.path);
-      this.dispatchEvent(new Event(EVENT.MUTATE_INSTANCE, {bubbles: false}))
-    }
+      this.dispatchEvent(new Event(EVENT.MUTATE_INSTANCE, { bubbles: false }));
+    };
 
     /**
      * This instance mutated, reflect mutation in source graph
@@ -150,7 +150,7 @@ namespace FudgeCore {
 
       this.#sync = SYNC.INSTANCE; // do not sync again, since mutation is already a synchronization
       await this.reflectMutation(_event, this, this.get(), Reflect.get(_event, "path"));
-    }
+    };
 
     private async reflectMutation(_event: CustomEvent, _source: Node, _destination: Node, _path: Node[]): Promise<void> {
       // console.log("Reflect mutation", _source, _destination);

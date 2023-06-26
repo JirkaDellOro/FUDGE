@@ -16,25 +16,24 @@ namespace FudgeCore {
     private keyIn: AnimationKey;
     private keyOut: AnimationKey;
 
-
-    constructor(_keyIn: AnimationKey, _keyOut: AnimationKey = null) {
+    public constructor(_keyIn: AnimationKey, _keyOut: AnimationKey = null) {
       this.keyIn = _keyIn;
       this.keyOut = _keyOut;
       this.calculate();
     }
 
-    set setKeyIn(_keyIn: AnimationKey) {
+    public set setKeyIn(_keyIn: AnimationKey) {
       this.keyIn = _keyIn;
       this.calculate();
     }
 
-    set setKeyOut(_keyOut: AnimationKey) {
+    public set setKeyOut(_keyOut: AnimationKey) {
       this.keyOut = _keyOut;
       this.calculate();
     }
 
-    public getParameters(): {a: number, b: number, c: number , d: number}  {
-      return {a: this.a, b: this.b, c: this.c, d: this.d};
+    public getParameters(): { a: number; b: number; c: number; d: number } {
+      return { a: this.a, b: this.b, c: this.c, d: this.d };
     }
 
     /**
@@ -42,7 +41,7 @@ namespace FudgeCore {
      * @param _time the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.
      * @returns the value at the given time
      */
-    evaluate(_time: number): number {
+    public evaluate(_time: number): number {
       _time -= this.keyIn.time;
       let time2: number = _time * _time;
       let time3: number = time2 * _time;
@@ -54,7 +53,7 @@ namespace FudgeCore {
      * See https://math.stackexchange.com/questions/3173469/calculate-cubic-equation-from-two-points-and-two-slopes-variably
      * and https://jirkadelloro.github.io/FUDGE/Documentation/Logs/190410_Notizen_LS
      */
-    calculate(): void {
+    public calculate(): void {
       if (!this.keyIn) {
         this.d = this.c = this.b = this.a = 0;
         return;
@@ -73,7 +72,7 @@ namespace FudgeCore {
       this.a = (-x1 * (this.keyIn.slopeOut + this.keyOut.slopeIn) - 2 * this.keyIn.value + 2 * this.keyOut.value) / -Math.pow(x1, 3);
       this.b = (this.keyOut.slopeIn - this.keyIn.slopeOut - 3 * this.a * Math.pow(x1, 2)) / (2 * x1);
     }
-    
+
   }
 
 }

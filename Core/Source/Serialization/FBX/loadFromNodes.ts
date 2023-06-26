@@ -132,21 +132,21 @@ namespace FudgeCore.FBX {
 
   function getPropertyValue(_node: Node): NodeProperty | Object {
     return _node.children.length > 0
-    ? _node.children.reduce(
-      (_subProperties, _subProperty) => {
-        const name: string = formatPropertyName(_subProperty.name);
-        if (_subProperties[name] == undefined)
-          _subProperties[name] = getPropertyValue(_subProperty);
-        else {
-          if (!(_subProperties[name] instanceof Array))
-            _subProperties[name] = [_subProperties[name] as Object];
-          (_subProperties[name] as Object[]).push(getPropertyValue(_subProperty) as Object);
-        }
-        return _subProperties;
-      },
-      {} as Object
-    )
-    : _node.properties[0];
+      ? _node.children.reduce(
+        (_subProperties, _subProperty) => {
+          const name: string = formatPropertyName(_subProperty.name);
+          if (_subProperties[name] == undefined)
+            _subProperties[name] = getPropertyValue(_subProperty);
+          else {
+            if (!(_subProperties[name] instanceof Array))
+              _subProperties[name] = [_subProperties[name] as Object];
+            (_subProperties[name] as Object[]).push(getPropertyValue(_subProperty) as Object);
+          }
+          return _subProperties;
+        },
+        {} as Object
+      )
+      : _node.properties[0];
   }
 
   function getProperty70Value(_node: Node): Property70 {
@@ -169,7 +169,7 @@ namespace FudgeCore.FBX {
       case "Lcl Rotation":
       case "Lcl Scaling":
         return new Vector3(..._node.properties.slice(4, 7) as number[]);
-      
+
       case "KString":
       default:
         return _node.properties[4] as string;

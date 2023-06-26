@@ -6,8 +6,8 @@ namespace FudgeCore {
    * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
    */
   export interface AnimationStructure {
-    children?: AnimationStructure,
     [attribute: string]: AnimationStructure[] | AnimationStructure | AnimationSequence;
+    children?: AnimationStructure;
   }
 
   export interface AnimationStructureVector3 extends AnimationStructure {
@@ -141,7 +141,7 @@ namespace FudgeCore {
       this.eventsProcessed.clear();
       this.clearCache();
     }
-    
+
     public clearCache(): void {
       this.#animationStructuresProcessed.clear();
     }
@@ -150,7 +150,7 @@ namespace FudgeCore {
      * Generates and returns a {@link Mutator} with the information to apply to the {@link Node} to animate
      * in the state the animation is in at the given time, direction and quantization
      */
-    getState(_time: number, _direction: number, _quantization: ANIMATION_QUANTIZATION): Mutator { 
+    public getState(_time: number, _direction: number, _quantization: ANIMATION_QUANTIZATION): Mutator {
       let m: Mutator = {};
       let animationStructure: ANIMATION_STRUCTURE_TYPE;
 
@@ -159,7 +159,7 @@ namespace FudgeCore {
       else
         animationStructure = _direction < 0 ? ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE : ANIMATION_STRUCTURE_TYPE.RASTERED;
 
-        m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(animationStructure), _time);
+      m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(animationStructure), _time);
       return m;
     }
 
@@ -168,7 +168,7 @@ namespace FudgeCore {
      * @param _direction The direction the animation is supposed to run in. >0 == forward, 0 == stop, <0 == backwards
      * @returns a list of strings with the names of the custom events to fire.
      */
-    getEventsToFire(_min: number, _max: number, _quantization: ANIMATION_QUANTIZATION, _direction: number): string[] {
+    public getEventsToFire(_min: number, _max: number, _quantization: ANIMATION_QUANTIZATION, _direction: number): string[] {
       let eventList: string[] = [];
       let minSection: number = Math.floor(_min / this.totalTime);
       let maxSection: number = Math.floor(_max / this.totalTime);
@@ -194,7 +194,7 @@ namespace FudgeCore {
      * @param _name The name of the event (needs to be unique per Animation).
      * @param _time The timestamp of the event (in milliseconds).
      */
-    setEvent(_name: string, _time: number): void {
+    public setEvent(_name: string, _time: number): void {
       this.events[_name] = _time;
       this.eventsProcessed.clear();
     }
@@ -203,7 +203,7 @@ namespace FudgeCore {
      * Removes the event with the given name from the list of events.
      * @param _name name of the event to remove.
      */
-    removeEvent(_name: string): void {
+    public removeEvent(_name: string): void {
       delete this.events[_name];
       this.eventsProcessed.clear();
     }
@@ -212,7 +212,7 @@ namespace FudgeCore {
     /**
      * (Re-)Calculate the total time of the Animation. Calculation-heavy, use only if actually needed.
      */
-    calculateTotalTime(): void {
+    public calculateTotalTime(): void {
       this.totalTime = 0;
       this.traverseStructureForTime(this.animationStructure);
     }
@@ -269,7 +269,7 @@ namespace FudgeCore {
         name: this.name,
         labels: {},
         events: {},
-        framesPerSecond: this.framesPerSecond,
+        framesPerSecond: this.framesPerSecond
         // sps: this.stepsPerSecond
       };
       for (let name in this.labels) {
@@ -304,7 +304,7 @@ namespace FudgeCore {
       this.calculateTotalTime();
       return this;
     }
-    
+
     // public getMutator(): Mutator {
     //   return this.serialize();
     // }
@@ -324,7 +324,7 @@ namespace FudgeCore {
         if (structureOrSequence instanceof AnimationSequence) {
           serialization[property] = structureOrSequence.serialize();
         } else {
-          if (Component.subclasses.some(type => type.name == property)) {
+          if (Component.subclasses.some(_type => _type.name == property)) {
             serialization[property] = [];
             for (const i in structureOrSequence) {
               (<Serialization[]>serialization[property]).push(this.traverseStructureForSerialization((<General>structureOrSequence)[i]));

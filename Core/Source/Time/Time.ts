@@ -1,4 +1,5 @@
 namespace FudgeCore {
+
   export interface TimeUnits {
     hours?: number;
     minutes?: number;
@@ -33,7 +34,7 @@ namespace FudgeCore {
     private timers: Timers = {};
     private idTimerAddedLast: number = 0;
 
-    constructor() {
+    public constructor() {
       super();
       this.start = performance.now();
       this.scale = 1.0;

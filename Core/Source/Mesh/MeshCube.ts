@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
    * Generate a simple cube with edges of length 1, each face consisting of two trigons
-   * ```plaintext
+   * ```text
    *       (12) 4____7  (11)
    *       (8) 0/__3/| (10)
    *       (15) ||5_||6 (14)

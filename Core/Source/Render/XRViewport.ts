@@ -87,7 +87,7 @@ namespace FudgeCore {
     public async initializeAR(_arSessionMode: XR_SESSION_MODE = null, _arReferenceSpaceType: XR_REFERENCE_SPACE = null): Promise<void> {
       Debug.error("NOT IMPLEMENTED YET! Check out initializeVR!");
     }
-    
+
     /**
      * Draw the xr viewport displaying its branch. By default, the transforms in the branch are recalculated first.
      * Pass `false` if calculation was already done for this frame 

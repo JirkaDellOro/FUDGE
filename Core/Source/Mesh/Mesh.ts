@@ -109,7 +109,7 @@ namespace FudgeCore {
     protected createBoundingBox(): Box {
       let box: Box = Recycler.get(Box);
       box.set();
-      for (let i: number = 0; i < this.vertices.length; i ++) {
+      for (let i: number = 0; i < this.vertices.length; i++) {
         let point: Vector3 = this.vertices.position(i);
         box.expand(point);
       }

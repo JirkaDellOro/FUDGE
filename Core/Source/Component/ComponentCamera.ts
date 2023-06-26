@@ -24,10 +24,6 @@ namespace FudgeCore {
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public clrBackground: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
     //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
-    #mtxWorldToView: Matrix4x4;
-    #mtxCameraInverse: Matrix4x4;
-    #mtxProjection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
-
     private projection: PROJECTION = PROJECTION.CENTRAL;
     private fieldOfView: number = 45; // The camera's sensorangle.
     private aspectRatio: number = 1.0;
@@ -36,6 +32,10 @@ namespace FudgeCore {
     private far: number = 2000;
     private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
     // TODO: examine, if background should be an attribute of Camera or Viewport
+
+    #mtxWorldToView: Matrix4x4;
+    #mtxCameraInverse: Matrix4x4;
+    #mtxProjection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
 
     public get mtxWorld(): Matrix4x4 {
       let mtxCamera: Matrix4x4 = this.mtxPivot.clone;
@@ -148,12 +148,10 @@ namespace FudgeCore {
         let aspect: number = Math.sqrt(this.aspectRatio);
         tanHorizontal = tanFov * aspect;
         tanVertical = tanFov / aspect;
-      }
-      else if (this.direction == FIELD_OF_VIEW.VERTICAL) {
+      } else if (this.direction == FIELD_OF_VIEW.VERTICAL) {
         tanVertical = tanFov;
         tanHorizontal = tanVertical * this.aspectRatio;
-      }
-      else {//FOV_DIRECTION.HORIZONTAL
+      } else {//FOV_DIRECTION.HORIZONTAL
         tanHorizontal = tanFov;
         tanVertical = tanHorizontal / this.aspectRatio;
       }

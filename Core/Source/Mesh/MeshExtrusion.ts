@@ -2,7 +2,7 @@
 namespace FudgeCore {
   /**
    * Generates an extrusion of a polygon by a series of transformations
-   * ```plaintext  
+   * ```text  
    *                      ____
    * Polygon         ____╱╲   ╲                             y
    * Transform 0  → ╱ ╲__╲_╲___╲ ← Transform 2          z __│

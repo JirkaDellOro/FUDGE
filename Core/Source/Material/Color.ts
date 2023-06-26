@@ -11,7 +11,7 @@ namespace FudgeCore {
     public b: number;
     public a: number;
 
-    constructor(_r: number = 1, _g: number = 1, _b: number = 1, _a: number = 1) {
+    public constructor(_r: number = 1, _g: number = 1, _b: number = 1, _a: number = 1) {
       super();
       this.setNormRGBA(_r, _g, _b, _a);
     }
@@ -92,12 +92,12 @@ namespace FudgeCore {
     }
 
     public copy(_color: Color): void {
-      this.r = _color.r; 
-      this.g = _color.g; 
-      this.b = _color.b; 
-      this.a = _color.a; 
+      this.r = _color.r;
+      this.g = _color.g;
+      this.b = _color.b;
+      this.a = _color.a;
     }
-    
+
     public toString(): string {
       return `(r: ${this.r.toFixed(3)}, g: ${this.g.toFixed(3)}, b: ${this.b.toFixed(3)}, a: ${this.a.toFixed(3)})`;
     }
@@ -113,8 +113,7 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       if (typeof (_serialization) == "string") {
         [this.r, this.g, this.b, this.a] = JSON.parse(<string><unknown>_serialization);
-      }
-      else
+      } else
         this.mutate(_serialization);
       return this;
     }

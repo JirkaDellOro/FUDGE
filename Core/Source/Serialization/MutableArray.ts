@@ -10,7 +10,7 @@ namespace FudgeCore {
       super(..._args);
       this.#type = _type;
     }
-    
+
     public get type(): new () => T {
       return this.#type;
     }

@@ -25,7 +25,7 @@ namespace FudgeCore {
     public position: Vector2 = Recycler.get(Vector2);
     public size: Vector2 = Recycler.get(Vector2);
 
-    constructor(_x: number = 0, _y: number = 0, _width: number = 1, _height: number = 1, _origin: ORIGIN2D = ORIGIN2D.TOPLEFT) {
+    public constructor(_x: number = 0, _y: number = 0, _width: number = 1, _height: number = 1, _origin: ORIGIN2D = ORIGIN2D.TOPLEFT) {
       super();
       this.setPositionAndSize(_x, _y, _width, _height, _origin);
     }
@@ -39,23 +39,23 @@ namespace FudgeCore {
       return rect;
     }
 
-    get x(): number {
+    public get x(): number {
       return this.position.x;
     }
-    get y(): number {
+    public get y(): number {
       return this.position.y;
     }
-    get width(): number {
+    public get width(): number {
       return this.size.x;
     }
-    get height(): number {
+    public get height(): number {
       return this.size.y;
     }
 
     /**
      * Return the leftmost expansion, respecting also negative values of width
      */
-    get left(): number {
+    public get left(): number {
       if (this.size.x > 0)
         return this.position.x;
       return (this.position.x + this.size.x);
@@ -63,7 +63,7 @@ namespace FudgeCore {
     /**
      * Return the topmost expansion, respecting also negative values of height
      */
-    get top(): number {
+    public get top(): number {
       if (this.size.y > 0)
         return this.position.y;
       return (this.position.y + this.size.y);
@@ -71,7 +71,7 @@ namespace FudgeCore {
     /**
      * Return the rightmost expansion, respecting also negative values of width
      */
-    get right(): number {
+    public get right(): number {
       if (this.size.x > 0)
         return (this.position.x + this.size.x);
       return this.position.x;
@@ -79,39 +79,39 @@ namespace FudgeCore {
     /**
      * Return the lowest expansion, respecting also negative values of height
      */
-    get bottom(): number {
+    public get bottom(): number {
       if (this.size.y > 0)
         return (this.position.y + this.size.y);
       return this.position.y;
     }
 
-    set x(_x: number) {
+    public set x(_x: number) {
       this.position.x = _x;
     }
-    set y(_y: number) {
+    public set y(_y: number) {
       this.position.y = _y;
     }
-    set width(_width: number) {
+    public set width(_width: number) {
       this.size.x = _width;
     }
-    set height(_height: number) {
+    public set height(_height: number) {
       this.size.y = _height;
     }
-    set left(_value: number) {
+    public set left(_value: number) {
       this.size.x = this.right - _value;
       this.position.x = _value;
     }
-    set top(_value: number) {
+    public set top(_value: number) {
       this.size.y = this.bottom - _value;
       this.position.y = _value;
     }
-    set right(_value: number) {
+    public set right(_value: number) {
       this.size.x = this.position.x + _value;
     }
-    set bottom(_value: number) {
+    public set bottom(_value: number) {
       this.size.y = this.position.y + _value;
     }
-    
+
     public get clone(): Rectangle {
       return Rectangle.GET(this.x, this.y, this.width, this.height);
     }

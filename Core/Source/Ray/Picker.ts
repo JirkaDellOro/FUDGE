@@ -1,7 +1,6 @@
 namespace FudgeCore {
   /**
    * Provides static methods for picking using {@link Render}
-   * 
    * @authors Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class Picker {
@@ -31,8 +30,7 @@ namespace FudgeCore {
         let mtxCamera: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.node.mtxWorld, _cmpCamera.mtxPivot);
         ray.transform(mtxCamera);
         Recycler.store(mtxCamera);
-      }
-      else
+      } else
         ray.transform(_cmpCamera.mtxPivot);
 
 

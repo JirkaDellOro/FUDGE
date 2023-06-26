@@ -14,9 +14,9 @@ namespace FudgeCore {
     /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Component[] = [];
 
-    #node: Node | null = null;
     protected singleton: boolean = true;
     protected active: boolean = true;
+    #node: Node | null = null;
 
     public constructor() {
       super();

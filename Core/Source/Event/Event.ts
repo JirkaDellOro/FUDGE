@@ -77,14 +77,15 @@ namespace FudgeCore {
 
   /** Extends EventTarget to work with {@link EventListenerUnified} and {@link EventUnified} */
   export class EventTargetUnified extends EventTarget {
-    addEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void {
+    public addEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void {
       super.addEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);
     }
-    removeEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void {
+
+    public removeEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void {
       super.removeEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);
     }
 
-    dispatchEvent(_event: EventUnified): boolean {
+    public dispatchEvent(_event: EventUnified): boolean {
       return super.dispatchEvent(_event);
     }
   }

@@ -1,5 +1,9 @@
 namespace FudgeCore {
-   //gives WebGL Buffer the data from the {@link Texture]]
+
+  /**
+   * Gives WebGL Buffer the data from the {@link Texture}
+   * @internal
+   */
   export class RenderInjectorTexture extends RenderInjector {
     public static decorate(_constructor: Function): void {
       RenderInjector.inject(_constructor, RenderInjectorTexture);
@@ -11,8 +15,7 @@ namespace FudgeCore {
         // buffers exist
         crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
-      }
-      else {
+      } else {
         this.renderData = {};
         // TODO: check if all WebGL-Creations are asserted
         const texture: WebGLTexture = Render.assert<WebGLTexture>(crc3.createTexture());

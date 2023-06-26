@@ -31,7 +31,7 @@ namespace FudgeCore {
      * 
      * TODO: for proper handling and deletion, use Time.setTimer instead of instantiating timers yourself.
      */
-    constructor(_time: Time, _elapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]) {
+    public constructor(_time: Time, _elapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]) {
       this.time = _time;
       this.elapse = _elapse;
       this.event = new EventTimer(this, _arguments);
@@ -51,7 +51,7 @@ namespace FudgeCore {
       let callback: Function = (): void => {
         if (!this.active)
           return;
-          
+
         this.event.count = this.count;
         this.event.lastCall = (this.count == 1);
         _handler(this.event);

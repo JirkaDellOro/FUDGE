@@ -13,17 +13,17 @@ namespace FudgeCore {
    */
   export class TerrainInfo {
     /** the position of the point vertically projected on the terrain in world coordinates */
-    position: Vector3;
+    public position: Vector3;
     /** the normal of the face of the terrain under the point in world coordinates */
-    normal: Vector3;
+    public normal: Vector3;
     /** vertical distance of the point to the terrain, negative if below */
-    distance: number;
+    public distance: number;
     /** the position in face coordinates */
-    positionFace: Vector3;
+    public positionFace: Vector3;
     /** the index of the face the position is inside */
-    index: number;
+    public index: number;
     /** the grid coordinates of the quad the face belongs to */
-    grid: Vector2;
+    public grid: Vector2;
   }
 
   /**
@@ -57,8 +57,7 @@ namespace FudgeCore {
         this.seed = _functionOrSeed;
         let prng: Random = new Random(this.seed);
         this.heightMapFunction = new Noise2(() => prng.getNorm()).sample; // TODO call PRNG
-      }
-      else
+      } else
         this.heightMapFunction = new Noise2().sample;
 
       this.vertices = new Vertices();
@@ -91,7 +90,7 @@ namespace FudgeCore {
         if (this.resolution.x % 2 == 0) // reverse last split change if x-resolution is even
           split = (split == QUADSPLIT.AT_0) ? QUADSPLIT.AT_1 : QUADSPLIT.AT_0;
       }
-      this.faces = quads.flatMap((quad: Quad) => quad.faces);
+      this.faces = quads.flatMap((_quad: Quad) => _quad.faces);
     }
 
     /**

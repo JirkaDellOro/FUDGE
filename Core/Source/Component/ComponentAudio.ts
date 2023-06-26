@@ -1,4 +1,5 @@
 namespace FudgeCore {
+
   export enum AUDIO_PANNER {
     CONE_INNER_ANGLE = "coneInnerAngle",
     CONE_OUTER_ANGLE = "coneOuterAngle",
@@ -16,7 +17,7 @@ namespace FudgeCore {
 
   /**
    * Builds a minimal audio graph (by default in {@link AudioManager}.default) and synchronizes it with the containing {@link Node}
-   * ```plaintext
+   * ```text
    * ┌ AudioManager(.default) ────────────────────────┐
    * │ ┌ ComponentAudio ───────────────────┐          │
    * │ │    ┌──────┐   ┌──────┐   ┌──────┐ │ ┌──────┐ │  
@@ -42,7 +43,7 @@ namespace FudgeCore {
     private playing: boolean = false;
     private listened: boolean = false;
 
-    constructor(_audio: Audio = null, _loop: boolean = false, _start: boolean = false, _audioManager: AudioManager = AudioManager.default) {
+    public constructor(_audio: Audio = null, _loop: boolean = false, _start: boolean = false, _audioManager: AudioManager = AudioManager.default) {
       super();
       this.install(_audioManager);
       this.createSource(_audio, _loop);
@@ -121,13 +122,11 @@ namespace FudgeCore {
         if (this.audio.isReady) {
           this.createSource(this.audio, this.source.loop);
           this.source.start(0, 0);
-        }
-        else {
+        } else {
           this.audio.addEventListener(EVENT_AUDIO.READY, this.hndAudioReady);
         }
         this.source.addEventListener(EVENT_AUDIO.ENDED, this.hndAudioEnded);
-      }
-      else
+      } else
         try {
           this.source.stop();
         } catch (_error: unknown) { /* catch exception when source hasn't been started... */ }
@@ -139,7 +138,7 @@ namespace FudgeCore {
      * _input and _output may be the same AudioNode, if there is only one to insert,
      * or may have multiple AudioNode between them to create an effect-graph.\
      * Note that {@link ComponentAudio} does not keep track of inserted AudioNodes!
-     * ```plaintext
+     * ```text
      * ┌ AudioManager(.default) ──────────────────────────────────────────────────────┐
      * │ ┌ ComponentAudio ─────────────────────────────────────────────────┐          │
      * │ │    ┌──────┐   ┌──────┐   ┌──────┐          ┌───────┐   ┌──────┐ │ ┌──────┐ │  
@@ -225,12 +224,12 @@ namespace FudgeCore {
       Debug.fudge("Audio start", Reflect.get(_event.target, "url"));
       if (this.playing)
         this.play(true);
-    }
+    };
 
     private hndAudioEnded: EventListener = (_event: Event) => {
       // Debug.fudge("Audio ended", Reflect.get(_event.target, "url"));
       this.playing = false;
-    }
+    };
 
     private install(_audioManager: AudioManager = AudioManager.default): void {
       let active: boolean = this.isActive;
@@ -278,15 +277,14 @@ namespace FudgeCore {
         this.node.addEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleGraph, true);
         this.node.addEventListener(EVENT_AUDIO.UPDATE, this.update, true);
         this.listened = this.node.isDescendantOf(AudioManager.default.getGraphListeningTo());
-      }
-      else {
+      } else {
         this.node.removeEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleGraph, true);
         this.node.removeEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleGraph, true);
         this.node.removeEventListener(EVENT_AUDIO.UPDATE, this.update, true);
         this.listened = false;
       }
       this.updateConnection();
-    }
+    };
 
     /** 
      * Automatically connects/disconnects AudioNodes when appending/removing the FUDGE-graph the component is in. 
@@ -295,7 +293,7 @@ namespace FudgeCore {
       // Debug.log(_event);
       this.listened = (_event.type == EVENT_AUDIO.CHILD_APPEND);
       this.updateConnection();
-    }
+    };
 
     /** 
      * Updates the panner node, its position and direction, using the worldmatrix of the container and the pivot of this component. 
@@ -321,6 +319,6 @@ namespace FudgeCore {
       // TODO: examine why the following produces erroneous results, see test "Spatial Audio"
       if (this.node)
         Recycler.store(mtxResult);
-    }
+    };
   }
 }

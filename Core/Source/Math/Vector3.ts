@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
    * Stores and manipulates a threedimensional vector comprised of the components x, y and z
-   * ```plaintext
+   * ```text
    *            +y
    *             |__ +x
    *            /
@@ -181,37 +181,37 @@ namespace FudgeCore {
 
     //#region Accessors
     // TODO: implement equals-functions
-    get x(): number {
+    public get x(): number {
       return this.data[0];
     }
-    get y(): number {
+    public get y(): number {
       return this.data[1];
     }
-    get z(): number {
+    public get z(): number {
       return this.data[2];
     }
 
-    set x(_x: number) {
+    public set x(_x: number) {
       this.data[0] = _x;
     }
-    set y(_y: number) {
+    public set y(_y: number) {
       this.data[1] = _y;
     }
-    set z(_z: number) {
+    public set z(_z: number) {
       this.data[2] = _z;
     }
 
     /**
      * Returns the length of the vector
      */
-    get magnitude(): number {
+    public get magnitude(): number {
       return Math.hypot(...this.data);
     }
 
     /**
      * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
      */
-    get magnitudeSquared(): number {
+    public get magnitudeSquared(): number {
       return Vector3.DOT(this, this);
     }
 
@@ -249,7 +249,7 @@ namespace FudgeCore {
     public recycle(): void {
       this.data.set([0, 0, 0]);
     }
-    
+
     /**
      * Copies the values of the given vector into this
      */
@@ -365,7 +365,7 @@ namespace FudgeCore {
     /**
      * Shuffles the components of this vector
      */
-    shuffle(): void {
+    public  shuffle(): void {
       let a: number[] = Array.from(this.data);
       this.set(Random.default.splice(a), Random.default.splice(a), a[0]);
     }
@@ -421,8 +421,7 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Vector3> {
       if (typeof (_serialization) == "string") {
         [this.x, this.y, this.z] = JSON.parse(<string><unknown>_serialization);
-      }
-      else
+      } else
         this.mutate(_serialization);
       return this;
     }

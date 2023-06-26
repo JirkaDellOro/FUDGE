@@ -15,8 +15,8 @@ namespace FudgeCore {
   /*
    * Interfaces dedicated for each purpose. Extra attribute necessary for compiletime type checking, not existent at runtime
    */
-  export interface MutatorForAnimation extends Mutator { readonly forAnimation: null; }
-  export interface MutatorForUserInterface extends Mutator { readonly forUserInterface: null; }
+  export interface MutatorForAnimation extends Mutator { readonly forAnimation: null }
+  export interface MutatorForUserInterface extends Mutator { readonly forUserInterface: null }
   // export interface MutatorForComponent extends Mutator { readonly forUserComponent: null; }
 
   /**
@@ -171,7 +171,7 @@ namespace FudgeCore {
     public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
       await this.mutateBase(_mutator, _selection);
       if (_dispatchMutate)
-        this.dispatchEvent(new CustomEvent(EVENT.MUTATE, {bubbles: true, detail: {mutator: _mutator}}));
+        this.dispatchEvent(new CustomEvent(EVENT.MUTATE, { bubbles: true, detail: { mutator: _mutator } }));
     }
 
     /**

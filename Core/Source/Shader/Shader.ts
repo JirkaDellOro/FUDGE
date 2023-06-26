@@ -1,5 +1,17 @@
 // / <reference path="../Coat/Coat.ts"/>
 namespace FudgeCore {
+
+  /**
+   * Interface to access data from a WebGl shaderprogram. 
+   * This should always mirror the (static) interface of {@link Shader}. It exposes the static members of Shader in an instance-based way. e.g.:
+   * ```typescript
+   * let shader: ShaderInterface;
+   * ```
+   * can take values of type 
+   * ```typescript
+   * typeof Shader | ShaderInteface
+   * ```
+   */
   export interface ShaderInterface {
     define: string[];
     program: WebGLProgram;
@@ -16,7 +28,6 @@ namespace FudgeCore {
    * Static superclass for the representation of WebGl shaderprograms. 
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
-
   // TODO: define attribute/uniforms as layout and use those consistently in shaders
   @RenderInjectorShader.decorate
   export abstract class Shader {
@@ -35,10 +46,10 @@ namespace FudgeCore {
 
     /** The type of coat that can be used with this shader to create a material */
     public static getCoat(): typeof Coat { return CoatColored; }
-    public static getVertexShaderSource(): string { 
+    public static getVertexShaderSource(): string {
       return this.insertDefines(shaderSources["ShaderUniversal.vert"], this.define);
-    }  
-    public static getFragmentShaderSource(): string { 
+    }
+    public static getFragmentShaderSource(): string {
       return this.insertDefines(shaderSources["ShaderUniversal.frag"], this.define);
     }
     public static deleteProgram(this: typeof Shader): void {/* injected by decorator */ }
@@ -52,7 +63,7 @@ namespace FudgeCore {
       if (!_defines)
         return _shader;
 
-      let code: string = `#version 300 es\n`;
+      let code: string = "#version 300 es\n";
       for (let define of _defines)
         code += `#define ${define}\n`;
 

@@ -2,7 +2,7 @@ namespace FudgeCore {
   /**
    * Generate a flat polygon. All trigons share vertex 0, so careful design is required to create concave polygons. 
    * Vertex 0 is also associated with the face normal.
-   * ```plaintext
+   * ```text
    *             0 
    *           1╱|╲  4 ...
    *            ╲|_╲╱ 

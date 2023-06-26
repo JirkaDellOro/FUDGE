@@ -14,7 +14,7 @@ namespace FudgeCore {
      * If a seed is given, LFIB4 is used as generator, reproducing a series of numbers from that seed.
      * If a function producing values between 0 and 1 is given, it will be used as generator.
      */
-    constructor(_seedOrFunction?: number | Function) {
+    public constructor(_seedOrFunction?: number | Function) {
       if (_seedOrFunction instanceof Function)
         this.generate = _seedOrFunction;
       else if (_seedOrFunction == undefined)

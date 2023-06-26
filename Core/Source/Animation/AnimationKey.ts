@@ -12,11 +12,11 @@ namespace FudgeCore {
   export class AnimationKey extends Mutable implements Serializable {
     // TODO: check if functionIn can be removed
     /**Don't modify this unless you know what you're doing.*/
-    functionIn: AnimationFunction;
+    public functionIn: AnimationFunction;
     /**Don't modify this unless you know what you're doing.*/
-    functionOut: AnimationFunction;
-    
-    broken: boolean;
+    public functionOut: AnimationFunction;
+
+    public broken: boolean;
 
     #time: number;
     #value: number;
@@ -25,7 +25,7 @@ namespace FudgeCore {
     #slopeIn: number = 0;
     #slopeOut: number = 0;
 
-    constructor(_time: number = 0, _value: number = 0, _slopeIn: number = 0, _slopeOut: number = 0, _constant: boolean = false) {
+    public constructor(_time: number = 0, _value: number = 0, _slopeIn: number = 0, _slopeOut: number = 0, _constant: boolean = false) {
       super();
       this.#time = _time;
       this.#value = _value;
@@ -47,57 +47,56 @@ namespace FudgeCore {
       return _a.time - _b.time;
     }
 
-    get time(): number {
-      return this.#time; 
+    public get time(): number {
+      return this.#time;
     }
 
-    set time(_time: number) {
+    public set time(_time: number) {
       this.#time = _time;
       this.functionIn.calculate();
       this.functionOut.calculate();
     }
 
-    get value(): number {
+    public get value(): number {
       return this.#value;
     }
 
-    set value(_value: number) {
+    public set value(_value: number) {
       this.#value = _value;
       this.functionIn.calculate();
       this.functionOut.calculate();
     }
-    
-    get constant(): boolean {
+
+    public get constant(): boolean {
       return this.#constant;
     }
 
-    set constant(_constant: boolean) {
+    public set constant(_constant: boolean) {
       this.#constant = _constant;
       this.functionIn.calculate();
       this.functionOut.calculate();
     }
 
-    get slopeIn(): number {
+    public get slopeIn(): number {
       return this.#slopeIn;
     }
-    
-    set slopeIn(_slope: number) {
+
+    public set slopeIn(_slope: number) {
       this.#slopeIn = _slope;
       this.functionIn.calculate();
     }
 
-    get slopeOut(): number {
+    public get slopeOut(): number {
       return this.#slopeOut;
     }
 
-    set slopeOut(_slope: number) {
+    public set slopeOut(_slope: number) {
       this.#slopeOut = _slope;
       this.functionOut.calculate();
     }
 
-
     //#region transfer
-    serialize(): Serialization {
+    public serialize(): Serialization {
       let serialization: Serialization = {};
       serialization.time = this.#time;
       serialization.value = this.#value;
@@ -119,7 +118,7 @@ namespace FudgeCore {
       return this;
     }
 
-    getMutator(): Mutator {
+    public getMutator(): Mutator {
       return this.serialize();
     }
 
@@ -127,7 +126,5 @@ namespace FudgeCore {
       //
     }
     //#endregion
-
   }
-
 }

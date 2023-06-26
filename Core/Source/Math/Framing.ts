@@ -13,6 +13,8 @@ namespace FudgeCore {
    * @link https://github.com/JirkaDellOro/FUDGE/wiki/Framing
    */
   export abstract class Framing extends Mutable {
+    protected reduceMutator(_mutator: Mutator): void {/** */ }
+
     /**
      * Maps a point in the given frame according to this framing
      * @param _pointInFrame The point in the frame given
@@ -32,7 +34,6 @@ namespace FudgeCore {
      * @param _rectFrame
      */
     public abstract getRect(_rectFrame: Rectangle): Rectangle;
-    protected reduceMutator(_mutator: Mutator): void {/** */ }
   }
 
   /**

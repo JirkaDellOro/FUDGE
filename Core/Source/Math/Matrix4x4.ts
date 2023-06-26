@@ -11,7 +11,7 @@ namespace FudgeCore {
 
   /**
    * Stores a 4x4 transformation matrix and provides operations for it.
-   * ```plaintext
+   * ```text
    * [ 0, 1, 2, 3 ] ← row vector x
    * [ 4, 5, 6, 7 ] ← row vector y
    * [ 8, 9,10,11 ] ← row vector z
@@ -20,7 +20,6 @@ namespace FudgeCore {
    * ```
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
-
   export class Matrix4x4 extends Mutable implements Serializable, Recycable {
     private data: Float32Array = new Float32Array(16); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
@@ -1027,7 +1026,7 @@ namespace FudgeCore {
         );
       }
       if (newRotation) {
-        if ("w" in newRotation) { 
+        if ("w" in newRotation) {
           // This rotation is a quaternion (mutator). Get the euler angles.
           // TODO: maybe make Quaternion the standard for rotation
           const rotation: Quaternion = Recycler.get(Quaternion);

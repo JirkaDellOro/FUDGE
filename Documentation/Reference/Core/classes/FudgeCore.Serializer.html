@@ -18,12 +18,12 @@
 <h1>Class Serializer<code class="tsd-tag ts-flagAbstract">Abstract</code> </h1></div>
 <section class="tsd-panel tsd-comment">
 <div class="tsd-comment tsd-typography"><p>Handles the external serialization and deserialization of <a href="../interfaces/FudgeCore.Serializable.html" class="tsd-kind-interface">Serializable</a> objects. The internal process is handled by the objects themselves.<br>A <a href="../interfaces/FudgeCore.Serialization.html" class="tsd-kind-interface">Serialization</a> object can be created from a <a href="../interfaces/FudgeCore.Serializable.html" class="tsd-kind-interface">Serializable</a> object and a JSON-String may be created from that.<br>Vice versa, a JSON-String can be parsed to a <a href="../interfaces/FudgeCore.Serialization.html" class="tsd-kind-interface">Serialization</a> which can be deserialized to a <a href="../interfaces/FudgeCore.Serializable.html" class="tsd-kind-interface">Serializable</a> object.</p>
-<pre><code class="language-plaintext"> [Serializable] → (serialize) → [Serialization] → (stringify) → [String] → (save or send)
+<pre><code class="language-text"> [Serializable] → (serialize) → [Serialization] → (stringify) → [String] → (save or send)
                                        ↓                            ↓                  ↓         
                [Serializable] ← (deserialize) ← [Serialization] ← (parse) ← (load) ← [Medium]
 </code><button>Copy</button></pre>
 <p>While the internal serialize/deserialize method1s of the objects care of the selection of information needed to recreate the object and its structure,<br>the <a href="FudgeCore.Serializer.html" class="tsd-kind-class">Serializer</a> keeps track of the namespaces and classes in order to recreate <a href="../interfaces/FudgeCore.Serializable.html" class="tsd-kind-interface">Serializable</a> objects. The general structure of a <a href="../interfaces/FudgeCore.Serialization.html" class="tsd-kind-interface">Serialization</a> is as follows  </p>
-<pre><code class="language-plaintext">{
+<pre><code class="language-text">{
      namespaceName.className: {
          propertyName: propertyValue,
          ...,
@@ -43,7 +43,7 @@ The constructorNameOfSuperclass is given instead as a property name in the seria
 <ul class="tsd-hierarchy">
 <li><span class="target">Serializer</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/2580a2954/Core/Source/Serialization/Serializer.ts#L43">Documents/FUDGE/Core/Source/Serialization/Serializer.ts:43</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f431cb2c/Core/Source/Serialization/Serializer.ts#L44">Core/Source/Serialization/Serializer.ts:44</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -93,7 +93,7 @@ including attached components, children, superclass-objects</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/FudgeCore.Serializable.html" class="tsd-signature-type tsd-kind-interface">Serializable</a><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/2580a2954/Core/Source/Serialization/Serializer.ts#L96">Documents/FUDGE/Core/Source/Serialization/Serializer.ts:96</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f431cb2c/Core/Source/Serialization/Serializer.ts#L97">Core/Source/Serialization/Serializer.ts:97</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="deserializeArray" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>deserialize<wbr/>Array</span><a href="#deserializeArray" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -110,7 +110,7 @@ including attached components, children, superclass-objects</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/FudgeCore.Serializable.html" class="tsd-signature-type tsd-kind-interface">Serializable</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/2580a2954/Core/Source/Serialization/Serializer.ts#L137">Documents/FUDGE/Core/Source/Serialization/Serializer.ts:137</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f431cb2c/Core/Source/Serialization/Serializer.ts#L138">Core/Source/Serialization/Serializer.ts:138</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getConstructor" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Constructor</span><a href="#getConstructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -134,7 +134,7 @@ including attached components, children, superclass-objects</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type tsd-kind-type-parameter">T</span></h4></li></ul></li></ul><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/2580a2954/Core/Source/Serialization/Serializer.ts#L194">Documents/FUDGE/Core/Source/Serialization/Serializer.ts:194</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f431cb2c/Core/Source/Serialization/Serializer.ts#L195">Core/Source/Serialization/Serializer.ts:195</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="parse" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>parse</span><a href="#parse" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -151,7 +151,7 @@ including attached components, children, superclass-objects</p>
 <h4 class="tsd-returns-title">Returns <a href="../interfaces/FudgeCore.Serialization.html" class="tsd-signature-type tsd-kind-interface">Serialization</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/2580a2954/Core/Source/Serialization/Serializer.ts#L179">Documents/FUDGE/Core/Source/Serialization/Serializer.ts:179</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f431cb2c/Core/Source/Serialization/Serializer.ts#L180">Core/Source/Serialization/Serializer.ts:180</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="prettify" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>prettify</span><a href="#prettify" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -164,7 +164,7 @@ including attached components, children, superclass-objects</p>
 <h5><span class="tsd-kind-parameter">_json</span>: <span class="tsd-signature-type">string</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/2580a2954/Core/Source/Serialization/Serializer.ts#L162">Documents/FUDGE/Core/Source/Serialization/Serializer.ts:162</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f431cb2c/Core/Source/Serialization/Serializer.ts#L163">Core/Source/Serialization/Serializer.ts:163</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="reconstruct" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>reconstruct</span><a href="#reconstruct" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -181,7 +181,7 @@ including attached components, children, superclass-objects</p>
 <h4 class="tsd-returns-title">Returns <a href="../interfaces/FudgeCore.Serializable.html" class="tsd-signature-type tsd-kind-interface">Serializable</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/2580a2954/Core/Source/Serialization/Serializer.ts#L187">Documents/FUDGE/Core/Source/Serialization/Serializer.ts:187</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f431cb2c/Core/Source/Serialization/Serializer.ts#L188">Core/Source/Serialization/Serializer.ts:188</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="registerNamespace" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>register<wbr/>Namespace</span><a href="#registerNamespace" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -198,7 +198,7 @@ including attached components, children, superclass-objects</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/2580a2954/Core/Source/Serialization/Serializer.ts#L51">Documents/FUDGE/Core/Source/Serialization/Serializer.ts:51</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f431cb2c/Core/Source/Serialization/Serializer.ts#L52">Core/Source/Serialization/Serializer.ts:52</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="serialize" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>serialize</span><a href="#serialize" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -218,7 +218,7 @@ including attached components, children, superclass-objects all information need
 <h4 class="tsd-returns-title">Returns <a href="../interfaces/FudgeCore.Serialization.html" class="tsd-signature-type tsd-kind-interface">Serialization</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/2580a2954/Core/Source/Serialization/Serializer.ts#L79">Documents/FUDGE/Core/Source/Serialization/Serializer.ts:79</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f431cb2c/Core/Source/Serialization/Serializer.ts#L80">Core/Source/Serialization/Serializer.ts:80</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="serializeArray" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>serialize<wbr/>Array</span><a href="#serializeArray" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -248,7 +248,7 @@ including attached components, children, superclass-objects all information need
 <h4 class="tsd-returns-title">Returns <a href="../interfaces/FudgeCore.Serialization.html" class="tsd-signature-type tsd-kind-interface">Serialization</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/2580a2954/Core/Source/Serialization/Serializer.ts#L118">Documents/FUDGE/Core/Source/Serialization/Serializer.ts:118</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f431cb2c/Core/Source/Serialization/Serializer.ts#L119">Core/Source/Serialization/Serializer.ts:119</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="stringify" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>stringify</span><a href="#stringify" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -265,7 +265,7 @@ including attached components, children, superclass-objects all information need
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/2580a2954/Core/Source/Serialization/Serializer.ts#L168">Documents/FUDGE/Core/Source/Serialization/Serializer.ts:168</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f431cb2c/Core/Source/Serialization/Serializer.ts#L169">Core/Source/Serialization/Serializer.ts:169</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -557,9 +557,6 @@ including attached components, children, superclass-objects all information need
 <li><a href="../functions/FudgeCore.LFIB4.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-64"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-function)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.39 16V7.24H14.55V8.224H10.446V11.128H14.238V12.112H10.47V16H9.39Z" fill="var(--color-text)"></path></g></svg><span>LFIB4</span></a></li>
 <li><a href="../functions/FudgeCore.Mash.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>Mash</span></a></li>
 <li><a href="../functions/FudgeCore.getMutatorOfArbitrary.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Mutator<wbr/>Of<wbr/>Arbitrary</span></a></li></ul></div></details></li>
-<li><a href="../modules/GLTF.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>GLTF</span></a></li>
-<li><a href="../variables/fflate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>fflate</span></a></li>
-<li><a href="../variables/pako.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>pako</span></a></li>
 <li><a href="../functions/ifNumber.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>if<wbr/>Number</span></a></li></ul></nav></div></div></div>
 <div class="tsd-generator">
 <p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div>

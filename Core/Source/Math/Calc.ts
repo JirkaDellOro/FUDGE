@@ -7,7 +7,7 @@ namespace FudgeCore {
     public static readonly deg2rad: number = Math.PI / 180;
     /** factor multiplied with angle in radian yields the angle in degrees */
     public static readonly rad2deg: number = 1 / Calc.deg2rad;
-    
+
     /**
      * Returns one of the values passed in, either _value if within _min and _max or the boundary being exceeded by _value
      */

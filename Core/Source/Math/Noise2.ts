@@ -1,24 +1,25 @@
 ///<reference path="./Noise.ts"/>
-/**
- * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
- * done by Jirka Dell'Oro-Friedl, HFU, 2021
- *
- * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
- * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
- * Better rank ordering method by Stefan Gustavson in 2012.
- *
- * This code was placed in the public domain by its original author,
- * Stefan Gustavson. You may use it as you see fit, but
- * attribution is appreciated.
- */
 
 namespace FudgeCore {
+
+  /**
+   * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
+   * done by Jirka Dell'Oro-Friedl, HFU, 2021
+   *
+   * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
+   * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
+   * Better rank ordering method by Stefan Gustavson in 2012.
+   *
+   * This code was placed in the public domain by its original author,
+   * Stefan Gustavson. You may use it as you see fit, but
+   * attribution is appreciated.
+   */
   export class Noise2 extends Noise {
     private static offset: number = (3.0 - Math.sqrt(3.0)) / 6.0;
     private static gradient: number[][] = [[1, 1], [-1, 1], [1, -1], [-1, -1], [1, 0], [-1, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [0, 1], [0, -1]];
     #sample: (_x: number, _y: number) => number = null;
 
-    constructor(_random: Function = Math.random) {
+    public constructor(_random: Function = Math.random) {
       super(_random);
 
       this.#sample = (_x: number, _y: number) => {
@@ -67,6 +68,6 @@ namespace FudgeCore {
 
     public sample = (_x: number, _y: number): number => {
       return this.#sample(_x, _y);
-    }
+    };
   }
 }

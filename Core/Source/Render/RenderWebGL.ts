@@ -51,7 +51,7 @@ namespace FudgeCore {
      * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
      */
     public static initialize(_antialias?: boolean, _alpha?: boolean): WebGL2RenderingContext {
-      let fudgeConfig: General = Reflect.get(globalThis,"fudgeConfig") || {};
+      let fudgeConfig: General = Reflect.get(globalThis, "fudgeConfig") || {};
       let contextAttributes: WebGLContextAttributes = {
         alpha: (_alpha != undefined) ? _alpha : fudgeConfig.alpha || false,
         antialias: (_antialias != undefined) ? _antialias : fudgeConfig.antialias || false,
@@ -383,7 +383,8 @@ namespace FudgeCore {
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       let drawParticles: boolean = cmpParticleSystem && cmpParticleSystem.isActive;
       let shader: ShaderInterface = cmpMaterial.material.getShader();
-      if (drawParticles) shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
+      if (drawParticles)
+        shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
 
       shader.useProgram();
       coat.useRenderData(shader, cmpMaterial);

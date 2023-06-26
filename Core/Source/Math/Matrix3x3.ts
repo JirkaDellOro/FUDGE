@@ -138,8 +138,8 @@ namespace FudgeCore {
 
       let d: number = 1 /
         (m00 * (m11 * m22 - m21 * m12) -
-        m01 * (m10 * m22 - m12 * m20) +
-        m02 * (m10 * m21 - m11 * m20));
+          m01 * (m10 * m22 - m12 * m20) +
+          m02 * (m10 * m21 - m11 * m20));
 
       const mtxResult: Matrix3x3 = Recycler.get(Matrix3x3);
       mtxResult.data.set([
@@ -223,9 +223,9 @@ namespace FudgeCore {
         0, 1, 0,
         0, 0, 1
       ]);
-      this.resetCache(); 
+      this.resetCache();
     }
-    
+
     /**
      * Resets the matrix to the identity-matrix and clears cache.
      */

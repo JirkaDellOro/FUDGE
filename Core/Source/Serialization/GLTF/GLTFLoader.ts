@@ -292,8 +292,8 @@ namespace FudgeCore {
         const gltfMaterial: GLTF.Material = this.gltf.materials[_iMaterial];
         // TODO: in the future create an appropriate shader based on the gltf material properties
         const gltfBaseColorTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
-        const material: Material = new Material(gltfMaterial.name, gltfBaseColorTexture ? 
-          (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) : 
+        const material: Material = new Material(gltfMaterial.name, gltfBaseColorTexture ?
+          (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
           (_skin ? ShaderPhongSkin : ShaderPhong));
         if (gltfBaseColorTexture) {
           const texture: Texture = await this.getTextureByIndex(gltfBaseColorTexture.index);

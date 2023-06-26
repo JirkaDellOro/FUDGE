@@ -1,5 +1,11 @@
 namespace FudgeCore {
+
+  /**
+   * Buffers the data from the {@link Mesh} into a WebGL Buffer
+   * @internal
+   */
   export class RenderInjectorMesh {
+
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor.prototype, "useRenderBuffers", {
         value: RenderInjectorMesh.useRenderBuffers
@@ -26,8 +32,7 @@ namespace FudgeCore {
             nIndices: this.renderMesh.indicesFlat.length
           };
         return this.renderMesh.flat;
-      }
-      else {
+      } else {
         if (this.renderMesh.smooth == null)
           this.renderMesh.smooth = {
             vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.vertices),

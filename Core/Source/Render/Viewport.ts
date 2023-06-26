@@ -124,7 +124,7 @@ namespace FudgeCore {
     /**
     * The transforms in the branch are recalculated here.
     */
-    public computeDrawing(_calculateTransforms: boolean = true) {
+    public computeDrawing(_calculateTransforms: boolean = true): void {
       if (!this.#branch)
         return;
       Render.resetFrameBuffer();
@@ -174,7 +174,7 @@ namespace FudgeCore {
         let picks: Pick[] = Picker.pickCamera(cameraPicks, this.camera, this.pointClientToProjection(posClient));
         for (let pick of picks) {
           Reflect.set(_event, "pick", pick);
-          pick.node.dispatchEvent(_event); 
+          pick.node.dispatchEvent(_event);
         }
       }
 

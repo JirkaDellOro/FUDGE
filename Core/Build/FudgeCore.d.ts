@@ -309,14 +309,14 @@ declare namespace FudgeCore {
      * Handles the external serialization and deserialization of {@link Serializable} objects. The internal process is handled by the objects themselves.
      * A {@link Serialization} object can be created from a {@link Serializable} object and a JSON-String may be created from that.
      * Vice versa, a JSON-String can be parsed to a {@link Serialization} which can be deserialized to a {@link Serializable} object.
-     * ```plaintext
+     * ```text
      *  [Serializable] → (serialize) → [Serialization] → (stringify) → [String] → (save or send)
      *                                        ↓                            ↓                  ↓
      *                [Serializable] ← (deserialize) ← [Serialization] ← (parse) ← (load) ← [Medium]
      * ```
      * While the internal serialize/deserialize method1s of the objects care of the selection of information needed to recreate the object and its structure,
      * the {@link Serializer} keeps track of the namespaces and classes in order to recreate {@link Serializable} objects. The general structure of a {@link Serialization} is as follows
-     * ```plaintext
+     * ```text
      * {
      *      namespaceName.className: {
      *          propertyName: propertyValue,
@@ -629,11 +629,19 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Baseclass for {@link RenderInjectorCoat} and {@link RenderInjectorTexture}
+     * @internal
+     */
     class RenderInjector {
         static inject(_constructor: Function, _injector: typeof RenderInjector): void;
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Gives WebGL Buffer the data from the {@link Shader}
+     * @internal
+     */
     class RenderInjectorShader {
         static decorate(_constructor: Function): void;
         static useProgram(this: typeof Shader): void;
@@ -642,6 +650,10 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Gives WebGL Buffer the data from the {@link Coat}
+     * @internal
+     */
     class RenderInjectorCoat extends RenderInjector {
         static decorate(_constructor: Function): void;
         protected static injectCoatColored(this: CoatColored, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
@@ -651,6 +663,10 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Buffers the data from the {@link Mesh} into a WebGL Buffer
+     * @internal
+     */
     class RenderInjectorMesh {
         static decorate(_constructor: Function): void;
         protected static getRenderBuffers(this: Mesh, _shader: typeof Shader): RenderBuffers;
@@ -680,8 +696,9 @@ declare namespace FudgeCore {
         };
     }
     /**
-     * Compiles particle system shaders from shader universal derivates for WebGL
+     * Compiles particle system shaders ({@link ShaderParticleSystem}) from shader universal derivates for WebGL
      * @authors Jonas Plotzky, HFU, 2022
+     * @internal
      */
     class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
         static readonly FUNCTIONS: {
@@ -700,8 +717,9 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * buffers the random number data for the particle system into WebGL
+     * Buffers the random number data for the particle system ({@link ComponentParticleSystem}) into a WebGL Texture
      * @authors Jonas Plotzky, HFU, 2022
+     * @internal
      */
     class RenderInjectorComponentParticleSystem {
         static decorate(_constructor: Function): void;
@@ -724,16 +742,16 @@ declare namespace FudgeCore {
         /**
          * Fetches an object of the requested type from the depot, calls its recycle-method and returns it.
          * If the depot for that type is empty it returns a new object of the requested type
-         * @param _T The class identifier of the desired object
+         * @param _t The class identifier of the desired object
          */
-        static get<T extends Recycable | RecycableArray<T>>(_T: new () => T): T;
+        static get<T extends Recycable | RecycableArray<T>>(_t: new () => T): T;
         /**
          * Returns a reference to an object of the requested type in the depot, but does not remove it there.
          * If no object of the requested type was in the depot, one is created, stored and borrowed.
          * For short term usage of objects in a local scope, when there will be no other call to Recycler.get or .borrow!
-         * @param _T The class identifier of the desired object
+         * @param _t The class identifier of the desired object
          */
-        static borrow<T extends Recycable>(_T: new () => T): T;
+        static borrow<T extends Recycable>(_t: new () => T): T;
         /**
          * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope and are not referenced by any other
          * @param _instance
@@ -741,9 +759,9 @@ declare namespace FudgeCore {
         static store(_instance: Object): void;
         /**
          * Emptys the depot of a given type, leaving the objects for the garbage collector. May result in a short stall when many objects were in
-         * @param _T
+         * @param _t
          */
-        static dump<T>(_T: new () => T): void;
+        static dump<T>(_t: new () => T): void;
         /**
          * Emptys all depots, leaving all objects to the garbage collector. May result in a short stall when many objects were in
          */
@@ -753,7 +771,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Stores and manipulates a twodimensional vector comprised of the components x and y
-     * ```plaintext
+     * ```text
      *            +y
      *             |__ +x
      * ```
@@ -818,7 +836,7 @@ declare namespace FudgeCore {
         static CROSS(_a: Vector2, _b: Vector2): number;
         /**
          * Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.
-         * ```plaintext
+         * ```text
          * ↑ => ← => ↓ => → => ↑
          * ```
          * @param _vector Vector to get the orthogonal equivalent of
@@ -1114,6 +1132,10 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Gives WebGL Buffer the data from the {@link Texture}
+     * @internal
+     */
     class RenderInjectorTexture extends RenderInjector {
         static decorate(_constructor: Function): void;
         protected static injectTexture(this: Texture): void;
@@ -1126,6 +1148,9 @@ declare namespace FudgeCore {
         COLLISION_ENTER = "ColliderEnteredCollision",
         COLLISION_EXIT = "ColliderLeftCollision"
     }
+    /**
+     * Special type of {@link Event} for physics.
+     */
     class EventPhysics extends Event {
         /**
          * ComponentRigidbody that collided with this ComponentRigidbody
@@ -1393,8 +1418,8 @@ declare namespace FudgeCore {
      * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
      */
     interface AnimationStructure {
-        children?: AnimationStructure;
         [attribute: string]: AnimationStructure[] | AnimationStructure | AnimationSequence;
+        children?: AnimationStructure;
     }
     interface AnimationStructureVector3 extends AnimationStructure {
         x?: AnimationSequence;
@@ -1793,12 +1818,12 @@ declare namespace FudgeCore {
     class AudioManager extends AudioContext {
         /** The default context that may be used throughout the project without the need to create others */
         static readonly default: AudioManager;
+        private static eventUpdate;
         /** The master volume all AudioNodes in the context should attach to */
         readonly gain: GainNode;
         private graph;
         private cmpListener;
-        private static eventUpdate;
-        constructor(contextOptions?: AudioContextOptions);
+        constructor(_contextOptions?: AudioContextOptions);
         /**
          * Set the master volume
          */
@@ -1873,7 +1898,7 @@ declare namespace FudgeCore {
         private updateAnimationLoop;
         /**
          * Fires all custom events the Animation should have fired between the last frame and the current frame.
-         * @param events a list of names of custom events to fire
+         * @param _events a list of names of custom events to fire
          */
         private executeEvents;
         /**
@@ -1900,7 +1925,7 @@ declare namespace FudgeCore {
     }
     /**
      * Builds a minimal audio graph (by default in {@link AudioManager}.default) and synchronizes it with the containing {@link Node}
-     * ```plaintext
+     * ```text
      * ┌ AudioManager(.default) ────────────────────────┐
      * │ ┌ ComponentAudio ───────────────────┐          │
      * │ │    ┌──────┐   ┌──────┐   ┌──────┐ │ ┌──────┐ │
@@ -1951,7 +1976,7 @@ declare namespace FudgeCore {
          * _input and _output may be the same AudioNode, if there is only one to insert,
          * or may have multiple AudioNode between them to create an effect-graph.\
          * Note that {@link ComponentAudio} does not keep track of inserted AudioNodes!
-         * ```plaintext
+         * ```text
          * ┌ AudioManager(.default) ──────────────────────────────────────────────────────┐
          * │ ┌ ComponentAudio ─────────────────────────────────────────────────┐          │
          * │ │    ┌──────┐   ┌──────┐   ┌──────┐          ┌───────┐   ┌──────┐ │ ┌──────┐ │
@@ -2131,7 +2156,7 @@ declare namespace FudgeCore {
     /**
      * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
      * Attached to a node by {@link ComponentLight}, the pivot matrix is ignored.
-     * ```plaintext
+     * ```text
      * ~ ~ ~
      *  ~ ~ ~
      * ```
@@ -2141,7 +2166,7 @@ declare namespace FudgeCore {
     /**
      * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
      * Attached to a node by {@link ComponentLight}, the pivot matrix specifies the direction of the light only.
-     * ```plaintext
+     * ```text
      * --->
      * --->
      * --->
@@ -2154,7 +2179,7 @@ declare namespace FudgeCore {
      * Attached to a node by {@link ComponentLight}, the pivot matrix specifies the position of the light, it's shape and rotation.
      * So with uneven scaling, other shapes than a perfect sphere, such as an oval or a disc, are possible, which creates a visible effect of the rotation too.
      * The intensity of the light drops linearly from 1 in the center to 0 at the perimeter of the shape.
-     * ```plaintext
+     * ```text
      *         .\|/.
      *        -- o --
      *         ´/|\`
@@ -2166,7 +2191,7 @@ declare namespace FudgeCore {
      * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
      * Attached to a node by {@link ComponentLight}, the pivot matrix specifies the position of the light, the direction and the size and angles of the cone.
      * The intensity of the light drops linearly from 1 in the center to 0 at the outer limits of the cone.
-     * ```plaintext
+     * ```text
      *          o
      *         /|\
      *        / | \
@@ -2413,12 +2438,12 @@ declare namespace FudgeCore {
     /**
      * Processes input signals of type number and generates an output signal of the same type using
      * proportional, integral or differential mapping, an amplification factor and a linear dampening/delay
-     * ```plaintext
-     *          ┌─────────────────────────────────────────────────────────────┐
-     *          │   ┌───────┐   ┌─────┐      pass through (Proportional)      │
-     *  Input → │ → │amplify│ → │delay│ → ⚟ sum up over time (Integral) ⚞ → │ → Output
-     *          │   └───────┘   └─────┘      pass change  (Differential)      │
-     *          └─────────────────────────────────────────────────────────────┘
+     * ```text
+     *         ┌─────────────────────────────────────────────────────────────┐
+     *         │   ┌───────┐   ┌─────┐      pass through (Proportional)      │
+     * Input → │ → │amplify│ → │delay│ → ⚟ sum up over time (Integral) ⚞ → │ → Output
+     *         │   └───────┘   └─────┘      pass change  (Differential)      │
+     *         └─────────────────────────────────────────────────────────────┘
      * ```
      */
     class Control extends EventTarget {
@@ -2479,7 +2504,7 @@ declare namespace FudgeCore {
      * Handles multiple controls as inputs and creates an output from that.
      * As a subclass of {@link Control}, axis calculates the ouput summing up the inputs and processing the result using its own settings.
      * Dispatches {@link EVENT_CONTROL.OUTPUT} and {@link EVENT_CONTROL.INPUT} when one of the controls dispatches them.
-     * ```plaintext
+     * ```text
      *           ┌───────────────────────────────────────────┐
      *           │ ┌───────┐                                 │
      *   Input → │ │control│\                                │
@@ -2998,6 +3023,7 @@ declare namespace FudgeCore {
      */
     class Material extends Mutable implements SerializableResource {
         #private;
+        /** The name to call the Material by. */
         name: string;
         idResource: string;
         private shaderType;
@@ -3059,6 +3085,7 @@ declare namespace FudgeCore {
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Framing
      */
     abstract class Framing extends Mutable {
+        protected reduceMutator(_mutator: Mutator): void;
         /**
          * Maps a point in the given frame according to this framing
          * @param _pointInFrame The point in the frame given
@@ -3076,7 +3103,6 @@ declare namespace FudgeCore {
          * @param _rectFrame
          */
         abstract getRect(_rectFrame: Rectangle): Rectangle;
-        protected reduceMutator(_mutator: Mutator): void;
     }
     /**
      * The resulting rectangle has a fixed width and height and display should scale to fit the frame
@@ -3119,7 +3145,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Representation of a vector2 as polar coordinates
-     * ```plaintext
+     * ```text
      *  ↕- angle (Angle to the x-axis)
      *  -→ Magnitude (Distance from the center)
      * ```
@@ -3142,7 +3168,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Representation of a vector3 as geographic coordinates as seen on a globe
-     * ```plaintext
+     * ```text
      * ←|→ Longitude (Angle to the z-axis)
      *  ↕- Latitude (Angle to the equator)
      *  -→ Magnitude (Distance from the center)
@@ -3296,7 +3322,7 @@ declare namespace FudgeCore {
     }
     /**
      * Stores a 4x4 transformation matrix and provides operations for it.
-     * ```plaintext
+     * ```text
      * [ 0, 1, 2, 3 ] ← row vector x
      * [ 4, 5, 6, 7 ] ← row vector y
      * [ 8, 9,10,11 ] ← row vector z
@@ -3543,31 +3569,31 @@ declare namespace FudgeCore {
     }
     export {};
 }
-/**
- * Baseclass for Noise2, Noise3 and Noise4
- * @authors Jirka Dell'Oro-Friedl, HFU, 2021
- * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
- */
 declare namespace FudgeCore {
+    /**
+     * Baseclass for Noise2, Noise3 and Noise4
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+     * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
+     */
     class Noise {
         protected perm: Uint8Array;
         protected permMod12: Uint8Array;
         constructor(_random?: Function);
     }
 }
-/**
- * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
- * done by Jirka Dell'Oro-Friedl, HFU, 2021
- *
- * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
- * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
- * Better rank ordering method by Stefan Gustavson in 2012.
- *
- * This code was placed in the public domain by its original author,
- * Stefan Gustavson. You may use it as you see fit, but
- * attribution is appreciated.
- */
 declare namespace FudgeCore {
+    /**
+     * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
+     * done by Jirka Dell'Oro-Friedl, HFU, 2021
+     *
+     * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
+     * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
+     * Better rank ordering method by Stefan Gustavson in 2012.
+     *
+     * This code was placed in the public domain by its original author,
+     * Stefan Gustavson. You may use it as you see fit, but
+     * attribution is appreciated.
+     */
     class Noise2 extends Noise {
         #private;
         private static offset;
@@ -3576,19 +3602,19 @@ declare namespace FudgeCore {
         sample: (_x: number, _y: number) => number;
     }
 }
-/**
- * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
- * done by Jirka Dell'Oro-Friedl, HFU, 2021
- *
- * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
- * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
- * Better rank ordering method by Stefan Gustavson in 2012.
- *
- * This code was placed in the public domain by its original author,
- * Stefan Gustavson. You may use it as you see fit, but
- * attribution is appreciated.
- */
 declare namespace FudgeCore {
+    /**
+     * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
+     * done by Jirka Dell'Oro-Friedl, HFU, 2021
+     *
+     * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
+     * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
+     * Better rank ordering method by Stefan Gustavson in 2012.
+     *
+     * This code was placed in the public domain by its original author,
+     * Stefan Gustavson. You may use it as you see fit, but
+     * attribution is appreciated.
+     */
     class Noise3 extends Noise {
         #private;
         private static offset;
@@ -3597,19 +3623,19 @@ declare namespace FudgeCore {
         sample: (_x: number, _y: number, _z: number) => number;
     }
 }
-/**
- * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
- * done by Jirka Dell'Oro-Friedl, HFU, 2021
- *
- * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
- * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
- * Better rank ordering method by Stefan Gustavson in 2012.
- *
- * This code was placed in the public domain by its original author,
- * Stefan Gustavson. You may use it as you see fit, but
- * attribution is appreciated.
- */
 declare namespace FudgeCore {
+    /**
+     * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
+     * done by Jirka Dell'Oro-Friedl, HFU, 2021
+     *
+     * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
+     * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
+     * Better rank ordering method by Stefan Gustavson in 2012.
+     *
+     * This code was placed in the public domain by its original author,
+     * Stefan Gustavson. You may use it as you see fit, but
+     * attribution is appreciated.
+     */
     class Noise4 extends Noise {
         #private;
         private static offset;
@@ -3795,7 +3821,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Stores and manipulates a threedimensional vector comprised of the components x, y and z
-     * ```plaintext
+     * ```text
      *            +y
      *             |__ +x
      *            /
@@ -4039,7 +4065,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Generate a simple cube with edges of length 1, each face consisting of two trigons
-     * ```plaintext
+     * ```text
      *       (12) 4____7  (11)
      *       (8) 0/__3/| (10)
      *       (15) ||5_||6 (14)
@@ -4056,7 +4082,7 @@ declare namespace FudgeCore {
     /**
      * Generate a flat polygon. All trigons share vertex 0, so careful design is required to create concave polygons.
      * Vertex 0 is also associated with the face normal.
-     * ```plaintext
+     * ```text
      *             0
      *           1╱|╲  4 ...
      *            ╲|_╲╱
@@ -4081,7 +4107,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Generates an extrusion of a polygon by a series of transformations
-     * ```plaintext
+     * ```text
      *                      ____
      * Polygon         ____╱╲   ╲                             y
      * Transform 0  → ╱ ╲__╲_╲___╲ ← Transform 2          z __│
@@ -4133,7 +4159,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
-     * ```plaintext
+     * ```text
      *               4
      *              /\`.
      *            3/__\_\ 2
@@ -4149,7 +4175,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Generate a simple quad with edges of length 1, the face consisting of two trigons
-     * ```plaintext
+     * ```text
      *        0 __ 3
      *         |_\|
      *        1    2
@@ -4239,7 +4265,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Generates a rotation of a polygon around the y-axis
-     * ```plaintext
+     * ```text
      *                     y
      *                  _  ↑ 0_1
      *                 │   │→x │2
@@ -4264,6 +4290,10 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Buffers the data from the {@link MeshSkin} into a WebGL Buffer
+     * @internal
+     */
     class RenderInjectorMeshSkin extends RenderInjectorMesh {
         static decorate(_constructor: Function): void;
         protected static getRenderBuffers(this: MeshSkin, _shader: typeof Shader): RenderBuffers;
@@ -4301,7 +4331,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Generate two quads placed back to back, the one facing in negative Z-direction is textured reversed
-     * ```plaintext
+     * ```text
      *        0 __ 3
      *         |__|
      *        1    2
@@ -4341,7 +4371,7 @@ declare namespace FudgeCore {
     }
     /**
      * A surface created with four vertices which immediately creates none, one or two {@link Face}s depending on vertices at identical positions.
-     * ```plaintext
+     * ```text
      * QUADSPLIT:  PLANAR                  AT_0                     AT_1
      *             0 _ 3                   0 _ 3                    0 _ 3
      *              |\|                     |\|                      |/|
@@ -4363,18 +4393,18 @@ declare namespace FudgeCore {
         index: number;
         weight: number;
     }
+    /**
+     * Represents a vertex of a mesh with extended information such as the uv coordinates and the vertex normal.
+     * It may refer to another vertex via an index into some array, in which case the position and the normal are stored there.
+     * This way, vertex position and normal is a 1:1 association, vertex to texture coordinates a 1:n association.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+     */
     class Vertex {
         position: Vector3;
         uv: Vector2;
         normal: Vector3;
         referTo: number;
         bones: Bone[];
-        /**
-         * Represents a vertex of a mesh with extended information such as the uv coordinates and the vertex normal.
-         * It may refer to another vertex via an index into some array, in which case the position and the normal are stored there.
-         * This way, vertex position and normal is a 1:1 association, vertex to texture coordinates a 1:n association.
-       * @authors Jirka Dell'Oro-Friedl, HFU, 2022
-         */
         constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3);
     }
 }
@@ -4499,7 +4529,7 @@ declare namespace FudgeCore {
         set data(_data: ParticleData.System);
         /**
          * Returns a corresponding {@link ShaderParticleSystem} for the given shader universal derivate.
-         * @param _source the shader universal derivate to use as a base for the particle system
+         * Used by the render system to render the particle system.
          * @returns the corresponding {@link ShaderParticleSystem}
          */
         getShaderFrom(_source: ShaderInterface): ShaderParticleSystem;
@@ -4512,7 +4542,8 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * A WebGL shaderprogramm for a particle system. Managed by a {@link ParticleSystem}. It uses {@link ParticleSystem.prototype.data} to generate and inject code into a shader universal derivate (GLSL) thus creating a shader particle system from a supplied {@link Shader}s vertex and fragment shader source code.
+     * A WebGL shaderprogram for a particle system. Managed by a {@link ParticleSystem}. It uses {@link ParticleSystem.prototype.data} to generate and inject code into a shader universal derivate (GLSL) thus creating a shader particle system from a supplied {@link Shader}s vertex and fragment shader source code.
+     * @author Jonas Plotzky, HFU, 2022
      */
     class ShaderParticleSystem implements ShaderInterface {
         data: ParticleData.System;
@@ -4546,12 +4577,12 @@ declare namespace FudgeCore {
         TO_PIVOT = 2
     }
     /**
-       * Acts as the physical representation of the {@link Node} it's attached to.
-       * It's the connection between the FUDGE rendered world and the Physics world.
-       * For the physics to correctly get the transformations rotations need to be applied with from left = true.
-       * Or rotations need to happen before scaling.
-       * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
-       */
+     * Acts as the physical representation of the {@link Node} it's attached to.
+     * It's the connection between the FUDGE rendered world and the Physics world.
+     * For the physics to correctly get the transformations rotations need to be applied with from left = true.
+     * Or rotations need to happen before scaling.
+     * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
+     */
     class ComponentRigidbody extends Component {
         #private;
         static readonly iSubclass: number;
@@ -4788,9 +4819,9 @@ declare namespace FudgeCore {
         /** Setup the rendering context for this buffer and create the actual buffer for this context. */
         constructor(_renderingContext: WebGL2RenderingContext);
         /** Fill the bound buffer with data. Used at buffer initialization */
-        setData(array: Array<number>): void;
+        setData(_array: Array<number>): void;
         /** Set Shader Attributes informations by getting their position in the shader, setting the offset, stride and size. For later use in the binding process */
-        setAttribs(attribs: Array<PhysicsDebugVertexAttribute>): void;
+        setAttribs(_attribs: Array<PhysicsDebugVertexAttribute>): void;
         /** Get the position of the attribute in the shader */
         loadAttribIndices(_program: PhysicsDebugShader): void;
         /** Enable a attribute in a shader for this context, */
@@ -4804,7 +4835,7 @@ declare namespace FudgeCore {
         /** Setup the rendering context for this buffer and create the actual buffer for this context. */
         constructor(_renderingContext: WebGL2RenderingContext);
         /** Fill the bound buffer with data amount. Used at buffer initialization */
-        setData(array: Array<number>): void;
+        setData(_array: Array<number>): void;
         /** The actual DrawCall for physicsDebugDraw Buffers. This is where the information from the debug is actually drawn. */
         draw(_mode?: number, _count?: number): void;
     }
@@ -4824,7 +4855,7 @@ declare namespace FudgeCore {
         /** Introduce the FUDGE Rendering Context to this class, creating a program and vertex/fragment shader in this context */
         constructor(_renderingContext: WebGL2RenderingContext);
         /** Take glsl shaders as strings and compile them, attaching the compiled shaders to a program thats used by this rendering context. */
-        compile(vertexSource: string, fragmentSource: string): void;
+        compile(_vertexSource: string, _fragmentSource: string): void;
         /** Get index of a attribute in a shader in this program */
         getAttribIndex(_name: string): number;
         /** Get the location of a uniform in a shader in this program */
@@ -4834,7 +4865,7 @@ declare namespace FudgeCore {
         /** Tell the FUDGE Rendering Context to use this program to draw. */
         use(): void;
         /** Compile a shader out of a string and validate it. */
-        compileShader(shader: WebGLShader, source: string): void;
+        compileShader(_shader: WebGLShader, _source: string): void;
     }
     /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed.
      * @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo
@@ -4893,7 +4924,7 @@ declare namespace FudgeCore {
      * A physical connection between two bodies with a defined axe of translation and rotation. Two Degrees of Freedom in the defined axis.
      * Two RigidBodies need to be defined to use it. A motor can be defined for rotation and translation, along with spring settings.
      *
-     * ```plaintext
+     * ```text
      *          JointHolder - bodyAnchor
      *                    ┌───┐
      *                    │   │
@@ -4976,7 +5007,7 @@ declare namespace FudgeCore {
        * Used to create a sliding joint along one axis. Two RigidBodies need to be defined to use it.
        * A motor can be defined to move the connected along the defined axis. Great to construct standard springs or physical sliders.
        *
-       * ```plaintext
+       * ```text
        *          JointHolder - bodyAnchor
        *                    ┌───┐
        *                    │   │
@@ -5012,7 +5043,7 @@ declare namespace FudgeCore {
       * A physical connection between two bodies, designed to simulate behaviour within a real body. It has two axis, a swing and twist axis, and also the perpendicular axis,
       * similar to a Spherical joint, but more restrictive in it's angles and only two degrees of freedom. Two RigidBodies need to be defined to use it. Mostly used to create humanlike joints that behave like a
       * lifeless body.
-      * ```plaintext
+      * ```text
       *
       *                      anchor - it can twist on one axis and swing on another
       *                            │
@@ -5113,7 +5144,7 @@ declare namespace FudgeCore {
        * A physical connection between two bodies with a defined axe of rotation. Also known as HINGE joint.
        * Two RigidBodies need to be defined to use it. A motor can be defined to rotate the connected along the defined axis.
        *
-       * ```plaintext
+       * ```text
        *                  rotation axis, 1st Degree of freedom
        *                    ↑
        *               ┌───┐│┌────┐
@@ -5162,7 +5193,7 @@ declare namespace FudgeCore {
        * Used for things like the connection of bones in the human shoulder (if simplified, else better use JointRagdoll). Two RigidBodies need to be defined to use it. Only spring settings can be defined.
        * 3 Degrees are swing horizontal, swing vertical and twist.
        *
-       * ```plaintext
+       * ```text
        *              JointHolder
        *         z      bodyAnchor (e.g. Human-Shoulder)
        *      y  ↑
@@ -5202,7 +5233,7 @@ declare namespace FudgeCore {
        * A physical connection between two bodies with two defined axis (normally e.g. (0,0,1) and rotation(1,0,0)), they share the same anchor and have free rotation, but transfer the twist.
        * In reality used in cars to transfer the more stable stationary force on the velocity axis to the bumping, damped moving wheel. Two RigidBodies need to be defined to use it.
        * The two motors can be defined for the two rotation axis, along with springs.
-       * ```plaintext
+       * ```text
        *
        *                      anchor - twist is transfered between bodies
        *         z                   |
@@ -5271,13 +5302,13 @@ declare namespace FudgeCore {
         get rotorSpeedFirst(): number;
         set rotorSpeedFirst(_value: number);
         /**
-          * The maximum motor torque in Newton. force <= 0 equals disabled.
+         * The maximum motor torque in Newton. force <= 0 equals disabled.
          */
         get rotorTorqueFirst(): number;
         set rotorTorqueFirst(_value: number);
         /**
-        * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
-       */
+         * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
+         */
         get maxRotorSecond(): number;
         set maxRotorSecond(_value: number);
         /**
@@ -5467,7 +5498,6 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Provides static methods for picking using {@link Render}
-     *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class Picker {
@@ -5491,7 +5521,6 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Defined by an origin and a direction of type {@link Pick}, rays are used to calculate picking and intersections
-     *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class Ray {
@@ -5575,6 +5604,9 @@ declare namespace FudgeCore {
         mtxBones?: WebGLBuffer;
         nIndices?: number;
     }
+    /**
+     * TODO: add typedoc-comment
+     */
     class RenderMesh {
         smooth: RenderBuffers;
         flat: RenderBuffers;
@@ -6105,16 +6137,16 @@ declare namespace FudgeCore.FBX {
     export interface LayerElementMaterial extends LayerElement {
         Materials?: number;
     }
-    export enum MappingInformationType {
-        ByVertex = 0,
-        ByPolygon = 1,
-        ByPolygonVertex = 2,
-        ByEdge = 3,
-        AllSame = 4
+    export enum MAPPING_INFORMATION_TYPE {
+        BY_VERTEX = 0,
+        BY_POLYGON = 1,
+        BY_POLYGON_VERTEX = 2,
+        BY_EDGE = 3,
+        ALL_SAME = 4
     }
-    export enum ReferenceInformationType {
-        Direct = 0,
-        IndexToDirect = 1
+    export enum REFERENCE_INFORMATION_TYPE {
+        DIRECT = 0,
+        INDEX_TO_DIRECT = 1
     }
     export interface Connection {
         parentUID: number;
@@ -6131,8 +6163,8 @@ declare namespace FudgeCore.FBX {
         propertyTemplate: PropertyTemplate;
     }
     export interface PropertyTemplate {
-        name: string;
         [propertyName: string]: Property70;
+        name: string;
     }
     export {};
 }
@@ -6148,9 +6180,9 @@ declare namespace FudgeCore {
         readonly nodes: FBX.Node[];
         readonly uri: string;
         constructor(_buffer: ArrayBuffer, _uri: string);
-        static LOAD(_uri: string): Promise<FBXLoader>;
         private static get defaultMaterial();
         private static get defaultSkinMaterial();
+        static LOAD(_uri: string): Promise<FBXLoader>;
         getScene(_index?: number): Promise<GraphInstance>;
         getNode(_index: number, _root?: Node): Promise<Node>;
         getMesh(_index: number): Promise<MeshImport>;
@@ -6189,7 +6221,7 @@ declare namespace FudgeCore.FBX {
     }
     type Property70 = boolean | number | string | Vector3;
     type NodeProperty = boolean | number | string | Uint8Array | Uint16Array | Float32Array;
-    enum ArrayEncoding {
+    enum ARRAY_ENCODING {
         UNCOMPRESSED = 0,
         COMPRESSED = 1
     }
@@ -6938,6 +6970,17 @@ declare namespace FudgeCore {
     };
 }
 declare namespace FudgeCore {
+    /**
+     * Interface to access data from a WebGl shaderprogram.
+     * This should always mirror the (static) interface of {@link Shader}. It exposes the static members of Shader in an instance-based way. e.g.:
+     * ```typescript
+     * let shader: ShaderInterface;
+     * ```
+     * can take values of type
+     * ```typescript
+     * typeof Shader | ShaderInteface
+     * ```
+     */
     interface ShaderInterface {
         define: string[];
         program: WebGLProgram;
@@ -7118,13 +7161,13 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     *  A list of all the bones in a {@link Skeleton}, addressed by their names.
+     *  A list of bones in a {@link Skeleton}, addressed by their names.
      */
     interface BoneList {
         [boneName: string]: Node;
     }
     /**
-     * A list transformations, each corresponding to a bone by name.
+     * A list of transformations, each corresponding to a bone by name.
      */
     interface BoneMatrixList {
         [boneName: string]: Matrix4x4;

@@ -78,18 +78,19 @@ module.exports = {
           "protected-constructor",
           "private-constructor",
 
+          // Static accessors
+          ["public-static-get", "public-static-set"],
+          ["protected-static-get", "protected-static-set"],
+          ["private-static-get", "private-static-set"],
+          ["#private-static-get", "#private-static-set"],
+
           // Static methods
           "public-static-method",
           "protected-static-method",
           "private-static-method",
           "#private-static-method",
 
-          // Accessors
-          ["public-static-get", "public-static-set"],
-          ["protected-static-get", "protected-static-set"],
-          ["private-static-get", "private-static-set"],
-          ["#private-static-get", "#private-static-set"],
-
+          // Instance accessors
           ["public-instance-get", "public-instance-set"],
           ["protected-instance-get", "protected-instance-set"],
           ["private-instance-get", "private-instance-set"],

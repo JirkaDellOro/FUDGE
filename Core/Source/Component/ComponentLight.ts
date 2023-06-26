@@ -23,7 +23,7 @@ namespace FudgeCore {
     public light: Light = null;
     //TODO: since there is almost no functionality left in Light, eliminate it and put all in the component as with the camera...
 
-    constructor(_light: Light = new LightAmbient()) {
+    public constructor(_light: Light = new LightAmbient()) {
       super();
       this.singleton = false;
       this.light = _light;

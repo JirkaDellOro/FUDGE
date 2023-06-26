@@ -5,10 +5,10 @@ namespace FudgeCore {
    */
   export class Material extends Mutable implements SerializableResource {
     /** The name to call the Material by. */
-    #coat: Coat;
     public name: string;
     public idResource: string = undefined;
     private shaderType: typeof Shader; // The shader program used by this BaseMaterial
+    #coat: Coat;
 
     public constructor(_name: string, _shader?: typeof Shader, _coat?: Coat) {
       super();
@@ -26,7 +26,7 @@ namespace FudgeCore {
     /**
      * Returns the currently referenced {@link Coat} instance
      */
-     public get coat(): Coat {
+    public get coat(): Coat {
       return this.#coat;
     }
     /**

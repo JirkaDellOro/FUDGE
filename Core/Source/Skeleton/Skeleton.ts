@@ -1,14 +1,14 @@
 namespace FudgeCore {
 
   /**
-   *  A list of all the bones in a {@link Skeleton}, addressed by their names.
+   *  A list of bones in a {@link Skeleton}, addressed by their names.
    */
   export interface BoneList {
     [boneName: string]: Node;
   }
 
   /**
-   * A list transformations, each corresponding to a bone by name.
+   * A list of transformations, each corresponding to a bone by name.
    */
   export interface BoneMatrixList {
     [boneName: string]: Matrix4x4;

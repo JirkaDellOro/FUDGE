@@ -4,9 +4,9 @@ namespace FudgeCore {
      * @author Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export abstract class JointAxial extends Joint {
-
+    protected springDamper: OIMO.SpringDamper;
+    
     //Internal Variables
-
     #maxMotor: number = 10;
     #minMotor: number = -10;
     #motorSpeed: number = 0;
@@ -14,11 +14,8 @@ namespace FudgeCore {
     #springFrequency: number = 0;
     #springDamping: number = 0;
 
-    protected springDamper: OIMO.SpringDamper;
-
-
     /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
-    constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
+    public constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_bodyAnchor, _bodyTied);
       this.axis = _axis;
       this.anchor = _localAnchor;
@@ -139,6 +136,13 @@ namespace FudgeCore {
       return mutator;
     }
 
+    //#endregion
+    
+    protected constructJoint(): void {
+      this.springDamper = new OIMO.SpringDamper().setSpring(this.#springFrequency, this.#springDamping);
+      super.constructJoint(this.#axis);
+    }
+
     #getMutator = (): Mutator => {
       let mutator: Mutator = {
         springDamping: this.#springDamping,
@@ -148,16 +152,10 @@ namespace FudgeCore {
         motorSpeed: this.#motorSpeed
       };
       return mutator;
-    }
+    };
+
     #mutate = (_mutator: Mutator): void => {
       this.mutateBase(_mutator, ["springDamping", "springFrequency", "maxMotor", "minMotor", "motorSpeed"]);
-    }
-
-    //#endregion
-
-    protected constructJoint(): void {
-      this.springDamper = new OIMO.SpringDamper().setSpring(this.#springFrequency, this.#springDamping);
-      super.constructJoint(this.#axis);
-    }
+    };
   }
 }

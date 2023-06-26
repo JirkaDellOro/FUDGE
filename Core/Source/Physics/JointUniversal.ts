@@ -3,7 +3,7 @@ namespace FudgeCore {
      * A physical connection between two bodies with two defined axis (normally e.g. (0,0,1) and rotation(1,0,0)), they share the same anchor and have free rotation, but transfer the twist.
      * In reality used in cars to transfer the more stable stationary force on the velocity axis to the bumping, damped moving wheel. Two RigidBodies need to be defined to use it.
      * The two motors can be defined for the two rotation axis, along with springs. 
-     * ```plaintext        
+     * ```text        
      *                  
      *                      anchor - twist is transfered between bodies
      *         z                   |
@@ -20,6 +20,9 @@ namespace FudgeCore {
      */
   export class JointUniversal extends Joint {
     public static readonly iSubclass: number = Joint.registerSubclass(JointUniversal);
+
+    protected joint: OIMO.UniversalJoint;
+    protected config: OIMO.UniversalJointConfig = new OIMO.UniversalJointConfig();
 
     #springDampingFirst: number = 0;
     #springFrequencyFirst: number = 0;
@@ -44,10 +47,7 @@ namespace FudgeCore {
     #axisFirst: OIMO.Vec3;
     #axisSecond: OIMO.Vec3;
 
-    protected joint: OIMO.UniversalJoint;
-    protected config: OIMO.UniversalJointConfig = new OIMO.UniversalJointConfig();
-
-    constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axisFirst: Vector3 = new Vector3(1, 0, 0), _axisSecond: Vector3 = new Vector3(0, 0, 1), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
+    public constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axisFirst: Vector3 = new Vector3(1, 0, 0), _axisSecond: Vector3 = new Vector3(0, 0, 1), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_bodyAnchor, _bodyTied);
       this.axisFirst = _axisFirst;
       this.axisSecond = _axisSecond;
@@ -59,10 +59,10 @@ namespace FudgeCore {
      * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
      *  When changed after initialization the joint needs to be reconnected.
      */
-    get axisFirst(): Vector3 {
+    public get axisFirst(): Vector3 {
       return new Vector3(this.#axisFirst.x, this.#axisFirst.y, this.#axisFirst.z);
     }
-    set axisFirst(_value: Vector3) {
+    public set axisFirst(_value: Vector3) {
       this.#axisFirst = new OIMO.Vec3(_value.x, _value.y, _value.z);
       this.disconnect();
       this.dirtyStatus();
@@ -71,10 +71,10 @@ namespace FudgeCore {
     * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
     *  When changed after initialization the joint needs to be reconnected.
     */
-    get axisSecond(): Vector3 {
+    public get axisSecond(): Vector3 {
       return new Vector3(this.#axisSecond.x, this.#axisSecond.y, this.#axisSecond.z);
     }
-    set axisSecond(_value: Vector3) {
+    public set axisSecond(_value: Vector3) {
       this.#axisSecond = new OIMO.Vec3(_value.x, _value.y, _value.z);
       this.disconnect();
       this.dirtyStatus();
@@ -83,10 +83,10 @@ namespace FudgeCore {
     /**
      * The damping of the spring. 1 equals completly damped.
      */
-    get springDampingFirst(): number {
+    public get springDampingFirst(): number {
       return this.#springDampingFirst;
     }
-    set springDampingFirst(_value: number) {
+    public set springDampingFirst(_value: number) {
       this.#springDampingFirst = _value;
       if (this.joint != null) this.joint.getSpringDamper1().dampingRatio = _value;
     }
@@ -94,10 +94,10 @@ namespace FudgeCore {
     /**
      * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
     */
-    get springFrequencyFirst(): number {
+    public get springFrequencyFirst(): number {
       return this.#springFrequencyFirst;
     }
-    set springFrequencyFirst(_value: number) {
+    public set springFrequencyFirst(_value: number) {
       this.#springFrequencyFirst = _value;
       if (this.joint != null) this.joint.getSpringDamper1().frequency = _value;
     }
@@ -105,10 +105,10 @@ namespace FudgeCore {
     /**
      * The damping of the spring. 1 equals completly damped.
      */
-    get springDampingSecond(): number {
+    public get springDampingSecond(): number {
       return this.#springDampingSecond;
     }
-    set springDampingSecond(_value: number) {
+    public set springDampingSecond(_value: number) {
       this.#springDampingSecond = _value;
       if (this.joint != null) this.joint.getSpringDamper2().dampingRatio = _value;
     }
@@ -116,95 +116,98 @@ namespace FudgeCore {
     /**
      * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
     */
-    get springFrequencySecond(): number {
+    public get springFrequencySecond(): number {
       return this.#springFrequencySecond;
     }
-    set springFrequencySecond(_value: number) {
+    public set springFrequencySecond(_value: number) {
       this.#springFrequencySecond = _value;
       if (this.joint != null) this.joint.getSpringDamper2().frequency = _value;
     }
 
-
-
-
     /**
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
      */
-    get maxRotorFirst(): number {
+    public get maxRotorFirst(): number {
       return this.#maxRotorFirst;
     }
-    set maxRotorFirst(_value: number) {
+    public set maxRotorFirst(_value: number) {
       this.#maxRotorFirst = _value;
       if (this.joint != null) this.joint.getLimitMotor1().upperLimit = _value * Calc.deg2rad;
     }
+
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
      */
-    get minRotorFirst(): number {
+    public get minRotorFirst(): number {
       return this.#minRotorFirst;
     }
-    set minRotorFirst(_value: number) {
+    public set minRotorFirst(_value: number) {
       this.#minRotorFirst = _value;
       if (this.joint != null) this.joint.getLimitMotor1().lowerLimit = _value * Calc.deg2rad;
     }
+
     /**
       * The target rotational speed of the motor in m/s. 
      */
-    get rotorSpeedFirst(): number {
+    public get rotorSpeedFirst(): number {
       return this.#rotorSpeedFirst;
     }
-    set rotorSpeedFirst(_value: number) {
+    public set rotorSpeedFirst(_value: number) {
       this.#rotorSpeedFirst = _value;
       if (this.joint != null) this.joint.getLimitMotor1().motorSpeed = _value;
     }
+
     /**
-      * The maximum motor torque in Newton. force <= 0 equals disabled. 
+     * The maximum motor torque in Newton. force <= 0 equals disabled. 
      */
-    get rotorTorqueFirst(): number {
+    public get rotorTorqueFirst(): number {
       return this.#rotorTorqueFirst;
     }
-    set rotorTorqueFirst(_value: number) {
+    public set rotorTorqueFirst(_value: number) {
       this.#rotorTorqueFirst = _value;
       if (this.joint != null) this.joint.getLimitMotor1().motorTorque = _value;
     }
 
     /**
-    * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
-   */
-    get maxRotorSecond(): number {
+     * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
+     */
+    public get maxRotorSecond(): number {
       return this.#maxRotorSecond;
     }
-    set maxRotorSecond(_value: number) {
+    public set maxRotorSecond(_value: number) {
       this.#maxRotorSecond = _value;
       if (this.joint != null) this.joint.getLimitMotor2().upperLimit = _value * Calc.deg2rad;
     }
+
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
      */
-    get minRotorSecond(): number {
+    public get minRotorSecond(): number {
       return this.#minRotorSecond;
     }
-    set minRotorSecond(_value: number) {
+    public set minRotorSecond(_value: number) {
       this.#minRotorSecond = _value;
       if (this.joint != null) this.joint.getLimitMotor2().lowerLimit = _value * Calc.deg2rad;
     }
+
     /**
       * The target rotational speed of the motor in m/s. 
      */
-    get rotorSpeedSecond(): number {
+    public get rotorSpeedSecond(): number {
       return this.#rotorSpeedSecond;
     }
-    set rotorSpeedSecond(_value: number) {
+    public set rotorSpeedSecond(_value: number) {
       this.#rotorSpeedSecond = _value;
       if (this.joint != null) this.joint.getLimitMotor2().motorSpeed = _value;
     }
+
     /**
       * The maximum motor torque in Newton. force <= 0 equals disabled. 
      */
-    get rotorTorqueSecond(): number {
+    public get rotorTorqueSecond(): number {
       return this.#rotorTorqueSecond;
     }
-    set rotorTorqueSecond(_value: number) {
+    public set rotorTorqueSecond(_value: number) {
       this.#rotorTorqueSecond = _value;
       if (this.joint != null) this.joint.getLimitMotor2().motorTorque = _value;
     }
@@ -251,32 +254,6 @@ namespace FudgeCore {
       mutator.axisSecond = this.axisSecond.getMutator();
       return mutator;
     }
-
-    #getMutator = (): Mutator => {
-      let mutator: Mutator = {
-        springDampingFirst: this.#springDampingFirst,
-        springFrequencyFirst: this.#springFrequencyFirst,
-        springDampingSecond: this.#springDampingSecond,
-        springFrequencySecond: this.#springFrequencySecond,
-        maxRotorFirst: this.#maxRotorFirst,
-        minRotorFirst: this.#minRotorFirst,
-        rotorSpeedFirst: this.#rotorSpeedFirst,
-        rotorTorqueFirst: this.#rotorTorqueFirst,
-        maxRotorSecond: this.#maxRotorSecond,
-        minRotorSecond: this.#minRotorSecond,
-        rotorSpeedSecond: this.#rotorSpeedSecond,
-        rotorTorqueSecond: this.#rotorTorqueSecond
-      };
-      return mutator;
-    }
-
-    #mutate = (_mutator: Mutator): void => {
-      this.mutateBase(_mutator, [
-        "springDampingFirst", "springFrequencyFirst", "springDampingSecond", "springFrequencySecond",
-        "maxRotorFirst", "minRotorFirst", "rotorSpeedFirst", "rotorTorqueFirst",
-        "maxRotorSecond", "minRotorSecond", "rotorSpeedSecond", ".rotorTorqueSecond"]
-      );
-    }
     //#endregion
 
     protected constructJoint(): void {
@@ -298,5 +275,31 @@ namespace FudgeCore {
       this.joint = new OIMO.UniversalJoint(this.config);
       super.configureJoint();
     }
+
+    #getMutator = (): Mutator => {
+      let mutator: Mutator = {
+        springDampingFirst: this.#springDampingFirst,
+        springFrequencyFirst: this.#springFrequencyFirst,
+        springDampingSecond: this.#springDampingSecond,
+        springFrequencySecond: this.#springFrequencySecond,
+        maxRotorFirst: this.#maxRotorFirst,
+        minRotorFirst: this.#minRotorFirst,
+        rotorSpeedFirst: this.#rotorSpeedFirst,
+        rotorTorqueFirst: this.#rotorTorqueFirst,
+        maxRotorSecond: this.#maxRotorSecond,
+        minRotorSecond: this.#minRotorSecond,
+        rotorSpeedSecond: this.#rotorSpeedSecond,
+        rotorTorqueSecond: this.#rotorTorqueSecond
+      };
+      return mutator;
+    };
+
+    #mutate = (_mutator: Mutator): void => {
+      this.mutateBase(_mutator, [
+        "springDampingFirst", "springFrequencyFirst", "springDampingSecond", "springFrequencySecond",
+        "maxRotorFirst", "minRotorFirst", "rotorSpeedFirst", "rotorTorqueFirst",
+        "maxRotorSecond", "minRotorSecond", "rotorSpeedSecond", ".rotorTorqueSecond"]
+      );
+    };
   }
 }

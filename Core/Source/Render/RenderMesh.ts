@@ -13,6 +13,9 @@ namespace FudgeCore {
     nIndices?: number;
   }
 
+  /**
+   * TODO: add typedoc-comment
+   */
   export class RenderMesh {
     public smooth: RenderBuffers = null;
     public flat: RenderBuffers = null;
@@ -42,7 +45,7 @@ namespace FudgeCore {
     protected ƒiBonesFlat: Uint8Array;
     protected ƒweightsFlat: Float32Array;
 
-    constructor(_mesh: Mesh) {
+    public constructor(_mesh: Mesh) {
       this.mesh = _mesh;
     }
 
@@ -53,7 +56,7 @@ namespace FudgeCore {
             const bones: Bone[] = this.mesh.vertices.bones(_index);
             return [bones?.[0]?.index || 0, bones?.[1]?.index || 0, bones?.[2]?.index || 0, bones?.[3]?.index || 0];
           })) :
-        undefined
+          undefined
       );
     }
 
@@ -64,7 +67,7 @@ namespace FudgeCore {
             const bones: Bone[] = this.mesh.vertices.bones(_index);
             return [bones?.[0]?.weight || 0, bones?.[1]?.weight || 0, bones?.[2]?.weight || 0, bones?.[3]?.weight || 0];
           })) :
-        undefined
+          undefined
       );
     }
 

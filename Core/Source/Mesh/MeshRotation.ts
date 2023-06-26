@@ -2,7 +2,7 @@
 namespace FudgeCore {
   /**
    * Generates a rotation of a polygon around the y-axis
-   * ```plaintext       
+   * ```text       
    *                     y
    *                  _  ↑ 0_1
    *                 │   │→x │2         
@@ -73,7 +73,7 @@ namespace FudgeCore {
           distances.push(total);
         }
       }
-      distances.forEach((entry, index) => { distances[index] = entry / total; });
+      distances.forEach((_entry, _index) => { distances[_index] = _entry / total; });
 
       let nVerticesPolygon: number = polygon.length;
 

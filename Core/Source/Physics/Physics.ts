@@ -12,14 +12,14 @@ namespace FudgeCore {
     public static settings: PhysicsSettings = new PhysicsSettings(COLLISION_GROUP.DEFAULT, (COLLISION_GROUP.DEFAULT | COLLISION_GROUP.GROUP_1 | COLLISION_GROUP.GROUP_2 | COLLISION_GROUP.GROUP_3 | COLLISION_GROUP.GROUP_4));
     private static ƒactive: Physics = new Physics();
 
+    private oimoWorld: OIMO.World;
+    private bodyList: ComponentRigidbody[] = new Array();
+    private jointList: Joint[] = new Array();
+
     /** The rendering of physical debug informations. Used internally no interaction needed.*/
     #debugDraw: PhysicsDebugDraw;
     /** The camera/viewport the physics are debugged to. Used internally no interaction needed. */
     #mainCam: ComponentCamera;
-
-    private oimoWorld: OIMO.World;
-    private bodyList: ComponentRigidbody[] = new Array();
-    private jointList: Joint[] = new Array();
 
     public constructor() {
       if (typeof OIMO == "undefined") {// Check if OIMO Namespace was loaded, else do not use any physics. Check is needed to ensure FUDGE can be used without Physics
@@ -63,17 +63,17 @@ namespace FudgeCore {
         Physics.ƒactive.oimoWorld.rayCast(begin, end, ray);
       } else { //Case2: Raycasting on each body in a specific group
         let allHits: RayHitInfo[] = new Array();
-        Physics.ƒactive.bodyList.forEach(function (value: ComponentRigidbody): void {
-          if (value.collisionGroup == _group) {
-            hitInfo = value.raycastThisBody(_origin, _direction, _length);
+        Physics.ƒactive.bodyList.forEach(function (_value: ComponentRigidbody): void {
+          if (_value.collisionGroup == _group) {
+            hitInfo = _value.raycastThisBody(_origin, _direction, _length);
             if (hitInfo.hit == true) { //Every hit is could potentially be the closest
               allHits.push(hitInfo);
             }
           }
         });
-        allHits.forEach(function (value: RayHitInfo): void { //get the closest hitInfo
-          if (value.hitDistance < hitInfo.hitDistance || hitInfo.hit == false) {
-            hitInfo = value;
+        allHits.forEach(function (_value: RayHitInfo): void { //get the closest hitInfo
+          if (_value.hitDistance < hitInfo.hitDistance || hitInfo.hit == false) {
+            hitInfo = _value;
           }
         });
       }
@@ -266,11 +266,11 @@ namespace FudgeCore {
     /** Internal function to calculate the endpoint of mathematical ray. By adding the multiplied direction to the origin. 
        * Used because OimoPhysics defines ray by start/end. But GameEngines commonly use origin/direction.
        */
-    private static getRayEndPoint(start: OIMO.Vec3, direction: Vector3, length: number): OIMO.Vec3 {
+    private static getRayEndPoint(_start: OIMO.Vec3, _direction: Vector3, _length: number): OIMO.Vec3 {
       let origin: Vector3 = Recycler.get(Vector3);
-      origin.set(start.x, start.y, start.z);
-      let scaledDirection: Vector3 = direction.clone;
-      scaledDirection.scale(length);
+      origin.set(_start.x, _start.y, _start.z);
+      let scaledDirection: Vector3 = _direction.clone;
+      scaledDirection.scale(_length);
       let endpoint: Vector3 = Vector3.SUM(scaledDirection, origin);
       Recycler.store(scaledDirection);
       Recycler.store(endpoint);
@@ -279,13 +279,12 @@ namespace FudgeCore {
     }
 
     /** Internal function to get the distance in which a ray hit by subtracting points from each other and get the square root of the squared product of each component. */
-    private static getRayDistance(origin: Vector3, hitPoint: Vector3): number {
-      let dx: number = origin.x - hitPoint.x;
-      let dy: number = origin.y - hitPoint.y;
-      let dz: number = origin.z - hitPoint.z;
+    private static getRayDistance(_origin: Vector3, _hitPoint: Vector3): number {
+      let dx: number = _origin.x - _hitPoint.x;
+      let dy: number = _origin.y - _hitPoint.y;
+      let dz: number = _origin.z - _hitPoint.z;
       return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
-
 
     // /** Returns the actual used world of the OIMO physics engine. No user interaction needed - Only for advanced users that need to access it directly */
     public getOimoWorld(): OIMO.World {

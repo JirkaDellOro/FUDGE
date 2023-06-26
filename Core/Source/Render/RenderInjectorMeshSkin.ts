@@ -1,4 +1,9 @@
 namespace FudgeCore {
+
+  /**
+   * Buffers the data from the {@link MeshSkin} into a WebGL Buffer
+   * @internal
+   */
   export class RenderInjectorMeshSkin extends RenderInjectorMesh {
 
     public static decorate(_constructor: Function): void {
@@ -39,7 +44,7 @@ namespace FudgeCore {
       if (!renderBuffers.mtxBones) {
         const bones: number = crc3.getUniformBlockIndex(_shader.program, UNIFORM_BLOCKS.SKIN.NAME);
         const bonesSize: number = crc3.getActiveUniformBlockParameter(_shader.program, bones, crc3.UNIFORM_BLOCK_DATA_SIZE);
-        
+
         renderBuffers.mtxBones = crc3.createBuffer();
         crc3.bindBufferBase(WebGL2RenderingContext.UNIFORM_BUFFER, UNIFORM_BLOCKS.SKIN.BINDING, renderBuffers.mtxBones);
         crc3.bufferData(WebGL2RenderingContext.UNIFORM_BUFFER, bonesSize, WebGL2RenderingContext.DYNAMIC_DRAW);

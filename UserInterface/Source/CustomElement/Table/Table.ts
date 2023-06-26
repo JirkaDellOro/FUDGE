@@ -11,7 +11,7 @@ namespace FudgeUserInterface {
 
   /**
    * Manages a sortable table of data given as simple array of flat objects   
-   * ```plaintext
+   * ```text
    * Key0  Key1 Key2
    * ```
    */

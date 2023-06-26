@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
    * Generate two quads placed back to back, the one facing in negative Z-direction is textured reversed
-   * ```plaintext
+   * ```text
    *        0 __ 3
    *         |__|
    *        1    2             

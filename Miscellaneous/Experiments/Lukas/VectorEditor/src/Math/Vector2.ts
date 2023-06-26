@@ -1,7 +1,7 @@
 namespace Fudge {
   /**
    * Stores and manipulates a twodimensional vector comprised of the components x and y
-   * ```plaintext
+   * ```text
    *            +y
    *             |__ +x
    * ```
@@ -173,7 +173,7 @@ namespace Fudge {
 
     /**
      * Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.
-     * ```plaintext
+     * ```text
      *    ^                |
      *    |  =>  <--  =>   v  =>  -->
      * ```

@@ -37,8 +37,9 @@ namespace FudgeCore {
   }
 
   /**
-   * Compiles particle system shaders from shader universal derivates for WebGL
+   * Compiles particle system shaders ({@link ShaderParticleSystem}) from shader universal derivates for WebGL
    * @authors Jonas Plotzky, HFU, 2022
+   * @internal
    */
   export class RenderInjectorShaderParticleSystem extends RenderInjectorShader {
     public static readonly FUNCTIONS: { [key in ParticleData.FUNCTION]: Function } = {

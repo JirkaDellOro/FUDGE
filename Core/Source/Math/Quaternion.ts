@@ -167,7 +167,7 @@ namespace FudgeCore {
 
       return this.#eulerAngles;
     }
-    
+
     public set eulerAngles(_eulerAngles: Vector3) {
       _eulerAngles.scale(Calc.deg2rad);
       const cosX: number = Math.cos(_eulerAngles.x / 2);

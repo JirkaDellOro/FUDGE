@@ -17,9 +17,6 @@ namespace FudgeCore {
     /** The radius of the bounding sphere in world dimensions enclosing the geometry of this node and all successors in the branch */
     public radius: number = 0;
 
-    #mtxWorldInverseUpdated: number;
-    #mtxWorldInverse: Matrix4x4;
-
     private parent: Node | null = null; // The parent of this node.
     private children: Node[] = []; // array of child nodes appended to this node.
     private components: MapClassToComponents = {};
@@ -29,6 +26,8 @@ namespace FudgeCore {
     private captures: MapEventTypeToListener = {};
     private active: boolean = true;
 
+    #mtxWorldInverseUpdated: number;
+    #mtxWorldInverse: Matrix4x4;
 
     /**
      * Creates a new node with a name and initializes all attributes
@@ -151,7 +150,7 @@ namespace FudgeCore {
      * Simply calls {@link addChild}. This reference is here solely because appendChild is the equivalent method in DOM.
      * See and preferably use {@link addChild}
      */
-    // tslint:disable-next-line: member-ordering
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     public readonly appendChild: (_child: Node) => void = this.addChild;
 
     /**
@@ -319,11 +318,10 @@ namespace FudgeCore {
       let cmpList: Component[] = this.components[_component.type];
       if (cmpList === undefined)
         this.components[_component.type] = [_component];
+      else if (cmpList.length && _component.isSingleton)
+        throw new Error(`Component ${_component.type} is marked singleton and can't be attached, no more than one allowed`);
       else
-        if (cmpList.length && _component.isSingleton)
-          throw new Error(`Component ${_component.type} is marked singleton and can't be attached, no more than one allowed`);
-        else
-          cmpList.push(_component);
+        cmpList.push(_component);
 
       _component.attachToNode(this);
       _component.dispatchEvent(new Event(EVENT.COMPONENT_ADD));

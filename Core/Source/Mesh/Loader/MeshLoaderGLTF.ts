@@ -6,7 +6,7 @@ namespace FudgeCore {
   export class MeshLoaderGLTF extends MeshLoader {
     public static async load(_mesh: MeshImport | MeshSkin, _data?: GLTF.Mesh): Promise<MeshImport> {
       const loader: GLTFLoader = await GLTFLoader.LOAD(_mesh.url.toString());
-      const meshGLTF: GLTF.Mesh = _data || loader.gltf.meshes.find(gltfMesh => gltfMesh.name == _mesh.name);
+      const meshGLTF: GLTF.Mesh = _data || loader.gltf.meshes.find(_gltfMesh => _gltfMesh.name == _mesh.name);
       const renderMesh: RenderMesh = Reflect.get(_mesh, "renderMesh");
       _mesh.name = _data.name;
       Reflect.set(renderMesh, "ƒindices", await loader.getUint16Array(meshGLTF.primitives[0].indices));

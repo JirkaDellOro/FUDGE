@@ -1,10 +1,11 @@
 namespace FudgeCore {
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export type General = any;
 
   export interface Serialization {
     [type: string]: General;
   }
+
   export interface Serializable {
     serialize(): Serialization;
     deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -18,14 +19,14 @@ namespace FudgeCore {
    * Handles the external serialization and deserialization of {@link Serializable} objects. The internal process is handled by the objects themselves.  
    * A {@link Serialization} object can be created from a {@link Serializable} object and a JSON-String may be created from that.  
    * Vice versa, a JSON-String can be parsed to a {@link Serialization} which can be deserialized to a {@link Serializable} object.
-   * ```plaintext
+   * ```text
    *  [Serializable] → (serialize) → [Serialization] → (stringify) → [String] → (save or send)
    *                                        ↓                            ↓                  ↓         
    *                [Serializable] ← (deserialize) ← [Serialization] ← (parse) ← (load) ← [Medium]
    * ```      
    * While the internal serialize/deserialize method1s of the objects care of the selection of information needed to recreate the object and its structure,  
    * the {@link Serializer} keeps track of the namespaces and classes in order to recreate {@link Serializable} objects. The general structure of a {@link Serialization} is as follows  
-   * ```plaintext
+   * ```text
    * {
    *      namespaceName.className: {
    *          propertyName: propertyValue,
@@ -120,7 +121,7 @@ namespace FudgeCore {
       let path: string = this.getFullPath(new _type());
       if (!path)
         throw new Error(`Namespace of serializable object of type ${_type.name} not found. Maybe the namespace hasn't been registered or the class not exported?`);
-      
+
       for (let object of _objects)
         serializations.push(object.serialize());
 

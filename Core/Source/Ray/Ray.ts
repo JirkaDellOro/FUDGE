@@ -1,7 +1,6 @@
 namespace FudgeCore {
   /**
    * Defined by an origin and a direction of type {@link Pick}, rays are used to calculate picking and intersections
-   * 
    * @authors Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class Ray {
@@ -10,7 +9,7 @@ namespace FudgeCore {
     /** TODO: support length */
     public length: number;
 
-    constructor(_direction: Vector3 = Vector3.Z(1), _origin: Vector3 = Vector3.ZERO(), _length: number = 1) {
+    public constructor(_direction: Vector3 = Vector3.Z(1), _origin: Vector3 = Vector3.ZERO(), _length: number = 1) {
       this.origin = _origin;
       this.direction = _direction;
       this.length = _length;

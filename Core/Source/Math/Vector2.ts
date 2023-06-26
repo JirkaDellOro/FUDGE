@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
    * Stores and manipulates a twodimensional vector comprised of the components x and y
-   * ```plaintext
+   * ```text
    *            +y
    *             |__ +x
    * ```
@@ -140,7 +140,7 @@ namespace FudgeCore {
 
     /**
      * Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.
-     * ```plaintext
+     * ```text
      * ↑ => ← => ↓ => → => ↑
      * ```
      * @param _vector Vector to get the orthogonal equivalent of
@@ -170,31 +170,31 @@ namespace FudgeCore {
     //#endregion
 
     //#region Accessors
-    get x(): number {
+    public get x(): number {
       return this.data[0];
     }
-    get y(): number {
+    public get y(): number {
       return this.data[1];
     }
 
-    set x(_x: number) {
+    public set x(_x: number) {
       this.data[0] = _x;
     }
-    set y(_y: number) {
+    public set y(_y: number) {
       this.data[1] = _y;
     }
 
     /**
      * Returns the length of the vector
      */
-    get magnitude(): number {
+    public get magnitude(): number {
       return Math.hypot(...this.data);
     }
 
     /**
      * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
      */
-    get magnitudeSquared(): number {
+    public get magnitudeSquared(): number {
       return Vector2.DOT(this, this);
     }
 
@@ -347,8 +347,7 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Vector2> {
       if (typeof (_serialization) == "string") {
         [this.x, this.y] = JSON.parse(<string><unknown>_serialization);
-      }
-      else
+      } else
         this.mutate(_serialization);
       return this;
     }

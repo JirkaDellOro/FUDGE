@@ -217,11 +217,11 @@ namespace FudgeCore {
       head.appendChild(script);
       Debug.log("Loading: ", _url);
 
-      return new Promise((resolve, reject) => {
-        script.addEventListener("load", () => resolve());
+      return new Promise((_resolve, _reject) => {
+        script.addEventListener("load", () => _resolve());
         script.addEventListener("error", () => {
           Debug.error("Loading script", _url);
-          reject();
+          _reject();
         });
         script.src = _url.toString();
       });

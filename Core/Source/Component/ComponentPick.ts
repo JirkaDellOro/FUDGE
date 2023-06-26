@@ -5,7 +5,6 @@ namespace FudgeCore {
     PHYSICS = "physics"
   }
 
-
   /**
    * Attaches picking functionality to the node
    * @authors Jirka Dell'Oro-Friedl, HFU, 2022
@@ -30,7 +29,7 @@ namespace FudgeCore {
           if (hitInfo.hit)
             this.node.dispatchEvent(_event);
           break;
-          //TODO: PICK.CAMERA
+        //TODO: PICK.CAMERA
       }
     }
 

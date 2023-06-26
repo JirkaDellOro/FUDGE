@@ -7,7 +7,7 @@ namespace FudgeCore {
   export class AnimationSequence extends Mutable implements Serializable {
     private keys: AnimationKey[] = [];
 
-    get length(): number {
+    public get length(): number {
       return this.keys.length;
     }
 
@@ -16,7 +16,7 @@ namespace FudgeCore {
      * @param _time the point in time at which to evaluate the sequence in milliseconds.
      * @returns the value of the sequence at the given time. undefined if there are no keys.
      */
-    evaluate(_time: number): number {
+    public evaluate(_time: number): number {
       if (this.keys.length == 0)
         return undefined; //TODO: shouldn't return 0 but something indicating no change, like null. probably needs to be changed in Node as well to ignore non-numeric values in the applyAnimation function
       if (this.keys.length == 1 || this.keys[0].time >= _time)
@@ -35,7 +35,7 @@ namespace FudgeCore {
      * Adds a new key to the sequence.
      * @param _key the key to add
      */
-    addKey(_key: AnimationKey): void {
+    public addKey(_key: AnimationKey): void {
       this.keys.push(_key);
       this.keys.sort(AnimationKey.compare);
       this.regenerateFunctions();
@@ -45,7 +45,7 @@ namespace FudgeCore {
      * Modifys a given key in the sequence.
      * @param _key the key to add
      */
-    modifyKey(_key: AnimationKey, _time?: number, _value?: number): void {
+    public modifyKey(_key: AnimationKey, _time?: number, _value?: number): void {
       if (_time != null)
         _key.time = _time;
       if (_value != null)
@@ -58,7 +58,7 @@ namespace FudgeCore {
      * Removes a given key from the sequence.
      * @param _key the key to remove
      */
-    removeKey(_key: AnimationKey): void {
+    public removeKey(_key: AnimationKey): void {
       for (let i: number = 0; i < this.keys.length; i++) {
         if (this.keys[i] == _key) {
           this.keys.splice(i, 1);
@@ -71,7 +71,7 @@ namespace FudgeCore {
     /**
      * Find a key in the sequence exactly matching the given time.
      */
-    findKey(_time: number): AnimationKey {
+    public findKey(_time: number): AnimationKey {
       for (let key of this.keys)
         if (key.time == _time)
           return key;
@@ -83,7 +83,7 @@ namespace FudgeCore {
      * @param _index the zero-based index at which to remove the key
      * @returns the removed AnimationKey if successful, null otherwise.
      */
-    removeKeyAtIndex(_index: number): AnimationKey {
+    public removeKeyAtIndex(_index: number): AnimationKey {
       if (_index < 0 || _index >= this.keys.length) {
         return null;
       }
@@ -98,18 +98,18 @@ namespace FudgeCore {
      * @param _index the zero-based index at which to get the key
      * @returns the AnimationKey at the index if it exists, null otherwise.
      */
-    getKey(_index: number): AnimationKey {
+    public getKey(_index: number): AnimationKey {
       if (_index < 0 || _index >= this.keys.length)
         return null;
       return this.keys[_index];
     }
 
-    getKeys(): AnimationKey[] {
+    public getKeys(): AnimationKey[] {
       return this.keys;
     }
 
     //#region transfer
-    serialize(): Serialization {
+    public serialize(): Serialization {
       let s: Serialization = {
         keys: [],
         animationSequence: true
@@ -131,9 +131,7 @@ namespace FudgeCore {
       this.regenerateFunctions();
       return this;
     }
-    protected reduceMutator(_mutator: Mutator): void {
-      //
-    }
+    protected reduceMutator(_mutator: Mutator): void { /* */ }
     //#endregion
 
     /**

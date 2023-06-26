@@ -12,12 +12,12 @@ namespace FudgeCore {
   }
 
   /**
-     * Acts as the physical representation of the {@link Node} it's attached to.
-     * It's the connection between the FUDGE rendered world and the Physics world.
-     * For the physics to correctly get the transformations rotations need to be applied with from left = true.
-     * Or rotations need to happen before scaling.
-     * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
-     */
+   * Acts as the physical representation of the {@link Node} it's attached to.
+   * It's the connection between the FUDGE rendered world and the Physics world.
+   * For the physics to correctly get the transformations rotations need to be applied with from left = true.
+   * Or rotations need to happen before scaling.
+   * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
+   */
   export class ComponentRigidbody extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentRigidbody);
     private static mapBodyType: { [type: number]: number } = (typeof OIMO == "undefined") ?
