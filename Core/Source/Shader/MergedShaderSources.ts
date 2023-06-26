@@ -199,6 +199,7 @@ vec4 calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _
   if(_fSpecular <= 0.0)
     return vctResult;
 
+
   //BLINN-Phong Shading
   vec3 halfwayDir = normalize(-_vctLight - _vctView);
   float factor = max(dot(-_vctLight, _vctNormal), 0.0);       //Factor for smoothing out transition from surface facing the lightsource to surface facing away from the lightsource
@@ -206,6 +207,13 @@ vec4 calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _
 
   vctResult += pow(max(dot(_vctNormal, halfwayDir), 0.0), exp2(_fSpecular * 5.0)) * _fSpecular * u_fIntensity * factor;
   return vctResult * _vctColor;
+
+  /*
+  //normal phong specular - old Shading
+  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
+  float fHitCamera = dot(vctReflection, _vctView);
+  return vec4(vec3(pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular*0.2), 1);
+  */
 }
 
 vec4 illuminateDiffuse(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor) {
