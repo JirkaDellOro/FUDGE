@@ -12,6 +12,9 @@ namespace FudgeCore {
       this.color = _color;
     }
 
+    /**
+     * Returns the {@link TypeOfLight} of this light.
+     */
     public getType(): TypeOfLight {
       return <TypeOfLight>this.constructor;
     }

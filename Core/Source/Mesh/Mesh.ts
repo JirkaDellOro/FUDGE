@@ -25,13 +25,11 @@ namespace FudgeCore {
     // public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
     protected renderMesh: RenderMesh; /* defined by RenderInjector*/
 
-
     /** bounding box AABB */
     protected ƒbox: Box;
     // TODO: explore mathematics for easy transformations of radius 
     /** bounding radius */
     protected ƒradius: number;
-
 
     public constructor(_name: string = "Mesh") {
       super();
@@ -59,10 +57,28 @@ namespace FudgeCore {
       return this.ƒradius;
     }
 
+    /**
+     * Injected by {@link RenderInjectorMesh}.
+     * Used by the render system.
+     * @internal
+     */
     public useRenderBuffers(_shader: ShaderInterface, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers { return null; /* injected by RenderInjector*/ }
+    /**
+     * Injected by {@link RenderInjectorMesh}.
+     * Used by the render system.
+     * @internal
+     */
     public getRenderBuffers(_shader: ShaderInterface): RenderBuffers { return null; /* injected by RenderInjector*/ }
+    /**
+     * Injected by {@link RenderInjectorMesh}.
+     * Used by the render system.
+     * @internal
+     */
     public deleteRenderBuffers(_shader: ShaderInterface): void {/* injected by RenderInjector*/ }
 
+    /**
+     * Clears the bounds of this mesh aswell as the buffers of the associated {@link RenderMesh}.
+     */
     public clear(): void {
       this.ƒbox = undefined;
       this.ƒradius = undefined;

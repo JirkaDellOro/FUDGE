@@ -158,6 +158,9 @@ namespace FudgeCore {
       return RenderWebGL.rectRender;
     }
 
+    /**
+     * Enable / Disable WebGLs depth test
+     */
     public static setDepthTest(_test: boolean): void {
       if (_test)
         RenderWebGL.crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
@@ -165,6 +168,9 @@ namespace FudgeCore {
         RenderWebGL.crc3.disable(WebGL2RenderingContext.DEPTH_TEST);
     }
 
+    /**
+     * Set the blend mode to render with
+     */
     public static setBlendMode(_mode: BLEND): void {
       switch (_mode) {
         case BLEND.OPAQUE:

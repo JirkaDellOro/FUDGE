@@ -9,7 +9,7 @@ namespace FudgeCore {
    * ```
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
    */
-  export class Vector3 extends Mutable implements Recycable {
+  export class Vector3 extends Mutable implements Serializable, Recycable {
     private data: Float32Array; // TODO: check why this shouldn't be x,y,z as numbers...
 
     public constructor(_x: number = 0, _y: number = 0, _z: number = 0) {

@@ -14,18 +14,38 @@ namespace FudgeCore {
     public name: string;
     public idResource: string = undefined;
     public mipmap: MIPMAP = MIPMAP.CRISP;
-    protected renderData: { [key: string]: unknown };
+    /** @internal A map of textures. Used by the render engine */
+    protected renderData: { [key: string]: unknown }; // TODO: check if a map is necessary here, the corresponding render injector only ever accesses "texture0"
 
     public constructor(_name: string = "Texture") {
       super();
       this.name = _name;
     }
 
+    /**
+     * Returns the image source of this texture.
+     */
     public abstract get texImageSource(): ImageSource;
+
+    /**
+     * Generates and binds the texture in WebGL from the {@link texImageSource}. 
+     * Injected by {@link RenderInjectorTexture}. Used by the render system.
+     * @internal
+     */
     public useRenderData(): void {/* injected by RenderInjector*/ }
 
+    /**
+     * Deletes the texture in WebGL freeing the allocated gpu memory.
+     * Injected by {@link RenderInjectorTexture}.
+     * @internal
+     */
+    public deleteRenderData(): void {/* injected by RenderInjector*/ }
+
+    /**
+     * Refreshes the image data in the render engine.
+     */
     public refresh(): void {
-      this.renderData = null;
+      this.deleteRenderData();
     }
 
     //#region Transfer

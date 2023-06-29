@@ -2,12 +2,22 @@ namespace FudgeCore {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export type General = any;
 
+  /**
+   * Holds information needed to recreate an object identical to the one it originated from. 
+   * A serialization is used to create copies of existing objects at runtime or to store objects as strings or recreate them.
+   */
   export interface Serialization {
     [type: string]: General;
   }
 
   export interface Serializable {
+    /**
+     * Returns a {@link Serialization} of this object.
+     */
     serialize(): Serialization;
+    /**
+     * Recreates this instance of {@link Serializable} with the information from the given {@link Serialization}.
+     */
     deserialize(_serialization: Serialization): Promise<Serializable>;
   }
 
@@ -160,6 +170,10 @@ namespace FudgeCore {
     }
 
     //TODO: implement prettifier to make JSON-Stringification of serializations more readable, e.g. placing x, y and z in one line
+    /**
+     * Prettify a JSON-String, to make it more readable.
+     * not implemented yet
+     */
     public static prettify(_json: string): string { return _json; }
 
     /**
@@ -192,6 +206,9 @@ namespace FudgeCore {
     }
 
     // public static getConstructor<T extends Serializable>(_type: string, _namespace: Object = FudgeCore): new () => T {
+    /**
+     * Returns the constructor from the given path to a class
+     */
     public static getConstructor<T extends Serializable>(_path: string): new () => T {
       let typeName: string = _path.substring(_path.lastIndexOf(".") + 1);
       let namespace: Object = Serializer.getNamespace(_path);

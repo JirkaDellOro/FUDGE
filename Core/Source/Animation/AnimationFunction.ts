@@ -32,6 +32,10 @@ namespace FudgeCore {
       this.calculate();
     }
 
+    /**
+     * Returns the parameter values of this cubic function. `f(x) = ax³ + bx² + cx + d`
+     * Used by editor.
+     */
     public getParameters(): { a: number; b: number; c: number; d: number } {
       return { a: this.a, b: this.b, c: this.c, d: this.d };
     }

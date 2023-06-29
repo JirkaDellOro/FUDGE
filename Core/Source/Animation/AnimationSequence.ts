@@ -104,6 +104,10 @@ namespace FudgeCore {
       return this.keys[_index];
     }
 
+    /**
+     * Returns this sequence's keys. This is not a copy, but the actual array used internally. Handle with care!
+     * Used by Editor.
+     */
     public getKeys(): AnimationKey[] {
       return this.keys;
     }

@@ -37,6 +37,9 @@ namespace FudgeCore {
     #mtxCameraInverse: Matrix4x4;
     #mtxProjection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
 
+    /**
+     * Returns the cameras worldtransformation matrix i.e. the transformation relative to the root of the graph
+     */
     public get mtxWorld(): Matrix4x4 {
       let mtxCamera: Matrix4x4 = this.mtxPivot.clone;
       try {
@@ -46,6 +49,7 @@ namespace FudgeCore {
       }
       return mtxCamera;
     }
+
     /**
      * Returns the multiplication of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix
      * yielding the worldspace to viewspace matrix
@@ -59,6 +63,9 @@ namespace FudgeCore {
       return this.#mtxWorldToView;
     }
 
+    /**
+     * Returns the inversion of this cameras worldtransformation
+     */
     public get mtxCameraInverse(): Matrix4x4 {
       if (this.#mtxCameraInverse)
         return this.#mtxCameraInverse;
@@ -67,6 +74,10 @@ namespace FudgeCore {
       this.#mtxCameraInverse = Matrix4x4.INVERSION(this.mtxWorld);
       return this.#mtxCameraInverse;
     }
+
+    /**
+     * Returns the projectionmatrix of this camera
+     */
     public get mtxProjection(): Matrix4x4 {
       if (this.#mtxProjection)
         return this.#mtxProjection;
@@ -75,6 +86,10 @@ namespace FudgeCore {
       this.#mtxProjection = new Matrix4x4;
       return this.#mtxProjection;
     }
+
+    /**
+     * Resets this cameras {@link mtxWorldToView} and {@link mtxCameraInverse} matrices
+     */
     public resetWorldToView(): void {
       if (this.#mtxWorldToView) Recycler.store(this.#mtxWorldToView);
       if (this.#mtxCameraInverse) Recycler.store(this.#mtxCameraInverse);
@@ -82,29 +97,51 @@ namespace FudgeCore {
       this.#mtxCameraInverse = null;
     }
 
+    /**
+     * Returns the cameras {@link PROJECTION} mode
+     */
     public getProjection(): PROJECTION {
       return this.projection;
     }
 
+    /**
+     * Returns true if the background of the camera should be rendered, false if not
+     */
     public getBackgroundEnabled(): boolean {
       return this.backgroundEnabled;
     }
 
+    /**
+     * Returns the cameras aspect ratio
+     */
     public getAspect(): number {
       return this.aspectRatio;
     }
 
+    /**
+     * Returns the cameras field of view in degrees
+     */
     public getFieldOfView(): number {
       return this.fieldOfView;
     }
 
+    /**
+     * Returns the cameras direction i.e. the plane on which the fieldOfView-Angle is given
+     */
     public getDirection(): FIELD_OF_VIEW {
       return this.direction;
     }
 
+    /**
+     * Returns the cameras near value i.e. the minimum distance to render objects at
+     */
     public getNear(): number {
       return this.near;
     }
+
+    /**
+     * Returns the cameras far value i.e. the maximum distance to render objects at
+     */
     public getFar(): number {
       return this.far;
     }
@@ -124,6 +161,7 @@ namespace FudgeCore {
       this.far = _far;
       this.#mtxProjection = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction); // TODO: remove magic numbers
     }
+
     /**
      * Set the camera to orthographic projection. Default values are derived the canvas client dimensions
      * @param _left The positionvalue of the projectionspace's left border.    
@@ -159,6 +197,9 @@ namespace FudgeCore {
       return Rectangle.GET(0, 0, tanHorizontal * 2, tanVertical * 2);
     }
 
+    /**
+     * Transforms the given point from world space to clip space
+     */
     public pointWorldToClip(_pointInWorldSpace: Vector3): Vector3 {
       let result: Vector3;
       let m: Float32Array = this.mtxWorldToView.get();
@@ -169,6 +210,9 @@ namespace FudgeCore {
       return result;
     }
 
+    /**
+     * Transforms the given point from clip space to world space
+     */
     public pointClipToWorld(_pointInClipSpace: Vector3): Vector3 {
       let mtxViewToWorld: Matrix4x4 = Matrix4x4.INVERSION(this.mtxWorldToView);
       let m: Float32Array = mtxViewToWorld.get();

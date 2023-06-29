@@ -55,7 +55,6 @@ namespace FudgeCore {
         this.play(_start);
     }
 
-
     public set volume(_value: number) {
       this.gain.gain.value = _value;
     }
@@ -75,16 +74,25 @@ namespace FudgeCore {
     public get isPlaying(): boolean {
       return this.playing;
     }
+
     public get isAttached(): boolean {
       return this.node != null;
     }
+
     public get isListened(): boolean {
       return this.listened;
     }
 
+    /**
+     * Sets the given {@link Audio} as the audio source
+     */
     public setAudio(_audio: Audio): void {
       this.createSource(_audio, this.source.loop);
     }
+
+    /**
+     * Returns the {@link Audio} currently used as audio source
+     */
     public getAudio(): Audio {
       return this.audio;
     }
@@ -97,6 +105,9 @@ namespace FudgeCore {
     }
 
     // TODO: may be used for serialization of AudioNodes
+    /**
+     * Returns the mutator for the specified AudioNode of the standard graph
+     */
     public getMutatorOfNode(_type: AUDIO_NODE_TYPE): Mutator {
       let node: AudioNode = this.getAudioNode(_type);
       let mutator: Mutator = getMutatorOfArbitrary(node);

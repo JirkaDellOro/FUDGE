@@ -83,10 +83,16 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * Returns an iterator over this node and all its descendants in the graph below
+     */
     public [Symbol.iterator](): IterableIterator<Node> {
       return this.getIterator();
     }
 
+    /**
+     * De- / Activate this node. Inactive nodes will not be processed by the renderer.
+     */
     public activate(_on: boolean): void {
       this.active = _on;
       this.dispatchEvent(new Event(_on ? EVENT.NODE_ACTIVATE : EVENT.NODE_DEACTIVATE, { bubbles: true }));
@@ -238,11 +244,16 @@ namespace FudgeCore {
       return true;
     }
 
-
+    /**
+     * Returns true if the given timestamp matches the last update timestamp this node underwent, else false
+     */
     public isUpdated(_timestampUpdate: number): boolean {
       return (this.timestampUpdate == _timestampUpdate);
     }
 
+    /** 
+     * Returns true if this node is a descendant of the given node, directly or indirectly, else false
+     */
     public isDescendantOf(_ancestor: Node): boolean {
       let node: Node = this;
       while (node && node != _ancestor)

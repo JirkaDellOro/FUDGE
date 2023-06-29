@@ -5,6 +5,9 @@ namespace FudgeCore {
    * @internal
    */
   export class RenderInjectorCoat extends RenderInjector {
+    /**
+     * Injects the functionality of this class into the constructor of the given {@link Coat}-subclass
+     */
     public static decorate(_constructor: Function): void {
       RenderInjector.inject(_constructor, RenderInjectorCoat);
     }

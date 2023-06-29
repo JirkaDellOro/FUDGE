@@ -253,6 +253,9 @@ namespace FudgeCore {
       this.resetCache();
     }
 
+    /**
+     * Returns a formatted string representation of this quaternion
+     */
     public toString(): string {
       return `ƒ.Quaternion(x: ${this.data[0]}, y: ${this.data[1]}, z: ${this.data[2]}, w: ${this.data[3]})`;
     }

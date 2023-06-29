@@ -142,6 +142,9 @@ namespace FudgeCore {
       this.clearCache();
     }
 
+    /**
+     * Clear this animations cache.
+     */
     public clearCache(): void {
       this.#animationStructuresProcessed.clear();
     }

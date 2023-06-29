@@ -1,7 +1,5 @@
 namespace FudgeCore {
-  /**
-   * Inserted into a {@link Mesh}, an instance of this class calculates and represents the mesh data in the form needed by the render engine
-   */
+
   export interface RenderBuffers {
     vertices?: WebGLBuffer;
     indices?: WebGLBuffer;
@@ -14,7 +12,7 @@ namespace FudgeCore {
   }
 
   /**
-   * TODO: add typedoc-comment
+   * Inserted into a {@link Mesh}, an instance of this class calculates and represents the mesh data in the form needed by the render engine
    */
   export class RenderMesh {
     public smooth: RenderBuffers = null;

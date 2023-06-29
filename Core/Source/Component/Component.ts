@@ -52,6 +52,9 @@ namespace FudgeCore {
       return this.#node;
     }
 
+    /**
+     * De- / Activate this component. Inactive components will not be processed by the renderer.
+     */
     public activate(_on: boolean): void {
       this.active = _on;
       this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));

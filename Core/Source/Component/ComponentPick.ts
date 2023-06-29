@@ -13,6 +13,9 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentPick);
     public pick: PICK = PICK.RADIUS;
 
+    /**
+     * Picks the node according to the given {@link Ray} and invokes events accordingly
+     */
     public pickAndDispatch(_ray: Ray, _event: PointerEvent): void {
       let cmpMesh: ComponentMesh = this.node.getComponent(ComponentMesh);
       let position: Vector3 = cmpMesh ? cmpMesh.mtxWorld.translation : this.node.mtxWorld.translation;

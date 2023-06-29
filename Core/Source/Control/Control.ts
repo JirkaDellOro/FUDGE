@@ -85,6 +85,9 @@ namespace FudgeCore {
         this.dispatchOutput(null);
     }
 
+    /**
+     * TODO: describe!
+     */
     public pulse(_input: number): void {
       this.setInput(_input);
       this.setInput(0);

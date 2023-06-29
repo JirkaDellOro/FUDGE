@@ -1,5 +1,7 @@
 namespace FudgeCore {
+
   export namespace ParticleData {
+
     export enum FUNCTION {
       // VALUE = "value",
       ADDITION = "addition",
@@ -94,7 +96,10 @@ namespace FudgeCore {
       });
     }
 
-    public static getVertexShaderSource(this: ShaderParticleSystem): string {
+    /**
+     * Generates the source code for the vertex shader of the {@link ShaderParticleSystem} from the set {@link ShaderParticleSystem.data} and the original {@link ShaderParticleSystem.vertexShaderSource}.
+     */
+    protected static getVertexShaderSource(this: ShaderParticleSystem): string {
       let data: ParticleData.System = this.data;
       let mtxLocal: ParticleData.Transformation[] = data?.mtxLocal;
       let mtxWorld: ParticleData.Transformation[] = data?.mtxWorld;
@@ -110,7 +115,10 @@ namespace FudgeCore {
       return source;
     }
 
-    public static getFragmentShaderSource(this: ShaderParticleSystem): string {
+    /**
+     * Generates the source code for the fragment shader of the {@link ShaderParticleSystem} from the set {@link ShaderParticleSystem.data} and the original {@link ShaderParticleSystem.fragmentShaderSource}.
+     */
+    protected static getFragmentShaderSource(this: ShaderParticleSystem): string {
       return this.fragmentShaderSource.replace("#version 300 es", `#version 300 es${this.data.color ? "\n#define PARTICLE_COLOR" : ""}`);
     }
 

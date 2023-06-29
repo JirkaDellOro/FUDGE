@@ -17,10 +17,15 @@ namespace FudgeCore {
     program: WebGLProgram;
     attributes: { [name: string]: number };
     uniforms: { [name: string]: WebGLUniformLocation };
+    /** Returns the vertex shader source code for the render engine */
     getVertexShaderSource(): string;
+    /** Returns the fragment shader source code for the render engine */
     getFragmentShaderSource(): string;
+    /** @internal Injected by decorator. Used by the render system. */
     deleteProgram(this: ShaderInterface): void;
+    /** @internal Injected by decorator. Used by the render system. */
     useProgram(this: ShaderInterface): void;
+    /** @internal Injected by decorator. Used by the render system. */
     createProgram(this: ShaderInterface): void;
   }
 
@@ -46,14 +51,19 @@ namespace FudgeCore {
 
     /** The type of coat that can be used with this shader to create a material */
     public static getCoat(): typeof Coat { return CoatColored; }
+    /** Returns the vertex shader source code for the render engine */
     public static getVertexShaderSource(): string {
       return this.insertDefines(shaderSources["ShaderUniversal.vert"], this.define);
     }
+    /** Returns the fragment shader source code for the render engine */
     public static getFragmentShaderSource(): string {
       return this.insertDefines(shaderSources["ShaderUniversal.frag"], this.define);
     }
+    /** @internal Injected by {@link RenderInjectorShader}. Used by the render system. */
     public static deleteProgram(this: typeof Shader): void {/* injected by decorator */ }
+    /** @internal Injected by {@link RenderInjectorShader}. Used by the render system. */
     public static useProgram(this: typeof Shader): void {/* injected by decorator */ }
+    /** @internal Injected by {@link RenderInjectorShader}. Used by the render system. */ // TODO: maybe don't flag this as internal, so shaders can be precompiled in future FUDGE apps. Or create an API to precompile shaders, load textures etc.
     public static createProgram(this: typeof Shader): void {/* injected by decorator */ }
 
     protected static registerSubclass(_subclass: typeof Shader): number { return Shader.subclasses.push(_subclass) - 1; }

@@ -6,6 +6,9 @@ namespace FudgeCore {
    * @internal
    */
   export class RenderInjectorComponentParticleSystem {
+    /**
+     * Injects the functionality of this class into the constructor of the {@link ComponentParticleSystem}
+     */
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor.prototype, "useRenderData", {
         value: RenderInjectorComponentParticleSystem.useRenderData
@@ -22,7 +25,6 @@ namespace FudgeCore {
         crc3.activeTexture(WebGL2RenderingContext.TEXTURE1); // ATTENTION!: changing this id requires changing of corresponding id in particle render method, use ctrl + shift + f search!
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData);
       } else {
-        this.renderData = {};
         const texture: WebGLTexture = Render.assert<WebGLTexture>(crc3.createTexture());
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
 
@@ -61,6 +63,7 @@ namespace FudgeCore {
       crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
       crc3.deleteTexture(this.renderData);
       delete this.renderData;
+      
     }
   }
 }

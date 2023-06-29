@@ -542,6 +542,9 @@ namespace FudgeCore {
       Recycler.store(mtxRotation);
     }
 
+    /**
+     * Transpose this matrix
+     */
     public transpose(): Matrix4x4 {
       let matrix: Float32Array = this.data;
       this.data.set([
@@ -553,6 +556,9 @@ namespace FudgeCore {
       return this;
     }
 
+    /**
+     * Invert this matrix
+     */
     public inverse(): Matrix4x4 {
       let m: Float32Array = this.data;
       let m00: number = m[0 * 4 + 0];
@@ -898,7 +904,10 @@ namespace FudgeCore {
         this.data.set(_mtxTo);
       this.resetCache();
     }
-
+    
+    /**
+     * Returns a formatted string representation of this matrix
+     */
     public toString(): string {
       return `ƒ.Matrix4x4(translation: ${this.translation.toString()}, rotation: ${this.rotation.toString()}, scaling: ${this.scaling.toString()}`;
     }

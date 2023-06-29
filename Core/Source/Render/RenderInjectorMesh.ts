@@ -6,6 +6,9 @@ namespace FudgeCore {
    */
   export class RenderInjectorMesh {
 
+    /**
+     * Injects the functionality of this class into the constructor of the given {@link Mesh}-subclass
+     */
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor.prototype, "useRenderBuffers", {
         value: RenderInjectorMesh.useRenderBuffers
@@ -85,7 +88,6 @@ namespace FudgeCore {
 
       setBuffer("a_vctPosition", renderBuffers.vertices);
       setBuffer("a_vctNormal", renderBuffers.normals);
-
 
       // feed in texture coordinates if shader accepts a_vctTexture
       let attribute: number = _shader.attributes["a_vctTexture"];

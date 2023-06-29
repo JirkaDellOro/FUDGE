@@ -5,6 +5,9 @@ namespace FudgeCore {
    * @internal
    */
   export class RenderInjectorShader {
+    /**
+     * Injects the functionality of this class into the constructor of the given {@link Shader}-subclass
+     */
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor, "useProgram", {
         value: RenderInjectorShader.useProgram
@@ -17,6 +20,9 @@ namespace FudgeCore {
       });
     }
 
+    /**
+     * Set this program to use as the active program in WebGL
+     */
     public static useProgram(this: typeof Shader): void {
       if (!this.program)
         this.createProgram();
@@ -25,6 +31,9 @@ namespace FudgeCore {
       crc3.useProgram(this.program);
     }
 
+    /**
+     * Deletes this program from WebGL, clearing the used memory on the GPU.
+     */
     public static deleteProgram(this: typeof Shader): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       if (this.program) {

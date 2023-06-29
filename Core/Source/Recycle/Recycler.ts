@@ -1,7 +1,15 @@
 namespace FudgeCore {
+  
+  /**
+   * Interface to be implemented by objects that can be recycled, i.e. to avoid garbage collection by reusing the object instead of replacing it with a new one.
+   */
   export interface Recycable {
+    /**
+     * Recycles the object for the next reuse by setting its properties to their default states.
+     */
     recycle(): void;
   }
+
   /**
    * Keeps a depot of objects that have been marked for reuse, sorted by type.  
    * Using {@link Recycler} reduces load on the carbage collector and thus supports smooth performance.

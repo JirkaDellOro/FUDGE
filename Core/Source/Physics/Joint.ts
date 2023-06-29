@@ -120,6 +120,9 @@ namespace FudgeCore {
       if (this.joint != null) this.joint.setAllowCollision(this.#internalCollision);
     }
 
+    /**
+     * Connect a child node with the given name to the joint.
+     */
     public connectChild(_name: string): void {
       this.#nameChildToConnect = _name;
       if (!this.node)
@@ -132,6 +135,9 @@ namespace FudgeCore {
         Debug.warn(`${this.constructor.name} at ${this.node.name} fails to connect child with non existent or ambigous name ${_name}`);
     }
 
+    /**
+     * Connect the given node to the joint. Tieing its rigidbody to the nodes rigidbody this component is attached to.
+     */
     public connectNode(_node: Node): void {
       if (!_node || !this.node)
         return;

@@ -94,7 +94,7 @@ namespace FudgeCore {
   }
 
   /** Info about Raycasts shot from the physics system. */
-  export class RayHitInfo {
+  export class RayHitInfo implements Recycable {
     public hit: boolean;
     public hitDistance: number;
     public hitPoint: Vector3 = Vector3.ZERO();

@@ -29,6 +29,10 @@ namespace FudgeCore {
       this.light = _light;
     }
 
+    // TODO: use TypeOfLight as return type?
+    /**
+     * Set the type of {@link Light} used by this component.
+     */
     public setType<T extends Light>(_class: new () => T): void {
       let mtrOld: Mutator = {};
       if (this.light)

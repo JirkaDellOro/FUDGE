@@ -36,6 +36,9 @@ namespace FudgeCore {
       return mtxResult;
     }
 
+    /**
+     * Retrieve a new identity matrix
+     */
     public static IDENTITY(): Matrix3x3 {
       const mtxResult: Matrix3x3 = Recycler.get(Matrix3x3);
       return mtxResult;
@@ -85,7 +88,11 @@ namespace FudgeCore {
     }
     //#endregion
 
-
+    /**
+     * Computes and returns the product of two passed matrices.
+     * @param _mtxLeft The matrix to multiply.
+     * @param _mtxRight The matrix to multiply by.
+     */
     public static MULTIPLICATION(_mtxLeft: Matrix3x3, _mtxRight: Matrix3x3): Matrix3x3 {
       let a00: number = _mtxLeft.data[0 * 3 + 0];
       let a01: number = _mtxLeft.data[0 * 3 + 1];
@@ -353,11 +360,12 @@ namespace FudgeCore {
       this.resetCache();
     }
 
+    /**
+     * Returns a formatted string representation of this matrix
+     */
     public toString(): string {
       return `ƒ.Matrix3x3(translation: ${this.translation.toString()}, rotation: ${this.rotation.toString()}, scaling: ${this.scaling.toString()}`;
     }
-
-
 
     /**
      * Return the elements of this matrix as a Float32Array

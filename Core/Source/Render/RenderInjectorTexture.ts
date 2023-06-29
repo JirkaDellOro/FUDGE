@@ -7,6 +7,9 @@ namespace FudgeCore {
   export class RenderInjectorTexture extends RenderInjector {
     public static decorate(_constructor: Function): void {
       RenderInjector.inject(_constructor, RenderInjectorTexture);
+      Object.defineProperty(_constructor.prototype, "deleteRenderData", {
+        value: RenderInjectorTexture.deleteRenderData
+      });
     }
 
     protected static injectTexture(this: Texture): void {
@@ -52,6 +55,16 @@ namespace FudgeCore {
 
         this.useRenderData();
       }
+    }
+
+    protected static deleteRenderData(this: Texture): void {
+      if (!this.renderData) return;
+
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+      crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
+      for (const textureKey in this.renderData) 
+        crc3.deleteTexture(this.renderData[textureKey]);
+      this.renderData = null;
     }
   }
 }

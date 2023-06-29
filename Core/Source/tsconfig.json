@@ -55,6 +55,7 @@
     "skipLibCheck": true, // TODO: check this. Became necessary on one computer because WebgGL in lib.dom.d.ts was not correctly implemented
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     "useDefineForClassFields": false,
+    "stripInternal": true,                /* Disable emitting declarations that have '@internal' in their JSDoc comments. */
   },
   "exclude": ["./Shader/Shaders"]
 }

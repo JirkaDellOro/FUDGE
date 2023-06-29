@@ -7,7 +7,7 @@ namespace FudgeCore {
    * ```
    * @authors Lukas Scheuerle, Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class Vector2 extends Mutable implements Recycable {
+  export class Vector2 extends Mutable implements Serializable, Recycable {
     private data: Float32Array;
 
     public constructor(_x: number = 0, _y: number = 0) {
@@ -58,6 +58,9 @@ namespace FudgeCore {
       return vector;
     }
 
+    /**
+     * Creates and returns a vector through transformation of the given vector by the given matrix
+     */
     public static TRANSFORMATION(_vector: Vector2, _mtxTransform: Matrix3x3, _includeTranslation: boolean = true): Vector2 {
       let result: Vector2 = Recycler.get(Vector2);
       let m: Float32Array = _mtxTransform.get();
@@ -296,6 +299,10 @@ namespace FudgeCore {
       return new Float32Array(this.data);
     }
 
+    /**
+     * Transforms this vector by the given matrix, including or exluding the translation.
+     * Including is the default, excluding will only rotate and scale this vector.
+     */
     public transform(_mtxTransform: Matrix3x3, _includeTranslation: boolean = true): void {
       this.data = Vector2.TRANSFORMATION(this, _mtxTransform, _includeTranslation).data;
     }
@@ -322,10 +329,14 @@ namespace FudgeCore {
       return new Vector3(this.x, this.y, _z);
     }
 
+    /**
+     * Returns a formatted string representation of this vector
+     */
     public toString(): string {
       let result: string = `(${this.x.toPrecision(5)}, ${this.y.toPrecision(5)})`;
       return result;
     }
+
     /**
      * Uses the standard array.map functionality to perform the given function on all components of this vector
      * and return a new vector with the results

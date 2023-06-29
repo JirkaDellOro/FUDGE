@@ -120,6 +120,9 @@ namespace FudgeCore {
       this.setPositionAndSize();
     }
 
+    /**
+     * Set this rectangle to the values given by the rectangle provided
+     */
     public copy(_rect: Rectangle): void {
       this.setPositionAndSize(_rect.x, _rect.y, _rect.width, _rect.height);
     }
@@ -141,6 +144,9 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * Transforms the given point from this rectangles space to the target rectangles space
+     */
     public pointToRect(_point: Vector2, _target: Rectangle): Vector2 {
       let result: Vector2 = _point.clone;
       result.subtract(this.position);

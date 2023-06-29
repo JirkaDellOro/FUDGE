@@ -5,6 +5,9 @@ namespace FudgeCore {
    */
   export namespace ParticleData {
 
+    /**
+     * The data structure for a particle system. Describes the particle behavior and appearance.
+     */
     export interface System {
       variableNames?: string[];
       variables?: Expression[]; //{ [name: string]: Expression };
@@ -39,26 +42,44 @@ namespace FudgeCore {
       parameters: Expression[];
     }
 
+    /**
+     * Returns true if the given data is a {@link Expression}
+     */
     export function isExpression(_data: Recursive): _data is Expression {
       return isFunction(_data) || isVariable(_data) || isConstant(_data) || isCode(_data);
     }
 
+    /**
+     * Returns true if the given data is a {@link Function}
+     */
     export function isFunction(_data: Recursive): _data is Function {
       return typeof _data == "object" && "function" in _data;
     }
 
+    /**
+     * Returns true if the given data is a {@link Variable}
+     */
     export function isVariable(_data: Recursive): _data is Variable {
       return typeof _data == "object" && "value" in _data && typeof _data.value == "string";
     }
 
+    /**
+     * Returns true if the given data is a {@link Constant}
+     */
     export function isConstant(_data: Recursive): _data is Constant {
       return typeof _data == "object" && "value" in _data && typeof _data.value == "number";
     }
 
+    /**
+     * Returns true if the given data is a {@link Code}
+     */
     export function isCode(_data: Recursive): _data is Code {
       return typeof _data == "object" && "code" in _data;
     }
 
+    /**
+     * Returns true if the given data is a {@link Transformation}
+     */
     export function isTransformation(_data: Recursive): _data is Transformation {
       return typeof _data == "object" && "transformation" in _data;
     }
@@ -101,6 +122,7 @@ namespace FudgeCore {
      * Returns a corresponding {@link ShaderParticleSystem} for the given shader universal derivate.
      * Used by the render system to render the particle system.
      * @returns the corresponding {@link ShaderParticleSystem}
+     * @internal
      */
     public getShaderFrom(_source: ShaderInterface): ShaderParticleSystem {
       if (!this.#shaderToShaderParticleSystem.has(_source)) {
