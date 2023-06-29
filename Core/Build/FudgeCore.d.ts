@@ -1356,7 +1356,13 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
+        /**
+         * Connect a child node with the given name to the joint.
+         */
         connectChild(_name: string): void;
+        /**
+         * Connect the given node to the joint. Tieing its rigidbody to the nodes rigidbody this component is attached to.
+         */
         connectNode(_node: Node): void;
         /** Check if connection is dirty, so when either rb is changed disconnect and reconnect. Internally used no user interaction needed. */
         isConnected(): boolean;
@@ -1526,6 +1532,9 @@ declare namespace FudgeCore {
         get getLabels(): Enumerator;
         get fps(): number;
         set fps(_fps: number);
+        /**
+         * Clear this animations cache.
+         */
         clearCache(): void;
         /**
          * Generates and returns a {@link Mutator} with the information to apply to the {@link Node} to animate
@@ -1661,6 +1670,10 @@ declare namespace FudgeCore {
         constructor(_keyIn: AnimationKey, _keyOut?: AnimationKey);
         set setKeyIn(_keyIn: AnimationKey);
         set setKeyOut(_keyOut: AnimationKey);
+        /**
+         * Returns the parameter values of this cubic function. `f(x) = ax³ + bx² + cx + d`
+         * Used by editor.
+         */
         getParameters(): {
             a: number;
             b: number;
@@ -1766,6 +1779,10 @@ declare namespace FudgeCore {
          * @returns the AnimationKey at the index if it exists, null otherwise.
          */
         getKey(_index: number): AnimationKey;
+        /**
+         * Returns this sequence's keys. This is not a copy, but the actual array used internally. Handle with care!
+         * Used by Editor.
+         */
         getKeys(): AnimationKey[];
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -1792,12 +1809,24 @@ declare namespace FudgeCore {
          * Sets the texture to be used as the spritesheet
          */
         setTexture(_texture: Texture): void;
+        /**
+         * Creates this animation sprite from the given arguments
+         */
         create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2, _framesPerSecond: number): void;
+        /**
+         * Returns the scale of the spritesheet
+         */
         getScale(): Vector2;
+        /**
+         * Returns the positions of the spritesheet
+         */
         getPositions(): Vector2[];
         mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
         serialize(): Serialization;
         deserialize(_s: Serialization): Promise<Serializable>;
+        /**
+         * Converts the {@link AnimationSprite} into an {@link Animation}
+         */
         convertToAnimation(): Animation;
     }
 }
@@ -2226,6 +2255,9 @@ declare namespace FudgeCore {
     abstract class Light extends Mutable implements Serializable {
         color: Color;
         constructor(_color?: Color);
+        /**
+         * Returns the {@link TypeOfLight} of this light.
+         */
         getType(): TypeOfLight;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -2550,6 +2582,9 @@ declare namespace FudgeCore {
          * Feed an input value into this control and fire the events {@link EVENT_CONTROL.INPUT} and {@link EVENT_CONTROL.OUTPUT}
          */
         setInput(_input: number): void;
+        /**
+         * TODO: describe!
+         */
         pulse(_input: number): void;
         /**
          * Set the time to take for the internal linear dampening until the final ouput value is reached
