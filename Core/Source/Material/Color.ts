@@ -4,7 +4,11 @@ namespace FudgeCore {
    */
   export class Color extends Mutable implements Serializable {
     // crc2 only used for converting colors from strings predefined by CSS
-    private static crc2: CanvasRenderingContext2D = document.createElement("canvas").getContext("2d");
+    private static crc2: CanvasRenderingContext2D = (() => {
+      const crc2: CanvasRenderingContext2D = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+      crc2.globalCompositeOperation = "copy";
+      return crc2;
+    })();
 
     public r: number;
     public g: number;
@@ -16,26 +20,54 @@ namespace FudgeCore {
       this.setNormRGBA(_r, _g, _b, _a);
     }
 
-    public static getHexFromCSSKeyword(_keyword: string): string {
+    // /**
+    //  * Returns a hex-code representation, i.e. "#RRGGBBAA", of the given css color keyword.
+    //  */
+    // public static getHexFromCSSKeyword(_keyword: string): string {
+    //   let hex: string = "#";
+    //   for (let byte of Color.getBytesRGBAFromCSSKeyword(_keyword))
+    //     hex += byte.toString(16).padStart(2, "0");
+    //   return hex;
+    // }
+
+    /**
+     * Returns a {@link Uint8ClampedArray} with the 8-bit color channel values in the order RGBA.
+     */
+    public static getBytesRGBAFromCSSKeyword(_keyword: string): Uint8ClampedArray {
       Color.crc2.fillStyle = _keyword;
-      return Color.crc2.fillStyle;
+      Color.crc2.fillRect(0, 0, 1, 1);
+      return Color.crc2.getImageData(0, 0, 1, 1).data;
     }
 
-    public static CSS(_keyword: string, _alpha: number = 1): Color {
-      let hex: string = Color.getHexFromCSSKeyword(_keyword);
-      let color: Color = new Color(
-        parseInt(hex.substr(1, 2), 16) / 255,
-        parseInt(hex.substr(3, 2), 16) / 255,
-        parseInt(hex.substr(5, 2), 16) / 255,
-        _alpha);
+    /**
+     * Returns a new {@link Color} object created from the given css color keyword. 
+     * Passing an _alpha value will override the alpha value specified in the keyword.
+     */
+    public static CSS(_keyword: string, _alpha?: number): Color {
+      const bytesRGBA: Uint8ClampedArray = Color.getBytesRGBAFromCSSKeyword(_keyword);
+      // // conserve the input alpha value from keyword when rgba() or hsla() is used, otherwise "rgba(..., 0.3)" results in color.a = ~0.30196 conversion
+      // if (_keyword.toLocaleLowerCase().match(/(rgba|hsla)\(.*\)/)) 
+      //   _alpha = parseFloat(_keyword.match(/[^,]+(?=\))/)[0]);
+      const color: Color = new Color(
+        bytesRGBA[0] / 255,
+        bytesRGBA[1] / 255,
+        bytesRGBA[2] / 255,
+        _alpha ?? bytesRGBA[3] / 255);
       return color;
     }
 
-
+    // TODO: rename to MULTIPLICATION like in Matarix3x3/Matrix4x4?
+    /**
+     * Computes and retruns the product of two colors. 
+     */
     public static MULTIPLY(_color1: Color, _color2: Color): Color {
       return new Color(_color1.r * _color2.r, _color1.g * _color2.g, _color1.b * _color2.b, _color1.a * _color2.a);
     }
 
+    // TODO: rename to setClampedRGBA? Norm is misleading, since it is not normalized but clamped
+    /**
+     * Clamps the given color channel values bewteen 0 and 1 and sets them.
+     */
     public setNormRGBA(_r: number, _g: number, _b: number, _a: number): void {
       this.r = Math.min(1, Math.max(0, _r));
       this.g = Math.min(1, Math.max(0, _g));
@@ -43,26 +75,44 @@ namespace FudgeCore {
       this.a = Math.min(1, Math.max(0, _a));
     }
 
+    /**
+     * Sets this color from the given 8-bit values for the color channels.
+     */
     public setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void {
       this.setNormRGBA(_r / 255, _g / 255, _b / 255, _a / 255);
     }
 
+    /**
+     * Returns a new {@link Float32Array} with the color channel values in the order RGBA.
+     */
     public getArray(): Float32Array {
       return new Float32Array([this.r, this.g, this.b, this.a]);
     }
 
+    /**
+     * Clamps the given color channel values between 0 and 1 and sets them.
+     */
     public setArrayNormRGBA(_color: Float32Array): void {
       this.setNormRGBA(_color[0], _color[1], _color[2], _color[3]);
     }
 
+    /**
+     * Sets this color from the given {@link Uint8ClampedArray}. Order of the channels is RGBA
+     */
     public setArrayBytesRGBA(_color: Uint8ClampedArray): void {
       this.setBytesRGBA(_color[0], _color[1], _color[2], _color[3]);
     }
 
+    /**
+     * Returns a new {@link Uint8ClampedArray} with the color channel values in the order RGBA.
+     */
     public getArrayBytesRGBA(): Uint8ClampedArray {
       return new Uint8ClampedArray([this.r * 255, this.g * 255, this.b * 255, this.a * 255]);
     }
 
+    /**
+     * Adds the given color to this.
+     */
     public add(_color: Color): void {
       this.r += _color.r;
       this.g += _color.g;
@@ -70,11 +120,17 @@ namespace FudgeCore {
       this.a += _color.a;
     }
 
+    /**
+     * Returns the css color keyword representing this color.
+     */
     public getCSS(): string {
       let bytes: Uint8ClampedArray = this.getArrayBytesRGBA();
-      return `RGBA(${bytes[0]}, ${bytes[1]}, ${bytes[2]}, ${bytes[3]})`;
+      return `RGBA(${bytes[0]}, ${bytes[1]}, ${bytes[2]}, ${this.a})`;
     }
 
+    /**
+     * Returns the hex string representation of this color.
+     */
     public getHex(): string {
       let bytes: Uint8ClampedArray = this.getArrayBytesRGBA();
       let hex: string = "";
@@ -83,6 +139,9 @@ namespace FudgeCore {
       return hex;
     }
 
+    /**
+     * Sets this color from the given hex string color.
+     */
     public setHex(_hex: string): void {
       let bytes: Uint8ClampedArray = this.getArrayBytesRGBA();
       let channel: number = 0;
@@ -91,6 +150,9 @@ namespace FudgeCore {
       this.setArrayBytesRGBA(bytes);
     }
 
+    /**
+     * Set this color to the values given by the color provided
+     */
     public copy(_color: Color): void {
       this.r = _color.r;
       this.g = _color.g;
@@ -98,6 +160,9 @@ namespace FudgeCore {
       this.a = _color.a;
     }
 
+    /**
+     * Returns a formatted string representation of this color
+     */
     public toString(): string {
       return `(r: ${this.r.toFixed(3)}, g: ${this.g.toFixed(3)}, b: ${this.b.toFixed(3)}, a: ${this.a.toFixed(3)})`;
     }
