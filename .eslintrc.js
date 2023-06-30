@@ -160,10 +160,10 @@ module.exports = {
     "no-unused-expressions": "off",
     "@typescript-eslint/no-unused-expressions": "warn",
     "quotes": "off",
-    "@typescript-eslint/quotes": [
-      "warn",
-      "double"
-    ],
+    // "@typescript-eslint/quotes": [
+    //   "warn",
+    //   "double"
+    // ],
     "@typescript-eslint/type-annotation-spacing": "warn",
     "@typescript-eslint/typedef": [
       "warn",

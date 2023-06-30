@@ -13,9 +13,10 @@ namespace Fudge {
     public fileScript: string = "Script/Build/Script.js";
     public fileStyles: string = "styles.css";
 
-    #document: Document;
-    // private includeAutoViewScript: boolean = true;
     private graphAutoView: string = "";
+    // private includeAutoViewScript: boolean = true;
+
+    #document: Document;
 
     public constructor(_base: URL) {
       super();
@@ -42,12 +43,12 @@ namespace Fudge {
     public hndChange = (_event: Event): void => {
       let mutator: ƒ.Mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
       console.log(mutator, this);
-    }
+    };
 
-    public async load(htmlContent: string): Promise<void> {
+    public async load(_htmlContent: string): Promise<void> {
       ƒ.Physics.activeInstance = new ƒ.Physics();
       const parser: DOMParser = new DOMParser();
-      this.#document = parser.parseFromString(htmlContent, "text/html");
+      this.#document = parser.parseFromString(_htmlContent, "text/html");
       const head: HTMLHeadElement = this.#document.querySelector("head");
 
       const scripts: NodeListOf<HTMLScriptElement> = head.querySelectorAll("script");

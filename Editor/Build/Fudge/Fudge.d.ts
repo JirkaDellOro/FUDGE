@@ -212,7 +212,7 @@ declare namespace Fudge {
         constructor(_base: URL);
         openDialog(): Promise<boolean>;
         hndChange: (_event: Event) => void;
-        load(htmlContent: string): Promise<void>;
+        load(_htmlContent: string): Promise<void>;
         getProjectJSON(): string;
         getProjectCSS(): string;
         getProjectHTML(_title: string): string;
@@ -729,12 +729,12 @@ declare namespace Fudge {
         private mtxImage;
         private timeoutDefer;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
-        private hndMouse;
-        private setTransform;
         private static createStandardMaterial;
         private static createStandardMesh;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private hndMouse;
+        private setTransform;
         private fillContent;
         private createStandardGraph;
         private setViewObject;

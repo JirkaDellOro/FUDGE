@@ -83,7 +83,7 @@ namespace Fudge {
     }
 
     private hndEvent = async (_event: EditorEvent | CustomEvent): Promise<void> => {
-      if (_event.type != EVENT_EDITOR.UPDATE && _event.type != EVENT_EDITOR.MODIFY)
+      if (_event.type != EVENT_EDITOR.UPDATE && _event.type != EVENT_EDITOR.MODIFY && _event.type != EVENT_EDITOR.CLOSE)
         _event.stopPropagation();
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:

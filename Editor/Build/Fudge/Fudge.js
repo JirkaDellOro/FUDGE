@@ -231,6 +231,8 @@ var Fudge;
             return;
         let base = new URL(new URL("file://" + filename[0]).toString() + "/");
         console.log("Path", base.toString());
+        if (Fudge.project) // reset panel info when we already have a project otherwise old panel state gets saved in new project when calling saveProject()
+            Fudge.Page.setPanelInfo("[]");
         Fudge.project = new Fudge.Project(base);
         await saveProject(true);
         let ƒPath = new URL("../../", location.href);
@@ -568,9 +570,9 @@ var Fudge;
         fileInternal = "Internal.json";
         fileScript = "Script/Build/Script.js";
         fileStyles = "styles.css";
-        #document;
-        // private includeAutoViewScript: boolean = true;
         graphAutoView = "";
+        // private includeAutoViewScript: boolean = true;
+        #document;
         constructor(_base) {
             super();
             this.base = _base;
@@ -593,10 +595,10 @@ var Fudge;
             let mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
             console.log(mutator, this);
         };
-        async load(htmlContent) {
+        async load(_htmlContent) {
             ƒ.Physics.activeInstance = new ƒ.Physics();
             const parser = new DOMParser();
-            this.#document = parser.parseFromString(htmlContent, "text/html");
+            this.#document = parser.parseFromString(_htmlContent, "text/html");
             const head = this.#document.querySelector("head");
             const scripts = head.querySelectorAll("script");
             for (let script of scripts) {
@@ -2206,7 +2208,7 @@ var Fudge;
             // TODO: iterate over views and collect their states for reconstruction 
         }
         hndEvent = async (_event) => {
-            if (_event.type != Fudge.EVENT_EDITOR.UPDATE && _event.type != Fudge.EVENT_EDITOR.MODIFY)
+            if (_event.type != Fudge.EVENT_EDITOR.UPDATE && _event.type != Fudge.EVENT_EDITOR.MODIFY && _event.type != Fudge.EVENT_EDITOR.CLOSE)
                 _event.stopPropagation();
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
@@ -2294,7 +2296,7 @@ var Fudge;
         }
         hndEvent = async (_event) => {
             this.broadcast(_event);
-            _event.stopPropagation();
+            // _event.stopPropagation();
         };
     }
     Fudge.PanelParticleSystem = PanelParticleSystem;
@@ -4435,8 +4437,8 @@ var Fudge;
             try {
                 this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             }
-            catch (_error) { }
-            ; // view should load even if rendering fails...
+            catch (_error) { /* view should load even if rendering fails... */ }
+            ;
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             this.viewport.addEventListener("renderPrepareStart" /* ƒ.EVENT.RENDER_PREPARE_START */, this.hndPrepare);
             this.setGraph(null);
@@ -4546,6 +4548,8 @@ var Fudge;
             _event.cancelBubble = true;
         };
         redraw = () => {
+            if (this.viewport.canvas.clientHeight == 0 || this.viewport.canvas.clientHeight == 0)
+                return;
             try {
                 ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.graph);
                 ƒ.Physics.connectJoints();
@@ -4596,9 +4600,10 @@ var Fudge;
             // cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
             // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
             cmpCamera.projectCentral(1, 45);
-            let canvas = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
+            let canvas = ƒAid.Canvas.create(false, ƒAid.IMAGE_RENDERING.PIXELATED);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Preview", null, cmpCamera, canvas);
+            // ƒ.RenderWebGL.setCanvasSize(1, 1);
             this.cmrOrbit = ƒAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             this.previewNode = this.createStandardGraph();
             this.fillContent();
@@ -4610,6 +4615,33 @@ var Fudge;
             this.dom.addEventListener("wheel", this.hndMouse);
             this.dom.addEventListener("mousemove", this.hndMouse);
         }
+        static createStandardMaterial() {
+            let mtrStandard = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("white")));
+            ƒ.Project.deregister(mtrStandard);
+            return mtrStandard;
+        }
+        static createStandardMesh() {
+            let meshStandard = new ƒ.MeshSphere("Sphere", 20, 12);
+            ƒ.Project.deregister(meshStandard);
+            return meshStandard;
+        }
+        // #region  ContextMenu
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            // item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU[CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
+            // menu.append(item);
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
+            // switch (_item.id) {
+            // case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
+            //   this.illuminateGraph();
+            //   break;
+            // }
+        }
+        //#endregion
         hndMouse = (_event) => {
             let div = this.dom.querySelector("div#image");
             if (!div)
@@ -4641,33 +4673,6 @@ var Fudge;
             transform = transform.copyWithin(2, 3);
             _div.style.transform = `matrix(${transform.slice(0, 6).join()})`;
         }
-        static createStandardMaterial() {
-            let mtrStandard = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("white")));
-            ƒ.Project.deregister(mtrStandard);
-            return mtrStandard;
-        }
-        static createStandardMesh() {
-            let meshStandard = new ƒ.MeshSphere("Sphere", 20, 12);
-            ƒ.Project.deregister(meshStandard);
-            return meshStandard;
-        }
-        // #region  ContextMenu
-        getContextMenu(_callback) {
-            const menu = new Fudge.remote.Menu();
-            let item;
-            // item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU[CONTEXTMENU.ILLUMINATE], checked: true, type: "checkbox", click: _callback });
-            // menu.append(item);
-            return menu;
-        }
-        contextMenuCallback(_item, _window, _event) {
-            ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
-            switch (_item.id) {
-                // case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
-                //   this.illuminateGraph();
-                //   break;
-            }
-        }
-        //#endregion
         fillContent() {
             this.dom.innerHTML = "";
             if (!this.resource) {
@@ -4852,6 +4857,8 @@ var Fudge;
             ƒ.Render.prepare(this.cmrOrbit);
         }
         redraw = () => {
+            if (this.viewport.canvas.clientHeight == 0 || this.viewport.canvas.clientHeight == 0)
+                return;
             try {
                 if (this.resource instanceof ƒ.Graph)
                     ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);

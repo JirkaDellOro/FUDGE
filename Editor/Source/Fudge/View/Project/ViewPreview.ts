@@ -17,7 +17,7 @@ namespace Fudge {
     private mtxImage: ƒ.Matrix3x3 = ƒ.Matrix3x3.IDENTITY();
     private timeoutDefer: number;
 
-    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
       // create viewport for 3D-resources
@@ -25,9 +25,10 @@ namespace Fudge {
       // cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
       // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
       cmpCamera.projectCentral(1, 45);
-      let canvas: HTMLCanvasElement = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
+      let canvas: HTMLCanvasElement = ƒAid.Canvas.create(false, ƒAid.IMAGE_RENDERING.PIXELATED);
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("Preview", null, cmpCamera, canvas);
+      // ƒ.RenderWebGL.setCanvasSize(1, 1);
       this.cmrOrbit = ƒAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
       this.previewNode = this.createStandardGraph();
 
@@ -40,40 +41,6 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("wheel", this.hndMouse);
       this.dom.addEventListener("mousemove", this.hndMouse);
-    }
-
-    private hndMouse = (_event: WheelEvent) => {
-      let div: HTMLDivElement = this.dom.querySelector("div#image");
-      if (!div)
-        return;
-      _event.preventDefault();
-      switch (_event.type) {
-        case "mousemove":
-          if (_event.buttons != 2)
-            return;
-          this.mtxImage.translateX(_event.movementX)
-          this.mtxImage.translateY(_event.movementY)
-          break;
-        case "wheel":
-          let offset: ƒ.Vector2 = new ƒ.Vector2(
-            _event.offsetX - this.dom.clientWidth, _event.offsetY - this.dom.clientHeight / 2)
-          let zoom: number = Math.exp(-_event.deltaY / 1000)
-          // console.log(offset.toString());
-          this.mtxImage.scaleX(zoom);
-          this.mtxImage.scaleY(zoom);
-          offset.scale(zoom - 1);
-          this.mtxImage.translateX(-offset.x)
-          this.mtxImage.translateY(-offset.y)
-          break;
-      }
-      this.setTransform(div);
-    }
-
-    private setTransform(_div: HTMLDivElement): void {
-      let transform: Float32Array = this.mtxImage.get();
-      transform = transform.copyWithin(5, 6);
-      transform = transform.copyWithin(2, 3);
-      _div.style.transform = `matrix(${transform.slice(0, 6).join()})`;
     }
 
     private static createStandardMaterial(): ƒ.Material {
@@ -101,14 +68,47 @@ namespace Fudge {
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
 
-      switch (_item.id) {
-        // case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
-        //   this.illuminateGraph();
-        //   break;
-      }
+      // switch (_item.id) {
+      // case CONTEXTMENU[CONTEXTMENU.ILLUMINATE]:
+      //   this.illuminateGraph();
+      //   break;
+      // }
     }
-
     //#endregion
+
+    private hndMouse = (_event: WheelEvent): void => {
+      let div: HTMLDivElement = this.dom.querySelector("div#image");
+      if (!div)
+        return;
+      _event.preventDefault();
+      switch (_event.type) {
+        case "mousemove":
+          if (_event.buttons != 2)
+            return;
+          this.mtxImage.translateX(_event.movementX);
+          this.mtxImage.translateY(_event.movementY);
+          break;
+        case "wheel":
+          let offset: ƒ.Vector2 = new ƒ.Vector2(
+            _event.offsetX - this.dom.clientWidth, _event.offsetY - this.dom.clientHeight / 2);
+          let zoom: number = Math.exp(-_event.deltaY / 1000);
+          // console.log(offset.toString());
+          this.mtxImage.scaleX(zoom);
+          this.mtxImage.scaleY(zoom);
+          offset.scale(zoom - 1);
+          this.mtxImage.translateX(-offset.x);
+          this.mtxImage.translateY(-offset.y);
+          break;
+      }
+      this.setTransform(div);
+    };
+
+    private setTransform(_div: HTMLDivElement): void {
+      let transform: Float32Array = this.mtxImage.get();
+      transform = transform.copyWithin(5, 6);
+      transform = transform.copyWithin(2, 3);
+      _div.style.transform = `matrix(${transform.slice(0, 6).join()})`;
+    }
 
     private fillContent(): void {
       this.dom.innerHTML = "";
@@ -175,7 +175,7 @@ namespace Fudge {
         case "TextureImage":
         case "AnimationSprite":
           let div: HTMLDivElement = document.createElement("div");
-          div.id = "image"
+          div.id = "image";
           let img: HTMLImageElement;
           if (type == "TextureImage") {
             img = (<ƒ.TextureImage>this.resource).image;
@@ -296,7 +296,7 @@ namespace Fudge {
           this.fillContent();
           break;
       }
-    }
+    };
 
     private resetCamera(): void {
       let branch: ƒ.Node = this.viewport.getBranch();
@@ -311,7 +311,9 @@ namespace Fudge {
       ƒ.Render.prepare(this.cmrOrbit);
     }
 
-    private redraw = () => {
+    private redraw = (): void => {
+      if (this.viewport.canvas.clientHeight == 0 || this.viewport.canvas.clientHeight == 0)
+        return;
       try {
         if (this.resource instanceof ƒ.Graph)
           ƒ.Physics.activeInstance = Page.getPhysics(this.resource);
@@ -319,7 +321,7 @@ namespace Fudge {
       } catch (_error: unknown) {
         //nop
       }
-    }
+    };
 
     private defer(_function: Function): void {
       if (this.timeoutDefer)

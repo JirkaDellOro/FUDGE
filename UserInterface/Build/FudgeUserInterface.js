@@ -1634,7 +1634,7 @@ var FudgeUserInterface;
 (function (FudgeUserInterface) {
     /**
      * Extension of {@link CustomTreeList} that represents the root of a tree control
-     * ```plaintext
+     * ```text
      * tree <ul>
      * ├ treeItem <li>
      * ├ treeItem <li>
@@ -2141,7 +2141,7 @@ var FudgeUserInterface;
     // TODO: duplicated code in Table and Tree, may be optimized...
     /**
      * Manages a sortable table of data given as simple array of flat objects
-     * ```plaintext
+     * ```text
      * Key0  Key1 Key2
      * ```
      */
@@ -2667,7 +2667,7 @@ var FudgeUserInterface;
     })(CSS_CLASS = FudgeUserInterface.CSS_CLASS || (FudgeUserInterface.CSS_CLASS = {}));
     /**
      * Extension of [[TreeList]] that represents the root of a tree control
-     * ```plaintext
+     * ```text
      * tree <ul>
      * ├ treeItem <li>
      * ├ treeItem <li>
