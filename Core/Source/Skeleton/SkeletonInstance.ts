@@ -1,13 +1,18 @@
 namespace FudgeCore {
+
+  /**
+   * An instance of a {@link Skeleton}.
+   * It holds all the information needed to animate itself. Referenced from a {@link ComponentMesh} it can be associated with a {@link MeshSkin} and enable skeleton animation for the mesh.
+   * As an extension of {@link GraphInstance} it also keeps a reference to its resource and can thus optimize serialization.
+   */
   export class SkeletonInstance extends GraphInstance {
+    public bindPose: BoneMatrixList;
+    private skeletonSource: Skeleton;
 
     #bones: BoneList;
     #mtxBoneLocals: BoneMatrixList;
     #mtxBones: Matrix4x4[];
     #mtxBonesUpdated: number;
-
-    public bindPose: BoneMatrixList;
-    private skeletonSource: Skeleton;
 
     public static async CREATE(_skeleton: Skeleton): Promise<SkeletonInstance> {
       const skeleton: SkeletonInstance = new SkeletonInstance();

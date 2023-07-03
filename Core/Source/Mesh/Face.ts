@@ -10,7 +10,7 @@ namespace FudgeCore {
     public normal: Vector3;
     private vertices: Vertices;
 
-    constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number) {
+    public constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number) {
       this.indices = [_index0, _index1, _index2];
       this.vertices = _vertices;
       this.calculateNormals();

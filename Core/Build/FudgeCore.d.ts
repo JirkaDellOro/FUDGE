@@ -2287,7 +2287,7 @@ declare namespace FudgeCore {
         getMutatorForAnimation(): MutatorForAnimation;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
-        hndEvent: (_event: Event) => void;
+        private hndEvent;
         private update;
         private updateTimeScale;
     }
@@ -2355,15 +2355,18 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-    * @author Valentin Schmidberger, HFU, 2022
-    * VR Component Class, for Session Management, Controller Management and Reference Space Management.
-    */
+     * Describes a VR Controller and its capabilities.
+     */
     class VRController {
         cmpTransform: ComponentTransform;
         gamePad: Gamepad;
         thumbstickX: number;
         thumbstickY: number;
     }
+    /**
+     * VR Component Class, for Session Management, Controller Management and Reference Space Management.
+     * @author Valentin Schmidberger, HFU, 2022
+     */
     class ComponentVRDevice extends ComponentCamera {
         #private;
         static readonly iSubclass: number;
@@ -2855,6 +2858,12 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * An instance of a {@link Graph}.
+     * This node keeps a reference to its resource an can thus optimize serialization
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
+     */
     class GraphInstance extends Node {
         #private;
         /**
@@ -4490,6 +4499,11 @@ declare namespace FudgeCore {
         constructor(_name?: string, _data?: ParticleData.System);
         get data(): ParticleData.System;
         set data(_data: ParticleData.System);
+        /**
+         * Returns a corresponding {@link ShaderParticleSystem} for the given shader universal derivate.
+         * @param _source the shader universal derivate to use as a base for the particle system
+         * @returns the corresponding {@link ShaderParticleSystem}
+         */
         getShaderFrom(_source: ShaderInterface): ShaderParticleSystem;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -4499,6 +4513,9 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * A WebGL shaderprogramm for a particle system. Managed by a {@link ParticleSystem}. It uses {@link ParticleSystem.prototype.data} to generate and inject code into a shader universal derivate (GLSL) thus creating a shader particle system from a supplied {@link Shader}s vertex and fragment shader source code.
+     */
     class ShaderParticleSystem implements ShaderInterface {
         data: ParticleData.System;
         define: string[];
@@ -7102,16 +7119,22 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     *  A list of all the bones in a {@link Skeleton}, addressed by their names.
+     */
     interface BoneList {
         [boneName: string]: Node;
     }
-}
-declare namespace FudgeCore {
+    /**
+     * A list transformations, each corresponding to a bone by name.
+     */
     interface BoneMatrixList {
         [boneName: string]: Matrix4x4;
     }
-}
-declare namespace FudgeCore {
+    /**
+     * A skeleton is an extension of {@link Graph}. The skeleton represents the root bone while its descendant {@link Node}s in the hierarchy make up the other bones.
+     * Like the Graph it serves as a template for {@link SkeletonInstance}s.
+     */
     class Skeleton extends Graph {
         readonly bones: BoneList;
         readonly mtxBindInverses: BoneMatrixList;
@@ -7150,6 +7173,11 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * An instance of a {@link Skeleton}.
+     * It holds all the information needed to animate itself. Referenced from a {@link ComponentMesh} it can be associated with a {@link MeshSkin} and enable skeleton animation for the mesh.
+     * As an extension of {@link GraphInstance} it also keeps a reference to its resource and can thus optimize serialization.
+     */
     class SkeletonInstance extends GraphInstance {
         #private;
         bindPose: BoneMatrixList;
