@@ -1928,6 +1928,8 @@ declare namespace FudgeCore {
         get volume(): number;
         set loop(_on: boolean);
         get loop(): boolean;
+        set playbackRate(_value: number);
+        get playbackRate(): number;
         get isPlaying(): boolean;
         get isAttached(): boolean;
         get isListened(): boolean;

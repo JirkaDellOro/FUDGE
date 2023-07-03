@@ -42,7 +42,7 @@ namespace FudgeCore {
     private playing: boolean = false;
     private listened: boolean = false;
 
-    constructor(_audio: Audio = null, _loop: boolean = false, _start: boolean = false, _audioManager: AudioManager = AudioManager.default) {
+    public constructor(_audio: Audio = null, _loop: boolean = false, _start: boolean = false, _audioManager: AudioManager = AudioManager.default) {
       super();
       this.install(_audioManager);
       this.createSource(_audio, _loop);
@@ -70,6 +70,15 @@ namespace FudgeCore {
     public get loop(): boolean {
       return this.source.loop;
     }
+
+    public set playbackRate(_value: number) {
+      this.source.playbackRate.value = _value;
+    }
+
+    public get playbackRate(): number {
+      return this.source.playbackRate.value;
+    }
+
 
     public get isPlaying(): boolean {
       return this.playing;
