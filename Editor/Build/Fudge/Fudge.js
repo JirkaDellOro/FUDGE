@@ -1803,7 +1803,7 @@ var Fudge;
                 spanName.innerText = parentData ? key : ƒ.ParticleSystem.name;
                 content.appendChild(spanName);
             }
-            if (parentData == this.data.variables) {
+            if (parentData && parentData == this.data.variables) {
                 let input = document.createElement("input");
                 input.type = "text";
                 input.disabled = true;

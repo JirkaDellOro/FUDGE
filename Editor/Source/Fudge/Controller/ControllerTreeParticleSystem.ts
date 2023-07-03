@@ -14,7 +14,7 @@ namespace Fudge {
     private data: ƒ.ParticleData.System;
     private view: ViewParticleSystem;
 
-    constructor(_data: ƒ.ParticleData.System, _view: ViewParticleSystem) {
+    public constructor(_data: ƒ.ParticleData.System, _view: ViewParticleSystem) {
       super();
       this.data = _data;
       this.view = _view;
@@ -31,7 +31,7 @@ namespace Fudge {
         content.appendChild(spanName);
       }
 
-      if (parentData == this.data.variables) {
+      if (parentData && parentData == this.data.variables) {
         let input: HTMLInputElement = document.createElement("input");
         input.type = "text";
         input.disabled = true;
@@ -243,7 +243,7 @@ namespace Fudge {
       let name: string = "newVariable";
       let count: number = 1;
       while (this.data.variableNames.includes(name)) {
-        name = "newVariable" + count
+        name = "newVariable" + count;
         count++;
       }
       return name;
@@ -283,7 +283,7 @@ namespace Fudge {
     private renameVariable(_name: string, _new: string, _data: ƒ.ParticleData.Recursive = this.data): void {
       if (ƒ.ParticleData.isVariable(_data) && _data.value == _name) {
         _data.value = _new;
-        this.view.dispatch(EVENT_EDITOR.MODIFY, { detail: { data: _data } })
+        this.view.dispatch(EVENT_EDITOR.MODIFY, { detail: { data: _data } });
       }
 
       for (const subData of Object.values("parameters" in _data ? _data.parameters : _data))
