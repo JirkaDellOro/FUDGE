@@ -5,9 +5,14 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2021
    * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
    */
-  export class Noise {
+  export abstract class Noise {
     protected perm: Uint8Array = new Uint8Array(512);
     protected permMod12: Uint8Array = new Uint8Array(512);
+    
+    /**
+     * Returns a random value between -1 and 1 based on the given position
+     */
+    public abstract sample: (..._args: number[]) => number;
 
     public constructor(_random: Function = Math.random) {
       const p: Uint8Array = new Uint8Array(256);
@@ -28,5 +33,7 @@ namespace FudgeCore {
         this.permMod12[i] = this.perm[i] % 12;
       }
     }
+
+
   }
 }

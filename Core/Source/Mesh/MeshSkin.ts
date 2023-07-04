@@ -7,6 +7,11 @@ namespace FudgeCore {
    */
   @RenderInjectorMeshSkin.decorate
   export class MeshSkin extends MeshImport {
+    /**
+     * Injected by {@link RenderInjectorMeshSkin}.
+     * Used by the render system.
+     * @internal
+     */
     public useRenderBuffers(_shader: ShaderInterface, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers { return null; /* injected by RenderInjector*/ }
 
     protected reduceMutator(_mutator: Mutator): void {

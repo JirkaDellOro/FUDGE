@@ -2,6 +2,7 @@ namespace FudgeCore {
   /**
    * Asset loader for Filmbox files.
    * @author Matthias Roming, HFU, 2023
+   * @ignore currently not working
    */
   export class FBXLoader {
     private static loaders: { [uri: string]: FBXLoader };

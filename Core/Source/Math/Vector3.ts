@@ -365,16 +365,20 @@ namespace FudgeCore {
     /**
      * Shuffles the components of this vector
      */
-    public  shuffle(): void {
+    public shuffle(): void {
       let a: number[] = Array.from(this.data);
       this.set(Random.default.splice(a), Random.default.splice(a), a[0]);
     }
 
+    /**
+     * Returns the distance bewtween this vector and the given vector
+     */
     public getDistance(_to: Vector3): number {
       let difference: Vector3 = Vector3.DIFFERENCE(this, _to);
       Recycler.store(difference);
       return difference.magnitude;
     }
+
     /**
      * For each dimension, moves the component to the minimum of this and the given vector
      */

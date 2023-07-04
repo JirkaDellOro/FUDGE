@@ -286,7 +286,7 @@ namespace FudgeCore {
       return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 
-    // /** Returns the actual used world of the OIMO physics engine. No user interaction needed - Only for advanced users that need to access it directly */
+    /** Returns the actual used world of the OIMO physics engine. No user interaction needed - Only for advanced users that need to access it directly */
     public getOimoWorld(): OIMO.World {
       return Physics.ƒactive.oimoWorld;
     }

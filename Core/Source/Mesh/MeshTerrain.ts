@@ -45,6 +45,9 @@ namespace FudgeCore {
       this.create(_resolution, _scaleInput, _functionOrSeed);
     }
 
+    /**
+     * Create this mesh from the given parameters
+     */
     public create(_resolution: Vector2 = Vector2.ONE(2), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed: HeightMapFunction | number = 0): void {
       this.clear();
       this.seed = undefined;
@@ -132,6 +135,9 @@ namespace FudgeCore {
       return terrainInfo;
     }
 
+    /**
+     * Returns the grid coordinates of the quad the given face belongs to.
+     */
     public getGridFromFaceIndex(_index: number): Vector2 {
       let result: Vector2 = Recycler.get(Vector2);
       let iQuad: number = Math.floor(_index / 2);
@@ -139,6 +145,9 @@ namespace FudgeCore {
       return result;
     }
 
+    /**
+     * Returns the indices of the two faces forming the quad the given grid position belongs to.
+     */
     public getFaceIndicesFromGrid(_grid: Vector2): number[] {
       let iQuad: number = _grid.y * 2 * this.resolution.x + _grid.x * 2;
       return [iQuad, iQuad + 1];

@@ -50,12 +50,16 @@ namespace FudgeCore {
 
   function* getFaces(_renderMesh: RenderMesh, _vertices: Vertices): Generator<Face> {
     for (let iFaceVertexIndex: number = 0; iFaceVertexIndex < _renderMesh.indices.length; iFaceVertexIndex += 3) {
-      yield new Face(
-        _vertices,
-        _renderMesh.indices[iFaceVertexIndex + 0],
-        _renderMesh.indices[iFaceVertexIndex + 1],
-        _renderMesh.indices[iFaceVertexIndex + 2]
-      );
+      try {
+        yield new Face(
+          _vertices,
+          _renderMesh.indices[iFaceVertexIndex + 0],
+          _renderMesh.indices[iFaceVertexIndex + 1],
+          _renderMesh.indices[iFaceVertexIndex + 2]
+        );
+      } catch (_e: unknown) {
+        Debug.fudge("Face excluded", (<Error>_e).message);
+      }
     }
   }
 

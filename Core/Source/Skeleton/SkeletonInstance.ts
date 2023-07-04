@@ -14,6 +14,9 @@ namespace FudgeCore {
     #mtxBones: Matrix4x4[];
     #mtxBonesUpdated: number;
 
+    /**
+     * Creates a new {@link SkeletonInstance} based on the given {@link Skeleton}
+     */
     public static async CREATE(_skeleton: Skeleton): Promise<SkeletonInstance> {
       const skeleton: SkeletonInstance = new SkeletonInstance();
       await skeleton.set(_skeleton);

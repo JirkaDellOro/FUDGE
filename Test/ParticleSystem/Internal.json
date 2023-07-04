@@ -680,13 +680,13 @@
             "value": 1
           },
           {
-            "value": "timeNormalized"
+            "value": "timeInvertedNormalized"
           },
           {
-            "value": "timeNormalized"
+            "value": "timeInvertedNormalized"
           },
           {
-            "value": "timeNormalized"
+            "value": "timeInvertedNormalized"
           }
         ],
         "variableNames": [
@@ -694,7 +694,7 @@
           "systemDurationSeconds",
           "velocity",
           "particleTime",
-          "timeNormalized"
+          "timeInvertedNormalized"
         ]
       }
     }

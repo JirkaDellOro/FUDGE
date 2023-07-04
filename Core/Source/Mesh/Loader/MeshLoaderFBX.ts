@@ -2,6 +2,7 @@ namespace FudgeCore {
   /**
    * Filmbox mesh import
    * @authors Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
+   * @ignore currently not working
    */
   export class MeshLoaderFBX extends MeshLoader {
     public static async load(_mesh: MeshImport | MeshSkin, _data: FBX.Geometry): Promise<MeshImport> {
@@ -71,13 +72,13 @@ namespace FudgeCore {
             _mesh.faces.push(...quad.faces);
           } else {
             // could add proper triangulation here
-            console.warn(`${MeshLoaderFBX.name}: Polygons with more than 4 vertices are not supported.`)
+            console.warn(`${MeshLoaderFBX.name}: Polygons with more than 4 vertices are not supported.`);
           }
           polygon = [];
           isEndOfPolygon = false;
           iPolygon++;
         }        
-      })
+      });
 
       if (_mesh instanceof MeshSkin) {
         const fbxDeformer: FBX.Deformer = geometryFBX.children[0];
@@ -92,9 +93,9 @@ namespace FudgeCore {
     let index: number =
       _layerElement.MappingInformationType == "ByVertex" ?
         _iVertex :
-      _layerElement.MappingInformationType == "ByPolygon" ?
-        _iPolygon :
-        _iPolygonVertex;
+        _layerElement.MappingInformationType == "ByPolygon" ?
+          _iPolygon :
+          _iPolygonVertex;
     
     if (_layerElement.ReferenceInformationType === 'IndexToDirect' ) {
       let indices: Uint16Array = (_layerElement as FBX.LayerElementUV).UVIndex || (_layerElement as FBX.LayerElementNormal).NormalsIndex;

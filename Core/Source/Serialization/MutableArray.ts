@@ -15,6 +15,9 @@ namespace FudgeCore {
       return this.#type;
     }
 
+    /**
+     * Rearrange the entries of the array according to the given sequence of indices
+     */
     public rearrange(_sequence: number[]): void {
       let length: number = this.length;
       for (let index of _sequence) {
@@ -27,6 +30,10 @@ namespace FudgeCore {
       }
       this.splice(0, length);
     }
+
+    /**
+     * Returns an associative array with this arrays elements corresponding types as string-values
+     */
     public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
       let types: MutatorAttributeTypes = {};
       for (let entry in this)
@@ -34,12 +41,24 @@ namespace FudgeCore {
 
       return types;
     }
+
+    /**
+     * Returns an array with each elements mutator by invoking {@link Mutable.getMutator} on them
+     */
     public getMutator(): Mutator {
       return this.map((_value) => _value.getMutator());
     }
+
+    /**
+     * See {@link Mutable.getMutatorForUserInterface}
+     */
     public getMutatorForUserInterface(): Mutator {
       return this.getMutator();
     }
+
+    /**
+     * Mutate each element of this array by invoking {@link Mutable.mutate} on it
+     */
     public async mutate(_mutator: Mutator): Promise<void> {
       for (let entry in this)
         await this[entry].mutate(_mutator[entry]);

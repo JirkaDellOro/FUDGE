@@ -26,6 +26,7 @@ namespace FudgeCore {
 
 
     //TODO: figure out what this is used for
+    /** TODO: describe! */
     public static PROJECTION(_width: number, _height: number): Matrix3x3 {
       let mtxResult: Matrix3x3 = new Matrix3x3;
       mtxResult.data.set([

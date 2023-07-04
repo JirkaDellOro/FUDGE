@@ -1,3 +1,4 @@
+/** @ignore currently not working */
 namespace FudgeCore.FBX {
   /**
    * Interface to represent fbx files containing its documents, definitions, objects and connections.
@@ -38,6 +39,7 @@ namespace FudgeCore.FBX {
    * with the help of following reference:
    * https://archive.blender.org/wiki/index.php/User:Mont29/Foundation/FBX_File_Structure/#Some_Specific_Property_Types
    * @author Matthias Roming, HFU, 2023
+   * @ignore
    */
   export interface Object extends ObjectBase {
     [name: string]: NodeProperty | { [name: string]: NodeProperty } | Property70 | Object | Object[] | (() => Object);

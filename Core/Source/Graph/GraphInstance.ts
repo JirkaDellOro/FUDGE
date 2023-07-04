@@ -78,6 +78,9 @@ namespace FudgeCore {
       return this;
     }
 
+    /**
+     * Connects this graph instance to the graph referenced.
+     */
     public async connectToGraph(): Promise<void> {
       let graph: Graph = this.get();
       if (this.#deserializeFromSource)

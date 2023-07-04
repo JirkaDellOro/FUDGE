@@ -57,11 +57,17 @@ namespace FudgeCore {
       Project.resources[_resource.idResource] = _resource;
     }
 
+    /**
+     * Removes the resource from the list of resources.
+     */
     public static deregister(_resource: SerializableResource): void {
       delete (Project.resources[_resource.idResource]);
       delete (Project.serialization[_resource.idResource]);
     }
 
+    /**
+     * Clears the list of resources and their serialization, thus removing all resources.
+     */
     public static clear(): void {
       Project.resources = {};
       Project.serialization = {};
@@ -73,6 +79,9 @@ namespace FudgeCore {
     //   return <T[]>(this.components[_class.name] || []).slice(0);
     // }
 
+    /**
+     * Returns an array of all resources of the requested type.
+     */
     public static getResourcesByType<T>(_type: new (_args: General) => T): SerializableResource[] {
       let found: SerializableResource[] = [];
       for (let resourceId in Project.resources) {
@@ -83,6 +92,9 @@ namespace FudgeCore {
       return found;
     }
 
+    /**
+     * Returns an array of all resources with the requested name.
+     */
     public static getResourcesByName(_name: string): SerializableResource[] {
       let found: SerializableResource[] = [];
       for (let resourceId in Project.resources) {
@@ -160,12 +172,18 @@ namespace FudgeCore {
       return instance;
     }
 
+    /**
+     * Register the given {@link GraphInstance} to be resynced
+     */
     public static registerGraphInstanceForResync(_instance: GraphInstance): void {
       let instances: GraphInstance[] = Project.graphInstancesToResync[_instance.idSource] || [];
       instances.push(_instance);
       Project.graphInstancesToResync[_instance.idSource] = instances;
     }
 
+    /**
+     * Resync all {@link GraphInstance} registered to the given {@link Graph}
+     */
     public static async resyncGraphInstances(_graph: Graph): Promise<void> {
       let instances: GraphInstance[] = Project.graphInstancesToResync[_graph.idResource];
       if (!instances)
@@ -175,12 +193,18 @@ namespace FudgeCore {
       delete (Project.graphInstancesToResync[_graph.idResource]);
     }
 
+    /**
+     * Register the given namespace to the list of script-namespaces.
+     */
     public static registerScriptNamespace(_namespace: Object): void {
       let name: string = Serializer.registerNamespace(_namespace);
       if (!Project.scriptNamespaces[name])
         Project.scriptNamespaces[name] = _namespace;
     }
 
+    /**
+     * Clear the list of script-namespaces.
+     */
     public static clearScriptNamespaces(): void {
       for (let name in Project.scriptNamespaces) {
         Reflect.set(window, name, undefined);
@@ -189,6 +213,9 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * Collects all {@link ComponentScript}s registered in {@link Project.scriptNamespaces} and returns them.
+     */
     public static getComponentScripts(): ComponentScripts {
       let compoments: ComponentScripts = {};
       for (let namespace in Project.scriptNamespaces) {
@@ -207,6 +234,9 @@ namespace FudgeCore {
       return compoments;
     }
 
+    /**
+     * Loads a script from the given URL and integrates it into a {@link HTMLScriptElement} in the {@link document.head}
+     */
     public static async loadScript(_url: RequestInfo): Promise<void> {
       let script: HTMLScriptElement = document.createElement("script");
       script.type = "text/javascript";
@@ -227,6 +257,9 @@ namespace FudgeCore {
       });
     }
 
+    /**
+     * Load {@link Resources} from the given url
+     */
     public static async loadResources(_url: RequestInfo): Promise<Resources> {
       const response: Response = await fetch(_url);
       const resourceFileContent: string = await response.text();
@@ -237,6 +270,9 @@ namespace FudgeCore {
       return reconstruction;
     }
 
+    /**
+     * Load all resources from the {@link document.head}
+     */
     public static async loadResourcesFromHTML(): Promise<void> {
       const head: HTMLHeadElement = document.head;
       let links: NodeListOf<HTMLLinkElement> = head.querySelectorAll("link[type=resources]");

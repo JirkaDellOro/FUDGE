@@ -2690,6 +2690,9 @@ declare namespace FudgeCore {
      */
     class DebugAlert extends DebugTarget {
         static delegates: MapDebugFilterToDelegate;
+        /**
+         * Returns a delegate-function expecting a message to log.
+         */
         static createDelegate(_headline: string): Function;
     }
 }
@@ -2709,9 +2712,21 @@ declare namespace FudgeCore {
         static autoScroll: boolean;
         static delegates: MapDebugFilterToDelegate;
         private static groups;
+        /**
+         * Clears the text area and the groups
+         */
         static clear(): void;
+        /**
+         * Begins a new group with the given name
+         */
         static group(_name: string): void;
+        /**
+         * Ends the last group
+         */
         static groupEnd(): void;
+        /**
+         * Returns a delegate-function expecting a message to log.
+         */
         static createDelegate(_headline: string): Function;
         private static getIndentation;
         private static print;
@@ -3017,6 +3032,9 @@ declare namespace FudgeCore {
         reset(): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        /**
+         * Connects this graph instance to the graph referenced.
+         */
         connectToGraph(): Promise<void>;
         /**
          * Set this node to be a recreation of the {@link Graph} given
@@ -3045,10 +3063,6 @@ declare namespace FudgeCore {
      * The method useRenderData will be injected by {@link RenderInjector} at runtime, extending the functionality of this class to deal with the renderer.
      */
     class Coat extends Mutable implements Serializable {
-        protected renderData: {
-            [key: string]: unknown;
-        };
-        useRenderData(_shader: ShaderInterface, _cmpMaterial: ComponentMaterial): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
@@ -3273,6 +3287,9 @@ declare namespace FudgeCore {
         width: number;
         height: number;
         constructor(_width?: number, _height?: number);
+        /**
+         * Sets this framing to the given width and height
+         */
         setSize(_width: number, _height: number): void;
         getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
         getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
@@ -3285,6 +3302,9 @@ declare namespace FudgeCore {
     class FramingScaled extends Framing {
         normWidth: number;
         normHeight: number;
+        /**
+         * Sets this framing to the given normed width and height
+         */
         setScale(_normWidth: number, _normHeight: number): void;
         getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
         getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
@@ -3365,6 +3385,7 @@ declare namespace FudgeCore {
         private mutator;
         private vectors;
         constructor();
+        /** TODO: describe! */
         static PROJECTION(_width: number, _height: number): Matrix3x3;
         /**
          * Retrieve a new identity matrix
@@ -3756,9 +3777,13 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
      */
-    class Noise {
+    abstract class Noise {
         protected perm: Uint8Array;
         protected permMod12: Uint8Array;
+        /**
+         * Returns a random value between -1 and 1 based on the given position
+         */
+        abstract sample: (..._args: number[]) => number;
         constructor(_random?: Function);
     }
 }
@@ -4165,6 +4190,9 @@ declare namespace FudgeCore {
          * Shuffles the components of this vector
          */
         shuffle(): void;
+        /**
+         * Returns the distance bewtween this vector and the given vector
+         */
         getDistance(_to: Vector3): number;
         /**
          * For each dimension, moves the component to the minimum of this and the given vector
@@ -4201,12 +4229,15 @@ declare namespace FudgeCore {
         normal: Vector3;
         private vertices;
         constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number);
-        calculateNormals(): void;
+        /**
+         * Returns the position of the vertex referenced by the given index
+         */
         getPosition(_index: number): Vector3;
         /**
          * must be coplanar
          */
         isInside(_point: Vector3): boolean;
+        private calculateNormals;
     }
 }
 declare namespace FudgeCore {
@@ -4281,6 +4312,9 @@ declare namespace FudgeCore {
         protected fitTexture: boolean;
         constructor(_name?: string, _shape?: Vector2[], _fitTexture?: boolean);
         protected get minVertices(): number;
+        /**
+         * Create this mesh from the given vertices.
+         */
         create(_shape?: Vector2[], _fitTexture?: boolean): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -4336,6 +4370,9 @@ declare namespace FudgeCore {
         private loader;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        /**
+         * Load mesh from file
+         */
         load(_loader?: typeof MeshLoader, _url?: RequestInfo, _data?: Object): Promise<MeshImport>;
         mutate(_mutator: Mutator): Promise<void>;
     }
@@ -4414,6 +4451,9 @@ declare namespace FudgeCore {
         protected seed: number;
         protected heightMapFunction: HeightMapFunction;
         constructor(_name?: string, _resolution?: Vector2, _scaleInput?: Vector2, _functionOrSeed?: HeightMapFunction | number);
+        /**
+         * Create this mesh from the given parameters
+         */
         create(_resolution?: Vector2, _scaleInput?: Vector2, _functionOrSeed?: HeightMapFunction | number): void;
         /**
          * Returns information about the vertical projection of the given position onto the terrain.
@@ -4421,7 +4461,13 @@ declare namespace FudgeCore {
          * If at hand, pass the inverse too to avoid unnecessary calculation.
          */
         getTerrainInfo(_position: Vector3, _mtxWorld?: Matrix4x4, _mtxInverse?: Matrix4x4): TerrainInfo;
+        /**
+         * Returns the grid coordinates of the quad the given face belongs to.
+         */
         getGridFromFaceIndex(_index: number): Vector2;
+        /**
+         * Returns the indices of the two faces forming the quad the given grid position belongs to.
+         */
         getFaceIndicesFromGrid(_grid: Vector2): number[];
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -4439,6 +4485,9 @@ declare namespace FudgeCore {
         constructor(_name?: string, _texture?: TextureImage);
         private static createHeightMapFunction;
         private static textureToClampedArray;
+        /**
+         * Sets the texture to be used as heightmap
+         */
         setTexture(_texture?: TextureImage): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -4481,7 +4530,6 @@ declare namespace FudgeCore {
      * @author Matthias Roming, HFU, 2022-2023
      */
     class MeshSkin extends MeshImport {
-        useRenderBuffers(_shader: ShaderInterface, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -4495,6 +4543,9 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         private latitudes;
         constructor(_name?: string, _longitudes?: number, _latitudes?: number);
+        /**
+         * Create this sphere with a given number of longitudes and latitudes
+         */
         create(_longitudes?: number, _latitudes?: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -4530,6 +4581,9 @@ declare namespace FudgeCore {
         private latitudes;
         constructor(_name?: string, _size?: number, _longitudes?: number, _latitudes?: number);
         private static getShape;
+        /**
+         * Create this torus from the given parameters
+         */
         create(_size?: number, _longitudes?: number, _latitudes?: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -4617,6 +4671,9 @@ declare namespace FudgeCore {
      * @author Matthias Roming, HFU, 2023
      */
     abstract class MeshLoader {
+        /**
+         * Loads the given data into the given mesh
+         */
         static load(_mesh: MeshImport | MeshSkin, _data?: Object): Promise<MeshImport>;
     }
 }
@@ -4624,6 +4681,7 @@ declare namespace FudgeCore {
     /**
      * Filmbox mesh import
      * @authors Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
+     * @ignore currently not working
      */
     class MeshLoaderFBX extends MeshLoader {
         static load(_mesh: MeshImport | MeshSkin, _data: FBX.Geometry): Promise<MeshImport>;
@@ -5611,6 +5669,7 @@ declare namespace FudgeCore {
         private static getRayEndPoint;
         /** Internal function to get the distance in which a ray hit by subtracting points from each other and get the square root of the squared product of each component. */
         private static getRayDistance;
+        /** Returns the actual used world of the OIMO physics engine. No user interaction needed - Only for advanced users that need to access it directly */
         getOimoWorld(): OIMO.World;
     }
 }
@@ -5748,12 +5807,18 @@ declare namespace FudgeCore {
          * render passes.
          */
         static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _shadersUsed?: (ShaderInterface)[]): void;
+        /**
+         * Add the given lights to the {@link Render.lights}-map, sorted by type.
+         */
         static addLights(_cmpLights: ComponentLight[]): void;
         /**
          * Used with a {@link Picker}-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted {@link Pick}-array
          */
         static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera): Pick[];
+        /**
+         * Draws the scene from the point of view of the given camera
+         */
         static draw(_cmpCamera: ComponentCamera): void;
         private static drawListAlpha;
         private static drawList;
@@ -5813,6 +5878,9 @@ declare namespace FudgeCore {
         get textureUVsFlat(): Float32Array;
         get iBonesFlat(): Uint8Array;
         get weightsFlat(): Float32Array;
+        /**
+         * Clears this render mesh and all its buffers
+         */
         clear(): void;
         protected createVerticesFlat(): Float32Array;
         protected createNormalsFlat(): Float32Array;
@@ -6013,10 +6081,19 @@ declare namespace FudgeCore {
      */
     class FileIoBrowserLocal extends EventTargetStatic {
         private static selector;
+        /**
+         * Open file select dialog to load files from local filesystem into browser application.
+         */
         static load(_multiple?: boolean): Promise<MapFilenameToContent>;
+        /**
+         * Open a file download dialog to save files to local filesystem.
+         */
         static save(_toSave: MapFilenameToContent, _type?: string): Promise<MapFilenameToContent>;
-        static handleFileSelect(_event: Event): Promise<void>;
+        /**
+         * Load the the files referenced in {@link FileList} into the provided {@link MapFilenameToContent}
+         */
         static loadFiles(_fileList: FileList, _loaded: MapFilenameToContent): Promise<void>;
+        private static handleFileSelect;
     }
 }
 declare namespace FudgeCore {
@@ -6028,10 +6105,25 @@ declare namespace FudgeCore {
         #private;
         constructor(_type: new () => T, ..._args: T[]);
         get type(): new () => T;
+        /**
+         * Rearrange the entries of the array according to the given sequence of indices
+         */
         rearrange(_sequence: number[]): void;
+        /**
+         * Returns an associative array with this arrays elements corresponding types as string-values
+         */
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        /**
+         * Returns an array with each elements mutator by invoking {@link Mutable.getMutator} on them
+         */
         getMutator(): Mutator;
+        /**
+         * See {@link Mutable.getMutatorForUserInterface}
+         */
         getMutatorForUserInterface(): Mutator;
+        /**
+         * Mutate each element of this array by invoking {@link Mutable.mutate} on it
+         */
         mutate(_mutator: Mutator): Promise<void>;
         /**
          * Updates the values of the given mutator according to the current state of the instance
@@ -6082,9 +6174,21 @@ declare namespace FudgeCore {
          * It's possible to pass an id, but should not be done except by the Serializer.
          */
         static register(_resource: SerializableResource, _idResource?: string): void;
+        /**
+         * Removes the resource from the list of resources.
+         */
         static deregister(_resource: SerializableResource): void;
+        /**
+         * Clears the list of resources and their serialization, thus removing all resources.
+         */
         static clear(): void;
+        /**
+         * Returns an array of all resources of the requested type.
+         */
         static getResourcesByType<T>(_type: new (_args: General) => T): SerializableResource[];
+        /**
+         * Returns an array of all resources with the requested name.
+         */
         static getResourcesByName(_name: string): SerializableResource[];
         /**
          * Generate a user readable and unique id using the type of the resource, the date and random numbers
@@ -6111,13 +6215,37 @@ declare namespace FudgeCore {
          * and connects it to the graph for synchronisation of mutation.
          */
         static createGraphInstance(_graph: Graph): Promise<GraphInstance>;
+        /**
+         * Register the given {@link GraphInstance} to be resynced
+         */
         static registerGraphInstanceForResync(_instance: GraphInstance): void;
+        /**
+         * Resync all {@link GraphInstance} registered to the given {@link Graph}
+         */
         static resyncGraphInstances(_graph: Graph): Promise<void>;
+        /**
+         * Register the given namespace to the list of script-namespaces.
+         */
         static registerScriptNamespace(_namespace: Object): void;
+        /**
+         * Clear the list of script-namespaces.
+         */
         static clearScriptNamespaces(): void;
+        /**
+         * Collects all {@link ComponentScript}s registered in {@link Project.scriptNamespaces} and returns them.
+         */
         static getComponentScripts(): ComponentScripts;
+        /**
+         * Loads a script from the given URL and integrates it into a {@link HTMLScriptElement} in the {@link document.head}
+         */
         static loadScript(_url: RequestInfo): Promise<void>;
+        /**
+         * Load {@link Resources} from the given url
+         */
         static loadResources(_url: RequestInfo): Promise<Resources>;
+        /**
+         * Load all resources from the {@link document.head}
+         */
         static loadResourcesFromHTML(): Promise<void>;
         /**
          * Serialize all resources
@@ -6157,6 +6285,7 @@ declare namespace FudgeCore.FBX {
         getSequence<T extends number | bigint>(_getter: () => T, _length: number, _offset?: number): Generator<T>;
     }
 }
+/** @ignore currently not working */
 declare namespace FudgeCore.FBX {
     /**
      * Interface to represent fbx files containing its documents, definitions, objects and connections.
@@ -6194,6 +6323,7 @@ declare namespace FudgeCore.FBX {
      * with the help of following reference:
      * https://archive.blender.org/wiki/index.php/User:Mont29/Foundation/FBX_File_Structure/#Some_Specific_Property_Types
      * @author Matthias Roming, HFU, 2023
+     * @ignore
      */
     export interface Object extends ObjectBase {
         [name: string]: NodeProperty | {
@@ -6339,6 +6469,7 @@ declare namespace FudgeCore {
     /**
      * Asset loader for Filmbox files.
      * @author Matthias Roming, HFU, 2023
+     * @ignore currently not working
      */
     class FBXLoader {
         #private;
@@ -7107,25 +7238,66 @@ declare namespace FudgeCore {
         readonly gltf: GLTF.GlTf;
         readonly url: string;
         private constructor();
+        /**
+         * Returns a {@link GLTFLoader} instance for the given url.
+         */
         static LOAD(_url: string): Promise<GLTFLoader>;
+        /**
+         * Returns a {@link GraphInstance} for the given scene name or the default scene if no name is given.
+         */
         getScene(_name?: string): Promise<GraphInstance>;
+        /**
+         * Returns a {@link GraphInstance} for the given scene index or the default scene if no index is given.
+         */
         getSceneByIndex(_iScene?: number): Promise<GraphInstance>;
+        /**
+         * Returns the first {@link Node} with the given name.
+         */
         getNode(_name: string): Promise<Node>;
+        /**
+         * Returns the {@link Node} for the given index.
+         */
         getNodeByIndex(_iNode: number): Promise<Node>;
+        /**
+         * Returns the first {@link ComponentCamera} with the given camera name.
+         */
         getCamera(_name: string): Promise<ComponentCamera>;
+        /**
+         * Returns the {@link ComponentCamera} for the given camera index.
+         */
         getCameraByIndex(_iCamera: number): Promise<ComponentCamera>;
+        /**
+         * Returns the first {@link Animation} with the given animation name.
+         */
         getAnimation(_name: string): Promise<Animation>;
+        /**
+         * Returns the {@link Animation} for the given animation index.
+         */
         getAnimationByIndex(_iAnimation: number): Promise<Animation>;
+        /**
+         * Returns the first {@link MeshImport} with the given mesh name.
+         */
         getMesh(_name: string): Promise<MeshImport>;
+        /**
+         * Returns the {@link MeshImport} for the given mesh index.
+         */
         getMeshByIndex(_iMesh: number): Promise<MeshImport>;
+        /**
+         * Returns the {@link Material} for the given material index.
+         */
         getMaterialByIndex(_iMaterial: number, _skin?: boolean): Promise<Material>;
+        /**
+         * Returns the {@link Texture} for the given texture index.
+         */
         getTextureByIndex(_iTexture: number): Promise<Texture>;
+        /**
+         * Returns the first {@link Skeleton} with the given skeleton name.
+         */
         getSkeleton(_name: string): Promise<Skeleton>;
+        /**
+         * Returns the {@link Skeleton} for the given skeleton index.
+         */
         getSkeletonByIndex(_iSkeleton: number): Promise<Skeleton>;
-        getUint8Array(_iAccessor: number): Promise<Uint8Array>;
-        getUint16Array(_iAccessor: number): Promise<Uint16Array>;
-        getUint32Array(_iAccessor: number): Promise<Uint32Array>;
-        getFloat32Array(_iAccessor: number): Promise<Float32Array>;
         private getBufferData;
         private getBuffer;
         private getAnimationSequenceVector3;
@@ -7365,6 +7537,9 @@ declare namespace FudgeCore {
          * by updating the inverse bind matrices
          */
         setDefaultPose(): void;
+        /**
+         * Returns the index of the bone with the given name or -1 if not found
+         */
         indexOfBone(_boneName: string): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -7388,6 +7563,9 @@ declare namespace FudgeCore {
         #private;
         bindPose: BoneMatrixList;
         private skeletonSource;
+        /**
+         * Creates a new {@link SkeletonInstance} based on the given {@link Skeleton}
+         */
         static CREATE(_skeleton: Skeleton): Promise<SkeletonInstance>;
         get bones(): BoneList;
         get mtxBoneLocals(): BoneMatrixList;
@@ -7558,6 +7736,9 @@ declare namespace FudgeCore {
          * Stops the loop
          */
         static stop(): void;
+        /**
+         * Continue running the loop
+         */
         static continue(): void;
         private static loop;
         private static loopFrame;

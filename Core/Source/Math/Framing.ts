@@ -49,6 +49,9 @@ namespace FudgeCore {
       this.setSize(_width, _height);
     }
 
+    /**
+     * Sets this framing to the given width and height
+     */
     public setSize(_width: number, _height: number): void {
       this.width = _width;
       this.height = _height;
@@ -82,6 +85,9 @@ namespace FudgeCore {
     public normWidth: number = 1.0;
     public normHeight: number = 1.0;
 
+    /**
+     * Sets this framing to the given normed width and height
+     */
     public setScale(_normWidth: number, _normHeight: number): void {
       this.normWidth = _normWidth;
       this.normHeight = _normHeight;

@@ -802,6 +802,7 @@ var Fudge;
             result = result.replace(/></g, ">\n<");
             result = result.replace(/<!--CRLF-->/g, "");
             result = result.replace(/">\n<\/script/g, `"></script`);
+            result = result.replace(/\n*<\/body>/g, "\n<\/body>"); // remove line breaks added by serializeToString before closing body-tag
             return result;
         }
     }

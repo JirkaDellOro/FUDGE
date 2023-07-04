@@ -143,7 +143,9 @@ namespace FudgeCore {
       return this.ƒweightsFlat;
     }
 
-
+    /**
+     * Clears this render mesh and all its buffers
+     */
     public clear(): void {
       this.smooth = null;
       this.flat = null;

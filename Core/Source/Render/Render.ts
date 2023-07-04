@@ -110,6 +110,9 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * Add the given lights to the {@link Render.lights}-map, sorted by type.
+     */
     public static addLights(_cmpLights: ComponentLight[]): void {
       for (let cmpLight of _cmpLights) {
         if (!cmpLight.isActive)
@@ -157,12 +160,14 @@ namespace FudgeCore {
     //#endregion
 
     //#region Drawing
+    /**
+     * Draws the scene from the point of view of the given camera
+     */
     public static draw(_cmpCamera: ComponentCamera): void {
       _cmpCamera.resetWorldToView();
       Render.drawList(_cmpCamera, this.nodesSimple);
       Render.drawListAlpha(_cmpCamera);
     }
-
 
     private static drawListAlpha(_cmpCamera: ComponentCamera): void {
       function sort(_a: Node, _b: Node): number {

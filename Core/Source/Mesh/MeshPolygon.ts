@@ -29,6 +29,9 @@ namespace FudgeCore {
       return 3;
     }
 
+    /**
+     * Create this mesh from the given vertices.
+     */
     public create(_shape: Vector2[] = [], _fitTexture: boolean = true): void {
       this.shape = <MutableArray<Vector2>>MutableArray.from(_shape.map(_vertex => _vertex.clone));
       this.clear();

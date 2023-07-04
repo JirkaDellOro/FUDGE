@@ -72,6 +72,9 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * Returns the index of the bone with the given name or -1 if not found
+     */
     public indexOfBone(_boneName: string): number {
       let index: number = 0;
       for (const boneName in this.bones) {

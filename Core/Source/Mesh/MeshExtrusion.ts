@@ -52,7 +52,6 @@ namespace FudgeCore {
     }
     //#endregion
 
-
     private extrude(_mtxTransforms: Matrix4x4[] = MeshExtrusion.mtxDefaults): void {
       this.mtxTransforms = <MutableArray<Matrix4x4>>MutableArray.from(<MutableArray<Matrix4x4>>_mtxTransforms);
       let nTransforms: number = _mtxTransforms.length;
