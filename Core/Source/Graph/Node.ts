@@ -45,7 +45,7 @@ namespace FudgeCore {
      * Shortcut to retrieve this nodes {@link ComponentTransform}
      */
     public get cmpTransform(): ComponentTransform {
-      return <ComponentTransform>this.getComponents(ComponentTransform)[0];
+      return <ComponentTransform>this.getComponents(ComponentTransform)?.[0];
     }
 
     /**
@@ -53,7 +53,7 @@ namespace FudgeCore {
      * Fails if no {@link ComponentTransform} is attached
      */
     public get mtxLocal(): Matrix4x4 {
-      return this.cmpTransform.mtxLocal;
+      return this.cmpTransform?.mtxLocal;
     }
 
     public get mtxWorldInverse(): Matrix4x4 {

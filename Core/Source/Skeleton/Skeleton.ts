@@ -27,7 +27,7 @@ namespace FudgeCore {
      */
     public constructor(_name: string = "Skeleton") {
       super(_name);
-      this.registerBone(this);
+      // this.registerBone(this);
       this.addEventListener(EVENT.CHILD_REMOVE, this.hndChildRemove);
     }
 

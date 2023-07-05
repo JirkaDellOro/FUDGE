@@ -36,11 +36,46 @@ namespace FudgeCore {
       if (!this.loaders[_url]) {
         const response: Response = await fetch(_url);
         const gltf: GLTF.GlTf = await response.json();
+
         gltf.nodes.forEach((_node, _iNode) => {
-          _node.children?.forEach(_iChild => gltf.nodes[_iChild].parent = _iNode); // mark parents of nodes
-          // _node.isJoint = gltf.skins?.some(_skin => _skin.joints.includes(_iNode)); // mark nodes that are joints
+          _node.children?.forEach(_iChild => gltf.nodes[_iChild].parent = _iNode); // mark parent of each node
+          _node.isJoint = gltf.skins?.some(_skin => _skin.joints.includes(_iNode)); // mark nodes that are joints
         });
-          
+
+        // mark the depth of each node
+        gltf.nodes.forEach((_node, _iNode) => {
+          let iParent: number = _node.parent;
+          let depth: number = 0;
+          while (iParent != undefined) {
+            depth++;
+            iParent = gltf.nodes[iParent].parent;
+          }
+          _node.depth = depth;
+        });
+
+        // mark the skeleton root nodes of each skin
+        gltf.skins?.forEach((_skin, _iSkin) => {
+          if (_skin.skeleton == undefined) {
+            // find the common root of all joints i.e. the skeleton
+            const ancestors: Set<number> = new Set<number>(
+              _skin.joints.flatMap(_iJoint => {
+                // find all ancestors of joint
+                let ancestors: number[] = [];
+                let iParent: number = gltf.nodes[_iJoint].parent;
+                while (iParent != undefined) {
+                  ancestors.push(iParent);
+                  iParent = gltf.nodes[iParent].parent;
+                }
+                return ancestors;
+              })
+            );
+
+            _skin.skeleton = Array.from(ancestors).reduce((_a, _b) => gltf.nodes[_a].depth < gltf.nodes[_b].depth ? _a : _b);
+          }
+
+          gltf.nodes[_skin.skeleton].iSkeletonRoot = _iSkin;
+        });
+
         this.loaders[_url] = new GLTFLoader(gltf, _url);
       }
       return this.loaders[_url];
@@ -93,13 +128,8 @@ namespace FudgeCore {
         this.#nodes = [];
       if (!this.#nodes[_iNode]) {
         const gltfNode: GLTF.Node = this.gltf.nodes[_iNode];
-        let iSkeleton: number = this.gltf.skins?.findIndex(_skin => _skin.joints[0] == _iNode);
+        let iSkeleton: number = gltfNode.iSkeletonRoot;
         const node: Node = iSkeleton >= 0 ? new Skeleton(gltfNode.name) : new Node(gltfNode.name);
-
-        // check for children
-        if (gltfNode.children)
-          for (const iNode of gltfNode.children)
-            node.addChild(await this.getNodeByIndex(iNode));
 
         // check for transformation
         if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation) {
@@ -149,21 +179,26 @@ namespace FudgeCore {
           }
         }
 
-        // check for skeleton        
-        if (gltfNode.skin != undefined) {
-          let iSkeleton: number = this.gltf.skins[gltfNode.skin].joints[0];
-          node.getComponent(ComponentMesh).skeleton = <SkeletonInstance>await this.getNodeByIndex(iSkeleton);
-        }
-
         this.#nodes[_iNode] = node;
 
         // replace skeleton with skeleton instance
-        if (iSkeleton >= 0) {
+        if (node instanceof Skeleton) {
           let skeletonInstance: SkeletonInstance = await SkeletonInstance.CREATE(await this.getSkeletonByIndex(iSkeleton));
           // replace cached nodes from skeleton with skeleton instance bones
           this.#nodes = this.#nodes.map(_node => skeletonInstance.bones[_node.name] || _node);
           this.#nodes[_iNode] = skeletonInstance;
         }
+
+        // check for skeleton
+        if (gltfNode.skin != undefined) {
+          let iNodeSkeleton: number = this.gltf.skins[gltfNode.skin].skeleton;
+          node.getComponent(ComponentMesh).skeleton = <SkeletonInstance>await this.getNodeByIndex(iNodeSkeleton);
+        }
+
+        // check for children
+        if (gltfNode.children)
+          for (const iNode of gltfNode.children)
+            node.addChild(await this.getNodeByIndex(iNode));
       }
       return this.#nodes[_iNode];
     }
@@ -263,7 +298,7 @@ namespace FudgeCore {
               currentStructure.children[pathNode.name] = {};
             currentStructure = currentStructure.children[pathNode.name] as AnimationStructure;
 
-            let iSkin: number = this.gltf.skins?.findIndex(_skin => _skin.joints[0] == iPathNode);
+            let iSkin: number = pathNode.iSkeletonRoot;// this.gltf.skins?.findIndex(_skin => _skin.joints[0] == iPathNode);
             if (iSkin >= 0 && this.gltf.skins[iSkin].joints.includes(gltfChannels[0].target.node)) {
               const mtxBoneLocal: AnimationStructureMatrix4x4 = {};
               for (const gltfChannel of gltfChannels)
@@ -330,15 +365,15 @@ namespace FudgeCore {
       if (!this.#materials[_iMaterial]) {
         // TODO: in the future create an appropriate shader based on the gltf material properties
         const gltfMaterial: GLTF.Material = this.gltf.materials[_iMaterial];
-        const gltfBaseColorTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture; 
+        const gltfBaseColorTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
 
         const color: Color = new Color(...gltfMaterial.pbrMetallicRoughness.baseColorFactor || [1, 1, 1, 1]); // TODO: check if phong shader should multiply baseColorTexture values with baseColorFactor
-        const coat: Coat = gltfBaseColorTexture ? 
-          new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index)) : 
+        const coat: Coat = gltfBaseColorTexture ?
+          new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index)) :
           new CoatRemissive(color);
 
         const material: Material = new Material(
-          gltfMaterial.name, 
+          gltfMaterial.name,
           gltfBaseColorTexture ?
             (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
             (_skin ? ShaderPhongSkin : ShaderPhong),
@@ -414,18 +449,20 @@ namespace FudgeCore {
       if (!this.#skeletons)
         this.#skeletons = [];
       if (!this.#skeletons[_iSkeleton]) {
-        const gltfSkeleton: GLTF.Skin = this.gltf.skins[_iSkeleton];
-        const skeleton: Skeleton = await this.getNodeByIndex(gltfSkeleton.joints[0]) as Skeleton;
+        const gltfSkin: GLTF.Skin = this.gltf.skins[_iSkeleton];
+        const skeleton: Skeleton = await this.getNodeByIndex(gltfSkin.skeleton) as Skeleton;
 
         // convert float array to array of matrices and register bones
-        const floatArray: Float32Array = await this.getFloat32Array(gltfSkeleton.inverseBindMatrices);
+        const floatArray: Float32Array = await this.getFloat32Array(gltfSkin.inverseBindMatrices);
         const span: number = 16;
         for (let iFloat: number = 0, iBone: number = 0; iFloat < floatArray.length; iFloat += span, iBone++) {
           const mtxBindInverse: Matrix4x4 = new Matrix4x4();
           mtxBindInverse.set(floatArray.subarray(iFloat, iFloat + span));
-          skeleton.registerBone(await this.getNodeByIndex(gltfSkeleton.joints[iBone]), mtxBindInverse);
+          skeleton.registerBone(await this.getNodeByIndex(gltfSkin.joints[iBone]), mtxBindInverse);
         }
         Project.register(skeleton);
+        let a = Object.keys(skeleton.bones).length;
+        let b = gltfSkin.joints.length;
         this.#skeletons[_iSkeleton] = skeleton;
       }
 
