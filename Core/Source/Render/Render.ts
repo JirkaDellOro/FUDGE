@@ -12,6 +12,9 @@ namespace FudgeCore {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
     public static pickBuffer: Int32Array;
 
+    public static mainFBO: WebGLFramebuffer;
+    public static mainTexture: WebGLTexture;
+
     public static mistFBO: WebGLFramebuffer;
     public static mistTexture: WebGLTexture;
     public static cmpMistMaterial: ComponentMaterial;
@@ -219,7 +222,17 @@ namespace FudgeCore {
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
     }
 
-    public static calcAO(_cmpCamera: ComponentCamera): void {
+    public static calcAO(_cmpPostFX: ComponentPostFX): void {
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.aoFBO);
+      Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+      Render.crc3.clearColor(1, 1, 1, 1);
+      Render.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
+
+      //TODO: Initialize and run AO Shader.
+
+      //Reset to main color buffer
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
+      Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
 
     }
 
@@ -248,9 +261,9 @@ namespace FudgeCore {
       Project.deregister(tempMat);  //Deregister this Material to prevent listing in the internal resources of the editor
     }
 
-    public static useScreenQuadRenderData(_shader: typeof Shader, _clr: Color = new Color(0, 0, 0, 1)): void {
+    public static useScreenQuadRenderData(_shader: typeof Shader, _tex: WebGLTexture, _clr: Color = new Color(0, 0, 0, 1)): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      let coat: CoatWebGlTextured = <CoatWebGlTextured>Render.screenQuadCmpMat.material.coat;
+      //let coat: CoatWebGlTextured = <CoatWebGlTextured>Render.screenQuadCmpMat.material.coat;
 
       function createBuffer(_type: GLenum, _array: Float32Array): WebGLBuffer {
         let buffer: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
@@ -277,7 +290,7 @@ namespace FudgeCore {
 
       //feed texture and uniform matrix
       crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
-      crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, coat.texture);
+      crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, _tex);
       crc3.uniform1i(_shader.uniforms["u_texture"], 0);
       crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, Render.screenQuadCmpMat.mtxPivot.get());
 

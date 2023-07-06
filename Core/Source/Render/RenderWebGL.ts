@@ -344,15 +344,20 @@ namespace FudgeCore {
     /**
      * Creates and stores texture buffers to be used for PostFX
      */
-    public static setPostBuffers(_mist: boolean = true, _ao: boolean = true, _bloom: boolean = true): void {
+    public static setupFBOs(_mist: boolean = true, _ao: boolean = true, _bloom: boolean = true): void {
+
+      let mainBufferData: PostBufferdata = RenderWebGL.setupFBO();
+      Render.mainFBO = mainBufferData.fbo;
+      Render.mainTexture = mainBufferData.texture;
+      Render.initScreenQuad(Render.mainTexture);
+
       if (_mist) {
-        let mistBufferData: PostBufferdata = RenderWebGL.setupPostBuffer();
+        let mistBufferData: PostBufferdata = RenderWebGL.setupFBO();
         Render.mistFBO = mistBufferData.fbo;
         Render.mistTexture = mistBufferData.texture;
         let tempMistMat: Material = new Material("mistMat", ShaderMist);
         Render.cmpMistMaterial = new ComponentMaterial(tempMistMat);
         Project.deregister(tempMistMat);  //Deregister this Material to prevent listing in the internal resources of the editor
-        Render.initScreenQuad(Render.mistTexture);
       }
       if (_ao) {
         /*
@@ -372,12 +377,13 @@ namespace FudgeCore {
     /**
      * updates texture and renderbuffersize for given postFX buffers
      */
-    public static adjustPostBuffers(_newSize: Vector2, _mist: boolean = false, _ao: boolean = false, _bloom: boolean = false): void {
+    public static adjustBufferSizes(_newSize: Vector2, _mist: boolean = false, _ao: boolean = false, _bloom: boolean = false): void {
       if (_newSize.x > 0 && _newSize.y > 0) {
+        let mainBufferData: PostBufferdata = RenderWebGL.setupFBO(Render.mainFBO);
+        Render.mainTexture = mainBufferData.texture;
         if (_mist) {
-          let mistBufferData: PostBufferdata = RenderWebGL.setupPostBuffer(Render.mistFBO);
+          let mistBufferData: PostBufferdata = RenderWebGL.setupFBO(Render.mistFBO);
           Render.mistTexture = mistBufferData.texture;
-          Render.initScreenQuad(Render.mistTexture);
         }
         if (_ao) {
           //TODO: ScreenQuad missing
@@ -391,7 +397,7 @@ namespace FudgeCore {
     /**
      * Sets up and configures framebuffers and textures for post-fx
      */
-    protected static setupPostBuffer(_fbo: WebGLFramebuffer = null): PostBufferdata {
+    protected static setupFBO(_fbo: WebGLFramebuffer = null): PostBufferdata {
       let postBufferData: PostBufferdata;
       let sizeX: number = RenderWebGL.crc3.canvas.width; //this should be based on the current Framing. Further it probably should get updated when Chaning the Framing
       let sizeY: number = RenderWebGL.crc3.canvas.height;
@@ -528,7 +534,7 @@ namespace FudgeCore {
     public static drawMist(_cmpCamera: ComponentCamera, _clrMist: Color = new Color()): void {
       let shader: ShaderInterface = Render.screenQuadCmpMat.material.getShader();
       shader.useProgram();
-      Render.useScreenQuadRenderData(Render.screenQuadCmpMat.material.getShader(), _clrMist);
+      Render.useScreenQuadRenderData(Render.screenQuadCmpMat.material.getShader(), Render.mistTexture, _clrMist);
       RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
     }
 

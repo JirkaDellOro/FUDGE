@@ -70,8 +70,8 @@ namespace FudgeCore {
       this.rectSource = Render.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
 
-      //TODO: Only set PostBuffers if needed. This proofs a bit complicated because the initialization might happen before a ComponentCamera with a ComponentPostFX exists. Therefore Postbuffers are initialized regardless for now. 
-      Render.setPostBuffers();
+      //TODO: Only setup needed FBOs. This proofs a bit complicated because the initialization might happen before a ComponentCamera with a ComponentPostFX exists. Therefore Postbuffers are initialized regardless for now. 
+      Render.setupFBOs();
 
       this.setBranch(_branch);
     }
@@ -136,7 +136,7 @@ namespace FudgeCore {
       if (cmpPostFx != null) if (cmpPostFx.isActive) {
         if (cmpPostFx.ao) {
           Render.calcMist(this.camera, cmpPostFx);
-          Render.calcAO(this.camera);
+          Render.calcAO(cmpPostFx);
         } else if (cmpPostFx.mist) {
           Render.calcMist(this.camera, cmpPostFx);
         }
@@ -235,11 +235,10 @@ namespace FudgeCore {
       if (rectRender.size.x != this.lastRectRenderSize.x || rectRender.size.y != this.lastRectRenderSize.y) {
         let cmpPostFx: ComponentPostFX = this.getComponentPostFX(this.camera);
         if (cmpPostFx != null) if (cmpPostFx.isActive) {
-          Render.adjustPostBuffers(rectRender.size, cmpPostFx.mist, cmpPostFx.ao, cmpPostFx.bloom);
+          Render.adjustBufferSizes(rectRender.size, cmpPostFx.mist, cmpPostFx.ao, cmpPostFx.bloom);
           this.lastRectRenderSize.set(rectRender.size.x, rectRender.size.y);
         }
       }
-
       Recycler.store(rectClient);
       Recycler.store(rectCanvas);
       Recycler.store(rectRender);

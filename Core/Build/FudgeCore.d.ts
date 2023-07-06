@@ -1102,15 +1102,15 @@ declare namespace FudgeCore {
         /**
          * Creates and stores texture buffers to be used for PostFX
          */
-        static setPostBuffers(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
+        static setupFBOs(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
         /**
          * updates texture and renderbuffersize for given postFX buffers
          */
-        static adjustPostBuffers(_newSize: Vector2, _mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
+        static adjustBufferSizes(_newSize: Vector2, _mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
         /**
          * Sets up and configures framebuffers and textures for post-fx
          */
-        protected static setupPostBuffer(_fbo?: WebGLFramebuffer): PostBufferdata;
+        protected static setupFBO(_fbo?: WebGLFramebuffer): PostBufferdata;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix. A shader can be passed to calculate every object with the same shader
          */
@@ -5444,6 +5444,8 @@ declare namespace FudgeCore {
     abstract class Render extends RenderWebGL {
         static rectClip: Rectangle;
         static pickBuffer: Int32Array;
+        static mainFBO: WebGLFramebuffer;
+        static mainTexture: WebGLTexture;
         static mistFBO: WebGLFramebuffer;
         static mistTexture: WebGLTexture;
         static cmpMistMaterial: ComponentMaterial;
@@ -5479,10 +5481,10 @@ declare namespace FudgeCore {
          */
         private static drawList;
         static calcMist(_cmpCamera: ComponentCamera, _cmpPostFX: ComponentPostFX): void;
-        static calcAO(_cmpCamera: ComponentCamera): void;
+        static calcAO(_cmpPostFX: ComponentPostFX): void;
         static calcBloom(_cmpCamera: ComponentCamera): void;
         static initScreenQuad(_texture: WebGLTexture): void;
-        static useScreenQuadRenderData(_shader: typeof Shader, _clr?: Color): void;
+        static useScreenQuadRenderData(_shader: typeof Shader, _tex: WebGLTexture, _clr?: Color): void;
         private static transformByPhysics;
     }
 }
