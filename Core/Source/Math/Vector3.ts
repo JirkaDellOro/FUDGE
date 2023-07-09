@@ -87,9 +87,9 @@ namespace FudgeCore {
      */
     public static NORMALIZATION(_vector: Vector3, _length: number = 1): Vector3 {
       let magnitudeSquared: number = _vector.magnitudeSquared;
-      let vector: Vector3 = _vector.clone;
       if (magnitudeSquared == 0)
         throw (new RangeError("Impossible normalization"));
+      let vector: Vector3 = _vector.clone;
       vector.scale(_length / Math.sqrt(magnitudeSquared));
       return vector;
     }
@@ -249,7 +249,7 @@ namespace FudgeCore {
     public recycle(): void {
       this.data.set([0, 0, 0]);
     }
-    
+
     /**
      * Copies the values of the given vector into this
      */

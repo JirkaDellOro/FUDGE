@@ -223,7 +223,10 @@ namespace FudgeCore {
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
       let zAxis: Vector3 = Vector3.DIFFERENCE(_target, _translation);
       zAxis.normalize();
-      let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
+      let vctCross: Vector3 = Vector3.CROSS(_up, zAxis);
+      if (vctCross.magnitudeSquared == 0) // experimental workaround: if z and up is parallel, there is no up to remain...
+        vctCross.x = 0.001; // so tilt a little
+      let xAxis: Vector3 = Vector3.NORMALIZATION(vctCross);
       let yAxis: Vector3 = _restrict ? _up : Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
       zAxis = _restrict ? Vector3.NORMALIZATION(Vector3.CROSS(xAxis, _up)) : zAxis;
       mtxResult.data.set(
@@ -1027,7 +1030,7 @@ namespace FudgeCore {
         );
       }
       if (newRotation) {
-        if ("w" in newRotation) { 
+        if ("w" in newRotation) {
           // This rotation is a quaternion (mutator). Get the euler angles.
           // TODO: maybe make Quaternion the standard for rotation
           const rotation: Quaternion = Recycler.get(Quaternion);
