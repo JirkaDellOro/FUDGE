@@ -128,7 +128,7 @@ namespace FudgeCore {
     public play(_on: boolean): void {
       if (_on) {
         if (this.audio.isReady) {
-          this.createSource(this.audio, this.source.loop);
+          this.createSource(this.audio, this.source.loop, this.playbackRate);
           this.source.start(0, 0);
         }
         else {
@@ -252,7 +252,7 @@ namespace FudgeCore {
       this.activate(active);
     }
 
-    private createSource(_audio: Audio, _loop: boolean): void {
+    private createSource(_audio: Audio, _loop: boolean, _playbackRate: number = 1.0): void {
       if (this.source) {
         this.source.disconnect();
         this.source.buffer = null;
@@ -266,6 +266,7 @@ namespace FudgeCore {
       }
 
       this.source.loop = _loop;
+      this.playbackRate = _playbackRate;
     }
 
     private updateConnection(): void {

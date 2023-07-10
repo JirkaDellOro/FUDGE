@@ -197,7 +197,7 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.clrBackground = _serialization.backgroundColor;
+      await this.clrBackground.deserialize(_serialization.backgroundColor);
       this.backgroundEnabled = _serialization.backgroundEnabled;
       this.projection = _serialization.projection;
       this.fieldOfView = _serialization.fieldOfView;
