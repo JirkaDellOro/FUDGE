@@ -64,8 +64,8 @@ namespace Fudge {
         case ƒui.EVENT.MUTATE:
           this.dispatchToParent(EVENT_EDITOR.UPDATE, {});
           break;
-        // case EVENT_EDITOR.MODIFY: // let modify pass
-        //   return;
+        case EVENT_EDITOR.MODIFY: // let modify pass
+          return;
         default:
           break;
       }

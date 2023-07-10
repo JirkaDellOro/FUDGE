@@ -2354,7 +2354,8 @@ var Fudge;
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
-            document.addEventListener(Fudge.EVENT_EDITOR.CREATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.CREATE, this.hndEvent); // TODO: explain use of document
             this.setTitle("Project | " + Fudge.project.name);
             this.broadcast(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.OPEN, {}));
         }
@@ -4603,6 +4604,7 @@ var Fudge;
             _container.on("resize", this.redraw);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("wheel", this.hndMouse);
@@ -4936,8 +4938,8 @@ var Fudge;
                 case "mutate" /* MUTATE */:
                     this.dispatchToParent(Fudge.EVENT_EDITOR.UPDATE, {});
                     break;
-                // case EVENT_EDITOR.MODIFY: // let modify pass
-                //   return;
+                case Fudge.EVENT_EDITOR.MODIFY: // let modify pass
+                    return;
                 default:
                     break;
             }
