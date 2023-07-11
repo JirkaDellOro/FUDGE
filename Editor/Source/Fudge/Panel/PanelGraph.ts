@@ -83,22 +83,15 @@ namespace Fudge {
     }
 
     private hndEvent = async (_event: EditorEvent | CustomEvent): Promise<void> => {
-      if (_event.type != EVENT_EDITOR.UPDATE && _event.type != EVENT_EDITOR.MODIFY)
-        _event.stopPropagation();
       switch (_event.type) {
+        case EVENT_EDITOR.UPDATE:
+        case EVENT_EDITOR.MODIFY:
+        case EVENT_EDITOR.CLOSE:
+          break;
         case EVENT_EDITOR.SELECT:
           this.setGraph(_event.detail.graph);
-        // case EVENT_EDITOR.MODIFY:
-        //   if (!_event.detail)
-        //     break;
-        //   // selected a graph or a node
-        //   if (this.graph) {
-        //     this.setGraph(_event.detail.graph); // TODO: examine, why this is supposed to happen any time...
-        //     let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
-        //     if (this.graph != newGraph) // TODO: examine, when this is actually true...
-        //       _event = new EditorEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
-        //   }
-        //   break;
+        default:
+          _event.stopPropagation();
       }
 
       this.broadcast(_event);

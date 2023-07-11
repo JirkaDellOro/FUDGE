@@ -453,8 +453,8 @@ var Fudge;
         }
         /** Send custom copies of the given event to the panels */
         static broadcast(_event) {
-            let detail = _event.detail;
-            let sender = detail.sender;
+            let detail = _event.detail || {};
+            let sender = detail?.sender;
             detail.sender = Page;
             for (let panel of Page.panels) {
                 if (panel != sender) // don't send back to original sender
@@ -2204,22 +2204,15 @@ var Fudge;
             // TODO: iterate over views and collect their states for reconstruction 
         }
         hndEvent = async (_event) => {
-            if (_event.type != Fudge.EVENT_EDITOR.UPDATE && _event.type != Fudge.EVENT_EDITOR.MODIFY)
-                _event.stopPropagation();
             switch (_event.type) {
+                case Fudge.EVENT_EDITOR.UPDATE:
+                case Fudge.EVENT_EDITOR.MODIFY:
+                case Fudge.EVENT_EDITOR.CLOSE:
+                    break;
                 case Fudge.EVENT_EDITOR.SELECT:
                     this.setGraph(_event.detail.graph);
-                // case EVENT_EDITOR.MODIFY:
-                //   if (!_event.detail)
-                //     break;
-                //   // selected a graph or a node
-                //   if (this.graph) {
-                //     this.setGraph(_event.detail.graph); // TODO: examine, why this is supposed to happen any time...
-                //     let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
-                //     if (this.graph != newGraph) // TODO: examine, when this is actually true...
-                //       _event = new EditorEvent(EVENT_EDITOR.SELECT, { detail: { graph: newGraph } });
-                //   }
-                //   break;
+                default:
+                    _event.stopPropagation();
             }
             this.broadcast(_event);
         };

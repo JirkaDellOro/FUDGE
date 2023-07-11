@@ -159,8 +159,8 @@ namespace Fudge {
 
     /** Send custom copies of the given event to the panels */
     private static broadcast(_event: EditorEvent): void {
-      let detail: EventDetail = _event.detail;
-      let sender: Panel | Page = detail.sender;
+      let detail: EventDetail = _event.detail || {};
+      let sender: Panel | Page = detail?.sender;
       detail.sender = Page;
       for (let panel of Page.panels) {
         if (panel != sender) // don't send back to original sender
