@@ -12,8 +12,7 @@ namespace FudgeCore {
     public static pickRay(_nodes: Node[], _ray: Ray, _min: number, _max: number): Pick[] {
       let cmpCameraPick: ComponentCamera = new ComponentCamera();
       cmpCameraPick.mtxPivot.translation = _ray.origin;
-      // cmpCameraPick.mtxPivot.lookAt(Vector3.SUM(_ray.origin, _ray.direction));
-      cmpCameraPick.mtxPivot.lookAt(_ray.direction);
+      cmpCameraPick.mtxPivot.lookAt(Vector3.SUM(_ray.origin, _ray.direction));
       cmpCameraPick.projectCentral(1, 0.001, FIELD_OF_VIEW.DIAGONAL, _min, _max);
 
       let picks: Pick[] = Render.pickBranch(_nodes, cmpCameraPick);
@@ -35,7 +34,6 @@ namespace FudgeCore {
       }
       else
         ray.transform(_cmpCamera.mtxPivot);
-
 
       let picks: Pick[] = Picker.pickRay(_nodes, ray, length * _cmpCamera.getNear(), length * _cmpCamera.getFar());
       return picks;

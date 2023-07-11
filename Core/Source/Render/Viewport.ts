@@ -174,7 +174,7 @@ namespace FudgeCore {
         let picks: Pick[] = Picker.pickCamera(cameraPicks, this.camera, this.pointClientToProjection(posClient));
         for (let pick of picks) {
           Reflect.set(_event, "pick", pick);
-          pick.node.dispatchEvent(_event); 
+          pick.node.dispatchEvent(_event);
         }
       }
 
@@ -240,13 +240,11 @@ namespace FudgeCore {
       let ray: Ray = new Ray(new Vector3(-posProjection.x, posProjection.y, 1));
 
       // ray.direction.scale(camera.distance);
-      ray.origin.transform(this.camera.mtxPivot);
-      ray.direction.transform(this.camera.mtxPivot, false);
+      ray.transform(this.camera.mtxPivot);
       let cameraNode: Node = this.camera.node;
-      if (cameraNode) {
-        ray.origin.transform(cameraNode.mtxWorld);
-        ray.direction.transform(cameraNode.mtxWorld, false);
-      }
+      if (cameraNode)
+        ray.transform(cameraNode.mtxWorld);
+        
       return ray;
     }
 

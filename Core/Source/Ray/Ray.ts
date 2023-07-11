@@ -54,8 +54,8 @@ namespace FudgeCore {
      * Transform the ray by the given matrix
      */
     public transform(_mtxTransform: Matrix4x4): void {
-      this.direction.transform(_mtxTransform);
       this.origin.transform(_mtxTransform);
+      this.direction.transform(_mtxTransform, false);
     }
 
     /**
