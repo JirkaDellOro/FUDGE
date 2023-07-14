@@ -14,37 +14,35 @@ namespace FudgeCore {
 
     public constructor(_name: string = "MeshCube") {
       super(_name);
-      // this.create();
+
+      // no shared vertices, corners need three normals for Phong and Gouraud
       this.vertices = new Vertices(
-        // front
+        // front vertices
         new Vertex(new Vector3(-0.5, 0.5, 0.5), new Vector2(0, 0)), // 0
         new Vertex(new Vector3(-0.5, -0.5, 0.5), new Vector2(0, 1)), // 1
         new Vertex(new Vector3(0.5, -0.5, 0.5), new Vector2(1, 1)), // 2
-        new Vertex(new Vector3(0.5, 0.5, 0.5), new Vector2(1, 0)), // 3
-        // back
-        new Vertex(new Vector3(-0.5, 0.5, -0.5), new Vector2(3, 0)), // 4
-        new Vertex(new Vector3(-0.5, -0.5, -0.5), new Vector2(3, 1)), // 5
-        new Vertex(new Vector3(0.5, -0.5, -0.5), new Vector2(2, 1)), // 6
-        new Vertex(new Vector3(0.5, 0.5, -0.5), new Vector2(2, 0)), // 7
-        // references
-        new Vertex(0, new Vector2(4, 0)), // 8
-        new Vertex(1, new Vector2(4, 1)), // 9
-        new Vertex(3, new Vector2(0, 1)), // 10
-        new Vertex(7, new Vector2(1, 1)), // 11
-        new Vertex(4, new Vector2(1, 0)), // 12
-        new Vertex(2, new Vector2(0, 0)), // 13
-        new Vertex(6, new Vector2(1, 0)), // 14
-        new Vertex(5, new Vector2(1, 1))  // 15
+        new Vertex(new Vector3(0.5, 0.5, 0.5), new Vector2(1, 0)) //3
       );
 
-      this.faces = [
-        ...new Quad(this.vertices, 0, 1, 2, 3).faces, // front
-        ...new Quad(this.vertices, 7, 6, 5, 4).faces, // back
-        ...new Quad(this.vertices, 3, 2, 6, 7).faces, // right
-        ...new Quad(this.vertices, 4, 5, 9, 8).faces, // left
-        ...new Quad(this.vertices, 0, 10, 11, 12).faces, // top
-        ...new Quad(this.vertices, 13, 1, 15, 14).faces  // bottom
-      ];
+      // generate vertices on sides
+      for (let angle: number = 90; angle < 360; angle += 90) {
+        let transform: Matrix4x4 = Matrix4x4.ROTATION(Vector3.Y(angle));
+        let side: Vertex[] = this.vertices.slice(0, 4).map((_v: Vertex) =>
+          new Vertex(Vector3.TRANSFORMATION(_v.position, transform), _v.uv));
+        this.vertices.push(...side);
+      }
+      // generate vertices for top and bottom
+      for (let angle: number = 90; angle < 360; angle += 180) {
+        let transform: Matrix4x4 = Matrix4x4.ROTATION(Vector3.X(angle));
+        let side: Vertex[] = this.vertices.slice(0, 4).map((_v: Vertex) =>
+          new Vertex(Vector3.TRANSFORMATION(_v.position, transform), _v.uv));
+        this.vertices.push(...side);
+      }
+
+      this.faces = [];
+      for (let i: number = 0; i < 24; i += 4)
+        // generate faces
+        this.faces.push(...new Quad(this.vertices, i + 0, i + 1, i + 2, i + 3).faces);
     }
   }
 }
