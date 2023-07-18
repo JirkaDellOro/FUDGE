@@ -1,4 +1,3 @@
-///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
@@ -173,7 +172,7 @@ namespace FudgeUserInterface {
     private hndFocus = (_event: Event): void => {
       if (_event.target == this.label)
         this.label.disabled = true;
-    }
+    };
 
     private hndKey = (_event: KeyboardEvent): void => {
       _event.stopPropagation();
@@ -231,7 +230,7 @@ namespace FudgeUserInterface {
           }
           break;
       }
-    }
+    };
 
     private startTypingLabel(): void {
       this.label.disabled = false;
@@ -242,7 +241,7 @@ namespace FudgeUserInterface {
       _event.stopPropagation();
       if (_event.target != this.checkbox)
         this.startTypingLabel();
-    }
+    };
 
     private hndChange = (_event: Event): void => {
       let target: HTMLInputElement = <HTMLInputElement>_event.target;
@@ -262,7 +261,7 @@ namespace FudgeUserInterface {
           // console.log(target);
           break;
       }
-    }
+    };
 
     private hndDragStart = (_event: DragEvent): void => {
       // _event.stopPropagation();
@@ -279,7 +278,7 @@ namespace FudgeUserInterface {
 
       // mark as already processed by this tree item to ignore it in further propagation through the tree
       _event.dataTransfer.setData("dragstart", this.label.value);
-    }
+    };
 
     private hndDragOver = (_event: DragEvent): void => {
       // this.controller.hndDragOver(_event);
@@ -291,21 +290,21 @@ namespace FudgeUserInterface {
       _event.preventDefault();
       this.controller.dragDrop.target = this.data;
       _event.dataTransfer.dropEffect = "move";
-    }
+    };
 
     private hndPointerUp = (_event: PointerEvent): void => {
       _event.stopPropagation();
       if (_event.target == this.checkbox)
         return;
       this.select(_event.ctrlKey, _event.shiftKey);
-    }
+    };
 
     private hndRemove = (_event: Event): void => {
       if (_event.currentTarget == _event.target)
         return;
       _event.stopPropagation();
       this.hasChildren = this.controller.hasChildren(this.data);
-    }
+    };
   }
 
   customElements.define("li-tree-item", <CustomElementConstructor><unknown>TreeItem, { extends: "li" });

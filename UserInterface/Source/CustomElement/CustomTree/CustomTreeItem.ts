@@ -1,4 +1,3 @@
-///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
@@ -174,7 +173,7 @@ namespace FudgeUserInterface {
       if (!(_event.target instanceof HTMLInputElement) || _event.target == this.checkbox) return;
 
       _event.target.disabled = true;
-    }
+    };
 
     private hndKey = (_event: KeyboardEvent): void => {
       _event.stopPropagation();
@@ -235,7 +234,7 @@ namespace FudgeUserInterface {
           }
           break;
       }
-    }
+    };
 
     private startTypingInput(_inputElement?: HTMLElement): void {
       if (!_inputElement) _inputElement = <HTMLElement>this.content.elements.item(0);
@@ -249,7 +248,7 @@ namespace FudgeUserInterface {
       _event.stopPropagation();
       if (_event.target != this.checkbox)
         this.startTypingInput(<HTMLElement>_event.target);
-    }
+    };
 
     private hndChange = (_event: Event): void => {
       let target: HTMLInputElement | HTMLSelectElement = <HTMLInputElement | HTMLSelectElement>_event.target;
@@ -275,7 +274,7 @@ namespace FudgeUserInterface {
       if (target instanceof HTMLSelectElement) 
         this.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { id: target.id, value: target.value } }));
         
-    }
+    };
 
     private hndDragStart = (_event: DragEvent): void => {
       // _event.stopPropagation();
@@ -293,12 +292,12 @@ namespace FudgeUserInterface {
 
       // mark as already processed by this tree item to ignore it in further propagation through the tree
       _event.dataTransfer.setData("dragstart", "dragstart");
-    }
+    };
 
     private hndDragEnter = (_event: DragEvent): void => { // this prevents cursor from flickering
       _event.preventDefault();
       _event.dataTransfer.dropEffect = "move";
-    }
+    };
 
     private hndDragOver = (_event: DragEvent): void => {      
       let rect: DOMRect = this.content.getBoundingClientRect();
@@ -313,21 +312,21 @@ namespace FudgeUserInterface {
         this.controller.dragDrop.at = null;
         this.controller.dragDrop.target = this.data;
       }
-    }
+    };
 
     private hndPointerUp = (_event: PointerEvent): void => {
       _event.stopPropagation();
       if (_event.target == this.checkbox)
         return;
       this.select(_event.ctrlKey, _event.shiftKey);
-    }
+    };
 
     private hndRemove = (_event: Event): void => {
       if (_event.currentTarget == _event.target)
         return;
       _event.stopPropagation();
       this.hasChildren = this.controller.hasChildren(this.data);
-    }
+    };
   }
 
   customElements.define("li-custom-tree-item", <CustomElementConstructor><unknown>CustomTreeItem, { extends: "li" });

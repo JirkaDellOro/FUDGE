@@ -1,5 +1,3 @@
-/// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
-
 namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
@@ -76,8 +74,7 @@ namespace FudgeUserInterface {
           let details: Details = new Details(key, "Details");
           details.setContent(Generator.createInterfaceFromMutator(value));
           div.appendChild(details);
-        }
-        else
+        } else
           div.appendChild(this.createMutatorElement(key, (<Object>value).constructor.name, value));
       }
       return div;
@@ -93,13 +90,10 @@ namespace FudgeUserInterface {
           let elementType: typeof CustomElement = CustomElement.get("Object");
           // @ts-ignore: instantiate abstract class
           element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
-        }
-        // TODO: delete?
-        else if (_value instanceof ƒ.MutableArray) {
+        } else if (_value instanceof ƒ.MutableArray) { // TODO: delete?
           console.log("MutableArray");
           // insert Array-Controller!
-        }
-        else {
+        } else {
           let elementType: typeof CustomElement = CustomElement.get(_type);
           if (!elementType)
             return element;

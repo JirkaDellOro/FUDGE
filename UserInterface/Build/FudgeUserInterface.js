@@ -1,7 +1,6 @@
 "use strict";
-// / <reference types="../../../Core/Build/FudgeCore"/>
+/// <reference types="../../Core/Build/FudgeCore"/>
 var FudgeUserInterface;
-// / <reference types="../../../Core/Build/FudgeCore"/>
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
     /**
@@ -103,8 +102,8 @@ var FudgeUserInterface;
                 }
             }
         }
-        static findChildElementByKey(_domElement, key) {
-            return _domElement.querySelector(`[key = "${key}"]`);
+        static findChildElementByKey(_domElement, _key) {
+            return _domElement.querySelector(`[key = "${_key}"]`);
         }
         getMutator(_mutator, _types) {
             // TODO: should get Mutator for UI or work with this.mutator (examine)
@@ -163,9 +162,7 @@ var FudgeUserInterface;
     }
     FudgeUserInterface.Controller = Controller;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-/// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
-/// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
     /**
@@ -253,8 +250,7 @@ var FudgeUserInterface;
                     // @ts-ignore: instantiate abstract class
                     element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
                 }
-                // TODO: delete?
-                else if (_value instanceof ƒ.MutableArray) {
+                else if (_value instanceof ƒ.MutableArray) { // TODO: delete?
                     console.log("MutableArray");
                     // insert Array-Controller!
                 }
@@ -1480,9 +1476,7 @@ var FudgeUserInterface;
     }
     FudgeUserInterface.Warning = Warning;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
-///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 (function (FudgeUserInterface) {
     /**
      * Extension of ul-element that keeps a list of {@link CustomTreeItem}s to represent a branch in a tree
@@ -1838,9 +1832,7 @@ var FudgeUserInterface;
     }
     FudgeUserInterface.CustomTreeController = CustomTreeController;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
-///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
     /**
@@ -2532,9 +2524,7 @@ var FudgeUserInterface;
     FudgeUserInterface.TableItem = TableItem;
     customElements.define("table-item", TableItem, { extends: "tr" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
-///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 (function (FudgeUserInterface) {
     /**
     * Extension of ul-element that keeps a list of [[TreeItem]]s to represent a branch in a tree
@@ -2858,9 +2848,7 @@ var FudgeUserInterface;
     }
     FudgeUserInterface.TreeController = TreeController;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
-///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
     /**

@@ -1,4 +1,3 @@
-// / <reference types="../../../Core/Build/FudgeCore"/>
 namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
@@ -19,7 +18,7 @@ namespace FudgeUserInterface {
 
     private idInterval: number;
 
-    constructor(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>, _domElement: HTMLElement) {
+    public constructor(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>, _domElement: HTMLElement) {
       this.domElement = _domElement;
       this.setMutable(_mutable);
       // TODO: examine, if this should register to one common interval, instead of each installing its own.
@@ -113,8 +112,8 @@ namespace FudgeUserInterface {
       }
     }
 
-    public static findChildElementByKey(_domElement: HTMLElement, key: string): HTMLElement {
-      return _domElement.querySelector(`[key = "${key}"]`);
+    public static findChildElementByKey(_domElement: HTMLElement, _key: string): HTMLElement {
+      return _domElement.querySelector(`[key = "${_key}"]`);
     }
 
     public getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
@@ -143,15 +142,15 @@ namespace FudgeUserInterface {
       this.idInterval = window.setInterval(this.refresh, this.timeUpdate);
     }
 
-    protected mutateOnInput = async (_event: Event) => {
+    protected mutateOnInput = async (_event: Event): Promise<void> => {
       this.mutator = this.getMutator();
       await this.mutable.mutate(this.mutator);
       _event.stopPropagation();
 
       this.domElement.dispatchEvent(new Event(EVENT.MUTATE, { bubbles: true }));
-    }
+    };
 
-    protected rearrangeArray = async (_event: Event) => {
+    protected rearrangeArray = async (_event: Event): Promise<void> => {
       let sequence: number[] = (<CustomEvent>_event).detail.sequence;
       let path: string[] = [];
       let details: DetailsArray = <DetailsArray>_event.target;
@@ -172,15 +171,15 @@ namespace FudgeUserInterface {
 
       // rearrange that mutable
       (<ƒ.MutableArray<ƒ.Mutable>><unknown>mutable).rearrange(sequence);
-    }
+    };
 
-    protected refresh = (_event: Event) => {
+    protected refresh = (_event: Event): void => {
       if (document.body.contains(this.domElement)) {
         this.updateUserInterface();
         return;
       }
 
       window.clearInterval(this.idInterval);
-    }
+    };
   }
 }
