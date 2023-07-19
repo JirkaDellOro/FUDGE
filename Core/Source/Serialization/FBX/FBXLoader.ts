@@ -464,7 +464,7 @@ namespace FudgeCore {
               mtxRotation.multiply(preRototation, true);
             if (postRotation)
               mtxRotation.multiply(postRotation);
-            vctEulerAngles = mtxRotation.getEulerAngles();
+            vctEulerAngles = mtxRotation.rotation;
             if (_frame.x)
               _frame.x.value = vctEulerAngles.x;
             if (_frame.y)

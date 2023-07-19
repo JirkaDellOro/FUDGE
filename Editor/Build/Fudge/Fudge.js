@@ -3040,7 +3040,6 @@ var Fudge;
         static PIXEL_PER_VALUE = 100; // at scaling 1
         static MINIMUM_PIXEL_PER_STEP = 60; // at any scaling, for both x and y
         static STANDARD_ANIMATION_LENGTH = 1000; // in miliseconds, used when animation length is falsy
-        #mode;
         animation;
         playbackTime = 0;
         canvas = document.createElement("canvas");
@@ -3058,6 +3057,7 @@ var Fudge;
         documentStyle = window.getComputedStyle(document.documentElement);
         posPanStart = new ƒ.Vector2();
         posRightClick = new ƒ.Vector2();
+        #mode;
         constructor(_container, _state) {
             super(_container, _state);
             // maybe use this solution for all views?
@@ -3449,6 +3449,7 @@ var Fudge;
                 }
             }
         }
+        // TODO: add correct drawing for constant/step interpolated keys
         drawCurves() {
             if (this.mode != SHEET_MODE.CURVES)
                 return;
@@ -3469,10 +3470,10 @@ var Fudge;
             }
             function getBezierPoints(_animationFunction, _keyStart, _keyEnd) {
                 let parameters = _animationFunction.getParameters();
-                const polarForm = (u, v, w) => {
-                    return (parameters.a * u * v * w +
-                        parameters.b * ((v * w + w * u + u * v) / 3) +
-                        parameters.c * ((u + v + w) / 3) +
+                const polarForm = (_u, _v, _w) => {
+                    return (parameters.a * _u * _v * _w +
+                        parameters.b * ((_v * _w + _w * _u + _u * _v) / 3) +
+                        parameters.c * ((_u + _v + _w) / 3) +
                         parameters.d);
                 };
                 let xStart = _keyStart.time;

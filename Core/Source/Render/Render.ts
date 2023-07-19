@@ -209,8 +209,7 @@ namespace FudgeCore {
       }
 
       let mtxWorld: Matrix4x4 = Matrix4x4.CONSTRUCTION(
-        { translation: _cmpRigidbody.getPosition(), rotation: _cmpRigidbody.getRotation(), scaling: null }
-      );
+        _cmpRigidbody.getPosition(), _cmpRigidbody.getRotation(), null);
       mtxWorld.multiply(_cmpRigidbody.mtxPivotInverse);
       _node.mtxWorld.translation = mtxWorld.translation;
       _node.mtxWorld.rotation = mtxWorld.rotation;

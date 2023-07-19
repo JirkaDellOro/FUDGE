@@ -7,7 +7,7 @@ namespace FudgeCore {
    *            /
    *          +z   
    * ```
-   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022 | Jonas Plotzky, HFU, 2023
    */
   export class Vector3 extends Mutable implements Serializable, Recycable {
     private data: Float32Array; // TODO: check why this shouldn't be x,y,z as numbers...
@@ -63,20 +63,41 @@ namespace FudgeCore {
       return vector;
     }
 
+
     /**
-     * Creates and returns a vector through transformation of the given vector by the given matrix
+     * Creates and returns a vector through transformation of the given vector by the given matrix or rotation quaternion.
      */
-    public static TRANSFORMATION(_vector: Vector3, _mtxTransform: Matrix4x4, _includeTranslation: boolean = true): Vector3 {
+    public static TRANSFORMATION(_vector: Vector3, _transform: Matrix4x4 | Quaternion, _includeTranslation: boolean = true): Vector3 {
       let result: Vector3 = Recycler.get(Vector3);
-      let m: Float32Array = _mtxTransform.get();
       let [x, y, z] = _vector.get();
 
-      result.x = m[0] * x + m[4] * y + m[8] * z;
-      result.y = m[1] * x + m[5] * y + m[9] * z;
-      result.z = m[2] * x + m[6] * y + m[10] * z;
+      if (_transform instanceof Matrix4x4) {
+        let m: Float32Array = _transform.get();
 
-      if (_includeTranslation) {
-        result.add(_mtxTransform.translation);
+        result.x = m[0] * x + m[4] * y + m[8] * z;
+        result.y = m[1] * x + m[5] * y + m[9] * z;
+        result.z = m[2] * x + m[6] * y + m[10] * z;
+
+        if (_includeTranslation) {
+          result.add(_transform.translation);
+        }
+      } else {
+        // From: https://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/transforms/index.htm
+        // result = q * quaternion(vector.x, vector.y, vector.z, 0) * conj(q)
+        // const q: number[] = _transform.get();
+
+        // q * quaternion(vector.x, vector.y, vector.z, 0) ...
+        const qx: number = _transform.w * x + _transform.y * z - _transform.z * y;
+        const qy: number = _transform.w * y + _transform.z * x - _transform.x * z;
+        const qz: number = _transform.w * z + _transform.x * y - _transform.y * x;
+        const qw: number = -_transform.x * x - _transform.y * y - _transform.z * z;
+
+        // ... * conj(q)
+        result.set(
+          qx * _transform.w + qw * - _transform.x + qy * - _transform.z - qz * - _transform.y,
+          qy * _transform.w + qw * - _transform.y + qz * - _transform.x - qx * - _transform.z,
+          qz * _transform.w + qw * - _transform.z + qx * - _transform.y - qy * - _transform.x
+        );
       }
 
       return result;
@@ -337,11 +358,12 @@ namespace FudgeCore {
     }
 
     /**
-     * Transforms this vector by the given matrix, including or exluding the translation.
+     * Transforms this vector by the given matrix or rotation quaternion. 
+     * Including or exluding the translation if a matrix is passed.
      * Including is the default, excluding will only rotate and scale this vector.
      */
-    public transform(_mtxTransform: Matrix4x4, _includeTranslation: boolean = true): void {
-      let transformed: Vector3 = Vector3.TRANSFORMATION(this, _mtxTransform, _includeTranslation);
+    public transform(_transform: Matrix4x4 | Quaternion, _includeTranslation: boolean = true): void {
+      let transformed: Vector3 = Vector3.TRANSFORMATION(this, _transform, _includeTranslation);
       this.data.set(transformed.data);
       Recycler.store(transformed);
     }
@@ -430,10 +452,14 @@ namespace FudgeCore {
       return this;
     }
 
+    public async mutate(_mutator: Mutator): Promise<void> {
+      this.data[0] = _mutator.x ?? this.data[0];
+      this.data[1] = _mutator.y ?? this.data[1];
+      this.data[2] = _mutator.z ?? this.data[2];
+    }
+
     public getMutator(): Mutator {
-      let mutator: Mutator = {
-        x: this.data[0], y: this.data[1], z: this.data[2]
-      };
+      let mutator: Mutator = { x: this.data[0], y: this.data[1], z: this.data[2] };
       return mutator;
     }
     protected reduceMutator(_mutator: Mutator): void {/** */ }

@@ -43,33 +43,25 @@ namespace FudgeCore {
         });
 
         // mark the depth of each node
+        const paths: number[][] = [];
         gltf.nodes.forEach((_node, _iNode) => {
           let iParent: number = _node.parent;
           let depth: number = 0;
+          let path: number[] = [];
           while (iParent != undefined) {
+            path.push(iParent);
             depth++;
             iParent = gltf.nodes[iParent].parent;
           }
           _node.depth = depth;
+          paths[_iNode] = path;
         });
 
         // mark the skeleton root nodes of each skin
         gltf.skins?.forEach((_skin, _iSkin) => {
           if (_skin.skeleton == undefined) {
             // find the common root of all joints i.e. the skeleton
-            const ancestors: Set<number> = new Set<number>(
-              _skin.joints.flatMap(_iJoint => {
-                // find all ancestors of joint
-                let ancestors: number[] = [];
-                let iParent: number = gltf.nodes[_iJoint].parent;
-                while (iParent != undefined) {
-                  ancestors.push(iParent);
-                  iParent = gltf.nodes[iParent].parent;
-                }
-                return ancestors;
-              })
-            );
-
+            const ancestors: Set<number> = new Set<number>(_skin.joints.flatMap(_iJoint => paths[_iJoint]));
             _skin.skeleton = Array.from(ancestors).reduce((_a, _b) => gltf.nodes[_a].depth < gltf.nodes[_b].depth ? _a : _b);
           }
 
@@ -132,7 +124,7 @@ namespace FudgeCore {
         const node: Node = iSkeleton >= 0 ? new Skeleton(gltfNode.name) : new Node(gltfNode.name);
 
         // check for transformation
-        if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation) {
+        if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation || gltfNode.isJoint) {
           if (!node.getComponent(ComponentTransform))
             node.addComponent(new ComponentTransform());
           if (gltfNode.matrix) {
@@ -142,7 +134,7 @@ namespace FudgeCore {
               node.mtxLocal.translate(new Vector3(...gltfNode.translation));
             if (gltfNode.rotation) {
               const rotation: Quaternion = new Quaternion();
-              rotation.set(gltfNode.rotation);
+              rotation.set(gltfNode.rotation[0], gltfNode.rotation[1], gltfNode.rotation[2], gltfNode.rotation[3]);
               node.mtxLocal.rotate(rotation.eulerAngles);
             }
             if (gltfNode.scale)
@@ -302,7 +294,7 @@ namespace FudgeCore {
             if (iSkin >= 0 && this.gltf.skins[iSkin].joints.includes(gltfChannels[0].target.node)) {
               const mtxBoneLocal: AnimationStructureMatrix4x4 = {};
               for (const gltfChannel of gltfChannels)
-                mtxBoneLocal[gltfChannel.target.path] =
+                mtxBoneLocal[toInternTransformation[gltfChannel.target.path]] =
                   await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
               if (currentStructure.mtxBoneLocals == undefined)
                 currentStructure.mtxBoneLocals = {};
@@ -313,7 +305,7 @@ namespace FudgeCore {
             if (pathNode == gltfNode) {
               const mtxLocal: AnimationStructureMatrix4x4 = {};
               for (const gltfChannel of gltfChannels)
-                mtxLocal[gltfChannel.target.path] =
+                mtxLocal[toInternTransformation[gltfChannel.target.path]] =
                   await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
               currentStructure.components = {
                 ComponentTransform: [
@@ -461,8 +453,6 @@ namespace FudgeCore {
           skeleton.registerBone(await this.getNodeByIndex(gltfSkin.joints[iBone]), mtxBindInverse);
         }
         Project.register(skeleton);
-        let a = Object.keys(skeleton.bones).length;
-        let b = gltfSkin.joints.length;
         this.#skeletons[_iSkeleton] = skeleton;
       }
 
@@ -585,22 +575,49 @@ namespace FudgeCore {
       const output: Float32Array = await this.getFloat32Array(_sampler.output);
       const millisPerSecond: number = 1000;
       const isRotation: boolean = _transformationType == "rotation";
+      const gltfInterpolation: GLTF.AnimationSampler["interpolation"] = _sampler.interpolation;
+
+      // used only for rotation interpolation
+      let lastRotation: Quaternion;
+      let nextRotation: Quaternion;
 
       const sequences: AnimationStructureVector3 | AnimationStructureVector4 = {};
       sequences.x = new AnimationSequence();
       sequences.y = new AnimationSequence();
       sequences.z = new AnimationSequence();
-      if (isRotation)
+      if (isRotation) {
         sequences.w = new AnimationSequence();
+        lastRotation = Recycler.get(Quaternion);
+        nextRotation = Recycler.get(Quaternion);
+      }
 
       for (let iInput: number = 0; iInput < input.length; ++iInput) {
         let iOutput: number = iInput * (_transformationType == "rotation" ? 4 : 3); // output buffer either contains data for quaternion or vector3
         let time: number = millisPerSecond * input[iInput];
-        sequences.x.addKey(new AnimationKey(time, output[iOutput + 0]));
-        sequences.y.addKey(new AnimationKey(time, output[iOutput + 1]));
-        sequences.z.addKey(new AnimationKey(time, output[iOutput + 2]));
+
+        if (isRotation) {
+          // Take the shortest path between two rotations, i.e. if the dot product is negative then the next quaternion needs to be negated.
+          // q and -q represent the same rotation but interpolation will take either the long way or the short way around the sphere depending on which we use.
+          nextRotation.set(output[iOutput + 0], output[iOutput + 1], output[iOutput + 2], output[iOutput + 3]);
+          if (Quaternion.DOT(lastRotation, nextRotation) < 0)
+            nextRotation.negate();
+          output[iOutput + 0] = nextRotation.x;
+          output[iOutput + 1] = nextRotation.y;
+          output[iOutput + 2] = nextRotation.z;
+          output[iOutput + 3] = nextRotation.w;
+          lastRotation.set(nextRotation.x, nextRotation.y, nextRotation.z, nextRotation.w);
+        }
+
+        sequences.x.addKey(new AnimationKey(time, output[iOutput + 0], toInternInterpolation[gltfInterpolation]));
+        sequences.y.addKey(new AnimationKey(time, output[iOutput + 1], toInternInterpolation[gltfInterpolation]));
+        sequences.z.addKey(new AnimationKey(time, output[iOutput + 2], toInternInterpolation[gltfInterpolation]));
         if (isRotation)
-          (<AnimationStructureVector4>sequences).w.addKey(new AnimationKey(time, output[iOutput + 3]));
+          (<AnimationStructureVector4>sequences).w.addKey(new AnimationKey(time, output[iOutput + 3], toInternInterpolation[gltfInterpolation]));
+      }
+
+      if (isRotation) {
+        Recycler.store(lastRotation);
+        Recycler.store(nextRotation);
       }
 
       return sequences;
@@ -623,5 +640,17 @@ namespace FudgeCore {
 
   type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Int32Array | Float32Array | Float64Array;
 
+  const toInternInterpolation: { [key in GLTF.AnimationSampler["interpolation"]]: AnimationKey["interpolation"] } = {
+    "LINEAR": "linear",
+    "STEP": "constant",
+    "CUBICSPLINE": "cubic"
+  };
+
+  const toInternTransformation: { [key in GLTF.AnimationChannelTarget["path"]]: string } = {
+    "translation": "translation",
+    "rotation": "rotation",
+    "scale": "scaling",
+    "weights": "weights"
+  };
   // type TransformationType = "rotation" | "scale" | "translation";
 }

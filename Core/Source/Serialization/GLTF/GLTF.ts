@@ -144,7 +144,7 @@ namespace GLTF {
     /**
      * Interpolation algorithm.
      */
-    "interpolation"?: any | any | any | string;
+    "interpolation"?: "LINEAR" | "STEP" | "CUBICSPLINE";
     /**
      * The index of an accessor, containing keyframe output values.
      */

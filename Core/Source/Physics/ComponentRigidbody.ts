@@ -283,8 +283,11 @@ namespace FudgeCore {
      */
     public getRotation(): Vector3 {
       let orientation: OIMO.Quat = this.#rigidbody.getOrientation();
-      let tmpQuat: Quaternion = new Quaternion(orientation.x, orientation.y, orientation.z, orientation.w);
-      return tmpQuat.eulerAngles;
+      let tmpQuat: Quaternion = Recycler.get(Quaternion);
+      tmpQuat.set(orientation.x, orientation.y, orientation.z, orientation.w);
+      let eulerAngles: Vector3 = tmpQuat.eulerAngles.clone;
+      Recycler.store(tmpQuat);
+      return eulerAngles;
     }
 
     /**
@@ -348,7 +351,7 @@ namespace FudgeCore {
       let mtxWorld: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
 
       let position: Vector3 = mtxWorld.translation; //Adding the offsets from the pivot
-      let rotation: Vector3 = mtxWorld.getEulerAngles();
+      let rotation: Vector3 = mtxWorld.rotation;
       let scaling: Vector3 = mtxWorld.scaling;
       //scaling requires collider to be recreated
       this.setScaling(scaling);
@@ -358,7 +361,7 @@ namespace FudgeCore {
       this.setRotation(rotation);
 
       let scalingInverse: Vector3 = this.node.mtxWorld.scaling.map(_i => 1 / _i);
-      this.#mtxPivotUnscaled = Matrix4x4.CONSTRUCTION({ translation: this.mtxPivot.translation, rotation: this.mtxPivot.rotation, scaling: scalingInverse });
+      this.#mtxPivotUnscaled = Matrix4x4.CONSTRUCTION(this.mtxPivot.translation, this.mtxPivot.rotation, scalingInverse);
       this.#mtxPivotInverse = Matrix4x4.INVERSION(this.#mtxPivotUnscaled);
 
       this.addRigidbodyToWorld();

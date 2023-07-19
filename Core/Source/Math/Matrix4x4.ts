@@ -1,15 +1,6 @@
 namespace FudgeCore {
 
   /**
-   * Represents the matrix as translation, rotation and scaling {@link Vector3}, being calculated from the matrix
-   */
-  interface VectorRepresentation {
-    translation: Vector3;
-    rotation: Vector3;
-    scaling: Vector3;
-  }
-
-  /**
    * Stores a 4x4 transformation matrix and provides operations for it.
    * ```text
    * [ 0, 1, 2, 3 ] ← row vector x
@@ -18,20 +9,25 @@ namespace FudgeCore {
    * [12,13,14,15 ] ← translation
    *            ↑  homogeneous column
    * ```
-   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019 | Jonas Plotzky, HFU, 2023
    */
   export class Matrix4x4 extends Mutable implements Serializable, Recycable {
     private data: Float32Array = new Float32Array(16); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
-    private vectors: VectorRepresentation; // vector representation of this matrix
 
-    #eulerAngles: Vector3 = Vector3.ZERO();
-    #vectors: VectorRepresentation = { translation: Vector3.ZERO(), rotation: Vector3.ZERO(), scaling: Vector3.ZERO() };
+    readonly #translation: Vector3 = Vector3.ZERO();
+    readonly #scaling: Vector3 = Vector3.ZERO();
+    readonly #rotation: Vector3 = Vector3.ONE();
+    readonly #quaternion: Quaternion = Quaternion.IDENTITY();
+
+    #translationDirty: boolean;
+    #scalingDirty: boolean;
+    #rotationDirty: boolean;
+    #quaternionDirty: boolean;
 
     public constructor() {
       super();
       this.recycle();
-      this.resetCache();
     }
 
     //#region STATICS
@@ -43,13 +39,12 @@ namespace FudgeCore {
       return mtxResult;
     }
 
-
     /**
-     * Constructs a new matrix according to the translation, rotation and scaling {@link Vector3}s given
+     * Construct a new matrix according to the given translation, rotation and scaling.
      */
-    public static CONSTRUCTION(_vectors: VectorRepresentation): Matrix4x4 {
+    public static CONSTRUCTION(_translation?: Vector3, _rotation?: Vector3 | Quaternion, _scaling?: Vector3): Matrix4x4 {
       let result: Matrix4x4 = Matrix4x4.IDENTITY();
-      result.mutate(_vectors);
+      result.mutate({ "translation": _translation, "rotation": _rotation, "scaling": _scaling });
       return result;
     }
 
@@ -61,7 +56,6 @@ namespace FudgeCore {
     public static MULTIPLICATION(_mtxLeft: Matrix4x4, _mtxRight: Matrix4x4): Matrix4x4 {
       let a: Float32Array = _mtxLeft.data;
       let b: Float32Array = _mtxRight.data;
-      // let matrix: Matrix4x4 = new Matrix4x4();
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
       let a00: number = a[0 * 4 + 0];
       let a01: number = a[0 * 4 + 1];
@@ -328,24 +322,12 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a matrix that rotates coordinates when multiplied by, using the angles given.
+     * Returns a matrix that rotates coordinates when multiplied by, using the rotation euler angles or unit quaternion given.
      * Rotation occurs around the axis in the order Z-Y-X .
      */
-    public static ROTATION(_eulerAnglesInDegrees: Vector3): Matrix4x4 {
+    public static ROTATION(_rotation: Vector3 | Quaternion): Matrix4x4 {
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
-      let anglesInRadians: Vector3 = Vector3.SCALE(_eulerAnglesInDegrees, Calc.deg2rad);
-      let sinX: number = Math.sin(anglesInRadians.x);
-      let cosX: number = Math.cos(anglesInRadians.x);
-      let sinY: number = Math.sin(anglesInRadians.y);
-      let cosY: number = Math.cos(anglesInRadians.y);
-      let sinZ: number = Math.sin(anglesInRadians.z);
-      let cosZ: number = Math.cos(anglesInRadians.z);
-      mtxResult.data.set([
-        /**/                 cosZ * cosY, /**/                 sinZ * cosY, /**/       -sinY, 0,
-        cosZ * sinY * sinX - sinZ * cosX, sinZ * sinY * sinX + cosZ * cosX, /**/ cosY * sinX, 0,
-        cosZ * sinY * cosX + sinZ * sinX, sinZ * sinY * cosX - cosZ * sinX, /**/ cosY * cosX, 0,
-        0, 0, 0, 1
-      ]);
+      Matrix4x4.SET_ROTATION(mtxResult.data, _rotation);
       return mtxResult;
     }
 
@@ -437,65 +419,142 @@ namespace FudgeCore {
       ]);
       return mtxResult;
     }
+
+    /**
+     * Set the rotation part of the given matrixes data array to the given rotation.
+     */
+    private static SET_ROTATION(_m: Float32Array, _rotation: Vector3 | Quaternion): void {
+      if (_rotation instanceof Vector3) {
+        const anglesInRadians: Vector3 = Vector3.SCALE(_rotation, Calc.deg2rad);
+        const sinX: number = Math.sin(anglesInRadians.x);
+        const cosX: number = Math.cos(anglesInRadians.x);
+        const sinY: number = Math.sin(anglesInRadians.y);
+        const cosY: number = Math.cos(anglesInRadians.y);
+        const sinZ: number = Math.sin(anglesInRadians.z);
+        const cosZ: number = Math.cos(anglesInRadians.z);
+        Recycler.store(anglesInRadians);
+
+        _m[0] = cosZ * cosY; /**/                 _m[1] = sinZ * cosY; /**/                 _m[2] = -sinY;
+        _m[4] = cosZ * sinY * sinX - sinZ * cosX; _m[5] = sinZ * sinY * sinX + cosZ * cosX; _m[6] = cosY * sinX;
+        _m[8] = cosZ * sinY * cosX + sinZ * sinX; _m[9] = sinZ * sinY * cosX - cosZ * sinX; _m[10] = cosY * cosX;
+      } else {
+        const x: number = _rotation.x, y: number = _rotation.y, z: number = _rotation.z, w: number = _rotation.w;
+        const xx: number = x * x, xy: number = x * y, xz: number = x * z, xw: number = x * w;
+        const yy: number = y * y, yz: number = y * z, yw: number = y * w;
+        const zz: number = z * z, zw: number = z * w;
+
+        _m[0] = 1 - 2 * (yy + zz); _m[1] = 2 * (xy + zw);/**/ _m[2] = 2 * (xz - yw);
+        _m[4] = 2 * (xy - zw);/**/ _m[5] = 1 - 2 * (xx + zz); _m[6] = 2 * (yz + xw);
+        _m[8] = 2 * (xz + yw);/**/ _m[9] = 2 * (yz - xw);/**/ _m[10] = 1 - 2 * (xx + yy);
+      }
+    }
     //#endregion
 
     //#region  Accessors
     /** 
      * - get: return a vector representation of the translation {@link Vector3}.  
-     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused internally. Create a clone to keep longer and manipulate. 
      * - set: effect the matrix ignoring its rotation and scaling
      */
     public set translation(_translation: Vector3) {
-      this.data.set(_translation.get(), 12);
-      // no full cache reset required
-      if (this.vectors.translation)
-        this.vectors.translation.set(_translation.x, _translation.y, _translation.z);
-      else
-        this.vectors.translation = _translation.clone;
-      this.mutator = null;
+      this.mutate({ "translation": _translation });
     }
     public get translation(): Vector3 {
-      if (!this.vectors.translation) {
-        this.vectors.translation = this.#vectors.translation;
-        this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
+      if (this.#translationDirty) {
+        this.#translation.set(this.data[12], this.data[13], this.data[14]);
+        this.#translationDirty = false;
       }
-      return this.vectors.translation.clone;
+      return this.#translation;
     }
 
     /** 
      * - get: return a vector representation of the rotation {@link Vector3}.  
-     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused internally. Create a clone to keep longer and manipulate. 
      * - set: effect the matrix
      */
     public get rotation(): Vector3 {
-      if (!this.vectors.rotation)
-        this.vectors.rotation = this.getEulerAngles().clone;
-      return this.vectors.rotation; //.clone;
+      if (this.#rotationDirty) {
+        let scaling: Vector3 = this.scaling;
+
+        let s0: number = this.data[0] / scaling.x;
+        let s1: number = this.data[1] / scaling.x;
+        let s2: number = this.data[2] / scaling.x;
+        let s6: number = this.data[6] / scaling.y;
+        let s10: number = this.data[10] / scaling.z;
+
+        let sy: number = Math.hypot(s0, s1); // probably 2. param should be this.data[4] / scaling.y
+
+        let singular: boolean = sy < 1e-6; // If
+
+        let x1: number, y1: number, z1: number;
+        let x2: number, y2: number, z2: number;
+
+        if (!singular) {
+          x1 = Math.atan2(s6, s10);
+          y1 = Math.atan2(-s2, sy);
+          z1 = Math.atan2(s1, s0);
+
+          x2 = Math.atan2(-s6, -s10);
+          y2 = Math.atan2(-s2, -sy);
+          z2 = Math.atan2(-s1, -s0);
+
+          if (Math.abs(x2) + Math.abs(y2) + Math.abs(z2) < Math.abs(x1) + Math.abs(y1) + Math.abs(z1)) {
+            x1 = x2;
+            y1 = y2;
+            z1 = z2;
+          }
+        } else {
+          x1 = Math.atan2(-this.data[9] / scaling.z, this.data[5] / scaling.y);
+          y1 = Math.atan2(-this.data[2] / scaling.x, sy);
+          z1 = 0;
+        }
+
+        this.#rotation.set(x1, y1, z1);
+        this.#rotation.scale(Calc.rad2deg);
+        this.#rotationDirty = false;
+      }
+
+      return this.#rotation;
     }
-    public set rotation(_rotation: Vector3) {
+    public set rotation(_rotation: Quaternion | Vector3) {
       this.mutate({ "rotation": _rotation });
-      this.resetCache();
     }
 
     /** 
      * - get: return a vector representation of the scaling {@link Vector3}.  
-     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused internally. Create a clone to keep longer and manipulate. 
      * - set: effect the matrix
      */
     public get scaling(): Vector3 {
-      if (!this.vectors.scaling) {
-        this.vectors.scaling = this.#vectors.scaling;
-        this.vectors.scaling.set(
+      if (this.#scalingDirty) {
+        this.#scaling.set(
           Math.hypot(this.data[0], this.data[1], this.data[2]), //* (this.data[0] < 0 ? -1 : 1),
           Math.hypot(this.data[4], this.data[5], this.data[6]), //* (this.data[5] < 0 ? -1 : 1),
           Math.hypot(this.data[8], this.data[9], this.data[10]) // * (this.data[10] < 0 ? -1 : 1)
         );
+        this.#scalingDirty = false;
       }
-      return this.vectors.scaling; // .clone;
+      return this.#scaling;
     }
     public set scaling(_scaling: Vector3) {
       this.mutate({ "scaling": _scaling });
-      this.resetCache();
+    }
+
+    /** 
+     * - get: return a unit quaternion representing the rotation of this matrix.
+     * **Caution!** Use immediately and readonly, since the quaternion is going to be reused internally. Create a clone to keep longer and manipulate. 
+     * - set: effect the matrix
+     */
+    public get quaternion(): Quaternion {
+      if (this.#quaternionDirty) {
+        this.#quaternion.eulerAngles = this.rotation;
+        this.#quaternionDirty = false;
+      }
+
+      return this.#quaternion;
+    }
+    public set quaternion(_quaternion: Quaternion) {
+      this.mutate({ "rotation": _quaternion });
     }
 
     /**
@@ -518,6 +577,18 @@ namespace FudgeCore {
         0, 0, 1, 0,
         0, 0, 0, 1
       ]);
+      // TODO: think about this change: translation, rotation and scaling of a recycled matrix are actually 
+      // known and need not be lazily recalculated. But most matrix manipulation logic assumes that a recycled matrix
+      // will do this lazily. So, for now, we reset the cache here, but maybe we should rather reset the cache
+      // everytime a matrix is changed i.e. use .set() instead of .data.set() when cache should be reset.
+      // this.#translation.set(0, 0, 0);
+      // this.#rotation.set(0, 0, 0);
+      // this.#scaling.set(1, 1, 1);
+      // this.#quaternion.set(0, 0, 0, 1);
+      // this.#translationDirty = false;
+      // this.#rotationDirty = false;
+      // this.#scalingDirty = false;
+      // this.#quaternionDirty = false;
       this.resetCache();
     }
 
@@ -614,7 +685,6 @@ namespace FudgeCore {
 
       let d: number = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
 
-      // let matrix: Matrix4x4 = new Matrix4x4;
       const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
       matrix.data.set([
         d * t0, // [0]
@@ -732,9 +802,7 @@ namespace FudgeCore {
         this.data[13] += _by.y;
         this.data[14] += _by.z;
         this.mutator = null;
-        if (this.vectors.translation)
-          Recycler.store(this.vectors.translation);
-        this.vectors.translation = null;
+        this.#translationDirty = true;
       }
 
       // const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
@@ -849,50 +917,6 @@ namespace FudgeCore {
 
     //   return this.#eulerAngles;
     // }
-    /**
-     * Calculates and returns the euler-angles representing the current rotation of this matrix.  
-     */
-    public getEulerAngles(): Vector3 {
-      let scaling: Vector3 = this.scaling;
-
-      let s0: number = this.data[0] / scaling.x;
-      let s1: number = this.data[1] / scaling.x;
-      let s2: number = this.data[2] / scaling.x;
-      let s6: number = this.data[6] / scaling.y;
-      let s10: number = this.data[10] / scaling.z;
-
-      let sy: number = Math.hypot(s0, s1); // probably 2. param should be this.data[4] / scaling.y
-
-      let singular: boolean = sy < 1e-6; // If
-
-      let x1: number, y1: number, z1: number;
-      let x2: number, y2: number, z2: number;
-
-      if (!singular) {
-        x1 = Math.atan2(s6, s10);
-        y1 = Math.atan2(-s2, sy);
-        z1 = Math.atan2(s1, s0);
-
-        x2 = Math.atan2(-s6, -s10);
-        y2 = Math.atan2(-s2, -sy);
-        z2 = Math.atan2(-s1, -s0);
-
-        if (Math.abs(x2) + Math.abs(y2) + Math.abs(z2) < Math.abs(x1) + Math.abs(y1) + Math.abs(z1)) {
-          x1 = x2;
-          y1 = y2;
-          z1 = z2;
-        }
-      } else {
-        x1 = Math.atan2(-this.data[9] / scaling.z, this.data[5] / scaling.y);
-        y1 = Math.atan2(-this.data[2] / scaling.x, sy);
-        z1 = 0;
-      }
-
-      this.#eulerAngles.set(x1, y1, z1);
-      this.#eulerAngles.scale(Calc.rad2deg);
-
-      return this.#eulerAngles;
-    }
 
     /**
      * Sets the elements of this matrix to the values of the given matrix
@@ -904,7 +928,7 @@ namespace FudgeCore {
         this.data.set(_mtxTo);
       this.resetCache();
     }
-    
+
     /**
      * Returns a formatted string representation of this matrix
      */
@@ -1017,62 +1041,48 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      let oldTranslation: Vector3 = this.translation;
-      let oldRotation: Vector3 = this.rotation;
-      let oldScaling: Vector3 = this.scaling;
-      // The new values are not necessarily Vector3 objects but could be simple mutator objects.
-      // They are only guaranteed to be instance of Vector3 when set by Matrix4x4 setters, but not when for example set by the animation system.
-      let newTranslation: Vector3 | Mutator = <Vector3 | Mutator>_mutator["translation"];
-      let newRotation: Vector3 | Mutator = <Vector3 | Mutator>_mutator["rotation"];
-      let newScaling: Vector3 | Mutator = <Vector3 | Mutator>_mutator["scaling"];
-      let vectors: VectorRepresentation = { translation: oldTranslation, rotation: oldRotation, scaling: oldScaling };
-      if (newTranslation) {
-        vectors.translation = vectors.translation || this.#vectors.translation;
-        vectors.translation.set(
-          newTranslation.x != undefined ? newTranslation.x : oldTranslation.x,
-          newTranslation.y != undefined ? newTranslation.y : oldTranslation.y,
-          newTranslation.z != undefined ? newTranslation.z : oldTranslation.z
-        );
-      }
-      if (newRotation) {
-        if ("w" in newRotation) {
-          // This rotation is a quaternion (mutator). Get the euler angles.
-          // TODO: maybe make Quaternion the standard for rotation
-          const rotation: Quaternion = Recycler.get(Quaternion);
-          rotation.set([newRotation.x, newRotation.y, newRotation.z, newRotation.w]);
-          newRotation = rotation.eulerAngles;
-          Recycler.store(rotation);
-        }
-        vectors.rotation = vectors.rotation || this.#vectors.rotation;
-        vectors.rotation.set(
-          newRotation.x != undefined ? newRotation.x : oldRotation.x,
-          newRotation.y != undefined ? newRotation.y : oldRotation.y,
-          newRotation.z != undefined ? newRotation.z : oldRotation.z
-        );
-      }
-      if (newScaling) {
-        vectors.scaling = vectors.scaling || this.#vectors.scaling;
-        vectors.scaling.set(
-          newScaling.x != undefined ? newScaling.x : oldScaling.x,
-          newScaling.y != undefined ? newScaling.y : oldScaling.y,
-          newScaling.z != undefined ? newScaling.z : oldScaling.z
-        );
+      const m: Float32Array = this.data;
+
+      if (_mutator.translation) {
+        let translation: Vector3 = this.translation;
+        translation.mutate(_mutator.translation);
+        m[12] = translation.x; m[13] = translation.y; m[14] = translation.z;
+        this.#translationDirty = false;
       }
 
-      // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/quotients
-      let mtxResult: Matrix4x4 = Matrix4x4.IDENTITY();
-      if (vectors.translation)
-        mtxResult.translate(vectors.translation);
-      // problem: previous rotation might have been calculated back as a scaling and vice versa. Applying again might double the effect...
-      if (vectors.rotation)
-        mtxResult.rotate(vectors.rotation);
-      if (vectors.scaling)
-        mtxResult.scale(vectors.scaling);
+      if (_mutator.rotation || _mutator.scaling) {
+        // TODO: imported animation uses "scale" instead of "scaling" -> rename our "scaling" to "scale"?
+        // TODO: make full vector and quaternion mutators mandatory?
 
-      this.set(mtxResult);
-      this.vectors = vectors;
+        let rotation: Vector3 | Quaternion = _mutator.rotation?.w != undefined ?
+          this.#quaternion : // using this.#quaternion assumes we get a full quaternion mutator with x, y, z and w set so we never need to recalculate the quaternion here. This might cause trouble if we ever want to mutate only a part of a quaternion...
+          isFullVectorMutator(_mutator.rotation) ? this.#rotation : this.rotation; // hack to avoid unnecessary recalculation of rotation and scaling. This recalculation is unnecessary when we get a full mutator i.e. with x, y and z set
+        
+        let scaling: Vector3 = isFullVectorMutator(_mutator.scaling) ? this.#scaling : this.scaling;
 
-      Recycler.store(mtxResult);
+        if (_mutator.rotation)
+          rotation.mutate(_mutator.rotation);
+
+        if (_mutator.scaling)
+          scaling.mutate(_mutator.scaling);
+
+        Matrix4x4.SET_ROTATION(m, rotation);
+        const isEulerRotation: boolean = rotation instanceof Vector3;
+        this.#rotationDirty = !isEulerRotation;
+        this.#quaternionDirty = isEulerRotation;
+
+        const sx: number = scaling.x, sy: number = scaling.y, sz: number = scaling.z;
+        m[0] *= sx; m[1] *= sx; m[2] *= sx;
+        m[4] *= sy; m[5] *= sy; m[6] *= sy;
+        m[8] *= sz; m[9] *= sz; m[10] *= sz;
+        this.#scalingDirty = false;
+      }
+
+      this.mutator = null;
+
+      function isFullVectorMutator(_mutator: Mutator): boolean {
+        return _mutator && _mutator.x != undefined && _mutator.y != undefined && _mutator.z != undefined;
+      }
     }
 
     public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
@@ -1085,7 +1095,10 @@ namespace FudgeCore {
     protected reduceMutator(_mutator: Mutator): void {/** */ }
 
     private resetCache(): void {
-      this.vectors = { translation: null, rotation: null, scaling: null };
+      this.#translationDirty = true;
+      this.#rotationDirty = true;
+      this.#quaternionDirty = true;
+      this.#scalingDirty = true;
       this.mutator = null;
     }
   }

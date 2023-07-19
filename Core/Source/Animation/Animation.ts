@@ -1,5 +1,3 @@
-// / <reference path="../Transfer/Mutable.ts"/>
-
 namespace FudgeCore {
   /**
    * Holds information about the AnimationStructure that the Animation uses to map the Sequences to the Attributes.
@@ -389,6 +387,7 @@ namespace FudgeCore {
           newMutator[n] = this.traverseStructureForMutator(<AnimationStructure>_structure[n], _time);
         }
       }
+
       return newMutator;
     }
 
@@ -497,7 +496,7 @@ namespace FudgeCore {
       let seq: AnimationSequence = new AnimationSequence();
       for (let i: number = 0; i < _sequence.length; i++) {
         let oldKey: AnimationKey = _sequence.getKey(i);
-        let key: AnimationKey = new AnimationKey(this.totalTime - oldKey.time, oldKey.value, oldKey.slopeOut, oldKey.slopeIn, oldKey.constant);
+        let key: AnimationKey = new AnimationKey(this.totalTime - oldKey.time, oldKey.value, oldKey.interpolation, oldKey.slopeOut, oldKey.slopeIn);
         seq.addKey(key);
       }
       return seq;
@@ -512,7 +511,7 @@ namespace FudgeCore {
       let seq: AnimationSequence = new AnimationSequence();
       let frameTime: number = 1000 / this.framesPerSecond;
       for (let i: number = 0; i < this.totalTime; i += frameTime) {
-        let key: AnimationKey = new AnimationKey(i, _sequence.evaluate(i), 0, 0, true);
+        let key: AnimationKey = new AnimationKey(i, _sequence.evaluate(i), "constant", 0, 0);
         seq.addKey(key);
       }
       return seq;

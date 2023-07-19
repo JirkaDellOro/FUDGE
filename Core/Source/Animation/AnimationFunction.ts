@@ -1,6 +1,3 @@
-// / <reference path="../Transfer/Serializer.ts"/>
-// / <reference path="../Transfer/Mutable.ts"/>
-
 namespace FudgeCore {
   /**
    * Calculates the values between {@link AnimationKey}s.
@@ -62,7 +59,7 @@ namespace FudgeCore {
         this.d = this.c = this.b = this.a = 0;
         return;
       }
-      if (!this.keyOut || this.keyIn.constant) {
+      if (!this.keyOut || this.keyIn.interpolation == "constant") {
         this.d = this.keyIn.value;
         this.c = this.b = this.a = 0;
         return;
@@ -71,12 +68,14 @@ namespace FudgeCore {
       let x1: number = this.keyOut.time - this.keyIn.time;
 
       this.d = this.keyIn.value;
-      this.c = this.keyIn.slopeOut;
+      if (this.keyIn.interpolation == "linear") {
+        this.c = (this.keyOut.value - this.keyIn.value) / x1;
+        return;
+      }
 
+      this.c = this.keyIn.slopeOut;
       this.a = (-x1 * (this.keyIn.slopeOut + this.keyOut.slopeIn) - 2 * this.keyIn.value + 2 * this.keyOut.value) / -Math.pow(x1, 3);
       this.b = (this.keyOut.slopeIn - this.keyIn.slopeOut - 3 * this.a * Math.pow(x1, 2)) / (2 * x1);
     }
-
   }
-
 }

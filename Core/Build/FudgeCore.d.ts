@@ -1695,6 +1695,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    type AnimationInterpolation = "constant" | "linear" | "cubic";
     /**
      * Holds information about continous points in time their accompanying values as well as their slopes.
      * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides.
@@ -1702,14 +1703,13 @@ declare namespace FudgeCore {
      * If the property constant is true, the value does not change and wil not be interpolated between this and the next key in a sequence
      * @author Lukas Scheuerle, HFU, 2019
      */
-    class AnimationKey extends Mutable implements Serializable {
+    export class AnimationKey extends Mutable implements Serializable {
         #private;
         /**Don't modify this unless you know what you're doing.*/
         functionIn: AnimationFunction;
         /**Don't modify this unless you know what you're doing.*/
         functionOut: AnimationFunction;
-        broken: boolean;
-        constructor(_time?: number, _value?: number, _slopeIn?: number, _slopeOut?: number, _constant?: boolean);
+        constructor(_time?: number, _value?: number, _interpolation?: AnimationInterpolation, _slopeIn?: number, _slopeOut?: number);
         /**
          * Static comparation function to use in an array sort function to sort the keys by their time.
          * @param _a the animation key to check
@@ -1721,8 +1721,8 @@ declare namespace FudgeCore {
         set time(_time: number);
         get value(): number;
         set value(_value: number);
-        get constant(): boolean;
-        set constant(_constant: boolean);
+        get interpolation(): AnimationInterpolation;
+        set interpolation(_interpolation: AnimationInterpolation);
         get slopeIn(): number;
         set slopeIn(_slope: number);
         get slopeOut(): number;
@@ -1732,6 +1732,7 @@ declare namespace FudgeCore {
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -3506,14 +3507,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Represents the matrix as translation, rotation and scaling {@link Vector3}, being calculated from the matrix
-     */
-    interface VectorRepresentation {
-        translation: Vector3;
-        rotation: Vector3;
-        scaling: Vector3;
-    }
-    /**
      * Stores a 4x4 transformation matrix and provides operations for it.
      * ```text
      * [ 0, 1, 2, 3 ] ← row vector x
@@ -3522,22 +3515,21 @@ declare namespace FudgeCore {
      * [12,13,14,15 ] ← translation
      *            ↑  homogeneous column
      * ```
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019 | Jonas Plotzky, HFU, 2023
      */
-    export class Matrix4x4 extends Mutable implements Serializable, Recycable {
+    class Matrix4x4 extends Mutable implements Serializable, Recycable {
         #private;
         private data;
         private mutator;
-        private vectors;
         constructor();
         /**
          * Retrieve a new identity matrix
          */
         static IDENTITY(): Matrix4x4;
         /**
-         * Constructs a new matrix according to the translation, rotation and scaling {@link Vector3}s given
+         * Construct a new matrix according to the given translation, rotation and scaling.
          */
-        static CONSTRUCTION(_vectors: VectorRepresentation): Matrix4x4;
+        static CONSTRUCTION(_translation?: Vector3, _rotation?: Vector3 | Quaternion, _scaling?: Vector3): Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
          * @param _mtxLeft The matrix to multiply.
@@ -3580,10 +3572,10 @@ declare namespace FudgeCore {
          */
         static ROTATION_Z(_angleInDegrees: number): Matrix4x4;
         /**
-         * Returns a matrix that rotates coordinates when multiplied by, using the angles given.
+         * Returns a matrix that rotates coordinates when multiplied by, using the rotation euler angles or unit quaternion given.
          * Rotation occurs around the axis in the order Z-Y-X .
          */
-        static ROTATION(_eulerAnglesInDegrees: Vector3): Matrix4x4;
+        static ROTATION(_rotation: Vector3 | Quaternion): Matrix4x4;
         /**
          * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given {@link Vector3}
          */
@@ -3613,26 +3605,37 @@ declare namespace FudgeCore {
          */
         static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
         /**
+         * Set the rotation part of the given matrixes data array to the given rotation.
+         */
+        private static SET_ROTATION;
+        /**
          * - get: return a vector representation of the translation {@link Vector3}.
-         * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate.
+         * **Caution!** Use immediately and readonly, since the vector is going to be reused internally. Create a clone to keep longer and manipulate.
          * - set: effect the matrix ignoring its rotation and scaling
          */
         set translation(_translation: Vector3);
         get translation(): Vector3;
         /**
          * - get: return a vector representation of the rotation {@link Vector3}.
-         * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate.
+         * **Caution!** Use immediately and readonly, since the vector is going to be reused internally. Create a clone to keep longer and manipulate.
          * - set: effect the matrix
          */
         get rotation(): Vector3;
-        set rotation(_rotation: Vector3);
+        set rotation(_rotation: Quaternion | Vector3);
         /**
          * - get: return a vector representation of the scaling {@link Vector3}.
-         * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate.
+         * **Caution!** Use immediately and readonly, since the vector is going to be reused internally. Create a clone to keep longer and manipulate.
          * - set: effect the matrix
          */
         get scaling(): Vector3;
         set scaling(_scaling: Vector3);
+        /**
+         * - get: return a unit quaternion representing the rotation of this matrix.
+         * **Caution!** Use immediately and readonly, since the quaternion is going to be reused internally. Create a clone to keep longer and manipulate.
+         * - set: effect the matrix
+         */
+        get quaternion(): Quaternion;
+        set quaternion(_quaternion: Quaternion);
         /**
          * Return a copy of this
          */
@@ -3718,10 +3721,6 @@ declare namespace FudgeCore {
          */
         multiply(_matrix: Matrix4x4, _fromLeft?: boolean): void;
         /**
-         * Calculates and returns the euler-angles representing the current rotation of this matrix.
-         */
-        getEulerAngles(): Vector3;
-        /**
          * Sets the elements of this matrix to the values of the given matrix
          */
         set(_mtxTo: Matrix4x4 | ArrayLike<number>): void;
@@ -3769,7 +3768,6 @@ declare namespace FudgeCore {
         protected reduceMutator(_mutator: Mutator): void;
         private resetCache;
     }
-    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -3860,7 +3858,10 @@ declare namespace FudgeCore {
       */
     class Quaternion extends Mutable implements Serializable, Recycable {
         #private;
-        private data;
+        x: number;
+        y: number;
+        z: number;
+        w: number;
         private mutator;
         constructor(_x?: number, _y?: number, _z?: number, _w?: number);
         /**
@@ -3868,13 +3869,14 @@ declare namespace FudgeCore {
          */
         static IDENTITY(): Quaternion;
         /**
-         * Constructs a new quaternion from the euler angles given
+         * Returns a quaternion that rotates coordinates when multiplied by, using the angles given.
+         * Rotation occurs around the axis in the order Z-Y-X.
          */
-        static FROM_EULER_ANGLES(_eulerAngles: Vector3, _order?: string): Quaternion;
+        static ROTATION(_eulerAngles: Vector3): Quaternion;
         /**
          * Computes and returns the product of two passed quaternions.
-         * @param _mtxLeft The matrix to multiply.
-         * @param _mtxRight The matrix to multiply by.
+         * @param _mtxLeft The quaternion to multiply.
+         * @param _mtxRight The quaternion to multiply by.
          */
         static MULTIPLICATION(_qLeft: Quaternion, _qRight: Quaternion): Quaternion;
         /**
@@ -3888,21 +3890,17 @@ declare namespace FudgeCore {
          */
         static CONJUGATION(_q: Quaternion): Quaternion;
         /**
-         * Experimental: Creates and returns a vector through transformation of the given vector by the given quaternion
+         * Returns the dot product of two quaternions.
          */
-        static TRANSFORM_VECTOR(_v: Vector3, _q: Quaternion): Vector3;
+        static DOT(_q1: Quaternion, _q2: Quaternion): number;
         /**
-         * Experimental: Converts the quaternion to a Matrix4x4
+         * Returns the normalized linear interpolation between two quaternions based on the given _factor. When _factor is 0 the result is _from, when _factor is 1 the result is _to.
          */
-        static QUATERNION_TO_MATRIX(_q: Quaternion): Matrix4x4;
-        get x(): number;
-        get y(): number;
-        get z(): number;
-        get w(): number;
-        set x(_x: number);
-        set y(_y: number);
-        set z(_z: number);
-        set w(_w: number);
+        static LERP(_from: Quaternion, _to: Quaternion, _factor: number): Quaternion;
+        /**
+         * Returns the spherical linear interpolation between two quaternions based on the given _factor. When _factor is 0 the result is _from, when _factor is 1 the result is _to.
+         */
+        static SLERP(_from: Quaternion, _to: Quaternion, _factor: number): Quaternion;
         /**
          * Return a copy of this
          */
@@ -3914,21 +3912,25 @@ declare namespace FudgeCore {
         get eulerAngles(): Vector3;
         set eulerAngles(_eulerAngles: Vector3);
         /**
+         * Normalizes this quaternion to a length of 1 (a unit quaternion) making it a valid rotation representation
+         */
+        normalize(): Quaternion;
+        /**
+         * Negate this quaternion and returns it
+         */
+        negate(): Quaternion;
+        /**
          * Resets the quaternion to the identity-quaternion and clears cache. Used by the recycler to reset.
          */
         recycle(): void;
-        /**
-         * Resets the quaternion to the identity-quaternion and clears cache.
-         */
-        reset(): void;
         /**
          * Inverse this quaternion
          */
         inverse(): void;
         /**
-         * Conjugate this quaternion
+         * Conjugates this quaternion and returns it
          */
-        conjugate(): void;
+        conjugate(): Quaternion;
         /**
          * Multiply this quaternion with the given quaternion
          */
@@ -3936,17 +3938,13 @@ declare namespace FudgeCore {
         /**
          * Sets the elements of this quaternion to the values of the given quaternion
          */
-        set(_qTo: Quaternion | ArrayLike<number>): void;
+        set(_x: number, _y: number, _z: number, _w: number): void;
         /**
          * Returns a formatted string representation of this quaternion
          */
         toString(): string;
-        /**
-         * Return the elements of this quaternion as a Float32Array
-         */
-        get(): Float32Array;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
+        deserialize(_serialization: Serialization): Promise<Quaternion>;
         getMutator(): Mutator;
         mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
@@ -4036,7 +4034,7 @@ declare namespace FudgeCore {
      *            /
      *          +z
      * ```
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022 | Jonas Plotzky, HFU, 2023
      */
     class Vector3 extends Mutable implements Serializable, Recycable {
         private data;
@@ -4062,9 +4060,9 @@ declare namespace FudgeCore {
          */
         static ONE(_scale?: number): Vector3;
         /**
-         * Creates and returns a vector through transformation of the given vector by the given matrix
+         * Creates and returns a vector through transformation of the given vector by the given matrix or rotation quaternion.
          */
-        static TRANSFORMATION(_vector: Vector3, _mtxTransform: Matrix4x4, _includeTranslation?: boolean): Vector3;
+        static TRANSFORMATION(_vector: Vector3, _transform: Matrix4x4 | Quaternion, _includeTranslation?: boolean): Vector3;
         /**
          * Creates and returns a vector which is a copy of the given vector scaled to the given length
          */
@@ -4174,10 +4172,11 @@ declare namespace FudgeCore {
          */
         get(): Float32Array;
         /**
-         * Transforms this vector by the given matrix, including or exluding the translation.
+         * Transforms this vector by the given matrix or rotation quaternion.
+         * Including or exluding the translation if a matrix is passed.
          * Including is the default, excluding will only rotate and scale this vector.
          */
-        transform(_mtxTransform: Matrix4x4, _includeTranslation?: boolean): void;
+        transform(_transform: Matrix4x4 | Quaternion, _includeTranslation?: boolean): void;
         /**
          * Drops the z-component and returns a Vector2 consisting of the x- and y-components
          */
@@ -4213,6 +4212,7 @@ declare namespace FudgeCore {
         map(_function: (value: number, index: number, array: Float32Array) => number): Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Vector3>;
+        mutate(_mutator: Mutator): Promise<void>;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -6685,7 +6685,7 @@ declare namespace GLTF {
         /**
          * Interpolation algorithm.
          */
-        "interpolation"?: any | any | any | string;
+        "interpolation"?: "LINEAR" | "STEP" | "CUBICSPLINE";
         /**
          * The index of an accessor, containing keyframe output values.
          */

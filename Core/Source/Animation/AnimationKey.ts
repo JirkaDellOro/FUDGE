@@ -1,7 +1,7 @@
-// / <reference path="../Transfer/Serializer.ts"/>
-// / <reference path="../Transfer/Mutable.ts"/>
-
 namespace FudgeCore {
+  
+  type AnimationInterpolation = "constant" | "linear" | "cubic";
+
   /**
    * Holds information about continous points in time their accompanying values as well as their slopes. 
    * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. 
@@ -16,24 +16,21 @@ namespace FudgeCore {
     /**Don't modify this unless you know what you're doing.*/
     public functionOut: AnimationFunction;
 
-    public broken: boolean;
-
     #time: number;
     #value: number;
-    #constant: boolean = false;
+    #interpolation: AnimationInterpolation;
 
     #slopeIn: number = 0;
     #slopeOut: number = 0;
 
-    public constructor(_time: number = 0, _value: number = 0, _slopeIn: number = 0, _slopeOut: number = 0, _constant: boolean = false) {
+    public constructor(_time: number = 0, _value: number = 0, _interpolation: AnimationInterpolation = "cubic", _slopeIn: number = 0, _slopeOut: number = 0) {
       super();
       this.#time = _time;
       this.#value = _value;
+      this.#interpolation = _interpolation;
       this.#slopeIn = _slopeIn;
       this.#slopeOut = _slopeOut;
-      this.#constant = _constant;
 
-      this.broken = this.slopeIn != -this.slopeOut;
       this.functionOut = new AnimationFunction(this, null);
     }
 
@@ -67,12 +64,12 @@ namespace FudgeCore {
       this.functionOut.calculate();
     }
 
-    public get constant(): boolean {
-      return this.#constant;
+    public get interpolation(): AnimationInterpolation {
+      return this.#interpolation;
     }
 
-    public set constant(_constant: boolean) {
-      this.#constant = _constant;
+    public set interpolation(_interpolation: AnimationInterpolation) {
+      this.#interpolation = _interpolation;
       this.functionIn.calculate();
       this.functionOut.calculate();
     }
@@ -100,20 +97,23 @@ namespace FudgeCore {
       let serialization: Serialization = {};
       serialization.time = this.#time;
       serialization.value = this.#value;
+      serialization.interpolation = this.#interpolation;
       serialization.slopeIn = this.#slopeIn;
       serialization.slopeOut = this.#slopeOut;
-      serialization.constant = this.#constant;
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.#time = _serialization.time;
       this.#value = _serialization.value;
+      this.#interpolation = _serialization.interpolation;
       this.#slopeIn = _serialization.slopeIn;
       this.#slopeOut = _serialization.slopeOut;
-      this.#constant = _serialization.constant;
-
-      this.broken = this.slopeIn != -this.slopeOut;
+      // if (_serialization.interpolation == undefined)
+      //   if (_serialization.constant) // TODO: remove this when constant is removed
+      //     this.#interpolation = "constant";
+      //   else
+      //     this.#interpolation = "cubic";
 
       return this;
     }
