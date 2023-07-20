@@ -315,7 +315,7 @@ var Fudge;
                 }
                 else
                     Fudge.watcher = fs.watch(dir, { recursive: true }, hndFileChange);
-                document.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY));
+                document.dispatchEvent(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.MODIFY, { detail: {} }));
             }
         }
     }

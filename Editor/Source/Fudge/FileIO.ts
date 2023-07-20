@@ -120,7 +120,7 @@ namespace Fudge {
           await loadProject(project.base);
         } else
           watcher = fs.watch(dir, { recursive: true }, hndFileChange);
-        document.dispatchEvent(new Event(EVENT_EDITOR.MODIFY));
+        document.dispatchEvent(new EditorEvent(EVENT_EDITOR.MODIFY, { detail: {}}));
       }
     }
   }
