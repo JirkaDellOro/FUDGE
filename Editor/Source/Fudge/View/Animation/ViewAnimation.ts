@@ -212,8 +212,11 @@ namespace Fudge {
             this.pause();
 
           this.playbackTime = _event.detail.data;
-          this.frameInput.value = (Math.trunc(this.playbackTime / 1000 * this.animation.fps)).toString();
 
+          if (!this.animation)
+            break;
+            
+          this.frameInput.value = (Math.trunc(this.playbackTime / 1000 * this.animation.fps)).toString();
           this.animation.clearCache();
           let nodeMutator: ƒ.Mutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
           this.controller?.update(nodeMutator, this.playbackTime);

@@ -313,8 +313,8 @@ var Fudge;
                 }
                 else
                     Fudge.watcher = fs.watch(dir, { recursive: true }, hndFileChange);
-                document.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY));
             }
+            document.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY));
         }
     }
     function unwatchFolder() {
@@ -1094,7 +1094,7 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.OPEN, this.hndEvent);
-            // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
         }
         setProject() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -2923,6 +2923,8 @@ var Fudge;
                     if (_event.detail.view instanceof Fudge.ViewAnimationSheet)
                         this.pause();
                     this.playbackTime = _event.detail.data;
+                    if (!this.animation)
+                        break;
                     this.frameInput.value = (Math.trunc(this.playbackTime / 1000 * this.animation.fps)).toString();
                     this.animation.clearCache();
                     let nodeMutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
