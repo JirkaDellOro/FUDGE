@@ -1,4 +1,4 @@
-<img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="document.querySelector('h1').style.visibility='hidden'"/>
+<a href="https://github.com/JirkaDellOro/FUDGE"><img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="document.querySelector('h1').style.visibility='hidden'"/></a>
 
 # Welcome!
 
