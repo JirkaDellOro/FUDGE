@@ -675,15 +675,15 @@ void main() {
         aoTex *= vec4(u_vctAOColor.rgb, 1.0f);
         vctTempFrag = mix(vctTempFrag, vctTempFrag * vec4(aoTex.rgb, 1.0f), u_vctAOColor.a);
     }
+    if(u_mist > 0.5f) {
+        vec4 mistTex = texture(u_mistTexture, v_vctTexture);
+        vctTempFrag = mix(vctTempFrag, vec4(u_vctMistColor.rgb, 1.0f), mistTex.r * u_vctMistColor.a);
+    }
     if(u_bloom > 0.5f) {
         float intensity = max(u_bloomIntensity, 0.0f);
         vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
         //vctTempFrag += vec4(bloomTex.rgb * intensity, 1.0f);
         vctTempFrag += (bloomTex * intensity);
-    }
-    if(u_mist > 0.5f) {
-        vec4 mistTex = texture(u_mistTexture, v_vctTexture);
-        vctTempFrag = mix(vctTempFrag, vec4(u_vctMistColor.rgb, 1.0f), mistTex.r * u_vctMistColor.a);
     }
     vctFrag = vctTempFrag;
 }
@@ -1050,7 +1050,7 @@ void main() {
         tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
     }
     vec4 tex2 = texture(u_texture2, v_vctTexture);
-    vctFrag = tex2 * 0.07f + tex1 * 1.3f;
+    vctFrag = tex2 * 0.08f + tex1 * 1.3f;
 }`;
   shaderSources["ShaderUpsample.vert"] = `#version 300 es
 /**
