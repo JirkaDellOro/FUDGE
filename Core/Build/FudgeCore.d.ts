@@ -3868,6 +3868,7 @@ declare namespace FudgeCore {
          * Retrieve a new identity quaternion
          */
         static IDENTITY(): Quaternion;
+        static NORMALIZATION(_q: Quaternion): Quaternion;
         /**
          * Returns a quaternion that rotates coordinates when multiplied by, using the angles given.
          * Rotation occurs around the axis in the order Z-Y-X.
@@ -4693,7 +4694,10 @@ declare namespace FudgeCore {
      * @author Matthias Roming, HFU, 2022-2023
      */
     class MeshLoaderGLTF extends MeshLoader {
-        static load(_mesh: MeshImport | MeshSkin, _data?: GLTF.Mesh): Promise<MeshImport>;
+        static load(_mesh: MeshImport | MeshSkin, _data?: {
+            mesh: GLTF.Mesh;
+            iPrimitive: number;
+        }): Promise<MeshImport>;
     }
 }
 declare namespace FudgeCore {
@@ -7233,11 +7237,11 @@ declare namespace FudgeCore {
     class GLTFLoader {
         #private;
         private static loaders;
-        private static defaultMaterial;
-        private static defaultSkinMaterial;
         readonly gltf: GLTF.GlTf;
         readonly url: string;
         private constructor();
+        private static get defaultMaterial();
+        private static get defaultSkinMaterial();
         /**
          * Returns a {@link GLTFLoader} instance for the given url.
          */
@@ -7257,7 +7261,7 @@ declare namespace FudgeCore {
         /**
          * Returns the {@link Node} for the given index.
          */
-        getNodeByIndex(_iNode: number): Promise<Node>;
+        getNodeByIndex(_iNode: number, _nodes?: Node[]): Promise<Node>;
         /**
          * Returns the first {@link ComponentCamera} with the given camera name.
          */
@@ -7281,7 +7285,7 @@ declare namespace FudgeCore {
         /**
          * Returns the {@link MeshImport} for the given mesh index.
          */
-        getMeshByIndex(_iMesh: number): Promise<MeshImport>;
+        getMeshByIndex(_iMesh: number, _iPrimitive?: number): Promise<MeshImport>;
         /**
          * Returns the {@link Material} for the given material index.
          */
@@ -7561,7 +7565,6 @@ declare namespace FudgeCore {
      */
     class SkeletonInstance extends GraphInstance {
         #private;
-        bindPose: BoneMatrixList;
         private skeletonSource;
         /**
          * Creates a new {@link SkeletonInstance} based on the given {@link Skeleton}

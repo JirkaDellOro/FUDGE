@@ -1,3 +1,4 @@
+/// <reference types="../../../../Core/Build/FudgeCore"/>
 namespace Script {
   import ƒ = FudgeCore;
   ƒ.Debug.info("Main Program Template running!");

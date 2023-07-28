@@ -30,6 +30,12 @@ namespace FudgeCore {
       return result;
     }
 
+    public static NORMALIZATION(_q: Quaternion): Quaternion {
+      const result: Quaternion = _q.clone;
+      result.normalize();
+      return result;
+    }
+
     /**
      * Returns a quaternion that rotates coordinates when multiplied by, using the angles given.
      * Rotation occurs around the axis in the order Z-Y-X.

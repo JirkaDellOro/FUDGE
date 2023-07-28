@@ -1,18 +1,25 @@
 namespace FudgeCore {
-
+  
   /**
    * An instance of a {@link Skeleton}.
    * It holds all the information needed to animate itself. Referenced from a {@link ComponentMesh} it can be associated with a {@link MeshSkin} and enable skeleton animation for the mesh.
    * As an extension of {@link GraphInstance} it also keeps a reference to its resource and can thus optimize serialization.
    */
   export class SkeletonInstance extends GraphInstance {
-    public bindPose: BoneMatrixList;
+    // static #instanceCounter: number = 0;
+
+    // public bindPose: BoneMatrixList;
     private skeletonSource: Skeleton;
 
     #bones: BoneList;
     #mtxBoneLocals: BoneMatrixList;
     #mtxBones: Matrix4x4[];
     #mtxBonesUpdated: number;
+
+    // public constructor(_name: string = "SkeletonInstance_" + SkeletonInstance.#instanceCounter++) {
+    //   super();
+    //   Reflect.set(this, "instacnename", _name);
+    // }
 
     /**
      * Creates a new {@link SkeletonInstance} based on the given {@link Skeleton}
@@ -47,17 +54,17 @@ namespace FudgeCore {
      */
     public async set(_skeleton: Skeleton): Promise<void> {
       await super.set(_skeleton);
-      this.skeletonSource = _skeleton;
-      this.registerBones();
+      // this.skeletonSource = _skeleton; // TODO: check if these lines are needed as super.set calls deserialize
+      // this.registerBones();
     }
 
     public serialize(): Serialization {
       const serialization: Serialization = super.serialize();
-      if (this.bindPose) {
-        serialization.bindPose = {};
-        for (const boneName in this.bindPose)
-          serialization.bindPose[boneName] = this.bindPose[boneName].serialize();
-      }
+      // if (this.bindPose) {
+      //   serialization.bindPose = {};
+      //   for (const boneName in this.bindPose)
+      //     serialization.bindPose[boneName] = this.bindPose[boneName].serialize();
+      // }
       return serialization;
     }
 
@@ -65,11 +72,11 @@ namespace FudgeCore {
       await super.deserialize(_serialization);
       this.skeletonSource = Project.resources[_serialization.idSource || _serialization.idResource] as Skeleton;
       this.registerBones();
-      if (_serialization.bindPose) {
-        this.bindPose = {};
-        for (const boneName in _serialization.bindPose)
-          this.bindPose[boneName] = await new Matrix4x4().deserialize(_serialization.bindPose[boneName]) as Matrix4x4;
-      }
+      // if (_serialization.bindPose) {
+      //   this.bindPose = {};
+      //   for (const boneName in _serialization.bindPose)
+      //     this.bindPose[boneName] = await new Matrix4x4().deserialize(_serialization.bindPose[boneName]) as Matrix4x4;
+      // }
       return this;
     }
 
@@ -94,8 +101,8 @@ namespace FudgeCore {
     private calculateMtxBones(): void {
       this.#mtxBones = [];
       for (const boneName in this.bones) {
-        // bone matrix T = N^-1 * B_delta * B_0^-1 * S
-        const mtxBone: Matrix4x4 = this.getParent()?.mtxWorldInverse.clone || Matrix4x4.IDENTITY();
+        // bone matrix T = N^-1 * B_delta * B_0^-1 * S // no idea if this is correct
+        const mtxBone: Matrix4x4 = this.mtxWorldInverse.clone;
         // if (this.mtxPivot) mtxBone.multiply(this.mtxPivot);
         mtxBone.multiply(this.bones[boneName].mtxWorld);
         mtxBone.multiply(this.skeletonSource.mtxBindInverses[boneName]);

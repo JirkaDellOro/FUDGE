@@ -438,7 +438,8 @@ namespace FudgeCore {
         _m[4] = cosZ * sinY * sinX - sinZ * cosX; _m[5] = sinZ * sinY * sinX + cosZ * cosX; _m[6] = cosY * sinX;
         _m[8] = cosZ * sinY * cosX + sinZ * sinX; _m[9] = sinZ * sinY * cosX - cosZ * sinX; _m[10] = cosY * cosX;
       } else {
-        const x: number = _rotation.x, y: number = _rotation.y, z: number = _rotation.z, w: number = _rotation.w;
+        const rotationNormalized: Quaternion = Quaternion.NORMALIZATION(_rotation);
+        const x: number = rotationNormalized.x, y: number = rotationNormalized.y, z: number = rotationNormalized.z, w: number = rotationNormalized.w;
         const xx: number = x * x, xy: number = x * y, xz: number = x * z, xw: number = x * w;
         const yy: number = y * y, yz: number = y * z, yw: number = y * w;
         const zz: number = z * z, zw: number = z * w;
@@ -446,6 +447,7 @@ namespace FudgeCore {
         _m[0] = 1 - 2 * (yy + zz); _m[1] = 2 * (xy + zw);/**/ _m[2] = 2 * (xz - yw);
         _m[4] = 2 * (xy - zw);/**/ _m[5] = 1 - 2 * (xx + zz); _m[6] = 2 * (yz + xw);
         _m[8] = 2 * (xz + yw);/**/ _m[9] = 2 * (yz - xw);/**/ _m[10] = 1 - 2 * (xx + yy);
+        Recycler.store(rotationNormalized);
       }
     }
     //#endregion

@@ -59,7 +59,7 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.#idSource = _serialization.idSource;
+      this.#idSource = _serialization.idSource ?? _serialization.idResource;
       if (!_serialization.deserializeFromSource) {
         await super.deserialize(_serialization); // instance is deserialized from individual data
         this.#deserializeFromSource = false;
@@ -95,6 +95,7 @@ namespace FudgeCore {
      * Set this node to be a recreation of the {@link Graph} given
      */
     public async set(_graph: Graph): Promise<void> {
+      this.#idSource = _graph.idResource;
       // TODO: examine, if the serialization should be stored in the Graph for optimization <- also useful for sync with instances
       let serialization: Serialization = Serializer.serialize(_graph);
       //Serializer.deserialize(serialization);
@@ -102,7 +103,7 @@ namespace FudgeCore {
         await this.deserialize(serialization[path]);
         break;
       }
-      this.#idSource = _graph.idResource;
+
       this.dispatchEvent(new Event(EVENT.GRAPH_INSTANTIATED));
     }
 

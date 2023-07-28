@@ -4,22 +4,22 @@ namespace FudgeCore {
    * @author Matthias Roming, HFU, 2022-2023
    */
   export class MeshLoaderGLTF extends MeshLoader {
-    public static async load(_mesh: MeshImport | MeshSkin, _data?: GLTF.Mesh): Promise<MeshImport> {
+    public static async load(_mesh: MeshImport | MeshSkin, _data?: { mesh: GLTF.Mesh; iPrimitive: number}): Promise<MeshImport> {
       const loader: GLTFLoader = await GLTFLoader.LOAD(_mesh.url.toString());
-      const meshGLTF: GLTF.Mesh = _data || loader.gltf.meshes.find(_gltfMesh => _gltfMesh.name == _mesh.name);
+      const meshGLTF: GLTF.Mesh = _data.mesh || loader.gltf.meshes.find(_gltfMesh => _gltfMesh.name == _mesh.name);
       const renderMesh: RenderMesh = Reflect.get(_mesh, "renderMesh");
-      _mesh.name = _data.name;
-      Reflect.set(renderMesh, "ƒindices", await loader.getUint16Array(meshGLTF.primitives[0].indices));
-      Reflect.set(renderMesh, "ƒvertices", await loader.getFloat32Array(meshGLTF.primitives[0].attributes.POSITION));
-      if (meshGLTF.primitives[0].attributes.NORMAL)
-        Reflect.set(renderMesh, "ƒnormalsVertex", await loader.getFloat32Array(meshGLTF.primitives[0].attributes.NORMAL));
-      if (meshGLTF.primitives[0].attributes.TEXCOORD_0)
-        Reflect.set(renderMesh, "ƒtextureUVs", await loader.getFloat32Array(meshGLTF.primitives[0].attributes.TEXCOORD_0));
+      _mesh.name = _data.mesh.name;
+      Reflect.set(renderMesh, "ƒindices", await loader.getUint16Array(meshGLTF.primitives[_data.iPrimitive].indices));
+      Reflect.set(renderMesh, "ƒvertices", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.POSITION));
+      if (meshGLTF.primitives[_data.iPrimitive].attributes.NORMAL)
+        Reflect.set(renderMesh, "ƒnormalsVertex", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.NORMAL));
+      if (meshGLTF.primitives[_data.iPrimitive].attributes.TEXCOORD_0)
+        Reflect.set(renderMesh, "ƒtextureUVs", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.TEXCOORD_0));
       _mesh.vertices.push(...getVertices(renderMesh));
       _mesh.faces.push(...getFaces(renderMesh, _mesh.vertices));
       if (_mesh instanceof MeshSkin) {
-        Reflect.set(renderMesh, "ƒiBones", await loader.getUint8Array(meshGLTF.primitives[0].attributes.JOINTS_0));
-        Reflect.set(renderMesh, "ƒweights", await loader.getFloat32Array(meshGLTF.primitives[0].attributes.WEIGHTS_0));
+        Reflect.set(renderMesh, "ƒiBones", await loader.getUint8Array(meshGLTF.primitives[_data.iPrimitive].attributes.JOINTS_0));
+        Reflect.set(renderMesh, "ƒweights", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.WEIGHTS_0));
         createBones(renderMesh, _mesh.vertices);
       }
       return _mesh;
