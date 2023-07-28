@@ -216,7 +216,7 @@ namespace FudgeCore {
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mistFBO);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
       Render.setDepthTest(true);
-      Render.clear(new Color(0, 0, 0, 1));
+      Render.clear(new Color(1, 1, 1, 1));
       _cmpCamera.resetWorldToView();
 
       Render.drawNodesMist(_cmpCamera, this.nodesSimple, _cmpMist);
