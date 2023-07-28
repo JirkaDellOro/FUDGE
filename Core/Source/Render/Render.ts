@@ -22,12 +22,14 @@ namespace FudgeCore {
     public static aoFBO: WebGLFramebuffer;
     public static aoTexture: WebGLTexture;
 
-    public static bloomFBO: WebGLFramebuffer;
-    public static bloomTexture: WebGLTexture;
+    public static downsamplingDepth: number = 7;
+    public static bloomDownsamplingFBOs: WebGLFramebuffer[] = [];
+    public static bloomDownsamplingTextures: WebGLTexture[] = [];
+    public static bloomUpsamplingFBOs: WebGLFramebuffer[] = [];
+    public static bloomUpsamplingTextures: WebGLTexture[] = [];
 
     public static screenQuad: Float32Array;
     public static screenQuadUV: Float32Array;
-    public static screenQuadCmpMat: ComponentMaterial;
 
     public static nodesPhysics: RecycableArray<Node> = new RecycableArray();
     public static componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
@@ -178,10 +180,15 @@ namespace FudgeCore {
 
     //#region Drawing
     public static draw(_cmpCamera: ComponentCamera): void {
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mainFBO);
+      Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+      Render.setDepthTest(true);
+      Render.clear(_cmpCamera.clrBackground);
+
       _cmpCamera.resetWorldToView();
+
       Render.drawList(_cmpCamera, this.nodesSimple);
       Render.drawListAlpha(_cmpCamera);
-      //TODO: Draw FBO on top of canvas
     }
 
     private static drawListAlpha(_cmpCamera: ComponentCamera): void {
@@ -205,38 +212,92 @@ namespace FudgeCore {
     //#endregion
 
     //#region PostFX
-    public static calcMist(_cmpCamera: ComponentCamera, _cmpPostFX: ComponentPostFX): void {
+    public static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mistFBO);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
       Render.setDepthTest(true);
-      Render.crc3.clearColor(0, 0, 0, 1);
-      Render.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
-
+      Render.clear(new Color(0, 0, 0, 1));
       _cmpCamera.resetWorldToView();
-      Render.drawNodesMist(_cmpCamera, this.nodesSimple, _cmpPostFX);
-      //TODO: Implement alpha-mist-calculation. For now they are drawn fully opaque
-      Render.drawNodesMist(_cmpCamera, this.nodesAlpha, _cmpPostFX);
 
-      //Reset to main color buffer
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
-      Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+      Render.drawNodesMist(_cmpCamera, this.nodesSimple, _cmpMist);
+      //TODO: Implement alpha-mist-calculation. For now they are drawn fully opaque
+      Render.drawNodesMist(_cmpCamera, this.nodesAlpha, _cmpMist);
     }
 
-    public static calcAO(_cmpPostFX: ComponentPostFX): void {
+    public static calcAO(_cmpAO: ComponentAmbientOcclusion): void {
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.aoFBO);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
-      Render.crc3.clearColor(1, 1, 1, 1);
-      Render.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
+      Render.clear(new Color(1, 1, 1, 1));
 
       //TODO: Initialize and run AO Shader.
-
-      //Reset to main color buffer
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
-      Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
-
     }
 
-    public static calcBloom(_cmpCamera: ComponentCamera): void {
+    public static calcBloom(_cmpBloom: ComponentBloom): void {
+      //feed texture and uniform matrix
+      function bindTextureSlot0(_texture: WebGLTexture): void {
+        RenderWebGL.crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
+        RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, _texture);
+        RenderWebGL.crc3.uniform1i(shader.uniforms["u_texture"], 0);
+      }
+
+      function bindTextureSlot1(_texture: WebGLTexture): void {
+        RenderWebGL.crc3.activeTexture(WebGL2RenderingContext.TEXTURE1);
+        RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, _texture);
+        RenderWebGL.crc3.uniform1i(shader.uniforms["u_texture2"], 1);
+      }
+
+      let tempTexture: WebGLTexture = Render.mainTexture;
+      let tempThreshold: number = _cmpBloom.threshold;
+      let div: number = 2;
+
+      let shader: typeof Shader = ShaderDownsample;
+      shader.useProgram();
+      Render.useScreenQuadRenderData(shader);
+
+      //Downsampling
+      for (let i: number = 0; i < Render.bloomDownsamplingFBOs.length; i++) {
+        let width: number = Math.max(Render.crc3.canvas.width / div, 1);
+        let height: number = Math.max(Render.crc3.canvas.height / div, 1);
+
+        Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.bloomDownsamplingFBOs[i]);
+        Render.crc3.viewport(0, 0, Math.floor(width), Math.floor(height));
+        Render.clear(new Color(0, 0, 0, 1));
+
+        bindTextureSlot0(tempTexture);
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Math.floor(width * 2));
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Math.floor(height * 2));
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_threshold"], tempThreshold);
+        RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
+
+        tempTexture = Render.bloomDownsamplingTextures[i];
+        tempThreshold = -1;
+        div *= 2;
+      }
+
+      shader = ShaderUpsample;
+      shader.useProgram();
+      Render.useScreenQuadRenderData(shader);
+      div /= 4;
+
+      //Upsampling and combining Downsamplingpasses
+      for (let i: number = Render.bloomUpsamplingFBOs.length - 1; i >= 0; i--) {
+        let width: number = Math.max(Render.crc3.canvas.width / div, 1);
+        let height: number = Math.max(Render.crc3.canvas.height / div, 1);
+
+        Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.bloomUpsamplingFBOs[i]);
+        Render.crc3.viewport(0, 0, width, height);
+        Render.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
+
+        bindTextureSlot0(tempTexture);
+        bindTextureSlot1(this.bloomDownsamplingTextures[i]);
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Math.min(Math.floor(width / 2)));
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Math.min(Math.floor(height / 2)));
+
+        RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
+
+        tempTexture = Render.bloomUpsamplingTextures[i];
+        div /= 2;
+      }
 
     }
 
@@ -255,15 +316,10 @@ namespace FudgeCore {
         1.0, 1.0,
         1.0, 0.0,
       ]);
-      let tempCoat: CoatWebGlTextured = new CoatWebGlTextured(_texture);
-      let tempMat: Material = new Material("screenQuadMat", ShaderScreen, tempCoat);
-      Render.screenQuadCmpMat = new ComponentMaterial(tempMat);
-      Project.deregister(tempMat);  //Deregister this Material to prevent listing in the internal resources of the editor
     }
 
-    public static useScreenQuadRenderData(_shader: typeof Shader, _tex: WebGLTexture, _clr: Color = new Color(0, 0, 0, 1)): void {
+    public static useScreenQuadRenderData(_shader: typeof Shader): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      //let coat: CoatWebGlTextured = <CoatWebGlTextured>Render.screenQuadCmpMat.material.coat;
 
       function createBuffer(_type: GLenum, _array: Float32Array): WebGLBuffer {
         let buffer: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
@@ -287,16 +343,6 @@ namespace FudgeCore {
         crc3.enableVertexAttribArray(texAttribute);
         crc3.vertexAttribPointer(texAttribute, 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
       }
-
-      //feed texture and uniform matrix
-      crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
-      crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, _tex);
-      crc3.uniform1i(_shader.uniforms["u_texture"], 0);
-      crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, Render.screenQuadCmpMat.mtxPivot.get());
-
-      //feed in color information (fog color etc.)
-      let uniform: WebGLUniformLocation = _shader.uniforms["u_vctColor"];
-      RenderWebGL.getRenderingContext().uniform4fv(uniform, _clr.getArray());
     }
 
     //#endregion

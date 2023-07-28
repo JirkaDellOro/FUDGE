@@ -5,7 +5,6 @@
 */
 in vec2 a_vctPosition;
 in vec2 a_vctTexture;
-uniform mat3 u_mtxPivot;
 
 out vec2 v_vctTexture;
 

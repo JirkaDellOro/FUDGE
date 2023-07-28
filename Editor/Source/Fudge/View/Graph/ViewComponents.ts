@@ -115,9 +115,19 @@ namespace Fudge {
           console.log(this.node);
           return;
         }
-      if (cmpNew instanceof ƒ.ComponentPostFX)
+      if (cmpNew instanceof ƒ.ComponentMist)
         if (this.node.getComponent(ƒ.ComponentCamera) == null) {
-          alert("To attach ComponentPostFX, first attach ComponentCamera!");
+          alert("To attach ComponentMist, first attach ComponentCamera!");
+          return;
+        }
+      if (cmpNew instanceof ƒ.ComponentAmbientOcclusion)
+        if (this.node.getComponent(ƒ.ComponentCamera) == null) {
+          alert("To attach ComponentAmbientOcclusion, first attach ComponentCamera!");
+          return;
+        }
+      if (cmpNew instanceof ƒ.ComponentBloom)
+        if (this.node.getComponent(ƒ.ComponentCamera) == null) {
+          alert("To attach ComponentBloom, first attach ComponentCamera!");
           return;
         }
       ƒ.Debug.info(cmpNew.type, cmpNew);

@@ -18,8 +18,7 @@ uniform vec3 u_vctCamera;
 in vec4 v_vctColor;
 in vec4 v_vctPosition;
 in vec3 v_vctNormal;
-in vec3 v_vctTangent;
-in vec3 v_vctBitangent;
+in mat3 v_mtxTBN;
 out vec4 vctFrag;
 
 struct Light {
@@ -92,9 +91,7 @@ void main() {
   // calculate NewNormal based on NormalMap
   vec3 vctNormal = normalize(v_vctNormal);
   #if defined(NORMALMAP)
-  mat3 tbn = mat3(v_vctTangent, v_vctBitangent, vctNormal);
-  //tbn = transpose(tbn);
-  vctNormal = tbn * (2.0 * texture(u_normalMap, v_vctNormalMap).xyz - 1.0);
+  vctNormal = v_mtxTBN * (2.0 * texture(u_normalMap, v_vctNormalMap).xyz - 1.0);
   #endif
 
   // calculate directional light effect
