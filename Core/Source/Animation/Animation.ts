@@ -5,26 +5,25 @@ namespace FudgeCore {
    */
   export interface AnimationStructure {
     [attribute: string]: AnimationStructure[] | AnimationStructure | AnimationSequence;
-    children?: AnimationStructure;
   }
 
-  export interface AnimationStructureVector3 extends AnimationStructure {
+  export interface AnimationSequenceVector3 extends AnimationStructure {
     x?: AnimationSequence;
     y?: AnimationSequence;
     z?: AnimationSequence;
   }
 
-  export interface AnimationStructureVector4 extends AnimationStructure {
+  export interface AnimationSequenceVector4 extends AnimationStructure {
     x?: AnimationSequence;
     y?: AnimationSequence;
     z?: AnimationSequence;
     w?: AnimationSequence;
   }
 
-  export interface AnimationStructureMatrix4x4 extends AnimationStructure {
-    rotation?: AnimationStructureVector3 | AnimationStructureVector4;
-    scale?: AnimationStructureVector3;
-    translation?: AnimationStructureVector3;
+  export interface AnimationSequenceMatrix4x4 extends AnimationStructure {
+    rotation?: AnimationSequenceVector3 | AnimationSequenceVector4;
+    scale?: AnimationSequenceVector3;
+    translation?: AnimationSequenceVector3;
   }
 
   /**
@@ -216,6 +215,8 @@ namespace FudgeCore {
     public calculateTotalTime(): void {
       this.totalTime = 0;
       this.traverseStructureForTime(this.animationStructure);
+      if (this.totalTime == 0) // animations with one keyframe need a total time != 0 to work
+        this.totalTime = 1;
     }
 
     /**
@@ -511,7 +512,7 @@ namespace FudgeCore {
       let seq: AnimationSequence = new AnimationSequence();
       let frameTime: number = 1000 / this.framesPerSecond;
       for (let i: number = 0; i < this.totalTime; i += frameTime) {
-        let key: AnimationKey = new AnimationKey(i, _sequence.evaluate(i), "constant", 0, 0);
+        let key: AnimationKey = new AnimationKey(i, _sequence.evaluate(i), ANIMATION_INTERPOLATION.CONSTANT, 0, 0);
         seq.addKey(key);
       }
       return seq;

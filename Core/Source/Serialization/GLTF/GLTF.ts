@@ -71,7 +71,7 @@ namespace GLTF {
     /**
      * The datatype of the accessor's components.
      */
-    "componentType": number | number | number | number | number | number | number;
+    "componentType": COMPONENT_TYPE;
     /**
      * Specifies whether integer data values are normalized before usage.
      */
@@ -83,7 +83,7 @@ namespace GLTF {
     /**
      * Specifies if the accessor's elements are scalars, vectors, or matrices.
      */
-    "type": any | any | any | any | any | any | any | string;
+    "type": "SCALAR" | "VEC2" | "VEC3" | "VEC4" | "MAT2" | "MAT3" | "MAT4";
     /**
      * Maximum value of each component in this accessor.
      */
@@ -101,6 +101,19 @@ namespace GLTF {
     "extras"?: any;
     [k: string]: any;
   }
+
+  /**
+   * https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#accessor-data-types
+   */ 
+  export enum COMPONENT_TYPE {
+    BYTE = 5120,
+    UNSIGNED_BYTE = 5121,
+    SHORT = 5122,
+    UNSIGNED_SHORT = 5123,
+    UNSIGNED_INT = 5125,
+    FLOAT = 5126
+  }
+
   /**
    * The descriptor of the animated property.
    */
@@ -526,10 +539,38 @@ namespace GLTF {
      * The weights of the instantiated morph target. The number of array elements **MUST** match the number of morph targets of the referenced mesh. When defined, `mesh` **MUST** also be defined.
      */
     "weights"?: number[];
-    "name"?: any;
+    "name"?: string;
     "extensions"?: any;
     "extras"?: any;
     [k: string]: any;
+    
+    /**
+     * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+     */
+    isAnimated?: boolean;
+    /**
+     * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+     */
+    isJoint?: boolean;
+    /**
+     * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+     * The depth of the node in the hierarchy, starting with 0 for the root node.
+     */
+    depth?: number;
+    /**
+     * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+     */
+    parent?: number;
+    /**
+     * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+     */
+    path?: number[];
+
+    /**
+     * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+     * The index of the skin this node is the root of.
+     */
+    iSkinRoot?: number;
   }
   /**
    * Texture sampler properties for filtering and wrapping modes.

@@ -59,7 +59,7 @@ namespace FudgeCore {
         this.d = this.c = this.b = this.a = 0;
         return;
       }
-      if (!this.keyOut || this.keyIn.interpolation == "constant") {
+      if (!this.keyOut || this.keyIn.interpolation == ANIMATION_INTERPOLATION.CONSTANT) {
         this.d = this.keyIn.value;
         this.c = this.b = this.a = 0;
         return;
@@ -68,7 +68,7 @@ namespace FudgeCore {
       let x1: number = this.keyOut.time - this.keyIn.time;
 
       this.d = this.keyIn.value;
-      if (this.keyIn.interpolation == "linear") {
+      if (this.keyIn.interpolation == ANIMATION_INTERPOLATION.LINEAR) {
         this.c = (this.keyOut.value - this.keyIn.value) / x1;
         return;
       }

@@ -47,11 +47,16 @@ namespace FudgeCore {
       return this.#scale;
     }
 
-    /**
-     * Returns the current sample time of the animation
+    /** 
+     * - get: return the current sample time of the animation  
+     * - set: jump to a certain sample time in the animation
      */
     public get time(): number {
       return this.#timeLocal.get() % this.animation.totalTime;
+    }
+
+    public set time(_time: number) {
+      this.jumpTo(_time);
     }
 
     public activate(_on: boolean): void {

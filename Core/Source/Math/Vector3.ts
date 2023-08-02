@@ -198,6 +198,14 @@ namespace FudgeCore {
       Recycler.store(geo);
       return vector;
     }
+
+    /**
+     * Return the angle in degrees between the two given vectors
+     */
+    public static ANGLE(_from: Vector3, _to: Vector3): number {
+      let angle: number = Math.acos(Vector3.DOT(_from, _to) / (_from.magnitude * _to.magnitude));
+      return angle * Calc.rad2deg;
+    }
     //#endregion
 
     //#region Accessors

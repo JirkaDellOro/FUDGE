@@ -50,39 +50,57 @@ namespace FudgeCore {
         const response: Response = await fetch(_url);
         const gltf: GLTF.GlTf = await response.json();
 
-        gltf.nodes.forEach((_node, _iNode) => {
-          _node.children?.forEach(_iChild => gltf.nodes[_iChild].parent = _iNode); // mark parent of each node
-          _node.isJoint = gltf.skins?.some(_skin => _skin.joints.includes(_iNode)); // mark nodes that are joints
-        });
+        if (gltf.nodes) {
+          // mark all nodes that are animated
+          gltf.animations?.forEach(_animation => {
+            _animation.channels.forEach(_channel => {
+              const iNode: number = _channel.target.node;
+              if (iNode != undefined)
+                gltf.nodes[iNode].isAnimated = true;
+            });
+          });
 
-        // mark the depth of each node
-        const paths: number[][] = [];
-        gltf.nodes.forEach((_node, _iNode) => {
-          let iParent: number = _node.parent;
-          let depth: number = 0;
-          let path: number[] = [];
-          while (iParent != undefined) {
-            path.push(iParent);
-            depth++;
-            iParent = gltf.nodes[iParent].parent;
-          }
-          _node.depth = depth;
-          paths[_iNode] = path;
-        });
+          // mark nodes that are joints
+          gltf.skins?.forEach(_skin => {
+            _skin.joints.forEach(_iJoint => gltf.nodes[_iJoint].isJoint = true);
+          });
 
-        // mark the skeleton root nodes of each skin
-        gltf.skins?.forEach((_skin, _iSkin) => {
-          if (_skin.skeleton == undefined) {
-            // find the common root of all joints i.e. the skeleton
-            const ancestors: Set<number> = new Set<number>(_skin.joints.flatMap(_iJoint => paths[_iJoint]));
-            _skin.skeleton = Array.from(ancestors).reduce((_a, _b) => gltf.nodes[_a].depth < gltf.nodes[_b].depth ? _a : _b);
-          }
+          // mark parent of each node
+          gltf.nodes.forEach((_node, _iNode) => _node.children?.forEach(_iChild => gltf.nodes[_iChild].parent = _iNode));
 
-          gltf.nodes[_skin.skeleton].iSkinRoot = _iSkin;
-        });
+          // mark the depth of each node
+          // add names to nodes that don't have one
+          gltf.nodes.forEach((_node, _iNode) => {
+            if (!_node.name)
+              _node.name = `Node${_iNode}`;
+            let iParent: number = _node.parent;
+            let depth: number = 0;
+            let path: number[] = [];
+            path.push(_iNode);
+            while (iParent != undefined) {
+              path.push(iParent);
+              depth++;
+              iParent = gltf.nodes[iParent].parent;
+            }
+            _node.depth = depth;
+            _node.path = path;
+          });
+
+          // mark the skeleton root nodes of each skin
+          gltf.skins?.forEach((_skin, _iSkin) => {
+            if (_skin.skeleton == undefined) {
+              // find the common root of all joints i.e. the skeleton
+              const ancestors: Set<number> = new Set<number>(_skin.joints.flatMap(_iJoint => gltf.nodes[_iJoint].path));
+              _skin.skeleton = Array.from(ancestors).reduce((_a, _b) => gltf.nodes[_a].depth < gltf.nodes[_b].depth ? _a : _b);
+            }
+
+            gltf.nodes[_skin.skeleton].iSkinRoot = _iSkin;
+          });
+        }
 
         this.loaders[_url] = new GLTFLoader(gltf, _url);
       }
+
       return this.loaders[_url];
     }
 
@@ -109,26 +127,7 @@ namespace FudgeCore {
           scene.addChild(await this.getNodeByIndex(iNode));
         if (this.gltf.animations?.length > 0)
           scene.addComponent(new ComponentAnimator(await this.getAnimationByIndex(0)));
-
-        // const skeletonInstances: SkeletonInstance[] = [];
-        // for (const skeleton of this.#skeletons || []) {
-        //   const skeletonInstance: SkeletonInstance = await SkeletonInstance.CREATE(skeleton);
-        //   skeleton.getParent()?.replaceChild(skeleton, skeletonInstance);
-        //   skeletonInstances.push(skeletonInstance);
-
-        //   // replace cached nodes from skeleton with skeleton instance bones
-        //   // this.#nodes = this.#nodes.map(_node => skeletonInstance.bones[_node.name] || _node);
-        //   // this.#nodes[this.#nodes.indexOf(skeleton)] = skeletonInstance;
-        // }
-
-        // for (const iNode in this.gltf.nodes) {
-        //   let gltfNode: GLTF.Node = this.gltf.nodes[iNode];
-        //   if (gltfNode.skin != undefined) {
-        //     let skeletonInstance: SkeletonInstance = skeletonInstances[gltfNode.skin];
-        //     let cmpMesh: ComponentMesh = this.#nodes[iNode].getComponent(ComponentMesh);
-        //     cmpMesh.skeleton = skeletonInstance;
-        //   } 
-        // }
+        // TODO: load all animations, not just the first one
 
         Project.register(scene);
         this.#scenes[_iScene] = scene;
@@ -171,9 +170,8 @@ namespace FudgeCore {
             node.addChild(await this.getNodeByIndex(iNode, _nodes));
 
         // check for transformation
-        if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation || gltfNode.isJoint) {
-          if (!node.getComponent(ComponentTransform))
-            node.addComponent(new ComponentTransform());
+        if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation || gltfNode.isJoint || gltfNode.isAnimated) {
+          node.addComponent(new ComponentTransform());
           if (gltfNode.matrix) {
             node.mtxLocal.set(Float32Array.from(gltfNode.matrix));
           } else {
@@ -334,60 +332,54 @@ namespace FudgeCore {
       if (!this.#animations)
         this.#animations = [];
       if (!this.#animations[_iAnimation]) {
-        const gltfAnimation: GLTF.Animation = this.gltf.animations[_iAnimation];
+        const gltfAnimation: GLTF.Animation = this.gltf.animations?.[_iAnimation];
 
-        // TODO: maybe refactor this to iterate over channels directly and remove this map
-        const mapiNodeToGltfChannel: GLTF.AnimationChannel[][] = [];
+        if (!gltfAnimation)
+          throw new Error(`${GLTFLoader.name}: Couldn't find animation with index ${_iAnimation}.`);
+
+        // group channels by node
+        const gltfChannelsGrouped: GLTF.AnimationChannel[][] = [];
         for (const gltfChannel of gltfAnimation.channels) {
-          if (gltfChannel.target.node == undefined)
+          const iNode: number = gltfChannel.target.node;
+          if (iNode == undefined)
             continue;
-          if (!mapiNodeToGltfChannel[gltfChannel.target.node])
-            mapiNodeToGltfChannel[gltfChannel.target.node] = [];
-          mapiNodeToGltfChannel[gltfChannel.target.node].push(gltfChannel);
+          if (!gltfChannelsGrouped[iNode])
+            gltfChannelsGrouped[iNode] = [];
+          gltfChannelsGrouped[iNode].push(gltfChannel);
         }
 
         const animationStructure: AnimationStructure = {};
-
-        for (const iNode in mapiNodeToGltfChannel) {
-          const gltfChannels: GLTF.AnimationChannel[] = mapiNodeToGltfChannel[iNode];
+        for (const gltfChannels of gltfChannelsGrouped) {
           const gltfNode: GLTF.Node = this.gltf.nodes[gltfChannels[0].target.node];
 
-          const path: number[] = [];
-          path.push(gltfChannels[0].target.node);
-          let root: GLTF.Node = gltfNode;
-          while (root.parent != undefined) { // parent of gltfNode is set when json is loaded
-            path.push(root.parent);
-            root = this.gltf.nodes[root.parent];
-          }
-
           let currentStructure: AnimationStructure = animationStructure;
-          for (const iPathNode of path.reverse()) {
+          for (const iPathNode of gltfNode.path.reverse()) {
             const pathNode: GLTF.Node = this.gltf.nodes[iPathNode];
 
             if (currentStructure.children == undefined)
               currentStructure.children = {};
 
-            if (currentStructure.children[pathNode.name] == undefined)
-              currentStructure.children[pathNode.name] = {};
-            currentStructure = currentStructure.children[pathNode.name] as AnimationStructure;
+            if ((currentStructure.children as AnimationStructure)[pathNode.name] == undefined)
+              (currentStructure.children as AnimationStructure)[pathNode.name] = {};
+            currentStructure = (currentStructure.children as AnimationStructure)[pathNode.name] as AnimationStructure;
 
-            let iSkin: number = pathNode.iSkinRoot;
-            if (iSkin >= 0 && this.gltf.skins[iSkin].joints.includes(gltfChannels[0].target.node)) {
-              const mtxBoneLocal: AnimationStructureMatrix4x4 = {};
+            const iSkin: number = pathNode.iSkinRoot;
+            if (iSkin != undefined && this.gltf.skins[iSkin].joints.includes(gltfChannels[0].target.node)) {
+              const mtxBoneLocal: AnimationSequenceMatrix4x4 = {};
               for (const gltfChannel of gltfChannels)
                 mtxBoneLocal[toInternTransformation[gltfChannel.target.path]] =
-                  await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
+                  await this.getAnimationSequenceVector(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
               if (currentStructure.mtxBoneLocals == undefined)
                 currentStructure.mtxBoneLocals = {};
-              (currentStructure.mtxBoneLocals as { [boneName: string]: AnimationStructureMatrix4x4 })[gltfNode.name] = mtxBoneLocal;
+              (currentStructure.mtxBoneLocals as { [boneName: string]: AnimationSequenceMatrix4x4 })[gltfNode.name] = mtxBoneLocal;
               break;
             }
 
             if (pathNode == gltfNode) {
-              const mtxLocal: AnimationStructureMatrix4x4 = {};
+              const mtxLocal: AnimationSequenceMatrix4x4 = {};
               for (const gltfChannel of gltfChannels)
                 mtxLocal[toInternTransformation[gltfChannel.target.path]] =
-                  await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
+                  await this.getAnimationSequenceVector(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
               currentStructure.components = {
                 ComponentTransform: [
                   { mtxLocal: mtxLocal }
@@ -554,10 +546,10 @@ namespace FudgeCore {
      */
     public async getUint8Array(_iAccessor: number): Promise<Uint8Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      if (this.gltf.accessors[_iAccessor]?.componentType == COMPONENT_TYPE.UNSIGNED_BYTE)
+      if (this.gltf.accessors[_iAccessor]?.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE)
         return array as Uint8Array;
       else {
-        console.warn(`Expected component type UNSIGNED_BYTE but was ${COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+        console.warn(`Expected component type UNSIGNED_BYTE but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
         return Uint8Array.from(array);
       }
     }
@@ -568,10 +560,10 @@ namespace FudgeCore {
      */
     public async getUint16Array(_iAccessor: number): Promise<Uint16Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      if (this.gltf.accessors[_iAccessor]?.componentType == COMPONENT_TYPE.UNSIGNED_SHORT)
+      if (this.gltf.accessors[_iAccessor]?.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_SHORT)
         return array as Uint16Array;
       else {
-        console.warn(`Expected component type UNSIGNED_SHORT but was ${COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+        console.warn(`Expected component type UNSIGNED_SHORT but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
         return Uint16Array.from(array);
       }
     }
@@ -582,10 +574,10 @@ namespace FudgeCore {
      */
     public async getUint32Array(_iAccessor: number): Promise<Uint32Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      if (this.gltf.accessors[_iAccessor]?.componentType == COMPONENT_TYPE.UNSIGNED_INT)
+      if (this.gltf.accessors[_iAccessor]?.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_INT)
         return array as Uint32Array;
       else {
-        console.warn(`Expected component type UNSIGNED_INT but was ${COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+        console.warn(`Expected component type UNSIGNED_INT but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
         return Uint32Array.from(array);
       }
     }
@@ -596,10 +588,10 @@ namespace FudgeCore {
      */
     public async getFloat32Array(_iAccessor: number): Promise<Float32Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      if (this.gltf.accessors[_iAccessor]?.componentType == COMPONENT_TYPE.FLOAT)
+      if (this.gltf.accessors[_iAccessor]?.componentType == GLTF.COMPONENT_TYPE.FLOAT)
         return array as Float32Array;
       else {
-        console.warn(`Expected component type FLOAT but was ${COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+        console.warn(`Expected component type FLOAT but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
         return Float32Array.from(array);
       }
     }
@@ -614,29 +606,26 @@ namespace FudgeCore {
         throw new Error("Couldn't find buffer view");
 
       const buffer: ArrayBuffer = await this.getBuffer(gltfBufferView.buffer);;
-      const byteOffset: number = gltfBufferView.byteOffset || 0;
+      const byteOffset: number = (gltfAccessor.byteOffset ?? 0) + (gltfBufferView.byteOffset ?? 0);
       const byteLength: number = gltfBufferView.byteLength || 0;
 
       switch (gltfAccessor.componentType) {
-        case COMPONENT_TYPE.UNSIGNED_BYTE:
+        case GLTF.COMPONENT_TYPE.UNSIGNED_BYTE:
           return new Uint8Array(buffer, byteOffset, byteLength / Uint8Array.BYTES_PER_ELEMENT);
 
-        case COMPONENT_TYPE.BYTE:
+        case GLTF.COMPONENT_TYPE.BYTE:
           return new Int8Array(buffer, byteOffset, byteLength / Int8Array.BYTES_PER_ELEMENT);
 
-        case COMPONENT_TYPE.UNSIGNED_SHORT:
+        case GLTF.COMPONENT_TYPE.UNSIGNED_SHORT:
           return new Uint16Array(buffer, byteOffset, byteLength / Uint16Array.BYTES_PER_ELEMENT);
 
-        case COMPONENT_TYPE.SHORT:
+        case GLTF.COMPONENT_TYPE.SHORT:
           return new Int16Array(buffer, byteOffset, byteLength / Int16Array.BYTES_PER_ELEMENT);
 
-        case COMPONENT_TYPE.UNSIGNED_INT:
+        case GLTF.COMPONENT_TYPE.UNSIGNED_INT:
           return new Uint32Array(buffer, byteOffset, byteLength / Uint32Array.BYTES_PER_ELEMENT);
 
-        case COMPONENT_TYPE.INT:
-          return new Int32Array(buffer, byteOffset, byteLength / Int32Array.BYTES_PER_ELEMENT);
-
-        case COMPONENT_TYPE.FLOAT:
+        case GLTF.COMPONENT_TYPE.FLOAT:
           return new Float32Array(buffer, byteOffset, byteLength / Float32Array.BYTES_PER_ELEMENT);
 
         default:
@@ -659,30 +648,36 @@ namespace FudgeCore {
       return this.#buffers[_iBuffer];
     }
 
-    private async getAnimationSequenceVector3(_sampler: GLTF.AnimationSampler, _transformationType: GLTF.AnimationChannelTarget["path"]): Promise<AnimationStructureVector3 | AnimationStructureVector4> {
+    private async getAnimationSequenceVector(_sampler: GLTF.AnimationSampler, _transformationType: GLTF.AnimationChannelTarget["path"]): Promise<AnimationSequenceVector3 | AnimationSequenceVector4> {
       const input: Float32Array = await this.getFloat32Array(_sampler.input);
       const output: Float32Array = await this.getFloat32Array(_sampler.output);
       const millisPerSecond: number = 1000;
       const isRotation: boolean = _transformationType == "rotation";
-      const gltfInterpolation: GLTF.AnimationSampler["interpolation"] = _sampler.interpolation;
+      const vectorLength: number = isRotation ? 4 : 3; // rotation is stored as quaternion
+      const interpolation: ANIMATION_INTERPOLATION = toInternInterpolation(_sampler.interpolation);
+      const isCubic: true | undefined = interpolation == ANIMATION_INTERPOLATION.CUBIC ? true : undefined;
+      const vectorsPerInput: number = isCubic ? 3 : 1; // cubic interpolation uses 3 values per input: in-tangent, property value and out-tangent. https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#interpolation-cubic
 
       // used only for rotation interpolation
       let lastRotation: Quaternion;
       let nextRotation: Quaternion;
 
-      const sequences: AnimationStructureVector3 | AnimationStructureVector4 = {};
-      sequences.x = new AnimationSequence();
-      sequences.y = new AnimationSequence();
-      sequences.z = new AnimationSequence();
+      const sequenceVector: AnimationSequenceVector3 | AnimationSequenceVector4 = {};
+      sequenceVector.x = new AnimationSequence();
+      sequenceVector.y = new AnimationSequence();
+      sequenceVector.z = new AnimationSequence();
       if (isRotation) {
-        sequences.w = new AnimationSequence();
+        sequenceVector.w = new AnimationSequence();
         lastRotation = Recycler.get(Quaternion);
         nextRotation = Recycler.get(Quaternion);
       }
 
-      for (let iInput: number = 0; iInput < input.length; ++iInput) {
-        let iOutput: number = iInput * (_transformationType == "rotation" ? 4 : 3); // output buffer either contains data for quaternion or vector3
-        let time: number = millisPerSecond * input[iInput];
+      for (let iInput: number = 0; iInput < input.length; iInput++) {
+        const iOutput: number = iInput * vectorsPerInput * vectorLength + (isCubic ? vectorLength : 0);
+        const iOutputSlopeIn: number = iOutput - vectorLength;
+        const iOutputSlopeOut: number = iOutput + vectorLength;
+        const time: number = millisPerSecond * input[iInput];
+
 
         if (isRotation) {
           // Take the shortest path between two rotations, i.e. if the dot product is negative then the next quaternion needs to be negated.
@@ -697,11 +692,10 @@ namespace FudgeCore {
           lastRotation.set(nextRotation.x, nextRotation.y, nextRotation.z, nextRotation.w);
         }
 
-        sequences.x.addKey(new AnimationKey(time, output[iOutput + 0], toInternInterpolation[gltfInterpolation]));
-        sequences.y.addKey(new AnimationKey(time, output[iOutput + 1], toInternInterpolation[gltfInterpolation]));
-        sequences.z.addKey(new AnimationKey(time, output[iOutput + 2], toInternInterpolation[gltfInterpolation]));
-        if (isRotation)
-          (<AnimationStructureVector4>sequences).w.addKey(new AnimationKey(time, output[iOutput + 3], toInternInterpolation[gltfInterpolation]));
+        sequenceVector.x.addKey(new AnimationKey(time, output[iOutput + 0], interpolation, isCubic && output[iOutputSlopeIn + 0] / millisPerSecond, isCubic && output[iOutputSlopeOut + 0] / millisPerSecond));
+        sequenceVector.y.addKey(new AnimationKey(time, output[iOutput + 1], interpolation, isCubic && output[iOutputSlopeIn + 1] / millisPerSecond, isCubic && output[iOutputSlopeOut + 1] / millisPerSecond));
+        sequenceVector.z.addKey(new AnimationKey(time, output[iOutput + 2], interpolation, isCubic && output[iOutputSlopeIn + 2] / millisPerSecond, isCubic && output[iOutputSlopeOut + 2] / millisPerSecond));
+        (<AnimationSequenceVector4>sequenceVector).w?.addKey(new AnimationKey(time, output[iOutput + 3], interpolation, isCubic && output[iOutputSlopeIn + 3] / millisPerSecond, isCubic && output[iOutputSlopeOut + 3] / millisPerSecond));
       }
 
       if (isRotation) {
@@ -709,7 +703,7 @@ namespace FudgeCore {
         Recycler.store(nextRotation);
       }
 
-      return sequences;
+      return sequenceVector;
     }
   }
 
@@ -717,23 +711,23 @@ namespace FudgeCore {
     return Object.keys(WebGL2RenderingContext).find(_key => Reflect.get(WebGL2RenderingContext, _key) == _value);
   }
 
-  enum COMPONENT_TYPE {
-    BYTE = 5120,
-    UNSIGNED_BYTE = 5121,
-    SHORT = 5122,
-    UNSIGNED_SHORT = 5123,
-    INT = 5124,
-    UNSIGNED_INT = 5125,
-    FLOAT = 5126
+
+  type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Float32Array | Float64Array;
+
+  function toInternInterpolation(_interpolation: GLTF.AnimationSampler["interpolation"]): ANIMATION_INTERPOLATION {
+    switch (_interpolation) {
+      case "LINEAR":
+        return ANIMATION_INTERPOLATION.LINEAR;
+      case "STEP":
+        return ANIMATION_INTERPOLATION.CONSTANT;
+      case "CUBICSPLINE":
+        return ANIMATION_INTERPOLATION.CUBIC;
+      default:
+        if (_interpolation != undefined)
+          Debug.warn(`${GLTFLoader.name}: Unknown interpolation type ${_interpolation}`);
+        return ANIMATION_INTERPOLATION.LINEAR;
+    }
   }
-
-  type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Int32Array | Float32Array | Float64Array;
-
-  const toInternInterpolation: { [key in GLTF.AnimationSampler["interpolation"]]: AnimationKey["interpolation"] } = {
-    "LINEAR": "linear",
-    "STEP": "constant",
-    "CUBICSPLINE": "cubic"
-  };
 
   const toInternTransformation: { [key in GLTF.AnimationChannelTarget["path"]]: string } = {
     "translation": "translation",
@@ -741,5 +735,4 @@ namespace FudgeCore {
     "scale": "scaling",
     "weights": "weights"
   };
-  // type TransformationType = "rotation" | "scale" | "translation";
 }

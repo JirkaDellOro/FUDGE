@@ -1452,23 +1452,22 @@ declare namespace FudgeCore {
      */
     interface AnimationStructure {
         [attribute: string]: AnimationStructure[] | AnimationStructure | AnimationSequence;
-        children?: AnimationStructure;
     }
-    interface AnimationStructureVector3 extends AnimationStructure {
+    interface AnimationSequenceVector3 extends AnimationStructure {
         x?: AnimationSequence;
         y?: AnimationSequence;
         z?: AnimationSequence;
     }
-    interface AnimationStructureVector4 extends AnimationStructure {
+    interface AnimationSequenceVector4 extends AnimationStructure {
         x?: AnimationSequence;
         y?: AnimationSequence;
         z?: AnimationSequence;
         w?: AnimationSequence;
     }
-    interface AnimationStructureMatrix4x4 extends AnimationStructure {
-        rotation?: AnimationStructureVector3 | AnimationStructureVector4;
-        scale?: AnimationStructureVector3;
-        translation?: AnimationStructureVector3;
+    interface AnimationSequenceMatrix4x4 extends AnimationStructure {
+        rotation?: AnimationSequenceVector3 | AnimationSequenceVector4;
+        scale?: AnimationSequenceVector3;
+        translation?: AnimationSequenceVector3;
     }
     /**
     * An associative array mapping names of lables to timestamps.
@@ -1695,7 +1694,11 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    type AnimationInterpolation = "constant" | "linear" | "cubic";
+    enum ANIMATION_INTERPOLATION {
+        CONSTANT = 0,
+        LINEAR = 1,
+        CUBIC = 2
+    }
     /**
      * Holds information about continous points in time their accompanying values as well as their slopes.
      * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides.
@@ -1703,13 +1706,13 @@ declare namespace FudgeCore {
      * If the property constant is true, the value does not change and wil not be interpolated between this and the next key in a sequence
      * @author Lukas Scheuerle, HFU, 2019
      */
-    export class AnimationKey extends Mutable implements Serializable {
+    class AnimationKey extends Mutable implements Serializable {
         #private;
         /**Don't modify this unless you know what you're doing.*/
         functionIn: AnimationFunction;
         /**Don't modify this unless you know what you're doing.*/
         functionOut: AnimationFunction;
-        constructor(_time?: number, _value?: number, _interpolation?: AnimationInterpolation, _slopeIn?: number, _slopeOut?: number);
+        constructor(_time?: number, _value?: number, _interpolation?: ANIMATION_INTERPOLATION, _slopeIn?: number, _slopeOut?: number);
         /**
          * Static comparation function to use in an array sort function to sort the keys by their time.
          * @param _a the animation key to check
@@ -1721,8 +1724,8 @@ declare namespace FudgeCore {
         set time(_time: number);
         get value(): number;
         set value(_value: number);
-        get interpolation(): AnimationInterpolation;
-        set interpolation(_interpolation: AnimationInterpolation);
+        get interpolation(): ANIMATION_INTERPOLATION;
+        set interpolation(_interpolation: ANIMATION_INTERPOLATION);
         get slopeIn(): number;
         set slopeIn(_slope: number);
         get slopeOut(): number;
@@ -1732,7 +1735,6 @@ declare namespace FudgeCore {
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
-    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -1927,9 +1929,11 @@ declare namespace FudgeCore {
         set scale(_scale: number);
         get scale(): number;
         /**
-         * Returns the current sample time of the animation
+         * - get: return the current sample time of the animation
+         * - set: jump to a certain sample time in the animation
          */
         get time(): number;
+        set time(_time: number);
         activate(_on: boolean): void;
         /**
          * Jumps to a certain time in the animation to play from there.
@@ -4106,6 +4110,10 @@ declare namespace FudgeCore {
          * Creates a cartesian vector from geographic coordinates
          */
         static GEO(_longitude?: number, _latitude?: number, _magnitude?: number): Vector3;
+        /**
+         * Return the angle in degrees between the two given vectors
+         */
+        static ANGLE(_from: Vector3, _to: Vector3): number;
         get x(): number;
         get y(): number;
         get z(): number;
@@ -6616,7 +6624,7 @@ declare namespace GLTF {
         /**
          * The datatype of the accessor's components.
          */
-        "componentType": number | number | number | number | number | number | number;
+        "componentType": COMPONENT_TYPE;
         /**
          * Specifies whether integer data values are normalized before usage.
          */
@@ -6628,7 +6636,7 @@ declare namespace GLTF {
         /**
          * Specifies if the accessor's elements are scalars, vectors, or matrices.
          */
-        "type": any | any | any | any | any | any | any | string;
+        "type": "SCALAR" | "VEC2" | "VEC3" | "VEC4" | "MAT2" | "MAT3" | "MAT4";
         /**
          * Maximum value of each component in this accessor.
          */
@@ -6645,6 +6653,17 @@ declare namespace GLTF {
         "extensions"?: any;
         "extras"?: any;
         [k: string]: any;
+    }
+    /**
+     * https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#accessor-data-types
+     */
+    enum COMPONENT_TYPE {
+        BYTE = 5120,
+        UNSIGNED_BYTE = 5121,
+        SHORT = 5122,
+        UNSIGNED_SHORT = 5123,
+        UNSIGNED_INT = 5125,
+        FLOAT = 5126
     }
     /**
      * The descriptor of the animated property.
@@ -7071,10 +7090,36 @@ declare namespace GLTF {
          * The weights of the instantiated morph target. The number of array elements **MUST** match the number of morph targets of the referenced mesh. When defined, `mesh` **MUST** also be defined.
          */
         "weights"?: number[];
-        "name"?: any;
+        "name"?: string;
         "extensions"?: any;
         "extras"?: any;
         [k: string]: any;
+        /**
+         * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+         */
+        isAnimated?: boolean;
+        /**
+         * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+         */
+        isJoint?: boolean;
+        /**
+         * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+         * The depth of the node in the hierarchy, starting with 0 for the root node.
+         */
+        depth?: number;
+        /**
+         * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+         */
+        parent?: number;
+        /**
+         * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+         */
+        path?: number[];
+        /**
+         * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+         * The index of the skin this node is the root of.
+         */
+        iSkinRoot?: number;
     }
     /**
      * Texture sampler properties for filtering and wrapping modes.
@@ -7304,7 +7349,7 @@ declare namespace FudgeCore {
         getSkeletonByIndex(_iSkeleton: number): Promise<Skeleton>;
         private getBufferData;
         private getBuffer;
-        private getAnimationSequenceVector3;
+        private getAnimationSequenceVector;
     }
 }
 declare namespace FudgeCore {

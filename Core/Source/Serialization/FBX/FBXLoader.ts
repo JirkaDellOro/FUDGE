@@ -256,7 +256,7 @@ namespace FudgeCore {
           children: {
             [childName: string]: {
               mtxBoneLocals: {
-                [boneName: string]: AnimationStructureMatrix4x4;
+                [boneName: string]: AnimationSequenceMatrix4x4;
               };
             };
           };
@@ -415,8 +415,8 @@ namespace FudgeCore {
       );
     }
 
-    private getAnimationVector3(_animNode: FBX.AnimCurveNode, _target: FBX.Model): AnimationStructureVector3 {
-      const vectorSequence: AnimationStructureVector3 = {};
+    private getAnimationVector3(_animNode: FBX.AnimCurveNode, _target: FBX.Model): AnimationSequenceVector3 {
+      const vectorSequence: AnimationSequenceVector3 = {};
       for (const valueName in _animNode) if (valueName == "dX" || valueName == "dY" || valueName == "dZ") {
         const value: FBX.AnimCurve | number = _animNode[valueName];
         if (typeof value != "number") {

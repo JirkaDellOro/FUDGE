@@ -1,6 +1,11 @@
 namespace FudgeCore {
   
-  type AnimationInterpolation = "constant" | "linear" | "cubic";
+  export enum ANIMATION_INTERPOLATION {
+    CONSTANT,
+    LINEAR,
+    CUBIC
+  }
+  // type AnimationInterpolation = "constant" | "linear" | "cubic";
 
   /**
    * Holds information about continous points in time their accompanying values as well as their slopes. 
@@ -18,12 +23,12 @@ namespace FudgeCore {
 
     #time: number;
     #value: number;
-    #interpolation: AnimationInterpolation;
+    #interpolation: ANIMATION_INTERPOLATION;
 
     #slopeIn: number = 0;
     #slopeOut: number = 0;
 
-    public constructor(_time: number = 0, _value: number = 0, _interpolation: AnimationInterpolation = "cubic", _slopeIn: number = 0, _slopeOut: number = 0) {
+    public constructor(_time: number = 0, _value: number = 0, _interpolation: ANIMATION_INTERPOLATION = ANIMATION_INTERPOLATION.CUBIC, _slopeIn: number = 0, _slopeOut: number = 0) {
       super();
       this.#time = _time;
       this.#value = _value;
@@ -64,11 +69,11 @@ namespace FudgeCore {
       this.functionOut.calculate();
     }
 
-    public get interpolation(): AnimationInterpolation {
+    public get interpolation(): ANIMATION_INTERPOLATION {
       return this.#interpolation;
     }
 
-    public set interpolation(_interpolation: AnimationInterpolation) {
+    public set interpolation(_interpolation: ANIMATION_INTERPOLATION) {
       this.#interpolation = _interpolation;
       this.functionIn.calculate();
       this.functionOut.calculate();

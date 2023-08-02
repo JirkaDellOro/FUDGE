@@ -24,9 +24,11 @@ namespace FudgeCore {
 
 
       for (let i: number = 0; i < this.keys.length - 1; i++) {
-        if (this.keys[i].time <= _time && this.keys[i + 1].time > _time) {
+        if (this.keys[i].time <= _time && _time < this.keys[i + 1].time) {
           return this.keys[i].functionOut.evaluate(_time);
         }
+        // if (this.keys[i].time == _time)
+        //   return this.keys[i].value;
       }
       return this.keys[this.keys.length - 1].value;
     }
