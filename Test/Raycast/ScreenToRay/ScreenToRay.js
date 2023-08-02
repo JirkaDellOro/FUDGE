@@ -127,7 +127,7 @@ var ScreenToRay;
         width = width < 0 ? 1 + (width + Math.trunc(width)) : width -= Math.trunc(width);
         let height = pick.textureUV.y;
         height = height < 0 ? 1 + (height + Math.trunc(height)) : height -= Math.trunc(height);
-        crc2.fillRect(Math.round(width * img.width), Math.round(height * img.height), 1, 1);
+        crc2.fillRect(Math.round(width * img.width), Math.round(height * img.height), 1, 5);
         let txtCanvas = new ƒ.TextureCanvas("Test", crc2);
         material.coat = new ƒ.CoatTextured(ƒ.Color.CSS("white"), txtCanvas);
     }
