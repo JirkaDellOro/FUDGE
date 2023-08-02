@@ -272,7 +272,7 @@ namespace FudgeCore {
 
       switch (this.projection) {
         case PROJECTION.CENTRAL:
-          this.projectCentral(this.aspectRatio, this.fieldOfView, this.direction);
+          this.projectCentral(this.aspectRatio, this.fieldOfView, this.direction, this.near, this.far);
           break;
       }
     }

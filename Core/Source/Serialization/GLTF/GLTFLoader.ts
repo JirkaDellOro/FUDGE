@@ -338,7 +338,7 @@ namespace FudgeCore {
           throw new Error(`${GLTFLoader.name}: Couldn't find animation with index ${_iAnimation}.`);
 
         // group channels by node
-        const gltfChannelsGrouped: GLTF.AnimationChannel[][] = [];
+        let gltfChannelsGrouped: GLTF.AnimationChannel[][] = [];
         for (const gltfChannel of gltfAnimation.channels) {
           const iNode: number = gltfChannel.target.node;
           if (iNode == undefined)
@@ -347,6 +347,8 @@ namespace FudgeCore {
             gltfChannelsGrouped[iNode] = [];
           gltfChannelsGrouped[iNode].push(gltfChannel);
         }
+        // remove empty entries
+        gltfChannelsGrouped = gltfChannelsGrouped.filter(_channels => _channels != undefined);
 
         const animationStructure: AnimationStructure = {};
         for (const gltfChannels of gltfChannelsGrouped) {
