@@ -152,7 +152,7 @@ namespace FudgeCore {
      * @param _fieldOfView The field of view in Degrees. (Default = 45)
      * @param _direction The plane on which the fieldOfView-Angle is given 
      */
-    public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FIELD_OF_VIEW = this.direction, _near: number = 1, _far: number = 2000): void {
+    public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FIELD_OF_VIEW = this.direction, _near: number = this.near, _far: number = this.far): void {
       this.aspectRatio = _aspect;
       this.fieldOfView = _fieldOfView;
       this.direction = _direction;
@@ -231,6 +231,8 @@ namespace FudgeCore {
         projection: this.projection,
         fieldOfView: this.fieldOfView,
         direction: this.direction,
+        near: this.near,
+        far: this.far,
         aspect: this.aspectRatio,
         pivot: this.mtxPivot.serialize(),
         [super.constructor.name]: super.serialize()
@@ -245,6 +247,8 @@ namespace FudgeCore {
       this.fieldOfView = _serialization.fieldOfView;
       this.aspectRatio = _serialization.aspect;
       this.direction = _serialization.direction;
+      this.near = _serialization.near;
+      this.far = _serialization.far;
       await this.mtxPivot.deserialize(_serialization.pivot);
       await super.deserialize(_serialization[super.constructor.name]);
       switch (this.projection) {
