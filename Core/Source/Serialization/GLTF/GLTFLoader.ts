@@ -110,7 +110,7 @@ namespace FudgeCore {
     public async getScene(_name?: string): Promise<GraphInstance> {
       const iScene: number = _name ? this.gltf.scenes.findIndex(_scene => _scene.name == _name) : this.gltf.scene;
       if (iScene == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf scenes.`);
+        throw new Error(`${GLTFLoader.name}: Couldn't find name ${_name} in gltf scenes.`);
       return await this.getSceneByIndex(iScene);
     }
 
@@ -141,7 +141,7 @@ namespace FudgeCore {
     public async getNode(_name: string): Promise<Node> {
       const iNode: number = this.gltf.nodes.findIndex(_node => _node.name == _name);
       if (iNode == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf nodes.`);
+        throw new Error(`${GLTFLoader.name}: Couldn't find name ${_name} in gltf nodes.`);
       return await this.getNodeByIndex(iNode);
     }
 
@@ -280,7 +280,7 @@ namespace FudgeCore {
     public async getCamera(_name: string): Promise<ComponentCamera> {
       const iCamera: number = this.gltf.cameras.findIndex(_camera => _camera.name == _name);
       if (iCamera == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf cameras.`);
+        throw new Error(`${GLTFLoader.name}: Couldn't find name ${_name} in gltf cameras.`);
       return await this.getCameraByIndex(iCamera);
     }
 
@@ -321,7 +321,7 @@ namespace FudgeCore {
     public async getAnimation(_name: string): Promise<Animation> {
       const iAnimation: number = this.gltf.animations.findIndex(_animation => _animation.name == _name);
       if (iAnimation == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf animations.`);
+        throw new Error(`${GLTFLoader.name}: Couldn't find name ${_name} in gltf animations.`);
       return await this.getAnimationByIndex(iAnimation);
     }
 
@@ -402,7 +402,7 @@ namespace FudgeCore {
     public async getMesh(_name: string): Promise<MeshImport> {
       const iMesh: number = this.gltf.meshes.findIndex(_mesh => _mesh.name == _name);
       if (iMesh == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf meshes.`);
+        throw new Error(`${GLTFLoader.name}: Couldn't find name ${_name} in gltf meshes.`);
       return await this.getMeshByIndex(iMesh);
     }
 
@@ -434,7 +434,7 @@ namespace FudgeCore {
         const gltfMaterial: GLTF.Material = this.gltf.materials[_iMaterial];
         const gltfBaseColorTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
 
-        const color: Color = new Color(...gltfMaterial.pbrMetallicRoughness.baseColorFactor || [1, 1, 1, 1]); // TODO: check if phong shader should multiply baseColorTexture values with baseColorFactor
+        const color: Color = new Color(...gltfMaterial.pbrMetallicRoughness?.baseColorFactor || [1, 1, 1, 1]); // TODO: check if phong shader should multiply baseColorTexture values with baseColorFactor
         const coat: Coat = gltfBaseColorTexture ?
           new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index)) :
           new CoatRemissive(color);
@@ -505,7 +505,7 @@ namespace FudgeCore {
     public async getSkeleton(_name: string): Promise<Skeleton> {
       const iSkeleton: number = this.gltf.skins.findIndex(_skeleton => _skeleton.name == _name);
       if (iSkeleton == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf skins.`);
+        throw new Error(`${GLTFLoader.name}: Couldn't find name ${_name} in gltf skins.`);
       return await this.getSkeletonByIndex(iSkeleton);
     }
 
@@ -557,32 +557,39 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a {@link Uint16Array} for the given accessor index.
+     * Returns a {@link Uint16Array} for the given accessor index. Only used to get the vertex indices.
      * @internal
      */
     public async getUint16Array(_iAccessor: number): Promise<Uint16Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      if (this.gltf.accessors[_iAccessor]?.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_SHORT)
+      const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
+
+      if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_SHORT)
         return array as Uint16Array;
-      else {
-        console.warn(`Expected component type UNSIGNED_SHORT but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+
+      if (gltfAccessor.count > 65535 && gltfAccessor.type == "SCALAR")
+        throw new Error(`${GLTFLoader.name}: The vertex indices array has more than 65535 vertices. FUDGE does not support meshes with more than 65535 vertices.`);
+
+      if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE || gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_INT)
         return Uint16Array.from(array);
-      }
+
+      console.warn(`Expected component type UNSIGNED_SHORT but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+      return Uint16Array.from(array);
     }
 
     /**
      * Returns a {@link Uint32Array} for the given accessor index.
      * @internal
      */
-    public async getUint32Array(_iAccessor: number): Promise<Uint32Array> {
-      const array: TypedArray = await this.getBufferData(_iAccessor);
-      if (this.gltf.accessors[_iAccessor]?.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_INT)
-        return array as Uint32Array;
-      else {
-        console.warn(`Expected component type UNSIGNED_INT but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
-        return Uint32Array.from(array);
-      }
-    }
+    // public async getUint32Array(_iAccessor: number): Promise<Uint32Array> {
+    //   const array: TypedArray = await this.getBufferData(_iAccessor);
+    //   if (this.gltf.accessors[_iAccessor]?.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_INT)
+    //     return array as Uint32Array;
+    //   else {
+    //     console.warn(`Expected component type UNSIGNED_INT but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+    //     return Uint32Array.from(array);
+    //   }
+    // }
 
     /**
      * Returns a {@link Float32Array} for the given accessor index.
@@ -590,55 +597,98 @@ namespace FudgeCore {
      */
     public async getFloat32Array(_iAccessor: number): Promise<Float32Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      if (this.gltf.accessors[_iAccessor]?.componentType == GLTF.COMPONENT_TYPE.FLOAT)
+      const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
+
+      if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.FLOAT)
         return array as Float32Array;
-      else {
-        console.warn(`Expected component type FLOAT but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
-        return Float32Array.from(array);
+
+      if (gltfAccessor.normalized) {
+        switch (gltfAccessor.componentType) {
+          case GLTF.COMPONENT_TYPE.BYTE:
+            return Float32Array.from(array, _value => Math.max(_value / 127, -1));
+          case GLTF.COMPONENT_TYPE.UNSIGNED_BYTE:
+            return Float32Array.from(array, _value => _value / 255);
+          case GLTF.COMPONENT_TYPE.SHORT:
+            return Float32Array.from(array, _value => Math.max(_value / 32767, -1));
+          case GLTF.COMPONENT_TYPE.UNSIGNED_SHORT:
+            return Float32Array.from(array, _value => _value / 65535);
+          default:
+            throw new Error(`${GLTFLoader.name}: Invalid component type ${GLTF.COMPONENT_TYPE[gltfAccessor.componentType]} for normalized accessor.`);
+          // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_accessor_normalized
+        }
       }
+
+      console.warn(`${GLTFLoader.name}: Expected component type FLOAT but was ${GLTF.COMPONENT_TYPE[gltfAccessor?.componentType]}.`);
+      return Float32Array.from(array);
     }
 
     private async getBufferData(_iAccessor: number): Promise<TypedArray> {
       const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
       if (!gltfAccessor)
-        throw new Error("Couldn't find accessor");
+        throw new Error(`${GLTFLoader.name}: Couldn't find accessor`);
 
-      const gltfBufferView: GLTF.BufferView = this.gltf.bufferViews[gltfAccessor.bufferView];
-      if (!gltfBufferView)
-        throw new Error("Couldn't find buffer view");
+      let array: TypedArray;
+      const componentType: GLTF.COMPONENT_TYPE = gltfAccessor.componentType;
+      const accessorType: GLTF.ACCESSOR_TYPE = gltfAccessor.type;
 
-      const buffer: ArrayBuffer = await this.getBuffer(gltfBufferView.buffer);;
-      const byteOffset: number = (gltfAccessor.byteOffset ?? 0) + (gltfBufferView.byteOffset ?? 0);
-      const byteLength: number = gltfBufferView.byteLength || 0;
+      if (gltfAccessor.bufferView != undefined)
+        array = await this.getBufferViewData(this.gltf.bufferViews[gltfAccessor.bufferView], gltfAccessor.byteOffset, componentType, accessorType);
 
-      switch (gltfAccessor.componentType) {
-        case GLTF.COMPONENT_TYPE.UNSIGNED_BYTE:
-          return new Uint8Array(buffer, byteOffset, byteLength / Uint8Array.BYTES_PER_ELEMENT);
+      if (gltfAccessor.sparse) {
+        const gltfBufferViewIndices: GLTF.BufferView = this.gltf.bufferViews[gltfAccessor.sparse.indices.bufferView];
+        const gltfBufferViewValues: GLTF.BufferView = this.gltf.bufferViews[gltfAccessor.sparse.values.bufferView];
 
-        case GLTF.COMPONENT_TYPE.BYTE:
-          return new Int8Array(buffer, byteOffset, byteLength / Int8Array.BYTES_PER_ELEMENT);
+        if (!gltfBufferViewIndices || !gltfBufferViewValues)
+          throw new Error(`${GLTFLoader.name}: Couldn't find buffer views for sparse indices or values`);
 
-        case GLTF.COMPONENT_TYPE.UNSIGNED_SHORT:
-          return new Uint16Array(buffer, byteOffset, byteLength / Uint16Array.BYTES_PER_ELEMENT);
+        const arrayIndices: TypedArray = await this.getBufferViewData(gltfBufferViewIndices, gltfAccessor.sparse.indices.byteOffset, gltfAccessor.sparse.indices.componentType, GLTF.ACCESSOR_TYPE.SCALAR);
+        const arrayValues: TypedArray = await this.getBufferViewData(gltfBufferViewValues, gltfAccessor.sparse.values.byteOffset, componentType, accessorType);
 
-        case GLTF.COMPONENT_TYPE.SHORT:
-          return new Int16Array(buffer, byteOffset, byteLength / Int16Array.BYTES_PER_ELEMENT);
+        const accessorTypeLength: number = toAccessorTypeLength[gltfAccessor.type];
+        if (gltfAccessor.bufferView == undefined)
+          array = new toArrayConstructor[gltfAccessor.componentType](gltfAccessor.count * accessorTypeLength);
 
-        case GLTF.COMPONENT_TYPE.UNSIGNED_INT:
-          return new Uint32Array(buffer, byteOffset, byteLength / Uint32Array.BYTES_PER_ELEMENT);
-
-        case GLTF.COMPONENT_TYPE.FLOAT:
-          return new Float32Array(buffer, byteOffset, byteLength / Float32Array.BYTES_PER_ELEMENT);
-
-        default:
-          throw new Error(`Unsupported component type: ${gltfAccessor.componentType}.`);
+        for (let i: number = 0; i < gltfAccessor.sparse.count; i++) {
+          array.set(arrayValues.slice(i * accessorTypeLength, (i + 1) * accessorTypeLength), arrayIndices[i] * accessorTypeLength);
+        }
       }
+
+      return array;
+    }
+
+    private async getBufferViewData(_bufferView: GLTF.BufferView, _byteOffset: number, _componentType: GLTF.COMPONENT_TYPE, _accessorType: GLTF.ACCESSOR_TYPE): Promise<TypedArray> {
+      const buffer: ArrayBuffer = await this.getBuffer(_bufferView.buffer);
+      const byteOffset: number = (_bufferView.byteOffset ?? 0) + (_byteOffset ?? 0);
+      const byteLength: number = _bufferView.byteLength ?? 0;
+      const byteStride: number = _bufferView.byteStride;
+      // TODO: handle byteStride
+
+      const arrayConstructor: TypedArrayConstructor = toArrayConstructor[_componentType];
+      const array: TypedArray = new arrayConstructor(buffer, byteOffset, byteLength / arrayConstructor.BYTES_PER_ELEMENT);
+
+      if (byteStride != undefined) {
+        const nComponentsPerElement: number = toAccessorTypeLength[_accessorType]; // amount of components per element of the accessor type, i.e. 3 for VEC3
+        const nElements: number = byteLength / byteStride; // amount of elements, i.e. n*VEC3 
+        const stride: number = byteStride / arrayConstructor.BYTES_PER_ELEMENT;
+        const newArray: TypedArray = new arrayConstructor(nElements * nComponentsPerElement);
+        for (let iNewElement: number = 0; iNewElement < nElements; iNewElement++) {
+          const iElement: number = iNewElement * stride;
+          // TODO: check if loop is faster than set + slice
+          for (let iComponent: number = 0; iComponent < nComponentsPerElement; iComponent++) 
+            newArray[iNewElement * nComponentsPerElement + iComponent] = array[iElement + iComponent];
+          // newArray.set(array.slice(iElement, iElement + nComponentsPerElement), iNewElement * nComponentsPerElement);
+        }
+
+        return newArray;
+      }
+
+      return array;
     }
 
     private async getBuffer(_iBuffer: number): Promise<ArrayBuffer> {
       const gltfBuffer: GLTF.Buffer = this.gltf.buffers[_iBuffer];
       if (!gltfBuffer)
-        throw new Error("Couldn't find buffer");
+        throw new Error(`${GLTFLoader.name}: Couldn't find buffer`);
 
       if (!this.#buffers)
         this.#buffers = [];
@@ -653,6 +703,7 @@ namespace FudgeCore {
     private async getAnimationSequenceVector(_sampler: GLTF.AnimationSampler, _transformationType: GLTF.AnimationChannelTarget["path"]): Promise<AnimationSequenceVector3 | AnimationSequenceVector4> {
       const input: Float32Array = await this.getFloat32Array(_sampler.input);
       const output: Float32Array = await this.getFloat32Array(_sampler.output);
+
       const millisPerSecond: number = 1000;
       const isRotation: boolean = _transformationType == "rotation";
       const vectorLength: number = isRotation ? 4 : 3; // rotation is stored as quaternion
@@ -679,7 +730,6 @@ namespace FudgeCore {
         const iOutputSlopeIn: number = iOutput - vectorLength;
         const iOutputSlopeOut: number = iOutput + vectorLength;
         const time: number = millisPerSecond * input[iInput];
-
 
         if (isRotation) {
           // Take the shortest path between two rotations, i.e. if the dot product is negative then the next quaternion needs to be negated.
@@ -714,7 +764,8 @@ namespace FudgeCore {
   }
 
 
-  type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Float32Array | Float64Array;
+  type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Float32Array;
+  type TypedArrayConstructor = Uint8ArrayConstructor | Uint16ArrayConstructor | Uint32ArrayConstructor | Int8ArrayConstructor | Int16ArrayConstructor | Float32ArrayConstructor;
 
   function toInternInterpolation(_interpolation: GLTF.AnimationSampler["interpolation"]): ANIMATION_INTERPOLATION {
     switch (_interpolation) {
@@ -731,10 +782,31 @@ namespace FudgeCore {
     }
   }
 
-  const toInternTransformation: { [key in GLTF.AnimationChannelTarget["path"]]: string } = {
+  const toInternTransformation: Record<GLTF.AnimationChannelTarget["path"], string> = {
     "translation": "translation",
     "rotation": "rotation",
     "scale": "scaling",
     "weights": "weights"
   };
+
+  // number of components defined by 'type'
+  const toAccessorTypeLength: Record<GLTF.ACCESSOR_TYPE, number> = {
+    "SCALAR": 1,
+    "VEC2": 2,
+    "VEC3": 3,
+    "VEC4": 4,
+    "MAT2": 4,
+    "MAT3": 9,
+    "MAT4": 16
+  };
+
+  const toArrayConstructor: Record<GLTF.COMPONENT_TYPE, TypedArrayConstructor> = {
+    [GLTF.COMPONENT_TYPE.UNSIGNED_BYTE]: Uint8Array,
+    [GLTF.COMPONENT_TYPE.BYTE]: Int8Array,
+    [GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]: Uint16Array,
+    [GLTF.COMPONENT_TYPE.SHORT]: Int16Array,
+    [GLTF.COMPONENT_TYPE.UNSIGNED_INT]: Uint32Array,
+    [GLTF.COMPONENT_TYPE.FLOAT]: Float32Array
+  };
+
 }

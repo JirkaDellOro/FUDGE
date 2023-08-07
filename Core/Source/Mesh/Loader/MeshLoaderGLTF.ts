@@ -4,17 +4,21 @@ namespace FudgeCore {
    * @author Matthias Roming, HFU, 2022-2023
    */
   export class MeshLoaderGLTF extends MeshLoader {
-    public static async load(_mesh: MeshImport | MeshSkin, _data?: { mesh: GLTF.Mesh; iPrimitive: number}): Promise<MeshImport> {
+    public static async load(_mesh: MeshImport | MeshSkin, _data?: { mesh: GLTF.Mesh; iPrimitive: number }): Promise<MeshImport> {
       const loader: GLTFLoader = await GLTFLoader.LOAD(_mesh.url.toString());
       const meshGLTF: GLTF.Mesh = _data.mesh || loader.gltf.meshes.find(_gltfMesh => _gltfMesh.name == _mesh.name);
       const renderMesh: RenderMesh = Reflect.get(_mesh, "renderMesh");
       _mesh.name = _data.mesh.name;
-      Reflect.set(renderMesh, "ƒindices", await loader.getUint16Array(meshGLTF.primitives[_data.iPrimitive].indices));
+      if (meshGLTF.primitives[_data.iPrimitive].indices)
+        Reflect.set(renderMesh, "ƒindices", await loader.getUint16Array(meshGLTF.primitives[_data.iPrimitive].indices));
       Reflect.set(renderMesh, "ƒvertices", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.POSITION));
       if (meshGLTF.primitives[_data.iPrimitive].attributes.NORMAL)
         Reflect.set(renderMesh, "ƒnormalsVertex", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.NORMAL));
       if (meshGLTF.primitives[_data.iPrimitive].attributes.TEXCOORD_0)
         Reflect.set(renderMesh, "ƒtextureUVs", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.TEXCOORD_0));
+      // if (meshGLTF.primitives[_data.iPrimitive].attributes.COLOR_0)
+        // Reflect.set(renderMesh, "ƒcolors", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.COLOR_0));
+      // TODO: check if these lines are needed, also spread operator will cause problems with too many vertices/faces
       _mesh.vertices.push(...getVertices(renderMesh));
       _mesh.faces.push(...getFaces(renderMesh, _mesh.vertices));
       if (_mesh instanceof MeshSkin) {

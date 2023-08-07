@@ -4713,7 +4713,7 @@ declare namespace FudgeCore {
      * Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
      * static LOAD Method. Currently only works with triangulated Meshes
      * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
-     * @todo UVs, Load Materials, Support Quads
+     * @todo Load Materials, Support Quads
      * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Matthias Roming, HFU, 2023
      */
     class MeshLoaderOBJ extends MeshLoader {
@@ -6568,7 +6568,7 @@ declare namespace GLTF {
         /**
          * The indices data type.
          */
-        "componentType": number | number | number | number;
+        "componentType": COMPONENT_TYPE.UNSIGNED_BYTE | COMPONENT_TYPE.UNSIGNED_SHORT | COMPONENT_TYPE.UNSIGNED_INT;
         "extensions"?: any;
         "extras"?: any;
         [k: string]: any;
@@ -6636,7 +6636,7 @@ declare namespace GLTF {
         /**
          * Specifies if the accessor's elements are scalars, vectors, or matrices.
          */
-        "type": "SCALAR" | "VEC2" | "VEC3" | "VEC4" | "MAT2" | "MAT3" | "MAT4";
+        "type": ACCESSOR_TYPE;
         /**
          * Maximum value of each component in this accessor.
          */
@@ -6664,6 +6664,15 @@ declare namespace GLTF {
         UNSIGNED_SHORT = 5123,
         UNSIGNED_INT = 5125,
         FLOAT = 5126
+    }
+    enum ACCESSOR_TYPE {
+        SCALAR = "SCALAR",
+        VEC2 = "VEC2",
+        VEC3 = "VEC3",
+        VEC4 = "VEC4",
+        MAT2 = "MAT2",
+        MAT3 = "MAT3",
+        MAT4 = "MAT4"
     }
     /**
      * The descriptor of the animated property.
@@ -7348,6 +7357,7 @@ declare namespace FudgeCore {
          */
         getSkeletonByIndex(_iSkeleton: number): Promise<Skeleton>;
         private getBufferData;
+        private getBufferViewData;
         private getBuffer;
         private getAnimationSequenceVector;
     }

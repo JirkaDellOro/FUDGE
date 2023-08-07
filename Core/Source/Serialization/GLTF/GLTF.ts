@@ -15,7 +15,7 @@ namespace GLTF {
     /**
      * The indices data type.
      */
-    "componentType": number | number | number | number;
+    "componentType": COMPONENT_TYPE.UNSIGNED_BYTE | COMPONENT_TYPE.UNSIGNED_SHORT | COMPONENT_TYPE.UNSIGNED_INT;
     "extensions"?: any;
     "extras"?: any;
     [k: string]: any;
@@ -83,7 +83,7 @@ namespace GLTF {
     /**
      * Specifies if the accessor's elements are scalars, vectors, or matrices.
      */
-    "type": "SCALAR" | "VEC2" | "VEC3" | "VEC4" | "MAT2" | "MAT3" | "MAT4";
+    "type": ACCESSOR_TYPE;
     /**
      * Maximum value of each component in this accessor.
      */
@@ -112,6 +112,16 @@ namespace GLTF {
     UNSIGNED_SHORT = 5123,
     UNSIGNED_INT = 5125,
     FLOAT = 5126
+  }
+
+  export enum ACCESSOR_TYPE {
+    SCALAR = "SCALAR",
+    VEC2 = "VEC2",
+    VEC3 = "VEC3",
+    VEC4 = "VEC4",
+    MAT2 = "MAT2",
+    MAT3 = "MAT3",
+    MAT4 = "MAT4"
   }
 
   /**
