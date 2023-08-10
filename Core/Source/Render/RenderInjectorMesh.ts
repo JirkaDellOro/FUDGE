@@ -32,6 +32,7 @@ namespace FudgeCore {
             indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indicesFlat),
             normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normalsFlat),
             textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVsFlat),
+            colors: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.colors),
             nIndices: this.renderMesh.indicesFlat.length
           };
         return this.renderMesh.flat;
@@ -42,6 +43,7 @@ namespace FudgeCore {
             indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indices),
             normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normalsVertex),
             textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVs),
+            colors: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.colors),
             nIndices: this.renderMesh.indices.length
           };
         return this.renderMesh.smooth;
@@ -88,6 +90,7 @@ namespace FudgeCore {
 
       setBuffer("a_vctPosition", renderBuffers.vertices);
       setBuffer("a_vctNormal", renderBuffers.normals);
+      setBuffer("a_vctColor", renderBuffers.colors);
 
       // feed in texture coordinates if shader accepts a_vctTexture
       let attribute: number = _shader.attributes["a_vctTexture"];

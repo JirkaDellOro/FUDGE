@@ -4640,9 +4640,10 @@ declare namespace FudgeCore {
         position: Vector3;
         uv: Vector2;
         normal: Vector3;
+        color: Color;
         referTo: number;
         bones: Bone[];
-        constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3);
+        constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3, _color?: Color);
     }
 }
 declare namespace FudgeCore {
@@ -5843,6 +5844,7 @@ declare namespace FudgeCore {
         indices?: WebGLBuffer;
         textureUVs?: WebGLBuffer;
         normals?: WebGLBuffer;
+        colors?: WebGLBuffer;
         iBones?: WebGLBuffer;
         weights?: WebGLBuffer;
         mtxBones?: WebGLBuffer;
@@ -5863,6 +5865,7 @@ declare namespace FudgeCore {
         protected ƒtextureUVs: Float32Array;
         /** vertex normals for smooth shading, interpolated between vertices during rendering */
         protected ƒnormalsVertex: Float32Array;
+        protected ƒcolors: Float32Array;
         /** bones */
         protected ƒiBones: Uint8Array;
         protected ƒweights: Float32Array;
@@ -5884,6 +5887,7 @@ declare namespace FudgeCore {
         get indices(): Uint16Array;
         get normalsVertex(): Float32Array;
         get textureUVs(): Float32Array;
+        get colors(): Float32Array;
         get verticesFlat(): Float32Array;
         get indicesFlat(): Uint16Array;
         get normalsFlat(): Float32Array;

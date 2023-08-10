@@ -560,7 +560,7 @@ namespace FudgeCore {
      * Returns a {@link Uint16Array} for the given accessor index. Only used to get the vertex indices.
      * @internal
      */
-    public async getUint16Array(_iAccessor: number): Promise<Uint16Array> {
+    public async getVertexIndices(_iAccessor: number): Promise<Uint16Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
       const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
 
@@ -576,20 +576,6 @@ namespace FudgeCore {
       console.warn(`Expected component type UNSIGNED_SHORT but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
       return Uint16Array.from(array);
     }
-
-    /**
-     * Returns a {@link Uint32Array} for the given accessor index.
-     * @internal
-     */
-    // public async getUint32Array(_iAccessor: number): Promise<Uint32Array> {
-    //   const array: TypedArray = await this.getBufferData(_iAccessor);
-    //   if (this.gltf.accessors[_iAccessor]?.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_INT)
-    //     return array as Uint32Array;
-    //   else {
-    //     console.warn(`Expected component type UNSIGNED_INT but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
-    //     return Uint32Array.from(array);
-    //   }
-    // }
 
     /**
      * Returns a {@link Float32Array} for the given accessor index.
@@ -620,6 +606,28 @@ namespace FudgeCore {
 
       console.warn(`${GLTFLoader.name}: Expected component type FLOAT but was ${GLTF.COMPONENT_TYPE[gltfAccessor?.componentType]}.`);
       return Float32Array.from(array);
+    }
+
+    /**
+     * Return a {@link Float32Array} for the given accessor index. The array contains the vertex colors in RGBA format.
+     * @internal
+     */
+    public async getVertexColors(_iAccessor: number): Promise<Float32Array> {
+      const array: Float32Array = await this.getFloat32Array(_iAccessor);
+      const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
+
+      if (gltfAccessor.type == GLTF.ACCESSOR_TYPE.VEC3) {
+        const rgbaArray: Float32Array = new Float32Array(array.length * 4 / 3);
+        for (let i: number = 0; i < array.length; i += 3) {
+          rgbaArray[i] = array[i];
+          rgbaArray[i + 1] = array[i + 1];
+          rgbaArray[i + 2] = array[i + 2];
+          rgbaArray[i + 3] = 1;
+        }
+        return rgbaArray;
+      }
+
+      return array;
     }
 
     private async getBufferData(_iAccessor: number): Promise<TypedArray> {
@@ -667,6 +675,7 @@ namespace FudgeCore {
       const array: TypedArray = new arrayConstructor(buffer, byteOffset, byteLength / arrayConstructor.BYTES_PER_ELEMENT);
 
       if (byteStride != undefined) {
+        // TODO: instead of creating new buffers maybe rather pass stride into the render mesh? and set it when data is passed to the gpu?
         const nComponentsPerElement: number = toAccessorTypeLength[_accessorType]; // amount of components per element of the accessor type, i.e. 3 for VEC3
         const nElements: number = byteLength / byteStride; // amount of elements, i.e. n*VEC3 
         const stride: number = byteStride / arrayConstructor.BYTES_PER_ELEMENT;

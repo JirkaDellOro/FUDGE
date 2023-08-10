@@ -233,7 +233,7 @@ void main() {
   shaderSources["ShaderUniversal.vert"] = /*glsl*/ `#version 300 es
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
+* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2023
 */
 
 precision mediump float;
@@ -242,6 +242,8 @@ precision highp int;
   // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxMeshToView;
 in vec3 a_vctPosition;
+// TODO: think about making vertex color optional
+in vec4 a_vctColor;
 
   // PARTICLE: offer buffer and functionality for in shader position calculation
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
@@ -337,8 +339,7 @@ layout (std140) uniform Skin {
   // FLAT: outbuffer is flat
   #if defined(FLAT)
 flat out vec4 v_vctColor;
-  #elif defined(LIGHT) || defined(PARTICLE)
-  // regular if not FLAT
+  #else
 out vec4 v_vctColor;
   #endif
 
@@ -492,6 +493,7 @@ void main() {
   v_vctTexture = 0.5 * vctReflection.xy + 0.5;
     #endif
 
+  v_vctColor *= a_vctColor;
     #if defined(PARTICLE_COLOR)
   vec4 vctParticleColor = /*$color*/;
       #if defined(LIGHT)

@@ -5,6 +5,7 @@ namespace FudgeCore {
     indices?: WebGLBuffer;
     textureUVs?: WebGLBuffer;
     normals?: WebGLBuffer;
+    colors?: WebGLBuffer;
     iBones?: WebGLBuffer;
     weights?: WebGLBuffer;
     mtxBones?: WebGLBuffer;
@@ -27,6 +28,8 @@ namespace FudgeCore {
     protected ƒtextureUVs: Float32Array;
     /** vertex normals for smooth shading, interpolated between vertices during rendering */
     protected ƒnormalsVertex: Float32Array;
+    /* colors */
+    protected ƒcolors: Float32Array;
     /** bones */
     protected ƒiBones: Uint8Array;
     protected ƒweights: Float32Array;
@@ -118,6 +121,13 @@ namespace FudgeCore {
         ));
     }
 
+    public get colors(): Float32Array {
+      return this.ƒcolors || (
+        this.ƒcolors = new Float32Array(this.mesh.vertices
+          .filter(_vertex => _vertex.color)
+          .flatMap(_vertex => [..._vertex.color.getArray()])
+        ));
+    }
 
     public get verticesFlat(): Float32Array {
       return this.ƒverticesFlat || (this.ƒverticesFlat = this.createVerticesFlat());

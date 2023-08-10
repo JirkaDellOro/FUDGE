@@ -15,10 +15,11 @@ namespace FudgeCore {
     public position: Vector3;
     public uv: Vector2;
     public normal: Vector3;
+    public color: Color;
     public referTo: number;
     public bones: Bone[];
 
-    public constructor(_positionOrIndex: Vector3 | number, _uv: Vector2 = null, _normal: Vector3 = Vector3.ZERO()) {
+    public constructor(_positionOrIndex: Vector3 | number, _uv: Vector2 = null, _normal: Vector3 = Vector3.ZERO(), _color: Color = new Color(1, 1, 1, 1)) {
       if (_positionOrIndex instanceof Vector3)
         this.position = _positionOrIndex;
       else
@@ -26,6 +27,7 @@ namespace FudgeCore {
 
       this.uv = _uv;
       this.normal = _normal;
+      this.color = _color;
     }
   }
 }
