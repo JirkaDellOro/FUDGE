@@ -110,7 +110,7 @@ namespace FudgeCore {
     public async getScene(_name?: string): Promise<GraphInstance> {
       const iScene: number = _name ? this.gltf.scenes.findIndex(_scene => _scene.name == _name) : this.gltf.scene;
       if (iScene == -1)
-        throw new Error(`${GLTFLoader.name}: Couldn't find name ${_name} in gltf scenes.`);
+        throw new Error(`${this}: Couldn't find name ${_name} in gltf scenes.`);
       return await this.getSceneByIndex(iScene);
     }
 
@@ -141,7 +141,7 @@ namespace FudgeCore {
     public async getNode(_name: string): Promise<Node> {
       const iNode: number = this.gltf.nodes.findIndex(_node => _node.name == _name);
       if (iNode == -1)
-        throw new Error(`${GLTFLoader.name}: Couldn't find name ${_name} in gltf nodes.`);
+        throw new Error(`${this}: Couldn't find name ${_name} in gltf nodes.`);
       return await this.getNodeByIndex(iNode);
     }
 
@@ -255,7 +255,7 @@ namespace FudgeCore {
           node.addComponent(cmpMesh);
 
           if (gltfMesh.primitives.length > 1)
-            Debug.warn(`Node ${gltfNode.name} has a mesh with more than one primitive attached to it. FUDGE currently only supports one primitive per mesh.`);
+            Debug.warn(`${this}: Node ${gltfNode.name} has a mesh with more than one primitive attached to it. FUDGE currently only supports one primitive per mesh.`);
 
           const isSkin: boolean = cmpMesh.mesh instanceof MeshSkin;
           const iMaterial: number = gltfMesh.primitives?.[0]?.material;
@@ -280,7 +280,7 @@ namespace FudgeCore {
     public async getCamera(_name: string): Promise<ComponentCamera> {
       const iCamera: number = this.gltf.cameras.findIndex(_camera => _camera.name == _name);
       if (iCamera == -1)
-        throw new Error(`${GLTFLoader.name}: Couldn't find name ${_name} in gltf cameras.`);
+        throw new Error(`${this}: Couldn't find name ${_name} in gltf cameras.`);
       return await this.getCameraByIndex(iCamera);
     }
 
@@ -321,7 +321,7 @@ namespace FudgeCore {
     public async getAnimation(_name: string): Promise<Animation> {
       const iAnimation: number = this.gltf.animations.findIndex(_animation => _animation.name == _name);
       if (iAnimation == -1)
-        throw new Error(`${GLTFLoader.name}: Couldn't find name ${_name} in gltf animations.`);
+        throw new Error(`${this}: Couldn't find name ${_name} in gltf animations.`);
       return await this.getAnimationByIndex(iAnimation);
     }
 
@@ -335,7 +335,7 @@ namespace FudgeCore {
         const gltfAnimation: GLTF.Animation = this.gltf.animations?.[_iAnimation];
 
         if (!gltfAnimation)
-          throw new Error(`${GLTFLoader.name}: Couldn't find animation with index ${_iAnimation}.`);
+          throw new Error(`${this}: Couldn't find animation with index ${_iAnimation}.`);
 
         // group channels by node
         let gltfChannelsGrouped: GLTF.AnimationChannel[][] = [];
@@ -402,7 +402,7 @@ namespace FudgeCore {
     public async getMesh(_name: string): Promise<MeshImport> {
       const iMesh: number = this.gltf.meshes.findIndex(_mesh => _mesh.name == _name);
       if (iMesh == -1)
-        throw new Error(`${GLTFLoader.name}: Couldn't find name ${_name} in gltf meshes.`);
+        throw new Error(`${this}: Couldn't find name ${_name} in gltf meshes.`);
       return await this.getMeshByIndex(iMesh);
     }
 
@@ -414,6 +414,15 @@ namespace FudgeCore {
         this.#meshes = [];
       if (!this.#meshes[_iMesh + _iPrimitive]) {
         const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
+        // TODO: support multiple primitives per mesh
+
+        const gltfPrimitive: GLTF.MeshPrimitive = gltfMesh.primitives[_iPrimitive];
+        if (gltfPrimitive.indices == undefined)
+          Debug.warn(`${this}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has no indices. FUDGE does not support non-indexed meshes.`);
+
+        if (gltfPrimitive.mode != undefined && gltfPrimitive.mode != GLTF.MESH_PRIMITIVE_MODE.TRIANGLES)
+          Debug.warn(`${this}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has topology type mode ${GLTF.MESH_PRIMITIVE_MODE[gltfPrimitive.mode]}. FUDGE only supports ${GLTF.MESH_PRIMITIVE_MODE[4]}.`);
+
         this.#meshes[_iMesh + _iPrimitive] = await (
           gltfMesh.primitives[_iPrimitive].attributes.JOINTS_0 != undefined ?
             new MeshSkin() :
@@ -432,6 +441,12 @@ namespace FudgeCore {
       if (!this.#materials[_iMaterial]) {
         // TODO: in the future create an appropriate shader based on the gltf material properties
         const gltfMaterial: GLTF.Material = this.gltf.materials[_iMaterial];
+
+        if (!gltfMaterial)
+          throw new Error(`${this}: Couldn't find material with index ${_iMaterial}.`);
+
+        // TODO: add support for other gltf material properties: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#reference-material
+        // e.g. normal, occlusion and emissive textures; alphaMode; alphaCutoff; doubleSided
         const gltfBaseColorTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
 
         const color: Color = new Color(...gltfMaterial.pbrMetallicRoughness?.baseColorFactor || [1, 1, 1, 1]); // TODO: check if phong shader should multiply baseColorTexture values with baseColorFactor
@@ -461,10 +476,17 @@ namespace FudgeCore {
       if (!this.#textures[_iTexture]) {
         const gltfTexture: GLTF.Texture = this.gltf.textures[_iTexture];
         const gltfSampler: GLTF.Sampler = this.gltf.samplers?.[gltfTexture.sampler];
-        const gltfImage: GLTF.Image = this.gltf.images[gltfTexture.source];
+        const gltfImage: GLTF.Image = this.gltf.images?.[gltfTexture.source];
 
-        if (gltfSampler && (gltfSampler.wrapS != undefined || gltfSampler.wrapT != undefined))
-          console.warn(`${GLTFLoader.name}: Texture ${_iTexture} in '${this.url}' has a wrapS and wrapT of '${getWebGLParameterName(gltfSampler.wrapS)}' and '${getWebGLParameterName(gltfSampler.wrapT)}' respectively. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`);
+        if (gltfImage == undefined) {
+          Debug.warn(`${this}: Texture with index ${_iTexture} has no image.`);
+          return TextureDefault.texture;
+        }
+
+        if (gltfSampler?.wrapS != undefined && gltfSampler?.wrapS != WebGL2RenderingContext.REPEAT)
+          Debug.warn(`${this}: Texture with index ${_iTexture} has a wrapS of '${getWebGLParameterName(gltfSampler.wrapS)}'. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`);
+        if (gltfSampler?.wrapT != undefined && gltfSampler?.wrapT != WebGL2RenderingContext.REPEAT)
+          Debug.warn(`${this}: Texture with index ${_iTexture} has a wrapT of '${getWebGLParameterName(gltfSampler.wrapT)}'. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`);
 
         let url: string = new URL(gltfImage.uri, this.url).toString();
 
@@ -490,8 +512,8 @@ namespace FudgeCore {
           texture.mipmap = MIPMAP.MEDIUM;
         else if (gltfSampler && gltfSampler.magFilter == WebGL2RenderingContext.LINEAR && gltfSampler.minFilter == WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR)
           texture.mipmap = MIPMAP.BLURRY;
-        else if (gltfSampler && gltfSampler.magFilter != undefined && gltfSampler.minFilter != undefined)
-          throw new Error(`${GLTFLoader.name}: Texture ${_iTexture} in '${this.url}' has a magFilter and minFilter of '${getWebGLParameterName(gltfSampler.magFilter)}' and '${getWebGLParameterName(gltfSampler.minFilter)}' respectively. FUDGE only supports the following combinations: NEAREST and NEAREST | NEAREST and NEAREST_MIPMAP_LINEAR | LINEAR and LINEAR_MIPMAP_LINEAR.`);
+        else if (gltfSampler && (gltfSampler.magFilter != undefined || gltfSampler.minFilter != undefined))
+          Debug.warn(`${this}: Texture with index ${_iTexture} has a magFilter and minFilter of '${getWebGLParameterName(gltfSampler.magFilter)}' and '${getWebGLParameterName(gltfSampler.minFilter)}' respectively. FUDGE only supports the following combinations: NEAREST and NEAREST | NEAREST and NEAREST_MIPMAP_LINEAR | LINEAR and LINEAR_MIPMAP_LINEAR.`);
 
         this.#textures[_iTexture] = texture;
       }
@@ -505,7 +527,7 @@ namespace FudgeCore {
     public async getSkeleton(_name: string): Promise<Skeleton> {
       const iSkeleton: number = this.gltf.skins.findIndex(_skeleton => _skeleton.name == _name);
       if (iSkeleton == -1)
-        throw new Error(`${GLTFLoader.name}: Couldn't find name ${_name} in gltf skins.`);
+        throw new Error(`${this}: Couldn't find name ${_name} in gltf skins.`);
       return await this.getSkeletonByIndex(iSkeleton);
     }
 
@@ -551,30 +573,9 @@ namespace FudgeCore {
       if (this.gltf.accessors[_iAccessor]?.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE)
         return array as Uint8Array;
       else {
-        console.warn(`Expected component type UNSIGNED_BYTE but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+        Debug.warn(`${this}: Expected component type UNSIGNED_BYTE but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
         return Uint8Array.from(array);
       }
-    }
-
-    /**
-     * Returns a {@link Uint16Array} for the given accessor index. Only used to get the vertex indices.
-     * @internal
-     */
-    public async getVertexIndices(_iAccessor: number): Promise<Uint16Array> {
-      const array: TypedArray = await this.getBufferData(_iAccessor);
-      const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
-
-      if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_SHORT)
-        return array as Uint16Array;
-
-      if (gltfAccessor.count > 65535 && gltfAccessor.type == "SCALAR")
-        throw new Error(`${GLTFLoader.name}: The vertex indices array has more than 65535 vertices. FUDGE does not support meshes with more than 65535 vertices.`);
-
-      if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE || gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_INT)
-        return Uint16Array.from(array);
-
-      console.warn(`Expected component type UNSIGNED_SHORT but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
-      return Uint16Array.from(array);
     }
 
     /**
@@ -599,13 +600,34 @@ namespace FudgeCore {
           case GLTF.COMPONENT_TYPE.UNSIGNED_SHORT:
             return Float32Array.from(array, _value => _value / 65535);
           default:
-            throw new Error(`${GLTFLoader.name}: Invalid component type ${GLTF.COMPONENT_TYPE[gltfAccessor.componentType]} for normalized accessor.`);
+            throw new Error(`${this}: Invalid component type ${GLTF.COMPONENT_TYPE[gltfAccessor.componentType]} for normalized accessor.`);
           // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_accessor_normalized
         }
       }
 
-      console.warn(`${GLTFLoader.name}: Expected component type FLOAT but was ${GLTF.COMPONENT_TYPE[gltfAccessor?.componentType]}.`);
+      Debug.warn(`${this}: Expected component type FLOAT but was ${GLTF.COMPONENT_TYPE[gltfAccessor?.componentType]}.`);
       return Float32Array.from(array);
+    }
+
+    /**
+     * Returns a {@link Uint16Array} for the given accessor index. Only used to get the vertex indices.
+     * @internal
+     */
+    public async getVertexIndices(_iAccessor: number): Promise<Uint16Array> {
+      const array: TypedArray = await this.getBufferData(_iAccessor);
+      const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
+
+      if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_SHORT)
+        return array as Uint16Array;
+
+      if (gltfAccessor.count > 65535 && gltfAccessor.type == "SCALAR")
+        throw new Error(`${this}: File includes a mesh with more than 65535 vertices. FUDGE does not support meshes with more than 65535 vertices.`);
+
+      if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE || gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_INT)
+        return Uint16Array.from(array);
+
+      Debug.warn(`${this}: Expected component type UNSIGNED_SHORT but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+      return Uint16Array.from(array);
     }
 
     /**
@@ -630,10 +652,14 @@ namespace FudgeCore {
       return array;
     }
 
+    public toString(): string {
+      return `${GLTFLoader.name} | ${this.url}`;
+    }
+
     private async getBufferData(_iAccessor: number): Promise<TypedArray> {
       const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
       if (!gltfAccessor)
-        throw new Error(`${GLTFLoader.name}: Couldn't find accessor`);
+        throw new Error(`${this}: Couldn't find accessor`);
 
       let array: TypedArray;
       const componentType: GLTF.COMPONENT_TYPE = gltfAccessor.componentType;
@@ -647,7 +673,7 @@ namespace FudgeCore {
         const gltfBufferViewValues: GLTF.BufferView = this.gltf.bufferViews[gltfAccessor.sparse.values.bufferView];
 
         if (!gltfBufferViewIndices || !gltfBufferViewValues)
-          throw new Error(`${GLTFLoader.name}: Couldn't find buffer views for sparse indices or values`);
+          throw new Error(`${this}: Couldn't find buffer views for sparse indices or values`);
 
         const arrayIndices: TypedArray = await this.getBufferViewData(gltfBufferViewIndices, gltfAccessor.sparse.indices.byteOffset, gltfAccessor.sparse.indices.componentType, GLTF.ACCESSOR_TYPE.SCALAR);
         const arrayValues: TypedArray = await this.getBufferViewData(gltfBufferViewValues, gltfAccessor.sparse.values.byteOffset, componentType, accessorType);
@@ -669,7 +695,6 @@ namespace FudgeCore {
       const byteOffset: number = (_bufferView.byteOffset ?? 0) + (_byteOffset ?? 0);
       const byteLength: number = _bufferView.byteLength ?? 0;
       const byteStride: number = _bufferView.byteStride;
-      // TODO: handle byteStride
 
       const arrayConstructor: TypedArrayConstructor = toArrayConstructor[_componentType];
       const array: TypedArray = new arrayConstructor(buffer, byteOffset, byteLength / arrayConstructor.BYTES_PER_ELEMENT);
@@ -683,7 +708,7 @@ namespace FudgeCore {
         for (let iNewElement: number = 0; iNewElement < nElements; iNewElement++) {
           const iElement: number = iNewElement * stride;
           // TODO: check if loop is faster than set + slice
-          for (let iComponent: number = 0; iComponent < nComponentsPerElement; iComponent++) 
+          for (let iComponent: number = 0; iComponent < nComponentsPerElement; iComponent++)
             newArray[iNewElement * nComponentsPerElement + iComponent] = array[iElement + iComponent];
           // newArray.set(array.slice(iElement, iElement + nComponentsPerElement), iNewElement * nComponentsPerElement);
         }
@@ -697,7 +722,7 @@ namespace FudgeCore {
     private async getBuffer(_iBuffer: number): Promise<ArrayBuffer> {
       const gltfBuffer: GLTF.Buffer = this.gltf.buffers[_iBuffer];
       if (!gltfBuffer)
-        throw new Error(`${GLTFLoader.name}: Couldn't find buffer`);
+        throw new Error(`${this}: Couldn't find buffer`);
 
       if (!this.#buffers)
         this.#buffers = [];
@@ -716,7 +741,7 @@ namespace FudgeCore {
       const millisPerSecond: number = 1000;
       const isRotation: boolean = _transformationType == "rotation";
       const vectorLength: number = isRotation ? 4 : 3; // rotation is stored as quaternion
-      const interpolation: ANIMATION_INTERPOLATION = toInternInterpolation(_sampler.interpolation);
+      const interpolation: ANIMATION_INTERPOLATION = this.toInternInterpolation(_sampler.interpolation);
       const isCubic: true | undefined = interpolation == ANIMATION_INTERPOLATION.CUBIC ? true : undefined;
       const vectorsPerInput: number = isCubic ? 3 : 1; // cubic interpolation uses 3 values per input: in-tangent, property value and out-tangent. https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#interpolation-cubic
 
@@ -766,30 +791,29 @@ namespace FudgeCore {
 
       return sequenceVector;
     }
+
+    private toInternInterpolation(_interpolation: GLTF.AnimationSampler["interpolation"]): ANIMATION_INTERPOLATION {
+      switch (_interpolation) {
+        case "LINEAR":
+          return ANIMATION_INTERPOLATION.LINEAR;
+        case "STEP":
+          return ANIMATION_INTERPOLATION.CONSTANT;
+        case "CUBICSPLINE":
+          return ANIMATION_INTERPOLATION.CUBIC;
+        default:
+          if (_interpolation != undefined)
+            Debug.warn(`${this}: Unknown interpolation type ${_interpolation}`);
+          return ANIMATION_INTERPOLATION.LINEAR;
+      }
+    }
   }
 
   function getWebGLParameterName(_value: number): string {
     return Object.keys(WebGL2RenderingContext).find(_key => Reflect.get(WebGL2RenderingContext, _key) == _value);
   }
 
-
   type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Float32Array;
   type TypedArrayConstructor = Uint8ArrayConstructor | Uint16ArrayConstructor | Uint32ArrayConstructor | Int8ArrayConstructor | Int16ArrayConstructor | Float32ArrayConstructor;
-
-  function toInternInterpolation(_interpolation: GLTF.AnimationSampler["interpolation"]): ANIMATION_INTERPOLATION {
-    switch (_interpolation) {
-      case "LINEAR":
-        return ANIMATION_INTERPOLATION.LINEAR;
-      case "STEP":
-        return ANIMATION_INTERPOLATION.CONSTANT;
-      case "CUBICSPLINE":
-        return ANIMATION_INTERPOLATION.CUBIC;
-      default:
-        if (_interpolation != undefined)
-          Debug.warn(`${GLTFLoader.name}: Unknown interpolation type ${_interpolation}`);
-        return ANIMATION_INTERPOLATION.LINEAR;
-    }
-  }
 
   const toInternTransformation: Record<GLTF.AnimationChannelTarget["path"], string> = {
     "translation": "translation",

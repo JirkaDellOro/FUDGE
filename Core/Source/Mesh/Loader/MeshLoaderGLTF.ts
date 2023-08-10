@@ -9,15 +9,27 @@ namespace FudgeCore {
       const meshGLTF: GLTF.Mesh = _data.mesh || loader.gltf.meshes.find(_gltfMesh => _gltfMesh.name == _mesh.name);
       const renderMesh: RenderMesh = Reflect.get(_mesh, "renderMesh");
       _mesh.name = _data.mesh.name;
+
       if (meshGLTF.primitives[_data.iPrimitive].indices)
         Reflect.set(renderMesh, "ƒindices", await loader.getVertexIndices(meshGLTF.primitives[_data.iPrimitive].indices));
+
       Reflect.set(renderMesh, "ƒvertices", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.POSITION));
+
       if (meshGLTF.primitives[_data.iPrimitive].attributes.NORMAL)
         Reflect.set(renderMesh, "ƒnormalsVertex", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.NORMAL));
+
+      // TODO: add tangents to RenderMesh
+      // if (meshGLTF.primitives[_data.iPrimitive].attributes.TANGENT)
+      //   Reflect.set(renderMesh, "ƒtangents", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.TANGENT));
+
       if (meshGLTF.primitives[_data.iPrimitive].attributes.TEXCOORD_0)
         Reflect.set(renderMesh, "ƒtextureUVs", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.TEXCOORD_0));
+
       if (meshGLTF.primitives[_data.iPrimitive].attributes.COLOR_0)
         Reflect.set(renderMesh, "ƒcolors", await loader.getVertexColors(meshGLTF.primitives[_data.iPrimitive].attributes.COLOR_0));
+      else
+        Reflect.set(renderMesh, "ƒcolors", new Float32Array(renderMesh.vertices.length * 4).fill(1));
+      
       // TODO: check if these lines are needed, also spread operator will cause problems with too many vertices/faces
       // _mesh.vertices.push(...getVertices(renderMesh));
       // _mesh.faces.push(...getFaces(renderMesh, _mesh.vertices));
@@ -47,6 +59,12 @@ namespace FudgeCore {
   //         _renderMesh.normalsVertex[iVertex + 0],
   //         _renderMesh.normalsVertex[iVertex + 1],
   //         _renderMesh.normalsVertex[iVertex + 2]
+  //       ),
+  //       new Color(
+  //         _renderMesh.colors[iVertex + 0],
+  //         _renderMesh.colors[iVertex + 1],
+  //         _renderMesh.colors[iVertex + 2],
+  //         _renderMesh.colors[iVertex + 3]
   //       )
   //     );
   //   }

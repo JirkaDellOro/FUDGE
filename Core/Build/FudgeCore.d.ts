@@ -7003,7 +7003,7 @@ declare namespace GLTF {
         /**
          * The alpha rendering mode of the material.
          */
-        "alphaMode"?: any | any | any | string;
+        "alphaMode"?: "OPAQUE" | "MASK" | "BLEND";
         /**
          * The alpha cutoff value of the material.
          */
@@ -7035,7 +7035,7 @@ declare namespace GLTF {
         /**
          * The topology type of primitives to render.
          */
-        "mode"?: number | number | number | number | number | number | number | number;
+        "mode"?: MESH_PRIMITIVE_MODE;
         /**
          * An array of morph targets.
          */
@@ -7045,6 +7045,15 @@ declare namespace GLTF {
         "extensions"?: any;
         "extras"?: any;
         [k: string]: any;
+    }
+    enum MESH_PRIMITIVE_MODE {
+        POINTS = 0,
+        LINES = 1,
+        LINE_LOOP = 2,
+        LINE_STRIP = 3,
+        TRIANGLES = 4,
+        TRIANGLE_STRIP = 5,
+        TRIANGLE_FAN = 6
     }
     /**
      * A set of primitives to be rendered.  Its global transform is defined by a node that references it.
@@ -7360,10 +7369,12 @@ declare namespace FudgeCore {
          * Returns the {@link Skeleton} for the given skeleton index.
          */
         getSkeletonByIndex(_iSkeleton: number): Promise<Skeleton>;
+        toString(): string;
         private getBufferData;
         private getBufferViewData;
         private getBuffer;
         private getAnimationSequenceVector;
+        private toInternInterpolation;
     }
 }
 declare namespace FudgeCore {

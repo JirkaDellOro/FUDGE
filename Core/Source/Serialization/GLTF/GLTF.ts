@@ -104,7 +104,7 @@ namespace GLTF {
 
   /**
    * https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#accessor-data-types
-   */ 
+   */
   export enum COMPONENT_TYPE {
     BYTE = 5120,
     UNSIGNED_BYTE = 5121,
@@ -449,7 +449,7 @@ namespace GLTF {
     /**
      * The alpha rendering mode of the material.
      */
-    "alphaMode"?: any | any | any | string;
+    "alphaMode"?: "OPAQUE" | "MASK" | "BLEND";
     /**
      * The alpha cutoff value of the material.
      */
@@ -481,7 +481,7 @@ namespace GLTF {
     /**
      * The topology type of primitives to render.
      */
-    "mode"?: number | number | number | number | number | number | number | number;
+    "mode"?: MESH_PRIMITIVE_MODE;
     /**
      * An array of morph targets.
      */
@@ -492,6 +492,17 @@ namespace GLTF {
     "extras"?: any;
     [k: string]: any;
   }
+
+  export enum MESH_PRIMITIVE_MODE {
+    POINTS,
+    LINES,
+    LINE_LOOP,
+    LINE_STRIP,
+    TRIANGLES,
+    TRIANGLE_STRIP,
+    TRIANGLE_FAN
+  }
+
   /**
    * A set of primitives to be rendered.  Its global transform is defined by a node that references it.
    */
@@ -553,7 +564,7 @@ namespace GLTF {
     "extensions"?: any;
     "extras"?: any;
     [k: string]: any;
-    
+
     /**
      * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
      */
