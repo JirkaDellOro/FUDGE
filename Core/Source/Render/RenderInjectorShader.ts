@@ -66,17 +66,21 @@ namespace FudgeCore {
         this.attributes = detectAttributes();
         this.uniforms = detectUniforms();
 
-        if (!this.define.includes("LIGHT"))
-          return;
+        if (this.define.includes("SKIN")) {
+          const blockIndex: number = crc3.getUniformBlockIndex(program, UNIFORM_BLOCKS.SKIN.NAME);
+          crc3.uniformBlockBinding(program, blockIndex, UNIFORM_BLOCKS.SKIN.BINDING);
+        }
 
-        if (!RenderWebGL.uboLights)
-          RenderWebGL.uboLights = createUBOLights();
-        if (!RenderWebGL.uboLightsVariableOffsets)
-          RenderWebGL.uboLightsVariableOffsets = detectUBOLightsVariableOffsets();
-
-        // bind lights UBO to shader program
-        const blockIndex: number = crc3.getUniformBlockIndex(program, UNIFORM_BLOCKS.LIGHTS.NAME);
-        crc3.uniformBlockBinding(program, blockIndex, UNIFORM_BLOCKS.LIGHTS.BINDING);
+        if (this.define.includes("LIGHT")) {
+          if (!RenderWebGL.uboLights)
+            RenderWebGL.uboLights = createUBOLights();
+          if (!RenderWebGL.uboLightsVariableOffsets)
+            RenderWebGL.uboLightsVariableOffsets = detectUBOLightsVariableOffsets();
+  
+          // bind lights UBO to shader program
+          const blockIndex: number = crc3.getUniformBlockIndex(program, UNIFORM_BLOCKS.LIGHTS.NAME);
+          crc3.uniformBlockBinding(program, blockIndex, UNIFORM_BLOCKS.LIGHTS.BINDING);
+        }
       } catch (_error) {
         Debug.error(_error);
         debugger;
@@ -132,16 +136,12 @@ namespace FudgeCore {
 
       function createUBOLights(): WebGLBuffer {
         const blockIndex: number = crc3.getUniformBlockIndex(program, UNIFORM_BLOCKS.LIGHTS.NAME);
-        const blockSize: number = crc3.getActiveUniformBlockParameter(
-          program,
-          blockIndex,
-          crc3.UNIFORM_BLOCK_DATA_SIZE
-        );
-        const ubo: WebGLBuffer = crc3.createBuffer();
-        crc3.bindBuffer(crc3.UNIFORM_BUFFER, ubo);
-        crc3.bufferData(crc3.UNIFORM_BUFFER, blockSize, crc3.DYNAMIC_DRAW);
-        crc3.bindBuffer(crc3.UNIFORM_BUFFER, null);
-        crc3.bindBufferBase(crc3.UNIFORM_BUFFER, UNIFORM_BLOCKS.LIGHTS.BINDING, ubo);
+        const blockSize: number = crc3.getActiveUniformBlockParameter(program, blockIndex, crc3.UNIFORM_BLOCK_DATA_SIZE);
+        
+        const ubo: WebGLBuffer = RenderWebGL.assert(crc3.createBuffer());
+        crc3.bindBuffer(WebGL2RenderingContext.UNIFORM_BUFFER, ubo);
+        crc3.bufferData(WebGL2RenderingContext.UNIFORM_BUFFER, blockSize, crc3.DYNAMIC_DRAW);
+        crc3.bindBufferBase(WebGL2RenderingContext.UNIFORM_BUFFER, UNIFORM_BLOCKS.LIGHTS.BINDING, ubo);
 
         return ubo;
       }

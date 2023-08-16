@@ -17,7 +17,7 @@ namespace FudgeCore {
     #nodesSkeleton: Node[] = [];
     #cameras: ComponentCamera[];
     #animations: Animation[];
-    #meshes: MeshImport[];
+    #meshes: MeshImport[][];
     #materials: Material[];
     #textures: Texture[];
     #skeletons: Skeleton[];
@@ -90,6 +90,8 @@ namespace FudgeCore {
           gltf.skins?.forEach((_skin, _iSkin) => {
             if (_skin.skeleton == undefined) {
               // find the common root of all joints i.e. the skeleton
+              // TODO: add an error for when there is no common root found, as this is a breach of the gltf specification
+              // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#joint-hierarchy
               const ancestors: Set<number> = new Set<number>(_skin.joints.flatMap(_iJoint => gltf.nodes[_iJoint].path));
               _skin.skeleton = Array.from(ancestors).reduce((_a, _b) => gltf.nodes[_a].depth < gltf.nodes[_b].depth ? _a : _b);
             }
@@ -107,7 +109,7 @@ namespace FudgeCore {
     /**
      * Returns a {@link GraphInstance} for the given scene name or the default scene if no name is given.
      */
-    public async getScene(_name?: string): Promise<GraphInstance> {
+    public async getScene(_name?: string): Promise<Graph> {
       const iScene: number = _name ? this.gltf.scenes.findIndex(_scene => _scene.name == _name) : this.gltf.scene;
       if (iScene == -1)
         throw new Error(`${this}: Couldn't find name ${_name} in gltf scenes.`);
@@ -117,7 +119,7 @@ namespace FudgeCore {
     /**
      * Returns a {@link GraphInstance} for the given scene index or the default scene if no index is given.
      */
-    public async getSceneByIndex(_iScene: number = this.gltf.scene): Promise<GraphInstance> {
+    public async getSceneByIndex(_iScene: number = this.gltf.scene): Promise<Graph> {
       if (!this.#scenes)
         this.#scenes = [];
       if (!this.#scenes[_iScene]) {
@@ -132,7 +134,7 @@ namespace FudgeCore {
         Project.register(scene);
         this.#scenes[_iScene] = scene;
       }
-      return await Project.createGraphInstance(this.#scenes[_iScene]);
+      return this.#scenes[_iScene];
     }
 
     /**
@@ -206,68 +208,68 @@ namespace FudgeCore {
           const gltfMesh: GLTF.Mesh = this.gltf.meshes?.[gltfNode.mesh];
 
 
-          // if (gltfMesh.primitives.length != 1)
-          //   Debug.warn(`Node ${gltfNode.name} has a mesh with more than one primitive attached to it. FUDGE currently only supports one primitive per mesh.`);
+          if (gltfMesh.primitives.length != 1)
+            Debug.warn(`Node ${gltfNode.name} has a mesh with more than one primitive attached to it. FUDGE currently only supports one primitive per mesh.`);
 
-          // const subComponents: [ComponentMesh, ComponentMaterial][] = [];
-          // for (let iPrimitive: number = 0; iPrimitive < gltfMesh.primitives.length; iPrimitive++) {
-          //   const cmpMesh: ComponentMesh = new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh, iPrimitive));
+          const subComponents: [ComponentMesh, ComponentMaterial][] = [];
+          for (let iPrimitive: number = 0; iPrimitive < gltfMesh.primitives.length; iPrimitive++) {
+            const cmpMesh: ComponentMesh = new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh, iPrimitive));
 
-          //   // check for skeleton
-          //   if (gltfNode.skin != undefined) {
-          //     let iSkeletonInstance: number = this.gltf.skins[gltfNode.skin].skeleton;
-          //     cmpMesh.skeleton = <SkeletonInstance>await this.getNodeByIndex(iSkeletonInstance);
-          //   }
+            // check for skeleton
+            if (gltfNode.skin != undefined) {
+              let iSkeletonInstance: number = this.gltf.skins[gltfNode.skin].skeleton;
+              cmpMesh.skeleton = <SkeletonInstance>await this.getNodeByIndex(iSkeletonInstance);
+            }
 
-          //   let cmpMaterial: ComponentMaterial;
-          //   const iMaterial: number = gltfMesh.primitives?.[iPrimitive]?.material;
-          //   if (iMaterial == undefined) {
-          //     cmpMaterial = new ComponentMaterial(cmpMesh.mesh instanceof MeshSkin ?
-          //       GLTFLoader.defaultSkinMaterial :
-          //       GLTFLoader.defaultMaterial);
-          //   } else {
-          //     cmpMaterial = new ComponentMaterial(await this.getMaterialByIndex(iMaterial, cmpMesh.mesh instanceof MeshSkin));
-          //   }
+            let cmpMaterial: ComponentMaterial;
+            const iMaterial: number = gltfMesh.primitives?.[iPrimitive]?.material;
+            if (iMaterial == undefined) {
+              cmpMaterial = new ComponentMaterial(cmpMesh.mesh instanceof MeshSkin ?
+                GLTFLoader.defaultSkinMaterial :
+                GLTFLoader.defaultMaterial);
+            } else {
+              cmpMaterial = new ComponentMaterial(await this.getMaterialByIndex(iMaterial, cmpMesh.mesh instanceof MeshSkin));
+            }
 
-          //   subComponents.push([cmpMesh, cmpMaterial]);
-          // }
-
-          // if (subComponents.length == 1) {
-          //   node.addComponent(subComponents[0][0]);
-          //   node.addComponent(subComponents[0][1]);
-          // } else {
-          //   let i: number = 0;
-          //   for (const [cmpMesh, cmpMaterial] of subComponents) {
-          //     const nodePart: Node = new Node(node.name + "_" + i++);
-          //     nodePart.addComponent(cmpMesh);
-          //     nodePart.addComponent(cmpMaterial);
-          //     node.addChild(nodePart);
-          //   }
-          // }
-
-
-          const cmpMesh: ComponentMesh = new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh, 0));
-          // check for skeleton
-          if (gltfNode.skin != undefined) {
-            let iSkeletonInstance: number = this.gltf.skins[gltfNode.skin].skeleton;
-            cmpMesh.skeleton = <SkeletonInstance>await this.getNodeByIndex(iSkeletonInstance);
+            subComponents.push([cmpMesh, cmpMaterial]);
           }
-          node.addComponent(cmpMesh);
 
-          if (gltfMesh.primitives.length > 1)
-            Debug.warn(`${this}: Node ${gltfNode.name} has a mesh with more than one primitive attached to it. FUDGE currently only supports one primitive per mesh.`);
-
-          const isSkin: boolean = cmpMesh.mesh instanceof MeshSkin;
-          const iMaterial: number = gltfMesh.primitives?.[0]?.material;
-          let material: Material;
-          if (iMaterial == undefined) {
-            material = isSkin ?
-              GLTFLoader.defaultSkinMaterial :
-              GLTFLoader.defaultMaterial;
+          if (subComponents.length == 1) {
+            node.addComponent(subComponents[0][0]);
+            node.addComponent(subComponents[0][1]);
           } else {
-            material = await this.getMaterialByIndex(iMaterial, isSkin);
+            subComponents.forEach(([_cmpMesh, _cmpMaterial], _i) => {
+              const nodePart: Node = new Node(node.name + "_primitive" + _i);
+              nodePart.addComponent(_cmpMesh);
+              nodePart.addComponent(_cmpMaterial);
+              node.addChild(nodePart);
+            });
           }
-          node.addComponent(new ComponentMaterial(material));
+
+
+          // const cmpMesh: ComponentMesh = new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh, 0));
+          // // check for skeleton
+          // if (gltfNode.skin != undefined) {
+          //   let iSkeletonInstance: number = this.gltf.skins[gltfNode.skin].skeleton;
+          //   cmpMesh.skeleton = <SkeletonInstance>await this.getNodeByIndex(iSkeletonInstance);
+          // }
+          // node.addComponent(cmpMesh);
+
+          // if (gltfMesh.primitives.length > 1)
+          //   Debug.warn(`${this}: Node ${gltfNode.name} has a mesh with more than one primitive attached to it. FUDGE currently only supports one primitive per mesh.`);
+
+          // const isSkin: boolean = cmpMesh.mesh instanceof MeshSkin;
+          // const iMaterial: number = gltfMesh.primitives?.[0]?.material;
+          // let material: Material;
+          // if (iMaterial == undefined) {
+          //   material = isSkin ?
+          //     GLTFLoader.defaultSkinMaterial :
+          //     GLTFLoader.defaultMaterial;
+          // } else {
+          //   material = await this.getMaterialByIndex(iMaterial, isSkin);
+          // }
+
+          // node.addComponent(new ComponentMaterial(material));
         }
       }
 
@@ -412,7 +414,11 @@ namespace FudgeCore {
     public async getMeshByIndex(_iMesh: number, _iPrimitive: number = 0): Promise<MeshImport> {
       if (!this.#meshes)
         this.#meshes = [];
-      if (!this.#meshes[_iMesh + _iPrimitive]) {
+      if (!this.#meshes[_iMesh])
+        this.#meshes[_iMesh] = [];
+
+      if (!this.#meshes[_iMesh][_iPrimitive]) {
+        
         const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
         // TODO: support multiple primitives per mesh
 
@@ -423,13 +429,14 @@ namespace FudgeCore {
         if (gltfPrimitive.mode != undefined && gltfPrimitive.mode != GLTF.MESH_PRIMITIVE_MODE.TRIANGLES)
           Debug.warn(`${this}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has topology type mode ${GLTF.MESH_PRIMITIVE_MODE[gltfPrimitive.mode]}. FUDGE only supports ${GLTF.MESH_PRIMITIVE_MODE[4]}.`);
 
-        this.#meshes[_iMesh + _iPrimitive] = await (
+        this.#meshes[_iMesh][_iPrimitive] = await (
           gltfMesh.primitives[_iPrimitive].attributes.JOINTS_0 != undefined ?
             new MeshSkin() :
             new MeshImport()
         ).load(MeshLoaderGLTF, this.url, { mesh: gltfMesh, iPrimitive: _iPrimitive });
       }
-      return this.#meshes[_iMesh + _iPrimitive];
+
+      return this.#meshes[_iMesh][_iPrimitive];
     }
 
     /**
@@ -449,10 +456,10 @@ namespace FudgeCore {
         // e.g. normal, occlusion and emissive textures; alphaMode; alphaCutoff; doubleSided
         const gltfBaseColorTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
 
-        const color: Color = new Color(...gltfMaterial.pbrMetallicRoughness?.baseColorFactor || [1, 1, 1, 1]); // TODO: check if phong shader should multiply baseColorTexture values with baseColorFactor
+        const color: Color = new Color(...gltfMaterial.pbrMetallicRoughness?.baseColorFactor || [1, 1, 1, 1]);
         const coat: Coat = gltfBaseColorTexture ?
-          new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index)) :
-          new CoatRemissive(color);
+          new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index), 0.5, 1) :
+          new CoatRemissive(color, 0.5, 1);
 
         const material: Material = new Material(
           gltfMaterial.name,

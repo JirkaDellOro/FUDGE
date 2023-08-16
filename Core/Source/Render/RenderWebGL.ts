@@ -305,7 +305,7 @@ namespace FudgeCore {
     /**
      * Buffer the data from the lights in the scenegraph into the lights ubo
      */
-    protected static fillLightsUBO(_lights: MapLightTypeToLightList): void {
+    protected static updateLightsUBO(_lights: MapLightTypeToLightList): void {
       if (!RenderWebGL.uboLights)
         return;
 
@@ -327,13 +327,11 @@ namespace FudgeCore {
 
       // fill the buffer with the light data for each light type
       // we are currently doing a maximum of 4 crc3.bufferSubData() calls, but we could do this in one call
-      fillLights(LightDirectional, "u_nLightsDirectional", "u_directional");
-      fillLights(LightPoint, "u_nLightsPoint", "u_point");
-      fillLights(LightSpot, "u_nLightsSpot", "u_spot");
+      updateLights(LightDirectional, "u_nLightsDirectional", "u_directional");
+      updateLights(LightPoint, "u_nLightsPoint", "u_point");
+      updateLights(LightSpot, "u_nLightsSpot", "u_spot");
 
-      RenderWebGL.crc3.bindBuffer(WebGL2RenderingContext.UNIFORM_BUFFER, null);
-
-      function fillLights(_type: TypeOfLight, _uniName: string, _uniStruct: string): void {
+      function updateLights(_type: TypeOfLight, _uniName: string, _uniStruct: string): void {
         const cmpLights: RecycableArray<ComponentLight> = _lights.get(_type);
 
         RenderWebGL.crc3.bufferSubData(
@@ -396,7 +394,10 @@ namespace FudgeCore {
       coat.useRenderData(shader, cmpMaterial);
 
       let mtxMeshToView: Matrix4x4 = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
-      let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
+      let renderBuffers: RenderBuffers = cmpMesh.mesh.useRenderBuffers(shader, cmpMesh.mtxWorld, mtxMeshToView);
+
+      if (cmpMesh.skeleton)
+        cmpMesh.skeleton.useRenderBuffer(shader);
 
       let uniform: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
       if (uniform)
@@ -450,15 +451,5 @@ namespace FudgeCore {
 
       return Matrix4x4.MULTIPLICATION(_mtxWorldToView, _cmpMesh.mtxWorld);
     }
-
-    private static getRenderBuffers(_cmpMesh: ComponentMesh, _shader: ShaderInterface, _mtxMeshToView: Matrix4x4): RenderBuffers {
-      if (_cmpMesh.mesh instanceof MeshSkin && (_shader.define.includes("SKIN")))
-        // TODO: make mesh skin pickable
-        return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton?.mtxBones);
-      else
-        return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView);
-    }
-
-
   }
 }

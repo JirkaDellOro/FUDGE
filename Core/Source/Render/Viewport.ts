@@ -147,10 +147,10 @@ namespace FudgeCore {
       let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
-      this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
+      // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START)); // TODO: these events seem to get fired in Render.prepare aswell, check where the should get fired
       this.adjustFrames();
       Render.prepare(this.#branch, null, mtxRoot);
-      this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
+      // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END)); // TODO: these events seem to get fired in Render.prepare aswell, check where the should get fired
       this.componentsPick = Render.componentsPick;
     }
 

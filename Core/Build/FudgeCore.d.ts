@@ -1156,14 +1156,13 @@ declare namespace FudgeCore {
         /**
          * Buffer the data from the lights in the scenegraph into the lights ubo
          */
-        protected static fillLightsUBO(_lights: MapLightTypeToLightList): void;
+        protected static updateLightsUBO(_lights: MapLightTypeToLightList): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
         protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
         private static calcMeshToView;
-        private static getRenderBuffers;
     }
 }
 declare namespace FudgeCore {
@@ -4536,10 +4535,9 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Mesh influenced by a skeleton and loaded from a file
-     * @author Matthias Roming, HFU, 2022-2023
+     * @authors Matthias Roming, HFU, 2022-2023 | Jonas Plotzky, HFU, 2023
      */
     class MeshSkin extends MeshImport {
-        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -4700,7 +4698,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * gl Transfer Format mesh import
-     * @author Matthias Roming, HFU, 2022-2023
+     * @authors Matthias Roming, HFU, 2022-2023 | Jonas Plotzky, HFU, 2023
      */
     class MeshLoaderGLTF extends MeshLoader {
         static load(_mesh: MeshImport | MeshSkin, _data?: {
@@ -5808,11 +5806,12 @@ declare namespace FudgeCore {
     abstract class Render extends RenderWebGL {
         static rectClip: Rectangle;
         static pickBuffer: Int32Array;
-        static nodesPhysics: RecycableArray<Node>;
-        static componentsPick: RecycableArray<ComponentPick>;
-        static lights: MapLightTypeToLightList;
-        private static nodesSimple;
-        private static nodesAlpha;
+        static readonly nodesPhysics: RecycableArray<Node>;
+        static readonly componentsPick: RecycableArray<ComponentPick>;
+        static readonly lights: MapLightTypeToLightList;
+        private static readonly nodesSimple;
+        private static readonly nodesAlpha;
+        private static readonly skeletons;
         private static timestampUpdate;
         /**
          * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
@@ -5839,6 +5838,8 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+}
+declare namespace FudgeCore {
     interface RenderBuffers {
         vertices?: WebGLBuffer;
         indices?: WebGLBuffer;
@@ -5847,7 +5848,6 @@ declare namespace FudgeCore {
         colors?: WebGLBuffer;
         iBones?: WebGLBuffer;
         weights?: WebGLBuffer;
-        mtxBones?: WebGLBuffer;
         nIndices?: number;
     }
     /**
@@ -7316,11 +7316,11 @@ declare namespace FudgeCore {
         /**
          * Returns a {@link GraphInstance} for the given scene name or the default scene if no name is given.
          */
-        getScene(_name?: string): Promise<GraphInstance>;
+        getScene(_name?: string): Promise<Graph>;
         /**
          * Returns a {@link GraphInstance} for the given scene index or the default scene if no index is given.
          */
-        getSceneByIndex(_iScene?: number): Promise<GraphInstance>;
+        getSceneByIndex(_iScene?: number): Promise<Graph>;
         /**
          * Returns the first {@link Node} with the given name.
          */
@@ -7589,6 +7589,11 @@ declare namespace FudgeCore {
      */
     class Skeleton extends Graph {
         readonly bones: BoneList;
+        /**
+         * When applied to vertices, it moves them from object/model space to bone-local space as if the bone were at its initial pose.
+         * This matrix undoes any transformations that were applied to the bone in its initial state,
+         * allowing the subsequent bone transformation (from animation) to be correctly applied to the vertices in bone-local space
+         */
         readonly mtxBindInverses: BoneMatrixList;
         /**
          * Creates a new skeleton with a name
@@ -7635,17 +7640,18 @@ declare namespace FudgeCore {
      */
     class SkeletonInstance extends GraphInstance {
         #private;
+        /**
+         * The bone matrices render buffer
+         */
+        protected renderBuffer: unknown;
         private skeletonSource;
+        constructor(_name?: string);
         /**
          * Creates a new {@link SkeletonInstance} based on the given {@link Skeleton}
          */
         static CREATE(_skeleton: Skeleton): Promise<SkeletonInstance>;
         get bones(): BoneList;
         get mtxBoneLocals(): BoneMatrixList;
-        /**
-         * Gets the bone transformations for a vertex
-         */
-        get mtxBones(): Matrix4x4[];
         /**
          * Set this skeleton instance to be a recreation of the {@link Skeleton} given
          */
@@ -7657,7 +7663,7 @@ declare namespace FudgeCore {
          */
         resetPose(): void;
         applyAnimation(_mutator: Mutator): void;
-        private calculateMtxBones;
+        calculateMtxBones(): void;
         private registerBones;
     }
 }

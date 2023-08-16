@@ -89,34 +89,7 @@ namespace FudgeCore {
       else
         mesh = <Mesh>await Serializer.deserialize(_serialization.mesh);
       this.mesh = mesh;
-
-      if (_serialization.skeleton)
-        this.addEventListener(EVENT.COMPONENT_ADD, (_event: Event) => {
-          if (_event.target != this) return;
-          const trySetSkeleton: () => void = () => {
-            // find root node
-            let root: Node = this.node;
-            while (root.getParent()) {
-              root = root.getParent();
-            }
-            for (const node of root) {
-              if (node instanceof SkeletonInstance && node.idSource == _serialization.skeleton)
-                this.skeleton = node;
-            }
-            if (!this.skeleton) {
-              const trySetSkeletonOnChildAppend: (_event: Event) => void = _event => {
-                root.removeEventListener(EVENT.CHILD_APPEND, trySetSkeletonOnChildAppend);
-                if (_event.target instanceof SkeletonInstance && _event.target.idSource == _serialization.skeleton)
-                  this.skeleton = _event.target;
-                else {
-                  trySetSkeleton();
-                }
-              };
-              root.addEventListener(EVENT.CHILD_APPEND, trySetSkeletonOnChildAppend);
-            }
-          };
-          trySetSkeleton();
-        });
+      this.skeleton = _serialization.skeleton; // TODO: this is brach of types
 
       await this.mtxPivot.deserialize(_serialization.pivot);
       await super.deserialize(_serialization[super.constructor.name]);

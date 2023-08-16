@@ -105,6 +105,8 @@ void main() {
   vec4 vctColorTexture = texture(u_texture, v_vctTexture);
   vctFrag *= vctColorTexture;
     #endif
+    
+  vctFrag *= u_vctColor;
 }`;
   shaderSources["ShaderPick.frag"] = /*glsl*/ `#version 300 es
 /**
@@ -325,12 +327,12 @@ out vec4 v_vctPosition;
   #endif
 
   #if defined(SKIN)
-// uniform mat4 u_mtxMeshToWorld;
+uniform mat4 u_mtxWorldToView; // 
 // Bones
 // https://github.com/mrdoob/three.js/blob/dev/src/renderers/shaders/ShaderChunk/skinning_pars_vertex.glsl.js
 in uvec4 a_iBone;
 in vec4 a_fWeight;
-const uint MAX_BONES = 256u;
+const uint MAX_BONES = 256u; // CAUTION: this number must be the same as in RenderInjectorSkeletonInstance where the corresponding buffers are created
 layout (std140) uniform Skin {
   mat4 u_bones[MAX_BONES];
 };
@@ -421,8 +423,8 @@ void main() {
     a_fWeight.z * u_bones[a_iBone.z] +
     a_fWeight.w * u_bones[a_iBone.w];
 
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld * mtxSkin));
+  mtxMeshToView = u_mtxWorldToView * mtxSkin;
+  mtxNormalMeshToWorld = transpose(inverse(mtxSkin)); // TODO: check if this is correct as there was an error in the previous line mtxMeshToWorld might be the wrong matrix
     #endif
 
     // calculate position and normal according to input and defines

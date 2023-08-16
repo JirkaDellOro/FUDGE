@@ -103,4 +103,6 @@ void main() {
   vec4 vctColorTexture = texture(u_texture, v_vctTexture);
   vctFrag *= vctColorTexture;
     #endif
+    
+  vctFrag *= u_vctColor;
 }

@@ -11,11 +11,12 @@ namespace FudgeCore {
   export abstract class Render extends RenderWebGL {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
     public static pickBuffer: Int32Array;
-    public static nodesPhysics: RecycableArray<Node> = new RecycableArray();
-    public static componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
-    public static lights: MapLightTypeToLightList = new Map();
-    private static nodesSimple: RecycableArray<Node> = new RecycableArray();
-    private static nodesAlpha: RecycableArray<Node> = new RecycableArray();
+    public static readonly nodesPhysics: RecycableArray<Node> = new RecycableArray();
+    public static readonly componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
+    public static readonly lights: MapLightTypeToLightList = new Map();
+    private static readonly nodesSimple: RecycableArray<Node> = new RecycableArray();
+    private static readonly nodesAlpha: RecycableArray<Node> = new RecycableArray();
+    private static readonly skeletons: RecycableArray<SkeletonInstance> = new RecycableArray();
     private static timestampUpdate: number;
 
     // TODO: research if picking should be optimized using radius picking to filter
@@ -35,6 +36,7 @@ namespace FudgeCore {
         Render.nodesAlpha.reset();
         Render.nodesPhysics.reset();
         Render.componentsPick.reset();
+        Render.skeletons.reset();
         Render.lights.forEach(_array => _array.reset());
         _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
       }
@@ -55,7 +57,6 @@ namespace FudgeCore {
       } else
         _branch.mtxWorld.set(_mtxWorld); // overwrite readonly mtxWorld of the current node
 
-
       let cmpRigidbody: ComponentRigidbody = _branch.getComponent(ComponentRigidbody);
       if (cmpRigidbody && cmpRigidbody.isActive) { //TODO: support de-/activation throughout
         Render.nodesPhysics.push(_branch); // add this node to physics list
@@ -63,12 +64,10 @@ namespace FudgeCore {
           this.transformByPhysics(_branch, cmpRigidbody);
       }
 
-
       let cmpPick: ComponentPick = _branch.getComponent(ComponentPick);
       if (cmpPick && cmpPick.isActive) {
         Render.componentsPick.push(cmpPick); // add this component to pick list
       }
-
 
       let cmpLights: ComponentLight[] = _branch.getComponents(ComponentLight);
       Render.addLights(cmpLights);
@@ -93,6 +92,9 @@ namespace FudgeCore {
           Render.nodesSimple.push(_branch); // add this node to render list
       }
 
+      if (_branch instanceof SkeletonInstance)
+        Render.skeletons.push(_branch);
+
       for (let child of _branch.getChildren()) {
         Render.prepare(child, _options, _branch.mtxWorld, _shadersUsed);
 
@@ -105,8 +107,12 @@ namespace FudgeCore {
       }
 
       if (firstLevel) {
+        for (const skeleton of Render.skeletons) {
+          skeleton.calculateMtxBones();
+          skeleton.updateRenderBuffer();
+        }
         _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
-        Render.fillLightsUBO(Render.lights);
+        Render.updateLightsUBO(Render.lights);
       }
     }
 

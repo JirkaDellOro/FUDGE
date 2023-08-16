@@ -1,25 +1,35 @@
+///<reference path="./../Render/RenderInjectorSkeletonInstance.ts"/>
 namespace FudgeCore {
-  
+  let instanceCounter: number = 0;
+
   /**
    * An instance of a {@link Skeleton}.
    * It holds all the information needed to animate itself. Referenced from a {@link ComponentMesh} it can be associated with a {@link MeshSkin} and enable skeleton animation for the mesh.
    * As an extension of {@link GraphInstance} it also keeps a reference to its resource and can thus optimize serialization.
    */
+  @RenderInjectorSkeletonInstance.decorate
   export class SkeletonInstance extends GraphInstance {
-    // static #instanceCounter: number = 0;
+    /**
+     * Contains the bone transformations applicable to the vertices of a {@link MeshSkin}
+     * @internal
+     */
+    protected readonly mtxBones: Matrix4x4[] = [];
+
+    /**
+     * The bone matrices render buffer
+     */
+    protected renderBuffer: unknown;
 
     // public bindPose: BoneMatrixList;
     private skeletonSource: Skeleton;
 
     #bones: BoneList;
     #mtxBoneLocals: BoneMatrixList;
-    #mtxBones: Matrix4x4[];
-    #mtxBonesUpdated: number;
 
-    // public constructor(_name: string = "SkeletonInstance_" + SkeletonInstance.#instanceCounter++) {
-    //   super();
-    //   Reflect.set(this, "instacnename", _name);
-    // }
+    public constructor(_name: string = "SkeletonInstance_" + instanceCounter++) {
+      super();
+      Reflect.set(this, "instacnename", _name);
+    }
 
     /**
      * Creates a new {@link SkeletonInstance} based on the given {@link Skeleton}
@@ -39,15 +49,23 @@ namespace FudgeCore {
     }
 
     /**
-     * Gets the bone transformations for a vertex
+     * Injected by {@link RenderInjectorSkeletonInstance}.
+     * Used by the render system.
+     * @internal
      */
-    public get mtxBones(): Matrix4x4[] {
-      if (this.#mtxBonesUpdated != this.timestampUpdate) {
-        this.calculateMtxBones();
-        this.#mtxBonesUpdated = this.timestampUpdate;
-      }
-      return this.#mtxBones;
-    }
+    public useRenderBuffer(_shader: ShaderInterface): RenderBuffers { return null; /* injected by RenderInjector*/ }
+    /**
+     * Injected by {@link RenderInjectorSkeletonInstance}.
+     * Used by the render system.
+     * @internal
+     */
+    public updateRenderBuffer(): RenderBuffers { return null; /* injected by RenderInjector*/ }
+    /**
+     * Injected by {@link RenderInjectorSkeletonInstance}.
+     * Used by the render system.
+     * @internal
+     */
+    public deleteRenderBuffer(): void {/* injected by RenderInjector*/ }
 
     /**
      * Set this skeleton instance to be a recreation of the {@link Skeleton} given
@@ -71,6 +89,11 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization);
       this.skeletonSource = Project.resources[_serialization.idSource || _serialization.idResource] as Skeleton;
+      for (const node of this) {
+        const cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
+        if (cmpMesh?.skeleton)
+          cmpMesh.skeleton = this;
+      }
       this.registerBones();
       // if (_serialization.bindPose) {
       //   this.bindPose = {};
@@ -98,17 +121,16 @@ namespace FudgeCore {
           this.bones[boneName]?.applyAnimation(_mutator.bones[boneName]);
     }
 
-    private calculateMtxBones(): void {
-      this.#mtxBones = [];
-      for (const boneName in this.bones) {
-        // bone matrix T = N^-1 * B_delta * B_0^-1 * S // no idea if this is correct
-        const mtxBone: Matrix4x4 = this.mtxWorldInverse.clone;
-        // if (this.mtxPivot) mtxBone.multiply(this.mtxPivot);
-        mtxBone.multiply(this.bones[boneName].mtxWorld);
-        mtxBone.multiply(this.skeletonSource.mtxBindInverses[boneName]);
-        // if (this.mtxPivot) mtxBone.multiply(Matrix4x4.INVERSION(this.mtxPivot));
+    public calculateMtxBones(): void {
+      for (const mtxBone of this.mtxBones)
+        Recycler.store(mtxBone);
+      this.mtxBones.length = 0;
 
-        this.#mtxBones.push(mtxBone);
+      for (const boneName in this.bones) {
+        // Bones mtxWorld represents the animated transformation of the bone.
+        // Combines with the inverse bind pose matrix for correct vertex animation.
+        const mtxBone: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.bones[boneName].mtxWorld, this.skeletonSource.mtxBindInverses[boneName]);
+        this.mtxBones.push(mtxBone);
       }
     }
 

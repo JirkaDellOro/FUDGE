@@ -20,6 +20,12 @@ namespace FudgeCore {
    */
   export class Skeleton extends Graph {
     public readonly bones: BoneList = {};
+
+    /**
+     * When applied to vertices, it moves them from object/model space to bone-local space as if the bone were at its initial pose.
+     * This matrix undoes any transformations that were applied to the bone in its initial state, 
+     * allowing the subsequent bone transformation (from animation) to be correctly applied to the vertices in bone-local space
+     */
     public readonly mtxBindInverses: BoneMatrixList = {};
 
     /**
