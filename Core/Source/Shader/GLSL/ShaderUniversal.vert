@@ -182,7 +182,6 @@ void main() {
       #endif
     #endif
 
-
     #if defined(SKIN)
   mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x] +
     a_fWeight.y * u_bones[a_iBone.y] +
@@ -190,14 +189,14 @@ void main() {
     a_fWeight.w * u_bones[a_iBone.w];
 
   mtxMeshToView = u_mtxWorldToView * mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(mtxSkin)); // TODO: check if this is correct as there was an error in the previous line mtxMeshToWorld might be the wrong matrix
+  mtxNormalMeshToWorld = mtxSkin; // no need for transpose(inverse(...)) for skinning
     #endif
 
     // calculate position and normal according to input and defines
   gl_Position = mtxMeshToView * vctPosition;
 
     #if defined(CAMERA) || defined(MATCAP)
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
+  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera); // TODO: when skinning is used, this is most likely wrong, use mtxSkin instead of u_mtxMeshToWorld
     #endif
 
     #if defined(LIGHT)

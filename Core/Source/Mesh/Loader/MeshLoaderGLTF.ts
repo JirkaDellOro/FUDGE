@@ -36,7 +36,7 @@ namespace FudgeCore {
       _mesh.faces.push(...getFaces(renderMesh, _mesh.vertices));
 
       if (_mesh instanceof MeshSkin) {
-        Reflect.set(renderMesh, "ƒiBones", await loader.getUint8Array(gltfPrimitive.attributes.JOINTS_0));
+        Reflect.set(renderMesh, "ƒiBones", await loader.getBoneIndices(gltfPrimitive.attributes.JOINTS_0));
         Reflect.set(renderMesh, "ƒweights", await loader.getFloat32Array(gltfPrimitive.attributes.WEIGHTS_0));
         createBones(renderMesh, _mesh.vertices);
       }

@@ -418,7 +418,7 @@ namespace FudgeCore {
         this.#meshes[_iMesh] = [];
 
       if (!this.#meshes[_iMesh][_iPrimitive]) {
-        
+
         const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
         // TODO: support multiple primitives per mesh
 
@@ -458,8 +458,8 @@ namespace FudgeCore {
 
         const color: Color = new Color(...gltfMaterial.pbrMetallicRoughness?.baseColorFactor || [1, 1, 1, 1]);
         const coat: Coat = gltfBaseColorTexture ?
-          new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index), 0.5, 1) :
-          new CoatRemissive(color, 0.5, 1);
+          new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index), 1, 0.5) :
+          new CoatRemissive(color, 1, 0.5);
 
         const material: Material = new Material(
           gltfMaterial.name,
@@ -575,14 +575,19 @@ namespace FudgeCore {
      * Returns a {@link Uint8Array} for the given accessor index.
      * @internal
      */
-    public async getUint8Array(_iAccessor: number): Promise<Uint8Array> {
+    public async getBoneIndices(_iAccessor: number): Promise<Uint8Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      if (this.gltf.accessors[_iAccessor]?.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE)
+      const componentType: GLTF.COMPONENT_TYPE = this.gltf.accessors[_iAccessor]?.componentType;
+
+      if (componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE)
         return array as Uint8Array;
-      else {
-        Debug.warn(`${this}: Expected component type UNSIGNED_BYTE but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+
+      if (componentType == GLTF.COMPONENT_TYPE.UNSIGNED_SHORT) {
+        Debug.info(`${this}: Bone indices are stored as ${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]}. FUDGE will convert them to UNSIGNED_BYTE. FUDGE only supports skeletons with up to 256 bones, so make sure your skeleton has no more than 256 bones.`);
         return Uint8Array.from(array);
       }
+      
+      throw new Error(`${this}: Invalid component type ${GLTF.COMPONENT_TYPE[componentType]} for bone indices. Expected ${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_BYTE]} or ${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]}.`);
     }
 
     /**
