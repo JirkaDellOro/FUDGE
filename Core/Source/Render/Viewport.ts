@@ -27,7 +27,10 @@ namespace FudgeCore {
     public adjustingFrames: boolean = true;
     public adjustingCamera: boolean = true;
     public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
+
+    //Variables to check if the FBOs need to be recalculated
     private lastRectRenderSize: Vector2 = new Vector2(0, 0);
+    private lastCamera: ComponentCamera;
 
     public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
 
@@ -62,7 +65,7 @@ namespace FudgeCore {
      */
     public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
       this.name = _name;
-      this.camera = _camera;
+      this.camera = this.lastCamera = _camera;
       this.#canvas = _canvas;
       this.#crc2 = _canvas.getContext("2d");
       this.#canvas.tabIndex = 0; // can get focus and receive keyboard events
@@ -71,7 +74,7 @@ namespace FudgeCore {
       this.rectDestination = this.getClientRectangle();
 
       //TODO: Only setup needed FBOs. This proofs a bit complicated because the initialization might happen before a ComponentCamera with a ComponentPostFX exists. Therefore Postbuffers are initialized regardless for now. 
-      Render.setupFBOs();
+      Render.initFBOs();
 
       this.setBranch(_branch);
     }
@@ -124,36 +127,30 @@ namespace FudgeCore {
       if (_calculateTransforms)
         this.calculateTransforms();
 
-      Render.setDepthTest(true);
-      Render.clear(this.camera.clrBackground);
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
         Physics.draw(this.camera, this.physicsDebugMode);
       }
 
-      let cmpPostFx: ComponentPostFX = this.getComponentPostFX(this.camera);
-      if (cmpPostFx != null) if (cmpPostFx.isActive) {
-        if (cmpPostFx.ao) {
-          Render.calcMist(this.camera, cmpPostFx);
-          Render.calcAO(cmpPostFx);
-        } else if (cmpPostFx.mist) {
-          Render.calcMist(this.camera, cmpPostFx);
-        }
-
-        Render.setDepthTest(false);
-        if (cmpPostFx.mist)
-          Render.drawMist(this.camera, cmpPostFx.clrMist);
-        if (cmpPostFx.ao)
-          Render.drawAO();
-        if (cmpPostFx.bloom) {
-          Render.calcBloom(this.camera);
-          Render.drawBloom();
-        }
-        Render.setDepthTest(true);
+      let cmpMist: ComponentMist = this.getComponentMist(this.camera);
+      if (cmpMist != null) if (cmpMist.isActive) {
+        Render.calcMist(this.camera, cmpMist);
+      }
+      let cmpAO: ComponentAmbientOcclusion = this.getComponentAmbientOcclusion(this.camera);
+      if (cmpAO != null) if (cmpAO.isActive) {
+        Render.calcAO(cmpAO);
+      }
+      let cmpBloom: ComponentBloom = this.getComponentBloom(this.camera);
+      if (cmpBloom != null) if (cmpBloom.isActive) {
+        Render.calcBloom(cmpBloom);
       }
 
+      Render.setDepthTest(false);
+      Render.compositeEffects(this.camera, cmpMist, cmpAO, cmpBloom);
       this.#crc2.imageSmoothingEnabled = false;
+
+
       this.#crc2.drawImage(
         Render.getCanvas(),
         this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
@@ -231,18 +228,33 @@ namespace FudgeCore {
       Render.setRenderRectangle(rectRender);
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
       Render.setCanvasSize(rectRender.width, rectRender.height);
-      // setting the new canvas size on the post-fx textures
-      if (rectRender.size.x != this.lastRectRenderSize.x || rectRender.size.y != this.lastRectRenderSize.y) {
-        let cmpPostFx: ComponentPostFX = this.getComponentPostFX(this.camera);
-        if (cmpPostFx != null) if (cmpPostFx.isActive) {
-          Render.adjustBufferSizes(rectRender.size, cmpPostFx.mist, cmpPostFx.ao, cmpPostFx.bloom);
-          this.lastRectRenderSize.set(rectRender.size.x, rectRender.size.y);
+
+      // setting the new canvas size on the FBO-Textures
+      if (rectRender.size.x != this.lastRectRenderSize.x || rectRender.size.y != this.lastRectRenderSize.y || this.camera != this.lastCamera) {
+        this.lastRectRenderSize.set(rectRender.size.x, rectRender.size.y);
+        this.lastCamera = this.camera;
+        if (rectRender.size.x >= 1 || rectRender.size.y >= 1) {
+          Render.adjustBufferSize(Render.mainFBO, Render.mainTexture, 1);
+          let cmpMist: ComponentMist = this.getComponentMist(this.camera);
+          if (cmpMist != null) if (cmpMist.isActive) {
+            Render.adjustBufferSize(Render.mistFBO, Render.mistTexture, 1);
+          }
+          let cmpAO: ComponentAmbientOcclusion = this.getComponentAmbientOcclusion(this.camera);
+          if (cmpAO != null) if (cmpAO.isActive) {
+            Render.adjustBufferSize(Render.aoFBO, Render.aoTexture, 1);
+          }
+          let cmpBloom: ComponentBloom = this.getComponentBloom(this.camera);
+          if (cmpBloom != null) if (cmpBloom.isActive) {
+            Render.adjustBlooomBufferSize();
+          }
         }
       }
+
       Recycler.store(rectClient);
       Recycler.store(rectCanvas);
       Recycler.store(rectRender);
     }
+
     /**
      * Adjust the camera parameters to fit the rendering into the render vieport
      */
@@ -369,10 +381,24 @@ namespace FudgeCore {
       return screen;
     }
 
-    private getComponentPostFX(_camera: ComponentCamera): ComponentPostFX {
+    private getComponentMist(_camera: ComponentCamera): ComponentMist {
       let camParentNode: Node = _camera.node;
       if (camParentNode != null) {
-        return camParentNode.getComponent(ComponentPostFX);
+        return camParentNode.getComponent(ComponentMist);
+      }
+      return null;
+    }
+    private getComponentAmbientOcclusion(_camera: ComponentCamera): ComponentAmbientOcclusion {
+      let camParentNode: Node = _camera.node;
+      if (camParentNode != null) {
+        return camParentNode.getComponent(ComponentAmbientOcclusion);
+      }
+      return null;
+    }
+    private getComponentBloom(_camera: ComponentCamera): ComponentBloom {
+      let camParentNode: Node = _camera.node;
+      if (camParentNode != null) {
+        return camParentNode.getComponent(ComponentBloom);
       }
       return null;
     }

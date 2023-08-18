@@ -2,9 +2,7 @@ namespace FudgeCore {
     export abstract class ShaderMist extends Shader {
         public static readonly iSubclass: number = Shader.registerSubclass(ShaderMist);
 
-        public static define: string[] = [
-            "MIST",
-          ];
+        public static define: string[] = [];
 
         public static getCoat(): typeof Coat { return CoatColored; }
 

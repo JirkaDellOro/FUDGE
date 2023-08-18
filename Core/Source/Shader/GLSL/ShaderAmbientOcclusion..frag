@@ -1,6 +1,6 @@
 #version 300 es
 /**
-*Calculates depth from camera based on near- and farplane
+*Calculates AO based on depthmap
 *@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
 precision mediump float;

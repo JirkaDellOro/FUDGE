@@ -1102,23 +1102,25 @@ declare namespace FudgeCore {
         /**
          * Creates and stores texture buffers to be used for PostFX
          */
-        static setupFBOs(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
-        /**
-         * updates texture and renderbuffersize for given postFX buffers
-         */
-        static adjustBufferSizes(_newSize: Vector2, _mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
+        static initFBOs(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
         /**
          * Sets up and configures framebuffers and textures for post-fx
+        */
+        protected static setupFBO(_fbo?: WebGLFramebuffer, _tex?: WebGLTexture, _divider?: number): PostBufferdata;
+        /**
+         * updates texture and renderbuffersize for given FBO
          */
-        protected static setupFBO(_fbo?: WebGLFramebuffer): PostBufferdata;
+        static adjustBufferSize(_fbo: WebGLFramebuffer, _tex: WebGLTexture, _divider?: number): void;
+        /**
+         * updates all off the bloom FBOs and textures
+         */
+        static adjustBlooomBufferSize(): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix. A shader can be passed to calculate every object with the same shader
-         */
+        */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
-        static drawNodesMist(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpPostFX: ComponentPostFX): void;
-        static drawMist(_cmpCamera: ComponentCamera, _clrMist?: Color): void;
-        static drawAO(): void;
-        static drawBloom(): void;
+        static drawNodesMist(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpMist: ComponentMist): void;
+        static compositeEffects(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist, _cmpAO: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
         protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
         private static calcMeshToView;
         private static getRenderBuffers;
@@ -1831,6 +1833,19 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Attaches a {@link Material} to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
+     */
+    class ComponentAmbientOcclusion extends Component {
+        static readonly iSubclass: number;
+        clrAO: Color;
+        constructor(_mist?: boolean, _clrMist?: Color, _nearPlane?: number, _farPlane?: number, _ao?: boolean, _clrAO?: Color, _bloom?: boolean);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Holds a reference to an {@link Animation} and controls it. Controls quantization and playmode as well as speed.
      * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2022
      */
@@ -2012,6 +2027,20 @@ declare namespace FudgeCore {
          * Updates the position and orientation of the given AudioListener
          */
         update(_listener: AudioListener): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Attaches a {@link Material} to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
+     */
+    class ComponentBloom extends Component {
+        static readonly iSubclass: number;
+        threshold: number;
+        intensity: number;
+        constructor(_threshold?: number, _intensity?: number);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -2247,6 +2276,21 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Attaches a {@link Material} to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
+     */
+    class ComponentMist extends Component {
+        static readonly iSubclass: number;
+        clrMist: Color;
+        nearPlane: number;
+        farPlane: number;
+        constructor(_mist?: boolean, _clrMist?: Color, _nearPlane?: number, _farPlane?: number, _ao?: boolean, _clrAO?: Color, _bloom?: boolean);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Attaches a {@link ParticleSystem} to the node.
      * Works in conjunction with {@link ComponentMesh} and {@link ComponentMaterial} to create a shader particle system.
      * Additionally a {@link ComponentFaceCamera} can be attached to make the particles face the camera.
@@ -2299,25 +2343,6 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Attaches a {@link Material} to the node
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
-     */
-    class ComponentPostFX extends Component {
-        static readonly iSubclass: number;
-        mist: boolean;
-        clrMist: Color;
-        nearPlane: number;
-        farPlane: number;
-        ao: boolean;
-        clrAO: Color;
-        bloom: boolean;
-        constructor(_mist?: boolean, _clrMist?: Color, _nearPlane?: number, _farPlane?: number, _ao?: boolean, _clrAO?: Color, _bloom?: boolean);
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -5451,11 +5476,13 @@ declare namespace FudgeCore {
         static cmpMistMaterial: ComponentMaterial;
         static aoFBO: WebGLFramebuffer;
         static aoTexture: WebGLTexture;
-        static bloomFBO: WebGLFramebuffer;
-        static bloomTexture: WebGLTexture;
+        static downsamplingDepth: number;
+        static bloomDownsamplingFBOs: WebGLFramebuffer[];
+        static bloomDownsamplingTextures: WebGLTexture[];
+        static bloomUpsamplingFBOs: WebGLFramebuffer[];
+        static bloomUpsamplingTextures: WebGLTexture[];
         static screenQuad: Float32Array;
         static screenQuadUV: Float32Array;
-        static screenQuadCmpMat: ComponentMaterial;
         static nodesPhysics: RecycableArray<Node>;
         static componentsPick: RecycableArray<ComponentPick>;
         static lights: MapLightTypeToLightList;
@@ -5480,11 +5507,11 @@ declare namespace FudgeCore {
          * Draws a given list of nodes. A @param _cmpMat can be passed to render every node of the list with the same Material (useful for PostFX)
          */
         private static drawList;
-        static calcMist(_cmpCamera: ComponentCamera, _cmpPostFX: ComponentPostFX): void;
-        static calcAO(_cmpPostFX: ComponentPostFX): void;
-        static calcBloom(_cmpCamera: ComponentCamera): void;
+        static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
+        static calcAO(_cmpAO: ComponentAmbientOcclusion): void;
+        static calcBloom(_cmpBloom: ComponentBloom): void;
         static initScreenQuad(_texture: WebGLTexture): void;
-        static useScreenQuadRenderData(_shader: typeof Shader, _tex: WebGLTexture, _clr?: Color): void;
+        static useScreenQuadRenderData(_shader: typeof Shader): void;
         private static transformByPhysics;
     }
 }
@@ -5574,6 +5601,7 @@ declare namespace FudgeCore {
         adjustingCamera: boolean;
         physicsDebugMode: PHYSICS_DEBUGMODE;
         private lastRectRenderSize;
+        private lastCamera;
         componentsPick: RecycableArray<ComponentPick>;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
@@ -5672,7 +5700,9 @@ declare namespace FudgeCore {
          * Returns a point in the browser page matching the given point of the viewport
          */
         pointClientToScreen(_client: Vector2): Vector2;
-        private getComponentPostFX;
+        private getComponentMist;
+        private getComponentAmbientOcclusion;
+        private getComponentBloom;
     }
 }
 declare namespace FudgeCore {
@@ -6570,6 +6600,33 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    abstract class ShaderAmbientOcclusion extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderBloom extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderDownsample extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
     abstract class ShaderFlat extends Shader {
         static readonly iSubclass: number;
         static define: string[];
@@ -6682,6 +6739,15 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     abstract class ShaderScreen extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderUpsample extends Shader {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
