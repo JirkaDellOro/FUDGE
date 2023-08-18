@@ -1046,14 +1046,21 @@ precision mediump float;
 precision highp int;
 
 in vec2 v_vctTexture;
+in vec2[9] v_vctOffsets;
 uniform sampler2D u_texture;
 uniform sampler2D u_texture2;
 
+float altGaussianKernel[9] = float[](0.04f, 0.044f, 0.04f, 0.122f, 0.332f, 0.122f, 0.05f, 0.2f, 0.05f);
 
 out vec4 vctFrag;
 
 void main() {
-    vctFrag = texture(u_texture, v_vctTexture) + texture(u_texture2, v_vctTexture); 
+    vec4 tex1 = vec4(0.0f);
+    for(int i = 0; i < 9; i++) {
+        tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * altGaussianKernel[i]);
+    }
+    vec4 tex2 = texture(u_texture2, v_vctTexture);
+    vctFrag = tex2 + tex1; 
 }`;
   shaderSources["ShaderUpsample.vert"] = `#version 300 es
 /**
@@ -1063,11 +1070,24 @@ void main() {
 in vec2 a_vctPosition;
 in vec2 a_vctTexture;
 
+uniform float u_width;
+uniform float u_height;
+
 out vec2 v_vctTexture;
+out vec2[9] v_vctOffsets;
 
 void main() {
     gl_Position = vec4(a_vctPosition, 0.0, 1.0);
     v_vctTexture = a_vctTexture;
+
+    vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
+
+    v_vctOffsets = vec2[]
+    (
+        vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
+        vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
+        vec2(-offset.x, -offset.y), vec2(0.0, offset.y),  vec2(-offset.x, -offset.y)
+    );
 }`;
 
 }
