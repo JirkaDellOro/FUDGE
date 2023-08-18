@@ -115,7 +115,7 @@ void main() {
         float averageBrightness = (tex1.r + tex1.g + tex1.b) / 3.0f;
         tex1 = tex1 * averageBrightness * 2.0f;
     }
-    tex1 *= 1.0f + (u_lvl * 0.4f);
+    tex1 *= 1.0f + (u_lvl * 0.2f);
     vctFrag = tex1;
 }`;
   shaderSources["ShaderDownsample.vert"] = `#version 300 es
