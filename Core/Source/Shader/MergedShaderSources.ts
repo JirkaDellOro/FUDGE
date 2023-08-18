@@ -98,23 +98,24 @@ in vec2 v_vctTexture;
 in vec2[9] v_vctOffsets;
 uniform sampler2D u_texture;
 uniform float u_threshold;
+uniform float u_lvl;
 
-float gaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f, 0.045f, 0.122f, 0.045f);
+float altGaussianKernel[9] = float[](0.04f, 0.044f, 0.04f, 0.122f, 0.332f, 0.122f, 0.05f, 0.2f, 0.05f);
 
 out vec4 vctFrag;
 
 void main() {
     vec4 tex1 = vec4(0.0f);
     for(int i = 0; i < 9; i++) {
-        tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
+        tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * altGaussianKernel[i]);
     }
-    if(u_threshold >= 0.0f) {
+    if(u_lvl < 1.0f) {
         tex1 -= u_threshold;
         tex1 /= 1.0f - u_threshold;
         float brightness = (tex1.r + tex1.g + tex1.b) / 3.0f;
         tex1 = tex1 * brightness * 2.0f;
     }
-    //tempTex = pow(tempTex, vec4(2.0f));
+    tex1 *= 1.0f + (u_lvl * 0.4f);
     vctFrag = tex1;
 }`;
   shaderSources["ShaderDownsample.vert"] = `#version 300 es
@@ -137,7 +138,7 @@ void main() {
 
     vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
 
-    v_vctOffsets = vec2[]
+v_vctOffsets = vec2[]
     (
         vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
         vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
@@ -682,9 +683,20 @@ void main() {
     if(u_bloom > 0.5f) {
         float intensity = max(u_bloomIntensity, 0.0f);
         vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
-        //vctTempFrag += vec4(bloomTex.rgb * intensity, 1.0f);
         vctTempFrag += (bloomTex * intensity);
+
+/*
+        */
+        float factor = 0.5f;
+        float r = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
+        float g = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
+        float b = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
+
+        vctTempFrag.r += g + b;
+        vctTempFrag.g += r + b;
+        vctTempFrag.b += r + g;
     }
+
     vctFrag = vctTempFrag;
 }
 `;
@@ -1045,12 +1057,13 @@ float gaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f
 out vec4 vctFrag;
 
 void main() {
-    vec4 tex1 = vec4(0.0f);
+    /*vec4 tex1 = vec4(0.0f);
     for(int i = 0; i < 9; i++) {
         tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
-    }
+    }*/
+    vec4 tex1 = texture(u_texture, v_vctTexture);
     vec4 tex2 = texture(u_texture2, v_vctTexture);
-    vctFrag = tex2 * 0.08f + tex1 * 1.3f;
+    vctFrag = tex2 + tex1; //The textures are not weighted equally. It gives the bloom Effect a nicer Falloff.
 }`;
   shaderSources["ShaderUpsample.vert"] = `#version 300 es
 /**

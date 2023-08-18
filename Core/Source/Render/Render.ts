@@ -267,10 +267,10 @@ namespace FudgeCore {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Math.floor(width * 2));
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Math.floor(height * 2));
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_threshold"], tempThreshold);
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_lvl"], i);
         RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
 
         tempTexture = Render.bloomDownsamplingTextures[i];
-        tempThreshold = -1;
         div *= 2;
       }
 

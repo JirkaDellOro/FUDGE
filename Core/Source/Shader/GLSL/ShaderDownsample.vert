@@ -18,7 +18,7 @@ void main() {
 
     vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
 
-    v_vctOffsets = vec2[]
+v_vctOffsets = vec2[]
     (
         vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
         vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),

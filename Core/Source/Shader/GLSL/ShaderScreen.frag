@@ -38,8 +38,17 @@ void main() {
     if(u_bloom > 0.5f) {
         float intensity = max(u_bloomIntensity, 0.0f);
         vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
-        //vctTempFrag += vec4(bloomTex.rgb * intensity, 1.0f);
         vctTempFrag += (bloomTex * intensity);
+
+        float factor = 0.5f;
+        float r = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
+        float g = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
+        float b = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
+
+        vctTempFrag.r += g + b;
+        vctTempFrag.g += r + b;
+        vctTempFrag.b += r + g;
     }
+
     vctFrag = vctTempFrag;
 }
