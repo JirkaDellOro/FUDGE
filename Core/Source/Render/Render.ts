@@ -290,9 +290,6 @@ namespace FudgeCore {
 
         bindTextureSlot0(tempTexture);
         bindTextureSlot1(this.bloomDownsamplingTextures[i]);
-        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Math.min(Math.floor(width / 2)));
-        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Math.min(Math.floor(height / 2)));
-
         RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
 
         tempTexture = Render.bloomUpsamplingTextures[i];

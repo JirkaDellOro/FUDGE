@@ -112,8 +112,8 @@ void main() {
     if(u_lvl < 1.0f) {
         tex1 -= u_threshold;
         tex1 /= 1.0f - u_threshold;
-        float brightness = (tex1.r + tex1.g + tex1.b) / 3.0f;
-        tex1 = tex1 * brightness * 2.0f;
+        float averageBrightness = (tex1.r + tex1.g + tex1.b) / 3.0f;
+        tex1 = tex1 * averageBrightness * 2.0f;
     }
     tex1 *= 1.0f + (u_lvl * 0.4f);
     vctFrag = tex1;
@@ -138,7 +138,7 @@ void main() {
 
     vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
 
-v_vctOffsets = vec2[]
+    v_vctOffsets = vec2[]
     (
         vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
         vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
@@ -685,8 +685,6 @@ void main() {
         vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
         vctTempFrag += (bloomTex * intensity);
 
-/*
-        */
         float factor = 0.5f;
         float r = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
         float g = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
@@ -1048,22 +1046,14 @@ precision mediump float;
 precision highp int;
 
 in vec2 v_vctTexture;
-in vec2[9] v_vctOffsets;
 uniform sampler2D u_texture;
 uniform sampler2D u_texture2;
 
-float gaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f, 0.045f, 0.122f, 0.045f);
 
 out vec4 vctFrag;
 
 void main() {
-    /*vec4 tex1 = vec4(0.0f);
-    for(int i = 0; i < 9; i++) {
-        tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
-    }*/
-    vec4 tex1 = texture(u_texture, v_vctTexture);
-    vec4 tex2 = texture(u_texture2, v_vctTexture);
-    vctFrag = tex2 + tex1; //The textures are not weighted equally. It gives the bloom Effect a nicer Falloff.
+    vctFrag = texture(u_texture, v_vctTexture) + texture(u_texture2, v_vctTexture); 
 }`;
   shaderSources["ShaderUpsample.vert"] = `#version 300 es
 /**
@@ -1073,24 +1063,11 @@ void main() {
 in vec2 a_vctPosition;
 in vec2 a_vctTexture;
 
-uniform float u_width;
-uniform float u_height;
-
 out vec2 v_vctTexture;
-out vec2[9] v_vctOffsets;
 
 void main() {
     gl_Position = vec4(a_vctPosition, 0.0, 1.0);
     v_vctTexture = a_vctTexture;
-
-    vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
-
-    v_vctOffsets = vec2[]
-    (
-        vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
-        vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
-        vec2(-offset.x, -offset.y), vec2(0.0, offset.y),  vec2(-offset.x, -offset.y)
-    );
 }`;
 
 }
