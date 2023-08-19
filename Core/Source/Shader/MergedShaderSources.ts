@@ -1,6 +1,6 @@
 namespace FudgeCore {
   export let shaderSources: {[source: string]: string} = {};
-  shaderSources["ShaderAmbientOcclusion..frag"] = `#version 300 es
+  shaderSources["ShaderAmbientOcclusion.frag"] = `#version 300 es
 /**
 *Calculates AO based on depthmap
 *@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
@@ -48,6 +48,131 @@ void main() {
     gl_Position = mtxMeshToView * vctPosition;
     v_vctPosition = vctPosition;
 }`;
+  shaderSources["ShaderAODepth.frag"] = `#version 300 es
+/**
+*Renders depthinformation onto texture
+*@authors Roland Heer, HFU, 2023
+*/
+precision mediump float;
+precision highp int;
+
+in vec2 v_vctTexture;
+uniform sampler2D u_mainTexture;
+
+uniform float u_mist;
+uniform sampler2D u_mistTexture;
+uniform vec4 u_vctMistColor;
+
+uniform float u_ao;
+uniform sampler2D u_aoTexture;
+uniform vec4 u_vctAOColor;
+
+uniform float u_bloom;
+uniform sampler2D u_bloomTexture;
+uniform float u_bloomIntensity;
+
+out vec4 vctFrag;
+
+void main() {
+    vec4 mainTex = texture(u_mainTexture, v_vctTexture);
+    vec4 vctTempFrag = mainTex;
+    if(u_ao > 0.5f) {
+        vec4 aoTex = texture(u_aoTexture, v_vctTexture);
+        aoTex *= vec4(u_vctAOColor.rgb, 1.0f);
+        vctTempFrag = mix(vctTempFrag, vctTempFrag * vec4(aoTex.rgb, 1.0f), u_vctAOColor.a);
+        vctTempFrag = aoTex;
+    }
+    if(u_mist > 0.5f) {
+        vec4 mistTex = texture(u_mistTexture, v_vctTexture);
+        vctTempFrag = mix(vctTempFrag, vec4(u_vctMistColor.rgb, 1.0f), mistTex.r * u_vctMistColor.a);
+    }
+    if(u_bloom > 0.5f) {
+        float intensity = max(u_bloomIntensity, 0.0f);
+        vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
+        vctTempFrag += (bloomTex * intensity);
+
+        float factor = 0.5f;
+        float r = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
+        float g = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
+        float b = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
+
+        vctTempFrag.r += g + b;
+        vctTempFrag.g += r + b;
+        vctTempFrag.b += r + g;
+    }
+
+    vctFrag = vctTempFrag;
+}
+`;
+  shaderSources["ShaderAODepth.vert"] = `#version 300 es
+/**
+*Renders depthinformation onto texture
+*@authors Roland Heer, HFU, 2023
+*/
+in vec2 a_vctPosition;
+in vec2 a_vctTexture;
+
+out vec2 v_vctTexture;
+
+void main() {
+    gl_Position = vec4(a_vctPosition, 0.0, 1.0);
+    v_vctTexture = a_vctTexture;
+}
+`;
+  shaderSources["ShaderAONormal.frag"] = `#version 300 es
+/**
+*Renders normalinformation onto texture
+*@authors Roland Heer, HFU, 2023
+*/
+precision mediump float;
+precision highp int;
+
+in vec3 v_vctCamera;
+in mat4 v_mtxMeshToWorld;
+in vec4 v_vctPosition;
+in vec4 v_vctNormal;
+
+out vec4 vctFrag;
+
+void main() {
+    /*
+    float dist = length((v_mtxMeshToWorld * v_vctPosition).xyz - v_vctCamera);
+    float fogAmount = min(max((dist - u_nearPlane) / (u_farPlane - u_nearPlane), 0.0),1.0);
+    vec3 fog = vec3(-pow(fogAmount, 2.0) + (2.0 * fogAmount)); //lets Fog appear quicker and fall off slower results in a more gradual falloff
+    vctFrag = vec4(fog, 1.0);
+    */
+    vctFrag = v_vctNormal;
+}
+`;
+  shaderSources["ShaderAONormal.vert"] = `#version 300 es
+/**
+*Renders normalinformation onto texture
+*@authors Roland Heer, HFU, 2023
+*/
+uniform vec3 u_vctCamera;
+uniform mat4 u_mtxMeshToView;
+uniform mat4 u_mtxWorldToView;
+uniform mat4 u_mtxMeshToWorld;
+in vec3 a_vctPosition;
+in vec3 a_vctNormal;
+
+out vec4 v_vctPosition;
+out mat4 v_mtxMeshToWorld;
+out vec3 v_vctCamera;
+out vec4 v_vctNormal;
+
+void main() {
+    vec4 vctPosition = vec4(a_vctPosition, 1.0f);
+    mat4 mtxMeshToView = u_mtxMeshToView;
+    v_mtxMeshToWorld = u_mtxMeshToWorld;
+    v_vctCamera = u_vctCamera;
+    gl_Position = mtxMeshToView * vctPosition;
+    v_vctPosition = vctPosition;
+    vec4 vctNormal = vec4(a_vctNormal, 1.0f);
+    v_vctNormal = u_mtxMeshToWorld * vctNormal;
+    //v_vctNormal = u_mtxMeshToView * vctNormal;
+}
+`;
   shaderSources["ShaderBloom.frag"] = `#version 300 es
 /**
 *Calculates bloom based on shaded render 
@@ -673,8 +798,9 @@ void main() {
     vec4 vctTempFrag = mainTex;
     if(u_ao > 0.5f) {
         vec4 aoTex = texture(u_aoTexture, v_vctTexture);
-        aoTex *= vec4(u_vctAOColor.rgb, 1.0f);
+        //aoTex *= vec4(u_vctAOColor.rgb, 1.0f);
         vctTempFrag = mix(vctTempFrag, vctTempFrag * vec4(aoTex.rgb, 1.0f), u_vctAOColor.a);
+        vctTempFrag = aoTex;
     }
     if(u_mist > 0.5f) {
         vec4 mistTex = texture(u_mistTexture, v_vctTexture);

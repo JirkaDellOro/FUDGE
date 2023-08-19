@@ -15,7 +15,11 @@ var Fudge;
                 let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(_id), click: _callback });
                 //@ts-ignore
                 item.overrideProperty("iSubclass", iSubclass);
-                menu.append(item);
+                let name = subclass.name;
+                //TODO: Implement option to exclude shaders from list from within the shader class
+                if (name != "ShaderAmbientOcclusion" && name != "ShaderBloom" && name != "ShaderDownsample" && name != "ShaderMist" && name != "ShaderScreen" && name != "ShaderUpsample" && name != "ShaderAODepth" && name != "ShaderAONormal") {
+                    menu.append(item);
+                }
             }
             return menu;
         }

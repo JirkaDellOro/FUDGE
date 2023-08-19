@@ -139,7 +139,7 @@ namespace FudgeCore {
       }
       let cmpAO: ComponentAmbientOcclusion = this.getComponentAmbientOcclusion(this.camera);
       if (cmpAO != null) if (cmpAO.isActive) {
-        Render.calcAO(cmpAO);
+        Render.calcAO(this.camera, cmpAO);
       }
       let cmpBloom: ComponentBloom = this.getComponentBloom(this.camera);
       if (cmpBloom != null) if (cmpBloom.isActive) {
@@ -234,14 +234,16 @@ namespace FudgeCore {
         this.lastRectRenderSize.set(rectRender.size.x, rectRender.size.y);
         this.lastCamera = this.camera;
         if (rectRender.size.x >= 1 || rectRender.size.y >= 1) {
-          Render.adjustBufferSize(Render.mainFBO, Render.mainTexture, 1);
+          Render.adjustBufferSize(Render.mainFBO, Render.mainTexture);
           let cmpMist: ComponentMist = this.getComponentMist(this.camera);
           if (cmpMist != null) if (cmpMist.isActive) {
-            Render.adjustBufferSize(Render.mistFBO, Render.mistTexture, 1);
+            Render.adjustBufferSize(Render.mistFBO, Render.mistTexture);
           }
           let cmpAO: ComponentAmbientOcclusion = this.getComponentAmbientOcclusion(this.camera);
           if (cmpAO != null) if (cmpAO.isActive) {
-            Render.adjustBufferSize(Render.aoFBO, Render.aoTexture, 1);
+            Render.adjustBufferSize(Render.aoDepthFBO, Render.aoDepthTexture);
+            Render.adjustBufferSize(Render.aoNormalFBO, Render.aoNormalTexture);
+            Render.adjustBufferSize(Render.aoFBO, Render.aoTexture);
           }
           let cmpBloom: ComponentBloom = this.getComponentBloom(this.camera);
           if (cmpBloom != null) if (cmpBloom.isActive) {

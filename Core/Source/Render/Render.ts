@@ -19,8 +19,14 @@ namespace FudgeCore {
     public static mistTexture: WebGLTexture;
     public static cmpMistMaterial: ComponentMaterial;
 
+    public static aoDepthFBO: WebGLFramebuffer;
+    public static aoDepthTexture: WebGLTexture;
+    public static aoNormalFBO: WebGLFramebuffer;
+    public static aoNormalTexture: WebGLTexture;
     public static aoFBO: WebGLFramebuffer;
     public static aoTexture: WebGLTexture;
+    public static cmpNormalMaterial: ComponentMaterial;
+    public static cmpDepthMaterial: ComponentMaterial;
 
     public static downsamplingDepth: number = 7;
     public static bloomDownsamplingFBOs: WebGLFramebuffer[] = [];
@@ -212,24 +218,39 @@ namespace FudgeCore {
     //#endregion
 
     //#region PostFX
-    public static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mistFBO);
+    public static calcAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void {
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.aoNormalFBO);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
       Render.setDepthTest(true);
       Render.clear(new Color(1, 1, 1, 1));
       _cmpCamera.resetWorldToView();
 
+      
+      Render.drawNodesNormal(_cmpCamera, this.nodesSimple, _cmpAO);
+      //TODO: Implement Normal Calculation for non or partially opaque materials
+      Render.drawNodesNormal(_cmpCamera, this.nodesSimple, _cmpAO);
+
+      /*
+      Render.drawNodesDepth(_cmpCamera, this.nodesSimple, _cmpAO);
+      //TODO: Implement Normal Calculation for non or partially opaque materials
+      Render.drawNodesDepth(_cmpCamera, this.nodesSimple, _cmpAO);
+      */
+     
+     //TODO: Initialize and run AO Shader.
+     Render.setDepthTest(false);
+    }
+    
+    public static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mistFBO);
+      Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+      Render.setDepthTest(true);
+      Render.clear(new Color(1, 1, 1, 1));
+      
+      _cmpCamera.resetWorldToView();
+
       Render.drawNodesMist(_cmpCamera, this.nodesSimple, _cmpMist);
       //TODO: Implement alpha-mist-calculation. For now they are drawn fully opaque
       Render.drawNodesMist(_cmpCamera, this.nodesAlpha, _cmpMist);
-    }
-
-    public static calcAO(_cmpAO: ComponentAmbientOcclusion): void {
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.aoFBO);
-      Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
-      Render.clear(new Color(1, 1, 1, 1));
-
-      //TODO: Initialize and run AO Shader.
     }
 
     public static calcBloom(_cmpBloom: ComponentBloom): void {

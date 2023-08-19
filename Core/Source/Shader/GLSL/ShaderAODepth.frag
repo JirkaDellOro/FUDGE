@@ -1,6 +1,6 @@
 #version 300 es
 /**
-*Renders Framebuffer on to Renderbuffer
+*Renders depthinformation onto texture
 *@authors Roland Heer, HFU, 2023
 */
 precision mediump float;
@@ -28,7 +28,7 @@ void main() {
     vec4 vctTempFrag = mainTex;
     if(u_ao > 0.5f) {
         vec4 aoTex = texture(u_aoTexture, v_vctTexture);
-        //aoTex *= vec4(u_vctAOColor.rgb, 1.0f);
+        aoTex *= vec4(u_vctAOColor.rgb, 1.0f);
         vctTempFrag = mix(vctTempFrag, vctTempFrag * vec4(aoTex.rgb, 1.0f), u_vctAOColor.a);
         vctTempFrag = aoTex;
     }
