@@ -219,25 +219,32 @@ namespace FudgeCore {
 
     //#region PostFX
     public static calcAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void {
+
+      //NormalCalculation
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.aoNormalFBO);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
       Render.setDepthTest(true);
       Render.clear(new Color(1, 1, 1, 1));
       _cmpCamera.resetWorldToView();
 
-      
+      //TODO: Also send the normalmap to the shader if the material has one. This could lead to even better AO.
       Render.drawNodesNormal(_cmpCamera, this.nodesSimple, _cmpAO);
       //TODO: Implement Normal Calculation for non or partially opaque materials
       Render.drawNodesNormal(_cmpCamera, this.nodesSimple, _cmpAO);
 
-      /*
+      //DepthCalculation
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.aoDepthFBO);
+      Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+      Render.setDepthTest(true);
+      Render.clear(new Color(1, 0, 1, 1));
+      
       Render.drawNodesDepth(_cmpCamera, this.nodesSimple, _cmpAO);
       //TODO: Implement Normal Calculation for non or partially opaque materials
       Render.drawNodesDepth(_cmpCamera, this.nodesSimple, _cmpAO);
-      */
      
      //TODO: Initialize and run AO Shader.
      Render.setDepthTest(false);
+
     }
     
     public static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {

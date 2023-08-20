@@ -1032,7 +1032,7 @@
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
-                    "aspect": 1.7912772585669783,
+                    "aspect": 1.5617283950617284,
                     "pivot": {
                       "translation": "[0, 0, -3.889984130859375]",
                       "rotation": "[0, 0, 0]",
@@ -1072,7 +1072,7 @@
                     "threshold": 0.6,
                     "intensity": 1,
                     "Component": {
-                      "active": true
+                      "active": false
                     }
                   }
                 }

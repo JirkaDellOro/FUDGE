@@ -13,5 +13,6 @@ namespace FudgeCore {
         public static getFragmentShaderSource(): string {
             return this.insertDefines(shaderSources["ShaderAONormal.frag"], this.define);
         }
+        
     }
 }

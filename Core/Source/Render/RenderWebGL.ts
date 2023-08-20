@@ -366,7 +366,7 @@ namespace FudgeCore {
         let aoNormalBufferData: PostBufferdata = RenderWebGL.setupFBO();
         Render.aoNormalFBO = aoNormalBufferData.fbo;
         Render.aoNormalTexture = aoNormalBufferData.texture;
-        
+
         let aoBufferData: PostBufferdata = RenderWebGL.setupFBO();
         Render.aoFBO = aoBufferData.fbo;
         Render.aoTexture = aoBufferData.texture;
@@ -553,21 +553,43 @@ namespace FudgeCore {
       shader.useProgram();
       coat.useRenderData(shader, cmpMaterial);
 
-      let uniform: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
-      RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
-      uniform = shader.uniforms["u_mtxWorldToView"];
-      RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxWorldToView.get());
-
+      let uniform = shader.uniforms["u_mtxWorldToCamera"];
+      if (uniform) {
+        RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
+      }
       for (let node of _list) {
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
         let mtxMeshToView: Matrix4x4 = RenderWebGL.calcMeshToView(node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
         let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       }
-      /*Maybe useful for the AO Calculation
+    }
+
+    public static drawNodesDepth(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpAO: ComponentAmbientOcclusion) {
+      let cmpMaterial: ComponentMaterial = Render.cmpDepthMaterial;
+      let coat: Coat = cmpMaterial.material.coat;
+      let shader: ShaderInterface = cmpMaterial.material.getShader();
+      shader.useProgram();
+      coat.useRenderData(shader, cmpMaterial);
+      
+      let uniform: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
+      RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
+      uniform = shader.uniforms["u_clipStart"];
+      RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpCamera.getNear());
+      uniform = shader.uniforms["u_clipEnd"];
+      RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpCamera.getFar());
+
+
       uniform = shader.uniforms["u_mtxWorldToCamera"];
-      if (uniform) RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
-      */
+      if (uniform) {
+        RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
+      }
+      for (let node of _list) {
+        let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
+        let mtxMeshToView: Matrix4x4 = RenderWebGL.calcMeshToView(node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
+        let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
+        RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+      }
     }
 
     public static drawNodesMist(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpMist: ComponentMist): void {
@@ -590,10 +612,6 @@ namespace FudgeCore {
         let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       }
-      /*Maybe useful for the AO Calculation
-      uniform = shader.uniforms["u_mtxWorldToCamera"];
-      if (uniform) RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
-      */
     }
 
     public static compositeEffects(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist, _cmpAO: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void {
@@ -612,19 +630,19 @@ namespace FudgeCore {
       Render.useScreenQuadRenderData(shader);
       bindTexture(Render.mainTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_mainTexture");
 
+      if (_cmpAO != null) if (_cmpAO.isActive) {
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_ao"], 1);
+        bindTexture(Render.aoDepthTexture, WebGL2RenderingContext.TEXTURE2, 2, "u_aoTexture");
+        RenderWebGL.getRenderingContext().uniform4fv(shader.uniforms["u_vctAOColor"], _cmpAO.clrAO.getArray());
+      } else {
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_ao"], 0);
+      }
       if (_cmpMist != null) if (_cmpMist.isActive) {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_mist"], 1);
         bindTexture(Render.mistTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_mistTexture");
         RenderWebGL.getRenderingContext().uniform4fv(shader.uniforms["u_vctMistColor"], _cmpMist.clrMist.getArray());
       } else {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_mist"], 0);
-      }
-      if (_cmpAO != null) if (_cmpAO.isActive) {
-        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_ao"], 1);
-        bindTexture(Render.aoNormalTexture, WebGL2RenderingContext.TEXTURE2, 2, "u_aoTexture");
-        RenderWebGL.getRenderingContext().uniform4fv(shader.uniforms["u_vctAOColor"], _cmpAO.clrAO.getArray());
-      } else {
-        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_ao"], 0);
       }
       if (_cmpBloom != null) if (_cmpBloom.isActive) {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bloom"], 1);

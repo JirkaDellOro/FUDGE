@@ -50,73 +50,44 @@ void main() {
 }`;
   shaderSources["ShaderAODepth.frag"] = `#version 300 es
 /**
-*Renders depthinformation onto texture
+*Renders the depth information onto texture
 *@authors Roland Heer, HFU, 2023
 */
 precision mediump float;
 precision highp int;
 
-in vec2 v_vctTexture;
-uniform sampler2D u_mainTexture;
-
-uniform float u_mist;
-uniform sampler2D u_mistTexture;
-uniform vec4 u_vctMistColor;
-
-uniform float u_ao;
-uniform sampler2D u_aoTexture;
-uniform vec4 u_vctAOColor;
-
-uniform float u_bloom;
-uniform sampler2D u_bloomTexture;
-uniform float u_bloomIntensity;
+uniform float u_clipStart;
+uniform float u_clipEnd;
+in float v_depth;
 
 out vec4 vctFrag;
 
 void main() {
-    vec4 mainTex = texture(u_mainTexture, v_vctTexture);
-    vec4 vctTempFrag = mainTex;
-    if(u_ao > 0.5f) {
-        vec4 aoTex = texture(u_aoTexture, v_vctTexture);
-        aoTex *= vec4(u_vctAOColor.rgb, 1.0f);
-        vctTempFrag = mix(vctTempFrag, vctTempFrag * vec4(aoTex.rgb, 1.0f), u_vctAOColor.a);
-        vctTempFrag = aoTex;
-    }
-    if(u_mist > 0.5f) {
-        vec4 mistTex = texture(u_mistTexture, v_vctTexture);
-        vctTempFrag = mix(vctTempFrag, vec4(u_vctMistColor.rgb, 1.0f), mistTex.r * u_vctMistColor.a);
-    }
-    if(u_bloom > 0.5f) {
-        float intensity = max(u_bloomIntensity, 0.0f);
-        vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
-        vctTempFrag += (bloomTex * intensity);
-
-        float factor = 0.5f;
-        float r = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
-        float g = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
-        float b = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
-
-        vctTempFrag.r += g + b;
-        vctTempFrag.g += r + b;
-        vctTempFrag.b += r + g;
-    }
-
-    vctFrag = vctTempFrag;
+    float depth = v_depth;
+    depth = min(max((depth - u_clipStart) / (u_clipEnd / 2.0f - u_clipStart), 0.0f), 1.0f);
+    depth = ((log(depth + 0.001f) / log(20.0f)) / 3.0f) + 1.0f;
+    vctFrag = vec4(vec3(depth), 1.0f);
 }
 `;
   shaderSources["ShaderAODepth.vert"] = `#version 300 es
 /**
-*Renders depthinformation onto texture
+*Calculates the depth Information relative to the Camera
 *@authors Roland Heer, HFU, 2023
 */
-in vec2 a_vctPosition;
-in vec2 a_vctTexture;
+uniform mat4 u_mtxMeshToView;
+uniform mat4 u_mtxWorldToCamera;
+uniform mat4 u_mtxNormalMeshToWorld;
+uniform vec3 u_vctCamera;
 
-out vec2 v_vctTexture;
+in vec3 a_vctPosition;
+
+out float v_depth;
 
 void main() {
-    gl_Position = vec4(a_vctPosition, 0.0, 1.0);
-    v_vctTexture = a_vctTexture;
+    vec4 vctPosition = (u_mtxMeshToView * vec4(a_vctPosition, 1.0f));
+    gl_Position = vctPosition;
+    float depth = vctPosition.b;
+    v_depth = depth;
 }
 `;
   shaderSources["ShaderAONormal.frag"] = `#version 300 es
@@ -127,50 +98,33 @@ void main() {
 precision mediump float;
 precision highp int;
 
-in vec3 v_vctCamera;
-in mat4 v_mtxMeshToWorld;
-in vec4 v_vctPosition;
 in vec4 v_vctNormal;
 
 out vec4 vctFrag;
 
 void main() {
-    /*
-    float dist = length((v_mtxMeshToWorld * v_vctPosition).xyz - v_vctCamera);
-    float fogAmount = min(max((dist - u_nearPlane) / (u_farPlane - u_nearPlane), 0.0),1.0);
-    vec3 fog = vec3(-pow(fogAmount, 2.0) + (2.0 * fogAmount)); //lets Fog appear quicker and fall off slower results in a more gradual falloff
-    vctFrag = vec4(fog, 1.0);
-    */
     vctFrag = v_vctNormal;
 }
 `;
   shaderSources["ShaderAONormal.vert"] = `#version 300 es
 /**
-*Renders normalinformation onto texture
+*Calculates the Normal Information relative to the Camera
 *@authors Roland Heer, HFU, 2023
 */
-uniform vec3 u_vctCamera;
 uniform mat4 u_mtxMeshToView;
-uniform mat4 u_mtxWorldToView;
-uniform mat4 u_mtxMeshToWorld;
+uniform mat4 u_mtxWorldToCamera;
+uniform mat4 u_mtxNormalMeshToWorld;
 in vec3 a_vctPosition;
 in vec3 a_vctNormal;
 
-out vec4 v_vctPosition;
-out mat4 v_mtxMeshToWorld;
-out vec3 v_vctCamera;
 out vec4 v_vctNormal;
 
 void main() {
-    vec4 vctPosition = vec4(a_vctPosition, 1.0f);
-    mat4 mtxMeshToView = u_mtxMeshToView;
-    v_mtxMeshToWorld = u_mtxMeshToWorld;
-    v_vctCamera = u_vctCamera;
-    gl_Position = mtxMeshToView * vctPosition;
-    v_vctPosition = vctPosition;
-    vec4 vctNormal = vec4(a_vctNormal, 1.0f);
-    v_vctNormal = u_mtxMeshToWorld * vctNormal;
-    //v_vctNormal = u_mtxMeshToView * vctNormal;
+    gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0f);
+
+    vec3 vctNormal = a_vctNormal;
+    vctNormal = normalize(mat3(u_mtxWorldToCamera) * mat3(u_mtxNormalMeshToWorld) * vctNormal);
+    v_vctNormal = vec4(vctNormal, 1.0f);
 }
 `;
   shaderSources["ShaderBloom.frag"] = `#version 300 es
