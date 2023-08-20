@@ -2040,8 +2040,8 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         threshold: number;
         intensity: number;
-        lvl: number;
-        constructor(_threshold?: number, _intensity?: number, _lvl?: number);
+        desaturateHighlights: number;
+        constructor(_threshold?: number, _intensity?: number, _desaturateHighlights?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }

@@ -20,6 +20,7 @@ uniform vec4 u_vctAOColor;
 uniform float u_bloom;
 uniform sampler2D u_bloomTexture;
 uniform float u_bloomIntensity;
+uniform float u_highlightDesaturation;
 
 out vec4 vctFrag;
 
@@ -41,7 +42,7 @@ void main() {
         vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
         vctTempFrag += (bloomTex * intensity);
 
-        float factor = 0.5f;
+        float factor = u_highlightDesaturation;
         float r = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
         float g = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
         float b = max(vctTempFrag.r - 1.0f, 0.0f) * factor;

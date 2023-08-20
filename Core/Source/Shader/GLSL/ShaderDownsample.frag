@@ -25,7 +25,7 @@ void main() {
     if(u_lvl < 1.0f) {
         tex1 -= u_threshold;
         tex1 /= 1.0f - u_threshold;
-        float averageBrightness = (tex1.r + tex1.g + tex1.b) / 3.0f;
+        float averageBrightness = (((tex1.r + tex1.g + tex1.b)/3.0) * 0.2f) + 0.8f; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.9
         tex1 = tex1 * averageBrightness * 2.0f;
     }
     tex1 *= 1.3f;

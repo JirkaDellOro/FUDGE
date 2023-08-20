@@ -448,8 +448,6 @@ namespace FudgeCore {
       RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
       RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR);
       RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.LINEAR);
-      //RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST);
-      //RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
       RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.CLAMP_TO_EDGE);
       RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.CLAMP_TO_EDGE);
       RenderWebGL.crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, width, height, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, null);
@@ -573,7 +571,7 @@ namespace FudgeCore {
       let shader: ShaderInterface = cmpMaterial.material.getShader();
       shader.useProgram();
       coat.useRenderData(shader, cmpMaterial);
-      
+
       let uniform: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
       RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
       uniform = shader.uniforms["u_clipStart"];
@@ -648,12 +646,9 @@ namespace FudgeCore {
       }
       if (_cmpBloom != null) if (_cmpBloom.isActive) {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bloom"], 1);
-        if(_cmpBloom.lvl < 7){
-          bindTexture(Render.bloomDownsamplingTextures[_cmpBloom.lvl], WebGL2RenderingContext.TEXTURE3, 3, "u_bloomTexture");
-        }else{
-          bindTexture(Render.bloomUpsamplingTextures[5-(_cmpBloom.lvl-7)], WebGL2RenderingContext.TEXTURE3, 3, "u_bloomTexture");
-        }
+        bindTexture(Render.bloomUpsamplingTextures[0], WebGL2RenderingContext.TEXTURE3, 3, "u_bloomTexture");
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bloomIntensity"], _cmpBloom.intensity);
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_highlightDesaturation"], _cmpBloom.desaturateHighlights);
       } else {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bloom"], 0);
       }

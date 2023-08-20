@@ -21,5 +21,5 @@ void main() {
         tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * altGaussianKernel[i]);
     }
     vec4 tex2 = texture(u_texture2, v_vctTexture);
-    vctFrag = tex2 + tex1; 
+    vctFrag = tex2 + tex1;
 }

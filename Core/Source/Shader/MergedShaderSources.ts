@@ -154,7 +154,7 @@ void main() {
     if(u_lvl < 1.0f) {
         tex1 -= u_threshold;
         tex1 /= 1.0f - u_threshold;
-        float averageBrightness = (tex1.r + tex1.g + tex1.b) / 3.0f;
+        float averageBrightness = (((tex1.r + tex1.g + tex1.b)/3.0) * 0.2f) + 0.8f; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.9
         tex1 = tex1 * averageBrightness * 2.0f;
     }
     tex1 *= 1.3f;
@@ -707,6 +707,7 @@ uniform vec4 u_vctAOColor;
 uniform float u_bloom;
 uniform sampler2D u_bloomTexture;
 uniform float u_bloomIntensity;
+uniform float u_highlightDesaturation;
 
 out vec4 vctFrag;
 
@@ -728,7 +729,7 @@ void main() {
         vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
         vctTempFrag += (bloomTex * intensity);
 
-        float factor = 0.5f;
+        float factor = u_highlightDesaturation;
         float r = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
         float g = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
         float b = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
@@ -1103,7 +1104,7 @@ void main() {
         tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * altGaussianKernel[i]);
     }
     vec4 tex2 = texture(u_texture2, v_vctTexture);
-    vctFrag = tex2 + tex1; 
+    vctFrag = tex2 + tex1;
 }`;
   shaderSources["ShaderUpsample.vert"] = `#version 300 es
 /**
