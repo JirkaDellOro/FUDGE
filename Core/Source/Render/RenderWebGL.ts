@@ -408,8 +408,8 @@ namespace FudgeCore {
     */
     protected static setupFBO(_fbo: WebGLFramebuffer = null, _tex: WebGLTexture = null, _divider: number = 1): PostBufferdata {
       let postBufferData: PostBufferdata;
-      let width: number = Math.max(Math.floor(RenderWebGL.crc3.canvas.width / _divider), 1);         //the _divider variable is used for Downsampling (for bloom shader)
-      let height: number = Math.max(Math.floor(RenderWebGL.crc3.canvas.height / _divider), 1);
+      let width: number = Math.max(Math.round(RenderWebGL.crc3.canvas.width / _divider), 1);         //the _divider variable is used for Downsampling (for bloom shader)
+      let height: number = Math.max(Math.round(RenderWebGL.crc3.canvas.height / _divider), 1);
       let framebuffer: WebGLFramebuffer;
       let texture: RenderTexture;
       let depthBuffer: WebGLRenderbuffer;
@@ -448,6 +448,8 @@ namespace FudgeCore {
       RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
       RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR);
       RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.LINEAR);
+      //RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST);
+      //RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
       RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.CLAMP_TO_EDGE);
       RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.CLAMP_TO_EDGE);
       RenderWebGL.crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, width, height, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, null);
@@ -646,7 +648,11 @@ namespace FudgeCore {
       }
       if (_cmpBloom != null) if (_cmpBloom.isActive) {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bloom"], 1);
-        bindTexture(Render.bloomUpsamplingTextures[0], WebGL2RenderingContext.TEXTURE3, 3, "u_bloomTexture");
+        if(_cmpBloom.lvl < 7){
+          bindTexture(Render.bloomDownsamplingTextures[_cmpBloom.lvl], WebGL2RenderingContext.TEXTURE3, 3, "u_bloomTexture");
+        }else{
+          bindTexture(Render.bloomUpsamplingTextures[5-(_cmpBloom.lvl-7)], WebGL2RenderingContext.TEXTURE3, 3, "u_bloomTexture");
+        }
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bloomIntensity"], _cmpBloom.intensity);
       } else {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bloom"], 0);

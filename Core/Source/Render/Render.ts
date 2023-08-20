@@ -237,22 +237,22 @@ namespace FudgeCore {
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
       Render.setDepthTest(true);
       Render.clear(new Color(1, 0, 1, 1));
-      
+
       Render.drawNodesDepth(_cmpCamera, this.nodesSimple, _cmpAO);
       //TODO: Implement Normal Calculation for non or partially opaque materials
       Render.drawNodesDepth(_cmpCamera, this.nodesSimple, _cmpAO);
-     
-     //TODO: Initialize and run AO Shader.
-     Render.setDepthTest(false);
+
+      //TODO: Initialize and run AO Shader.
+      Render.setDepthTest(false);
 
     }
-    
+
     public static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mistFBO);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
       Render.setDepthTest(true);
       Render.clear(new Color(1, 1, 1, 1));
-      
+
       _cmpCamera.resetWorldToView();
 
       Render.drawNodesMist(_cmpCamera, this.nodesSimple, _cmpMist);
@@ -288,12 +288,12 @@ namespace FudgeCore {
         let height: number = Math.max(Render.crc3.canvas.height / div, 1);
 
         Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.bloomDownsamplingFBOs[i]);
-        Render.crc3.viewport(0, 0, Math.floor(width), Math.floor(height));
+        Render.crc3.viewport(0, 0, Math.round(width), Math.round(height));
         Render.clear(new Color(0, 0, 0, 1));
 
         bindTextureSlot0(tempTexture);
-        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Math.floor(width * 2));
-        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Math.floor(height * 2));
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], width * 2);
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], height * 2);
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_threshold"], tempThreshold);
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_lvl"], i);
         RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
@@ -313,13 +313,13 @@ namespace FudgeCore {
         let height: number = Math.max(Render.crc3.canvas.height / div, 1);
 
         Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.bloomUpsamplingFBOs[i]);
-        Render.crc3.viewport(0, 0, width, height);
+        Render.crc3.viewport(0, 0, Math.round(width), Math.round(height));
         Render.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
 
         bindTextureSlot0(tempTexture);
         bindTextureSlot1(this.bloomDownsamplingTextures[i]);
-        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Math.min(Math.floor(width / 2)));
-        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Math.min(Math.floor(height / 2)));
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Math.min(width / 2));
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Math.min(height / 2));
 
         RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
 

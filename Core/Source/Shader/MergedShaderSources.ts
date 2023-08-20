@@ -127,44 +127,6 @@ void main() {
     v_vctNormal = vec4(vctNormal, 1.0f);
 }
 `;
-  shaderSources["ShaderBloom.frag"] = `#version 300 es
-/**
-*Calculates bloom based on shaded render 
-*@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
-*/
-precision mediump float;
-precision highp int;
-
-out vec4 vctFrag;
-
-void main() {
-    
-}
-`;
-  shaderSources["ShaderBloom.vert"] = `#version 300 es
-
-/**
-* Bloom Vertex - Shader. Sets Values for Bloom Fragment - Shader
-* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
-*/
-
-uniform vec3 u_vctCamera;
-uniform mat4 u_mtxMeshToView;
-uniform mat4 u_mtxMeshToWorld;
-in vec3 a_vctPosition;
-
-out vec4 v_vctPosition;
-out mat4 v_mtxMeshToWorld;
-out vec3 v_vctCamera;
-
-void main() {
-    vec4 vctPosition = vec4(a_vctPosition, 1.0);
-    mat4 mtxMeshToView = u_mtxMeshToView;
-    v_mtxMeshToWorld = u_mtxMeshToWorld;
-    v_vctCamera = u_vctCamera;
-    gl_Position = mtxMeshToView * vctPosition;
-    v_vctPosition = vctPosition;
-}`;
   shaderSources["ShaderDownsample.frag"] = `#version 300 es
 /**
 *Downsamples a given Texture to the current FBOs Texture
@@ -175,11 +137,12 @@ precision highp int;
 
 in vec2 v_vctTexture;
 in vec2[9] v_vctOffsets;
+
 uniform sampler2D u_texture;
 uniform float u_threshold;
 uniform float u_lvl;
 
-float altGaussianKernel[9] = float[](0.04f, 0.044f, 0.04f, 0.122f, 0.332f, 0.122f, 0.05f, 0.2f, 0.05f);
+float altGaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f, 0.045f, 0.122f, 0.045f);
 
 out vec4 vctFrag;
 
@@ -194,7 +157,7 @@ void main() {
         float averageBrightness = (tex1.r + tex1.g + tex1.b) / 3.0f;
         tex1 = tex1 * averageBrightness * 2.0f;
     }
-    tex1 *= 1.0f + (u_lvl * 0.3f);
+    tex1 *= 1.3f;
     vctFrag = tex1;
 }`;
   shaderSources["ShaderDownsample.vert"] = `#version 300 es
@@ -221,7 +184,7 @@ void main() {
     (
         vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
         vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
-        vec2(-offset.x, -offset.y), vec2(0.0, offset.y),  vec2(-offset.x, -offset.y)
+        vec2(-offset.x, -offset.y), vec2(0.0, -offset.y),  vec2(offset.x, -offset.y)
     );
 }`;
   shaderSources["ShaderMist.frag"] = `#version 300 es
@@ -1130,7 +1093,7 @@ in vec2[9] v_vctOffsets;
 uniform sampler2D u_texture;
 uniform sampler2D u_texture2;
 
-float altGaussianKernel[9] = float[](0.04f, 0.044f, 0.04f, 0.122f, 0.332f, 0.122f, 0.05f, 0.2f, 0.05f);
+float altGaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f, 0.045f, 0.122f, 0.045f);
 
 out vec4 vctFrag;
 
@@ -1166,7 +1129,7 @@ void main() {
     (
         vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
         vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
-        vec2(-offset.x, -offset.y), vec2(0.0, offset.y),  vec2(-offset.x, -offset.y)
+        vec2(-offset.x, -offset.y), vec2(0.0, -offset.y),  vec2(offset.x, -offset.y)
     );
 }`;
 

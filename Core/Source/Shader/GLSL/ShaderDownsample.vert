@@ -22,6 +22,6 @@ void main() {
     (
         vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
         vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
-        vec2(-offset.x, -offset.y), vec2(0.0, offset.y),  vec2(-offset.x, -offset.y)
+        vec2(-offset.x, -offset.y), vec2(0.0, -offset.y),  vec2(offset.x, -offset.y)
     );
 }

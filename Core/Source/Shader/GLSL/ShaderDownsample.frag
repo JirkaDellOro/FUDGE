@@ -8,11 +8,12 @@ precision highp int;
 
 in vec2 v_vctTexture;
 in vec2[9] v_vctOffsets;
+
 uniform sampler2D u_texture;
 uniform float u_threshold;
 uniform float u_lvl;
 
-float altGaussianKernel[9] = float[](0.04f, 0.044f, 0.04f, 0.122f, 0.332f, 0.122f, 0.05f, 0.2f, 0.05f);
+float altGaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f, 0.045f, 0.122f, 0.045f);
 
 out vec4 vctFrag;
 
@@ -27,6 +28,6 @@ void main() {
         float averageBrightness = (tex1.r + tex1.g + tex1.b) / 3.0f;
         tex1 = tex1 * averageBrightness * 2.0f;
     }
-    tex1 *= 1.0f + (u_lvl * 0.3f);
+    tex1 *= 1.3f;
     vctFrag = tex1;
 }

@@ -11,7 +11,7 @@ in vec2[9] v_vctOffsets;
 uniform sampler2D u_texture;
 uniform sampler2D u_texture2;
 
-float altGaussianKernel[9] = float[](0.04f, 0.044f, 0.04f, 0.122f, 0.332f, 0.122f, 0.05f, 0.2f, 0.05f);
+float altGaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f, 0.045f, 0.122f, 0.045f);
 
 out vec4 vctFrag;
 
