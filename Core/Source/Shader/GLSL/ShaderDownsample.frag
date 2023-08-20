@@ -23,9 +23,10 @@ void main() {
         tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * altGaussianKernel[i]);
     }
     if(u_lvl < 1.0f) {
-        tex1 -= u_threshold;
-        tex1 /= 1.0f - u_threshold;
-        float averageBrightness = (((tex1.r + tex1.g + tex1.b)/3.0) * 0.2f) + 0.8f; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.9
+        float threshold = min(max(u_threshold, 0.0f), 0.999999999f);     //None of the rendered values can exeed 1.0 therefor the bloom effect won't work if the threshold is >= 1.0
+        tex1 -= threshold;
+        tex1 /= 1.0f - threshold;
+        float averageBrightness = (((tex1.r + tex1.g + tex1.b) / 3.0f) * 0.2f) + 0.8f; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.9
         tex1 = tex1 * averageBrightness * 2.0f;
     }
     tex1 *= 1.3f;

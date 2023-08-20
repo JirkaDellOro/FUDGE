@@ -42,7 +42,7 @@ void main() {
         vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
         vctTempFrag += (bloomTex * intensity);
 
-        float factor = u_highlightDesaturation;
+        float factor = min(max(u_highlightDesaturation, 0.0f), 1.0f);
         float r = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
         float g = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
         float b = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
