@@ -23,7 +23,8 @@ namespace FudgeCore {
     public faces: Face[] = [];
 
     // public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
-    protected renderMesh: RenderMesh; /* defined by RenderInjector*/
+    /** @internal */
+    public renderMesh: RenderMesh; /* defined by RenderInjector*/
 
     /** bounding box AABB */
     protected ƒbox: Box;

@@ -39,6 +39,13 @@ namespace FudgeCore {
     }
 
     /**
+     * returns the color associated with the vertex addressed
+     */
+    public color(_index: number): Color {
+      return this[_index].color;
+    }
+
+    /**
      * returns the position associated with the vertex addressed, resolving references between vertices 
      */
     public bones(_index: number): Bone[] {

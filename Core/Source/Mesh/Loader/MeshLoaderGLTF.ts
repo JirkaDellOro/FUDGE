@@ -4,101 +4,92 @@ namespace FudgeCore {
    * @authors Matthias Roming, HFU, 2022-2023 | Jonas Plotzky, HFU, 2023
    */
   export class MeshLoaderGLTF extends MeshLoader {
-    public static async load(_mesh: MeshImport | MeshSkin, _data?: { mesh: GLTF.Mesh; iPrimitive: number }): Promise<MeshImport> {
+    public static async load(_mesh: MeshImport | MeshSkin, _data?: { gltfMesh: GLTF.Mesh; iPrimitive: number }): Promise<MeshImport> {
       const loader: GLTFLoader = await GLTFLoader.LOAD(_mesh.url.toString());
-      const gltfMesh: GLTF.Mesh = _data.mesh;
+      const gltfMesh: GLTF.Mesh = _data.gltfMesh;
       const gltfPrimitive: GLTF.MeshPrimitive = gltfMesh.primitives[_data.iPrimitive];
-      const renderMesh: RenderMesh = Reflect.get(_mesh, "renderMesh");
-      _mesh.name = _data.mesh.name;
 
-      if (gltfPrimitive.indices)
-        Reflect.set(renderMesh, "ƒindices", await loader.getVertexIndices(gltfPrimitive.indices));
+      _mesh.name = _data.gltfMesh.name;
 
-      Reflect.set(renderMesh, "ƒvertices", await loader.getFloat32Array(gltfPrimitive.attributes.POSITION));
+      let indices: Uint16Array;
+      let vertices: Float32Array;
+      let normalsVertex: Float32Array;
+      let textureUVs: Float32Array;
+      let colors: Float32Array;
+      let iBones: Uint8Array;
+      let weights: Float32Array;
 
-      if (gltfPrimitive.attributes.NORMAL)
-        Reflect.set(renderMesh, "ƒnormalsVertex", await loader.getFloat32Array(gltfPrimitive.attributes.NORMAL));
+      vertices = await loader.getFloat32Array(gltfPrimitive.attributes.POSITION);
+
+      if (gltfPrimitive.indices != undefined)
+        indices = await loader.getVertexIndices(gltfPrimitive.indices);
+
+      if (gltfPrimitive.attributes.NORMAL != undefined)
+        normalsVertex = await loader.getFloat32Array(gltfPrimitive.attributes.NORMAL);
 
       // TODO: add tangents to RenderMesh
       // if (meshGLTF.primitives[_data.iPrimitive].attributes.TANGENT)
       //   Reflect.set(renderMesh, "ƒtangents", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.TANGENT));
 
-      if (gltfPrimitive.attributes.TEXCOORD_0)
-        Reflect.set(renderMesh, "ƒtextureUVs", await loader.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_0));
+      if (gltfPrimitive.attributes.TEXCOORD_0 != undefined)
+        textureUVs = await loader.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_0);
 
-      if (gltfPrimitive.attributes.COLOR_0)
-        Reflect.set(renderMesh, "ƒcolors", await loader.getVertexColors(gltfPrimitive.attributes.COLOR_0));
-      else
-        Reflect.set(renderMesh, "ƒcolors", new Float32Array(renderMesh.vertices.length * 4).fill(1));
+      if (gltfPrimitive.attributes.COLOR_0 != undefined)
+        colors = await loader.getVertexColors(gltfPrimitive.attributes.COLOR_0);
 
-      // TODO: check if these lines are needed, also spread operator will cause problems with too many vertices/faces
-      _mesh.vertices.push(...getVertices(renderMesh));
-      _mesh.faces.push(...getFaces(renderMesh, _mesh.vertices));
-
-      if (_mesh instanceof MeshSkin) {
-        Reflect.set(renderMesh, "ƒiBones", await loader.getBoneIndices(gltfPrimitive.attributes.JOINTS_0));
-        Reflect.set(renderMesh, "ƒweights", await loader.getFloat32Array(gltfPrimitive.attributes.WEIGHTS_0));
-        createBones(renderMesh, _mesh.vertices);
+      if (gltfPrimitive.attributes.JOINTS_0 != undefined && gltfPrimitive.attributes.WEIGHTS_0 != undefined) {
+        iBones = await loader.getBoneIndices(gltfPrimitive.attributes.JOINTS_0);
+        weights = await loader.getFloat32Array(gltfPrimitive.attributes.WEIGHTS_0);
       }
+
+      for (let iVertex: number = 0, iTextureUV: number = 0, iBoneEntry: number = 0; iVertex < vertices.length; iVertex += 3, iTextureUV += 2, iBoneEntry += 4) {
+        _mesh.vertices.push(
+          new Vertex(
+            new Vector3(vertices[iVertex + 0], vertices[iVertex + 1], vertices[iVertex + 2]),
+            textureUVs ?
+              new Vector2(textureUVs[iTextureUV + 0], textureUVs[iTextureUV + 1]) :
+              undefined,
+            normalsVertex ?
+              new Vector3(normalsVertex[iVertex + 0], normalsVertex[iVertex + 1], normalsVertex[iVertex + 2]) :
+              undefined,
+            colors ?
+              new Color(colors[iVertex + 0], colors[iVertex + 1], colors[iVertex + 2], colors[iVertex + 3]) :
+              undefined,
+            iBones && weights ?
+              [
+                { index: iBones[iBoneEntry + 0], weight: weights[iBoneEntry + 0] },
+                { index: iBones[iBoneEntry + 1], weight: weights[iBoneEntry + 1] },
+                { index: iBones[iBoneEntry + 2], weight: weights[iBoneEntry + 2] },
+                { index: iBones[iBoneEntry + 3], weight: weights[iBoneEntry + 3] }
+              ] :
+              undefined
+          )
+        );
+      }
+
+      for (let iFaceVertexIndex: number = 0; iFaceVertexIndex < indices.length; iFaceVertexIndex += 3) {
+        try {
+          _mesh.faces.push(new Face(
+            _mesh.vertices,
+            indices[iFaceVertexIndex + 0],
+            indices[iFaceVertexIndex + 1],
+            indices[iFaceVertexIndex + 2]
+          ));
+        } catch (_e: unknown) {
+          Debug.fudge("Face excluded", (<Error>_e).message);
+        }
+      }
+
+      const renderMesh: RenderMesh = _mesh.renderMesh;
+      renderMesh.indices = indices;
+      renderMesh.vertices = vertices;
+      renderMesh.normalsVertex = normalsVertex;
+      renderMesh.textureUVs = textureUVs;
+      renderMesh.colors = colors;
+      renderMesh.iBones = iBones;
+      renderMesh.weights = weights;
 
       return _mesh;
-    }
-  }
-
-  function* getVertices(_renderMesh: RenderMesh): Generator<Vertex> {
-    for (let iVertex: number = 0, iTextureUV: number = 0; iVertex < _renderMesh.vertices.length;
-      iVertex += 3, iTextureUV += 2) {
-      yield new Vertex(
-        new Vector3(
-          _renderMesh.vertices[iVertex + 0],
-          _renderMesh.vertices[iVertex + 1],
-          _renderMesh.vertices[iVertex + 2]
-        ),
-        new Vector2(
-          _renderMesh.textureUVs[iTextureUV + 0],
-          _renderMesh.textureUVs[iTextureUV + 1]
-        ),
-        Reflect.get(_renderMesh, "ƒnormalsVertex") ?
-          new Vector3(
-            _renderMesh.normalsVertex[iVertex + 0],
-            _renderMesh.normalsVertex[iVertex + 1],
-            _renderMesh.normalsVertex[iVertex + 2]
-          ) :
-          undefined,
-        new Color(
-          _renderMesh.colors[iVertex + 0],
-          _renderMesh.colors[iVertex + 1],
-          _renderMesh.colors[iVertex + 2],
-          _renderMesh.colors[iVertex + 3]
-        )
-      );
-    }
-  }
-
-  function* getFaces(_renderMesh: RenderMesh, _vertices: Vertices): Generator<Face> {
-    for (let iFaceVertexIndex: number = 0; iFaceVertexIndex < _renderMesh.indices.length; iFaceVertexIndex += 3) {
-      try {
-        yield new Face(
-          _vertices,
-          _renderMesh.indices[iFaceVertexIndex + 0],
-          _renderMesh.indices[iFaceVertexIndex + 1],
-          _renderMesh.indices[iFaceVertexIndex + 2]
-        );
-      } catch (_e: unknown) {
-        Debug.fudge("Face excluded", (<Error>_e).message);
-      }
-    }
-  }
-
-  function createBones(_renderMesh: RenderMesh, _vertices: Vertices): void {
-    for (let iVertex: number = 0, iBoneEntry: number = 0; iVertex < _vertices.length; iVertex++) {
-      _vertices[iVertex].bones = [];
-      for (let i: number = 0; i < 4; i++, iBoneEntry++) {
-        _vertices[iVertex].bones.push({
-          index: _renderMesh.iBones[iBoneEntry],
-          weight: _renderMesh.weights[iBoneEntry]
-        });
-      }
     }
   }
 }

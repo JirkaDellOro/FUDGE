@@ -397,7 +397,10 @@ namespace FudgeCore {
       let renderBuffers: RenderBuffers = cmpMesh.mesh.useRenderBuffers(shader, cmpMesh.mtxWorld, mtxMeshToView);
 
       if (cmpMesh.skeleton)
-        cmpMesh.skeleton.useRenderBuffer(shader);
+        if (cmpMesh.skeleton instanceof SkeletonInstance)
+          cmpMesh.skeleton.useRenderBuffer(shader);
+        else
+          Debug.warn(`${RenderWebGL.name}: ${ComponentMesh.name} references ${Skeleton.name}Id ${cmpMesh.skeleton} and not an instance of it. This can happen if this node is not a descendant of the referenced skeleton inside the graph. FUDGE currently only supports skinned meshes with a skeleton that is a direct ancestor of the mesh.`);
 
       let uniform: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
       if (uniform)

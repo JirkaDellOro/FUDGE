@@ -25,7 +25,7 @@ namespace FudgeCore {
 
     private constructor(_gltf: GLTF.GlTf, _url: string) {
       this.gltf = _gltf;
-      this.url = new URL(_url, Project.baseURL).toString();
+      this.url = _url;
     }
 
     private static get defaultMaterial(): Material {
@@ -44,10 +44,13 @@ namespace FudgeCore {
      * Returns a {@link GLTFLoader} instance for the given url.
      */
     public static async LOAD(_url: string): Promise<GLTFLoader> {
+      const url: string = new URL(_url, Project.baseURL).toString();
+
       if (!this.loaders)
         this.loaders = {};
-      if (!this.loaders[_url]) {
-        const response: Response = await fetch(_url);
+      
+      if (!this.loaders[url]) {
+        const response: Response = await fetch(url);
         const gltf: GLTF.GlTf = await response.json();
 
         if (gltf.nodes) {
@@ -96,14 +99,19 @@ namespace FudgeCore {
               _skin.skeleton = Array.from(ancestors).reduce((_a, _b) => gltf.nodes[_a].depth < gltf.nodes[_b].depth ? _a : _b);
             }
 
+            if (gltf.nodes[_skin.skeleton].iSkinRoot != undefined) {
+              Debug.warn(`${GLTFLoader.name} | ${url}: Skin with index ${_iSkin} and ${gltf.nodes[_skin.skeleton].iSkinRoot} share the same common root node. FUDGE currently only supports one skeleton at the same postion in the hierarchy`);
+              return;
+            }
+
             gltf.nodes[_skin.skeleton].iSkinRoot = _iSkin;
           });
         }
 
-        this.loaders[_url] = new GLTFLoader(gltf, _url);
+        this.loaders[url] = new GLTFLoader(gltf, url);
       }
 
-      return this.loaders[_url];
+      return this.loaders[url];
     }
 
     /**
@@ -433,7 +441,7 @@ namespace FudgeCore {
           gltfMesh.primitives[_iPrimitive].attributes.JOINTS_0 != undefined ?
             new MeshSkin() :
             new MeshImport()
-        ).load(MeshLoaderGLTF, this.url, { mesh: gltfMesh, iPrimitive: _iPrimitive });
+        ).load(MeshLoaderGLTF, this.url, { gltfMesh: gltfMesh, iPrimitive: _iPrimitive });
       }
 
       return this.#meshes[_iMesh][_iPrimitive];
@@ -465,7 +473,7 @@ namespace FudgeCore {
           gltfMaterial.name,
           gltfBaseColorTexture ?
             (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
-            (_skin ? ShaderPhongSkin : ShaderPhong),
+            (_skin ? ShaderFlatSkin : ShaderPhong),
           coat);
 
         this.#materials[_iMaterial] = material;

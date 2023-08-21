@@ -32,7 +32,7 @@ namespace FudgeCore {
             indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indicesFlat),
             normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normalsFlat),
             textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVsFlat),
-            colors: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.colors),
+            colors: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.colorsFlat),
             nIndices: this.renderMesh.indicesFlat.length
           };
         return this.renderMesh.flat;

@@ -60,7 +60,7 @@ namespace FudgeCore {
      * @param _bone the node to be registered, that should be a descendant of this skeleton
      * @param _mtxBindInverse a precalculated inverse matrix of the bind pose from the bone
      */
-    public registerBone(_bone: Node, _mtxBindInverse: Matrix4x4 = _bone.mtxWorldInverse): void {
+    public registerBone(_bone: Node, _mtxBindInverse: Matrix4x4 = _bone.mtxWorldInverse.clone): void {
       this.bones[_bone.name] = _bone;
       this.mtxBindInverses[_bone.name] = _mtxBindInverse;
     }
