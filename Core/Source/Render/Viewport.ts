@@ -241,7 +241,7 @@ namespace FudgeCore {
           }
           let cmpAO: ComponentAmbientOcclusion = this.getComponentAmbientOcclusion(this.camera);
           if (cmpAO != null) if (cmpAO.isActive) {
-            Render.adjustBufferSize(Render.aoDepthFBO, Render.aoDepthTexture);
+            Render.adjustBufferSize(Render.aoDepthFBO, Render.aoDepthTexture,1,WebGL2RenderingContext.R16UI,WebGL2RenderingContext.RED_INTEGER,WebGL2RenderingContext.UNSIGNED_SHORT);
             Render.adjustBufferSize(Render.aoNormalFBO, Render.aoNormalTexture);
             Render.adjustBufferSize(Render.aoFBO, Render.aoTexture);
           }

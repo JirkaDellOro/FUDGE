@@ -60,13 +60,13 @@ uniform float u_clipStart;
 uniform float u_clipEnd;
 in float v_depth;
 
-out vec4 vctFrag;
+out uint vctFrag;
 
 void main() {
     float depth = v_depth;
     depth = min(max((depth - u_clipStart) / (u_clipEnd / 2.0f - u_clipStart), 0.0f), 1.0f);
     depth = ((log(depth + 0.001f) / log(20.0f)) / 3.0f) + 1.0f;
-    vctFrag = vec4(vec3(depth), 1.0f);
+    vctFrag = uint(0);
 }
 `;
   shaderSources["ShaderAODepth.vert"] = `#version 300 es
@@ -716,10 +716,10 @@ void main() {
     vec4 mainTex = texture(u_mainTexture, v_vctTexture);
     vec4 vctTempFrag = mainTex;
     if(u_ao > 0.5f) {
-        vec4 aoTex = texture(u_aoTexture, v_vctTexture);
+        uint aoTex = uint(texture(u_aoTexture, v_vctTexture).r);
         //aoTex *= vec4(u_vctAOColor.rgb, 1.0f);
-        vctTempFrag = mix(vctTempFrag, vctTempFrag * vec4(aoTex.rgb, 1.0f), u_vctAOColor.a);
-        vctTempFrag = aoTex;
+        //vctTempFrag = mix(vctTempFrag, vctTempFrag * vec4(aoTex.rgb, 1.0f), u_vctAOColor.a);
+        vctTempFrag = vec4(aoTex);
     }
     if(u_mist > 0.5f) {
         vec4 mistTex = texture(u_mistTexture, v_vctTexture);
@@ -730,7 +730,7 @@ void main() {
         vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
         vctTempFrag += (bloomTex * intensity);
 
-        float factor = min(u_highlightDesaturation, 1.0);
+        float factor = min(max(u_highlightDesaturation, 0.0f), 1.0f);
         float r = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
         float g = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
         float b = max(vctTempFrag.r - 1.0f, 0.0f) * factor;

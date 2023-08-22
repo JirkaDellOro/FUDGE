@@ -1106,11 +1106,11 @@ declare namespace FudgeCore {
         /**
          * Sets up and configures framebuffers and textures for post-fx
         */
-        protected static setupFBO(_fbo?: WebGLFramebuffer, _tex?: WebGLTexture, _divider?: number): PostBufferdata;
+        protected static setupFBO(_fbo?: WebGLFramebuffer, _tex?: WebGLTexture, _divider?: number, _internalFormat?: number, _format?: number, _type?: number): PostBufferdata;
         /**
          * updates texture and renderbuffersize for given FBO
          */
-        static adjustBufferSize(_fbo: WebGLFramebuffer, _tex: WebGLTexture, _divider?: number): void;
+        static adjustBufferSize(_fbo: WebGLFramebuffer, _tex: WebGLTexture, _divider?: number, _internalFormat?: number, _format?: number, _type?: number): void;
         /**
          * updates all off the bloom FBOs and textures
          */

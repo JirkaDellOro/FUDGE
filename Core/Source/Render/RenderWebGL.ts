@@ -27,6 +27,7 @@ namespace FudgeCore {
   export interface PostBufferdata {
     fbo: WebGLFramebuffer;
     texture: WebGLTexture;
+    depthBuffer: WebGLRenderbuffer;
   }
 
   /**
@@ -359,10 +360,10 @@ namespace FudgeCore {
         Project.deregister(tempMistMat);  //Deregister this Material to prevent listing in the internal resources of the editor
       }
       if (_ao) {
-        let aoDepthBufferData: PostBufferdata = RenderWebGL.setupFBO();
+        let aoDepthBufferData: PostBufferdata = RenderWebGL.setupFBO(null, null, 1,WebGL2RenderingContext.R16UI, WebGL2RenderingContext.RED_INTEGER, WebGL2RenderingContext.UNSIGNED_SHORT);
         Render.aoDepthFBO = aoDepthBufferData.fbo;
         Render.aoDepthTexture = aoDepthBufferData.texture;
-
+        
         let aoNormalBufferData: PostBufferdata = RenderWebGL.setupFBO();
         Render.aoNormalFBO = aoNormalBufferData.fbo;
         Render.aoNormalTexture = aoNormalBufferData.texture;
@@ -406,7 +407,7 @@ namespace FudgeCore {
     /**
      * Sets up and configures framebuffers and textures for post-fx
     */
-    protected static setupFBO(_fbo: WebGLFramebuffer = null, _tex: WebGLTexture = null, _divider: number = 1): PostBufferdata {
+    protected static setupFBO(_fbo: WebGLFramebuffer = null, _tex: WebGLTexture = null, _divider: number = 1, _internalFormat: number = WebGL2RenderingContext.RGBA, _format: number = WebGL2RenderingContext.RGBA, _type: number = WebGL2RenderingContext.UNSIGNED_BYTE): PostBufferdata {
       let postBufferData: PostBufferdata;
       let width: number = Math.max(Math.round(RenderWebGL.crc3.canvas.width / _divider), 1);         //the _divider variable is used for Downsampling (for bloom shader)
       let height: number = Math.max(Math.round(RenderWebGL.crc3.canvas.height / _divider), 1);
@@ -446,11 +447,11 @@ namespace FudgeCore {
       }
 
       RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
-      RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR);
-      RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.LINEAR);
+      RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST);
+      RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
       RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.CLAMP_TO_EDGE);
       RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.CLAMP_TO_EDGE);
-      RenderWebGL.crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, width, height, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, null);
+      RenderWebGL.crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, _internalFormat, width, height, 0, _format, _type, null);
 
 
       //Create renderbuffer 
@@ -478,15 +479,15 @@ namespace FudgeCore {
       RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
       RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
       RenderWebGL.crc3.bindRenderbuffer(WebGL2RenderingContext.RENDERBUFFER, null);
-      postBufferData = { fbo: framebuffer, texture: texture };
+      postBufferData = { fbo: framebuffer, texture: texture, depthBuffer: depthBuffer };
       return postBufferData;
     }
 
     /**
      * updates texture and renderbuffersize for given FBO
      */
-    public static adjustBufferSize(_fbo: WebGLFramebuffer, _tex: WebGLTexture, _divider: number = 1): void {
-      let bufferData: PostBufferdata = RenderWebGL.setupFBO(_fbo, _tex, _divider);
+    public static adjustBufferSize(_fbo: WebGLFramebuffer, _tex: WebGLTexture, _divider: number = 1, _internalFormat: number = WebGL2RenderingContext.RGBA, _format: number = WebGL2RenderingContext.RGBA, _type: number = WebGL2RenderingContext.UNSIGNED_BYTE ): void {
+      let bufferData: PostBufferdata = RenderWebGL.setupFBO(_fbo, _tex, _divider,_internalFormat,_format,_type);
       _tex = bufferData.texture;
     }
 

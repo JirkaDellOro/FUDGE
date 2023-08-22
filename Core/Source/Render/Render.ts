@@ -236,7 +236,7 @@ namespace FudgeCore {
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.aoDepthFBO);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
       Render.setDepthTest(true);
-      Render.clear(new Color(1, 0, 1, 1));
+      //Render.clear(new Color(1, 0, 1, 1));
 
       Render.drawNodesDepth(_cmpCamera, this.nodesSimple, _cmpAO);
       //TODO: Implement Normal Calculation for non or partially opaque materials
