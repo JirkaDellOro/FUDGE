@@ -1,9 +1,9 @@
 namespace FudgeCore {
-    export abstract class ShaderAONormal extends Shader {
-        public static readonly iSubclass: number = Shader.registerSubclass(ShaderAONormal);
+    export abstract class ShaderAONormalFlat extends Shader {
+        public static readonly iSubclass: number = Shader.registerSubclass(ShaderAONormalFlat);
 
-        public static define: string[] = [];
-
+        public static define: string[] = ["FLAT"];   
+        
         public static getCoat(): typeof Coat { return CoatColored; }
 
         public static getVertexShaderSource(): string {

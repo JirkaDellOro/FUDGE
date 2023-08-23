@@ -1023,6 +1023,7 @@ declare namespace FudgeCore {
     interface PostBufferdata {
         fbo: WebGLFramebuffer;
         texture: WebGLTexture;
+        depthTexture: WebGLTexture;
     }
     /**
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
@@ -1106,11 +1107,11 @@ declare namespace FudgeCore {
         /**
          * Sets up and configures framebuffers and textures for post-fx
         */
-        protected static setupFBO(_fbo?: WebGLFramebuffer, _tex?: WebGLTexture, _divider?: number, _internalFormat?: number, _format?: number, _type?: number): PostBufferdata;
+        protected static setupFBO(_fbo?: WebGLFramebuffer, _tex?: WebGLTexture, _depthTexture?: WebGLTexture, _divider?: number): PostBufferdata;
         /**
          * updates texture and renderbuffersize for given FBO
          */
-        static adjustBufferSize(_fbo: WebGLFramebuffer, _tex: WebGLTexture, _divider?: number, _internalFormat?: number, _format?: number, _type?: number): void;
+        static adjustBufferSize(_fbo: WebGLFramebuffer, _tex: WebGLTexture, _depth: WebGLTexture, _divider?: number): void;
         /**
          * updates all off the bloom FBOs and textures
          */
@@ -1120,7 +1121,6 @@ declare namespace FudgeCore {
         */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
         static drawNodesNormal(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpAO: ComponentAmbientOcclusion): void;
-        static drawNodesDepth(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpAO: ComponentAmbientOcclusion): void;
         static drawNodesMist(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpMist: ComponentMist): void;
         static compositeEffects(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist, _cmpAO: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
         protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
@@ -1841,7 +1841,9 @@ declare namespace FudgeCore {
     class ComponentAmbientOcclusion extends Component {
         static readonly iSubclass: number;
         clrAO: Color;
-        constructor(_mist?: boolean, _clrMist?: Color, _nearPlane?: number, _farPlane?: number, _ao?: boolean, _clrAO?: Color, _bloom?: boolean);
+        radius: number;
+        samples: number;
+        constructor(_clrAO?: Color, _radius?: number, _samples?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -5477,14 +5479,13 @@ declare namespace FudgeCore {
         static mistFBO: WebGLFramebuffer;
         static mistTexture: WebGLTexture;
         static cmpMistMaterial: ComponentMaterial;
-        static aoDepthFBO: WebGLFramebuffer;
-        static aoDepthTexture: WebGLTexture;
         static aoNormalFBO: WebGLFramebuffer;
         static aoNormalTexture: WebGLTexture;
+        static aoDepthTexture: WebGLTexture;
         static aoFBO: WebGLFramebuffer;
         static aoTexture: WebGLTexture;
-        static cmpNormalMaterial: ComponentMaterial;
-        static cmpDepthMaterial: ComponentMaterial;
+        static cmpSmoothNormalMaterial: ComponentMaterial;
+        static cmpFlatNormalMaterial: ComponentMaterial;
         static downsamplingDepth: number;
         static bloomDownsamplingFBOs: WebGLFramebuffer[];
         static bloomDownsamplingTextures: WebGLTexture[];
@@ -5517,6 +5518,7 @@ declare namespace FudgeCore {
          */
         private static drawList;
         static calcAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
+        protected static generateSamplePoints(_samples: number, _shader: typeof Shader): void;
         static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
         static calcBloom(_cmpBloom: ComponentBloom): void;
         static initScreenQuad(_texture: WebGLTexture): void;
@@ -6609,7 +6611,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    abstract class ShaderAODepth extends Shader {
+    abstract class ShaderAONormal extends Shader {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
@@ -6618,7 +6620,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    abstract class ShaderAONormal extends Shader {
+    abstract class ShaderAONormalFlat extends Shader {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;

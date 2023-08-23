@@ -19,14 +19,13 @@ namespace FudgeCore {
     public static mistTexture: WebGLTexture;
     public static cmpMistMaterial: ComponentMaterial;
 
-    public static aoDepthFBO: WebGLFramebuffer;
-    public static aoDepthTexture: WebGLTexture;
     public static aoNormalFBO: WebGLFramebuffer;
     public static aoNormalTexture: WebGLTexture;
+    public static aoDepthTexture: WebGLTexture;
     public static aoFBO: WebGLFramebuffer;
     public static aoTexture: WebGLTexture;
-    public static cmpNormalMaterial: ComponentMaterial;
-    public static cmpDepthMaterial: ComponentMaterial;
+    public static cmpSmoothNormalMaterial: ComponentMaterial;
+    public static cmpFlatNormalMaterial: ComponentMaterial;
 
     public static downsamplingDepth: number = 7;
     public static bloomDownsamplingFBOs: WebGLFramebuffer[] = [];
@@ -219,39 +218,64 @@ namespace FudgeCore {
 
     //#region PostFX
     public static calcAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void {
-
       //NormalCalculation
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.aoNormalFBO);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
       Render.setDepthTest(true);
-      Render.clear(new Color(1, 1, 1, 1));
+      Render.clear(new Color(1));
       _cmpCamera.resetWorldToView();
 
       //TODO: Also send the normalmap to the shader if the material has one. This could lead to even better AO.
       Render.drawNodesNormal(_cmpCamera, this.nodesSimple, _cmpAO);
       //TODO: Implement Normal Calculation for non or partially opaque materials
-      Render.drawNodesNormal(_cmpCamera, this.nodesSimple, _cmpAO);
+      Render.drawNodesNormal(_cmpCamera, this.nodesAlpha, _cmpAO);
 
-      //DepthCalculation
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.aoDepthFBO);
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.aoFBO);              //Reset to main color buffer
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
-      Render.setDepthTest(true);
-      //Render.clear(new Color(1, 0, 1, 1));
-
-      Render.drawNodesDepth(_cmpCamera, this.nodesSimple, _cmpAO);
-      //TODO: Implement Normal Calculation for non or partially opaque materials
-      Render.drawNodesDepth(_cmpCamera, this.nodesSimple, _cmpAO);
-
-      //TODO: Initialize and run AO Shader.
       Render.setDepthTest(false);
+      Render.clear(new Color(1));
+      _cmpCamera.resetWorldToView();
 
+      //feed texture and uniform matrix
+      function bindTexture(_texture: WebGLTexture, _texSlot: number, _texSlotNumber: number, _texVarName: string): void {
+        RenderWebGL.crc3.activeTexture(_texSlot);
+        RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, _texture);
+        RenderWebGL.crc3.uniform1i(shader.uniforms[_texVarName], _texSlotNumber);
+      }
+
+      let shader: typeof Shader = ShaderAmbientOcclusion;
+      shader.useProgram();
+      Render.useScreenQuadRenderData(shader);
+      bindTexture(Render.aoNormalTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_normalTexture");
+      bindTexture(Render.aoDepthTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_depthTexture");
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_nearPlane"], _cmpCamera.getNear());
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_farPlane"], _cmpCamera.getFar());
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_radius"], _cmpAO.radius);
+      RenderWebGL.getRenderingContext().uniform1ui(shader.uniforms["u_nSamples"], _cmpAO.samples);
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Render.crc3.canvas.width);
+        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Render.crc3.canvas.height);
+      this.generateSamplePoints(_cmpAO.samples, shader);
+
+      RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
+    }
+
+    protected static generateSamplePoints(_samples: number, _shader: typeof Shader) {
+      let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
+      for (let i: number = 0; i < _samples; i++) {
+        let sample: Vector3 = new Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random());
+        sample.normalize();
+        sample.scale(Math.random());
+        let scale: number = i / 64;
+        sample.scale(((scale * scale)*0.9)+0.1); //Moves the samplepoints closer to the origin
+        RenderWebGL.getRenderingContext().uniform3fv(uni[`u_samples[${i}].vct`], new Float32Array([sample.x, sample.y, sample.z]));
+      }
     }
 
     public static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mistFBO);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
       Render.setDepthTest(true);
-      Render.clear(new Color(1, 1, 1, 1));
+      Render.clear(new Color(1));
 
       _cmpCamera.resetWorldToView();
 

@@ -234,16 +234,15 @@ namespace FudgeCore {
         this.lastRectRenderSize.set(rectRender.size.x, rectRender.size.y);
         this.lastCamera = this.camera;
         if (rectRender.size.x >= 1 || rectRender.size.y >= 1) {
-          Render.adjustBufferSize(Render.mainFBO, Render.mainTexture);
+          Render.adjustBufferSize(Render.mainFBO, Render.mainTexture, null);
           let cmpMist: ComponentMist = this.getComponentMist(this.camera);
           if (cmpMist != null) if (cmpMist.isActive) {
-            Render.adjustBufferSize(Render.mistFBO, Render.mistTexture);
+            Render.adjustBufferSize(Render.mistFBO, Render.mistTexture, null);
           }
           let cmpAO: ComponentAmbientOcclusion = this.getComponentAmbientOcclusion(this.camera);
           if (cmpAO != null) if (cmpAO.isActive) {
-            Render.adjustBufferSize(Render.aoDepthFBO, Render.aoDepthTexture,1,WebGL2RenderingContext.R16UI,WebGL2RenderingContext.RED_INTEGER,WebGL2RenderingContext.UNSIGNED_SHORT);
-            Render.adjustBufferSize(Render.aoNormalFBO, Render.aoNormalTexture);
-            Render.adjustBufferSize(Render.aoFBO, Render.aoTexture);
+            Render.adjustBufferSize(Render.aoNormalFBO, Render.aoNormalTexture, Render.aoDepthTexture);
+            Render.adjustBufferSize(Render.aoFBO, Render.aoTexture, null);
           }
           let cmpBloom: ComponentBloom = this.getComponentBloom(this.camera);
           if (cmpBloom != null) if (cmpBloom.isActive) {

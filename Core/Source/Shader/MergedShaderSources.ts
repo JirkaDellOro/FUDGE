@@ -8,20 +8,55 @@ namespace FudgeCore {
 precision mediump float;
 precision highp int;
 
+in vec2 v_vctTexture;
+uniform sampler2D u_normalTexture;
+uniform sampler2D u_depthTexture;
+
+struct Sample {
+    vec3 vct;
+};
+
+const uint MAX_SAMPLES = 64u;
+uniform uint u_nSamples;
+uniform Sample u_samples[MAX_SAMPLES];
+
 uniform float u_nearPlane;
 uniform float u_farPlane;
+uniform float u_radius;
 
-in vec3 v_vctCamera;
-in mat4 v_mtxMeshToWorld;
-in vec4 v_vctPosition;
+uniform float u_width;
+uniform float u_height;
 
 out vec4 vctFrag;
 
+float linearizeDepth(float original_depth) {
+    return (2.0f * u_nearPlane) / (u_farPlane + u_nearPlane - original_depth * (u_farPlane - u_nearPlane));
+}
+
+vec2 calculateOffset(vec3 vct_vector) {
+    vec2 tempOffset = vec2(vct_vector.x, vct_vector.y);
+    return tempOffset * u_radius;
+}
+
 void main() {
-    float dist = length((v_mtxMeshToWorld * v_vctPosition).xyz - v_vctCamera);
-    float fogAmount = min(max((dist - u_nearPlane) / (u_farPlane - u_nearPlane), 0.0),1.0);
-    vec3 fog = vec3(-pow(fogAmount, 2.0) + (2.0 * fogAmount)); //lets Fog appear quicker and fall off slower results in a more gradual falloff
-    vctFrag = vec4(fog, 1.0);
+    float depth = linearizeDepth(texture(u_depthTexture, v_vctTexture).r);
+    vec3 vct_Normal = texture(u_normalTexture, v_vctTexture).rgb;
+    vct_Normal = 1.0f - (vct_Normal * 2.0f);
+
+    vec2 pixel = vec2(1.0f / u_width, 1.0f / u_height);
+    /*
+    vec3 vctTangent = normalize(vec3(1.0f) - vctNormal * dot(vec3(1.0f), vctNormal));
+    vec3 vctBitangent = cross(vctNormal, vctTangent);
+    mat3 TBN = mat3(vctTangent, vctBitangent, vctNormal);
+    */
+    float occlusion = 1.0f;
+    vec2 offset = calculateOffset(vct_Normal);
+    offset = offset * pixel;
+    float sampleDepth = linearizeDepth(texture(u_depthTexture, v_vctTexture + offset).r);
+    if(depth < sampleDepth) {
+        occlusion = 0.0f;
+    }
+    vctFrag = vec4(vec3(occlusion), 1.0f);
 }
 `;
   shaderSources["ShaderAmbientOcclusion.vert"] = `#version 300 es
@@ -30,66 +65,15 @@ void main() {
 * AO Vertex - Shader. Sets Values for AO Fragment - Shader
 * @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
+in vec2 a_vctPosition;
+in vec2 a_vctTexture;
 
-uniform vec3 u_vctCamera;
-uniform mat4 u_mtxMeshToView;
-uniform mat4 u_mtxMeshToWorld;
-in vec3 a_vctPosition;
-
-out vec4 v_vctPosition;
-out mat4 v_mtxMeshToWorld;
-out vec3 v_vctCamera;
+out vec2 v_vctTexture;
 
 void main() {
-    vec4 vctPosition = vec4(a_vctPosition, 1.0);
-    mat4 mtxMeshToView = u_mtxMeshToView;
-    v_mtxMeshToWorld = u_mtxMeshToWorld;
-    v_vctCamera = u_vctCamera;
-    gl_Position = mtxMeshToView * vctPosition;
-    v_vctPosition = vctPosition;
+    gl_Position = vec4(a_vctPosition, 0.0, 1.0);
+    v_vctTexture = a_vctTexture;
 }`;
-  shaderSources["ShaderAODepth.frag"] = `#version 300 es
-/**
-*Renders the depth information onto texture
-*@authors Roland Heer, HFU, 2023
-*/
-precision mediump float;
-precision highp int;
-
-uniform float u_clipStart;
-uniform float u_clipEnd;
-in float v_depth;
-
-out uint vctFrag;
-
-void main() {
-    float depth = v_depth;
-    depth = min(max((depth - u_clipStart) / (u_clipEnd / 2.0f - u_clipStart), 0.0f), 1.0f);
-    depth = ((log(depth + 0.001f) / log(20.0f)) / 3.0f) + 1.0f;
-    vctFrag = uint(0);
-}
-`;
-  shaderSources["ShaderAODepth.vert"] = `#version 300 es
-/**
-*Calculates the depth Information relative to the Camera
-*@authors Roland Heer, HFU, 2023
-*/
-uniform mat4 u_mtxMeshToView;
-uniform mat4 u_mtxWorldToCamera;
-uniform mat4 u_mtxNormalMeshToWorld;
-uniform vec3 u_vctCamera;
-
-in vec3 a_vctPosition;
-
-out float v_depth;
-
-void main() {
-    vec4 vctPosition = (u_mtxMeshToView * vec4(a_vctPosition, 1.0f));
-    gl_Position = vctPosition;
-    float depth = vctPosition.b;
-    v_depth = depth;
-}
-`;
   shaderSources["ShaderAONormal.frag"] = `#version 300 es
 /**
 *Renders normalinformation onto texture
@@ -98,12 +82,22 @@ void main() {
 precision mediump float;
 precision highp int;
 
+#if defined(FLAT)
+flat in vec4 v_vctNormal;
+#else
 in vec4 v_vctNormal;
+#endif
 
 out vec4 vctFrag;
 
 void main() {
-    vctFrag = v_vctNormal;
+    vctFrag = vec4(0.0f);
+
+    #if defined(FLAT)
+    vctFrag += v_vctNormal;
+#else
+    vctFrag += v_vctNormal;
+#endif
 }
 `;
   shaderSources["ShaderAONormal.vert"] = `#version 300 es
@@ -117,14 +111,20 @@ uniform mat4 u_mtxNormalMeshToWorld;
 in vec3 a_vctPosition;
 in vec3 a_vctNormal;
 
+#if defined(FLAT)
+flat out vec4 v_vctNormal;
+#else
 out vec4 v_vctNormal;
+#endif
 
 void main() {
     gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0f);
 
     vec3 vctNormal = a_vctNormal;
     vctNormal = normalize(mat3(u_mtxWorldToCamera) * mat3(u_mtxNormalMeshToWorld) * vctNormal);
-    v_vctNormal = vec4(vctNormal, 1.0f);
+    vctNormal.g = vctNormal.g * -1.0f;
+    vctNormal.b = vctNormal.b * -1.0f;
+    v_vctNormal = vec4((vctNormal + 1.0f) / 2.0f, 1.0f);
 }
 `;
   shaderSources["ShaderDownsample.frag"] = `#version 300 es
@@ -716,10 +716,10 @@ void main() {
     vec4 mainTex = texture(u_mainTexture, v_vctTexture);
     vec4 vctTempFrag = mainTex;
     if(u_ao > 0.5f) {
-        uint aoTex = uint(texture(u_aoTexture, v_vctTexture).r);
+        vec4 aoTex = texture(u_aoTexture, v_vctTexture);
         //aoTex *= vec4(u_vctAOColor.rgb, 1.0f);
         //vctTempFrag = mix(vctTempFrag, vctTempFrag * vec4(aoTex.rgb, 1.0f), u_vctAOColor.a);
-        vctTempFrag = vec4(aoTex);
+        vctTempFrag = vec4(aoTex.rgb, 1.0f);
     }
     if(u_mist > 0.5f) {
         vec4 mistTex = texture(u_mistTexture, v_vctTexture);
