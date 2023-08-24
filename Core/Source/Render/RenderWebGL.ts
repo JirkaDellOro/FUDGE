@@ -375,6 +375,8 @@ namespace FudgeCore {
         let tempNormalFlatMat: Material = new Material("normalFlatMat", ShaderAONormalFlat);
         Render.cmpFlatNormalMaterial = new ComponentMaterial(tempNormalFlatMat);
         Project.deregister(tempNormalFlatMat);  //Deregister this Material to prevent listing in the internal resources of the editor
+
+        RenderWebGL.generateNewSamplePoints(64);
       }
       if (_bloom) {
         Render.bloomDownsamplingFBOs.splice(0, Render.bloomDownsamplingFBOs.length);
@@ -397,6 +399,18 @@ namespace FudgeCore {
           Render.bloomUpsamplingTextures.push(upsamplingBufferData.texture);
           div *= 2;
         }
+      }
+    }
+
+    protected static generateNewSamplePoints(_samples: number) {
+      Render.aoSamplePoints.splice(0,Render.aoSamplePoints.length);
+      for (let i: number = 0; i < _samples; i++) {
+        let sample: Vector3 = new Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random());
+        sample.normalize();
+        sample.scale(Math.random());
+        let scale: number = i / _samples;
+        sample.scale(((scale * scale) * 0.9) + 0.1); //Moves the samplepoints closer to the origin
+        Render.aoSamplePoints.push(sample);
       }
     }
 
@@ -613,6 +627,8 @@ namespace FudgeCore {
       shader.useProgram();
       Render.useScreenQuadRenderData(shader);
       bindTexture(Render.mainTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_mainTexture");
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Render.crc3.canvas.width);
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Render.crc3.canvas.height);
 
       if (_cmpAO != null) if (_cmpAO.isActive) {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_ao"], 1);

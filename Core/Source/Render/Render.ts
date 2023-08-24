@@ -24,6 +24,7 @@ namespace FudgeCore {
     public static aoDepthTexture: WebGLTexture;
     public static aoFBO: WebGLFramebuffer;
     public static aoTexture: WebGLTexture;
+    public static aoSamplePoints: Vector3[] = [];
     public static cmpSmoothNormalMaterial: ComponentMaterial;
     public static cmpFlatNormalMaterial: ComponentMaterial;
 
@@ -251,24 +252,44 @@ namespace FudgeCore {
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_nearPlane"], _cmpCamera.getNear());
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_farPlane"], _cmpCamera.getFar());
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_radius"], _cmpAO.radius);
-      RenderWebGL.getRenderingContext().uniform1ui(shader.uniforms["u_nSamples"], _cmpAO.samples);
+      RenderWebGL.getRenderingContext().uniform1i(shader.uniforms["u_nSamples"], _cmpAO.samples);
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bias"], _cmpAO.shadowBias);
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Render.crc3.canvas.width);
-        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Render.crc3.canvas.height);
-      this.generateSamplePoints(_cmpAO.samples, shader);
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Render.crc3.canvas.height);
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_XYMultiplier"], this.getXYMultiplier(_cmpCamera.getFieldOfView()));
+
+      this.feedSamplePoints(_cmpAO.samples, shader);
+      let noiseTex: WebGLTexture = RenderWebGL.getRenderingContext().createTexture();
+      let pixelInformation: Uint8Array = new Uint8Array(64);
+      for (let i: number = 0; i < 64; i++) {
+        pixelInformation[i] = Math.floor(Math.random() * 256);
+      }
+      bindTexture(noiseTex, WebGL2RenderingContext.TEXTURE2, 2, "u_noiseTexture");
+      RenderWebGL.getRenderingContext().texImage2D(WebGLRenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, 4, 4, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, pixelInformation);
+      RenderWebGL.getRenderingContext().texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
+      RenderWebGL.getRenderingContext().texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST);
+      RenderWebGL.getRenderingContext().texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.REPEAT);
+      RenderWebGL.getRenderingContext().texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.REPEAT);
 
       RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
     }
 
-    protected static generateSamplePoints(_samples: number, _shader: typeof Shader) {
-      let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
-      for (let i: number = 0; i < _samples; i++) {
-        let sample: Vector3 = new Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random());
-        sample.normalize();
-        sample.scale(Math.random());
-        let scale: number = i / 64;
-        sample.scale(((scale * scale)*0.9)+0.1); //Moves the samplepoints closer to the origin
-        RenderWebGL.getRenderingContext().uniform3fv(uni[`u_samples[${i}].vct`], new Float32Array([sample.x, sample.y, sample.z]));
+    protected static feedSamplePoints(_samples: number, _shader: typeof Shader) {
+      if(_samples != Render.aoSamplePoints.length){
+        RenderWebGL.generateNewSamplePoints(_samples);
       }
+      let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
+      let i: number = 0;
+      for (let sample of Render.aoSamplePoints) {
+        RenderWebGL.getRenderingContext().uniform3fv(uni[`u_samples[${i}].vct`], new Float32Array([sample.x, sample.y, sample.z]));
+        i++;
+      }
+    }
+
+    //A rather crude approximation to convert the Screen X and Y to View X and Y, dependent on the depth of the scene
+    protected static getXYMultiplier(_FOV: number): number {
+      let x: number = _FOV / 90;
+      return (Math.pow(x, 6) + x) / 2;
     }
 
     public static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {

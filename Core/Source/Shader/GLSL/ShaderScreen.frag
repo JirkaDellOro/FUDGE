@@ -22,16 +22,25 @@ uniform sampler2D u_bloomTexture;
 uniform float u_bloomIntensity;
 uniform float u_highlightDesaturation;
 
+in vec2[25] v_vctOffsets;
+float gaussianKernel[25] = float[]( 0.00366, 0.01465, 0.02564, 0.01465, 0.00366,
+                                    0.01465, 0.05860, 0.09523, 0.05860, 0.01465, 
+                                    0.02564, 0.09523, 0.15018, 0.09523, 0.02564, 
+                                    0.01465, 0.05860, 0.09523, 0.05860, 0.01465,
+                                    0.00366, 0.01465, 0.02564, 0.01465, 0.00366);
+
 out vec4 vctFrag;
 
 void main() {
     vec4 mainTex = texture(u_mainTexture, v_vctTexture);
     vec4 vctTempFrag = mainTex;
     if(u_ao > 0.5f) {
-        vec4 aoTex = texture(u_aoTexture, v_vctTexture);
-        //aoTex *= vec4(u_vctAOColor.rgb, 1.0f);
-        //vctTempFrag = mix(vctTempFrag, vctTempFrag * vec4(aoTex.rgb, 1.0f), u_vctAOColor.a);
-        vctTempFrag = vec4(aoTex.rgb, 1.0f);
+        vec4 aoTex = vec4(0.0f);
+        for(int i = 0; i < 25; i++) {
+            aoTex += vec4(texture(u_aoTexture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
+        }
+        aoTex = mix(vec4(u_vctAOColor.rgb, 1.0f), vec4(1.0f), aoTex.r);
+        vctTempFrag = mix(vctTempFrag, vctTempFrag * aoTex, u_vctAOColor.a);
     }
     if(u_mist > 0.5f) {
         vec4 mistTex = texture(u_mistTexture, v_vctTexture);

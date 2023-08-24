@@ -1104,6 +1104,7 @@ declare namespace FudgeCore {
          * Creates and stores texture buffers to be used for PostFX
          */
         static initFBOs(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
+        protected static generateNewSamplePoints(_samples: number): void;
         /**
          * Sets up and configures framebuffers and textures for post-fx
         */
@@ -1843,7 +1844,8 @@ declare namespace FudgeCore {
         clrAO: Color;
         radius: number;
         samples: number;
-        constructor(_clrAO?: Color, _radius?: number, _samples?: number);
+        shadowBias: number;
+        constructor(_clrAO?: Color, _radius?: number, _samples?: number, _bias?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -5484,6 +5486,7 @@ declare namespace FudgeCore {
         static aoDepthTexture: WebGLTexture;
         static aoFBO: WebGLFramebuffer;
         static aoTexture: WebGLTexture;
+        static aoSamplePoints: Vector3[];
         static cmpSmoothNormalMaterial: ComponentMaterial;
         static cmpFlatNormalMaterial: ComponentMaterial;
         static downsamplingDepth: number;
@@ -5518,7 +5521,8 @@ declare namespace FudgeCore {
          */
         private static drawList;
         static calcAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
-        protected static generateSamplePoints(_samples: number, _shader: typeof Shader): void;
+        protected static feedSamplePoints(_samples: number, _shader: typeof Shader): void;
+        protected static getXYMultiplier(_FOV: number): number;
         static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
         static calcBloom(_cmpBloom: ComponentBloom): void;
         static initScreenQuad(_texture: WebGLTexture): void;

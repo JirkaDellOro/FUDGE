@@ -11,52 +11,75 @@ precision highp int;
 in vec2 v_vctTexture;
 uniform sampler2D u_normalTexture;
 uniform sampler2D u_depthTexture;
+uniform sampler2D u_noiseTexture;
 
 struct Sample {
     vec3 vct;
 };
 
-const uint MAX_SAMPLES = 64u;
-uniform uint u_nSamples;
+const uint MAX_SAMPLES = 128u;
+uniform int u_nSamples;
 uniform Sample u_samples[MAX_SAMPLES];
 
 uniform float u_nearPlane;
 uniform float u_farPlane;
 uniform float u_radius;
+uniform float u_bias;
 
 uniform float u_width;
 uniform float u_height;
+uniform float u_XYMultiplier;
 
 out vec4 vctFrag;
 
-float linearizeDepth(float original_depth) {
-    return (2.0f * u_nearPlane) / (u_farPlane + u_nearPlane - original_depth * (u_farPlane - u_nearPlane));
+vec3 getFragPos(vec2 _vct_xy, float _depth) {
+    _vct_xy.x /= u_width;
+    _vct_xy.y /= u_height;
+    _vct_xy = (_vct_xy - 0.5f) * 2.0f; //set coordinates to clip space
+    return vec3(_vct_xy, _depth);
 }
 
-vec2 calculateOffset(vec3 vct_vector) {
-    vec2 tempOffset = vec2(vct_vector.x, vct_vector.y);
-    return tempOffset * u_radius;
+float linearizeDepth(float _originalDepth) {
+    return (pow(u_farPlane + 1.0f, _originalDepth) - 1.0f) + u_nearPlane;
+    //return _originalDepth;
 }
 
 void main() {
     float depth = linearizeDepth(texture(u_depthTexture, v_vctTexture).r);
-    vec3 vct_Normal = texture(u_normalTexture, v_vctTexture).rgb;
-    vct_Normal = 1.0f - (vct_Normal * 2.0f);
+    vec3 vct_FragPos = getFragPos(gl_FragCoord.xy, depth);
 
-    vec2 pixel = vec2(1.0f / u_width, 1.0f / u_height);
-    /*
-    vec3 vctTangent = normalize(vec3(1.0f) - vctNormal * dot(vec3(1.0f), vctNormal));
-    vec3 vctBitangent = cross(vctNormal, vctTangent);
-    mat3 TBN = mat3(vctTangent, vctBitangent, vctNormal);
-    */
-    float occlusion = 1.0f;
-    vec2 offset = calculateOffset(vct_Normal);
-    offset = offset * pixel;
-    float sampleDepth = linearizeDepth(texture(u_depthTexture, v_vctTexture + offset).r);
-    if(depth < sampleDepth) {
-        occlusion = 0.0f;
+    vec3 vct_Normal = texture(u_normalTexture, v_vctTexture).rgb;
+    vct_Normal = 1.0f - (vct_Normal * 2.0f);    //set normals into -1 to 1 range
+    vct_Normal = normalize(vct_Normal);
+
+    vec2 noiseScale = vec2(u_width / 4.0f, u_height / 4.0f);
+
+    vec3 vct_Random = normalize(texture(u_noiseTexture, v_vctTexture * noiseScale).rgb);
+
+    vec3 vct_Tangent = normalize(vct_Random - vct_Normal * dot(vct_Random, vct_Normal));
+    vec3 vct_Bitangent = cross(vct_Normal, vct_Tangent);
+    mat3 mtxTBN = mat3(vct_Tangent, vct_Bitangent, vct_Normal);
+
+    float occlusion = 0.0f;
+    for(int i = 0; i < u_nSamples; i++) {
+        //get sample position
+        vec3 vct_Sample = mtxTBN * u_samples[i].vct;
+        vct_Sample = vct_FragPos + (vct_Sample * u_radius);
+
+        vec3 offset = vec3(vct_Sample);
+        offset = offset * 0.5f + 0.5f;
+
+        float occluderDepth = linearizeDepth(texture(u_depthTexture, offset.xy).r);
+
+        float rangeCheck = (vct_Sample.z - occluderDepth > u_radius * u_bias * 10.0f ? 0.0f : 1.0f);
+        //rangeCheck = 1.0f;
+        occlusion += (occluderDepth <= vct_Sample.z ? 1.0f : 0.0f) * rangeCheck;
     }
+    float nSamples = float(u_nSamples);
+    occlusion = min((1.0f - (occlusion / nSamples)) * 1.5f, 1.0f);
+    occlusion *= occlusion;
     vctFrag = vec4(vec3(occlusion), 1.0f);
+    //vctFrag = vec4(texture(u_depthTexture, (vct_FragPos + ((mtxTBN * u_samples[127].vct) * u_radius)).xy * 0.5f + 0.5f).rgb, 1.0f);
 }
 `;
   shaderSources["ShaderAmbientOcclusion.vert"] = `#version 300 es
@@ -122,6 +145,7 @@ void main() {
 
     vec3 vctNormal = a_vctNormal;
     vctNormal = normalize(mat3(u_mtxWorldToCamera) * mat3(u_mtxNormalMeshToWorld) * vctNormal);
+    //vctNormal.r = vctNormal.r * -1.0f;
     vctNormal.g = vctNormal.g * -1.0f;
     vctNormal.b = vctNormal.b * -1.0f;
     v_vctNormal = vec4((vctNormal + 1.0f) / 2.0f, 1.0f);
@@ -142,14 +166,14 @@ uniform sampler2D u_texture;
 uniform float u_threshold;
 uniform float u_lvl;
 
-float altGaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f, 0.045f, 0.122f, 0.045f);
+float gaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f, 0.045f, 0.122f, 0.045f);
 
 out vec4 vctFrag;
 
 void main() {
     vec4 tex1 = vec4(0.0f);
     for(int i = 0; i < 9; i++) {
-        tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * altGaussianKernel[i]);
+        tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
     }
     if(u_lvl < 1.0f) {
         float threshold = min(max(u_threshold, 0.0f), 0.999999999f);     //None of the rendered values can exeed 1.0 therefor the bloom effect won't work if the threshold is >= 1.0
@@ -710,16 +734,25 @@ uniform sampler2D u_bloomTexture;
 uniform float u_bloomIntensity;
 uniform float u_highlightDesaturation;
 
+in vec2[25] v_vctOffsets;
+float gaussianKernel[25] = float[]( 0.00366, 0.01465, 0.02564, 0.01465, 0.00366,
+                                    0.01465, 0.05860, 0.09523, 0.05860, 0.01465, 
+                                    0.02564, 0.09523, 0.15018, 0.09523, 0.02564, 
+                                    0.01465, 0.05860, 0.09523, 0.05860, 0.01465,
+                                    0.00366, 0.01465, 0.02564, 0.01465, 0.00366);
+
 out vec4 vctFrag;
 
 void main() {
     vec4 mainTex = texture(u_mainTexture, v_vctTexture);
     vec4 vctTempFrag = mainTex;
     if(u_ao > 0.5f) {
-        vec4 aoTex = texture(u_aoTexture, v_vctTexture);
-        //aoTex *= vec4(u_vctAOColor.rgb, 1.0f);
-        //vctTempFrag = mix(vctTempFrag, vctTempFrag * vec4(aoTex.rgb, 1.0f), u_vctAOColor.a);
-        vctTempFrag = vec4(aoTex.rgb, 1.0f);
+        vec4 aoTex = vec4(0.0f);
+        for(int i = 0; i < 25; i++) {
+            aoTex += vec4(texture(u_aoTexture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
+        }
+        aoTex = mix(vec4(u_vctAOColor.rgb, 1.0f), vec4(1.0f), aoTex.r);
+        vctTempFrag = mix(vctTempFrag, vctTempFrag * aoTex, u_vctAOColor.a);
     }
     if(u_mist > 0.5f) {
         vec4 mistTex = texture(u_mistTexture, v_vctTexture);
@@ -751,11 +784,27 @@ void main() {
 in vec2 a_vctPosition;
 in vec2 a_vctTexture;
 
+uniform float u_width;
+uniform float u_height;
+
 out vec2 v_vctTexture;
+out vec2 v_vctOffsets[25];
 
 void main() {
     gl_Position = vec4(a_vctPosition, 0.0, 1.0);
     v_vctTexture = a_vctTexture;
+
+    vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
+
+    //TODO: Blend this even more
+    v_vctOffsets = vec2[]
+    (
+        vec2(-2.0*offset.x, 2.0*offset.y),  vec2(-offset.x, 2.0*offset.y),  vec2(0.0, 2.0*offset.y),    vec2(offset.x,2.0* offset.y),   vec2(2.0*offset.x,2.0* offset.y), 
+        vec2(-2.0*offset.x, offset.y),      vec2(-offset.x, offset.y),      vec2(0.0, offset.y),        vec2(offset.x, offset.y),       vec2(2.0*offset.x, offset.y),
+        vec2(-2.0*offset.x, 0.0),           vec2(-offset.x, 0.0),           vec2(0.0, 0.0),             vec2(offset.x, 0.0),            vec2(2.0*offset.x, 0.0),
+        vec2(-2.0*offset.x, -offset.y),     vec2(-offset.x, -offset.y),     vec2(0.0, -offset.y),       vec2(offset.x, -offset.y),      vec2(2.0*offset.x, -offset.y),
+        vec2(-2.0*offset.x, -2.0*offset.y), vec2(-offset.x, -2.0*offset.y), vec2(0.0, -2.0*offset.y),   vec2(offset.x,-2.0* offset.y), vec2(2.0*offset.x,-2.0* offset.y)
+    );
 }
 `;
   shaderSources["ShaderUniversal.frag"] = `#version 300 es
@@ -1095,14 +1144,14 @@ in vec2[9] v_vctOffsets;
 uniform sampler2D u_texture;
 uniform sampler2D u_texture2;
 
-float altGaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f, 0.045f, 0.122f, 0.045f);
+float gaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f, 0.045f, 0.122f, 0.045f);
 
 out vec4 vctFrag;
 
 void main() {
     vec4 tex1 = vec4(0.0f);
     for(int i = 0; i < 9; i++) {
-        tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * altGaussianKernel[i]);
+        tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
     }
     vec4 tex2 = texture(u_texture2, v_vctTexture);
     vctFrag = tex2 + tex1;

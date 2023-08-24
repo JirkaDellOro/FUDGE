@@ -8,12 +8,14 @@ namespace FudgeCore {
     public clrAO: Color = new Color(0, 0, 0, 1); // Ambient occlusion color
     public radius: number;
     public samples: number;
+    public shadowBias: number;
 
-    public constructor(_clrAO: Color = new Color(0, 0, 0, 1), _radius: number = 0.1, _samples: number = 64) {
+    public constructor(_clrAO: Color = new Color(0, 0, 0, 1), _radius: number = 1.5, _samples: number = 64, _bias: number = 85.0) {
       super();
       this.clrAO = _clrAO;
       this.radius = _radius;
       this.samples = _samples;
+      this.shadowBias = _bias;
     }
 
     //#region Transfer
@@ -22,6 +24,7 @@ namespace FudgeCore {
         clrAO: this.clrAO.serialize(),
         samples: this.samples,
         radius: this.radius,
+        bias: this.shadowBias,
       };
       serialization[super.constructor.name] = super.serialize();
       return serialization;
@@ -31,6 +34,7 @@ namespace FudgeCore {
       await this.clrAO.deserialize(_serialization.clrAO);
       this.samples = _serialization.samples;
       this.radius = _serialization.radius;
+      this.shadowBias = _serialization.bias;
       await super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
