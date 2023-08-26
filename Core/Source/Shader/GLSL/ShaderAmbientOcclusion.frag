@@ -26,7 +26,6 @@ uniform float u_bias;
 
 uniform float u_width;
 uniform float u_height;
-uniform float u_XYMultiplier;
 
 out vec4 vctFrag;
 

@@ -5522,7 +5522,6 @@ declare namespace FudgeCore {
         private static drawList;
         static calcAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
         protected static feedSamplePoints(_samples: number, _shader: typeof Shader): void;
-        protected static getXYMultiplier(_FOV: number): number;
         static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
         static calcBloom(_cmpBloom: ComponentBloom): void;
         static initScreenQuad(_texture: WebGLTexture): void;

@@ -445,6 +445,7 @@ namespace FudgeCore {
         framebuffer = _fbo;
       }
 
+      //TODO: Only use a Depthtexture if necessary. Otherwise use a Renderbuffer
       //Create Texture Object
       if (_tex == null) {
         texture = RenderWebGL.crc3.createTexture();

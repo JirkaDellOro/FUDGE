@@ -256,16 +256,15 @@ namespace FudgeCore {
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bias"], _cmpAO.shadowBias);
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Render.crc3.canvas.width);
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Render.crc3.canvas.height);
-      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_XYMultiplier"], this.getXYMultiplier(_cmpCamera.getFieldOfView()));
 
       this.feedSamplePoints(_cmpAO.samples, shader);
       let noiseTex: WebGLTexture = RenderWebGL.getRenderingContext().createTexture();
-      let pixelInformation: Uint8Array = new Uint8Array(64);
-      for (let i: number = 0; i < 64; i++) {
+      let pixelInformation: Uint8Array = new Uint8Array(100); //100 values are needed to get a 5 by 5 texture with 4 color channels
+      for (let i: number = 0; i < 100 * 4; i++) {
         pixelInformation[i] = Math.floor(Math.random() * 256);
       }
       bindTexture(noiseTex, WebGL2RenderingContext.TEXTURE2, 2, "u_noiseTexture");
-      RenderWebGL.getRenderingContext().texImage2D(WebGLRenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, 4, 4, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, pixelInformation);
+      RenderWebGL.getRenderingContext().texImage2D(WebGLRenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, 5, 5, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, pixelInformation);
       RenderWebGL.getRenderingContext().texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
       RenderWebGL.getRenderingContext().texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST);
       RenderWebGL.getRenderingContext().texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.REPEAT);
@@ -275,7 +274,7 @@ namespace FudgeCore {
     }
 
     protected static feedSamplePoints(_samples: number, _shader: typeof Shader) {
-      if(_samples != Render.aoSamplePoints.length){
+      if (_samples != Render.aoSamplePoints.length) {
         RenderWebGL.generateNewSamplePoints(_samples);
       }
       let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
@@ -284,12 +283,6 @@ namespace FudgeCore {
         RenderWebGL.getRenderingContext().uniform3fv(uni[`u_samples[${i}].vct`], new Float32Array([sample.x, sample.y, sample.z]));
         i++;
       }
-    }
-
-    //A rather crude approximation to convert the Screen X and Y to View X and Y, dependent on the depth of the scene
-    protected static getXYMultiplier(_FOV: number): number {
-      let x: number = _FOV / 90;
-      return (Math.pow(x, 6) + x) / 2;
     }
 
     public static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {
