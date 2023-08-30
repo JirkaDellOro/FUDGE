@@ -253,7 +253,7 @@ namespace FudgeCore {
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_farPlane"], _cmpCamera.getFar());
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_radius"], _cmpAO.radius);
       RenderWebGL.getRenderingContext().uniform1i(shader.uniforms["u_nSamples"], _cmpAO.samples);
-      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bias"], _cmpAO.shadowBias);
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_shadowDistance"], _cmpAO.shadowDistance);
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Render.crc3.canvas.width);
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Render.crc3.canvas.height);
 

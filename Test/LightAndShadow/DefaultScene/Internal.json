@@ -911,7 +911,7 @@
                                   "scaling": "[1, 1, 1]"
                                 },
                                 "Component": {
-                                  "active": true
+                                  "active": false
                                 }
                               }
                             }
@@ -1009,7 +1009,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[0, 0.399999737739563, 0]",
+                      "translation": "[0, 0.6299996972084045, 0]",
                       "rotation": "[0, 139, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -1032,7 +1032,7 @@
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
-                    "aspect": 1.5617283950617284,
+                    "aspect": 1.796137339055794,
                     "pivot": {
                       "translation": "[0, 0, -3.889984130859375]",
                       "rotation": "[0, 0, 0]",
@@ -1051,7 +1051,7 @@
                     "nearPlane": 1,
                     "farPlane": 10,
                     "Component": {
-                      "active": false
+                      "active": true
                     }
                   }
                 }
@@ -1059,7 +1059,9 @@
               "ComponentAmbientOcclusion": [
                 {
                   "ƒ.ComponentAmbientOcclusion": {
-                    "clrAO": "[1, 1, 1, 1]",
+                    "clrAO": "[0, 0, 0, 1]",
+                    "samples": 128,
+                    "radius": 1.5,
                     "Component": {
                       "active": true
                     }
@@ -1069,10 +1071,11 @@
               "ComponentBloom": [
                 {
                   "ƒ.ComponentBloom": {
-                    "threshold": 0.6,
+                    "threshold": 0.9819999999999999,
                     "intensity": 1,
+                    "desaturateHighlights": 0,
                     "Component": {
-                      "active": false
+                      "active": true
                     }
                   }
                 }

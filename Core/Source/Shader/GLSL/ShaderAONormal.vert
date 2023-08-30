@@ -20,7 +20,6 @@ void main() {
 
     vec3 vctNormal = a_vctNormal;
     vctNormal = normalize(mat3(u_mtxWorldToCamera) * mat3(u_mtxNormalMeshToWorld) * vctNormal);
-    //vctNormal.r = vctNormal.r * -1.0f;
     vctNormal.g = vctNormal.g * -1.0f;
     vctNormal.b = vctNormal.b * -1.0f;
     v_vctNormal = vec4((vctNormal + 1.0f) / 2.0f, 1.0f);

@@ -1844,8 +1844,8 @@ declare namespace FudgeCore {
         clrAO: Color;
         radius: number;
         samples: number;
-        shadowBias: number;
-        constructor(_clrAO?: Color, _radius?: number, _samples?: number, _bias?: number);
+        shadowDistance: number;
+        constructor(_clrAO?: Color, _radius?: number, _samples?: number, _distance?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }

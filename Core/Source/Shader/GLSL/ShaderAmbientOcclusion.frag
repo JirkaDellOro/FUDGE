@@ -22,7 +22,7 @@ uniform Sample u_samples[MAX_SAMPLES];
 uniform float u_nearPlane;
 uniform float u_farPlane;
 uniform float u_radius;
-uniform float u_bias;
+uniform float u_shadowDistance;
 
 uniform float u_width;
 uniform float u_height;
@@ -68,7 +68,7 @@ void main() {
 
         float occluderDepth = linearizeDepth(texture(u_depthTexture, offset.xy).r);
 
-        float rangeCheck = (vct_Sample.z - occluderDepth > u_radius * u_bias * 10.0f ? 0.0f : 1.0f);
+        float rangeCheck = (vct_Sample.z - occluderDepth > u_radius * u_shadowDistance * 10.0f ? 0.0f : 1.0f);
         //rangeCheck = 1.0f;
         occlusion += (occluderDepth <= vct_Sample.z ? 1.0f : 0.0f) * rangeCheck;
     }
