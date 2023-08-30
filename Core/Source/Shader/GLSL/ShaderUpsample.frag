@@ -1,6 +1,6 @@
 #version 300 es
 /**
-*Downsamples a given Texture to the current FBOs Texture
+*upsamples a given texture onto the current FBOs texture and applies a small gaussian blur
 *@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
 precision mediump float;

@@ -1,7 +1,7 @@
 #version 300 es
 
 /**
-* Mist Vertex - Shader. Sets Values for Mist Fragment - Shader
+* Mist vertexshader. Sets values for mist fragmentshader
 * @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
 

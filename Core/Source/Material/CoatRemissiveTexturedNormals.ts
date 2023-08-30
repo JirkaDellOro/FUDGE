@@ -9,7 +9,7 @@ namespace FudgeCore {
     public normalMap: Texture = null;
 
     constructor(_color: Color = new Color(), _texture: Texture = TextureDefault.texture, _normalMap: Texture = TextureNormalDefault.texture, _diffuse: number = 1, _specular: number = 0, _metallic: number = 0.5, _intensity: number = 0.5) {
-      super(_color, _texture);
+      super(_color, _texture, _diffuse, _specular, _metallic, _intensity);
       this.normalMap = _normalMap;
     }
 

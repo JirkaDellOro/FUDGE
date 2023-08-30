@@ -341,9 +341,9 @@ namespace FudgeCore {
     }
     //#endregionF
 
-    //#region Post
+    //#region Post-FX
     /**
-     * Creates and stores texture buffers to be used for PostFX
+     * Creates and stores texture buffers to be used for Post-FX
      */
     public static initFBOs(_mist: boolean = true, _ao: boolean = true, _bloom: boolean = true): void {
       let mainBufferData: PostBufferdata = RenderWebGL.setupFBO();
@@ -376,7 +376,7 @@ namespace FudgeCore {
         Render.cmpFlatNormalMaterial = new ComponentMaterial(tempNormalFlatMat);
         Project.deregister(tempNormalFlatMat);  //Deregister this Material to prevent listing in the internal resources of the editor
 
-        RenderWebGL.generateNewSamplePoints(64);
+        RenderWebGL.generateNewSamplePoints();
       }
       if (_bloom) {
         Render.bloomDownsamplingFBOs.splice(0, Render.bloomDownsamplingFBOs.length);
@@ -402,13 +402,16 @@ namespace FudgeCore {
       }
     }
 
-    protected static generateNewSamplePoints(_samples: number) {
+    /**
+    * Calculates sample points to be used in AO-calculations, based on the specified samplecount
+     */
+    protected static generateNewSamplePoints(_nSamples: number = 64) {
       Render.aoSamplePoints.splice(0,Render.aoSamplePoints.length);
-      for (let i: number = 0; i < _samples; i++) {
+      for (let i: number = 0; i < _nSamples; i++) {
         let sample: Vector3 = new Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random());
         sample.normalize();
         sample.scale(Math.random());
-        let scale: number = i / _samples;
+        let scale: number = i / _nSamples;
         sample.scale(((scale * scale) * 0.9) + 0.1); //Moves the samplepoints closer to the origin
         Render.aoSamplePoints.push(sample);
       }
@@ -504,7 +507,7 @@ namespace FudgeCore {
 
 
     /**
-     * updates texture and renderbuffersize for given FBO
+     * updates texture and renderbuffer sizes for given FBO
      */
     public static adjustBufferSize(_fbo: WebGLFramebuffer, _tex: WebGLTexture, _depth: WebGLTexture, _divider: number = 1): void {
       let bufferData: PostBufferdata = RenderWebGL.setupFBO(_fbo, _tex, _depth, _divider);
@@ -529,7 +532,7 @@ namespace FudgeCore {
     //#endregion
 
     /**
-     * Draw a mesh buffer using the given infos and the complete projection matrix. A shader can be passed to calculate every object with the same shader
+     * Draw a mesh buffer using the given infos and the complete projection matrix
     */
     protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void {
       let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
@@ -566,10 +569,12 @@ namespace FudgeCore {
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       }
     }
-
+    /**
+     * Draw all of the given nodes using the normal shader to be used in AO-calculations
+    */
     public static drawNodesNormal(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpAO: ComponentAmbientOcclusion): void {
-      let shaderSmooth: ShaderInterface = Render.cmpSmoothNormalMaterial.material.getShader();
-      let shaderFlat: ShaderInterface = Render.cmpFlatNormalMaterial.material.getShader();
+      let shaderSmooth: ShaderInterface = Render.cmpSmoothNormalMaterial.material.getShader();  
+      let shaderFlat: ShaderInterface = Render.cmpFlatNormalMaterial.material.getShader();      //since Shaders handle Flat materials differently we use the different defines of these two materials
       let tempShader: ShaderInterface;
       let coat: Coat = Render.cmpFlatNormalMaterial.material.coat;
 
@@ -591,6 +596,9 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * Draw all of the given nodes using the mist shader.
+    */
     public static drawNodesMist(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpMist: ComponentMist): void {
       let cmpMaterial: ComponentMaterial = Render.cmpMistMaterial;
       let coat: Coat = cmpMaterial.material.coat;
@@ -613,6 +621,9 @@ namespace FudgeCore {
       }
     }
 
+    /**
+    * composites all effects that are used in the scene to a final render.
+     */
     public static compositeEffects(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist, _cmpAO: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void {
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);              //Reset to main color buffer
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
@@ -627,10 +638,13 @@ namespace FudgeCore {
       let shader: typeof Shader = ShaderScreen;
       shader.useProgram();
       Render.useScreenQuadRenderData(shader);
+
+      //set main-render
       bindTexture(Render.mainTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_mainTexture");
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Render.crc3.canvas.width);
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Render.crc3.canvas.height);
 
+      //set ao-texture and color if available
       if (_cmpAO != null) if (_cmpAO.isActive) {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_ao"], 1);
         bindTexture(Render.aoTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_aoTexture");
@@ -638,6 +652,8 @@ namespace FudgeCore {
       } else {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_ao"], 0);
       }
+
+      //set mist-texture and color if available
       if (_cmpMist != null) if (_cmpMist.isActive) {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_mist"], 1);
         bindTexture(Render.mistTexture, WebGL2RenderingContext.TEXTURE2, 2, "u_mistTexture");
@@ -645,6 +661,8 @@ namespace FudgeCore {
       } else {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_mist"], 0);
       }
+
+      //set bloom-texture, intensity and highlight desaturation if available
       if (_cmpBloom != null) if (_cmpBloom.isActive) {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bloom"], 1);
         bindTexture(Render.bloomUpsamplingTextures[0], WebGL2RenderingContext.TEXTURE3, 3, "u_bloomTexture");

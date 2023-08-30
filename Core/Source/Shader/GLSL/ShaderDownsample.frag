@@ -1,6 +1,6 @@
 #version 300 es
 /**
-*Downsamples a given Texture to the current FBOs Texture
+*Downsamples a given texture to the current FBOs texture
 *@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
 precision mediump float;
@@ -26,7 +26,7 @@ void main() {
         float threshold = min(max(u_threshold, 0.0f), 0.999999999f);     //None of the rendered values can exeed 1.0 therefor the bloom effect won't work if the threshold is >= 1.0
         tex1 -= threshold;
         tex1 /= 1.0f - threshold;
-        float averageBrightness = (((tex1.r + tex1.g + tex1.b) / 3.0f) * 0.2f) + 0.8f; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.9
+        float averageBrightness = (((tex1.r + tex1.g + tex1.b) / 3.0f) * 0.2f) + 0.8f; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.8
         tex1 = tex1 * averageBrightness * 2.0f;
     }
     tex1 *= 1.3f;

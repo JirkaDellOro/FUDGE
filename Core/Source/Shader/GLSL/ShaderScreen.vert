@@ -1,6 +1,6 @@
 #version 300 es
 /**
-*Renders Framebuffer on to Renderbuffer
+*Sets up the data for the ShaderScreen fragmentshader
 *@authors Roland Heer, HFU, 2023
 */
 in vec2 a_vctPosition;
@@ -18,7 +18,7 @@ void main() {
 
     vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
 
-    //TODO: Blend this even more
+    //TODO: Maybe try Downsampling instead of this giant gaussian kernel
     v_vctOffsets = vec2[]
     (
         vec2(-2.0*offset.x, 2.0*offset.y),  vec2(-offset.x, 2.0*offset.y),  vec2(0.0, 2.0*offset.y),    vec2(offset.x,2.0* offset.y),   vec2(2.0*offset.x,2.0* offset.y), 

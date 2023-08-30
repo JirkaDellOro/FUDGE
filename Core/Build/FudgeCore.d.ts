@@ -1101,16 +1101,19 @@ declare namespace FudgeCore {
          */
         protected static setLightsInShader(_shader: ShaderInterface, _lights: MapLightTypeToLightList): void;
         /**
-         * Creates and stores texture buffers to be used for PostFX
+         * Creates and stores texture buffers to be used for Post-FX
          */
         static initFBOs(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
-        protected static generateNewSamplePoints(_samples: number): void;
+        /**
+        * Calculates sample points to be used in AO-calculations, based on the specified samplecount
+         */
+        protected static generateNewSamplePoints(_nSamples?: number): void;
         /**
          * Sets up and configures framebuffers and textures for post-fx
         */
         protected static setupFBO(_fbo?: WebGLFramebuffer, _tex?: WebGLTexture, _depthTexture?: WebGLTexture, _divider?: number): PostBufferdata;
         /**
-         * updates texture and renderbuffersize for given FBO
+         * updates texture and renderbuffer sizes for given FBO
          */
         static adjustBufferSize(_fbo: WebGLFramebuffer, _tex: WebGLTexture, _depth: WebGLTexture, _divider?: number): void;
         /**
@@ -1118,11 +1121,20 @@ declare namespace FudgeCore {
          */
         static adjustBlooomBufferSize(): void;
         /**
-         * Draw a mesh buffer using the given infos and the complete projection matrix. A shader can be passed to calculate every object with the same shader
+         * Draw a mesh buffer using the given infos and the complete projection matrix
         */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
+        /**
+         * Draw all of the given nodes using the normal shader to be used in AO-calculations
+        */
         static drawNodesNormal(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpAO: ComponentAmbientOcclusion): void;
+        /**
+         * Draw all of the given nodes using the mist shader.
+        */
         static drawNodesMist(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpMist: ComponentMist): void;
+        /**
+        * composites all effects that are used in the scene to a final render.
+         */
         static compositeEffects(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist, _cmpAO: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
         protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
         private static calcMeshToView;
@@ -2291,7 +2303,7 @@ declare namespace FudgeCore {
         clrMist: Color;
         nearPlane: number;
         farPlane: number;
-        constructor(_mist?: boolean, _clrMist?: Color, _nearPlane?: number, _farPlane?: number, _ao?: boolean, _clrAO?: Color, _bloom?: boolean);
+        constructor(_mist?: boolean, _clrMist?: Color, _nearPlane?: number, _farPlane?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -5474,6 +5486,12 @@ declare namespace FudgeCore {
      * The main interface to the render engine, here WebGL (see superclass {@link RenderWebGL} and the RenderInjectors
      */
     abstract class Render extends RenderWebGL {
+        static nodesPhysics: RecycableArray<Node>;
+        static componentsPick: RecycableArray<ComponentPick>;
+        static lights: MapLightTypeToLightList;
+        private static nodesSimple;
+        private static nodesAlpha;
+        private static timestampUpdate;
         static rectClip: Rectangle;
         static pickBuffer: Int32Array;
         static mainFBO: WebGLFramebuffer;
@@ -5496,12 +5514,6 @@ declare namespace FudgeCore {
         static bloomUpsamplingTextures: WebGLTexture[];
         static screenQuad: Float32Array;
         static screenQuadUV: Float32Array;
-        static nodesPhysics: RecycableArray<Node>;
-        static componentsPick: RecycableArray<ComponentPick>;
-        static lights: MapLightTypeToLightList;
-        private static nodesSimple;
-        private static nodesAlpha;
-        private static timestampUpdate;
         /**
          * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
          * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
@@ -5520,11 +5532,29 @@ declare namespace FudgeCore {
          * Draws a given list of nodes. A @param _cmpMat can be passed to render every node of the list with the same Material (useful for PostFX)
          */
         private static drawList;
+        /**
+         * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
+         */
         static calcAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
+        protected static calcNormalPass(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
+        protected static feedAOUniforms(_bindTexture: Function, _cmpAO: ComponentAmbientOcclusion, _cmpCamera: ComponentCamera, _shader: typeof Shader): void;
         protected static feedSamplePoints(_samples: number, _shader: typeof Shader): void;
+        protected static feedNoiseTexture(_bindTexture: Function): void;
+        /**
+        * Calculates the mist-effect
+         */
         static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
+        /**
+        * Calculates the bloom-effect
+         */
         static calcBloom(_cmpBloom: ComponentBloom): void;
+        /**
+        * Sets up the "ScreenQuad" that is used to render a texture over the whole screen area
+         */
         static initScreenQuad(_texture: WebGLTexture): void;
+        /**
+        * Sets all necessary data in the shader for the screen quad to be rendered on
+         */
         static useScreenQuadRenderData(_shader: typeof Shader): void;
         private static transformByPhysics;
     }
@@ -5714,9 +5744,10 @@ declare namespace FudgeCore {
          * Returns a point in the browser page matching the given point of the viewport
          */
         pointClientToScreen(_client: Vector2): Vector2;
-        private getComponentMist;
-        private getComponentAmbientOcclusion;
-        private getComponentBloom;
+        /**
+        * Returns a ComponentPostFX object based on the given Post-FX type, as long as the camaera has a component of this type
+         */
+        private getComponentPost;
     }
 }
 declare namespace FudgeCore {

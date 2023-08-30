@@ -133,24 +133,23 @@ namespace FudgeCore {
         Physics.draw(this.camera, this.physicsDebugMode);
       }
 
-      let cmpMist: ComponentMist = this.getComponentMist(this.camera);
-      if (cmpMist != null) if (cmpMist.isActive) {
-        Render.calcMist(this.camera, cmpMist);
-      }
-      let cmpAO: ComponentAmbientOcclusion = this.getComponentAmbientOcclusion(this.camera);
+      let cmpAO: ComponentAmbientOcclusion = <ComponentAmbientOcclusion> this.getComponentPost(this.camera, "AO");
       if (cmpAO != null) if (cmpAO.isActive) {
         Render.calcAO(this.camera, cmpAO);
       }
-      let cmpBloom: ComponentBloom = this.getComponentBloom(this.camera);
+      let cmpMist: ComponentMist = <ComponentMist> this.getComponentPost(this.camera, "Mist");
+      if (cmpMist != null) if (cmpMist.isActive) {
+        Render.calcMist(this.camera, cmpMist);
+      }
+      let cmpBloom: ComponentBloom = <ComponentBloom> this.getComponentPost(this.camera, "Bloom");
       if (cmpBloom != null) if (cmpBloom.isActive) {
         Render.calcBloom(cmpBloom);
       }
 
       Render.setDepthTest(false);
       Render.compositeEffects(this.camera, cmpMist, cmpAO, cmpBloom);
+
       this.#crc2.imageSmoothingEnabled = false;
-
-
       this.#crc2.drawImage(
         Render.getCanvas(),
         this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
@@ -235,16 +234,19 @@ namespace FudgeCore {
         this.lastCamera = this.camera;
         if (rectRender.size.x >= 1 || rectRender.size.y >= 1) {
           Render.adjustBufferSize(Render.mainFBO, Render.mainTexture, null);
-          let cmpMist: ComponentMist = this.getComponentMist(this.camera);
-          if (cmpMist != null) if (cmpMist.isActive) {
-            Render.adjustBufferSize(Render.mistFBO, Render.mistTexture, null);
-          }
-          let cmpAO: ComponentAmbientOcclusion = this.getComponentAmbientOcclusion(this.camera);
+
+          let cmpAO: ComponentAmbientOcclusion = <ComponentAmbientOcclusion> this.getComponentPost(this.camera, "AO");
           if (cmpAO != null) if (cmpAO.isActive) {
             Render.adjustBufferSize(Render.aoNormalFBO, Render.aoNormalTexture, Render.aoDepthTexture);
             Render.adjustBufferSize(Render.aoFBO, Render.aoTexture, null);
           }
-          let cmpBloom: ComponentBloom = this.getComponentBloom(this.camera);
+          
+          let cmpMist: ComponentMist = <ComponentMist> this.getComponentPost(this.camera, "Mist");
+          if (cmpMist != null) if (cmpMist.isActive) {
+            Render.adjustBufferSize(Render.mistFBO, Render.mistTexture, null);
+          }
+
+          let cmpBloom: ComponentBloom = <ComponentBloom> this.getComponentPost(this.camera, "Bloom");
           if (cmpBloom != null) if (cmpBloom.isActive) {
             Render.adjustBlooomBufferSize();
           }
@@ -381,25 +383,15 @@ namespace FudgeCore {
       let screen: Vector2 = new Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
       return screen;
     }
-
-    private getComponentMist(_camera: ComponentCamera): ComponentMist {
+    /**
+    * Returns a ComponentPostFX object based on the given Post-FX type, as long as the camaera has a component of this type
+     */
+    private getComponentPost(_camera: ComponentCamera, _cmpType: string): Component {
       let camParentNode: Node = _camera.node;
       if (camParentNode != null) {
-        return camParentNode.getComponent(ComponentMist);
-      }
-      return null;
-    }
-    private getComponentAmbientOcclusion(_camera: ComponentCamera): ComponentAmbientOcclusion {
-      let camParentNode: Node = _camera.node;
-      if (camParentNode != null) {
-        return camParentNode.getComponent(ComponentAmbientOcclusion);
-      }
-      return null;
-    }
-    private getComponentBloom(_camera: ComponentCamera): ComponentBloom {
-      let camParentNode: Node = _camera.node;
-      if (camParentNode != null) {
-        return camParentNode.getComponent(ComponentBloom);
+        if (_cmpType == "AO")return camParentNode.getComponent(ComponentAmbientOcclusion);
+        if (_cmpType == "Mist")return camParentNode.getComponent(ComponentMist);
+        if (_cmpType == "Bloom")return camParentNode.getComponent(ComponentBloom);
       }
       return null;
     }

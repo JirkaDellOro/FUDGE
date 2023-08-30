@@ -145,8 +145,6 @@ namespace FudgeCore {
 
         //TODO: In some cases (when uvs are mirrored) the tangents would have to be flipped in order to work properly
 
-        //At last, all the tangents are stored in their respective Float32Array
-
         //All faces have their individual tangents, which leads to shading artifacts, which is accounted for here
         for (let vertex of this.mesh.vertices) {
           if (typeof vertex.referTo !== "undefined") {
@@ -157,7 +155,8 @@ namespace FudgeCore {
             }
           }
         }
-
+        
+        //At last, all the tangents are stored in their respective Float32Array
         this.ƒtangentsVertex = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
           return [...this.mesh.vertices[_index].tangent.get()];
         }));

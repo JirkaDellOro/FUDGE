@@ -1,6 +1,6 @@
 #version 300 es
 /**
-* ShaderDownsample sets Values for Downsampling Fragmentshader
+* ShaderDownsample sets values for downsampling fragmentshader and applies a small gaussian blur
 * @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
 in vec2 a_vctPosition;

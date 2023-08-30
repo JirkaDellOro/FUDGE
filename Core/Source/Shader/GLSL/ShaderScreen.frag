@@ -1,6 +1,6 @@
 #version 300 es
 /**
-*Renders Framebuffer on to Renderbuffer
+*Composites all Post-FX on to the main-render and renders it to the main Renderbuffer
 *@authors Roland Heer, HFU, 2023
 */
 precision mediump float;

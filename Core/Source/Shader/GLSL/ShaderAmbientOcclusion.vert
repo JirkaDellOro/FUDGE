@@ -1,7 +1,7 @@
 #version 300 es
 
 /**
-* AO Vertex - Shader. Sets Values for AO Fragment - Shader
+* AO vertexshader. Sets values for AO fragmentshader
 * @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
 in vec2 a_vctPosition;

@@ -1,6 +1,6 @@
 #version 300 es
 /**
-*Calculates the Normal Information relative to the Camera
+*Calculates the normal information relative to the Camera
 *@authors Roland Heer, HFU, 2023
 */
 uniform mat4 u_mtxMeshToView;

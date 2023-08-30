@@ -597,10 +597,10 @@
                     "ComponentAmbientOcclusion": [
                       {
                         "ƒ.ComponentAmbientOcclusion": {
-                          "clrAO": "[0, 0.06666666666666667, 0.09803921568627451, 1]",
-                          "samples": 64,
-                          "radius": 1.4,
-                          "bias": 8,
+                          "clrAO": "[0, 0, 0, 1]",
+                          "samples": 128,
+                          "radius": 1.7000000000000002,
+                          "distance": 7,
                           "Component": {
                             "active": true
                           }

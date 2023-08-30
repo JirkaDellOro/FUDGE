@@ -9,7 +9,7 @@ namespace FudgeCore {
     public intensity: number;
     public desaturateHighlights: number;
 
-    public constructor(_threshold: number = 0.6, _intensity: number = 1.0, _desaturateHighlights: number = 0.5) {
+    public constructor(_threshold: number = 0.9, _intensity: number = 1.0, _desaturateHighlights: number = 0.5) {
       super();
       this.threshold = _threshold;
       this.intensity = _intensity;

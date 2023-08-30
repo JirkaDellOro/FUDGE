@@ -57,6 +57,7 @@ void main() {
     vec3 vct_Bitangent = cross(vct_Normal, vct_Tangent);
     mat3 mtxTBN = mat3(vct_Tangent, vct_Bitangent, vct_Normal);
 
+    //calculation of the occlusion-factor   
     float occlusion = 0.0f;
     for(int i = 0; i < u_nSamples; i++) {
         //get sample position
@@ -68,13 +69,12 @@ void main() {
 
         float occluderDepth = linearizeDepth(texture(u_depthTexture, offset.xy).r);
 
-        float rangeCheck = (vct_Sample.z - occluderDepth > u_radius * u_shadowDistance * 10.0f ? 0.0f : 1.0f);
-        //rangeCheck = 1.0f;
+        float rangeCheck = (vct_Sample.z - occluderDepth > u_radius * u_shadowDistance * 10.0f ? 0.0f : 1.0f);  
         occlusion += (occluderDepth <= vct_Sample.z ? 1.0f : 0.0f) * rangeCheck;
     }
+
     float nSamples = float(u_nSamples);
     occlusion = min((1.0f - (occlusion / nSamples)) * 1.5f, 1.0f);
     occlusion *= occlusion;
     vctFrag = vec4(vec3(occlusion), 1.0f);
-    //vctFrag = vec4(texture(u_depthTexture, (vct_FragPos + ((mtxTBN * u_samples[127].vct) * u_radius)).xy * 0.5f + 0.5f).rgb, 1.0f);
 }
