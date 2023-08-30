@@ -7,6 +7,7 @@ This is a fork of the original FUDGE repository. It is used to work on the graph
 This repository is a fork of the original FUDGE repository. It contains the source code, the documentation and the full development history of FUDGE and FUDGE_LightAndShadow.
 
 FUDGE is a lightweight open-source game engine and editor created for educating students in an academic environment in the field of design and development of games and highly interactive applications. It may also be used as a rapid prototyping tool to easly convey and evaluate ideas for applications and games and as a tool to create educational games.
+
 This projects extends the functionality of FUDGE to achieve a higher visual fidelity.
 
 # Example Scene
