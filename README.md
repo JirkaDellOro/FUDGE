@@ -4,9 +4,13 @@
 This is a fork of the original FUDGE repository. It is used to work on the graphical capabilities of FUDGE and will specifically tackle Effects regarding Light and Shadow.
 
 # Welcome!  
-This repository contains the source code, the documentation and the full development history of FUDGE. If you want to create using FUDGE, visit the repository [FUDGE_Runtime](https://github.com/JirkaDellOro/FUDGE_Runtime), which contains an excerpt with all you need to get going.
+This repository is a fork of the original FUDGE repository. It contains the source code, the documentation and the full development history of FUDGE and FUDGE_LightAndShadow.
 
 FUDGE is a lightweight open-source game engine and editor created for educating students in an academic environment in the field of design and development of games and highly interactive applications. It may also be used as a rapid prototyping tool to easly convey and evaluate ideas for applications and games and as a tool to create educational games.
+This projects extends the functionality of FUDGE to achieve a higher visual fidelity.
+
+# Example Scene
+This Scene contains everything created in the FUDGE_LightAndShadow Project[Example Scene](https://github.com/lo-th/Oimo.js) 
 
 # Folders
 ## Core  
@@ -27,46 +31,3 @@ The directory of the actual standalone editor to be executed with Electron or pa
 Contains programs to test the functionality of various components of FUDGE separately, thus also serve as a resource for learning about those functionalities and how to set them up. Use a local server to run the tests locally on your machine.
 ## Miscellaneous	
 A collection of various other documents and resources, including unmaintained experiments of developers who worked on FUDGE, and the thesis documents about aspects FUDGE former students graduated with. 
-
-# Call for papers
-## ToDo
-- Cameratransformation, Axonometry
-- Diegetic User-Interface
-- Grapheditor/Wiring for Shader and Animation
-- Importer for standard file formats
-- Runtime-Recording for Replay
-- Undo/Rollback
-- Selection-Sets to store temporary Groups
-- Advanced texturing
-- Input-Manager  
-- Graphic Feedback/Feedforward in RenderView
-- Image-Tracking
-
-## In Progress
-- Pathfinding System
-- Skeletal Animation
-- Procedural 3D-Assets
-- VR Components
-- Light and Shadow
-
-## Done  
-
-| Name               | Area                              |
-|--------------------|-----------------------------------|
-| Robel Teklezgi     | Foundation WebGL/Angular/Electron |
-| Jascha Karagöl     | Foundation Scenetree              |
-| Kathrin Fuhrer     | AR-Core with FUDGE and Electron   |
-| Lukas Scheuerle    | Sketch- and Animation System      |
-| Thomas Dorner      | Foundation Audio                  |
-| Falco Böhnke       | Net-Components                    |
-| Monika Galkewitsch | UI-Components                     |
-| Lea Stegk          | UI-Design                         |
-| Elke Scherffius    | Tutorials                         |
-| Marko Fehrenbach   | Physics                           |
-| Jonas Plotzky      | Particlesystem                    |
-| Robin Schwab       | Modeller                          |
-| Luis Keck          | Shader-System                     |
-| Marius König       | Integration Golden Layout 2       |
-| Moritz Beaugrand   | Terrain                           |
-| Matthias Roming    | Skeleton System & glTF Importer   |
-| Jonas Plotzky      | Particle & Animation Editor       |
