@@ -104,7 +104,7 @@ namespace Script {
 
     crc2.fillStyle = "#fff";
     crc2.font = canvas.height * 0.012 + "px sans-serif";
-    crc2.fillText("S to toggle old and new shading; M to toglle Mist, B to toggle Bloom and A to toggle AO; Press the Up or Down key to change the cameras pitch", canvas.height * 0.05, canvas.height * 0.07);
+    crc2.fillText("S to toggle old and new shading; M to toggle Mist, B to toggle Bloom and A to toggle AO; Press the Up or Down key to change the cameras pitch", canvas.height * 0.05, canvas.height * 0.07);
 
     let deltafps: number = 0;
     if(fps.length > 30){
