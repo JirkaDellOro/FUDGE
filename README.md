@@ -11,7 +11,7 @@ FUDGE is a lightweight open-source game engine and editor created for educating 
 This projects extends the functionality of FUDGE to achieve a higher visual fidelity.
 
 # Example Scene
-[This scene](https://github.com/lo-th/Oimo.js) contains everything created in the FUDGE_LightAndShadow Project
+[This scene](https://rolandheer.github.io/FUDGE_LightAndShadow/Miscellaneous/TestWIP/LightAndShadow/LightAndShadow/) contains everything created in the FUDGE_LightAndShadow Project
 
 # Folders
 ## Core  
