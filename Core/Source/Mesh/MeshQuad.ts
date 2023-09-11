@@ -30,7 +30,7 @@ namespace FudgeCore {
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization);
-      this.create(MeshQuad.shape, true);
+      this.create(MeshQuad.shape, true); // this seems to be dispatched doubled while deserializing the resources
       return this;
     }
     protected reduceMutator(_mutator: Mutator): void {

@@ -3,7 +3,7 @@ namespace FudgeCore {
   shaderSources["ShaderPhong.frag"] = /*glsl*/ `#version 300 es
 /**
 * Phong shading
-* @authors Jirka Dell'Oro-Friedl, HFU, 2022
+* @authors Jirka Dell'Oro-Friedl, HFU, 2022 | Jonas Plotzky, HFU, 2023
 */
 
 precision mediump float;
@@ -18,12 +18,21 @@ uniform sampler2D u_texture;
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
 uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
+// uniform mat4 u_mtxMeshToWorld; // can't use this when skinning
 uniform vec3 u_vctCamera;
 
 in vec4 v_vctColor;
-in vec4 v_vctPosition;
+in vec4 v_vctPosition; // in world space
+
+  #if defined(PHONG)
 in vec3 v_vctNormal;
+in vec3 v_vctView;
+  #endif
+
+  #if defined(FLAT)
+flat in vec3 v_vctView;
+  #endif
+
 out vec4 vctFrag;
 
 struct Light {
@@ -71,25 +80,38 @@ vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec
 
 void main() {
   vctFrag = v_vctColor;
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * v_vctPosition) - u_vctCamera);
+
+  vec3 vctPosition = vec3(v_vctPosition);
+
+    #if defined(PHONG)
+  vec3 vctNormal = normalize(v_vctNormal); // normalize after interpolation otherwise it's not a unit vector anymore
+    #endif
+
+    #if defined(FLAT)
+  vec3 vctXTangent = dFdx(vctPosition);
+  vec3 vctYTangent = dFdy(vctPosition);
+  vec3 vctNormal = normalize(cross(vctXTangent, vctYTangent));
+    #endif
 
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
-    vctFrag += illuminateDirected(vctDirection, v_vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
+    vctFrag += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, v_vctView, u_fSpecular);
   }
+
   // calculate point light effect
   for(uint i = 0u; i < u_nLightsPoint; i++) {
     vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-    vec3 vctDirection = vec3(u_mtxMeshToWorld * v_vctPosition) - vctPositionLight;
+    vec3 vctDirection = vctPosition - vctPositionLight;
     float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
     if(fIntensity < 0.0)
       continue;
-    vctFrag += illuminateDirected(vctDirection, v_vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
+    vctFrag += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, v_vctView, u_fSpecular);
   }
+
   // calculate spot light effect
   for(uint i = 0u; i < u_nLightsSpot; i++) {
     vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-    vec3 vctDirection = vec3(u_mtxMeshToWorld * v_vctPosition) - vctPositionLight;
+    vec3 vctDirection = vctPosition - vctPositionLight;
     vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
     if(vctDirectionInverted.z <= 0.0)
       continue;
@@ -97,7 +119,7 @@ void main() {
     fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);
     if(fIntensity < 0.0)
       continue;
-    vctFrag += illuminateDirected(vctDirection, v_vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
+    vctFrag += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, v_vctView, u_fSpecular);
   }
 
   // TEXTURE: multiply with texel color
@@ -246,6 +268,7 @@ uniform mat4 u_mtxMeshToView;
 in vec3 a_vctPosition;
 // TODO: think about making vertex color optional
 in vec4 a_vctColor;
+out vec4 v_vctColor;
 
   // PARTICLE: offer buffer and functionality for in shader position calculation
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
@@ -324,6 +347,12 @@ out vec2 v_vctTexture;
   #if defined(PHONG)
 out vec3 v_vctNormal;
 out vec4 v_vctPosition;
+out vec3 v_vctView;
+  #endif
+
+  #if defined(FLAT)
+out vec4 v_vctPosition;
+flat out vec3 v_vctView;
   #endif
 
   #if defined(SKIN)
@@ -336,13 +365,6 @@ const uint MAX_BONES = 256u; // CAUTION: this number must be the same as in Rend
 layout (std140) uniform Skin {
   mat4 u_bones[MAX_BONES];
 };
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-out vec4 v_vctColor;
   #endif
 
   #if defined(PARTICLE)
@@ -378,7 +400,7 @@ float fetchRandomNumber(int _iIndex, int _iParticleSystemRandomNumbersSize, int 
 void main() {
   vec4 vctPosition = vec4(a_vctPosition, 1.0);
 
-    #if defined(CAMERA) || defined(PARTICLE)
+    #if defined(CAMERA) || defined(PARTICLE) || defined(SKIN) || defined(MATCAP)
   mat4 mtxMeshToWorld = u_mtxMeshToWorld;
     #endif
 
@@ -411,36 +433,47 @@ void main() {
       #else
   mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
       #endif
-      #if defined(LIGHT)
+    #endif
+
+    #if defined(LIGHT)
   v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
+    #else
+  v_vctColor = vec4(1.0, 1.0, 1.0, 1.0);
     #endif
 
     #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x] +
+  mtxMeshToWorld = a_fWeight.x * u_bones[a_iBone.x] +
     a_fWeight.y * u_bones[a_iBone.y] +
     a_fWeight.z * u_bones[a_iBone.z] +
     a_fWeight.w * u_bones[a_iBone.w];
-
-  mtxMeshToView = u_mtxWorldToView * mtxSkin;
-  mtxNormalMeshToWorld = mtxSkin; // no need for transpose(inverse(...)) for skinning
+  
+  mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
+  mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
     #endif
 
     // calculate position and normal according to input and defines
   gl_Position = mtxMeshToView * vctPosition;
 
     #if defined(CAMERA) || defined(MATCAP)
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera); // TODO: when skinning is used, this is most likely wrong, use mtxSkin instead of u_mtxMeshToWorld
+  vec3 vctView = normalize(vec3(mtxMeshToWorld * vctPosition) - u_vctCamera);
     #endif
 
     #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
+  vctNormal = mat3(mtxNormalMeshToWorld) * vctNormal;
+
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader
-  v_vctPosition = vctPosition;
-      #endif  
+  v_vctPosition = mtxMeshToWorld * vctPosition;
+  v_vctView = vctView;
+      #endif
 
-    #if !defined(PHONG)
+      #if defined(FLAT)
+  v_vctPosition = mtxMeshToWorld * vctPosition;
+  v_vctView = vctView;
+      #endif
+
+    #if !defined(PHONG) && !defined(FLAT)
+  vctNormal = normalize(vctNormal);
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));

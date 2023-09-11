@@ -25,29 +25,18 @@ namespace FudgeCore {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
       this.renderMesh = this.renderMesh || new RenderMesh(this);
-      if (_shader.define.includes("FLAT")) {
-        if (this.renderMesh.flat == null)
-          this.renderMesh.flat = {
-            vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.verticesFlat),
-            indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indicesFlat),
-            normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normalsFlat),
-            textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVsFlat),
-            colors: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.colorsFlat),
-            nIndices: this.renderMesh.indicesFlat.length
-          };
-        return this.renderMesh.flat;
-      } else {
-        if (this.renderMesh.smooth == null)
-          this.renderMesh.smooth = {
-            vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.vertices),
-            indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indices),
-            normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normalsVertex),
-            textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVs),
-            colors: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.colors),
-            nIndices: this.renderMesh.indices.length
-          };
-        return this.renderMesh.smooth;
-      }
+
+      if (this.renderMesh.buffers == null)
+        this.renderMesh.buffers = {
+          vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.vertices),
+          indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indices),
+          normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normals),
+          textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVs),
+          colors: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.colors),
+          nIndices: this.renderMesh.indices.length
+        };
+      return this.renderMesh.buffers;
+
 
       function createBuffer(_type: GLenum, _array: Float32Array | Uint16Array): WebGLBuffer {
         let buffer: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());

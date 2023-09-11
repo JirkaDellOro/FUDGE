@@ -12,6 +12,7 @@ uniform mat4 u_mtxMeshToView;
 in vec3 a_vctPosition;
 // TODO: think about making vertex color optional
 in vec4 a_vctColor;
+out vec4 v_vctColor;
 
   // PARTICLE: offer buffer and functionality for in shader position calculation
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
@@ -90,6 +91,12 @@ out vec2 v_vctTexture;
   #if defined(PHONG)
 out vec3 v_vctNormal;
 out vec4 v_vctPosition;
+out vec3 v_vctView;
+  #endif
+
+  #if defined(FLAT)
+out vec4 v_vctPosition;
+flat out vec3 v_vctView;
   #endif
 
   #if defined(SKIN)
@@ -102,13 +109,6 @@ const uint MAX_BONES = 256u; // CAUTION: this number must be the same as in Rend
 layout (std140) uniform Skin {
   mat4 u_bones[MAX_BONES];
 };
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #else
-out vec4 v_vctColor;
   #endif
 
   #if defined(PARTICLE)
@@ -144,7 +144,7 @@ float fetchRandomNumber(int _iIndex, int _iParticleSystemRandomNumbersSize, int 
 void main() {
   vec4 vctPosition = vec4(a_vctPosition, 1.0);
 
-    #if defined(CAMERA) || defined(PARTICLE)
+    #if defined(CAMERA) || defined(PARTICLE) || defined(SKIN) || defined(MATCAP)
   mat4 mtxMeshToWorld = u_mtxMeshToWorld;
     #endif
 
@@ -177,36 +177,47 @@ void main() {
       #else
   mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
       #endif
-      #if defined(LIGHT)
+    #endif
+
+    #if defined(LIGHT)
   v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
+    #else
+  v_vctColor = vec4(1.0, 1.0, 1.0, 1.0);
     #endif
 
     #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x] +
+  mtxMeshToWorld = a_fWeight.x * u_bones[a_iBone.x] +
     a_fWeight.y * u_bones[a_iBone.y] +
     a_fWeight.z * u_bones[a_iBone.z] +
     a_fWeight.w * u_bones[a_iBone.w];
-
-  mtxMeshToView = u_mtxWorldToView * mtxSkin;
-  mtxNormalMeshToWorld = mtxSkin; // no need for transpose(inverse(...)) for skinning
+  
+  mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
+  mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
     #endif
 
     // calculate position and normal according to input and defines
   gl_Position = mtxMeshToView * vctPosition;
 
     #if defined(CAMERA) || defined(MATCAP)
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera); // TODO: when skinning is used, this is most likely wrong, use mtxSkin instead of u_mtxMeshToWorld
+  vec3 vctView = normalize(vec3(mtxMeshToWorld * vctPosition) - u_vctCamera);
     #endif
 
     #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
+  vctNormal = mat3(mtxNormalMeshToWorld) * vctNormal;
+
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader
-  v_vctPosition = vctPosition;
-      #endif  
+  v_vctPosition = mtxMeshToWorld * vctPosition;
+  v_vctView = vctView;
+      #endif
 
-    #if !defined(PHONG)
+      #if defined(FLAT)
+  v_vctPosition = mtxMeshToWorld * vctPosition;
+  v_vctView = vctView;
+      #endif
+
+    #if !defined(PHONG) && !defined(FLAT)
+  vctNormal = normalize(vctNormal);
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));

@@ -73,6 +73,7 @@ namespace FudgeCore {
 
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.idResource;
+      delete _mutator.renderData;
     }
   }
 

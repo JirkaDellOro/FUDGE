@@ -46,7 +46,7 @@ namespace FudgeCore {
     }
 
     /**
-     * returns the position associated with the vertex addressed, resolving references between vertices 
+     * returns the bones associated with the vertex addressed, resolving references between vertices 
      */
     public bones(_index: number): Bone[] {
       let vertex: Vertex = this[_index];

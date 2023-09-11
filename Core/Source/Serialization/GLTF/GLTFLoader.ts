@@ -30,13 +30,13 @@ namespace FudgeCore {
 
     private static get defaultMaterial(): Material {
       if (!this.#defaultMaterial)
-        this.#defaultMaterial = new Material("GLTFDefaultMaterial", ShaderGouraud, new CoatRemissive(Color.CSS("white")));
+        this.#defaultMaterial = new Material("GLTFDefaultMaterial", ShaderPhong, new CoatRemissive(Color.CSS("white"), 1, 0.5));
       return this.#defaultMaterial;
     }
 
     private static get defaultSkinMaterial(): Material {
       if (!this.#defaultSkinMaterial)
-        this.#defaultSkinMaterial = new Material("GLTFDefaultSkinMaterial", ShaderGouraudSkin, new CoatRemissive(Color.CSS("white")));
+        this.#defaultSkinMaterial = new Material("GLTFDefaultSkinMaterial", ShaderPhongSkin, new CoatRemissive(Color.CSS("white"), 1, 0.5));
       return this.#defaultSkinMaterial;
     }
 
@@ -47,71 +47,87 @@ namespace FudgeCore {
       const url: string = new URL(_url, Project.baseURL).toString();
 
       if (!this.loaders)
-        this.loaders = {};
-      
+        GLTFLoader.loaders = {};
+
       if (!this.loaders[url]) {
         const response: Response = await fetch(url);
         const gltf: GLTF.GlTf = await response.json();
 
-        if (gltf.nodes) {
-          // mark all nodes that are animated
-          gltf.animations?.forEach(_animation => {
-            _animation.channels.forEach(_channel => {
-              const iNode: number = _channel.target.node;
-              if (iNode != undefined)
-                gltf.nodes[iNode].isAnimated = true;
-            });
-          });
+        GLTFLoader.checkCompatibility(gltf, url);
+        GLTFLoader.preProcess(gltf, url);
 
-          // mark nodes that are joints
-          gltf.skins?.forEach(_skin => {
-            _skin.joints.forEach(_iJoint => gltf.nodes[_iJoint].isJoint = true);
-          });
-
-          // mark parent of each node
-          gltf.nodes.forEach((_node, _iNode) => _node.children?.forEach(_iChild => gltf.nodes[_iChild].parent = _iNode));
-
-          // mark the depth of each node
-          // add names to nodes that don't have one
-          gltf.nodes.forEach((_node, _iNode) => {
-            if (!_node.name)
-              _node.name = `Node${_iNode}`;
-            let iParent: number = _node.parent;
-            let depth: number = 0;
-            let path: number[] = [];
-            path.push(_iNode);
-            while (iParent != undefined) {
-              path.push(iParent);
-              depth++;
-              iParent = gltf.nodes[iParent].parent;
-            }
-            _node.depth = depth;
-            _node.path = path;
-          });
-
-          // mark the skeleton root nodes of each skin
-          gltf.skins?.forEach((_skin, _iSkin) => {
-            if (_skin.skeleton == undefined) {
-              // find the common root of all joints i.e. the skeleton
-              // TODO: add an error for when there is no common root found, as this is a breach of the gltf specification
-              // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#joint-hierarchy
-              const ancestors: Set<number> = new Set<number>(_skin.joints.flatMap(_iJoint => gltf.nodes[_iJoint].path));
-              _skin.skeleton = Array.from(ancestors).reduce((_a, _b) => gltf.nodes[_a].depth < gltf.nodes[_b].depth ? _a : _b);
-            }
-
-            if (gltf.nodes[_skin.skeleton].iSkinRoot != undefined) {
-              Debug.warn(`${GLTFLoader.name} | ${url}: Skin with index ${_iSkin} and ${gltf.nodes[_skin.skeleton].iSkinRoot} share the same common root node. FUDGE currently only supports one skeleton at the same postion in the hierarchy`);
-              return;
-            }
-
-            gltf.nodes[_skin.skeleton].iSkinRoot = _iSkin;
-          });
-        }
-
-        this.loaders[url] = new GLTFLoader(gltf, url);
+        GLTFLoader.loaders[url] = new GLTFLoader(gltf, url);
       }
 
-      return this.loaders[url];
+      return GLTFLoader.loaders[url];
+    }
+
+    private static checkCompatibility(_gltf: GLTF.GlTf, _url: string): void {
+      if (_gltf.asset.version != "2.0")
+        Debug.warn(`${GLTFLoader.name} | ${_url}: This loader was developed for glTF 2.0. It may not work as intended with version ${_gltf.asset.version}.`);
+      if (_gltf.asset.minVersion != undefined && _gltf.asset.minVersion != "2.0")
+        throw new Error(`${GLTFLoader.name} | ${_url}: This loader was developed for glTF 2.0. It does not work with required min version ${_gltf.asset.minVersion}.`);
+      if (_gltf.extensionsUsed?.length > 0)
+        Debug.warn(`${GLTFLoader.name} | ${_url}: This loader does not support glTF extensions. It may not work as intended with extensions ${_gltf.extensionsUsed.toString()}.`);
+      if (_gltf.extensionsRequired?.length > 0)
+        throw new Error(`${GLTFLoader.name} | ${_url}: This loader does not support glTF extensions. It does not work with required extensions ${_gltf.extensionsRequired.toString()}.`);
+    }
+
+    private static preProcess(_gltf: GLTF.GlTf, _url: string): void {
+      if (_gltf.nodes) {
+        // mark all nodes that are animated
+        _gltf.animations?.forEach(_animation => {
+          _animation.channels.forEach(_channel => {
+            const iNode: number = _channel.target.node;
+            if (iNode != undefined)
+              _gltf.nodes[iNode].isAnimated = true;
+          });
+        });
+
+        // mark nodes that are joints
+        _gltf.skins?.forEach(_skin => {
+          _skin.joints.forEach(_iJoint => _gltf.nodes[_iJoint].isJoint = true);
+        });
+
+        // mark parent of each node
+        _gltf.nodes.forEach((_node, _iNode) => _node.children?.forEach(_iChild => _gltf.nodes[_iChild].parent = _iNode));
+
+        // mark the depth of each node
+        // add names to nodes that don't have one
+        _gltf.nodes.forEach((_node, _iNode) => {
+          if (!_node.name)
+            _node.name = `Node${_iNode}`;
+          let iParent: number = _node.parent;
+          let depth: number = 0;
+          let path: number[] = [];
+          path.push(_iNode);
+          while (iParent != undefined) {
+            path.push(iParent);
+            depth++;
+            iParent = _gltf.nodes[iParent].parent;
+          }
+          _node.depth = depth;
+          _node.path = path;
+        });
+
+        // mark the skeleton root nodes of each skin
+        _gltf.skins?.forEach((_skin, _iSkin) => {
+          if (_skin.skeleton == undefined) {
+            // find the common root of all joints i.e. the skeleton
+            // TODO: add an error for when there is no common root found, as this is a breach of the gltf specification
+            // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#joint-hierarchy
+            const ancestors: Set<number> = new Set<number>(_skin.joints.flatMap(_iJoint => _gltf.nodes[_iJoint].path));
+            _skin.skeleton = Array.from(ancestors).reduce((_a, _b) => _gltf.nodes[_a].depth < _gltf.nodes[_b].depth ? _a : _b);
+          }
+
+          if (_gltf.nodes[_skin.skeleton].iSkinRoot != undefined) {
+            Debug.warn(`${GLTFLoader.name} | ${_url}: Skin with index ${_iSkin} and ${_gltf.nodes[_skin.skeleton].iSkinRoot} share the same common root node. FUDGE currently only supports one skeleton at the same postion in the hierarchy`);
+            return;
+          }
+
+          _gltf.nodes[_skin.skeleton].iSkinRoot = _iSkin;
+        });
+      }
     }
 
     /**
@@ -214,11 +230,7 @@ namespace FudgeCore {
         // check for mesh and material
         if (gltfNode.mesh != undefined) {
           const gltfMesh: GLTF.Mesh = this.gltf.meshes?.[gltfNode.mesh];
-
-
-          if (gltfMesh.primitives.length != 1)
-            Debug.warn(`Node ${gltfNode.name} has a mesh with more than one primitive attached to it. FUDGE currently only supports one primitive per mesh.`);
-
+          // TODO: review this
           const subComponents: [ComponentMesh, ComponentMaterial][] = [];
           for (let iPrimitive: number = 0; iPrimitive < gltfMesh.primitives.length; iPrimitive++) {
             const cmpMesh: ComponentMesh = new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh, iPrimitive));
@@ -253,31 +265,6 @@ namespace FudgeCore {
               node.addChild(nodePart);
             });
           }
-
-
-          // const cmpMesh: ComponentMesh = new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh, 0));
-          // // check for skeleton
-          // if (gltfNode.skin != undefined) {
-          //   let iSkeletonInstance: number = this.gltf.skins[gltfNode.skin].skeleton;
-          //   cmpMesh.skeleton = <SkeletonInstance>await this.getNodeByIndex(iSkeletonInstance);
-          // }
-          // node.addComponent(cmpMesh);
-
-          // if (gltfMesh.primitives.length > 1)
-          //   Debug.warn(`${this}: Node ${gltfNode.name} has a mesh with more than one primitive attached to it. FUDGE currently only supports one primitive per mesh.`);
-
-          // const isSkin: boolean = cmpMesh.mesh instanceof MeshSkin;
-          // const iMaterial: number = gltfMesh.primitives?.[0]?.material;
-          // let material: Material;
-          // if (iMaterial == undefined) {
-          //   material = isSkin ?
-          //     GLTFLoader.defaultSkinMaterial :
-          //     GLTFLoader.defaultMaterial;
-          // } else {
-          //   material = await this.getMaterialByIndex(iMaterial, isSkin);
-          // }
-
-          // node.addComponent(new ComponentMaterial(material));
         }
       }
 
@@ -428,7 +415,6 @@ namespace FudgeCore {
       if (!this.#meshes[_iMesh][_iPrimitive]) {
 
         const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
-        // TODO: support multiple primitives per mesh
 
         const gltfPrimitive: GLTF.MeshPrimitive = gltfMesh.primitives[_iPrimitive];
         if (gltfPrimitive.indices == undefined)
@@ -473,7 +459,7 @@ namespace FudgeCore {
           gltfMaterial.name,
           gltfBaseColorTexture ?
             (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
-            (_skin ? ShaderFlatSkin : ShaderPhong),
+            (_skin ? ShaderPhongSkin : ShaderPhong),
           coat);
 
         this.#materials[_iMaterial] = material;
@@ -594,7 +580,7 @@ namespace FudgeCore {
         Debug.info(`${this}: Bone indices are stored as ${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]}. FUDGE will convert them to UNSIGNED_BYTE. FUDGE only supports skeletons with up to 256 bones, so make sure your skeleton has no more than 256 bones.`);
         return Uint8Array.from(array);
       }
-      
+
       throw new Error(`${this}: Invalid component type ${GLTF.COMPONENT_TYPE[componentType]} for bone indices. Expected ${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_BYTE]} or ${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]}.`);
     }
 

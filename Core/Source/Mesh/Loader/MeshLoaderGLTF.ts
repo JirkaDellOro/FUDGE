@@ -11,9 +11,9 @@ namespace FudgeCore {
 
       _mesh.name = _data.gltfMesh.name;
 
-      let indices: Uint16Array;
       let vertices: Float32Array;
-      let normalsVertex: Float32Array;
+      let indices: Uint16Array;
+      let normals: Float32Array;
       let textureUVs: Float32Array;
       let colors: Float32Array;
       let iBones: Uint8Array;
@@ -25,13 +25,15 @@ namespace FudgeCore {
         indices = await loader.getVertexIndices(gltfPrimitive.indices);
 
       if (gltfPrimitive.attributes.NORMAL != undefined)
-        normalsVertex = await loader.getFloat32Array(gltfPrimitive.attributes.NORMAL);
+        normals = await loader.getFloat32Array(gltfPrimitive.attributes.NORMAL);
 
       // TODO: add tangents to RenderMesh
       // if (meshGLTF.primitives[_data.iPrimitive].attributes.TANGENT)
       //   Reflect.set(renderMesh, "ƒtangents", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.TANGENT));
 
-      if (gltfPrimitive.attributes.TEXCOORD_0 != undefined)
+      if (gltfPrimitive.attributes.TEXCOORD_1 != undefined)
+        textureUVs = await loader.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_1);
+      else if (gltfPrimitive.attributes.TEXCOORD_0 != undefined)
         textureUVs = await loader.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_0);
 
       if (gltfPrimitive.attributes.COLOR_0 != undefined)
@@ -49,8 +51,8 @@ namespace FudgeCore {
             textureUVs ?
               new Vector2(textureUVs[iTextureUV + 0], textureUVs[iTextureUV + 1]) :
               undefined,
-            normalsVertex ?
-              new Vector3(normalsVertex[iVertex + 0], normalsVertex[iVertex + 1], normalsVertex[iVertex + 2]) :
+            normals ?
+              new Vector3(normals[iVertex + 0], normals[iVertex + 1], normals[iVertex + 2]) :
               undefined,
             colors ?
               new Color(colors[iVertex + 0], colors[iVertex + 1], colors[iVertex + 2], colors[iVertex + 3]) :
@@ -83,7 +85,7 @@ namespace FudgeCore {
       const renderMesh: RenderMesh = _mesh.renderMesh;
       renderMesh.indices = indices;
       renderMesh.vertices = vertices;
-      renderMesh.normalsVertex = normalsVertex;
+      renderMesh.normals = normals;
       renderMesh.textureUVs = textureUVs;
       renderMesh.colors = colors;
       renderMesh.iBones = iBones;

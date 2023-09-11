@@ -27,9 +27,9 @@ namespace FudgeCore {
     public async load(_loader: typeof MeshLoader = this.loader, _url: RequestInfo = this.url, _data?: Object): Promise<MeshImport> {
       this.url = _url;
       this.loader = _loader;
+      this.clear();
       if (!this.renderMesh)
         this.renderMesh = new RenderMesh(this);
-      this.clear();
       return _loader.load(this, _data);
     }
 

@@ -2373,7 +2373,7 @@ declare namespace FudgeCore {
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
         mesh: Mesh;
-        skeleton: SkeletonInstance;
+        skeleton: SkeletonInstance | string;
         constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance);
         get radius(): number;
         serialize(): Serialization;
@@ -4264,7 +4264,6 @@ declare namespace FudgeCore {
         name: string;
         vertices: Vertices;
         faces: Face[];
-        protected renderMesh: RenderMesh;
         /** bounding box AABB */
         protected ƒbox: Box;
         /** bounding radius */
@@ -4641,7 +4640,7 @@ declare namespace FudgeCore {
         color: Color;
         referTo: number;
         bones: Bone[];
-        constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3, _color?: Color);
+        constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3, _color?: Color, _bones?: Bone[]);
     }
 }
 declare namespace FudgeCore {
@@ -4668,7 +4667,11 @@ declare namespace FudgeCore {
          */
         uv(_index: number): Vector2;
         /**
-         * returns the position associated with the vertex addressed, resolving references between vertices
+         * returns the color associated with the vertex addressed
+         */
+        color(_index: number): Color;
+        /**
+         * returns the bones associated with the vertex addressed, resolving references between vertices
          */
         bones(_index: number): Bone[];
     }
@@ -4702,7 +4705,7 @@ declare namespace FudgeCore {
      */
     class MeshLoaderGLTF extends MeshLoader {
         static load(_mesh: MeshImport | MeshSkin, _data?: {
-            mesh: GLTF.Mesh;
+            gltfMesh: GLTF.Mesh;
             iPrimitive: number;
         }): Promise<MeshImport>;
     }
@@ -5849,58 +5852,6 @@ declare namespace FudgeCore {
         iBones?: WebGLBuffer;
         weights?: WebGLBuffer;
         nIndices?: number;
-    }
-    /**
-     * Inserted into a {@link Mesh}, an instance of this class calculates and represents the mesh data in the form needed by the render engine
-     */
-    class RenderMesh {
-        smooth: RenderBuffers;
-        flat: RenderBuffers;
-        mesh: Mesh;
-        /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
-        protected ƒvertices: Float32Array;
-        /** indices to create faces from the vertices, rotation determines direction of face-normal */
-        protected ƒindices: Uint16Array;
-        /** texture coordinates associated with the vertices by the position in the array */
-        protected ƒtextureUVs: Float32Array;
-        /** vertex normals for smooth shading, interpolated between vertices during rendering */
-        protected ƒnormalsVertex: Float32Array;
-        protected ƒcolors: Float32Array;
-        /** bones */
-        protected ƒiBones: Uint8Array;
-        protected ƒweights: Float32Array;
-        /** flat-shading: normalized face normals, every third entry is used only */
-        protected ƒnormalsFlat: Float32Array;
-        /** flat-shading: extra vertex array, since using vertices with multiple faces is rarely possible due to the limitation above */
-        protected ƒverticesFlat: Float32Array;
-        /** flat-shading: therefore an extra indices-array is needed */
-        protected ƒindicesFlat: Uint16Array;
-        /** flat-shading: and an extra textureUV-array */
-        protected ƒtextureUVsFlat: Float32Array;
-        /** bones */
-        protected ƒiBonesFlat: Uint8Array;
-        protected ƒweightsFlat: Float32Array;
-        constructor(_mesh: Mesh);
-        get iBones(): Uint8Array;
-        get weights(): Float32Array;
-        get vertices(): Float32Array;
-        get indices(): Uint16Array;
-        get normalsVertex(): Float32Array;
-        get textureUVs(): Float32Array;
-        get colors(): Float32Array;
-        get verticesFlat(): Float32Array;
-        get indicesFlat(): Uint16Array;
-        get normalsFlat(): Float32Array;
-        get textureUVsFlat(): Float32Array;
-        get iBonesFlat(): Uint8Array;
-        get weightsFlat(): Float32Array;
-        /**
-         * Clears this render mesh and all its buffers
-         */
-        clear(): void;
-        protected createVerticesFlat(): Float32Array;
-        protected createNormalsFlat(): Float32Array;
-        protected createTextureUVsFlat(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -7313,6 +7264,8 @@ declare namespace FudgeCore {
          * Returns a {@link GLTFLoader} instance for the given url.
          */
         static LOAD(_url: string): Promise<GLTFLoader>;
+        private static checkCompatibility;
+        private static preProcess;
         /**
          * Returns a {@link GraphInstance} for the given scene name or the default scene if no name is given.
          */
@@ -7440,6 +7393,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
+        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7447,6 +7401,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
+        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7454,6 +7409,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
+        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7461,6 +7417,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
+        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
