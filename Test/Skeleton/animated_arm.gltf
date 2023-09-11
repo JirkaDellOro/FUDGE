@@ -6,9 +6,6 @@
   "extensionsUsed": [
     "KHR_lights_punctual"
   ],
-  "extensionsRequired": [
-    "KHR_lights_punctual"
-  ],
   "extensions": {
     "KHR_lights_punctual": {
       "lights": [
