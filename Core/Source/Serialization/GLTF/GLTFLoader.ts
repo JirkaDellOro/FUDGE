@@ -413,21 +413,13 @@ namespace FudgeCore {
         this.#meshes[_iMesh] = [];
 
       if (!this.#meshes[_iMesh][_iPrimitive]) {
-
         const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
-
-        const gltfPrimitive: GLTF.MeshPrimitive = gltfMesh.primitives[_iPrimitive];
-        if (gltfPrimitive.indices == undefined)
-          Debug.warn(`${this}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has no indices. FUDGE does not support non-indexed meshes.`);
-
-        if (gltfPrimitive.mode != undefined && gltfPrimitive.mode != GLTF.MESH_PRIMITIVE_MODE.TRIANGLES)
-          Debug.warn(`${this}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has topology type mode ${GLTF.MESH_PRIMITIVE_MODE[gltfPrimitive.mode]}. FUDGE only supports ${GLTF.MESH_PRIMITIVE_MODE[4]}.`);
-
+        
         this.#meshes[_iMesh][_iPrimitive] = await (
           gltfMesh.primitives[_iPrimitive].attributes.JOINTS_0 != undefined ?
             new MeshSkin() :
             new MeshImport()
-        ).load(MeshLoaderGLTF, this.url, { gltfMesh: gltfMesh, iPrimitive: _iPrimitive });
+        ).load(MeshLoaderGLTF, this.url, { iMesh: _iMesh, iPrimitive: _iPrimitive });
       }
 
       return this.#meshes[_iMesh][_iPrimitive];

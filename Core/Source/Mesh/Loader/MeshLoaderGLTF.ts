@@ -4,12 +4,23 @@ namespace FudgeCore {
    * @authors Matthias Roming, HFU, 2022-2023 | Jonas Plotzky, HFU, 2023
    */
   export class MeshLoaderGLTF extends MeshLoader {
-    public static async load(_mesh: MeshImport | MeshSkin, _data?: { gltfMesh: GLTF.Mesh; iPrimitive: number }): Promise<MeshImport> {
+    public static async load(_mesh: MeshImport | MeshSkin, _data?: { iMesh: number; iPrimitive: number }): Promise<MeshImport> {
       const loader: GLTFLoader = await GLTFLoader.LOAD(_mesh.url.toString());
-      const gltfMesh: GLTF.Mesh = _data.gltfMesh;
+      const gltfMesh: GLTF.Mesh = loader.gltf.meshes[_data.iMesh];
       const gltfPrimitive: GLTF.MeshPrimitive = gltfMesh.primitives[_data.iPrimitive];
 
-      _mesh.name = _data.gltfMesh.name;
+      if (gltfPrimitive.indices == undefined)
+        Debug.warn(`${loader}: Mesh with index ${_data.iMesh} primitive ${_data.iPrimitive} has no indices. FUDGE does not support non-indexed meshes.`);
+
+      if (gltfPrimitive.mode != undefined && gltfPrimitive.mode != GLTF.MESH_PRIMITIVE_MODE.TRIANGLES)
+        Debug.warn(`${loader}: Mesh with index ${_data.iMesh} primitive ${_data.iPrimitive} has topology type mode ${GLTF.MESH_PRIMITIVE_MODE[gltfPrimitive.mode]}. FUDGE only supports ${GLTF.MESH_PRIMITIVE_MODE[4]}.`);
+
+      checkMaxSupport(gltfPrimitive.attributes, "TEXCOORD", 2);
+      checkMaxSupport(gltfPrimitive.attributes, "COLOR", 1);
+      checkMaxSupport(gltfPrimitive.attributes, "JOINTS", 1);
+      checkMaxSupport(gltfPrimitive.attributes, "WEIGHTS", 1);
+
+      _mesh.name = gltfMesh.name;
 
       let vertices: Float32Array;
       let indices: Uint16Array;
@@ -35,6 +46,7 @@ namespace FudgeCore {
         textureUVs = await loader.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_1);
       else if (gltfPrimitive.attributes.TEXCOORD_0 != undefined)
         textureUVs = await loader.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_0);
+
 
       if (gltfPrimitive.attributes.COLOR_0 != undefined)
         colors = await loader.getVertexColors(gltfPrimitive.attributes.COLOR_0);
@@ -69,7 +81,7 @@ namespace FudgeCore {
         );
       }
 
-      for (let iFaceVertexIndex: number = 0; iFaceVertexIndex < indices.length; iFaceVertexIndex += 3) {
+      for (let iFaceVertexIndex: number = 0; iFaceVertexIndex < indices?.length; iFaceVertexIndex += 3) {
         try {
           _mesh.faces.push(new Face(
             _mesh.vertices,
@@ -92,6 +104,11 @@ namespace FudgeCore {
       renderMesh.weights = weights;
 
       return _mesh;
+
+      function checkMaxSupport(_gltfAttributes: GLTF.MeshPrimitive["attributes"], _check: string, _max: number): void {
+        if (Object.keys(gltfPrimitive.attributes).filter((_key: string) => _key.startsWith(_check)).length > _max)
+          Debug.warn(`${loader}: Mesh with index ${_data.iMesh} primitive ${_data.iPrimitive} has more than ${_max} sets of ${_check} associated with it. FUGDE only supports up to ${_max} ${_check} sets per primitve`);
+      }
     }
   }
 }

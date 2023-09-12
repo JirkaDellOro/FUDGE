@@ -4705,7 +4705,7 @@ declare namespace FudgeCore {
      */
     class MeshLoaderGLTF extends MeshLoader {
         static load(_mesh: MeshImport | MeshSkin, _data?: {
-            gltfMesh: GLTF.Mesh;
+            iMesh: number;
             iPrimitive: number;
         }): Promise<MeshImport>;
     }
