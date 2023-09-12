@@ -30,13 +30,13 @@ namespace FudgeCore {
 
     private static get defaultMaterial(): Material {
       if (!this.#defaultMaterial)
-        this.#defaultMaterial = new Material("GLTFDefaultMaterial", ShaderPhong, new CoatRemissive(Color.CSS("white"), 1, 0.5));
+        this.#defaultMaterial = new Material("GLTFDefaultMaterial", ShaderFlat, new CoatRemissive(Color.CSS("white"), 1, 0.5));
       return this.#defaultMaterial;
     }
 
     private static get defaultSkinMaterial(): Material {
       if (!this.#defaultSkinMaterial)
-        this.#defaultSkinMaterial = new Material("GLTFDefaultSkinMaterial", ShaderPhongSkin, new CoatRemissive(Color.CSS("white"), 1, 0.5));
+        this.#defaultSkinMaterial = new Material("GLTFDefaultSkinMaterial", ShaderFlatSkin, new CoatRemissive(Color.CSS("white"), 1, 0.5));
       return this.#defaultSkinMaterial;
     }
 

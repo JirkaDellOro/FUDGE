@@ -20,15 +20,14 @@ uniform float u_fSpecular;
 uniform vec3 u_vctCamera;
 
 in vec4 v_vctColor;
-in vec4 v_vctPosition; // in world space
+in vec3 v_vctPosition;
 
   #if defined(PHONG)
 in vec3 v_vctNormal;
-in vec3 v_vctView;
   #endif
 
   #if defined(FLAT)
-flat in vec3 v_vctView;
+flat in vec3 v_vctPositionFlat;
   #endif
 
 out vec4 vctFrag;
@@ -79,21 +78,23 @@ vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec
 void main() {
   vctFrag = v_vctColor;
 
-  vec3 vctPosition = vec3(v_vctPosition);
+  vec3 vctPosition = v_vctPosition;
 
     #if defined(PHONG)
-  vec3 vctNormal = normalize(v_vctNormal); // normalize after interpolation otherwise it's not a unit vector anymore
+  vec3 vctNormal = normalize(v_vctNormal);
+  vec3 vctView = normalize(v_vctPosition - u_vctCamera);
     #endif
 
     #if defined(FLAT)
   vec3 vctXTangent = dFdx(vctPosition);
   vec3 vctYTangent = dFdy(vctPosition);
   vec3 vctNormal = normalize(cross(vctXTangent, vctYTangent));
+  vec3 vctView = normalize(v_vctPositionFlat - u_vctCamera);
     #endif
 
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
-    vctFrag += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, v_vctView, u_fSpecular);
+    vctFrag += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
   }
 
   // calculate point light effect
@@ -103,7 +104,7 @@ void main() {
     float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
     if(fIntensity < 0.0)
       continue;
-    vctFrag += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, v_vctView, u_fSpecular);
+    vctFrag += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
   }
 
   // calculate spot light effect
@@ -117,7 +118,7 @@ void main() {
     fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);
     if(fIntensity < 0.0)
       continue;
-    vctFrag += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, v_vctView, u_fSpecular);
+    vctFrag += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
 
   // TEXTURE: multiply with texel color

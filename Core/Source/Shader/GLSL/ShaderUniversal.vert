@@ -90,13 +90,12 @@ out vec2 v_vctTexture;
 
   #if defined(PHONG)
 out vec3 v_vctNormal;
-out vec4 v_vctPosition;
-out vec3 v_vctView;
+out vec3 v_vctPosition;
   #endif
 
   #if defined(FLAT)
-out vec4 v_vctPosition;
-flat out vec3 v_vctView;
+out vec3 v_vctPosition;
+flat out vec3 v_vctPositionFlat;
   #endif
 
   #if defined(SKIN)
@@ -207,13 +206,12 @@ void main() {
 
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader
-  v_vctPosition = mtxMeshToWorld * vctPosition;
-  v_vctView = vctView;
+  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
       #endif
 
       #if defined(FLAT)
-  v_vctPosition = mtxMeshToWorld * vctPosition;
-  v_vctView = vctView;
+  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+  v_vctPositionFlat = v_vctPosition;
       #endif
 
     #if !defined(PHONG) && !defined(FLAT)
