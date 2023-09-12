@@ -76,8 +76,6 @@ vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec
 }
 
 void main() {
-  vctFrag = v_vctColor;
-
   vec3 vctPosition = v_vctPosition;
 
     #if defined(PHONG)
@@ -92,6 +90,8 @@ void main() {
   vec3 vctView = normalize(v_vctPositionFlat - u_vctCamera);
     #endif
 
+  vctFrag = u_fDiffuse * u_ambient.vctColor;
+  
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
     vctFrag += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
@@ -127,5 +127,5 @@ void main() {
   vctFrag *= vctColorTexture;
     #endif
     
-  vctFrag *= u_vctColor;
+  vctFrag *= u_vctColor * v_vctColor;
 }

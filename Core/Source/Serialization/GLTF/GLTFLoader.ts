@@ -452,13 +452,13 @@ namespace FudgeCore {
 
         const color: Color = new Color(...gltfMaterial.pbrMetallicRoughness?.baseColorFactor || [1, 1, 1, 1]);
         const coat: Coat = gltfBaseColorTexture ?
-          new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index), 1, 0.5) :
+          new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index), 1, 1) :
           new CoatRemissive(color, 1, 0.5);
 
         const material: Material = new Material(
           gltfMaterial.name,
           gltfBaseColorTexture ?
-            (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
+            (_skin ? ShaderPhongTexturedSkin : ShaderGouraudTextured) :
             (_skin ? ShaderPhongSkin : ShaderPhong),
           coat);
 
@@ -646,11 +646,11 @@ namespace FudgeCore {
 
       if (gltfAccessor.type == GLTF.ACCESSOR_TYPE.VEC3) {
         const rgbaArray: Float32Array = new Float32Array(array.length * 4 / 3);
-        for (let i: number = 0; i < array.length; i += 3) {
-          rgbaArray[i] = array[i];
-          rgbaArray[i + 1] = array[i + 1];
-          rgbaArray[i + 2] = array[i + 2];
-          rgbaArray[i + 3] = 1;
+        for (let iVec3: number = 0, iVec4: number = 0; iVec3 < array.length; iVec3 += 3, iVec4 += 4) {
+          rgbaArray[iVec4] = array[iVec3];
+          rgbaArray[iVec4 + 1] = array[iVec3 + 1];
+          rgbaArray[iVec4 + 2] = array[iVec3 + 2];
+          rgbaArray[iVec4 + 3] = 1;
         }
         return rgbaArray;
       }

@@ -178,12 +178,6 @@ void main() {
       #endif
     #endif
 
-    #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-    #else
-  v_vctColor = vec4(1.0, 1.0, 1.0, 1.0);
-    #endif
-
     #if defined(SKIN)
   mtxMeshToWorld = a_fWeight.x * u_bones[a_iBone.x] +
     a_fWeight.y * u_bones[a_iBone.y] +
@@ -196,6 +190,7 @@ void main() {
 
     // calculate position and normal according to input and defines
   gl_Position = mtxMeshToView * vctPosition;
+  v_vctColor = a_vctColor;
 
     #if defined(CAMERA) || defined(MATCAP)
   vec3 vctView = normalize(vec3(mtxMeshToWorld * vctPosition) - u_vctCamera);
@@ -214,13 +209,16 @@ void main() {
   v_vctPositionFlat = v_vctPosition;
       #endif
 
-    #if !defined(PHONG) && !defined(FLAT)
+    #if !defined(PHONG) && !defined(FLAT) // gouraud
   vctNormal = normalize(vctNormal);
+  v_vctColor = u_fDiffuse * u_ambient.vctColor;
+
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
     v_vctColor += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
   }
+
   // calculate point light effect
   for(uint i = 0u; i < u_nLightsPoint; i++) {
     vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
@@ -244,6 +242,8 @@ void main() {
       continue;
     v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
+  
+  v_vctColor *= a_vctColor;
       #endif // PHONG
     #endif
 
@@ -269,7 +269,6 @@ void main() {
   v_vctTexture = 0.5 * vctReflection.xy + 0.5;
     #endif
 
-  v_vctColor *= a_vctColor;
     #if defined(PARTICLE_COLOR)
   vec4 vctParticleColor = /*$color*/;
       #if defined(LIGHT)
@@ -281,7 +280,7 @@ void main() {
     #else
     // always full opacity for now...
       #if defined(LIGHT)
-    v_vctColor.a = 1.0;
+  v_vctColor.a = 1.0;
       #endif
     #endif
 }

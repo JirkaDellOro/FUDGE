@@ -44,7 +44,7 @@ namespace FudgeCore {
         weights = await loader.getFloat32Array(gltfPrimitive.attributes.WEIGHTS_0);
       }
 
-      for (let iVertex: number = 0, iTextureUV: number = 0, iBoneEntry: number = 0; iVertex < vertices.length; iVertex += 3, iTextureUV += 2, iBoneEntry += 4) {
+      for (let iVertex: number = 0, iColor: number = 0, iTextureUV: number = 0, iBoneEntry: number = 0; iVertex < vertices.length; iVertex += 3, iColor += 4, iTextureUV += 2, iBoneEntry += 4) {
         _mesh.vertices.push(
           new Vertex(
             new Vector3(vertices[iVertex + 0], vertices[iVertex + 1], vertices[iVertex + 2]),
@@ -55,7 +55,7 @@ namespace FudgeCore {
               new Vector3(normals[iVertex + 0], normals[iVertex + 1], normals[iVertex + 2]) :
               undefined,
             colors ?
-              new Color(colors[iVertex + 0], colors[iVertex + 1], colors[iVertex + 2], colors[iVertex + 3]) :
+              new Color(colors[iColor + 0], colors[iColor + 1], colors[iColor + 2], colors[iColor + 3]) :
               undefined,
             iBones && weights ?
               [

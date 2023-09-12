@@ -22,7 +22,7 @@ uniform float u_fSpecular;
 uniform vec3 u_vctCamera;
 
 in vec4 v_vctColor;
-in vec3 v_vctPosition; // in world space
+in vec3 v_vctPosition;
 
   #if defined(PHONG)
 in vec3 v_vctNormal;
@@ -78,8 +78,6 @@ vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec
 }
 
 void main() {
-  vctFrag = v_vctColor;
-
   vec3 vctPosition = v_vctPosition;
 
     #if defined(PHONG)
@@ -94,6 +92,8 @@ void main() {
   vec3 vctView = normalize(v_vctPositionFlat - u_vctCamera);
     #endif
 
+  vctFrag = u_fDiffuse * u_ambient.vctColor;
+  
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
     vctFrag += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
@@ -129,7 +129,7 @@ void main() {
   vctFrag *= vctColorTexture;
     #endif
     
-  vctFrag *= u_vctColor;
+  vctFrag *= u_vctColor * v_vctColor;
 }`;
   shaderSources["ShaderPick.frag"] = /*glsl*/ `#version 300 es
 /**
@@ -219,14 +219,7 @@ precision highp int;
 
   // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT) || defined(PARTICLE_COLOR)
 in vec4 v_vctColor;
-  #endif
 
   // TEXTURE: input UVs and texture
   #if defined(TEXTURE) || defined(MATCAP)
@@ -238,12 +231,7 @@ out vec4 vctFrag;
 
 void main() {
     // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT) || defined(PARTICLE_COLOR)
-  vctFrag *= v_vctColor;
-    #endif
+  vctFrag = u_vctColor * v_vctColor;
 
     // TEXTURE: multiply with texel color
     #if defined(TEXTURE) || defined(MATCAP)
@@ -435,12 +423,6 @@ void main() {
       #endif
     #endif
 
-    #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-    #else
-  v_vctColor = vec4(1.0, 1.0, 1.0, 1.0);
-    #endif
-
     #if defined(SKIN)
   mtxMeshToWorld = a_fWeight.x * u_bones[a_iBone.x] +
     a_fWeight.y * u_bones[a_iBone.y] +
@@ -453,6 +435,7 @@ void main() {
 
     // calculate position and normal according to input and defines
   gl_Position = mtxMeshToView * vctPosition;
+  v_vctColor = a_vctColor;
 
     #if defined(CAMERA) || defined(MATCAP)
   vec3 vctView = normalize(vec3(mtxMeshToWorld * vctPosition) - u_vctCamera);
@@ -471,13 +454,16 @@ void main() {
   v_vctPositionFlat = v_vctPosition;
       #endif
 
-    #if !defined(PHONG) && !defined(FLAT)
+    #if !defined(PHONG) && !defined(FLAT) // gouraud
   vctNormal = normalize(vctNormal);
+  v_vctColor = u_fDiffuse * u_ambient.vctColor;
+
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
     v_vctColor += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
   }
+
   // calculate point light effect
   for(uint i = 0u; i < u_nLightsPoint; i++) {
     vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
@@ -501,6 +487,8 @@ void main() {
       continue;
     v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
+  
+  v_vctColor *= a_vctColor;
       #endif // PHONG
     #endif
 
@@ -526,7 +514,6 @@ void main() {
   v_vctTexture = 0.5 * vctReflection.xy + 0.5;
     #endif
 
-  v_vctColor *= a_vctColor;
     #if defined(PARTICLE_COLOR)
   vec4 vctParticleColor = /*$color*/;
       #if defined(LIGHT)
@@ -538,7 +525,7 @@ void main() {
     #else
     // always full opacity for now...
       #if defined(LIGHT)
-    v_vctColor.a = 1.0;
+  v_vctColor.a = 1.0;
       #endif
     #endif
 }`;

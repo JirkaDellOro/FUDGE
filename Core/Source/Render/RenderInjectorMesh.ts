@@ -50,7 +50,7 @@ namespace FudgeCore {
       let renderBuffers: RenderBuffers = this.getRenderBuffers(_shader);
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
-      function setBuffer(_name: string, _buffer: WebGLBuffer): void {
+      function setBuffer(_name: string, _buffer: WebGLBuffer, _size: number): void {
         let attribute: number = _shader.attributes[_name];
         if (attribute == undefined)
           return;
@@ -58,7 +58,7 @@ namespace FudgeCore {
         crc3.enableVertexAttribArray(attribute);
         RenderWebGL.setAttributeStructure(
           attribute,
-          { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 }
+          { size: _size, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 }
         );
       }
 
@@ -77,9 +77,9 @@ namespace FudgeCore {
         crc3.uniformMatrix4fv(uniform, false, normalMatrix.get());
       }
 
-      setBuffer("a_vctPosition", renderBuffers.vertices);
-      setBuffer("a_vctNormal", renderBuffers.normals);
-      setBuffer("a_vctColor", renderBuffers.colors);
+      setBuffer("a_vctPosition", renderBuffers.vertices, 3);
+      setBuffer("a_vctNormal", renderBuffers.normals, 3);
+      setBuffer("a_vctColor", renderBuffers.colors, 4);
 
       // feed in texture coordinates if shader accepts a_vctTexture
       let attribute: number = _shader.attributes["a_vctTexture"];
