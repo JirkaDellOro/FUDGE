@@ -414,7 +414,7 @@ namespace FudgeCore {
 
       if (!this.#meshes[_iMesh][_iPrimitive]) {
         const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
-        
+
         this.#meshes[_iMesh][_iPrimitive] = await (
           gltfMesh.primitives[_iPrimitive].attributes.JOINTS_0 != undefined ?
             new MeshSkin() :
@@ -450,7 +450,7 @@ namespace FudgeCore {
         const material: Material = new Material(
           gltfMaterial.name,
           gltfBaseColorTexture ?
-            (_skin ? ShaderPhongTexturedSkin : ShaderGouraudTextured) :
+            (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
             (_skin ? ShaderPhongSkin : ShaderPhong),
           coat);
 

@@ -812,7 +812,7 @@
                     "ComponentMaterial": [
                       {
                         "ƒ.ComponentMaterial": {
-                          "sortForAlpha": false,
+                          "sortForAlpha": true,
                           "clrPrimary": "[1, 1, 1, 1]",
                           "clrSecondary": "[1, 1, 1, 1]",
                           "pivot": {
@@ -848,7 +848,7 @@
                             "active": true
                           },
                           "idParticleSystem": "ParticleSystem|2022-10-13T20:55:33.532Z|40614",
-                          "depthMask": false,
+                          "depthMask": true,
                           "blendMode": 1,
                           "playMode": 0,
                           "duration": 3600000,

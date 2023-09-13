@@ -69,7 +69,7 @@ var FudgePhysics_Communication;
         f.Loop.start();
     }
     function update() {
-        f.Physics.simulate();
+        f.Physics.simulate(f.Loop.timeFrameGame / 1000);
         viewPort.draw();
         measureFPS();
     }
