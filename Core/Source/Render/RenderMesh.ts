@@ -6,7 +6,7 @@ namespace FudgeCore {
     textureUVs?: WebGLBuffer;
     normals?: WebGLBuffer;
     colors?: WebGLBuffer;
-    iBones?: WebGLBuffer;
+    bones?: WebGLBuffer;
     weights?: WebGLBuffer;
     nIndices?: number;
   }
@@ -31,16 +31,16 @@ namespace FudgeCore {
     /* colors */
     protected ƒcolors: Float32Array;
     /** bones */
-    protected ƒiBones: Uint8Array;
+    protected ƒbones: Uint8Array;
     protected ƒweights: Float32Array;
 
     public constructor(_mesh: Mesh) {
       this.mesh = _mesh;
     }
 
-    public get iBones(): Uint8Array {
-      return this.ƒiBones || ( // return cache or ...
-        this.ƒiBones = this.mesh.vertices.some(_vertex => _vertex.bones) ?
+    public get bones(): Uint8Array {
+      return this.ƒbones || ( // return cache or ...
+        this.ƒbones = this.mesh.vertices.some(_vertex => _vertex.bones) ?
           new Uint8Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
             const bones: Bone[] = this.mesh.vertices.bones(_index);
             return [bones?.[0]?.index || 0, bones?.[1]?.index || 0, bones?.[2]?.index || 0, bones?.[3]?.index || 0];
@@ -48,8 +48,8 @@ namespace FudgeCore {
           undefined
       );
     }
-    public set iBones(_iBones: Uint8Array) {
-      this.ƒiBones = _iBones;
+    public set bones(_iBones: Uint8Array) {
+      this.ƒbones = _iBones;
     }
 
     public get weights(): Float32Array {
@@ -149,7 +149,7 @@ namespace FudgeCore {
       this.ƒnormals = undefined;
       this.ƒcolors = undefined;
 
-      this.ƒiBones = undefined;
+      this.ƒbones = undefined;
       this.ƒweights = undefined;
     }
   }

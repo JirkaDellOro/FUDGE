@@ -458,15 +458,15 @@ namespace FudgeCore {
      * **Caution!** Use immediately and readonly, since the vector is going to be reused internally. Create a clone to keep longer and manipulate. 
      * - set: effect the matrix ignoring its rotation and scaling
      */
-    public set translation(_translation: Vector3) {
-      this.mutate({ "translation": _translation });
-    }
     public get translation(): Vector3 {
       if (this.#translationDirty) {
         this.#translation.set(this.data[12], this.data[13], this.data[14]);
         this.#translationDirty = false;
       }
       return this.#translation;
+    }
+    public set translation(_translation: Vector3) {
+      this.mutate({ "translation": _translation });
     }
 
     /** 
@@ -1059,7 +1059,7 @@ namespace FudgeCore {
         let rotation: Vector3 | Quaternion = _mutator.rotation?.w != undefined ?
           this.#quaternion : // using this.#quaternion assumes we get a full quaternion mutator with x, y, z and w set so we never need to recalculate the quaternion here. This might cause trouble if we ever want to mutate only a part of a quaternion...
           isFullVectorMutator(_mutator.rotation) ? this.#rotation : this.rotation; // hack to avoid unnecessary recalculation of rotation and scaling. This recalculation is unnecessary when we get a full mutator i.e. with x, y and z set
-        
+
         let scaling: Vector3 = isFullVectorMutator(_mutator.scaling) ? this.#scaling : this.scaling;
 
         if (_mutator.rotation)

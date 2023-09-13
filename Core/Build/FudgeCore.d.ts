@@ -3616,8 +3616,8 @@ declare namespace FudgeCore {
          * **Caution!** Use immediately and readonly, since the vector is going to be reused internally. Create a clone to keep longer and manipulate.
          * - set: effect the matrix ignoring its rotation and scaling
          */
-        set translation(_translation: Vector3);
         get translation(): Vector3;
+        set translation(_translation: Vector3);
         /**
          * - get: return a vector representation of the rotation {@link Vector3}.
          * **Caution!** Use immediately and readonly, since the vector is going to be reused internally. Create a clone to keep longer and manipulate.
@@ -5849,7 +5849,7 @@ declare namespace FudgeCore {
         textureUVs?: WebGLBuffer;
         normals?: WebGLBuffer;
         colors?: WebGLBuffer;
-        iBones?: WebGLBuffer;
+        bones?: WebGLBuffer;
         weights?: WebGLBuffer;
         nIndices?: number;
     }

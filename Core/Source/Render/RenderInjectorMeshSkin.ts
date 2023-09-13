@@ -22,10 +22,10 @@ namespace FudgeCore {
       let renderBuffers: RenderBuffers = super.getRenderBuffers.call(this, _shader);
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
-      if (!renderBuffers.iBones) {
-        renderBuffers.iBones = RenderWebGL.assert(crc3.createBuffer());
-        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.iBones);
-        crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.iBones, WebGL2RenderingContext.STATIC_DRAW);
+      if (!renderBuffers.bones) {
+        renderBuffers.bones = RenderWebGL.assert(crc3.createBuffer());
+        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.bones);
+        crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.bones, WebGL2RenderingContext.STATIC_DRAW);
       }
 
       if (!renderBuffers.weights) {
@@ -41,14 +41,14 @@ namespace FudgeCore {
       let renderBuffers: RenderBuffers = super.useRenderBuffers.call(this, _shader, _mtxMeshToWorld, _mtxMeshToView, _id);
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
-      const aIBone: number = _shader.attributes["a_iBone"];
-      if (aIBone) {
-        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.iBones);
-        crc3.enableVertexAttribArray(aIBone);
-        crc3.vertexAttribIPointer(aIBone, 4, WebGL2RenderingContext.UNSIGNED_BYTE, 0, 0);
+      const aBone: number = _shader.attributes["a_vctBones"];
+      if (aBone) {
+        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.bones);
+        crc3.enableVertexAttribArray(aBone);
+        crc3.vertexAttribIPointer(aBone, 4, WebGL2RenderingContext.UNSIGNED_BYTE, 0, 0);
       }
 
-      const aWeight: number = _shader.attributes["a_fWeight"];
+      const aWeight: number = _shader.attributes["a_vctWeights"];
       if (aWeight) {
         crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.weights);
         crc3.enableVertexAttribArray(aWeight);
@@ -64,7 +64,7 @@ namespace FudgeCore {
 
       if (_renderBuffers) {
         crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
-        crc3.deleteBuffer(_renderBuffers.iBones);
+        crc3.deleteBuffer(_renderBuffers.bones);
         crc3.deleteBuffer(_renderBuffers.weights);
       }
     }

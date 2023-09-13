@@ -12,6 +12,9 @@ namespace FudgeCore {
       if (gltfPrimitive.indices == undefined)
         Debug.warn(`${loader}: Mesh with index ${_data.iMesh} primitive ${_data.iPrimitive} has no indices. FUDGE does not support non-indexed meshes.`);
 
+      if (gltfPrimitive.attributes.POSITION == undefined)
+        Debug.warn(`${loader}: Mesh with index ${_data.iMesh} primitive ${_data.iPrimitive} has no position attribute. Primitive will be ignored.`);
+
       if (gltfPrimitive.mode != undefined && gltfPrimitive.mode != GLTF.MESH_PRIMITIVE_MODE.TRIANGLES)
         Debug.warn(`${loader}: Mesh with index ${_data.iMesh} primitive ${_data.iPrimitive} has topology type mode ${GLTF.MESH_PRIMITIVE_MODE[gltfPrimitive.mode]}. FUDGE only supports ${GLTF.MESH_PRIMITIVE_MODE[4]}.`);
 
@@ -22,41 +25,42 @@ namespace FudgeCore {
 
       _mesh.name = gltfMesh.name;
 
-      let vertices: Float32Array;
       let indices: Uint16Array;
+      let vertices: Float32Array;
       let normals: Float32Array;
+      // let tangents: Float32Array;
       let textureUVs: Float32Array;
       let colors: Float32Array;
-      let iBones: Uint8Array;
+      let bones: Uint8Array;
       let weights: Float32Array;
 
-      vertices = await loader.getFloat32Array(gltfPrimitive.attributes.POSITION);
-
       if (gltfPrimitive.indices != undefined)
-        indices = await loader.getVertexIndices(gltfPrimitive.indices);
+        indices = await loader.getVertexIndices(gltfPrimitive.indices); // maybe throw error instead
+
+      if (gltfPrimitive.attributes.POSITION != undefined)
+        vertices = await loader.getFloat32Array(gltfPrimitive.attributes.POSITION); // maybe throw error instead
 
       if (gltfPrimitive.attributes.NORMAL != undefined)
         normals = await loader.getFloat32Array(gltfPrimitive.attributes.NORMAL);
 
       // TODO: add tangents to RenderMesh
-      // if (meshGLTF.primitives[_data.iPrimitive].attributes.TANGENT)
-      //   Reflect.set(renderMesh, "ƒtangents", await loader.getFloat32Array(meshGLTF.primitives[_data.iPrimitive].attributes.TANGENT));
+      // if (gltfPrimitive.attributes.TANGENT)
+      //   tangents = await loader.getFloat32Array(gltfPrimitive.attributes.TANGENT);
 
       if (gltfPrimitive.attributes.TEXCOORD_1 != undefined)
         textureUVs = await loader.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_1);
       else if (gltfPrimitive.attributes.TEXCOORD_0 != undefined)
         textureUVs = await loader.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_0);
 
-
       if (gltfPrimitive.attributes.COLOR_0 != undefined)
         colors = await loader.getVertexColors(gltfPrimitive.attributes.COLOR_0);
 
       if (gltfPrimitive.attributes.JOINTS_0 != undefined && gltfPrimitive.attributes.WEIGHTS_0 != undefined) {
-        iBones = await loader.getBoneIndices(gltfPrimitive.attributes.JOINTS_0);
+        bones = await loader.getBoneIndices(gltfPrimitive.attributes.JOINTS_0);
         weights = await loader.getFloat32Array(gltfPrimitive.attributes.WEIGHTS_0);
       }
 
-      for (let iVertex: number = 0, iColor: number = 0, iTextureUV: number = 0, iBoneEntry: number = 0; iVertex < vertices.length; iVertex += 3, iColor += 4, iTextureUV += 2, iBoneEntry += 4) {
+      for (let iVertex: number = 0, iColor: number = 0, iTextureUV: number = 0, iBoneEntry: number = 0; iVertex < vertices?.length; iVertex += 3, iColor += 4, iTextureUV += 2, iBoneEntry += 4) {
         _mesh.vertices.push(
           new Vertex(
             new Vector3(vertices[iVertex + 0], vertices[iVertex + 1], vertices[iVertex + 2]),
@@ -69,12 +73,12 @@ namespace FudgeCore {
             colors ?
               new Color(colors[iColor + 0], colors[iColor + 1], colors[iColor + 2], colors[iColor + 3]) :
               undefined,
-            iBones && weights ?
+            bones && weights ?
               [
-                { index: iBones[iBoneEntry + 0], weight: weights[iBoneEntry + 0] },
-                { index: iBones[iBoneEntry + 1], weight: weights[iBoneEntry + 1] },
-                { index: iBones[iBoneEntry + 2], weight: weights[iBoneEntry + 2] },
-                { index: iBones[iBoneEntry + 3], weight: weights[iBoneEntry + 3] }
+                { index: bones[iBoneEntry + 0], weight: weights[iBoneEntry + 0] },
+                { index: bones[iBoneEntry + 1], weight: weights[iBoneEntry + 1] },
+                { index: bones[iBoneEntry + 2], weight: weights[iBoneEntry + 2] },
+                { index: bones[iBoneEntry + 3], weight: weights[iBoneEntry + 3] }
               ] :
               undefined
           )
@@ -98,16 +102,17 @@ namespace FudgeCore {
       renderMesh.indices = indices;
       renderMesh.vertices = vertices;
       renderMesh.normals = normals;
+      // renderMesh.tangents = tangents;
       renderMesh.textureUVs = textureUVs;
       renderMesh.colors = colors;
-      renderMesh.iBones = iBones;
+      renderMesh.bones = bones;
       renderMesh.weights = weights;
 
       return _mesh;
 
       function checkMaxSupport(_gltfAttributes: GLTF.MeshPrimitive["attributes"], _check: string, _max: number): void {
         if (Object.keys(gltfPrimitive.attributes).filter((_key: string) => _key.startsWith(_check)).length > _max)
-          Debug.warn(`${loader}: Mesh with index ${_data.iMesh} primitive ${_data.iPrimitive} has more than ${_max} sets of ${_check} associated with it. FUGDE only supports up to ${_max} ${_check} sets per primitve`);
+          Debug.warn(`${loader}: Mesh with index ${_data.iMesh} primitive ${_data.iPrimitive} has more than ${_max} sets of '${_check}' associated with it. FUGDE only supports up to ${_max} ${_check} sets per primitve.`);
       }
     }
   }

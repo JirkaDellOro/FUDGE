@@ -30,13 +30,13 @@ namespace FudgeCore {
 
     private static get defaultMaterial(): Material {
       if (!this.#defaultMaterial)
-        this.#defaultMaterial = new Material("GLTFDefaultMaterial", ShaderFlat, new CoatRemissive(Color.CSS("white"), 1, 0.5));
+        this.#defaultMaterial = new Material("GLTFDefaultMaterial", ShaderPhong, new CoatRemissive(Color.CSS("white"), 1, 0.5));
       return this.#defaultMaterial;
     }
 
     private static get defaultSkinMaterial(): Material {
       if (!this.#defaultSkinMaterial)
-        this.#defaultSkinMaterial = new Material("GLTFDefaultSkinMaterial", ShaderFlatSkin, new CoatRemissive(Color.CSS("white"), 1, 0.5));
+        this.#defaultSkinMaterial = new Material("GLTFDefaultSkinMaterial", ShaderPhongSkin, new CoatRemissive(Color.CSS("white"), 1, 0.5));
       return this.#defaultSkinMaterial;
     }
 
@@ -121,7 +121,7 @@ namespace FudgeCore {
           }
 
           if (_gltf.nodes[_skin.skeleton].iSkinRoot != undefined) {
-            Debug.warn(`${GLTFLoader.name} | ${_url}: Skin with index ${_iSkin} and ${_gltf.nodes[_skin.skeleton].iSkinRoot} share the same common root node. FUDGE currently only supports one skeleton at the same postion in the hierarchy`);
+            Debug.warn(`${GLTFLoader.name} | ${_url}: Skin with index ${_iSkin} and ${_gltf.nodes[_skin.skeleton].iSkinRoot} share the same common root node. FUDGE currently only supports one skeleton at the same position in the hierarchy.`);
             return;
           }
 
@@ -136,7 +136,7 @@ namespace FudgeCore {
     public async getScene(_name?: string): Promise<Graph> {
       const iScene: number = _name ? this.gltf.scenes.findIndex(_scene => _scene.name == _name) : this.gltf.scene;
       if (iScene == -1)
-        throw new Error(`${this}: Couldn't find name ${_name} in gltf scenes.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in gltf scenes.`);
       return await this.getSceneByIndex(iScene);
     }
 
@@ -167,7 +167,7 @@ namespace FudgeCore {
     public async getNode(_name: string): Promise<Node> {
       const iNode: number = this.gltf.nodes.findIndex(_node => _node.name == _name);
       if (iNode == -1)
-        throw new Error(`${this}: Couldn't find name ${_name} in gltf nodes.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in gltf nodes.`);
       return await this.getNodeByIndex(iNode);
     }
 
@@ -277,7 +277,7 @@ namespace FudgeCore {
     public async getCamera(_name: string): Promise<ComponentCamera> {
       const iCamera: number = this.gltf.cameras.findIndex(_camera => _camera.name == _name);
       if (iCamera == -1)
-        throw new Error(`${this}: Couldn't find name ${_name} in gltf cameras.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in gltf cameras.`);
       return await this.getCameraByIndex(iCamera);
     }
 
@@ -318,7 +318,7 @@ namespace FudgeCore {
     public async getAnimation(_name: string): Promise<Animation> {
       const iAnimation: number = this.gltf.animations.findIndex(_animation => _animation.name == _name);
       if (iAnimation == -1)
-        throw new Error(`${this}: Couldn't find name ${_name} in gltf animations.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in gltf animations.`);
       return await this.getAnimationByIndex(iAnimation);
     }
 
@@ -399,7 +399,7 @@ namespace FudgeCore {
     public async getMesh(_name: string): Promise<MeshImport> {
       const iMesh: number = this.gltf.meshes.findIndex(_mesh => _mesh.name == _name);
       if (iMesh == -1)
-        throw new Error(`${this}: Couldn't find name ${_name} in gltf meshes.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in gltf meshes.`);
       return await this.getMeshByIndex(iMesh);
     }
 
@@ -520,7 +520,7 @@ namespace FudgeCore {
     public async getSkeleton(_name: string): Promise<Skeleton> {
       const iSkeleton: number = this.gltf.skins.findIndex(_skeleton => _skeleton.name == _name);
       if (iSkeleton == -1)
-        throw new Error(`${this}: Couldn't find name ${_name} in gltf skins.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in gltf skins.`);
       return await this.getSkeletonByIndex(iSkeleton);
     }
 
@@ -569,11 +569,11 @@ namespace FudgeCore {
         return array as Uint8Array;
 
       if (componentType == GLTF.COMPONENT_TYPE.UNSIGNED_SHORT) {
-        Debug.info(`${this}: Bone indices are stored as ${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]}. FUDGE will convert them to UNSIGNED_BYTE. FUDGE only supports skeletons with up to 256 bones, so make sure your skeleton has no more than 256 bones.`);
+        Debug.log(`${this}: Bone indices are stored as '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]}'. FUDGE will convert them to '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_BYTE]}'. FUDGE only supports skeletons with up to 256 bones, so make sure your skeleton has no more than 256 bones.`);
         return Uint8Array.from(array);
       }
 
-      throw new Error(`${this}: Invalid component type ${GLTF.COMPONENT_TYPE[componentType]} for bone indices. Expected ${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_BYTE]} or ${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]}.`);
+      throw new Error(`${this}: Invalid component type '${GLTF.COMPONENT_TYPE[componentType]}' for bone indices. Expected '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_BYTE]}' or '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]}'.`);
     }
 
     /**
@@ -598,12 +598,12 @@ namespace FudgeCore {
           case GLTF.COMPONENT_TYPE.UNSIGNED_SHORT:
             return Float32Array.from(array, _value => _value / 65535);
           default:
-            throw new Error(`${this}: Invalid component type ${GLTF.COMPONENT_TYPE[gltfAccessor.componentType]} for normalized accessor.`);
+            throw new Error(`${this}: Invalid component type '${GLTF.COMPONENT_TYPE[gltfAccessor.componentType]}' for normalized accessor.`);
           // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_accessor_normalized
         }
       }
 
-      Debug.warn(`${this}: Expected component type FLOAT but was ${GLTF.COMPONENT_TYPE[gltfAccessor?.componentType]}.`);
+      Debug.warn(`${this}: Expected component type '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.FLOAT]}' but was '${GLTF.COMPONENT_TYPE[gltfAccessor?.componentType]}'.`);
       return Float32Array.from(array);
     }
 
@@ -624,7 +624,7 @@ namespace FudgeCore {
       if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE || gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_INT)
         return Uint16Array.from(array);
 
-      Debug.warn(`${this}: Expected component type UNSIGNED_SHORT but was ${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+      Debug.warn(`${this}: Expected an unsigned integer component type but was '${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}'.`);
       return Uint16Array.from(array);
     }
 
@@ -657,7 +657,7 @@ namespace FudgeCore {
     private async getBufferData(_iAccessor: number): Promise<TypedArray> {
       const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
       if (!gltfAccessor)
-        throw new Error(`${this}: Couldn't find accessor`);
+        throw new Error(`${this}: Couldn't find accessor with index ${_iAccessor}.`);
 
       let array: TypedArray;
       const componentType: GLTF.COMPONENT_TYPE = gltfAccessor.componentType;
@@ -671,7 +671,7 @@ namespace FudgeCore {
         const gltfBufferViewValues: GLTF.BufferView = this.gltf.bufferViews[gltfAccessor.sparse.values.bufferView];
 
         if (!gltfBufferViewIndices || !gltfBufferViewValues)
-          throw new Error(`${this}: Couldn't find buffer views for sparse indices or values`);
+          throw new Error(`${this}: Couldn't find buffer views for sparse indices or values of accessor with index ${_iAccessor}.`);
 
         const arrayIndices: TypedArray = await this.getBufferViewData(gltfBufferViewIndices, gltfAccessor.sparse.indices.byteOffset, gltfAccessor.sparse.indices.componentType, GLTF.ACCESSOR_TYPE.SCALAR);
         const arrayValues: TypedArray = await this.getBufferViewData(gltfBufferViewValues, gltfAccessor.sparse.values.byteOffset, componentType, accessorType);
@@ -720,7 +720,7 @@ namespace FudgeCore {
     private async getBuffer(_iBuffer: number): Promise<ArrayBuffer> {
       const gltfBuffer: GLTF.Buffer = this.gltf.buffers[_iBuffer];
       if (!gltfBuffer)
-        throw new Error(`${this}: Couldn't find buffer`);
+        throw new Error(`${this}: Couldn't find buffer with index ${_iBuffer}.`);
 
       if (!this.#buffers)
         this.#buffers = [];
@@ -800,7 +800,7 @@ namespace FudgeCore {
           return ANIMATION_INTERPOLATION.CUBIC;
         default:
           if (_interpolation != undefined)
-            Debug.warn(`${this}: Unknown interpolation type ${_interpolation}`);
+            Debug.warn(`${this}: Unknown interpolation type ${_interpolation}.`);
           return ANIMATION_INTERPOLATION.LINEAR;
       }
     }

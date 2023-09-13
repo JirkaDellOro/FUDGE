@@ -102,11 +102,11 @@ flat out vec3 v_vctPositionFlat;
 uniform mat4 u_mtxWorldToView; // 
 // Bones
 // https://github.com/mrdoob/three.js/blob/dev/src/renderers/shaders/ShaderChunk/skinning_pars_vertex.glsl.js
-in uvec4 a_iBone;
-in vec4 a_fWeight;
+in uvec4 a_vctBones;
+in vec4 a_vctWeights;
 const uint MAX_BONES = 256u; // CAUTION: this number must be the same as in RenderInjectorSkeletonInstance where the corresponding buffers are created
 layout (std140) uniform Skin {
-  mat4 u_bones[MAX_BONES];
+  mat4 u_mtxBones[MAX_BONES];
 };
   #endif
 
@@ -179,10 +179,10 @@ void main() {
     #endif
 
     #if defined(SKIN)
-  mtxMeshToWorld = a_fWeight.x * u_bones[a_iBone.x] +
-    a_fWeight.y * u_bones[a_iBone.y] +
-    a_fWeight.z * u_bones[a_iBone.z] +
-    a_fWeight.w * u_bones[a_iBone.w];
+  mtxMeshToWorld = a_vctWeights.x * u_mtxBones[a_vctBones.x] +
+    a_vctWeights.y * u_mtxBones[a_vctBones.y] +
+    a_vctWeights.z * u_mtxBones[a_vctBones.z] +
+    a_vctWeights.w * u_mtxBones[a_vctBones.w];
   
   mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
   mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
