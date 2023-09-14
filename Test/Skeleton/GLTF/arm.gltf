@@ -622,7 +622,7 @@
   ],
   "buffers": [
     {
-      "uri": "animated_arm_data.bin",
+      "uri": "arm_data.bin",
       "byteLength": 22240
     }
   ]

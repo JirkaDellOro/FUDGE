@@ -279,20 +279,6 @@
       "latitudes": 20
     }
   },
-  "Material|2022-10-12T17:00:01.954Z|82264": {
-    "ƒ.Material": {
-      "name": "ShaderGouraud",
-      "idResource": "Material|2022-10-12T17:00:01.954Z|82264",
-      "shader": "ShaderGouraud",
-      "coat": {
-        "ƒ.CoatRemissive": {
-          "color": "[1, 1, 1, 1]",
-          "diffuse": 0.5,
-          "specular": 0.9999999999999999
-        }
-      }
-    }
-  },
   "ParticleSystem|2022-10-12T16:59:31.988Z|08886": {
     "ƒ.ParticleSystem": {
       "idResource": "ParticleSystem|2022-10-12T16:59:31.988Z|08886",
@@ -382,6 +368,12 @@
             "transformation": "rotate",
             "parameters": [
               {
+                "value": 0
+              },
+              {
+                "value": 0
+              },
+              {
                 "function": "randomRange",
                 "parameters": [
                   {
@@ -400,9 +392,6 @@
           {
             "transformation": "translate",
             "parameters": [
-              {
-                "value": 0
-              },
               {
                 "function": "randomRange",
                 "parameters": [
@@ -499,10 +488,21 @@
             "transformation": "rotate",
             "parameters": [
               {
+                "value": 0
+              },
+              {
                 "function": "randomRange",
                 "parameters": [
                   {
-                    "value": "particleId"
+                    "function": "addition",
+                    "parameters": [
+                      {
+                        "value": "particleId"
+                      },
+                      {
+                        "value": 0
+                      }
+                    ]
                   },
                   {
                     "value": 0
@@ -533,7 +533,12 @@
                     "value": 360
                   }
                 ]
-              },
+              }
+            ]
+          },
+          {
+            "transformation": "translate",
+            "parameters": [
               {
                 "function": "randomRange",
                 "parameters": [
@@ -547,25 +552,6 @@
                         "value": 2
                       }
                     ]
-                  },
-                  {
-                    "value": 0
-                  },
-                  {
-                    "value": 360
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "transformation": "translate",
-            "parameters": [
-              {
-                "function": "randomRange",
-                "parameters": [
-                  {
-                    "value": "particleId"
                   },
                   {
                     "value": 20
@@ -699,6 +685,20 @@
       }
     }
   },
+  "Material|2023-09-14T11:14:11.890Z|80538": {
+    "ƒ.Material": {
+      "name": "ShaderPhong",
+      "idResource": "Material|2023-09-14T11:14:11.890Z|80538",
+      "shader": "ShaderPhong",
+      "coat": {
+        "ƒ.CoatRemissive": {
+          "color": "[1, 1, 1, 1]",
+          "diffuse": 1,
+          "specular": 0.5
+        }
+      }
+    }
+  },
   "Graph|2022-10-12T15:22:44.800Z|84622": {
     "ƒ.Graph": {
       "name": "Graph",
@@ -786,13 +786,13 @@
         {
           "ƒ.Node": {
             "name": "Space",
-            "active": false,
+            "active": true,
             "components": {},
             "children": [
               {
                 "ƒ.Node": {
                   "name": "Stars",
-                  "active": true,
+                  "active": false,
                   "components": {
                     "ComponentMesh": [
                       {
@@ -848,7 +848,7 @@
                             "active": true
                           },
                           "idParticleSystem": "ParticleSystem|2022-10-13T20:55:33.532Z|40614",
-                          "depthMask": true,
+                          "depthMask": false,
                           "blendMode": 1,
                           "playMode": 0,
                           "duration": 3600000,
@@ -862,6 +862,14 @@
                           "active": true
                         }
                       }
+                    ],
+                    "ParticleSystemController": [
+                      {
+                        "ParticleSystemTest.ParticleSystemController": {
+                          "active": true,
+                          "dependencyNames": ""
+                        }
+                      }
                     ]
                   },
                   "children": []
@@ -870,7 +878,7 @@
               {
                 "ƒ.Node": {
                   "name": "Sun",
-                  "active": true,
+                  "active": false,
                   "components": {
                     "ComponentMesh": [
                       {
@@ -943,7 +951,7 @@
                     {
                       "ƒ.Node": {
                         "name": "Asteroids",
-                        "active": true,
+                        "active": false,
                         "components": {
                           "ComponentMesh": [
                             {
@@ -974,7 +982,7 @@
                                 "Component": {
                                   "active": true
                                 },
-                                "idMaterial": "Material|2022-10-12T17:00:01.954Z|82264"
+                                "idMaterial": "Material|2023-09-14T11:14:11.890Z|80538"
                               }
                             }
                           ],
@@ -1004,6 +1012,14 @@
                                 "playMode": 0,
                                 "duration": 360000,
                                 "size": 5000
+                              }
+                            }
+                          ],
+                          "ParticleSystemController": [
+                            {
+                              "ParticleSystemTest.ParticleSystemController": {
+                                "active": true,
+                                "dependencyNames": "Sun"
                               }
                             }
                           ]
@@ -1097,7 +1113,7 @@
         },
         {
           "ƒ.Node": {
-            "name": "FlameCode",
+            "name": "Flame",
             "active": true,
             "components": {
               "ComponentMaterial": [
@@ -1166,6 +1182,14 @@
                 {
                   "ƒ.ComponentFaceCamera": {
                     "active": true
+                  }
+                }
+              ],
+              "ParticleSystemController": [
+                {
+                  "ParticleSystemTest.ParticleSystemController": {
+                    "active": true,
+                    "dependencyNames": ""
                   }
                 }
               ]

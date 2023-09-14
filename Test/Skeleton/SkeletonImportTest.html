@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+
 <head>
   <meta charset="utf-8" />
-  <meta type="settings" autoview="Graph|2023-07-25T08:47:48.755Z|05108" project="{'name':'SkeletonImport','graphAutoView':'Graph|2023-07-25T08:47:48.755Z|05108'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-07-25T08:47:48.755Z|05108'}}]" />
+  <meta type="settings" autoview="Graph|2023-07-25T08:47:48.755Z|05108"
+    project="{'name':'SkeletonImport','graphAutoView':'Graph|2023-07-25T08:47:48.755Z|05108'}"
+    panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-07-25T08:47:48.755Z|05108'}}]" />
   <title>SkeletonImport</title>
   <!--Load FUDGE-->
   <script src="./../../Core/Build/FudgeCore.js"></script>
@@ -10,7 +13,7 @@
 
   <!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
   <link type="resources" src="SkeletonImportTest.json" />
-  
+
   <!--Load scripts-->
   <script src="SkeletonImportTest.js" editor="true"></script>
   <style>
@@ -44,16 +47,29 @@
       color: yellow;
       text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
     }
+
+    #file {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
   </style>
 </head>
 
 <body>
   <!--Canvas for FUDGE to render to-->
   <canvas class="fullscreen">
-</canvas>
+  </canvas>
   <span id="fps">
-</span>
+  </span>
   <span id="time">
-</span>
+  </span>
+
+  <select id="file" onchange="load(this)">
+    <option value="./GLTF/arm.gltf">Arm</option>
+    <option value="./GLTF/robot.gltf">Robot</option>
+    <option value="./GLTF/walk.gltf">Walk</option>
+  </select>
 </body>
+
 </html>

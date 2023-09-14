@@ -19,21 +19,15 @@ var SkeletonTest;
         let cmpCamera = new ƒ.ComponentCamera();
         // cmpCamera.clrBackground = ƒ.Color.CSS("SKYBLUE");
         let canvas = document.querySelector("canvas");
-        let viewport = new ƒ.Viewport();
-        viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
-        ƒ.Debug.log("Viewport:", viewport);
+        SkeletonTest.viewport = new ƒ.Viewport();
+        SkeletonTest.viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
+        ƒ.Debug.log("Viewport:", SkeletonTest.viewport);
         // hide the cursor when interacting, also suppressing right-click menu
         canvas.addEventListener("mousedown", canvas.requestPointerLock);
         canvas.addEventListener("mouseup", function () { document.exitPointerLock(); });
         // make the camera interactive (complex method in ƒAid)
-        ƒAid.Viewport.expandCameraToInteractiveOrbit(viewport);
-        // load scene
-        const loader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
-        const loaded = await loader.getScene();
-        // loaded.getComponent(ƒ.ComponentAnimator)?.activate(false);
-        ƒ.Debug.log("Loader:", loader);
-        ƒ.Debug.log("Loaded:", loaded);
-        graph.addChild(loaded);
+        ƒAid.Viewport.expandCameraToInteractiveOrbit(SkeletonTest.viewport);
+        graph.addChild(new ƒ.Node("placeholder"));
         let timeSpan = document.getElementById("time");
         let fpsSpan = document.getElementById("fps");
         let gPressed = false;
@@ -41,17 +35,11 @@ var SkeletonTest;
         const shaders = [ƒ.ShaderFlatSkin, ƒ.ShaderGouraudSkin, ƒ.ShaderPhongSkin];
         let lastUpdateTime = 0;
         const updateInterval = 200;
-        let cmpLightDirectional = graph.getChildrenByName("Light")[0]?.getComponents(ƒ.ComponentLight)[1];
+        let cmpLightDirectional = graph.getChildrenByName("Light")[0]?.getComponents(ƒ.ComponentLight)?.find((_cmp) => _cmp.light instanceof ƒ.LightDirectional);
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start();
         function update(_event) {
-            cmpLightDirectional.mtxPivot.rotation = new ƒ.Vector3(0, cmpCamera.mtxWorld.rotation.y, 0);
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.P]))
-                ƒ.Time.game.setScale(0);
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W]))
-                ƒ.Time.game.setScale(0.1);
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S]))
-                ƒ.Time.game.setScale(1);
+            cmpLightDirectional.mtxPivot.rotation = new ƒ.Vector3(cmpCamera.mtxWorld.rotation.x, cmpCamera.mtxWorld.rotation.y, 0);
             const setShader = _shader => {
                 for (const node of graph) {
                     if (node.getComponent(ƒ.ComponentMaterial))
@@ -72,10 +60,59 @@ var SkeletonTest;
                 fpsSpan.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
                 lastUpdateTime = ƒ.Loop.timeFrameStartReal;
             }
-            if (loaded.getComponent(ƒ.ComponentAnimator))
-                timeSpan.innerText = "TIME: " + loaded.getComponent(ƒ.ComponentAnimator).time.toFixed(0);
-            viewport.draw();
+            if (SkeletonTest.loaded?.getComponent(ƒ.ComponentAnimator))
+                timeSpan.innerText = "TIME: " + SkeletonTest.loaded?.getComponent(ƒ.ComponentAnimator).time.toFixed(0);
+            SkeletonTest.viewport.draw();
         }
+        document.addEventListener("keydown", hndKeydown);
+        function hndKeydown(_event) {
+            switch (_event.code) {
+                case ƒ.KEYBOARD_CODE.SPACE:
+                    SkeletonTest.cmpAnimator?.jumpTo(0);
+                    break;
+                case ƒ.KEYBOARD_CODE.P:
+                    ƒ.Time.game.setScale(ƒ.Time.game.getScale() == 0 ? 1 : 0);
+                    break;
+                case ƒ.KEYBOARD_CODE.D:
+                    SkeletonTest.cmpAnimator?.jumpTo(SkeletonTest.cmpAnimator.time + 50);
+                    break;
+                case ƒ.KEYBOARD_CODE.A:
+                    SkeletonTest.cmpAnimator?.jumpTo(SkeletonTest.cmpAnimator.time - 50);
+                    break;
+                case ƒ.KEYBOARD_CODE.W:
+                    ƒ.Time.game.setScale(ƒ.Time.game.getScale() * 2);
+                    break;
+                case ƒ.KEYBOARD_CODE.S:
+                    ƒ.Time.game.setScale(ƒ.Time.game.getScale() / 2);
+                    break;
+                case ƒ.KEYBOARD_CODE.L:
+                    console.log(SkeletonTest.loaded.getChild(0)?.mtxWorld.toString());
+                    break;
+            }
+        }
+        const selectedFile = parseInt(sessionStorage.getItem('selectedFile'));
+        const selection = document.getElementById("file");
+        if (selectedFile != undefined)
+            selection.selectedIndex = selectedFile;
+        load(selection);
     }
 })(SkeletonTest || (SkeletonTest = {}));
+async function load(_selection) {
+    // load scene
+    SkeletonTest.loader = await ƒ.GLTFLoader.LOAD(_selection.value);
+    SkeletonTest.loaded = await SkeletonTest.loader.getScene();
+    SkeletonTest.cmpAnimator = SkeletonTest.loaded?.getComponent(ƒ.ComponentAnimator);
+    SkeletonTest.loaded.name = "loaded";
+    // loaded.getComponent(ƒ.ComponentAnimator)?.activate(false);
+    let root = SkeletonTest.viewport.getBranch();
+    let loaded = root.getChildrenByName("loaded")[0];
+    if (loaded)
+        root.replaceChild(loaded, SkeletonTest.loaded);
+    else
+        root.appendChild(SkeletonTest.loaded);
+    ƒ.Debug.log("Loader:", SkeletonTest.loader);
+    ƒ.Debug.log("Loaded:", SkeletonTest.loaded);
+    // To store the selected option in sessionStorage
+    sessionStorage.setItem('selectedFile', _selection.selectedIndex.toString());
+}
 //# sourceMappingURL=SkeletonImportTest.js.map
