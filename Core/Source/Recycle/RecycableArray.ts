@@ -25,16 +25,25 @@ namespace FudgeCore {
       this.#length = 0;
     }
 
+    /**
+     * Recycle this array
+     */
     public recycle(): void {
       this.reset();
     }
 
+    /**
+     * Appends a new entry to the end of the array, and returns the new length of the array.
+     */
     public push(_entry: T): number {
       this.#array[this.#length] = _entry;
       this.#length++;
       return this.#length;
     }
 
+    /**
+     * Removes the last entry from the array and returns it.
+     */
     public pop(): T {
       this.#length--;
       return this.#array[this.#length];
@@ -58,6 +67,9 @@ namespace FudgeCore {
         yield this.#array[i];
     }
 
+    /**
+     * Returns a copy of the array sorted according to the given compare function
+     */
     public getSorted(_sort: (a: T, b: T) => number): T[] {
       let sorted: T[] = this.#array.slice(0, this.#length);
       sorted.sort(_sort);

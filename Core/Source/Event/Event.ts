@@ -77,14 +77,24 @@ namespace FudgeCore {
 
   /** Extends EventTarget to work with {@link EventListenerUnified} and {@link EventUnified} */
   export class EventTargetUnified extends EventTarget {
-    addEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void {
+    /**
+     * See {@link EventTarget.addEventListener} for reference. Works with {@link EventListenerUnified} and {@link EventUnified}
+     */
+    public addEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void {
       super.addEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);
     }
-    removeEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void {
+
+    /**
+     * See {@link EventTarget.removeEventListener} for reference. Works with {@link EventListenerUnified} and {@link EventUnified}
+     */
+    public removeEventListener(_type: string, _handler: EventListenerUnified, _options?: boolean | AddEventListenerOptions): void {
       super.removeEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);
     }
 
-    dispatchEvent(_event: EventUnified): boolean {
+    /**
+     * See {@link EventTarget.dispatchEvent} for reference. Works with with {@link EventUnified}
+     */
+    public dispatchEvent(_event: EventUnified): boolean {
       return super.dispatchEvent(_event);
     }
   }
@@ -99,12 +109,23 @@ namespace FudgeCore {
       super();
     }
 
+    /**
+     * Add an event listener to {@link targetStatic}.
+     */
     public static addEventListener(_type: string, _handler: EventListener): void {
       EventTargetStatic.targetStatic.addEventListener(_type, _handler);
     }
+    
+    /**
+     * Remove an event listener from {@link targetStatic}.
+     */
     public static removeEventListener(_type: string, _handler: EventListener): void {
       EventTargetStatic.targetStatic.removeEventListener(_type, _handler);
     }
+
+    /**
+     * Dispatch an event on {@link targetStatic}.
+     */
     public static dispatchEvent(_event: Event): boolean {
       EventTargetStatic.targetStatic.dispatchEvent(_event);
       return true;

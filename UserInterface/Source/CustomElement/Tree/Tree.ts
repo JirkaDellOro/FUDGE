@@ -7,7 +7,7 @@ namespace FudgeUserInterface {
 
   /**
    * Extension of [[TreeList]] that represents the root of a tree control  
-   * ```plaintext
+   * ```text
    * tree <ul>
    * ├ treeItem <li>
    * ├ treeItem <li>
@@ -90,7 +90,7 @@ namespace FudgeUserInterface {
     // Callback / Eventhandler in Tree
     private hndSelect(_event: Event): void {
       // _event.stopPropagation();
-      let detail: { data: Object, interval: boolean, additive: boolean } = (<CustomEvent>_event).detail;
+      let detail: { data: Object; interval: boolean; additive: boolean } = (<CustomEvent>_event).detail;
       let index: number = this.controller.selection.indexOf(<T>detail.data);
 
       if (detail.interval) {
@@ -152,11 +152,11 @@ namespace FudgeUserInterface {
       let remove: T[] = this.controller.delete([target.data]);
 
       this.delete(remove);
-    }
+    };
 
     private hndEscape = (_event: Event): void => {
       this.clearSelection();
-    }
+    };
 
     private hndCopyPaste = async (_event: Event): Promise<void> => {
       // console.log(_event);
@@ -175,7 +175,7 @@ namespace FudgeUserInterface {
           this.delete(cut);
           break;
       }
-    }
+    };
 
     private hndFocus = (_event: KeyboardEvent): void => {
       _event.stopPropagation();
@@ -205,7 +205,7 @@ namespace FudgeUserInterface {
         (<TreeItem<T>>document.activeElement).select(true);
       else if (!_event.ctrlKey)
         this.clearSelection();
-    }
+    };
   }
 
   customElements.define("ul-tree", <CustomElementConstructor><unknown>Tree, { extends: "ul" });

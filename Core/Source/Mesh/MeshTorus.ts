@@ -26,6 +26,9 @@ namespace FudgeCore {
       return shape;
     }
 
+    /**
+     * Create this torus from the given parameters
+     */
     public create(_size: number = 0.25, _longitudes: number = 8, _latitudes: number = 6): void {
       this.size = _size;
       this.latitudes = Math.max(3, _latitudes);

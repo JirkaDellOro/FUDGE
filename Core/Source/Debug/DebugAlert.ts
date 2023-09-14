@@ -12,6 +12,10 @@ namespace FudgeCore {
       [DEBUG_FILTER.FUDGE]: DebugAlert.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.FUDGE]),
       [DEBUG_FILTER.SOURCE]: DebugAlert.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.SOURCE])
     };
+
+    /** 
+     * Returns a delegate-function expecting a message to log.
+     */
     public static createDelegate(_headline: string): Function {
       let delegate: Function = function (_message: Object, ..._args: Object[]): void {
         let args: string[] = _args.map(_arg => _arg.toString());

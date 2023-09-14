@@ -1,14 +1,14 @@
 namespace FudgeCore {
 
   /**
-   *  A list of all the bones in a {@link Skeleton}, addressed by their names.
+   *  A list of bones in a {@link Skeleton}, addressed by their names.
    */
   export interface BoneList {
     [boneName: string]: Node;
   }
 
   /**
-   * A list transformations, each corresponding to a bone by name.
+   * A list of transformations, each corresponding to a bone by name.
    */
   export interface BoneMatrixList {
     [boneName: string]: Matrix4x4;
@@ -20,6 +20,12 @@ namespace FudgeCore {
    */
   export class Skeleton extends Graph {
     public readonly bones: BoneList = {};
+
+    /**
+     * When applied to vertices, it moves them from object/model space to bone-local space as if the bone were at its initial pose.
+     * This matrix undoes any transformations that were applied to the bone in its initial state, 
+     * allowing the subsequent bone transformation (from animation) to be correctly applied to the vertices in bone-local space
+     */
     public readonly mtxBindInverses: BoneMatrixList = {};
 
     /**
@@ -27,7 +33,7 @@ namespace FudgeCore {
      */
     public constructor(_name: string = "Skeleton") {
       super(_name);
-      this.registerBone(this);
+      // this.registerBone(this);
       this.addEventListener(EVENT.CHILD_REMOVE, this.hndChildRemove);
     }
 
@@ -54,7 +60,7 @@ namespace FudgeCore {
      * @param _bone the node to be registered, that should be a descendant of this skeleton
      * @param _mtxBindInverse a precalculated inverse matrix of the bind pose from the bone
      */
-    public registerBone(_bone: Node, _mtxBindInverse: Matrix4x4 = _bone.mtxWorldInverse): void {
+    public registerBone(_bone: Node, _mtxBindInverse: Matrix4x4 = _bone.mtxWorldInverse.clone): void {
       this.bones[_bone.name] = _bone;
       this.mtxBindInverses[_bone.name] = _mtxBindInverse;
     }
@@ -72,6 +78,9 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * Returns the index of the bone with the given name or -1 if not found
+     */
     public indexOfBone(_boneName: string): number {
       let index: number = 0;
       for (const boneName in this.bones) {

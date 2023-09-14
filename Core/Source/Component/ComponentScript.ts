@@ -8,7 +8,8 @@ namespace FudgeCore {
     // registering this doesn't make sense, only its subclasses. Or this component must refer to scripts to be attached to this component
     // TODO: rethink & refactor
     public static readonly iSubclass: number = Component.registerSubclass(ComponentScript);
-    constructor() {
+
+    public constructor() {
       super();
       this.singleton = false;
     }

@@ -51,7 +51,7 @@ namespace FudgeCore {
      * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
      */
     public static initialize(_antialias?: boolean, _alpha?: boolean): WebGL2RenderingContext {
-      let fudgeConfig: General = Reflect.get(globalThis,"fudgeConfig") || {};
+      let fudgeConfig: General = Reflect.get(globalThis, "fudgeConfig") || {};
       let contextAttributes: WebGLContextAttributes = {
         alpha: (_alpha != undefined) ? _alpha : fudgeConfig.alpha || false,
         antialias: (_antialias != undefined) ? _antialias : fudgeConfig.antialias || false,
@@ -158,6 +158,9 @@ namespace FudgeCore {
       return RenderWebGL.rectRender;
     }
 
+    /**
+     * Enable / Disable WebGLs depth test
+     */
     public static setDepthTest(_test: boolean): void {
       if (_test)
         RenderWebGL.crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
@@ -165,6 +168,9 @@ namespace FudgeCore {
         RenderWebGL.crc3.disable(WebGL2RenderingContext.DEPTH_TEST);
     }
 
+    /**
+     * Set the blend mode to render with
+     */
     public static setBlendMode(_mode: BLEND): void {
       switch (_mode) {
         case BLEND.OPAQUE:
@@ -299,7 +305,7 @@ namespace FudgeCore {
     /**
      * Buffer the data from the lights in the scenegraph into the lights ubo
      */
-    protected static fillLightsUBO(_lights: MapLightTypeToLightList): void {
+    protected static updateLightsUBO(_lights: MapLightTypeToLightList): void {
       if (!RenderWebGL.uboLights)
         return;
 
@@ -321,13 +327,11 @@ namespace FudgeCore {
 
       // fill the buffer with the light data for each light type
       // we are currently doing a maximum of 4 crc3.bufferSubData() calls, but we could do this in one call
-      fillLights(LightDirectional, "u_nLightsDirectional", "u_directional");
-      fillLights(LightPoint, "u_nLightsPoint", "u_point");
-      fillLights(LightSpot, "u_nLightsSpot", "u_spot");
+      updateLights(LightDirectional, "u_nLightsDirectional", "u_directional");
+      updateLights(LightPoint, "u_nLightsPoint", "u_point");
+      updateLights(LightSpot, "u_nLightsSpot", "u_spot");
 
-      RenderWebGL.crc3.bindBuffer(WebGL2RenderingContext.UNIFORM_BUFFER, null);
-
-      function fillLights(_type: TypeOfLight, _uniName: string, _uniStruct: string): void {
+      function updateLights(_type: TypeOfLight, _uniName: string, _uniStruct: string): void {
         const cmpLights: RecycableArray<ComponentLight> = _lights.get(_type);
 
         RenderWebGL.crc3.bufferSubData(
@@ -383,13 +387,20 @@ namespace FudgeCore {
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       let drawParticles: boolean = cmpParticleSystem && cmpParticleSystem.isActive;
       let shader: ShaderInterface = cmpMaterial.material.getShader();
-      if (drawParticles) shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
+      if (drawParticles)
+        shader = cmpParticleSystem.particleSystem.getShaderFrom(shader);
 
       shader.useProgram();
       coat.useRenderData(shader, cmpMaterial);
 
       let mtxMeshToView: Matrix4x4 = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
-      let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
+      let renderBuffers: RenderBuffers = cmpMesh.mesh.useRenderBuffers(shader, cmpMesh.mtxWorld, mtxMeshToView);
+
+      if (cmpMesh.skeleton)
+        if (cmpMesh.skeleton instanceof SkeletonInstance)
+          cmpMesh.skeleton.useRenderBuffer(shader);
+        else
+          Debug.warn(`${RenderWebGL.name}: ${ComponentMesh.name} references ${Skeleton.name}Id ${cmpMesh.skeleton} and not an instance of it. This can happen if this node is not a descendant of the referenced skeleton inside the graph. FUDGE currently only supports skinned meshes with a skeleton that is a direct ancestor of the mesh.`);
 
       let uniform: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
       if (uniform)
@@ -443,15 +454,5 @@ namespace FudgeCore {
 
       return Matrix4x4.MULTIPLICATION(_mtxWorldToView, _cmpMesh.mtxWorld);
     }
-
-    private static getRenderBuffers(_cmpMesh: ComponentMesh, _shader: ShaderInterface, _mtxMeshToView: Matrix4x4): RenderBuffers {
-      if (_cmpMesh.mesh instanceof MeshSkin && (_shader.define.includes("SKIN")))
-        // TODO: make mesh skin pickable
-        return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton?.mtxBones);
-      else
-        return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView);
-    }
-
-
   }
 }

@@ -11,7 +11,7 @@ namespace FudgeCore {
     private url: RequestInfo = undefined;
     private ready: boolean = false;
 
-    constructor(_url?: RequestInfo) {
+    public constructor(_url?: RequestInfo) {
       super();
       if (_url) {
         this.load(_url);
@@ -20,7 +20,7 @@ namespace FudgeCore {
       Project.register(this);
     }
 
-    get isReady(): boolean {
+    public get isReady(): boolean {
       return this.ready;
     }
 

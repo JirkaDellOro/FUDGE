@@ -3,7 +3,7 @@ namespace FudgeCore {
    * Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
    * static LOAD Method. Currently only works with triangulated Meshes
    * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
-   * @todo UVs, Load Materials, Support Quads
+   * @todo Load Materials, Support Quads
    * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Matthias Roming, HFU, 2023
    */
   export class MeshLoaderOBJ extends MeshLoader {

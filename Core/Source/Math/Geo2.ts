@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
    * Representation of a vector2 as polar coordinates 
-   * ```plaintext
+   * ```text
    *  ↕- angle (Angle to the x-axis)
    *  -→ Magnitude (Distance from the center)  
    * ```
@@ -10,7 +10,7 @@ namespace FudgeCore {
     public magnitude: number = 0;
     public angle: number = 0;
 
-    constructor(_angle: number = 0, _magnitude: number = 1) {
+    public constructor(_angle: number = 0, _magnitude: number = 1) {
       this.set(_angle, _magnitude);
     }
 

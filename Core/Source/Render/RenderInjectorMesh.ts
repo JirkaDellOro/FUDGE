@@ -1,5 +1,14 @@
 namespace FudgeCore {
+
+  /**
+   * Buffers the data from the {@link Mesh} into a WebGL Buffer
+   * @internal
+   */
   export class RenderInjectorMesh {
+
+    /**
+     * Injects the functionality of this class into the constructor of the given {@link Mesh}-subclass
+     */
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor.prototype, "useRenderBuffers", {
         value: RenderInjectorMesh.useRenderBuffers
@@ -16,28 +25,18 @@ namespace FudgeCore {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
       this.renderMesh = this.renderMesh || new RenderMesh(this);
-      if (_shader.define.includes("FLAT")) {
-        if (this.renderMesh.flat == null)
-          this.renderMesh.flat = {
-            vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.verticesFlat),
-            indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indicesFlat),
-            normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normalsFlat),
-            textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVsFlat),
-            nIndices: this.renderMesh.indicesFlat.length
-          };
-        return this.renderMesh.flat;
-      }
-      else {
-        if (this.renderMesh.smooth == null)
-          this.renderMesh.smooth = {
-            vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.vertices),
-            indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indices),
-            normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normalsVertex),
-            textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVs),
-            nIndices: this.renderMesh.indices.length
-          };
-        return this.renderMesh.smooth;
-      }
+
+      if (this.renderMesh.buffers == null)
+        this.renderMesh.buffers = {
+          vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.vertices),
+          indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indices),
+          normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normals),
+          textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVs),
+          colors: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.colors),
+          nIndices: this.renderMesh.indices.length
+        };
+      return this.renderMesh.buffers;
+
 
       function createBuffer(_type: GLenum, _array: Float32Array | Uint16Array): WebGLBuffer {
         let buffer: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
@@ -51,7 +50,7 @@ namespace FudgeCore {
       let renderBuffers: RenderBuffers = this.getRenderBuffers(_shader);
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
-      function setBuffer(_name: string, _buffer: WebGLBuffer): void {
+      function setBuffer(_name: string, _buffer: WebGLBuffer, _size: number): void {
         let attribute: number = _shader.attributes[_name];
         if (attribute == undefined)
           return;
@@ -59,7 +58,7 @@ namespace FudgeCore {
         crc3.enableVertexAttribArray(attribute);
         RenderWebGL.setAttributeStructure(
           attribute,
-          { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 }
+          { size: _size, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 }
         );
       }
 
@@ -78,9 +77,9 @@ namespace FudgeCore {
         crc3.uniformMatrix4fv(uniform, false, normalMatrix.get());
       }
 
-      setBuffer("a_vctPosition", renderBuffers.vertices);
-      setBuffer("a_vctNormal", renderBuffers.normals);
-
+      setBuffer("a_vctPosition", renderBuffers.vertices, 3);
+      setBuffer("a_vctNormal", renderBuffers.normals, 3);
+      setBuffer("a_vctColor", renderBuffers.colors, 4);
 
       // feed in texture coordinates if shader accepts a_vctTexture
       let attribute: number = _shader.attributes["a_vctTexture"];

@@ -8,7 +8,7 @@ namespace FudgeCore {
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public mesh: Mesh;
-    public skeleton: SkeletonInstance;
+    public skeleton: SkeletonInstance | string;
 
     public constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance) {
       super();
@@ -30,7 +30,7 @@ namespace FudgeCore {
     //   // extract the vertex data (vertices: 3D vectors, bone indices & weights: 4D vectors)
     //   const iVertex: number = _index * 3;
     //   const iBoneInfluence: number = _index * 4;
-      
+
     //   const vertex: Vector3 = new Vector3(...Reflect.get(this.mesh, "renderMesh").vertices.slice(iVertex, iVertex + 3));
     //   if (!(this.mesh instanceof MeshSkin)) return vertex;
 
@@ -75,7 +75,9 @@ namespace FudgeCore {
         serialization = { mesh: Serializer.serialize(this.mesh) };
 
       if (this.skeleton)
-        serialization.skeleton = this.skeleton.idSource;
+        serialization.skeleton = this.skeleton instanceof SkeletonInstance ?
+          this.skeleton.idSource :
+          this.skeleton;
 
       serialization.pivot = this.mtxPivot.serialize();
       serialization[super.constructor.name] = super.serialize();
@@ -89,34 +91,7 @@ namespace FudgeCore {
       else
         mesh = <Mesh>await Serializer.deserialize(_serialization.mesh);
       this.mesh = mesh;
-
-      if (_serialization.skeleton)
-        this.addEventListener(EVENT.COMPONENT_ADD, (_event: Event) => {
-          if (_event.target != this) return;
-          const trySetSkeleton: () => void = () => {
-            // find root node
-            let root: Node = this.node;
-            while (root.getParent()) {
-              root = root.getParent();
-            }
-            for (const node of root) {
-              if (node instanceof SkeletonInstance && node.idSource == _serialization.skeleton)
-                this.skeleton = node;
-            }
-            if (!this.skeleton) {
-              const trySetSkeletonOnChildAppend: (_event: Event) => void = _event => {
-                root.removeEventListener(EVENT.CHILD_APPEND, trySetSkeletonOnChildAppend);
-                if (_event.target instanceof SkeletonInstance && _event.target.idSource == _serialization.skeleton)
-                  this.skeleton = _event.target;
-                else {
-                  trySetSkeleton();
-                }
-              };
-              root.addEventListener(EVENT.CHILD_APPEND, trySetSkeletonOnChildAppend);
-            }
-          };
-          trySetSkeleton();
-        });
+      this.skeleton = _serialization.skeleton;
 
       await this.mtxPivot.deserialize(_serialization.pivot);
       await super.deserialize(_serialization[super.constructor.name]);

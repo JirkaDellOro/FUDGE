@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
    * Representation of a vector3 as geographic coordinates as seen on a globe
-   * ```plaintext
+   * ```text
    * ←|→ Longitude (Angle to the z-axis) 
    *  ↕- Latitude (Angle to the equator)
    *  -→ Magnitude (Distance from the center)  
@@ -12,7 +12,7 @@ namespace FudgeCore {
     public latitude: number = 0;
     public longitude: number = 0;
 
-    constructor(_longitude: number = 0, _latitude: number = 0, _magnitude: number = 1) {
+    public constructor(_longitude: number = 0, _latitude: number = 0, _magnitude: number = 1) {
       this.set(_longitude, _latitude, _magnitude);
     }
 

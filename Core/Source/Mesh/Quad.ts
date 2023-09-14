@@ -5,7 +5,7 @@ namespace FudgeCore {
 
   /**
    * A surface created with four vertices which immediately creates none, one or two {@link Face}s depending on vertices at identical positions.
-   * ```plaintext
+   * ```text
    * QUADSPLIT:  PLANAR                  AT_0                     AT_1
    *             0 _ 3                   0 _ 3                    0 _ 3                         
    *              |\|                     |\|                      |/|                         
@@ -19,7 +19,7 @@ namespace FudgeCore {
     public faces: Face[];
     #split: QUADSPLIT;
 
-    constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number, _index3: number, _split: QUADSPLIT = QUADSPLIT.PLANAR) {
+    public constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number, _index3: number, _split: QUADSPLIT = QUADSPLIT.PLANAR) {
       this.faces = [];
       this.#split = _split;
       try {

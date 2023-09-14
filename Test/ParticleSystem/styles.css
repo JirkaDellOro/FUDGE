@@ -1,16 +1,30 @@
-html, body {
-  padding: 0px;
-  margin: 0px;
-  width: 100%;
-  height: 100%;
- overflow: hidden;
+html,
+body {
+  margin: 0;
+  padding: 0;
 }
 
-dialog { 
-  text-align: center; 
+canvas.fullscreen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
 }
 
-canvas.fullscreen { 
-  width: 100vw; 
-  height: 100vh; 
+span#fps {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+span#time {
+  position: absolute;
+  top: 1em;
+  left: 0;
+}
+
+span {
+  color: yellow;
+  text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
 }

@@ -3,15 +3,14 @@
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 ///<reference path="Definition.ts"/>
 
+
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒaid = FudgeAid;
-  import ƒui = FudgeUserInterface;
+  // import ƒaid = FudgeAid;
+  // import ƒui = FudgeUserInterface;
 
   export const ipcRenderer: Electron.IpcRenderer = require("electron").ipcRenderer; // Replace with:
-  export const remote: Electron.Remote = require("electron").remote;
-  // TODO: use the following line instead in Electron version 14 and up
-  // export const remote: Electron.Remote = require("@electron/remote");
+  export const remote: Electron.RemoteMainInterface = require("@electron/remote");
 
   export let project: Project; // = new Project();
 
@@ -183,7 +182,7 @@ namespace Fudge {
           Page.setTransform(TRANSFORM.SCALE);
           break;
       }
-    }
+    };
 
     private static hndEvent(_event: EditorEvent): void {
       switch (_event.type) {
@@ -205,7 +204,7 @@ namespace Fudge {
       if (target instanceof Page.goldenLayoutModule.ComponentItem) {
         Page.panels.push(<Panel>target.component);
       }
-    }
+    };
 
     private static async loadProject(_url: URL): Promise<void> {
       await loadProject(_url);

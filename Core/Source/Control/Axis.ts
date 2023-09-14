@@ -4,7 +4,7 @@ namespace FudgeCore {
    * Handles multiple controls as inputs and creates an output from that.
    * As a subclass of {@link Control}, axis calculates the ouput summing up the inputs and processing the result using its own settings.  
    * Dispatches {@link EVENT_CONTROL.OUTPUT} and {@link EVENT_CONTROL.INPUT} when one of the controls dispatches them.
-   * ```plaintext
+   * ```text
    *           ┌───────────────────────────────────────────┐
    *           │ ┌───────┐                                 │
    *   Input → │ │control│\                                │
@@ -74,20 +74,22 @@ namespace FudgeCore {
         return;
 
       let control: Control = (<Control>_event.target);
-      let event: CustomEvent = new CustomEvent(EVENT_CONTROL.OUTPUT, {detail: {
-        control: control, 
-        input: (<CustomEvent>_event).detail.output,
-        output: this.getOutput()
-      }});
+      let event: CustomEvent = new CustomEvent(EVENT_CONTROL.OUTPUT, {
+        detail: {
+          control: control,
+          input: (<CustomEvent>_event).detail.output,
+          output: this.getOutput()
+        }
+      });
       this.dispatchEvent(event);
-    }
+    };
 
     private hndInputEvent: EventListener = (_event: Event): void => {
       if (!this.active)
         return;
-        
+
       let event: Event = new Event(EVENT_CONTROL.INPUT, _event);
       this.dispatchEvent(event);
-    }
+    };
   }
 }

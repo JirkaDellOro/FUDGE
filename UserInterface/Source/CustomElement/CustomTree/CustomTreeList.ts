@@ -1,4 +1,3 @@
-///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 namespace FudgeUserInterface {
 
   /**
@@ -7,7 +6,7 @@ namespace FudgeUserInterface {
   export class CustomTreeList<T> extends HTMLUListElement {
     public controller: CustomTreeController<T>;
 
-    constructor(_controller: CustomTreeController<T>, _items: CustomTreeItem<T>[] = []) {
+    public constructor(_controller: CustomTreeController<T>, _items: CustomTreeItem<T>[] = []) {
       super();
       this.controller = _controller;
       this.addItems(_items);
@@ -51,8 +50,7 @@ namespace FudgeUserInterface {
           if (!found.hasChildren)
             found.expand(false);
           items.push(found);
-        }
-        else
+        } else
           items.push(item);
       }
 
@@ -65,7 +63,7 @@ namespace FudgeUserInterface {
      */
     public findItem(_data: T): CustomTreeItem<T> {
       for (let item of this.children)
-      if ((<CustomTreeItem<T>>item).data == _data)
+        if ((<CustomTreeItem<T>>item).data == _data)
           return <CustomTreeItem<T>>item;
 
       return null;
@@ -158,7 +156,7 @@ namespace FudgeUserInterface {
         Array.from(this.children).indexOf(this.controller.dragDropDivider) :
         this.controller.dragDrop.at = null;
       this.controller.dragDrop.target = (<CustomTreeItem<T>>this.parentElement).data;
-    }
+    };
   }
 
   customElements.define("ul-custom-tree-list", CustomTreeList, { extends: "ul" });

@@ -5,7 +5,6 @@ namespace FudgeCore {
     PHYSICS = "physics"
   }
 
-
   /**
    * Attaches picking functionality to the node
    * @authors Jirka Dell'Oro-Friedl, HFU, 2022
@@ -14,6 +13,9 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentPick);
     public pick: PICK = PICK.RADIUS;
 
+    /**
+     * Picks the node according to the given {@link Ray} and invokes events accordingly
+     */
     public pickAndDispatch(_ray: Ray, _event: PointerEvent): void {
       let cmpMesh: ComponentMesh = this.node.getComponent(ComponentMesh);
       let position: Vector3 = cmpMesh ? cmpMesh.mtxWorld.translation : this.node.mtxWorld.translation;
@@ -30,7 +32,7 @@ namespace FudgeCore {
           if (hitInfo.hit)
             this.node.dispatchEvent(_event);
           break;
-          //TODO: PICK.CAMERA
+        //TODO: PICK.CAMERA
       }
     }
 

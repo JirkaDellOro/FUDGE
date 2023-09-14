@@ -1,5 +1,7 @@
 "use strict";
+/// <reference types="../../../../Core/Build/FudgeCore"/>
 var Script;
+/// <reference types="../../../../Core/Build/FudgeCore"/>
 (function (Script) {
     var ƒ = FudgeCore;
     ƒ.Debug.info("Main Program Template running!");
@@ -7,58 +9,20 @@ var Script;
     document.addEventListener("interactiveViewportStarted", start);
     function start(_event) {
         viewport = _event.detail;
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
+        ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start(); // start the game loop to continously draw the viewport, update the audiosystem and drive the physics i/a
-    }
-    function update(_event) {
-        // ƒ.Physics.simulate();  // if physics is included and used
-        viewport.draw();
-        ƒ.AudioManager.default.update();
-    }
-})(Script || (Script = {}));
-var Script;
-(function (Script) {
-    var ƒ = FudgeCore;
-    ƒ.Project.registerScriptNamespace(Script);
-    class ParticleSystemTimeController extends ƒ.ComponentScript {
-        // Register the script as component for use in the editor via drag&drop
-        static iSubclass = ƒ.Component.registerSubclass(ParticleSystemTimeController);
-        #cmpParticleSystem;
-        constructor() {
-            super();
-            this.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndEvent);
-            this.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndEvent);
-            this.addEventListener("nodeDeserialized" /* NODE_DESERIALIZED */, this.hndEvent);
-        }
-        get scale() {
-            return this.#cmpParticleSystem.time.getScale();
-        }
-        set scale(_value) {
-            this.#cmpParticleSystem.time.setScale(_value);
-        }
-        get time() {
-            return this.#cmpParticleSystem.time.get() / 1000;
-        }
-        set time(_value) {
-            this.#cmpParticleSystem.time.set(_value * 1000);
-        }
-        // Activate the functions of this component as response to events
-        hndEvent = (_event) => {
-            switch (_event.type) {
-                case "componentAdd" /* COMPONENT_ADD */:
-                case "nodeDeserialized" /* NODE_DESERIALIZED */:
-                    // if deserialized the node is now fully reconstructed and access to all its components and children is possible
-                    this.#cmpParticleSystem = this.node.getComponent(ƒ.ComponentParticleSystem);
-                    break;
+        let fpsSpan = document.getElementById("fps");
+        let lastUpdateTime = 0;
+        const updateInterval = 200;
+        function update(_event) {
+            if (ƒ.Loop.timeFrameStartReal - lastUpdateTime > updateInterval) {
+                fpsSpan.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
+                lastUpdateTime = ƒ.Loop.timeFrameStartReal;
             }
-        };
-        getMutatorForUserInterface() {
-            let mutator = super.getMutator(true);
-            mutator.scale = this.scale;
-            mutator.time = this.time;
-            return mutator;
+            // ƒ.Physics.simulate();  // if physics is included and used
+            viewport.draw();
+            ƒ.AudioManager.default.update();
         }
     }
-    Script.ParticleSystemTimeController = ParticleSystemTimeController;
 })(Script || (Script = {}));
 //# sourceMappingURL=Script.js.map

@@ -27,6 +27,7 @@ div[panel] .lm_close {
   padding: 0.5em;
   padding-bottom: 0em;
   overflow: auto;
+  box-sizing: border-box;
 }
 
 *[view="ViewRender"], *[view="ViewPreview"] {

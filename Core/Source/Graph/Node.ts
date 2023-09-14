@@ -17,9 +17,6 @@ namespace FudgeCore {
     /** The radius of the bounding sphere in world dimensions enclosing the geometry of this node and all successors in the branch */
     public radius: number = 0;
 
-    #mtxWorldInverseUpdated: number;
-    #mtxWorldInverse: Matrix4x4;
-
     private parent: Node | null = null; // The parent of this node.
     private children: Node[] = []; // array of child nodes appended to this node.
     private components: MapClassToComponents = {};
@@ -29,6 +26,8 @@ namespace FudgeCore {
     private captures: MapEventTypeToListener = {};
     private active: boolean = true;
 
+    #mtxWorldInverseUpdated: number;
+    #mtxWorldInverse: Matrix4x4;
 
     /**
      * Creates a new node with a name and initializes all attributes
@@ -46,7 +45,7 @@ namespace FudgeCore {
      * Shortcut to retrieve this nodes {@link ComponentTransform}
      */
     public get cmpTransform(): ComponentTransform {
-      return <ComponentTransform>this.getComponents(ComponentTransform)[0];
+      return <ComponentTransform>this.getComponents(ComponentTransform)?.[0];
     }
 
     /**
@@ -54,7 +53,7 @@ namespace FudgeCore {
      * Fails if no {@link ComponentTransform} is attached
      */
     public get mtxLocal(): Matrix4x4 {
-      return this.cmpTransform.mtxLocal;
+      return this.cmpTransform?.mtxLocal;
     }
 
     public get mtxWorldInverse(): Matrix4x4 {
@@ -84,10 +83,16 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * Returns an iterator over this node and all its descendants in the graph below
+     */
     public [Symbol.iterator](): IterableIterator<Node> {
       return this.getIterator();
     }
 
+    /**
+     * De- / Activate this node. Inactive nodes will not be processed by the renderer.
+     */
     public activate(_on: boolean): void {
       this.active = _on;
       this.dispatchEvent(new Event(_on ? EVENT.NODE_ACTIVATE : EVENT.NODE_DEACTIVATE, { bubbles: true }));
@@ -151,7 +156,7 @@ namespace FudgeCore {
      * Simply calls {@link addChild}. This reference is here solely because appendChild is the equivalent method in DOM.
      * See and preferably use {@link addChild}
      */
-    // tslint:disable-next-line: member-ordering
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     public readonly appendChild: (_child: Node) => void = this.addChild;
 
     /**
@@ -239,11 +244,16 @@ namespace FudgeCore {
       return true;
     }
 
-
+    /**
+     * Returns true if the given timestamp matches the last update timestamp this node underwent, else false
+     */
     public isUpdated(_timestampUpdate: number): boolean {
       return (this.timestampUpdate == _timestampUpdate);
     }
 
+    /** 
+     * Returns true if this node is a descendant of the given node, directly or indirectly, else false
+     */
     public isDescendantOf(_ancestor: Node): boolean {
       let node: Node = this;
       while (node && node != _ancestor)
@@ -319,11 +329,10 @@ namespace FudgeCore {
       let cmpList: Component[] = this.components[_component.type];
       if (cmpList === undefined)
         this.components[_component.type] = [_component];
+      else if (cmpList.length && _component.isSingleton)
+        throw new Error(`Component ${_component.type} is marked singleton and can't be attached, no more than one allowed`);
       else
-        if (cmpList.length && _component.isSingleton)
-          throw new Error(`Component ${_component.type} is marked singleton and can't be attached, no more than one allowed`);
-        else
-          cmpList.push(_component);
+        cmpList.push(_component);
 
       _component.attachToNode(this);
       _component.dispatchEvent(new Event(EVENT.COMPONENT_ADD));

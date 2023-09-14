@@ -2,6 +2,7 @@ namespace FudgeCore {
   /**
    * Asset loader for Filmbox files.
    * @author Matthias Roming, HFU, 2023
+   * @ignore currently not working
    */
   export class FBXLoader {
     private static loaders: { [uri: string]: FBXLoader };
@@ -30,17 +31,6 @@ namespace FudgeCore {
       console.log(this.fbx);
     }
 
-    public static async LOAD(_uri: string): Promise<FBXLoader> {
-      if (!this.loaders)
-        this.loaders = {};
-      if (!this.loaders[_uri]) {      
-        const response: Response = await fetch(_uri);
-        const binary: ArrayBuffer = await response.arrayBuffer();
-        this.loaders[_uri] = new FBXLoader(binary, _uri);
-      }
-      return this.loaders[_uri];
-    }
-
     private static get defaultMaterial(): Material {
       return this.#defaultMaterial || (this.#defaultMaterial =
         new Material("FBXDefaultMaterial", ShaderGouraud, new CoatRemissive(Color.CSS("white")))
@@ -51,6 +41,17 @@ namespace FudgeCore {
       return this.#defaultSkinMaterial || (this.#defaultSkinMaterial =
         new Material("FBXDefaultSkinMaterial", ShaderGouraudSkin, new CoatRemissive(Color.CSS("white")))
       );
+    }
+
+    public static async LOAD(_uri: string): Promise<FBXLoader> {
+      if (!this.loaders)
+        this.loaders = {};
+      if (!this.loaders[_uri]) {
+        const response: Response = await fetch(_uri);
+        const binary: ArrayBuffer = await response.arrayBuffer();
+        this.loaders[_uri] = new FBXLoader(binary, _uri);
+      }
+      return this.loaders[_uri];
     }
 
     public async getScene(_index: number = 0): Promise<GraphInstance> {
@@ -195,24 +196,24 @@ namespace FudgeCore {
 
       function average(_array: Float32Array): number { // TODO: specular factor vector (together with specular color texture) is not supported so we use the average of the vector to approximate a singular specular factor.
         if (_array)
-          return _array.reduce((a, b) => a + b) / _array.length;
+          return _array.reduce((_a, _b) => _a + _b) / _array.length;
         else
           return undefined;
-      } 
+      }
     }
 
     public async getTexture(_index: number): Promise<Texture> {
-      return new Promise((resolve, reject) => {
+      return new Promise((_resolve, _reject) => {
         if (!this.#textures)
           this.#textures = [];
         if (this.#textures[_index])
-          return resolve(this.#textures[_index]);
+          return _resolve(this.#textures[_index]);
 
         const videoFBX: FBX.Video = this.fbx.objects.textures[_index].children[0];
         const texture: TextureImage = new TextureImage();
         texture.image = new Image();
-        texture.image.onload = () => resolve(texture);
-        texture.image.onerror = reject;
+        texture.image.onload = () => _resolve(texture);
+        texture.image.onerror = _reject;
         texture.image.src = URL.createObjectURL(new Blob([videoFBX.Content], { type: "image/png" }));
         this.#textures[_index] = texture;
         // TODO: get and set mipmap information ???
@@ -227,10 +228,10 @@ namespace FudgeCore {
     public async getSkeleton(_fbxLimbNode: FBX.Model): Promise<Skeleton> {
       if (!this.#skeletons)
         this.#skeletons = [];
-      return this.#skeletons.find(_skeleton => _fbxLimbNode.name in _skeleton.bones) || await (async() => {
+      return this.#skeletons.find(_skeleton => _fbxLimbNode.name in _skeleton.bones) || await (async () => {
         const skeleton: Skeleton = new Skeleton(`Skeleton${this.#skeletons.length}`);
         let rootNode: FBX.Model = _fbxLimbNode;
-        while (rootNode.parents && rootNode.parents.some(parent => parent.subtype == "LimbNode"))
+        while (rootNode.parents && rootNode.parents.some(_parent => _parent.subtype == "LimbNode"))
           rootNode = rootNode.parents.find(_parent => _parent.subtype == "LimbNode");
         const iRootNode: number = this.fbx.objects.models.findIndex(_model => _model.name == rootNode.name);
         skeleton.addChild(await this.getNode(iRootNode));
@@ -255,13 +256,13 @@ namespace FudgeCore {
           children: {
             [childName: string]: {
               mtxBoneLocals: {
-                [boneName: string]: AnimationStructureMatrix4x4;
+                [boneName: string]: AnimationSequenceMatrix4x4;
               };
             };
           };
         } = { children: { "Skeleton0": { mtxBoneLocals: {} } } };
         for (const animNodeFBX of animNodesFBX) {
-          if (typeof animNodeFBX.dX == "number" && typeof animNodeFBX.dY == "number" && typeof animNodeFBX.dZ == "number") 
+          if (typeof animNodeFBX.dX == "number" && typeof animNodeFBX.dY == "number" && typeof animNodeFBX.dZ == "number")
             continue;
           const target: FBX.Model = animNodeFBX.parents.find(_parent => _parent.type != "AnimLayer");
           (animStructure.children.Skeleton0.mtxBoneLocals[target.name] ||
@@ -284,7 +285,7 @@ namespace FudgeCore {
     private async generateTransform(_modelFBX: FBX.Model, _node: Node): Promise<void> {
       const parentIndex: number = this.fbx.objects.models.indexOf(_modelFBX.parents.find(_parent => _parent.type == "Model"));
       const parent: Node = parentIndex >= 0 ? await this.getNode(parentIndex) : undefined;
-      
+
       const mtxLocalRotation: Matrix4x4 = _modelFBX.PreRotation || _modelFBX.LclRotation || _modelFBX.PostRotation ?
         Matrix4x4.IDENTITY() :
         undefined;
@@ -295,7 +296,7 @@ namespace FudgeCore {
         mtxLocalRotation.rotate(this.getOrdered(this.getTransformVector(_modelFBX.LclRotation, Vector3.ZERO), _modelFBX));
       }
       if (_modelFBX.PostRotation) {
-        let mtxPostRotationInverse: Matrix4x4 = Matrix4x4.ROTATION(this.getOrdered(_modelFBX.PostRotation , _modelFBX));
+        let mtxPostRotationInverse: Matrix4x4 = Matrix4x4.ROTATION(this.getOrdered(_modelFBX.PostRotation, _modelFBX));
         mtxPostRotationInverse = Matrix4x4.INVERSION(mtxPostRotationInverse);
         mtxLocalRotation.multiply(mtxPostRotationInverse);
       }
@@ -359,11 +360,11 @@ namespace FudgeCore {
         translation.add(_modelFBX.RotationOffset);
       if (_modelFBX.RotationPivot)
         translation.add(_modelFBX.RotationPivot);
-      
+
       const mtxTransform: Matrix4x4 = Matrix4x4.TRANSLATION(translation);
       if (mtxLocalRotation)
         mtxTransform.multiply(mtxLocalRotation);
-      
+
       translation = Vector3.ZERO();
       if (_modelFBX.RotationPivot)
         translation.subtract(_modelFBX.RotationPivot);
@@ -414,8 +415,8 @@ namespace FudgeCore {
       );
     }
 
-    private getAnimationVector3(_animNode: FBX.AnimCurveNode, _target: FBX.Model): AnimationStructureVector3 {
-      const vectorSequence: AnimationStructureVector3 = {};
+    private getAnimationVector3(_animNode: FBX.AnimCurveNode, _target: FBX.Model): AnimationSequenceVector3 {
+      const vectorSequence: AnimationSequenceVector3 = {};
       for (const valueName in _animNode) if (valueName == "dX" || valueName == "dY" || valueName == "dZ") {
         const value: FBX.AnimCurve | number = _animNode[valueName];
         if (typeof value != "number") {
@@ -434,7 +435,7 @@ namespace FudgeCore {
 
       if (_animNode.name == "R" && (_target.PreRotation || _target.PostRotation)) {
         let preRototation: Matrix4x4;
-        if (_target.PreRotation) 
+        if (_target.PreRotation)
           preRototation = Matrix4x4.ROTATION(_target.PreRotation);
         let postRotation: Matrix4x4;
         if (_target.PostRotation)
@@ -463,7 +464,7 @@ namespace FudgeCore {
               mtxRotation.multiply(preRototation, true);
             if (postRotation)
               mtxRotation.multiply(postRotation);
-            vctEulerAngles = mtxRotation.getEulerAngles();
+            vctEulerAngles = mtxRotation.rotation;
             if (_frame.x)
               _frame.x.value = vctEulerAngles.x;
             if (_frame.y)
@@ -479,7 +480,7 @@ namespace FudgeCore {
     private getOrdered(_rotation: Vector3, _modelFBX: FBX.Model): Vector3 {
       if (!_modelFBX.EulerOrder)
         return _rotation;
-      
+
       const data: Float32Array = _rotation.get();
       const result: Vector3 = Recycler.get(Vector3);
       result.set(

@@ -35,7 +35,7 @@ var SkeletonTest;
         viewport.draw();
         console.log(viewport);
         // run loop
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal, cylinder.getComponent(ƒ.ComponentMaterial).material));
+        ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal, cylinder.getComponent(ƒ.ComponentMaterial).material));
         ƒ.Loop.start();
     }
     class MeshSkinCylinder extends ƒ.MeshSkin {
@@ -66,7 +66,7 @@ var SkeletonTest;
             if (!this.ƒskeleton) {
                 // setup skeleton with a skeleton transform test
                 this.ƒskeleton = new ƒ.Skeleton("SkeletonCylinder");
-                this.ƒskeleton.addBone(new ƒ.Node("LowerBone"), this.ƒskeleton.name, ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0)));
+                this.ƒskeleton.addBone(new ƒ.Node("LowerBone"), null, ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0)));
                 this.ƒskeleton.addBone(new ƒ.Node("UpperBone"), "LowerBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(1)));
                 this.ƒskeleton.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2))));
             }

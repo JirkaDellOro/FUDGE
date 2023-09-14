@@ -6,11 +6,12 @@ namespace FudgeCore.FBX {
    */
   export class Node {
     public name: string;
-
-    #children: Node[];
-    #properties: NodeProperty[];
+    
     private loadProperties: () => NodeProperty[];
     private loadChildren: () => Node[];
+    
+    #children: Node[];
+    #properties: NodeProperty[];
 
     public constructor(_name: string, _loadProperties: () => NodeProperty[], _loadChildren: () => Node[]) {
       this.name = _name;
@@ -31,7 +32,7 @@ namespace FudgeCore.FBX {
 
   export type NodeProperty = boolean | number | string | Uint8Array | Uint16Array | Float32Array;
 
-  export enum ArrayEncoding {
+  export enum ARRAY_ENCODING {
     UNCOMPRESSED, COMPRESSED
   }
   

@@ -21,19 +21,31 @@ namespace FudgeCore {
     };
     private static groups: string[] = [];
 
+    /**
+     * Clears the text area and the groups
+     */
     public static clear(): void {
       DebugTextArea.textArea.textContent = "";
       DebugTextArea.groups = [];
     }
 
+    /**
+     * Begins a new group with the given name
+     */
     public static group(_name: string): void {
       DebugTextArea.print("▼ " + _name);
       DebugTextArea.groups.push(_name);
     }
+    /**
+     * Ends the last group
+     */
     public static groupEnd(): void {
       DebugTextArea.groups.pop();
     }
 
+    /**
+     * Returns a delegate-function expecting a message to log.
+     */
     public static createDelegate(_headline: string): Function {
       let delegate: Function = function (_message: Object, ..._args: Object[]): void {
         DebugTextArea.print(_headline + " " + DebugTarget.mergeArguments(_message, _args));

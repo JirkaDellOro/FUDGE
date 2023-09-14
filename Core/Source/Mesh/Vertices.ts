@@ -13,8 +13,8 @@ namespace FudgeCore {
      */
     public get originals(): Array<Vertex> {
       return this.filter(_vertex => _vertex.referTo == undefined);
-    }   
-    
+    }
+
     /**
      * returns the position associated with the vertex addressed, resolving references between vertices 
      */
@@ -22,7 +22,7 @@ namespace FudgeCore {
       let vertex: Vertex = this[_index];
       return (vertex.referTo == undefined) ? vertex.position : this[vertex.referTo].position;
     }
-    
+
     /**
      * returns the normal associated with the vertex addressed, resolving references between vertices 
      */
@@ -39,9 +39,16 @@ namespace FudgeCore {
     }
 
     /**
-     * returns the position associated with the vertex addressed, resolving references between vertices 
+     * returns the color associated with the vertex addressed
      */
-     public bones(_index: number): Bone[] {
+    public color(_index: number): Color {
+      return this[_index].color;
+    }
+
+    /**
+     * returns the bones associated with the vertex addressed, resolving references between vertices 
+     */
+    public bones(_index: number): Bone[] {
       let vertex: Vertex = this[_index];
       return (vertex.referTo == undefined) ? vertex.bones : this[vertex.referTo].bones;
     }

@@ -9,14 +9,7 @@ precision highp int;
 
   // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT) || defined(PARTICLE_COLOR)
 in vec4 v_vctColor;
-  #endif
 
   // TEXTURE: input UVs and texture
   #if defined(TEXTURE) || defined(MATCAP)
@@ -28,12 +21,7 @@ out vec4 vctFrag;
 
 void main() {
     // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT) || defined(PARTICLE_COLOR)
-  vctFrag *= v_vctColor;
-    #endif
+  vctFrag = u_vctColor * v_vctColor;
 
     // TEXTURE: multiply with texel color
     #if defined(TEXTURE) || defined(MATCAP)

@@ -5,7 +5,8 @@ namespace FudgeCore {
   @RenderInjectorCoat.decorate
   export class CoatColored extends Coat {
     public color: Color;
-    constructor(_color: Color = new Color()) {
+
+    public constructor(_color: Color = new Color()) {
       super();
       this.color = _color;
     }

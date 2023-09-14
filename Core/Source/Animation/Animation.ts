@@ -1,32 +1,29 @@
-// / <reference path="../Transfer/Mutable.ts"/>
-
 namespace FudgeCore {
   /**
    * Holds information about the AnimationStructure that the Animation uses to map the Sequences to the Attributes.
    * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
    */
   export interface AnimationStructure {
-    children?: AnimationStructure,
     [attribute: string]: AnimationStructure[] | AnimationStructure | AnimationSequence;
   }
 
-  export interface AnimationStructureVector3 extends AnimationStructure {
+  export interface AnimationSequenceVector3 extends AnimationStructure {
     x?: AnimationSequence;
     y?: AnimationSequence;
     z?: AnimationSequence;
   }
 
-  export interface AnimationStructureVector4 extends AnimationStructure {
+  export interface AnimationSequenceVector4 extends AnimationStructure {
     x?: AnimationSequence;
     y?: AnimationSequence;
     z?: AnimationSequence;
     w?: AnimationSequence;
   }
 
-  export interface AnimationStructureMatrix4x4 extends AnimationStructure {
-    rotation?: AnimationStructureVector3 | AnimationStructureVector4;
-    scale?: AnimationStructureVector3;
-    translation?: AnimationStructureVector3;
+  export interface AnimationSequenceMatrix4x4 extends AnimationStructure {
+    rotation?: AnimationSequenceVector3 | AnimationSequenceVector4;
+    scale?: AnimationSequenceVector3;
+    translation?: AnimationSequenceVector3;
   }
 
   /**
@@ -141,7 +138,10 @@ namespace FudgeCore {
       this.eventsProcessed.clear();
       this.clearCache();
     }
-    
+
+    /**
+     * Clear this animations cache.
+     */
     public clearCache(): void {
       this.#animationStructuresProcessed.clear();
     }
@@ -150,7 +150,7 @@ namespace FudgeCore {
      * Generates and returns a {@link Mutator} with the information to apply to the {@link Node} to animate
      * in the state the animation is in at the given time, direction and quantization
      */
-    getState(_time: number, _direction: number, _quantization: ANIMATION_QUANTIZATION): Mutator { 
+    public getState(_time: number, _direction: number, _quantization: ANIMATION_QUANTIZATION): Mutator {
       let m: Mutator = {};
       let animationStructure: ANIMATION_STRUCTURE_TYPE;
 
@@ -159,7 +159,7 @@ namespace FudgeCore {
       else
         animationStructure = _direction < 0 ? ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE : ANIMATION_STRUCTURE_TYPE.RASTERED;
 
-        m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(animationStructure), _time);
+      m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(animationStructure), _time);
       return m;
     }
 
@@ -168,7 +168,7 @@ namespace FudgeCore {
      * @param _direction The direction the animation is supposed to run in. >0 == forward, 0 == stop, <0 == backwards
      * @returns a list of strings with the names of the custom events to fire.
      */
-    getEventsToFire(_min: number, _max: number, _quantization: ANIMATION_QUANTIZATION, _direction: number): string[] {
+    public getEventsToFire(_min: number, _max: number, _quantization: ANIMATION_QUANTIZATION, _direction: number): string[] {
       let eventList: string[] = [];
       let minSection: number = Math.floor(_min / this.totalTime);
       let maxSection: number = Math.floor(_max / this.totalTime);
@@ -194,7 +194,7 @@ namespace FudgeCore {
      * @param _name The name of the event (needs to be unique per Animation).
      * @param _time The timestamp of the event (in milliseconds).
      */
-    setEvent(_name: string, _time: number): void {
+    public setEvent(_name: string, _time: number): void {
       this.events[_name] = _time;
       this.eventsProcessed.clear();
     }
@@ -203,7 +203,7 @@ namespace FudgeCore {
      * Removes the event with the given name from the list of events.
      * @param _name name of the event to remove.
      */
-    removeEvent(_name: string): void {
+    public removeEvent(_name: string): void {
       delete this.events[_name];
       this.eventsProcessed.clear();
     }
@@ -212,9 +212,11 @@ namespace FudgeCore {
     /**
      * (Re-)Calculate the total time of the Animation. Calculation-heavy, use only if actually needed.
      */
-    calculateTotalTime(): void {
+    public calculateTotalTime(): void {
       this.totalTime = 0;
       this.traverseStructureForTime(this.animationStructure);
+      if (this.totalTime == 0) // animations with one keyframe need a total time != 0 to work
+        this.totalTime = 1;
     }
 
     /**
@@ -269,7 +271,7 @@ namespace FudgeCore {
         name: this.name,
         labels: {},
         events: {},
-        framesPerSecond: this.framesPerSecond,
+        framesPerSecond: this.framesPerSecond
         // sps: this.stepsPerSecond
       };
       for (let name in this.labels) {
@@ -304,7 +306,7 @@ namespace FudgeCore {
       this.calculateTotalTime();
       return this;
     }
-    
+
     // public getMutator(): Mutator {
     //   return this.serialize();
     // }
@@ -324,7 +326,7 @@ namespace FudgeCore {
         if (structureOrSequence instanceof AnimationSequence) {
           serialization[property] = structureOrSequence.serialize();
         } else {
-          if (Component.subclasses.some(type => type.name == property)) {
+          if (Component.subclasses.some(_type => _type.name == property)) {
             serialization[property] = [];
             for (const i in structureOrSequence) {
               (<Serialization[]>serialization[property]).push(this.traverseStructureForSerialization((<General>structureOrSequence)[i]));
@@ -386,6 +388,7 @@ namespace FudgeCore {
           newMutator[n] = this.traverseStructureForMutator(<AnimationStructure>_structure[n], _time);
         }
       }
+
       return newMutator;
     }
 
@@ -494,7 +497,7 @@ namespace FudgeCore {
       let seq: AnimationSequence = new AnimationSequence();
       for (let i: number = 0; i < _sequence.length; i++) {
         let oldKey: AnimationKey = _sequence.getKey(i);
-        let key: AnimationKey = new AnimationKey(this.totalTime - oldKey.time, oldKey.value, oldKey.slopeOut, oldKey.slopeIn, oldKey.constant);
+        let key: AnimationKey = new AnimationKey(this.totalTime - oldKey.time, oldKey.value, oldKey.interpolation, oldKey.slopeOut, oldKey.slopeIn);
         seq.addKey(key);
       }
       return seq;
@@ -509,7 +512,7 @@ namespace FudgeCore {
       let seq: AnimationSequence = new AnimationSequence();
       let frameTime: number = 1000 / this.framesPerSecond;
       for (let i: number = 0; i < this.totalTime; i += frameTime) {
-        let key: AnimationKey = new AnimationKey(i, _sequence.evaluate(i), 0, 0, true);
+        let key: AnimationKey = new AnimationKey(i, _sequence.evaluate(i), ANIMATION_INTERPOLATION.CONSTANT, 0, 0);
         seq.addKey(key);
       }
       return seq;

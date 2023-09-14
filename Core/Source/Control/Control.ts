@@ -1,4 +1,5 @@
 namespace FudgeCore {
+
   export const enum EVENT_CONTROL {
     INPUT = "input",
     OUTPUT = "output"
@@ -16,12 +17,12 @@ namespace FudgeCore {
   /**
    * Processes input signals of type number and generates an output signal of the same type using 
    * proportional, integral or differential mapping, an amplification factor and a linear dampening/delay
-   * ```plaintext
-   *          ┌─────────────────────────────────────────────────────────────┐
-   *          │   ┌───────┐   ┌─────┐      pass through (Proportional)      │
-   *  Input → │ → │amplify│ → │delay│ → ⚟ sum up over time (Integral) ⚞ → │ → Output
-   *          │   └───────┘   └─────┘      pass change  (Differential)      │
-   *          └─────────────────────────────────────────────────────────────┘ 
+   * ```text
+   *         ┌─────────────────────────────────────────────────────────────┐
+   *         │   ┌───────┐   ┌─────┐      pass through (Proportional)      │
+   * Input → │ → │amplify│ → │delay│ → ⚟ sum up over time (Integral) ⚞ → │ → Output
+   *         │   └───────┘   └─────┘      pass change  (Differential)      │
+   *         └─────────────────────────────────────────────────────────────┘ 
    * ```
    */
   export class Control extends EventTarget {
@@ -42,7 +43,7 @@ namespace FudgeCore {
     protected timeOutputTargetSet: number = 0;
     protected idTimer: number = undefined;
 
-    constructor(_name: string, _factor: number = 1, _type: CONTROL_TYPE = CONTROL_TYPE.PROPORTIONAL, _delay: number = 0) {
+    public constructor(_name: string, _factor: number = 1, _type: CONTROL_TYPE = CONTROL_TYPE.PROPORTIONAL, _delay: number = 0) {
       super();
       this.factor = _factor;
       this.type = _type;
@@ -65,7 +66,7 @@ namespace FudgeCore {
     public setInput(_input: number): void {
       if (!this.active)
         return;
-        
+
       this.outputBase = this.calculateOutput();
       this.valuePrevious = this.getValueDelayed();
       this.outputTarget = this.factor * _input;
@@ -84,6 +85,9 @@ namespace FudgeCore {
         this.dispatchOutput(null);
     }
 
+    /**
+     * TODO: describe!
+     */
     public pulse(_input: number): void {
       this.setInput(_input);
       this.setInput(0);
@@ -139,8 +143,7 @@ namespace FudgeCore {
             if (timeElapsedSinceInput < this.timeValueDelay) {
               output += 0.5 * (this.valuePrevious + value) * timeElapsedSinceInput;
               break;
-            }
-            else {
+            } else {
               output += 0.5 * (this.valuePrevious + value) * this.timeValueDelay;
               timeElapsedSinceInput -= this.timeValueDelay;
             }
@@ -167,11 +170,11 @@ namespace FudgeCore {
       }
       return this.outputTarget;
     }
-    
+
     private dispatchOutput = (_eventOrValue: EventTimer | number): void => {
       if (!this.active)
         return;
-        
+
       let timer: Timer = this.time.getTimer(this.idTimer);
       let output: number;
       if (typeof (_eventOrValue) == "number")
@@ -195,6 +198,6 @@ namespace FudgeCore {
       });
 
       this.dispatchEvent(event);
-    }
+    };
   }
 }

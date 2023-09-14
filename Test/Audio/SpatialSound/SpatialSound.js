@@ -81,7 +81,7 @@ var AudioSpace;
         canvas.addEventListener("mouseup", () => document.exitPointerLock());
         document.addEventListener("keydown", () => canvas.focus());
         startInteraction(viewport);
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
+        ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start();
         function update(_event) {
             let panner = cmpAudio.getMutatorOfNode(ƒ.AUDIO_NODE_TYPE.PANNER);

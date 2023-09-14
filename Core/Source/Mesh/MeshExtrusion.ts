@@ -2,7 +2,7 @@
 namespace FudgeCore {
   /**
    * Generates an extrusion of a polygon by a series of transformations
-   * ```plaintext  
+   * ```text  
    *                      ____
    * Polygon         ____╱╲   ╲                             y
    * Transform 0  → ╱ ╲__╲_╲___╲ ← Transform 2          z __│
@@ -51,7 +51,6 @@ namespace FudgeCore {
       super.reduceMutator(_mutator);
     }
     //#endregion
-
 
     private extrude(_mtxTransforms: Matrix4x4[] = MeshExtrusion.mtxDefaults): void {
       this.mtxTransforms = <MutableArray<Matrix4x4>>MutableArray.from(<MutableArray<Matrix4x4>>_mtxTransforms);

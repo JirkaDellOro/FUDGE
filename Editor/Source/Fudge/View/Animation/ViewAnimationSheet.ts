@@ -39,8 +39,6 @@ namespace Fudge {
     private static readonly MINIMUM_PIXEL_PER_STEP: number = 60; // at any scaling, for both x and y
     private static readonly STANDARD_ANIMATION_LENGTH: number = 1000; // in miliseconds, used when animation length is falsy
 
-    #mode: SHEET_MODE;
-
     private animation: ƒ.Animation;
     private playbackTime: number = 0;
 
@@ -63,7 +61,9 @@ namespace Fudge {
     private posPanStart: ƒ.Vector2 = new ƒ.Vector2();
     private posRightClick: ƒ.Vector2 = new ƒ.Vector2();
 
-    constructor(_container: ComponentContainer, _state: Object) {
+    #mode: SHEET_MODE;
+
+    public constructor(_container: ComponentContainer, _state: Object) {
       super(_container, _state);
 
       // maybe use this solution for all views?
@@ -160,7 +160,7 @@ namespace Fudge {
         }
         this.openContextMenu(_event);
       }
-    }
+    };
 
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
@@ -515,6 +515,7 @@ namespace Fudge {
       }
     }
 
+    // TODO: add correct drawing for constant/step interpolated keys
     private drawCurves(): void {
       if (this.mode != SHEET_MODE.CURVES) return;
 
@@ -540,11 +541,11 @@ namespace Fudge {
 
       function getBezierPoints(_animationFunction: ƒ.AnimationFunction, _keyStart: ƒ.AnimationKey, _keyEnd: ƒ.AnimationKey): ƒ.Vector2[] {
         let parameters: { a: number; b: number; c: number; d: number } = _animationFunction.getParameters();
-        const polarForm: (u: number, v: number, w: number) => number = (u, v, w) => {
+        const polarForm: (u: number, v: number, w: number) => number = (_u, _v, _w) => {
           return (
-            parameters.a * u * v * w +
-            parameters.b * ((v * w + w * u + u * v) / 3) +
-            parameters.c * ((u + v + w) / 3) +
+            parameters.a * _u * _v * _w +
+            parameters.b * ((_v * _w + _w * _u + _u * _v) / 3) +
+            parameters.c * ((_u + _v + _w) / 3) +
             parameters.d
           );
         };
@@ -673,7 +674,7 @@ namespace Fudge {
           this.dispatch(EVENT_EDITOR.UPDATE, { bubbles: true });
           break;
       }
-    }
+    };
 
     private hndPointerDown = (_event: PointerEvent): void => {
       _event.preventDefault();
@@ -723,13 +724,13 @@ namespace Fudge {
           this.scrollContainer.onpointermove = this.hndPointerMovePan;
           break;
       }
-    }
+    };
 
     private hndPointerMoveTimeline = (_event: PointerEvent): void => {
       _event.preventDefault();
       this.playbackTime = this.screenToTime(_event.offsetX);
       this.animate();
-    }
+    };
 
     private hndPointerMoveSlope = (_event: PointerEvent): void => {
       _event.preventDefault();
@@ -739,7 +740,7 @@ namespace Fudge {
       this.selectedKey.data.slopeIn = slope;
       this.selectedKey.data.slopeOut = slope;
       this.animate();
-    }
+    };
 
     private hndPointerMovePan = (_event: PointerEvent): void => {
       _event.preventDefault();
@@ -748,7 +749,7 @@ namespace Fudge {
         translation.y = 0;
       this.mtxWorldToScreen.translate(translation);
       this.draw(true);
-    }
+    };
 
     private hndPointerMoveDragKey = (_event: PointerEvent): void => {
       _event.preventDefault();
@@ -763,7 +764,7 @@ namespace Fudge {
       this.animation.calculateTotalTime();
       this.playbackTime = key.time;
       this.animate();
-    }
+    };
 
     private hndPointerMoveDragEvent = (_event: PointerEvent): void => {
       _event.preventDefault();
@@ -773,7 +774,7 @@ namespace Fudge {
       else
         this.animation.labels[this.selectedEvent.data] = time;
       this.draw();
-    }
+    };
 
     private hndPointerUp = (_event: PointerEvent): void => {
       _event.preventDefault();
@@ -783,9 +784,9 @@ namespace Fudge {
 
       this.scrollContainer.onscroll = undefined;
       this.scrollContainer.onpointermove = undefined;
-    }
+    };
 
-    private hndWheel = (_event: WheelEvent) => {
+    private hndWheel = (_event: WheelEvent): void => {
       _event.preventDefault();
       if (_event.buttons != 0) return;
       let zoomFactor: number = _event.deltaY < 0 ? 1.05 : 0.95;
@@ -799,15 +800,15 @@ namespace Fudge {
       this.mtxWorldToScreen.translate(ƒ.Vector2.SCALE(posCursorWorld, -1));
 
       this.draw(true);
-    }
+    };
 
-    private hndScroll = (_event: Event) => {
+    private hndScroll = (_event: Event): void => {
       _event.preventDefault();
       let translation: ƒ.Vector2 = this.mtxWorldToScreen.translation;
       translation.x = -this.scrollContainer.scrollLeft + ViewAnimationSheet.SCALE_WIDTH;
       this.mtxWorldToScreen.translation = translation;
       this.draw();
-    }
+    };
 
     private animate(): void {
       this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true, detail: { data: this.playbackTime } });

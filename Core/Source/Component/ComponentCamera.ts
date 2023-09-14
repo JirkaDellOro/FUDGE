@@ -24,10 +24,6 @@ namespace FudgeCore {
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public clrBackground: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
     //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
-    #mtxWorldToView: Matrix4x4;
-    #mtxCameraInverse: Matrix4x4;
-    #mtxProjection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
-
     private projection: PROJECTION = PROJECTION.CENTRAL;
     private fieldOfView: number = 45; // The camera's sensorangle.
     private aspectRatio: number = 1.0;
@@ -37,6 +33,13 @@ namespace FudgeCore {
     private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
     // TODO: examine, if background should be an attribute of Camera or Viewport
 
+    #mtxWorldToView: Matrix4x4;
+    #mtxCameraInverse: Matrix4x4;
+    #mtxProjection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
+
+    /**
+     * Returns the cameras worldtransformation matrix i.e. the transformation relative to the root of the graph
+     */
     public get mtxWorld(): Matrix4x4 {
       let mtxCamera: Matrix4x4 = this.mtxPivot.clone;
       try {
@@ -46,6 +49,7 @@ namespace FudgeCore {
       }
       return mtxCamera;
     }
+
     /**
      * Returns the multiplication of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix
      * yielding the worldspace to viewspace matrix
@@ -59,6 +63,9 @@ namespace FudgeCore {
       return this.#mtxWorldToView;
     }
 
+    /**
+     * Returns the inversion of this cameras worldtransformation
+     */
     public get mtxCameraInverse(): Matrix4x4 {
       if (this.#mtxCameraInverse)
         return this.#mtxCameraInverse;
@@ -67,6 +74,10 @@ namespace FudgeCore {
       this.#mtxCameraInverse = Matrix4x4.INVERSION(this.mtxWorld);
       return this.#mtxCameraInverse;
     }
+
+    /**
+     * Returns the projectionmatrix of this camera
+     */
     public get mtxProjection(): Matrix4x4 {
       if (this.#mtxProjection)
         return this.#mtxProjection;
@@ -75,6 +86,10 @@ namespace FudgeCore {
       this.#mtxProjection = new Matrix4x4;
       return this.#mtxProjection;
     }
+
+    /**
+     * Resets this cameras {@link mtxWorldToView} and {@link mtxCameraInverse} matrices
+     */
     public resetWorldToView(): void {
       if (this.#mtxWorldToView) Recycler.store(this.#mtxWorldToView);
       if (this.#mtxCameraInverse) Recycler.store(this.#mtxCameraInverse);
@@ -82,29 +97,51 @@ namespace FudgeCore {
       this.#mtxCameraInverse = null;
     }
 
+    /**
+     * Returns the cameras {@link PROJECTION} mode
+     */
     public getProjection(): PROJECTION {
       return this.projection;
     }
 
+    /**
+     * Returns true if the background of the camera should be rendered, false if not
+     */
     public getBackgroundEnabled(): boolean {
       return this.backgroundEnabled;
     }
 
+    /**
+     * Returns the cameras aspect ratio
+     */
     public getAspect(): number {
       return this.aspectRatio;
     }
 
+    /**
+     * Returns the cameras field of view in degrees
+     */
     public getFieldOfView(): number {
       return this.fieldOfView;
     }
 
+    /**
+     * Returns the cameras direction i.e. the plane on which the fieldOfView-Angle is given
+     */
     public getDirection(): FIELD_OF_VIEW {
       return this.direction;
     }
 
+    /**
+     * Returns the cameras near value i.e. the minimum distance to render objects at
+     */
     public getNear(): number {
       return this.near;
     }
+
+    /**
+     * Returns the cameras far value i.e. the maximum distance to render objects at
+     */
     public getFar(): number {
       return this.far;
     }
@@ -115,7 +152,7 @@ namespace FudgeCore {
      * @param _fieldOfView The field of view in Degrees. (Default = 45)
      * @param _direction The plane on which the fieldOfView-Angle is given 
      */
-    public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FIELD_OF_VIEW = this.direction, _near: number = 1, _far: number = 2000): void {
+    public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FIELD_OF_VIEW = this.direction, _near: number = this.near, _far: number = this.far): void {
       this.aspectRatio = _aspect;
       this.fieldOfView = _fieldOfView;
       this.direction = _direction;
@@ -124,6 +161,7 @@ namespace FudgeCore {
       this.far = _far;
       this.#mtxProjection = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction); // TODO: remove magic numbers
     }
+
     /**
      * Set the camera to orthographic projection. Default values are derived the canvas client dimensions
      * @param _left The positionvalue of the projectionspace's left border.    
@@ -148,12 +186,10 @@ namespace FudgeCore {
         let aspect: number = Math.sqrt(this.aspectRatio);
         tanHorizontal = tanFov * aspect;
         tanVertical = tanFov / aspect;
-      }
-      else if (this.direction == FIELD_OF_VIEW.VERTICAL) {
+      } else if (this.direction == FIELD_OF_VIEW.VERTICAL) {
         tanVertical = tanFov;
         tanHorizontal = tanVertical * this.aspectRatio;
-      }
-      else {//FOV_DIRECTION.HORIZONTAL
+      } else {//FOV_DIRECTION.HORIZONTAL
         tanHorizontal = tanFov;
         tanVertical = tanHorizontal / this.aspectRatio;
       }
@@ -161,6 +197,9 @@ namespace FudgeCore {
       return Rectangle.GET(0, 0, tanHorizontal * 2, tanVertical * 2);
     }
 
+    /**
+     * Transforms the given point from world space to clip space
+     */
     public pointWorldToClip(_pointInWorldSpace: Vector3): Vector3 {
       let result: Vector3;
       let m: Float32Array = this.mtxWorldToView.get();
@@ -171,6 +210,9 @@ namespace FudgeCore {
       return result;
     }
 
+    /**
+     * Transforms the given point from clip space to world space
+     */
     public pointClipToWorld(_pointInClipSpace: Vector3): Vector3 {
       let mtxViewToWorld: Matrix4x4 = Matrix4x4.INVERSION(this.mtxWorldToView);
       let m: Float32Array = mtxViewToWorld.get();
@@ -189,6 +231,8 @@ namespace FudgeCore {
         projection: this.projection,
         fieldOfView: this.fieldOfView,
         direction: this.direction,
+        near: this.near,
+        far: this.far,
         aspect: this.aspectRatio,
         pivot: this.mtxPivot.serialize(),
         [super.constructor.name]: super.serialize()
@@ -203,6 +247,8 @@ namespace FudgeCore {
       this.fieldOfView = _serialization.fieldOfView;
       this.aspectRatio = _serialization.aspect;
       this.direction = _serialization.direction;
+      this.near = _serialization.near;
+      this.far = _serialization.far;
       await this.mtxPivot.deserialize(_serialization.pivot);
       await super.deserialize(_serialization[super.constructor.name]);
       switch (this.projection) {
@@ -230,7 +276,7 @@ namespace FudgeCore {
 
       switch (this.projection) {
         case PROJECTION.CENTRAL:
-          this.projectCentral(this.aspectRatio, this.fieldOfView, this.direction);
+          this.projectCentral(this.aspectRatio, this.fieldOfView, this.direction, this.near, this.far);
           break;
       }
     }

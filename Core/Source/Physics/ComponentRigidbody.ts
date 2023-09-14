@@ -12,12 +12,12 @@ namespace FudgeCore {
   }
 
   /**
-     * Acts as the physical representation of the {@link Node} it's attached to.
-     * It's the connection between the FUDGE rendered world and the Physics world.
-     * For the physics to correctly get the transformations rotations need to be applied with from left = true.
-     * Or rotations need to happen before scaling.
-     * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
-     */
+   * Acts as the physical representation of the {@link Node} it's attached to.
+   * It's the connection between the FUDGE rendered world and the Physics world.
+   * For the physics to correctly get the transformations rotations need to be applied with from left = true.
+   * Or rotations need to happen before scaling.
+   * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
+   */
   export class ComponentRigidbody extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentRigidbody);
     private static mapBodyType: { [type: number]: number } = (typeof OIMO == "undefined") ?
@@ -238,30 +238,7 @@ namespace FudgeCore {
     }
     //#endregion
 
-    // Activate the functions of this component as response to events
-    public hndEvent = (_event: Event): void => {
-      switch (_event.type) {
-        case EVENT.COMPONENT_ADD:
-          // this.addEventListener(EVENT.COMPONENT_ACTIVATE, this.addRigidbodyToWorld);
-          this.addEventListener(EVENT.COMPONENT_DEACTIVATE, this.removeRigidbodyFromWorld);
-          // this.node.addEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld, true); // use capture to react to broadcast!
-          this.node.addEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld, true);
-          if (!this.node.cmpTransform)
-            Debug.warn("ComponentRigidbody attached to node missing ComponentTransform", this.node);
-          break;
-        case EVENT.COMPONENT_REMOVE:
-          // this.removeEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
-          this.removeEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld);
-          // this.node.removeEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld, true); // use capture to react to broadcast!
-          this.node.removeEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld, true);
-          this.removeRigidbodyFromWorld();
-          break;
-        case EVENT.NODE_DESERIALIZED:
-          if (!this.node.cmpTransform)
-            Debug.error("ComponentRigidbody attached to node missing ComponentTransform", this.node);
-          break;
-      }
-    };
+
 
     //#region Transformation
     /**
@@ -306,8 +283,11 @@ namespace FudgeCore {
      */
     public getRotation(): Vector3 {
       let orientation: OIMO.Quat = this.#rigidbody.getOrientation();
-      let tmpQuat: Quaternion = new Quaternion(orientation.x, orientation.y, orientation.z, orientation.w);
-      return tmpQuat.eulerAngles;
+      let tmpQuat: Quaternion = Recycler.get(Quaternion);
+      tmpQuat.set(orientation.x, orientation.y, orientation.z, orientation.w);
+      let eulerAngles: Vector3 = tmpQuat.eulerAngles.clone;
+      Recycler.store(tmpQuat);
+      return eulerAngles;
     }
 
     /**
@@ -323,7 +303,6 @@ namespace FudgeCore {
       // quat.normalize();
       this.#rigidbody.setOrientation(quat);
     }
-
 
     /** Get the current SCALING in the physical space. */
     public getScaling(): Vector3 {
@@ -372,7 +351,7 @@ namespace FudgeCore {
       let mtxWorld: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
 
       let position: Vector3 = mtxWorld.translation; //Adding the offsets from the pivot
-      let rotation: Vector3 = mtxWorld.getEulerAngles();
+      let rotation: Vector3 = mtxWorld.rotation;
       let scaling: Vector3 = mtxWorld.scaling;
       //scaling requires collider to be recreated
       this.setScaling(scaling);
@@ -382,7 +361,7 @@ namespace FudgeCore {
       this.setRotation(rotation);
 
       let scalingInverse: Vector3 = this.node.mtxWorld.scaling.map(_i => 1 / _i);
-      this.#mtxPivotUnscaled = Matrix4x4.CONSTRUCTION({ translation: this.mtxPivot.translation, rotation: this.mtxPivot.rotation, scaling: scalingInverse });
+      this.#mtxPivotUnscaled = Matrix4x4.CONSTRUCTION(this.mtxPivot.translation, this.mtxPivot.rotation, scalingInverse);
       this.#mtxPivotInverse = Matrix4x4.INVERSION(this.#mtxPivotUnscaled);
 
       this.addRigidbodyToWorld();
@@ -466,34 +445,34 @@ namespace FudgeCore {
     }
 
     /**
-   * Applies a instant ROTATIONAL-FORCE to the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS
-   * Only influencing it's rotation.
-   */
+     * Applies a instant ROTATIONAL-FORCE to the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS
+     * Only influencing it's rotation.
+     */
     public applyAngularImpulse(_rotationalImpulse: Vector3): void {
       this.#rigidbody.applyAngularImpulse(new OIMO.Vec3(_rotationalImpulse.x, _rotationalImpulse.y, _rotationalImpulse.z));
     }
 
     /**
-   * Changing the VELOCITY of the RIGIDBODY. Only influencing the linear speed not angular
-   */
+     * Changing the VELOCITY of the RIGIDBODY. Only influencing the linear speed not angular
+     */
     public addVelocity(_value: Vector3): void {
       this.#rigidbody.addLinearVelocity(new OIMO.Vec3(_value.x, _value.y, _value.z));
     }
 
     /**
-   * Changing the VELOCITY of the RIGIDBODY. Only influencing the angular speed not the linear
-   */
+     * Changing the VELOCITY of the RIGIDBODY. Only influencing the angular speed not the linear
+     */
     public addAngularVelocity(_value: Vector3): void {
       this.#rigidbody.addAngularVelocity(new OIMO.Vec3(_value.x, _value.y, _value.z));
     }
 
-    /** Stops the rigidbody from sleeping when movement is too minimal. Decreasing performance, for rarely more precise physics results */
-    public deactivateAutoSleep(): void {
-      this.#rigidbody.setAutoSleep(false);
-    }
-
-    public activateAutoSleep(): void {
-      this.#rigidbody.setAutoSleep(true);
+    /**
+     * De- / Activate the rigidbodies auto-sleeping function.
+     * If activated the rigidbody will automatically sleep when needed, increasing performance.
+     * If deactivated the rigidbody gets stopped from sleeping when movement is too minimal. Decreasing performance, for rarely more precise physics results 
+     */
+    public activateAutoSleep(_on: boolean): void {
+      this.#rigidbody.setAutoSleep(_on);
     }
     //#endregion
 
@@ -710,13 +689,38 @@ namespace FudgeCore {
       return types;
     }
 
-    public reduceMutator(_mutator: Mutator): void {
+    protected reduceMutator(_mutator: Mutator): void {
       super.reduceMutator(_mutator);
       delete _mutator.convexMesh; //Convex Mesh can't be shown in the editor because float32Array is not a viable mutator
       delete _mutator.collisionMask;
       delete _mutator.isInitialized;
     }
     //#endregion
+
+    // Activate the functions of this component as response to events
+    private hndEvent = (_event: Event): void => {
+      switch (_event.type) {
+        case EVENT.COMPONENT_ADD:
+          // this.addEventListener(EVENT.COMPONENT_ACTIVATE, this.addRigidbodyToWorld);
+          this.addEventListener(EVENT.COMPONENT_DEACTIVATE, this.removeRigidbodyFromWorld);
+          // this.node.addEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld, true); // use capture to react to broadcast!
+          this.node.addEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld, true);
+          if (!this.node.cmpTransform)
+            Debug.warn("ComponentRigidbody attached to node missing ComponentTransform", this.node);
+          break;
+        case EVENT.COMPONENT_REMOVE:
+          // this.removeEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
+          this.removeEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld);
+          // this.node.removeEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld, true); // use capture to react to broadcast!
+          this.node.removeEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld, true);
+          this.removeRigidbodyFromWorld();
+          break;
+        case EVENT.NODE_DESERIALIZED:
+          if (!this.node.cmpTransform)
+            Debug.error("ComponentRigidbody attached to node missing ComponentTransform", this.node);
+          break;
+      }
+    };
 
     //#region Creation
     private create(_mass: number = 1, _type: BODY_TYPE = BODY_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: COLLISION_GROUP = Physics.settings.defaultCollisionGroup, _mtxTransform: Matrix4x4 = null, _convexMesh: Float32Array = null): void {

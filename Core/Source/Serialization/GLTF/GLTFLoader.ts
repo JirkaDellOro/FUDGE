@@ -4,19 +4,20 @@ namespace FudgeCore {
    * @authors Matthias Roming, HFU, 2022 | Jonas Plotzky, HFU, 2023
    */
   export class GLTFLoader {
-
     private static loaders: { [url: string]: GLTFLoader };
-    private static defaultMaterial: Material;
-    private static defaultSkinMaterial: Material;
+
+    static #defaultMaterial: Material;
+    static #defaultSkinMaterial: Material;
 
     public readonly gltf: GLTF.GlTf;
     public readonly url: string;
 
     #scenes: Graph[];
-    #nodes: Node[];
+    #nodesGraph: Node[] = [];
+    #nodesSkeleton: Node[] = [];
     #cameras: ComponentCamera[];
     #animations: Animation[];
-    #meshes: MeshImport[];
+    #meshes: MeshImport[][];
     #materials: Material[];
     #textures: Texture[];
     #skeletons: Skeleton[];
@@ -27,27 +28,122 @@ namespace FudgeCore {
       this.url = _url;
     }
 
-    public static async LOAD(_url: string): Promise<GLTFLoader> {
-      if (!this.loaders)
-        this.loaders = {};
-      if (!this.loaders[_url]) {
-        const response: Response = await fetch(_url);
-        const gltf: GLTF.GlTf = await response.json();
-        gltf.nodes.forEach((_node, _iNode) => // mark parents of nodes
-          _node.children?.forEach(_iChild => gltf.nodes[_iChild].parent = _iNode));
-        this.loaders[_url] = new GLTFLoader(gltf, _url);
-      }
-      return this.loaders[_url];
+    private static get defaultMaterial(): Material {
+      if (!this.#defaultMaterial)
+        this.#defaultMaterial = new Material("GLTFDefaultMaterial", ShaderPhong, new CoatRemissive(Color.CSS("white"), 1, 0.5));
+      return this.#defaultMaterial;
     }
 
-    public async getScene(_name?: string): Promise<GraphInstance> {
+    private static get defaultSkinMaterial(): Material {
+      if (!this.#defaultSkinMaterial)
+        this.#defaultSkinMaterial = new Material("GLTFDefaultSkinMaterial", ShaderPhongSkin, new CoatRemissive(Color.CSS("white"), 1, 0.5));
+      return this.#defaultSkinMaterial;
+    }
+
+    /**
+     * Returns a {@link GLTFLoader} instance for the given url.
+     */
+    public static async LOAD(_url: string): Promise<GLTFLoader> {
+      const url: string = new URL(_url, Project.baseURL).toString();
+
+      if (!this.loaders)
+        GLTFLoader.loaders = {};
+
+      if (!this.loaders[url]) {
+        const response: Response = await fetch(url);
+        const gltf: GLTF.GlTf = await response.json();
+
+        GLTFLoader.checkCompatibility(gltf, url);
+        GLTFLoader.preProcess(gltf, url);
+
+        GLTFLoader.loaders[url] = new GLTFLoader(gltf, url);
+      }
+
+      return GLTFLoader.loaders[url];
+    }
+
+    private static checkCompatibility(_gltf: GLTF.GlTf, _url: string): void {
+      if (_gltf.asset.version != "2.0")
+        Debug.warn(`${GLTFLoader.name} | ${_url}: This loader was developed for glTF 2.0. It may not work as intended with version ${_gltf.asset.version}.`);
+      if (_gltf.asset.minVersion != undefined && _gltf.asset.minVersion != "2.0")
+        throw new Error(`${GLTFLoader.name} | ${_url}: This loader was developed for glTF 2.0. It does not work with required min version ${_gltf.asset.minVersion}.`);
+      if (_gltf.extensionsUsed?.length > 0)
+        Debug.warn(`${GLTFLoader.name} | ${_url}: This loader does not support glTF extensions. It may not work as intended with extensions ${_gltf.extensionsUsed.toString()}.`);
+      if (_gltf.extensionsRequired?.length > 0)
+        throw new Error(`${GLTFLoader.name} | ${_url}: This loader does not support glTF extensions. It does not work with required extensions ${_gltf.extensionsRequired.toString()}.`);
+    }
+
+    private static preProcess(_gltf: GLTF.GlTf, _url: string): void {
+      if (_gltf.nodes) {
+        // mark all nodes that are animated
+        _gltf.animations?.forEach(_animation => {
+          _animation.channels.forEach(_channel => {
+            const iNode: number = _channel.target.node;
+            if (iNode != undefined)
+              _gltf.nodes[iNode].isAnimated = true;
+          });
+        });
+
+        // mark nodes that are joints
+        _gltf.skins?.forEach(_skin => {
+          _skin.joints.forEach(_iJoint => _gltf.nodes[_iJoint].isJoint = true);
+        });
+
+        // mark parent of each node
+        _gltf.nodes.forEach((_node, _iNode) => _node.children?.forEach(_iChild => _gltf.nodes[_iChild].parent = _iNode));
+
+        // mark the depth of each node
+        // add names to nodes that don't have one
+        _gltf.nodes.forEach((_node, _iNode) => {
+          if (!_node.name)
+            _node.name = `Node${_iNode}`;
+          let iParent: number = _node.parent;
+          let depth: number = 0;
+          let path: number[] = [];
+          path.push(_iNode);
+          while (iParent != undefined) {
+            path.push(iParent);
+            depth++;
+            iParent = _gltf.nodes[iParent].parent;
+          }
+          _node.depth = depth;
+          _node.path = path;
+        });
+
+        // mark the skeleton root nodes of each skin
+        _gltf.skins?.forEach((_skin, _iSkin) => {
+          if (_skin.skeleton == undefined) {
+            // find the common root of all joints i.e. the skeleton
+            // TODO: add an error for when there is no common root found, as this is a breach of the gltf specification
+            // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#joint-hierarchy
+            const ancestors: Set<number> = new Set<number>(_skin.joints.flatMap(_iJoint => _gltf.nodes[_iJoint].path));
+            _skin.skeleton = Array.from(ancestors).reduce((_a, _b) => _gltf.nodes[_a].depth < _gltf.nodes[_b].depth ? _a : _b);
+          }
+
+          if (_gltf.nodes[_skin.skeleton].iSkinRoot != undefined) {
+            Debug.warn(`${GLTFLoader.name} | ${_url}: Skin with index ${_iSkin} and ${_gltf.nodes[_skin.skeleton].iSkinRoot} share the same common root node. FUDGE currently only supports one skeleton at the same position in the hierarchy.`);
+            return;
+          }
+
+          _gltf.nodes[_skin.skeleton].iSkinRoot = _iSkin;
+        });
+      }
+    }
+
+    /**
+     * Returns a {@link GraphInstance} for the given scene name or the default scene if no name is given.
+     */
+    public async getScene(_name?: string): Promise<Graph> {
       const iScene: number = _name ? this.gltf.scenes.findIndex(_scene => _scene.name == _name) : this.gltf.scene;
       if (iScene == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf scenes.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in gltf scenes.`);
       return await this.getSceneByIndex(iScene);
     }
 
-    public async getSceneByIndex(_iScene: number = this.gltf.scene): Promise<GraphInstance> {
+    /**
+     * Returns a {@link GraphInstance} for the given scene index or the default scene if no index is given.
+     */
+    public async getSceneByIndex(_iScene: number = this.gltf.scene): Promise<Graph> {
       if (!this.#scenes)
         this.#scenes = [];
       if (!this.#scenes[_iScene]) {
@@ -57,48 +153,72 @@ namespace FudgeCore {
           scene.addChild(await this.getNodeByIndex(iNode));
         if (this.gltf.animations?.length > 0)
           scene.addComponent(new ComponentAnimator(await this.getAnimationByIndex(0)));
+        // TODO: load all animations, not just the first one
+
         Project.register(scene);
         this.#scenes[_iScene] = scene;
       }
-      return await Project.createGraphInstance(this.#scenes[_iScene]);
+      return this.#scenes[_iScene];
     }
 
+    /**
+     * Returns the first {@link Node} with the given name.
+     */
     public async getNode(_name: string): Promise<Node> {
       const iNode: number = this.gltf.nodes.findIndex(_node => _node.name == _name);
       if (iNode == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf nodes.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in gltf nodes.`);
       return await this.getNodeByIndex(iNode);
     }
 
-    public async getNodeByIndex(_iNode: number): Promise<Node> {
-      if (!this.#nodes)
-        this.#nodes = [];
-      if (!this.#nodes[_iNode]) {
+    /**
+     * Returns the {@link Node} for the given index.
+     */
+    public async getNodeByIndex(_iNode: number, _nodes: Node[] = this.#nodesGraph): Promise<Node> {
+      if (!_nodes[_iNode]) {
         const gltfNode: GLTF.Node = this.gltf.nodes[_iNode];
-        let iSkeleton: number = this.gltf.skins?.findIndex(_skin => _skin.joints[0] == _iNode);
-        const node: Node = iSkeleton >= 0 ? new Skeleton(gltfNode.name) : new Node(gltfNode.name);
+        const node: Node = gltfNode.iSkinRoot >= 0 ?
+          _nodes == this.#nodesGraph ?
+            new SkeletonInstance() :
+            new Skeleton(gltfNode.name) :
+          new Node(gltfNode.name);
+
+        _nodes[_iNode] = node;
+
+        if (node instanceof SkeletonInstance) {
+          await node.set(await this.getSkeletonByIndex(gltfNode.iSkinRoot));
+          return node;
+        }
 
         // check for children
         if (gltfNode.children)
           for (const iNode of gltfNode.children)
-            node.addChild(await this.getNodeByIndex(iNode));
+            node.addChild(await this.getNodeByIndex(iNode, _nodes));
 
         // check for transformation
-        if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation) {
-          if (!node.getComponent(ComponentTransform))
-            node.addComponent(new ComponentTransform());
+        if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation || gltfNode.isJoint || gltfNode.isAnimated) {
+          node.addComponent(new ComponentTransform());
           if (gltfNode.matrix) {
             node.mtxLocal.set(Float32Array.from(gltfNode.matrix));
           } else {
-            if (gltfNode.translation)
-              node.mtxLocal.translate(new Vector3(...gltfNode.translation));
-            if (gltfNode.rotation) {
-              const rotation: Quaternion = new Quaternion();
-              rotation.set(gltfNode.rotation);
-              node.mtxLocal.rotate(rotation.eulerAngles);
+            if (gltfNode.translation) {
+              const translation: Vector3 = Recycler.get(Vector3);
+              translation.set(gltfNode.translation[0], gltfNode.translation[1], gltfNode.translation[2]);
+              node.mtxLocal.translation = translation;
+              Recycler.store(translation);
             }
-            if (gltfNode.scale)
-              node.mtxLocal.scale(new Vector3(...gltfNode.scale));
+            if (gltfNode.rotation) {
+              const rotation: Quaternion = Recycler.get(Quaternion);
+              rotation.set(gltfNode.rotation[0], gltfNode.rotation[1], gltfNode.rotation[2], gltfNode.rotation[3]);
+              node.mtxLocal.rotation = rotation;
+              Recycler.store(rotation);
+            }
+            if (gltfNode.scale) {
+              const scale: Vector3 = Recycler.get(Vector3);
+              scale.set(gltfNode.scale[0], gltfNode.scale[1], gltfNode.scale[2]);
+              node.mtxLocal.scaling = scale;
+              Recycler.store(scale);
+            }
           }
         }
 
@@ -109,54 +229,61 @@ namespace FudgeCore {
 
         // check for mesh and material
         if (gltfNode.mesh != undefined) {
-          node.addComponent(new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh)));
-
           const gltfMesh: GLTF.Mesh = this.gltf.meshes?.[gltfNode.mesh];
-          if (gltfMesh.primitives.length > 1)
-            throw new Error(`Node ${gltfNode.name} has a mesh with more than one primitive attached to it. FUDGE currently only supports one primitive per mesh.`);
+          // TODO: review this
+          const subComponents: [ComponentMesh, ComponentMaterial][] = [];
+          for (let iPrimitive: number = 0; iPrimitive < gltfMesh.primitives.length; iPrimitive++) {
+            const cmpMesh: ComponentMesh = new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh, iPrimitive));
 
-          const iMaterial: number = gltfMesh.primitives?.[0]?.material;
-          if (iMaterial != undefined) {
-            node.addComponent(new ComponentMaterial(await this.getMaterialByIndex(iMaterial, node.getComponent(ComponentMesh).mesh instanceof MeshSkin)));
-          } else {
-            if (node.getComponent(ComponentMesh).mesh instanceof MeshSkin) {
-              if (!GLTFLoader.defaultSkinMaterial)
-                GLTFLoader.defaultSkinMaterial = new Material("GLTFDefaultSkinMaterial", ShaderGouraudSkin, new CoatRemissive(Color.CSS("white")));
-              node.addComponent(new ComponentMaterial(GLTFLoader.defaultSkinMaterial));
-            } else {
-              if (!GLTFLoader.defaultMaterial)
-                GLTFLoader.defaultMaterial = new Material("GLTFDefaultMaterial", ShaderGouraud, new CoatRemissive(Color.CSS("white")));
-              node.addComponent(new ComponentMaterial(GLTFLoader.defaultMaterial));
+            // check for skeleton
+            if (gltfNode.skin != undefined) {
+              let iSkeletonInstance: number = this.gltf.skins[gltfNode.skin].skeleton;
+              cmpMesh.skeleton = <SkeletonInstance>await this.getNodeByIndex(iSkeletonInstance);
             }
+
+            let cmpMaterial: ComponentMaterial;
+            const iMaterial: number = gltfMesh.primitives?.[iPrimitive]?.material;
+            if (iMaterial == undefined) {
+              cmpMaterial = new ComponentMaterial(cmpMesh.mesh instanceof MeshSkin ?
+                GLTFLoader.defaultSkinMaterial :
+                GLTFLoader.defaultMaterial);
+            } else {
+              cmpMaterial = new ComponentMaterial(await this.getMaterialByIndex(iMaterial, cmpMesh.mesh instanceof MeshSkin));
+            }
+
+            subComponents.push([cmpMesh, cmpMaterial]);
+          }
+
+          if (subComponents.length == 1) {
+            node.addComponent(subComponents[0][0]);
+            node.addComponent(subComponents[0][1]);
+          } else {
+            subComponents.forEach(([_cmpMesh, _cmpMaterial], _i) => {
+              const nodePart: Node = new Node(node.name + "_primitive" + _i);
+              nodePart.addComponent(_cmpMesh);
+              nodePart.addComponent(_cmpMaterial);
+              node.addChild(nodePart);
+            });
           }
         }
-
-        // check for skeleton        
-        if (gltfNode.skin != undefined) {
-          let iSkeleton: number = this.gltf.skins[gltfNode.skin].joints[0];
-          node.getComponent(ComponentMesh).skeleton = <SkeletonInstance>await this.getNodeByIndex(iSkeleton);
-        }
-
-        this.#nodes[_iNode] = node;
-
-        // replace skeleton with skeleton instance
-        if (iSkeleton >= 0) {
-          let skeletonInstance: SkeletonInstance = await SkeletonInstance.CREATE(await this.getSkeletonByIndex(iSkeleton));
-          // replace cached nodes from skeleton with skeleton instance bones
-          this.#nodes = this.#nodes.map(_node => skeletonInstance.bones[_node.name] || _node);
-          this.#nodes[_iNode] = skeletonInstance;
-        }
       }
-      return this.#nodes[_iNode];
+
+      return _nodes[_iNode];
     }
 
+    /**
+     * Returns the first {@link ComponentCamera} with the given camera name.
+     */
     public async getCamera(_name: string): Promise<ComponentCamera> {
       const iCamera: number = this.gltf.cameras.findIndex(_camera => _camera.name == _name);
       if (iCamera == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf cameras.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in gltf cameras.`);
       return await this.getCameraByIndex(iCamera);
     }
 
+    /**
+     * Returns the {@link ComponentCamera} for the given camera index.
+     */
     public async getCameraByIndex(_iCamera: number): Promise<ComponentCamera> {
       if (!this.#cameras)
         this.#cameras = [];
@@ -185,71 +312,73 @@ namespace FudgeCore {
       return this.#cameras[_iCamera];
     }
 
+    /**
+     * Returns the first {@link Animation} with the given animation name.
+     */
     public async getAnimation(_name: string): Promise<Animation> {
       const iAnimation: number = this.gltf.animations.findIndex(_animation => _animation.name == _name);
       if (iAnimation == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf animations.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in gltf animations.`);
       return await this.getAnimationByIndex(iAnimation);
     }
 
+    /**
+     * Returns the {@link Animation} for the given animation index.
+     */
     public async getAnimationByIndex(_iAnimation: number): Promise<Animation> {
       if (!this.#animations)
         this.#animations = [];
       if (!this.#animations[_iAnimation]) {
-        const gltfAnimation: GLTF.Animation = this.gltf.animations[_iAnimation];
+        const gltfAnimation: GLTF.Animation = this.gltf.animations?.[_iAnimation];
 
-        // TODO: maybe refactor this to iterate over channels directly and remove this map
-        const mapiNodeToGltfChannel: GLTF.AnimationChannel[][] = [];
+        if (!gltfAnimation)
+          throw new Error(`${this}: Couldn't find animation with index ${_iAnimation}.`);
+
+        // group channels by node
+        let gltfChannelsGrouped: GLTF.AnimationChannel[][] = [];
         for (const gltfChannel of gltfAnimation.channels) {
-          if (gltfChannel.target.node == undefined)
+          const iNode: number = gltfChannel.target.node;
+          if (iNode == undefined)
             continue;
-          if (!mapiNodeToGltfChannel[gltfChannel.target.node])
-            mapiNodeToGltfChannel[gltfChannel.target.node] = [];
-          mapiNodeToGltfChannel[gltfChannel.target.node].push(gltfChannel);
+          if (!gltfChannelsGrouped[iNode])
+            gltfChannelsGrouped[iNode] = [];
+          gltfChannelsGrouped[iNode].push(gltfChannel);
         }
+        // remove empty entries
+        gltfChannelsGrouped = gltfChannelsGrouped.filter(_channels => _channels != undefined);
 
         const animationStructure: AnimationStructure = {};
-
-        for (const iNode in mapiNodeToGltfChannel) {
-          const gltfChannels: GLTF.AnimationChannel[] = mapiNodeToGltfChannel[iNode];
+        for (const gltfChannels of gltfChannelsGrouped) {
           const gltfNode: GLTF.Node = this.gltf.nodes[gltfChannels[0].target.node];
 
-          const path: number[] = [];
-          path.push(gltfChannels[0].target.node);
-          let root: GLTF.Node = gltfNode;
-          while (root.parent != undefined) { // parent of gltfNode is set when json is loaded
-            path.push(root.parent);
-            root = this.gltf.nodes[root.parent];
-          }
-
           let currentStructure: AnimationStructure = animationStructure;
-          for (const iPathNode of path.reverse()) {
+          for (const iPathNode of gltfNode.path.reverse()) {
             const pathNode: GLTF.Node = this.gltf.nodes[iPathNode];
 
             if (currentStructure.children == undefined)
               currentStructure.children = {};
 
-            if (currentStructure.children[pathNode.name] == undefined)
-              currentStructure.children[pathNode.name] = {};
-            currentStructure = currentStructure.children[pathNode.name] as AnimationStructure;
+            if ((currentStructure.children as AnimationStructure)[pathNode.name] == undefined)
+              (currentStructure.children as AnimationStructure)[pathNode.name] = {};
+            currentStructure = (currentStructure.children as AnimationStructure)[pathNode.name] as AnimationStructure;
 
-            let iSkin: number = this.gltf.skins?.findIndex(_skin => _skin.joints[0] == iPathNode);
-            if (iSkin >= 0 && this.gltf.skins[iSkin].joints.includes(gltfChannels[0].target.node)) {
-              const mtxBoneLocal: AnimationStructureMatrix4x4 = {};
+            const iSkin: number = pathNode.iSkinRoot;
+            if (iSkin != undefined && this.gltf.skins[iSkin].joints.includes(gltfChannels[0].target.node)) {
+              const mtxBoneLocal: AnimationSequenceMatrix4x4 = {};
               for (const gltfChannel of gltfChannels)
-                mtxBoneLocal[gltfChannel.target.path] =
-                  await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
+                mtxBoneLocal[toInternTransformation[gltfChannel.target.path]] =
+                  await this.getAnimationSequenceVector(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
               if (currentStructure.mtxBoneLocals == undefined)
                 currentStructure.mtxBoneLocals = {};
-              (currentStructure.mtxBoneLocals as { [boneName: string]: AnimationStructureMatrix4x4 })[gltfNode.name] = mtxBoneLocal;
+              (currentStructure.mtxBoneLocals as { [boneName: string]: AnimationSequenceMatrix4x4 })[gltfNode.name] = mtxBoneLocal;
               break;
             }
 
             if (pathNode == gltfNode) {
-              const mtxLocal: AnimationStructureMatrix4x4 = {};
+              const mtxLocal: AnimationSequenceMatrix4x4 = {};
               for (const gltfChannel of gltfChannels)
-                mtxLocal[gltfChannel.target.path] =
-                  await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
+                mtxLocal[toInternTransformation[gltfChannel.target.path]] =
+                  await this.getAnimationSequenceVector(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
               currentStructure.components = {
                 ComponentTransform: [
                   { mtxLocal: mtxLocal }
@@ -264,64 +393,96 @@ namespace FudgeCore {
       return this.#animations[_iAnimation];
     }
 
+    /**
+     * Returns the first {@link MeshImport} with the given mesh name.
+     */
     public async getMesh(_name: string): Promise<MeshImport> {
       const iMesh: number = this.gltf.meshes.findIndex(_mesh => _mesh.name == _name);
       if (iMesh == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf meshes.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in gltf meshes.`);
       return await this.getMeshByIndex(iMesh);
     }
 
-    public async getMeshByIndex(_iMesh: number): Promise<MeshImport> {
+    /**
+     * Returns the {@link MeshImport} for the given mesh index.
+     */
+    public async getMeshByIndex(_iMesh: number, _iPrimitive: number = 0): Promise<MeshImport> {
       if (!this.#meshes)
         this.#meshes = [];
-      if (!this.#meshes[_iMesh]) {
+      if (!this.#meshes[_iMesh])
+        this.#meshes[_iMesh] = [];
+
+      if (!this.#meshes[_iMesh][_iPrimitive]) {
         const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
-        this.#meshes[_iMesh] = await (
-          gltfMesh.primitives[0].attributes.JOINTS_0 != undefined ?
+
+        this.#meshes[_iMesh][_iPrimitive] = await (
+          gltfMesh.primitives[_iPrimitive].attributes.JOINTS_0 != undefined ?
             new MeshSkin() :
             new MeshImport()
-        ).load(MeshLoaderGLTF, this.url, gltfMesh);
+        ).load(MeshLoaderGLTF, this.url, { iMesh: _iMesh, iPrimitive: _iPrimitive });
       }
-      return this.#meshes[_iMesh];
+
+      return this.#meshes[_iMesh][_iPrimitive];
     }
 
+    /**
+     * Returns the {@link Material} for the given material index.
+     */
     public async getMaterialByIndex(_iMaterial: number, _skin: boolean = false): Promise<Material> {
       if (!this.#materials)
         this.#materials = [];
       if (!this.#materials[_iMaterial]) {
-        const gltfMaterial: GLTF.Material = this.gltf.materials[_iMaterial];
         // TODO: in the future create an appropriate shader based on the gltf material properties
+        const gltfMaterial: GLTF.Material = this.gltf.materials[_iMaterial];
+
+        if (!gltfMaterial)
+          throw new Error(`${this}: Couldn't find material with index ${_iMaterial}.`);
+
+        // TODO: add support for other gltf material properties: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#reference-material
+        // e.g. normal, occlusion and emissive textures; alphaMode; alphaCutoff; doubleSided
         const gltfBaseColorTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
-        const material: Material = new Material(gltfMaterial.name, gltfBaseColorTexture ? 
-          (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) : 
-          (_skin ? ShaderPhongSkin : ShaderPhong));
-        if (gltfBaseColorTexture) {
-          const texture: Texture = await this.getTextureByIndex(gltfBaseColorTexture.index);
-          material.coat = new CoatRemissiveTextured(
-            new Color(...gltfMaterial.pbrMetallicRoughness.baseColorFactor || [1, 1, 1, 1]), // TODO: check if shader should multiply baseColorTexture values with baseColorFactor
-            texture,
-            1,
-            1
-          );
-        }
+
+        const color: Color = new Color(...gltfMaterial.pbrMetallicRoughness?.baseColorFactor || [1, 1, 1, 1]);
+        const coat: Coat = gltfBaseColorTexture ?
+          new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index), 1, 1) :
+          new CoatRemissive(color, 1, 0.5);
+
+        const material: Material = new Material(
+          gltfMaterial.name,
+          gltfBaseColorTexture ?
+            (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
+            (_skin ? ShaderPhongSkin : ShaderPhong),
+          coat);
+
         this.#materials[_iMaterial] = material;
       }
 
       return this.#materials[_iMaterial];
     }
 
+    /**
+     * Returns the {@link Texture} for the given texture index.
+     */
     public async getTextureByIndex(_iTexture: number): Promise<Texture> {
       if (!this.#textures)
         this.#textures = [];
       if (!this.#textures[_iTexture]) {
         const gltfTexture: GLTF.Texture = this.gltf.textures[_iTexture];
         const gltfSampler: GLTF.Sampler = this.gltf.samplers?.[gltfTexture.sampler];
-        const gltfImage: GLTF.Image = this.gltf.images[gltfTexture.source];
+        const gltfImage: GLTF.Image = this.gltf.images?.[gltfTexture.source];
 
-        if (gltfSampler && (gltfSampler.wrapS != undefined || gltfSampler.wrapT != undefined))
-          console.warn(`${GLTFLoader.name}: Texture ${_iTexture} in '${this.url}' has a wrapS and wrapT of '${getWebGLParameterName(gltfSampler.wrapS)}' and '${getWebGLParameterName(gltfSampler.wrapT)}' respectively. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`);
+        if (gltfImage == undefined) {
+          Debug.warn(`${this}: Texture with index ${_iTexture} has no image.`);
+          return TextureDefault.texture;
+        }
 
-        let url: string = gltfImage.uri;
+        if (gltfSampler?.wrapS != undefined && gltfSampler?.wrapS != WebGL2RenderingContext.REPEAT)
+          Debug.warn(`${this}: Texture with index ${_iTexture} has a wrapS of '${getWebGLParameterName(gltfSampler.wrapS)}'. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`);
+        if (gltfSampler?.wrapT != undefined && gltfSampler?.wrapT != WebGL2RenderingContext.REPEAT)
+          Debug.warn(`${this}: Texture with index ${_iTexture} has a wrapT of '${getWebGLParameterName(gltfSampler.wrapT)}'. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`);
+
+        let url: string = new URL(gltfImage.uri, this.url).toString();
+
         if (!gltfImage.uri && gltfImage.bufferView) {
           // TODO: this is duplicate code from getBufferData, maybe refactor getBufferData to handle bufferViewIndex input
           const gltfBufferView: GLTF.BufferView = this.gltf.bufferViews[gltfImage.bufferView];
@@ -344,8 +505,8 @@ namespace FudgeCore {
           texture.mipmap = MIPMAP.MEDIUM;
         else if (gltfSampler && gltfSampler.magFilter == WebGL2RenderingContext.LINEAR && gltfSampler.minFilter == WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR)
           texture.mipmap = MIPMAP.BLURRY;
-        else if (gltfSampler && gltfSampler.magFilter != undefined && gltfSampler.minFilter != undefined)
-          throw new Error(`${GLTFLoader.name}: Texture ${_iTexture} in '${this.url}' has a magFilter and minFilter of '${getWebGLParameterName(gltfSampler.magFilter)}' and '${getWebGLParameterName(gltfSampler.minFilter)}' respectively. FUDGE only supports the following combinations: NEAREST and NEAREST | NEAREST and NEAREST_MIPMAP_LINEAR | LINEAR and LINEAR_MIPMAP_LINEAR.`);
+        else if (gltfSampler && (gltfSampler.magFilter != undefined || gltfSampler.minFilter != undefined))
+          Debug.warn(`${this}: Texture with index ${_iTexture} has a magFilter and minFilter of '${getWebGLParameterName(gltfSampler.magFilter)}' and '${getWebGLParameterName(gltfSampler.minFilter)}' respectively. FUDGE only supports the following combinations: NEAREST and NEAREST | NEAREST and NEAREST_MIPMAP_LINEAR | LINEAR and LINEAR_MIPMAP_LINEAR.`);
 
         this.#textures[_iTexture] = texture;
       }
@@ -353,28 +514,42 @@ namespace FudgeCore {
       return this.#textures[_iTexture];
     }
 
+    /**
+     * Returns the first {@link Skeleton} with the given skeleton name.
+     */
     public async getSkeleton(_name: string): Promise<Skeleton> {
       const iSkeleton: number = this.gltf.skins.findIndex(_skeleton => _skeleton.name == _name);
       if (iSkeleton == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf skins.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in gltf skins.`);
       return await this.getSkeletonByIndex(iSkeleton);
     }
 
+    /**
+     * Returns the {@link Skeleton} for the given skeleton index.
+     */
     public async getSkeletonByIndex(_iSkeleton: number): Promise<Skeleton> {
       if (!this.#skeletons)
         this.#skeletons = [];
       if (!this.#skeletons[_iSkeleton]) {
-        const gltfSkeleton: GLTF.Skin = this.gltf.skins[_iSkeleton];
-        const skeleton: Skeleton = await this.getNodeByIndex(gltfSkeleton.joints[0]) as Skeleton;
+        const gltfSkin: GLTF.Skin = this.gltf.skins[_iSkeleton];
+        const skeleton: Skeleton = await this.getNodeByIndex(gltfSkin.skeleton, this.#nodesSkeleton) as Skeleton;
 
         // convert float array to array of matrices and register bones
-        const floatArray: Float32Array = await this.getFloat32Array(gltfSkeleton.inverseBindMatrices);
-        const span: number = 16;
-        for (let iFloat: number = 0, iBone: number = 0; iFloat < floatArray.length; iFloat += span, iBone++) {
-          const mtxBindInverse: Matrix4x4 = new Matrix4x4();
-          mtxBindInverse.set(floatArray.subarray(iFloat, iFloat + span));
-          skeleton.registerBone(this.#nodes[gltfSkeleton.joints[iBone]], mtxBindInverse);
+        let mtxData: Float32Array;
+        if (gltfSkin.inverseBindMatrices != undefined)
+          mtxData = await this.getFloat32Array(gltfSkin.inverseBindMatrices);
+        const mtxDataSpan: number = 16; // size of matrix
+
+        // iterate over joints and get corresponding matrix from float array
+        for (let iBone: number = 0; iBone < gltfSkin.joints.length; iBone++) {
+          let mtxBindInverse: Matrix4x4;
+          if (mtxData) {
+            mtxBindInverse = new Matrix4x4();
+            mtxBindInverse.set(mtxData.subarray(iBone * mtxDataSpan, iBone * mtxDataSpan + mtxDataSpan));
+          }
+          skeleton.registerBone(await this.getNodeByIndex(gltfSkin.joints[iBone], this.#nodesSkeleton), mtxBindInverse);
         }
+
         Project.register(skeleton);
         this.#skeletons[_iSkeleton] = skeleton;
       }
@@ -382,125 +557,252 @@ namespace FudgeCore {
       return this.#skeletons[_iSkeleton];
     }
 
-    public async getUint8Array(_iAccessor: number): Promise<Uint8Array> {
+    /**
+     * Returns a {@link Uint8Array} for the given accessor index.
+     * @internal
+     */
+    public async getBoneIndices(_iAccessor: number): Promise<Uint8Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      if (this.gltf.accessors[_iAccessor]?.componentType == COMPONENT_TYPE.UNSIGNED_BYTE)
+      const componentType: GLTF.COMPONENT_TYPE = this.gltf.accessors[_iAccessor]?.componentType;
+
+      if (componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE)
         return array as Uint8Array;
-      else {
-        console.warn(`Expected component type UNSIGNED_BYTE but was ${COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+
+      if (componentType == GLTF.COMPONENT_TYPE.UNSIGNED_SHORT) {
+        Debug.log(`${this}: Bone indices are stored as '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]}'. FUDGE will convert them to '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_BYTE]}'. FUDGE only supports skeletons with up to 256 bones, so make sure your skeleton has no more than 256 bones.`);
         return Uint8Array.from(array);
       }
+
+      throw new Error(`${this}: Invalid component type '${GLTF.COMPONENT_TYPE[componentType]}' for bone indices. Expected '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_BYTE]}' or '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]}'.`);
     }
 
-    public async getUint16Array(_iAccessor: number): Promise<Uint16Array> {
-      const array: TypedArray = await this.getBufferData(_iAccessor);
-      if (this.gltf.accessors[_iAccessor]?.componentType == COMPONENT_TYPE.UNSIGNED_SHORT)
-        return array as Uint16Array;
-      else {
-        console.warn(`Expected component type UNSIGNED_SHORT but was ${COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
-        return Uint16Array.from(array);
-      }
-    }
-
-    public async getUint32Array(_iAccessor: number): Promise<Uint32Array> {
-      const array: TypedArray = await this.getBufferData(_iAccessor);
-      if (this.gltf.accessors[_iAccessor]?.componentType == COMPONENT_TYPE.UNSIGNED_INT)
-        return array as Uint32Array;
-      else {
-        console.warn(`Expected component type UNSIGNED_INT but was ${COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
-        return Uint32Array.from(array);
-      }
-    }
-
+    /**
+     * Returns a {@link Float32Array} for the given accessor index.
+     * @internal
+     */
     public async getFloat32Array(_iAccessor: number): Promise<Float32Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      if (this.gltf.accessors[_iAccessor]?.componentType == COMPONENT_TYPE.FLOAT)
+      const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
+
+      if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.FLOAT)
         return array as Float32Array;
-      else {
-        console.warn(`Expected component type FLOAT but was ${COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}.`);
-        return Float32Array.from(array);
+
+      if (gltfAccessor.normalized) {
+        switch (gltfAccessor.componentType) {
+          case GLTF.COMPONENT_TYPE.BYTE:
+            return Float32Array.from(array, _value => Math.max(_value / 127, -1));
+          case GLTF.COMPONENT_TYPE.UNSIGNED_BYTE:
+            return Float32Array.from(array, _value => _value / 255);
+          case GLTF.COMPONENT_TYPE.SHORT:
+            return Float32Array.from(array, _value => Math.max(_value / 32767, -1));
+          case GLTF.COMPONENT_TYPE.UNSIGNED_SHORT:
+            return Float32Array.from(array, _value => _value / 65535);
+          default:
+            throw new Error(`${this}: Invalid component type '${GLTF.COMPONENT_TYPE[gltfAccessor.componentType]}' for normalized accessor.`);
+          // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_accessor_normalized
+        }
       }
+
+      Debug.warn(`${this}: Expected component type '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.FLOAT]}' but was '${GLTF.COMPONENT_TYPE[gltfAccessor?.componentType]}'.`);
+      return Float32Array.from(array);
+    }
+
+    /**
+     * Returns a {@link Uint16Array} for the given accessor index. Only used to get the vertex indices.
+     * @internal
+     */
+    public async getVertexIndices(_iAccessor: number): Promise<Uint16Array> {
+      const array: TypedArray = await this.getBufferData(_iAccessor);
+      const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
+
+      if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_SHORT)
+        return array as Uint16Array;
+
+      if (gltfAccessor.count > 65535 && gltfAccessor.type == "SCALAR")
+        throw new Error(`${this}: File includes a mesh with more than 65535 vertices. FUDGE does not support meshes with more than 65535 vertices.`);
+
+      if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE || gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_INT)
+        return Uint16Array.from(array);
+
+      Debug.warn(`${this}: Expected an unsigned integer component type but was '${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}'.`);
+      return Uint16Array.from(array);
+    }
+
+    /**
+     * Return a {@link Float32Array} for the given accessor index. The array contains the vertex colors in RGBA format.
+     * @internal
+     */
+    public async getVertexColors(_iAccessor: number): Promise<Float32Array> {
+      const array: Float32Array = await this.getFloat32Array(_iAccessor);
+      const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
+
+      if (gltfAccessor.type == GLTF.ACCESSOR_TYPE.VEC3) {
+        const rgbaArray: Float32Array = new Float32Array(array.length * 4 / 3);
+        for (let iVec3: number = 0, iVec4: number = 0; iVec3 < array.length; iVec3 += 3, iVec4 += 4) {
+          rgbaArray[iVec4] = array[iVec3];
+          rgbaArray[iVec4 + 1] = array[iVec3 + 1];
+          rgbaArray[iVec4 + 2] = array[iVec3 + 2];
+          rgbaArray[iVec4 + 3] = 1;
+        }
+        return rgbaArray;
+      }
+
+      return array;
+    }
+
+    public toString(): string {
+      return `${GLTFLoader.name} | ${this.url}`;
     }
 
     private async getBufferData(_iAccessor: number): Promise<TypedArray> {
       const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
       if (!gltfAccessor)
-        throw new Error("Couldn't find accessor");
+        throw new Error(`${this}: Couldn't find accessor with index ${_iAccessor}.`);
 
-      const gltfBufferView: GLTF.BufferView = this.gltf.bufferViews[gltfAccessor.bufferView];
-      if (!gltfBufferView)
-        throw new Error("Couldn't find buffer view");
+      let array: TypedArray;
+      const componentType: GLTF.COMPONENT_TYPE = gltfAccessor.componentType;
+      const accessorType: GLTF.ACCESSOR_TYPE = gltfAccessor.type;
 
-      const buffer: ArrayBuffer = await this.getBuffer(gltfBufferView.buffer);;
-      const byteOffset: number = gltfBufferView.byteOffset || 0;
-      const byteLength: number = gltfBufferView.byteLength || 0;
+      if (gltfAccessor.bufferView != undefined)
+        array = await this.getBufferViewData(this.gltf.bufferViews[gltfAccessor.bufferView], gltfAccessor.byteOffset, componentType, accessorType);
 
-      switch (gltfAccessor.componentType) {
-        case COMPONENT_TYPE.UNSIGNED_BYTE:
-          return new Uint8Array(buffer, byteOffset, byteLength / Uint8Array.BYTES_PER_ELEMENT);
+      if (gltfAccessor.sparse) {
+        const gltfBufferViewIndices: GLTF.BufferView = this.gltf.bufferViews[gltfAccessor.sparse.indices.bufferView];
+        const gltfBufferViewValues: GLTF.BufferView = this.gltf.bufferViews[gltfAccessor.sparse.values.bufferView];
 
-        case COMPONENT_TYPE.BYTE:
-          return new Int8Array(buffer, byteOffset, byteLength / Int8Array.BYTES_PER_ELEMENT);
+        if (!gltfBufferViewIndices || !gltfBufferViewValues)
+          throw new Error(`${this}: Couldn't find buffer views for sparse indices or values of accessor with index ${_iAccessor}.`);
 
-        case COMPONENT_TYPE.UNSIGNED_SHORT:
-          return new Uint16Array(buffer, byteOffset, byteLength / Uint16Array.BYTES_PER_ELEMENT);
+        const arrayIndices: TypedArray = await this.getBufferViewData(gltfBufferViewIndices, gltfAccessor.sparse.indices.byteOffset, gltfAccessor.sparse.indices.componentType, GLTF.ACCESSOR_TYPE.SCALAR);
+        const arrayValues: TypedArray = await this.getBufferViewData(gltfBufferViewValues, gltfAccessor.sparse.values.byteOffset, componentType, accessorType);
 
-        case COMPONENT_TYPE.SHORT:
-          return new Int16Array(buffer, byteOffset, byteLength / Int16Array.BYTES_PER_ELEMENT);
+        const accessorTypeLength: number = toAccessorTypeLength[gltfAccessor.type];
+        if (gltfAccessor.bufferView == undefined)
+          array = new toArrayConstructor[gltfAccessor.componentType](gltfAccessor.count * accessorTypeLength);
 
-        case COMPONENT_TYPE.UNSIGNED_INT:
-          return new Uint32Array(buffer, byteOffset, byteLength / Uint32Array.BYTES_PER_ELEMENT);
-
-        case COMPONENT_TYPE.INT:
-          return new Int32Array(buffer, byteOffset, byteLength / Int32Array.BYTES_PER_ELEMENT);
-
-        case COMPONENT_TYPE.FLOAT:
-          return new Float32Array(buffer, byteOffset, byteLength / Float32Array.BYTES_PER_ELEMENT);
-
-        default:
-          throw new Error(`Unsupported component type: ${gltfAccessor.componentType}.`);
+        for (let i: number = 0; i < gltfAccessor.sparse.count; i++) {
+          array.set(arrayValues.slice(i * accessorTypeLength, (i + 1) * accessorTypeLength), arrayIndices[i] * accessorTypeLength);
+        }
       }
+
+      return array;
+    }
+
+    private async getBufferViewData(_bufferView: GLTF.BufferView, _byteOffset: number, _componentType: GLTF.COMPONENT_TYPE, _accessorType: GLTF.ACCESSOR_TYPE): Promise<TypedArray> {
+      const buffer: ArrayBuffer = await this.getBuffer(_bufferView.buffer);
+      const byteOffset: number = (_bufferView.byteOffset ?? 0) + (_byteOffset ?? 0);
+      const byteLength: number = _bufferView.byteLength ?? 0;
+      const byteStride: number = _bufferView.byteStride;
+
+      const arrayConstructor: TypedArrayConstructor = toArrayConstructor[_componentType];
+      const array: TypedArray = new arrayConstructor(buffer, byteOffset, byteLength / arrayConstructor.BYTES_PER_ELEMENT);
+
+      if (byteStride != undefined) {
+        // TODO: instead of creating new buffers maybe rather pass stride into the render mesh? and set it when data is passed to the gpu?
+        const nComponentsPerElement: number = toAccessorTypeLength[_accessorType]; // amount of components per element of the accessor type, i.e. 3 for VEC3
+        const nElements: number = byteLength / byteStride; // amount of elements, i.e. n*VEC3 
+        const stride: number = byteStride / arrayConstructor.BYTES_PER_ELEMENT;
+        const newArray: TypedArray = new arrayConstructor(nElements * nComponentsPerElement);
+        for (let iNewElement: number = 0; iNewElement < nElements; iNewElement++) {
+          const iElement: number = iNewElement * stride;
+          // TODO: check if loop is faster than set + slice
+          for (let iComponent: number = 0; iComponent < nComponentsPerElement; iComponent++)
+            newArray[iNewElement * nComponentsPerElement + iComponent] = array[iElement + iComponent];
+          // newArray.set(array.slice(iElement, iElement + nComponentsPerElement), iNewElement * nComponentsPerElement);
+        }
+
+        return newArray;
+      }
+
+      return array;
     }
 
     private async getBuffer(_iBuffer: number): Promise<ArrayBuffer> {
       const gltfBuffer: GLTF.Buffer = this.gltf.buffers[_iBuffer];
       if (!gltfBuffer)
-        throw new Error("Couldn't find buffer");
+        throw new Error(`${this}: Couldn't find buffer with index ${_iBuffer}.`);
 
       if (!this.#buffers)
         this.#buffers = [];
       if (!this.#buffers[_iBuffer]) {
-        const response: Response = await fetch(gltfBuffer.uri);
+        const response: Response = await fetch(new URL(gltfBuffer.uri, this.url));
         this.#buffers[_iBuffer] = await response.arrayBuffer();
       }
 
       return this.#buffers[_iBuffer];
     }
 
-    private async getAnimationSequenceVector3(_sampler: GLTF.AnimationSampler, _transformationType: GLTF.AnimationChannelTarget["path"]): Promise<AnimationStructureVector3 | AnimationStructureVector4> {
+    private async getAnimationSequenceVector(_sampler: GLTF.AnimationSampler, _transformationType: GLTF.AnimationChannelTarget["path"]): Promise<AnimationSequenceVector3 | AnimationSequenceVector4> {
       const input: Float32Array = await this.getFloat32Array(_sampler.input);
       const output: Float32Array = await this.getFloat32Array(_sampler.output);
+
       const millisPerSecond: number = 1000;
       const isRotation: boolean = _transformationType == "rotation";
+      const vectorLength: number = isRotation ? 4 : 3; // rotation is stored as quaternion
+      const interpolation: ANIMATION_INTERPOLATION = this.toInternInterpolation(_sampler.interpolation);
+      const isCubic: true | undefined = interpolation == ANIMATION_INTERPOLATION.CUBIC ? true : undefined;
+      const vectorsPerInput: number = isCubic ? 3 : 1; // cubic interpolation uses 3 values per input: in-tangent, property value and out-tangent. https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#interpolation-cubic
 
-      const sequences: AnimationStructureVector3 | AnimationStructureVector4 = {};
-      sequences.x = new AnimationSequence();
-      sequences.y = new AnimationSequence();
-      sequences.z = new AnimationSequence();
-      if (isRotation)
-        sequences.w = new AnimationSequence();
+      // used only for rotation interpolation
+      let lastRotation: Quaternion;
+      let nextRotation: Quaternion;
 
-      for (let iInput: number = 0; iInput < input.length; ++iInput) {
-        let iOutput: number = iInput * (_transformationType == "rotation" ? 4 : 3); // output buffer either contains data for quaternion or vector3
-        let time: number = millisPerSecond * input[iInput];
-        sequences.x.addKey(new AnimationKey(time, output[iOutput + 0]));
-        sequences.y.addKey(new AnimationKey(time, output[iOutput + 1]));
-        sequences.z.addKey(new AnimationKey(time, output[iOutput + 2]));
-        if (isRotation)
-          (<AnimationStructureVector4>sequences).w.addKey(new AnimationKey(time, output[iOutput + 3]));
+      const sequenceVector: AnimationSequenceVector3 | AnimationSequenceVector4 = {};
+      sequenceVector.x = new AnimationSequence();
+      sequenceVector.y = new AnimationSequence();
+      sequenceVector.z = new AnimationSequence();
+      if (isRotation) {
+        sequenceVector.w = new AnimationSequence();
+        lastRotation = Recycler.get(Quaternion);
+        nextRotation = Recycler.get(Quaternion);
       }
 
-      return sequences;
+      for (let iInput: number = 0; iInput < input.length; iInput++) {
+        const iOutput: number = iInput * vectorsPerInput * vectorLength + (isCubic ? vectorLength : 0);
+        const iOutputSlopeIn: number = iOutput - vectorLength;
+        const iOutputSlopeOut: number = iOutput + vectorLength;
+        const time: number = millisPerSecond * input[iInput];
+
+        if (isRotation) {
+          // Take the shortest path between two rotations, i.e. if the dot product is negative then the next quaternion needs to be negated.
+          // q and -q represent the same rotation but interpolation will take either the long way or the short way around the sphere depending on which we use.
+          nextRotation.set(output[iOutput + 0], output[iOutput + 1], output[iOutput + 2], output[iOutput + 3]);
+          if (Quaternion.DOT(lastRotation, nextRotation) < 0)
+            nextRotation.negate();
+          output[iOutput + 0] = nextRotation.x;
+          output[iOutput + 1] = nextRotation.y;
+          output[iOutput + 2] = nextRotation.z;
+          output[iOutput + 3] = nextRotation.w;
+          lastRotation.set(nextRotation.x, nextRotation.y, nextRotation.z, nextRotation.w);
+        }
+
+        sequenceVector.x.addKey(new AnimationKey(time, output[iOutput + 0], interpolation, isCubic && output[iOutputSlopeIn + 0] / millisPerSecond, isCubic && output[iOutputSlopeOut + 0] / millisPerSecond));
+        sequenceVector.y.addKey(new AnimationKey(time, output[iOutput + 1], interpolation, isCubic && output[iOutputSlopeIn + 1] / millisPerSecond, isCubic && output[iOutputSlopeOut + 1] / millisPerSecond));
+        sequenceVector.z.addKey(new AnimationKey(time, output[iOutput + 2], interpolation, isCubic && output[iOutputSlopeIn + 2] / millisPerSecond, isCubic && output[iOutputSlopeOut + 2] / millisPerSecond));
+        (<AnimationSequenceVector4>sequenceVector).w?.addKey(new AnimationKey(time, output[iOutput + 3], interpolation, isCubic && output[iOutputSlopeIn + 3] / millisPerSecond, isCubic && output[iOutputSlopeOut + 3] / millisPerSecond));
+      }
+
+      if (isRotation) {
+        Recycler.store(lastRotation);
+        Recycler.store(nextRotation);
+      }
+
+      return sequenceVector;
+    }
+
+    private toInternInterpolation(_interpolation: GLTF.AnimationSampler["interpolation"]): ANIMATION_INTERPOLATION {
+      switch (_interpolation) {
+        case "LINEAR":
+          return ANIMATION_INTERPOLATION.LINEAR;
+        case "STEP":
+          return ANIMATION_INTERPOLATION.CONSTANT;
+        case "CUBICSPLINE":
+          return ANIMATION_INTERPOLATION.CUBIC;
+        default:
+          if (_interpolation != undefined)
+            Debug.warn(`${this}: Unknown interpolation type ${_interpolation}.`);
+          return ANIMATION_INTERPOLATION.LINEAR;
+      }
     }
   }
 
@@ -508,17 +810,34 @@ namespace FudgeCore {
     return Object.keys(WebGL2RenderingContext).find(_key => Reflect.get(WebGL2RenderingContext, _key) == _value);
   }
 
-  enum COMPONENT_TYPE {
-    BYTE = 5120,
-    UNSIGNED_BYTE = 5121,
-    SHORT = 5122,
-    UNSIGNED_SHORT = 5123,
-    INT = 5124,
-    UNSIGNED_INT = 5125,
-    FLOAT = 5126
-  }
+  type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Float32Array;
+  type TypedArrayConstructor = Uint8ArrayConstructor | Uint16ArrayConstructor | Uint32ArrayConstructor | Int8ArrayConstructor | Int16ArrayConstructor | Float32ArrayConstructor;
 
-  type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Int32Array | Float32Array | Float64Array;
+  const toInternTransformation: Record<GLTF.AnimationChannelTarget["path"], string> = {
+    "translation": "translation",
+    "rotation": "rotation",
+    "scale": "scaling",
+    "weights": "weights"
+  };
 
-  // type TransformationType = "rotation" | "scale" | "translation";
+  // number of components defined by 'type'
+  const toAccessorTypeLength: Record<GLTF.ACCESSOR_TYPE, number> = {
+    "SCALAR": 1,
+    "VEC2": 2,
+    "VEC3": 3,
+    "VEC4": 4,
+    "MAT2": 4,
+    "MAT3": 9,
+    "MAT4": 16
+  };
+
+  const toArrayConstructor: Record<GLTF.COMPONENT_TYPE, TypedArrayConstructor> = {
+    [GLTF.COMPONENT_TYPE.UNSIGNED_BYTE]: Uint8Array,
+    [GLTF.COMPONENT_TYPE.BYTE]: Int8Array,
+    [GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]: Uint16Array,
+    [GLTF.COMPONENT_TYPE.SHORT]: Int16Array,
+    [GLTF.COMPONENT_TYPE.UNSIGNED_INT]: Uint32Array,
+    [GLTF.COMPONENT_TYPE.FLOAT]: Float32Array
+  };
+
 }

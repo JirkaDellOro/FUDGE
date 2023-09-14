@@ -7,24 +7,24 @@ namespace FudgeCore.FBX {
   export function parseNodesFromBinary(_buffer: ArrayBuffer): Node[] {
     if (_buffer.byteLength < binaryStartChars.length)
       throw "Not a binary FBX file";
-    
+
     const data: BufferReader = new BufferReader(_buffer);
     const firstChars: Uint8Array = new Uint8Array(data.getSequence(data.getUint8, binaryStartChars.length));
     const matchesFBXBinaryFirstChars: boolean
-      = firstChars.every((_value, _index)  => _value == binaryStartChars[_index]);    
+      = firstChars.every((_value, _index) => _value == binaryStartChars[_index]);
     if (!matchesFBXBinaryFirstChars)
       throw "Not a binary FBX file";
 
     const version: number = data.getUint32();
     const nodeAttributesAsUInt64: boolean = version >= 7500; // Warum >= 7500?
     const nodes: Node[] = [];
-  
+
     while (true) {
       const node: Node = readNode(data, nodeAttributesAsUInt64);
       if (node == null) break;
       nodes.push(node);
     }
-  
+
     return nodes;
   }
 
@@ -49,7 +49,7 @@ namespace FudgeCore.FBX {
           properties.push(readProperty(_data));
         }
         return properties;
-      }, 
+      },
       () => {
         _data.offset = childrenOffset;
         const children: Node[] = [];
@@ -60,7 +60,7 @@ namespace FudgeCore.FBX {
         return children;
       }
     );
-    
+
     _data.offset = endOffset;
 
     return node;
@@ -89,24 +89,24 @@ namespace FudgeCore.FBX {
 
     if (value == null)
       Debug.warn(`Unknown property type ${typeCode.charCodeAt(0)}`);
-    
+
     return value;
   }
 
   function readArray<T extends number | bigint>(_data: BufferReader, _getter: () => T): Generator<T> {
     const length: number = _data.getUint32();
-    const encoding: FBX.ArrayEncoding = _data.getUint32();
+    const encoding: FBX.ARRAY_ENCODING = _data.getUint32();
     const byteLength: number = _data.getUint32();
     const endOffset: number = _data.offset + byteLength;
 
-    const iterable: Generator<T> = encoding == FBX.ArrayEncoding.COMPRESSED ?
+    const iterable: Generator<T> = encoding == FBX.ARRAY_ENCODING.COMPRESSED ?
       (() => {
         const arrayData: Uint8Array = new Uint8Array(_data.view.buffer, _data.offset, byteLength);
         const inflatedData: Uint8Array = (Reflect.get(globalThis, "pako") ? pako.inflate : fflate.inflateSync)(arrayData);
         return new BufferReader(inflatedData.buffer).getSequence(_getter, length);
       })() :
       _data.getSequence(_getter, length);
-    
+
     _data.offset = endOffset;
 
     return iterable;
@@ -120,7 +120,7 @@ namespace FudgeCore.FBX {
   }
 
   const binaryStartChars: Uint8Array
-    = Uint8Array.from("Kaydara FBX Binary\x20\x20\x00\x1a\x00".split(""), (v) => v.charCodeAt(0));
+    = Uint8Array.from("Kaydara FBX Binary\x20\x20\x00\x1a\x00".split(""), _v => _v.charCodeAt(0));
 
   const nullCountAtNodeEnd: number = 13;
 

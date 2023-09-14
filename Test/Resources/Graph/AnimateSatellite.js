@@ -10,15 +10,15 @@ var Graph;
         mtxPivot;
         constructor() {
             super();
-            this.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndAddComponent);
-            this.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndRemoveComponent);
+            this.addEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndAddComponent);
+            this.addEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndRemoveComponent);
         }
         hndAddComponent = (_event) => {
             this.node.addEventListener("startSatellite", this.start, true);
         };
         hndRemoveComponent = (_event) => {
             this.node.removeEventListener("startSatellite", this.start);
-            ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.update);
+            ƒ.Loop.removeEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
         };
         start = (_event) => {
             this.mtxLocal = this.node.mtxLocal;
@@ -26,7 +26,7 @@ var Graph;
             this.mtxPivot.translateZ(-0.5);
             this.mtxPivot.scale(ƒ.Vector3.ONE(0.2));
             this.mtxLocal.rotateY(Math.random() * 360);
-            ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.update);
+            ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
         };
         update = (_event) => {
             // tpo: test performance optimization

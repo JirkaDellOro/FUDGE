@@ -1,12 +1,23 @@
 namespace FudgeCore {
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export type General = any;
 
+  /**
+   * Holds information needed to recreate an object identical to the one it originated from. 
+   * A serialization is used to create copies of existing objects at runtime or to store objects as strings or recreate them.
+   */
   export interface Serialization {
     [type: string]: General;
   }
+
   export interface Serializable {
+    /**
+     * Returns a {@link Serialization} of this object.
+     */
     serialize(): Serialization;
+    /**
+     * Recreates this instance of {@link Serializable} with the information from the given {@link Serialization}.
+     */
     deserialize(_serialization: Serialization): Promise<Serializable>;
   }
 
@@ -18,14 +29,14 @@ namespace FudgeCore {
    * Handles the external serialization and deserialization of {@link Serializable} objects. The internal process is handled by the objects themselves.  
    * A {@link Serialization} object can be created from a {@link Serializable} object and a JSON-String may be created from that.  
    * Vice versa, a JSON-String can be parsed to a {@link Serialization} which can be deserialized to a {@link Serializable} object.
-   * ```plaintext
+   * ```text
    *  [Serializable] → (serialize) → [Serialization] → (stringify) → [String] → (save or send)
    *                                        ↓                            ↓                  ↓         
    *                [Serializable] ← (deserialize) ← [Serialization] ← (parse) ← (load) ← [Medium]
    * ```      
    * While the internal serialize/deserialize method1s of the objects care of the selection of information needed to recreate the object and its structure,  
    * the {@link Serializer} keeps track of the namespaces and classes in order to recreate {@link Serializable} objects. The general structure of a {@link Serialization} is as follows  
-   * ```plaintext
+   * ```text
    * {
    *      namespaceName.className: {
    *          propertyName: propertyValue,
@@ -120,7 +131,7 @@ namespace FudgeCore {
       let path: string = this.getFullPath(new _type());
       if (!path)
         throw new Error(`Namespace of serializable object of type ${_type.name} not found. Maybe the namespace hasn't been registered or the class not exported?`);
-      
+
       for (let object of _objects)
         serializations.push(object.serialize());
 
@@ -159,6 +170,10 @@ namespace FudgeCore {
     }
 
     //TODO: implement prettifier to make JSON-Stringification of serializations more readable, e.g. placing x, y and z in one line
+    /**
+     * Prettify a JSON-String, to make it more readable.
+     * not implemented yet
+     */
     public static prettify(_json: string): string { return _json; }
 
     /**
@@ -191,6 +206,9 @@ namespace FudgeCore {
     }
 
     // public static getConstructor<T extends Serializable>(_type: string, _namespace: Object = FudgeCore): new () => T {
+    /**
+     * Returns the constructor from the given path to a class
+     */
     public static getConstructor<T extends Serializable>(_path: string): new () => T {
       let typeName: string = _path.substring(_path.lastIndexOf(".") + 1);
       let namespace: Object = Serializer.getNamespace(_path);

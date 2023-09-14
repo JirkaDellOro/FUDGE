@@ -9,7 +9,7 @@ namespace FudgeCore {
     public clrSecondary: Color = Color.CSS("white");
     public mtxPivot: Matrix3x3 = Matrix3x3.IDENTITY();
     public material: Material;
-    /** support sorting of objects with transparency when rendering, render objects in the back first. Should be enabled when {@link ComponentParticleSystem.prototype.depthMask} is disabled */
+    /** Support sorting of objects with transparency when rendering, render objects in the back first. When this component is used as a part of a {@link ParticleSystem}, try enabling this when disabling {@link ComponentParticleSystem.depthMask} */
     public sortForAlpha: boolean = false;
     // public mutatorCoat: MutatorForComponent;
 
