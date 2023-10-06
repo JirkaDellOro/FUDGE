@@ -323,18 +323,10 @@ namespace FudgeCore {
       let serialization: Serialization = {};
       for (const property in _structure) {
         let structureOrSequence: Object = (<General>_structure)[property];
-        if (structureOrSequence instanceof AnimationSequence) {
+        if (structureOrSequence instanceof AnimationSequence)
           serialization[property] = structureOrSequence.serialize();
-        } else {
-          if (Component.subclasses.some(_type => _type.name == property)) {
-            serialization[property] = [];
-            for (const i in structureOrSequence) {
-              (<Serialization[]>serialization[property]).push(this.traverseStructureForSerialization((<General>structureOrSequence)[i]));
-            }
-          } else {
-            serialization[property] = this.traverseStructureForSerialization(structureOrSequence);
-          }
-        }
+        else
+          serialization[property] = this.traverseStructureForSerialization(structureOrSequence);
       }
       return serialization;
     }

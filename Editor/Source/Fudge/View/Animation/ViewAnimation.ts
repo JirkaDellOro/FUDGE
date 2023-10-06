@@ -22,7 +22,7 @@ namespace Fudge {
     private time: ƒ.Time = new ƒ.Time();
     private idInterval: number;
 
-    constructor(_container: ComponentContainer, _state: Object) {
+    public constructor(_container: ComponentContainer, _state: Object) {
       super(_container, _state);
       this.setAnimation(null);
       this.createToolbar();
@@ -101,16 +101,16 @@ namespace Fudge {
       const menu: Electron.Menu = new remote.Menu();
       for (const componentClass of ƒ.Component.subclasses) {
         //@ts-ignore
-        _node.getComponents(componentClass).forEach((component, index) => { // we need to get the attached componnents as array so we can reconstuct their path
+        _node.getComponents(componentClass).forEach((_component, _index) => { // we need to get the attached componnents as array so we can reconstuct their path
           let path: string[] = Object.assign([], _path);
           path.push("components");
-          path.push(component.type);
-          path.push(index.toString());
-          let mutator: ƒ.Mutator = component.getMutatorForAnimation();
+          path.push(_component.type);
+          path.push(_index.toString());
+          let mutator: ƒ.Mutator = _component.getMutatorForAnimation();
           if (mutator && Object.keys(mutator).length > 0) {
             let item: Electron.MenuItem;
             item = new remote.MenuItem(
-              { label: component.type, submenu: this.getMutatorSubmenu(mutator, path, _callback) }
+              { label: _component.type, submenu: this.getMutatorSubmenu(mutator, path, _callback) }
             );
             menu.append(item);
           }
@@ -208,6 +208,10 @@ namespace Fudge {
               this.dispatch(EVENT_EDITOR.SELECT, { detail: { node: _event.detail.mutable.node } });
             break;
           }
+
+          if (!(_event.detail.view instanceof ViewAnimation || _event.detail.view instanceof ViewAnimationSheet))
+            break;
+
           if (_event.detail.view instanceof ViewAnimationSheet)
             this.pause();
 
@@ -215,7 +219,7 @@ namespace Fudge {
 
           if (!this.animation)
             break;
-            
+
           this.frameInput.value = (Math.trunc(this.playbackTime / 1000 * this.animation.fps)).toString();
           this.animation.clearCache();
           let nodeMutator: ƒ.Mutator = this.cmpAnimator?.updateAnimation(this.playbackTime) || {};
@@ -233,7 +237,7 @@ namespace Fudge {
           this.animate();
           break;
       }
-    }
+    };
 
     private setAnimation(_animation: ƒ.Animation): void {
       if (_animation) {
@@ -270,7 +274,7 @@ namespace Fudge {
       this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true, detail: { data: this.playbackTime } });
     }
 
-    private hndToolbarClick = (_event: MouseEvent) => {
+    private hndToolbarClick = (_event: MouseEvent): void => {
       let target: HTMLInputElement = <HTMLInputElement>_event.target;
       switch (target.id) {
         case "previous":
@@ -295,7 +299,7 @@ namespace Fudge {
           this.animate();
           break;
       }
-    }
+    };
 
     private pause(): void {
       if (this.idInterval == null) return;

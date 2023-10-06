@@ -33,8 +33,8 @@
       "framesPerSecond": 60,
       "animationStructure": {
         "components": {
-          "ComponentTransform": [
-            {
+          "ComponentTransform": {
+            "0": {
               "mtxLocal": {
                 "rotation": {
                   "y": {
@@ -43,15 +43,13 @@
                         "time": 0,
                         "value": 0,
                         "slopeIn": 0.03970370688005208,
-                        "slopeOut": 0.03970370688005208,
-                        "constant": false
+                        "slopeOut": 0.03970370688005208
                       },
                       {
                         "time": 10000,
                         "value": 359,
                         "slopeIn": 0.03168513262793446,
-                        "slopeOut": 0.03168513262793446,
-                        "constant": false
+                        "slopeOut": 0.03168513262793446
                       }
                     ],
                     "animationSequence": true
@@ -59,13 +57,13 @@
                 }
               }
             }
-          ]
+          }
         },
         "children": {
           "Earth": {
             "components": {
-              "ComponentTransform": [
-                {
+              "ComponentTransform": {
+                "0": {
                   "mtxLocal": {
                     "rotation": {
                       "y": {
@@ -74,15 +72,13 @@
                             "time": 0,
                             "value": 0,
                             "slopeIn": 0.06774086136288295,
-                            "slopeOut": 0.06774086136288295,
-                            "constant": false
+                            "slopeOut": 0.06774086136288295
                           },
                           {
                             "time": 10000,
                             "value": 719,
                             "slopeIn": 0.07374833733551069,
-                            "slopeOut": 0.07374833733551069,
-                            "constant": false
+                            "slopeOut": 0.07374833733551069
                           }
                         ],
                         "animationSequence": true
@@ -90,7 +86,7 @@
                     }
                   }
                 }
-              ]
+              }
             }
           }
         }
