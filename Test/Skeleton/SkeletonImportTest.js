@@ -91,15 +91,15 @@ var SkeletonTest;
             }
         }
         const selectedFile = parseInt(sessionStorage.getItem('selectedFile'));
-        const selection = document.getElementById("file");
+        const select = document.getElementById("file");
         if (selectedFile != undefined)
-            selection.selectedIndex = selectedFile;
-        load(selection);
+            select.selectedIndex = selectedFile;
+        load(select);
     }
 })(SkeletonTest || (SkeletonTest = {}));
-async function load(_selection) {
+async function load(_select) {
     // load scene
-    SkeletonTest.loader = await ƒ.GLTFLoader.LOAD(_selection.value);
+    SkeletonTest.loader = await ƒ.GLTFLoader.LOAD(_select.value);
     SkeletonTest.loaded = await SkeletonTest.loader.getScene();
     SkeletonTest.cmpAnimator = SkeletonTest.loaded?.getComponent(ƒ.ComponentAnimator);
     SkeletonTest.loaded.name = "loaded";
@@ -113,6 +113,6 @@ async function load(_selection) {
     ƒ.Debug.log("Loader:", SkeletonTest.loader);
     ƒ.Debug.log("Loaded:", SkeletonTest.loaded);
     // To store the selected option in sessionStorage
-    sessionStorage.setItem('selectedFile', _selection.selectedIndex.toString());
+    sessionStorage.setItem('selectedFile', _select.selectedIndex.toString());
 }
 //# sourceMappingURL=SkeletonImportTest.js.map

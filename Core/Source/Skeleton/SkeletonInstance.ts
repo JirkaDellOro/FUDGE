@@ -89,11 +89,11 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization);
       this.skeletonSource = Project.resources[_serialization.idSource || _serialization.idResource] as Skeleton;
-      for (const node of this) {
-        const cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
-        if (cmpMesh?.skeleton)
-          cmpMesh.skeleton = this;
-      }
+      // for (const node of this) {
+      //   const cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
+      //   if (cmpMesh?.skeleton)
+      //     cmpMesh.skeleton = this;
+      // }
       this.registerBones();
       // if (_serialization.bindPose) {
       //   this.bindPose = {};

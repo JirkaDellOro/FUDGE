@@ -104,7 +104,7 @@ namespace FudgeCore {
         break;
       }
 
-      this.dispatchEvent(new Event(EVENT.GRAPH_INSTANTIATED));
+      this.broadcastEvent(new Event(EVENT.GRAPH_INSTANTIATED));
     }
 
     /**

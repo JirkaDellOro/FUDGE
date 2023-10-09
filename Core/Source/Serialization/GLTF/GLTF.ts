@@ -572,26 +572,11 @@ namespace GLTF {
     /**
      * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
      */
-    isJoint?: boolean;
-    /**
-     * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
-     * The depth of the node in the hierarchy, starting with 0 for the root node.
-     */
-    depth?: number;
-    /**
-     * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
-     */
     parent?: number;
     /**
      * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
      */
     path?: number[];
-
-    /**
-     * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
-     * The index of the skin this node is the root of.
-     */
-    iSkinRoot?: number;
   }
   /**
    * Texture sampler properties for filtering and wrapping modes.
