@@ -27,6 +27,10 @@ namespace FudgeCore {
     public adjustingCamera: boolean = true;
     public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
 
+    //Variables to check if the FBOs need to be recalculated
+    private lastRectRenderSize: Vector2 = new Vector2(0, 0);
+    private lastCamera: ComponentCamera;
+
     public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
 
     #branch: Node = null; // The to render with all its descendants.
@@ -60,13 +64,16 @@ namespace FudgeCore {
      */
     public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
       this.name = _name;
-      this.camera = _camera;
+      this.camera = this.lastCamera = _camera;
       this.#canvas = _canvas;
       this.#crc2 = _canvas.getContext("2d");
       this.#canvas.tabIndex = 0; // can get focus and receive keyboard events
 
       this.rectSource = Render.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
+
+      //TODO: Only setup needed FBOs. This proofs a bit complicated because the initialization might happen before a ComponentCamera with a ComponentPostFX exists. Therefore Postbuffers are initialized regardless for now. 
+      Render.initFBOs();
 
       this.setBranch(_branch);
     }
@@ -114,6 +121,22 @@ namespace FudgeCore {
         Physics.draw(this.camera, this.physicsDebugMode);
       }
 
+      let cmpAO: ComponentAmbientOcclusion = <ComponentAmbientOcclusion> this.getComponentPost(this.camera, "AO");
+      if (cmpAO != null) if (cmpAO.isActive) {
+        Render.calcAO(this.camera, cmpAO);
+      }
+      let cmpMist: ComponentMist = <ComponentMist> this.getComponentPost(this.camera, "Mist");
+      if (cmpMist != null) if (cmpMist.isActive) {
+        Render.calcMist(this.camera, cmpMist);
+      }
+      let cmpBloom: ComponentBloom = <ComponentBloom> this.getComponentPost(this.camera, "Bloom");
+      if (cmpBloom != null) if (cmpBloom.isActive) {
+        Render.calcBloom(cmpBloom);
+      }
+
+      Render.setDepthTest(false);
+      Render.compositeEffects(this.camera, cmpMist, cmpAO, cmpBloom);
+
       this.#crc2.imageSmoothingEnabled = false;
       this.#crc2.drawImage(
         Render.getCanvas(),
@@ -134,7 +157,6 @@ namespace FudgeCore {
         this.adjustFrames();
       if (this.adjustingCamera)
         this.adjustCamera();
-
       if (_calculateTransforms)
         this.calculateTransforms();
 
@@ -211,6 +233,31 @@ namespace FudgeCore {
       Render.setRenderRectangle(rectRender);
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
       Render.setCanvasSize(rectRender.width, rectRender.height);
+
+      // setting the new canvas size on the FBO-Textures
+      if (rectRender.size.x != this.lastRectRenderSize.x || rectRender.size.y != this.lastRectRenderSize.y || this.camera != this.lastCamera) {
+        this.lastRectRenderSize.set(rectRender.size.x, rectRender.size.y);
+        this.lastCamera = this.camera;
+        if (rectRender.size.x >= 1 || rectRender.size.y >= 1) {
+          Render.adjustBufferSize(Render.mainFBO, Render.mainTexture, null);
+
+          let cmpAO: ComponentAmbientOcclusion = <ComponentAmbientOcclusion> this.getComponentPost(this.camera, "AO");
+          if (cmpAO != null) if (cmpAO.isActive) {
+            Render.adjustBufferSize(Render.aoNormalFBO, Render.aoNormalTexture, Render.aoDepthTexture);
+            Render.adjustBufferSize(Render.aoFBO, Render.aoTexture, null);
+          }
+          
+          let cmpMist: ComponentMist = <ComponentMist> this.getComponentPost(this.camera, "Mist");
+          if (cmpMist != null) if (cmpMist.isActive) {
+            Render.adjustBufferSize(Render.mistFBO, Render.mistTexture, null);
+          }
+
+          let cmpBloom: ComponentBloom = <ComponentBloom> this.getComponentPost(this.camera, "Bloom");
+          if (cmpBloom != null) if (cmpBloom.isActive) {
+            Render.adjustBlooomBufferSize();
+          }
+        }
+      }
 
       Recycler.store(rectClient);
       Recycler.store(rectCanvas);
@@ -339,6 +386,18 @@ namespace FudgeCore {
     public pointClientToScreen(_client: Vector2): Vector2 {
       let screen: Vector2 = new Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
       return screen;
+    }
+    /**
+    * Returns a ComponentPostFX object based on the given Post-FX type, as long as the camaera has a component of this type
+     */
+    private getComponentPost(_camera: ComponentCamera, _cmpType: string): Component {
+      let camParentNode: Node = _camera.node;
+      if (camParentNode != null) {
+        if (_cmpType == "AO")return camParentNode.getComponent(ComponentAmbientOcclusion);
+        if (_cmpType == "Mist")return camParentNode.getComponent(ComponentMist);
+        if (_cmpType == "Bloom")return camParentNode.getComponent(ComponentBloom);
+      }
+      return null;
     }
   }
 }

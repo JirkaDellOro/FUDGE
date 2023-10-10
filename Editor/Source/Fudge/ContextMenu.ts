@@ -26,7 +26,11 @@ namespace Fudge {
         );
         //@ts-ignore
         item.overrideProperty("iSubclass", iSubclass);
-        menu.append(item);
+        let name: string = subclass.name;
+        //TODO: Implement option to exclude shaders from list from within the shader class
+        if (name != "ShaderAmbientOcclusion" && name != "ShaderBloom" && name != "ShaderDownsample" && name != "ShaderMist" && name != "ShaderScreen" && name != "ShaderUpsample" && name != "ShaderAONormalFlat"&& name != "ShaderAONormal") {
+          menu.append(item);
+        }
       }
       return menu;
     }

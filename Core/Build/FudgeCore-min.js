@@ -1046,24 +1046,41 @@ var FudgeCore;
         static injectCoatRemissive(_shader, _cmpMaterial) {
             RenderInjectorCoat.injectCoatColored.call(this, _shader, _cmpMaterial);
             let uniform;
-            uniform = _shader.uniforms["u_fSpecular"];
-            FudgeCore.RenderWebGL.getRenderingContext().uniform1f(uniform, this.specular);
             uniform = _shader.uniforms["u_fDiffuse"];
             FudgeCore.RenderWebGL.getRenderingContext().uniform1f(uniform, this.diffuse);
+            uniform = _shader.uniforms["u_fMetallic"];
+            FudgeCore.RenderWebGL.getRenderingContext().uniform1f(uniform, this.metallic);
+            uniform = _shader.uniforms["u_fSpecular"];
+            FudgeCore.RenderWebGL.getRenderingContext().uniform1f(uniform, this.specular);
+            uniform = _shader.uniforms["u_fIntensity"];
+            FudgeCore.RenderWebGL.getRenderingContext().uniform1f(uniform, this.intensity);
         }
         static injectCoatTextured(_shader, _cmpMaterial) {
             RenderInjectorCoat.injectCoatColored.call(this, _shader, _cmpMaterial);
             let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
-            this.texture.useRenderData();
+            this.texture.useRenderData(0);
+            crc3.uniform1i(_shader.uniforms["u_texture"], 0);
+            crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, _cmpMaterial.mtxPivot.get());
+        }
+        static injectCoatWebGlTextured(_shader, _cmpMaterial) {
+            let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
+            this.texture.useRenderData(0);
             crc3.uniform1i(_shader.uniforms["u_texture"], 0);
             crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, _cmpMaterial.mtxPivot.get());
         }
         static injectCoatRemissiveTextured(_shader, _cmpMaterial) {
             RenderInjectorCoat.injectCoatRemissive.call(this, _shader, _cmpMaterial);
             let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
-            this.texture.useRenderData();
+            this.texture.useRenderData(0);
             crc3.uniform1i(_shader.uniforms["u_texture"], 0);
             crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, _cmpMaterial.mtxPivot.get());
+        }
+        static injectCoatRemissiveTexturedNormals(_shader, _cmpMaterial) {
+            RenderInjectorCoat.injectCoatRemissiveTextured.call(this, _shader, _cmpMaterial);
+            let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
+            this.normalMap.useRenderData(2);
+            crc3.uniform1i(_shader.uniforms["u_normalMap"], 2);
+            crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivotN"], false, _cmpMaterial.mtxPivot.get());
         }
     }
     FudgeCore.RenderInjectorCoat = RenderInjectorCoat;
@@ -2092,6 +2109,124 @@ var FudgeCore;
                 RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, RenderWebGL.uboLightsVariableOffsets[`${_uniStruct}[0].vctColor`], lightsData);
             }
         }
+        static initFBOs(_mist = true, _ao = true, _bloom = true) {
+            let mainBufferData = RenderWebGL.setupFBO();
+            FudgeCore.Render.mainFBO = mainBufferData.fbo;
+            FudgeCore.Render.mainTexture = mainBufferData.texture;
+            FudgeCore.Render.initScreenQuad(FudgeCore.Render.mainTexture);
+            if (_mist) {
+                let mistBufferData = RenderWebGL.setupFBO();
+                FudgeCore.Render.mistFBO = mistBufferData.fbo;
+                FudgeCore.Render.mistTexture = mistBufferData.texture;
+                let tempMistMat = new FudgeCore.Material("mistMat", FudgeCore.ShaderMist);
+                FudgeCore.Render.cmpMistMaterial = new FudgeCore.ComponentMaterial(tempMistMat);
+                FudgeCore.Project.deregister(tempMistMat);
+            }
+            if (_ao) {
+                let aoBufferData = RenderWebGL.setupFBO();
+                FudgeCore.Render.aoFBO = aoBufferData.fbo;
+                FudgeCore.Render.aoTexture = aoBufferData.texture;
+            }
+            if (_bloom) {
+                FudgeCore.Render.bloomDownsamplingFBOs.splice(0, FudgeCore.Render.bloomDownsamplingFBOs.length);
+                FudgeCore.Render.bloomDownsamplingTextures.splice(0, FudgeCore.Render.bloomDownsamplingTextures.length);
+                FudgeCore.Render.bloomUpsamplingFBOs.splice(0, FudgeCore.Render.bloomUpsamplingFBOs.length);
+                FudgeCore.Render.bloomUpsamplingTextures.splice(0, FudgeCore.Render.bloomUpsamplingTextures.length);
+                let div = 2;
+                for (let i = 0; i < FudgeCore.Render.downsamplingDepth; i++) {
+                    let downsamplingBufferData = RenderWebGL.setupFBO(null, null, div);
+                    FudgeCore.Render.bloomDownsamplingFBOs.push(downsamplingBufferData.fbo);
+                    FudgeCore.Render.bloomDownsamplingTextures.push(downsamplingBufferData.texture);
+                    div *= 2;
+                }
+                div = 2;
+                for (let i = 0; i < FudgeCore.Render.downsamplingDepth - 1; i++) {
+                    let upsamplingBufferData = RenderWebGL.setupFBO(null, null, div);
+                    FudgeCore.Render.bloomUpsamplingFBOs.push(upsamplingBufferData.fbo);
+                    FudgeCore.Render.bloomUpsamplingTextures.push(upsamplingBufferData.texture);
+                    div *= 2;
+                }
+            }
+        }
+        static setupFBO(_fbo = null, _tex = null, _divider = 1) {
+            let postBufferData;
+            let width = Math.max(Math.floor(RenderWebGL.crc3.canvas.width / _divider), 1);
+            let height = Math.max(Math.floor(RenderWebGL.crc3.canvas.height / _divider), 1);
+            let framebuffer;
+            let texture;
+            let depthBuffer;
+            let error = function () {
+                if (framebuffer)
+                    RenderWebGL.crc3.deleteFramebuffer(framebuffer);
+                if (texture)
+                    RenderWebGL.crc3.deleteTexture(texture);
+                if (depthBuffer)
+                    RenderWebGL.crc3.deleteRenderbuffer(depthBuffer);
+                return null;
+            };
+            if (_fbo == null) {
+                framebuffer = RenderWebGL.crc3.createFramebuffer();
+                if (!framebuffer) {
+                    console.log("Failed to create FBO");
+                    return error();
+                }
+            }
+            else {
+                framebuffer = _fbo;
+            }
+            if (_tex == null) {
+                texture = RenderWebGL.crc3.createTexture();
+                if (!texture) {
+                    console.log("Failed to create Texture Oject");
+                    return error();
+                }
+            }
+            else {
+                texture = _tex;
+            }
+            RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
+            RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR);
+            RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.LINEAR);
+            RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.CLAMP_TO_EDGE);
+            RenderWebGL.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.CLAMP_TO_EDGE);
+            RenderWebGL.crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, width, height, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, null);
+            depthBuffer = RenderWebGL.crc3.createRenderbuffer();
+            if (!depthBuffer) {
+                console.log("Failed to create render buffer object");
+                return error();
+            }
+            RenderWebGL.crc3.bindRenderbuffer(WebGL2RenderingContext.RENDERBUFFER, depthBuffer);
+            RenderWebGL.crc3.renderbufferStorage(WebGL2RenderingContext.RENDERBUFFER, WebGL2RenderingContext.DEPTH_COMPONENT16, width, height);
+            RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
+            RenderWebGL.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, texture, 0);
+            RenderWebGL.crc3.framebufferRenderbuffer(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.DEPTH_ATTACHMENT, WebGL2RenderingContext.RENDERBUFFER, depthBuffer);
+            let e = RenderWebGL.crc3.checkFramebufferStatus(WebGL2RenderingContext.FRAMEBUFFER);
+            if (WebGL2RenderingContext.FRAMEBUFFER_COMPLETE !== e) {
+                console.log("FBO is incomplete: " + e.toString());
+                return error();
+            }
+            RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
+            RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
+            RenderWebGL.crc3.bindRenderbuffer(WebGL2RenderingContext.RENDERBUFFER, null);
+            postBufferData = { fbo: framebuffer, texture: texture };
+            return postBufferData;
+        }
+        static adjustBufferSize(_fbo, _tex, _divider = 1) {
+            let bufferData = RenderWebGL.setupFBO(_fbo, _tex, _divider);
+            _tex = bufferData.texture;
+        }
+        static adjustBlooomBufferSize() {
+            let div = 2;
+            for (let i = 0; i < FudgeCore.Render.bloomDownsamplingFBOs.length; i++) {
+                this.adjustBufferSize(FudgeCore.Render.bloomDownsamplingFBOs[i], FudgeCore.Render.bloomDownsamplingTextures[i], div);
+                div *= 2;
+            }
+            div = 2;
+            for (let i = 0; i < FudgeCore.Render.bloomUpsamplingFBOs.length; i++) {
+                this.adjustBufferSize(FudgeCore.Render.bloomUpsamplingFBOs[i], FudgeCore.Render.bloomUpsamplingTextures[i], div);
+                div *= 2;
+            }
+        }
         static drawNode(_node, _cmpCamera) {
             let cmpMesh = _node.getComponent(FudgeCore.ComponentMesh);
             let cmpMaterial = _node.getComponent(FudgeCore.ComponentMaterial);
@@ -2126,6 +2261,68 @@ var FudgeCore;
             else {
                 RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
             }
+        }
+        static drawNodesMist(_cmpCamera, _list, _cmpMist) {
+            let cmpMaterial = FudgeCore.Render.cmpMistMaterial;
+            let coat = cmpMaterial.material.coat;
+            let shader = cmpMaterial.material.getShader();
+            shader.useProgram();
+            coat.useRenderData(shader, cmpMaterial);
+            let uniform = shader.uniforms["u_vctCamera"];
+            RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
+            uniform = shader.uniforms["u_mtxWorldToView"];
+            RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxWorldToView.get());
+            uniform = shader.uniforms["u_nearPlane"];
+            RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpMist.nearPlane);
+            uniform = shader.uniforms["u_farPlane"];
+            RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpMist.farPlane);
+            for (let node of _list) {
+                let cmpMesh = node.getComponent(FudgeCore.ComponentMesh);
+                let mtxMeshToView = RenderWebGL.calcMeshToView(node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
+                let renderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
+                RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+            }
+        }
+        static compositeEffects(_cmpCamera, _cmpMist, _cmpAO, _cmpBloom) {
+            FudgeCore.Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
+            FudgeCore.Render.crc3.viewport(0, 0, FudgeCore.Render.crc3.canvas.width, FudgeCore.Render.crc3.canvas.height);
+            function bindTexture(_texture, _texSlot, _texSlotNumber, _texVarName) {
+                RenderWebGL.crc3.activeTexture(_texSlot);
+                RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, _texture);
+                RenderWebGL.crc3.uniform1i(shader.uniforms[_texVarName], _texSlotNumber);
+            }
+            let shader = FudgeCore.ShaderScreen;
+            shader.useProgram();
+            FudgeCore.Render.useScreenQuadRenderData(shader);
+            bindTexture(FudgeCore.Render.mainTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_mainTexture");
+            if (_cmpMist != null)
+                if (_cmpMist.isActive) {
+                    RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_mist"], 1);
+                    bindTexture(FudgeCore.Render.mistTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_mistTexture");
+                    RenderWebGL.getRenderingContext().uniform4fv(shader.uniforms["u_vctMistColor"], _cmpMist.clrMist.getArray());
+                }
+                else {
+                    RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_mist"], 0);
+                }
+            if (_cmpAO != null)
+                if (_cmpAO.isActive) {
+                    RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_ao"], 1);
+                    bindTexture(FudgeCore.Render.aoTexture, WebGL2RenderingContext.TEXTURE2, 2, "u_aoTexture");
+                    RenderWebGL.getRenderingContext().uniform4fv(shader.uniforms["u_vctAOColor"], _cmpAO.clrAO.getArray());
+                }
+                else {
+                    RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_ao"], 0);
+                }
+            if (_cmpBloom != null)
+                if (_cmpBloom.isActive) {
+                    RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bloom"], 1);
+                    bindTexture(FudgeCore.Render.bloomUpsamplingTextures[0], WebGL2RenderingContext.TEXTURE3, 3, "u_bloomTexture");
+                    RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bloomIntensity"], _cmpBloom.intensity);
+                }
+                else {
+                    RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bloom"], 0);
+                }
+            RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
         }
         static drawParticles(_cmpParticleSystem, _shader, _renderBuffers, _cmpFaceCamera, _sortForAlpha) {
             RenderWebGL.crc3.depthMask(_cmpParticleSystem.depthMask);
@@ -2164,10 +2361,20 @@ var FudgeCore;
                 value: RenderInjectorTexture.deleteRenderData
             });
         }
-        static injectTexture() {
+        static injectTexture(_textureslot = 0) {
             let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
             if (this.renderData) {
-                crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
+                switch (_textureslot) {
+                    case 0:
+                        crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
+                        break;
+                    case 2:
+                        crc3.activeTexture(WebGL2RenderingContext.TEXTURE2);
+                        break;
+                    default:
+                        console.log("there is no textureslot '" + _textureslot + "', textureslot '0' is used instead");
+                        crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
+                }
                 crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
             }
             else {
@@ -2199,7 +2406,7 @@ var FudgeCore;
                 }
                 this.renderData["texture0"] = texture;
                 crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
-                this.useRenderData();
+                this.useRenderData(_textureslot);
             }
         }
         static deleteRenderData() {
@@ -3512,6 +3719,30 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    class ComponentAmbientOcclusion extends FudgeCore.Component {
+        constructor(_mist = false, _clrMist = new FudgeCore.Color(1, 1, 1, 1), _nearPlane = 1, _farPlane = 50, _ao = false, _clrAO = new FudgeCore.Color(0, 0, 0, 1), _bloom = false) {
+            super();
+            this.clrAO = new FudgeCore.Color(0, 0, 0, 1);
+            this.clrAO = _clrAO;
+        }
+        serialize() {
+            let serialization = {
+                clrAO: this.clrAO.serialize(),
+            };
+            serialization[super.constructor.name] = super.serialize();
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            await this.clrAO.deserialize(_serialization.clrAO);
+            await super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
+    }
+    ComponentAmbientOcclusion.iSubclass = FudgeCore.Component.registerSubclass(ComponentAmbientOcclusion);
+    FudgeCore.ComponentAmbientOcclusion = ComponentAmbientOcclusion;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
     class ComponentAnimator extends FudgeCore.Component {
         static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentAnimator); }
         #scale;
@@ -3912,6 +4143,32 @@ var FudgeCore;
         }
     }
     FudgeCore.ComponentAudioListener = ComponentAudioListener;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ComponentBloom extends FudgeCore.Component {
+        constructor(_threshold = 0.6, _intensity = 1.0) {
+            super();
+            this.threshold = _threshold;
+            this.intensity = _intensity;
+        }
+        serialize() {
+            let serialization = {
+                threshold: this.threshold,
+                intensity: this.intensity,
+            };
+            serialization[super.constructor.name] = super.serialize();
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            this.threshold = _serialization.threshold;
+            this.intensity = _serialization.intensity;
+            await super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
+    }
+    ComponentBloom.iSubclass = FudgeCore.Component.registerSubclass(ComponentBloom);
+    FudgeCore.ComponentBloom = ComponentBloom;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -4322,6 +4579,36 @@ var FudgeCore;
         }
     }
     FudgeCore.ComponentMesh = ComponentMesh;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ComponentMist extends FudgeCore.Component {
+        constructor(_mist = false, _clrMist = new FudgeCore.Color(1, 1, 1, 1), _nearPlane = 1, _farPlane = 50, _ao = false, _clrAO = new FudgeCore.Color(0, 0, 0, 1), _bloom = false) {
+            super();
+            this.clrMist = new FudgeCore.Color(1, 1, 1, 1);
+            this.clrMist = _clrMist;
+            this.nearPlane = _nearPlane;
+            this.farPlane = _farPlane;
+        }
+        serialize() {
+            let serialization = {
+                clrMist: this.clrMist.serialize(),
+                nearPlane: this.nearPlane,
+                farPlane: this.farPlane
+            };
+            serialization[super.constructor.name] = super.serialize();
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            await this.clrMist.deserialize(_serialization.clrMist);
+            this.nearPlane = _serialization.nearPlane;
+            this.farPlane = _serialization.farPlane;
+            await super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
+    }
+    ComponentMist.iSubclass = FudgeCore.Component.registerSubclass(ComponentMist);
+    FudgeCore.ComponentMist = ComponentMist;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -5488,22 +5775,28 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     let CoatRemissive = class CoatRemissive extends FudgeCore.CoatColored {
-        constructor(_color = new FudgeCore.Color(), _diffuse = 1, _specular = 0) {
+        constructor(_color = new FudgeCore.Color(), _diffuse = 1, _specular = 0.5, _metallic = 0.0, _intensity = 0.7) {
             super(_color);
             this.diffuse = _diffuse;
+            this.metallic = _metallic;
             this.specular = _specular;
+            this.intensity = _intensity;
         }
         serialize() {
             let serialization = super.serialize();
             serialization.diffuse = this.diffuse;
+            serialization.metallic = this.metallic;
             serialization.specular = this.specular;
+            serialization.intensity = this.intensity;
             return serialization;
         }
         async deserialize(_serialization) {
             await super.deserialize(_serialization);
             await this.color.deserialize(_serialization.color);
             this.diffuse = _serialization.diffuse;
+            this.metallic = _serialization.metallic;
             this.specular = _serialization.specular;
+            this.intensity = _serialization.intensity;
             return this;
         }
     };
@@ -5540,21 +5833,27 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     let CoatRemissiveTextured = class CoatRemissiveTextured extends FudgeCore.CoatTextured {
-        constructor(_color = new FudgeCore.Color(), _texture = FudgeCore.TextureDefault.texture, _diffuse = 1, _specular = 0) {
+        constructor(_color = new FudgeCore.Color(), _texture = FudgeCore.TextureDefault.texture, _diffuse = 1, _specular = 0.5, _metallic = 0.0, _intensity = 0.7) {
             super(_color, _texture);
             this.diffuse = _diffuse;
+            this.metallic = _metallic;
             this.specular = _specular;
+            this.intensity = _intensity;
         }
         serialize() {
             let serialization = super.serialize();
             serialization.diffuse = this.diffuse;
             serialization.specular = this.specular;
+            serialization.metallic = this.metallic;
+            serialization.intensity = this.intensity;
             return serialization;
         }
         async deserialize(_serialization) {
             await super.deserialize(_serialization);
             this.diffuse = _serialization.diffuse;
             this.specular = _serialization.specular;
+            this.metallic = _serialization.metallic;
+            this.intensity = _serialization.intensity;
             return this;
         }
     };
@@ -5562,6 +5861,45 @@ var FudgeCore;
         FudgeCore.RenderInjectorCoat.decorate
     ], CoatRemissiveTextured);
     FudgeCore.CoatRemissiveTextured = CoatRemissiveTextured;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    let CoatRemissiveTexturedNormals = class CoatRemissiveTexturedNormals extends FudgeCore.CoatRemissiveTextured {
+        constructor(_color = new FudgeCore.Color(), _texture = FudgeCore.TextureDefault.texture, _normalMap = FudgeCore.TextureNormalDefault.texture, _diffuse = 1, _specular = 0, _metallic = 0.5, _intensity = 0.5) {
+            super(_color, _texture);
+            this.normalMap = null;
+            this.normalMap = _normalMap;
+        }
+        serialize() {
+            let serialization = super.serialize();
+            serialization.idNormalMap = this.normalMap.idResource;
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            await super.deserialize(_serialization);
+            if (_serialization.idNormalMap)
+                this.normalMap = await FudgeCore.Project.getResource(_serialization.idNormalMap);
+            return this;
+        }
+    };
+    CoatRemissiveTexturedNormals = __decorate([
+        FudgeCore.RenderInjectorCoat.decorate
+    ], CoatRemissiveTexturedNormals);
+    FudgeCore.CoatRemissiveTexturedNormals = CoatRemissiveTexturedNormals;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    let CoatWebGlTextured = class CoatWebGlTextured extends FudgeCore.Coat {
+        constructor(_texture = FudgeCore.TextureDefault.texture) {
+            super();
+            this.texture = null;
+            this.texture = _texture;
+        }
+    };
+    CoatWebGlTextured = __decorate([
+        FudgeCore.RenderInjectorCoat.decorate
+    ], CoatWebGlTextured);
+    FudgeCore.CoatWebGlTextured = CoatWebGlTextured;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -8667,6 +9005,14 @@ var FudgeCore;
             let vertex = this[_index];
             return (vertex.referTo == undefined) ? vertex.normal : this[vertex.referTo].normal;
         }
+        tangent(_index) {
+            let vertex = this[_index];
+            return (vertex.referTo == undefined) ? vertex.tangent : this[vertex.referTo].tangent;
+        }
+        bitangent(_index) {
+            let vertex = this[_index];
+            return (vertex.referTo == undefined) ? vertex.bitangent : this[vertex.referTo].bitangent;
+        }
         uv(_index) {
             return this[_index].uv;
         }
@@ -11255,6 +11601,10 @@ var FudgeCore;
             return picks;
         }
         static draw(_cmpCamera) {
+            Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mainFBO);
+            Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+            Render.setDepthTest(true);
+            Render.clear(_cmpCamera.clrBackground);
             _cmpCamera.resetWorldToView();
             Render.drawList(_cmpCamera, this.nodesSimple);
             Render.drawListAlpha(_cmpCamera);
@@ -11271,6 +11621,106 @@ var FudgeCore;
         static drawList(_cmpCamera, _list) {
             for (let node of _list) {
                 Render.drawNode(node, _cmpCamera);
+            }
+        }
+        static calcMist(_cmpCamera, _cmpMist) {
+            Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mistFBO);
+            Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+            Render.setDepthTest(true);
+            Render.clear(new FudgeCore.Color(1, 1, 1, 1));
+            _cmpCamera.resetWorldToView();
+            Render.drawNodesMist(_cmpCamera, this.nodesSimple, _cmpMist);
+            Render.drawNodesMist(_cmpCamera, this.nodesAlpha, _cmpMist);
+        }
+        static calcAO(_cmpAO) {
+            Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.aoFBO);
+            Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+            Render.clear(new FudgeCore.Color(1, 1, 1, 1));
+        }
+        static calcBloom(_cmpBloom) {
+            function bindTextureSlot0(_texture) {
+                FudgeCore.RenderWebGL.crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
+                FudgeCore.RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, _texture);
+                FudgeCore.RenderWebGL.crc3.uniform1i(shader.uniforms["u_texture"], 0);
+            }
+            function bindTextureSlot1(_texture) {
+                FudgeCore.RenderWebGL.crc3.activeTexture(WebGL2RenderingContext.TEXTURE1);
+                FudgeCore.RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, _texture);
+                FudgeCore.RenderWebGL.crc3.uniform1i(shader.uniforms["u_texture2"], 1);
+            }
+            let tempTexture = Render.mainTexture;
+            let tempThreshold = _cmpBloom.threshold;
+            let div = 2;
+            let shader = FudgeCore.ShaderDownsample;
+            shader.useProgram();
+            Render.useScreenQuadRenderData(shader);
+            for (let i = 0; i < Render.bloomDownsamplingFBOs.length; i++) {
+                let width = Math.max(Render.crc3.canvas.width / div, 1);
+                let height = Math.max(Render.crc3.canvas.height / div, 1);
+                Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.bloomDownsamplingFBOs[i]);
+                Render.crc3.viewport(0, 0, Math.floor(width), Math.floor(height));
+                Render.clear(new FudgeCore.Color(0, 0, 0, 1));
+                bindTextureSlot0(tempTexture);
+                FudgeCore.RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Math.floor(width * 2));
+                FudgeCore.RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Math.floor(height * 2));
+                FudgeCore.RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_threshold"], tempThreshold);
+                FudgeCore.RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
+                tempTexture = Render.bloomDownsamplingTextures[i];
+                tempThreshold = -1;
+                div *= 2;
+            }
+            shader = FudgeCore.ShaderUpsample;
+            shader.useProgram();
+            Render.useScreenQuadRenderData(shader);
+            div /= 4;
+            for (let i = Render.bloomUpsamplingFBOs.length - 1; i >= 0; i--) {
+                let width = Math.max(Render.crc3.canvas.width / div, 1);
+                let height = Math.max(Render.crc3.canvas.height / div, 1);
+                Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.bloomUpsamplingFBOs[i]);
+                Render.crc3.viewport(0, 0, width, height);
+                Render.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
+                bindTextureSlot0(tempTexture);
+                bindTextureSlot1(this.bloomDownsamplingTextures[i]);
+                FudgeCore.RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Math.min(Math.floor(width / 2)));
+                FudgeCore.RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Math.min(Math.floor(height / 2)));
+                FudgeCore.RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
+                tempTexture = Render.bloomUpsamplingTextures[i];
+                div /= 2;
+            }
+        }
+        static initScreenQuad(_texture) {
+            Render.screenQuad = new Float32Array([
+                -1.0, 1.0,
+                -1.0, -1.0,
+                1.0, 1.0,
+                1.0, -1.0,
+            ]);
+            Render.screenQuadUV = new Float32Array([
+                0.0, 1.0,
+                0.0, 0.0,
+                1.0, 1.0,
+                1.0, 0.0,
+            ]);
+        }
+        static useScreenQuadRenderData(_shader) {
+            let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
+            function createBuffer(_type, _array) {
+                let buffer = FudgeCore.RenderWebGL.assert(crc3.createBuffer());
+                crc3.bindBuffer(_type, buffer);
+                crc3.bufferData(_type, _array, WebGL2RenderingContext.STATIC_DRAW);
+                return buffer;
+            }
+            let attribute = _shader.attributes["a_vctPosition"];
+            if (typeof attribute !== "undefined") {
+                crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, Render.screenQuad));
+                crc3.enableVertexAttribArray(attribute);
+                crc3.vertexAttribPointer(attribute, 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
+            }
+            let texAttribute = _shader.attributes["a_vctTexture"];
+            if (texAttribute) {
+                crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, Render.screenQuadUV));
+                crc3.enableVertexAttribArray(texAttribute);
+                crc3.vertexAttribPointer(texAttribute, 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
             }
         }
         static transformByPhysics(_node, _cmpRigidbody) {
@@ -11405,6 +11855,43 @@ var FudgeCore;
         set normals(_normals) {
             this.ƒnormals = _normals;
         }
+        get tangentsVertex() {
+            if (this.ƒtangentsVertex == null) {
+                this.mesh.vertices.forEach(_vertex => _vertex.tangent.set(0, 0, 0));
+                for (let face of this.mesh.faces) {
+                    let i0 = face.indices[0];
+                    let i1 = face.indices[1];
+                    let i2 = face.indices[2];
+                    let v0 = this.mesh.vertices.position(i0);
+                    let v1 = this.mesh.vertices.position(i1);
+                    let v2 = this.mesh.vertices.position(i2);
+                    let uv0 = this.mesh.vertices.uv(i0);
+                    let uv1 = this.mesh.vertices.uv(i1);
+                    let uv2 = this.mesh.vertices.uv(i2);
+                    let deltaPos1 = FudgeCore.Vector3.DIFFERENCE(v1, v0);
+                    let deltaPos2 = FudgeCore.Vector3.DIFFERENCE(v2, v0);
+                    let deltaUV1 = FudgeCore.Vector2.DIFFERENCE(uv1, uv0);
+                    let deltaUV2 = FudgeCore.Vector2.DIFFERENCE(uv2, uv0);
+                    let r = 1 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+                    let tempTangent = FudgeCore.Vector3.SCALE(FudgeCore.Vector3.DIFFERENCE(FudgeCore.Vector3.SCALE(deltaPos1, deltaUV2.y), FudgeCore.Vector3.SCALE(deltaPos2, deltaUV1.y)), r);
+                    this.mesh.vertices[i0].tangent = tempTangent;
+                    this.mesh.vertices[i1].tangent = tempTangent;
+                    this.mesh.vertices[i2].tangent = tempTangent;
+                }
+                this.mesh.vertices.forEach(_vertex => _vertex.tangent.add(FudgeCore.Vector3.SCALE(_vertex.normal, -FudgeCore.Vector3.DOT(_vertex.normal, _vertex.tangent))));
+                for (let vertex of this.mesh.vertices) {
+                    if (typeof vertex.referTo !== "undefined") {
+                        if (vertex.uv.equals(this.mesh.vertices[vertex.referTo].uv)) {
+                            vertex.tangent = this.mesh.vertices[vertex.referTo].tangent;
+                        }
+                    }
+                }
+                this.ƒtangentsVertex = new Float32Array(this.mesh.vertices.flatMap((_vertex, _index) => {
+                    return [...this.mesh.vertices[_index].tangent.get()];
+                }));
+            }
+            return this.ƒtangentsVertex;
+        }
         get textureUVs() {
             return this.ƒtextureUVs || (this.ƒtextureUVs = new Float32Array(this.mesh.vertices
                 .filter(_vertex => _vertex.uv)
@@ -11448,6 +11935,7 @@ var FudgeCore;
             this.adjustingFrames = true;
             this.adjustingCamera = true;
             this.physicsDebugMode = FudgeCore.PHYSICS_DEBUGMODE.NONE;
+            this.lastRectRenderSize = new FudgeCore.Vector2(0, 0);
             this.componentsPick = new FudgeCore.RecycableArray();
             this.#branch = null;
             this.#crc2 = null;
@@ -11467,12 +11955,13 @@ var FudgeCore;
         }
         initialize(_name, _branch, _camera, _canvas) {
             this.name = _name;
-            this.camera = _camera;
+            this.camera = this.lastCamera = _camera;
             this.#canvas = _canvas;
             this.#crc2 = _canvas.getContext("2d");
             this.#canvas.tabIndex = 0;
             this.rectSource = FudgeCore.Render.getCanvasRect();
             this.rectDestination = this.getClientRectangle();
+            FudgeCore.Render.initFBOs();
             this.setBranch(_branch);
         }
         getCanvasRectangle() {
@@ -11555,6 +12044,28 @@ var FudgeCore;
             let rectRender = this.frameSourceToRender.getRect(this.rectSource);
             FudgeCore.Render.setRenderRectangle(rectRender);
             FudgeCore.Render.setCanvasSize(rectRender.width, rectRender.height);
+            if (rectRender.size.x != this.lastRectRenderSize.x || rectRender.size.y != this.lastRectRenderSize.y || this.camera != this.lastCamera) {
+                this.lastRectRenderSize.set(rectRender.size.x, rectRender.size.y);
+                this.lastCamera = this.camera;
+                if (rectRender.size.x >= 1 || rectRender.size.y >= 1) {
+                    FudgeCore.Render.adjustBufferSize(FudgeCore.Render.mainFBO, FudgeCore.Render.mainTexture, 1);
+                    let cmpMist = this.getComponentMist(this.camera);
+                    if (cmpMist != null)
+                        if (cmpMist.isActive) {
+                            FudgeCore.Render.adjustBufferSize(FudgeCore.Render.mistFBO, FudgeCore.Render.mistTexture, 1);
+                        }
+                    let cmpAO = this.getComponentAmbientOcclusion(this.camera);
+                    if (cmpAO != null)
+                        if (cmpAO.isActive) {
+                            FudgeCore.Render.adjustBufferSize(FudgeCore.Render.aoFBO, FudgeCore.Render.aoTexture, 1);
+                        }
+                    let cmpBloom = this.getComponentBloom(this.camera);
+                    if (cmpBloom != null)
+                        if (cmpBloom.isActive) {
+                            FudgeCore.Render.adjustBlooomBufferSize();
+                        }
+                }
+            }
             FudgeCore.Recycler.store(rectClient);
             FudgeCore.Recycler.store(rectCanvas);
             FudgeCore.Recycler.store(rectRender);
@@ -11613,6 +12124,27 @@ var FudgeCore;
         pointClientToScreen(_client) {
             let screen = new FudgeCore.Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
             return screen;
+        }
+        getComponentMist(_camera) {
+            let camParentNode = _camera.node;
+            if (camParentNode != null) {
+                return camParentNode.getComponent(FudgeCore.ComponentMist);
+            }
+            return null;
+        }
+        getComponentAmbientOcclusion(_camera) {
+            let camParentNode = _camera.node;
+            if (camParentNode != null) {
+                return camParentNode.getComponent(FudgeCore.ComponentAmbientOcclusion);
+            }
+            return null;
+        }
+        getComponentBloom(_camera) {
+            let camParentNode = _camera.node;
+            if (camParentNode != null) {
+                return camParentNode.getComponent(FudgeCore.ComponentBloom);
+            }
+            return null;
         }
     }
     FudgeCore.Viewport = Viewport;
@@ -13435,6 +13967,7 @@ uniform sampler2D u_texture;
 
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
+uniform float u_fMetallic;
 uniform float u_fSpecular;
 // uniform mat4 u_mtxMeshToWorld; // can't use this when skinning
 uniform vec3 u_vctCamera;
@@ -13472,25 +14005,42 @@ layout(std140) uniform Lights {
   Light u_spot[MAX_LIGHTS_SPOT];
 };
 
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
-  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fHitCamera = dot(vctReflection, _vctView);
-  // attempted BLINN 
-  // vec3 halfway = normalize(_vctView + _vctLight);
-  // float fHitCamera = dot(-halfway, _vctNormal);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
+// Returns a vector for visualizing on model. Great for debugging
+vec4 showVectorAsColor(vec3 _vector, bool _clamp) {
+  if(_clamp) {
+    _vector *= 0.5;
+    _vector += 0.5;
+  }
+  return vec4(_vector.x, _vector.y, _vector.z, 1);
 }
 
-vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _vctView, float _fSpecular) {
+vec4 calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular, vec4 _vctColor) {
   vec4 vctResult = vec4(0, 0, 0, 1);
-  vec3 vctDirection = normalize(_vctDirection);
-  float fIllumination = -dot(_vctNormal, vctDirection);
+  if(_fSpecular <= 0.0)
+    return vctResult;
+
+
+  //BLINN-Phong Shading
+  vec3 halfwayDir = normalize(-_vctLight - _vctView);
+  float factor = max(dot(-_vctLight, _vctNormal), 0.0);       //Factor for smoothing out transition from surface facing the lightsource to surface facing away from the lightsource
+  factor = 1.0 - (pow(factor - 1.0, 8.0));                            //The factor is altered In Order to clearly see the specular Highlight even at steep angles, while still preventing artifacts
+
+  vctResult += pow(max(dot(_vctNormal, halfwayDir), 0.0), exp2(_fSpecular * 5.0)) * _fSpecular * u_fIntensity * factor;
+  return vctResult * _vctColor;
+
+  /*
+  //normal phong specular - old Shading
+  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
+  float fHitCamera = dot(vctReflection, _vctView);
+  return vec4(vec3(pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular*0.2), 1);
+  */
+}
+
+vec4 illuminateDiffuse(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor) {
+  vec4 vctResult = vec4(0, 0, 0, 1);
+  float fIllumination = -dot(_vctNormal, _vctDirection);
   if(fIllumination > 0.0f) {
     vctResult += u_fDiffuse * fIllumination * _vctColor;
-    float fReflection = calculateReflection(vctDirection, _vctView, _vctNormal, _fSpecular);
-    vctResult += fReflection * _vctColor;
   }
   return vctResult;
 }
@@ -13522,6 +14072,9 @@ void main() {
     vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
     vec3 vctDirection = vctPosition - vctPositionLight;
     float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
+    vctDirection = normalize(vctDirection);
+    vctSpec += calculateReflection(vctDirection, vctView, vctNormal, u_fSpecular, u_point[i].vctColor);
+
     if(fIntensity < 0.0)
       continue;
     vctFrag += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
@@ -13534,8 +14087,13 @@ void main() {
     vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
     if(vctDirectionInverted.z <= 0.0)
       continue;
-    float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);
-    fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);
+
+    float fSpotIntensity = min(1.0, vctDirectionInverted.z * 5.0);                                        //Due to the specular highlight simulating the direct reflection of a given Light, it makes sense to calculate the specular highlight only infront of a spotlight however not dependend on the coneshape.
+    vctDirection = normalize(vctDirection);
+    vctSpec += calculateReflection(vctDirection, vctView, vctNormal, u_fSpecular, fSpotIntensity * u_spot[i].vctColor);
+
+    float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);    //Coneshape that is brightest in the center. Possible Todo: "Variable Spotlightsoftness"
+    fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);                                                 //Prevents harsh lighting artifacts at boundary of the given spotlight
     if(fIntensity < 0.0)
       continue;
     vctFrag += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
@@ -13626,6 +14184,67 @@ void main() {
     gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
     v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
 }`;
+    FudgeCore.shaderSources["ShaderScreen.frag"] = `#version 300 es
+/**
+*Renders Framebuffer on to Renderbuffer
+*@authors Roland Heer, HFU, 2023
+*/
+precision mediump float;
+precision highp int;
+
+in vec2 v_vctTexture;
+uniform sampler2D u_mainTexture;
+
+uniform float u_mist;
+uniform sampler2D u_mistTexture;
+uniform vec4 u_vctMistColor;
+
+uniform float u_ao;
+uniform sampler2D u_aoTexture;
+uniform vec4 u_vctAOColor;
+
+uniform float u_bloom;
+uniform sampler2D u_bloomTexture;
+uniform float u_bloomIntensity;
+
+out vec4 vctFrag;
+
+void main() {
+    vec4 mainTex = texture(u_mainTexture, v_vctTexture);
+    vec4 vctTempFrag = mainTex;
+    if(u_ao > 0.5f) {
+        vec4 aoTex = texture(u_aoTexture, v_vctTexture);
+        aoTex *= vec4(u_vctAOColor.rgb, 1.0f);
+        vctTempFrag = mix(vctTempFrag, vctTempFrag * vec4(aoTex.rgb, 1.0f), u_vctAOColor.a);
+    }
+    if(u_mist > 0.5f) {
+        vec4 mistTex = texture(u_mistTexture, v_vctTexture);
+        vctTempFrag = mix(vctTempFrag, vec4(u_vctMistColor.rgb, 1.0f), mistTex.r * u_vctMistColor.a);
+    }
+    if(u_bloom > 0.5f) {
+        float intensity = max(u_bloomIntensity, 0.0f);
+        vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
+        //vctTempFrag += vec4(bloomTex.rgb * intensity, 1.0f);
+        vctTempFrag += (bloomTex * intensity);
+    }
+    vctFrag = vctTempFrag;
+}
+`;
+    FudgeCore.shaderSources["ShaderScreen.vert"] = `#version 300 es
+/**
+*Renders Framebuffer on to Renderbuffer
+*@authors Roland Heer, HFU, 2023
+*/
+in vec2 a_vctPosition;
+in vec2 a_vctTexture;
+
+out vec2 v_vctTexture;
+
+void main() {
+    gl_Position = vec4(a_vctPosition, 0.0, 1.0);
+    v_vctTexture = a_vctTexture;
+}
+`;
     FudgeCore.shaderSources["ShaderUniversal.frag"] = `#version 300 es
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
@@ -13688,11 +14307,11 @@ uniform vec3 u_vctCamera;
 uniform float u_fSpecular;
 
 float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0)
-    return 0.0;
+  if(_fSpecular <= 0.0f)
+    return 0.0f;
   vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
   float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
+  return pow(max(fHitCamera, 0.0f), _fSpecular * 10.0f) * _fSpecular; // 10.0 = magic number, looks good... 
 }
   #endif
 
@@ -13700,6 +14319,7 @@ float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float 
   #if defined(LIGHT)
 uniform mat4 u_mtxNormalMeshToWorld;
 in vec3 a_vctNormal;
+in vec3 a_vctTangent;
 uniform float u_fDiffuse;
 
 struct Light {
@@ -13737,11 +14357,21 @@ vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec
 }
   #endif 
 
+// TEXTURE || NORMALMAP: texture coordinates for texturemaps
+#if defined(TEXTURE) || defined(NORMALMAP)
+in vec2 a_vctTexture;
+#endif
+
   // TEXTURE: offer buffers for UVs and pivot matrix
   #if defined(TEXTURE)
 uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
 out vec2 v_vctTexture;
+  #endif
+
+  // NORMALMAP: offer buffers for UVs and pivot matrix
+  #if defined(NORMALMAP)
+uniform mat3 u_mtxPivotN;
+out vec2 v_vctNormalMap;
   #endif
 
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
@@ -13783,18 +14413,13 @@ uniform bool u_bParticleSystemFaceCamera;
 uniform bool u_bParticleSystemRestrict;
 
 mat4 lookAt(vec3 _vctTranslation, vec3 _vctTarget) {
-  vec3 vctUp = vec3(0.0, 1.0, 0.0);
+  vec3 vctUp = vec3(0.0f, 1.0f, 0.0f);
   vec3 zAxis = normalize(_vctTarget - _vctTranslation);
   vec3 xAxis = normalize(cross(vctUp, zAxis));
   vec3 yAxis = u_bParticleSystemRestrict ? vctUp : normalize(cross(zAxis, xAxis));
   zAxis = u_bParticleSystemRestrict ? normalize(cross(xAxis, vctUp)) : zAxis;
 
-  return mat4(
-    xAxis.x, xAxis.y, xAxis.z, 0.0,
-    yAxis.x, yAxis.y, yAxis.z, 0.0,
-    zAxis.x, zAxis.y, zAxis.z, 0.0,
-    _vctTranslation.x,  _vctTranslation.y,  _vctTranslation.z, 1.0
-  );
+  return mat4(xAxis.x, xAxis.y, xAxis.z, 0.0f, yAxis.x, yAxis.y, yAxis.z, 0.0f, zAxis.x, zAxis.y, zAxis.z, 0.0f, _vctTranslation.x, _vctTranslation.y, _vctTranslation.z, 1.0f);
 }
 
 float fetchRandomNumber(int _iIndex, int _iParticleSystemRandomNumbersSize, int _iParticleSystemRandomNumbersLength) {
@@ -13804,7 +14429,7 @@ float fetchRandomNumber(int _iIndex, int _iParticleSystemRandomNumbersSize, int 
   #endif
 
 void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
+  vec4 vctPosition = vec4(a_vctPosition, 1.0f);
 
     #if defined(CAMERA) || defined(PARTICLE) || defined(SKIN) || defined(MATCAP)
   mat4 mtxMeshToWorld = u_mtxMeshToWorld;
@@ -13818,15 +14443,9 @@ void main() {
   /*$mtxLocal*/
   /*$mtxWorld*/
   mtxMeshToWorld = /*$mtxWorld*/ mtxMeshToWorld /*$mtxLocal*/;
-  if (u_bParticleSystemFaceCamera) 
-    mtxMeshToWorld = 
-      lookAt(vec3(mtxMeshToWorld[3][0], mtxMeshToWorld[3][1], mtxMeshToWorld[3][2]), u_vctCamera) * 
-      mat4(
-        length(vec3(mtxMeshToWorld[0][0], mtxMeshToWorld[1][0], mtxMeshToWorld[2][0])), 0.0, 0.0, 0.0,
-        0.0, length(vec3(mtxMeshToWorld[0][1], mtxMeshToWorld[1][1], mtxMeshToWorld[2][1])), 0.0, 0.0,
-        0.0, 0.0, length(vec3(mtxMeshToWorld[0][2], mtxMeshToWorld[1][2], mtxMeshToWorld[2][2])), 0.0,
-        0.0, 0.0, 0.0, 1.0
-      );
+  if(u_bParticleSystemFaceCamera)
+    mtxMeshToWorld = lookAt(vec3(mtxMeshToWorld[3][0], mtxMeshToWorld[3][1], mtxMeshToWorld[3][2]), u_vctCamera) *
+      mat4(length(vec3(mtxMeshToWorld[0][0], mtxMeshToWorld[1][0], mtxMeshToWorld[2][0])), 0.0f, 0.0f, 0.0f, 0.0f, length(vec3(mtxMeshToWorld[0][1], mtxMeshToWorld[1][1], mtxMeshToWorld[2][1])), 0.0f, 0.0f, 0.0f, 0.0f, length(vec3(mtxMeshToWorld[0][2], mtxMeshToWorld[1][2], mtxMeshToWorld[2][2])), 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
   mat4 mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
     #else
   mat4 mtxMeshToView = u_mtxMeshToView;
@@ -13878,30 +14497,30 @@ void main() {
 
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
+    vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0f, 0.0f, 1.0f, 1.0f));
     v_vctColor += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
   }
 
   // calculate point light effect
   for(uint i = 0u; i < u_nLightsPoint; i++) {
-    vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
+    vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0f, 0.0f, 0.0f, 1.0f));
     vec3 vctDirection = vec3(mtxMeshToWorld * vctPosition) - vctPositionLight;
-    float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
-    if(fIntensity < 0.0)
+    float fIntensity = 1.0f - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
+    if(fIntensity < 0.0f)
       continue;
     v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
   }
 
   // calculate spot light effect
   for(uint i = 0u; i < u_nLightsSpot; i++) {
-    vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
+    vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0f, 0.0f, 0.0f, 1.0f));
     vec3 vctDirection = vec3(mtxMeshToWorld * vctPosition) - vctPositionLight;
     vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
-    if(vctDirectionInverted.z <= 0.0)
+    if(vctDirectionInverted.z <= 0.0f)
       continue;
-    float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);
-    fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);
-    if(fIntensity < 0.0)
+    float fIntensity = 1.0f - min(1.0f, 2.0f * length(vctDirectionInverted.xy) / vctDirectionInverted.z);
+    fIntensity *= 1.0f - pow(vctDirectionInverted.z, 2.0f);
+    if(fIntensity < 0.0f)
       continue;
     v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
@@ -13912,12 +14531,17 @@ void main() {
 
     // TEXTURE: transform UVs
     #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0f)).xy;
+    #endif
+
+    // NORMALMAP: transform UVs
+    #if defined(NORMALMAP)
+  v_vctNormalMap = vec2(u_mtxPivotN * vec3(a_vctTexture, 1.0f)).xy;
     #endif
 
     #if defined(MATCAP)
   vec4 vctVertexInCamera = normalize(u_mtxWorldToCamera * vctPosition);
-  vctVertexInCamera.xy *= -1.0;
+  vctVertexInCamera.xy *= -1.0f;
   mat4 mtx_RotX = mat4(1, 0, 0, 0, 0, vctVertexInCamera.z, vctVertexInCamera.y, 0, 0, -vctVertexInCamera.y, vctVertexInCamera.z, 0, 0, 0, 0, 1);
   mat4 mtx_RotY = mat4(vctVertexInCamera.z, 0, -vctVertexInCamera.x, 0, 0, 1, 0, 0, vctVertexInCamera.x, 0, vctVertexInCamera.z, 0, 0, 0, 0, 1);
 
@@ -13925,11 +14549,11 @@ void main() {
 
   // adds correction for things being far and to the side, but distortion for things being close
   vctNormal = mat3(mtx_RotX * mtx_RotY) * vctNormal;
-  
+
   vec3 vctReflection = normalize(mat3(u_mtxWorldToCamera) * normalize(vctNormal));
   vctReflection.y = -vctReflection.y;
 
-  v_vctTexture = 0.5 * vctReflection.xy + 0.5;
+  v_vctTexture = 0.5f * vctReflection.xy + 0.5f;
     #endif
 
     #if defined(PARTICLE_COLOR)
@@ -13946,6 +14570,58 @@ void main() {
   v_vctColor.a = 1.0;
       #endif
     #endif
+}`;
+    FudgeCore.shaderSources["ShaderUpsample.frag"] = `#version 300 es
+/**
+*Downsamples a given Texture to the current FBOs Texture
+*@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
+*/
+precision mediump float;
+precision highp int;
+
+in vec2 v_vctTexture;
+in vec2[9] v_vctOffsets;
+uniform sampler2D u_texture;
+uniform sampler2D u_texture2;
+
+float gaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f, 0.045f, 0.122f, 0.045f);
+
+out vec4 vctFrag;
+
+void main() {
+    vec4 tex1 = vec4(0.0f);
+    for(int i = 0; i < 9; i++) {
+        tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
+    }
+    vec4 tex2 = texture(u_texture2, v_vctTexture);
+    vctFrag = tex2 * 0.08f + tex1 * 1.3f;
+}`;
+    FudgeCore.shaderSources["ShaderUpsample.vert"] = `#version 300 es
+/**
+* ShaderDownsample sets Values for Downsampling Fragmentshader
+* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
+*/
+in vec2 a_vctPosition;
+in vec2 a_vctTexture;
+
+uniform float u_width;
+uniform float u_height;
+
+out vec2 v_vctTexture;
+out vec2[9] v_vctOffsets;
+
+void main() {
+    gl_Position = vec4(a_vctPosition, 0.0, 1.0);
+    v_vctTexture = a_vctTexture;
+
+    vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
+
+    v_vctOffsets = vec2[]
+    (
+        vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
+        vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
+        vec2(-offset.x, -offset.y), vec2(0.0, offset.y),  vec2(-offset.x, -offset.y)
+    );
 }`;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -13979,6 +14655,51 @@ var FudgeCore;
         FudgeCore.RenderInjectorShader.decorate
     ], Shader);
     FudgeCore.Shader = Shader;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderAmbientOcclusion extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatColored; }
+        static getVertexShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderAmbientOcclusion.vert"], this.define);
+        }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderAmbientOcclusion.frag"], this.define);
+        }
+    }
+    ShaderAmbientOcclusion.iSubclass = FudgeCore.Shader.registerSubclass(ShaderAmbientOcclusion);
+    ShaderAmbientOcclusion.define = [];
+    FudgeCore.ShaderAmbientOcclusion = ShaderAmbientOcclusion;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderBloom extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatColored; }
+        static getVertexShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderBloom.vert"], this.define);
+        }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderBloom.frag"], this.define);
+        }
+    }
+    ShaderBloom.iSubclass = FudgeCore.Shader.registerSubclass(ShaderBloom);
+    ShaderBloom.define = [];
+    FudgeCore.ShaderBloom = ShaderBloom;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderDownsample extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatWebGlTextured; }
+        static getVertexShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderDownsample.vert"], this.define);
+        }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderDownsample.frag"], this.define);
+        }
+    }
+    ShaderDownsample.iSubclass = FudgeCore.Shader.registerSubclass(ShaderDownsample);
+    ShaderDownsample.define = [];
+    FudgeCore.ShaderDownsample = ShaderDownsample;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -14281,6 +15002,36 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    class ShaderScreen extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatWebGlTextured; }
+        static getVertexShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderScreen.vert"], this.define);
+        }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderScreen.frag"], this.define);
+        }
+    }
+    ShaderScreen.iSubclass = FudgeCore.Shader.registerSubclass(ShaderScreen);
+    ShaderScreen.define = [];
+    FudgeCore.ShaderScreen = ShaderScreen;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class ShaderUpsample extends FudgeCore.Shader {
+        static getCoat() { return FudgeCore.CoatWebGlTextured; }
+        static getVertexShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderUpsample.vert"], this.define);
+        }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderUpsample.frag"], this.define);
+        }
+    }
+    ShaderUpsample.iSubclass = FudgeCore.Shader.registerSubclass(ShaderUpsample);
+    ShaderUpsample.define = [];
+    FudgeCore.ShaderUpsample = ShaderUpsample;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
     class Skeleton extends FudgeCore.Graph {
         constructor(_name = "Skeleton") {
             super(_name);
@@ -14572,6 +15323,16 @@ var FudgeCore;
         }
     }
     FudgeCore.TextureDefault = TextureDefault;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class TextureNormalDefault extends FudgeCore.TextureBase64 {
+        static get() {
+            return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAFDmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgeG1wOkNyZWF0ZURhdGU9IjIwMjMtMDUtMDZUMjI6Mjg6MDYrMDIwMCIKICAgeG1wOk1vZGlmeURhdGU9IjIwMjMtMDUtMDZUMjI6MzA6MjErMDI6MDAiCiAgIHhtcDpNZXRhZGF0YURhdGU9IjIwMjMtMDUtMDZUMjI6MzA6MjErMDI6MDAiCiAgIHBob3Rvc2hvcDpEYXRlQ3JlYXRlZD0iMjAyMy0wNS0wNlQyMjoyODowNiswMjAwIgogICBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIgogICBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiCiAgIGV4aWY6UGl4ZWxYRGltZW5zaW9uPSIxIgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iMSIKICAgZXhpZjpDb2xvclNwYWNlPSIxIgogICB0aWZmOkltYWdlV2lkdGg9IjEiCiAgIHRpZmY6SW1hZ2VMZW5ndGg9IjEiCiAgIHRpZmY6UmVzb2x1dGlvblVuaXQ9IjIiCiAgIHRpZmY6WFJlc29sdXRpb249IjcyLzEiCiAgIHRpZmY6WVJlc29sdXRpb249IjcyLzEiPgogICA8eG1wTU06SGlzdG9yeT4KICAgIDxyZGY6U2VxPgogICAgIDxyZGY6bGkKICAgICAgc3RFdnQ6YWN0aW9uPSJwcm9kdWNlZCIKICAgICAgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWZmaW5pdHkgUGhvdG8gMiAyLjAuNCIKICAgICAgc3RFdnQ6d2hlbj0iMjAyMy0wNS0wNlQyMjozMDoyMSswMjowMCIvPgogICAgPC9yZGY6U2VxPgogICA8L3htcE1NOkhpc3Rvcnk+CiAgPC9yZGY6RGVzY3JpcHRpb24+CiA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSJyIj8+0IgVxAAAAYBpQ0NQc1JHQiBJRUM2MTk2Ni0yLjEAACiRdZHPK0RRFMc/M37mR6NYKBYvDauhQYmNxcivwmKMMtjMvPml5o3Xe2/SZKtsFSU2fi34C9gqa6WIlGxZExv0nOepkcy5nXs+93vvOd17LngjWVUzy4Og5SwjPBpSZqNzStUjFVTSRAu+mGrqk9MjEUra2w0eJ151OrVKn/vXahNJUwVPtfCgqhuW8JjwxLKlO7wp3KRmYgnhY+GAIRcUvnb0uMtPDqdd/nDYiISHwNsgrKR/cfwXqxlDE5aX49eyefXnPs5L6pK5mWmJbeKtmIQZJYTCOMMM0Uc3AzL30UkPXbKiRH7wO3+KJclVZdYpYLBImgwWAVHzUj0pMSV6UkaWgtP/v301U709bvW6EFQ82PZLO1RtwOe6bb/v2/bnAZTdw1mumL+0B/2voq8XNf8u+Fbh5LyoxbfgdA2a7/SYEfuWysS9qRQ8H0F9FBovoWbe7dnPPoe3EFmRr7qA7R3okPO+hS824WfQgxGCcgAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAxJREFUCJljaGj4DwADgwIAVbjWPwAAAABJRU5ErkJggg==";
+        }
+    }
+    TextureNormalDefault.texture = new TextureNormalDefault("TextureNormalDefault", TextureNormalDefault.get(), FudgeCore.MIPMAP.MEDIUM);
+    FudgeCore.TextureNormalDefault = TextureNormalDefault;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
