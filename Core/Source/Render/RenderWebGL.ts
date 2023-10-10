@@ -624,7 +624,7 @@ namespace FudgeCore {
     */
     public static drawNodesNormal(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpAO: ComponentAmbientOcclusion): void {
       let shaderSmooth: ShaderInterface = Render.cmpSmoothNormalMaterial.material.getShader();  
-      let shaderFlat: ShaderInterface = Render.cmpFlatNormalMaterial.material.getShader();      //since Shaders handle Flat materials differently we use the different defines of these two materials
+      let shaderFlat: ShaderInterface = Render.cmpFlatNormalMaterial.material.getShader(); // TODO: remove flat shading stuff     //since Shaders handle Flat materials differently we use the different defines of these two materials
       let tempShader: ShaderInterface;
       let coat: Coat = Render.cmpFlatNormalMaterial.material.coat;
 
@@ -641,7 +641,7 @@ namespace FudgeCore {
 
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
         let mtxMeshToView: Matrix4x4 = RenderWebGL.calcMeshToView(node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
-        let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, tempShader, mtxMeshToView);
+        let renderBuffers: RenderBuffers = cmpMesh.mesh.useRenderBuffers(tempShader, cmpMesh.mtxWorld, mtxMeshToView);
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       }
     }
@@ -666,7 +666,7 @@ namespace FudgeCore {
       for (let node of _list) {
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
         let mtxMeshToView: Matrix4x4 = RenderWebGL.calcMeshToView(node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
-        let renderBuffers: RenderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
+        let renderBuffers: RenderBuffers = cmpMesh.mesh.useRenderBuffers(shader, cmpMesh.mtxWorld, mtxMeshToView);
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       }
     }

@@ -17,7 +17,6 @@ namespace FudgeCore {
     public normal: Vector3;
     public color: Color;
     public tangent: Vector3;
-    public bitangent: Vector3;
     public referTo: number;
     public bones: Bone[];
 
@@ -27,7 +26,7 @@ namespace FudgeCore {
      * This way, vertex position and normal is a 1:1 association, vertex to texture coordinates a 1:n association.
    * @authors Jirka Dell'Oro-Friedl, HFU, 2022
      */
-    public constructor(_positionOrIndex: Vector3 | number, _uv: Vector2 = null, _normal: Vector3 = Vector3.ZERO(), _tangent: Vector3 = Vector3.ZERO(), _bitangent: Vector3 = Vector3.ZERO(), _color: Color = new Color(1, 1, 1, 1), _bones: Bone[] = null) {
+    public constructor(_positionOrIndex: Vector3 | number, _uv: Vector2 = null, _normal: Vector3 = Vector3.ZERO(), _tangent: Vector3 = Vector3.ZERO(), _color: Color = new Color(1, 1, 1, 1), _bones: Bone[] = null) {
       if (_positionOrIndex instanceof Vector3)
         this.position = _positionOrIndex;
       else
@@ -36,7 +35,6 @@ namespace FudgeCore {
       this.uv = _uv;
       this.normal = _normal;
       this.tangent = _tangent;
-      this.bitangent = _bitangent;
       this.color = _color;
       this.bones = _bones;
     }

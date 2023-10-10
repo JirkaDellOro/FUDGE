@@ -32,7 +32,7 @@ namespace FudgeCore {
     /* colors */
     protected ƒcolors: Float32Array;
     /** vertex tangents for normal mapping, based on the vertex normals and the UV coordinates */
-    protected ƒtangentsVertex: Float32Array;
+    protected ƒtangents: Float32Array;
     /** bones */
     protected ƒbones: Uint8Array;
     protected ƒweights: Float32Array;
@@ -120,8 +120,7 @@ namespace FudgeCore {
     }
 
     public get tangentsVertex(): Float32Array {
-
-      if (this.ƒtangentsVertex == null) {
+      if (this.ƒtangents == null) {
         this.mesh.vertices.forEach(_vertex => _vertex.tangent.set(0, 0, 0));
         for (let face of this.mesh.faces) {
           let i0: number = face.indices[0];
@@ -172,73 +171,12 @@ namespace FudgeCore {
         }
 
         //At last, all the tangents are stored in their respective Float32Array
-        this.ƒtangentsVertex = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
+        this.ƒtangents = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
           return [...this.mesh.vertices[_index].tangent.get()];
         }));
 
       }
-      return this.ƒtangentsVertex;
-    }
-
-    public get tangentsVertex(): Float32Array {
-
-      if (this.ƒtangentsVertex == null) {
-        this.mesh.vertices.forEach(_vertex => _vertex.tangent.set(0, 0, 0));
-        for (let face of this.mesh.faces) {
-          let i0: number = face.indices[0];
-          let i1: number = face.indices[1];
-          let i2: number = face.indices[2];
-
-          //vertices surrounding one triangle
-          let v0: Vector3 = this.mesh.vertices.position(i0);
-          let v1: Vector3 = this.mesh.vertices.position(i1);
-          let v2: Vector3 = this.mesh.vertices.position(i2);
-
-          //their UVs
-          let uv0: Vector2 = this.mesh.vertices.uv(i0);
-          let uv1: Vector2 = this.mesh.vertices.uv(i1);
-          let uv2: Vector2 = this.mesh.vertices.uv(i2);
-
-          //We compute the edges of the triangle...
-          let deltaPos1: Vector3 = Vector3.DIFFERENCE(v1, v0);
-          let deltaPos2: Vector3 = Vector3.DIFFERENCE(v2, v0);
-
-          //...and the edges of the triangles in UV space...
-          let deltaUV1: Vector2 = Vector2.DIFFERENCE(uv1, uv0);
-          let deltaUV2: Vector2 = Vector2.DIFFERENCE(uv2, uv0);
-
-          //...and compute the tangent
-          let r: number = 1 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-          let tempTangent: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(Vector3.SCALE(deltaPos1, deltaUV2.y), Vector3.SCALE(deltaPos2, deltaUV1.y)), r);
-
-          this.mesh.vertices[i0].tangent = tempTangent;
-          this.mesh.vertices[i1].tangent = tempTangent;
-          this.mesh.vertices[i2].tangent = tempTangent;
-        }
-
-        //Now we orthagonalize the calculated tangents to the vertex normal
-        this.mesh.vertices.forEach(_vertex => _vertex.tangent.add(Vector3.SCALE(_vertex.normal, - Vector3.DOT(_vertex.normal, _vertex.tangent))));
-
-        //TODO: In some cases (when uvs are mirrored) the tangents would have to be flipped in order to work properly
-
-        //All faces have their individual tangents, which leads to shading artifacts, which is accounted for here
-        for (let vertex of this.mesh.vertices) {
-          if (typeof vertex.referTo !== "undefined") {
-            if (vertex.uv.equals(this.mesh.vertices[vertex.referTo].uv)) {
-              //TODO: It would be ideal to compare all vertices first and average out the different tangents between the ones with the same position, UV-position and vertex-normal but this approach is taken for its lower computational impact
-              vertex.tangent = this.mesh.vertices[vertex.referTo].tangent;
-              //This however leeds to minor artifacts along UV-seams
-            }
-          }
-        }
-        
-        //At last, all the tangents are stored in their respective Float32Array
-        this.ƒtangentsVertex = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
-          return [...this.mesh.vertices[_index].tangent.get()];
-        }));
-
-      }
-      return this.ƒtangentsVertex;
+      return this.ƒtangents;
     }
 
     public get textureUVs(): Float32Array {
@@ -274,7 +212,7 @@ namespace FudgeCore {
       this.ƒtextureUVs = undefined;
       this.ƒnormals = undefined;
       this.ƒcolors = undefined;
-      this.ƒtangentsVertex = undefined;
+      this.ƒtangents = undefined;
 
       this.ƒbones = undefined;
       this.ƒweights = undefined;

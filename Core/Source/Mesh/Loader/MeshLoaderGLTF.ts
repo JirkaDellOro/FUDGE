@@ -28,7 +28,7 @@ namespace FudgeCore {
       let indices: Uint16Array;
       let vertices: Float32Array;
       let normals: Float32Array;
-      // let tangents: Float32Array;
+      let tangents: Float32Array;
       let textureUVs: Float32Array;
       let colors: Float32Array;
       let bones: Uint8Array;
@@ -44,8 +44,8 @@ namespace FudgeCore {
         normals = await loader.getFloat32Array(gltfPrimitive.attributes.NORMAL);
 
       // TODO: add tangents to RenderMesh
-      // if (gltfPrimitive.attributes.TANGENT)
-      //   tangents = await loader.getFloat32Array(gltfPrimitive.attributes.TANGENT);
+      if (gltfPrimitive.attributes.TANGENT)
+        tangents = await loader.getFloat32Array(gltfPrimitive.attributes.TANGENT);
 
       if (gltfPrimitive.attributes.TEXCOORD_1 != undefined)
         textureUVs = await loader.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_1);
@@ -69,6 +69,9 @@ namespace FudgeCore {
               undefined,
             normals ?
               new Vector3(normals[iVertex + 0], normals[iVertex + 1], normals[iVertex + 2]) :
+              undefined,
+            tangents ?
+              new Vector3(tangents[iVertex + 0], tangents[iVertex + 1], tangents[iVertex + 2]) :
               undefined,
             colors ?
               new Color(colors[iColor + 0], colors[iColor + 1], colors[iColor + 2], colors[iColor + 3]) :

@@ -40,14 +40,6 @@ namespace FudgeCore {
     }
 
     /**
-     * returns the bitangent associated with the vertex addressed, resolving references between vertices 
-     */
-    public bitangent(_index: number): Vector3 {
-      let vertex: Vertex = this[_index];
-      return (vertex.referTo == undefined) ? vertex.bitangent : this[vertex.referTo].bitangent;
-    }
-
-    /**
      * returns the uv-coordinates associated with the vertex addressed
      */
     public uv(_index: number): Vector2 {

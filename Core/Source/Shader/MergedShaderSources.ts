@@ -1,6 +1,6 @@
 namespace FudgeCore {
   export let shaderSources: {[source: string]: string} = {};
-  shaderSources["ShaderAmbientOcclusion.frag"] = `#version 300 es
+  shaderSources["ShaderAmbientOcclusion.frag"] = /*glsl*/ `#version 300 es
 /**
 *Calculates AO based on depthmap
 *@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
@@ -59,6 +59,7 @@ void main() {
     vec3 vct_Bitangent = cross(vct_Normal, vct_Tangent);
     mat3 mtxTBN = mat3(vct_Tangent, vct_Bitangent, vct_Normal);
 
+    //calculation of the occlusion-factor   
     float occlusion = 0.0f;
     for(int i = 0; i < u_nSamples; i++) {
         //get sample position
@@ -70,21 +71,20 @@ void main() {
 
         float occluderDepth = linearizeDepth(texture(u_depthTexture, offset.xy).r);
 
-        float rangeCheck = (vct_Sample.z - occluderDepth > u_radius * u_shadowDistance * 10.0f ? 0.0f : 1.0f);
-        //rangeCheck = 1.0f;
+        float rangeCheck = (vct_Sample.z - occluderDepth > u_radius * u_shadowDistance * 10.0f ? 0.0f : 1.0f);  
         occlusion += (occluderDepth <= vct_Sample.z ? 1.0f : 0.0f) * rangeCheck;
     }
+
     float nSamples = float(u_nSamples);
     occlusion = min((1.0f - (occlusion / nSamples)) * 1.5f, 1.0f);
     occlusion *= occlusion;
     vctFrag = vec4(vec3(occlusion), 1.0f);
-    //vctFrag = vec4(texture(u_depthTexture, (vct_FragPos + ((mtxTBN * u_samples[127].vct) * u_radius)).xy * 0.5f + 0.5f).rgb, 1.0f);
 }
 `;
-  shaderSources["ShaderAmbientOcclusion.vert"] = `#version 300 es
+  shaderSources["ShaderAmbientOcclusion.vert"] = /*glsl*/ `#version 300 es
 
 /**
-* AO Vertex - Shader. Sets Values for AO Fragment - Shader
+* AO vertexshader. Sets values for AO fragmentshader
 * @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
 in vec2 a_vctPosition;
@@ -96,7 +96,7 @@ void main() {
     gl_Position = vec4(a_vctPosition, 0.0, 1.0);
     v_vctTexture = a_vctTexture;
 }`;
-  shaderSources["ShaderAONormal.frag"] = `#version 300 es
+  shaderSources["ShaderAONormal.frag"] = /*glsl*/ `#version 300 es
 /**
 *Renders normalinformation onto texture
 *@authors Roland Heer, HFU, 2023
@@ -122,9 +122,9 @@ void main() {
 #endif
 }
 `;
-  shaderSources["ShaderAONormal.vert"] = `#version 300 es
+  shaderSources["ShaderAONormal.vert"] = /*glsl*/ `#version 300 es
 /**
-*Calculates the Normal Information relative to the Camera
+*Calculates the normal information relative to the Camera
 *@authors Roland Heer, HFU, 2023
 */
 uniform mat4 u_mtxMeshToView;
@@ -149,9 +149,9 @@ void main() {
     v_vctNormal = vec4((vctNormal + 1.0f) / 2.0f, 1.0f);
 }
 `;
-  shaderSources["ShaderDownsample.frag"] = `#version 300 es
+  shaderSources["ShaderDownsample.frag"] = /*glsl*/ `#version 300 es
 /**
-*Downsamples a given Texture to the current FBOs Texture
+*Downsamples a given texture to the current FBOs texture
 *@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
 precision mediump float;
@@ -177,15 +177,15 @@ void main() {
         float threshold = min(max(u_threshold, 0.0f), 0.999999999f);     //None of the rendered values can exeed 1.0 therefor the bloom effect won't work if the threshold is >= 1.0
         tex1 -= threshold;
         tex1 /= 1.0f - threshold;
-        float averageBrightness = (((tex1.r + tex1.g + tex1.b) / 3.0f) * 0.2f) + 0.8f; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.9
+        float averageBrightness = (((tex1.r + tex1.g + tex1.b) / 3.0f) * 0.2f) + 0.8f; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.8
         tex1 = tex1 * averageBrightness * 2.0f;
     }
     tex1 *= 1.3f;
     vctFrag = tex1;
 }`;
-  shaderSources["ShaderDownsample.vert"] = `#version 300 es
+  shaderSources["ShaderDownsample.vert"] = /*glsl*/ `#version 300 es
 /**
-* ShaderDownsample sets Values for Downsampling Fragmentshader
+* ShaderDownsample sets values for downsampling fragmentshader and applies a small gaussian blur
 * @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
 in vec2 a_vctPosition;
@@ -210,7 +210,7 @@ void main() {
         vec2(-offset.x, -offset.y), vec2(0.0, -offset.y),  vec2(offset.x, -offset.y)
     );
 }`;
-  shaderSources["ShaderMist.frag"] = `#version 300 es
+  shaderSources["ShaderMist.frag"] = /*glsl*/ `#version 300 es
 /**
 *Calculates depth from camera based on near- and farplane
 *@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
@@ -234,10 +234,10 @@ void main() {
     vctFrag = vec4(fog, 1.0);
 }
 `;
-  shaderSources["ShaderMist.vert"] = `#version 300 es
+  shaderSources["ShaderMist.vert"] = /*glsl*/ `#version 300 es
 
 /**
-* Mist Vertex - Shader. Sets Values for Mist Fragment - Shader
+* Mist vertexshader. Sets values for mist fragmentshader
 * @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
 
@@ -258,108 +258,10 @@ void main() {
     gl_Position = mtxMeshToView * vctPosition;
     v_vctPosition = vctPosition;
 }`;
-  shaderSources["ShaderParticle.frag"] = `#version 300 es
-/**
-* Particle shader similar to lit textured shader
-* @authors Jonas Plotzky, HFU, 2022
-*/
-
-precision mediump float;
-
-uniform vec4 u_vctColor;
-  
-  #if defined(PARTICLE_COLOR)
-in vec4 v_vctColor;
-  #endif
-
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-
-out vec4 vctFrag;
-
-void main() {
-  // TEXTURE: multiply with texel color
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag = u_vctColor * vctColorTexture;
-    #if defined(PARTICLE_COLOR)
-  vctFrag *= v_vctColor;
-    #endif
-
-
-  // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}`;
-  shaderSources["ShaderParticle.vert"] = `#version 300 es
-/**
-* Particle shader similar to lit textured shader
-* @authors Jonas Plotzky, HFU, 2022
-*/
-
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-in vec3 a_vctPosition;
-
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-
-  #if defined(PARTICLE_COLOR)
-out vec4 v_vctColor;
-  #endif
-
-uniform float u_fParticleSystemSize;
-uniform float u_fParticleSystemTime;
-uniform sampler2D u_fParticleSystemRandomNumbers;
-
-uniform bool u_bParticleSystemFaceCamera;
-uniform bool u_bParticleSystemRestrict;
-
-mat4 lookAt(vec3 _vctTranslation, vec3 _vctTarget) {
-  vec3 vctUp = vec3(0.0, 1.0, 0.0);
-  vec3 zAxis = normalize(_vctTarget - _vctTranslation);
-  vec3 xAxis = normalize(cross(vctUp, zAxis));
-  vec3 yAxis = u_bParticleSystemRestrict ? vctUp : normalize(cross(zAxis, xAxis));
-  zAxis = u_bParticleSystemRestrict ? normalize(cross(xAxis, vctUp)) : zAxis;
-
-  return mat4(
-    xAxis.x, xAxis.y, xAxis.z, 0.0,
-    yAxis.x, yAxis.y, yAxis.z, 0.0,
-    zAxis.x, zAxis.y, zAxis.z, 0.0,
-    _vctTranslation.x,  _vctTranslation.y,  _vctTranslation.z, 1.0
-  );
-}
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  float fParticleId = float(gl_InstanceID);
-
-  /*$variables*/
-  /*$mtxLocal*/
-  /*$mtxWorld*/
-
-  mat4 mtxMeshToWorld = /*$mtxWorld*/ u_mtxMeshToWorld /*$mtxLocal*/;
-  if (u_bParticleSystemFaceCamera) mtxMeshToWorld = 
-    lookAt(vec3(mtxMeshToWorld[3][0], mtxMeshToWorld[3][1], mtxMeshToWorld[3][2]), u_vctCamera) * 
-    mat4(
-      length(vec3(mtxMeshToWorld[0][0], mtxMeshToWorld[1][0], mtxMeshToWorld[2][0])), 0.0, 0.0, 0.0,
-      0.0, length(vec3(mtxMeshToWorld[0][1], mtxMeshToWorld[1][1], mtxMeshToWorld[2][1])), 0.0, 0.0,
-      0.0, 0.0, length(vec3(mtxMeshToWorld[0][2], mtxMeshToWorld[1][2], mtxMeshToWorld[2][2])), 0.0,
-      0.0, 0.0, 0.0, 1.0
-    );
-
-  // calculate position
-  gl_Position = u_mtxWorldToView * mtxMeshToWorld * vctPosition;
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #if defined(PARTICLE_COLOR)
-  v_vctColor = /*$color*/;
-    #endif
-}`;
-  shaderSources["ShaderPhong.frag"] = `#version 300 es
+  shaderSources["ShaderPhong.frag"] = /*glsl*/ `#version 300 es
 /**
 * Phong shading
-* @authors Jirka Dell'Oro-Friedl, HFU, 2022 || Roland Heer, HFU, 2023
+* @authors Jirka Dell'Oro-Friedl, HFU, 2022 | Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
 */
 
 precision mediump float;
@@ -402,12 +304,15 @@ const uint MAX_LIGHTS_DIRECTIONAL = 15u;
 const uint MAX_LIGHTS_POINT = 100u;
 const uint MAX_LIGHTS_SPOT = 100u;
 
-uniform uint u_nLightsDirectional;
-uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
-uniform uint u_nLightsPoint;
-uniform Light u_point[MAX_LIGHTS_POINT];
-uniform uint u_nLightsSpot;
-uniform Light u_spot[MAX_LIGHTS_SPOT];
+layout(std140) uniform Lights {
+  uint u_nLightsDirectional;
+  uint u_nLightsPoint;
+  uint u_nLightsSpot;
+  Light u_ambient;
+  Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+  Light u_point[MAX_LIGHTS_POINT];
+  Light u_spot[MAX_LIGHTS_SPOT];
+};
 
 // Returns a vector for visualizing on model. Great for debugging
 vec4 showVectorAsColor(vec3 _vector, bool _clamp) {
@@ -450,11 +355,23 @@ vec4 illuminateDiffuse(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor) {
 }
 
 void main() {
+  vec3 vctPosition = v_vctPosition;
   float fMetallic = max(min(u_fMetallic, 1.0), 0.0);
   vec4 vctSpec = vec4(0, 0, 0, 1);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * v_vctPosition) - u_vctCamera);
-  vctFrag += v_vctColor;
+
+    #if defined(PHONG)
   vec3 vctNormal = normalize(v_vctNormal);
+  vec3 vctView = normalize(v_vctPosition - u_vctCamera);
+    #endif
+
+    #if defined(FLAT)
+  vec3 vctXTangent = dFdx(vctPosition);
+  vec3 vctYTangent = dFdy(vctPosition);
+  vec3 vctNormal = normalize(cross(vctXTangent, vctYTangent));
+  vec3 vctView = normalize(v_vctPositionFlat - u_vctCamera);
+    #endif
+
+  vctFrag = u_fDiffuse * u_ambient.vctColor;
 
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
@@ -484,11 +401,11 @@ void main() {
     if(vctDirectionInverted.z <= 0.0)
       continue;
 
-    float fSpotIntensity = min(1.0, vctDirectionInverted.z * 5.0);                                        //Due to the specular highlight simulating the direct reflection of a given Light, it makes sense to calculate the specular highlight only infront of a spotlight however not dependend on the coneshape.
+    float fSpotIntensity = min(1.0, vctDirectionInverted.z * 5.0);                                        //Due to the specular highlight simulating the direct reflection of a given light, it makes sense to calculate the specular highlight only infront of a spotlight however not dependend on the coneshape.
     vctDirection = normalize(vctDirection);
     vctSpec += calculateReflection(vctDirection, vctView, vctNormal, u_fSpecular, fSpotIntensity * u_spot[i].vctColor);
 
-    float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);    //Coneshape that is brightest in the center. Possible Todo: "Variable Spotlightsoftness"
+    float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);    //Coneshape that is brightest in the center. Possible TODO: "Variable Spotlightsoftness"
     fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);                                                 //Prevents harsh lighting artifacts at boundary of the given spotlight
     if(fIntensity < 0.0)
       continue;
@@ -496,10 +413,11 @@ void main() {
   }
 
   vctFrag += vctSpec * fMetallic;
-  vctFrag *= u_vctColor;
+  vctFrag *= u_vctColor * v_vctColor;
   vctFrag += vctSpec * (1.0 - fMetallic);
+
 }`;
-  shaderSources["ShaderPhongTextured.frag"] = `#version 300 es
+  shaderSources["ShaderPhongTextured.frag"] = /*glsl*/ `#version 300 es
 /**
 * Phong shading
 * @authors Jirka Dell'Oro-Friedl, HFU, 2022 || Roland Heer, HFU, 2023
@@ -623,11 +541,11 @@ void main() {
     if(vctDirectionInverted.z <= 0.0)
       continue;
 
-    float fSpotIntensity = min(1.0, vctDirectionInverted.z * 5.0);                                        //Due to the specular highlight simulating the direct reflection of a given Light, it makes sense to calculate the specular highlight only infront of a spotlight however not dependend on the coneshape.
+    float fSpotIntensity = min(1.0, vctDirectionInverted.z * 5.0);                                        //Due to the specular highlight simulating the direct reflection of a given light, it makes sense to calculate the specular highlight only infront of a spotlight however not dependend on the coneshape.
     vctDirection = normalize(vctDirection);
     vctSpec += calculateReflection(vctDirection, vctView, vctNormal, u_fSpecular, fSpotIntensity * u_spot[i].vctColor);
 
-    float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);    //Coneshape that is brightest in the center. Possible Todo: "Variable Spotlightsoftness"
+    float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);    //Coneshape that is brightest in the center. Possible TODO: "Variable Spotlightsoftness"
     fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);                                                 //Prevents harsh lighting artifacts at boundary of the given spotlight
     if(fIntensity < 0.0)
       continue;
@@ -720,9 +638,9 @@ void main() {
     gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
     v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
 }`;
-  shaderSources["ShaderScreen.frag"] = `#version 300 es
+  shaderSources["ShaderScreen.frag"] = /*glsl*/ `#version 300 es
 /**
-*Renders Framebuffer on to Renderbuffer
+*Composites all Post-FX on to the main-render and renders it to the main Renderbuffer
 *@authors Roland Heer, HFU, 2023
 */
 precision mediump float;
@@ -786,9 +704,9 @@ void main() {
     vctFrag = vctTempFrag;
 }
 `;
-  shaderSources["ShaderScreen.vert"] = `#version 300 es
+  shaderSources["ShaderScreen.vert"] = /*glsl*/ `#version 300 es
 /**
-*Renders Framebuffer on to Renderbuffer
+*Sets up the data for the ShaderScreen fragmentshader
 *@authors Roland Heer, HFU, 2023
 */
 in vec2 a_vctPosition;
@@ -806,7 +724,7 @@ void main() {
 
     vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
 
-    //TODO: Blend this even more
+    //TODO: Maybe try Downsampling instead of this giant gaussian kernel
     v_vctOffsets = vec2[]
     (
         vec2(-2.0*offset.x, 2.0*offset.y),  vec2(-offset.x, 2.0*offset.y),  vec2(0.0, 2.0*offset.y),    vec2(offset.x,2.0* offset.y),   vec2(2.0*offset.x,2.0* offset.y), 
@@ -817,7 +735,7 @@ void main() {
     );
 }
 `;
-  shaderSources["ShaderUniversal.frag"] = `#version 300 es
+  shaderSources["ShaderUniversal.frag"] = /*glsl*/ `#version 300 es
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
 * @authors Jirka Dell'Oro-Friedl, HFU, 2021
@@ -955,8 +873,13 @@ out vec2 v_vctTexture;
 
   #if defined(PHONG)
 out vec3 v_vctNormal;
+out vec3 v_vctPosition;
 out mat3 v_mtxTBN;
-out vec4 v_vctPosition;
+  #endif
+
+  #if defined(FLAT)
+out vec3 v_vctPosition;
+flat out vec3 v_vctPositionFlat;
   #endif
 
   #if defined(SKIN)
@@ -1051,11 +974,21 @@ void main() {
 
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader
-  v_vctPosition = vctPosition;
-    #endif  
-    #if defined(NORMALMAP)
-    v_mtxTBN = mat3(normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent), normalize(mat3(mtxNormalMeshToWorld) * cross(a_vctNormal, a_vctTangent)), vctNormal);
-    #endif
+  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+      #endif
+
+      #if defined(FLAT)
+  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+  v_vctPositionFlat = v_vctPosition;
+      #endif
+
+      #if defined(NORMALMAP)
+  v_mtxTBN = mat3(normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent), normalize(mat3(mtxNormalMeshToWorld) * cross(a_vctNormal, a_vctTangent)), vctNormal);
+      #endif
+      
+      #if !defined(PHONG) && !defined(FLAT) // gouraud
+  vctNormal = normalize(vctNormal);
+  v_vctColor = u_fDiffuse * u_ambient.vctColor;
 
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
@@ -1129,13 +1062,13 @@ void main() {
     #else
     // always full opacity for now...
       #if defined(LIGHT)
-  v_vctColor.a = 1.0f;
+  v_vctColor.a = 1.0;
       #endif
     #endif
 }`;
-  shaderSources["ShaderUpsample.frag"] = `#version 300 es
+  shaderSources["ShaderUpsample.frag"] = /*glsl*/ `#version 300 es
 /**
-*Downsamples a given Texture to the current FBOs Texture
+*upsamples a given texture onto the current FBOs texture and applies a small gaussian blur
 *@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
 precision mediump float;
@@ -1158,9 +1091,9 @@ void main() {
     vec4 tex2 = texture(u_texture2, v_vctTexture);
     vctFrag = tex2 + tex1;
 }`;
-  shaderSources["ShaderUpsample.vert"] = `#version 300 es
+  shaderSources["ShaderUpsample.vert"] = /*glsl*/ `#version 300 es
 /**
-* ShaderDownsample sets Values for Downsampling Fragmentshader
+* ShaderUpsample sets values for upsampling fragmentshader
 * @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
 */
 in vec2 a_vctPosition;

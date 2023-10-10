@@ -210,15 +210,13 @@ void main() {
   v_vctPositionFlat = v_vctPosition;
       #endif
 
-      #if !defined(PHONG) && !defined(FLAT) // gouraud
-  vctNormal = normalize(vctNormal);
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-  v_vctPosition = vctPosition;
-      #endif
-
       #if defined(NORMALMAP)
   v_mtxTBN = mat3(normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent), normalize(mat3(mtxNormalMeshToWorld) * cross(a_vctNormal, a_vctTangent)), vctNormal);
       #endif
+      
+      #if !defined(PHONG) && !defined(FLAT) // gouraud
+  vctNormal = normalize(vctNormal);
+  v_vctColor = u_fDiffuse * u_ambient.vctColor;
 
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
