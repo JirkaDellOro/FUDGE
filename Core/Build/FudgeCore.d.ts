@@ -474,11 +474,14 @@ declare namespace FudgeCore {
          */
         constructor(_name: string);
         /**
-         * Return the mutator path to get from one node to another or null if no path is found
+         * Return the mutator path string to get from one node to another or null if no path is found e.g.:
+         * ```typescript
+         * "node/parent/children/1/components/ComponentSkeleton/0"
+         * ```
          */
         static PATH_FROM_TO(_from: Node | Component, _to: Node | Component): string | null;
         /**
-         * Return the {@link Node} or {@link Component} found at the given path starting starting from the given node or undefined if not found
+         * Return the {@link Node} or {@link Component} found at the given path starting from the given node or undefined if not found
          */
         static FIND(_from: Node | Component, _path: string): Node | Component;
         get isActive(): boolean;

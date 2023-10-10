@@ -38,7 +38,10 @@ namespace FudgeCore {
     }
 
     /**
-     * Return the mutator path to get from one node to another or null if no path is found
+     * Return the mutator path string to get from one node to another or null if no path is found e.g.:
+     * ```typescript
+     * "node/parent/children/1/components/ComponentSkeleton/0"
+     * ```
      */
     public static PATH_FROM_TO(_from: Node | Component, _to: Node | Component): string | null {
       const from: Node = _from instanceof Component ? _from.node : _from;
@@ -74,14 +77,14 @@ namespace FudgeCore {
     }
 
     /**
-     * Return the {@link Node} or {@link Component} found at the given path starting starting from the given node or undefined if not found
+     * Return the {@link Node} or {@link Component} found at the given path starting from the given node or undefined if not found
      */
     public static FIND(_from: Node | Component, _path: string): Node | Component {
       let path: string[] = _path.split("/");
       let to: General = _from;
 
       while (path.length && to)
-        to = to[path.shift()];
+        to = Reflect.get(to, path.shift());
 
       return to;
     }
