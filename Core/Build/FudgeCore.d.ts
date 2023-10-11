@@ -473,6 +473,17 @@ declare namespace FudgeCore {
          * Creates a new node with a name and initializes all attributes
          */
         constructor(_name: string);
+        /**
+         * Return the mutator path string to get from one node to another or null if no path is found e.g.:
+         * ```typescript
+         * "node/parent/children/1/components/ComponentSkeleton/0"
+         * ```
+         */
+        static PATH_FROM_TO(_from: Node | Component, _to: Node | Component): string | null;
+        /**
+         * Return the {@link Node} or {@link Component} found at the given path starting from the given node or undefined if not found
+         */
+        static FIND(_from: Node | Component, _path: string): Node | Component;
         get isActive(): boolean;
         /**
          * Shortcut to retrieve this nodes {@link ComponentTransform}
@@ -2375,8 +2386,8 @@ declare namespace FudgeCore {
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
         mesh: Mesh;
-        skeleton: SkeletonInstance | string;
-        constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance);
+        skeleton: ComponentSkeleton;
+        constructor(_mesh?: Mesh, _skeleton?: ComponentSkeleton);
         get radius(): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -2463,6 +2474,47 @@ declare namespace FudgeCore {
         constructor();
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+}
+declare namespace FudgeCore {
+    /**
+     * Holds an array of bones ({@link Node}s within a {@link Graph}). Referenced from a {@link ComponentMesh} it can be associated with a {@link MeshSkin} and enable skinning for the mesh.
+     * @authors Matthias Roming, HFU, 2022-2023 | Jonas Plotzky, HFU, 2023
+     */
+    class ComponentSkeleton extends Component {
+        /** The bones used for skinning */
+        bones: Node[];
+        /** When applied to vertices, it moves them from object/model space to bone-local space as if the bone were at its initial pose */
+        mtxBindInverses: Matrix4x4[];
+        protected renderBuffer: unknown;
+        protected singleton: boolean;
+        /** Contains the bone transformations applicable to the vertices of a {@link MeshSkin} */
+        protected readonly mtxBones: Matrix4x4[];
+        constructor(_bones?: Node[], _mtxBoneInverses?: Matrix4x4[]);
+        /**
+         * Adds a node as a bone with its bind inverse matrix
+         */
+        addBone(_bone: Node, _mtxBindInverse?: Matrix4x4): void;
+        /**
+         * Return the index of the first bone in the bones array which has the given name, and -1 otherwise.
+         */
+        indexOf(_name: string): number;
+        /**
+         * Return the index of the first occurrence of the given bone node in the bone array, or -1 if it is not present.
+         */
+        indexOf(_node: Node): number;
+        /**
+         * Updates the bone matrices to be used by the shader
+         */
+        update(): void;
+        /**
+         * Resets the pose of this skeleton to the default pose
+         */
+        resetPose(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<ComponentSkeleton>;
     }
 }
 declare namespace FudgeCore {
@@ -5816,7 +5868,7 @@ declare namespace FudgeCore {
         static readonly lights: MapLightTypeToLightList;
         private static readonly nodesSimple;
         private static readonly nodesAlpha;
-        private static readonly skeletons;
+        private static readonly componentsSkeleton;
         private static timestampUpdate;
         /**
          * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
@@ -7076,25 +7128,11 @@ declare namespace GLTF {
         /**
          * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
          */
-        isJoint?: boolean;
-        /**
-         * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
-         * The depth of the node in the hierarchy, starting with 0 for the root node.
-         */
-        depth?: number;
-        /**
-         * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
-         */
         parent?: number;
         /**
          * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
          */
         path?: number[];
-        /**
-         * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
-         * The index of the skin this node is the root of.
-         */
-        iSkinRoot?: number;
     }
     /**
      * Texture sampler properties for filtering and wrapping modes.
@@ -7283,7 +7321,7 @@ declare namespace FudgeCore {
         /**
          * Returns the {@link Node} for the given index.
          */
-        getNodeByIndex(_iNode: number, _nodes?: Node[]): Promise<Node>;
+        getNodeByIndex(_iNode: number): Promise<Node>;
         /**
          * Returns the first {@link ComponentCamera} with the given camera name.
          */
@@ -7317,13 +7355,13 @@ declare namespace FudgeCore {
          */
         getTextureByIndex(_iTexture: number): Promise<Texture>;
         /**
-         * Returns the first {@link Skeleton} with the given skeleton name.
-         */
-        getSkeleton(_name: string): Promise<Skeleton>;
+        * Returns the first {@link ComponentSkeleton} with the given skeleton name.
+        */
+        getSkeleton(_name: string): Promise<ComponentSkeleton>;
         /**
-         * Returns the {@link Skeleton} for the given skeleton index.
+         * Returns the {@link ComponentSkeleton} for the given skeleton index.
          */
-        getSkeletonByIndex(_iSkeleton: number): Promise<Skeleton>;
+        getSkeletonByIndex(_iSkeleton: number): Promise<ComponentSkeleton>;
         toString(): string;
         private getBufferData;
         private getBufferViewData;

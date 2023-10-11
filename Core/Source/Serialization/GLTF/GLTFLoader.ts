@@ -13,14 +13,13 @@ namespace FudgeCore {
     public readonly url: string;
 
     #scenes: Graph[];
-    #nodesGraph: Node[] = [];
-    #nodesSkeleton: Node[] = [];
+    #nodes: Node[] = [];
     #cameras: ComponentCamera[];
     #animations: Animation[];
     #meshes: MeshImport[][];
     #materials: Material[];
+    #skeletons: ComponentSkeleton[];
     #textures: Texture[];
-    #skeletons: Skeleton[];
     #buffers: ArrayBuffer[];
 
     private constructor(_gltf: GLTF.GlTf, _url: string) {
@@ -84,48 +83,26 @@ namespace FudgeCore {
           });
         });
 
-        // mark nodes that are joints
-        _gltf.skins?.forEach(_skin => {
-          _skin.joints.forEach(_iJoint => _gltf.nodes[_iJoint].isJoint = true);
-        });
-
         // mark parent of each node
         _gltf.nodes.forEach((_node, _iNode) => _node.children?.forEach(_iChild => _gltf.nodes[_iChild].parent = _iNode));
 
-        // mark the depth of each node
-        // add names to nodes that don't have one
         _gltf.nodes.forEach((_node, _iNode) => {
+          // add names to nodes that don't have one
           if (!_node.name)
             _node.name = `Node${_iNode}`;
-          let iParent: number = _node.parent;
-          let depth: number = 0;
-          let path: number[] = [];
-          path.push(_iNode);
-          while (iParent != undefined) {
-            path.push(iParent);
-            depth++;
-            iParent = _gltf.nodes[iParent].parent;
-          }
-          _node.depth = depth;
-          _node.path = path;
-        });
 
-        // mark the skeleton root nodes of each skin
-        _gltf.skins?.forEach((_skin, _iSkin) => {
-          if (_skin.skeleton == undefined) {
-            // find the common root of all joints i.e. the skeleton
-            // TODO: add an error for when there is no common root found, as this is a breach of the gltf specification
-            // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#joint-hierarchy
-            const ancestors: Set<number> = new Set<number>(_skin.joints.flatMap(_iJoint => _gltf.nodes[_iJoint].path));
-            _skin.skeleton = Array.from(ancestors).reduce((_a, _b) => _gltf.nodes[_a].depth < _gltf.nodes[_b].depth ? _a : _b);
+          if (_node.isAnimated) {
+            // add path to each animated node
+            let iParent: number = _node.parent;
+            let path: number[] = [];
+            path.push(_iNode);
+            while (iParent != undefined) {
+              path.push(iParent);
+              iParent = _gltf.nodes[iParent].parent;
+            }
+            _node.path = path;
           }
 
-          if (_gltf.nodes[_skin.skeleton].iSkinRoot != undefined) {
-            Debug.warn(`${GLTFLoader.name} | ${_url}: Skin with index ${_iSkin} and ${_gltf.nodes[_skin.skeleton].iSkinRoot} share the same common root node. FUDGE currently only supports one skeleton at the same position in the hierarchy.`);
-            return;
-          }
-
-          _gltf.nodes[_skin.skeleton].iSkinRoot = _iSkin;
         });
       }
     }
@@ -149,11 +126,18 @@ namespace FudgeCore {
       if (!this.#scenes[_iScene]) {
         const gltfScene: GLTF.Scene = this.gltf.scenes[_iScene];
         const scene: Graph = new Graph(gltfScene.name);
+
         for (const iNode of gltfScene.nodes)
           scene.addChild(await this.getNodeByIndex(iNode));
+
         if (this.gltf.animations?.length > 0)
           scene.addComponent(new ComponentAnimator(await this.getAnimationByIndex(0)));
         // TODO: load all animations, not just the first one
+
+        // TODO: load only skeletons which belong to the scene???
+        if (this.gltf.skins?.length > 0)
+          for (let iSkin: number = 0; iSkin < this.gltf.skins.length; iSkin++)
+            scene.addComponent(await this.getSkeletonByIndex(iSkin));
 
         Project.register(scene);
         this.#scenes[_iScene] = scene;
@@ -174,29 +158,20 @@ namespace FudgeCore {
     /**
      * Returns the {@link Node} for the given index.
      */
-    public async getNodeByIndex(_iNode: number, _nodes: Node[] = this.#nodesGraph): Promise<Node> {
-      if (!_nodes[_iNode]) {
+    public async getNodeByIndex(_iNode: number): Promise<Node> {
+      if (!this.#nodes[_iNode]) {
         const gltfNode: GLTF.Node = this.gltf.nodes[_iNode];
-        const node: Node = gltfNode.iSkinRoot >= 0 ?
-          _nodes == this.#nodesGraph ?
-            new SkeletonInstance() :
-            new Skeleton(gltfNode.name) :
-          new Node(gltfNode.name);
+        const node: Node = new Node(gltfNode.name);
 
-        _nodes[_iNode] = node;
-
-        if (node instanceof SkeletonInstance) {
-          await node.set(await this.getSkeletonByIndex(gltfNode.iSkinRoot));
-          return node;
-        }
+        this.#nodes[_iNode] = node;
 
         // check for children
         if (gltfNode.children)
           for (const iNode of gltfNode.children)
-            node.addChild(await this.getNodeByIndex(iNode, _nodes));
+            node.addChild(await this.getNodeByIndex(iNode));
 
         // check for transformation
-        if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation || gltfNode.isJoint || gltfNode.isAnimated) {
+        if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation || gltfNode.isAnimated) {
           node.addComponent(new ComponentTransform());
           if (gltfNode.matrix) {
             node.mtxLocal.set(Float32Array.from(gltfNode.matrix));
@@ -236,10 +211,8 @@ namespace FudgeCore {
             const cmpMesh: ComponentMesh = new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh, iPrimitive));
 
             // check for skeleton
-            if (gltfNode.skin != undefined) {
-              let iSkeletonInstance: number = this.gltf.skins[gltfNode.skin].skeleton;
-              cmpMesh.skeleton = <SkeletonInstance>await this.getNodeByIndex(iSkeletonInstance);
-            }
+            if (gltfNode.skin != undefined)
+              cmpMesh.skeleton = await this.getSkeletonByIndex(gltfNode.skin);
 
             let cmpMaterial: ComponentMaterial;
             const iMaterial: number = gltfMesh.primitives?.[iPrimitive]?.material;
@@ -268,7 +241,7 @@ namespace FudgeCore {
         }
       }
 
-      return _nodes[_iNode];
+      return this.#nodes[_iNode];
     }
 
     /**
@@ -361,18 +334,6 @@ namespace FudgeCore {
             if ((currentStructure.children as AnimationStructure)[pathNode.name] == undefined)
               (currentStructure.children as AnimationStructure)[pathNode.name] = {};
             currentStructure = (currentStructure.children as AnimationStructure)[pathNode.name] as AnimationStructure;
-
-            const iSkin: number = pathNode.iSkinRoot;
-            if (iSkin != undefined && this.gltf.skins[iSkin].joints.includes(gltfChannels[0].target.node)) {
-              const mtxBoneLocal: AnimationSequenceMatrix4x4 = {};
-              for (const gltfChannel of gltfChannels)
-                mtxBoneLocal[toInternTransformation[gltfChannel.target.path]] =
-                  await this.getAnimationSequenceVector(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
-              if (currentStructure.mtxBoneLocals == undefined)
-                currentStructure.mtxBoneLocals = {};
-              (currentStructure.mtxBoneLocals as { [boneName: string]: AnimationSequenceMatrix4x4 })[gltfNode.name] = mtxBoneLocal;
-              break;
-            }
 
             if (pathNode == gltfNode) {
               const mtxLocal: AnimationSequenceMatrix4x4 = {};
@@ -515,9 +476,9 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns the first {@link Skeleton} with the given skeleton name.
-     */
-    public async getSkeleton(_name: string): Promise<Skeleton> {
+    * Returns the first {@link ComponentSkeleton} with the given skeleton name.
+    */
+    public async getSkeleton(_name: string): Promise<ComponentSkeleton> {
       const iSkeleton: number = this.gltf.skins.findIndex(_skeleton => _skeleton.name == _name);
       if (iSkeleton == -1)
         throw new Error(`${this}: Couldn't find name '${_name}' in gltf skins.`);
@@ -525,14 +486,14 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns the {@link Skeleton} for the given skeleton index.
+     * Returns the {@link ComponentSkeleton} for the given skeleton index.
      */
-    public async getSkeletonByIndex(_iSkeleton: number): Promise<Skeleton> {
+    public async getSkeletonByIndex(_iSkeleton: number): Promise<ComponentSkeleton> {
       if (!this.#skeletons)
         this.#skeletons = [];
       if (!this.#skeletons[_iSkeleton]) {
         const gltfSkin: GLTF.Skin = this.gltf.skins[_iSkeleton];
-        const skeleton: Skeleton = await this.getNodeByIndex(gltfSkin.skeleton, this.#nodesSkeleton) as Skeleton;
+        const bones: Node[] = [];
 
         // convert float array to array of matrices and register bones
         let mtxData: Float32Array;
@@ -540,6 +501,7 @@ namespace FudgeCore {
           mtxData = await this.getFloat32Array(gltfSkin.inverseBindMatrices);
         const mtxDataSpan: number = 16; // size of matrix
 
+        const mtxBindInverses: Matrix4x4[] = [];
         // iterate over joints and get corresponding matrix from float array
         for (let iBone: number = 0; iBone < gltfSkin.joints.length; iBone++) {
           let mtxBindInverse: Matrix4x4;
@@ -547,11 +509,12 @@ namespace FudgeCore {
             mtxBindInverse = new Matrix4x4();
             mtxBindInverse.set(mtxData.subarray(iBone * mtxDataSpan, iBone * mtxDataSpan + mtxDataSpan));
           }
-          skeleton.registerBone(await this.getNodeByIndex(gltfSkin.joints[iBone], this.#nodesSkeleton), mtxBindInverse);
+
+          bones.push(await this.getNodeByIndex(gltfSkin.joints[iBone]));
+          mtxBindInverses.push(mtxBindInverse);
         }
 
-        Project.register(skeleton);
-        this.#skeletons[_iSkeleton] = skeleton;
+        this.#skeletons[_iSkeleton] = new ComponentSkeleton(bones, mtxBindInverses);
       }
 
       return this.#skeletons[_iSkeleton];

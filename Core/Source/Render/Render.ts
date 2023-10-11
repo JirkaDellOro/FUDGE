@@ -16,7 +16,7 @@ namespace FudgeCore {
     public static readonly lights: MapLightTypeToLightList = new Map();
     private static readonly nodesSimple: RecycableArray<Node> = new RecycableArray();
     private static readonly nodesAlpha: RecycableArray<Node> = new RecycableArray();
-    private static readonly skeletons: RecycableArray<SkeletonInstance> = new RecycableArray();
+    private static readonly componentsSkeleton: RecycableArray<ComponentSkeleton> = new RecycableArray();
     private static timestampUpdate: number;
 
     // TODO: research if picking should be optimized using radius picking to filter
@@ -36,7 +36,7 @@ namespace FudgeCore {
         Render.nodesAlpha.reset();
         Render.nodesPhysics.reset();
         Render.componentsPick.reset();
-        Render.skeletons.reset();
+        Render.componentsSkeleton.reset();
         Render.lights.forEach(_array => _array.reset());
         _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
       }
@@ -92,8 +92,10 @@ namespace FudgeCore {
           Render.nodesSimple.push(_branch); // add this node to render list
       }
 
-      if (_branch instanceof SkeletonInstance)
-        Render.skeletons.push(_branch);
+      let cmpSkeletons: ComponentSkeleton[] = _branch.getComponents(ComponentSkeleton);
+      for (let cmpSkeleton of cmpSkeletons) 
+        if (cmpSkeleton && cmpSkeleton.isActive)
+          Render.componentsSkeleton.push(cmpSkeleton);
 
       for (let child of _branch.getChildren()) {
         Render.prepare(child, _options, _branch.mtxWorld, _shadersUsed);
@@ -107,10 +109,11 @@ namespace FudgeCore {
       }
 
       if (firstLevel) {
-        for (const skeleton of Render.skeletons) {
-          skeleton.calculateMtxBones();
-          skeleton.updateRenderBuffer();
+        for (const cmpSkeleton of Render.componentsSkeleton) {
+          cmpSkeleton.update();
+          cmpSkeleton.updateRenderBuffer();
         }
+
         _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
         Render.updateLightsUBO(Render.lights);
       }

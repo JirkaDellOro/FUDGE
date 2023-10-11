@@ -8,9 +8,9 @@ namespace FudgeCore {
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public mesh: Mesh;
-    public skeleton: SkeletonInstance | string;
+    public skeleton: ComponentSkeleton;
 
-    public constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance) {
+    public constructor(_mesh?: Mesh, _skeleton?: ComponentSkeleton) {
       super();
       this.mesh = _mesh;
       this.skeleton = _skeleton;
@@ -75,9 +75,7 @@ namespace FudgeCore {
         serialization = { mesh: Serializer.serialize(this.mesh) };
 
       if (this.skeleton)
-        serialization.skeleton = this.skeleton instanceof SkeletonInstance ?
-          this.skeleton.idSource :
-          this.skeleton;
+        serialization.skeleton = Node.PATH_FROM_TO(this, this.skeleton);
 
       serialization.pivot = this.mtxPivot.serialize();
       serialization[super.constructor.name] = super.serialize();
@@ -91,7 +89,20 @@ namespace FudgeCore {
       else
         mesh = <Mesh>await Serializer.deserialize(_serialization.mesh);
       this.mesh = mesh;
-      this.skeleton = _serialization.skeleton;
+
+      if (_serialization.skeleton) {
+        const hndNodeDeserialized: EventListenerUnified = () => {
+          const hndGraphDeserialized: EventListenerUnified = () => {
+            this.skeleton = Node.FIND(this, _serialization.skeleton) as ComponentSkeleton;
+            this.node.removeEventListener(EVENT.GRAPH_DESERIALIZED, hndGraphDeserialized);
+            this.node.removeEventListener(EVENT.GRAPH_INSTANTIATED, hndGraphDeserialized);
+            this.removeEventListener(EVENT.NODE_DESERIALIZED, hndNodeDeserialized);
+          };
+          this.node.addEventListener(EVENT.GRAPH_DESERIALIZED, hndGraphDeserialized, true);
+          this.node.addEventListener(EVENT.GRAPH_INSTANTIATED, hndGraphDeserialized, true);
+        };
+        this.addEventListener(EVENT.NODE_DESERIALIZED, hndNodeDeserialized);
+      }
 
       await this.mtxPivot.deserialize(_serialization.pivot);
       await super.deserialize(_serialization[super.constructor.name]);

@@ -148,7 +148,7 @@ namespace FudgeCore {
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
       // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START)); // TODO: these events seem to get fired in Render.prepare aswell, check where the should get fired
-      this.adjustFrames();
+      // this.adjustFrames(); // TODO: this got called twice per computeDrawing, check if it's necessary
       Render.prepare(this.#branch, null, mtxRoot);
       // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END)); // TODO: these events seem to get fired in Render.prepare aswell, check where the should get fired
       this.componentsPick = Render.componentsPick;

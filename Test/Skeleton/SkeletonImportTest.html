@@ -54,6 +54,12 @@
       top: 0;
       right: 0;
     }
+
+    #amount {
+      position: absolute;
+      top: 1rem;
+      right: 0;
+    }
   </style>
 </head>
 
@@ -66,10 +72,15 @@
   <span id="time">
   </span>
 
-  <select id="file" onchange="load(this)">
+  <select id="file" onchange="load()">
     <option value="./GLTF/arm.gltf">Arm</option>
     <option value="./GLTF/robot.gltf">Robot</option>
     <option value="./GLTF/walk.gltf">Walk</option>
+  </select>
+  <select id="amount" onchange="load()">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3" selected>3</option>
   </select>
 </body>
 

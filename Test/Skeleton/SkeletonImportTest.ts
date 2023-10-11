@@ -7,6 +7,8 @@ namespace SkeletonTest {
   export let loader: ƒ.GLTFLoader;
   export let loaded: ƒ.Node;
   export let cmpAnimator: ƒ.ComponentAnimator;
+  export let slcFile: HTMLSelectElement;
+  export let slcAmount: HTMLSelectElement;
 
   async function init(): Promise<void> {
     let graphId: string = document.head.querySelector("meta[autoView]").getAttribute("autoView");
@@ -106,19 +108,37 @@ namespace SkeletonTest {
       }
     }
 
+
+    slcFile = document.getElementById("file") as HTMLSelectElement;
+    slcAmount = document.getElementById("amount") as HTMLSelectElement;
     const selectedFile: number = parseInt(sessionStorage.getItem('selectedFile'));
-    const selection: HTMLSelectElement = document.getElementById("file") as HTMLSelectElement;
-    if (selectedFile != undefined) 
-      selection.selectedIndex = selectedFile;
-    load(selection);
+    if (selectedFile != undefined)
+      slcFile.selectedIndex = selectedFile;
+    const selectedAmount: number = parseInt(sessionStorage.getItem('selectedAmount'));
+    if (selectedAmount != undefined)
+      slcAmount.selectedIndex = selectedAmount;
+    load();
   }
 }
 
 
-async function load(_selection: HTMLSelectElement): Promise<void> {
+async function load(): Promise<void> {
   // load scene
-  SkeletonTest.loader = await ƒ.GLTFLoader.LOAD(_selection.value);
-  SkeletonTest.loaded = await SkeletonTest.loader.getScene();
+  SkeletonTest.loader = await ƒ.GLTFLoader.LOAD(SkeletonTest.slcFile.value);
+
+  const amount: number = parseInt(SkeletonTest.slcAmount.value);
+  if (amount == 1) {
+    SkeletonTest.loaded = await SkeletonTest.loader.getScene();
+  } else {
+    SkeletonTest.loaded = new ƒ.Node("loaded");
+    for (let i: number = 0; i < amount; i++) {
+      let instance: ƒ.GraphInstance = await ƒ.Project.createGraphInstance(await SkeletonTest.loader.getScene());
+      instance.addComponent(new ƒ.ComponentTransform());
+      instance.name = "instance" + i;
+      instance.mtxLocal.translateX((i * 2 - (amount - 1)) * 1.5);
+      SkeletonTest.loaded.addChild(instance);
+    }
+  }
 
   SkeletonTest.cmpAnimator = SkeletonTest.loaded?.getComponent(ƒ.ComponentAnimator);
   SkeletonTest.loaded.name = "loaded";
@@ -134,5 +154,6 @@ async function load(_selection: HTMLSelectElement): Promise<void> {
   ƒ.Debug.log("Loaded:", SkeletonTest.loaded);
 
   // To store the selected option in sessionStorage
-  sessionStorage.setItem('selectedFile', _selection.selectedIndex.toString());
+  sessionStorage.setItem('selectedFile', SkeletonTest.slcFile.selectedIndex.toString());
+  sessionStorage.setItem('selectedAmount', SkeletonTest.slcAmount.selectedIndex.toString());
 }

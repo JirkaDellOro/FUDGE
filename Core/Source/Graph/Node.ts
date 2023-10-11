@@ -37,6 +37,58 @@ namespace FudgeCore {
       this.name = _name;
     }
 
+    /**
+     * Return the mutator path string to get from one node to another or null if no path is found e.g.:
+     * ```typescript
+     * "node/parent/children/1/components/ComponentSkeleton/0"
+     * ```
+     */
+    public static PATH_FROM_TO(_from: Node | Component, _to: Node | Component): string | null {
+      const from: Node = _from instanceof Component ? _from.node : _from;
+      const to: Node = _to instanceof Component ? _to.node : _to;
+      if (!from || !to)
+        return null;
+
+      // find paths to lowest common ancestor
+      let pathFrom: Node[] = from.getPath();
+      let pathTo: Node[] = to.getPath();
+      let ancestor: Node = null;
+      while (pathFrom.length && pathTo.length && pathFrom[0] == pathTo[0]) {
+        ancestor = pathFrom.shift();
+        pathTo.shift();
+      }
+      pathTo.unshift(ancestor);
+
+      if (!ancestor)
+        return null;
+
+      // create relative path
+      let pathToAncestor: string[] = pathFrom.map(_node => "parent"); // TODO: use "keyof Node" as type
+      let pathFromAncestor: string[] = pathTo
+        .flatMap((_node, _index, _array) => ["children", _node.findChild(_array[_index + 1]).toString()])
+        .slice(0, -2);
+
+      if (_from instanceof Component)
+        pathToAncestor.unshift("node");
+      if (_to instanceof Component)
+        pathFromAncestor.push("components", _to.type, to.components[_to.type].indexOf(_to).toString());
+
+      return pathToAncestor.concat(pathFromAncestor).join("/"); // TODO: or maybe validate this string with node and component objects?
+    }
+
+    /**
+     * Return the {@link Node} or {@link Component} found at the given path starting from the given node or undefined if not found
+     */
+    public static FIND(_from: Node | Component, _path: string): Node | Component {
+      let path: string[] = _path.split("/");
+      let to: General = _from;
+
+      while (path.length && to)
+        to = Reflect.get(to, path.shift());
+
+      return to;
+    }
+
     public get isActive(): boolean {
       return this.active;
     }
@@ -127,7 +179,6 @@ namespace FudgeCore {
         path.unshift(ancestor = ancestor.getParent());
       return path;
     }
-
 
     /**
      * Returns child at the given index in the list of children
@@ -412,6 +463,16 @@ namespace FudgeCore {
       this.dispatchEvent(new Event(EVENT.NODE_DESERIALIZED));
       for (let component of this.getAllComponents())
         component.dispatchEvent(new Event(EVENT.NODE_DESERIALIZED));
+
+      // TODO: consider if this is a good idea
+      // const hndGraphDeserialized: EventListenerUnified = () => {
+      //   for (let component of this.getAllComponents())
+      //     component.dispatchEvent(new Event(EVENT.GRAPH_DESERIALIZED, { bubbles: false }));
+      //   this.removeEventListener(EVENT.GRAPH_DESERIALIZED, hndGraphDeserialized, true);
+      //   this.removeEventListener(EVENT.GRAPH_INSTANTIATED, hndGraphDeserialized, true);
+      // };
+      // this.addEventListener(EVENT.GRAPH_DESERIALIZED, hndGraphDeserialized, true);
+      // this.addEventListener(EVENT.GRAPH_INSTANTIATED, hndGraphDeserialized, true);
 
       this.activate(_serialization.active);
       return this;

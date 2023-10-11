@@ -90,17 +90,34 @@ var SkeletonTest;
                     break;
             }
         }
+        SkeletonTest.slcFile = document.getElementById("file");
+        SkeletonTest.slcAmount = document.getElementById("amount");
         const selectedFile = parseInt(sessionStorage.getItem('selectedFile'));
-        const selection = document.getElementById("file");
         if (selectedFile != undefined)
-            selection.selectedIndex = selectedFile;
-        load(selection);
+            SkeletonTest.slcFile.selectedIndex = selectedFile;
+        const selectedAmount = parseInt(sessionStorage.getItem('selectedAmount'));
+        if (selectedAmount != undefined)
+            SkeletonTest.slcAmount.selectedIndex = selectedAmount;
+        load();
     }
 })(SkeletonTest || (SkeletonTest = {}));
-async function load(_selection) {
+async function load() {
     // load scene
-    SkeletonTest.loader = await ƒ.GLTFLoader.LOAD(_selection.value);
-    SkeletonTest.loaded = await SkeletonTest.loader.getScene();
+    SkeletonTest.loader = await ƒ.GLTFLoader.LOAD(SkeletonTest.slcFile.value);
+    const amount = parseInt(SkeletonTest.slcAmount.value);
+    if (amount == 1) {
+        SkeletonTest.loaded = await SkeletonTest.loader.getScene();
+    }
+    else {
+        SkeletonTest.loaded = new ƒ.Node("loaded");
+        for (let i = 0; i < amount; i++) {
+            let instance = await ƒ.Project.createGraphInstance(await SkeletonTest.loader.getScene());
+            instance.addComponent(new ƒ.ComponentTransform());
+            instance.name = "instance" + i;
+            instance.mtxLocal.translateX((i * 2 - (amount - 1)) * 1.5);
+            SkeletonTest.loaded.addChild(instance);
+        }
+    }
     SkeletonTest.cmpAnimator = SkeletonTest.loaded?.getComponent(ƒ.ComponentAnimator);
     SkeletonTest.loaded.name = "loaded";
     // loaded.getComponent(ƒ.ComponentAnimator)?.activate(false);
@@ -113,6 +130,7 @@ async function load(_selection) {
     ƒ.Debug.log("Loader:", SkeletonTest.loader);
     ƒ.Debug.log("Loaded:", SkeletonTest.loaded);
     // To store the selected option in sessionStorage
-    sessionStorage.setItem('selectedFile', _selection.selectedIndex.toString());
+    sessionStorage.setItem('selectedFile', SkeletonTest.slcFile.selectedIndex.toString());
+    sessionStorage.setItem('selectedAmount', SkeletonTest.slcAmount.selectedIndex.toString());
 }
 //# sourceMappingURL=SkeletonImportTest.js.map
