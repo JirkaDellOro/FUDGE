@@ -37,8 +37,11 @@ float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float 
   #if defined(LIGHT)
 uniform mat4 u_mtxNormalMeshToWorld;
 in vec3 a_vctNormal;
-in vec3 a_vctTangent;
 uniform float u_fDiffuse;
+
+    #if defined(NORMALMAP)
+in vec3 a_vctTangent;
+    #endif
 
 struct Light {
   vec4 vctColor;

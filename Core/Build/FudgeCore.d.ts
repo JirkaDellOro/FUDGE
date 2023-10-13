@@ -4342,6 +4342,7 @@ declare namespace FudgeCore {
      */
     class Face {
         indices: number[];
+        angles: number[];
         normalUnscaled: Vector3;
         normal: Vector3;
         private vertices;
@@ -4836,7 +4837,7 @@ declare namespace FudgeCore {
      * static LOAD Method. Currently only works with triangulated Meshes
      * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
      * @todo Load Materials, Support Quads
-     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Matthias Roming, HFU, 2023
+     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
      */
     class MeshLoaderOBJ extends MeshLoader {
         static load(_mesh: MeshImport): Promise<MeshImport>;

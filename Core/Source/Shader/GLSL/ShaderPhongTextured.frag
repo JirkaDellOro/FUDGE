@@ -12,11 +12,11 @@ uniform float u_fDiffuse;
 uniform float u_fMetallic;
 uniform float u_fSpecular;
 uniform float u_fIntensity;
-uniform mat4 u_mtxMeshToWorld;
+// uniform mat4 u_mtxMeshToWorld;
 uniform vec3 u_vctCamera;
 
 in vec4 v_vctColor;
-in vec4 v_vctPosition;
+in vec3 v_vctPosition;
 in vec3 v_vctNormal;
 in mat3 v_mtxTBN;
 out vec4 vctFrag;
@@ -27,16 +27,19 @@ struct Light {
   mat4 mtxShapeInverse;
 };
 
-const uint MAX_LIGHTS_DIRECTIONAL = 10u;
-const uint MAX_LIGHTS_POINT = 50u;
-const uint MAX_LIGHTS_SPOT = 50u;
+const uint MAX_LIGHTS_DIRECTIONAL = 15u;
+const uint MAX_LIGHTS_POINT = 100u;
+const uint MAX_LIGHTS_SPOT = 100u;
 
-uniform uint u_nLightsDirectional;
-uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
-uniform uint u_nLightsPoint;
-uniform Light u_point[MAX_LIGHTS_POINT];
-uniform uint u_nLightsSpot;
-uniform Light u_spot[MAX_LIGHTS_SPOT];
+layout(std140) uniform Lights {
+  uint u_nLightsDirectional;
+  uint u_nLightsPoint;
+  uint u_nLightsSpot;
+  Light u_ambient;
+  Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+  Light u_point[MAX_LIGHTS_POINT];
+  Light u_spot[MAX_LIGHTS_SPOT];
+};
 
 // TEXTURE: input UVs and texture
 #if defined(TEXTURE)
@@ -85,14 +88,15 @@ vec4 illuminateDiffuse(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor) {
 void main() {
   float fMetallic = max(min(u_fMetallic, 1.0), 0.0);
   vec4 vctSpec = vec4(0, 0, 0, 1);
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * v_vctPosition) - u_vctCamera);
-  vctFrag += v_vctColor;
+  vec3 vctView = normalize(v_vctPosition - u_vctCamera);
 
   // calculate NewNormal based on NormalMap
   vec3 vctNormal = normalize(v_vctNormal);
   #if defined(NORMALMAP)
   vctNormal = v_mtxTBN * (2.0 * texture(u_normalMap, v_vctNormalMap).xyz - 1.0);
   #endif
+
+  vctFrag = u_fDiffuse * u_ambient.vctColor;
 
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
@@ -104,7 +108,7 @@ void main() {
   // calculate point light effect
   for(uint i = 0u; i < u_nLightsPoint; i++) {
     vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-    vec3 vctDirection = vec3(u_mtxMeshToWorld * v_vctPosition) - vctPositionLight;
+    vec3 vctDirection = v_vctPosition - vctPositionLight;
     float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
     vctDirection = normalize(vctDirection);
     vctSpec += calculateReflection(vctDirection, vctView, vctNormal, u_fSpecular, u_point[i].vctColor);
@@ -117,7 +121,7 @@ void main() {
   // calculate spot light effect
   for(uint i = 0u; i < u_nLightsSpot; i++) {
     vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-    vec3 vctDirection = vec3(u_mtxMeshToWorld * v_vctPosition) - vctPositionLight;
+    vec3 vctDirection = v_vctPosition - vctPositionLight;
     vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
     if(vctDirectionInverted.z <= 0.0)
       continue;

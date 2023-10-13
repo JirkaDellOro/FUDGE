@@ -1,10 +1,11 @@
 {
   "MeshObj|2023-06-14T23:27:37.374Z|48561": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2023-06-14T23:27:37.374Z|48561",
       "name": "obj\\chair.obj",
-      "type": "MeshObj",
-      "url": "obj\\chair.obj"
+      "type": "MeshImport",
+      "url": "obj\\chair.obj",
+      "filetype": "OBJ"
     }
   },
   "Material|2023-06-14T23:29:05.625Z|35796": {
@@ -48,11 +49,12 @@
     }
   },
   "MeshObj|2023-06-14T23:28:05.534Z|27668": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2023-06-14T23:28:05.534Z|27668",
       "name": "obj\\chair1.obj",
-      "type": "MeshObj",
-      "url": "obj\\chair1.obj"
+      "type": "MeshImport",
+      "url": "obj\\chair1.obj",
+      "filetype": "OBJ"
     }
   },
   "Material|2023-06-14T23:29:58.995Z|23832": {

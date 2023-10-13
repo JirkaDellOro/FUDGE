@@ -34,8 +34,15 @@ namespace FudgeCore {
       let bones: Uint8Array;
       let weights: Float32Array;
 
-      if (gltfPrimitive.indices != undefined)
+      if (gltfPrimitive.indices != undefined) {
         indices = await loader.getVertexIndices(gltfPrimitive.indices); // maybe throw error instead
+        for(let i: number = 0; i < indices.length; i += 3) {
+          const temp: number = indices[i + 2];
+          indices[i + 2] = indices[i + 0];
+          indices[i + 0] = indices[i + 1];
+          indices[i + 1] = temp;
+        }
+      }
 
       if (gltfPrimitive.attributes.POSITION != undefined)
         vertices = await loader.getFloat32Array(gltfPrimitive.attributes.POSITION); // maybe throw error instead

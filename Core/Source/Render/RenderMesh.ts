@@ -91,14 +91,15 @@ namespace FudgeCore {
     }
 
     public get normals(): Float32Array {
+      // TODO: this should use the normals from the vertices and only calculate them if they are not present
       if (this.ƒnormals == null) {
-        // sum up all unscaled normals of faces connected to one vertex...
+        // sum up all unscaled normals of faces connected to one vertex, weighted by the angle between the two neighbour vertices...
         this.mesh.vertices.forEach(_vertex => _vertex.normal.set(0, 0, 0));
 
         for (let face of this.mesh.faces)
-          for (let index of face.indices) {
-            this.mesh.vertices.normal(index).add(face.normalUnscaled);
-          }
+          face.indices.forEach((_iVertex, _iFaceVertex) => {
+            this.mesh.vertices.normal(_iVertex).add(Vector3.SCALE(face.normalUnscaled, face.angles[_iFaceVertex]));
+          });
         // ... and normalize them
         this.mesh.vertices.forEach(_vertex => {
           // some vertices might be unused and yield a zero-normal...
@@ -119,9 +120,13 @@ namespace FudgeCore {
       this.ƒnormals = _normals;
     }
 
-    public get tangentsVertex(): Float32Array {
+    public get tangents(): Float32Array {
       if (this.ƒtangents == null) {
-        this.mesh.vertices.forEach(_vertex => _vertex.tangent.set(0, 0, 0));
+        if (this.mesh.vertices.some(_vertex => !_vertex.uv))
+          return new Float32Array(); // no texture coordinates, no tangents
+
+        // TODO: this should use the tangents from the vertices and only calculate them if they are not present
+        this.mesh.vertices.forEach(_vertex => _vertex.tangent.set(0, 0, 0)); // ???
         for (let face of this.mesh.faces) {
           let i0: number = face.indices[0];
           let i1: number = face.indices[1];
@@ -154,7 +159,7 @@ namespace FudgeCore {
           this.mesh.vertices[i2].tangent = tempTangent;
         }
 
-        //Now we orthagonalize the calculated tangents to the vertex normal
+        // Orthagonalize the calculated tangents to the vertex normal
         this.mesh.vertices.forEach(_vertex => _vertex.tangent.add(Vector3.SCALE(_vertex.normal, - Vector3.DOT(_vertex.normal, _vertex.tangent))));
 
         //TODO: In some cases (when uvs are mirrored) the tangents would have to be flipped in order to work properly
@@ -176,6 +181,7 @@ namespace FudgeCore {
         }));
 
       }
+
       return this.ƒtangents;
     }
 
