@@ -6502,15 +6502,15 @@ declare namespace FudgeCore {
         private static get defaultMaterial();
         private static get defaultSkinMaterial();
         static LOAD(_uri: string): Promise<FBXLoader>;
-        getScene(_index?: number): Promise<GraphInstance>;
-        getNode(_index: number, _root?: Node): Promise<Node>;
+        getScene(_index?: number): Promise<Graph>;
+        getNode(_index: number): Promise<Node>;
         getMesh(_index: number): Promise<MeshImport>;
         getMaterial(_index: number): Promise<Material>;
         getTexture(_index: number): Promise<Texture>;
         /**
          * Retriefs the skeleton containing the given limb node.
          */
-        getSkeleton(_fbxLimbNode: FBX.Model): Promise<Skeleton>;
+        getSkeleton(_fbxLimbNode: FBX.Model): Promise<ComponentSkeleton>;
         getAnimation(_index: number): Promise<Animation>;
         /**
          * fetched from three.js, adapted to FUDGE and optimized
@@ -7565,103 +7565,6 @@ declare namespace FudgeCore {
         static define: string[];
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     *  A list of bones in a {@link Skeleton}, addressed by their names.
-     */
-    interface BoneList {
-        [boneName: string]: Node;
-    }
-    /**
-     * A list of transformations, each corresponding to a bone by name.
-     */
-    interface BoneMatrixList {
-        [boneName: string]: Matrix4x4;
-    }
-    /**
-     * A skeleton is an extension of {@link Graph}. The skeleton represents the root bone while its descendant {@link Node}s in the hierarchy make up the other bones.
-     * Like the Graph it serves as a template for {@link SkeletonInstance}s.
-     */
-    class Skeleton extends Graph {
-        readonly bones: BoneList;
-        /**
-         * When applied to vertices, it moves them from object/model space to bone-local space as if the bone were at its initial pose.
-         * This matrix undoes any transformations that were applied to the bone in its initial state,
-         * allowing the subsequent bone transformation (from animation) to be correctly applied to the vertices in bone-local space
-         */
-        readonly mtxBindInverses: BoneMatrixList;
-        /**
-         * Creates a new skeleton with a name
-         */
-        constructor(_name?: string);
-        /**
-         * Appends a node to this skeleton or the given parent and registers it as a bone
-         * @param _mtxInit initial local matrix
-         * @param _parentName name of the parent node, that must be registered as a bone
-         */
-        addBone(_bone: Node, _parentName: string, _mtxInit?: Matrix4x4): void;
-        /**
-         * Registers a node as a bone with its bind inverse matrix
-         * @param _bone the node to be registered, that should be a descendant of this skeleton
-         * @param _mtxBindInverse a precalculated inverse matrix of the bind pose from the bone
-         */
-        registerBone(_bone: Node, _mtxBindInverse?: Matrix4x4): void;
-        /**
-         * Sets the current state of this skeleton as the default pose
-         * by updating the inverse bind matrices
-         */
-        setDefaultPose(): void;
-        /**
-         * Returns the index of the bone with the given name or -1 if not found
-         */
-        indexOfBone(_boneName: string): number;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        /**
-         * Calculates and sets the world matrix of a bone relative to its parent
-         */
-        private calculateMtxWorld;
-        /**
-         * Deregisters all bones of a removed node
-         */
-        private hndChildRemove;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * An instance of a {@link Skeleton}.
-     * It holds all the information needed to animate itself. Referenced from a {@link ComponentMesh} it can be associated with a {@link MeshSkin} and enable skeleton animation for the mesh.
-     * As an extension of {@link GraphInstance} it also keeps a reference to its resource and can thus optimize serialization.
-     */
-    class SkeletonInstance extends GraphInstance {
-        #private;
-        /**
-         * The bone matrices render buffer
-         */
-        protected renderBuffer: unknown;
-        private skeletonSource;
-        constructor(_name?: string);
-        /**
-         * Creates a new {@link SkeletonInstance} based on the given {@link Skeleton}
-         */
-        static CREATE(_skeleton: Skeleton): Promise<SkeletonInstance>;
-        get bones(): BoneList;
-        get mtxBoneLocals(): BoneMatrixList;
-        /**
-         * Set this skeleton instance to be a recreation of the {@link Skeleton} given
-         */
-        set(_skeleton: Skeleton): Promise<void>;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        /**
-         * Resets this skeleton instance to its default pose
-         */
-        resetPose(): void;
-        applyAnimation(_mutator: Mutator): void;
-        calculateMtxBones(): void;
-        private registerBones;
     }
 }
 declare namespace FudgeCore {

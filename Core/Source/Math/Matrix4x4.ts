@@ -446,10 +446,15 @@ namespace FudgeCore {
         const xx: number = x * x, xy: number = x * y, xz: number = x * z, xw: number = x * w;
         const yy: number = y * y, yz: number = y * z, yw: number = y * w;
         const zz: number = z * z, zw: number = z * w;
+        const ww: number = w * w;
 
-        _m[0] = 1 - 2 * (yy + zz); _m[1] = 2 * (xy + zw);/**/ _m[2] = 2 * (xz - yw);
-        _m[4] = 2 * (xy - zw);/**/ _m[5] = 1 - 2 * (xx + zz); _m[6] = 2 * (yz + xw);
-        _m[8] = 2 * (xz + yw);/**/ _m[9] = 2 * (yz - xw);/**/ _m[10] = 1 - 2 * (xx + yy);
+        _m[0] = ww + xx - yy - zz; _m[1] = 2 * (xy + zw);/**/ _m[2] = 2 * (xz - yw);
+        _m[4] = 2 * (xy - zw);/**/ _m[5] = ww - xx + yy - zz; _m[6] = 2 * (yz + xw);
+        _m[8] = 2 * (xz + yw);/**/ _m[9] = 2 * (yz - xw);/**/ _m[10] = ww - xx - yy + zz;
+
+        // _m[0] = 1 - 2 * (yy + zz); _m[1] = 2 * (xy + zw);/**/ _m[2] = 2 * (xz - yw);
+        // _m[4] = 2 * (xy - zw);/**/ _m[5] = 1 - 2 * (xx + zz); _m[6] = 2 * (yz + xw);
+        // _m[8] = 2 * (xz + yw);/**/ _m[9] = 2 * (yz - xw);/**/ _m[10] = 1 - 2 * (xx + yy);
         Recycler.store(rotationNormalized);
       }
     }

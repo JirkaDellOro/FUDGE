@@ -135,9 +135,11 @@ namespace FudgeCore {
         // TODO: load all animations, not just the first one
 
         // TODO: load only skeletons which belong to the scene???
-        if (this.gltf.skins?.length > 0)
-          for (let iSkin: number = 0; iSkin < this.gltf.skins.length; iSkin++)
-            scene.addComponent(await this.getSkeletonByIndex(iSkin));
+        // if (this.gltf.skins?.length > 0)
+        //   for (let iSkin: number = 0; iSkin < this.gltf.skins.length; iSkin++)
+        //     scene.addComponent(await this.getSkeletonByIndex(iSkin));
+        for (const skeleton of this.#skeletons) 
+          scene.addComponent(skeleton);
 
         Project.register(scene);
         this.#scenes[_iScene] = scene;
@@ -308,7 +310,7 @@ namespace FudgeCore {
           throw new Error(`${this}: Couldn't find animation with index ${_iAnimation}.`);
 
         // group channels by node
-        let gltfChannelsGrouped: GLTF.AnimationChannel[][] = [];
+        let gltfChannelsGrouped: GLTF.AnimationChannel[][] = []; // TODO: maybe change this to map or js object
         for (const gltfChannel of gltfAnimation.channels) {
           const iNode: number = gltfChannel.target.node;
           if (iNode == undefined)

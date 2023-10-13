@@ -99,7 +99,7 @@ namespace SkeletonTest {
 
         let cmpSkeleton: ƒ.ComponentSkeleton = new ƒ.ComponentSkeleton();
         cmpSkeleton.addBone(lowerBone, ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0)));
-        cmpSkeleton.addBone(upperBone, ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(1)));
+        cmpSkeleton.addBone(upperBone, ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(-1)));
         this.#skeleton.addComponent(cmpSkeleton);
       }
       return this.#skeleton;

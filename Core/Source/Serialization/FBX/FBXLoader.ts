@@ -20,7 +20,7 @@ namespace FudgeCore {
     #materials: Material[];
     #skinMaterials: Material[] = [];
     #textures: Texture[];
-    #skeletons: Skeleton[];
+    #skeletons: ComponentSkeleton[];
     #animations: Animation[];
 
     public constructor(_buffer: ArrayBuffer, _uri: string) {
@@ -54,7 +54,7 @@ namespace FudgeCore {
       return this.loaders[_uri];
     }
 
-    public async getScene(_index: number = 0): Promise<GraphInstance> {
+    public async getScene(_index: number = 0): Promise<Graph> {
       if (!this.#scenes)
         this.#scenes = [];
       if (!this.#scenes[_index]) {
@@ -62,29 +62,27 @@ namespace FudgeCore {
         const scene: Graph = new Graph(documentFBX.name);
         for (const childFBX of documentFBX.children) {
           if (childFBX.type == "Model") {
-            if (childFBX.subtype == "LimbNode")
-              scene.addChild(await SkeletonInstance.CREATE(await this.getSkeleton(childFBX)));
-            else
-              scene.addChild(await this.getNode(this.fbx.objects.models.indexOf(childFBX), scene));
+            scene.addChild(await this.getNode(this.fbx.objects.models.indexOf(childFBX)));
           }
         }
+
         if (this.fbx.objects.animStacks && this.fbx.objects.animStacks.length > 0) {
           const animation: Animation = await this.getAnimation(documentFBX.ActiveAnimStackName.length > 0 ?
             this.fbx.objects.animStacks.findIndex(_animStack => _animStack.name == documentFBX.ActiveAnimStackName) : 0);
-          for (const child of scene) {
-            if (child.name == "Skeleton0")
-              child.getParent().addComponent(new ComponentAnimator(
-                animation, ANIMATION_PLAYMODE.LOOP, ANIMATION_QUANTIZATION.CONTINOUS
-              ));
-          }
+          if (animation)
+            scene.addComponent(new ComponentAnimator(animation));
         }
+
+        for (const skeleton of this.#skeletons) 
+          scene.addComponent(skeleton);
+
         Project.register(scene);
         this.#scenes[_index] = scene;
       }
-      return await Project.createGraphInstance(this.#scenes[_index]);
+      return this.#scenes[_index];
     }
 
-    public async getNode(_index: number, _root?: Node): Promise<Node> {
+    public async getNode(_index: number): Promise<Node> {
       if (!this.#nodes)
         this.#nodes = [];
       if (!this.#nodes[_index]) {
@@ -92,43 +90,24 @@ namespace FudgeCore {
         const modelFBX: FBX.Model = this.fbx.objects.models[_index].load();
         const node: Node = new Node(modelFBX.name);
         await this.generateTransform(modelFBX, node);
-        // node.addComponent(new ComponentTransform(Matrix4x4.CONSTRUCTION({
-        //   translation: this.getTransformVector(modelFBX.LclTranslation, Vector3.ZERO),
-        //   rotation: this.getTransformVector(modelFBX.LclRotation, Vector3.ZERO),
-        //   scaling: this.getTransformVector(modelFBX.LclScaling, Vector3.ONE)
-        // })));
-        // if (modelFBX.PreRotation)
-        //   node.mtxLocal.multiply(Matrix4x4.ROTATION(modelFBX.PreRotation), true);
-        // if (modelFBX.PostRotation)
-        //   node.mtxLocal.multiply(Matrix4x4.ROTATION(modelFBX.PostRotation));
         this.#nodes[_index] = node;
 
         // attach children and components
         if (modelFBX.children) for (const childFBX of modelFBX.children) {
           if (childFBX.type == "Model") {
-            if (_root && childFBX.subtype == "LimbNode") {
-              const skeleton: Skeleton = await this.getSkeleton(childFBX);
-              let skeletonInstance: SkeletonInstance;
-              for (const child of _root) {
-                if (child instanceof SkeletonInstance && child.idSource == skeleton.idResource)
-                  skeletonInstance = child;
-              }
-              node.addChild(skeletonInstance || await SkeletonInstance.CREATE(skeleton));
-            } else
-              node.addChild(await this.getNode(this.fbx.objects.models.indexOf(childFBX)));
+            node.addChild(await this.getNode(this.fbx.objects.models.indexOf(childFBX)));
           } else if (childFBX.type == "Geometry") {
             const mesh: MeshImport = await this.getMesh(this.fbx.objects.geometries.indexOf(childFBX));
             const cmpMesh: ComponentMesh = new ComponentMesh(mesh);
             node.addComponent(new ComponentMaterial(FBXLoader.defaultMaterial));
             if (mesh instanceof MeshSkin) {
-              const skeleton: Skeleton = await this.getSkeleton(childFBX.children[0].children[0].children[0]); // Model.Deformer.SubDeformer.LimbNode
-              cmpMesh.skeleton = (_root?.getChild(0) as SkeletonInstance || await SkeletonInstance.CREATE(skeleton));
-              for (const subDeformerFBX of childFBX.children[0].children as FBX.SubDeformer[]) {
-                const bone: Node = cmpMesh.skeleton.bones[subDeformerFBX.children[0].name];
-                bone.mtxLocal.set(subDeformerFBX.TransformLink);
-                if (bone.getParent())
-                  bone.mtxLocal.multiply(bone.getParent().mtxWorldInverse);
-              }
+              cmpMesh.skeleton = await this.getSkeleton(childFBX.children[0].children[0].children[0]);
+              // for (const subDeformerFBX of childFBX.children[0].children as FBX.SubDeformer[]) {
+              //   const bone: Node = cmpMesh.skeleton.bones[subDeformerFBX.children[0].name];
+              //   bone.mtxLocal.set(subDeformerFBX.TransformLink);
+              //   if (bone.getParent())
+              //     bone.mtxLocal.multiply(bone.getParent().mtxWorldInverse);
+              // }
               node.getComponent(ComponentMaterial).material = FBXLoader.defaultSkinMaterial;
             }
             node.addComponent(cmpMesh);
@@ -225,22 +204,29 @@ namespace FudgeCore {
     /**
      * Retriefs the skeleton containing the given limb node.
      */
-    public async getSkeleton(_fbxLimbNode: FBX.Model): Promise<Skeleton> {
+    public async getSkeleton(_fbxLimbNode: FBX.Model): Promise<ComponentSkeleton> {
       if (!this.#skeletons)
         this.#skeletons = [];
       return this.#skeletons.find(_skeleton => _fbxLimbNode.name in _skeleton.bones) || await (async () => {
-        const skeleton: Skeleton = new Skeleton(`Skeleton${this.#skeletons.length}`);
+        const skeleton: ComponentSkeleton = new ComponentSkeleton(); // new Skeleton(`Skeleton${this.#skeletons.length}`);
         let rootNode: FBX.Model = _fbxLimbNode;
         while (rootNode.parents && rootNode.parents.some(_parent => _parent.subtype == "LimbNode"))
           rootNode = rootNode.parents.find(_parent => _parent.subtype == "LimbNode");
         const iRootNode: number = this.fbx.objects.models.findIndex(_model => _model.name == rootNode.name);
-        skeleton.addChild(await this.getNode(iRootNode));
-        for (const node of skeleton) {
-          if (node != skeleton && this.fbx.objects.models[this.#nodes.indexOf(node)].subtype == "LimbNode")
-            skeleton.registerBone(node);
+
+        for (const node of await this.getNode(iRootNode)) {
+          // TODO: maybe move this into the component, as this is probably needed in gltf import aswell
+          if (this.fbx.objects.models[this.#nodes.indexOf(node)].subtype == "LimbNode") {
+            node.mtxWorld.set(
+              node.cmpTransform ?
+                Matrix4x4.MULTIPLICATION(node.getParent().mtxWorld, node.mtxLocal) :
+                node.getParent().mtxWorld
+            );
+            node.mtxWorldInverse.set(Matrix4x4.INVERSION(node.mtxWorld));
+            skeleton.addBone(node);
+          }
         }
-        skeleton.setDefaultPose();
-        Project.register(skeleton);
+
         this.#skeletons.push(skeleton);
         return skeleton;
       })();
@@ -252,27 +238,56 @@ namespace FudgeCore {
       if (!this.#animations[_index]) {
         const animStack: FBX.Object = this.fbx.objects.animStacks[_index];
         const animNodesFBX: FBX.AnimCurveNode[] = animStack.children[0].children;
-        const animStructure: {
-          children: {
-            [childName: string]: {
-              mtxBoneLocals: {
-                [boneName: string]: AnimationSequenceMatrix4x4;
-              };
-            };
-          };
-        } = { children: { "Skeleton0": { mtxBoneLocals: {} } } };
-        for (const animNodeFBX of animNodesFBX) {
-          if (typeof animNodeFBX.dX == "number" && typeof animNodeFBX.dY == "number" && typeof animNodeFBX.dZ == "number")
+
+        let fbxAnimNodeGrouped: Map<FBX.Model, FBX.AnimCurveNode[]> = new Map();
+        for (const fbxAnimNode of animNodesFBX) {
+          const key: FBX.Model = fbxAnimNode.parents.find(_parent => _parent.type == "Model");
+          if (key == undefined)
             continue;
-          const target: FBX.Model = animNodeFBX.parents.find(_parent => _parent.type != "AnimLayer");
-          (animStructure.children.Skeleton0.mtxBoneLocals[target.name] ||
-            (animStructure.children.Skeleton0.mtxBoneLocals[target.name] = {}))[{
-            T: "translation",
-            R: "rotation",
-            S: "scale"
-          }[animNodeFBX.name]] = this.getAnimationVector3(animNodeFBX, target);
+          if (!fbxAnimNodeGrouped.has(key))
+            fbxAnimNodeGrouped.set(key, []);
+          fbxAnimNodeGrouped.get(key).push(fbxAnimNode);
         }
-        this.#animations[_index] = new Animation(animStack.name, animStructure);
+
+        const animationStructure: AnimationStructure = {};
+
+        for (const [fbxModel, fbxAnimNodes] of fbxAnimNodeGrouped) {
+          let currentStructure: AnimationStructure = animationStructure;
+
+          let parent: FBX.Model = fbxModel.parents.find(_parent => _parent.type == "Model");
+          let path: FBX.Model[] = [];
+          path.push(fbxModel);
+          while (parent != undefined) {
+            path.push(parent);
+            parent = parent.parents.find(_parent => _parent.type == "Model");
+          }
+
+          for (const fbxPathModel of path.reverse()) {
+            if (currentStructure.children == undefined)
+              currentStructure.children = {};
+
+            if ((currentStructure.children as AnimationStructure)[fbxPathModel.name] == undefined)
+              (currentStructure.children as AnimationStructure)[fbxPathModel.name] = {};
+            currentStructure = (currentStructure.children as AnimationStructure)[fbxPathModel.name] as AnimationStructure;
+
+            if (fbxPathModel == fbxModel) {
+              const mtxLocal: AnimationSequenceMatrix4x4 = {};
+              for (const fbxAnimNode of fbxAnimNodes)
+                mtxLocal[{
+                  T: "translation",
+                  R: "rotation",
+                  S: "scale"
+                }[fbxAnimNode.name]] = this.getAnimationVector3(fbxAnimNode, fbxPathModel);
+              currentStructure.components = {
+                ComponentTransform: [
+                  { mtxLocal: mtxLocal }
+                ]
+              };
+            }
+          }
+        }
+
+        this.#animations[_index] = new Animation(animStack.name, animationStructure);
       }
       return this.#animations[_index];
     }

@@ -14,7 +14,7 @@ namespace FudgeCore {
       ).load();
       if (_data)
         _mesh.name = _data.name.length > 0 ? _data.name : _data.parents[0].name;
-      
+
       let positions: Vector3[] = [];
       let vertexBuffer: Float32Array = geometryFBX.Vertices;
       for (let iVertex: number = 0; iVertex < vertexBuffer.length; iVertex += 3) {
@@ -55,7 +55,7 @@ namespace FudgeCore {
         let vertexKey = position.toString() + uv.toString();
         if (!mapVertexToIndex.has(vertexKey)) {
           let normal: Vector3 = normals[getDataIndex(geometryFBX.LayerElementNormal, _iVertex, iPolygon, _iPolygonVertex)];
-        
+
           _mesh.vertices.push(new Vertex(position, uv, normal));
           mapVertexToIndex.set(vertexKey, _mesh.vertices.length - 1);
           if (!newVertexIndices[_iVertex])
@@ -63,26 +63,27 @@ namespace FudgeCore {
           newVertexIndices[_iVertex].push(_mesh.vertices.length - 1);
         }
         polygon.push(mapVertexToIndex.get(vertexKey));
-        
+
         if (isEndOfPolygon) {
           if (polygon.length == 3) {
             _mesh.faces.push(new Face(_mesh.vertices, polygon[0], polygon[1], polygon[2]));
           } else if (polygon.length == 4) {
-            let quad: Quad = new Quad(_mesh.vertices, polygon[0], polygon[1], polygon[2], polygon[3], QUADSPLIT.AT_0);
+            let quad: Quad = new Quad(_mesh.vertices, polygon[0], polygon[1], polygon[2], polygon[3]);
             _mesh.faces.push(...quad.faces);
           } else {
-            // could add proper triangulation here
-            console.warn(`${MeshLoaderFBX.name}: Polygons with more than 4 vertices are not supported.`);
+            for (let i: number = 2; i < polygon.length; i++)
+              _mesh.faces.push(new Face(_mesh.vertices, polygon[0], polygon[i - 1], polygon[i - 0]));
+            // console.warn(`${MeshLoaderFBX.name}: Polygons with more than 4 vertices are not supported.`);
           }
           polygon = [];
           isEndOfPolygon = false;
           iPolygon++;
-        }        
+        }
       });
 
       if (_mesh instanceof MeshSkin) {
         const fbxDeformer: FBX.Deformer = geometryFBX.children[0];
-        const skeleton: Skeleton = await loader.getSkeleton(fbxDeformer.children[0].children[0]); // Deformer.SubDeformer.LimbNode
+        const skeleton: ComponentSkeleton = await loader.getSkeleton(fbxDeformer.children[0].children[0]); // Deformer.SubDeformer.LimbNode
         createBones(fbxDeformer, skeleton, _mesh.vertices, newVertexIndices);
       }
       return _mesh;
@@ -96,8 +97,8 @@ namespace FudgeCore {
         _layerElement.MappingInformationType == "ByPolygon" ?
           _iPolygon :
           _iPolygonVertex;
-    
-    if (_layerElement.ReferenceInformationType === 'IndexToDirect' ) {
+
+    if (_layerElement.ReferenceInformationType === 'IndexToDirect') {
       let indices: Uint16Array = (_layerElement as FBX.LayerElementUV).UVIndex || (_layerElement as FBX.LayerElementNormal).NormalsIndex;
       index = indices[index];
     }
@@ -105,7 +106,7 @@ namespace FudgeCore {
     return index;
   }
 
-  function createBones(_deformerFBX: FBX.Deformer, _skeleton: Skeleton, _vertices: Vertices, _newVertexIndices?: number[][]): void {
+  function createBones(_deformerFBX: FBX.Deformer, _skeleton: ComponentSkeleton, _vertices: Vertices, _newVertexIndices?: number[][]): void {
     for (const fbxSubDeformer of _deformerFBX.children as FBX.SubDeformer[]) {
       fbxSubDeformer.load();
       if (fbxSubDeformer.Indexes)
@@ -113,7 +114,7 @@ namespace FudgeCore {
           const iVertex: number = fbxSubDeformer.Indexes[iBoneInfluence];
           for (const iVertexNew of _newVertexIndices ? _newVertexIndices[iVertex] : [iVertex]) {
             (_vertices[iVertexNew].bones || (_vertices[iVertexNew].bones = [])).push({
-              index: _skeleton.indexOfBone(fbxSubDeformer.children[0].name),
+              index: _skeleton.indexOf(fbxSubDeformer.children[0].name),
               weight: fbxSubDeformer.Weights[iBoneInfluence] || 1
             });
           }
