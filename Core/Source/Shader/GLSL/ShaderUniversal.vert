@@ -93,6 +93,7 @@ out vec2 v_vctTexture;
   #if defined(NORMALMAP)
 uniform mat3 u_mtxPivotN;
 out vec2 v_vctNormalMap;
+out mat3 v_mtxTBN;
   #endif
 
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
@@ -105,7 +106,6 @@ out vec2 v_vctTexture;
   #if defined(PHONG)
 out vec3 v_vctNormal;
 out vec3 v_vctPosition;
-out mat3 v_mtxTBN;
   #endif
 
   #if defined(FLAT)
@@ -214,7 +214,7 @@ void main() {
       #endif
 
       #if defined(NORMALMAP)
-  v_mtxTBN = mat3(normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent), normalize(mat3(mtxNormalMeshToWorld) * cross(a_vctNormal, a_vctTangent)), vctNormal);
+  v_mtxTBN = mat3(normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent), normalize(mat3(mtxNormalMeshToWorld) * cross(a_vctNormal, a_vctTangent)), normalize(vctNormal));
       #endif
       
       #if !defined(PHONG) && !defined(FLAT) // gouraud

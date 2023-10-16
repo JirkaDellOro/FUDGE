@@ -7,22 +7,18 @@
 precision mediump float;
 precision highp int;
 
-  // TEXTURE: input UVs and texture
-  #if defined(TEXTURE)
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-  #endif
-
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
 uniform float u_fMetallic;
 uniform float u_fSpecular;
 uniform float u_fIntensity;
-uniform mat4 u_mtxMeshToWorld;
+// uniform mat4 u_mtxMeshToWorld;
 uniform vec3 u_vctCamera;
 
 in vec4 v_vctColor;
 in vec3 v_vctPosition;
+
+out vec4 vctFrag;
 
   #if defined(PHONG)
 in vec3 v_vctNormal;
@@ -31,8 +27,6 @@ in vec3 v_vctNormal;
   #if defined(FLAT)
 flat in vec3 v_vctPositionFlat;
   #endif
-
-out vec4 vctFrag;
 
 struct Light {
   vec4 vctColor;
@@ -53,6 +47,19 @@ layout(std140) uniform Lights {
   Light u_point[MAX_LIGHTS_POINT];
   Light u_spot[MAX_LIGHTS_SPOT];
 };
+
+    // TEXTURE: input UVs and texture
+  #if defined(TEXTURE)
+in vec2 v_vctTexture;
+uniform sampler2D u_texture;
+  #endif
+
+  // NORMALMAP: input UVs and texture
+  #if defined(NORMALMAP)
+in mat3 v_mtxTBN;
+in vec2 v_vctNormalMap;
+uniform sampler2D u_normalMap;
+  #endif
 
 // Returns a vector for visualizing on model. Great for debugging
 vec4 showVectorAsColor(vec3 _vector, bool _clamp) {
@@ -100,7 +107,11 @@ void main() {
   vec4 vctSpec = vec4(0, 0, 0, 1);
 
     #if defined(PHONG)
+      #if defined(NORMALMAP)
+  vec3 vctNormal = v_mtxTBN * (2.0 * texture(u_normalMap, v_vctNormalMap).xyz - 1.0);
+      #else
   vec3 vctNormal = normalize(v_vctNormal);
+      #endif
   vec3 vctView = normalize(v_vctPosition - u_vctCamera);
     #endif
 
@@ -153,6 +164,10 @@ void main() {
   }
 
   vctFrag += vctSpec * fMetallic;
+    #if defined(TEXTURE)
+  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+  vctFrag *= vctColorTexture;
+    #endif  
   vctFrag *= u_vctColor * v_vctColor;
   vctFrag += vctSpec * (1.0 - fMetallic);
 
