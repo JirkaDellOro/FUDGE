@@ -1091,6 +1091,8 @@
                       "b": 0,
                       "a": 1
                     },
+                    "near": 1,
+                    "far": 1000,
                     "backgroundEnabled": false,
                     "projection": "central",
                     "fieldOfView": 45,
