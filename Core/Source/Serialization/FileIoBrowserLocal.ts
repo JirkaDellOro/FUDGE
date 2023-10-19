@@ -9,6 +9,9 @@ namespace FudgeCore {
   export class FileIoBrowserLocal extends EventTargetStatic {
     private static selector: HTMLInputElement;
     // TODO: refactor to async function to be handled using promise, instead of using event target
+    /**
+     * Open file select dialog to load files from local filesystem into browser application.
+     */
     public static async load(_multiple: boolean = false): Promise<MapFilenameToContent> {
       FileIoBrowserLocal.selector = document.createElement("input");
       FileIoBrowserLocal.selector.type = "file";
@@ -29,7 +32,10 @@ namespace FudgeCore {
     }
 
     // TODO: refactor to async function to be handled using promise, instead of using event target
-    public static save(_toSave: MapFilenameToContent, _type: string = "text/plain" ): Promise<MapFilenameToContent> {
+    /**
+     * Open a file download dialog to save files to local filesystem.
+     */
+    public static save(_toSave: MapFilenameToContent, _type: string = "text/plain"): Promise<MapFilenameToContent> {
       for (let filename in _toSave) {
         let content: string = _toSave[filename];
         let blob: Blob = new Blob([content], { type: _type });
@@ -58,7 +64,17 @@ namespace FudgeCore {
       });
     }
 
-    public static async handleFileSelect(_event: Event): Promise<void> {
+    /**
+     * Load the the files referenced in {@link FileList} into the provided {@link MapFilenameToContent}
+     */
+    public static async loadFiles(_fileList: FileList, _loaded: MapFilenameToContent): Promise<void> {
+      for (let file of _fileList) {
+        const content: string = await new Response(file).text();
+        _loaded[file.name] = content;
+      }
+    }
+
+    private static async handleFileSelect(_event: Event): Promise<void> {
       Debug.fudge("-------------------------------- handleFileSelect");
       document.body.removeChild(FileIoBrowserLocal.selector);
       let fileList: FileList = (<HTMLInputElement>_event.target).files;
@@ -71,13 +87,6 @@ namespace FudgeCore {
 
       let event: CustomEvent = new CustomEvent(EVENT.FILE_LOADED, { detail: { mapFilenameToContent: loaded } });
       FileIoBrowserLocal.targetStatic.dispatchEvent(event);
-    }
-
-    public static async loadFiles(_fileList: FileList, _loaded: MapFilenameToContent): Promise<void> {
-      for (let file of _fileList) {
-        const content: string = await new Response(file).text();
-        _loaded[file.name] = content;
-      }
     }
   }
 } 

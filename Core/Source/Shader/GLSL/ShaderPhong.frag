@@ -1,7 +1,7 @@
 #version 300 es
 /**
 * Phong shading
-* @authors Jirka Dell'Oro-Friedl, HFU, 2022
+* @authors Jirka Dell'Oro-Friedl, HFU, 2022 | Jonas Plotzky, HFU, 2023
 */
 
 precision mediump float;
@@ -16,12 +16,20 @@ uniform sampler2D u_texture;
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
 uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
+// uniform mat4 u_mtxMeshToWorld; // can't use this when skinning
 uniform vec3 u_vctCamera;
 
 in vec4 v_vctColor;
-in vec4 v_vctPosition;
+in vec3 v_vctPosition;
+
+  #if defined(PHONG)
 in vec3 v_vctNormal;
+  #endif
+
+  #if defined(FLAT)
+flat in vec3 v_vctPositionFlat;
+  #endif
+
 out vec4 vctFrag;
 
 struct Light {
@@ -68,26 +76,41 @@ vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec
 }
 
 void main() {
-  vctFrag = v_vctColor;
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * v_vctPosition) - u_vctCamera);
+  vec3 vctPosition = v_vctPosition;
 
+    #if defined(PHONG)
+  vec3 vctNormal = normalize(v_vctNormal);
+  vec3 vctView = normalize(v_vctPosition - u_vctCamera);
+    #endif
+
+    #if defined(FLAT)
+  vec3 vctXTangent = dFdx(vctPosition);
+  vec3 vctYTangent = dFdy(vctPosition);
+  vec3 vctNormal = normalize(cross(vctXTangent, vctYTangent));
+  vec3 vctView = normalize(v_vctPositionFlat - u_vctCamera);
+    #endif
+
+  vctFrag = u_fDiffuse * u_ambient.vctColor;
+  
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
-    vctFrag += illuminateDirected(vctDirection, v_vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
+    vctFrag += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
   }
+
   // calculate point light effect
   for(uint i = 0u; i < u_nLightsPoint; i++) {
     vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-    vec3 vctDirection = vec3(u_mtxMeshToWorld * v_vctPosition) - vctPositionLight;
+    vec3 vctDirection = vctPosition - vctPositionLight;
     float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
     if(fIntensity < 0.0)
       continue;
-    vctFrag += illuminateDirected(vctDirection, v_vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
+    vctFrag += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
   }
+
   // calculate spot light effect
   for(uint i = 0u; i < u_nLightsSpot; i++) {
     vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-    vec3 vctDirection = vec3(u_mtxMeshToWorld * v_vctPosition) - vctPositionLight;
+    vec3 vctDirection = vctPosition - vctPositionLight;
     vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
     if(vctDirectionInverted.z <= 0.0)
       continue;
@@ -95,7 +118,7 @@ void main() {
     fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);
     if(fIntensity < 0.0)
       continue;
-    vctFrag += illuminateDirected(vctDirection, v_vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
+    vctFrag += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
 
   // TEXTURE: multiply with texel color
@@ -103,4 +126,6 @@ void main() {
   vec4 vctColorTexture = texture(u_texture, v_vctTexture);
   vctFrag *= vctColorTexture;
     #endif
+    
+  vctFrag *= u_vctColor * v_vctColor;
 }

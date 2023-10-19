@@ -11,30 +11,30 @@ namespace FudgeCore {
     public dataLength: number;
 
     /** Setup the rendering context for this buffer and create the actual buffer for this context. */
-    constructor(_renderingContext: WebGL2RenderingContext) {
+    public constructor(_renderingContext: WebGL2RenderingContext) {
       this.gl = _renderingContext;
       this.buffer = this.gl.createBuffer();
     }
 
     /** Fill the bound buffer with data. Used at buffer initialization */
-    public setData(array: Array<number>): void {
+    public setData(_array: Array<number>): void {
       if (this.attribs == null) throw "set attributes first";
-      this.numVertices = array.length / (this.stride / 4);
+      this.numVertices = _array.length / (this.stride / 4);
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
-      this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(array), this.gl.DYNAMIC_DRAW);
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(_array), this.gl.DYNAMIC_DRAW);
       //not necessary an in webgl2 anymore to rebind the same last buffer (which is achieved by giving a null buffer), after buffer is changed. Removed it on all other occasions
       // this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null); 
     }
 
     /** Set Shader Attributes informations by getting their position in the shader, setting the offset, stride and size. For later use in the binding process */
-    public setAttribs(attribs: Array<PhysicsDebugVertexAttribute>): void {
-      this.attribs = attribs;
+    public setAttribs(_attribs: Array<PhysicsDebugVertexAttribute>): void {
+      this.attribs = _attribs;
       this.offsets = [];
       this.stride = 0;
-      let n: number = attribs.length;
+      let n: number = _attribs.length;
       for (let i: number = 0; i < n; i++) {
         this.offsets.push(this.stride);
-        this.stride += attribs[i].float32Count * Float32Array.BYTES_PER_ELEMENT; // 32bit float Bytes are a constant of 4
+        this.stride += _attribs[i].float32Count * Float32Array.BYTES_PER_ELEMENT; // 32bit float Bytes are a constant of 4
       }
     }
 
@@ -62,16 +62,16 @@ namespace FudgeCore {
     public count: number;
 
     /** Setup the rendering context for this buffer and create the actual buffer for this context. */
-    constructor(_renderingContext: WebGL2RenderingContext) {
+    public constructor(_renderingContext: WebGL2RenderingContext) {
       this.gl = _renderingContext;
       this.buffer = this.gl.createBuffer();
     }
 
     /** Fill the bound buffer with data amount. Used at buffer initialization */
-    public setData(array: Array<number>): void {
+    public setData(_array: Array<number>): void {
       this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffer);
-      this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Int16Array(array), this.gl.DYNAMIC_DRAW);
-      this.count = array.length;
+      this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Int16Array(_array), this.gl.DYNAMIC_DRAW);
+      this.count = _array.length;
     }
 
     /** The actual DrawCall for physicsDebugDraw Buffers. This is where the information from the debug is actually drawn. */
@@ -86,7 +86,7 @@ namespace FudgeCore {
     public float32Count: number;
     public name: string;
 
-    constructor(_float32Count: number, _name: string) {
+    public constructor(_float32Count: number, _name: string) {
       this.name = _name;
       this.float32Count = _float32Count;
     }
@@ -101,7 +101,7 @@ namespace FudgeCore {
     public uniformLocationMap: Map<string, WebGLUniformLocation>;
 
     /** Introduce the FUDGE Rendering Context to this class, creating a program and vertex/fragment shader in this context */
-    constructor(_renderingContext: WebGL2RenderingContext) {
+    public constructor(_renderingContext: WebGL2RenderingContext) {
       this.gl = _renderingContext;
       this.program = this.gl.createProgram();
       this.vertexShader = this.gl.createShader(this.gl.VERTEX_SHADER);
@@ -109,10 +109,10 @@ namespace FudgeCore {
     }
 
     /** Take glsl shaders as strings and compile them, attaching the compiled shaders to a program thats used by this rendering context. */
-    public compile(vertexSource: string, fragmentSource: string): void {
+    public compile(_vertexSource: string, _fragmentSource: string): void {
       this.uniformLocationMap = new Map<string, WebGLUniformLocation>();
-      this.compileShader(this.vertexShader, vertexSource);
-      this.compileShader(this.fragmentShader, fragmentSource);
+      this.compileShader(this.vertexShader, _vertexSource);
+      this.compileShader(this.fragmentShader, _fragmentSource);
       this.gl.attachShader(this.program, this.vertexShader);
       this.gl.attachShader(this.program, this.fragmentShader);
       this.gl.linkProgram(this.program);
@@ -142,8 +142,8 @@ namespace FudgeCore {
     /** Get all indices for every attribute in the shaders of this program */
     public getAttribIndices(_attribs: Array<PhysicsDebugVertexAttribute>): Array<number> {
       let indices: Array<number> = [];
-      _attribs.forEach(value => {
-        indices.push(this.getAttribIndex(value.name));
+      _attribs.forEach(_value => {
+        indices.push(this.getAttribIndex(_value.name));
       });
       return indices;
     }
@@ -154,11 +154,11 @@ namespace FudgeCore {
     }
 
     /** Compile a shader out of a string and validate it. */
-    public compileShader(shader: WebGLShader, source: string): void {
-      this.gl.shaderSource(shader, source);
-      this.gl.compileShader(shader);
-      if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-        Debug.log(this.gl.getShaderInfoLog(shader));
+    public compileShader(_shader: WebGLShader, _source: string): void {
+      this.gl.shaderSource(_shader, _source);
+      this.gl.compileShader(_shader);
+      if (!this.gl.getShaderParameter(_shader, this.gl.COMPILE_STATUS)) {
+        Debug.log(this.gl.getShaderInfoLog(_shader));
       }
     }
   }
@@ -198,7 +198,7 @@ namespace FudgeCore {
 
     /** Creating the debug for physics in FUDGE. Tell it to draw only wireframe objects, since FUDGE is handling rendering of the objects besides physics. 
      * Override OimoPhysics Functions with own rendering. Initialize buffers and connect them with the context for later use. */
-    constructor() {
+    public constructor() {
       super();
 
       this.style = new OIMO.DebugDrawStyle();

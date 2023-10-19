@@ -4,7 +4,7 @@ namespace FudgeCore {
      * Used to create a sliding joint along one axis. Two RigidBodies need to be defined to use it.
      * A motor can be defined to move the connected along the defined axis. Great to construct standard springs or physical sliders.
      * 
-     * ```plaintext
+     * ```text
      *          JointHolder - bodyAnchor
      *                    ┌───┐
      *                    │   │
@@ -17,15 +17,15 @@ namespace FudgeCore {
   export class JointPrismatic extends JointAxial {
     public static readonly iSubclass: number = Joint.registerSubclass(JointPrismatic);
 
-    #motorForce: number = 0;
-
     protected joint: OIMO.PrismaticJoint;
     protected config: OIMO.PrismaticJointConfig = new OIMO.PrismaticJointConfig();
     protected motor: OIMO.TranslationalLimitMotor;
-    //Internally used variables - Joint Properties that are used even when no actual joint is currently existend
+    //Internally used variables - Joint Properties that are used even when no actual joint is currently existent
+
+    #motorForce: number = 0;
 
     /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
-    constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
+    public constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_bodyAnchor, _bodyTied, _axis, _localAnchor);
 
       this.maxMotor = 10;

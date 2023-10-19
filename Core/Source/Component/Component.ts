@@ -14,9 +14,9 @@ namespace FudgeCore {
     /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Component[] = [];
 
-    #node: Node | null = null;
     protected singleton: boolean = true;
     protected active: boolean = true;
+    #node: Node | null = null;
 
     public constructor() {
       super();
@@ -52,6 +52,9 @@ namespace FudgeCore {
       return this.#node;
     }
 
+    /**
+     * De- / Activate this component. Inactive components will not be processed by the renderer.
+     */
     public activate(_on: boolean): void {
       this.active = _on;
       this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));

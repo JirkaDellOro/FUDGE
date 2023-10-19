@@ -11,7 +11,7 @@ namespace FudgeUserInterface {
 
   /**
    * Manages a sortable table of data given as simple array of flat objects   
-   * ```plaintext
+   * ```text
    * Key0  Key1 Key2
    * ```
    */
@@ -56,7 +56,7 @@ namespace FudgeUserInterface {
         let item: TableItem<T> = new TableItem<T>(this.controller, row);
         // TODO: see if icon consideration should move to TableItem
         if (this.icon)
-          item.setAttribute("icon", Reflect.get(row, this.icon));
+          item.setAttribute("icon", <string>Reflect.get(row, this.icon));
         this.appendChild(item);
       }
     }
@@ -168,7 +168,7 @@ namespace FudgeUserInterface {
 
     private hndSelect(_event: Event): void {
       // _event.stopPropagation();
-      let detail: { data: Object, interval: boolean, additive: boolean } = (<CustomEvent>_event).detail;
+      let detail: { data: Object; interval: boolean; additive: boolean } = (<CustomEvent>_event).detail;
       let index: number = this.controller.selection.indexOf(<T>detail.data);
 
       if (detail.interval) {
@@ -201,11 +201,11 @@ namespace FudgeUserInterface {
       let deleted: T[] = await this.controller.delete([target.data]);
       if (deleted.length)
         this.dispatchEvent(new Event(EVENT.REMOVE_CHILD, { bubbles: true }));
-    }
+    };
 
     private hndEscape = (_event: Event): void => {
       this.clearSelection();
-    }
+    };
 
     // private hndCopyPaste = async (_event: Event): Promise<void> => {
     //   // // console.log(_event);
@@ -254,7 +254,7 @@ namespace FudgeUserInterface {
         (<TreeItem<T>>document.activeElement).select(true);
       else if (!_event.ctrlKey)
         this.clearSelection();
-    }
+    };
   }
 
   customElements.define("table-sortable", Table, { extends: "table" });

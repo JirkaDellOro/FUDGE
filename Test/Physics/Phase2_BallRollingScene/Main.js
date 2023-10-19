@@ -53,7 +53,7 @@ var FudgePhysics_Communication;
         bodies[3].mtxLocal.translate(new f.Vector3(0, -3, 0));
         bodies[3].mtxLocal.scale(new f.Vector3(60, 1, 60));
         bodies[3].getComponent(f.ComponentRigidbody).isTrigger = true;
-        bodies[3].getComponent(f.ComponentRigidbody).addEventListener("TriggerEnteredCollision" /* TRIGGER_ENTER */, resetBall);
+        bodies[3].getComponent(f.ComponentRigidbody).addEventListener("TriggerEnteredCollision" /* f.EVENT_PHYSICS.TRIGGER_ENTER */, resetBall);
         let cmpLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
         cmpLight.mtxPivot.lookAt(new f.Vector3(0.5, -1, -0.8));
         hierarchy.addComponent(cmpLight);
@@ -64,12 +64,12 @@ var FudgePhysics_Communication;
         viewPort = new f.Viewport();
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
         f.Debug.branch(viewPort.getBranch());
-        f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
+        f.Loop.addEventListener("loopFrame" /* f.EVENT.LOOP_FRAME */, update);
         f.Physics.adjustTransforms(hierarchy);
         f.Loop.start();
     }
     function update() {
-        f.Physics.simulate();
+        f.Physics.simulate(f.Loop.timeFrameGame / 1000);
         viewPort.draw();
         measureFPS();
     }

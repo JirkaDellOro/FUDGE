@@ -23,11 +23,11 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["RENDER_CONTINUOUSLY"] = 17] = "RENDER_CONTINUOUSLY";
         CONTEXTMENU[CONTEXTMENU["ADD_PROPERTY"] = 18] = "ADD_PROPERTY";
         CONTEXTMENU[CONTEXTMENU["DELETE_PROPERTY"] = 19] = "DELETE_PROPERTY";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_PROPERTY"] = 20] = "ADD_PARTICLE_PROPERTY";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION"] = 21] = "ADD_PARTICLE_FUNCTION";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION_NAMED"] = 22] = "ADD_PARTICLE_FUNCTION_NAMED";
+        CONTEXTMENU[CONTEXTMENU["CONVERT_ANIMATION"] = 20] = "CONVERT_ANIMATION";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_PROPERTY"] = 21] = "ADD_PARTICLE_PROPERTY";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION"] = 22] = "ADD_PARTICLE_FUNCTION";
         CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT"] = 23] = "ADD_PARTICLE_CONSTANT";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT_NAMED"] = 24] = "ADD_PARTICLE_CONSTANT_NAMED";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CODE"] = 24] = "ADD_PARTICLE_CODE";
         CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_TRANSFORMATION"] = 25] = "ADD_PARTICLE_TRANSFORMATION";
         CONTEXTMENU[CONTEXTMENU["DELETE_PARTICLE_DATA"] = 26] = "DELETE_PARTICLE_DATA";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
@@ -90,9 +90,11 @@ var Main;
  */
 (function (Main) {
     //#region Types and Data
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { app, BrowserWindow, Menu, ipcMain } = require("electron");
-    // TODO: use the following line in Electron version 14 and up
-    // require("@electron/remote/main").initialize();
+    // couldn't find type in electron d.ts file
+    const remote = require("@electron/remote/main");
+    remote.initialize();
     let fudge;
     let defaultWidth = 800;
     let defaultHeight = 600;
@@ -111,7 +113,8 @@ var Main;
     });
     function quit(_event) {
         if (!saved) {
-            console.log("Trying to save state!", _event.type);
+            if ("type" in _event)
+                console.log("Trying to save state!", _event.type);
             // _event.preventDefault();
             send(fudge, Fudge.MENU.QUIT);
             saved = true;
@@ -133,17 +136,17 @@ var Main;
         Menu.setApplicationMenu(menu);
         fudge.on("close", quit);
     }
-    function addWindow(_url, width = defaultWidth, height = defaultHeight) {
+    function addWindow(_url, _width = defaultWidth, _height = defaultHeight) {
         let window = new BrowserWindow({
-            width: width,
-            height: height,
+            width: _width,
+            height: _height,
             // fullscreen: true,
             webPreferences: {
                 nodeIntegration: true,
-                enableRemoteModule: true,
                 contextIsolation: false
             }
         });
+        remote.enable(window.webContents);
         window.webContents.openDevTools();
         window.loadFile(_url);
         window.maximize();

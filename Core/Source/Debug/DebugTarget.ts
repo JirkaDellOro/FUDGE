@@ -4,6 +4,10 @@ namespace FudgeCore {
    */
   export abstract class DebugTarget {
     public delegates: MapDebugFilterToDelegate;
+
+    /**
+     * Merge the given message and arguments into a single string, separated by ', '
+     */
     public static mergeArguments(_message: Object, ..._args: Object[]): string {
       let out: string = _message.toString(); //JSON.stringify(_message);
       for (let arg of _args)

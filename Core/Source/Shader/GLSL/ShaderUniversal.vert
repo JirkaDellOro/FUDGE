@@ -1,7 +1,7 @@
 #version 300 es
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
+* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2023
 */
 
 precision mediump float;
@@ -10,6 +10,9 @@ precision highp int;
   // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxMeshToView;
 in vec3 a_vctPosition;
+// TODO: think about making vertex color optional
+in vec4 a_vctColor;
+out vec4 v_vctColor;
 
   // PARTICLE: offer buffer and functionality for in shader position calculation
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
@@ -87,27 +90,24 @@ out vec2 v_vctTexture;
 
   #if defined(PHONG)
 out vec3 v_vctNormal;
-out vec4 v_vctPosition;
+out vec3 v_vctPosition;
+  #endif
+
+  #if defined(FLAT)
+out vec3 v_vctPosition;
+flat out vec3 v_vctPositionFlat;
   #endif
 
   #if defined(SKIN)
-// uniform mat4 u_mtxMeshToWorld;
+uniform mat4 u_mtxWorldToView; // 
 // Bones
 // https://github.com/mrdoob/three.js/blob/dev/src/renderers/shaders/ShaderChunk/skinning_pars_vertex.glsl.js
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-const uint MAX_BONES = 256u;
+in uvec4 a_vctBones;
+in vec4 a_vctWeights;
+const uint MAX_BONES = 256u; // CAUTION: this number must be the same as in RenderInjectorSkeletonInstance where the corresponding buffers are created
 layout (std140) uniform Skin {
-  mat4 u_bones[MAX_BONES];
+  mat4 u_mtxBones[MAX_BONES];
 };
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #elif defined(LIGHT) || defined(PARTICLE)
-  // regular if not FLAT
-out vec4 v_vctColor;
   #endif
 
   #if defined(PARTICLE)
@@ -143,7 +143,7 @@ float fetchRandomNumber(int _iIndex, int _iParticleSystemRandomNumbersSize, int 
 void main() {
   vec4 vctPosition = vec4(a_vctPosition, 1.0);
 
-    #if defined(CAMERA) || defined(PARTICLE)
+    #if defined(CAMERA) || defined(PARTICLE) || defined(SKIN) || defined(MATCAP)
   mat4 mtxMeshToWorld = u_mtxMeshToWorld;
     #endif
 
@@ -176,42 +176,49 @@ void main() {
       #else
   mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
       #endif
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
     #endif
 
-
     #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x] +
-    a_fWeight.y * u_bones[a_iBone.y] +
-    a_fWeight.z * u_bones[a_iBone.z] +
-    a_fWeight.w * u_bones[a_iBone.w];
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld * mtxSkin));
+  mtxMeshToWorld = a_vctWeights.x * u_mtxBones[a_vctBones.x] +
+    a_vctWeights.y * u_mtxBones[a_vctBones.y] +
+    a_vctWeights.z * u_mtxBones[a_vctBones.z] +
+    a_vctWeights.w * u_mtxBones[a_vctBones.w];
+  
+  mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
+  mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
     #endif
 
     // calculate position and normal according to input and defines
   gl_Position = mtxMeshToView * vctPosition;
+  v_vctColor = a_vctColor;
 
     #if defined(CAMERA) || defined(MATCAP)
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
+  vec3 vctView = normalize(vec3(mtxMeshToWorld * vctPosition) - u_vctCamera);
     #endif
 
     #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
+  vctNormal = mat3(mtxNormalMeshToWorld) * vctNormal;
+
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader
-  v_vctPosition = vctPosition;
-      #endif  
+  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+      #endif
 
-    #if !defined(PHONG)
+      #if defined(FLAT)
+  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+  v_vctPositionFlat = v_vctPosition;
+      #endif
+
+    #if !defined(PHONG) && !defined(FLAT) // gouraud
+  vctNormal = normalize(vctNormal);
+  v_vctColor = u_fDiffuse * u_ambient.vctColor;
+
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
     v_vctColor += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
   }
+
   // calculate point light effect
   for(uint i = 0u; i < u_nLightsPoint; i++) {
     vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
@@ -235,6 +242,8 @@ void main() {
       continue;
     v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
+  
+  v_vctColor *= a_vctColor;
       #endif // PHONG
     #endif
 
@@ -271,7 +280,7 @@ void main() {
     #else
     // always full opacity for now...
       #if defined(LIGHT)
-    v_vctColor.a = 1.0;
+  v_vctColor.a = 1.0;
       #endif
     #endif
 }

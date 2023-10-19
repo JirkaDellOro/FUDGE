@@ -1,18 +1,16 @@
-/**
- * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
- * done by Jirka Dell'Oro-Friedl, HFU, 2021
- *
- * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
- * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
- * Better rank ordering method by Stefan Gustavson in 2012.
- *
- * This code was placed in the public domain by its original author,
- * Stefan Gustavson. You may use it as you see fit, but
- * attribution is appreciated.
- */
-
 namespace FudgeCore {
-
+  /**
+   * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
+   * done by Jirka Dell'Oro-Friedl, HFU, 2021
+   *
+   * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
+   * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
+   * Better rank ordering method by Stefan Gustavson in 2012.
+   *
+   * This code was placed in the public domain by its original author,
+   * Stefan Gustavson. You may use it as you see fit, but
+   * attribution is appreciated.
+   */
   // TODO: Test
   export class Noise3 extends Noise {
     private static offset: number = 1.0 / 6.0;
@@ -20,7 +18,7 @@ namespace FudgeCore {
     ];
     #sample: (_x: number, _y: number, _z: number) => number = null;
 
-    constructor(_random: Function = Math.random) {
+    public constructor(_random: Function = Math.random) {
       super(_random);
 
       this.#sample = (_x: number, _y: number, _z: number) => {
@@ -111,6 +109,6 @@ namespace FudgeCore {
 
     public sample = (_x: number, _y: number, _z: number): number => {
       return this.#sample(_x, _y, _z);
-    }
+    };
   }
 }

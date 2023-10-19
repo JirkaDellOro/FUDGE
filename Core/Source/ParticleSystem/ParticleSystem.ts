@@ -1,10 +1,13 @@
 namespace FudgeCore {
-  
+
   /**
    * The namesapce for handling the particle data
    */
   export namespace ParticleData {
 
+    /**
+     * The data structure for a particle system. Describes the particle behavior and appearance.
+     */
     export interface System {
       variableNames?: string[];
       variables?: Expression[]; //{ [name: string]: Expression };
@@ -12,7 +15,7 @@ namespace FudgeCore {
       mtxLocal?: Transformation[];
       mtxWorld?: Transformation[];
     }
-    
+
     export type Recursive = System | Expression[] | Transformation[] | Transformation | Expression;
 
     export type Expression = Function | Variable | Constant | Code;
@@ -21,11 +24,11 @@ namespace FudgeCore {
       function: FUNCTION;
       parameters: Expression[];
     }
-  
+
     export interface Variable {
       value: string;
     }
-  
+
     export interface Constant {
       value: number;
     }
@@ -33,32 +36,50 @@ namespace FudgeCore {
     export interface Code {
       code: string;
     }
-  
+
     export interface Transformation {
       transformation: "translate" | "rotate" | "scale";
       parameters: Expression[];
     }
 
+    /**
+     * Returns true if the given data is a {@link Expression}
+     */
     export function isExpression(_data: Recursive): _data is Expression {
       return isFunction(_data) || isVariable(_data) || isConstant(_data) || isCode(_data);
     }
 
+    /**
+     * Returns true if the given data is a {@link Function}
+     */
     export function isFunction(_data: Recursive): _data is Function {
       return typeof _data == "object" && "function" in _data;
     }
 
+    /**
+     * Returns true if the given data is a {@link Variable}
+     */
     export function isVariable(_data: Recursive): _data is Variable {
       return typeof _data == "object" && "value" in _data && typeof _data.value == "string";
     }
 
+    /**
+     * Returns true if the given data is a {@link Constant}
+     */
     export function isConstant(_data: Recursive): _data is Constant {
       return typeof _data == "object" && "value" in _data && typeof _data.value == "number";
     }
 
+    /**
+     * Returns true if the given data is a {@link Code}
+     */
     export function isCode(_data: Recursive): _data is Code {
       return typeof _data == "object" && "code" in _data;
     }
 
+    /**
+     * Returns true if the given data is a {@link Transformation}
+     */
     export function isTransformation(_data: Recursive): _data is Transformation {
       return typeof _data == "object" && "transformation" in _data;
     }
@@ -73,10 +94,10 @@ namespace FudgeCore {
   export class ParticleSystem extends Mutable implements SerializableResource {
     public name: string;
     public idResource: string = undefined;
-    
+
     #data: ParticleData.System;
     /** Map of shader universal derivates to corresponding computed {@link ShaderParticleSystem}. 
-     * This way each particle system resource can be used in conjunction with all shader universal derivates */
+     * This way each particle system resource can be used in conjunction with multiple shader universal derivates */
     #shaderToShaderParticleSystem: Map<ShaderInterface, ShaderParticleSystem> = new Map();
 
     public constructor(_name: string = ParticleSystem.name, _data: ParticleData.System = {}) {
@@ -86,7 +107,7 @@ namespace FudgeCore {
 
       Project.register(this);
     }
-    
+
     public get data(): ParticleData.System {
       return this.#data;
     }
@@ -99,8 +120,9 @@ namespace FudgeCore {
 
     /**
      * Returns a corresponding {@link ShaderParticleSystem} for the given shader universal derivate.
-     * @param _source the shader universal derivate to use as a base for the particle system
+     * Used by the render system to render the particle system.
      * @returns the corresponding {@link ShaderParticleSystem}
+     * @internal
      */
     public getShaderFrom(_source: ShaderInterface): ShaderParticleSystem {
       if (!this.#shaderToShaderParticleSystem.has(_source)) {
@@ -111,20 +133,20 @@ namespace FudgeCore {
         particleShader.fragmentShaderSource = _source.getFragmentShaderSource();
         this.#shaderToShaderParticleSystem.set(_source, particleShader);
       }
-      
+
       return this.#shaderToShaderParticleSystem.get(_source);
     }
 
     //#region Transfer
     public serialize(): Serialization {
-      let serialization: Serialization =  {
+      let serialization: Serialization = {
         idResource: this.idResource,
         name: this.name,
         data: this.data
       };
       return serialization;
     }
-    
+
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       Project.register(this, _serialization.idResource);
       this.name = _serialization.name;
@@ -141,7 +163,7 @@ namespace FudgeCore {
       mutator.data = this.data;
       return mutator;
     }
-    
+
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.cachedMutators;
       delete _mutator.shaderMap;

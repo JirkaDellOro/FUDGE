@@ -6,8 +6,13 @@ namespace FudgeCore {
    */
   export class Coat extends Mutable implements Serializable {
     // public name: string = "Coat";
-    protected renderData: { [key: string]: unknown };
+    // protected renderData: { [key: string]: unknown }; // this wasn't used anywhere...
 
+    /**
+     * Sets the render-parameters from this and the given material inside the given shader.
+     * Injected by {@link RenderInjectorCoat}. Used by the render system.
+     * @internal
+     */
     public useRenderData(_shader: ShaderInterface, _cmpMaterial: ComponentMaterial): void {/* injected by RenderInjector*/ }
 
     //#region Transfer
@@ -18,9 +23,9 @@ namespace FudgeCore {
       return this;
     }
 
-    protected reduceMutator(_mutator: Mutator): void { 
+    protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.renderData;
-     }
+    }
     //#endregion
   }
 }

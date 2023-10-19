@@ -59,7 +59,7 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.#idSource = _serialization.idSource;
+      this.#idSource = _serialization.idSource ?? _serialization.idResource;
       if (!_serialization.deserializeFromSource) {
         await super.deserialize(_serialization); // instance is deserialized from individual data
         this.#deserializeFromSource = false;
@@ -78,6 +78,9 @@ namespace FudgeCore {
       return this;
     }
 
+    /**
+     * Connects this graph instance to the graph referenced.
+     */
     public async connectToGraph(): Promise<void> {
       let graph: Graph = this.get();
       if (this.#deserializeFromSource)
@@ -92,6 +95,7 @@ namespace FudgeCore {
      * Set this node to be a recreation of the {@link Graph} given
      */
     public async set(_graph: Graph): Promise<void> {
+      this.#idSource = _graph.idResource;
       // TODO: examine, if the serialization should be stored in the Graph for optimization <- also useful for sync with instances
       let serialization: Serialization = Serializer.serialize(_graph);
       //Serializer.deserialize(serialization);
@@ -99,8 +103,8 @@ namespace FudgeCore {
         await this.deserialize(serialization[path]);
         break;
       }
-      this.#idSource = _graph.idResource;
-      this.dispatchEvent(new Event(EVENT.GRAPH_INSTANTIATED));
+
+      this.broadcastEvent(new Event(EVENT.GRAPH_INSTANTIATED));
     }
 
     /**
@@ -126,8 +130,8 @@ namespace FudgeCore {
 
       this.#sync = SYNC.GRAPH_SYNCED; // do not sync again, since mutation is already a synchronization
       await this.reflectMutation(_event, <Graph>_event.currentTarget, this, _event.detail.path);
-      this.dispatchEvent(new Event(EVENT.MUTATE_INSTANCE, {bubbles: false}))
-    }
+      this.dispatchEvent(new Event(EVENT.MUTATE_INSTANCE, { bubbles: false }));
+    };
 
     /**
      * This instance mutated, reflect mutation in source graph
@@ -150,7 +154,7 @@ namespace FudgeCore {
 
       this.#sync = SYNC.INSTANCE; // do not sync again, since mutation is already a synchronization
       await this.reflectMutation(_event, this, this.get(), Reflect.get(_event, "path"));
-    }
+    };
 
     private async reflectMutation(_event: CustomEvent, _source: Node, _destination: Node, _path: Node[]): Promise<void> {
       // console.log("Reflect mutation", _source, _destination);

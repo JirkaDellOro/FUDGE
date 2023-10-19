@@ -20,7 +20,7 @@ namespace FudgeCore {
     ALL = MESSAGES | FORMAT
   }
 
-  export const DEBUG_SYMBOL: { [filter: number]: string; } = {
+  export const DEBUG_SYMBOL: { [filter: number]: string } = {
     [DEBUG_FILTER.INFO]: "✓",
     [DEBUG_FILTER.LOG]: "✎",
     [DEBUG_FILTER.WARN]: "⚠",
@@ -30,5 +30,5 @@ namespace FudgeCore {
   };
 
   export type MapDebugTargetToDelegate = Map<DebugTarget, Function>;
-  export interface MapDebugFilterToDelegate { [filter: number]: Function; }
+  export interface MapDebugFilterToDelegate { [filter: number]: Function }
 }

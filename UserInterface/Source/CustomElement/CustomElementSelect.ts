@@ -7,7 +7,7 @@ namespace FudgeUserInterface {
     private static customElement: void = CustomElement.register("fudge-select", CustomElementSelect, Object);
     public content: Object;
 
-    constructor(_attributes: CustomElementAttributes, _content: Object = {}) {
+    public constructor(_attributes: CustomElementAttributes, _content: Object = {}) {
       super(_attributes);
       if (!_attributes.label)
         this.setAttribute("label", _attributes.key);
@@ -17,7 +17,7 @@ namespace FudgeUserInterface {
     /**
      * Creates the content of the element when connected the first time
      */
-    connectedCallback(): void {
+    public connectedCallback(): void {
       if (this.initialized)
         return;
       this.initialized = true;
@@ -26,9 +26,9 @@ namespace FudgeUserInterface {
 
       let select: HTMLSelectElement = document.createElement("select");
       for (let key in this.content) {
-        if (!isNaN(parseInt(key))) //key being a number will not be shown, assuming it's a simple enum with double entries
+        let value: string | number = Reflect.get(this.content, key);
+        if (Reflect.has(this.content, value) && Reflect.get(this.content, value) !== key) // filter number keys out of simple enum 
           continue;
-        let value: string | number = (<{ [key: string]: string | number }>this.content)[key];
         let entry: HTMLOptionElement = document.createElement("option");
         entry.text = key;
         entry.setAttribute("type", typeof value);

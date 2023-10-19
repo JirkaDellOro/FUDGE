@@ -2,7 +2,7 @@ namespace FudgeCore {
   /**
    * Generate a flat polygon. All trigons share vertex 0, so careful design is required to create concave polygons. 
    * Vertex 0 is also associated with the face normal.
-   * ```plaintext
+   * ```text
    *             0 
    *           1╱|╲  4 ...
    *            ╲|_╲╱ 
@@ -29,6 +29,9 @@ namespace FudgeCore {
       return 3;
     }
 
+    /**
+     * Create this mesh from the given vertices.
+     */
     public create(_shape: Vector2[] = [], _fitTexture: boolean = true): void {
       this.shape = <MutableArray<Vector2>>MutableArray.from(_shape.map(_vertex => _vertex.clone));
       this.clear();

@@ -4,11 +4,15 @@ namespace FudgeCore {
 
     public static define: string[] = [
       "LIGHT",
+      "CAMERA",
       "FLAT",
-      "SKIN",
-      "CAMERA"
+      "SKIN"
     ];
 
     public static getCoat(): typeof Coat { return CoatRemissive; }
+
+    public static getFragmentShaderSource(): string {
+      return this.insertDefines(shaderSources["ShaderPhong.frag"], this.define);
+    }
   }
 }

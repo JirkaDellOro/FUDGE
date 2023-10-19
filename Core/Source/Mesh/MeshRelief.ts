@@ -34,6 +34,9 @@ namespace FudgeCore {
       return crc.getImageData(0, 0, _texture.image.width, _texture.image.height).data;
     }
 
+    /**
+     * Sets the texture to be used as heightmap
+     */
     public setTexture(_texture: TextureImage = null): void {
       if (!_texture)
         return;

@@ -1,4 +1,3 @@
-///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 namespace FudgeUserInterface {
 
   /**
@@ -6,7 +5,7 @@ namespace FudgeUserInterface {
   */
   export class TreeList<T> extends HTMLUListElement {
 
-    constructor(_items: TreeItem<T>[] = []) {
+    public constructor(_items: TreeItem<T>[] = []) {
       super();
       this.addItems(_items);
       this.className = "tree";
@@ -47,8 +46,7 @@ namespace FudgeUserInterface {
           if (!found.hasChildren)
             found.expand(false);
           items.push(found);
-        }
-        else
+        } else
           items.push(item);
       }
 

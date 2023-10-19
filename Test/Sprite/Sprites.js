@@ -30,7 +30,7 @@ var Test_sprites;
         viewport.initialize("Viewport", root, cmpCamera, canvas);
         viewport.camera.clrBackground = ƒ.Color.CSS("White");
         viewport.draw();
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, hndLoop);
+        ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, hndLoop);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 10);
         document.forms[0].addEventListener("change", handleChange);
     }

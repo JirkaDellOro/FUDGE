@@ -8,7 +8,7 @@ namespace Fudge {
    */
   export class PanelAnimation extends Panel {
 
-    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
       this.goldenLayout.registerComponentConstructor(VIEW.ANIMATION, ViewAnimation);
@@ -58,7 +58,7 @@ namespace Fudge {
 
       this.broadcast(_event);
       _event.stopPropagation();
-    }
+    };
   }
 }
 

@@ -19,7 +19,7 @@ namespace Fudge {
     private view: ViewAnimation;
     private sequences: ViewAnimationSequence[];
 
-    constructor(_animation: ƒ.Animation, _dom: HTMLElement, _view: ViewAnimation) {
+    public constructor(_animation: ƒ.Animation, _dom: HTMLElement, _view: ViewAnimation) {
       this.animation = _animation;
       this.dom = _dom;
       this.dom.addEventListener(ƒui.EVENT.CLICK, this.hndEvent);
@@ -29,7 +29,7 @@ namespace Fudge {
 
     public update(_mutator: ƒ.Mutator, _time?: number): void {
       let colorIndex: number = 0;
-      let keySelected = this.view.keySelected;
+      let keySelected: ƒ.AnimationKey = this.view.keySelected;
 
       updateRecursive(this.dom, _mutator, this.animation.animationStructure, _time);
 
@@ -53,8 +53,7 @@ namespace Fudge {
             element.style.setProperty("--color-animation-property", getNextColor());
             element.setMutatorValue(value);
             Reflect.set(element, "animationSequence", structureOrSequence);
-          }
-          else {
+          } else {
             updateRecursive(element, value, <ƒ.AnimationStructure>structureOrSequence, _time);
           }
         }
@@ -75,11 +74,10 @@ namespace Fudge {
       let key: ƒ.AnimationKey = sequence.findKey(_time);
       if (!key) {
         if (_add) {
-          key = new ƒ.AnimationKey(_time, <number>_element.getMutatorValue())
+          key = new ƒ.AnimationKey(_time, <number>_element.getMutatorValue());
           sequence.addKey(key);
         }
-      }
-      else
+      } else
         sequence.modifyKey(key, null, <number>_element.getMutatorValue());
       this.view.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: key } });
       this.animation.calculateTotalTime();
@@ -189,6 +187,6 @@ namespace Fudge {
           this.view.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { data: this.sequences } });
           break;
       }
-    }
+    };
   }
 }

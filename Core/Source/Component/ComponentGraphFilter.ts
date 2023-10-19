@@ -7,7 +7,8 @@ namespace FudgeCore {
    */
   export class ComponentGraphFilter extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentGraphFilter);
-    constructor() {
+
+    public constructor() {
       super();
       this.singleton = true;
     }

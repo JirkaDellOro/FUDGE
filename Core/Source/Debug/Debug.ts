@@ -32,6 +32,9 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * Get the filter(s) for the given DebugTarget. 
+     */
     public static getFilter(_target: DebugTarget): DEBUG_FILTER {
       let result: DEBUG_FILTER = 0;
       for (let filter in _target.delegates)
@@ -39,11 +42,17 @@ namespace FudgeCore {
       return result;
     }
 
+    /**
+     * Add a filter to the given DebugTarget. 
+     */
     public static addFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void {
       let current: DEBUG_FILTER = Debug.getFilter(_target);
       Debug.setFilter(_target, current | _filter);
     }
 
+    /**
+     * Remove a filter from the given DebugTarget.
+     */
     public static removeFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void {
       let current: DEBUG_FILTER = Debug.getFilter(_target);
       Debug.setFilter(_target, current ^ _filter);

@@ -20,7 +20,7 @@ namespace FudgeCore {
     #timeLocal: Time;
     #previous: number = 0;
 
-    constructor(_animation?: Animation, _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _quantization: ANIMATION_QUANTIZATION = ANIMATION_QUANTIZATION.CONTINOUS) {
+    public constructor(_animation?: Animation, _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _quantization: ANIMATION_QUANTIZATION = ANIMATION_QUANTIZATION.CONTINOUS) {
       super();
       this.playmode = _playmode;
       this.quantization = _quantization;
@@ -47,11 +47,16 @@ namespace FudgeCore {
       return this.#scale;
     }
 
-    /**
-     * Returns the current sample time of the animation
+    /** 
+     * - get: return the current sample time of the animation  
+     * - set: jump to a certain sample time in the animation
      */
-     public get time(): number {
+    public get time(): number {
       return this.#timeLocal.get() % this.animation.totalTime;
+    }
+
+    public set time(_time: number) {
+      this.jumpTo(_time);
     }
 
     public activate(_on: boolean): void {
@@ -140,8 +145,7 @@ namespace FudgeCore {
       if (_on && (Project.mode != MODE.EDITOR || Project.mode == MODE.EDITOR && this.animateInEditor)) {
         Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale);
         this.node.addEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
-      }
-      else {
+      } else {
         Time.game.removeEventListener(EVENT.TIME_SCALED, this.updateScale);
         this.node.removeEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
       }
@@ -174,15 +178,15 @@ namespace FudgeCore {
         return mutator;
       }
       return null;
-    }
+    };
 
     /**
      * Fires all custom events the Animation should have fired between the last frame and the current frame.
-     * @param events a list of names of custom events to fire
+     * @param _events a list of names of custom events to fire
      */
-    private executeEvents(events: string[]): void {
-      for (let i: number = 0; i < events.length; i++) {
-        this.dispatchEvent(new Event(events[i]));
+    private executeEvents(_events: string[]): void {
+      for (let i: number = 0; i < _events.length; i++) {
+        this.dispatchEvent(new Event(_events[i]));
       }
     }
 
@@ -194,7 +198,7 @@ namespace FudgeCore {
       if (this.scaleWithGameTime)
         newScale *= Time.game.getScale();
       this.#timeLocal.setScale(newScale);
-    }
+    };
     //#endregion
   }
 }

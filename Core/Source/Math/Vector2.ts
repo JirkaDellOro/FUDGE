@@ -1,13 +1,13 @@
 namespace FudgeCore {
   /**
    * Stores and manipulates a twodimensional vector comprised of the components x and y
-   * ```plaintext
+   * ```text
    *            +y
    *             |__ +x
    * ```
    * @authors Lukas Scheuerle, Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class Vector2 extends Mutable implements Recycable {
+  export class Vector2 extends Mutable implements Serializable, Recycable {
     private data: Float32Array;
 
     public constructor(_x: number = 0, _y: number = 0) {
@@ -58,6 +58,9 @@ namespace FudgeCore {
       return vector;
     }
 
+    /**
+     * Creates and returns a vector through transformation of the given vector by the given matrix
+     */
     public static TRANSFORMATION(_vector: Vector2, _mtxTransform: Matrix3x3, _includeTranslation: boolean = true): Vector2 {
       let result: Vector2 = Recycler.get(Vector2);
       let m: Float32Array = _mtxTransform.get();
@@ -140,7 +143,7 @@ namespace FudgeCore {
 
     /**
      * Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.
-     * ```plaintext
+     * ```text
      * ↑ => ← => ↓ => → => ↑
      * ```
      * @param _vector Vector to get the orthogonal equivalent of
@@ -170,31 +173,31 @@ namespace FudgeCore {
     //#endregion
 
     //#region Accessors
-    get x(): number {
+    public get x(): number {
       return this.data[0];
     }
-    get y(): number {
+    public get y(): number {
       return this.data[1];
     }
 
-    set x(_x: number) {
+    public set x(_x: number) {
       this.data[0] = _x;
     }
-    set y(_y: number) {
+    public set y(_y: number) {
       this.data[1] = _y;
     }
 
     /**
      * Returns the length of the vector
      */
-    get magnitude(): number {
+    public get magnitude(): number {
       return Math.hypot(...this.data);
     }
 
     /**
      * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
      */
-    get magnitudeSquared(): number {
+    public get magnitudeSquared(): number {
       return Vector2.DOT(this, this);
     }
 
@@ -296,6 +299,10 @@ namespace FudgeCore {
       return new Float32Array(this.data);
     }
 
+    /**
+     * Transforms this vector by the given matrix, including or exluding the translation.
+     * Including is the default, excluding will only rotate and scale this vector.
+     */
     public transform(_mtxTransform: Matrix3x3, _includeTranslation: boolean = true): void {
       this.data = Vector2.TRANSFORMATION(this, _mtxTransform, _includeTranslation).data;
     }
@@ -322,10 +329,14 @@ namespace FudgeCore {
       return new Vector3(this.x, this.y, _z);
     }
 
+    /**
+     * Returns a formatted string representation of this vector
+     */
     public toString(): string {
       let result: string = `(${this.x.toPrecision(5)}, ${this.y.toPrecision(5)})`;
       return result;
     }
+
     /**
      * Uses the standard array.map functionality to perform the given function on all components of this vector
      * and return a new vector with the results
@@ -347,8 +358,7 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Vector2> {
       if (typeof (_serialization) == "string") {
         [this.x, this.y] = JSON.parse(<string><unknown>_serialization);
-      }
-      else
+      } else
         this.mutate(_serialization);
       return this;
     }

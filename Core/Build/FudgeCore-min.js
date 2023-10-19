@@ -55,6 +55,20 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class DebugConsole extends FudgeCore.DebugTarget {
+        static {
+            this.delegates = {
+                [FudgeCore.DEBUG_FILTER.INFO]: console.info,
+                [FudgeCore.DEBUG_FILTER.LOG]: console.log,
+                [FudgeCore.DEBUG_FILTER.WARN]: console.warn,
+                [FudgeCore.DEBUG_FILTER.ERROR]: console.error,
+                [FudgeCore.DEBUG_FILTER.FUDGE]: DebugConsole.fudge,
+                [FudgeCore.DEBUG_FILTER.CLEAR]: console.clear,
+                [FudgeCore.DEBUG_FILTER.GROUP]: console.group,
+                [FudgeCore.DEBUG_FILTER.GROUPCOLLAPSED]: console.groupCollapsed,
+                [FudgeCore.DEBUG_FILTER.GROUPEND]: console.groupEnd,
+                [FudgeCore.DEBUG_FILTER.SOURCE]: DebugConsole.source
+            };
+        }
         static fudge(_message, ..._args) {
             console.debug(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.FUDGE], _message, ..._args);
         }
@@ -62,23 +76,12 @@ var FudgeCore;
             console.log(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.SOURCE], _message, ..._args);
         }
     }
-    DebugConsole.delegates = {
-        [FudgeCore.DEBUG_FILTER.INFO]: console.info,
-        [FudgeCore.DEBUG_FILTER.LOG]: console.log,
-        [FudgeCore.DEBUG_FILTER.WARN]: console.warn,
-        [FudgeCore.DEBUG_FILTER.ERROR]: console.error,
-        [FudgeCore.DEBUG_FILTER.FUDGE]: DebugConsole.fudge,
-        [FudgeCore.DEBUG_FILTER.CLEAR]: console.clear,
-        [FudgeCore.DEBUG_FILTER.GROUP]: console.group,
-        [FudgeCore.DEBUG_FILTER.GROUPCOLLAPSED]: console.groupCollapsed,
-        [FudgeCore.DEBUG_FILTER.GROUPEND]: console.groupEnd,
-        [FudgeCore.DEBUG_FILTER.SOURCE]: DebugConsole.source
-    };
     FudgeCore.DebugConsole = DebugConsole;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Debug {
+        static { this.delegates = Debug.setupConsole(); }
         static setFilter(_target, _filter) {
             for (let filter in Debug.delegates)
                 Debug.delegates[filter].delete(_target);
@@ -176,7 +179,6 @@ var FudgeCore;
             return result;
         }
     }
-    Debug.delegates = Debug.setupConsole();
     FudgeCore.Debug = Debug;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -194,6 +196,7 @@ var FudgeCore;
     }
     FudgeCore.EventTargetUnified = EventTargetUnified;
     class EventTargetStatic extends EventTargetUnified {
+        static { this.targetStatic = new EventTargetStatic(); }
         constructor() {
             super();
         }
@@ -208,7 +211,6 @@ var FudgeCore;
             return true;
         }
     }
-    EventTargetStatic.targetStatic = new EventTargetStatic();
     FudgeCore.EventTargetStatic = EventTargetStatic;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -322,6 +324,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Serializer {
+        static { this.namespaces = { "ƒ": FudgeCore }; }
         static registerNamespace(_namespace) {
             for (let name in Serializer.namespaces)
                 if (Serializer.namespaces[name] == _namespace)
@@ -437,12 +440,13 @@ var FudgeCore;
             return null;
         }
     }
-    Serializer.namespaces = { "ƒ": FudgeCore };
     FudgeCore.Serializer = Serializer;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Node extends FudgeCore.EventTargetUnified {
+        #mtxWorldInverseUpdated;
+        #mtxWorldInverse;
         constructor(_name) {
             super();
             this.mtxWorld = FudgeCore.Matrix4x4.IDENTITY();
@@ -458,16 +462,14 @@ var FudgeCore;
             this.appendChild = this.addChild;
             this.name = _name;
         }
-        #mtxWorldInverseUpdated;
-        #mtxWorldInverse;
         get isActive() {
             return this.active;
         }
         get cmpTransform() {
-            return this.getComponents(FudgeCore.ComponentTransform)[0];
+            return this.getComponents(FudgeCore.ComponentTransform)?.[0];
         }
         get mtxLocal() {
-            return this.cmpTransform.mtxLocal;
+            return this.cmpTransform?.mtxLocal;
         }
         get mtxWorldInverse() {
             if (this.#mtxWorldInverseUpdated != this.timestampUpdate)
@@ -780,11 +782,14 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Component extends FudgeCore.Mutable {
+        static { this.baseClass = Component; }
+        static { this.subclasses = []; }
+        #node;
         constructor() {
             super();
-            this.#node = null;
             this.singleton = true;
             this.active = true;
+            this.#node = null;
             this.addEventListener("mutate", (_event) => {
                 if (this.#node) {
                     _event.detail.component = this;
@@ -793,7 +798,6 @@ var FudgeCore;
                 }
             });
         }
-        #node;
         static registerSubclass(_subclass) { return Component.subclasses.push(_subclass) - 1; }
         get isActive() {
             return this.active;
@@ -843,19 +847,13 @@ var FudgeCore;
             delete _mutator.mtxWorld;
         }
     }
-    Component.baseClass = Component;
-    Component.subclasses = [];
     FudgeCore.Component = Component;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class RecycableArray {
-        constructor() {
-            this.#length = 0;
-            this.#array = new Array();
-        }
-        #length;
-        #array;
+        #length = 0;
+        #array = new Array();
         get length() {
             return this.#length;
         }
@@ -947,6 +945,18 @@ var FudgeCore;
                 this.program = program;
                 this.attributes = detectAttributes();
                 this.uniforms = detectUniforms();
+                if (this.define.includes("SKIN")) {
+                    const blockIndex = crc3.getUniformBlockIndex(program, FudgeCore.UNIFORM_BLOCKS.SKIN.NAME);
+                    crc3.uniformBlockBinding(program, blockIndex, FudgeCore.UNIFORM_BLOCKS.SKIN.BINDING);
+                }
+                if (this.define.includes("LIGHT")) {
+                    if (!FudgeCore.RenderWebGL.uboLights)
+                        FudgeCore.RenderWebGL.uboLights = createUBOLights();
+                    if (!FudgeCore.RenderWebGL.uboLightsVariableOffsets)
+                        FudgeCore.RenderWebGL.uboLightsVariableOffsets = detectUBOLightsVariableOffsets();
+                    const blockIndex = crc3.getUniformBlockIndex(program, FudgeCore.UNIFORM_BLOCKS.LIGHTS.NAME);
+                    crc3.uniformBlockBinding(program, blockIndex, FudgeCore.UNIFORM_BLOCKS.LIGHTS.BINDING);
+                }
             }
             catch (_error) {
                 FudgeCore.Debug.error(_error);
@@ -982,53 +992,45 @@ var FudgeCore;
             function detectUniforms() {
                 let detectedUniforms = {};
                 let uniformCount = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
-                let oldLength = RenderInjectorShader.uboInfos.length;
                 for (let i = 0; i < uniformCount; i++) {
                     let info = FudgeCore.RenderWebGL.assert(crc3.getActiveUniform(program, i));
                     if (!info) {
                         break;
                     }
-                    if (crc3.getUniformLocation(program, info.name) != null)
-                        detectedUniforms[info.name] = FudgeCore.RenderWebGL.assert(crc3.getUniformLocation(program, info.name));
-                    else if (!RenderInjectorShader.uboInfos.includes(info.name))
-                        RenderInjectorShader.uboInfos.push(info.name);
+                    let location = crc3.getUniformLocation(program, info.name);
+                    if (location)
+                        detectedUniforms[info.name] = FudgeCore.RenderWebGL.assert(location);
                 }
-                if (oldLength < RenderInjectorShader.uboInfos.length)
-                    setUniformInfosInUBO();
                 return detectedUniforms;
             }
-            function setUniformInfosInUBO() {
-                initializeUBO();
-                let uboVariableIndices = crc3.getUniformIndices(program, RenderInjectorShader.uboInfos);
-                let uboVariableOffsets = crc3.getActiveUniforms(program, uboVariableIndices, crc3.UNIFORM_OFFSET);
-                RenderInjectorShader.uboInfos.forEach((_name, _index) => {
-                    RenderInjectorShader.uboLightsInfo[_name] = new UboLightStrucure(uboVariableIndices[_index], uboVariableOffsets[_index]);
-                });
-            }
-            function initializeUBO() {
-                let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
+            function createUBOLights() {
                 const blockIndex = crc3.getUniformBlockIndex(program, FudgeCore.UNIFORM_BLOCKS.LIGHTS.NAME);
                 const blockSize = crc3.getActiveUniformBlockParameter(program, blockIndex, crc3.UNIFORM_BLOCK_DATA_SIZE);
-                const uboBuffer = crc3.createBuffer();
-                crc3.bindBuffer(crc3.UNIFORM_BUFFER, uboBuffer);
-                crc3.bufferData(crc3.UNIFORM_BUFFER, blockSize, crc3.DYNAMIC_DRAW);
-                crc3.bindBuffer(crc3.UNIFORM_BUFFER, null);
-                crc3.uniformBlockBinding(program, blockIndex, FudgeCore.UNIFORM_BLOCKS.LIGHTS.BINDING);
-                crc3.bindBufferBase(crc3.UNIFORM_BUFFER, FudgeCore.UNIFORM_BLOCKS.LIGHTS.BINDING, uboBuffer);
+                const ubo = FudgeCore.RenderWebGL.assert(crc3.createBuffer());
+                crc3.bindBuffer(WebGL2RenderingContext.UNIFORM_BUFFER, ubo);
+                crc3.bufferData(WebGL2RenderingContext.UNIFORM_BUFFER, blockSize, crc3.DYNAMIC_DRAW);
+                crc3.bindBufferBase(WebGL2RenderingContext.UNIFORM_BUFFER, FudgeCore.UNIFORM_BLOCKS.LIGHTS.BINDING, ubo);
+                return ubo;
+            }
+            function detectUBOLightsVariableOffsets() {
+                const uboVariableNames = [
+                    "u_nLightsDirectional",
+                    "u_nLightsPoint",
+                    "u_nLightsSpot",
+                    "u_ambient.vctColor",
+                    "u_directional[0].vctColor",
+                    "u_point[0].vctColor",
+                    "u_spot[0].vctColor"
+                ];
+                const uboVariableIndices = crc3.getUniformIndices(program, uboVariableNames);
+                const uboVariableOffsets = crc3.getActiveUniforms(program, uboVariableIndices, crc3.UNIFORM_OFFSET);
+                const uboVariableNameToOffset = {};
+                uboVariableNames.forEach((_name, _index) => uboVariableNameToOffset[_name] = uboVariableOffsets[_index]);
+                return uboVariableNameToOffset;
             }
         }
     }
-    RenderInjectorShader.uboLightsInfo = {};
-    RenderInjectorShader.uboInfos = new Array();
     FudgeCore.RenderInjectorShader = RenderInjectorShader;
-    class UboLightStrucure {
-        constructor(_index, _offset) {
-            this.index = {};
-            this.offset = {};
-            this.index = _index;
-            this.offset = _offset;
-        }
-    }
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -1083,28 +1085,16 @@ var FudgeCore;
         static getRenderBuffers(_shader) {
             let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
             this.renderMesh = this.renderMesh || new FudgeCore.RenderMesh(this);
-            if (_shader.define.includes("FLAT")) {
-                if (this.renderMesh.flat == null)
-                    this.renderMesh.flat = {
-                        vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.verticesFlat),
-                        indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indicesFlat),
-                        normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normalsFlat),
-                        textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVsFlat),
-                        nIndices: this.renderMesh.indicesFlat.length
-                    };
-                return this.renderMesh.flat;
-            }
-            else {
-                if (this.renderMesh.smooth == null)
-                    this.renderMesh.smooth = {
-                        vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.vertices),
-                        indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indices),
-                        normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normalsVertex),
-                        textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVs),
-                        nIndices: this.renderMesh.indices.length
-                    };
-                return this.renderMesh.smooth;
-            }
+            if (this.renderMesh.buffers == null)
+                this.renderMesh.buffers = {
+                    vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.vertices),
+                    indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indices),
+                    normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normals),
+                    textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVs),
+                    colors: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.colors),
+                    nIndices: this.renderMesh.indices.length
+                };
+            return this.renderMesh.buffers;
             function createBuffer(_type, _array) {
                 let buffer = FudgeCore.RenderWebGL.assert(crc3.createBuffer());
                 crc3.bindBuffer(_type, buffer);
@@ -1115,13 +1105,13 @@ var FudgeCore;
         static useRenderBuffers(_shader, _mtxMeshToWorld, _mtxMeshToView, _id) {
             let renderBuffers = this.getRenderBuffers(_shader);
             let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
-            function setBuffer(_name, _buffer) {
+            function setBuffer(_name, _buffer, _size) {
                 let attribute = _shader.attributes[_name];
                 if (attribute == undefined)
                     return;
                 crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _buffer);
                 crc3.enableVertexAttribArray(attribute);
-                FudgeCore.RenderWebGL.setAttributeStructure(attribute, { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 });
+                FudgeCore.RenderWebGL.setAttributeStructure(attribute, { size: _size, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 });
             }
             let uniform;
             uniform = _shader.uniforms["u_mtxMeshToView"];
@@ -1134,8 +1124,9 @@ var FudgeCore;
                 let normalMatrix = FudgeCore.Matrix4x4.TRANSPOSE(FudgeCore.Matrix4x4.INVERSION(_mtxMeshToWorld));
                 crc3.uniformMatrix4fv(uniform, false, normalMatrix.get());
             }
-            setBuffer("a_vctPosition", renderBuffers.vertices);
-            setBuffer("a_vctNormal", renderBuffers.normals);
+            setBuffer("a_vctPosition", renderBuffers.vertices, 3);
+            setBuffer("a_vctNormal", renderBuffers.normals, 3);
+            setBuffer("a_vctColor", renderBuffers.colors, 4);
             let attribute = _shader.attributes["a_vctTexture"];
             if (attribute) {
                 crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.textureUVs);
@@ -1198,6 +1189,46 @@ var FudgeCore;
         };
     })(ParticleData = FudgeCore.ParticleData || (FudgeCore.ParticleData = {}));
     class RenderInjectorShaderParticleSystem extends FudgeCore.RenderInjectorShader {
+        static {
+            this.FUNCTIONS = {
+                [ParticleData.FUNCTION.ADDITION]: (_parameters) => {
+                    return `(${_parameters.reduce((_accumulator, _value) => `${_accumulator} + ${_value}`)})`;
+                },
+                [ParticleData.FUNCTION.SUBTRACTION]: (_parameters) => {
+                    return `(${_parameters.reduce((_accumulator, _value) => `${_accumulator} - ${_value}`)})`;
+                },
+                [ParticleData.FUNCTION.MULTIPLICATION]: (_parameters) => {
+                    return `(${_parameters.reduce((_accumulator, _value) => `${_accumulator} * ${_value}`)})`;
+                },
+                [ParticleData.FUNCTION.DIVISION]: (_parameters) => {
+                    return `(${_parameters[0]} / ${_parameters[1]})`;
+                },
+                [ParticleData.FUNCTION.MODULO]: (_parameters) => {
+                    return `(${_parameters.reduce((_accumulator, _value) => `mod(${_accumulator}, ${_value})`)})`;
+                },
+                [ParticleData.FUNCTION.POWER]: (_parameters) => {
+                    return `pow(${_parameters[0]}, ${_parameters[1]})`;
+                },
+                [ParticleData.FUNCTION.POLYNOMIAL3]: (_parameters) => {
+                    let x = _parameters[0];
+                    let a = _parameters[1];
+                    let b = _parameters[2];
+                    let c = _parameters[3];
+                    let d = _parameters[4];
+                    return `(${a} * pow(${x}, 3.0) + ${b} * pow(${x}, 2.0) + ${c} * ${x} + ${d})`;
+                },
+                [ParticleData.FUNCTION.SQUARE_ROOT]: (_parameters) => {
+                    let x = _parameters[0];
+                    return `sqrt(${x})`;
+                },
+                [ParticleData.FUNCTION.RANDOM]: (_parameters) => {
+                    return `fetchRandomNumber(int(${_parameters[0]}), iParticleSystemRandomNumbersSize, iParticleSystemRandomNumbersLength)`;
+                },
+                [ParticleData.FUNCTION.RANDOM_RANGE]: (_parameters) => {
+                    return `(${RenderInjectorShaderParticleSystem.FUNCTIONS["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]})`;
+                }
+            };
+        }
         static decorate(_constructor) {
             super.decorate(_constructor.prototype);
             Object.defineProperty(_constructor.prototype, "getVertexShaderSource", {
@@ -1362,54 +1393,17 @@ var FudgeCore;
                     }
                     argumentsLastIndex++;
                 }
-                let args = [functionRegex.lastIndex - 1, ...commaIndices, argumentsLastIndex - 1]
-                    .reduce((_accumulator, _position, _index, _positions) => _index == _positions.length - 1 ?
-                    _accumulator :
-                    _accumulator.concat(_code.slice(_position + 1, _positions[_index + 1]).trim()), []);
+                let args = [functionRegex.lastIndex - 1, ...commaIndices, argumentsLastIndex - 1].reduce((_accumulator, _position, _index, _positions) => {
+                    return _index == _positions.length - 1 ?
+                        _accumulator :
+                        _accumulator.concat(_code.slice(_position + 1, _positions[_index + 1]).trim());
+                }, []);
                 functionRegex.lastIndex = match.index;
                 _code = `${_code.slice(0, match.index)}(${functionGenerator(args)})${_code.slice(argumentsLastIndex)}`;
             }
             return _code;
         }
     }
-    RenderInjectorShaderParticleSystem.FUNCTIONS = {
-        [ParticleData.FUNCTION.ADDITION]: (_parameters) => {
-            return `(${_parameters.reduce((_accumulator, _value) => `${_accumulator} + ${_value}`)})`;
-        },
-        [ParticleData.FUNCTION.SUBTRACTION]: (_parameters) => {
-            return `(${_parameters.reduce((_accumulator, _value) => `${_accumulator} - ${_value}`)})`;
-        },
-        [ParticleData.FUNCTION.MULTIPLICATION]: (_parameters) => {
-            return `(${_parameters.reduce((_accumulator, _value) => `${_accumulator} * ${_value}`)})`;
-        },
-        [ParticleData.FUNCTION.DIVISION]: (_parameters) => {
-            return `(${_parameters[0]} / ${_parameters[1]})`;
-        },
-        [ParticleData.FUNCTION.MODULO]: (_parameters) => {
-            return `(${_parameters.reduce((_accumulator, _value) => `mod(${_accumulator}, ${_value})`)})`;
-        },
-        [ParticleData.FUNCTION.POWER]: (_parameters) => {
-            return `pow(${_parameters[0]}, ${_parameters[1]})`;
-        },
-        [ParticleData.FUNCTION.POLYNOMIAL3]: (_parameters) => {
-            let x = _parameters[0];
-            let a = _parameters[1];
-            let b = _parameters[2];
-            let c = _parameters[3];
-            let d = _parameters[4];
-            return `(${a} * pow(${x}, 3.0) + ${b} * pow(${x}, 2.0) + ${c} * ${x} + ${d})`;
-        },
-        [ParticleData.FUNCTION.SQUARE_ROOT]: (_parameters) => {
-            let x = _parameters[0];
-            return `sqrt(${x})`;
-        },
-        [ParticleData.FUNCTION.RANDOM]: (_parameters) => {
-            return `fetchRandomNumber(int(${_parameters[0]}), iParticleSystemRandomNumbersSize, iParticleSystemRandomNumbersLength)`;
-        },
-        [ParticleData.FUNCTION.RANDOM_RANGE]: (_parameters) => {
-            return `(${RenderInjectorShaderParticleSystem.FUNCTIONS["random"](_parameters)} * (${_parameters[2]} - ${_parameters[1]}) + ${_parameters[1]})`;
-        }
-    };
     FudgeCore.RenderInjectorShaderParticleSystem = RenderInjectorShaderParticleSystem;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -1430,15 +1424,13 @@ var FudgeCore;
                 crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData);
             }
             else {
-                this.renderData = {};
                 const texture = FudgeCore.Render.assert(crc3.createTexture());
                 crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
                 let textureSize = Math.ceil(Math.sqrt(this.size));
                 textureSize = Math.min(textureSize, crc3.getParameter(crc3.MAX_TEXTURE_SIZE));
                 let randomNumbers = [];
-                for (let i = 0; i < textureSize * textureSize; i++) {
+                for (let i = 0; i < textureSize * textureSize; i++)
                     randomNumbers.push(Math.random());
-                }
                 try {
                     crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.R32F, textureSize, textureSize, 0, WebGL2RenderingContext.RED, WebGL2RenderingContext.FLOAT, Float32Array.from(randomNumbers));
                 }
@@ -1466,8 +1458,9 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Recycler {
-        static get(_T) {
-            let key = _T.name;
+        static { this.depot = {}; }
+        static get(_t) {
+            let key = _t.name;
             let instances = Recycler.depot[key];
             if (instances && instances.length > 0) {
                 let instance = instances.pop();
@@ -1475,14 +1468,14 @@ var FudgeCore;
                 return instance;
             }
             else
-                return new _T();
+                return new _t();
         }
-        static borrow(_T) {
+        static borrow(_t) {
             let t;
-            let key = _T.name;
+            let key = _t.name;
             let instances = Recycler.depot[key];
             if (!instances || instances.length == 0) {
-                t = new _T();
+                t = new _t();
                 Recycler.store(t);
                 return t;
             }
@@ -1496,15 +1489,14 @@ var FudgeCore;
             instances.push(_instance);
             Recycler.depot[key] = instances;
         }
-        static dump(_T) {
-            let key = _T.name;
+        static dump(_t) {
+            let key = _t.name;
             Recycler.depot[key] = [];
         }
         static dumpAll() {
             Recycler.depot = {};
         }
     }
-    Recycler.depot = {};
     FudgeCore.Recycler = Recycler;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -1901,11 +1893,13 @@ var FudgeCore;
         }
     };
     class RenderWebGL extends FudgeCore.EventTargetStatic {
+        static { this.crc3 = RenderWebGL.initialize(); }
+        static { this.rectRender = RenderWebGL.getCanvasRect(); }
         static initialize(_antialias, _alpha) {
-            FudgeCore.fudgeConfig = FudgeCore.fudgeConfig || {};
+            let fudgeConfig = Reflect.get(globalThis, "fudgeConfig") || {};
             let contextAttributes = {
-                alpha: (_alpha != undefined) ? _alpha : FudgeCore.fudgeConfig.alpha || false,
-                antialias: (_antialias != undefined) ? _antialias : FudgeCore.fudgeConfig.antialias || false,
+                alpha: (_alpha != undefined) ? _alpha : fudgeConfig.alpha || false,
+                antialias: (_antialias != undefined) ? _antialias : fudgeConfig.antialias || false,
                 premultipliedAlpha: false
             };
             FudgeCore.Debug.fudge("Initialize RenderWebGL", contextAttributes);
@@ -2060,51 +2054,42 @@ var FudgeCore;
             catch (_error) {
             }
         }
-        static setLightsInShader(_shader, _lights) {
-            _shader.useProgram();
-            let uni = _shader.uniforms;
-            let ambient = uni["u_ambient.vctColor"];
-            if (ambient) {
-                RenderWebGL.crc3.uniform4fv(ambient, [0, 0, 0, 0]);
-                let cmpLights = _lights.get(FudgeCore.LightAmbient);
-                if (cmpLights) {
-                    let result = new FudgeCore.Color(0, 0, 0, 1);
-                    for (let cmpLight of cmpLights)
-                        result.add(cmpLight.light.color);
-                    RenderWebGL.crc3.uniform4fv(ambient, result.getArray());
-                }
+        static updateLightsUBO(_lights) {
+            if (!RenderWebGL.uboLights)
+                return;
+            RenderWebGL.crc3.bindBuffer(WebGL2RenderingContext.UNIFORM_BUFFER, RenderWebGL.uboLights);
+            let cmpLights = _lights.get(FudgeCore.LightAmbient);
+            if (cmpLights) {
+                let result = new FudgeCore.Color(0, 0, 0, 0);
+                for (let cmpLight of cmpLights)
+                    result.add(cmpLight.light.color);
+                RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, RenderWebGL.uboLightsVariableOffsets["u_ambient.vctColor"], new Float32Array(result.getArray()));
             }
-            fillLightBuffers(FudgeCore.LightDirectional, "u_nLightsDirectional", "u_directional");
-            fillLightBuffers(FudgeCore.LightPoint, "u_nLightsPoint", "u_point");
-            fillLightBuffers(FudgeCore.LightSpot, "u_nLightsSpot", "u_spot");
-            function fillLightBuffers(_type, _uniNumber, _uniStruct) {
-                let uni = FudgeCore.RenderInjectorShader.uboLightsInfo;
-                let uniLights = uni[_uniNumber];
-                if (uniLights) {
-                    let zeroOut = new Uint8Array([0]);
-                    ;
-                    RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uniLights.offset, zeroOut);
-                    let cmpLights = _lights.get(_type);
-                    if (cmpLights) {
-                        let n = cmpLights.length;
-                        let nLightsAmount = new Uint8Array([n]);
-                        ;
-                        RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uniLights.offset, nLightsAmount);
-                        let i = 0;
-                        for (let cmpLight of cmpLights) {
-                            RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uni[`${_uniStruct}[${i}].vctColor`].offset, cmpLight.light.color.getArray());
-                            let mtxTotal = FudgeCore.Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
-                            RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uni[`${_uniStruct}[${i}].mtxShape`].offset, mtxTotal.get());
-                            if (_type != FudgeCore.LightDirectional) {
-                                let mtxInverse = mtxTotal.inverse();
-                                RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, uni[`${_uniStruct}[${i}].mtxShapeInverse`].offset, mtxInverse.get());
-                                FudgeCore.Recycler.store(mtxInverse);
-                            }
-                            FudgeCore.Recycler.store(mtxTotal);
-                            i++;
-                        }
+            updateLights(FudgeCore.LightDirectional, "u_nLightsDirectional", "u_directional");
+            updateLights(FudgeCore.LightPoint, "u_nLightsPoint", "u_point");
+            updateLights(FudgeCore.LightSpot, "u_nLightsSpot", "u_spot");
+            function updateLights(_type, _uniName, _uniStruct) {
+                const cmpLights = _lights.get(_type);
+                RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, RenderWebGL.uboLightsVariableOffsets[_uniName], new Uint8Array([cmpLights?.length ?? 0]));
+                if (!cmpLights)
+                    return;
+                const lightDataSize = 4 + 16 + 16;
+                const lightsData = new Float32Array(cmpLights.length * lightDataSize);
+                let iLight = 0;
+                for (let cmpLight of cmpLights) {
+                    const lightDataOffset = iLight * lightDataSize;
+                    lightsData.set(cmpLight.light.color.getArray(), lightDataOffset + 0);
+                    let mtxTotal = FudgeCore.Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
+                    lightsData.set(mtxTotal.get(), lightDataOffset + 4);
+                    if (_type != FudgeCore.LightDirectional) {
+                        let mtxInverse = mtxTotal.inverse();
+                        lightsData.set(mtxInverse.get(), lightDataOffset + 4 + 16);
+                        FudgeCore.Recycler.store(mtxInverse);
                     }
+                    FudgeCore.Recycler.store(mtxTotal);
+                    iLight++;
                 }
+                RenderWebGL.crc3.bufferSubData(RenderWebGL.crc3.UNIFORM_BUFFER, RenderWebGL.uboLightsVariableOffsets[`${_uniStruct}[0].vctColor`], lightsData);
             }
         }
         static drawNode(_node, _cmpCamera) {
@@ -2119,7 +2104,12 @@ var FudgeCore;
             shader.useProgram();
             coat.useRenderData(shader, cmpMaterial);
             let mtxMeshToView = this.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
-            let renderBuffers = this.getRenderBuffers(cmpMesh, shader, mtxMeshToView);
+            let renderBuffers = cmpMesh.mesh.useRenderBuffers(shader, cmpMesh.mtxWorld, mtxMeshToView);
+            if (cmpMesh.skeleton)
+                if (cmpMesh.skeleton instanceof FudgeCore.SkeletonInstance)
+                    cmpMesh.skeleton.useRenderBuffer(shader);
+                else
+                    FudgeCore.Debug.warn(`${RenderWebGL.name}: ${FudgeCore.ComponentMesh.name} references ${FudgeCore.Skeleton.name}Id ${cmpMesh.skeleton} and not an instance of it. This can happen if this node is not a descendant of the referenced skeleton inside the graph. FUDGE currently only supports skinned meshes with a skeleton that is a direct ancestor of the mesh.`);
             let uniform = shader.uniforms["u_vctCamera"];
             if (uniform)
                 RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
@@ -2162,15 +2152,7 @@ var FudgeCore;
             }
             return FudgeCore.Matrix4x4.MULTIPLICATION(_mtxWorldToView, _cmpMesh.mtxWorld);
         }
-        static getRenderBuffers(_cmpMesh, _shader, _mtxMeshToView) {
-            if (_cmpMesh.mesh instanceof FudgeCore.MeshSkin && (_shader.define.includes("SKIN")))
-                return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView, null, _cmpMesh.skeleton?.mtxBones);
-            else
-                return _cmpMesh.mesh.useRenderBuffers(_shader, _cmpMesh.mtxWorld, _mtxMeshToView);
-        }
     }
-    RenderWebGL.crc3 = RenderWebGL.initialize();
-    RenderWebGL.rectRender = RenderWebGL.getCanvasRect();
     FudgeCore.RenderWebGL = RenderWebGL;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -2178,6 +2160,9 @@ var FudgeCore;
     class RenderInjectorTexture extends FudgeCore.RenderInjector {
         static decorate(_constructor) {
             FudgeCore.RenderInjector.inject(_constructor, RenderInjectorTexture);
+            Object.defineProperty(_constructor.prototype, "deleteRenderData", {
+                value: RenderInjectorTexture.deleteRenderData
+            });
         }
         static injectTexture() {
             let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
@@ -2216,6 +2201,15 @@ var FudgeCore;
                 crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
                 this.useRenderData();
             }
+        }
+        static deleteRenderData() {
+            if (!this.renderData)
+                return;
+            let crc3 = FudgeCore.RenderWebGL.getRenderingContext();
+            crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
+            for (const textureKey in this.renderData)
+                crc3.deleteTexture(this.renderData[textureKey]);
+            this.renderData = null;
         }
     }
     FudgeCore.RenderInjectorTexture = RenderInjectorTexture;
@@ -2373,27 +2367,27 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Joint extends FudgeCore.Component {
+        static { this.baseClass = Joint; }
+        static { this.subclasses = []; }
+        #idBodyAnchor;
+        #idBodyTied;
+        #bodyAnchor;
+        #bodyTied;
+        #connected;
+        #anchor;
+        #internalCollision;
+        #breakForce;
+        #breakTorque;
+        #nameChildToConnect;
         constructor(_bodyAnchor = null, _bodyTied = null) {
             super();
+            this.singleton = false;
             this.#idBodyAnchor = 0;
             this.#idBodyTied = 0;
             this.#connected = false;
             this.#internalCollision = false;
             this.#breakForce = 0;
             this.#breakTorque = 0;
-            this.singleton = false;
-            this.#getMutator = () => {
-                let mutator = {
-                    nameChildToConnect: this.#nameChildToConnect,
-                    internalCollision: this.#internalCollision,
-                    breakForce: this.#breakForce,
-                    breakTorque: this.#breakTorque
-                };
-                return mutator;
-            };
-            this.#mutate = (_mutator) => {
-                this.mutateBase(_mutator, ["internalCollision", "breakForce", "breakTorque"]);
-            };
             this.hndEvent = (_event) => {
                 switch (_event.type) {
                     case "componentAdd":
@@ -2406,21 +2400,23 @@ var FudgeCore;
                         break;
                 }
             };
+            this.#getMutator = () => {
+                let mutator = {
+                    nameChildToConnect: this.#nameChildToConnect,
+                    internalCollision: this.#internalCollision,
+                    breakForce: this.#breakForce,
+                    breakTorque: this.#breakTorque
+                };
+                return mutator;
+            };
+            this.#mutate = (_mutator) => {
+                this.mutateBase(_mutator, ["internalCollision", "breakForce", "breakTorque"]);
+            };
             this.bodyAnchor = _bodyAnchor;
             this.bodyTied = _bodyTied;
             this.addEventListener("componentAdd", this.hndEvent);
             this.addEventListener("componentRemove", this.hndEvent);
         }
-        #idBodyAnchor;
-        #idBodyTied;
-        #bodyAnchor;
-        #bodyTied;
-        #connected;
-        #anchor;
-        #internalCollision;
-        #breakForce;
-        #breakTorque;
-        #nameChildToConnect;
         static registerSubclass(_subclass) { return Joint.subclasses.push(_subclass) - 1; }
         get bodyAnchor() {
             return this.#bodyAnchor;
@@ -2548,8 +2544,6 @@ var FudgeCore;
             this.deleteFromMutator(_mutator, this.#getMutator());
             super.mutate(_mutator);
         }
-        #getMutator;
-        #mutate;
         reduceMutator(_mutator) {
             delete _mutator.springDamper;
             delete _mutator.joint;
@@ -2579,45 +2573,27 @@ var FudgeCore;
             for (let key in _delete)
                 delete _mutator[key];
         }
+        #getMutator;
+        #mutate;
     }
-    Joint.baseClass = Joint;
-    Joint.subclasses = [];
     FudgeCore.Joint = Joint;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class JointAxial extends FudgeCore.Joint {
+        #maxMotor = 10;
+        #minMotor = -10;
+        #motorSpeed = 0;
+        #axis;
+        #springFrequency = 0;
+        #springDamping = 0;
         constructor(_bodyAnchor = null, _bodyTied = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
             super(_bodyAnchor, _bodyTied);
-            this.#maxMotor = 10;
-            this.#minMotor = -10;
-            this.#motorSpeed = 0;
-            this.#springFrequency = 0;
-            this.#springDamping = 0;
-            this.#getMutator = () => {
-                let mutator = {
-                    springDamping: this.#springDamping,
-                    springFrequency: this.#springFrequency,
-                    maxMotor: this.#maxMotor,
-                    minMotor: this.#minMotor,
-                    motorSpeed: this.#motorSpeed
-                };
-                return mutator;
-            };
-            this.#mutate = (_mutator) => {
-                this.mutateBase(_mutator, ["springDamping", "springFrequency", "maxMotor", "minMotor", "motorSpeed"]);
-            };
             this.axis = _axis;
             this.anchor = _localAnchor;
             this.minMotor = -10;
             this.maxMotor = 10;
         }
-        #maxMotor;
-        #minMotor;
-        #motorSpeed;
-        #axis;
-        #springFrequency;
-        #springDamping;
         get axis() {
             return new FudgeCore.Vector3(this.#axis.x, this.#axis.y, this.#axis.z);
         }
@@ -2702,12 +2678,23 @@ var FudgeCore;
             Object.assign(mutator, this.#getMutator());
             return mutator;
         }
-        #getMutator;
-        #mutate;
         constructJoint() {
             this.springDamper = new OIMO.SpringDamper().setSpring(this.#springFrequency, this.#springDamping);
             super.constructJoint(this.#axis);
         }
+        #getMutator = () => {
+            let mutator = {
+                springDamping: this.#springDamping,
+                springFrequency: this.#springFrequency,
+                maxMotor: this.#maxMotor,
+                minMotor: this.#minMotor,
+                motorSpeed: this.#motorSpeed
+            };
+            return mutator;
+        };
+        #mutate = (_mutator) => {
+            this.mutateBase(_mutator, ["springDamping", "springFrequency", "maxMotor", "minMotor", "motorSpeed"]);
+        };
     }
     FudgeCore.JointAxial = JointAxial;
 })(FudgeCore || (FudgeCore = {}));
@@ -2738,6 +2725,9 @@ var FudgeCore;
         ANIMATION_QUANTIZATION["FRAMES"] = "frames";
     })(ANIMATION_QUANTIZATION = FudgeCore.ANIMATION_QUANTIZATION || (FudgeCore.ANIMATION_QUANTIZATION = {}));
     class Animation extends FudgeCore.Mutable {
+        static { this.subclasses = []; }
+        static { this.iSubclass = Animation.registerSubclass(Animation); }
+        #animationStructuresProcessed;
         constructor(_name = Animation.name, _animStructure = {}, _fps = 60) {
             super();
             this.idResource = undefined;
@@ -2754,7 +2744,6 @@ var FudgeCore;
             this.calculateTotalTime();
             FudgeCore.Project.register(this);
         }
-        #animationStructuresProcessed;
         static registerSubclass(_subClass) { return Animation.subclasses.push(_subClass) - 1; }
         get getLabels() {
             let en = new Enumerator(this.labels);
@@ -2811,6 +2800,8 @@ var FudgeCore;
         calculateTotalTime() {
             this.totalTime = 0;
             this.traverseStructureForTime(this.animationStructure);
+            if (this.totalTime == 0)
+                this.totalTime = 1;
         }
         getModalTime(_time, _playmode, _timeStop = _time) {
             switch (_playmode) {
@@ -2846,7 +2837,7 @@ var FudgeCore;
                 name: this.name,
                 labels: {},
                 events: {},
-                framesPerSecond: this.framesPerSecond,
+                framesPerSecond: this.framesPerSecond
             };
             for (let name in this.labels) {
                 s.labels[name] = this.labels[name];
@@ -2886,7 +2877,7 @@ var FudgeCore;
                     serialization[property] = structureOrSequence.serialize();
                 }
                 else {
-                    if (FudgeCore.Component.subclasses.some(type => type.name == property)) {
+                    if (FudgeCore.Component.subclasses.some(_type => _type.name == property)) {
                         serialization[property] = [];
                         for (const i in structureOrSequence) {
                             serialization[property].push(this.traverseStructureForSerialization(structureOrSequence[i]));
@@ -3020,7 +3011,7 @@ var FudgeCore;
             let seq = new FudgeCore.AnimationSequence();
             for (let i = 0; i < _sequence.length; i++) {
                 let oldKey = _sequence.getKey(i);
-                let key = new FudgeCore.AnimationKey(this.totalTime - oldKey.time, oldKey.value, oldKey.slopeOut, oldKey.slopeIn, oldKey.constant);
+                let key = new FudgeCore.AnimationKey(this.totalTime - oldKey.time, oldKey.value, oldKey.interpolation, oldKey.slopeOut, oldKey.slopeIn);
                 seq.addKey(key);
             }
             return seq;
@@ -3029,7 +3020,7 @@ var FudgeCore;
             let seq = new FudgeCore.AnimationSequence();
             let frameTime = 1000 / this.framesPerSecond;
             for (let i = 0; i < this.totalTime; i += frameTime) {
-                let key = new FudgeCore.AnimationKey(i, _sequence.evaluate(i), 0, 0, true);
+                let key = new FudgeCore.AnimationKey(i, _sequence.evaluate(i), FudgeCore.ANIMATION_INTERPOLATION.CONSTANT, 0, 0);
                 seq.addKey(key);
             }
             return seq;
@@ -3059,8 +3050,6 @@ var FudgeCore;
             return eventsToTrigger;
         }
     }
-    Animation.subclasses = [];
-    Animation.iSubclass = Animation.registerSubclass(Animation);
     FudgeCore.Animation = Animation;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -3097,13 +3086,17 @@ var FudgeCore;
                 this.d = this.c = this.b = this.a = 0;
                 return;
             }
-            if (!this.keyOut || this.keyIn.constant) {
+            if (!this.keyOut || this.keyIn.interpolation == FudgeCore.ANIMATION_INTERPOLATION.CONSTANT) {
                 this.d = this.keyIn.value;
                 this.c = this.b = this.a = 0;
                 return;
             }
             let x1 = this.keyOut.time - this.keyIn.time;
             this.d = this.keyIn.value;
+            if (this.keyIn.interpolation == FudgeCore.ANIMATION_INTERPOLATION.LINEAR) {
+                this.c = (this.keyOut.value - this.keyIn.value) / x1;
+                return;
+            }
             this.c = this.keyIn.slopeOut;
             this.a = (-x1 * (this.keyIn.slopeOut + this.keyOut.slopeIn) - 2 * this.keyIn.value + 2 * this.keyOut.value) / -Math.pow(x1, 3);
             this.b = (this.keyOut.slopeIn - this.keyIn.slopeOut - 3 * this.a * Math.pow(x1, 2)) / (2 * x1);
@@ -3113,25 +3106,27 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    let ANIMATION_INTERPOLATION;
+    (function (ANIMATION_INTERPOLATION) {
+        ANIMATION_INTERPOLATION[ANIMATION_INTERPOLATION["CONSTANT"] = 0] = "CONSTANT";
+        ANIMATION_INTERPOLATION[ANIMATION_INTERPOLATION["LINEAR"] = 1] = "LINEAR";
+        ANIMATION_INTERPOLATION[ANIMATION_INTERPOLATION["CUBIC"] = 2] = "CUBIC";
+    })(ANIMATION_INTERPOLATION = FudgeCore.ANIMATION_INTERPOLATION || (FudgeCore.ANIMATION_INTERPOLATION = {}));
     class AnimationKey extends FudgeCore.Mutable {
-        constructor(_time = 0, _value = 0, _slopeIn = 0, _slopeOut = 0, _constant = false) {
-            super();
-            this.#constant = false;
-            this.#slopeIn = 0;
-            this.#slopeOut = 0;
-            this.#time = _time;
-            this.#value = _value;
-            this.#slopeIn = _slopeIn;
-            this.#slopeOut = _slopeOut;
-            this.#constant = _constant;
-            this.broken = this.slopeIn != -this.slopeOut;
-            this.functionOut = new FudgeCore.AnimationFunction(this, null);
-        }
         #time;
         #value;
-        #constant;
-        #slopeIn;
-        #slopeOut;
+        #interpolation;
+        #slopeIn = 0;
+        #slopeOut = 0;
+        constructor(_time = 0, _value = 0, _interpolation = ANIMATION_INTERPOLATION.CUBIC, _slopeIn = 0, _slopeOut = 0) {
+            super();
+            this.#time = _time;
+            this.#value = _value;
+            this.#interpolation = _interpolation;
+            this.#slopeIn = _slopeIn;
+            this.#slopeOut = _slopeOut;
+            this.functionOut = new FudgeCore.AnimationFunction(this, null);
+        }
         static compare(_a, _b) {
             return _a.time - _b.time;
         }
@@ -3151,11 +3146,11 @@ var FudgeCore;
             this.functionIn.calculate();
             this.functionOut.calculate();
         }
-        get constant() {
-            return this.#constant;
+        get interpolation() {
+            return this.#interpolation;
         }
-        set constant(_constant) {
-            this.#constant = _constant;
+        set interpolation(_interpolation) {
+            this.#interpolation = _interpolation;
             this.functionIn.calculate();
             this.functionOut.calculate();
         }
@@ -3177,18 +3172,17 @@ var FudgeCore;
             let serialization = {};
             serialization.time = this.#time;
             serialization.value = this.#value;
+            serialization.interpolation = this.#interpolation;
             serialization.slopeIn = this.#slopeIn;
             serialization.slopeOut = this.#slopeOut;
-            serialization.constant = this.#constant;
             return serialization;
         }
         async deserialize(_serialization) {
             this.#time = _serialization.time;
             this.#value = _serialization.value;
+            this.#interpolation = _serialization.interpolation;
             this.#slopeIn = _serialization.slopeIn;
             this.#slopeOut = _serialization.slopeOut;
-            this.#constant = _serialization.constant;
-            this.broken = this.slopeIn != -this.slopeOut;
             return this;
         }
         getMutator() {
@@ -3215,7 +3209,7 @@ var FudgeCore;
             if (this.keys.length == 1 || this.keys[0].time >= _time)
                 return this.keys[0].value;
             for (let i = 0; i < this.keys.length - 1; i++) {
-                if (this.keys[i].time <= _time && this.keys[i + 1].time > _time) {
+                if (this.keys[i].time <= _time && _time < this.keys[i + 1].time) {
                     return this.keys[i].functionOut.evaluate(_time);
                 }
             }
@@ -3285,8 +3279,7 @@ var FudgeCore;
             this.regenerateFunctions();
             return this;
         }
-        reduceMutator(_mutator) {
-        }
+        reduceMutator(_mutator) { }
         regenerateFunctions() {
             for (let i = 0; i < this.keys.length; i++) {
                 let f = new FudgeCore.AnimationFunction(this.keys[i]);
@@ -3306,6 +3299,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class AnimationSprite extends FudgeCore.Animation {
+        static { this.iSubclass = FudgeCore.Animation.registerSubclass(AnimationSprite); }
         constructor(_name = "AnimationSprite") {
             super(_name, {}, 1);
             this.texture = FudgeCore.TextureDefault.texture;
@@ -3351,11 +3345,11 @@ var FudgeCore;
                             "mtxPivot": {
                                 "translation": {
                                     x: xTranslation,
-                                    y: yTranslation,
+                                    y: yTranslation
                                 },
                                 "scaling": {
                                     x: xScale,
-                                    y: yScale,
+                                    y: yScale
                                 }
                             }
                         }]
@@ -3414,7 +3408,6 @@ var FudgeCore;
             return animation;
         }
     }
-    AnimationSprite.iSubclass = FudgeCore.Animation.registerSubclass(AnimationSprite);
     FudgeCore.AnimationSprite = AnimationSprite;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -3480,8 +3473,10 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class AudioManager extends AudioContext {
-        constructor(contextOptions) {
-            super(contextOptions);
+        static { this.default = new AudioManager({ latencyHint: "interactive", sampleRate: 44100 }); }
+        static { this.eventUpdate = new Event("updateAudioGraph"); }
+        constructor(_contextOptions) {
+            super(_contextOptions);
             this.graph = null;
             this.cmpListener = null;
             this.listenTo = (_graph) => {
@@ -3513,13 +3508,15 @@ var FudgeCore;
             return this.gain.gain.value;
         }
     }
-    AudioManager.default = new AudioManager({ latencyHint: "interactive", sampleRate: 44100 });
-    AudioManager.eventUpdate = new Event("updateAudioGraph");
     FudgeCore.AudioManager = AudioManager;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentAnimator extends FudgeCore.Component {
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentAnimator); }
+        #scale;
+        #timeLocal;
+        #previous;
         constructor(_animation, _playmode = FudgeCore.ANIMATION_PLAYMODE.LOOP, _quantization = FudgeCore.ANIMATION_QUANTIZATION.CONTINOUS) {
             super();
             this.scaleWithGameTime = true;
@@ -3564,9 +3561,6 @@ var FudgeCore;
                 this.activate(true);
             });
         }
-        #scale;
-        #timeLocal;
-        #previous;
         set scale(_scale) {
             this.#scale = _scale;
             this.updateScale();
@@ -3576,6 +3570,9 @@ var FudgeCore;
         }
         get time() {
             return this.#timeLocal.get() % this.animation.totalTime;
+        }
+        set time(_time) {
+            this.jumpTo(_time);
         }
         activate(_on) {
             super.activate(_on);
@@ -3645,13 +3642,12 @@ var FudgeCore;
                 this.node.removeEventListener("renderPrepare", this.updateAnimationLoop);
             }
         }
-        executeEvents(events) {
-            for (let i = 0; i < events.length; i++) {
-                this.dispatchEvent(new Event(events[i]));
+        executeEvents(_events) {
+            for (let i = 0; i < _events.length; i++) {
+                this.dispatchEvent(new Event(_events[i]));
             }
         }
     }
-    ComponentAnimator.iSubclass = FudgeCore.Component.registerSubclass(ComponentAnimator);
     FudgeCore.ComponentAnimator = ComponentAnimator;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -3674,6 +3670,7 @@ var FudgeCore;
         AUDIO_NODE_TYPE[AUDIO_NODE_TYPE["GAIN"] = 2] = "GAIN";
     })(AUDIO_NODE_TYPE = FudgeCore.AUDIO_NODE_TYPE || (FudgeCore.AUDIO_NODE_TYPE = {}));
     class ComponentAudio extends FudgeCore.Component {
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentAudio); }
         constructor(_audio = null, _loop = false, _start = false, _audioManager = FudgeCore.AudioManager.default) {
             super();
             this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
@@ -3742,6 +3739,12 @@ var FudgeCore;
         get loop() {
             return this.source.loop;
         }
+        set playbackRate(_value) {
+            this.source.playbackRate.value = _value;
+        }
+        get playbackRate() {
+            return this.source.playbackRate.value;
+        }
         get isPlaying() {
             return this.playing;
         }
@@ -3775,7 +3778,7 @@ var FudgeCore;
         play(_on) {
             if (_on) {
                 if (this.audio.isReady) {
-                    this.createSource(this.audio, this.source.loop);
+                    this.createSource(this.audio, this.source.loop, this.playbackRate);
                     this.source.start(0, 0);
                 }
                 else {
@@ -3848,7 +3851,7 @@ var FudgeCore;
             this.gain.connect(_audioManager.gain);
             this.activate(active);
         }
-        createSource(_audio, _loop) {
+        createSource(_audio, _loop, _playbackRate = 1.0) {
             if (this.source) {
                 this.source.disconnect();
                 this.source.buffer = null;
@@ -3860,6 +3863,7 @@ var FudgeCore;
                 this.source.buffer = _audio.buffer;
             }
             this.source.loop = _loop;
+            this.playbackRate = _playbackRate;
         }
         updateConnection() {
             try {
@@ -3869,7 +3873,6 @@ var FudgeCore;
             }
         }
     }
-    ComponentAudio.iSubclass = FudgeCore.Component.registerSubclass(ComponentAudio);
     FudgeCore.ComponentAudio = ComponentAudio;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -3879,6 +3882,7 @@ var FudgeCore;
             super(...arguments);
             this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
         }
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentAudioListener); }
         update(_listener) {
             let mtxResult = this.mtxPivot;
             if (this.node)
@@ -3907,7 +3911,6 @@ var FudgeCore;
                 FudgeCore.Recycler.store(mtxResult);
         }
     }
-    ComponentAudioListener.iSubclass = FudgeCore.Component.registerSubclass(ComponentAudioListener);
     FudgeCore.ComponentAudioListener = ComponentAudioListener;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -3930,7 +3933,6 @@ var FudgeCore;
             super(...arguments);
             this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
             this.clrBackground = new FudgeCore.Color(0, 0, 0, 1);
-            this.#mtxProjection = new FudgeCore.Matrix4x4;
             this.projection = PROJECTION.CENTRAL;
             this.fieldOfView = 45;
             this.aspectRatio = 1.0;
@@ -3938,7 +3940,9 @@ var FudgeCore;
             this.near = 1;
             this.far = 2000;
             this.backgroundEnabled = true;
+            this.#mtxProjection = new FudgeCore.Matrix4x4;
         }
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentCamera); }
         #mtxWorldToView;
         #mtxCameraInverse;
         #mtxProjection;
@@ -3998,7 +4002,7 @@ var FudgeCore;
         getFar() {
             return this.far;
         }
-        projectCentral(_aspect = this.aspectRatio, _fieldOfView = this.fieldOfView, _direction = this.direction, _near = 1, _far = 2000) {
+        projectCentral(_aspect = this.aspectRatio, _fieldOfView = this.fieldOfView, _direction = this.direction, _near = this.near, _far = this.far) {
             this.aspectRatio = _aspect;
             this.fieldOfView = _fieldOfView;
             this.direction = _direction;
@@ -4053,6 +4057,8 @@ var FudgeCore;
                 projection: this.projection,
                 fieldOfView: this.fieldOfView,
                 direction: this.direction,
+                near: this.near,
+                far: this.far,
                 aspect: this.aspectRatio,
                 pivot: this.mtxPivot.serialize(),
                 [super.constructor.name]: super.serialize()
@@ -4060,12 +4066,14 @@ var FudgeCore;
             return serialization;
         }
         async deserialize(_serialization) {
-            this.clrBackground = _serialization.backgroundColor;
+            await this.clrBackground.deserialize(_serialization.backgroundColor);
             this.backgroundEnabled = _serialization.backgroundEnabled;
             this.projection = _serialization.projection;
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
             this.direction = _serialization.direction;
+            this.near = _serialization.near;
+            this.far = _serialization.far;
             await this.mtxPivot.deserialize(_serialization.pivot);
             await super.deserialize(_serialization[super.constructor.name]);
             switch (this.projection) {
@@ -4090,7 +4098,7 @@ var FudgeCore;
             super.mutate(_mutator);
             switch (this.projection) {
                 case PROJECTION.CENTRAL:
-                    this.projectCentral(this.aspectRatio, this.fieldOfView, this.direction);
+                    this.projectCentral(this.aspectRatio, this.fieldOfView, this.direction, this.near, this.far);
                     break;
             }
         }
@@ -4099,12 +4107,12 @@ var FudgeCore;
             super.reduceMutator(_mutator);
         }
     }
-    ComponentCamera.iSubclass = FudgeCore.Component.registerSubclass(ComponentCamera);
     FudgeCore.ComponentCamera = ComponentCamera;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentFaceCamera extends FudgeCore.Component {
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentFaceCamera); }
         constructor() {
             super();
             this.upLocal = true;
@@ -4113,12 +4121,12 @@ var FudgeCore;
             this.singleton = true;
         }
     }
-    ComponentFaceCamera.iSubclass = FudgeCore.Component.registerSubclass(ComponentFaceCamera);
     FudgeCore.ComponentFaceCamera = ComponentFaceCamera;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentGraphFilter extends FudgeCore.Component {
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentGraphFilter); }
         constructor() {
             super();
             this.singleton = true;
@@ -4131,7 +4139,6 @@ var FudgeCore;
             return this;
         }
     }
-    ComponentGraphFilter.iSubclass = FudgeCore.Component.registerSubclass(ComponentGraphFilter);
     FudgeCore.ComponentGraphFilter = ComponentGraphFilter;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -4180,6 +4187,7 @@ var FudgeCore;
         LIGHT_TYPE["SPOT"] = "LightSpot";
     })(LIGHT_TYPE = FudgeCore.LIGHT_TYPE || (FudgeCore.LIGHT_TYPE = {}));
     class ComponentLight extends FudgeCore.Component {
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentLight); }
         constructor(_light = new FudgeCore.LightAmbient()) {
             super();
             this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
@@ -4228,12 +4236,12 @@ var FudgeCore;
             _mutator.type = type;
         }
     }
-    ComponentLight.iSubclass = FudgeCore.Component.registerSubclass(ComponentLight);
     FudgeCore.ComponentLight = ComponentLight;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentMaterial extends FudgeCore.Component {
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentMaterial); }
         constructor(_material = null) {
             super();
             this.clrPrimary = FudgeCore.Color.CSS("white");
@@ -4263,12 +4271,12 @@ var FudgeCore;
             return this;
         }
     }
-    ComponentMaterial.iSubclass = FudgeCore.Component.registerSubclass(ComponentMaterial);
     FudgeCore.ComponentMaterial = ComponentMaterial;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentMesh extends FudgeCore.Component {
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentMesh); }
         constructor(_mesh, _skeleton) {
             super();
             this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
@@ -4289,7 +4297,9 @@ var FudgeCore;
             else
                 serialization = { mesh: FudgeCore.Serializer.serialize(this.mesh) };
             if (this.skeleton)
-                serialization.skeleton = this.skeleton.idSource;
+                serialization.skeleton = this.skeleton instanceof FudgeCore.SkeletonInstance ?
+                    this.skeleton.idSource :
+                    this.skeleton;
             serialization.pivot = this.mtxPivot.serialize();
             serialization[super.constructor.name] = super.serialize();
             return serialization;
@@ -4301,33 +4311,7 @@ var FudgeCore;
             else
                 mesh = await FudgeCore.Serializer.deserialize(_serialization.mesh);
             this.mesh = mesh;
-            if (_serialization.skeleton)
-                this.addEventListener("componentAdd", (_event) => {
-                    if (_event.target != this)
-                        return;
-                    const trySetSkeleton = () => {
-                        let root = this.node;
-                        while (root.getParent()) {
-                            root = root.getParent();
-                        }
-                        for (const node of root) {
-                            if (node instanceof FudgeCore.SkeletonInstance && node.idSource == _serialization.skeleton)
-                                this.skeleton = node;
-                        }
-                        if (!this.skeleton) {
-                            const trySetSkeletonOnChildAppend = _event => {
-                                root.removeEventListener("childAppend", trySetSkeletonOnChildAppend);
-                                if (_event.target instanceof FudgeCore.SkeletonInstance && _event.target.idSource == _serialization.skeleton)
-                                    this.skeleton = _event.target;
-                                else {
-                                    trySetSkeleton();
-                                }
-                            };
-                            root.addEventListener("childAppend", trySetSkeletonOnChildAppend);
-                        }
-                    };
-                    trySetSkeleton();
-                });
+            this.skeleton = _serialization.skeleton;
             await this.mtxPivot.deserialize(_serialization.pivot);
             await super.deserialize(_serialization[super.constructor.name]);
             return this;
@@ -4337,7 +4321,6 @@ var FudgeCore;
             return mutator;
         }
     }
-    ComponentMesh.iSubclass = FudgeCore.Component.registerSubclass(ComponentMesh);
     FudgeCore.ComponentMesh = ComponentMesh;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -4348,7 +4331,12 @@ var FudgeCore;
         PARTICLE_SYSTEM_PLAYMODE[PARTICLE_SYSTEM_PLAYMODE["LOOP"] = 0] = "LOOP";
         PARTICLE_SYSTEM_PLAYMODE[PARTICLE_SYSTEM_PLAYMODE["PLAY_ONCE"] = 1] = "PLAY_ONCE";
     })(PARTICLE_SYSTEM_PLAYMODE = FudgeCore.PARTICLE_SYSTEM_PLAYMODE || (FudgeCore.PARTICLE_SYSTEM_PLAYMODE = {}));
-    let ComponentParticleSystem = ComponentParticleSystem_1 = class ComponentParticleSystem extends FudgeCore.Component {
+    let ComponentParticleSystem = class ComponentParticleSystem extends FudgeCore.Component {
+        static { ComponentParticleSystem_1 = this; }
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentParticleSystem_1); }
+        #size;
+        #timeScale;
+        #time;
         constructor(_particleSystem = null) {
             super();
             this.#timeScale = 1;
@@ -4392,9 +4380,6 @@ var FudgeCore;
             this.addEventListener("componentRemove", this.hndEvent);
             this.addEventListener("nodeDeserialized", this.hndEvent);
         }
-        #size;
-        #timeScale;
-        #time;
         get size() {
             return this.#size;
         }
@@ -4471,7 +4456,6 @@ var FudgeCore;
             delete _mutator.time;
         }
     };
-    ComponentParticleSystem.iSubclass = FudgeCore.Component.registerSubclass(ComponentParticleSystem_1);
     ComponentParticleSystem = ComponentParticleSystem_1 = __decorate([
         FudgeCore.RenderInjectorComponentParticleSystem.decorate
     ], ComponentParticleSystem);
@@ -4490,6 +4474,7 @@ var FudgeCore;
             super(...arguments);
             this.pick = PICK.RADIUS;
         }
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentPick); }
         pickAndDispatch(_ray, _event) {
             let cmpMesh = this.node.getComponent(FudgeCore.ComponentMesh);
             let position = cmpMesh ? cmpMesh.mtxWorld.translation : this.node.mtxWorld.translation;
@@ -4520,12 +4505,12 @@ var FudgeCore;
             return types;
         }
     }
-    ComponentPick.iSubclass = FudgeCore.Component.registerSubclass(ComponentPick);
     FudgeCore.ComponentPick = ComponentPick;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentScript extends FudgeCore.Component {
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentScript); }
         constructor() {
             super();
             this.singleton = false;
@@ -4538,7 +4523,6 @@ var FudgeCore;
             return this;
         }
     }
-    ComponentScript.iSubclass = FudgeCore.Component.registerSubclass(ComponentScript);
     FudgeCore.ComponentScript = ComponentScript;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -4551,6 +4535,7 @@ var FudgeCore;
         BASE[BASE["NODE"] = 3] = "NODE";
     })(BASE = FudgeCore.BASE || (FudgeCore.BASE = {}));
     class ComponentTransform extends FudgeCore.Component {
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentTransform); }
         constructor(_mtxInit = FudgeCore.Matrix4x4.IDENTITY()) {
             super();
             this.mtxLocal = _mtxInit;
@@ -4614,7 +4599,6 @@ var FudgeCore;
             super.reduceMutator(_mutator);
         }
     }
-    ComponentTransform.iSubclass = FudgeCore.Component.registerSubclass(ComponentTransform);
     FudgeCore.ComponentTransform = ComponentTransform;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -4629,13 +4613,14 @@ var FudgeCore;
     }
     FudgeCore.VRController = VRController;
     class ComponentVRDevice extends FudgeCore.ComponentCamera {
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentVRDevice); }
+        #mtxLocal;
         constructor() {
             super();
             this.rightCntrl = new VRController();
             this.leftCntrl = new VRController();
             this.addEventListener("componentAdd", this.getMtxLocalFromCmpTransform);
         }
-        #mtxLocal;
         get mtxLocal() {
             return this.#mtxLocal;
         }
@@ -4646,8 +4631,8 @@ var FudgeCore;
         }
         set rotation(_newRot) {
             let newRot = FudgeCore.Vector3.SCALE(FudgeCore.Vector3.SCALE(FudgeCore.Vector3.SUM(_newRot, this.#mtxLocal.rotation), -1), Math.PI / 180);
-            let orientation = new FudgeCore.PhysicsQuaternion();
-            orientation.setFromVector3(newRot.x, newRot.y, newRot.z);
+            let orientation = new FudgeCore.Quaternion();
+            orientation.eulerAngles = newRot;
             FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(FudgeCore.Vector3.DIFFERENCE(this.#mtxLocal.translation, FudgeCore.Vector3.ZERO())));
             FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(FudgeCore.Vector3.ZERO(), orientation));
             FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(FudgeCore.Vector3.DIFFERENCE(FudgeCore.Vector3.ZERO(), this.#mtxLocal.translation)));
@@ -4660,8 +4645,8 @@ var FudgeCore;
         }
         rotate(_by) {
             let rotAmount = FudgeCore.Vector3.SCALE(FudgeCore.Vector3.SCALE(_by, -1), Math.PI / 180);
-            let orientation = new FudgeCore.PhysicsQuaternion();
-            orientation.setFromVector3(rotAmount.x, rotAmount.y, rotAmount.z);
+            let orientation = new FudgeCore.Quaternion();
+            orientation.eulerAngles = rotAmount;
             FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(FudgeCore.Vector3.DIFFERENCE(this.#mtxLocal.translation, FudgeCore.Vector3.ZERO())));
             FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(FudgeCore.Vector3.ZERO(), orientation));
             FudgeCore.XRViewport.default.referenceSpace = FudgeCore.XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(FudgeCore.Vector3.DIFFERENCE(FudgeCore.Vector3.ZERO(), this.#mtxLocal.translation)));
@@ -4671,7 +4656,6 @@ var FudgeCore;
             this.#mtxLocal = this.node.getComponent(FudgeCore.ComponentTransform).mtxLocal;
         }
     }
-    ComponentVRDevice.iSubclass = FudgeCore.Component.registerSubclass(ComponentVRDevice);
     FudgeCore.ComponentVRDevice = ComponentVRDevice;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -4811,11 +4795,13 @@ var FudgeCore;
                 if (!this.active)
                     return;
                 let control = _event.target;
-                let event = new CustomEvent("output", { detail: {
+                let event = new CustomEvent("output", {
+                    detail: {
                         control: control,
                         input: _event.detail.output,
                         output: this.getOutput()
-                    } });
+                    }
+                });
                 this.dispatchEvent(event);
             };
             this.hndInputEvent = (_event) => {
@@ -4858,6 +4844,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Keyboard {
+        static { this.keysPressed = Keyboard.initialize(); }
         static isPressedOne(_keys) {
             for (let code of _keys) {
                 if (Keyboard.keysPressed[code])
@@ -4892,12 +4879,21 @@ var FudgeCore;
             Keyboard.keysPressed[_event.code] = (_event.type == "keydown");
         }
     }
-    Keyboard.keysPressed = Keyboard.initialize();
     FudgeCore.Keyboard = Keyboard;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class DebugAlert extends FudgeCore.DebugTarget {
+        static {
+            this.delegates = {
+                [FudgeCore.DEBUG_FILTER.INFO]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.INFO]),
+                [FudgeCore.DEBUG_FILTER.LOG]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.LOG]),
+                [FudgeCore.DEBUG_FILTER.WARN]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.WARN]),
+                [FudgeCore.DEBUG_FILTER.ERROR]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.ERROR]),
+                [FudgeCore.DEBUG_FILTER.FUDGE]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.FUDGE]),
+                [FudgeCore.DEBUG_FILTER.SOURCE]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.SOURCE])
+            };
+        }
         static createDelegate(_headline) {
             let delegate = function (_message, ..._args) {
                 let args = _args.map(_arg => _arg.toString());
@@ -4907,14 +4903,6 @@ var FudgeCore;
             return delegate;
         }
     }
-    DebugAlert.delegates = {
-        [FudgeCore.DEBUG_FILTER.INFO]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.INFO]),
-        [FudgeCore.DEBUG_FILTER.LOG]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.LOG]),
-        [FudgeCore.DEBUG_FILTER.WARN]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.WARN]),
-        [FudgeCore.DEBUG_FILTER.ERROR]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.ERROR]),
-        [FudgeCore.DEBUG_FILTER.FUDGE]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.FUDGE]),
-        [FudgeCore.DEBUG_FILTER.SOURCE]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.SOURCE])
-    };
     FudgeCore.DebugAlert = DebugAlert;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -4926,6 +4914,23 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class DebugTextArea extends FudgeCore.DebugTarget {
+        static { this.textArea = document.createElement("textarea"); }
+        static { this.autoScroll = true; }
+        static {
+            this.delegates = {
+                [FudgeCore.DEBUG_FILTER.INFO]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.INFO]),
+                [FudgeCore.DEBUG_FILTER.LOG]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.LOG]),
+                [FudgeCore.DEBUG_FILTER.WARN]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.WARN]),
+                [FudgeCore.DEBUG_FILTER.ERROR]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.ERROR]),
+                [FudgeCore.DEBUG_FILTER.FUDGE]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.FUDGE]),
+                [FudgeCore.DEBUG_FILTER.CLEAR]: DebugTextArea.clear,
+                [FudgeCore.DEBUG_FILTER.GROUP]: DebugTextArea.group,
+                [FudgeCore.DEBUG_FILTER.GROUPCOLLAPSED]: DebugTextArea.group,
+                [FudgeCore.DEBUG_FILTER.GROUPEND]: DebugTextArea.groupEnd,
+                [FudgeCore.DEBUG_FILTER.SOURCE]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.SOURCE])
+            };
+        }
+        static { this.groups = []; }
         static clear() {
             DebugTextArea.textArea.textContent = "";
             DebugTextArea.groups = [];
@@ -4955,21 +4960,6 @@ var FudgeCore;
                 DebugTextArea.textArea.scrollTop = DebugTextArea.textArea.scrollHeight;
         }
     }
-    DebugTextArea.textArea = document.createElement("textarea");
-    DebugTextArea.autoScroll = true;
-    DebugTextArea.delegates = {
-        [FudgeCore.DEBUG_FILTER.INFO]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.INFO]),
-        [FudgeCore.DEBUG_FILTER.LOG]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.LOG]),
-        [FudgeCore.DEBUG_FILTER.WARN]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.WARN]),
-        [FudgeCore.DEBUG_FILTER.ERROR]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.ERROR]),
-        [FudgeCore.DEBUG_FILTER.FUDGE]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.FUDGE]),
-        [FudgeCore.DEBUG_FILTER.CLEAR]: DebugTextArea.clear,
-        [FudgeCore.DEBUG_FILTER.GROUP]: DebugTextArea.group,
-        [FudgeCore.DEBUG_FILTER.GROUPCOLLAPSED]: DebugTextArea.group,
-        [FudgeCore.DEBUG_FILTER.GROUPEND]: DebugTextArea.groupEnd,
-        [FudgeCore.DEBUG_FILTER.SOURCE]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.SOURCE])
-    };
-    DebugTextArea.groups = [];
     FudgeCore.DebugTextArea = DebugTextArea;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -5344,6 +5334,9 @@ var FudgeCore;
         SYNC[SYNC["INSTANCE"] = 3] = "INSTANCE";
     })(SYNC || (SYNC = {}));
     class GraphInstance extends FudgeCore.Node {
+        #idSource;
+        #sync;
+        #deserializeFromSource;
         constructor(_graph) {
             super("GraphInstance");
             this.#idSource = undefined;
@@ -5378,9 +5371,6 @@ var FudgeCore;
                 return;
             this.#idSource = _graph.idResource;
         }
-        #idSource;
-        #sync;
-        #deserializeFromSource;
         get idSource() {
             return this.#idSource;
         }
@@ -5400,7 +5390,7 @@ var FudgeCore;
             return serialization;
         }
         async deserialize(_serialization) {
-            this.#idSource = _serialization.idSource;
+            this.#idSource = _serialization.idSource ?? _serialization.idResource;
             if (!_serialization.deserializeFromSource) {
                 await super.deserialize(_serialization);
                 this.#deserializeFromSource = false;
@@ -5420,12 +5410,12 @@ var FudgeCore;
             graph.addEventListener("mutateGraph", this.hndMutationGraph);
         }
         async set(_graph) {
+            this.#idSource = _graph.idResource;
             let serialization = FudgeCore.Serializer.serialize(_graph);
             for (let path in serialization) {
                 await this.deserialize(serialization[path]);
                 break;
             }
-            this.#idSource = _graph.idResource;
             this.dispatchEvent(new Event("graphInstantiated"));
         }
         get() {
@@ -5576,17 +5566,25 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Color extends FudgeCore.Mutable {
+        static {
+            this.crc2 = (() => {
+                const crc2 = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+                crc2.globalCompositeOperation = "copy";
+                return crc2;
+            })();
+        }
         constructor(_r = 1, _g = 1, _b = 1, _a = 1) {
             super();
             this.setNormRGBA(_r, _g, _b, _a);
         }
-        static getHexFromCSSKeyword(_keyword) {
+        static getBytesRGBAFromCSSKeyword(_keyword) {
             Color.crc2.fillStyle = _keyword;
-            return Color.crc2.fillStyle;
+            Color.crc2.fillRect(0, 0, 1, 1);
+            return Color.crc2.getImageData(0, 0, 1, 1).data;
         }
-        static CSS(_keyword, _alpha = 1) {
-            let hex = Color.getHexFromCSSKeyword(_keyword);
-            let color = new Color(parseInt(hex.substr(1, 2), 16) / 255, parseInt(hex.substr(3, 2), 16) / 255, parseInt(hex.substr(5, 2), 16) / 255, _alpha);
+        static CSS(_keyword, _alpha) {
+            const bytesRGBA = Color.getBytesRGBAFromCSSKeyword(_keyword);
+            const color = new Color(bytesRGBA[0] / 255, bytesRGBA[1] / 255, bytesRGBA[2] / 255, _alpha ?? bytesRGBA[3] / 255);
             return color;
         }
         static MULTIPLY(_color1, _color2) {
@@ -5621,7 +5619,7 @@ var FudgeCore;
         }
         getCSS() {
             let bytes = this.getArrayBytesRGBA();
-            return `RGBA(${bytes[0]}, ${bytes[1]}, ${bytes[2]}, ${bytes[3]})`;
+            return `RGBA(${bytes[0]}, ${bytes[1]}, ${bytes[2]}, ${this.a})`;
         }
         getHex() {
             let bytes = this.getArrayBytesRGBA();
@@ -5661,12 +5659,12 @@ var FudgeCore;
         }
         reduceMutator(_mutator) { }
     }
-    Color.crc2 = document.createElement("canvas").getContext("2d");
     FudgeCore.Color = Color;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Material extends FudgeCore.Mutable {
+        #coat;
         constructor(_name, _shader, _coat) {
             super();
             this.idResource = undefined;
@@ -5680,7 +5678,6 @@ var FudgeCore;
             }
             FudgeCore.Project.register(this);
         }
-        #coat;
         get coat() {
             return this.#coat;
         }
@@ -5735,6 +5732,8 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Calc {
+        static { this.deg2rad = Math.PI / 180; }
+        static { this.rad2deg = 1 / Calc.deg2rad; }
         static clamp(_value, _min, _max, _isSmaller = (_value1, _value2) => { return _value1 < _value2; }) {
             if (_isSmaller(_value, _min))
                 return _min;
@@ -5743,8 +5742,6 @@ var FudgeCore;
             return _value;
         }
     }
-    Calc.deg2rad = Math.PI / 180;
-    Calc.rad2deg = 1 / Calc.deg2rad;
     FudgeCore.Calc = Calc;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -5877,10 +5874,10 @@ var FudgeCore;
 (function (FudgeCore) {
     function Mash() {
         let n = 0xefc8249d;
-        let mash = function (data) {
-            data = data.toString();
-            for (let i = 0; i < data.length; i++) {
-                n += data.charCodeAt(i);
+        let mash = function (_data) {
+            _data = _data.toString();
+            for (let i = 0; i < _data.length; i++) {
+                n += _data.charCodeAt(i);
                 let h = 0.02519603282416938 * n;
                 n = h >>> 0;
                 h -= n;
@@ -6247,24 +6244,31 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Matrix4x4 extends FudgeCore.Mutable {
+        #translation;
+        #scaling;
+        #rotation;
+        #quaternion;
+        #translationDirty;
+        #scalingDirty;
+        #rotationDirty;
+        #quaternionDirty;
         constructor() {
             super();
-            this.#eulerAngles = FudgeCore.Vector3.ZERO();
-            this.#vectors = { translation: FudgeCore.Vector3.ZERO(), rotation: FudgeCore.Vector3.ZERO(), scaling: FudgeCore.Vector3.ZERO() };
             this.data = new Float32Array(16);
             this.mutator = null;
+            this.#translation = FudgeCore.Vector3.ZERO();
+            this.#scaling = FudgeCore.Vector3.ZERO();
+            this.#rotation = FudgeCore.Vector3.ONE();
+            this.#quaternion = FudgeCore.Quaternion.IDENTITY();
             this.recycle();
-            this.resetCache();
         }
-        #eulerAngles;
-        #vectors;
         static IDENTITY() {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
             return mtxResult;
         }
-        static CONSTRUCTION(_vectors) {
+        static CONSTRUCTION(_translation, _rotation, _scaling) {
             let result = Matrix4x4.IDENTITY();
-            result.mutate(_vectors);
+            result.mutate({ "translation": _translation, "rotation": _rotation, "scaling": _scaling });
             return result;
         }
         static MULTIPLICATION(_mtxLeft, _mtxRight) {
@@ -6410,7 +6414,10 @@ var FudgeCore;
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
             let zAxis = FudgeCore.Vector3.DIFFERENCE(_target, _translation);
             zAxis.normalize();
-            let xAxis = FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(_up, zAxis));
+            let vctCross = FudgeCore.Vector3.CROSS(_up, zAxis);
+            if (vctCross.magnitudeSquared == 0)
+                vctCross.x = 0.001;
+            let xAxis = FudgeCore.Vector3.NORMALIZATION(vctCross);
             let yAxis = _restrict ? _up : FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(zAxis, xAxis));
             zAxis = _restrict ? FudgeCore.Vector3.NORMALIZATION(FudgeCore.Vector3.CROSS(xAxis, _up)) : zAxis;
             mtxResult.data.set([
@@ -6473,21 +6480,9 @@ var FudgeCore;
             ]);
             return mtxResult;
         }
-        static ROTATION(_eulerAnglesInDegrees) {
+        static ROTATION(_rotation) {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            let anglesInRadians = FudgeCore.Vector3.SCALE(_eulerAnglesInDegrees, FudgeCore.Calc.deg2rad);
-            let sinX = Math.sin(anglesInRadians.x);
-            let cosX = Math.cos(anglesInRadians.x);
-            let sinY = Math.sin(anglesInRadians.y);
-            let cosY = Math.cos(anglesInRadians.y);
-            let sinZ = Math.sin(anglesInRadians.z);
-            let cosZ = Math.cos(anglesInRadians.z);
-            mtxResult.data.set([
-                cosZ * cosY, sinZ * cosY, -sinY, 0,
-                cosZ * sinY * sinX - sinZ * cosX, sinZ * sinY * sinX + cosZ * cosX, cosY * sinX, 0,
-                cosZ * sinY * cosX + sinZ * sinX, sinZ * sinY * cosX - cosZ * sinX, cosY * cosX, 0,
-                0, 0, 0, 1
-            ]);
+            Matrix4x4.SET_ROTATION(mtxResult.data, _rotation);
             return mtxResult;
         }
         static SCALING(_scalar) {
@@ -6544,40 +6539,112 @@ var FudgeCore;
             ]);
             return mtxResult;
         }
-        set translation(_translation) {
-            this.data.set(_translation.get(), 12);
-            if (this.vectors.translation)
-                this.vectors.translation.set(_translation.x, _translation.y, _translation.z);
-            else
-                this.vectors.translation = _translation.clone;
-            this.mutator = null;
+        static SET_ROTATION(_m, _rotation) {
+            if (_rotation instanceof FudgeCore.Vector3) {
+                const anglesInRadians = FudgeCore.Vector3.SCALE(_rotation, FudgeCore.Calc.deg2rad);
+                const sinX = Math.sin(anglesInRadians.x);
+                const cosX = Math.cos(anglesInRadians.x);
+                const sinY = Math.sin(anglesInRadians.y);
+                const cosY = Math.cos(anglesInRadians.y);
+                const sinZ = Math.sin(anglesInRadians.z);
+                const cosZ = Math.cos(anglesInRadians.z);
+                FudgeCore.Recycler.store(anglesInRadians);
+                _m[0] = cosZ * cosY;
+                _m[1] = sinZ * cosY;
+                _m[2] = -sinY;
+                _m[4] = cosZ * sinY * sinX - sinZ * cosX;
+                _m[5] = sinZ * sinY * sinX + cosZ * cosX;
+                _m[6] = cosY * sinX;
+                _m[8] = cosZ * sinY * cosX + sinZ * sinX;
+                _m[9] = sinZ * sinY * cosX - cosZ * sinX;
+                _m[10] = cosY * cosX;
+            }
+            else {
+                const rotationNormalized = FudgeCore.Quaternion.NORMALIZATION(_rotation);
+                const x = rotationNormalized.x, y = rotationNormalized.y, z = rotationNormalized.z, w = rotationNormalized.w;
+                const xx = x * x, xy = x * y, xz = x * z, xw = x * w;
+                const yy = y * y, yz = y * z, yw = y * w;
+                const zz = z * z, zw = z * w;
+                _m[0] = 1 - 2 * (yy + zz);
+                _m[1] = 2 * (xy + zw);
+                _m[2] = 2 * (xz - yw);
+                _m[4] = 2 * (xy - zw);
+                _m[5] = 1 - 2 * (xx + zz);
+                _m[6] = 2 * (yz + xw);
+                _m[8] = 2 * (xz + yw);
+                _m[9] = 2 * (yz - xw);
+                _m[10] = 1 - 2 * (xx + yy);
+                FudgeCore.Recycler.store(rotationNormalized);
+            }
         }
         get translation() {
-            if (!this.vectors.translation) {
-                this.vectors.translation = this.#vectors.translation;
-                this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
+            if (this.#translationDirty) {
+                this.#translation.set(this.data[12], this.data[13], this.data[14]);
+                this.#translationDirty = false;
             }
-            return this.vectors.translation.clone;
+            return this.#translation;
+        }
+        set translation(_translation) {
+            this.mutate({ "translation": _translation });
         }
         get rotation() {
-            if (!this.vectors.rotation)
-                this.vectors.rotation = this.getEulerAngles().clone;
-            return this.vectors.rotation;
+            if (this.#rotationDirty) {
+                let scaling = this.scaling;
+                let s0 = this.data[0] / scaling.x;
+                let s1 = this.data[1] / scaling.x;
+                let s2 = this.data[2] / scaling.x;
+                let s6 = this.data[6] / scaling.y;
+                let s10 = this.data[10] / scaling.z;
+                let sy = Math.hypot(s0, s1);
+                let singular = sy < 1e-6;
+                let x1, y1, z1;
+                let x2, y2, z2;
+                if (!singular) {
+                    x1 = Math.atan2(s6, s10);
+                    y1 = Math.atan2(-s2, sy);
+                    z1 = Math.atan2(s1, s0);
+                    x2 = Math.atan2(-s6, -s10);
+                    y2 = Math.atan2(-s2, -sy);
+                    z2 = Math.atan2(-s1, -s0);
+                    if (Math.abs(x2) + Math.abs(y2) + Math.abs(z2) < Math.abs(x1) + Math.abs(y1) + Math.abs(z1)) {
+                        x1 = x2;
+                        y1 = y2;
+                        z1 = z2;
+                    }
+                }
+                else {
+                    x1 = Math.atan2(-this.data[9] / scaling.z, this.data[5] / scaling.y);
+                    y1 = Math.atan2(-this.data[2] / scaling.x, sy);
+                    z1 = 0;
+                }
+                this.#rotation.set(x1, y1, z1);
+                this.#rotation.scale(FudgeCore.Calc.rad2deg);
+                this.#rotationDirty = false;
+            }
+            return this.#rotation;
         }
         set rotation(_rotation) {
             this.mutate({ "rotation": _rotation });
-            this.resetCache();
         }
         get scaling() {
-            if (!this.vectors.scaling) {
-                this.vectors.scaling = this.#vectors.scaling;
-                this.vectors.scaling.set(Math.hypot(this.data[0], this.data[1], this.data[2]), Math.hypot(this.data[4], this.data[5], this.data[6]), Math.hypot(this.data[8], this.data[9], this.data[10]));
+            if (this.#scalingDirty) {
+                this.#scaling.set(Math.hypot(this.data[0], this.data[1], this.data[2]), Math.hypot(this.data[4], this.data[5], this.data[6]), Math.hypot(this.data[8], this.data[9], this.data[10]));
+                this.#scalingDirty = false;
             }
-            return this.vectors.scaling;
+            return this.#scaling;
         }
         set scaling(_scaling) {
             this.mutate({ "scaling": _scaling });
-            this.resetCache();
+        }
+        get quaternion() {
+            if (this.#quaternionDirty) {
+                this.#quaternion.eulerAngles = this.rotation;
+                this.#quaternionDirty = false;
+            }
+            return this.#quaternion;
+        }
+        set quaternion(_quaternion) {
+            this.mutate({ "rotation": _quaternion });
         }
         get clone() {
             let mtxClone = FudgeCore.Recycler.get(Matrix4x4);
@@ -6716,9 +6783,7 @@ var FudgeCore;
                 this.data[13] += _by.y;
                 this.data[14] += _by.z;
                 this.mutator = null;
-                if (this.vectors.translation)
-                    FudgeCore.Recycler.store(this.vectors.translation);
-                this.vectors.translation = null;
+                this.#translationDirty = true;
             }
         }
         translateX(_x, _local = true) {
@@ -6763,39 +6828,6 @@ var FudgeCore;
             const mtxResult = _fromLeft ? Matrix4x4.MULTIPLICATION(_matrix, this) : Matrix4x4.MULTIPLICATION(this, _matrix);
             this.set(mtxResult);
             FudgeCore.Recycler.store(mtxResult);
-        }
-        getEulerAngles() {
-            let scaling = this.scaling;
-            let s0 = this.data[0] / scaling.x;
-            let s1 = this.data[1] / scaling.x;
-            let s2 = this.data[2] / scaling.x;
-            let s6 = this.data[6] / scaling.y;
-            let s10 = this.data[10] / scaling.z;
-            let sy = Math.hypot(s0, s1);
-            let singular = sy < 1e-6;
-            let x1, y1, z1;
-            let x2, y2, z2;
-            if (!singular) {
-                x1 = Math.atan2(s6, s10);
-                y1 = Math.atan2(-s2, sy);
-                z1 = Math.atan2(s1, s0);
-                x2 = Math.atan2(-s6, -s10);
-                y2 = Math.atan2(-s2, -sy);
-                z2 = Math.atan2(-s1, -s0);
-                if (Math.abs(x2) + Math.abs(y2) + Math.abs(z2) < Math.abs(x1) + Math.abs(y1) + Math.abs(z1)) {
-                    x1 = x2;
-                    y1 = y2;
-                    z1 = z2;
-                }
-            }
-            else {
-                x1 = Math.atan2(-this.data[9] / scaling.z, this.data[5] / scaling.y);
-                y1 = Math.atan2(-this.data[2] / scaling.x, sy);
-                z1 = 0;
-            }
-            this.#eulerAngles.set(x1, y1, z1);
-            this.#eulerAngles.scale(FudgeCore.Calc.rad2deg);
-            return this.#eulerAngles;
         }
         set(_mtxTo) {
             if (_mtxTo instanceof Matrix4x4)
@@ -6877,35 +6909,44 @@ var FudgeCore;
             return mutator;
         }
         async mutate(_mutator) {
-            let oldTranslation = this.translation;
-            let oldRotation = this.rotation;
-            let oldScaling = this.scaling;
-            let newTranslation = _mutator["translation"];
-            let newRotation = _mutator["rotation"];
-            let newScaling = _mutator["scaling"];
-            let vectors = { translation: oldTranslation, rotation: oldRotation, scaling: oldScaling };
-            if (newTranslation) {
-                vectors.translation = vectors.translation || this.#vectors.translation;
-                vectors.translation.set(newTranslation.x != undefined ? newTranslation.x : oldTranslation.x, newTranslation.y != undefined ? newTranslation.y : oldTranslation.y, newTranslation.z != undefined ? newTranslation.z : oldTranslation.z);
+            const m = this.data;
+            if (_mutator.translation) {
+                let translation = this.translation;
+                translation.mutate(_mutator.translation);
+                m[12] = translation.x;
+                m[13] = translation.y;
+                m[14] = translation.z;
+                this.#translationDirty = false;
             }
-            if (newRotation) {
-                vectors.rotation = vectors.rotation || this.#vectors.rotation;
-                vectors.rotation.set(newRotation.x != undefined ? newRotation.x : oldRotation.x, newRotation.y != undefined ? newRotation.y : oldRotation.y, newRotation.z != undefined ? newRotation.z : oldRotation.z);
+            if (_mutator.rotation || _mutator.scaling) {
+                let rotation = _mutator.rotation?.w != undefined ?
+                    this.#quaternion :
+                    isFullVectorMutator(_mutator.rotation) ? this.#rotation : this.rotation;
+                let scaling = isFullVectorMutator(_mutator.scaling) ? this.#scaling : this.scaling;
+                if (_mutator.rotation)
+                    rotation.mutate(_mutator.rotation);
+                if (_mutator.scaling)
+                    scaling.mutate(_mutator.scaling);
+                Matrix4x4.SET_ROTATION(m, rotation);
+                const isEulerRotation = rotation instanceof FudgeCore.Vector3;
+                this.#rotationDirty = !isEulerRotation;
+                this.#quaternionDirty = isEulerRotation;
+                const sx = scaling.x, sy = scaling.y, sz = scaling.z;
+                m[0] *= sx;
+                m[1] *= sx;
+                m[2] *= sx;
+                m[4] *= sy;
+                m[5] *= sy;
+                m[6] *= sy;
+                m[8] *= sz;
+                m[9] *= sz;
+                m[10] *= sz;
+                this.#scalingDirty = false;
             }
-            if (newScaling) {
-                vectors.scaling = vectors.scaling || this.#vectors.scaling;
-                vectors.scaling.set(newScaling.x != undefined ? newScaling.x : oldScaling.x, newScaling.y != undefined ? newScaling.y : oldScaling.y, newScaling.z != undefined ? newScaling.z : oldScaling.z);
+            this.mutator = null;
+            function isFullVectorMutator(_mutator) {
+                return _mutator && _mutator.x != undefined && _mutator.y != undefined && _mutator.z != undefined;
             }
-            let mtxResult = Matrix4x4.IDENTITY();
-            if (vectors.translation)
-                mtxResult.translate(vectors.translation);
-            if (vectors.rotation)
-                mtxResult.rotate(vectors.rotation);
-            if (vectors.scaling)
-                mtxResult.scale(vectors.scaling);
-            this.set(mtxResult);
-            this.vectors = vectors;
-            FudgeCore.Recycler.store(mtxResult);
         }
         getMutatorAttributeTypes(_mutator) {
             let types = {};
@@ -6919,7 +6960,10 @@ var FudgeCore;
         }
         reduceMutator(_mutator) { }
         resetCache() {
-            this.vectors = { translation: null, rotation: null, scaling: null };
+            this.#translationDirty = true;
+            this.#rotationDirty = true;
+            this.#quaternionDirty = true;
+            this.#scalingDirty = true;
             this.mutator = null;
         }
     }
@@ -6953,6 +6997,9 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Noise2 extends FudgeCore.Noise {
+        static { this.offset = (3.0 - Math.sqrt(3.0)) / 6.0; }
+        static { this.gradient = [[1, 1], [-1, 1], [1, -1], [-1, -1], [1, 0], [-1, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [0, 1], [0, -1]]; }
+        #sample;
         constructor(_random = Math.random) {
             super(_random);
             this.#sample = null;
@@ -6988,15 +7035,18 @@ var FudgeCore;
                 return 70.14805770653952 * (n0 + n1 + n2);
             };
         }
-        #sample;
     }
-    Noise2.offset = (3.0 - Math.sqrt(3.0)) / 6.0;
-    Noise2.gradient = [[1, 1], [-1, 1], [1, -1], [-1, -1], [1, 0], [-1, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [0, 1], [0, -1]];
     FudgeCore.Noise2 = Noise2;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Noise3 extends FudgeCore.Noise {
+        static { this.offset = 1.0 / 6.0; }
+        static {
+            this.gradient = [[1, 1, 0], [-1, 1, 0], [1, -1, 0], [-1, -1, 0], [1, 0, 1], [-1, 0, 1], [1, 0, -1], [-1, 0, -1], [0, 1, 1], [0, -1, -1], [0, 1, -1], [0, -1, -1]
+            ];
+        }
+        #sample;
         constructor(_random = Math.random) {
             super(_random);
             this.#sample = null;
@@ -7080,37 +7130,36 @@ var FudgeCore;
                 return 94.68493150681972 * (n0 + n1 + n2 + n3);
             };
         }
-        #sample;
     }
-    Noise3.offset = 1.0 / 6.0;
-    Noise3.gradient = [[1, 1, 0], [-1, 1, 0], [1, -1, 0], [-1, -1, 0], [1, 0, 1], [-1, 0, 1], [1, 0, -1], [-1, 0, -1], [0, 1, 1], [0, -1, -1], [0, 1, -1], [0, -1, -1]
-    ];
     FudgeCore.Noise3 = Noise3;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Noise4 extends FudgeCore.Noise {
+        static { this.offset = (5.0 - Math.sqrt(5.0)) / 20.0; }
+        static { this.gradient = [[0, 1, 1, 1], [0, 1, 1, -1], [0, 1, -1, 1], [0, 1, -1, -1], [0, -1, 1, 1], [0, -1, 1, -1], [0, -1, -1, 1], [0, -1, -1, -1], [1, 0, 1, 1], [1, 0, 1, -1], [1, 0, -1, 1], [1, 0, -1, -1], [-1, 0, 1, 1], [-1, 0, 1, -1], [-1, 0, -1, 1], [-1, 0, -1, -1], [1, 1, 0, 1], [1, 1, 0, -1], [1, -1, 0, 1], [1, -1, 0, -1], [-1, 1, 0, 1], [-1, 1, 0, -1], [-1, -1, 0, 1], [-1, -1, 0, -1], [1, 1, 1, 0], [1, 1, -1, 0], [1, -1, 1, 0], [1, -1, -1, 0], [-1, 1, 1, 0], [-1, 1, -1, 0], [-1, -1, 1, 0], [-1, -1, -1, 0]]; }
+        #sample;
         constructor(_random = Math.random) {
             super(_random);
             this.#sample = null;
             this.sample = (_x, _y, _z, _w) => {
                 return this.#sample(_x, _y, _z, _w);
             };
-            this.#sample = (x, y, z, w) => {
-                const s = (x + y + z + w) * (Math.sqrt(5.0) - 1.0) / 4.0;
-                const i = Math.floor(x + s);
-                const j = Math.floor(y + s);
-                const k = Math.floor(z + s);
-                const l = Math.floor(w + s);
+            this.#sample = (_x, _y, _z, _w) => {
+                const s = (_x + _y + _z + _w) * (Math.sqrt(5.0) - 1.0) / 4.0;
+                const i = Math.floor(_x + s);
+                const j = Math.floor(_y + s);
+                const k = Math.floor(_z + s);
+                const l = Math.floor(_w + s);
                 const t = (i + j + k + l) * Noise4.offset;
                 const X0 = i - t;
                 const Y0 = j - t;
                 const Z0 = k - t;
                 const W0 = l - t;
-                const x0 = x - X0;
-                const y0 = y - Y0;
-                const z0 = z - Z0;
-                const w0 = w - W0;
+                const x0 = _x - X0;
+                const y0 = _y - Y0;
+                const z0 = _z - Z0;
+                const w0 = _w - W0;
                 let rankx = 0;
                 let ranky = 0;
                 let rankz = 0;
@@ -7200,30 +7249,32 @@ var FudgeCore;
                 return 72.37855765153665 * (n0 + n1 + n2 + n3 + n4);
             };
         }
-        #sample;
     }
-    Noise4.offset = (5.0 - Math.sqrt(5.0)) / 20.0;
-    Noise4.gradient = [[0, 1, 1, 1], [0, 1, 1, -1], [0, 1, -1, 1], [0, 1, -1, -1], [0, -1, 1, 1], [0, -1, 1, -1], [0, -1, -1, 1], [0, -1, -1, -1], [1, 0, 1, 1], [1, 0, 1, -1], [1, 0, -1, 1], [1, 0, -1, -1], [-1, 0, 1, 1], [-1, 0, 1, -1], [-1, 0, -1, 1], [-1, 0, -1, -1], [1, 1, 0, 1], [1, 1, 0, -1], [1, -1, 0, 1], [1, -1, 0, -1], [-1, 1, 0, 1], [-1, 1, 0, -1], [-1, -1, 0, 1], [-1, -1, 0, -1], [1, 1, 1, 0], [1, 1, -1, 0], [1, -1, 1, 0], [1, -1, -1, 0], [-1, 1, 1, 0], [-1, 1, -1, 0], [-1, -1, 1, 0], [-1, -1, -1, 0]];
     FudgeCore.Noise4 = Noise4;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Quaternion extends FudgeCore.Mutable {
-        constructor() {
-            super();
-            this.data = new Float32Array(4);
-            this.mutator = null;
-            this.#eulerAngles = null;
-            this.recycle();
-        }
         #eulerAngles;
+        #eulerAnglesDirty;
+        constructor(_x = 0, _y = 0, _z = 0, _w = 1) {
+            super();
+            this.mutator = null;
+            this.#eulerAngles = FudgeCore.Vector3.ZERO();
+            this.set(_x, _y, _z, _w);
+        }
         static IDENTITY() {
             const result = FudgeCore.Recycler.get(Quaternion);
             return result;
         }
-        static FROM_EULER_ANGLES(_eulerAngles, _order = "ZYX") {
+        static NORMALIZATION(_q) {
+            const result = _q.clone;
+            result.normalize();
+            return result;
+        }
+        static ROTATION(_eulerAngles) {
             const result = FudgeCore.Recycler.get(Quaternion);
-            result.setFromEulerAngles(_eulerAngles, _order);
+            result.eulerAngles = _eulerAngles;
             return result;
         }
         static MULTIPLICATION(_qLeft, _qRight) {
@@ -7241,271 +7292,151 @@ var FudgeCore;
             result.conjugate();
             return result;
         }
-        static TRANSFORM_VECTOR(_v, _q) {
-            const v = FudgeCore.Recycler.get(Quaternion);
-            v.set([0, _v.z, _v.x, _v.y]);
-            v.multiply(_q, true);
-            v.multiply(this.CONJUGATION(_q));
-            const result = FudgeCore.Recycler.get(FudgeCore.Vector3);
-            result.set(v.data[2], v.data[3], v.data[1]);
+        static DOT(_q1, _q2) {
+            return _q1.x * _q2.x + _q1.y * _q2.y + _q1.z * _q2.z + _q1.w * _q2.w;
+        }
+        static LERP(_from, _to, _factor) {
+            let result = FudgeCore.Recycler.get(Quaternion);
+            result.set((_from.x * (1 - _factor) + _to.x * _factor), (_from.y * (1 - _factor) + _to.y * _factor), (_from.z * (1 - _factor) + _to.z * _factor), (_from.w * (1 - _factor) + _to.w * _factor));
+            result.normalize();
             return result;
         }
-        static QUATERNION_TO_MATRIX(_q) {
-            const x = _q.data[0], y = _q.data[1], z = _q.data[2], w = _q.data[3];
-            const xx = x * x, xy = x * y, xz = x * z, xw = x * w;
-            const yy = y * y, yz = y * z, yw = y * w;
-            const zz = z * z, zw = z * w;
-            const result = FudgeCore.Recycler.get(FudgeCore.Matrix4x4);
-            result.set([
-                1 - 2 * (yy + zz), 2 * (xy - zw), 2 * (xz + yw), 0,
-                2 * (xy + zw), 1 - 2 * (xx + zz), 2 * (yz - xw), 0,
-                2 * (xz - yw), 2 * (yz + xw), 1 - 2 * (xx + yy), 0,
-                0, 0, 0, 1
-            ]);
+        static SLERP(_from, _to, _factor) {
+            let cosHalfTheta = _from.w * _to.w + _from.x * _to.x + _from.y * _to.y + _from.z * _to.z;
+            if (Math.abs(cosHalfTheta) >= 1)
+                return _from;
+            let halfTheta = Math.acos(cosHalfTheta);
+            let sinHalfTheta = Math.sqrt(1 - cosHalfTheta * cosHalfTheta);
+            if (Math.abs(sinHalfTheta) < 0.001) {
+                let result = FudgeCore.Recycler.get(Quaternion);
+                result.set((_from.x * 0.5 + _to.x * 0.5), (_from.y * 0.5 + _to.y * 0.5), (_from.z * 0.5 + _to.z * 0.5), (_from.w * 0.5 + _to.w * 0.5));
+                return result;
+            }
+            let ratioA = Math.sin((1 - _factor) * halfTheta) / sinHalfTheta;
+            let ratioB = Math.sin(_factor * halfTheta) / sinHalfTheta;
+            let result = FudgeCore.Recycler.get(Quaternion);
+            result.set((_from.x * ratioA + _to.x * ratioB), (_from.y * ratioA + _to.y * ratioB), (_from.z * ratioA + _to.z * ratioB), (_from.w * ratioA + _to.w * ratioB));
             return result;
         }
-        get x() {
-            return this.data[0];
+        get clone() {
+            let result = FudgeCore.Recycler.get(Quaternion);
+            result.set(this.x, this.y, this.z, this.w);
+            return result;
         }
-        get y() {
-            return this.data[1];
-        }
-        get z() {
-            return this.data[2];
-        }
-        get w() {
-            return this.data[3];
-        }
-        set x(_x) {
-            this.data[0] = _x;
-        }
-        set y(_y) {
-            this.data[1] = _y;
-        }
-        set z(_z) {
-            this.data[2] = _z;
-        }
-        set w(_w) {
-            this.data[3] = _w;
-        }
-        getEulerAngles(_order = "ZYX") {
-            if (!this.#eulerAngles) {
-                const mtx = Quaternion.QUATERNION_TO_MATRIX(this);
-                const mtxData = mtx.get();
-                const m11 = mtxData[0], m12 = mtxData[1], m13 = mtxData[2];
-                const m21 = mtxData[4], m22 = mtxData[5], m23 = mtxData[6];
-                const m31 = mtxData[8], m32 = mtxData[9], m33 = mtxData[10];
-                this.#eulerAngles = FudgeCore.Recycler.get(FudgeCore.Vector3);
-                switch (_order) {
-                    case "XYZ":
-                        this.#eulerAngles.y = Math.asin(FudgeCore.Calc.clamp(m13, -1, 1));
-                        if (Math.abs(m13) < 0.9999999) {
-                            this.#eulerAngles.x = Math.atan2(-m23, m33);
-                            this.#eulerAngles.z = Math.atan2(-m12, m11);
-                        }
-                        else {
-                            this.#eulerAngles.x = Math.atan2(m32, m22);
-                            this.#eulerAngles.z = 0;
-                        }
-                        break;
-                    case "YXZ":
-                        this.#eulerAngles.x = Math.asin(-FudgeCore.Calc.clamp(m23, -1, 1));
-                        if (Math.abs(m23) < 0.9999999) {
-                            this.#eulerAngles.y = Math.atan2(m13, m33);
-                            this.#eulerAngles.z = Math.atan2(m21, m22);
-                        }
-                        else {
-                            this.#eulerAngles.y = Math.atan2(-m31, m11);
-                            this.#eulerAngles.z = 0;
-                        }
-                        break;
-                    case "ZXY":
-                        this.#eulerAngles.x = Math.asin(FudgeCore.Calc.clamp(m32, -1, 1));
-                        if (Math.abs(m32) < 0.9999999) {
-                            this.#eulerAngles.y = Math.atan2(-m31, m33);
-                            this.#eulerAngles.z = Math.atan2(-m12, m22);
-                        }
-                        else {
-                            this.#eulerAngles.y = 0;
-                            this.#eulerAngles.z = Math.atan2(m21, m11);
-                        }
-                        break;
-                    case "ZYX":
-                        this.#eulerAngles.y = Math.asin(-FudgeCore.Calc.clamp(m31, -1, 1));
-                        if (Math.abs(m31) < 0.9999999) {
-                            this.#eulerAngles.x = Math.atan2(m32, m33);
-                            this.#eulerAngles.z = Math.atan2(m21, m11);
-                        }
-                        else {
-                            this.#eulerAngles.x = 0;
-                            this.#eulerAngles.z = Math.atan2(-m12, m22);
-                        }
-                        break;
-                    case "YZX":
-                        this.#eulerAngles.z = Math.asin(FudgeCore.Calc.clamp(m21, -1, 1));
-                        if (Math.abs(m21) < 0.9999999) {
-                            this.#eulerAngles.x = Math.atan2(-m23, m22);
-                            this.#eulerAngles.y = Math.atan2(-m31, m11);
-                        }
-                        else {
-                            this.#eulerAngles.x = 0;
-                            this.#eulerAngles.y = Math.atan2(m13, m33);
-                        }
-                        break;
-                    case "XZY":
-                        this.#eulerAngles.z = Math.asin(-FudgeCore.Calc.clamp(m12, -1, 1));
-                        if (Math.abs(m12) < 0.9999999) {
-                            this.#eulerAngles.x = Math.atan2(m32, m22);
-                            this.#eulerAngles.y = Math.atan2(m13, m11);
-                        }
-                        else {
-                            this.#eulerAngles.x = Math.atan2(-m23, m33);
-                            this.#eulerAngles.y = 0;
-                        }
-                        break;
-                    default:
-                        console.warn("encountered an unknown order: " + _order);
+        get eulerAngles() {
+            if (this.#eulerAnglesDirty) {
+                this.#eulerAnglesDirty = false;
+                if (this.x == 0 && this.y == 0 && this.z == 0 && this.w == 1) {
+                    this.#eulerAngles.set(0, 0, 0);
+                    return this.#eulerAngles;
                 }
+                let sinrcosp = 2 * (this.w * this.x + this.y * this.z);
+                let cosrcosp = 1 - 2 * (this.x * this.x + this.y * this.y);
+                this.#eulerAngles.x = Math.atan2(sinrcosp, cosrcosp);
+                let sinp = 2 * (this.w * this.y - this.z * this.x);
+                if (Math.abs(sinp) >= 1)
+                    this.#eulerAngles.y = sinp < 0 ? -Math.abs(Math.PI / 2) : Math.abs(Math.PI / 2);
+                else
+                    this.#eulerAngles.y = Math.asin(sinp);
+                let sinycosp = 2 * (this.w * this.z + this.x * this.y);
+                let cosycosp = 1 - 2 * (this.y * this.y + this.z * this.z);
+                this.#eulerAngles.z = Math.atan2(sinycosp, cosycosp);
                 this.#eulerAngles.scale(FudgeCore.Calc.rad2deg);
             }
             return this.#eulerAngles;
         }
-        setFromEulerAngles(_eulerAngles, _order = "ZYX") {
-            const cosX = Math.cos(_eulerAngles.x * FudgeCore.Calc.deg2rad / 2);
-            const cosY = Math.cos(_eulerAngles.y * FudgeCore.Calc.deg2rad / 2);
-            const cosZ = Math.cos(_eulerAngles.z * FudgeCore.Calc.deg2rad / 2);
-            const sinX = Math.sin(_eulerAngles.x * FudgeCore.Calc.deg2rad / 2);
-            const sinY = Math.sin(_eulerAngles.y * FudgeCore.Calc.deg2rad / 2);
-            const sinZ = Math.sin(_eulerAngles.z * FudgeCore.Calc.deg2rad / 2);
-            switch (_order) {
-                case "XYZ":
-                    this.set([
-                        sinX * cosY * cosZ + cosX * sinY * sinZ,
-                        cosX * sinY * cosZ - sinX * cosY * sinZ,
-                        cosX * cosY * sinZ + sinX * sinY * cosZ,
-                        cosX * cosY * cosZ - sinX * sinY * sinZ
-                    ]);
-                    break;
-                case "YXZ":
-                    this.set([
-                        sinX * cosY * cosZ + cosX * sinY * sinZ,
-                        cosX * sinY * cosZ - sinX * cosY * sinZ,
-                        cosX * cosY * sinZ - sinX * sinY * cosZ,
-                        cosX * cosY * cosZ + sinX * sinY * sinZ
-                    ]);
-                    break;
-                case "ZXY":
-                    this.set([
-                        sinX * cosY * cosZ - cosX * sinY * sinZ,
-                        cosX * sinY * cosZ + sinX * cosY * sinZ,
-                        cosX * cosY * sinZ + sinX * sinY * cosZ,
-                        cosX * cosY * cosZ - sinX * sinY * sinZ
-                    ]);
-                    break;
-                case "ZYX":
-                    this.set([
-                        sinX * cosY * cosZ - cosX * sinY * sinZ,
-                        cosX * sinY * cosZ + sinX * cosY * sinZ,
-                        cosX * cosY * sinZ - sinX * sinY * cosZ,
-                        cosX * cosY * cosZ + sinX * sinY * sinZ
-                    ]);
-                    break;
-                case "YZX":
-                    this.set([
-                        sinX * cosY * cosZ + cosX * sinY * sinZ,
-                        cosX * sinY * cosZ + sinX * cosY * sinZ,
-                        cosX * cosY * sinZ - sinX * sinY * cosZ,
-                        cosX * cosY * cosZ - sinX * sinY * sinZ
-                    ]);
-                    break;
-                case "XZY":
-                    this.set([
-                        sinX * cosY * cosZ - cosX * sinY * sinZ,
-                        cosX * sinY * cosZ - sinX * cosY * sinZ,
-                        cosX * cosY * sinZ + sinX * sinY * cosZ,
-                        cosX * cosY * cosZ + sinX * sinY * sinZ
-                    ]);
-                    break;
-                default:
-                    console.warn("encountered an unknown order: " + _order);
-            }
+        set eulerAngles(_eulerAngles) {
+            const halfAnglesInRadians = FudgeCore.Vector3.SCALE(_eulerAngles, FudgeCore.Calc.deg2rad / 2);
+            const cosX = Math.cos(halfAnglesInRadians.x);
+            const cosY = Math.cos(halfAnglesInRadians.y);
+            const cosZ = Math.cos(halfAnglesInRadians.z);
+            const sinX = Math.sin(halfAnglesInRadians.x);
+            const sinY = Math.sin(halfAnglesInRadians.y);
+            const sinZ = Math.sin(halfAnglesInRadians.z);
+            this.set(sinX * cosY * cosZ - cosX * sinY * sinZ, cosX * sinY * cosZ + sinX * cosY * sinZ, cosX * cosY * sinZ - sinX * sinY * cosZ, cosX * cosY * cosZ + sinX * sinY * sinZ);
+            this.#eulerAnglesDirty = false;
         }
-        get clone() {
-            let result = FudgeCore.Recycler.get(Quaternion);
-            result.set(this);
-            return result;
+        normalize() {
+            let length = Math.sqrt(this.x ** 2 + this.y ** 2 + this.z ** 2 + this.w ** 2);
+            this.x /= length;
+            this.y /= length;
+            this.z /= length;
+            this.w /= length;
+            this.resetCache();
+            return this;
+        }
+        negate() {
+            this.x *= -1;
+            this.y *= -1;
+            this.z *= -1;
+            this.w *= -1;
+            this.resetCache();
+            return this;
         }
         recycle() {
-            this.data.set([0, 0, 0, 1]);
-            this.resetCache();
-        }
-        reset() {
-            this.recycle();
+            this.set(0, 0, 0, 1);
         }
         inverse() {
             this.conjugate();
         }
         conjugate() {
-            this.data[0] *= -1;
-            this.data[1] *= -1;
-            this.data[2] *= -1;
+            this.x *= -1;
+            this.y *= -1;
+            this.z *= -1;
             this.resetCache();
+            return this;
         }
         multiply(_other, _fromLeft = false) {
             const a = _fromLeft ? _other : this;
             const b = _fromLeft ? this : _other;
-            const ax = a.data[0];
-            const ay = a.data[1];
-            const az = a.data[2];
-            const aw = a.data[3];
-            const bx = b.data[0];
-            const by = b.data[1];
-            const bz = b.data[2];
-            const bw = b.data[3];
-            this.set([
-                ax * bw + ay * bz - az * by + aw * bx,
-                -ax * bz + ay * bw + az * bx + aw * by,
-                ax * by - ay * bx + az * bw + aw * bz,
-                -ax * bx - ay * by - az * bz + aw * bw,
-            ]);
+            const ax = a.x;
+            const ay = a.y;
+            const az = a.z;
+            const aw = a.w;
+            const bx = b.x;
+            const by = b.y;
+            const bz = b.z;
+            const bw = b.w;
+            this.set(ax * bw + ay * bz - az * by + aw * bx, -ax * bz + ay * bw + az * bx + aw * by, ax * by - ay * bx + az * bw + aw * bz, -ax * bx - ay * by - az * bz + aw * bw);
         }
-        set(_qTo) {
-            if (_qTo instanceof Quaternion)
-                this.data.set(_qTo.data);
-            else
-                this.data.set(_qTo);
+        set(_x, _y, _z, _w) {
+            this.x = _x;
+            this.y = _y;
+            this.z = _z;
+            this.w = _w;
             this.resetCache();
         }
         toString() {
-            return `ƒ.Quaternion(x: ${this.data[0]}, y: ${this.data[1]}, z: ${this.data[2]}, w: ${this.data[3]})`;
-        }
-        get() {
-            return new Float32Array(this.data);
+            return `ƒ.Quaternion(x: ${this.x}, y: ${this.y}, z: ${this.z}, w: ${this.w})`;
         }
         serialize() {
-            return this.getMutator();
+            let serialization = this.getMutator();
+            serialization.toJSON = () => { return `[${this.x}, ${this.y}, ${this.z}, ${this.w}]`; };
+            return serialization;
         }
         async deserialize(_serialization) {
-            this.mutate(_serialization);
+            if (typeof (_serialization) == "string") {
+                [this.x, this.y, this.z, this.w] = JSON.parse(_serialization);
+            }
+            else
+                this.mutate(_serialization);
             return this;
         }
         getMutator() {
             if (!this.mutator)
-                this.mutator = {
-                    x: this.data[0], y: this.data[1], z: this.data[2], w: this.data[3]
-                };
+                this.mutator = { x: this.x, y: this.y, z: this.z, w: this.w };
             return this.mutator;
         }
         async mutate(_mutator) {
-            this.data[0] = _mutator.x;
-            this.data[1] = _mutator.y;
-            this.data[2] = _mutator.z;
-            this.data[3] = _mutator.w;
+            this.x = _mutator.x ?? this.x;
+            this.y = _mutator.y ?? this.y;
+            this.z = _mutator.z ?? this.z;
+            this.w = _mutator.w ?? this.w;
             this.resetCache();
         }
         reduceMutator(_mutator) { }
         resetCache() {
-            this.#eulerAngles = null;
+            this.#eulerAnglesDirty = true;
             this.mutator = null;
         }
     }
@@ -7514,6 +7445,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Random {
+        static { this.default = new Random(); }
         constructor(_seedOrFunction) {
             this.generate = Math.random;
             if (_seedOrFunction instanceof Function)
@@ -7570,7 +7502,6 @@ var FudgeCore;
             return new FudgeCore.Vector2(this.getRange(_corner0.x, _corner1.x), this.getRange(_corner0.y, _corner1.y));
         }
     }
-    Random.default = new Random();
     FudgeCore.Random = Random;
     FudgeCore.random = new Random();
 })(FudgeCore || (FudgeCore = {}));
@@ -7606,23 +7537,32 @@ var FudgeCore;
             vector.set(_scale, _scale, _scale);
             return vector;
         }
-        static TRANSFORMATION(_vector, _mtxTransform, _includeTranslation = true) {
+        static TRANSFORMATION(_vector, _transform, _includeTranslation = true) {
             let result = FudgeCore.Recycler.get(Vector3);
-            let m = _mtxTransform.get();
             let [x, y, z] = _vector.get();
-            result.x = m[0] * x + m[4] * y + m[8] * z;
-            result.y = m[1] * x + m[5] * y + m[9] * z;
-            result.z = m[2] * x + m[6] * y + m[10] * z;
-            if (_includeTranslation) {
-                result.add(_mtxTransform.translation);
+            if (_transform instanceof FudgeCore.Matrix4x4) {
+                let m = _transform.get();
+                result.x = m[0] * x + m[4] * y + m[8] * z;
+                result.y = m[1] * x + m[5] * y + m[9] * z;
+                result.z = m[2] * x + m[6] * y + m[10] * z;
+                if (_includeTranslation) {
+                    result.add(_transform.translation);
+                }
+            }
+            else {
+                const qx = _transform.w * x + _transform.y * z - _transform.z * y;
+                const qy = _transform.w * y + _transform.z * x - _transform.x * z;
+                const qz = _transform.w * z + _transform.x * y - _transform.y * x;
+                const qw = -_transform.x * x - _transform.y * y - _transform.z * z;
+                result.set(qx * _transform.w + qw * -_transform.x + qy * -_transform.z - qz * -_transform.y, qy * _transform.w + qw * -_transform.y + qz * -_transform.x - qx * -_transform.z, qz * _transform.w + qw * -_transform.z + qx * -_transform.y - qy * -_transform.x);
             }
             return result;
         }
         static NORMALIZATION(_vector, _length = 1) {
             let magnitudeSquared = _vector.magnitudeSquared;
-            let vector = _vector.clone;
             if (magnitudeSquared == 0)
                 throw (new RangeError("Impossible normalization"));
+            let vector = _vector.clone;
             vector.scale(_length / Math.sqrt(magnitudeSquared));
             return vector;
         }
@@ -7668,6 +7608,10 @@ var FudgeCore;
             vector.geo = geo;
             FudgeCore.Recycler.store(geo);
             return vector;
+        }
+        static ANGLE(_from, _to) {
+            let angle = Math.acos(Vector3.DOT(_from, _to) / (_from.magnitude * _to.magnitude));
+            return angle * FudgeCore.Calc.rad2deg;
         }
         get x() {
             return this.data[0];
@@ -7763,8 +7707,8 @@ var FudgeCore;
         get() {
             return new Float32Array(this.data);
         }
-        transform(_mtxTransform, _includeTranslation = true) {
-            let transformed = Vector3.TRANSFORMATION(this, _mtxTransform, _includeTranslation);
+        transform(_transform, _includeTranslation = true) {
+            let transformed = Vector3.TRANSFORMATION(this, _transform, _includeTranslation);
             this.data.set(transformed.data);
             FudgeCore.Recycler.store(transformed);
         }
@@ -7817,10 +7761,13 @@ var FudgeCore;
                 this.mutate(_serialization);
             return this;
         }
+        async mutate(_mutator) {
+            this.data[0] = _mutator.x ?? this.data[0];
+            this.data[1] = _mutator.y ?? this.data[1];
+            this.data[2] = _mutator.z ?? this.data[2];
+        }
         getMutator() {
-            let mutator = {
-                x: this.data[0], y: this.data[1], z: this.data[2]
-            };
+            let mutator = { x: this.data[0], y: this.data[1], z: this.data[2] };
             return mutator;
         }
         reduceMutator(_mutator) { }
@@ -7835,13 +7782,6 @@ var FudgeCore;
             this.indices = [_index0, _index1, _index2];
             this.vertices = _vertices;
             this.calculateNormals();
-        }
-        calculateNormals() {
-            let trigon = this.indices.map((_index) => this.vertices.position(_index));
-            let v1 = FudgeCore.Vector3.DIFFERENCE(trigon[1], trigon[0]);
-            let v2 = FudgeCore.Vector3.DIFFERENCE(trigon[2], trigon[0]);
-            this.normalUnscaled = FudgeCore.Vector3.CROSS(v1, v2);
-            this.normal = FudgeCore.Vector3.NORMALIZATION(this.normalUnscaled);
         }
         getPosition(_index) {
             return this.vertices.position(this.indices[_index]);
@@ -7859,13 +7799,23 @@ var FudgeCore;
             let dot2 = FudgeCore.Vector3.DOT(n0, n2);
             return !(dot1 < 0 || dot2 < 0);
         }
+        calculateNormals() {
+            let trigon = this.indices.map((_index) => this.vertices.position(_index));
+            let v1 = FudgeCore.Vector3.DIFFERENCE(trigon[1], trigon[0]);
+            let v2 = FudgeCore.Vector3.DIFFERENCE(trigon[2], trigon[0]);
+            this.normalUnscaled = FudgeCore.Vector3.CROSS(v1, v2);
+            this.normal = FudgeCore.Vector3.NORMALIZATION(this.normalUnscaled);
+        }
     }
     FudgeCore.Face = Face;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     var Mesh_1;
-    let Mesh = Mesh_1 = class Mesh extends FudgeCore.Mutable {
+    let Mesh = class Mesh extends FudgeCore.Mutable {
+        static { Mesh_1 = this; }
+        static { this.baseClass = Mesh_1; }
+        static { this.subclasses = []; }
         constructor(_name = "Mesh") {
             super();
             this.idResource = undefined;
@@ -7933,8 +7883,6 @@ var FudgeCore;
             return box;
         }
     };
-    Mesh.baseClass = Mesh_1;
-    Mesh.subclasses = [];
     Mesh = Mesh_1 = __decorate([
         FudgeCore.RenderInjectorMesh.decorate
     ], Mesh);
@@ -7943,25 +7891,38 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class MeshCube extends FudgeCore.Mesh {
+        static { this.iSubclass = FudgeCore.Mesh.registerSubclass(MeshCube); }
         constructor(_name = "MeshCube") {
             super(_name);
-            this.vertices = new FudgeCore.Vertices(new FudgeCore.Vertex(new FudgeCore.Vector3(-0.5, 0.5, 0.5), new FudgeCore.Vector2(0, 0)), new FudgeCore.Vertex(new FudgeCore.Vector3(-0.5, -0.5, 0.5), new FudgeCore.Vector2(0, 1)), new FudgeCore.Vertex(new FudgeCore.Vector3(0.5, -0.5, 0.5), new FudgeCore.Vector2(1, 1)), new FudgeCore.Vertex(new FudgeCore.Vector3(0.5, 0.5, 0.5), new FudgeCore.Vector2(1, 0)), new FudgeCore.Vertex(new FudgeCore.Vector3(-0.5, 0.5, -0.5), new FudgeCore.Vector2(3, 0)), new FudgeCore.Vertex(new FudgeCore.Vector3(-0.5, -0.5, -0.5), new FudgeCore.Vector2(3, 1)), new FudgeCore.Vertex(new FudgeCore.Vector3(0.5, -0.5, -0.5), new FudgeCore.Vector2(2, 1)), new FudgeCore.Vertex(new FudgeCore.Vector3(0.5, 0.5, -0.5), new FudgeCore.Vector2(2, 0)), new FudgeCore.Vertex(0, new FudgeCore.Vector2(4, 0)), new FudgeCore.Vertex(1, new FudgeCore.Vector2(4, 1)), new FudgeCore.Vertex(3, new FudgeCore.Vector2(0, 1)), new FudgeCore.Vertex(7, new FudgeCore.Vector2(1, 1)), new FudgeCore.Vertex(4, new FudgeCore.Vector2(1, 0)), new FudgeCore.Vertex(2, new FudgeCore.Vector2(0, 0)), new FudgeCore.Vertex(6, new FudgeCore.Vector2(1, 0)), new FudgeCore.Vertex(5, new FudgeCore.Vector2(1, 1)));
-            this.faces = [
-                ...new FudgeCore.Quad(this.vertices, 0, 1, 2, 3).faces,
-                ...new FudgeCore.Quad(this.vertices, 7, 6, 5, 4).faces,
-                ...new FudgeCore.Quad(this.vertices, 3, 2, 6, 7).faces,
-                ...new FudgeCore.Quad(this.vertices, 4, 5, 9, 8).faces,
-                ...new FudgeCore.Quad(this.vertices, 0, 10, 11, 12).faces,
-                ...new FudgeCore.Quad(this.vertices, 13, 1, 15, 14).faces
-            ];
+            this.vertices = new FudgeCore.Vertices(new FudgeCore.Vertex(new FudgeCore.Vector3(-0.5, 0.5, 0.5), new FudgeCore.Vector2(0, 0)), new FudgeCore.Vertex(new FudgeCore.Vector3(-0.5, -0.5, 0.5), new FudgeCore.Vector2(0, 1)), new FudgeCore.Vertex(new FudgeCore.Vector3(0.5, -0.5, 0.5), new FudgeCore.Vector2(1, 1)), new FudgeCore.Vertex(new FudgeCore.Vector3(0.5, 0.5, 0.5), new FudgeCore.Vector2(1, 0)));
+            for (let angle = 90; angle < 360; angle += 90) {
+                let transform = FudgeCore.Matrix4x4.ROTATION(FudgeCore.Vector3.Y(angle));
+                let side = this.vertices.slice(0, 4).map((_v) => new FudgeCore.Vertex(FudgeCore.Vector3.TRANSFORMATION(_v.position, transform), _v.uv));
+                this.vertices.push(...side);
+            }
+            for (let angle = 90; angle < 360; angle += 180) {
+                let transform = FudgeCore.Matrix4x4.ROTATION(FudgeCore.Vector3.X(angle));
+                let side = this.vertices.slice(0, 4).map((_v) => new FudgeCore.Vertex(FudgeCore.Vector3.TRANSFORMATION(_v.position, transform), _v.uv));
+                this.vertices.push(...side);
+            }
+            this.faces = [];
+            for (let i = 0; i < 24; i += 4)
+                this.faces.push(...new FudgeCore.Quad(this.vertices, i + 0, i + 1, i + 2, i + 3).faces);
         }
     }
-    MeshCube.iSubclass = FudgeCore.Mesh.registerSubclass(MeshCube);
     FudgeCore.MeshCube = MeshCube;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshPolygon extends FudgeCore.Mesh {
+        static { this.iSubclass = FudgeCore.Mesh.registerSubclass(MeshPolygon); }
+        static {
+            this.shapeDefault = [
+                new FudgeCore.Vector2(-1, -1),
+                new FudgeCore.Vector2(1, -1),
+                new FudgeCore.Vector2(0, 1)
+            ];
+        }
         constructor(_name = "MeshPolygon", _shape = MeshPolygon.shapeDefault, _fitTexture = true) {
             super(_name);
             this.shape = new FudgeCore.MutableArray(FudgeCore.Vector2);
@@ -7993,12 +7954,12 @@ var FudgeCore;
             let size = new FudgeCore.Vector2(max.x - min.x, max.y - min.y);
             if (this.fitTexture) {
                 for (let i = 0; i < shape.length; i++) {
-                    let textureUV = FudgeCore.Vector2.SUM(shape[i], min);
-                    this.vertices[i].uv = new FudgeCore.Vector2(textureUV.x / size.x, -textureUV.y / size.y);
+                    let textureUV = FudgeCore.Vector2.DIFFERENCE(shape[i], min);
+                    this.vertices[i].uv = new FudgeCore.Vector2(textureUV.x / size.x, 1 - textureUV.y / size.y);
                 }
             }
             else {
-                _shape.forEach((_vertex, i) => this.vertices[i].uv = new FudgeCore.Vector2(_vertex.x, -_vertex.y));
+                _shape.forEach((_vertex, _i) => this.vertices[_i].uv = new FudgeCore.Vector2(_vertex.x, -_vertex.y));
             }
             this.faces = [];
             for (let i = 2; i < this.vertices.length; i++)
@@ -8025,17 +7986,18 @@ var FudgeCore;
             super.reduceMutator(_mutator);
         }
     }
-    MeshPolygon.iSubclass = FudgeCore.Mesh.registerSubclass(MeshPolygon);
-    MeshPolygon.shapeDefault = [
-        new FudgeCore.Vector2(-1, -1),
-        new FudgeCore.Vector2(1, -1),
-        new FudgeCore.Vector2(0, 1)
-    ];
     FudgeCore.MeshPolygon = MeshPolygon;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshExtrusion extends FudgeCore.MeshPolygon {
+        static { this.iSubclass = FudgeCore.Mesh.registerSubclass(MeshExtrusion); }
+        static {
+            this.mtxDefaults = [
+                FudgeCore.Matrix4x4.TRANSLATION(FudgeCore.Vector3.Z(0.5)),
+                FudgeCore.Matrix4x4.TRANSLATION(FudgeCore.Vector3.Z(-0.5))
+            ];
+        }
         constructor(_name = "MeshExtrusion", _vertices = FudgeCore.MeshPolygon.shapeDefault, _mtxTransforms = MeshExtrusion.mtxDefaults, _fitTexture = true) {
             super(_name, _vertices, _fitTexture);
             this.mtxTransforms = new FudgeCore.MutableArray(FudgeCore.Matrix4x4);
@@ -8092,11 +8054,6 @@ var FudgeCore;
             return;
         }
     }
-    MeshExtrusion.iSubclass = FudgeCore.Mesh.registerSubclass(MeshExtrusion);
-    MeshExtrusion.mtxDefaults = [
-        FudgeCore.Matrix4x4.TRANSLATION(FudgeCore.Vector3.Z(0.5)),
-        FudgeCore.Matrix4x4.TRANSLATION(FudgeCore.Vector3.Z(-0.5))
-    ];
     FudgeCore.MeshExtrusion = MeshExtrusion;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -8142,9 +8099,9 @@ var FudgeCore;
         async load(_loader = this.loader, _url = this.url, _data) {
             this.url = _url;
             this.loader = _loader;
+            this.clear();
             if (!this.renderMesh)
                 this.renderMesh = new FudgeCore.RenderMesh(this);
-            this.clear();
             return _loader.load(this, _data);
         }
         async mutate(_mutator) {
@@ -8158,6 +8115,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class MeshPyramid extends FudgeCore.Mesh {
+        static { this.iSubclass = FudgeCore.Mesh.registerSubclass(MeshPyramid); }
         constructor(_name = "MeshPyramid") {
             super(_name);
             this.vertices = new FudgeCore.Vertices(new FudgeCore.Vertex(new FudgeCore.Vector3(-0.5, 0.0, 0.5), new FudgeCore.Vector2(0, 1)), new FudgeCore.Vertex(new FudgeCore.Vector3(0.5, 0.0, 0.5), new FudgeCore.Vector2(1, 1)), new FudgeCore.Vertex(new FudgeCore.Vector3(0.5, 0.0, -0.5), new FudgeCore.Vector2(1, 0)), new FudgeCore.Vertex(new FudgeCore.Vector3(-0.5, 0.0, -0.5), new FudgeCore.Vector2(0, 0)), new FudgeCore.Vertex(new FudgeCore.Vector3(0.0, 1.0, 0.0), new FudgeCore.Vector2(0.5, 0.5)), new FudgeCore.Vertex(0, new FudgeCore.Vector2(0, 0)), new FudgeCore.Vertex(1, new FudgeCore.Vector2(1, 0)), new FudgeCore.Vertex(2, new FudgeCore.Vector2(1, 1)), new FudgeCore.Vertex(3, new FudgeCore.Vector2(0, 1)));
@@ -8171,12 +8129,17 @@ var FudgeCore;
             ];
         }
     }
-    MeshPyramid.iSubclass = FudgeCore.Mesh.registerSubclass(MeshPyramid);
     FudgeCore.MeshPyramid = MeshPyramid;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshQuad extends FudgeCore.MeshPolygon {
+        static { this.iSubclass = FudgeCore.Mesh.registerSubclass(MeshQuad); }
+        static {
+            this.shape = [
+                new FudgeCore.Vector2(-0.5, 0.5), new FudgeCore.Vector2(-0.5, -0.5), new FudgeCore.Vector2(0.5, -0.5), new FudgeCore.Vector2(0.5, 0.5)
+            ];
+        }
         constructor(_name = "MeshQuad") {
             super(_name, MeshQuad.shape);
         }
@@ -8195,10 +8158,6 @@ var FudgeCore;
             delete _mutator.fitTexture;
         }
     }
-    MeshQuad.iSubclass = FudgeCore.Mesh.registerSubclass(MeshQuad);
-    MeshQuad.shape = [
-        new FudgeCore.Vector2(-0.5, 0.5), new FudgeCore.Vector2(-0.5, -0.5), new FudgeCore.Vector2(0.5, -0.5), new FudgeCore.Vector2(0.5, 0.5)
-    ];
     FudgeCore.MeshQuad = MeshQuad;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -8207,6 +8166,7 @@ var FudgeCore;
     }
     FudgeCore.TerrainInfo = TerrainInfo;
     class MeshTerrain extends FudgeCore.Mesh {
+        static { this.iSubclass = FudgeCore.Mesh.registerSubclass(MeshTerrain); }
         constructor(_name = "MeshTerrain", _resolution = FudgeCore.Vector2.ONE(2), _scaleInput = FudgeCore.Vector2.ONE(), _functionOrSeed = 0) {
             super(_name);
             this.heightMapFunction = null;
@@ -8244,7 +8204,7 @@ var FudgeCore;
                 if (this.resolution.x % 2 == 0)
                     split = (split == FudgeCore.QUADSPLIT.AT_0) ? FudgeCore.QUADSPLIT.AT_1 : FudgeCore.QUADSPLIT.AT_0;
             }
-            this.faces = quads.flatMap((quad) => quad.faces);
+            this.faces = quads.flatMap((_quad) => _quad.faces);
         }
         getTerrainInfo(_position, _mtxWorld = FudgeCore.Matrix4x4.IDENTITY(), _mtxInverse) {
             if (!_mtxInverse)
@@ -8302,12 +8262,12 @@ var FudgeCore;
             this.create(this.resolution, this.scale, this.seed);
         }
     }
-    MeshTerrain.iSubclass = FudgeCore.Mesh.registerSubclass(MeshTerrain);
     FudgeCore.MeshTerrain = MeshTerrain;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshRelief extends FudgeCore.MeshTerrain {
+        static { this.iSubclass = FudgeCore.Mesh.registerSubclass(MeshRelief); }
         constructor(_name = "MeshRelief", _texture = null) {
             super(_name, FudgeCore.Vector2.ONE(2), undefined, (_x, _z) => 0);
             this.texture = null;
@@ -8365,12 +8325,18 @@ var FudgeCore;
             delete _mutator.resolution;
         }
     }
-    MeshRelief.iSubclass = FudgeCore.Mesh.registerSubclass(MeshRelief);
     FudgeCore.MeshRelief = MeshRelief;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshRotation extends FudgeCore.Mesh {
+        static { this.iSubclass = FudgeCore.Mesh.registerSubclass(MeshRotation); }
+        static {
+            this.verticesDefault = [
+                new FudgeCore.Vector2(0.5, 0.5),
+                new FudgeCore.Vector2(0.5, -0.5)
+            ];
+        }
         constructor(_name = "MeshRotation", _shape = MeshRotation.verticesDefault, _longitudes = 3) {
             super(_name);
             this.shape = new FudgeCore.MutableArray(FudgeCore.Vector2);
@@ -8414,7 +8380,7 @@ var FudgeCore;
                     distances.push(total);
                 }
             }
-            distances.forEach((entry, index) => { distances[index] = entry / total; });
+            distances.forEach((_entry, _index) => { distances[_index] = _entry / total; });
             let nVerticesPolygon = polygon.length;
             let cloud = new FudgeCore.Vertices();
             for (let longitude = 0; longitude <= this.longitudes; longitude++) {
@@ -8443,11 +8409,6 @@ var FudgeCore;
             this.faces = faces;
         }
     }
-    MeshRotation.iSubclass = FudgeCore.Mesh.registerSubclass(MeshRotation);
-    MeshRotation.verticesDefault = [
-        new FudgeCore.Vector2(0.5, 0.5),
-        new FudgeCore.Vector2(0.5, -0.5)
-    ];
     FudgeCore.MeshRotation = MeshRotation;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -8467,52 +8428,32 @@ var FudgeCore;
         static getRenderBuffers(_shader) {
             let renderBuffers = super.getRenderBuffers.call(this, _shader);
             const crc3 = FudgeCore.RenderWebGL.getRenderingContext();
-            let iBones = this.renderMesh.iBones;
-            let weights = this.renderMesh.weights;
-            if (_shader.define.includes("FLAT")) {
-                iBones = this.renderMesh.iBonesFlat;
-                weights = this.renderMesh.weightsFlat;
-            }
-            if (!renderBuffers.iBones) {
-                renderBuffers.iBones = FudgeCore.RenderWebGL.assert(crc3.createBuffer());
-                crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.iBones);
-                crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, iBones, WebGL2RenderingContext.STATIC_DRAW);
+            if (!renderBuffers.bones) {
+                renderBuffers.bones = FudgeCore.RenderWebGL.assert(crc3.createBuffer());
+                crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.bones);
+                crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.bones, WebGL2RenderingContext.STATIC_DRAW);
             }
             if (!renderBuffers.weights) {
                 renderBuffers.weights = FudgeCore.RenderWebGL.assert(crc3.createBuffer());
                 crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.weights);
-                crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, weights, WebGL2RenderingContext.STATIC_DRAW);
-            }
-            if (!renderBuffers.mtxBones) {
-                const bones = crc3.getUniformBlockIndex(_shader.program, FudgeCore.UNIFORM_BLOCKS.SKIN.NAME);
-                const bonesSize = crc3.getActiveUniformBlockParameter(_shader.program, bones, crc3.UNIFORM_BLOCK_DATA_SIZE);
-                renderBuffers.mtxBones = crc3.createBuffer();
-                crc3.bindBufferBase(crc3.UNIFORM_BUFFER, FudgeCore.UNIFORM_BLOCKS.SKIN.BINDING, renderBuffers.mtxBones);
-                crc3.bufferData(crc3.UNIFORM_BUFFER, bonesSize, crc3.DYNAMIC_DRAW);
-                crc3.uniformBlockBinding(_shader.program, bones, FudgeCore.UNIFORM_BLOCKS.SKIN.BINDING);
+                crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.weights, WebGL2RenderingContext.STATIC_DRAW);
             }
             return renderBuffers;
         }
-        static useRenderBuffers(_shader, _mtxMeshToWorld, _mtxMeshToView, _id, _mtxBones) {
+        static useRenderBuffers(_shader, _mtxMeshToWorld, _mtxMeshToView, _id) {
             let renderBuffers = super.useRenderBuffers.call(this, _shader, _mtxMeshToWorld, _mtxMeshToView, _id);
             const crc3 = FudgeCore.RenderWebGL.getRenderingContext();
-            const aIBone = _shader.attributes["a_iBone"];
-            if (aIBone) {
-                crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.iBones);
-                crc3.enableVertexAttribArray(aIBone);
-                crc3.vertexAttribIPointer(aIBone, 4, WebGL2RenderingContext.UNSIGNED_BYTE, 0, 0);
+            const aBone = _shader.attributes["a_vctBones"];
+            if (aBone) {
+                crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.bones);
+                crc3.enableVertexAttribArray(aBone);
+                crc3.vertexAttribIPointer(aBone, 4, WebGL2RenderingContext.UNSIGNED_BYTE, 0, 0);
             }
-            const aWeight = _shader.attributes["a_fWeight"];
+            const aWeight = _shader.attributes["a_vctWeights"];
             if (aWeight) {
                 crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.weights);
                 crc3.enableVertexAttribArray(aWeight);
                 crc3.vertexAttribPointer(aWeight, 4, WebGL2RenderingContext.FLOAT, false, 0, 0);
-            }
-            if (_mtxBones) {
-                const skin = crc3.getUniformBlockIndex(_shader.program, FudgeCore.UNIFORM_BLOCKS.SKIN.NAME);
-                crc3.uniformBlockBinding(_shader.program, skin, FudgeCore.UNIFORM_BLOCKS.SKIN.BINDING);
-                crc3.bindBuffer(crc3.UNIFORM_BUFFER, renderBuffers.mtxBones);
-                crc3.bufferSubData(crc3.UNIFORM_BUFFER, 0, new Float32Array(iterableFrom(_mtxBones)));
             }
             return renderBuffers;
         }
@@ -8521,26 +8462,16 @@ var FudgeCore;
             const crc3 = FudgeCore.RenderWebGL.getRenderingContext();
             if (_renderBuffers) {
                 crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
-                crc3.deleteBuffer(_renderBuffers.iBones);
+                crc3.deleteBuffer(_renderBuffers.bones);
                 crc3.deleteBuffer(_renderBuffers.weights);
-                crc3.deleteBuffer(_renderBuffers.mtxBones);
             }
         }
     }
     FudgeCore.RenderInjectorMeshSkin = RenderInjectorMeshSkin;
-    function* iterableFrom(_matrices) {
-        for (const matrix of _matrices)
-            for (const value of matrix.get())
-                yield value;
-    }
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     let MeshSkin = class MeshSkin extends FudgeCore.MeshImport {
-        useRenderBuffers(_shader, _mtxWorld, _mtxProjection, _id, _mtxBones) { return null; }
-        reduceMutator(_mutator) {
-            super.reduceMutator(_mutator);
-        }
     };
     MeshSkin = __decorate([
         FudgeCore.RenderInjectorMeshSkin.decorate
@@ -8550,6 +8481,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class MeshSphere extends FudgeCore.MeshRotation {
+        static { this.iSubclass = FudgeCore.Mesh.registerSubclass(MeshSphere); }
         constructor(_name = "MeshSphere", _longitudes = 8, _latitudes = 8) {
             super(_name);
             this.create(_longitudes, _latitudes);
@@ -8595,12 +8527,12 @@ var FudgeCore;
             delete _mutator.shape;
         }
     }
-    MeshSphere.iSubclass = FudgeCore.Mesh.registerSubclass(MeshSphere);
     FudgeCore.MeshSphere = MeshSphere;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshSprite extends FudgeCore.Mesh {
+        static { this.iSubclass = FudgeCore.Mesh.registerSubclass(MeshSprite); }
         constructor(_name = "MeshSprite") {
             super(_name);
             this.vertices = new FudgeCore.Vertices(new FudgeCore.Vertex(new FudgeCore.Vector3(-0.5, 0.5, 0), new FudgeCore.Vector2(0, 0)), new FudgeCore.Vertex(new FudgeCore.Vector3(-0.5, -0.5, 0), new FudgeCore.Vector2(0, 1)), new FudgeCore.Vertex(new FudgeCore.Vector3(0.5, -0.5, 0), new FudgeCore.Vector2(1, 1)), new FudgeCore.Vertex(new FudgeCore.Vector3(0.5, 0.5, 0), new FudgeCore.Vector2(1, 0)));
@@ -8614,12 +8546,12 @@ var FudgeCore;
         get verticesFlat() { return this.renderMesh.vertices; }
         get indicesFlat() { return this.renderMesh.indices; }
     }
-    MeshSprite.iSubclass = FudgeCore.Mesh.registerSubclass(MeshSprite);
     FudgeCore.MeshSprite = MeshSprite;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshTorus extends FudgeCore.MeshRotation {
+        static { this.iSubclass = FudgeCore.Mesh.registerSubclass(MeshTorus); }
         constructor(_name = "MeshTorus", _size = 0.25, _longitudes = 8, _latitudes = 6) {
             super(_name, MeshTorus.getShape(_size, Math.max(3, _latitudes)), _longitudes);
             this.size = 0.25;
@@ -8663,7 +8595,6 @@ var FudgeCore;
             delete _mutator.shape;
         }
     }
-    MeshTorus.iSubclass = FudgeCore.Mesh.registerSubclass(MeshTorus);
     FudgeCore.MeshTorus = MeshTorus;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -8675,6 +8606,7 @@ var FudgeCore;
         QUADSPLIT[QUADSPLIT["AT_1"] = 2] = "AT_1";
     })(QUADSPLIT = FudgeCore.QUADSPLIT || (FudgeCore.QUADSPLIT = {}));
     class Quad {
+        #split;
         constructor(_vertices, _index0, _index1, _index2, _index3, _split = QUADSPLIT.PLANAR) {
             this.faces = [];
             this.#split = _split;
@@ -8699,7 +8631,6 @@ var FudgeCore;
                 FudgeCore.Debug.fudge("Face excluded", _e.message);
             }
         }
-        #split;
         get split() {
             return this.#split;
         }
@@ -8709,13 +8640,15 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Vertex {
-        constructor(_positionOrIndex, _uv = null, _normal = FudgeCore.Vector3.ZERO()) {
+        constructor(_positionOrIndex, _uv = undefined, _normal = FudgeCore.Vector3.ZERO(), _color = new FudgeCore.Color(1, 1, 1, 1), _bones = null) {
             if (_positionOrIndex instanceof FudgeCore.Vector3)
                 this.position = _positionOrIndex;
             else
                 this.referTo = _positionOrIndex;
             this.uv = _uv;
             this.normal = _normal;
+            this.color = _color;
+            this.bones = _bones;
         }
     }
     FudgeCore.Vertex = Vertex;
@@ -8736,6 +8669,9 @@ var FudgeCore;
         }
         uv(_index) {
             return this[_index].uv;
+        }
+        color(_index) {
+            return this[_index].color;
         }
         bones(_index) {
             let vertex = this[_index];
@@ -8862,47 +8798,82 @@ var FudgeCore;
     class MeshLoaderGLTF extends FudgeCore.MeshLoader {
         static async load(_mesh, _data) {
             const loader = await FudgeCore.GLTFLoader.LOAD(_mesh.url.toString());
-            const meshGLTF = _data || loader.gltf.meshes.find(gltfMesh => gltfMesh.name == _mesh.name);
-            const renderMesh = Reflect.get(_mesh, "renderMesh");
-            _mesh.name = _data.name;
-            Reflect.set(renderMesh, "ƒindices", await loader.getUint16Array(meshGLTF.primitives[0].indices));
-            Reflect.set(renderMesh, "ƒvertices", await loader.getFloat32Array(meshGLTF.primitives[0].attributes.POSITION));
-            if (meshGLTF.primitives[0].attributes.NORMAL)
-                Reflect.set(renderMesh, "ƒnormalsVertex", await loader.getFloat32Array(meshGLTF.primitives[0].attributes.NORMAL));
-            if (meshGLTF.primitives[0].attributes.TEXCOORD_0)
-                Reflect.set(renderMesh, "ƒtextureUVs", await loader.getFloat32Array(meshGLTF.primitives[0].attributes.TEXCOORD_0));
-            _mesh.vertices.push(...getVertices(renderMesh));
-            _mesh.faces.push(...getFaces(renderMesh, _mesh.vertices));
-            if (_mesh instanceof FudgeCore.MeshSkin) {
-                Reflect.set(renderMesh, "ƒiBones", await loader.getUint8Array(meshGLTF.primitives[0].attributes.JOINTS_0));
-                Reflect.set(renderMesh, "ƒweights", await loader.getFloat32Array(meshGLTF.primitives[0].attributes.WEIGHTS_0));
-                createBones(renderMesh, _mesh.vertices);
+            const gltfMesh = loader.gltf.meshes[_data.iMesh];
+            const gltfPrimitive = gltfMesh.primitives[_data.iPrimitive];
+            if (gltfPrimitive.indices == undefined)
+                FudgeCore.Debug.warn(`${loader}: Mesh with index ${_data.iMesh} primitive ${_data.iPrimitive} has no indices. FUDGE does not support non-indexed meshes.`);
+            if (gltfPrimitive.attributes.POSITION == undefined)
+                FudgeCore.Debug.warn(`${loader}: Mesh with index ${_data.iMesh} primitive ${_data.iPrimitive} has no position attribute. Primitive will be ignored.`);
+            if (gltfPrimitive.mode != undefined && gltfPrimitive.mode != GLTF.MESH_PRIMITIVE_MODE.TRIANGLES)
+                FudgeCore.Debug.warn(`${loader}: Mesh with index ${_data.iMesh} primitive ${_data.iPrimitive} has topology type mode ${GLTF.MESH_PRIMITIVE_MODE[gltfPrimitive.mode]}. FUDGE only supports ${GLTF.MESH_PRIMITIVE_MODE[4]}.`);
+            checkMaxSupport(gltfPrimitive.attributes, "TEXCOORD", 2);
+            checkMaxSupport(gltfPrimitive.attributes, "COLOR", 1);
+            checkMaxSupport(gltfPrimitive.attributes, "JOINTS", 1);
+            checkMaxSupport(gltfPrimitive.attributes, "WEIGHTS", 1);
+            _mesh.name = gltfMesh.name;
+            let indices;
+            let vertices;
+            let normals;
+            let textureUVs;
+            let colors;
+            let bones;
+            let weights;
+            if (gltfPrimitive.indices != undefined)
+                indices = await loader.getVertexIndices(gltfPrimitive.indices);
+            if (gltfPrimitive.attributes.POSITION != undefined)
+                vertices = await loader.getFloat32Array(gltfPrimitive.attributes.POSITION);
+            if (gltfPrimitive.attributes.NORMAL != undefined)
+                normals = await loader.getFloat32Array(gltfPrimitive.attributes.NORMAL);
+            if (gltfPrimitive.attributes.TEXCOORD_1 != undefined)
+                textureUVs = await loader.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_1);
+            else if (gltfPrimitive.attributes.TEXCOORD_0 != undefined)
+                textureUVs = await loader.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_0);
+            if (gltfPrimitive.attributes.COLOR_0 != undefined)
+                colors = await loader.getVertexColors(gltfPrimitive.attributes.COLOR_0);
+            if (gltfPrimitive.attributes.JOINTS_0 != undefined && gltfPrimitive.attributes.WEIGHTS_0 != undefined) {
+                bones = await loader.getBoneIndices(gltfPrimitive.attributes.JOINTS_0);
+                weights = await loader.getFloat32Array(gltfPrimitive.attributes.WEIGHTS_0);
             }
+            for (let iVertex = 0, iColor = 0, iTextureUV = 0, iBoneEntry = 0; iVertex < vertices?.length; iVertex += 3, iColor += 4, iTextureUV += 2, iBoneEntry += 4) {
+                _mesh.vertices.push(new FudgeCore.Vertex(new FudgeCore.Vector3(vertices[iVertex + 0], vertices[iVertex + 1], vertices[iVertex + 2]), textureUVs ?
+                    new FudgeCore.Vector2(textureUVs[iTextureUV + 0], textureUVs[iTextureUV + 1]) :
+                    undefined, normals ?
+                    new FudgeCore.Vector3(normals[iVertex + 0], normals[iVertex + 1], normals[iVertex + 2]) :
+                    undefined, colors ?
+                    new FudgeCore.Color(colors[iColor + 0], colors[iColor + 1], colors[iColor + 2], colors[iColor + 3]) :
+                    undefined, bones && weights ?
+                    [
+                        { index: bones[iBoneEntry + 0], weight: weights[iBoneEntry + 0] },
+                        { index: bones[iBoneEntry + 1], weight: weights[iBoneEntry + 1] },
+                        { index: bones[iBoneEntry + 2], weight: weights[iBoneEntry + 2] },
+                        { index: bones[iBoneEntry + 3], weight: weights[iBoneEntry + 3] }
+                    ] :
+                    undefined));
+            }
+            for (let iFaceVertexIndex = 0; iFaceVertexIndex < indices?.length; iFaceVertexIndex += 3) {
+                try {
+                    _mesh.faces.push(new FudgeCore.Face(_mesh.vertices, indices[iFaceVertexIndex + 0], indices[iFaceVertexIndex + 1], indices[iFaceVertexIndex + 2]));
+                }
+                catch (_e) {
+                    FudgeCore.Debug.fudge("Face excluded", _e.message);
+                }
+            }
+            const renderMesh = _mesh.renderMesh;
+            renderMesh.indices = indices;
+            renderMesh.vertices = vertices;
+            renderMesh.normals = normals;
+            renderMesh.textureUVs = textureUVs;
+            renderMesh.colors = colors;
+            renderMesh.bones = bones;
+            renderMesh.weights = weights;
             return _mesh;
+            function checkMaxSupport(_gltfAttributes, _check, _max) {
+                if (Object.keys(gltfPrimitive.attributes).filter((_key) => _key.startsWith(_check)).length > _max)
+                    FudgeCore.Debug.warn(`${loader}: Mesh with index ${_data.iMesh} primitive ${_data.iPrimitive} has more than ${_max} sets of '${_check}' associated with it. FUGDE only supports up to ${_max} ${_check} sets per primitve.`);
+            }
         }
     }
     FudgeCore.MeshLoaderGLTF = MeshLoaderGLTF;
-    function* getVertices(_renderMesh) {
-        for (let iVertex = 0, iTextureUV = 0; iVertex < _renderMesh.vertices.length; iVertex += 3, iTextureUV += 2) {
-            yield new FudgeCore.Vertex(new FudgeCore.Vector3(_renderMesh.vertices[iVertex + 0], _renderMesh.vertices[iVertex + 1], _renderMesh.vertices[iVertex + 2]), new FudgeCore.Vector2(_renderMesh.textureUVs[iTextureUV + 0], _renderMesh.textureUVs[iTextureUV + 1]), new FudgeCore.Vector3(_renderMesh.normalsVertex[iVertex + 0], _renderMesh.normalsVertex[iVertex + 1], _renderMesh.normalsVertex[iVertex + 2]));
-        }
-    }
-    function* getFaces(_renderMesh, _vertices) {
-        for (let iFaceVertexIndex = 0; iFaceVertexIndex < _renderMesh.indices.length; iFaceVertexIndex += 3) {
-            yield new FudgeCore.Face(_vertices, _renderMesh.indices[iFaceVertexIndex + 0], _renderMesh.indices[iFaceVertexIndex + 1], _renderMesh.indices[iFaceVertexIndex + 2]);
-        }
-    }
-    function createBones(_renderMesh, _vertices) {
-        for (let iVertex = 0, iBoneEntry = 0; iVertex < _vertices.length; iVertex++) {
-            _vertices[iVertex].bones = [];
-            for (let i = 0; i < 4; i++, iBoneEntry++) {
-                _vertices[iVertex].bones.push({
-                    index: _renderMesh.iBones[iBoneEntry],
-                    weight: _renderMesh.weights[iBoneEntry]
-                });
-            }
-        }
-    }
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -8920,6 +8891,7 @@ var FudgeCore;
         const lines = _data.split("\n");
         let positions = [];
         let uvs = [];
+        let normals = [];
         let faceInfo = [];
         for (let line of lines) {
             line = line.trim();
@@ -8929,31 +8901,34 @@ var FudgeCore;
             parts.shift();
             if (line.startsWith("v "))
                 positions.push(new FudgeCore.Vector3(...parts.map(_value => +_value)));
+            if (line.startsWith("vn "))
+                normals.push(new FudgeCore.Vector3(...parts.map(_value => +_value)));
             else if (line.startsWith("vt "))
                 uvs.push(new FudgeCore.Vector2(...parts.map((_value, _index) => +_value * (_index == 1 ? -1 : 1))));
             else if (line.startsWith("f "))
                 for (let i = 0; i < 3; i++) {
+                    const indices = parts[i].split("/");
                     faceInfo.push({
-                        iPosition: +parts[i].split("/")[0] - 1,
-                        iUV: +parts[i].split("/")[1] - 1,
-                        iNormal: +parts[i].split("/")[2] - 1
+                        iPosition: +indices[0] - 1,
+                        iUV: +indices[1] - 1,
+                        iNormal: +indices[2] - 1
                     });
                 }
         }
-        _mesh.vertices = new FudgeCore.Vertices(...positions.map((_p) => new FudgeCore.Vertex(_p)));
+        _mesh.vertices = new FudgeCore.Vertices();
         for (let i = 0; i < faceInfo.length; i += 3) {
             let indices = [];
             for (let v = 0; v < 3; v++) {
                 let info = faceInfo[i + v];
-                let index = info.iPosition;
-                if (_mesh.vertices[index].uv) {
-                    index = _mesh.vertices.length;
-                    _mesh.vertices.push(new FudgeCore.Vertex(info.iPosition));
-                }
-                _mesh.vertices[index].uv = uvs[info.iUV];
-                indices.push(index);
+                _mesh.vertices.push(new FudgeCore.Vertex(positions[info.iPosition], uvs[info.iUV], normals[info.iNormal]));
+                indices.push(_mesh.vertices.length - 1);
             }
-            _mesh.faces.push(new FudgeCore.Face(_mesh.vertices, indices[0], indices[1], indices[2]));
+            try {
+                _mesh.faces.push(new FudgeCore.Face(_mesh.vertices, indices[0], indices[1], indices[2]));
+            }
+            catch (_e) {
+                FudgeCore.Debug.fudge("Face excluded", _e.message);
+            }
         }
     }
 })(FudgeCore || (FudgeCore = {}));
@@ -8987,32 +8962,34 @@ var FudgeCore;
         ParticleData.isTransformation = isTransformation;
     })(ParticleData = FudgeCore.ParticleData || (FudgeCore.ParticleData = {}));
     class ParticleSystem extends FudgeCore.Mutable {
+        #data;
+        #shaderToShaderParticleSystem;
         constructor(_name = ParticleSystem.name, _data = {}) {
             super();
             this.idResource = undefined;
-            this.shaderToShaderParticleSystem = new Map();
+            this.#shaderToShaderParticleSystem = new Map();
             this.name = _name;
             this.data = _data;
             FudgeCore.Project.register(this);
         }
-        #data;
         get data() {
             return this.#data;
         }
         set data(_data) {
             this.#data = _data;
-            this.shaderToShaderParticleSystem.forEach(shader => shader.deleteProgram());
-            this.shaderToShaderParticleSystem.clear();
+            this.#shaderToShaderParticleSystem.forEach(_shader => _shader.deleteProgram());
+            this.#shaderToShaderParticleSystem.clear();
         }
         getShaderFrom(_source) {
-            if (!this.shaderToShaderParticleSystem.has(_source)) {
+            if (!this.#shaderToShaderParticleSystem.has(_source)) {
                 let particleShader = new FudgeCore.ShaderParticleSystem();
                 particleShader.data = this.data;
+                particleShader.define = [...particleShader.define, ..._source.define];
                 particleShader.vertexShaderSource = _source.getVertexShaderSource();
                 particleShader.fragmentShaderSource = _source.getFragmentShaderSource();
-                this.shaderToShaderParticleSystem.set(_source, particleShader);
+                this.#shaderToShaderParticleSystem.set(_source, particleShader);
             }
-            return this.shaderToShaderParticleSystem.get(_source);
+            return this.#shaderToShaderParticleSystem.get(_source);
         }
         serialize() {
             let serialization = {
@@ -9069,6 +9046,34 @@ var FudgeCore;
         BODY_INIT[BODY_INIT["TO_PIVOT"] = 2] = "TO_PIVOT";
     })(BODY_INIT = FudgeCore.BODY_INIT || (FudgeCore.BODY_INIT = {}));
     class ComponentRigidbody extends FudgeCore.Component {
+        static { this.iSubclass = FudgeCore.Component.registerSubclass(ComponentRigidbody); }
+        static {
+            this.mapBodyType = (typeof OIMO == "undefined") ?
+                {
+                    [FudgeCore.BODY_TYPE.DYNAMIC]: FudgeCore.BODY_TYPE.DYNAMIC, [FudgeCore.BODY_TYPE.STATIC]: FudgeCore.BODY_TYPE.STATIC, [FudgeCore.BODY_TYPE.KINEMATIC]: FudgeCore.BODY_TYPE.KINEMATIC
+                } : {
+                [FudgeCore.BODY_TYPE.DYNAMIC]: OIMO.RigidBodyType.DYNAMIC, [FudgeCore.BODY_TYPE.STATIC]: OIMO.RigidBodyType.STATIC, [FudgeCore.BODY_TYPE.KINEMATIC]: OIMO.RigidBodyType.KINEMATIC
+            };
+        }
+        #id;
+        #collider;
+        #colliderInfo;
+        #collisionGroup;
+        #typeCollider;
+        #rigidbody;
+        #rigidbodyInfo;
+        #typeBody;
+        #massData;
+        #restitution;
+        #friction;
+        #dampingLinear;
+        #dampingAngular;
+        #effectRotation;
+        #effectGravity;
+        #isTrigger;
+        #mtxPivotUnscaled;
+        #mtxPivotInverse;
+        #callbacks;
         constructor(_mass = 1, _type = FudgeCore.BODY_TYPE.DYNAMIC, _colliderType = FudgeCore.COLLIDER_TYPE.CUBE, _group = FudgeCore.Physics.settings.defaultCollisionGroup, _mtxTransform = null, _convexMesh = null) {
             super();
             this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
@@ -9096,7 +9101,7 @@ var FudgeCore;
                         this.addEventListener("componentDeactivate", this.removeRigidbodyFromWorld);
                         this.node.addEventListener("nodeDeactivate", this.removeRigidbodyFromWorld, true);
                         if (!this.node.cmpTransform)
-                            FudgeCore.Debug.warn(`ComponentRigidbody attached to node missing ComponentTransform`, this.node);
+                            FudgeCore.Debug.warn("ComponentRigidbody attached to node missing ComponentTransform", this.node);
                         break;
                     case "componentRemove":
                         this.removeEventListener("componentRemove", this.removeRigidbodyFromWorld);
@@ -9105,7 +9110,7 @@ var FudgeCore;
                         break;
                     case "nodeDeserialized":
                         if (!this.node.cmpTransform)
-                            FudgeCore.Debug.error(`ComponentRigidbody attached to node missing ComponentTransform`, this.node);
+                            FudgeCore.Debug.error("ComponentRigidbody attached to node missing ComponentTransform", this.node);
                         break;
                 }
             };
@@ -9121,25 +9126,6 @@ var FudgeCore;
             this.addEventListener("componentAdd", this.hndEvent);
             this.addEventListener("componentRemove", this.hndEvent);
         }
-        #id;
-        #collider;
-        #colliderInfo;
-        #collisionGroup;
-        #typeCollider;
-        #rigidbody;
-        #rigidbodyInfo;
-        #typeBody;
-        #massData;
-        #restitution;
-        #friction;
-        #dampingLinear;
-        #dampingAngular;
-        #effectRotation;
-        #effectGravity;
-        #isTrigger;
-        #mtxPivotUnscaled;
-        #mtxPivotInverse;
-        #callbacks;
         get id() {
             return this.#id;
         }
@@ -9255,8 +9241,11 @@ var FudgeCore;
         }
         getRotation() {
             let orientation = this.#rigidbody.getOrientation();
-            let tmpQuat = new FudgeCore.PhysicsQuaternion(orientation.x, orientation.y, orientation.z, orientation.w);
-            return tmpQuat.toDegrees();
+            let tmpQuat = FudgeCore.Recycler.get(FudgeCore.Quaternion);
+            tmpQuat.set(orientation.x, orientation.y, orientation.z, orientation.w);
+            let eulerAngles = tmpQuat.eulerAngles.clone;
+            FudgeCore.Recycler.store(tmpQuat);
+            return eulerAngles;
         }
         setRotation(_value) {
             let quat = new OIMO.Quat();
@@ -9304,14 +9293,14 @@ var FudgeCore;
             }
             let mtxWorld = FudgeCore.Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
             let position = mtxWorld.translation;
-            let rotation = mtxWorld.getEulerAngles();
+            let rotation = mtxWorld.rotation;
             let scaling = mtxWorld.scaling;
             this.setScaling(scaling);
             this.#rigidbody.setMassData(this.#massData);
             this.setPosition(position);
             this.setRotation(rotation);
             let scalingInverse = this.node.mtxWorld.scaling.map(_i => 1 / _i);
-            this.#mtxPivotUnscaled = FudgeCore.Matrix4x4.CONSTRUCTION({ translation: this.mtxPivot.translation, rotation: this.mtxPivot.rotation, scaling: scalingInverse });
+            this.#mtxPivotUnscaled = FudgeCore.Matrix4x4.CONSTRUCTION(this.mtxPivot.translation, this.mtxPivot.rotation, scalingInverse);
             this.#mtxPivotInverse = FudgeCore.Matrix4x4.INVERSION(this.#mtxPivotUnscaled);
             this.addRigidbodyToWorld();
             this.isInitialized = true;
@@ -9357,11 +9346,8 @@ var FudgeCore;
         addAngularVelocity(_value) {
             this.#rigidbody.addAngularVelocity(new OIMO.Vec3(_value.x, _value.y, _value.z));
         }
-        deactivateAutoSleep() {
-            this.#rigidbody.setAutoSleep(false);
-        }
-        activateAutoSleep() {
-            this.#rigidbody.setAutoSleep(true);
+        activateAutoSleep(_on) {
+            this.#rigidbody.setAutoSleep(_on);
         }
         checkCollisionEvents() {
             if (!this.isInitialized)
@@ -9391,10 +9377,10 @@ var FudgeCore;
                 if (objHit.getOimoRigidbody() != this.getOimoRigidbody() && this.collisions.indexOf(objHit) == -1) {
                     let colPos = this.collisionCenterPoint(points, collisionManifold.getNumPoints());
                     colPoint = new FudgeCore.Vector3(colPos.x, colPos.y, colPos.z);
-                    points.forEach((value) => {
-                        normalImpulse += value.getNormalImpulse();
-                        binormalImpulse += value.getBinormalImpulse();
-                        tangentImpulse += value.getTangentImpulse();
+                    points.forEach((_value) => {
+                        normalImpulse += _value.getNormalImpulse();
+                        binormalImpulse += _value.getBinormalImpulse();
+                        tangentImpulse += _value.getTangentImpulse();
                     });
                     this.collisions.push(objHit);
                     event = new FudgeCore.EventPhysics("ColliderEnteredCollision", objHit, normalImpulse, tangentImpulse, binormalImpulse, colPoint, new FudgeCore.Vector3(normal.x, normal.y, normal.z));
@@ -9403,10 +9389,10 @@ var FudgeCore;
                 if (objHit2 != this && this.collisions.indexOf(objHit2) == -1) {
                     let colPos = this.collisionCenterPoint(points, collisionManifold.getNumPoints());
                     colPoint = new FudgeCore.Vector3(colPos.x, colPos.y, colPos.z);
-                    points.forEach((value) => {
-                        normalImpulse += value.getNormalImpulse();
-                        binormalImpulse += value.getBinormalImpulse();
-                        tangentImpulse += value.getTangentImpulse();
+                    points.forEach((_value) => {
+                        normalImpulse += _value.getNormalImpulse();
+                        binormalImpulse += _value.getBinormalImpulse();
+                        tangentImpulse += _value.getTangentImpulse();
                     });
                     this.collisions.push(objHit2);
                     event = new FudgeCore.EventPhysics("ColliderEnteredCollision", objHit2, normalImpulse, tangentImpulse, binormalImpulse, colPoint, new FudgeCore.Vector3(normal.x, normal.y, normal.z));
@@ -9414,21 +9400,21 @@ var FudgeCore;
                 }
                 list = list.getNext();
             }
-            this.collisions.forEach((value) => {
+            this.collisions.forEach((_value) => {
                 let isColliding = false;
                 list = this.#rigidbody.getContactLinkList();
                 for (let i = 0; i < this.#rigidbody.getNumContactLinks(); i++) {
                     objHit = list.getContact().getShape1().userData;
                     objHit2 = list.getContact().getShape2().userData;
-                    if (value == objHit || value == objHit2) {
+                    if (_value == objHit || _value == objHit2) {
                         isColliding = true;
                     }
                     list = list.getNext();
                 }
                 if (isColliding == false) {
-                    let index = this.collisions.indexOf(value);
+                    let index = this.collisions.indexOf(_value);
                     this.collisions.splice(index);
-                    event = new FudgeCore.EventPhysics("ColliderLeftCollision", value, 0, 0, 0);
+                    event = new FudgeCore.EventPhysics("ColliderLeftCollision", _value, 0, 0, 0);
                     this.dispatchEvent(event);
                 }
             });
@@ -9640,28 +9626,28 @@ var FudgeCore;
             let totalX = 0;
             let totalY = 0;
             let totalZ = 0;
-            _colPoints.forEach((value) => {
+            _colPoints.forEach((_value) => {
                 if (totalPoints < _numPoints) {
                     totalPoints++;
-                    totalX += value.getPosition2().x;
-                    totalY += value.getPosition2().y;
-                    totalZ += value.getPosition2().z;
+                    totalX += _value.getPosition2().x;
+                    totalY += _value.getPosition2().y;
+                    totalZ += _value.getPosition2().z;
                 }
             });
             center = new OIMO.Vec3(totalX / _numPoints, totalY / _numPoints, totalZ / _numPoints);
             return center;
         }
-        triggerEnter(contact) {
+        triggerEnter(_contact) {
             let objHit;
             let objHit2;
             let event;
             let colPoint;
-            let collisionManifold = contact.getManifold();
-            objHit = contact.getShape1().userData;
-            if (objHit == null || contact.isTouching() == false)
+            let collisionManifold = _contact.getManifold();
+            objHit = _contact.getShape1().userData;
+            if (objHit == null || _contact.isTouching() == false)
                 return;
-            objHit2 = contact.getShape2().userData;
-            if (objHit2 == null || contact.isTouching() == false)
+            objHit2 = _contact.getShape2().userData;
+            if (objHit2 == null || _contact.isTouching() == false)
                 return;
             let points = collisionManifold.getPoints();
             let normal = collisionManifold.getNormal();
@@ -9680,12 +9666,12 @@ var FudgeCore;
                 objHit.dispatchEvent(event);
             }
         }
-        triggerExit(contact) {
+        triggerExit(_contact) {
             let objHit;
             let objHit2;
             let event;
-            objHit = contact.getShape1().userData;
-            objHit2 = contact.getShape2().userData;
+            objHit = _contact.getShape1().userData;
+            objHit2 = _contact.getShape2().userData;
             let index = objHit.triggerings.indexOf(objHit2);
             if (index != -1) {
                 objHit.triggerings.splice(index);
@@ -9700,13 +9686,6 @@ var FudgeCore;
             }
         }
     }
-    ComponentRigidbody.iSubclass = FudgeCore.Component.registerSubclass(ComponentRigidbody);
-    ComponentRigidbody.mapBodyType = (typeof OIMO == "undefined") ?
-        {
-            [FudgeCore.BODY_TYPE.DYNAMIC]: FudgeCore.BODY_TYPE.DYNAMIC, [FudgeCore.BODY_TYPE.STATIC]: FudgeCore.BODY_TYPE.STATIC, [FudgeCore.BODY_TYPE.KINEMATIC]: FudgeCore.BODY_TYPE.KINEMATIC
-        } : {
-        [FudgeCore.BODY_TYPE.DYNAMIC]: OIMO.RigidBodyType.DYNAMIC, [FudgeCore.BODY_TYPE.STATIC]: OIMO.RigidBodyType.STATIC, [FudgeCore.BODY_TYPE.KINEMATIC]: OIMO.RigidBodyType.KINEMATIC
-    };
     FudgeCore.ComponentRigidbody = ComponentRigidbody;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -9717,21 +9696,21 @@ var FudgeCore;
             this.gl = _renderingContext;
             this.buffer = this.gl.createBuffer();
         }
-        setData(array) {
+        setData(_array) {
             if (this.attribs == null)
                 throw "set attributes first";
-            this.numVertices = array.length / (this.stride / 4);
+            this.numVertices = _array.length / (this.stride / 4);
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
-            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(array), this.gl.DYNAMIC_DRAW);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(_array), this.gl.DYNAMIC_DRAW);
         }
-        setAttribs(attribs) {
-            this.attribs = attribs;
+        setAttribs(_attribs) {
+            this.attribs = _attribs;
             this.offsets = [];
             this.stride = 0;
-            let n = attribs.length;
+            let n = _attribs.length;
             for (let i = 0; i < n; i++) {
                 this.offsets.push(this.stride);
-                this.stride += attribs[i].float32Count * Float32Array.BYTES_PER_ELEMENT;
+                this.stride += _attribs[i].float32Count * Float32Array.BYTES_PER_ELEMENT;
             }
         }
         loadAttribIndices(_program) {
@@ -9754,10 +9733,10 @@ var FudgeCore;
             this.gl = _renderingContext;
             this.buffer = this.gl.createBuffer();
         }
-        setData(array) {
+        setData(_array) {
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffer);
-            this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Int16Array(array), this.gl.DYNAMIC_DRAW);
-            this.count = array.length;
+            this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Int16Array(_array), this.gl.DYNAMIC_DRAW);
+            this.count = _array.length;
         }
         draw(_mode = this.gl.TRIANGLES, _count = -1) {
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffer);
@@ -9779,10 +9758,10 @@ var FudgeCore;
             this.vertexShader = this.gl.createShader(this.gl.VERTEX_SHADER);
             this.fragmentShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
         }
-        compile(vertexSource, fragmentSource) {
+        compile(_vertexSource, _fragmentSource) {
             this.uniformLocationMap = new Map();
-            this.compileShader(this.vertexShader, vertexSource);
-            this.compileShader(this.fragmentShader, fragmentSource);
+            this.compileShader(this.vertexShader, _vertexSource);
+            this.compileShader(this.fragmentShader, _fragmentSource);
             this.gl.attachShader(this.program, this.vertexShader);
             this.gl.attachShader(this.program, this.fragmentShader);
             this.gl.linkProgram(this.program);
@@ -9807,19 +9786,19 @@ var FudgeCore;
         }
         getAttribIndices(_attribs) {
             let indices = [];
-            _attribs.forEach(value => {
-                indices.push(this.getAttribIndex(value.name));
+            _attribs.forEach(_value => {
+                indices.push(this.getAttribIndex(_value.name));
             });
             return indices;
         }
         use() {
             this.gl.useProgram(this.program);
         }
-        compileShader(shader, source) {
-            this.gl.shaderSource(shader, source);
-            this.gl.compileShader(shader);
-            if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-                FudgeCore.Debug.log(this.gl.getShaderInfoLog(shader));
+        compileShader(_shader, _source) {
+            this.gl.shaderSource(_shader, _source);
+            this.gl.compileShader(_shader);
+            if (!this.gl.getShaderParameter(_shader, this.gl.COMPILE_STATUS)) {
+                FudgeCore.Debug.log(this.gl.getShaderInfoLog(_shader));
             }
         }
     }
@@ -10008,8 +9987,19 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class JointCylindrical extends FudgeCore.JointAxial {
+        static { this.iSubclass = FudgeCore.Joint.registerSubclass(JointCylindrical); }
+        #springDampingRotation;
+        #springFrequencyRotation;
+        #motorForce;
+        #maxRotor;
+        #minRotor;
+        #rotorTorque;
+        #rotorSpeed;
+        #rotor;
+        #rotorSpringDamper;
         constructor(_bodyAnchor = null, _bodyTied = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
             super(_bodyAnchor, _bodyTied, _axis, _localAnchor);
+            this.config = new OIMO.CylindricalJointConfig();
             this.#springDampingRotation = 0;
             this.#springFrequencyRotation = 0;
             this.#motorForce = 0;
@@ -10017,7 +10007,6 @@ var FudgeCore;
             this.#minRotor = 0;
             this.#rotorTorque = 0;
             this.#rotorSpeed = 0;
-            this.config = new OIMO.CylindricalJointConfig();
             this.#getMutator = () => {
                 let mutator = {
                     motorForce: this.motorForce,
@@ -10034,15 +10023,6 @@ var FudgeCore;
                 this.mutateBase(_mutator, ["motorForce", "rotorTorque", "rotorSpeed", "maxRotor", "minRotor", "springDampingRotation", "springFrequencyRotation", "springFrequency"]);
             };
         }
-        #springDampingRotation;
-        #springFrequencyRotation;
-        #motorForce;
-        #maxRotor;
-        #minRotor;
-        #rotorTorque;
-        #rotorSpeed;
-        #rotor;
-        #rotorSpringDamper;
         set springDamping(_value) {
             super.springDamping = _value;
             if (this.joint != null)
@@ -10144,8 +10124,6 @@ var FudgeCore;
             Object.assign(mutator, this.#getMutator());
             return mutator;
         }
-        #getMutator;
-        #mutate;
         constructJoint() {
             this.#rotorSpringDamper = new OIMO.SpringDamper().setSpring(this.springFrequencyRotation, this.springDampingRotation);
             this.motor = new OIMO.TranslationalLimitMotor().setLimits(super.minMotor, super.maxMotor);
@@ -10161,21 +10139,23 @@ var FudgeCore;
             this.joint = new OIMO.CylindricalJoint(this.config);
             this.configureJoint();
         }
+        #getMutator;
+        #mutate;
     }
-    JointCylindrical.iSubclass = FudgeCore.Joint.registerSubclass(JointCylindrical);
     FudgeCore.JointCylindrical = JointCylindrical;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class JointPrismatic extends FudgeCore.JointAxial {
+        static { this.iSubclass = FudgeCore.Joint.registerSubclass(JointPrismatic); }
+        #motorForce;
         constructor(_bodyAnchor = null, _bodyTied = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
             super(_bodyAnchor, _bodyTied, _axis, _localAnchor);
-            this.#motorForce = 0;
             this.config = new OIMO.PrismaticJointConfig();
+            this.#motorForce = 0;
             this.maxMotor = 10;
             this.minMotor = -10;
         }
-        #motorForce;
         get motorForce() {
             return this.#motorForce;
         }
@@ -10218,14 +10198,30 @@ var FudgeCore;
             this.configureJoint();
         }
     }
-    JointPrismatic.iSubclass = FudgeCore.Joint.registerSubclass(JointPrismatic);
     FudgeCore.JointPrismatic = JointPrismatic;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class JointRagdoll extends FudgeCore.Joint {
+        static { this.iSubclass = FudgeCore.Joint.registerSubclass(JointRagdoll); }
+        #springDampingTwist;
+        #springFrequencyTwist;
+        #springDampingSwing;
+        #springFrequencySwing;
+        #maxMotorTwist;
+        #minMotorTwist;
+        #motorTorqueTwist;
+        #motorSpeedTwist;
+        #motorTwist;
+        #springDamperTwist;
+        #springDamperSwing;
+        #axisFirst;
+        #axisSecond;
+        #maxAngleFirst;
+        #maxAngleSecond;
         constructor(_bodyAnchor = null, _bodyTied = null, _axisFirst = new FudgeCore.Vector3(1, 0, 0), _axisSecond = new FudgeCore.Vector3(0, 0, 1), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
             super(_bodyAnchor, _bodyTied);
+            this.config = new OIMO.RagdollJointConfig();
             this.#springDampingTwist = 0;
             this.#springFrequencyTwist = 0;
             this.#springDampingSwing = 0;
@@ -10236,7 +10232,6 @@ var FudgeCore;
             this.#motorSpeedTwist = 0;
             this.#maxAngleFirst = 0;
             this.#maxAngleSecond = 0;
-            this.config = new OIMO.RagdollJointConfig();
             this.#getMutator = () => {
                 let mutator = {
                     maxAngleFirst: this.#maxAngleFirst,
@@ -10265,21 +10260,6 @@ var FudgeCore;
             this.axisSecond = _axisSecond;
             this.anchor = _localAnchor;
         }
-        #springDampingTwist;
-        #springFrequencyTwist;
-        #springDampingSwing;
-        #springFrequencySwing;
-        #maxMotorTwist;
-        #minMotorTwist;
-        #motorTorqueTwist;
-        #motorSpeedTwist;
-        #motorTwist;
-        #springDamperTwist;
-        #springDamperSwing;
-        #axisFirst;
-        #axisSecond;
-        #maxAngleFirst;
-        #maxAngleSecond;
         get axisFirst() {
             return new FudgeCore.Vector3(this.#axisFirst.x, this.#axisFirst.y, this.#axisFirst.z);
         }
@@ -10410,8 +10390,6 @@ var FudgeCore;
             mutator.axisSecond = this.axisSecond.getMutator();
             return mutator;
         }
-        #getMutator;
-        #mutate;
         constructJoint() {
             this.#springDamperTwist = new OIMO.SpringDamper().setSpring(this.springFrequencyTwist, this.springDampingTwist);
             this.#springDamperSwing = new OIMO.SpringDamper().setSpring(this.springFrequencySwing, this.springDampingSwing);
@@ -10427,22 +10405,24 @@ var FudgeCore;
             this.joint = new OIMO.RagdollJoint(this.config);
             super.configureJoint();
         }
+        #getMutator;
+        #mutate;
     }
-    JointRagdoll.iSubclass = FudgeCore.Joint.registerSubclass(JointRagdoll);
     FudgeCore.JointRagdoll = JointRagdoll;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class JointRevolute extends FudgeCore.JointAxial {
+        static { this.iSubclass = FudgeCore.Joint.registerSubclass(JointRevolute); }
+        #motorTorque;
+        #rotor;
         constructor(_bodyAnchor = null, _bodyTied = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
             super(_bodyAnchor, _bodyTied, _axis, _localAnchor);
-            this.#motorTorque = 0;
             this.config = new OIMO.RevoluteJointConfig();
+            this.#motorTorque = 0;
             this.maxMotor = 360;
             this.minMotor = 0;
         }
-        #motorTorque;
-        #rotor;
         set maxMotor(_value) {
             super.maxMotor = _value;
             _value *= FudgeCore.Calc.deg2rad;
@@ -10496,22 +10476,22 @@ var FudgeCore;
             this.configureJoint();
         }
     }
-    JointRevolute.iSubclass = FudgeCore.Joint.registerSubclass(JointRevolute);
     FudgeCore.JointRevolute = JointRevolute;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class JointSpherical extends FudgeCore.Joint {
-        constructor(_bodyAnchor = null, _bodyTied = null, _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
-            super(_bodyAnchor, _bodyTied);
-            this.#springDamping = 0;
-            this.#springFrequency = 0;
-            this.config = new OIMO.SphericalJointConfig();
-            this.anchor = new FudgeCore.Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-        }
+        static { this.iSubclass = FudgeCore.Joint.registerSubclass(JointSpherical); }
         #springDamping;
         #springFrequency;
         #springDamper;
+        constructor(_bodyAnchor = null, _bodyTied = null, _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
+            super(_bodyAnchor, _bodyTied);
+            this.config = new OIMO.SphericalJointConfig();
+            this.#springDamping = 0;
+            this.#springFrequency = 0;
+            this.anchor = new FudgeCore.Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+        }
         get springDamping() {
             return this.#springDamping;
         }
@@ -10563,14 +10543,33 @@ var FudgeCore;
             super.configureJoint();
         }
     }
-    JointSpherical.iSubclass = FudgeCore.Joint.registerSubclass(JointSpherical);
     FudgeCore.JointSpherical = JointSpherical;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class JointUniversal extends FudgeCore.Joint {
+        static { this.iSubclass = FudgeCore.Joint.registerSubclass(JointUniversal); }
+        #springDampingFirst;
+        #springFrequencyFirst;
+        #springDampingSecond;
+        #springFrequencySecond;
+        #maxRotorFirst;
+        #minRotorFirst;
+        #rotorTorqueFirst;
+        #rotorSpeedFirst;
+        #maxRotorSecond;
+        #minRotorSecond;
+        #rotorTorqueSecond;
+        #rotorSpeedSecond;
+        #motorFirst;
+        #motorSecond;
+        #axisSpringDamperFirst;
+        #axisSpringDamperSecond;
+        #axisFirst;
+        #axisSecond;
         constructor(_bodyAnchor = null, _bodyTied = null, _axisFirst = new FudgeCore.Vector3(1, 0, 0), _axisSecond = new FudgeCore.Vector3(0, 0, 1), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
             super(_bodyAnchor, _bodyTied);
+            this.config = new OIMO.UniversalJointConfig();
             this.#springDampingFirst = 0;
             this.#springFrequencyFirst = 0;
             this.#springDampingSecond = 0;
@@ -10583,7 +10582,6 @@ var FudgeCore;
             this.#minRotorSecond = 0;
             this.#rotorTorqueSecond = 0;
             this.#rotorSpeedSecond = 0;
-            this.config = new OIMO.UniversalJointConfig();
             this.#getMutator = () => {
                 let mutator = {
                     springDampingFirst: this.#springDampingFirst,
@@ -10612,24 +10610,6 @@ var FudgeCore;
             this.axisSecond = _axisSecond;
             this.anchor = _localAnchor;
         }
-        #springDampingFirst;
-        #springFrequencyFirst;
-        #springDampingSecond;
-        #springFrequencySecond;
-        #maxRotorFirst;
-        #minRotorFirst;
-        #rotorTorqueFirst;
-        #rotorSpeedFirst;
-        #maxRotorSecond;
-        #minRotorSecond;
-        #rotorTorqueSecond;
-        #rotorSpeedSecond;
-        #motorFirst;
-        #motorSecond;
-        #axisSpringDamperFirst;
-        #axisSpringDamperSecond;
-        #axisFirst;
-        #axisSecond;
         get axisFirst() {
             return new FudgeCore.Vector3(this.#axisFirst.x, this.#axisFirst.y, this.#axisFirst.z);
         }
@@ -10774,8 +10754,6 @@ var FudgeCore;
             mutator.axisSecond = this.axisSecond.getMutator();
             return mutator;
         }
-        #getMutator;
-        #mutate;
         constructJoint() {
             this.#axisSpringDamperFirst = new OIMO.SpringDamper().setSpring(this.#springFrequencyFirst, this.#springDampingFirst);
             this.#axisSpringDamperSecond = new OIMO.SpringDamper().setSpring(this.#springFrequencySecond, this.#springDampingSecond);
@@ -10792,13 +10770,15 @@ var FudgeCore;
             this.joint = new OIMO.UniversalJoint(this.config);
             super.configureJoint();
         }
+        #getMutator;
+        #mutate;
     }
-    JointUniversal.iSubclass = FudgeCore.Joint.registerSubclass(JointUniversal);
     FudgeCore.JointUniversal = JointUniversal;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class JointWelding extends FudgeCore.Joint {
+        static { this.iSubclass = FudgeCore.Joint.registerSubclass(JointWelding); }
         constructor(_bodyAnchor = null, _bodyTied = null, _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
             super(_bodyAnchor, _bodyTied);
             this.config = new OIMO.GenericJointConfig();
@@ -10821,12 +10801,15 @@ var FudgeCore;
             this.joint.setAllowCollision(this.internalCollision);
         }
     }
-    JointWelding.iSubclass = FudgeCore.Joint.registerSubclass(JointWelding);
     FudgeCore.JointWelding = JointWelding;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Physics {
+        static { this.settings = new FudgeCore.PhysicsSettings(FudgeCore.COLLISION_GROUP.DEFAULT, (FudgeCore.COLLISION_GROUP.DEFAULT | FudgeCore.COLLISION_GROUP.GROUP_1 | FudgeCore.COLLISION_GROUP.GROUP_2 | FudgeCore.COLLISION_GROUP.GROUP_3 | FudgeCore.COLLISION_GROUP.GROUP_4)); }
+        static { this.ƒactive = new Physics(); }
+        #debugDraw;
+        #mainCam;
         constructor() {
             this.bodyList = new Array();
             this.jointList = new Array();
@@ -10838,8 +10821,6 @@ var FudgeCore;
             this.#debugDraw = new FudgeCore.PhysicsDebugDraw();
             this.oimoWorld.setDebugDraw(this.#debugDraw.oimoDebugDraw);
         }
-        #debugDraw;
-        #mainCam;
         static set activeInstance(_physics) {
             Physics.ƒactive = _physics;
         }
@@ -10863,17 +10844,17 @@ var FudgeCore;
             }
             else {
                 let allHits = new Array();
-                Physics.ƒactive.bodyList.forEach(function (value) {
-                    if (value.collisionGroup == _group) {
-                        hitInfo = value.raycastThisBody(_origin, _direction, _length);
+                Physics.ƒactive.bodyList.forEach(function (_value) {
+                    if (_value.collisionGroup == _group) {
+                        hitInfo = _value.raycastThisBody(_origin, _direction, _length);
                         if (hitInfo.hit == true) {
                             allHits.push(hitInfo);
                         }
                     }
                 });
-                allHits.forEach(function (value) {
-                    if (value.hitDistance < hitInfo.hitDistance || hitInfo.hit == false) {
-                        hitInfo = value;
+                allHits.forEach(function (_value) {
+                    if (_value.hitDistance < hitInfo.hitDistance || hitInfo.hit == false) {
+                        hitInfo = _value;
                     }
                 });
             }
@@ -10997,127 +10978,28 @@ var FudgeCore;
                 }
             }
         }
-        static getRayEndPoint(start, direction, length) {
+        static getRayEndPoint(_start, _direction, _length) {
             let origin = FudgeCore.Recycler.get(FudgeCore.Vector3);
-            origin.set(start.x, start.y, start.z);
-            let scaledDirection = direction.clone;
-            scaledDirection.scale(length);
+            origin.set(_start.x, _start.y, _start.z);
+            let scaledDirection = _direction.clone;
+            scaledDirection.scale(_length);
             let endpoint = FudgeCore.Vector3.SUM(scaledDirection, origin);
             FudgeCore.Recycler.store(scaledDirection);
             FudgeCore.Recycler.store(endpoint);
             FudgeCore.Recycler.store(origin);
             return new OIMO.Vec3(endpoint.x, endpoint.y, endpoint.z);
         }
-        static getRayDistance(origin, hitPoint) {
-            let dx = origin.x - hitPoint.x;
-            let dy = origin.y - hitPoint.y;
-            let dz = origin.z - hitPoint.z;
+        static getRayDistance(_origin, _hitPoint) {
+            let dx = _origin.x - _hitPoint.x;
+            let dy = _origin.y - _hitPoint.y;
+            let dz = _origin.z - _hitPoint.z;
             return Math.sqrt(dx * dx + dy * dy + dz * dz);
         }
         getOimoWorld() {
             return Physics.ƒactive.oimoWorld;
         }
     }
-    Physics.settings = new FudgeCore.PhysicsSettings(FudgeCore.COLLISION_GROUP.DEFAULT, (FudgeCore.COLLISION_GROUP.DEFAULT | FudgeCore.COLLISION_GROUP.GROUP_1 | FudgeCore.COLLISION_GROUP.GROUP_2 | FudgeCore.COLLISION_GROUP.GROUP_3 | FudgeCore.COLLISION_GROUP.GROUP_4));
-    Physics.ƒactive = new Physics();
     FudgeCore.Physics = Physics;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class PhysicsQuaternion extends FudgeCore.Mutable {
-        constructor(_x = 0, _y = 0, _z = 0, _w = 0) {
-            super();
-            this.#x = _x;
-            this.#y = _y;
-            this.#z = _z;
-            this.#w = _w;
-        }
-        #x;
-        #y;
-        #z;
-        #w;
-        get x() {
-            return this.#x;
-        }
-        set x(_x) {
-            this.#x = _x;
-        }
-        get y() {
-            return this.#y;
-        }
-        set y(_y) {
-            this.#y = _y;
-        }
-        get z() {
-            return this.#z;
-        }
-        set z(_z) {
-            this.#z = _z;
-        }
-        get w() {
-            return this.#w;
-        }
-        set w(_w) {
-            this.#w = _w;
-        }
-        multiply(_other, _fromLeft = false) {
-            const a = _fromLeft ? _other : this;
-            const b = _fromLeft ? this : _other;
-            const x = a.x * b.x - a.y * b.y - a.z * b.z - a.w * b.w;
-            const y = a.x * b.y + a.y * b.x + a.z * b.w - a.w * b.z;
-            const z = a.x * b.z - a.y * b.w + a.z * b.x + a.w * b.y;
-            const w = a.x * b.w + a.y * b.z - a.z * b.y + a.w * b.x;
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.w = w;
-        }
-        setFromVector3(rollX, pitchY, yawZ) {
-            let cy = Math.cos(yawZ * 0.5);
-            let sy = Math.sin(yawZ * 0.5);
-            let cp = Math.cos(pitchY * 0.5);
-            let sp = Math.sin(pitchY * 0.5);
-            let cr = Math.cos(rollX * 0.5);
-            let sr = Math.sin(rollX * 0.5);
-            this.w = cr * cp * cy + sr * sp * sy;
-            this.x = sr * cp * cy - cr * sp * sy;
-            this.y = cr * sp * cy + sr * cp * sy;
-            this.z = cr * cp * sy - sr * sp * cy;
-        }
-        toEulerangles() {
-            let angles = new FudgeCore.Vector3();
-            let sinrcosp = 2 * (this.w * this.x + this.y * this.z);
-            let cosrcosp = 1 - 2 * (this.x * this.x + this.y * this.y);
-            angles.x = Math.atan2(sinrcosp, cosrcosp);
-            let sinp = 2 * (this.w * this.y - this.z * this.x);
-            if (Math.abs(sinp) >= 1)
-                angles.y = this.copysign(Math.PI / 2, sinp);
-            else
-                angles.y = Math.asin(sinp);
-            let sinycosp = 2 * (this.w * this.z + this.x * this.y);
-            let cosycosp = 1 - 2 * (this.y * this.y + this.z * this.z);
-            angles.z = Math.atan2(sinycosp, cosycosp);
-            return angles;
-        }
-        toDegrees() {
-            let angles = this.toEulerangles();
-            angles.x = angles.x * (FudgeCore.Calc.rad2deg);
-            angles.y = angles.y * (FudgeCore.Calc.rad2deg);
-            angles.z = angles.z * (FudgeCore.Calc.rad2deg);
-            return angles;
-        }
-        getMutator() {
-            let mutator = {
-                x: this.x, y: this.y, z: this.z, w: this.w
-            };
-            return mutator;
-        }
-        reduceMutator(_mutator) { }
-        copysign(a, b) {
-            return b < 0 ? -Math.abs(a) : Math.abs(a);
-        }
-    }
-    FudgeCore.PhysicsQuaternion = PhysicsQuaternion;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -11143,12 +11025,12 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Pick {
-        constructor(_node) {
-            this.node = _node;
-        }
         #mtxViewToWorld;
         #posWorld;
         #posMesh;
+        constructor(_node) {
+            this.node = _node;
+        }
         get posWorld() {
             if (this.#posWorld)
                 return this.#posWorld;
@@ -11193,7 +11075,7 @@ var FudgeCore;
         static pickRay(_nodes, _ray, _min, _max) {
             let cmpCameraPick = new FudgeCore.ComponentCamera();
             cmpCameraPick.mtxPivot.translation = _ray.origin;
-            cmpCameraPick.mtxPivot.lookAt(_ray.direction);
+            cmpCameraPick.mtxPivot.lookAt(FudgeCore.Vector3.SUM(_ray.origin, _ray.direction));
             cmpCameraPick.projectCentral(1, 0.001, FudgeCore.FIELD_OF_VIEW.DIAGONAL, _min, _max);
             let picks = FudgeCore.Render.pickBranch(_nodes, cmpCameraPick);
             return picks;
@@ -11247,8 +11129,8 @@ var FudgeCore;
             return distance;
         }
         transform(_mtxTransform) {
-            this.direction.transform(_mtxTransform);
             this.origin.transform(_mtxTransform);
+            this.direction.transform(_mtxTransform, false);
         }
         toString() {
             return `origin: ${this.origin.toString()}, direction: ${this.direction.toString()}, length: ${this.length.toPrecision(5)}`;
@@ -11259,6 +11141,13 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Render extends FudgeCore.RenderWebGL {
+        static { this.rectClip = new FudgeCore.Rectangle(-1, 1, 2, -2); }
+        static { this.nodesPhysics = new FudgeCore.RecycableArray(); }
+        static { this.componentsPick = new FudgeCore.RecycableArray(); }
+        static { this.lights = new Map(); }
+        static { this.nodesSimple = new FudgeCore.RecycableArray(); }
+        static { this.nodesAlpha = new FudgeCore.RecycableArray(); }
+        static { this.skeletons = new FudgeCore.RecycableArray(); }
         static prepare(_branch, _options = {}, _mtxWorld = FudgeCore.Matrix4x4.IDENTITY(), _shadersUsed = null) {
             let firstLevel = (_shadersUsed == null);
             if (firstLevel) {
@@ -11268,6 +11157,7 @@ var FudgeCore;
                 Render.nodesAlpha.reset();
                 Render.nodesPhysics.reset();
                 Render.componentsPick.reset();
+                Render.skeletons.reset();
                 Render.lights.forEach(_array => _array.reset());
                 _branch.dispatchEvent(new Event("renderPrepareStart"));
             }
@@ -11314,6 +11204,8 @@ var FudgeCore;
                 else
                     Render.nodesSimple.push(_branch);
             }
+            if (_branch instanceof FudgeCore.SkeletonInstance)
+                Render.skeletons.push(_branch);
             for (let child of _branch.getChildren()) {
                 Render.prepare(child, _options, _branch.mtxWorld, _shadersUsed);
                 _branch.nNodesInBranch += child.nNodesInBranch;
@@ -11324,14 +11216,16 @@ var FudgeCore;
                 FudgeCore.Recycler.store(position);
             }
             if (firstLevel) {
-                _branch.dispatchEvent(new Event("renderPrepareEnd"));
-                for (let shader of _shadersUsed) {
-                    Render.setLightsInShader(shader, Render.lights);
+                for (const skeleton of Render.skeletons) {
+                    skeleton.calculateMtxBones();
+                    skeleton.updateRenderBuffer();
                 }
+                _branch.dispatchEvent(new Event("renderPrepareEnd"));
+                Render.updateLightsUBO(Render.lights);
             }
         }
-        static addLights(cmpLights) {
-            for (let cmpLight of cmpLights) {
+        static addLights(_cmpLights) {
+            for (let cmpLight of _cmpLights) {
                 if (!cmpLight.isActive)
                     continue;
                 let type = cmpLight.light.getType();
@@ -11395,7 +11289,7 @@ var FudgeCore;
                 FudgeCore.Recycler.store(mtxPivotWorld);
                 return;
             }
-            let mtxWorld = FudgeCore.Matrix4x4.CONSTRUCTION({ translation: _cmpRigidbody.getPosition(), rotation: _cmpRigidbody.getRotation(), scaling: null });
+            let mtxWorld = FudgeCore.Matrix4x4.CONSTRUCTION(_cmpRigidbody.getPosition(), _cmpRigidbody.getRotation(), null);
             mtxWorld.multiply(_cmpRigidbody.mtxPivotInverse);
             _node.mtxWorld.translation = mtxWorld.translation;
             _node.mtxWorld.rotation = mtxWorld.rotation;
@@ -11405,29 +11299,66 @@ var FudgeCore;
             FudgeCore.Recycler.store(mtxLocal);
         }
     }
-    Render.rectClip = new FudgeCore.Rectangle(-1, 1, 2, -2);
-    Render.nodesPhysics = new FudgeCore.RecycableArray();
-    Render.componentsPick = new FudgeCore.RecycableArray();
-    Render.lights = new Map();
-    Render.nodesSimple = new FudgeCore.RecycableArray();
-    Render.nodesAlpha = new FudgeCore.RecycableArray();
     FudgeCore.Render = Render;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class RenderInjectorSkeletonInstance {
+        static decorate(_constructor) {
+            Object.defineProperty(_constructor.prototype, "useRenderBuffer", {
+                value: RenderInjectorSkeletonInstance.useRenderBuffer
+            });
+            Object.defineProperty(_constructor.prototype, "updateRenderBuffer", {
+                value: RenderInjectorSkeletonInstance.updateRenderBuffer
+            });
+            Object.defineProperty(_constructor.prototype, "deleteRenderBuffer", {
+                value: RenderInjectorSkeletonInstance.deleteRenderBuffer
+            });
+        }
+        static useRenderBuffer(_shader) {
+            const crc3 = FudgeCore.RenderWebGL.getRenderingContext();
+            if (this.renderBuffer)
+                crc3.bindBufferBase(WebGL2RenderingContext.UNIFORM_BUFFER, FudgeCore.UNIFORM_BLOCKS.SKIN.BINDING, this.renderBuffer);
+        }
+        static updateRenderBuffer() {
+            const crc3 = FudgeCore.RenderWebGL.getRenderingContext();
+            if (!this.renderBuffer) {
+                const bonesByteSize = 256 * 16 * 4;
+                this.renderBuffer = FudgeCore.RenderWebGL.assert(crc3.createBuffer());
+                crc3.bindBuffer(WebGL2RenderingContext.UNIFORM_BUFFER, this.renderBuffer);
+                crc3.bufferData(WebGL2RenderingContext.UNIFORM_BUFFER, bonesByteSize, WebGL2RenderingContext.DYNAMIC_DRAW);
+            }
+            const data = new Float32Array(this.mtxBones.length * 16);
+            for (let i = 0; i < this.mtxBones.length; i++)
+                data.set(this.mtxBones[i].get(), i * 16);
+            crc3.bindBuffer(WebGL2RenderingContext.UNIFORM_BUFFER, this.renderBuffer);
+            crc3.bufferSubData(WebGL2RenderingContext.UNIFORM_BUFFER, 0, data);
+        }
+        static deleteRenderBuffer() {
+            const crc3 = FudgeCore.RenderWebGL.getRenderingContext();
+            if (this.renderBuffer)
+                crc3.deleteBuffer(this.renderBuffer);
+        }
+    }
+    FudgeCore.RenderInjectorSkeletonInstance = RenderInjectorSkeletonInstance;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class RenderMesh {
         constructor(_mesh) {
-            this.smooth = null;
-            this.flat = null;
+            this.buffers = null;
             this.mesh = _mesh;
         }
-        get iBones() {
-            return this.ƒiBones || (this.ƒiBones = this.mesh.vertices.some(_vertex => _vertex.bones) ?
+        get bones() {
+            return this.ƒbones || (this.ƒbones = this.mesh.vertices.some(_vertex => _vertex.bones) ?
                 new Uint8Array(this.mesh.vertices.flatMap((_vertex, _index) => {
                     const bones = this.mesh.vertices.bones(_index);
                     return [bones?.[0]?.index || 0, bones?.[1]?.index || 0, bones?.[2]?.index || 0, bones?.[3]?.index || 0];
                 })) :
                 undefined);
+        }
+        set bones(_iBones) {
+            this.ƒbones = _iBones;
         }
         get weights() {
             return this.ƒweights || (this.ƒweights = this.mesh.vertices.some(_vertex => _vertex.bones) ?
@@ -11437,16 +11368,25 @@ var FudgeCore;
                 })) :
                 undefined);
         }
+        set weights(_weights) {
+            this.ƒweights = _weights;
+        }
         get vertices() {
             return this.ƒvertices || (this.ƒvertices = new Float32Array(this.mesh.vertices.flatMap((_vertex, _index) => {
                 return [...this.mesh.vertices.position(_index).get()];
             })));
         }
+        set vertices(_vertices) {
+            this.ƒvertices = _vertices;
+        }
         get indices() {
             return this.ƒindices || (this.ƒindices = new Uint16Array(this.mesh.faces.flatMap((_face) => [..._face.indices])));
         }
-        get normalsVertex() {
-            if (this.ƒnormalsVertex == null) {
+        set indices(_indices) {
+            this.ƒindices = _indices;
+        }
+        get normals() {
+            if (this.ƒnormals == null) {
                 this.mesh.vertices.forEach(_vertex => _vertex.normal.set(0, 0, 0));
                 for (let face of this.mesh.faces)
                     for (let index of face.indices) {
@@ -11456,89 +11396,40 @@ var FudgeCore;
                     if (_vertex.normal.magnitudeSquared > 0)
                         _vertex.normal.normalize();
                 });
-                this.ƒnormalsVertex = new Float32Array(this.mesh.vertices.flatMap((_vertex, _index) => {
+                this.ƒnormals = new Float32Array(this.mesh.vertices.flatMap((_vertex, _index) => {
                     return [...this.mesh.vertices.normal(_index).get()];
                 }));
             }
-            return this.ƒnormalsVertex;
+            return this.ƒnormals;
+        }
+        set normals(_normals) {
+            this.ƒnormals = _normals;
         }
         get textureUVs() {
             return this.ƒtextureUVs || (this.ƒtextureUVs = new Float32Array(this.mesh.vertices
                 .filter(_vertex => _vertex.uv)
                 .flatMap((_vertex) => [..._vertex.uv.get()])));
         }
-        get verticesFlat() {
-            return this.ƒverticesFlat || (this.ƒverticesFlat = this.createVerticesFlat());
+        set textureUVs(_textureUVs) {
+            this.ƒtextureUVs = _textureUVs;
         }
-        get indicesFlat() {
-            return this.ƒindicesFlat;
+        get colors() {
+            return this.ƒcolors || (this.ƒcolors = new Float32Array(this.mesh.vertices
+                .filter(_vertex => _vertex.color)
+                .flatMap(_vertex => [..._vertex.color.getArray()])));
         }
-        get normalsFlat() {
-            return this.ƒnormalsFlat || (this.ƒnormalsFlat = this.createNormalsFlat());
-        }
-        get textureUVsFlat() {
-            return this.ƒtextureUVsFlat || (this.ƒtextureUVsFlat = this.createTextureUVsFlat());
-        }
-        get iBonesFlat() {
-            return this.ƒiBonesFlat;
-        }
-        get weightsFlat() {
-            return this.ƒweightsFlat;
+        set colors(_colors) {
+            this.ƒcolors = _colors;
         }
         clear() {
-            this.smooth = null;
-            this.flat = null;
+            this.buffers = null;
             this.ƒvertices = undefined;
             this.ƒindices = undefined;
             this.ƒtextureUVs = undefined;
-            this.ƒnormalsVertex = undefined;
-            this.ƒnormalsFlat = undefined;
-            this.ƒverticesFlat = undefined;
-            this.ƒindicesFlat = undefined;
-            this.ƒtextureUVsFlat = undefined;
-            this.ƒiBones = undefined;
+            this.ƒnormals = undefined;
+            this.ƒcolors = undefined;
+            this.ƒbones = undefined;
             this.ƒweights = undefined;
-        }
-        createVerticesFlat() {
-            let positions = [];
-            let bones = [];
-            let indices = [];
-            let i = 0;
-            for (let face of this.mesh.faces)
-                for (let index of face.indices) {
-                    indices.push(i++);
-                    positions.push(this.mesh.vertices.position(index));
-                    let bone = this.mesh.vertices.bones(index);
-                    if (bone)
-                        bones.push(bone);
-                }
-            this.ƒindicesFlat = new Uint16Array(indices);
-            this.ƒiBonesFlat = new Uint8Array(bones.flatMap((_bones) => {
-                return [..._bones.map(_bone => _bone.index)];
-            }));
-            this.ƒweightsFlat = new Float32Array(bones.flatMap((_bones) => {
-                return [..._bones.map(_bone => _bone.weight)];
-            }));
-            return new Float32Array(positions.flatMap(_v => [..._v.get()]));
-        }
-        createNormalsFlat() {
-            let normals = [];
-            let zero = FudgeCore.Vector3.ZERO();
-            for (let face of this.mesh.faces) {
-                normals.push(zero);
-                normals.push(zero);
-                normals.push(face.normal);
-            }
-            this.ƒnormalsFlat = new Float32Array(normals.flatMap(_n => [..._n.get()]));
-            return this.ƒnormalsFlat;
-        }
-        createTextureUVsFlat() {
-            let uv = [];
-            for (let i = 0; i < this.indices.length; i++) {
-                let index = this.indices[i] * 2;
-                uv.push(this.textureUVs[index], this.textureUVs[index + 1]);
-            }
-            return new Float32Array(uv);
         }
     }
     FudgeCore.RenderMesh = RenderMesh;
@@ -11626,10 +11517,8 @@ var FudgeCore;
             let mtxRoot = FudgeCore.Matrix4x4.IDENTITY();
             if (this.#branch.getParent())
                 mtxRoot = this.#branch.getParent().mtxWorld;
-            this.dispatchEvent(new Event("renderPrepareStart"));
             this.adjustFrames();
             FudgeCore.Render.prepare(this.#branch, null, mtxRoot);
-            this.dispatchEvent(new Event("renderPrepareEnd"));
             this.componentsPick = FudgeCore.Render.componentsPick;
         }
         dispatchPointerEvent(_event) {
@@ -11677,13 +11566,10 @@ var FudgeCore;
         getRayFromClient(_point) {
             let posProjection = this.pointClientToProjection(_point);
             let ray = new FudgeCore.Ray(new FudgeCore.Vector3(-posProjection.x, posProjection.y, 1));
-            ray.origin.transform(this.camera.mtxPivot);
-            ray.direction.transform(this.camera.mtxPivot, false);
+            ray.transform(this.camera.mtxPivot);
             let cameraNode = this.camera.node;
-            if (cameraNode) {
-                ray.origin.transform(cameraNode.mtxWorld);
-                ray.direction.transform(cameraNode.mtxWorld, false);
-            }
+            if (cameraNode)
+                ray.transform(cameraNode.mtxWorld);
             return ray;
         }
         pointWorldToClient(_position) {
@@ -11743,6 +11629,7 @@ var FudgeCore;
         XR_REFERENCE_SPACE["LOCAL"] = "local";
     })(XR_REFERENCE_SPACE = FudgeCore.XR_REFERENCE_SPACE || (FudgeCore.XR_REFERENCE_SPACE = {}));
     class XRViewport extends FudgeCore.Viewport {
+        static { this.xrViewportInstance = null; }
         constructor() {
             super();
             this.vrDevice = null;
@@ -11814,10 +11701,7 @@ var FudgeCore;
             mtxWorld = mtxWorld.clone;
             mtxWorld.rotateY(180);
             let invMtxTransfom = mtxWorld.inverse();
-            let invRotation = FudgeCore.Vector3.SCALE(invMtxTransfom.rotation, Math.PI / 180);
-            let invOrientation = new FudgeCore.PhysicsQuaternion();
-            invOrientation.setFromVector3(invRotation.x, invRotation.y, invRotation.z);
-            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invMtxTransfom.translation, invOrientation));
+            XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invMtxTransfom.translation, invMtxTransfom.quaternion));
         }
         setControllerConfigs(_xrFrame) {
             if (_xrFrame) {
@@ -11853,7 +11737,6 @@ var FudgeCore;
             }
         }
     }
-    XRViewport.xrViewportInstance = null;
     FudgeCore.XRViewport = XRViewport;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -11893,6 +11776,12 @@ var FudgeCore;
                 _resolve(_toSave);
             });
         }
+        static async loadFiles(_fileList, _loaded) {
+            for (let file of _fileList) {
+                const content = await new Response(file).text();
+                _loaded[file.name] = content;
+            }
+        }
         static async handleFileSelect(_event) {
             FudgeCore.Debug.fudge("-------------------------------- handleFileSelect");
             document.body.removeChild(FileIoBrowserLocal.selector);
@@ -11905,23 +11794,17 @@ var FudgeCore;
             let event = new CustomEvent("fileLoaded", { detail: { mapFilenameToContent: loaded } });
             FileIoBrowserLocal.targetStatic.dispatchEvent(event);
         }
-        static async loadFiles(_fileList, _loaded) {
-            for (let file of _fileList) {
-                const content = await new Response(file).text();
-                _loaded[file.name] = content;
-            }
-        }
     }
     FudgeCore.FileIoBrowserLocal = FileIoBrowserLocal;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MutableArray extends Array {
+        #type;
         constructor(_type, ..._args) {
             super(..._args);
             this.#type = _type;
         }
-        #type;
         get type() {
             return this.#type;
         }
@@ -11973,6 +11856,12 @@ var FudgeCore;
         MODE[MODE["RUNTIME"] = 1] = "RUNTIME";
     })(MODE = FudgeCore.MODE || (FudgeCore.MODE = {}));
     class Project extends FudgeCore.EventTargetStatic {
+        static { this.resources = {}; }
+        static { this.serialization = {}; }
+        static { this.scriptNamespaces = {}; }
+        static { this.baseURL = new URL(location.toString()); }
+        static { this.mode = MODE.RUNTIME; }
+        static { this.graphInstancesToResync = {}; }
         static register(_resource, _idResource) {
             if (_resource.idResource)
                 if (_resource.idResource == _idResource)
@@ -12095,11 +11984,11 @@ var FudgeCore;
             let head = document.head;
             head.appendChild(script);
             FudgeCore.Debug.log("Loading: ", _url);
-            return new Promise((resolve, reject) => {
-                script.addEventListener("load", () => resolve());
+            return new Promise((_resolve, _reject) => {
+                script.addEventListener("load", () => _resolve());
                 script.addEventListener("error", () => {
                     FudgeCore.Debug.error("Loading script", _url);
-                    reject();
+                    _reject();
                 });
                 script.src = _url.toString();
             });
@@ -12145,12 +12034,6 @@ var FudgeCore;
             return FudgeCore.Serializer.deserialize(_serialization);
         }
     }
-    Project.resources = {};
-    Project.serialization = {};
-    Project.scriptNamespaces = {};
-    Project.baseURL = new URL(location.toString());
-    Project.mode = MODE.RUNTIME;
-    Project.graphInstancesToResync = {};
     FudgeCore.Project = Project;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -12217,42 +12100,49 @@ var FudgeCore;
 (function (FudgeCore) {
     var FBX;
     (function (FBX) {
-        let MappingInformationType;
-        (function (MappingInformationType) {
-            MappingInformationType[MappingInformationType["ByVertex"] = 0] = "ByVertex";
-            MappingInformationType[MappingInformationType["ByPolygon"] = 1] = "ByPolygon";
-            MappingInformationType[MappingInformationType["ByPolygonVertex"] = 2] = "ByPolygonVertex";
-            MappingInformationType[MappingInformationType["ByEdge"] = 3] = "ByEdge";
-            MappingInformationType[MappingInformationType["AllSame"] = 4] = "AllSame";
-        })(MappingInformationType = FBX.MappingInformationType || (FBX.MappingInformationType = {}));
-        let ReferenceInformationType;
-        (function (ReferenceInformationType) {
-            ReferenceInformationType[ReferenceInformationType["Direct"] = 0] = "Direct";
-            ReferenceInformationType[ReferenceInformationType["IndexToDirect"] = 1] = "IndexToDirect";
-        })(ReferenceInformationType = FBX.ReferenceInformationType || (FBX.ReferenceInformationType = {}));
+        let MAPPING_INFORMATION_TYPE;
+        (function (MAPPING_INFORMATION_TYPE) {
+            MAPPING_INFORMATION_TYPE[MAPPING_INFORMATION_TYPE["BY_VERTEX"] = 0] = "BY_VERTEX";
+            MAPPING_INFORMATION_TYPE[MAPPING_INFORMATION_TYPE["BY_POLYGON"] = 1] = "BY_POLYGON";
+            MAPPING_INFORMATION_TYPE[MAPPING_INFORMATION_TYPE["BY_POLYGON_VERTEX"] = 2] = "BY_POLYGON_VERTEX";
+            MAPPING_INFORMATION_TYPE[MAPPING_INFORMATION_TYPE["BY_EDGE"] = 3] = "BY_EDGE";
+            MAPPING_INFORMATION_TYPE[MAPPING_INFORMATION_TYPE["ALL_SAME"] = 4] = "ALL_SAME";
+        })(MAPPING_INFORMATION_TYPE = FBX.MAPPING_INFORMATION_TYPE || (FBX.MAPPING_INFORMATION_TYPE = {}));
+        let REFERENCE_INFORMATION_TYPE;
+        (function (REFERENCE_INFORMATION_TYPE) {
+            REFERENCE_INFORMATION_TYPE[REFERENCE_INFORMATION_TYPE["DIRECT"] = 0] = "DIRECT";
+            REFERENCE_INFORMATION_TYPE[REFERENCE_INFORMATION_TYPE["INDEX_TO_DIRECT"] = 1] = "INDEX_TO_DIRECT";
+        })(REFERENCE_INFORMATION_TYPE = FBX.REFERENCE_INFORMATION_TYPE || (FBX.REFERENCE_INFORMATION_TYPE = {}));
     })(FBX = FudgeCore.FBX || (FudgeCore.FBX = {}));
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class FBXLoader {
-        constructor(_buffer, _uri) {
-            this.#skinMaterials = [];
-            this.uri = _uri;
-            this.nodes = FudgeCore.FBX.parseNodesFromBinary(_buffer);
-            console.log(this.nodes);
-            this.fbx = FudgeCore.FBX.loadFromNodes(this.nodes);
-            console.log(this.fbx);
-        }
         static #defaultMaterial;
         static #defaultSkinMaterial;
         #scenes;
         #nodes;
         #meshes;
         #materials;
-        #skinMaterials;
+        #skinMaterials = [];
         #textures;
         #skeletons;
         #animations;
+        constructor(_buffer, _uri) {
+            this.uri = _uri;
+            this.nodes = FudgeCore.FBX.parseNodesFromBinary(_buffer);
+            console.log(this.nodes);
+            this.fbx = FudgeCore.FBX.loadFromNodes(this.nodes);
+            console.log(this.fbx);
+        }
+        static get defaultMaterial() {
+            return this.#defaultMaterial || (this.#defaultMaterial =
+                new FudgeCore.Material("FBXDefaultMaterial", FudgeCore.ShaderGouraud, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white"))));
+        }
+        static get defaultSkinMaterial() {
+            return this.#defaultSkinMaterial || (this.#defaultSkinMaterial =
+                new FudgeCore.Material("FBXDefaultSkinMaterial", FudgeCore.ShaderGouraudSkin, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white"))));
+        }
         static async LOAD(_uri) {
             if (!this.loaders)
                 this.loaders = {};
@@ -12262,14 +12152,6 @@ var FudgeCore;
                 this.loaders[_uri] = new FBXLoader(binary, _uri);
             }
             return this.loaders[_uri];
-        }
-        static get defaultMaterial() {
-            return this.#defaultMaterial || (this.#defaultMaterial =
-                new FudgeCore.Material("FBXDefaultMaterial", FudgeCore.ShaderGouraud, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white"))));
-        }
-        static get defaultSkinMaterial() {
-            return this.#defaultSkinMaterial || (this.#defaultSkinMaterial =
-                new FudgeCore.Material("FBXDefaultSkinMaterial", FudgeCore.ShaderGouraudSkin, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white"))));
         }
         async getScene(_index = 0) {
             if (!this.#scenes)
@@ -12376,22 +12258,22 @@ var FudgeCore;
             return this.#materials[_index];
             function average(_array) {
                 if (_array)
-                    return _array.reduce((a, b) => a + b) / _array.length;
+                    return _array.reduce((_a, _b) => _a + _b) / _array.length;
                 else
                     return undefined;
             }
         }
         async getTexture(_index) {
-            return new Promise((resolve, reject) => {
+            return new Promise((_resolve, _reject) => {
                 if (!this.#textures)
                     this.#textures = [];
                 if (this.#textures[_index])
-                    return resolve(this.#textures[_index]);
+                    return _resolve(this.#textures[_index]);
                 const videoFBX = this.fbx.objects.textures[_index].children[0];
                 const texture = new FudgeCore.TextureImage();
                 texture.image = new Image();
-                texture.image.onload = () => resolve(texture);
-                texture.image.onerror = reject;
+                texture.image.onload = () => _resolve(texture);
+                texture.image.onerror = _reject;
                 texture.image.src = URL.createObjectURL(new Blob([videoFBX.Content], { type: "image/png" }));
                 this.#textures[_index] = texture;
             });
@@ -12402,7 +12284,7 @@ var FudgeCore;
             return this.#skeletons.find(_skeleton => _fbxLimbNode.name in _skeleton.bones) || await (async () => {
                 const skeleton = new FudgeCore.Skeleton(`Skeleton${this.#skeletons.length}`);
                 let rootNode = _fbxLimbNode;
-                while (rootNode.parents && rootNode.parents.some(parent => parent.subtype == "LimbNode"))
+                while (rootNode.parents && rootNode.parents.some(_parent => _parent.subtype == "LimbNode"))
                     rootNode = rootNode.parents.find(_parent => _parent.subtype == "LimbNode");
                 const iRootNode = this.fbx.objects.models.findIndex(_model => _model.name == rootNode.name);
                 skeleton.addChild(await this.getNode(iRootNode));
@@ -12588,7 +12470,7 @@ var FudgeCore;
                         mtxRotation.multiply(preRototation, true);
                     if (postRotation)
                         mtxRotation.multiply(postRotation);
-                    vctEulerAngles = mtxRotation.getEulerAngles();
+                    vctEulerAngles = mtxRotation.rotation;
                     if (_frame.x)
                         _frame.x.value = vctEulerAngles.x;
                     if (_frame.y)
@@ -12615,13 +12497,13 @@ var FudgeCore;
     var FBX;
     (function (FBX) {
         class Node {
+            #children;
+            #properties;
             constructor(_name, _loadProperties, _loadChildren) {
                 this.name = _name;
                 this.loadProperties = _loadProperties;
                 this.loadChildren = _loadChildren;
             }
-            #children;
-            #properties;
             get properties() {
                 return this.#properties || (this.#properties = this.loadProperties());
             }
@@ -12630,11 +12512,11 @@ var FudgeCore;
             }
         }
         FBX.Node = Node;
-        let ArrayEncoding;
-        (function (ArrayEncoding) {
-            ArrayEncoding[ArrayEncoding["UNCOMPRESSED"] = 0] = "UNCOMPRESSED";
-            ArrayEncoding[ArrayEncoding["COMPRESSED"] = 1] = "COMPRESSED";
-        })(ArrayEncoding = FBX.ArrayEncoding || (FBX.ArrayEncoding = {}));
+        let ARRAY_ENCODING;
+        (function (ARRAY_ENCODING) {
+            ARRAY_ENCODING[ARRAY_ENCODING["UNCOMPRESSED"] = 0] = "UNCOMPRESSED";
+            ARRAY_ENCODING[ARRAY_ENCODING["COMPRESSED"] = 1] = "COMPRESSED";
+        })(ARRAY_ENCODING = FBX.ARRAY_ENCODING || (FBX.ARRAY_ENCODING = {}));
     })(FBX = FudgeCore.FBX || (FudgeCore.FBX = {}));
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -12884,7 +12766,7 @@ var FudgeCore;
             const encoding = _data.getUint32();
             const byteLength = _data.getUint32();
             const endOffset = _data.offset + byteLength;
-            const iterable = encoding == FBX.ArrayEncoding.COMPRESSED ?
+            const iterable = encoding == FBX.ARRAY_ENCODING.COMPRESSED ?
                 (() => {
                     const arrayData = new Uint8Array(_data.view.buffer, _data.offset, byteLength);
                     const inflatedData = (Reflect.get(globalThis, "pako") ? pako.inflate : fflate.inflateSync)(arrayData);
@@ -12899,19 +12781,50 @@ var FudgeCore;
             return _data.getSequence(_getter, length);
             ;
         }
-        const binaryStartChars = Uint8Array.from("Kaydara FBX Binary\x20\x20\x00\x1a\x00".split(""), (v) => v.charCodeAt(0));
+        const binaryStartChars = Uint8Array.from("Kaydara FBX Binary\x20\x20\x00\x1a\x00".split(""), _v => _v.charCodeAt(0));
         const nullCountAtNodeEnd = 13;
     })(FBX = FudgeCore.FBX || (FudgeCore.FBX = {}));
 })(FudgeCore || (FudgeCore = {}));
+var GLTF;
+(function (GLTF) {
+    let COMPONENT_TYPE;
+    (function (COMPONENT_TYPE) {
+        COMPONENT_TYPE[COMPONENT_TYPE["BYTE"] = 5120] = "BYTE";
+        COMPONENT_TYPE[COMPONENT_TYPE["UNSIGNED_BYTE"] = 5121] = "UNSIGNED_BYTE";
+        COMPONENT_TYPE[COMPONENT_TYPE["SHORT"] = 5122] = "SHORT";
+        COMPONENT_TYPE[COMPONENT_TYPE["UNSIGNED_SHORT"] = 5123] = "UNSIGNED_SHORT";
+        COMPONENT_TYPE[COMPONENT_TYPE["UNSIGNED_INT"] = 5125] = "UNSIGNED_INT";
+        COMPONENT_TYPE[COMPONENT_TYPE["FLOAT"] = 5126] = "FLOAT";
+    })(COMPONENT_TYPE = GLTF.COMPONENT_TYPE || (GLTF.COMPONENT_TYPE = {}));
+    let ACCESSOR_TYPE;
+    (function (ACCESSOR_TYPE) {
+        ACCESSOR_TYPE["SCALAR"] = "SCALAR";
+        ACCESSOR_TYPE["VEC2"] = "VEC2";
+        ACCESSOR_TYPE["VEC3"] = "VEC3";
+        ACCESSOR_TYPE["VEC4"] = "VEC4";
+        ACCESSOR_TYPE["MAT2"] = "MAT2";
+        ACCESSOR_TYPE["MAT3"] = "MAT3";
+        ACCESSOR_TYPE["MAT4"] = "MAT4";
+    })(ACCESSOR_TYPE = GLTF.ACCESSOR_TYPE || (GLTF.ACCESSOR_TYPE = {}));
+    let MESH_PRIMITIVE_MODE;
+    (function (MESH_PRIMITIVE_MODE) {
+        MESH_PRIMITIVE_MODE[MESH_PRIMITIVE_MODE["POINTS"] = 0] = "POINTS";
+        MESH_PRIMITIVE_MODE[MESH_PRIMITIVE_MODE["LINES"] = 1] = "LINES";
+        MESH_PRIMITIVE_MODE[MESH_PRIMITIVE_MODE["LINE_LOOP"] = 2] = "LINE_LOOP";
+        MESH_PRIMITIVE_MODE[MESH_PRIMITIVE_MODE["LINE_STRIP"] = 3] = "LINE_STRIP";
+        MESH_PRIMITIVE_MODE[MESH_PRIMITIVE_MODE["TRIANGLES"] = 4] = "TRIANGLES";
+        MESH_PRIMITIVE_MODE[MESH_PRIMITIVE_MODE["TRIANGLE_STRIP"] = 5] = "TRIANGLE_STRIP";
+        MESH_PRIMITIVE_MODE[MESH_PRIMITIVE_MODE["TRIANGLE_FAN"] = 6] = "TRIANGLE_FAN";
+    })(MESH_PRIMITIVE_MODE = GLTF.MESH_PRIMITIVE_MODE || (GLTF.MESH_PRIMITIVE_MODE = {}));
+})(GLTF || (GLTF = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class GLTFLoader {
-        constructor(_gltf, _url) {
-            this.gltf = _gltf;
-            this.url = _url;
-        }
+        static #defaultMaterial;
+        static #defaultSkinMaterial;
         #scenes;
-        #nodes;
+        #nodesGraph = [];
+        #nodesSkeleton = [];
         #cameras;
         #animations;
         #meshes;
@@ -12919,21 +12832,88 @@ var FudgeCore;
         #textures;
         #skeletons;
         #buffers;
+        constructor(_gltf, _url) {
+            this.gltf = _gltf;
+            this.url = _url;
+        }
+        static get defaultMaterial() {
+            if (!this.#defaultMaterial)
+                this.#defaultMaterial = new FudgeCore.Material("GLTFDefaultMaterial", FudgeCore.ShaderPhong, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white"), 1, 0.5));
+            return this.#defaultMaterial;
+        }
+        static get defaultSkinMaterial() {
+            if (!this.#defaultSkinMaterial)
+                this.#defaultSkinMaterial = new FudgeCore.Material("GLTFDefaultSkinMaterial", FudgeCore.ShaderPhongSkin, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white"), 1, 0.5));
+            return this.#defaultSkinMaterial;
+        }
         static async LOAD(_url) {
+            const url = new URL(_url, FudgeCore.Project.baseURL).toString();
             if (!this.loaders)
-                this.loaders = {};
-            if (!this.loaders[_url]) {
-                const response = await fetch(_url);
+                GLTFLoader.loaders = {};
+            if (!this.loaders[url]) {
+                const response = await fetch(url);
                 const gltf = await response.json();
-                gltf.nodes.forEach((_node, _iNode) => _node.children?.forEach(_iChild => gltf.nodes[_iChild].parent = _iNode));
-                this.loaders[_url] = new GLTFLoader(gltf, _url);
+                GLTFLoader.checkCompatibility(gltf, url);
+                GLTFLoader.preProcess(gltf, url);
+                GLTFLoader.loaders[url] = new GLTFLoader(gltf, url);
             }
-            return this.loaders[_url];
+            return GLTFLoader.loaders[url];
+        }
+        static checkCompatibility(_gltf, _url) {
+            if (_gltf.asset.version != "2.0")
+                FudgeCore.Debug.warn(`${GLTFLoader.name} | ${_url}: This loader was developed for glTF 2.0. It may not work as intended with version ${_gltf.asset.version}.`);
+            if (_gltf.asset.minVersion != undefined && _gltf.asset.minVersion != "2.0")
+                throw new Error(`${GLTFLoader.name} | ${_url}: This loader was developed for glTF 2.0. It does not work with required min version ${_gltf.asset.minVersion}.`);
+            if (_gltf.extensionsUsed?.length > 0)
+                FudgeCore.Debug.warn(`${GLTFLoader.name} | ${_url}: This loader does not support glTF extensions. It may not work as intended with extensions ${_gltf.extensionsUsed.toString()}.`);
+            if (_gltf.extensionsRequired?.length > 0)
+                throw new Error(`${GLTFLoader.name} | ${_url}: This loader does not support glTF extensions. It does not work with required extensions ${_gltf.extensionsRequired.toString()}.`);
+        }
+        static preProcess(_gltf, _url) {
+            if (_gltf.nodes) {
+                _gltf.animations?.forEach(_animation => {
+                    _animation.channels.forEach(_channel => {
+                        const iNode = _channel.target.node;
+                        if (iNode != undefined)
+                            _gltf.nodes[iNode].isAnimated = true;
+                    });
+                });
+                _gltf.skins?.forEach(_skin => {
+                    _skin.joints.forEach(_iJoint => _gltf.nodes[_iJoint].isJoint = true);
+                });
+                _gltf.nodes.forEach((_node, _iNode) => _node.children?.forEach(_iChild => _gltf.nodes[_iChild].parent = _iNode));
+                _gltf.nodes.forEach((_node, _iNode) => {
+                    if (!_node.name)
+                        _node.name = `Node${_iNode}`;
+                    let iParent = _node.parent;
+                    let depth = 0;
+                    let path = [];
+                    path.push(_iNode);
+                    while (iParent != undefined) {
+                        path.push(iParent);
+                        depth++;
+                        iParent = _gltf.nodes[iParent].parent;
+                    }
+                    _node.depth = depth;
+                    _node.path = path;
+                });
+                _gltf.skins?.forEach((_skin, _iSkin) => {
+                    if (_skin.skeleton == undefined) {
+                        const ancestors = new Set(_skin.joints.flatMap(_iJoint => _gltf.nodes[_iJoint].path));
+                        _skin.skeleton = Array.from(ancestors).reduce((_a, _b) => _gltf.nodes[_a].depth < _gltf.nodes[_b].depth ? _a : _b);
+                    }
+                    if (_gltf.nodes[_skin.skeleton].iSkinRoot != undefined) {
+                        FudgeCore.Debug.warn(`${GLTFLoader.name} | ${_url}: Skin with index ${_iSkin} and ${_gltf.nodes[_skin.skeleton].iSkinRoot} share the same common root node. FUDGE currently only supports one skeleton at the same position in the hierarchy.`);
+                        return;
+                    }
+                    _gltf.nodes[_skin.skeleton].iSkinRoot = _iSkin;
+                });
+            }
         }
         async getScene(_name) {
-            const iScene = _name ? this.gltf.scenes.findIndex(scene => scene.name == _name) : this.gltf.scene;
+            const iScene = _name ? this.gltf.scenes.findIndex(_scene => _scene.name == _name) : this.gltf.scene;
             if (iScene == -1)
-                throw new Error(`Couldn't find name ${_name} in gltf scenes.`);
+                throw new Error(`${this}: Couldn't find name '${_name}' in gltf scenes.`);
             return await this.getSceneByIndex(iScene);
         }
         async getSceneByIndex(_iScene = this.gltf.scene) {
@@ -12949,84 +12929,100 @@ var FudgeCore;
                 FudgeCore.Project.register(scene);
                 this.#scenes[_iScene] = scene;
             }
-            return await FudgeCore.Project.createGraphInstance(this.#scenes[_iScene]);
+            return this.#scenes[_iScene];
         }
         async getNode(_name) {
-            const iNode = this.gltf.nodes.findIndex(node => node.name == _name);
+            const iNode = this.gltf.nodes.findIndex(_node => _node.name == _name);
             if (iNode == -1)
-                throw new Error(`Couldn't find name ${_name} in gltf nodes.`);
+                throw new Error(`${this}: Couldn't find name '${_name}' in gltf nodes.`);
             return await this.getNodeByIndex(iNode);
         }
-        async getNodeByIndex(_iNode) {
-            if (!this.#nodes)
-                this.#nodes = [];
-            if (!this.#nodes[_iNode]) {
+        async getNodeByIndex(_iNode, _nodes = this.#nodesGraph) {
+            if (!_nodes[_iNode]) {
                 const gltfNode = this.gltf.nodes[_iNode];
-                let iSkeleton = this.gltf.skins?.findIndex(skin => skin.joints[0] == _iNode);
-                const node = iSkeleton < 0 ? new FudgeCore.Node(gltfNode.name) : new FudgeCore.Skeleton(gltfNode.name);
+                const node = gltfNode.iSkinRoot >= 0 ?
+                    _nodes == this.#nodesGraph ?
+                        new FudgeCore.SkeletonInstance() :
+                        new FudgeCore.Skeleton(gltfNode.name) :
+                    new FudgeCore.Node(gltfNode.name);
+                _nodes[_iNode] = node;
+                if (node instanceof FudgeCore.SkeletonInstance) {
+                    await node.set(await this.getSkeletonByIndex(gltfNode.iSkinRoot));
+                    return node;
+                }
                 if (gltfNode.children)
                     for (const iNode of gltfNode.children)
-                        node.addChild(await this.getNodeByIndex(iNode));
-                if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation) {
-                    if (!node.getComponent(FudgeCore.ComponentTransform))
-                        node.addComponent(new FudgeCore.ComponentTransform());
+                        node.addChild(await this.getNodeByIndex(iNode, _nodes));
+                if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation || gltfNode.isJoint || gltfNode.isAnimated) {
+                    node.addComponent(new FudgeCore.ComponentTransform());
                     if (gltfNode.matrix) {
                         node.mtxLocal.set(Float32Array.from(gltfNode.matrix));
                     }
                     else {
-                        if (gltfNode.translation)
-                            node.mtxLocal.translate(new FudgeCore.Vector3(...gltfNode.translation));
-                        if (gltfNode.rotation) {
-                            const rotation = new FudgeCore.Quaternion();
-                            rotation.set(gltfNode.rotation);
-                            node.mtxLocal.rotate(rotation.getEulerAngles());
+                        if (gltfNode.translation) {
+                            const translation = FudgeCore.Recycler.get(FudgeCore.Vector3);
+                            translation.set(gltfNode.translation[0], gltfNode.translation[1], gltfNode.translation[2]);
+                            node.mtxLocal.translation = translation;
+                            FudgeCore.Recycler.store(translation);
                         }
-                        if (gltfNode.scale)
-                            node.mtxLocal.scale(new FudgeCore.Vector3(...gltfNode.scale));
+                        if (gltfNode.rotation) {
+                            const rotation = FudgeCore.Recycler.get(FudgeCore.Quaternion);
+                            rotation.set(gltfNode.rotation[0], gltfNode.rotation[1], gltfNode.rotation[2], gltfNode.rotation[3]);
+                            node.mtxLocal.rotation = rotation;
+                            FudgeCore.Recycler.store(rotation);
+                        }
+                        if (gltfNode.scale) {
+                            const scale = FudgeCore.Recycler.get(FudgeCore.Vector3);
+                            scale.set(gltfNode.scale[0], gltfNode.scale[1], gltfNode.scale[2]);
+                            node.mtxLocal.scaling = scale;
+                            FudgeCore.Recycler.store(scale);
+                        }
                     }
                 }
                 if (gltfNode.camera != undefined) {
                     node.addComponent(await this.getCameraByIndex(gltfNode.camera));
                 }
                 if (gltfNode.mesh != undefined) {
-                    node.addComponent(new FudgeCore.ComponentMesh(await this.getMeshByIndex(gltfNode.mesh)));
                     const gltfMesh = this.gltf.meshes?.[gltfNode.mesh];
-                    if (gltfMesh.primitives.length > 1)
-                        throw new Error(`Node ${gltfNode.name} has a mesh with more than one primitive attached to it. FUDGE currently only supports one primitive per mesh.`);
-                    const iMaterial = gltfMesh.primitives?.[0]?.material;
-                    if (iMaterial != undefined) {
-                        node.addComponent(new FudgeCore.ComponentMaterial(await this.getMaterialByIndex(iMaterial)));
-                    }
-                    else {
-                        if (node.getComponent(FudgeCore.ComponentMesh).mesh instanceof FudgeCore.MeshSkin) {
-                            if (!GLTFLoader.defaultSkinMaterial)
-                                GLTFLoader.defaultSkinMaterial = new FudgeCore.Material("GLTFDefaultSkinMaterial", FudgeCore.ShaderGouraudSkin, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white")));
-                            node.addComponent(new FudgeCore.ComponentMaterial(GLTFLoader.defaultSkinMaterial));
+                    const subComponents = [];
+                    for (let iPrimitive = 0; iPrimitive < gltfMesh.primitives.length; iPrimitive++) {
+                        const cmpMesh = new FudgeCore.ComponentMesh(await this.getMeshByIndex(gltfNode.mesh, iPrimitive));
+                        if (gltfNode.skin != undefined) {
+                            let iSkeletonInstance = this.gltf.skins[gltfNode.skin].skeleton;
+                            cmpMesh.skeleton = await this.getNodeByIndex(iSkeletonInstance);
+                        }
+                        let cmpMaterial;
+                        const iMaterial = gltfMesh.primitives?.[iPrimitive]?.material;
+                        if (iMaterial == undefined) {
+                            cmpMaterial = new FudgeCore.ComponentMaterial(cmpMesh.mesh instanceof FudgeCore.MeshSkin ?
+                                GLTFLoader.defaultSkinMaterial :
+                                GLTFLoader.defaultMaterial);
                         }
                         else {
-                            if (!GLTFLoader.defaultMaterial)
-                                GLTFLoader.defaultMaterial = new FudgeCore.Material("GLTFDefaultMaterial", FudgeCore.ShaderGouraud, new FudgeCore.CoatRemissive(FudgeCore.Color.CSS("white")));
-                            node.addComponent(new FudgeCore.ComponentMaterial(GLTFLoader.defaultMaterial));
+                            cmpMaterial = new FudgeCore.ComponentMaterial(await this.getMaterialByIndex(iMaterial, cmpMesh.mesh instanceof FudgeCore.MeshSkin));
                         }
+                        subComponents.push([cmpMesh, cmpMaterial]);
+                    }
+                    if (subComponents.length == 1) {
+                        node.addComponent(subComponents[0][0]);
+                        node.addComponent(subComponents[0][1]);
+                    }
+                    else {
+                        subComponents.forEach(([_cmpMesh, _cmpMaterial], _i) => {
+                            const nodePart = new FudgeCore.Node(node.name + "_primitive" + _i);
+                            nodePart.addComponent(_cmpMesh);
+                            nodePart.addComponent(_cmpMaterial);
+                            node.addChild(nodePart);
+                        });
                     }
                 }
-                if (gltfNode.skin != undefined) {
-                    let iSkeleton = this.gltf.skins[gltfNode.skin].joints[0];
-                    node.getComponent(FudgeCore.ComponentMesh).skeleton = await this.getNodeByIndex(iSkeleton);
-                }
-                this.#nodes[_iNode] = node;
-                if (iSkeleton >= 0) {
-                    let skeletonInstance = await FudgeCore.SkeletonInstance.CREATE(await this.getSkeletonByIndex(iSkeleton));
-                    this.#nodes = this.#nodes.map(_node => skeletonInstance.bones[_node.name] || _node);
-                    this.#nodes[_iNode] = skeletonInstance;
-                }
             }
-            return this.#nodes[_iNode];
+            return _nodes[_iNode];
         }
         async getCamera(_name) {
-            const iCamera = this.gltf.cameras.findIndex(camera => camera.name == _name);
+            const iCamera = this.gltf.cameras.findIndex(_camera => _camera.name == _name);
             if (iCamera == -1)
-                throw new Error(`Couldn't find name ${_name} in gltf cameras.`);
+                throw new Error(`${this}: Couldn't find name '${_name}' in gltf cameras.`);
             return await this.getCameraByIndex(iCamera);
         }
         async getCameraByIndex(_iCamera) {
@@ -13044,49 +13040,45 @@ var FudgeCore;
             return this.#cameras[_iCamera];
         }
         async getAnimation(_name) {
-            const iAnimation = this.gltf.animations.findIndex(animation => animation.name == _name);
+            const iAnimation = this.gltf.animations.findIndex(_animation => _animation.name == _name);
             if (iAnimation == -1)
-                throw new Error(`Couldn't find name ${_name} in gltf animations.`);
+                throw new Error(`${this}: Couldn't find name '${_name}' in gltf animations.`);
             return await this.getAnimationByIndex(iAnimation);
         }
         async getAnimationByIndex(_iAnimation) {
             if (!this.#animations)
                 this.#animations = [];
             if (!this.#animations[_iAnimation]) {
-                const gltfAnimation = this.gltf.animations[_iAnimation];
-                const mapiNodeToGltfChannel = [];
+                const gltfAnimation = this.gltf.animations?.[_iAnimation];
+                if (!gltfAnimation)
+                    throw new Error(`${this}: Couldn't find animation with index ${_iAnimation}.`);
+                let gltfChannelsGrouped = [];
                 for (const gltfChannel of gltfAnimation.channels) {
-                    if (gltfChannel.target.node == undefined)
+                    const iNode = gltfChannel.target.node;
+                    if (iNode == undefined)
                         continue;
-                    if (!mapiNodeToGltfChannel[gltfChannel.target.node])
-                        mapiNodeToGltfChannel[gltfChannel.target.node] = [];
-                    mapiNodeToGltfChannel[gltfChannel.target.node].push(gltfChannel);
+                    if (!gltfChannelsGrouped[iNode])
+                        gltfChannelsGrouped[iNode] = [];
+                    gltfChannelsGrouped[iNode].push(gltfChannel);
                 }
+                gltfChannelsGrouped = gltfChannelsGrouped.filter(_channels => _channels != undefined);
                 const animationStructure = {};
-                for (const iNode in mapiNodeToGltfChannel) {
-                    const gltfChannels = mapiNodeToGltfChannel[iNode];
+                for (const gltfChannels of gltfChannelsGrouped) {
                     const gltfNode = this.gltf.nodes[gltfChannels[0].target.node];
-                    const path = [];
-                    path.push(gltfChannels[0].target.node);
-                    let root = gltfNode;
-                    while (root.parent != undefined) {
-                        path.push(root.parent);
-                        root = this.gltf.nodes[root.parent];
-                    }
                     let currentStructure = animationStructure;
-                    for (const iPathNode of path.reverse()) {
+                    for (const iPathNode of gltfNode.path.reverse()) {
                         const pathNode = this.gltf.nodes[iPathNode];
                         if (currentStructure.children == undefined)
                             currentStructure.children = {};
                         if (currentStructure.children[pathNode.name] == undefined)
                             currentStructure.children[pathNode.name] = {};
                         currentStructure = currentStructure.children[pathNode.name];
-                        let iSkin = this.gltf.skins?.findIndex(skin => skin.joints[0] == iPathNode);
-                        if (iSkin >= 0 && this.gltf.skins[iSkin].joints.includes(gltfChannels[0].target.node)) {
+                        const iSkin = pathNode.iSkinRoot;
+                        if (iSkin != undefined && this.gltf.skins[iSkin].joints.includes(gltfChannels[0].target.node)) {
                             const mtxBoneLocal = {};
                             for (const gltfChannel of gltfChannels)
-                                mtxBoneLocal[gltfChannel.target.path] =
-                                    await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
+                                mtxBoneLocal[toInternTransformation[gltfChannel.target.path]] =
+                                    await this.getAnimationSequenceVector(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
                             if (currentStructure.mtxBoneLocals == undefined)
                                 currentStructure.mtxBoneLocals = {};
                             currentStructure.mtxBoneLocals[gltfNode.name] = mtxBoneLocal;
@@ -13095,8 +13087,8 @@ var FudgeCore;
                         if (pathNode == gltfNode) {
                             const mtxLocal = {};
                             for (const gltfChannel of gltfChannels)
-                                mtxLocal[gltfChannel.target.path] =
-                                    await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
+                                mtxLocal[toInternTransformation[gltfChannel.target.path]] =
+                                    await this.getAnimationSequenceVector(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
                             currentStructure.components = {
                                 ComponentTransform: [
                                     { mtxLocal: mtxLocal }
@@ -13110,33 +13102,39 @@ var FudgeCore;
             return this.#animations[_iAnimation];
         }
         async getMesh(_name) {
-            const iMesh = this.gltf.meshes.findIndex(mesh => mesh.name == _name);
+            const iMesh = this.gltf.meshes.findIndex(_mesh => _mesh.name == _name);
             if (iMesh == -1)
-                throw new Error(`Couldn't find name ${_name} in gltf meshes.`);
+                throw new Error(`${this}: Couldn't find name '${_name}' in gltf meshes.`);
             return await this.getMeshByIndex(iMesh);
         }
-        async getMeshByIndex(_iMesh) {
+        async getMeshByIndex(_iMesh, _iPrimitive = 0) {
             if (!this.#meshes)
                 this.#meshes = [];
-            if (!this.#meshes[_iMesh]) {
+            if (!this.#meshes[_iMesh])
+                this.#meshes[_iMesh] = [];
+            if (!this.#meshes[_iMesh][_iPrimitive]) {
                 const gltfMesh = this.gltf.meshes[_iMesh];
-                this.#meshes[_iMesh] = await (gltfMesh.primitives[0].attributes.JOINTS_0 != undefined ?
+                this.#meshes[_iMesh][_iPrimitive] = await (gltfMesh.primitives[_iPrimitive].attributes.JOINTS_0 != undefined ?
                     new FudgeCore.MeshSkin() :
-                    new FudgeCore.MeshImport()).load(FudgeCore.MeshLoaderGLTF, this.url, gltfMesh);
+                    new FudgeCore.MeshImport()).load(FudgeCore.MeshLoaderGLTF, this.url, { iMesh: _iMesh, iPrimitive: _iPrimitive });
             }
-            return this.#meshes[_iMesh];
+            return this.#meshes[_iMesh][_iPrimitive];
         }
-        async getMaterialByIndex(_iMaterial) {
+        async getMaterialByIndex(_iMaterial, _skin = false) {
             if (!this.#materials)
                 this.#materials = [];
             if (!this.#materials[_iMaterial]) {
                 const gltfMaterial = this.gltf.materials[_iMaterial];
-                const material = new FudgeCore.Material(gltfMaterial.name, FudgeCore.ShaderPhongTexturedSkin);
-                const gltfTextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
-                if (gltfTextureInfo) {
-                    const texture = await this.getTextureByIndex(gltfTextureInfo.index);
-                    material.coat = new FudgeCore.CoatRemissiveTextured(new FudgeCore.Color(...gltfMaterial.pbrMetallicRoughness.baseColorFactor || [1, 1, 1, 1]), texture, 1, 1);
-                }
+                if (!gltfMaterial)
+                    throw new Error(`${this}: Couldn't find material with index ${_iMaterial}.`);
+                const gltfBaseColorTexture = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
+                const color = new FudgeCore.Color(...gltfMaterial.pbrMetallicRoughness?.baseColorFactor || [1, 1, 1, 1]);
+                const coat = gltfBaseColorTexture ?
+                    new FudgeCore.CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index), 1, 1) :
+                    new FudgeCore.CoatRemissive(color, 1, 0.5);
+                const material = new FudgeCore.Material(gltfMaterial.name, gltfBaseColorTexture ?
+                    (_skin ? FudgeCore.ShaderPhongTexturedSkin : FudgeCore.ShaderPhongTextured) :
+                    (_skin ? FudgeCore.ShaderPhongSkin : FudgeCore.ShaderPhong), coat);
                 this.#materials[_iMaterial] = material;
             }
             return this.#materials[_iMaterial];
@@ -13146,11 +13144,17 @@ var FudgeCore;
                 this.#textures = [];
             if (!this.#textures[_iTexture]) {
                 const gltfTexture = this.gltf.textures[_iTexture];
-                const gltfSampler = this.gltf.samplers[gltfTexture.sampler];
-                const gltfImage = this.gltf.images[gltfTexture.source];
-                if (gltfSampler.wrapS != undefined || gltfSampler.wrapT != undefined)
-                    console.warn(`${GLTFLoader.name}: Texture ${_iTexture} in '${this.url}' has a wrapS and wrapT of '${getWebGLParameterName(gltfSampler.wrapS)}' and '${getWebGLParameterName(gltfSampler.wrapT)}' respectively. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`);
-                let url = gltfImage.uri;
+                const gltfSampler = this.gltf.samplers?.[gltfTexture.sampler];
+                const gltfImage = this.gltf.images?.[gltfTexture.source];
+                if (gltfImage == undefined) {
+                    FudgeCore.Debug.warn(`${this}: Texture with index ${_iTexture} has no image.`);
+                    return FudgeCore.TextureDefault.texture;
+                }
+                if (gltfSampler?.wrapS != undefined && gltfSampler?.wrapS != WebGL2RenderingContext.REPEAT)
+                    FudgeCore.Debug.warn(`${this}: Texture with index ${_iTexture} has a wrapS of '${getWebGLParameterName(gltfSampler.wrapS)}'. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`);
+                if (gltfSampler?.wrapT != undefined && gltfSampler?.wrapT != WebGL2RenderingContext.REPEAT)
+                    FudgeCore.Debug.warn(`${this}: Texture with index ${_iTexture} has a wrapT of '${getWebGLParameterName(gltfSampler.wrapT)}'. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`);
+                let url = new URL(gltfImage.uri, this.url).toString();
                 if (!gltfImage.uri && gltfImage.bufferView) {
                     const gltfBufferView = this.gltf.bufferViews[gltfImage.bufferView];
                     const buffer = await this.getBuffer(gltfBufferView.buffer);
@@ -13160,264 +13164,264 @@ var FudgeCore;
                 }
                 const texture = new FudgeCore.TextureImage();
                 await texture.load(url);
-                if (gltfSampler.magFilter == WebGL2RenderingContext.NEAREST && gltfSampler.minFilter == WebGL2RenderingContext.NEAREST)
+                if (gltfSampler && gltfSampler.magFilter == WebGL2RenderingContext.NEAREST && gltfSampler.minFilter == WebGL2RenderingContext.NEAREST)
                     texture.mipmap = FudgeCore.MIPMAP.CRISP;
-                else if (gltfSampler.magFilter == WebGL2RenderingContext.NEAREST && gltfSampler.minFilter == WebGL2RenderingContext.NEAREST_MIPMAP_LINEAR)
+                else if (gltfSampler && gltfSampler.magFilter == WebGL2RenderingContext.NEAREST && gltfSampler.minFilter == WebGL2RenderingContext.NEAREST_MIPMAP_LINEAR)
                     texture.mipmap = FudgeCore.MIPMAP.MEDIUM;
-                else if (gltfSampler.magFilter == WebGL2RenderingContext.LINEAR && gltfSampler.minFilter == WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR)
+                else if (gltfSampler && gltfSampler.magFilter == WebGL2RenderingContext.LINEAR && gltfSampler.minFilter == WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR)
                     texture.mipmap = FudgeCore.MIPMAP.BLURRY;
-                else if (gltfSampler.magFilter != undefined && gltfSampler.minFilter != undefined)
-                    throw new Error(`${GLTFLoader.name}: Texture ${_iTexture} in '${this.url}' has a magFilter and minFilter of '${getWebGLParameterName(gltfSampler.magFilter)}' and '${getWebGLParameterName(gltfSampler.minFilter)}' respectively. FUDGE only supports the following combinations: NEAREST and NEAREST | NEAREST and NEAREST_MIPMAP_LINEAR | LINEAR and LINEAR_MIPMAP_LINEAR.`);
+                else if (gltfSampler && (gltfSampler.magFilter != undefined || gltfSampler.minFilter != undefined))
+                    FudgeCore.Debug.warn(`${this}: Texture with index ${_iTexture} has a magFilter and minFilter of '${getWebGLParameterName(gltfSampler.magFilter)}' and '${getWebGLParameterName(gltfSampler.minFilter)}' respectively. FUDGE only supports the following combinations: NEAREST and NEAREST | NEAREST and NEAREST_MIPMAP_LINEAR | LINEAR and LINEAR_MIPMAP_LINEAR.`);
                 this.#textures[_iTexture] = texture;
             }
             return this.#textures[_iTexture];
         }
         async getSkeleton(_name) {
-            const iSkeleton = this.gltf.skins.findIndex(skeleton => skeleton.name == _name);
+            const iSkeleton = this.gltf.skins.findIndex(_skeleton => _skeleton.name == _name);
             if (iSkeleton == -1)
-                throw new Error(`Couldn't find name ${_name} in gltf skins.`);
+                throw new Error(`${this}: Couldn't find name '${_name}' in gltf skins.`);
             return await this.getSkeletonByIndex(iSkeleton);
         }
         async getSkeletonByIndex(_iSkeleton) {
             if (!this.#skeletons)
                 this.#skeletons = [];
             if (!this.#skeletons[_iSkeleton]) {
-                const gltfSkeleton = this.gltf.skins[_iSkeleton];
-                const skeleton = await this.getNodeByIndex(gltfSkeleton.joints[0]);
-                const floatArray = await this.getFloat32Array(gltfSkeleton.inverseBindMatrices);
-                const span = 16;
-                for (let iFloat = 0, iBone = 0; iFloat < floatArray.length; iFloat += span, iBone++) {
-                    const mtxBindInverse = new FudgeCore.Matrix4x4();
-                    mtxBindInverse.set(floatArray.subarray(iFloat, iFloat + span));
-                    skeleton.registerBone(this.#nodes[gltfSkeleton.joints[iBone]], mtxBindInverse);
+                const gltfSkin = this.gltf.skins[_iSkeleton];
+                const skeleton = await this.getNodeByIndex(gltfSkin.skeleton, this.#nodesSkeleton);
+                let mtxData;
+                if (gltfSkin.inverseBindMatrices != undefined)
+                    mtxData = await this.getFloat32Array(gltfSkin.inverseBindMatrices);
+                const mtxDataSpan = 16;
+                for (let iBone = 0; iBone < gltfSkin.joints.length; iBone++) {
+                    let mtxBindInverse;
+                    if (mtxData) {
+                        mtxBindInverse = new FudgeCore.Matrix4x4();
+                        mtxBindInverse.set(mtxData.subarray(iBone * mtxDataSpan, iBone * mtxDataSpan + mtxDataSpan));
+                    }
+                    skeleton.registerBone(await this.getNodeByIndex(gltfSkin.joints[iBone], this.#nodesSkeleton), mtxBindInverse);
                 }
                 FudgeCore.Project.register(skeleton);
                 this.#skeletons[_iSkeleton] = skeleton;
             }
             return this.#skeletons[_iSkeleton];
         }
-        async getUint8Array(_iAccessor) {
+        async getBoneIndices(_iAccessor) {
             const array = await this.getBufferData(_iAccessor);
-            if (this.gltf.accessors[_iAccessor]?.componentType == ComponentType.UNSIGNED_BYTE)
+            const componentType = this.gltf.accessors[_iAccessor]?.componentType;
+            if (componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE)
                 return array;
-            else {
-                console.warn(`Expected component type UNSIGNED_BYTE but was ${ComponentType[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+            if (componentType == GLTF.COMPONENT_TYPE.UNSIGNED_SHORT) {
+                FudgeCore.Debug.log(`${this}: Bone indices are stored as '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]}'. FUDGE will convert them to '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_BYTE]}'. FUDGE only supports skeletons with up to 256 bones, so make sure your skeleton has no more than 256 bones.`);
                 return Uint8Array.from(array);
             }
-        }
-        async getUint16Array(_iAccessor) {
-            const array = await this.getBufferData(_iAccessor);
-            if (this.gltf.accessors[_iAccessor]?.componentType == ComponentType.UNSIGNED_SHORT)
-                return array;
-            else {
-                console.warn(`Expected component type UNSIGNED_SHORT but was ${ComponentType[this.gltf.accessors[_iAccessor]?.componentType]}.`);
-                return Uint16Array.from(array);
-            }
-        }
-        async getUint32Array(_iAccessor) {
-            const array = await this.getBufferData(_iAccessor);
-            if (this.gltf.accessors[_iAccessor]?.componentType == ComponentType.UNSIGNED_INT)
-                return array;
-            else {
-                console.warn(`Expected component type UNSIGNED_INT but was ${ComponentType[this.gltf.accessors[_iAccessor]?.componentType]}.`);
-                return Uint32Array.from(array);
-            }
+            throw new Error(`${this}: Invalid component type '${GLTF.COMPONENT_TYPE[componentType]}' for bone indices. Expected '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_BYTE]}' or '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]}'.`);
         }
         async getFloat32Array(_iAccessor) {
             const array = await this.getBufferData(_iAccessor);
-            if (this.gltf.accessors[_iAccessor]?.componentType == ComponentType.FLOAT)
+            const gltfAccessor = this.gltf.accessors[_iAccessor];
+            if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.FLOAT)
                 return array;
-            else {
-                console.warn(`Expected component type FLOAT but was ${ComponentType[this.gltf.accessors[_iAccessor]?.componentType]}.`);
-                return Float32Array.from(array);
+            if (gltfAccessor.normalized) {
+                switch (gltfAccessor.componentType) {
+                    case GLTF.COMPONENT_TYPE.BYTE:
+                        return Float32Array.from(array, _value => Math.max(_value / 127, -1));
+                    case GLTF.COMPONENT_TYPE.UNSIGNED_BYTE:
+                        return Float32Array.from(array, _value => _value / 255);
+                    case GLTF.COMPONENT_TYPE.SHORT:
+                        return Float32Array.from(array, _value => Math.max(_value / 32767, -1));
+                    case GLTF.COMPONENT_TYPE.UNSIGNED_SHORT:
+                        return Float32Array.from(array, _value => _value / 65535);
+                    default:
+                        throw new Error(`${this}: Invalid component type '${GLTF.COMPONENT_TYPE[gltfAccessor.componentType]}' for normalized accessor.`);
+                }
             }
+            FudgeCore.Debug.warn(`${this}: Expected component type '${GLTF.COMPONENT_TYPE[GLTF.COMPONENT_TYPE.FLOAT]}' but was '${GLTF.COMPONENT_TYPE[gltfAccessor?.componentType]}'.`);
+            return Float32Array.from(array);
+        }
+        async getVertexIndices(_iAccessor) {
+            const array = await this.getBufferData(_iAccessor);
+            const gltfAccessor = this.gltf.accessors[_iAccessor];
+            if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_SHORT)
+                return array;
+            if (gltfAccessor.count > 65535 && gltfAccessor.type == "SCALAR")
+                throw new Error(`${this}: File includes a mesh with more than 65535 vertices. FUDGE does not support meshes with more than 65535 vertices.`);
+            if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE || gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_INT)
+                return Uint16Array.from(array);
+            FudgeCore.Debug.warn(`${this}: Expected an unsigned integer component type but was '${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}'.`);
+            return Uint16Array.from(array);
+        }
+        async getVertexColors(_iAccessor) {
+            const array = await this.getFloat32Array(_iAccessor);
+            const gltfAccessor = this.gltf.accessors[_iAccessor];
+            if (gltfAccessor.type == GLTF.ACCESSOR_TYPE.VEC3) {
+                const rgbaArray = new Float32Array(array.length * 4 / 3);
+                for (let iVec3 = 0, iVec4 = 0; iVec3 < array.length; iVec3 += 3, iVec4 += 4) {
+                    rgbaArray[iVec4] = array[iVec3];
+                    rgbaArray[iVec4 + 1] = array[iVec3 + 1];
+                    rgbaArray[iVec4 + 2] = array[iVec3 + 2];
+                    rgbaArray[iVec4 + 3] = 1;
+                }
+                return rgbaArray;
+            }
+            return array;
+        }
+        toString() {
+            return `${GLTFLoader.name} | ${this.url}`;
         }
         async getBufferData(_iAccessor) {
             const gltfAccessor = this.gltf.accessors[_iAccessor];
             if (!gltfAccessor)
-                throw new Error("Couldn't find accessor");
-            const gltfBufferView = this.gltf.bufferViews[gltfAccessor.bufferView];
-            if (!gltfBufferView)
-                throw new Error("Couldn't find buffer view");
-            const buffer = await this.getBuffer(gltfBufferView.buffer);
-            ;
-            const byteOffset = gltfBufferView.byteOffset || 0;
-            const byteLength = gltfBufferView.byteLength || 0;
-            switch (gltfAccessor.componentType) {
-                case ComponentType.UNSIGNED_BYTE:
-                    return new Uint8Array(buffer, byteOffset, byteLength / Uint8Array.BYTES_PER_ELEMENT);
-                case ComponentType.BYTE:
-                    return new Int8Array(buffer, byteOffset, byteLength / Int8Array.BYTES_PER_ELEMENT);
-                case ComponentType.UNSIGNED_SHORT:
-                    return new Uint16Array(buffer, byteOffset, byteLength / Uint16Array.BYTES_PER_ELEMENT);
-                case ComponentType.SHORT:
-                    return new Int16Array(buffer, byteOffset, byteLength / Int16Array.BYTES_PER_ELEMENT);
-                case ComponentType.UNSIGNED_INT:
-                    return new Uint32Array(buffer, byteOffset, byteLength / Uint32Array.BYTES_PER_ELEMENT);
-                case ComponentType.INT:
-                    return new Int32Array(buffer, byteOffset, byteLength / Int32Array.BYTES_PER_ELEMENT);
-                case ComponentType.FLOAT:
-                    return new Float32Array(buffer, byteOffset, byteLength / Float32Array.BYTES_PER_ELEMENT);
-                default:
-                    throw new Error(`Unsupported component type: ${gltfAccessor.componentType}.`);
+                throw new Error(`${this}: Couldn't find accessor with index ${_iAccessor}.`);
+            let array;
+            const componentType = gltfAccessor.componentType;
+            const accessorType = gltfAccessor.type;
+            if (gltfAccessor.bufferView != undefined)
+                array = await this.getBufferViewData(this.gltf.bufferViews[gltfAccessor.bufferView], gltfAccessor.byteOffset, componentType, accessorType);
+            if (gltfAccessor.sparse) {
+                const gltfBufferViewIndices = this.gltf.bufferViews[gltfAccessor.sparse.indices.bufferView];
+                const gltfBufferViewValues = this.gltf.bufferViews[gltfAccessor.sparse.values.bufferView];
+                if (!gltfBufferViewIndices || !gltfBufferViewValues)
+                    throw new Error(`${this}: Couldn't find buffer views for sparse indices or values of accessor with index ${_iAccessor}.`);
+                const arrayIndices = await this.getBufferViewData(gltfBufferViewIndices, gltfAccessor.sparse.indices.byteOffset, gltfAccessor.sparse.indices.componentType, GLTF.ACCESSOR_TYPE.SCALAR);
+                const arrayValues = await this.getBufferViewData(gltfBufferViewValues, gltfAccessor.sparse.values.byteOffset, componentType, accessorType);
+                const accessorTypeLength = toAccessorTypeLength[gltfAccessor.type];
+                if (gltfAccessor.bufferView == undefined)
+                    array = new toArrayConstructor[gltfAccessor.componentType](gltfAccessor.count * accessorTypeLength);
+                for (let i = 0; i < gltfAccessor.sparse.count; i++) {
+                    array.set(arrayValues.slice(i * accessorTypeLength, (i + 1) * accessorTypeLength), arrayIndices[i] * accessorTypeLength);
+                }
             }
+            return array;
+        }
+        async getBufferViewData(_bufferView, _byteOffset, _componentType, _accessorType) {
+            const buffer = await this.getBuffer(_bufferView.buffer);
+            const byteOffset = (_bufferView.byteOffset ?? 0) + (_byteOffset ?? 0);
+            const byteLength = _bufferView.byteLength ?? 0;
+            const byteStride = _bufferView.byteStride;
+            const arrayConstructor = toArrayConstructor[_componentType];
+            const array = new arrayConstructor(buffer, byteOffset, byteLength / arrayConstructor.BYTES_PER_ELEMENT);
+            if (byteStride != undefined) {
+                const nComponentsPerElement = toAccessorTypeLength[_accessorType];
+                const nElements = byteLength / byteStride;
+                const stride = byteStride / arrayConstructor.BYTES_PER_ELEMENT;
+                const newArray = new arrayConstructor(nElements * nComponentsPerElement);
+                for (let iNewElement = 0; iNewElement < nElements; iNewElement++) {
+                    const iElement = iNewElement * stride;
+                    for (let iComponent = 0; iComponent < nComponentsPerElement; iComponent++)
+                        newArray[iNewElement * nComponentsPerElement + iComponent] = array[iElement + iComponent];
+                }
+                return newArray;
+            }
+            return array;
         }
         async getBuffer(_iBuffer) {
             const gltfBuffer = this.gltf.buffers[_iBuffer];
             if (!gltfBuffer)
-                throw new Error("Couldn't find buffer");
+                throw new Error(`${this}: Couldn't find buffer with index ${_iBuffer}.`);
             if (!this.#buffers)
                 this.#buffers = [];
             if (!this.#buffers[_iBuffer]) {
-                const response = await fetch(gltfBuffer.uri);
+                const response = await fetch(new URL(gltfBuffer.uri, this.url));
                 this.#buffers[_iBuffer] = await response.arrayBuffer();
             }
             return this.#buffers[_iBuffer];
         }
-        async getAnimationSequenceVector3(_sampler, _transformationType) {
+        async getAnimationSequenceVector(_sampler, _transformationType) {
             const input = await this.getFloat32Array(_sampler.input);
             const output = await this.getFloat32Array(_sampler.output);
             const millisPerSecond = 1000;
             const isRotation = _transformationType == "rotation";
-            const sequences = {};
-            sequences.x = new FudgeCore.AnimationSequence();
-            sequences.y = new FudgeCore.AnimationSequence();
-            sequences.z = new FudgeCore.AnimationSequence();
-            if (isRotation)
-                sequences.w = new FudgeCore.AnimationSequence();
-            for (let iInput = 0; iInput < input.length; ++iInput) {
-                let iOutput = iInput * (_transformationType == "rotation" ? 4 : 3);
-                let time = millisPerSecond * input[iInput];
-                sequences.x.addKey(new FudgeCore.AnimationKey(time, output[iOutput + 0]));
-                sequences.y.addKey(new FudgeCore.AnimationKey(time, output[iOutput + 1]));
-                sequences.z.addKey(new FudgeCore.AnimationKey(time, output[iOutput + 2]));
-                if (isRotation)
-                    sequences.w.addKey(new FudgeCore.AnimationKey(time, output[iOutput + 3]));
+            const vectorLength = isRotation ? 4 : 3;
+            const interpolation = this.toInternInterpolation(_sampler.interpolation);
+            const isCubic = interpolation == FudgeCore.ANIMATION_INTERPOLATION.CUBIC ? true : undefined;
+            const vectorsPerInput = isCubic ? 3 : 1;
+            let lastRotation;
+            let nextRotation;
+            const sequenceVector = {};
+            sequenceVector.x = new FudgeCore.AnimationSequence();
+            sequenceVector.y = new FudgeCore.AnimationSequence();
+            sequenceVector.z = new FudgeCore.AnimationSequence();
+            if (isRotation) {
+                sequenceVector.w = new FudgeCore.AnimationSequence();
+                lastRotation = FudgeCore.Recycler.get(FudgeCore.Quaternion);
+                nextRotation = FudgeCore.Recycler.get(FudgeCore.Quaternion);
             }
-            return sequences;
+            for (let iInput = 0; iInput < input.length; iInput++) {
+                const iOutput = iInput * vectorsPerInput * vectorLength + (isCubic ? vectorLength : 0);
+                const iOutputSlopeIn = iOutput - vectorLength;
+                const iOutputSlopeOut = iOutput + vectorLength;
+                const time = millisPerSecond * input[iInput];
+                if (isRotation) {
+                    nextRotation.set(output[iOutput + 0], output[iOutput + 1], output[iOutput + 2], output[iOutput + 3]);
+                    if (FudgeCore.Quaternion.DOT(lastRotation, nextRotation) < 0)
+                        nextRotation.negate();
+                    output[iOutput + 0] = nextRotation.x;
+                    output[iOutput + 1] = nextRotation.y;
+                    output[iOutput + 2] = nextRotation.z;
+                    output[iOutput + 3] = nextRotation.w;
+                    lastRotation.set(nextRotation.x, nextRotation.y, nextRotation.z, nextRotation.w);
+                }
+                sequenceVector.x.addKey(new FudgeCore.AnimationKey(time, output[iOutput + 0], interpolation, isCubic && output[iOutputSlopeIn + 0] / millisPerSecond, isCubic && output[iOutputSlopeOut + 0] / millisPerSecond));
+                sequenceVector.y.addKey(new FudgeCore.AnimationKey(time, output[iOutput + 1], interpolation, isCubic && output[iOutputSlopeIn + 1] / millisPerSecond, isCubic && output[iOutputSlopeOut + 1] / millisPerSecond));
+                sequenceVector.z.addKey(new FudgeCore.AnimationKey(time, output[iOutput + 2], interpolation, isCubic && output[iOutputSlopeIn + 2] / millisPerSecond, isCubic && output[iOutputSlopeOut + 2] / millisPerSecond));
+                sequenceVector.w?.addKey(new FudgeCore.AnimationKey(time, output[iOutput + 3], interpolation, isCubic && output[iOutputSlopeIn + 3] / millisPerSecond, isCubic && output[iOutputSlopeOut + 3] / millisPerSecond));
+            }
+            if (isRotation) {
+                FudgeCore.Recycler.store(lastRotation);
+                FudgeCore.Recycler.store(nextRotation);
+            }
+            return sequenceVector;
+        }
+        toInternInterpolation(_interpolation) {
+            switch (_interpolation) {
+                case "LINEAR":
+                    return FudgeCore.ANIMATION_INTERPOLATION.LINEAR;
+                case "STEP":
+                    return FudgeCore.ANIMATION_INTERPOLATION.CONSTANT;
+                case "CUBICSPLINE":
+                    return FudgeCore.ANIMATION_INTERPOLATION.CUBIC;
+                default:
+                    if (_interpolation != undefined)
+                        FudgeCore.Debug.warn(`${this}: Unknown interpolation type ${_interpolation}.`);
+                    return FudgeCore.ANIMATION_INTERPOLATION.LINEAR;
+            }
         }
     }
     FudgeCore.GLTFLoader = GLTFLoader;
     function getWebGLParameterName(_value) {
         return Object.keys(WebGL2RenderingContext).find(_key => Reflect.get(WebGL2RenderingContext, _key) == _value);
     }
-    let ComponentType;
-    (function (ComponentType) {
-        ComponentType[ComponentType["BYTE"] = 5120] = "BYTE";
-        ComponentType[ComponentType["UNSIGNED_BYTE"] = 5121] = "UNSIGNED_BYTE";
-        ComponentType[ComponentType["SHORT"] = 5122] = "SHORT";
-        ComponentType[ComponentType["UNSIGNED_SHORT"] = 5123] = "UNSIGNED_SHORT";
-        ComponentType[ComponentType["INT"] = 5124] = "INT";
-        ComponentType[ComponentType["UNSIGNED_INT"] = 5125] = "UNSIGNED_INT";
-        ComponentType[ComponentType["FLOAT"] = 5126] = "FLOAT";
-    })(ComponentType || (ComponentType = {}));
+    const toInternTransformation = {
+        "translation": "translation",
+        "rotation": "rotation",
+        "scale": "scaling",
+        "weights": "weights"
+    };
+    const toAccessorTypeLength = {
+        "SCALAR": 1,
+        "VEC2": 2,
+        "VEC3": 3,
+        "VEC4": 4,
+        "MAT2": 4,
+        "MAT3": 9,
+        "MAT4": 16
+    };
+    const toArrayConstructor = {
+        [GLTF.COMPONENT_TYPE.UNSIGNED_BYTE]: Uint8Array,
+        [GLTF.COMPONENT_TYPE.BYTE]: Int8Array,
+        [GLTF.COMPONENT_TYPE.UNSIGNED_SHORT]: Uint16Array,
+        [GLTF.COMPONENT_TYPE.SHORT]: Int16Array,
+        [GLTF.COMPONENT_TYPE.UNSIGNED_INT]: Uint32Array,
+        [GLTF.COMPONENT_TYPE.FLOAT]: Float32Array
+    };
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     FudgeCore.shaderSources = {};
-    FudgeCore.shaderSources["ShaderParticle.frag"] = `#version 300 es
-/**
-* Particle shader similar to lit textured shader
-* @authors Jonas Plotzky, HFU, 2022
-*/
-
-precision mediump float;
-
-uniform vec4 u_vctColor;
-  
-  #if defined(PARTICLE_COLOR)
-in vec4 v_vctColor;
-  #endif
-
-in vec2 v_vctTexture;
-uniform sampler2D u_texture;
-
-out vec4 vctFrag;
-
-void main() {
-  // TEXTURE: multiply with texel color
-  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
-  vctFrag = u_vctColor * vctColorTexture;
-    #if defined(PARTICLE_COLOR)
-  vctFrag *= v_vctColor;
-    #endif
-
-
-  // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
-}`;
-    FudgeCore.shaderSources["ShaderParticle.vert"] = `#version 300 es
-/**
-* Particle shader similar to lit textured shader
-* @authors Jonas Plotzky, HFU, 2022
-*/
-
-uniform mat4 u_mtxMeshToWorld;
-uniform mat4 u_mtxWorldToView;
-uniform vec3 u_vctCamera;
-in vec3 a_vctPosition;
-
-uniform mat3 u_mtxPivot;
-in vec2 a_vctTexture;
-out vec2 v_vctTexture;
-
-  #if defined(PARTICLE_COLOR)
-out vec4 v_vctColor;
-  #endif
-
-uniform float u_fParticleSystemDuration;
-uniform float u_fParticleSystemSize;
-uniform float u_fParticleSystemTime;
-uniform sampler2D u_fParticleSystemRandomNumbers;
-
-uniform bool u_bParticleSystemFaceCamera;
-uniform bool u_bParticleSystemRestrict;
-
-mat4 lookAt(vec3 _vctTranslation, vec3 _vctTarget) {
-  vec3 vctUp = vec3(0.0, 1.0, 0.0);
-  vec3 zAxis = normalize(_vctTarget - _vctTranslation);
-  vec3 xAxis = normalize(cross(vctUp, zAxis));
-  vec3 yAxis = u_bParticleSystemRestrict ? vctUp : normalize(cross(zAxis, xAxis));
-  zAxis = u_bParticleSystemRestrict ? normalize(cross(xAxis, vctUp)) : zAxis;
-
-  return mat4(
-    xAxis.x, xAxis.y, xAxis.z, 0.0,
-    yAxis.x, yAxis.y, yAxis.z, 0.0,
-    zAxis.x, zAxis.y, zAxis.z, 0.0,
-    _vctTranslation.x,  _vctTranslation.y,  _vctTranslation.z, 1.0
-  );
-}
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  float fParticleId = float(gl_InstanceID);
-
-  /*$variables*/
-  /*$mtxLocal*/
-  /*$mtxWorld*/
-
-  mat4 mtxMeshToWorld = /*$mtxWorld*/ u_mtxMeshToWorld /*$mtxLocal*/;
-  if (u_bParticleSystemFaceCamera) mtxMeshToWorld = 
-    lookAt(vec3(mtxMeshToWorld[3][0], mtxMeshToWorld[3][1], mtxMeshToWorld[3][2]), u_vctCamera) * 
-    mat4(
-      length(vec3(mtxMeshToWorld[0][0], mtxMeshToWorld[1][0], mtxMeshToWorld[2][0])), 0.0, 0.0, 0.0,
-      0.0, length(vec3(mtxMeshToWorld[0][1], mtxMeshToWorld[1][1], mtxMeshToWorld[2][1])), 0.0, 0.0,
-      0.0, 0.0, length(vec3(mtxMeshToWorld[0][2], mtxMeshToWorld[1][2], mtxMeshToWorld[2][2])), 0.0,
-      0.0, 0.0, 0.0, 1.0
-    );
-
-  // calculate position
-  gl_Position = u_mtxWorldToView * mtxMeshToWorld * vctPosition;
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-    #if defined(PARTICLE_COLOR)
-  v_vctColor = /*$color*/;
-    #endif
-}`;
     FudgeCore.shaderSources["ShaderPhong.frag"] = `#version 300 es
 /**
 * Phong shading
-* @authors Jirka Dell'Oro-Friedl, HFU, 2022
+* @authors Jirka Dell'Oro-Friedl, HFU, 2022 | Jonas Plotzky, HFU, 2023
 */
 
 precision mediump float;
@@ -13432,12 +13436,20 @@ uniform sampler2D u_texture;
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
 uniform float u_fSpecular;
-uniform mat4 u_mtxMeshToWorld;
+// uniform mat4 u_mtxMeshToWorld; // can't use this when skinning
 uniform vec3 u_vctCamera;
 
 in vec4 v_vctColor;
-in vec4 v_vctPosition;
+in vec3 v_vctPosition;
+
+  #if defined(PHONG)
 in vec3 v_vctNormal;
+  #endif
+
+  #if defined(FLAT)
+flat in vec3 v_vctPositionFlat;
+  #endif
+
 out vec4 vctFrag;
 
 struct Light {
@@ -13445,23 +13457,20 @@ struct Light {
   mat4 mtxShape;
   mat4 mtxShapeInverse;
 };
-uniform Light u_ambient;
 
 const uint MAX_LIGHTS_DIRECTIONAL = 15u;
 const uint MAX_LIGHTS_POINT = 100u;
 const uint MAX_LIGHTS_SPOT = 100u;
 
-layout(std140) uniform Lights
-{
-uniform uint u_nLightsDirectional;
-uniform uint u_nLightsPoint;
-uniform uint u_nLightsSpot;
-uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
-uniform Light u_point[MAX_LIGHTS_POINT];
-uniform Light u_spot[MAX_LIGHTS_SPOT];
-} ;
-
-
+layout(std140) uniform Lights {
+  uint u_nLightsDirectional;
+  uint u_nLightsPoint;
+  uint u_nLightsSpot;
+  Light u_ambient;
+  Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+  Light u_point[MAX_LIGHTS_POINT];
+  Light u_spot[MAX_LIGHTS_SPOT];
+};
 
 float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
   if(_fSpecular <= 0.0)
@@ -13487,26 +13496,41 @@ vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec
 }
 
 void main() {
-  vctFrag = v_vctColor;
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * v_vctPosition) - u_vctCamera);
+  vec3 vctPosition = v_vctPosition;
 
+    #if defined(PHONG)
+  vec3 vctNormal = normalize(v_vctNormal);
+  vec3 vctView = normalize(v_vctPosition - u_vctCamera);
+    #endif
+
+    #if defined(FLAT)
+  vec3 vctXTangent = dFdx(vctPosition);
+  vec3 vctYTangent = dFdy(vctPosition);
+  vec3 vctNormal = normalize(cross(vctXTangent, vctYTangent));
+  vec3 vctView = normalize(v_vctPositionFlat - u_vctCamera);
+    #endif
+
+  vctFrag = u_fDiffuse * u_ambient.vctColor;
+  
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
-    vctFrag += illuminateDirected(vctDirection, v_vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
+    vctFrag += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
   }
+
   // calculate point light effect
   for(uint i = 0u; i < u_nLightsPoint; i++) {
     vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-    vec3 vctDirection = vec3(u_mtxMeshToWorld * v_vctPosition) - vctPositionLight;
+    vec3 vctDirection = vctPosition - vctPositionLight;
     float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
     if(fIntensity < 0.0)
       continue;
-    vctFrag += illuminateDirected(vctDirection, v_vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
+    vctFrag += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
   }
+
   // calculate spot light effect
   for(uint i = 0u; i < u_nLightsSpot; i++) {
     vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-    vec3 vctDirection = vec3(u_mtxMeshToWorld * v_vctPosition) - vctPositionLight;
+    vec3 vctDirection = vctPosition - vctPositionLight;
     vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
     if(vctDirectionInverted.z <= 0.0)
       continue;
@@ -13514,7 +13538,7 @@ void main() {
     fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);
     if(fIntensity < 0.0)
       continue;
-    vctFrag += illuminateDirected(vctDirection, v_vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
+    vctFrag += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
 
   // TEXTURE: multiply with texel color
@@ -13522,6 +13546,8 @@ void main() {
   vec4 vctColorTexture = texture(u_texture, v_vctTexture);
   vctFrag *= vctColorTexture;
     #endif
+    
+  vctFrag *= u_vctColor * v_vctColor;
 }`;
     FudgeCore.shaderSources["ShaderPick.frag"] = `#version 300 es
 /**
@@ -13611,14 +13637,7 @@ precision highp int;
 
   // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;
-
-  // FLAT: input vertex colors flat, so the third of a triangle determines the color
-  #if defined(FLAT) 
-flat in vec4 v_vctColor;
-  // LIGHT: input vertex colors for each vertex for interpolation over the face
-  #elif defined(LIGHT) || defined(PARTICLE_COLOR)
 in vec4 v_vctColor;
-  #endif
 
   // TEXTURE: input UVs and texture
   #if defined(TEXTURE) || defined(MATCAP)
@@ -13630,12 +13649,7 @@ out vec4 vctFrag;
 
 void main() {
     // MINIMAL: set the base color
-  vctFrag = u_vctColor;
-
-    // VERTEX: multiply with vertex color
-    #if defined(FLAT) || defined(LIGHT) || defined(PARTICLE_COLOR)
-  vctFrag *= v_vctColor;
-    #endif
+  vctFrag = u_vctColor * v_vctColor;
 
     // TEXTURE: multiply with texel color
     #if defined(TEXTURE) || defined(MATCAP)
@@ -13650,7 +13664,7 @@ void main() {
     FudgeCore.shaderSources["ShaderUniversal.vert"] = `#version 300 es
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
-* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
+* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2023
 */
 
 precision mediump float;
@@ -13659,6 +13673,9 @@ precision highp int;
   // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxMeshToView;
 in vec3 a_vctPosition;
+// TODO: think about making vertex color optional
+in vec4 a_vctColor;
+out vec4 v_vctColor;
 
   // PARTICLE: offer buffer and functionality for in shader position calculation
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
@@ -13691,22 +13708,19 @@ struct Light {
   mat4 mtxShapeInverse;
 };
 
-uniform Light u_ambient;
-
-  #if !defined(PHONG)
 const uint MAX_LIGHTS_DIRECTIONAL = 15u;
 const uint MAX_LIGHTS_POINT = 100u;
 const uint MAX_LIGHTS_SPOT = 100u;
 
 layout(std140) uniform Lights {
-  uniform uint u_nLightsDirectional;
-  uniform uint u_nLightsPoint;
-  uniform uint u_nLightsSpot;
-  uniform Light u_directional[MAX_LIGHTS_DIRECTIONAL];
-  uniform Light u_point[MAX_LIGHTS_POINT];
-  uniform Light u_spot[MAX_LIGHTS_SPOT];
+  uint u_nLightsDirectional;
+  uint u_nLightsPoint;
+  uint u_nLightsSpot;
+  Light u_ambient;
+  Light u_directional[MAX_LIGHTS_DIRECTIONAL];
+  Light u_point[MAX_LIGHTS_POINT];
+  Light u_spot[MAX_LIGHTS_SPOT];
 };
-  #endif
 
 vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec3 _vctView, float _fSpecular) {
   vec4 vctResult = vec4(0, 0, 0, 1);
@@ -13739,30 +13753,24 @@ out vec2 v_vctTexture;
 
   #if defined(PHONG)
 out vec3 v_vctNormal;
-out vec4 v_vctPosition;
+out vec3 v_vctPosition;
+  #endif
+
+  #if defined(FLAT)
+out vec3 v_vctPosition;
+flat out vec3 v_vctPositionFlat;
   #endif
 
   #if defined(SKIN)
-// uniform mat4 u_mtxMeshToWorld;
+uniform mat4 u_mtxWorldToView; // 
 // Bones
 // https://github.com/mrdoob/three.js/blob/dev/src/renderers/shaders/ShaderChunk/skinning_pars_vertex.glsl.js
-in uvec4 a_iBone;
-in vec4 a_fWeight;
-const uint MAX_BONES = 256u;
-struct Bone {
-  mat4 matrix; // TODO: change name to mtx to conform with naming scheme
-};
+in uvec4 a_vctBones;
+in vec4 a_vctWeights;
+const uint MAX_BONES = 256u; // CAUTION: this number must be the same as in RenderInjectorSkeletonInstance where the corresponding buffers are created
 layout (std140) uniform Skin {
-  Bone u_bones[MAX_BONES];
+  mat4 u_mtxBones[MAX_BONES];
 };
-  #endif
-
-  // FLAT: outbuffer is flat
-  #if defined(FLAT)
-flat out vec4 v_vctColor;
-  #elif defined(LIGHT) || defined(PARTICLE)
-  // regular if not FLAT
-out vec4 v_vctColor;
   #endif
 
   #if defined(PARTICLE)
@@ -13798,7 +13806,7 @@ float fetchRandomNumber(int _iIndex, int _iParticleSystemRandomNumbersSize, int 
 void main() {
   vec4 vctPosition = vec4(a_vctPosition, 1.0);
 
-    #if defined(CAMERA) || defined(PARTICLE)
+    #if defined(CAMERA) || defined(PARTICLE) || defined(SKIN) || defined(MATCAP)
   mat4 mtxMeshToWorld = u_mtxMeshToWorld;
     #endif
 
@@ -13831,42 +13839,49 @@ void main() {
       #else
   mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
       #endif
-      #if defined(LIGHT)
-  v_vctColor = u_fDiffuse * u_ambient.vctColor;
-      #endif
     #endif
 
-
     #if defined(SKIN)
-  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
-    a_fWeight.y * u_bones[a_iBone.y].matrix +
-    a_fWeight.z * u_bones[a_iBone.z].matrix +
-    a_fWeight.w * u_bones[a_iBone.w].matrix;
-
-  mtxMeshToView *= mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld * mtxSkin));
+  mtxMeshToWorld = a_vctWeights.x * u_mtxBones[a_vctBones.x] +
+    a_vctWeights.y * u_mtxBones[a_vctBones.y] +
+    a_vctWeights.z * u_mtxBones[a_vctBones.z] +
+    a_vctWeights.w * u_mtxBones[a_vctBones.w];
+  
+  mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
+  mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
     #endif
 
     // calculate position and normal according to input and defines
   gl_Position = mtxMeshToView * vctPosition;
+  v_vctColor = a_vctColor;
 
     #if defined(CAMERA) || defined(MATCAP)
-  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
+  vec3 vctView = normalize(vec3(mtxMeshToWorld * vctPosition) - u_vctCamera);
     #endif
 
     #if defined(LIGHT)
-  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
+  vctNormal = mat3(mtxNormalMeshToWorld) * vctNormal;
+
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader
-  v_vctPosition = vctPosition;
-      #endif  
+  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+      #endif
 
-    #if !defined(PHONG)
+      #if defined(FLAT)
+  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+  v_vctPositionFlat = v_vctPosition;
+      #endif
+
+    #if !defined(PHONG) && !defined(FLAT) // gouraud
+  vctNormal = normalize(vctNormal);
+  v_vctColor = u_fDiffuse * u_ambient.vctColor;
+
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
     v_vctColor += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
   }
+
   // calculate point light effect
   for(uint i = 0u; i < u_nLightsPoint; i++) {
     vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
@@ -13890,6 +13905,8 @@ void main() {
       continue;
     v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
+  
+  v_vctColor *= a_vctColor;
       #endif // PHONG
     #endif
 
@@ -13926,7 +13943,7 @@ void main() {
     #else
     // always full opacity for now...
       #if defined(LIGHT)
-    v_vctColor.a = 1.0;
+  v_vctColor.a = 1.0;
       #endif
     #endif
 }`;
@@ -13934,7 +13951,10 @@ void main() {
 var FudgeCore;
 (function (FudgeCore) {
     var Shader_1;
-    let Shader = Shader_1 = class Shader {
+    let Shader = class Shader {
+        static { Shader_1 = this; }
+        static { this.baseClass = Shader_1; }
+        static { this.subclasses = []; }
         static getCoat() { return FudgeCore.CoatColored; }
         static getVertexShaderSource() {
             return this.insertDefines(FudgeCore.shaderSources["ShaderUniversal.vert"], this.define);
@@ -13949,14 +13969,12 @@ var FudgeCore;
         static insertDefines(_shader, _defines) {
             if (!_defines)
                 return _shader;
-            let code = `#version 300 es\n`;
+            let code = "#version 300 es\n";
             for (let define of _defines)
                 code += `#define ${define}\n`;
             return _shader.replace("#version 300 es", code);
         }
     };
-    Shader.baseClass = Shader_1;
-    Shader.subclasses = [];
     Shader = Shader_1 = __decorate([
         FudgeCore.RenderInjectorShader.decorate
     ], Shader);
@@ -13965,250 +13983,280 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderFlat extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlat); }
+        static {
+            this.define = [
+                "LIGHT",
+                "CAMERA",
+                "FLAT"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatRemissive; }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
+        }
     }
-    ShaderFlat.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlat);
-    ShaderFlat.define = [
-        "LIGHT",
-        "FLAT",
-        "CAMERA"
-    ];
     FudgeCore.ShaderFlat = ShaderFlat;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderFlatSkin extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlatSkin); }
+        static {
+            this.define = [
+                "LIGHT",
+                "CAMERA",
+                "FLAT",
+                "SKIN"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatRemissive; }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
+        }
     }
-    ShaderFlatSkin.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlatSkin);
-    ShaderFlatSkin.define = [
-        "LIGHT",
-        "FLAT",
-        "SKIN",
-        "CAMERA"
-    ];
     FudgeCore.ShaderFlatSkin = ShaderFlatSkin;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderFlatTextured extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlatTextured); }
+        static {
+            this.define = [
+                "LIGHT",
+                "CAMERA",
+                "FLAT",
+                "TEXTURE"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatRemissiveTextured; }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
+        }
     }
-    ShaderFlatTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlatTextured);
-    ShaderFlatTextured.define = [
-        "LIGHT",
-        "FLAT",
-        "TEXTURE",
-        "CAMERA"
-    ];
     FudgeCore.ShaderFlatTextured = ShaderFlatTextured;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderFlatTexturedSkin extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlatTexturedSkin); }
+        static {
+            this.define = [
+                "LIGHT",
+                "CAMERA",
+                "FLAT",
+                "TEXTURE",
+                "SKIN"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatRemissiveTextured; }
+        static getFragmentShaderSource() {
+            return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
+        }
     }
-    ShaderFlatTexturedSkin.iSubclass = FudgeCore.Shader.registerSubclass(FudgeCore.ShaderFlatTextured);
-    ShaderFlatTexturedSkin.define = [
-        "LIGHT",
-        "FLAT",
-        "TEXTURE",
-        "CAMERA",
-        "SKIN"
-    ];
     FudgeCore.ShaderFlatTexturedSkin = ShaderFlatTexturedSkin;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderGouraud extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraud); }
+        static {
+            this.define = [
+                "LIGHT",
+                "CAMERA"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatRemissive; }
     }
-    ShaderGouraud.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraud);
-    ShaderGouraud.define = [
-        "LIGHT",
-        "CAMERA"
-    ];
     FudgeCore.ShaderGouraud = ShaderGouraud;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderGouraudSkin extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudSkin); }
+        static {
+            this.define = [
+                "LIGHT",
+                "SKIN",
+                "CAMERA"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatRemissive; }
     }
-    ShaderGouraudSkin.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudSkin);
-    ShaderGouraudSkin.define = [
-        "LIGHT",
-        "SKIN",
-        "CAMERA"
-    ];
     FudgeCore.ShaderGouraudSkin = ShaderGouraudSkin;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderGouraudTextured extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudTextured); }
+        static {
+            this.define = [
+                "LIGHT",
+                "TEXTURE",
+                "CAMERA"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatRemissiveTextured; }
     }
-    ShaderGouraudTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudTextured);
-    ShaderGouraudTextured.define = [
-        "LIGHT",
-        "TEXTURE",
-        "CAMERA"
-    ];
     FudgeCore.ShaderGouraudTextured = ShaderGouraudTextured;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderGouraudTexturedSkin extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderGouraudTexturedSkin); }
+        static {
+            this.define = [
+                "LIGHT",
+                "TEXTURE",
+                "CAMERA",
+                "SKIN"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatRemissiveTextured; }
     }
-    ShaderGouraudTexturedSkin.iSubclass = FudgeCore.Shader.registerSubclass(FudgeCore.ShaderGouraudTextured);
-    ShaderGouraudTexturedSkin.define = [
-        "LIGHT",
-        "TEXTURE",
-        "CAMERA",
-        "SKIN"
-    ];
     FudgeCore.ShaderGouraudTexturedSkin = ShaderGouraudTexturedSkin;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderLit extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLit); }
+        static { this.define = []; }
     }
-    ShaderLit.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLit);
-    ShaderLit.define = [];
     FudgeCore.ShaderLit = ShaderLit;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderLitSkin extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLitSkin); }
+        static {
+            this.define = [
+                "SKIN"
+            ];
+        }
     }
-    ShaderLitSkin.iSubclass = FudgeCore.Shader.registerSubclass(FudgeCore.ShaderLit);
-    ShaderLitSkin.define = [
-        "SKIN"
-    ];
     FudgeCore.ShaderLitSkin = ShaderLitSkin;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderLitTextured extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLitTextured); }
+        static {
+            this.define = [
+                "TEXTURE"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatTextured; }
     }
-    ShaderLitTextured.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLitTextured);
-    ShaderLitTextured.define = [
-        "TEXTURE"
-    ];
     FudgeCore.ShaderLitTextured = ShaderLitTextured;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderLitTexturedSkin extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderLitTexturedSkin); }
+        static {
+            this.define = [
+                "TEXTURE",
+                "SKIN"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatTextured; }
     }
-    ShaderLitTexturedSkin.iSubclass = FudgeCore.Shader.registerSubclass(FudgeCore.ShaderLitTextured);
-    ShaderLitTexturedSkin.define = [
-        "TEXTURE",
-        "SKIN"
-    ];
     FudgeCore.ShaderLitTexturedSkin = ShaderLitTexturedSkin;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderMatCap extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderMatCap); }
+        static {
+            this.define = [
+                "MATCAP",
+                "CAMERA"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatTextured; }
     }
-    ShaderMatCap.iSubclass = FudgeCore.Shader.registerSubclass(ShaderMatCap);
-    ShaderMatCap.define = [
-        "MATCAP",
-        "CAMERA"
-    ];
     FudgeCore.ShaderMatCap = ShaderMatCap;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class ShaderParticle extends FudgeCore.Shader {
-        static getCoat() { return FudgeCore.CoatTextured; }
-        static getVertexShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderParticle.vert"], this.define);
-        }
-        static getFragmentShaderSource() {
-            return this.insertDefines(FudgeCore.shaderSources["Source/ShaderParticle.frag"], this.define);
-        }
-    }
-    ShaderParticle.iSubclass = FudgeCore.Shader.registerSubclass(ShaderParticle);
-    ShaderParticle.define = [];
-    FudgeCore.ShaderParticle = ShaderParticle;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
     class ShaderPhong extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderPhong); }
+        static {
+            this.define = [
+                "LIGHT",
+                "CAMERA",
+                "PHONG"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatRemissive; }
         static getFragmentShaderSource() {
             return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
         }
     }
-    ShaderPhong.iSubclass = FudgeCore.Shader.registerSubclass(ShaderPhong);
-    ShaderPhong.define = [
-        "LIGHT",
-        "CAMERA",
-        "PHONG"
-    ];
     FudgeCore.ShaderPhong = ShaderPhong;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderPhongSkin extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderPhongSkin); }
+        static {
+            this.define = [
+                "LIGHT",
+                "CAMERA",
+                "PHONG",
+                "SKIN"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatRemissive; }
         static getFragmentShaderSource() {
             return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
         }
     }
-    ShaderPhongSkin.iSubclass = FudgeCore.Shader.registerSubclass(ShaderPhongSkin);
-    ShaderPhongSkin.define = [
-        "LIGHT",
-        "CAMERA",
-        "PHONG",
-        "SKIN"
-    ];
     FudgeCore.ShaderPhongSkin = ShaderPhongSkin;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderPhongTextured extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderPhongTextured); }
+        static {
+            this.define = [
+                "LIGHT",
+                "CAMERA",
+                "PHONG",
+                "TEXTURE"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatRemissiveTextured; }
         static getFragmentShaderSource() {
             return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
         }
     }
-    ShaderPhongTextured.iSubclass = FudgeCore.Shader.registerSubclass(FudgeCore.ShaderPhong);
-    ShaderPhongTextured.define = [
-        "LIGHT",
-        "CAMERA",
-        "PHONG",
-        "TEXTURE"
-    ];
     FudgeCore.ShaderPhongTextured = ShaderPhongTextured;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderPhongTexturedSkin extends FudgeCore.Shader {
+        static { this.iSubclass = FudgeCore.Shader.registerSubclass(ShaderPhongTexturedSkin); }
+        static {
+            this.define = [
+                "LIGHT",
+                "CAMERA",
+                "PHONG",
+                "TEXTURE",
+                "SKIN"
+            ];
+        }
         static getCoat() { return FudgeCore.CoatRemissiveTextured; }
         static getFragmentShaderSource() {
             return this.insertDefines(FudgeCore.shaderSources["ShaderPhong.frag"], this.define);
         }
     }
-    ShaderPhongTexturedSkin.iSubclass = FudgeCore.Shader.registerSubclass(FudgeCore.ShaderPhong);
-    ShaderPhongTexturedSkin.define = [
-        "LIGHT",
-        "CAMERA",
-        "PHONG",
-        "TEXTURE",
-        "SKIN"
-    ];
     FudgeCore.ShaderPhongTexturedSkin = ShaderPhongTexturedSkin;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderPick extends FudgeCore.Shader {
+        static { this.define = []; }
         static getVertexShaderSource() {
             return this.insertDefines(FudgeCore.shaderSources["ShaderPick.vert"], this.define);
         }
@@ -14216,12 +14264,12 @@ var FudgeCore;
             return this.insertDefines(FudgeCore.shaderSources["ShaderPick.frag"], this.define);
         }
     }
-    ShaderPick.define = [];
     FudgeCore.ShaderPick = ShaderPick;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderPickTextured extends FudgeCore.Shader {
+        static { this.define = []; }
         static getVertexShaderSource() {
             return this.insertDefines(FudgeCore.shaderSources["ShaderPickTextured.vert"], this.define);
         }
@@ -14229,7 +14277,6 @@ var FudgeCore;
             return this.insertDefines(FudgeCore.shaderSources["ShaderPickTextured.frag"], this.define);
         }
     }
-    ShaderPickTextured.define = [];
     FudgeCore.ShaderPickTextured = ShaderPickTextured;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -14248,7 +14295,6 @@ var FudgeCore;
                         delete this.mtxBindInverses[node.name];
                     }
             };
-            this.registerBone(this);
             this.addEventListener("childRemove", this.hndChildRemove);
         }
         addBone(_bone, _parentName, _mtxInit) {
@@ -14263,7 +14309,7 @@ var FudgeCore;
             this.calculateMtxWorld(_bone);
             this.registerBone(_bone);
         }
-        registerBone(_bone, _mtxBindInverse = _bone.mtxWorldInverse) {
+        registerBone(_bone, _mtxBindInverse = _bone.mtxWorldInverse.clone) {
             this.bones[_bone.name] = _bone;
             this.mtxBindInverses[_bone.name] = _mtxBindInverse;
         }
@@ -14309,13 +14355,18 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class SkeletonInstance extends FudgeCore.GraphInstance {
+    var SkeletonInstance_1;
+    let instanceCounter = 0;
+    let SkeletonInstance = SkeletonInstance_1 = class SkeletonInstance extends FudgeCore.GraphInstance {
         #bones;
         #mtxBoneLocals;
-        #mtxBones;
-        #mtxBonesUpdated;
+        constructor(_name = "SkeletonInstance_" + instanceCounter++) {
+            super();
+            this.mtxBones = [];
+            Reflect.set(this, "instacnename", _name);
+        }
         static async CREATE(_skeleton) {
-            const skeleton = new SkeletonInstance();
+            const skeleton = new SkeletonInstance_1();
             await skeleton.set(_skeleton);
             return skeleton;
         }
@@ -14325,36 +14376,25 @@ var FudgeCore;
         get mtxBoneLocals() {
             return this.#mtxBoneLocals;
         }
-        get mtxBones() {
-            if (this.#mtxBonesUpdated != this.timestampUpdate) {
-                this.calculateMtxBones();
-                this.#mtxBonesUpdated = this.timestampUpdate;
-            }
-            return this.#mtxBones;
-        }
+        useRenderBuffer(_shader) { return null; }
+        updateRenderBuffer() { return null; }
+        deleteRenderBuffer() { }
         async set(_skeleton) {
             await super.set(_skeleton);
-            this.skeletonSource = _skeleton;
-            this.registerBones();
         }
         serialize() {
             const serialization = super.serialize();
-            if (this.bindPose) {
-                serialization.bindPose = {};
-                for (const boneName in this.bindPose)
-                    serialization.bindPose[boneName] = this.bindPose[boneName].serialize();
-            }
             return serialization;
         }
         async deserialize(_serialization) {
             await super.deserialize(_serialization);
             this.skeletonSource = FudgeCore.Project.resources[_serialization.idSource || _serialization.idResource];
-            this.registerBones();
-            if (_serialization.bindPose) {
-                this.bindPose = {};
-                for (const boneName in _serialization.bindPose)
-                    this.bindPose[boneName] = await new FudgeCore.Matrix4x4().deserialize(_serialization.bindPose[boneName]);
+            for (const node of this) {
+                const cmpMesh = node.getComponent(FudgeCore.ComponentMesh);
+                if (cmpMesh?.skeleton)
+                    cmpMesh.skeleton = this;
             }
+            this.registerBones();
             return this;
         }
         resetPose() {
@@ -14364,24 +14404,19 @@ var FudgeCore;
         applyAnimation(_mutator) {
             super.applyAnimation(_mutator);
             if (_mutator.mtxBoneLocals)
-                for (const boneName in _mutator.mtxBoneLocals) {
-                    const mtxMutator = _mutator.mtxBoneLocals[boneName];
-                    if (mtxMutator.rotation?.w != undefined) {
-                        mtxMutator.rotation = new FudgeCore.PhysicsQuaternion(mtxMutator.rotation.x, mtxMutator.rotation.y, mtxMutator.rotation.z, mtxMutator.rotation.w).toDegrees();
-                    }
-                    this.mtxBoneLocals[boneName]?.mutate(mtxMutator);
-                }
+                for (const boneName in _mutator.mtxBoneLocals)
+                    this.mtxBoneLocals[boneName]?.mutate(_mutator.mtxBoneLocals[boneName]);
             if (_mutator.bones)
                 for (const boneName in _mutator.bones)
                     this.bones[boneName]?.applyAnimation(_mutator.bones[boneName]);
         }
         calculateMtxBones() {
-            this.#mtxBones = [];
+            for (const mtxBone of this.mtxBones)
+                FudgeCore.Recycler.store(mtxBone);
+            this.mtxBones.length = 0;
             for (const boneName in this.bones) {
-                const mtxBone = this.getParent()?.mtxWorldInverse.clone || FudgeCore.Matrix4x4.IDENTITY();
-                mtxBone.multiply(this.bones[boneName].mtxWorld);
-                mtxBone.multiply(this.skeletonSource.mtxBindInverses[boneName]);
-                this.#mtxBones.push(mtxBone);
+                const mtxBone = FudgeCore.Matrix4x4.MULTIPLICATION(this.bones[boneName].mtxWorld, this.skeletonSource.mtxBindInverses[boneName]);
+                this.mtxBones.push(mtxBone);
             }
         }
         registerBones() {
@@ -14393,7 +14428,10 @@ var FudgeCore;
                     this.mtxBoneLocals[node.name] = node.mtxLocal;
                 }
         }
-    }
+    };
+    SkeletonInstance = SkeletonInstance_1 = __decorate([
+        FudgeCore.RenderInjectorSkeletonInstance.decorate
+    ], SkeletonInstance);
     FudgeCore.SkeletonInstance = SkeletonInstance;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -14412,8 +14450,9 @@ var FudgeCore;
             this.name = _name;
         }
         useRenderData() { }
+        deleteRenderData() { }
         refresh() {
-            this.renderData = null;
+            this.deleteRenderData();
         }
         serialize() {
             let serialization = {
@@ -14437,6 +14476,7 @@ var FudgeCore;
         }
         reduceMutator(_mutator) {
             delete _mutator.idResource;
+            delete _mutator.renderData;
         }
     };
     Texture = __decorate([
@@ -14459,12 +14499,12 @@ var FudgeCore;
         async load(_url) {
             this.url = _url;
             this.image = new Image();
-            return new Promise((resolve, reject) => {
+            return new Promise((_resolve, _reject) => {
                 this.image.addEventListener("load", () => {
                     this.renderData = null;
-                    resolve();
+                    _resolve();
                 });
-                this.image.addEventListener("error", () => reject());
+                this.image.addEventListener("error", () => _reject());
                 this.image.src = new URL(this.url.toString(), FudgeCore.Project.baseURL).toString();
             });
         }
@@ -14526,11 +14566,11 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class TextureDefault extends FudgeCore.TextureBase64 {
+        static { this.texture = new TextureDefault("TextureDefault", TextureDefault.get(), FudgeCore.MIPMAP.MEDIUM); }
         static get() {
             return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAACAvzbMAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAADWLSURBVHhe7d0HnFTlvf/xH9uXZYGl9yrSRJpEUexYsJIba8Re498WNcZEb+41epOIsWs0Niyxm2g0duwaewO7oqJCAGnSt7H/8304B4dldpk5Z3b3zO7nzeu85pwzM8vMs7PPb35PO61qPBZjrVq18vfiKebFR/lFRPlFQ/lFE/fyy/FvAQBICwEEABAKAQQAEAp9IBHRhhoN5RcN5RdNSyg//YzCwkJr3bq1O169erXbMoEAEhF/wNFQftFQftE09/LLzc21Ll262E9+8hMbP368VVdX2+uvv27Tp093QSTq+yeARMQfcDSUXzSUXzTNtfxycnKspKTEBg0aZEceeaQdeuihtmLFCvvss89s3rx59vjjj9vDDz8cOROJHECqqqps9uzZtmzZMlu5cqVLldq1a2d9+/Z1+1HxAYyG8ouG8ouG8osmTPnl5+db9+7dbffdd7dTTz3V1cXvvvuuvfzyyy4DkVWrVtmNN95oS5YsccdhhQ4g5eXl9uyzz9qMGTNszZo1/tkfKQIq+u29995WWlrqn00fH8BoKL9oKL9oKL9o0ik/PbZNmza2xRZb2HHHHWeTJ0+2hQsX2pNPPmmLFy/2H7XOf/7zH7v11ltdPR5FqACyYMECu+eee1KKXmvXrrX99tvPRo8e7YJKuvgARkP5RROUnz67+iKUl5dnlZWVtnz58li8dj5/0TSn8lOT1b777msXXHCBde7c2V577TV78803k77Hb7/91u644w6rqKjwz4STdgBRtqHUJ4hoChCffPKJffXVV649rX379jZgwAC3BZQuTZo0ybbbbjuXXqWDD2A0lF80Qfl17NjRjjnmGOvUqZN988039sADD7gvUk39+vn8RdOcyq9r1642depU23rrre3RRx91X3JEdbSasIqLi23YsGHuXKYCSNopgXrvg+Ch/o/77rvPvVi9+J///Od29NFH29ChQ90LDGj4mNIlBZm4/8LQssycOdM1xb766qtJm2JF2UfPnj3t17/+tU2YMMF23XVXO/bYY11QQfM1f/58u+mmm1zfgfp44071sV6zPstB8FA9rC/8Tz31lOsXybS0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";
         }
     }
-    TextureDefault.texture = new TextureDefault("TextureDefault", TextureDefault.get(), FudgeCore.MIPMAP.MEDIUM);
     FudgeCore.TextureDefault = TextureDefault;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -14543,6 +14583,22 @@ var FudgeCore;
         LOOP_MODE["TIME_REAL"] = "timeReal";
     })(LOOP_MODE = FudgeCore.LOOP_MODE || (FudgeCore.LOOP_MODE = {}));
     class Loop extends FudgeCore.EventTargetStatic {
+        static { this.ƒTimeStartGame = 0; }
+        static { this.ƒTimeStartReal = 0; }
+        static { this.ƒTimeFrameGame = 0; }
+        static { this.ƒTimeFrameReal = 0; }
+        static { this.ƒTimeFrameStartGame = 0; }
+        static { this.ƒTimeFrameStartReal = 0; }
+        static { this.ƒTimeLastFrameGameAvg = 0; }
+        static { this.ƒTimeLastFrameRealAvg = 0; }
+        static { this.ƒFrames = 0; }
+        static { this.running = false; }
+        static { this.mode = LOOP_MODE.FRAME_REQUEST; }
+        static { this.idIntervall = 0; }
+        static { this.idRequest = 0; }
+        static { this.fpsDesired = 30; }
+        static { this.framesToAverage = 30; }
+        static { this.syncWithAnimationFrame = false; }
         static get timeStartGame() { return Loop.ƒTimeStartGame; }
         static get timeStartReal() { return Loop.ƒTimeStartReal; }
         static get timeFrameGame() { return Loop.ƒTimeFrameGame; }
@@ -14647,27 +14703,12 @@ var FudgeCore;
                 Loop.loop();
         }
     }
-    Loop.ƒTimeStartGame = 0;
-    Loop.ƒTimeStartReal = 0;
-    Loop.ƒTimeFrameGame = 0;
-    Loop.ƒTimeFrameReal = 0;
-    Loop.ƒTimeFrameStartGame = 0;
-    Loop.ƒTimeFrameStartReal = 0;
-    Loop.ƒTimeLastFrameGameAvg = 0;
-    Loop.ƒTimeLastFrameRealAvg = 0;
-    Loop.ƒFrames = 0;
-    Loop.running = false;
-    Loop.mode = LOOP_MODE.FRAME_REQUEST;
-    Loop.idIntervall = 0;
-    Loop.idRequest = 0;
-    Loop.fpsDesired = 30;
-    Loop.framesToAverage = 30;
-    Loop.syncWithAnimationFrame = false;
     FudgeCore.Loop = Loop;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Time extends FudgeCore.EventTargetUnified {
+        static { this.game = new Time(); }
         constructor() {
             super();
             this.timers = {};
@@ -14776,7 +14817,6 @@ var FudgeCore;
             }
         }
     }
-    Time.game = new Time();
     FudgeCore.Time = Time;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;

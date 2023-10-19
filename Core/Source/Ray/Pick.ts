@@ -13,7 +13,7 @@ namespace FudgeCore {
     #posWorld: Vector3;
     #posMesh: Vector3;
 
-    constructor(_node: Node) {
+    public constructor(_node: Node) {
       this.node = _node;
     }
 

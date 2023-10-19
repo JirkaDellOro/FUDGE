@@ -7,13 +7,18 @@ namespace FudgeCore {
     * @authors Matthias Roming, HFU, 2023 | Marko Fehrenbach, HFU, 2020 | Jonas Plotzky, HFU, 2023
     */
   export class Quaternion extends Mutable implements Serializable, Recycable {
-    private data: Float32Array = new Float32Array(4); // The data of the quaternion (x, y, z, w).
+    public x: number;
+    public y: number;
+    public z: number;
+    public w: number;
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
-    #eulerAngles: Vector3 = null; // euler angle representation of this quaternion in degrees.
+    
+    readonly #eulerAngles: Vector3 = Vector3.ZERO(); // euler angle representation of this quaternion in degrees.
+    #eulerAnglesDirty: boolean;
 
     public constructor(_x: number = 0, _y: number = 0, _z: number = 0, _w: number = 1) {
       super();
-      this.data.set([_x, _y, _z, _w]);
+      this.set(_x, _y, _z, _w);
     }
 
     //#region STATICS
@@ -25,10 +30,17 @@ namespace FudgeCore {
       return result;
     }
 
+    public static NORMALIZATION(_q: Quaternion): Quaternion {
+      const result: Quaternion = _q.clone;
+      result.normalize();
+      return result;
+    }
+
     /**
-     * Constructs a new quaternion from the euler angles given
+     * Returns a quaternion that rotates coordinates when multiplied by, using the angles given.
+     * Rotation occurs around the axis in the order Z-Y-X.
      */
-    public static FROM_EULER_ANGLES(_eulerAngles: Vector3, _order: string = "ZYX"): Quaternion {
+    public static ROTATION(_eulerAngles: Vector3): Quaternion {
       const result: Quaternion = Recycler.get(Quaternion);
       result.eulerAngles = _eulerAngles;
       return result;
@@ -36,8 +48,8 @@ namespace FudgeCore {
 
     /**
      * Computes and returns the product of two passed quaternions.
-     * @param _mtxLeft The matrix to multiply.
-     * @param _mtxRight The matrix to multiply by.
+     * @param _mtxLeft The quaternion to multiply.
+     * @param _mtxRight The quaternion to multiply by.
      */
     public static MULTIPLICATION(_qLeft: Quaternion, _qRight: Quaternion): Quaternion {
       const result: Quaternion = _qLeft.clone;
@@ -66,74 +78,68 @@ namespace FudgeCore {
     }
 
     /**
-     * Experimental: Creates and returns a vector through transformation of the given vector by the given quaternion
+     * Returns the dot product of two quaternions.
      */
-    public static TRANSFORM_VECTOR(_v: Vector3, _q: Quaternion): Vector3 {
-      // changed axis order might not be necessary, needs testing
-      const v: Quaternion = Recycler.get(Quaternion);
-      v.set([0, _v.z, _v.x, _v.y]);
-      v.multiply(_q, true);
-      v.multiply(this.CONJUGATION(_q));
+    public static DOT(_q1: Quaternion, _q2: Quaternion): number {
+      return _q1.x * _q2.x + _q1.y * _q2.y + _q1.z * _q2.z + _q1.w * _q2.w;
+    }
 
-      const result: Vector3 = Recycler.get(Vector3);
-      result.set(v.data[2], v.data[3], v.data[1]);
+    /**
+     * Returns the normalized linear interpolation between two quaternions based on the given _factor. When _factor is 0 the result is _from, when _factor is 1 the result is _to.
+     */
+    public static LERP(_from: Quaternion, _to: Quaternion, _factor: number): Quaternion {
+      let result: Quaternion = Recycler.get(Quaternion);
+      result.set(
+        (_from.x * (1 - _factor) + _to.x * _factor),
+        (_from.y * (1 - _factor) + _to.y * _factor),
+        (_from.z * (1 - _factor) + _to.z * _factor),
+        (_from.w * (1 - _factor) + _to.w * _factor)
+      );
+      result.normalize();
       return result;
     }
 
     /**
-     * Experimental: Converts the quaternion to a Matrix4x4
+     * Returns the spherical linear interpolation between two quaternions based on the given _factor. When _factor is 0 the result is _from, when _factor is 1 the result is _to. 
      */
-    public static QUATERNION_TO_MATRIX(_q: Quaternion): Matrix4x4 {
-      const x: number = _q.data[0], y: number = _q.data[1], z: number = _q.data[2], w: number = _q.data[3];
-      // From: https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm
-      const xx: number = x * x, xy: number = x * y, xz: number = x * z, xw: number = x * w;
-      const yy: number = y * y, yz: number = y * z, yw: number = y * w;
-      const zz: number = z * z, zw: number = z * w;
+    public static SLERP(_from: Quaternion, _to: Quaternion, _factor: number): Quaternion {
+      // From: https://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/
+      let cosHalfTheta: number = _from.w * _to.w + _from.x * _to.x + _from.y * _to.y + _from.z * _to.z;
+      if (Math.abs(cosHalfTheta) >= 1)
+        return _from;
+      let halfTheta: number = Math.acos(cosHalfTheta);
+      let sinHalfTheta: number = Math.sqrt(1 - cosHalfTheta * cosHalfTheta);
+      if (Math.abs(sinHalfTheta) < 0.001) {
+        let result: Quaternion = Recycler.get(Quaternion);
+        result.set(
+          (_from.x * 0.5 + _to.x * 0.5),
+          (_from.y * 0.5 + _to.y * 0.5),
+          (_from.z * 0.5 + _to.z * 0.5),
+          (_from.w * 0.5 + _to.w * 0.5)
+        );
+        return result;
+      }
+      let ratioA: number = Math.sin((1 - _factor) * halfTheta) / sinHalfTheta;
+      let ratioB: number = Math.sin(_factor * halfTheta) / sinHalfTheta;
+      let result: Quaternion = Recycler.get(Quaternion);
+      result.set(
+        (_from.x * ratioA + _to.x * ratioB),
+        (_from.y * ratioA + _to.y * ratioB),
+        (_from.z * ratioA + _to.z * ratioB),
+        (_from.w * ratioA + _to.w * ratioB)
+      );
 
-      const result: Matrix4x4 = Recycler.get(Matrix4x4);
-      result.set([
-        1 - 2 * (yy + zz), 2 * (xy - zw), 2 * (xz + yw), 0,
-        2 * (xy + zw), 1 - 2 * (xx + zz), 2 * (yz - xw), 0,
-        2 * (xz - yw), 2 * (yz + xw), 1 - 2 * (xx + yy), 0,
-        0, 0, 0, 1
-      ]);
       return result;
     }
+
     //#endregion
-
-    public get x(): number {
-      return this.data[0];
-    }
-    public get y(): number {
-      return this.data[1];
-    }
-    public get z(): number {
-      return this.data[2];
-    }
-    public get w(): number {
-      return this.data[3];
-    }
-
-    // TODO: reset cache when setting x,y,z,w ?
-    public set x(_x: number) {
-      this.data[0] = _x;
-    }
-    public set y(_y: number) {
-      this.data[1] = _y;
-    }
-    public set z(_z: number) {
-      this.data[2] = _z;
-    }
-    public set w(_w: number) {
-      this.data[3] = _w;
-    }
 
     /**
      * Return a copy of this
      */
     public get clone(): Quaternion {
       let result: Quaternion = Recycler.get(Quaternion);
-      result.set(this);
+      result.set(this.x, this.y, this.z, this.w);
       return result;
     }
 
@@ -142,8 +148,13 @@ namespace FudgeCore {
      * - set: set the euler angle representation of the rotation in degrees.
      */
     public get eulerAngles(): Vector3 {
-      if (!this.#eulerAngles) {
-        this.#eulerAngles = Recycler.get(Vector3);
+      if (this.#eulerAnglesDirty) {
+        this.#eulerAnglesDirty = false;
+
+        if (this.x == 0 && this.y == 0 && this.z == 0 && this.w == 1) {
+          this.#eulerAngles.set(0, 0, 0);
+          return this.#eulerAngles;
+        }
 
         // roll (x-axis rotation)
         let sinrcosp: number = 2 * (this.w * this.x + this.y * this.z);
@@ -167,37 +178,56 @@ namespace FudgeCore {
 
       return this.#eulerAngles;
     }
-    
-    public set eulerAngles(_eulerAngles: Vector3) {
-      _eulerAngles.scale(Calc.deg2rad);
-      const cosX: number = Math.cos(_eulerAngles.x / 2);
-      const cosY: number = Math.cos(_eulerAngles.y / 2);
-      const cosZ: number = Math.cos(_eulerAngles.z / 2);
-      const sinX: number = Math.sin(_eulerAngles.x / 2);
-      const sinY: number = Math.sin(_eulerAngles.y / 2);
-      const sinZ: number = Math.sin(_eulerAngles.z / 2);
 
-      this.set([
+    public set eulerAngles(_eulerAngles: Vector3) {
+      const halfAnglesInRadians: Vector3 = Vector3.SCALE(_eulerAngles, Calc.deg2rad / 2);
+      const cosX: number = Math.cos(halfAnglesInRadians.x);
+      const cosY: number = Math.cos(halfAnglesInRadians.y);
+      const cosZ: number = Math.cos(halfAnglesInRadians.z);
+      const sinX: number = Math.sin(halfAnglesInRadians.x);
+      const sinY: number = Math.sin(halfAnglesInRadians.y);
+      const sinZ: number = Math.sin(halfAnglesInRadians.z);
+
+      this.set(
         sinX * cosY * cosZ - cosX * sinY * sinZ,
         cosX * sinY * cosZ + sinX * cosY * sinZ,
         cosX * cosY * sinZ - sinX * sinY * cosZ,
         cosX * cosY * cosZ + sinX * sinY * sinZ
-      ]);
+      );
+
+      this.#eulerAnglesDirty = false;
+    }
+
+    /**
+     * Normalizes this quaternion to a length of 1 (a unit quaternion) making it a valid rotation representation
+     */
+    public normalize(): Quaternion {
+      let length: number = Math.sqrt(this.x ** 2 + this.y ** 2 + this.z ** 2 + this.w ** 2);
+      this.x /= length;
+      this.y /= length;
+      this.z /= length;
+      this.w /= length;
+      this.resetCache();
+      return this;
+    }
+
+    /**
+     * Negate this quaternion and returns it
+     */
+    public negate(): Quaternion {
+      this.x *= -1;
+      this.y *= -1;
+      this.z *= -1;
+      this.w *= -1;
+      this.resetCache();
+      return this;
     }
 
     /**
      * Resets the quaternion to the identity-quaternion and clears cache. Used by the recycler to reset.
      */
     public recycle(): void {
-      this.data.set([0, 0, 0, 1]);
-      this.resetCache();
-    }
-
-    /**
-     * Resets the quaternion to the identity-quaternion and clears cache.
-     */
-    public reset(): void {
-      this.recycle();
+      this.set(0, 0, 0, 1);
     }
 
     /**
@@ -209,13 +239,14 @@ namespace FudgeCore {
     }
 
     /**
-     * Conjugate this quaternion
+     * Conjugates this quaternion and returns it
      */
-    public conjugate(): void {
-      this.data[0] *= -1;
-      this.data[1] *= -1;
-      this.data[2] *= -1;
+    public conjugate(): Quaternion {
+      this.x *= -1;
+      this.y *= -1;
+      this.z *= -1;
       this.resetCache();
+      return this;
     }
 
     /**
@@ -225,75 +256,71 @@ namespace FudgeCore {
       const a: Quaternion = _fromLeft ? _other : this;
       const b: Quaternion = _fromLeft ? this : _other;
       // from: http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
-      const ax: number = a.data[0];
-      const ay: number = a.data[1];
-      const az: number = a.data[2];
-      const aw: number = a.data[3];
-      const bx: number = b.data[0];
-      const by: number = b.data[1];
-      const bz: number = b.data[2];
-      const bw: number = b.data[3];
+      const ax: number = a.x;
+      const ay: number = a.y;
+      const az: number = a.z;
+      const aw: number = a.w;
+      const bx: number = b.x;
+      const by: number = b.y;
+      const bz: number = b.z;
+      const bw: number = b.w;
 
-      this.set([
+      this.set(
         ax * bw + ay * bz - az * by + aw * bx,
         -ax * bz + ay * bw + az * bx + aw * by,
         ax * by - ay * bx + az * bw + aw * bz,
         -ax * bx - ay * by - az * bz + aw * bw
-      ]);
+      );
     }
 
     /**
      * Sets the elements of this quaternion to the values of the given quaternion
      */
-    public set(_qTo: Quaternion | ArrayLike<number>): void {
-      if (_qTo instanceof Quaternion)
-        this.data.set(_qTo.data);
-      else
-        this.data.set(_qTo);
+    public set(_x: number, _y: number, _z: number, _w: number): void {
+      this.x = _x; this.y = _y; this.z = _z; this.w = _w;
       this.resetCache();
     }
 
-    public toString(): string {
-      return `ƒ.Quaternion(x: ${this.data[0]}, y: ${this.data[1]}, z: ${this.data[2]}, w: ${this.data[3]})`;
-    }
-
     /**
-     * Return the elements of this quaternion as a Float32Array
+     * Returns a formatted string representation of this quaternion
      */
-    public get(): Float32Array {
-      // TODO: optimization, it shouldn"t always return a copy, since this bloats memory
-      return new Float32Array(this.data);
+    public toString(): string {
+      return `ƒ.Quaternion(x: ${this.x}, y: ${this.y}, z: ${this.z}, w: ${this.w})`;
     }
 
+    // currently quaternions are never serialized, so this is not needed. But maybe it will be in the future.
     public serialize(): Serialization {
-      return this.getMutator();
+      let serialization: Serialization = this.getMutator();
+      serialization.toJSON = () => { return `[${this.x}, ${this.y}, ${this.z}, ${this.w}]`; };
+      return serialization;
     }
 
-    public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.mutate(_serialization);
+    public async deserialize(_serialization: Serialization): Promise<Quaternion> {
+      if (typeof (_serialization) == "string") {
+        [this.x, this.y, this.z, this.w] = JSON.parse(<string><unknown>_serialization);
+      } else
+        this.mutate(_serialization);
       return this;
     }
 
     public getMutator(): Mutator {
       if (!this.mutator)
-        this.mutator = {
-          x: this.data[0], y: this.data[1], z: this.data[2], w: this.data[3]
-        };
+        this.mutator = { x: this.x, y: this.y, z: this.z, w: this.w };
       return this.mutator;
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.data[0] = _mutator.x;
-      this.data[1] = _mutator.y;
-      this.data[2] = _mutator.z;
-      this.data[3] = _mutator.w;
+      this.x = _mutator.x ?? this.x;
+      this.y = _mutator.y ?? this.y;
+      this.z = _mutator.z ?? this.z;
+      this.w = _mutator.w ?? this.w;
       this.resetCache();
     }
 
     protected reduceMutator(_mutator: Mutator): void {/** */ }
 
     private resetCache(): void {
-      this.#eulerAngles = null;
+      this.#eulerAnglesDirty = true;
       this.mutator = null;
     }
   }

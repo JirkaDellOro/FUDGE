@@ -4,7 +4,7 @@ namespace TreeControl {
   /**
   * Extension of ul-element that builds a tree structure with interactive controls from an array of type [[TreeItem]]
   *  
-  * ```plaintext
+  * ```text
   * treeList <ul>
   * ├ treeItem <li>
   * ├ treeItem <li>
@@ -56,8 +56,7 @@ namespace TreeControl {
           if (!found.hasChildren)
             found.open(false);
           items.push(found);
-        }
-        else
+        } else
           items.push(item);
       }
 

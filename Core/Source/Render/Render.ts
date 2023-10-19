@@ -11,11 +11,12 @@ namespace FudgeCore {
   export abstract class Render extends RenderWebGL {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
     public static pickBuffer: Int32Array;
-    public static nodesPhysics: RecycableArray<Node> = new RecycableArray();
-    public static componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
-    public static lights: MapLightTypeToLightList = new Map();
-    private static nodesSimple: RecycableArray<Node> = new RecycableArray();
-    private static nodesAlpha: RecycableArray<Node> = new RecycableArray();
+    public static readonly nodesPhysics: RecycableArray<Node> = new RecycableArray();
+    public static readonly componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
+    public static readonly lights: MapLightTypeToLightList = new Map();
+    private static readonly nodesSimple: RecycableArray<Node> = new RecycableArray();
+    private static readonly nodesAlpha: RecycableArray<Node> = new RecycableArray();
+    private static readonly componentsSkeleton: RecycableArray<ComponentSkeleton> = new RecycableArray();
     private static timestampUpdate: number;
 
     // TODO: research if picking should be optimized using radius picking to filter
@@ -35,6 +36,7 @@ namespace FudgeCore {
         Render.nodesAlpha.reset();
         Render.nodesPhysics.reset();
         Render.componentsPick.reset();
+        Render.componentsSkeleton.reset();
         Render.lights.forEach(_array => _array.reset());
         _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
       }
@@ -55,7 +57,6 @@ namespace FudgeCore {
       } else
         _branch.mtxWorld.set(_mtxWorld); // overwrite readonly mtxWorld of the current node
 
-
       let cmpRigidbody: ComponentRigidbody = _branch.getComponent(ComponentRigidbody);
       if (cmpRigidbody && cmpRigidbody.isActive) { //TODO: support de-/activation throughout
         Render.nodesPhysics.push(_branch); // add this node to physics list
@@ -63,12 +64,10 @@ namespace FudgeCore {
           this.transformByPhysics(_branch, cmpRigidbody);
       }
 
-
       let cmpPick: ComponentPick = _branch.getComponent(ComponentPick);
       if (cmpPick && cmpPick.isActive) {
         Render.componentsPick.push(cmpPick); // add this component to pick list
       }
-
 
       let cmpLights: ComponentLight[] = _branch.getComponents(ComponentLight);
       Render.addLights(cmpLights);
@@ -93,6 +92,11 @@ namespace FudgeCore {
           Render.nodesSimple.push(_branch); // add this node to render list
       }
 
+      let cmpSkeletons: ComponentSkeleton[] = _branch.getComponents(ComponentSkeleton);
+      for (let cmpSkeleton of cmpSkeletons) 
+        if (cmpSkeleton && cmpSkeleton.isActive)
+          Render.componentsSkeleton.push(cmpSkeleton);
+
       for (let child of _branch.getChildren()) {
         Render.prepare(child, _options, _branch.mtxWorld, _shadersUsed);
 
@@ -105,11 +109,19 @@ namespace FudgeCore {
       }
 
       if (firstLevel) {
+        for (const cmpSkeleton of Render.componentsSkeleton) {
+          cmpSkeleton.update();
+          cmpSkeleton.updateRenderBuffer();
+        }
+
         _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
-        Render.fillLightsUBO(Render.lights);
+        Render.updateLightsUBO(Render.lights);
       }
     }
 
+    /**
+     * Add the given lights to the {@link Render.lights}-map, sorted by type.
+     */
     public static addLights(_cmpLights: ComponentLight[]): void {
       for (let cmpLight of _cmpLights) {
         if (!cmpLight.isActive)
@@ -157,12 +169,14 @@ namespace FudgeCore {
     //#endregion
 
     //#region Drawing
+    /**
+     * Draws the scene from the point of view of the given camera
+     */
     public static draw(_cmpCamera: ComponentCamera): void {
       _cmpCamera.resetWorldToView();
       Render.drawList(_cmpCamera, this.nodesSimple);
       Render.drawListAlpha(_cmpCamera);
     }
-
 
     private static drawListAlpha(_cmpCamera: ComponentCamera): void {
       function sort(_a: Node, _b: Node): number {
@@ -204,8 +218,7 @@ namespace FudgeCore {
       }
 
       let mtxWorld: Matrix4x4 = Matrix4x4.CONSTRUCTION(
-        { translation: _cmpRigidbody.getPosition(), rotation: _cmpRigidbody.getRotation(), scaling: null }
-      );
+        _cmpRigidbody.getPosition(), _cmpRigidbody.getRotation(), null);
       mtxWorld.multiply(_cmpRigidbody.mtxPivotInverse);
       _node.mtxWorld.translation = mtxWorld.translation;
       _node.mtxWorld.rotation = mtxWorld.rotation;

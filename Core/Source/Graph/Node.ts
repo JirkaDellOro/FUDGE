@@ -17,9 +17,6 @@ namespace FudgeCore {
     /** The radius of the bounding sphere in world dimensions enclosing the geometry of this node and all successors in the branch */
     public radius: number = 0;
 
-    #mtxWorldInverseUpdated: number;
-    #mtxWorldInverse: Matrix4x4;
-
     private parent: Node | null = null; // The parent of this node.
     private children: Node[] = []; // array of child nodes appended to this node.
     private components: MapClassToComponents = {};
@@ -29,6 +26,8 @@ namespace FudgeCore {
     private captures: MapEventTypeToListener = {};
     private active: boolean = true;
 
+    #mtxWorldInverseUpdated: number;
+    #mtxWorldInverse: Matrix4x4;
 
     /**
      * Creates a new node with a name and initializes all attributes
@@ -36,6 +35,58 @@ namespace FudgeCore {
     public constructor(_name: string) {
       super();
       this.name = _name;
+    }
+
+    /**
+     * Return the mutator path string to get from one node to another or null if no path is found e.g.:
+     * ```typescript
+     * "node/parent/children/1/components/ComponentSkeleton/0"
+     * ```
+     */
+    public static PATH_FROM_TO(_from: Node | Component, _to: Node | Component): string | null {
+      const from: Node = _from instanceof Component ? _from.node : _from;
+      const to: Node = _to instanceof Component ? _to.node : _to;
+      if (!from || !to)
+        return null;
+
+      // find paths to lowest common ancestor
+      let pathFrom: Node[] = from.getPath();
+      let pathTo: Node[] = to.getPath();
+      let ancestor: Node = null;
+      while (pathFrom.length && pathTo.length && pathFrom[0] == pathTo[0]) {
+        ancestor = pathFrom.shift();
+        pathTo.shift();
+      }
+      pathTo.unshift(ancestor);
+
+      if (!ancestor)
+        return null;
+
+      // create relative path
+      let pathToAncestor: string[] = pathFrom.map(_node => "parent"); // TODO: use "keyof Node" as type
+      let pathFromAncestor: string[] = pathTo
+        .flatMap((_node, _index, _array) => ["children", _node.findChild(_array[_index + 1]).toString()])
+        .slice(0, -2);
+
+      if (_from instanceof Component)
+        pathToAncestor.unshift("node");
+      if (_to instanceof Component)
+        pathFromAncestor.push("components", _to.type, to.components[_to.type].indexOf(_to).toString());
+
+      return pathToAncestor.concat(pathFromAncestor).join("/"); // TODO: or maybe validate this string with node and component objects?
+    }
+
+    /**
+     * Return the {@link Node} or {@link Component} found at the given path starting from the given node or undefined if not found
+     */
+    public static FIND(_from: Node | Component, _path: string): Node | Component {
+      let path: string[] = _path.split("/");
+      let to: General = _from;
+
+      while (path.length && to)
+        to = Reflect.get(to, path.shift());
+
+      return to;
     }
 
     public get isActive(): boolean {
@@ -46,7 +97,7 @@ namespace FudgeCore {
      * Shortcut to retrieve this nodes {@link ComponentTransform}
      */
     public get cmpTransform(): ComponentTransform {
-      return <ComponentTransform>this.getComponents(ComponentTransform)[0];
+      return <ComponentTransform>this.getComponents(ComponentTransform)?.[0];
     }
 
     /**
@@ -54,7 +105,7 @@ namespace FudgeCore {
      * Fails if no {@link ComponentTransform} is attached
      */
     public get mtxLocal(): Matrix4x4 {
-      return this.cmpTransform.mtxLocal;
+      return this.cmpTransform?.mtxLocal;
     }
 
     public get mtxWorldInverse(): Matrix4x4 {
@@ -84,10 +135,16 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * Returns an iterator over this node and all its descendants in the graph below
+     */
     public [Symbol.iterator](): IterableIterator<Node> {
       return this.getIterator();
     }
 
+    /**
+     * De- / Activate this node. Inactive nodes will not be processed by the renderer.
+     */
     public activate(_on: boolean): void {
       this.active = _on;
       this.dispatchEvent(new Event(_on ? EVENT.NODE_ACTIVATE : EVENT.NODE_DEACTIVATE, { bubbles: true }));
@@ -123,7 +180,6 @@ namespace FudgeCore {
       return path;
     }
 
-
     /**
      * Returns child at the given index in the list of children
      */
@@ -151,7 +207,7 @@ namespace FudgeCore {
      * Simply calls {@link addChild}. This reference is here solely because appendChild is the equivalent method in DOM.
      * See and preferably use {@link addChild}
      */
-    // tslint:disable-next-line: member-ordering
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     public readonly appendChild: (_child: Node) => void = this.addChild;
 
     /**
@@ -239,11 +295,16 @@ namespace FudgeCore {
       return true;
     }
 
-
+    /**
+     * Returns true if the given timestamp matches the last update timestamp this node underwent, else false
+     */
     public isUpdated(_timestampUpdate: number): boolean {
       return (this.timestampUpdate == _timestampUpdate);
     }
 
+    /** 
+     * Returns true if this node is a descendant of the given node, directly or indirectly, else false
+     */
     public isDescendantOf(_ancestor: Node): boolean {
       let node: Node = this;
       while (node && node != _ancestor)
@@ -319,11 +380,10 @@ namespace FudgeCore {
       let cmpList: Component[] = this.components[_component.type];
       if (cmpList === undefined)
         this.components[_component.type] = [_component];
+      else if (cmpList.length && _component.isSingleton)
+        throw new Error(`Component ${_component.type} is marked singleton and can't be attached, no more than one allowed`);
       else
-        if (cmpList.length && _component.isSingleton)
-          throw new Error(`Component ${_component.type} is marked singleton and can't be attached, no more than one allowed`);
-        else
-          cmpList.push(_component);
+        cmpList.push(_component);
 
       _component.attachToNode(this);
       _component.dispatchEvent(new Event(EVENT.COMPONENT_ADD));
@@ -403,6 +463,16 @@ namespace FudgeCore {
       this.dispatchEvent(new Event(EVENT.NODE_DESERIALIZED));
       for (let component of this.getAllComponents())
         component.dispatchEvent(new Event(EVENT.NODE_DESERIALIZED));
+
+      // TODO: consider if this is a good idea
+      // const hndGraphDeserialized: EventListenerUnified = () => {
+      //   for (let component of this.getAllComponents())
+      //     component.dispatchEvent(new Event(EVENT.GRAPH_DESERIALIZED, { bubbles: false }));
+      //   this.removeEventListener(EVENT.GRAPH_DESERIALIZED, hndGraphDeserialized, true);
+      //   this.removeEventListener(EVENT.GRAPH_INSTANTIATED, hndGraphDeserialized, true);
+      // };
+      // this.addEventListener(EVENT.GRAPH_DESERIALIZED, hndGraphDeserialized, true);
+      // this.addEventListener(EVENT.GRAPH_INSTANTIATED, hndGraphDeserialized, true);
 
       this.activate(_serialization.active);
       return this;

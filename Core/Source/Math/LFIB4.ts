@@ -4,10 +4,10 @@ namespace FudgeCore {
   export function Mash(): Function {
     let n: number = 0xefc8249d;
 
-    let mash: Function = function (data: string | number): number {
-      data = data.toString();
-      for (let i: number = 0; i < data.length; i++) {
-        n += data.charCodeAt(i);
+    let mash: Function = function (_data: string | number): number {
+      _data = _data.toString();
+      for (let i: number = 0; i < _data.length; i++) {
+        n += _data.charCodeAt(i);
         let h: number = 0.02519603282416938 * n;
         n = h >>> 0;
         h -= n;

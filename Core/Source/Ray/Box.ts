@@ -6,7 +6,7 @@ namespace FudgeCore {
     public min: Vector3;
     public max: Vector3;
 
-    constructor(_min: Vector3 = Vector3.ONE(Infinity), _max: Vector3 = Vector3.ONE(-Infinity)) {
+    public constructor(_min: Vector3 = Vector3.ONE(Infinity), _max: Vector3 = Vector3.ONE(-Infinity)) {
       this.set(_min, _max);
     }
 
@@ -26,7 +26,7 @@ namespace FudgeCore {
       this.min.min(_include);
       this.max.max(_include);
     }
-    
+
     public recycle(): void {
       this.min.set(Infinity, Infinity, Infinity);
       this.max.set(-Infinity, -Infinity, -Infinity);

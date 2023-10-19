@@ -1,7 +1,12 @@
-// / <reference path="../Transfer/Serializer.ts"/>
-// / <reference path="../Transfer/Mutable.ts"/>
-
 namespace FudgeCore {
+  
+  export enum ANIMATION_INTERPOLATION {
+    CONSTANT,
+    LINEAR,
+    CUBIC
+  }
+  // type AnimationInterpolation = "constant" | "linear" | "cubic";
+
   /**
    * Holds information about continous points in time their accompanying values as well as their slopes. 
    * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. 
@@ -12,28 +17,25 @@ namespace FudgeCore {
   export class AnimationKey extends Mutable implements Serializable {
     // TODO: check if functionIn can be removed
     /**Don't modify this unless you know what you're doing.*/
-    functionIn: AnimationFunction;
+    public functionIn: AnimationFunction;
     /**Don't modify this unless you know what you're doing.*/
-    functionOut: AnimationFunction;
-    
-    broken: boolean;
+    public functionOut: AnimationFunction;
 
     #time: number;
     #value: number;
-    #constant: boolean = false;
+    #interpolation: ANIMATION_INTERPOLATION;
 
     #slopeIn: number = 0;
     #slopeOut: number = 0;
 
-    constructor(_time: number = 0, _value: number = 0, _slopeIn: number = 0, _slopeOut: number = 0, _constant: boolean = false) {
+    public constructor(_time: number = 0, _value: number = 0, _interpolation: ANIMATION_INTERPOLATION = ANIMATION_INTERPOLATION.CUBIC, _slopeIn: number = 0, _slopeOut: number = 0) {
       super();
       this.#time = _time;
       this.#value = _value;
+      this.#interpolation = _interpolation;
       this.#slopeIn = _slopeIn;
       this.#slopeOut = _slopeOut;
-      this.#constant = _constant;
 
-      this.broken = this.slopeIn != -this.slopeOut;
       this.functionOut = new AnimationFunction(this, null);
     }
 
@@ -47,79 +49,81 @@ namespace FudgeCore {
       return _a.time - _b.time;
     }
 
-    get time(): number {
-      return this.#time; 
+    public get time(): number {
+      return this.#time;
     }
 
-    set time(_time: number) {
+    public set time(_time: number) {
       this.#time = _time;
       this.functionIn.calculate();
       this.functionOut.calculate();
     }
 
-    get value(): number {
+    public get value(): number {
       return this.#value;
     }
 
-    set value(_value: number) {
+    public set value(_value: number) {
       this.#value = _value;
       this.functionIn.calculate();
       this.functionOut.calculate();
     }
-    
-    get constant(): boolean {
-      return this.#constant;
+
+    public get interpolation(): ANIMATION_INTERPOLATION {
+      return this.#interpolation;
     }
 
-    set constant(_constant: boolean) {
-      this.#constant = _constant;
+    public set interpolation(_interpolation: ANIMATION_INTERPOLATION) {
+      this.#interpolation = _interpolation;
       this.functionIn.calculate();
       this.functionOut.calculate();
     }
 
-    get slopeIn(): number {
+    public get slopeIn(): number {
       return this.#slopeIn;
     }
-    
-    set slopeIn(_slope: number) {
+
+    public set slopeIn(_slope: number) {
       this.#slopeIn = _slope;
       this.functionIn.calculate();
     }
 
-    get slopeOut(): number {
+    public get slopeOut(): number {
       return this.#slopeOut;
     }
 
-    set slopeOut(_slope: number) {
+    public set slopeOut(_slope: number) {
       this.#slopeOut = _slope;
       this.functionOut.calculate();
     }
 
-
     //#region transfer
-    serialize(): Serialization {
+    public serialize(): Serialization {
       let serialization: Serialization = {};
       serialization.time = this.#time;
       serialization.value = this.#value;
+      serialization.interpolation = this.#interpolation;
       serialization.slopeIn = this.#slopeIn;
       serialization.slopeOut = this.#slopeOut;
-      serialization.constant = this.#constant;
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.#time = _serialization.time;
       this.#value = _serialization.value;
+      this.#interpolation = _serialization.interpolation;
       this.#slopeIn = _serialization.slopeIn;
       this.#slopeOut = _serialization.slopeOut;
-      this.#constant = _serialization.constant;
-
-      this.broken = this.slopeIn != -this.slopeOut;
+      // if (_serialization.interpolation == undefined)
+      //   if (_serialization.constant) // TODO: remove this when constant is removed
+      //     this.#interpolation = "constant";
+      //   else
+      //     this.#interpolation = "cubic";
 
       return this;
     }
 
-    getMutator(): Mutator {
+    public getMutator(): Mutator {
       return this.serialize();
     }
 
@@ -127,7 +131,5 @@ namespace FudgeCore {
       //
     }
     //#endregion
-
   }
-
 }

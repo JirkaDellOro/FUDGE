@@ -3,48 +3,42 @@ namespace SkeletonTest {
   import ƒAid = FudgeAid;
 
   window.addEventListener("load", init);
-
-  let camera: ƒAid.CameraOrbit;
-  let speedCameraRotation: number = 0.2;
-  let speedCameraTranslation: number = 0.002;
-  let cntMouseX: ƒ.Control = new ƒ.Control("MouseX", speedCameraRotation);
-  let cntMouseY: ƒ.Control = new ƒ.Control("MouseY", speedCameraRotation);
+  export let viewport: ƒ.Viewport;
+  export let loader: ƒ.GLTFLoader;
+  export let loaded: ƒ.Node;
+  export let cmpAnimator: ƒ.ComponentAnimator;
+  export let slcFile: HTMLSelectElement;
+  export let slcAmount: HTMLSelectElement;
 
   async function init(): Promise<void> {
-    const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
-
-    // load scene
-    const graph: ƒ.Node = await loader.getScene();
-    // graph.getComponent(ƒ.ComponentAnimator)?.activate(false);
-    console.log(graph);
-
-    // camera setup
-    const cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-    camera = new ƒAid.CameraOrbit(cmpCamera, 7, 80, 2, 15);
-    camera.axisRotateX.addControl(cntMouseY);
-    camera.axisRotateY.addControl(cntMouseX);
-    cmpCamera.clrBackground.setHex("4472C4FF");
-    graph.addChild(camera);
-    camera.mtxLocal.translateY(1);
-
-    // setup light
-    let cmpLight: ƒ.ComponentLight;
-    cmpLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0.5, 0.5, 0.5)));
-    graph.addComponent(cmpLight);
-
-    const cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(0.5, 0.5, 0.5)));
-    graph.addComponent(cmpLightAmbient);
-
-    const viewport: ƒ.Viewport = new ƒ.Viewport();
-    const canvas: HTMLCanvasElement = document.querySelector("canvas") as HTMLCanvasElement;
-    viewport.initialize("Viewport", graph, cmpCamera, canvas);
-    viewport.canvas.addEventListener("pointermove", hndPointerMove);
-    viewport.canvas.addEventListener("wheel", hndWheelMove);
-
+    let graphId: string = document.head.querySelector("meta[autoView]").getAttribute("autoView");
+    // load resources referenced in the link-tag
+    await ƒ.Project.loadResourcesFromHTML();
+    ƒ.Debug.log("Project:", ƒ.Project.resources);
+    // pick the graph to show
+    let graph: ƒ.Graph = <ƒ.Graph>ƒ.Project.resources[graphId];
+    ƒ.Debug.log("Graph:", graph);
+    if (!graph) {
+      alert("Nothing to render. Create a graph with at least a mesh, material and probably some light");
+      return;
+    }
+    // setup the viewport
+    let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+    // cmpCamera.clrBackground = ƒ.Color.CSS("SKYBLUE");
+    let canvas: HTMLCanvasElement = document.querySelector("canvas");
+    viewport = new ƒ.Viewport();
+    viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
+    ƒ.Debug.log("Viewport:", viewport);
+    // hide the cursor when interacting, also suppressing right-click menu
     canvas.addEventListener("mousedown", canvas.requestPointerLock);
-    canvas.addEventListener("mouseup", () => document.exitPointerLock());
+    canvas.addEventListener("mouseup", function () { document.exitPointerLock(); });
+    // make the camera interactive (complex method in ƒAid)
+    ƒAid.Viewport.expandCameraToInteractiveOrbit(viewport);
 
-    let timeSpan: HTMLSpanElement = document.querySelector("span") as HTMLElement;
+    graph.addChild(new ƒ.Node("placeholder"));
+
+    let timeSpan: HTMLSpanElement = document.getElementById("time") as HTMLElement;
+    let fpsSpan: HTMLSpanElement = document.getElementById("fps") as HTMLElement;
     let gPressed: boolean = false;
     let iShader: number = 0;
     const shaders: typeof ƒ.Shader[] = [ƒ.ShaderFlatSkin, ƒ.ShaderGouraudSkin, ƒ.ShaderPhongSkin];
@@ -52,14 +46,14 @@ namespace SkeletonTest {
     let lastUpdateTime: number = 0;
     const updateInterval: number = 200;
 
+    let cmpLightDirectional: ƒ.ComponentLight = graph.getChildrenByName("Light")[0]?.getComponents(ƒ.ComponentLight)?.find((_cmp: ƒ.ComponentLight) => _cmp.light instanceof ƒ.LightDirectional);
+
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start();
 
     function update(_event: Event): void {
-      cmpLight.mtxPivot.rotation = new ƒ.Vector3(0, camera.rotationY + 180, 0);
-      if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.P])) ƒ.Time.game.setScale(0);
-      if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) ƒ.Time.game.setScale(0.1);
-      if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) ƒ.Time.game.setScale(1);
+      cmpLightDirectional.mtxPivot.rotation = new ƒ.Vector3(cmpCamera.mtxWorld.rotation.x, cmpCamera.mtxWorld.rotation.y, 0);
+
       const setShader: (_shader: typeof ƒ.Shader) => void = _shader => {
         for (const node of graph) {
           if (node.getComponent(ƒ.ComponentMaterial))
@@ -74,26 +68,92 @@ namespace SkeletonTest {
       } else
         gPressed = false;
       if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H])) setShader(ƒ.ShaderPhong);
-      
+
       if (ƒ.Loop.timeFrameStartReal - lastUpdateTime > updateInterval) {
-        timeSpan.innerText = ƒ.Loop.fpsRealAverage.toFixed(2);
+        fpsSpan.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
         lastUpdateTime = ƒ.Loop.timeFrameStartReal;
       }
-      
+
+      if (loaded?.getComponent(ƒ.ComponentAnimator))
+        timeSpan.innerText = "TIME: " + loaded?.getComponent(ƒ.ComponentAnimator).time.toFixed(0);
+
       viewport.draw();
+    }
+
+    document.addEventListener("keydown", hndKeydown);
+
+    function hndKeydown(_event: KeyboardEvent): void {
+      switch (_event.code) {
+        case ƒ.KEYBOARD_CODE.SPACE:
+          cmpAnimator?.jumpTo(0);
+          break;
+        case ƒ.KEYBOARD_CODE.P:
+          ƒ.Time.game.setScale(ƒ.Time.game.getScale() == 0 ? 1 : 0);
+          break;
+        case ƒ.KEYBOARD_CODE.D:
+          cmpAnimator?.jumpTo(cmpAnimator.time + 50);
+          break;
+        case ƒ.KEYBOARD_CODE.A:
+          cmpAnimator?.jumpTo(cmpAnimator.time - 50);
+          break;
+        case ƒ.KEYBOARD_CODE.W:
+          ƒ.Time.game.setScale(ƒ.Time.game.getScale() * 2);
+          break;
+        case ƒ.KEYBOARD_CODE.S:
+          ƒ.Time.game.setScale(ƒ.Time.game.getScale() / 2);
+          break;
+        case ƒ.KEYBOARD_CODE.L:
+          console.log(loaded.getChild(0)?.mtxWorld.toString());
+          break;
+      }
+    }
+
+
+    slcFile = document.getElementById("file") as HTMLSelectElement;
+    slcAmount = document.getElementById("amount") as HTMLSelectElement;
+    const selectedFile: number = parseInt(sessionStorage.getItem('selectedFile'));
+    if (selectedFile != undefined)
+      slcFile.selectedIndex = selectedFile;
+    const selectedAmount: number = parseInt(sessionStorage.getItem('selectedAmount'));
+    if (selectedAmount != undefined)
+      slcAmount.selectedIndex = selectedAmount;
+    load();
+  }
+}
+
+
+async function load(): Promise<void> {
+  // load scene
+  SkeletonTest.loader = await ƒ.GLTFLoader.LOAD(SkeletonTest.slcFile.value);
+
+  const amount: number = parseInt(SkeletonTest.slcAmount.value);
+  if (amount == 1) {
+    SkeletonTest.loaded = await SkeletonTest.loader.getScene();
+  } else {
+    SkeletonTest.loaded = new ƒ.Node("loaded");
+    for (let i: number = 0; i < amount; i++) {
+      let instance: ƒ.GraphInstance = await ƒ.Project.createGraphInstance(await SkeletonTest.loader.getScene());
+      instance.addComponent(new ƒ.ComponentTransform());
+      instance.name = "instance" + i;
+      instance.mtxLocal.translateX((i * 2 - (amount - 1)) * 1.5);
+      SkeletonTest.loaded.addChild(instance);
     }
   }
 
-  function hndPointerMove(_event: PointerEvent): void {
-    if (!_event.buttons)
-      return;
-    cntMouseX.setInput(-_event.movementX);
-    cntMouseY.setInput(-_event.movementY);
-  }
+  SkeletonTest.cmpAnimator = SkeletonTest.loaded?.getComponent(ƒ.ComponentAnimator);
+  SkeletonTest.loaded.name = "loaded";
+  // loaded.getComponent(ƒ.ComponentAnimator)?.activate(false);
+  let root: ƒ.Node = SkeletonTest.viewport.getBranch();
+  let loaded: ƒ.Node = root.getChildrenByName("loaded")[0];
+  if (loaded)
+    root.replaceChild(loaded, SkeletonTest.loaded);
+  else
+    root.appendChild(SkeletonTest.loaded);
 
-  function hndWheelMove(_event: WheelEvent): void {
-    camera.distance += _event.deltaY * speedCameraTranslation;
-  }
+  ƒ.Debug.log("Loader:", SkeletonTest.loader);
+  ƒ.Debug.log("Loaded:", SkeletonTest.loaded);
 
-
+  // To store the selected option in sessionStorage
+  sessionStorage.setItem('selectedFile', SkeletonTest.slcFile.selectedIndex.toString());
+  sessionStorage.setItem('selectedAmount', SkeletonTest.slcAmount.selectedIndex.toString());
 }

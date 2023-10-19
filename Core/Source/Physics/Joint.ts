@@ -14,6 +14,9 @@ namespace FudgeCore {
     /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Joint[] = [];
 
+    // public static readonly iSubclass: number = Component.registerSubclass(ComponentJoint);
+    protected singleton: boolean = false; //Multiple joints can be attached to one Node
+
     #idBodyAnchor: number = 0;
     #idBodyTied: number = 0;
     #bodyAnchor: ComponentRigidbody;
@@ -28,12 +31,8 @@ namespace FudgeCore {
 
     #nameChildToConnect: string;
 
-
-    // public static readonly iSubclass: number = Component.registerSubclass(ComponentJoint);
-    protected singleton: boolean = false; //Multiple joints can be attached to one Node
     protected abstract joint: OIMO.Joint;
     protected abstract config: OIMO.JointConfig;
-
 
     /** Create a joint connection between the two given RigidbodyComponents. */
     public constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null) {
@@ -121,6 +120,9 @@ namespace FudgeCore {
       if (this.joint != null) this.joint.setAllowCollision(this.#internalCollision);
     }
 
+    /**
+     * Connect a child node with the given name to the joint.
+     */
     public connectChild(_name: string): void {
       this.#nameChildToConnect = _name;
       if (!this.node)
@@ -133,6 +135,9 @@ namespace FudgeCore {
         Debug.warn(`${this.constructor.name} at ${this.node.name} fails to connect child with non existent or ambigous name ${_name}`);
     }
 
+    /**
+     * Connect the given node to the joint. Tieing its rigidbody to the nodes rigidbody this component is attached to.
+     */
     public connectNode(_node: Node): void {
       if (!_node || !this.node)
         return;
@@ -226,19 +231,7 @@ namespace FudgeCore {
       super.mutate(_mutator);
     }
 
-    #getMutator = (): Mutator => {
-      let mutator: Mutator = {
-        nameChildToConnect: this.#nameChildToConnect,
-        internalCollision: this.#internalCollision,
-        breakForce: this.#breakForce,
-        breakTorque: this.#breakTorque
-      };
-      return mutator;
-    }
 
-    #mutate = (_mutator: Mutator): void => {
-      this.mutateBase(_mutator, ["internalCollision", "breakForce", "breakTorque"]);
-    }
 
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.springDamper;
@@ -279,7 +272,7 @@ namespace FudgeCore {
         delete _mutator[key];
     }
 
-    private hndEvent = (_event: Event) => {
+    private hndEvent = (_event: Event): void => {
       switch (_event.type) {
         case EVENT.COMPONENT_ADD:
           this.node.addEventListener(EVENT.DISCONNECT_JOINT, () => { this.disconnect(); this.dirtyStatus(); }, true);
@@ -290,6 +283,20 @@ namespace FudgeCore {
           this.removeJoint();
           break;
       }
-    }
+    };
+
+    #getMutator = (): Mutator => {
+      let mutator: Mutator = {
+        nameChildToConnect: this.#nameChildToConnect,
+        internalCollision: this.#internalCollision,
+        breakForce: this.#breakForce,
+        breakTorque: this.#breakTorque
+      };
+      return mutator;
+    };
+
+    #mutate = (_mutator: Mutator): void => {
+      this.mutateBase(_mutator, ["internalCollision", "breakForce", "breakTorque"]);
+    };
   }
 }

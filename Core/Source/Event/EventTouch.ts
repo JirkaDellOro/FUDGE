@@ -130,9 +130,8 @@ namespace FudgeCore {
               new CustomEvent<EventTouchDetail>(EVENT_TOUCH.DOUBLE, {
                 bubbles: true, detail: { position: position, touches: _event.touches }
               }));
-          }
-          // check if there was movement, otherwise set timer to fire tap
-          else if (!this.moved)
+          } else if (!this.moved)
+            // check if there was movement, otherwise set timer to fire tap
             this.timerDouble = new Timer(this.time, this.timeDouble, 1, dispatchTap);
 
           break;
@@ -164,7 +163,7 @@ namespace FudgeCore {
       }
 
       this.posPrev.set(position.x, position.y);
-    }
+    };
 
     private detectPinch = (_event: TouchEvent, _position: Vector2): void => {
       if (_event.touches.length != 2)
@@ -180,7 +179,7 @@ namespace FudgeCore {
             bubbles: true, detail: { position: _position, touches: _event.touches, pinch: pinch, pinchDelta: pinchDelta }
           }));
       this.pinchDistance = pinchDistance;
-    }
+    };
 
     private startGesture(_position: Vector2): void {
       this.posNotch.set(_position.x, _position.y);

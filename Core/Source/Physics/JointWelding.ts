@@ -12,7 +12,7 @@ namespace FudgeCore {
     protected joint: OIMO.GenericJoint;
     protected config: OIMO.GenericJointConfig = new OIMO.GenericJointConfig();
 
-    constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
+    public constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_bodyAnchor, _bodyTied);
 
       this.anchor = new Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);

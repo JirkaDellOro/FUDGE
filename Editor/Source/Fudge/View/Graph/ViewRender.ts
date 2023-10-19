@@ -153,7 +153,7 @@ namespace Fudge {
       this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
       try {
         this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
-      } catch (_error: unknown) { }; // view should load even if rendering fails...
+      } catch (_error: unknown) { /* view should load even if rendering fails... */ }; 
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       this.viewport.addEventListener(ƒ.EVENT.RENDER_PREPARE_START, this.hndPrepare);
 
@@ -279,6 +279,8 @@ namespace Fudge {
     };
 
     private redraw = (): void => {
+      if (this.viewport.canvas.clientHeight == 0 || this.viewport.canvas.clientHeight == 0)
+        return;
       try {
         ƒ.Physics.activeInstance = Page.getPhysics(this.graph);
         ƒ.Physics.connectJoints();

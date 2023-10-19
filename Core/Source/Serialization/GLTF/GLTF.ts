@@ -15,7 +15,7 @@ namespace GLTF {
     /**
      * The indices data type.
      */
-    "componentType": number | number | number | number;
+    "componentType": COMPONENT_TYPE.UNSIGNED_BYTE | COMPONENT_TYPE.UNSIGNED_SHORT | COMPONENT_TYPE.UNSIGNED_INT;
     "extensions"?: any;
     "extras"?: any;
     [k: string]: any;
@@ -71,7 +71,7 @@ namespace GLTF {
     /**
      * The datatype of the accessor's components.
      */
-    "componentType": number | number | number | number | number | number | number;
+    "componentType": COMPONENT_TYPE;
     /**
      * Specifies whether integer data values are normalized before usage.
      */
@@ -83,7 +83,7 @@ namespace GLTF {
     /**
      * Specifies if the accessor's elements are scalars, vectors, or matrices.
      */
-    "type": any | any | any | any | any | any | any | string;
+    "type": ACCESSOR_TYPE;
     /**
      * Maximum value of each component in this accessor.
      */
@@ -101,6 +101,29 @@ namespace GLTF {
     "extras"?: any;
     [k: string]: any;
   }
+
+  /**
+   * https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#accessor-data-types
+   */
+  export enum COMPONENT_TYPE {
+    BYTE = 5120,
+    UNSIGNED_BYTE = 5121,
+    SHORT = 5122,
+    UNSIGNED_SHORT = 5123,
+    UNSIGNED_INT = 5125,
+    FLOAT = 5126
+  }
+
+  export enum ACCESSOR_TYPE {
+    SCALAR = "SCALAR",
+    VEC2 = "VEC2",
+    VEC3 = "VEC3",
+    VEC4 = "VEC4",
+    MAT2 = "MAT2",
+    MAT3 = "MAT3",
+    MAT4 = "MAT4"
+  }
+
   /**
    * The descriptor of the animated property.
    */
@@ -144,7 +167,7 @@ namespace GLTF {
     /**
      * Interpolation algorithm.
      */
-    "interpolation"?: any | any | any | string;
+    "interpolation"?: "LINEAR" | "STEP" | "CUBICSPLINE";
     /**
      * The index of an accessor, containing keyframe output values.
      */
@@ -426,7 +449,7 @@ namespace GLTF {
     /**
      * The alpha rendering mode of the material.
      */
-    "alphaMode"?: any | any | any | string;
+    "alphaMode"?: "OPAQUE" | "MASK" | "BLEND";
     /**
      * The alpha cutoff value of the material.
      */
@@ -458,7 +481,7 @@ namespace GLTF {
     /**
      * The topology type of primitives to render.
      */
-    "mode"?: number | number | number | number | number | number | number | number;
+    "mode"?: MESH_PRIMITIVE_MODE;
     /**
      * An array of morph targets.
      */
@@ -469,6 +492,17 @@ namespace GLTF {
     "extras"?: any;
     [k: string]: any;
   }
+
+  export enum MESH_PRIMITIVE_MODE {
+    POINTS,
+    LINES,
+    LINE_LOOP,
+    LINE_STRIP,
+    TRIANGLES,
+    TRIANGLE_STRIP,
+    TRIANGLE_FAN
+  }
+
   /**
    * A set of primitives to be rendered.  Its global transform is defined by a node that references it.
    */
@@ -526,10 +560,23 @@ namespace GLTF {
      * The weights of the instantiated morph target. The number of array elements **MUST** match the number of morph targets of the referenced mesh. When defined, `mesh` **MUST** also be defined.
      */
     "weights"?: number[];
-    "name"?: any;
+    "name"?: string;
     "extensions"?: any;
     "extras"?: any;
     [k: string]: any;
+
+    /**
+     * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+     */
+    isAnimated?: boolean;
+    /**
+     * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+     */
+    parent?: number;
+    /**
+     * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
+     */
+    path?: number[];
   }
   /**
    * Texture sampler properties for filtering and wrapping modes.

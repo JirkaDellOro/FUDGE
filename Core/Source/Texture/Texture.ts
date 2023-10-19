@@ -1,4 +1,7 @@
 namespace FudgeCore {
+  /** {@link TexImageSource} is a union type which as of now includes {@link VideoFrame}. All other parts of this union have a .width and .height property but VideoFrame does not. And since we only ever use {@link HTMLImageElement} and {@link OffscreenCanvas} currently VideoFrame can be excluded for convenience of accessing .width and .height */
+  type ImageSource = Exclude<TexImageSource, VideoFrame>;
+
   export enum MIPMAP {
     CRISP, MEDIUM, BLURRY
   }
@@ -11,18 +14,38 @@ namespace FudgeCore {
     public name: string;
     public idResource: string = undefined;
     public mipmap: MIPMAP = MIPMAP.CRISP;
-    protected renderData: { [key: string]: unknown };
+    /** @internal A map of textures. Used by the render engine */
+    protected renderData: { [key: string]: unknown }; // TODO: check if a map is necessary here, the corresponding render injector only ever accesses "texture0"
 
-    constructor(_name: string = "Texture") {
+    public constructor(_name: string = "Texture") {
       super();
       this.name = _name;
     }
 
-    public abstract get texImageSource(): TexImageSource;
+    /**
+     * Returns the image source of this texture.
+     */
+    public abstract get texImageSource(): ImageSource;
+
+    /**
+     * Generates and binds the texture in WebGL from the {@link texImageSource}. 
+     * Injected by {@link RenderInjectorTexture}. Used by the render system.
+     * @internal
+     */
     public useRenderData(): void {/* injected by RenderInjector*/ }
 
+    /**
+     * Deletes the texture in WebGL freeing the allocated gpu memory.
+     * Injected by {@link RenderInjectorTexture}.
+     * @internal
+     */
+    public deleteRenderData(): void {/* injected by RenderInjector*/ }
+
+    /**
+     * Refreshes the image data in the render engine.
+     */
     public refresh(): void {
-      this.renderData = null;
+      this.deleteRenderData();
     }
 
     //#region Transfer
@@ -50,6 +73,7 @@ namespace FudgeCore {
 
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.idResource;
+      delete _mutator.renderData;
     }
   }
 
@@ -60,7 +84,7 @@ namespace FudgeCore {
     public image: HTMLImageElement = null;
     public url: RequestInfo;
 
-    constructor(_url?: RequestInfo) {
+    public constructor(_url?: RequestInfo) {
       super();
       if (_url) {
         this.load(_url);
@@ -70,7 +94,7 @@ namespace FudgeCore {
       Project.register(this);
     }
 
-    public get texImageSource(): TexImageSource {
+    public get texImageSource(): ImageSource {
       return this.image;
     }
 
@@ -85,12 +109,12 @@ namespace FudgeCore {
       // let objectURL: string = URL.createObjectURL(blob);
       // this.image.src = objectURL;
 
-      return new Promise((resolve, reject) => {
+      return new Promise((_resolve, _reject) => {
         this.image.addEventListener("load", () => {
           this.renderData = null; // refresh render data on next draw call
-          resolve();
+          _resolve();
         });
-        this.image.addEventListener("error", () => reject());
+        this.image.addEventListener("error", () => _reject());
         this.image.src = new URL(this.url.toString(), Project.baseURL).toString();
       });
     }
@@ -128,38 +152,34 @@ namespace FudgeCore {
   export class TextureBase64 extends Texture {
     public image: HTMLImageElement = new Image();
 
-    constructor(_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP) {
+    public constructor(_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP) {
       super(_name);
       this.image.src = _base64;
       this.mipmap = _mipmap;
     }
-    public get texImageSource(): TexImageSource {
+    public get texImageSource(): ImageSource {
       return this.image;
     }
   }
   /**
    * Texture created from a canvas
    */
-  // TODO: remove type fixes when experimental technology is standard
-  type OffscreenCanvasRenderingContext2D = General;
-  type OffscreenCanvas = General;
-
   export class TextureCanvas extends Texture {
     public crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
-    constructor(_name: string, _crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
+    public constructor(_name: string, _crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
       super(_name);
       this.crc2 = _crc2;
     }
-    public get texImageSource(): TexImageSource {
-      return <OffscreenCanvas>this.crc2.canvas;
+    public get texImageSource(): ImageSource {
+      return this.crc2.canvas;
     }
   }
   /**
    * Texture created from a FUDGE-Sketch
    */
   export class TextureSketch extends TextureCanvas {
-    public get texImageSource(): TexImageSource {
+    public get texImageSource(): ImageSource {
       return null;
     }
   }
@@ -167,7 +187,7 @@ namespace FudgeCore {
    * Texture created from an HTML-page
    */
   export class TextureHTML extends TextureCanvas {
-    public get texImageSource(): TexImageSource {
+    public get texImageSource(): ImageSource {
       return null;
     }
   }

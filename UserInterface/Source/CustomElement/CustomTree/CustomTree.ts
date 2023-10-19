@@ -3,7 +3,7 @@ namespace FudgeUserInterface {
 
   /**
    * Extension of {@link CustomTreeList} that represents the root of a tree control  
-   * ```plaintext
+   * ```text
    * tree <ul>
    * ├ treeItem <li>
    * ├ treeItem <li>
@@ -86,7 +86,7 @@ namespace FudgeUserInterface {
 
     private hndSelect(_event: Event): void {
       // _event.stopPropagation();
-      let detail: { data: Object, interval: boolean, additive: boolean } = (<CustomEvent>_event).detail;
+      let detail: { data: Object; interval: boolean; additive: boolean } = (<CustomEvent>_event).detail;
       let index: number = this.controller.selection.indexOf(<T>detail.data);
 
       if (detail.interval) {
@@ -117,7 +117,7 @@ namespace FudgeUserInterface {
       let relatedTarget: EventTarget = _event.relatedTarget;
       if (relatedTarget instanceof HTMLElement && !this.contains(relatedTarget) && !this.contains(relatedTarget.offsetParent)) // offset parent is for weird (invisible) divs which are placed over input elements and trigger leave events... 
         this.controller.dragDropDivider.remove();
-    }
+    };
 
     private addChildren(_children: T[], _target: T, _at?: number): void {
       // if drop target included in children -> refuse
@@ -154,11 +154,11 @@ namespace FudgeUserInterface {
       let remove: T[] = this.controller.delete([target.data]);
 
       this.delete(remove);
-    }
+    };
 
     private hndEscape = (_event: Event): void => {
       this.clearSelection();
-    }
+    };
 
     private hndCopyPaste = async (_event: Event): Promise<void> => {
       // console.log(_event);
@@ -177,7 +177,7 @@ namespace FudgeUserInterface {
           this.delete(cut);
           break;
       }
-    }
+    };
 
     private hndFocus = (_event: KeyboardEvent): void => {
       _event.stopPropagation();
@@ -207,7 +207,7 @@ namespace FudgeUserInterface {
         (<CustomTreeItem<T>>document.activeElement).select(true);
       else if (!_event.ctrlKey)
         this.clearSelection();
-    }
+    };
   }
 
   customElements.define("ul-custom-tree", <CustomElementConstructor><unknown>CustomTree, { extends: "ul" });

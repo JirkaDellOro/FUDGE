@@ -1,5 +1,5 @@
 namespace FudgeCore {
-  
+
   export enum PARTICLE_SYSTEM_PLAYMODE {
     /**Plays particle system in a loop: it restarts once it hit the end.*/
     LOOP,
@@ -16,22 +16,23 @@ namespace FudgeCore {
   @RenderInjectorComponentParticleSystem.decorate
   export class ComponentParticleSystem extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
-    /** A texture filed with random numbers. Used by particle shader */
-    public renderData: unknown;
     public particleSystem: ParticleSystem;
-    /** When disabled try enabling {@link ComponentMaterial.prototype.sortForAlpha} */
+    /** When disabled try enabling {@link ComponentMaterial.sortForAlpha} */
     public depthMask: boolean;
     public blendMode: BLEND;
     public playMode: PARTICLE_SYSTEM_PLAYMODE;
     public duration: number;
-    
+
+    /** @internal A texture filed with random numbers. Used by the render engine */
+    protected renderData: unknown;
+
     /** The number of particles */
     #size: number;
     #timeScale: number = 1;
     readonly #time: Time;
 
     public constructor(_particleSystem: ParticleSystem = null) {
-      super();     
+      super();
       this.particleSystem = _particleSystem;
       this.depthMask = true;
       this.blendMode = BLEND.ADDITIVE;
@@ -77,7 +78,18 @@ namespace FudgeCore {
       this.updateTimeScale();
     }
 
+    /** 
+     * Generates and binds the random numbers texture in WebGL
+     * Injected by {@link RenderInjectorComponentParticleSystem}. Used by the render system.
+     * @internal 
+     */
     public useRenderData(): void {/* injected by RenderInjector*/ }
+
+    /** 
+     * Deletes the random numbers texture in WebGL freeing the allocated gpu memory.
+     * Injected by {@link RenderInjectorComponentParticleSystem}. 
+     * @internal
+     */
     public deleteRenderData(): void {/* injected by RenderInjector*/ }
 
     //#region transfer

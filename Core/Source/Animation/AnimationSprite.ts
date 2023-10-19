@@ -11,18 +11,24 @@ namespace FudgeCore {
     private wrap: Vector2 = new Vector2(0, 80);
 
     // TODO: fps should be a parameter too
-    constructor(_name: string = "AnimationSprite") { //}, _fps: number = 15) {
+    public constructor(_name: string = "AnimationSprite") { //}, _fps: number = 15) {
       super(_name, {}, 1);
       this.framesPerSecond = this.frames;
       this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond);
     }
 
+    /**
+     * Sets the texture to be used as the spritesheet
+     */
     public setTexture(_texture: Texture): void {
       this.texture = _texture;
       this.idTexture = _texture.idResource;
     }
 
-    public create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2, _framesPerSecond: number) {
+    /**
+     * Creates this animation sprite from the given arguments
+     */
+    public create(_texture: Texture, _frames: number, _wrapAfter: number, _start: Vector2, _size: Vector2, _next: Vector2, _wrap: Vector2, _framesPerSecond: number): void {
       this.setTexture(_texture);
       this.frames = _frames;
       this.wrapAfter = _wrapAfter;
@@ -55,20 +61,23 @@ namespace FudgeCore {
             "mtxPivot": {
               "translation": {
                 x: xTranslation,
-                y: yTranslation,
+                y: yTranslation
               },
               "scaling": {
                 x: xScale,
-                y: yScale,
+                y: yScale
               }
             }
           }]
         }
-      }
+      };
 
       this.calculateTotalTime();
     }
 
+    /**
+     * Returns the scale of the spritesheet
+     */
     public getScale(): Vector2 {
       return new Vector2(
         this.size.x / this.texture.texImageSource.width,
@@ -76,6 +85,9 @@ namespace FudgeCore {
       );
     }
 
+    /**
+     * Returns the positions of the spritesheet
+     */
     public getPositions(): Vector2[] {
       let iNext: number = 0;
       let iWrap: number = 0;
@@ -86,7 +98,7 @@ namespace FudgeCore {
           this.start.y + iNext * this.next.y + iWrap * this.wrap.y
         ));
 
-        iNext++
+        iNext++;
         if (iNext >= this.wrapAfter) {
           iNext = 0;
           iWrap++;
@@ -132,6 +144,9 @@ namespace FudgeCore {
     }
     //#endregion
 
+    /**
+     * Converts the {@link AnimationSprite} into an {@link Animation}
+     */
     public convertToAnimation(): Animation {
       let animation: Animation = new Animation(this.name, this.animationStructure, this.framesPerSecond);
       return animation;

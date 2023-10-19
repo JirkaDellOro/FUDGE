@@ -1,4 +1,4 @@
-/// <reference path="../../Core/Build/FudgeCore.d.ts" />
+/// <reference types="../../core/build/fudgecore" />
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     /**
@@ -31,7 +31,7 @@ declare namespace FudgeUserInterface {
          * If an additional [[ƒ.Mutator]] is passed, its values are used instead of those of the [[ƒ.Mutable]].
          */
         static updateUserInterface(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>, _domElement: HTMLElement, _mutator?: ƒ.Mutator): void;
-        static findChildElementByKey(_domElement: HTMLElement, key: string): HTMLElement;
+        static findChildElementByKey(_domElement: HTMLElement, _key: string): HTMLElement;
         getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
         updateUserInterface(): void;
         setMutable(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>): void;
@@ -428,7 +428,7 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
     /**
      * Extension of {@link CustomTreeList} that represents the root of a tree control
-     * ```plaintext
+     * ```text
      * tree <ul>
      * ├ treeItem <li>
      * ├ treeItem <li>
@@ -604,7 +604,7 @@ declare namespace FudgeUserInterface {
     }
     /**
      * Manages a sortable table of data given as simple array of flat objects
-     * ```plaintext
+     * ```text
      * Key0  Key1 Key2
      * ```
      */
@@ -748,7 +748,7 @@ declare namespace FudgeUserInterface {
     }
     /**
      * Extension of [[TreeList]] that represents the root of a tree control
-     * ```plaintext
+     * ```text
      * tree <ul>
      * ├ treeItem <li>
      * ├ treeItem <li>

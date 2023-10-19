@@ -1,36 +1,87 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Skeleton System Test</title>
-    <!--Load FUDGE-->
-    <script src="./../../Core/Build/FudgeCore.js"></script>
-    <script src="./../../Aid/Build/FudgeAid.js"></script>
-    <!--Load scripts-->
-    <script src="SkeletonImportTest.js" editor="true"></script>
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-      }
-      canvas.fullscreen {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100vw; 
-        height: 100vh; 
-      }
-      span#time {
-        position: absolute;
-        top: 0;
-        left: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <!--Canvas for FUDGE to render to-->
-    <canvas class="fullscreen" width="800" height="640"></canvas>
-    <span id="time"></span>
-  </body>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="utf-8" />
+  <meta type="settings" autoview="Graph|2023-07-25T08:47:48.755Z|05108"
+    project="{'name':'SkeletonImport','graphAutoView':'Graph|2023-07-25T08:47:48.755Z|05108'}"
+    panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-07-25T08:47:48.755Z|05108'}}]" />
+  <title>SkeletonImport</title>
+  <!--Load FUDGE-->
+  <script src="./../../Core/Build/FudgeCore.js"></script>
+  <script src="./../../Aid/Build/FudgeAid.js"></script>
+
+  <!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
+  <link type="resources" src="SkeletonImportTest.json" />
+
+  <!--Load scripts-->
+  <script src="SkeletonImportTest.js" editor="true"></script>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    canvas.fullscreen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    span#fps {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    span#time {
+      position: absolute;
+      top: 1rem;
+      left: 0;
+    }
+
+    span {
+      color: yellow;
+      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+    }
+
+    #file {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+
+    #amount {
+      position: absolute;
+      top: 1rem;
+      right: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <!--Canvas for FUDGE to render to-->
+  <canvas class="fullscreen">
+  </canvas>
+  <span id="fps">
+  </span>
+  <span id="time">
+  </span>
+
+  <select id="file" onchange="load()">
+    <option value="./GLTF/arm.gltf">Arm</option>
+    <option value="./GLTF/robot.gltf">Robot</option>
+    <option value="./GLTF/walk.gltf">Walk</option>
+  </select>
+  <select id="amount" onchange="load()">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3" selected>3</option>
+  </select>
+</body>
+
 </html>

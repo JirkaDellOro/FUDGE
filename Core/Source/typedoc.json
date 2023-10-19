@@ -4,7 +4,18 @@
     "out": "../../Documentation/Reference/Core/",
     "name": "Fudge Core",
     "readme": "none",
-    "excludePrivate": "true",
-    "excludeProtected": "true",
-    "plugin": "typedoc-plugin-merge-modules"
+    "validation": {
+        // "notExported": false,
+        "notDocumented": true,
+    },
+    "requiredToBeDocumented": [
+        "Class",
+        // "Accessor",
+        // "Method",
+    ],
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "exclude": ["Serialization/GLTF/GLTF.ts", "Serialization/FBX/inflate.d.ts"],
+    "intentionallyNotExported": ["GLTF.GlTf", "GLTF.Mesh", "GraphInstancesToResync", "ImageSource", "OIMO.DebugDraw", "OIMO.DebugDrawStyle", "OIMO.Joint", "OIMO.RigidBody", "OIMO.World", "VectorRepresentation"],
+    "plugin": ["typedoc-plugin-merge-modules"]
 }

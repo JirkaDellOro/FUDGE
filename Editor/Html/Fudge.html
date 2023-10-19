@@ -17,6 +17,13 @@
   <!-- <link type="text/css" rel="stylesheet" href="../Themes/DarkGray/Colors.css" /> -->
   <!-- <link type="text/css" rel="stylesheet" href="../Themes/Black/Colors.css" /> -->
   <!-- <link type="text/css" rel="stylesheet" href="../Themes/Espresso/Colors.css" /> -->
+  <script>
+    // TODO: make themes changeable from editor? maybe use localStorage?
+    let theme = /* localStorage.getItem("Theme") || */ "LightGray";
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) 
+      theme = "Black";
+    document.write(`<link type="text/css" rel="stylesheet" href="../Themes/${theme}/Colors.css" />`);
+  </script>
 
   <!-- GoldenLayout -->
   <script src="../GoldenLayout/golden-layout.js"></script>

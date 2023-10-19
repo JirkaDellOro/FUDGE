@@ -13,6 +13,9 @@ namespace FudgeCore {
       this.create(_longitudes, _latitudes);
     }
 
+    /**
+     * Create this sphere with a given number of longitudes and latitudes
+     */
     public create(_longitudes: number = 3, _latitudes: number = 2): void {
       this.clear();
       //Clamp resolution to prevent performance issues

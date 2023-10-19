@@ -135,6 +135,9 @@ namespace FudgeCore {
       Debug.fudge("Loop stopped!");
     }
 
+    /**
+     * Continue running the loop
+     */
     public static continue(): void {
       if (Loop.running)
         return;

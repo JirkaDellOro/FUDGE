@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
    * Generate a simple quad with edges of length 1, the face consisting of two trigons
-   * ```plaintext
+   * ```text
    *        0 __ 3
    *         |_\|
    *        1    2             
@@ -30,7 +30,7 @@ namespace FudgeCore {
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization);
-      this.create(MeshQuad.shape, true);
+      this.create(MeshQuad.shape, true); // this seems to be dispatched doubled while deserializing the resources
       return this;
     }
     protected reduceMutator(_mutator: Mutator): void {

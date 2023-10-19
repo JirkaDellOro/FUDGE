@@ -13,17 +13,17 @@ namespace FudgeCore {
    */
   export class TerrainInfo {
     /** the position of the point vertically projected on the terrain in world coordinates */
-    position: Vector3;
+    public position: Vector3;
     /** the normal of the face of the terrain under the point in world coordinates */
-    normal: Vector3;
+    public normal: Vector3;
     /** vertical distance of the point to the terrain, negative if below */
-    distance: number;
+    public distance: number;
     /** the position in face coordinates */
-    positionFace: Vector3;
+    public positionFace: Vector3;
     /** the index of the face the position is inside */
-    index: number;
+    public index: number;
     /** the grid coordinates of the quad the face belongs to */
-    grid: Vector2;
+    public grid: Vector2;
   }
 
   /**
@@ -45,6 +45,9 @@ namespace FudgeCore {
       this.create(_resolution, _scaleInput, _functionOrSeed);
     }
 
+    /**
+     * Create this mesh from the given parameters
+     */
     public create(_resolution: Vector2 = Vector2.ONE(2), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed: HeightMapFunction | number = 0): void {
       this.clear();
       this.seed = undefined;
@@ -57,8 +60,7 @@ namespace FudgeCore {
         this.seed = _functionOrSeed;
         let prng: Random = new Random(this.seed);
         this.heightMapFunction = new Noise2(() => prng.getNorm()).sample; // TODO call PRNG
-      }
-      else
+      } else
         this.heightMapFunction = new Noise2().sample;
 
       this.vertices = new Vertices();
@@ -91,7 +93,7 @@ namespace FudgeCore {
         if (this.resolution.x % 2 == 0) // reverse last split change if x-resolution is even
           split = (split == QUADSPLIT.AT_0) ? QUADSPLIT.AT_1 : QUADSPLIT.AT_0;
       }
-      this.faces = quads.flatMap((quad: Quad) => quad.faces);
+      this.faces = quads.flatMap((_quad: Quad) => _quad.faces);
     }
 
     /**
@@ -133,6 +135,9 @@ namespace FudgeCore {
       return terrainInfo;
     }
 
+    /**
+     * Returns the grid coordinates of the quad the given face belongs to.
+     */
     public getGridFromFaceIndex(_index: number): Vector2 {
       let result: Vector2 = Recycler.get(Vector2);
       let iQuad: number = Math.floor(_index / 2);
@@ -140,6 +145,9 @@ namespace FudgeCore {
       return result;
     }
 
+    /**
+     * Returns the indices of the two faces forming the quad the given grid position belongs to.
+     */
     public getFaceIndicesFromGrid(_grid: Vector2): number[] {
       let iQuad: number = _grid.y * 2 * this.resolution.x + _grid.x * 2;
       return [iQuad, iQuad + 1];

@@ -1,5 +1,5 @@
-///<reference path="../../Core/Build/FudgeCore.d.ts"/>
-///<reference path="../../Aid/Build/FudgeAid.d.ts"/>
+/// <reference types="../../Core/Build/FudgeCore"/>
+///<reference types="../../Aid/Build/FudgeAid"/>
 namespace SkeletonTest {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
@@ -29,7 +29,7 @@ namespace SkeletonTest {
     camera = new ƒAid.CameraOrbit(cmpCamera, 500, 80, 2, 1000);
     camera.axisRotateX.addControl(cntMouseY);
     camera.axisRotateY.addControl(cntMouseX);
-    cmpCamera.clrBackground.setHex("4472C4FF")
+    cmpCamera.clrBackground.setHex("4472C4FF");
     graph.addChild(camera);
     camera.mtxLocal.translateY(100);
 

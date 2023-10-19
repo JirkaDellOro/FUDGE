@@ -1,42 +1,41 @@
-/**
- * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
- * done by Jirka Dell'Oro-Friedl, HFU, 2021
- *
- * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
- * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
- * Better rank ordering method by Stefan Gustavson in 2012.
- *
- * This code was placed in the public domain by its original author,
- * Stefan Gustavson. You may use it as you see fit, but
- * attribution is appreciated.
- */
-
 namespace FudgeCore {
   // TODO: Test
+  /**
+   * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
+   * done by Jirka Dell'Oro-Friedl, HFU, 2021
+   *
+   * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
+   * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
+   * Better rank ordering method by Stefan Gustavson in 2012.
+   *
+   * This code was placed in the public domain by its original author,
+   * Stefan Gustavson. You may use it as you see fit, but
+   * attribution is appreciated.
+   */
   export class Noise4 extends Noise {
     private static offset: number = (5.0 - Math.sqrt(5.0)) / 20.0;
     private static gradient: number[][] = [[0, 1, 1, 1], [0, 1, 1, -1], [0, 1, -1, 1], [0, 1, -1, -1], [0, -1, 1, 1], [0, -1, 1, -1], [0, -1, -1, 1], [0, -1, -1, -1], [1, 0, 1, 1], [1, 0, 1, -1], [1, 0, -1, 1], [1, 0, -1, -1], [-1, 0, 1, 1], [-1, 0, 1, -1], [-1, 0, -1, 1], [-1, 0, -1, -1], [1, 1, 0, 1], [1, 1, 0, -1], [1, -1, 0, 1], [1, -1, 0, -1], [-1, 1, 0, 1], [-1, 1, 0, -1], [-1, -1, 0, 1], [-1, -1, 0, -1], [1, 1, 1, 0], [1, 1, -1, 0], [1, -1, 1, 0], [1, -1, -1, 0], [-1, 1, 1, 0], [-1, 1, -1, 0], [-1, -1, 1, 0], [-1, -1, -1, 0]];
     #sample: (_x: number, _y: number, _z: number, _w: number) => number = null;
 
-    constructor(_random: Function = Math.random) {
-      super(_random)
+    public constructor(_random: Function = Math.random) {
+      super(_random);
 
-      this.#sample = (x: number, y: number, z: number, w: number): number => {
+      this.#sample = (_x: number, _y: number, _z: number, _w: number): number => {
         // Skew the (x,y,z,w) space to determine which cell of 24 simplices we're in
-        const s: number = (x + y + z + w) * (Math.sqrt(5.0) - 1.0) / 4.0; // Factor for 4D skewing
-        const i: number = Math.floor(x + s);
-        const j: number = Math.floor(y + s);
-        const k: number = Math.floor(z + s);
-        const l: number = Math.floor(w + s);
+        const s: number = (_x + _y + _z + _w) * (Math.sqrt(5.0) - 1.0) / 4.0; // Factor for 4D skewing
+        const i: number = Math.floor(_x + s);
+        const j: number = Math.floor(_y + s);
+        const k: number = Math.floor(_z + s);
+        const l: number = Math.floor(_w + s);
         const t: number = (i + j + k + l) * Noise4.offset; // Factor for 4D unskewing
         const X0: number = i - t; // Unskew the cell origin back to (x,y,z,w) space
         const Y0: number = j - t;
         const Z0: number = k - t;
         const W0: number = l - t;
-        const x0: number = x - X0; // The x,y,z,w distances from the cell origin
-        const y0: number = y - Y0;
-        const z0: number = z - Z0;
-        const w0: number = w - W0;
+        const x0: number = _x - X0; // The x,y,z,w distances from the cell origin
+        const y0: number = _y - Y0;
+        const z0: number = _z - Z0;
+        const w0: number = _w - W0;
 
         // To find out which of the 24 possible simplices we're in, we need to determine the
         // magnitude ordering of x0, y0, z0 and w0. Six pair-wise comparisons are performed between
@@ -107,22 +106,22 @@ namespace FudgeCore {
         ];
         const g1: number[] = Noise4.gradient[
           this.perm[
-          ii + i1 + this.perm[jj + j1 + this.perm[kk + k1 + this.perm[ll + l1]]]
+            ii + i1 + this.perm[jj + j1 + this.perm[kk + k1 + this.perm[ll + l1]]]
           ] % 32
         ];
         const g2: number[] = Noise4.gradient[
           this.perm[
-          ii + i2 + this.perm[jj + j2 + this.perm[kk + k2 + this.perm[ll + l2]]]
+            ii + i2 + this.perm[jj + j2 + this.perm[kk + k2 + this.perm[ll + l2]]]
           ] % 32
         ];
         const g3: number[] = Noise4.gradient[
           this.perm[
-          ii + i3 + this.perm[jj + j3 + this.perm[kk + k3 + this.perm[ll + l3]]]
+            ii + i3 + this.perm[jj + j3 + this.perm[kk + k3 + this.perm[ll + l3]]]
           ] % 32
         ];
         const g4: number[] = Noise4.gradient[
           this.perm[
-          ii + 1 + this.perm[jj + 1 + this.perm[kk + 1 + this.perm[ll + 1]]]
+            ii + 1 + this.perm[jj + 1 + this.perm[kk + 1 + this.perm[ll + 1]]]
           ] % 32
         ];
 
@@ -155,6 +154,6 @@ namespace FudgeCore {
 
     public sample = (_x: number, _y: number, _z: number, _w: number): number => {
       return this.#sample(_x, _y, _z, _w);
-    }
+    };
   }
 }

@@ -1,60 +1,105 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
-<title>ParticleSystem</title>
-<meta charset="utf-8" />
-<link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="utf-8" />
+  <meta type="settings" autoview="Graph|2022-10-12T15:22:44.800Z|84622"
+    project="{'name':'ParticleSystem','graphAutoView':'Graph|2022-10-12T15:22:44.800Z|84622'}"
+    panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2022-10-12T15:22:44.800Z|84622'}},{'type':'PanelParticleSystem','state':{}}]" />
 
-<!--Editor settings of this project-->
-<meta type="settings" autoview="Graph|2022-10-12T15:22:44.800Z|84622" project="{'name':'ParticleSystem','graphAutoView':'Graph|2022-10-12T15:22:44.800Z|84622'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2022-10-12T15:22:44.800Z|84622'}},{'type':'PanelParticleSystem','state':{}}]" />
+  <title>ParticleSystem</title>
 
-<!--Activate the following line to include the FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!-->
-<!--<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js"></script>-->
+  <!--Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks-->
+  <!-- <script type="text/javascript" src="../../../Physics/OimoPhysics.js"></script> -->
+  <script type="text/javascript" src="./../../Core/Build/FudgeCore.js"></script>
+  <script type="text/javascript" src="./../../Aid/Build/FudgeAid.js"></script>
 
-<!--Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks-->
-<!-- <script type="text/javascript" src="../../../Physics/OimoPhysics.js"></script> -->
-<script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
-<script type="text/javascript" src="../../../Aid/Build/FudgeAid.js"></script>
+  <!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
+  <link type="resources" src="Internal.json" />
 
-<!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
-<link type="resources" src="Internal.json" />
+  <!--Load custom scripts-->
+  <script src="Main.js" editor="true"></script>
 
-<!--Load custom scripts-->
-<script type="text/javascript" src="Script/Build/Script.js" editor="true"></script>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      color: yellow;
+      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+    }
 
-<!--Load Autoview script-->
-<script type="text/javascript" src="Autoview.js"></script>
+    canvas.fullscreen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+    }
 
+    input[type=number] {
+      width: 4rem;
+    }
+
+    label {
+      display: inline-block;
+      width: 4rem;
+    }
+
+    span#fps {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    span#time {
+      position: absolute;
+      top: 1rem;
+      left: 0;
+    }
+
+    #settings {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+  </style>
 </head>
+
 <body>
-<!--Dialog shown at startup only-->
-<dialog>
-<p>FUDGE Autoview</p>
-<h1>Title (will be replaced by Autoview)</h1>
-<p>click to start</p>
-</dialog>
-<!--Canvas for FUDGE to render to-->
-<canvas class="fullscreen">
-</canvas>
+  <!--Dialog shown at startup only-->
+  <dialog>
+    <p>FUDGE Autoview</p>
+    <h1>Title (will be replaced by Autoview)</h1>
+    <p>click to start</p>
+  </dialog>
+  <!--Canvas for FUDGE to render to-->
+  <canvas class="fullscreen">
+  </canvas>
+  <span id="fps">
+  </span>
+  <span id="time">
+  </span>
+  <div id="settings">
+    <div>
+      <input id="flame" type="checkbox" />
+      <label for="flame">Flame</label>
+      <input id="flamesize" type="number" min="0" hidden="" />
+    </div>
 
+    <div>
+      <input id="asteroids" type="checkbox" />
+      <label for="asteroids">Asteroids</label>
+      <input id="asteroidssize" type="number" min="0" hidden="" />
+    </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    <div>
+      <input id="stars" type="checkbox" />
+      <label for="stars">Stars</label>
+      <input id="starssize" type="number" min="0" hidden="" />
+    </div>
+  </div>
 </body>
+
 </html>

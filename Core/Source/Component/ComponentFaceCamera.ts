@@ -11,7 +11,7 @@ namespace FudgeCore {
     public up: Vector3 = Vector3.Y(1);
     public restrict: boolean = false;
 
-    constructor() {
+    public constructor() {
       super();
       this.singleton = true;
     }
