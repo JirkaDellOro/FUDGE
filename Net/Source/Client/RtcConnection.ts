@@ -12,9 +12,10 @@ namespace FudgeNet {
   // tslint:disable-next-line: typedef
   export let configuration = {
     iceServers: [
+      { urls: "stun:Spiellabor.DM.hs-furtwangen.de" }
       // { urls: "stun:stun2.1.google.com:19302" }
       // { urls: "stun:stun.example.com" }
-      { urls: "stun:stun.l.google.com:19302" }
+      // { urls: "stun:stun.l.google.com:19302" }
       // { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }
       // {
       //   urls: "turn:192.158.29.39:3478?transport=udp",
@@ -41,7 +42,6 @@ namespace FudgeNet {
       //   username: "webrtc@live.com"
       // }
     ]
-
   };
 
   /**
