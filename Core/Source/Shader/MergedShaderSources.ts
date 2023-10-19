@@ -471,22 +471,21 @@ void main() {
     if(vctDirectionInverted.z <= 0.0)
       continue;
     
-    
-    // float fSpotIntensity = min(1.0, vctDirectionInverted.z * 5.0);                                        //Due to the specular highlight simulating the direct reflection of a given light, it makes sense to calculate the specular highlight only infront of a spotlight however not dependend on the coneshape.
-    // vctDirection = normalize(vctDirection);
-    // vctSpec += calculateReflection(vctDirection, vctView, vctNormal, fSpotIntensity * u_spot[i].vctColor);
+    float fSpotIntensity = min(1.0, vctDirectionInverted.z * 5.0);                                        //Due to the specular highlight simulating the direct reflection of a given light, it makes sense to calculate the specular highlight only infront of a spotlight however not dependend on the coneshape.
+    vctDirection = normalize(vctDirection);
+    vctSpec += calculateReflection(vctDirection, vctView, vctNormal, fSpotIntensity * u_spot[i].vctColor);
 
     float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);    //Coneshape that is brightest in the center. Possible TODO: "Variable Spotlightsoftness"
     fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);                                                 //Prevents harsh lighting artifacts at boundary of the given spotlight
     if(fIntensity < 0.0)
       continue;
 
-    vec2 vctIllumination = illuminateDirected(vctDirection, vctView, vctNormal);
-    vec4 vctColor = u_spot[i].vctColor * fIntensity;
-    vctFrag += vctIllumination.x * vctColor;
-    vctSpec += vctIllumination.y * vctColor;
+    // vec2 vctIllumination = illuminateDirected(vctDirection, vctView, vctNormal);
+    // vec4 vctColor = u_spot[i].vctColor * fIntensity;
+    // vctFrag += vctIllumination.x * vctColor;
+    // vctSpec += vctIllumination.y * vctColor;
 
-    // vctFrag += illuminateDiffuse(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor);
+    vctFrag += illuminateDiffuse(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor);
   }
 
   vctFrag += vctSpec * fMetallic;
@@ -496,6 +495,11 @@ void main() {
     #endif  
   vctFrag *= u_vctColor * v_vctColor;
   vctFrag += vctSpec * (1.0 - fMetallic);
+  vctFrag.a = 1.0;
+  vctFrag.a *= u_vctColor.a * v_vctColor.a;
+
+  if(vctFrag.a < 0.01)
+    discard;
 }`;
   shaderSources["ShaderPick.frag"] = /*glsl*/ `#version 300 es
 /**
