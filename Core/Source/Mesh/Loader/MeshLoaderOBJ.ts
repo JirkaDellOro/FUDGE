@@ -28,8 +28,8 @@ namespace FudgeCore {
 
     const vertices: Vertices = new Vertices();
     const faces: Face[] = [];
-    const mapVertexToIndex: { [key: string]: number } = {};
-    const mapPositionToIndex: { [key: string]: number } = {};
+    const mapPositionUVNormalToIndex: { [key: string]: number } = {};
+    const mapPositionNormalToIndex: { [key: string]: number } = {};
 
     // TODO: think about creating the needed buffers for rendermesh here already...
     for (let line of lines) {
@@ -47,7 +47,7 @@ namespace FudgeCore {
         case "f": /*Face Indices - example: f 1/1/1 2/2/1 3/3/1 --> vertex1/texcoord1/normal1 vertex2/texcoord2/normal2 vertex3/texcoord3/normal3*/
           for (let i: number = 0; i < 3; i++) {
             let key: string = parts[i];
-            let index: number | undefined = mapVertexToIndex[key];
+            let index: number | undefined = mapPositionUVNormalToIndex[key];
             if (index === undefined) {
               index = vertices.length;
               const vertexInfo: string[] = parts[i].split("/");
@@ -58,10 +58,11 @@ namespace FudgeCore {
               if (normal)
                 norms.push(normal.x, normal.y, normal.z);
 
-              vertices.push(new Vertex(mapPositionToIndex[vertexInfo[0]] ?? position, uv, normal));
-              mapVertexToIndex[key] = index;
-              if (mapPositionToIndex[vertexInfo[0]] == undefined)
-                mapPositionToIndex[vertexInfo[0]] = index;
+              let keyPosNorm: string = `${vertexInfo[0]}/${vertexInfo[2]}`;
+              vertices.push(new Vertex(mapPositionNormalToIndex[keyPosNorm] ?? position, uv, normal));
+              mapPositionUVNormalToIndex[key] = index;
+              if (mapPositionNormalToIndex[keyPosNorm] == undefined)
+                mapPositionNormalToIndex[keyPosNorm] = index;
             }
             indices.push(index);
           }

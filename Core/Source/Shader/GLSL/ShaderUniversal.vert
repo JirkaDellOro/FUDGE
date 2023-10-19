@@ -41,6 +41,7 @@ uniform float u_fDiffuse;
 
     #if defined(NORMALMAP)
 in vec3 a_vctTangent;
+out vec3 v_vctTangent;
     #endif
 
 struct Light {
@@ -93,7 +94,7 @@ out vec2 v_vctTexture;
   #if defined(NORMALMAP)
 uniform mat3 u_mtxPivotN;
 out vec2 v_vctNormalMap;
-out mat3 v_mtxTBN;
+// out mat3 v_mtxTBN;
   #endif
 
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
@@ -214,7 +215,8 @@ void main() {
       #endif
 
       #if defined(NORMALMAP)
-  v_mtxTBN = mat3(normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent), normalize(mat3(mtxNormalMeshToWorld) * cross(a_vctNormal, a_vctTangent)), normalize(vctNormal));
+  v_vctTangent = mat3(mtxNormalMeshToWorld) * a_vctTangent;
+  // v_mtxTBN = mat3(normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent), normalize(mat3(mtxNormalMeshToWorld) * cross(a_vctNormal, a_vctTangent)), normalize(vctNormal));
       #endif
       
       #if !defined(PHONG) && !defined(FLAT) // gouraud

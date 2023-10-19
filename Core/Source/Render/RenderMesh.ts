@@ -160,7 +160,12 @@ namespace FudgeCore {
         }
 
         // Orthagonalize the calculated tangents to the vertex normal
-        this.mesh.vertices.forEach(_vertex => _vertex.tangent.add(Vector3.SCALE(_vertex.normal, - Vector3.DOT(_vertex.normal, _vertex.tangent))));
+        this.mesh.vertices.forEach((_vertex, _index) => {
+          let normal: Vector3 = this.mesh.vertices.normal(_index);
+          _vertex.tangent.add(Vector3.SCALE(normal, - Vector3.DOT(normal, _vertex.tangent)));
+          if (_vertex.tangent.magnitudeSquared > 0)
+            _vertex.tangent.normalize();
+        });
 
         //TODO: In some cases (when uvs are mirrored) the tangents would have to be flipped in order to work properly
 

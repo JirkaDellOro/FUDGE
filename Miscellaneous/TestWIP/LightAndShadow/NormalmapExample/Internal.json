@@ -881,7 +881,7 @@
                                 "Component": {
                                   "active": true
                                 },
-                                "idMaterial": "Material|2023-05-06T12:15:24.432Z|50642"
+                                "idMaterial": "Material|2023-04-27T20:09:22.884Z|29193"
                               }
                             }
                           ]
@@ -1091,12 +1091,12 @@
                       "b": 0,
                       "a": 1
                     },
-                    "near": 1,
-                    "far": 1000,
                     "backgroundEnabled": false,
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
+                    "near": 1,
+                    "far": 1000,
                     "aspect": 1.5617283950617284,
                     "pivot": {
                       "translation": "[0, 0, -3.889984130859375]",

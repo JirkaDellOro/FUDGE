@@ -396,7 +396,7 @@
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2023-10-13T11:26:47.157Z|50997"
+                    "idMaterial": "Material|2023-10-13T07:11:17.681Z|28686"
                   }
                 }
               ],
@@ -589,22 +589,6 @@
       ],
       "idResource": "Graph|2023-07-25T08:47:48.755Z|05108",
       "type": "Graph"
-    }
-  },
-  "Material|2023-10-13T11:26:47.157Z|50997": {
-    "ƒ.Material": {
-      "name": "ShaderFlat",
-      "idResource": "Material|2023-10-13T11:26:47.157Z|50997",
-      "shader": "ShaderFlat",
-      "coat": {
-        "ƒ.CoatRemissive": {
-          "color": "[1, 1, 1, 1]",
-          "diffuse": 1,
-          "metallic": 0,
-          "specular": 0.5,
-          "intensity": 0.7
-        }
-      }
     }
   }
 }

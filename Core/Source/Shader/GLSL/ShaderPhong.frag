@@ -55,8 +55,9 @@ uniform sampler2D u_texture;
 
   // NORMALMAP: input UVs and texture
   #if defined(NORMALMAP)
-in mat3 v_mtxTBN;
+// in mat3 v_mtxTBN;
 in vec2 v_vctNormalMap;
+in vec3 v_vctTangent;
 uniform sampler2D u_normalMap;
   #endif
 
@@ -127,12 +128,38 @@ void main() {
   vec4 vctSpec = vec4(0, 0, 0, 1);
 
     #if defined(PHONG)
+  vec3 vctView = normalize(v_vctPosition - u_vctCamera);
       #if defined(NORMALMAP)
-  vec3 vctNormal = v_mtxTBN * (2.0 * texture(u_normalMap, v_vctNormalMap).xyz - 1.0);
+  // from http://www.thetenthplanet.de/archives/1180 "Followup: Normal Mapping Without Precomputed Tangents"
+  // this need highp float to work on mobile devices
+  // vec3 vctDeltaPosition1 = dFdx(v_vctPosition - u_vctCamera); // might have to use vctView (unnormalized!) instead of vctPosition if precision issues occur
+  // vec3 vctDeltaPosition2 = dFdy(v_vctPosition - u_vctCamera);
+  // vec2 vctDeltaUV1 = dFdx(v_vctNormalMap);
+  // vec2 vctDeltaUV2 = dFdy(v_vctNormalMap);
+  
+  // vec3 vctNormal = normalize(v_vctNormal);
+  // vec3 vctDeltaPosition1cross = cross( vctNormal, vctDeltaPosition1 ); 
+  // vec3 vctDeltaPosition2cross = cross( vctDeltaPosition2, vctNormal ); 
+
+  // vec3 vctTangent = vctDeltaPosition2cross * vctDeltaUV1.x + vctDeltaPosition1cross * vctDeltaUV2.x; 
+  // vec3 vctBitangent = vctDeltaPosition2cross * vctDeltaUV1.y + vctDeltaPosition1cross * vctDeltaUV2.y;
+
+  // float invmax = inversesqrt( max( dot(vctTangent,vctTangent), dot(vctBitangent,vctBitangent) ) ); 
+  // mat3 mtxTBN = mat3( vctTangent * invmax, vctBitangent * invmax, vctNormal );
+
+  // vctNormal = texture(u_normalMap, v_vctNormalMap).xyz * 2.0 - 1.0;
+  // vctNormal = normalize(mtxTBN * vctNormal);
+
+
+  vec3 vctBitangent = cross(v_vctNormal, v_vctTangent);
+  mat3 mtxTBN = mat3(normalize(v_vctTangent), normalize(vctBitangent), normalize(v_vctNormal));
+  vec3 vctNormal = texture(u_normalMap, v_vctNormalMap).xyz * 2.0 - 1.0;
+  vctNormal = normalize(mtxTBN * vctNormal);
+
+  // vec3 vctNormal = normalize(v_mtxTBN * (texture(u_normalMap, v_vctNormalMap).xyz * 2.0 - 1.0));
       #else
   vec3 vctNormal = normalize(v_vctNormal);
       #endif
-  vec3 vctView = normalize(v_vctPosition - u_vctCamera);
     #endif
 
     #if defined(FLAT)
@@ -147,13 +174,13 @@ void main() {
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
-    vec2 vctIllumination = illuminateDirected(vctDirection, vctView, vctNormal);
-    vctFrag += vctIllumination.x * u_directional[i].vctColor;
-    vctSpec += vctIllumination.y * u_directional[i].vctColor;
+    // vec2 vctIllumination = illuminateDirected(vctDirection, vctView, vctNormal);
+    // vctFrag += vctIllumination.x * u_directional[i].vctColor;
+    // vctSpec += vctIllumination.y * u_directional[i].vctColor;
     
-    // vctDirection = normalize(vctDirection);
-    // vctFrag += illuminateDiffuse(vctDirection, vctNormal, u_directional[i].vctColor);
-    // vctSpec += calculateReflection(vctDirection, vctView, vctNormal, u_directional[i].vctColor);
+    vctDirection = normalize(vctDirection);
+    vctFrag += illuminateDiffuse(vctDirection, vctNormal, u_directional[i].vctColor);
+    vctSpec += calculateReflection(vctDirection, vctView, vctNormal, u_directional[i].vctColor);
   }
 
   // calculate point light effect
@@ -162,17 +189,18 @@ void main() {
     vec3 vctDirection = vctPosition - vctPositionLight;
     float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
 
+    vctDirection = normalize(vctDirection);
+    vctSpec += calculateReflection(vctDirection, vctView, vctNormal, u_point[i].vctColor);
+
     if(fIntensity < 0.0)
       continue;
 
-    vec2 vctIllumination = illuminateDirected(vctDirection, vctView, vctNormal);
-    vec4 vctColor = u_point[i].vctColor * fIntensity;
-    vctFrag += vctIllumination.x * vctColor;
-    vctSpec += vctIllumination.y * vctColor;
+    // vec2 vctIllumination = illuminateDirected(vctDirection, vctView, vctNormal);
+    // vec4 vctColor = u_point[i].vctColor * fIntensity;
+    // vctFrag += vctIllumination.x * vctColor;
+    // vctSpec += vctIllumination.y * vctColor;
 
-    // vctDirection = normalize(vctDirection);
-    // vctSpec += calculateReflection(vctDirection, vctView, vctNormal, vctColor);
-    // vctFrag += illuminateDiffuse(vctDirection, vctNormal, vctColor);
+    vctFrag += illuminateDiffuse(vctDirection, vctNormal, u_point[i].vctColor * fIntensity);
   }
 
   // calculate spot light effect
@@ -182,22 +210,22 @@ void main() {
     vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
     if(vctDirectionInverted.z <= 0.0)
       continue;
+    
+    
+    // float fSpotIntensity = min(1.0, vctDirectionInverted.z * 5.0);                                        //Due to the specular highlight simulating the direct reflection of a given light, it makes sense to calculate the specular highlight only infront of a spotlight however not dependend on the coneshape.
+    // vctDirection = normalize(vctDirection);
+    // vctSpec += calculateReflection(vctDirection, vctView, vctNormal, fSpotIntensity * u_spot[i].vctColor);
+
     float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);    //Coneshape that is brightest in the center. Possible TODO: "Variable Spotlightsoftness"
     fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);                                                 //Prevents harsh lighting artifacts at boundary of the given spotlight
     if(fIntensity < 0.0)
       continue;
-
-
 
     vec2 vctIllumination = illuminateDirected(vctDirection, vctView, vctNormal);
     vec4 vctColor = u_spot[i].vctColor * fIntensity;
     vctFrag += vctIllumination.x * vctColor;
     vctSpec += vctIllumination.y * vctColor;
 
-    // float fSpotIntensity = min(1.0, vctDirectionInverted.z * 5.0);                                        //Due to the specular highlight simulating the direct reflection of a given light, it makes sense to calculate the specular highlight only infront of a spotlight however not dependend on the coneshape.
-    // vctDirection = normalize(vctDirection);
-
-    // vctSpec += calculateReflection(vctDirection, vctView, vctNormal, fIntensity * u_spot[i].vctColor);
     // vctFrag += illuminateDiffuse(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor);
   }
 
@@ -208,5 +236,4 @@ void main() {
     #endif  
   vctFrag *= u_vctColor * v_vctColor;
   vctFrag += vctSpec * (1.0 - fMetallic);
-
 }
