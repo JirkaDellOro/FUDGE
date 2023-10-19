@@ -63,7 +63,7 @@ var FudgePhysics_Communication;
         viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
         f.Debug.branch(viewPort.getBranch());
         // f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-        f.Loop.addEventListener("loopFrame" /* f.EVENT.LOOP_FRAME */, update);
+        f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         // f.Physics.adjustTransforms(hierarchy);
         f.Loop.start();
     }

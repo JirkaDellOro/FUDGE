@@ -20,7 +20,7 @@ var AnimatorControleTest;
             let cmpAnimator = node.getComponent(ƒ.ComponentAnimator);
             cmpAnimator.jumpToLabel("jump");
         }
-        ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
+        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start();
     }
     function initAnim() {

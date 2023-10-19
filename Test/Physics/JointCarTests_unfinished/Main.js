@@ -66,7 +66,7 @@ var Turorials_FUDGEPhysics_Lesson1;
         f.Physics.adjustTransforms(hierarchy);
         viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
         //Important start the game loop after starting physics, so physics can use the current transform before it's first iteration
-        f.Loop.addEventListener("loopFrame" /* f.EVENT.LOOP_FRAME */, update); //Tell the game loop to call the update function on each frame
+        f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update); //Tell the game loop to call the update function on each frame
         f.Loop.start(); //Stard the game loop
     }
     //Function to animate/update the Fudge scene, commonly known as gameloop

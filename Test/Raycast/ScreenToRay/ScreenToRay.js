@@ -71,7 +71,7 @@ var ScreenToRay;
             logMutatorInfo(name, uiMaps[name].framing);
         }
         document.addEventListener("keydown", hndKeydown);
-        ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, animate);
+        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
         ƒ.Loop.start();
         function animate(_event) {
             update();

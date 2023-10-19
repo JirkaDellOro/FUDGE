@@ -35,7 +35,7 @@ var SkeletonTest;
         viewport.draw();
         console.log(viewport);
         // run loop
-        ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal, cylinder.getComponent(ƒ.ComponentMaterial).material));
+        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal, cylinder.getComponent(ƒ.ComponentMaterial).material));
         ƒ.Loop.start();
     }
     class MeshSkinCylinder extends ƒ.MeshSkin {

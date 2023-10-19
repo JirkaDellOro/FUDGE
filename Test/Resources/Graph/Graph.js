@@ -48,7 +48,7 @@ var Graph;
             console.log(ƒ.Serializer.stringify(srlInstance));
             console.groupEnd();
         }
-        ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
+        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         // debugger;
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 10);
         async function update(_event) {

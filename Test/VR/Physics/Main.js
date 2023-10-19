@@ -31,7 +31,7 @@ var PhysicsVR;
         for (let i = 0; i <= 150; i++) {
             cubeInstances[i] = await f.Project.createGraphInstance(cubeGraph);
         }
-        f.Loop.addEventListener("loopFrame" /* f.EVENT.LOOP_FRAME */, update);
+        f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST, 60);
         checkForVRSupport();
     }
