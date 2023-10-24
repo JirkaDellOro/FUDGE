@@ -20,30 +20,29 @@ namespace FudgeCore {
     public buffers: RenderBuffers = null;
     public mesh: Mesh;
 
-    // TODO: could make these java script private i.e. #vertices, #indices...
     /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
-    protected ƒvertices: Float32Array;
+    #vertices: Float32Array;
     /** indices to create faces from the vertices, rotation determines direction of face-normal */
-    protected ƒindices: Uint16Array;
+    #indices: Uint16Array;
     /** texture coordinates associated with the vertices by the position in the array */
-    protected ƒtextureUVs: Float32Array;
+    #textureUVs: Float32Array;
     /** vertex normals for smooth shading, interpolated between vertices during rendering */
-    protected ƒnormals: Float32Array;
+    #normals: Float32Array;
     /* colors */
-    protected ƒcolors: Float32Array;
+    #colors: Float32Array;
     /** vertex tangents for normal mapping, based on the vertex normals and the UV coordinates */
-    protected ƒtangents: Float32Array;
+    #tangents: Float32Array;
     /** bones */
-    protected ƒbones: Uint8Array;
-    protected ƒweights: Float32Array;
+    #bones: Uint8Array;
+    #weights: Float32Array;
 
     public constructor(_mesh: Mesh) {
       this.mesh = _mesh;
     }
 
     public get bones(): Uint8Array {
-      return this.ƒbones || ( // return cache or ...
-        this.ƒbones = this.mesh.vertices.some(_vertex => _vertex.bones) ?
+      return this.#bones || ( // return cache or ...
+        this.#bones = this.mesh.vertices.some(_vertex => _vertex.bones) ?
           new Uint8Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
             const bones: Bone[] = this.mesh.vertices.bones(_index);
             return [bones?.[0]?.index || 0, bones?.[1]?.index || 0, bones?.[2]?.index || 0, bones?.[3]?.index || 0];
@@ -52,12 +51,12 @@ namespace FudgeCore {
       );
     }
     public set bones(_iBones: Uint8Array) {
-      this.ƒbones = _iBones;
+      this.#bones = _iBones;
     }
 
     public get weights(): Float32Array {
-      return this.ƒweights || ( // return cache or ...
-        this.ƒweights = this.mesh.vertices.some(_vertex => _vertex.bones) ?
+      return this.#weights || ( // return cache or ...
+        this.#weights = this.mesh.vertices.some(_vertex => _vertex.bones) ?
           new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
             const bones: Bone[] = this.mesh.vertices.bones(_index);
             return [bones?.[0]?.weight || 0, bones?.[1]?.weight || 0, bones?.[2]?.weight || 0, bones?.[3]?.weight || 0];
@@ -66,33 +65,35 @@ namespace FudgeCore {
       );
     }
     public set weights(_weights: Float32Array) {
-      this.ƒweights = _weights;
+      this.#weights = _weights;
     }
 
     public get vertices(): Float32Array {
-      return this.ƒvertices || ( // return cache or ...
+      return this.#vertices || ( // return cache or ...
         // ... flatten all vertex positions from cloud into a typed array
-        this.ƒvertices = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
+        this.#vertices = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
           return [...this.mesh.vertices.position(_index).get()];
         })));
     }
     public set vertices(_vertices: Float32Array) {
-      this.ƒvertices = _vertices;
+      this.#vertices = _vertices;
     }
 
     public get indices(): Uint16Array {
-      return this.ƒindices || ( // return cache or ...
+      return this.#indices || ( // return cache or ...
         // ... flatten all indices from the faces into a typed array
-        this.ƒindices = new Uint16Array(this.mesh.faces.flatMap((_face: Face) => [..._face.indices])
+        this.#indices = new Uint16Array(this.mesh.faces.flatMap((_face: Face) => [..._face.indices])
         ));
     }
     public set indices(_indices: Uint16Array) {
-      this.ƒindices = _indices;
+      this.#indices = _indices;
     }
 
     public get normals(): Float32Array {
-      // TODO: this should use the normals from the vertices and only calculate them if they are not present
-      if (this.ƒnormals == null) {
+      if (this.#normals == null) {
+
+        // TODO: implement a check similiar to the one for tangents below, to see if normals are already present in the vertices
+
         // sum up all unscaled normals of faces connected to one vertex, weighted by the angle between the two neighbour vertices...
         this.mesh.vertices.forEach(_vertex => _vertex.normal.set(0, 0, 0));
 
@@ -109,108 +110,130 @@ namespace FudgeCore {
 
         // this.ƒnormalsVertex = new Float32Array(normalsVertex.flatMap((_normal: Vector3) => [..._normal.get()]));
 
-        this.ƒnormals = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
-          return [...this.mesh.vertices.normal(_index).get()];
-        }));
+        this.#normals = new Float32Array(
+          this.mesh.vertices.flatMap((_vertex, _index) => [...this.mesh.vertices.normal(_index).get()])
+        );
       }
 
-      return this.ƒnormals;
+      return this.#normals;
     }
     public set normals(_normals: Float32Array) {
-      this.ƒnormals = _normals;
+      this.#normals = _normals;
     }
 
     public get tangents(): Float32Array {
-      if (this.ƒtangents == null) {
-        if (this.mesh.vertices.some(_vertex => !_vertex.uv))
-          return new Float32Array(); // no texture coordinates, no tangents
+      if (this.#tangents == null) {
 
-        // TODO: this should use the tangents from the vertices and only calculate them if they are not present
-        this.mesh.vertices.forEach(_vertex => _vertex.tangent.set(0, 0, 0)); // ???
-        for (let face of this.mesh.faces) {
-          let i0: number = face.indices[0];
-          let i1: number = face.indices[1];
-          let i2: number = face.indices[2];
-
-          //vertices surrounding one triangle
-          let v0: Vector3 = this.mesh.vertices.position(i0);
-          let v1: Vector3 = this.mesh.vertices.position(i1);
-          let v2: Vector3 = this.mesh.vertices.position(i2);
-
-          //their UVs
-          let uv0: Vector2 = this.mesh.vertices.uv(i0);
-          let uv1: Vector2 = this.mesh.vertices.uv(i1);
-          let uv2: Vector2 = this.mesh.vertices.uv(i2);
-
-          //We compute the edges of the triangle...
-          let deltaPos1: Vector3 = Vector3.DIFFERENCE(v1, v0);
-          let deltaPos2: Vector3 = Vector3.DIFFERENCE(v2, v0);
-
-          //...and the edges of the triangles in UV space...
-          let deltaUV1: Vector2 = Vector2.DIFFERENCE(uv1, uv0);
-          let deltaUV2: Vector2 = Vector2.DIFFERENCE(uv2, uv0);
-
-          //...and compute the tangent
-          let r: number = 1 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-          let tempTangent: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(Vector3.SCALE(deltaPos1, deltaUV2.y), Vector3.SCALE(deltaPos2, deltaUV1.y)), r);
-
-          this.mesh.vertices[i0].tangent = tempTangent;
-          this.mesh.vertices[i1].tangent = tempTangent;
-          this.mesh.vertices[i2].tangent = tempTangent;
+        if (this.mesh.vertices.some(_vertex => !_vertex.uv)) { // assume all vertices have texture coordinates or none
+          this.#tangents = new Float32Array(); // no texture coordinates, no tangents
+          return this.#tangents;
         }
 
-        // Orthagonalize the calculated tangents to the vertex normal
-        this.mesh.vertices.forEach((_vertex, _index) => {
-          let normal: Vector3 = this.mesh.vertices.normal(_index);
-          _vertex.tangent.add(Vector3.SCALE(normal, - Vector3.DOT(normal, _vertex.tangent)));
-          if (_vertex.tangent.magnitudeSquared > 0)
-            _vertex.tangent.normalize();
-        });
-
-        //TODO: In some cases (when uvs are mirrored) the tangents would have to be flipped in order to work properly
-
-        //All faces have their individual tangents, which leads to shading artifacts, which is accounted for here
-        for (let vertex of this.mesh.vertices) {
-          if (typeof vertex.referTo !== "undefined") {
-            if (vertex.uv.equals(this.mesh.vertices[vertex.referTo].uv)) {
-              //TODO: It would be ideal to compare all vertices first and average out the different tangents between the ones with the same position, UV-position and vertex-normal but this approach is taken for its lower computational impact
-              vertex.tangent = this.mesh.vertices[vertex.referTo].tangent;
-              //This however leeds to minor artifacts along UV-seams
-            }
+        if (this.mesh.vertices.some(_vertex => !_vertex.tangent)) { // assume all vertices have tangents or none
+          const tangents: Vector3[] = new Array(this.mesh.vertices.length);
+          const bitangents: Vector3[] = new Array(this.mesh.vertices.length);
+          for (let i: number = 0; i < tangents.length; i++) {
+            tangents[i] = Vector3.ZERO();
+            bitangents[i] = Vector3.ZERO();
           }
+
+          // this.mesh.vertices.forEach(_vertex => _vertex.tangent.set(0, 0, 0));
+
+          for (let face of this.mesh.faces) {
+            let i0: number = face.indices[0];
+            let i1: number = face.indices[1];
+            let i2: number = face.indices[2];
+
+            //vertices surrounding one triangle
+            let v0: Vector3 = this.mesh.vertices.position(i0);
+            let v1: Vector3 = this.mesh.vertices.position(i1);
+            let v2: Vector3 = this.mesh.vertices.position(i2);
+
+            //their UVs
+            let uv0: Vector2 = this.mesh.vertices.uv(i0);
+            let uv1: Vector2 = this.mesh.vertices.uv(i1);
+            let uv2: Vector2 = this.mesh.vertices.uv(i2);
+
+            //We compute the edges of the triangle...
+            let deltaPos0: Vector3 = Vector3.DIFFERENCE(v1, v0);
+            let deltaPos1: Vector3 = Vector3.DIFFERENCE(v2, v0);
+
+            //...and the edges of the triangles in UV space...
+            let deltaUV0: Vector2 = Vector2.DIFFERENCE(uv1, uv0);
+            let deltaUV1: Vector2 = Vector2.DIFFERENCE(uv2, uv0);
+
+            //...and compute the tangent
+            let r: number = 1 / (deltaUV0.x * deltaUV1.y - deltaUV0.y * deltaUV1.x); // correct
+            let faceTangent: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(Vector3.SCALE(deltaPos0, deltaUV1.y), Vector3.SCALE(deltaPos1, deltaUV0.y)), r);
+            let faceBitangent: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(Vector3.SCALE(deltaPos1, deltaUV0.x), Vector3.SCALE(deltaPos0, deltaUV1.x)), r);
+
+            tangents[i0].add(Vector3.SCALE(faceTangent, face.angles[0]));
+            tangents[i1].add(Vector3.SCALE(faceTangent, face.angles[1]));
+            tangents[i2].add(Vector3.SCALE(faceTangent, face.angles[2]));
+
+            bitangents[i0].add(Vector3.SCALE(faceBitangent, face.angles[0]));
+            bitangents[i1].add(Vector3.SCALE(faceBitangent, face.angles[1]));
+            bitangents[i2].add(Vector3.SCALE(faceBitangent, face.angles[2]));
+          }
+
+          this.mesh.vertices.forEach((_vertex, _index) => {
+            let normal: Vector3 = this.mesh.vertices.normal(_index);
+            let tangent: Vector3 = tangents[_index];
+            let bitangent: Vector3 = bitangents[_index];
+
+            // reorthogonalize
+            tangent.add(Vector3.SCALE(normal, - Vector3.DOT(normal, tangent)));
+            if (tangent.magnitudeSquared > 0) // some vertices might be unused and yield a zero-tangent...
+              tangent.normalize();
+
+            let handedness: number = (Vector3.DOT(Vector3.CROSS(normal, tangent), bitangent) < 0) ? -1 : 1;
+
+            _vertex.tangent = new Vector4(tangent.x, tangent.y, tangent.z, handedness);
+          });
+
+          //TODO: In some cases (when uvs are mirrored) the tangents would have to be flipped in order to work properly
+
+          //All faces have their individual tangents, which leads to shading artifacts, which is accounted for here
+          // for (let vertex of this.mesh.vertices) {
+          //   if (typeof vertex.referTo !== "undefined") {
+          //     if (vertex.uv.equals(this.mesh.vertices[vertex.referTo].uv)) {
+          //       //TODO: It would be ideal to compare all vertices first and average out the different tangents between the ones with the same position, UV-position and vertex-normal but this approach is taken for its lower computational impact
+          //       vertex.tangent = this.mesh.vertices[vertex.referTo].tangent;
+          //       //This however leeds to minor artifacts along UV-seams
+          //     }
+          //   }
+          // }
         }
 
-        //At last, all the tangents are stored in their respective Float32Array
-        this.ƒtangents = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
-          return [...this.mesh.vertices[_index].tangent.get()];
-        }));
-
+        this.#tangents = new Float32Array(
+          this.mesh.vertices.flatMap(_vertex => _vertex.tangent.get())
+        );
       }
 
-      return this.ƒtangents;
+      return this.#tangents;
     }
 
     public get textureUVs(): Float32Array {
-      return this.ƒtextureUVs || ( // return cache or ...
+      return this.#textureUVs || ( // return cache or ...
         // ... flatten all uvs from the clous into a typed array
-        this.ƒtextureUVs = new Float32Array(this.mesh.vertices
+        this.#textureUVs = new Float32Array(this.mesh.vertices
           .filter(_vertex => _vertex.uv)
           .flatMap((_vertex: Vertex) => [..._vertex.uv.get()])
         ));
     }
     public set textureUVs(_textureUVs: Float32Array) {
-      this.ƒtextureUVs = _textureUVs;
+      this.#textureUVs = _textureUVs;
     }
 
     public get colors(): Float32Array {
-      return this.ƒcolors || (
-        this.ƒcolors = new Float32Array(this.mesh.vertices
+      return this.#colors || (
+        this.#colors = new Float32Array(this.mesh.vertices
           .filter(_vertex => _vertex.color)
           .flatMap(_vertex => [..._vertex.color.getArray()])
         ));
     }
     public set colors(_colors: Float32Array) {
-      this.ƒcolors = _colors;
+      this.#colors = _colors;
     }
 
     /**
@@ -218,15 +241,15 @@ namespace FudgeCore {
      */
     public clear(): void {
       this.buffers = null;
-      this.ƒvertices = undefined;
-      this.ƒindices = undefined;
-      this.ƒtextureUVs = undefined;
-      this.ƒnormals = undefined;
-      this.ƒcolors = undefined;
-      this.ƒtangents = undefined;
+      this.#vertices = null;
+      this.#indices = null;
+      this.#textureUVs = null;
+      this.#normals = null;
+      this.#colors = null;
+      this.#tangents = null;
 
-      this.ƒbones = undefined;
-      this.ƒweights = undefined;
+      this.#bones = null;
+      this.#weights = null;
     }
   }
 }

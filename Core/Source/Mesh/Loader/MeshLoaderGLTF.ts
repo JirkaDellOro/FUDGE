@@ -67,28 +67,28 @@ namespace FudgeCore {
         weights = await loader.getFloat32Array(gltfPrimitive.attributes.WEIGHTS_0);
       }
 
-      for (let iVertex: number = 0, iColor: number = 0, iTextureUV: number = 0, iBoneEntry: number = 0; iVertex < vertices?.length; iVertex += 3, iColor += 4, iTextureUV += 2, iBoneEntry += 4) {
+      for (let iVector2: number = 0, iVector3: number = 0, iVector4: number = 0; iVector3 < vertices?.length; iVector2 += 2, iVector3 += 3, iVector4 += 4) {
         _mesh.vertices.push(
           new Vertex(
-            new Vector3(vertices[iVertex + 0], vertices[iVertex + 1], vertices[iVertex + 2]),
+            new Vector3(vertices[iVector3 + 0], vertices[iVector3 + 1], vertices[iVector3 + 2]),
             textureUVs ?
-              new Vector2(textureUVs[iTextureUV + 0], textureUVs[iTextureUV + 1]) :
+              new Vector2(textureUVs[iVector2 + 0], textureUVs[iVector2 + 1]) :
               undefined,
             normals ?
-              new Vector3(normals[iVertex + 0], normals[iVertex + 1], normals[iVertex + 2]) :
+              new Vector3(normals[iVector3 + 0], normals[iVector3 + 1], normals[iVector3 + 2]) :
               undefined,
             tangents ?
-              new Vector3(tangents[iVertex + 0], tangents[iVertex + 1], tangents[iVertex + 2]) :
+              new Vector4(tangents[iVector3 + 0], tangents[iVector3 + 1], tangents[iVector3 + 2], tangents[iVector3 + 4]) :
               undefined,
             colors ?
-              new Color(colors[iColor + 0], colors[iColor + 1], colors[iColor + 2], colors[iColor + 3]) :
+              new Color(colors[iVector4 + 0], colors[iVector4 + 1], colors[iVector4 + 2], colors[iVector4 + 3]) :
               undefined,
             bones && weights ?
               [
-                { index: bones[iBoneEntry + 0], weight: weights[iBoneEntry + 0] },
-                { index: bones[iBoneEntry + 1], weight: weights[iBoneEntry + 1] },
-                { index: bones[iBoneEntry + 2], weight: weights[iBoneEntry + 2] },
-                { index: bones[iBoneEntry + 3], weight: weights[iBoneEntry + 3] }
+                { index: bones[iVector4 + 0], weight: weights[iVector4 + 0] },
+                { index: bones[iVector4 + 1], weight: weights[iVector4 + 1] },
+                { index: bones[iVector4 + 2], weight: weights[iVector4 + 2] },
+                { index: bones[iVector4 + 3], weight: weights[iVector4 + 3] }
               ] :
               undefined
           )

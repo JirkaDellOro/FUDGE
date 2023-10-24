@@ -32,11 +32,10 @@ namespace FudgeCore {
     }
 
     /**
-     * returns the tangent associated with the vertex addressed, resolving references between vertices 
+     * returns the tangent associated with the vertex addressed
      */
-    public tangent(_index: number): Vector3 {
-      let vertex: Vertex = this[_index];
-      return (vertex.referTo == undefined) ? vertex.tangent : this[vertex.referTo].tangent;
+    public tangent(_index: number): Vector4 {
+      return this[_index].tangent; // tangents can not be shared as they are dependent on the uv-coordinates
     }
 
     /**

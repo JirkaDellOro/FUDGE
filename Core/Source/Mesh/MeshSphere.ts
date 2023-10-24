@@ -10,7 +10,7 @@ namespace FudgeCore {
 
     public constructor(_name: string = "MeshSphere", _longitudes: number = 8, _latitudes: number = 8) {
       super(_name);
-      this.create(_longitudes, _latitudes);
+      this.create(_longitudes, _latitudes); // TODO: when deserialized this causes this causes the mesh to be created twice
     }
 
     /**
