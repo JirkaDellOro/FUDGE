@@ -25,11 +25,11 @@ uniform vec3 u_vctCamera;
 uniform float u_fSpecular;
 
 float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
-  if(_fSpecular <= 0.0f)
-    return 0.0f;
+  if(_fSpecular <= 0.0)
+    return 0.0;
   vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
   float fHitCamera = dot(vctReflection, _vctView);
-  return pow(max(fHitCamera, 0.0f), _fSpecular * 10.0f) * _fSpecular; // 10.0 = magic number, looks good... 
+  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
 }
   #endif
 
@@ -40,8 +40,9 @@ in vec3 a_vctNormal;
 uniform float u_fDiffuse;
 
     #if defined(NORMALMAP)
-in vec3 a_vctTangent;
+in vec4 a_vctTangent;
 out vec3 v_vctTangent;
+out vec3 v_vctBitangent;
     #endif
 
 struct Light {
@@ -68,7 +69,7 @@ vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec
   vec4 vctResult = vec4(0, 0, 0, 1);
   vec3 vctDirection = normalize(_vctDirection);
   float fIllumination = -dot(_vctNormal, vctDirection);
-  if(fIllumination > 0.0f) {
+  if(fIllumination > 0.0) {
     vctResult += u_fDiffuse * fIllumination * _vctColor;
         #if defined(CAMERA)
     float fReflection = calculateReflection(vctDirection, _vctView, _vctNormal, _fSpecular);
@@ -79,24 +80,14 @@ vec4 illuminateDirected(vec3 _vctDirection, vec3 _vctNormal, vec4 _vctColor, vec
 }
   #endif 
 
-// TEXTURE || NORMALMAP: texture coordinates for texturemaps
-#if defined(TEXTURE) || defined(NORMALMAP)
-in vec2 a_vctTexture;
-#endif
-
-  // TEXTURE: offer buffers for UVs and pivot matrix
-  #if defined(TEXTURE)
+  // TEXTURE and NORMALMAP: texture coordinates for texturemaps
+  #if defined(TEXTURE) || defined(NORMALMAP)
 uniform mat3 u_mtxPivot;
+in vec2 a_vctTexture;
 out vec2 v_vctTexture;
   #endif
 
-  // NORMALMAP: offer buffers for UVs and pivot matrix
-  #if defined(NORMALMAP)
-uniform mat3 u_mtxPivotN;
-out vec2 v_vctNormalMap;
-// out mat3 v_mtxTBN;
-  #endif
-
+  // MATCAP: offer buffers for UVs and pivot matrix
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
 in vec3 a_vctNormal;
 uniform mat4 u_mtxNormalMeshToWorld;
@@ -121,7 +112,7 @@ uniform mat4 u_mtxWorldToView; //
 in uvec4 a_vctBones;
 in vec4 a_vctWeights;
 const uint MAX_BONES = 256u; // CAUTION: this number must be the same as in RenderInjectorSkeletonInstance where the corresponding buffers are created
-layout (std140) uniform Skin {
+layout(std140) uniform Skin {
   mat4 u_mtxBones[MAX_BONES];
 };
   #endif
@@ -136,13 +127,13 @@ uniform bool u_bParticleSystemFaceCamera;
 uniform bool u_bParticleSystemRestrict;
 
 mat4 lookAt(vec3 _vctTranslation, vec3 _vctTarget) {
-  vec3 vctUp = vec3(0.0f, 1.0f, 0.0f);
+  vec3 vctUp = vec3(0.0, 1.0, 0.0);
   vec3 zAxis = normalize(_vctTarget - _vctTranslation);
   vec3 xAxis = normalize(cross(vctUp, zAxis));
   vec3 yAxis = u_bParticleSystemRestrict ? vctUp : normalize(cross(zAxis, xAxis));
   zAxis = u_bParticleSystemRestrict ? normalize(cross(xAxis, vctUp)) : zAxis;
 
-  return mat4(xAxis.x, xAxis.y, xAxis.z, 0.0f, yAxis.x, yAxis.y, yAxis.z, 0.0f, zAxis.x, zAxis.y, zAxis.z, 0.0f, _vctTranslation.x, _vctTranslation.y, _vctTranslation.z, 1.0f);
+  return mat4(xAxis.x, xAxis.y, xAxis.z, 0.0, yAxis.x, yAxis.y, yAxis.z, 0.0, zAxis.x, zAxis.y, zAxis.z, 0.0, _vctTranslation.x, _vctTranslation.y, _vctTranslation.z, 1.0);
 }
 
 float fetchRandomNumber(int _iIndex, int _iParticleSystemRandomNumbersSize, int _iParticleSystemRandomNumbersLength) {
@@ -152,7 +143,7 @@ float fetchRandomNumber(int _iIndex, int _iParticleSystemRandomNumbersSize, int 
   #endif
 
 void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0f);
+  vec4 vctPosition = vec4(a_vctPosition, 1.0);
 
     #if defined(CAMERA) || defined(PARTICLE) || defined(SKIN) || defined(MATCAP)
   mat4 mtxMeshToWorld = u_mtxMeshToWorld;
@@ -168,7 +159,7 @@ void main() {
   mtxMeshToWorld = /*$mtxWorld*/ mtxMeshToWorld /*$mtxLocal*/;
   if(u_bParticleSystemFaceCamera)
     mtxMeshToWorld = lookAt(vec3(mtxMeshToWorld[3][0], mtxMeshToWorld[3][1], mtxMeshToWorld[3][2]), u_vctCamera) *
-      mat4(length(vec3(mtxMeshToWorld[0][0], mtxMeshToWorld[1][0], mtxMeshToWorld[2][0])), 0.0f, 0.0f, 0.0f, 0.0f, length(vec3(mtxMeshToWorld[0][1], mtxMeshToWorld[1][1], mtxMeshToWorld[2][1])), 0.0f, 0.0f, 0.0f, 0.0f, length(vec3(mtxMeshToWorld[0][2], mtxMeshToWorld[1][2], mtxMeshToWorld[2][2])), 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+      mat4(length(vec3(mtxMeshToWorld[0][0], mtxMeshToWorld[1][0], mtxMeshToWorld[2][0])), 0.0, 0.0, 0.0, 0.0, length(vec3(mtxMeshToWorld[0][1], mtxMeshToWorld[1][1], mtxMeshToWorld[2][1])), 0.0, 0.0, 0.0, 0.0, length(vec3(mtxMeshToWorld[0][2], mtxMeshToWorld[1][2], mtxMeshToWorld[2][2])), 0.0, 0.0, 0.0, 0.0, 1.0);
   mat4 mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
     #else
   mat4 mtxMeshToView = u_mtxMeshToView;
@@ -188,7 +179,7 @@ void main() {
     a_vctWeights.y * u_mtxBones[a_vctBones.y] +
     a_vctWeights.z * u_mtxBones[a_vctBones.z] +
     a_vctWeights.w * u_mtxBones[a_vctBones.w];
-  
+
   mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
   mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
     #endif
@@ -215,61 +206,56 @@ void main() {
       #endif
 
       #if defined(NORMALMAP)
-  v_vctTangent = mat3(mtxNormalMeshToWorld) * a_vctTangent;
-  // v_mtxTBN = mat3(normalize(mat3(mtxNormalMeshToWorld) * a_vctTangent), normalize(mat3(mtxNormalMeshToWorld) * cross(a_vctNormal, a_vctTangent)), normalize(vctNormal));
+  v_vctTangent = mat3(mtxNormalMeshToWorld) * a_vctTangent.xyz;
+  v_vctBitangent = cross(vctNormal, v_vctTangent) * a_vctTangent.w;
       #endif
-      
+
       #if !defined(PHONG) && !defined(FLAT) // gouraud
   vctNormal = normalize(vctNormal);
   v_vctColor = u_fDiffuse * u_ambient.vctColor;
 
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0f, 0.0f, 1.0f, 1.0f));
+    vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
     v_vctColor += illuminateDirected(vctDirection, vctNormal, u_directional[i].vctColor, vctView, u_fSpecular);
   }
 
   // calculate point light effect
   for(uint i = 0u; i < u_nLightsPoint; i++) {
-    vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
     vec3 vctDirection = vec3(mtxMeshToWorld * vctPosition) - vctPositionLight;
-    float fIntensity = 1.0f - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
-    if(fIntensity < 0.0f)
+    float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
+    if(fIntensity < 0.0)
       continue;
     v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_point[i].vctColor, vctView, u_fSpecular);
   }
 
   // calculate spot light effect
   for(uint i = 0u; i < u_nLightsSpot; i++) {
-    vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
     vec3 vctDirection = vec3(mtxMeshToWorld * vctPosition) - vctPositionLight;
     vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
-    if(vctDirectionInverted.z <= 0.0f)
+    if(vctDirectionInverted.z <= 0.0)
       continue;
-    float fIntensity = 1.0f - min(1.0f, 2.0f * length(vctDirectionInverted.xy) / vctDirectionInverted.z);
-    fIntensity *= 1.0f - pow(vctDirectionInverted.z, 2.0f);
-    if(fIntensity < 0.0f)
+    float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);
+    fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);
+    if(fIntensity < 0.0)
       continue;
     v_vctColor += illuminateDirected(vctDirection, vctNormal, fIntensity * u_spot[i].vctColor, vctView, u_fSpecular);
   }
-  
+
   v_vctColor *= a_vctColor;
       #endif // PHONG
     #endif
 
     // TEXTURE: transform UVs
-    #if defined(TEXTURE)
-  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0f)).xy;
-    #endif
-
-    // NORMALMAP: transform UVs
-    #if defined(NORMALMAP)
-  v_vctNormalMap = vec2(u_mtxPivotN * vec3(a_vctTexture, 1.0f)).xy;
+    #if defined(TEXTURE) || defined(NORMALMAP)
+  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
     #endif
 
     #if defined(MATCAP)
   vec4 vctVertexInCamera = normalize(u_mtxWorldToCamera * vctPosition);
-  vctVertexInCamera.xy *= -1.0f;
+  vctVertexInCamera.xy *= -1.0;
   mat4 mtx_RotX = mat4(1, 0, 0, 0, 0, vctVertexInCamera.z, vctVertexInCamera.y, 0, 0, -vctVertexInCamera.y, vctVertexInCamera.z, 0, 0, 0, 0, 1);
   mat4 mtx_RotY = mat4(vctVertexInCamera.z, 0, -vctVertexInCamera.x, 0, 0, 1, 0, 0, vctVertexInCamera.x, 0, vctVertexInCamera.z, 0, 0, 0, 0, 1);
 
@@ -281,7 +267,7 @@ void main() {
   vec3 vctReflection = normalize(mat3(u_mtxWorldToCamera) * normalize(vctNormal));
   vctReflection.y = -vctReflection.y;
 
-  v_vctTexture = 0.5f * vctReflection.xy + 0.5f;
+  v_vctTexture = 0.5 * vctReflection.xy + 0.5;
     #endif
 
     #if defined(PARTICLE_COLOR)

@@ -61,7 +61,6 @@ namespace FudgeCore {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       this.normalMap.useRenderData(2);
       crc3.uniform1i(_shader.uniforms["u_normalMap"], 2);
-      crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivotN"], false, _cmpMaterial.mtxPivot.get());
     }
   }
 }

@@ -3173,13 +3173,16 @@ declare namespace FudgeCore {
      * The simplest {@link Coat} providing just a color
      */
     class CoatRemissive extends CoatColored {
+        #private;
         diffuse: number;
-        metallic: number;
         specular: number;
         intensity: number;
         constructor(_color?: Color, _diffuse?: number, _specular?: number, _metallic?: number, _intensity?: number);
+        get metallic(): number;
+        set metallic(_value: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
     }
 }
 declare namespace FudgeCore {
@@ -4336,6 +4339,67 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Stores and manipulates a fourdimensional vector comprised of the components x, y, z and w.
+     * @authors Jonas Plotzky, HFU, 2023
+     */
+    class Vector4 extends Mutable implements Serializable, Recycable {
+        x: number;
+        y: number;
+        z: number;
+        w: number;
+        constructor(_x?: number, _y?: number, _z?: number, _w?: number);
+        /**
+         * The magnitude (length) of the vector.
+         */
+        get magnitude(): number;
+        /**
+         * The squared magnitude (length) of the vector. Faster for simple proximity evaluation.
+         */
+        get magnitudeSquared(): number;
+        /**
+         * Creates and returns a clone of this vector
+         */
+        get clone(): Vector4;
+        /**
+         * Sets the components of this vector.
+         */
+        set(_x: number, _y: number, _z: number, _w: number): void;
+        /**
+         * Returns an array with the components of this vector.
+         */
+        get(): number[];
+        /**
+         * Copies the values of the given vector into this vector.
+         */
+        copy(_original: Vector4): void;
+        /**
+         * Adds the given vector to this vector.
+         */
+        add(_addend: Vector4): Vector4;
+        /**
+         * Subtracts the given vector from this vector.
+         */
+        subtract(_subtrahend: Vector4): Vector4;
+        /**
+         * Scales this vector by the given scalar.
+         */
+        scale(_scalar: number): Vector4;
+        /**
+         * Normalizes this vector to the given length, 1 by default.
+         */
+        normalize(_length?: number): Vector4;
+        /**
+         * Calculates the dot product of this instance and another vector.
+         */
+        dot(_other: Vector4): number;
+        recycle(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Vector4>;
+        protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Describes a face of a {@link Mesh} by referencing three {@link Vertices} with their indizes
      * and calculates face normals.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
@@ -4745,10 +4809,10 @@ declare namespace FudgeCore {
      */
     class Vertex {
         position: Vector3;
-        uv: Vector2;
+        uv: Vector2 | null;
         normal: Vector3;
         color: Color;
-        tangent: Vector3;
+        tangent: Vector4 | null;
         referTo: number;
         bones: Bone[];
         /**
@@ -4757,7 +4821,7 @@ declare namespace FudgeCore {
          * This way, vertex position and normal is a 1:1 association, vertex to texture coordinates a 1:n association.
        * @authors Jirka Dell'Oro-Friedl, HFU, 2022
          */
-        constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3, _tangent?: Vector3, _color?: Color, _bones?: Bone[]);
+        constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3, _tangent?: Vector4, _color?: Color, _bones?: Bone[]);
     }
 }
 declare namespace FudgeCore {
@@ -4780,9 +4844,9 @@ declare namespace FudgeCore {
          */
         normal(_index: number): Vector3;
         /**
-         * returns the tangent associated with the vertex addressed, resolving references between vertices
+         * returns the tangent associated with the vertex addressed
          */
-        tangent(_index: number): Vector3;
+        tangent(_index: number): Vector4;
         /**
          * returns the uv-coordinates associated with the vertex addressed
          */

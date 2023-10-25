@@ -80,7 +80,7 @@ namespace FudgeCore {
 
       setBuffer("a_vctPosition", renderBuffers.vertices, 3);
       setBuffer("a_vctNormal", renderBuffers.normals, 3);
-      setBuffer("a_vctTangent", renderBuffers.tangents, 3);
+      setBuffer("a_vctTangent", renderBuffers.tangents, 4);
       setBuffer("a_vctColor", renderBuffers.colors, 4);
 
       // feed in texture coordinates if shader accepts a_vctTexture

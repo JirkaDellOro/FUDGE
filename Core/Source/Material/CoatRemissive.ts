@@ -5,9 +5,10 @@ namespace FudgeCore {
   @RenderInjectorCoat.decorate
   export class CoatRemissive extends CoatColored {
     public diffuse: number;
-    public metallic: number;
     public specular: number;
     public intensity: number;
+
+    #metallic: number;
 
     public constructor(_color: Color = new Color(), _diffuse: number = 1, _specular: number = 0.5, _metallic: number = 0.0, _intensity: number = 0.7) {
       super(_color);
@@ -15,6 +16,13 @@ namespace FudgeCore {
       this.metallic = _metallic;
       this.specular = _specular;
       this.intensity = _intensity;
+    }
+
+    public get metallic(): number {
+      return this.#metallic;
+    }
+    public set metallic(_value: number) {
+      this.#metallic = Calc.clamp(_value, 0, 1);
     }
 
     //#region Transfer
@@ -26,6 +34,7 @@ namespace FudgeCore {
       serialization.intensity = this.intensity;
       return serialization;
     }
+
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization);
       await this.color.deserialize(_serialization.color);
@@ -34,6 +43,12 @@ namespace FudgeCore {
       this.specular = _serialization.specular;
       this.intensity = _serialization.intensity;
       return this;
+    }
+
+    public getMutator(): Mutator {
+      let mutator: Mutator = super.getMutator(true);
+      mutator.metallic = this.metallic;
+      return mutator;
     }
     //#endregion
   }
