@@ -9,9 +9,9 @@ precision highp int;
 
 uniform vec4 u_vctColor;
 uniform float u_fDiffuse;
-uniform float u_fMetallic;
 uniform float u_fSpecular;
 uniform float u_fIntensity;
+uniform float u_fMetallic;
 uniform vec3 u_vctCamera;
 
 in vec4 v_vctColor;
@@ -85,10 +85,11 @@ void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec4
 
     if(u_fSpecular <= 0.0)
       return;
-
+      
+    //BLINN-Phong Shading
     vec3 halfwayDir = normalize(-vctDirection - _vctView);
     float factor = max(dot(-vctDirection, _vctNormal), 0.0); //Factor for smoothing out transition from surface facing the lightsource to surface facing away from the lightsource
-    factor = 1.0 - (pow(factor - 1.0, 8.0));                 //The factor is altered In Order to clearly see the specular Highlight even at steep angles, while still preventing artifacts
+    factor = 1.0 - (pow(factor - 1.0, 8.0));                 //The factor is altered in order to clearly see the specular highlight even at steep angles, while still preventing artifacts
 
     _vctSpecular += pow(max(dot(_vctNormal, halfwayDir), 0.0), exp2(u_fSpecular * 5.0)) * u_fSpecular * u_fIntensity * factor * _vctColor;
   }

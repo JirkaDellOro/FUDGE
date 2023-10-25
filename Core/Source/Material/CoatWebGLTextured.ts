@@ -5,7 +5,7 @@ namespace FudgeCore {
   @RenderInjectorCoat.decorate
   export class CoatWebGlTextured extends Coat {
     public texture: WebGLTexture = null;
-    constructor(_texture: WebGLTexture = TextureDefault.texture) {
+    public constructor(_texture: WebGLTexture = TextureDefault.texture) {
       super();
       this.texture = _texture;
     }
