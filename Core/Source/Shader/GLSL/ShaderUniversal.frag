@@ -15,8 +15,8 @@ in vec4 v_vctColor;
 #ifdef LIGHT
 
   uniform float u_fMetallic;
-  in vec4 v_vctDiffuse;
-  in vec4 v_vctSpecular;
+  in vec3 v_vctDiffuse;
+  in vec3 v_vctSpecular;
 
 #endif
 
@@ -31,10 +31,11 @@ in vec4 v_vctColor;
 out vec4 vctFrag;
 
 void main() {
-
+  
   #ifdef LIGHT
 
-    vctFrag = v_vctDiffuse + v_vctSpecular * u_fMetallic;
+    vctFrag.rgb = v_vctDiffuse + v_vctSpecular * u_fMetallic;
+    vctFrag.a = 1.0;
 
   #else
 
@@ -54,8 +55,7 @@ void main() {
   #ifdef LIGHT
 
     vctFrag *= u_vctColor * v_vctColor;
-    vctFrag += v_vctSpecular * (1.0 - u_fMetallic);
-    vctFrag.a = 1.0 * u_vctColor.a * v_vctColor.a; // restore alpha value
+    vctFrag.rgb += v_vctSpecular * (1.0 - u_fMetallic);
   
   #endif
 

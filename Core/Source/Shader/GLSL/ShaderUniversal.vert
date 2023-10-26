@@ -30,8 +30,8 @@ uniform float u_fIntensity;
 in vec3 a_vctNormal;
 
     #if !defined(PHONG) && !defined(FLAT) // gouraud
-out vec4 v_vctDiffuse;
-out vec4 v_vctSpecular;
+out vec3 v_vctDiffuse;
+out vec3 v_vctSpecular;
     #endif
 
     #if defined(NORMALMAP)
@@ -60,7 +60,7 @@ layout(std140) uniform Lights {
   Light u_spot[MAX_LIGHTS_SPOT];
 };
 
-void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec4 _vctColor, out vec4 _vctDiffuse, out vec4 _vctSpecular) {
+void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec3 _vctColor, out vec3 _vctDiffuse, out vec3 _vctSpecular) {
   vec3 vctDirection = normalize(_vctDirection);
   float fIllumination = -dot(_vctNormal, vctDirection);
   if(fIllumination > 0.0) {
@@ -219,13 +219,13 @@ void main() {
 
       #if !defined(PHONG) && !defined(FLAT) // gouraud
   vctNormal = normalize(vctNormal);
-  v_vctDiffuse = u_fDiffuse * u_ambient.vctColor;
-  v_vctSpecular = vec4(0, 0, 0, 1);
+  v_vctDiffuse = u_fDiffuse * u_ambient.vctColor.rgb;
+  v_vctSpecular = vec3(0, 0, 0);
 
   // calculate directional light effect
 for(uint i = 0u; i < u_nLightsDirectional; i ++) {
   vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
-  illuminateDirected(vctDirection, vctView, vctNormal, u_directional[i].vctColor, v_vctDiffuse, v_vctSpecular);
+  illuminateDirected(vctDirection, vctView, vctNormal, u_directional[i].vctColor.rgb, v_vctDiffuse, v_vctSpecular);
 }
 
   // calculate point light effect
@@ -235,7 +235,7 @@ for(uint i = 0u;i < u_nLightsPoint;i ++) {
   float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
   if(fIntensity < 0.0) continue;
 
-  illuminateDirected(vctDirection, vctView, vctNormal, u_point[i].vctColor * fIntensity, v_vctDiffuse, v_vctSpecular);
+  illuminateDirected(vctDirection, vctView, vctNormal, u_point[i].vctColor.rgb * fIntensity, v_vctDiffuse, v_vctSpecular);
 }
 
   // calculate spot light effect
@@ -249,7 +249,7 @@ for(uint i = 0u;i < u_nLightsSpot;i ++) {
   fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);                                                 //Prevents harsh lighting artifacts at boundary of the given spotlight
   if(fIntensity < 0.0) continue;
 
-  illuminateDirected(vctDirection, vctView, vctNormal, u_spot[i].vctColor * fIntensity, v_vctDiffuse, v_vctSpecular);
+  illuminateDirected(vctDirection, vctView, vctNormal, u_spot[i].vctColor.rgb * fIntensity, v_vctDiffuse, v_vctSpecular);
 }
       #endif // gouraud
     #endif // light

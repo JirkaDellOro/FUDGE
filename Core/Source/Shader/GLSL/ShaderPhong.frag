@@ -77,7 +77,7 @@ vec4 showVectorAsColor(vec3 _vector, bool _clamp) {
   return vec4(_vector.x, _vector.y, _vector.z, 1);
 }
 
-void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec4 _vctColor, out vec4 _vctDiffuse, out vec4 _vctSpecular) {
+void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec3 _vctColor, out vec3 _vctDiffuse, out vec3 _vctSpecular) {
   vec3 vctDirection = normalize(_vctDirection);
   float fIllumination = -dot(_vctNormal, vctDirection);
   if(fIllumination > 0.0) {
@@ -125,13 +125,13 @@ void main() {
 
   #endif
 
-  vec4 vctDiffuse = u_fDiffuse * u_ambient.vctColor;
-  vec4 vctSpecular = vec4(0, 0, 0, 1);
+  vec3 vctDiffuse = u_fDiffuse * u_ambient.vctColor.rgb;
+  vec3 vctSpecular = vec3(0, 0, 0);
 
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
-    illuminateDirected(vctDirection, vctView, vctNormal, u_directional[i].vctColor, vctDiffuse, vctSpecular);
+    illuminateDirected(vctDirection, vctView, vctNormal, u_directional[i].vctColor.rgb, vctDiffuse, vctSpecular);
   }
 
   // calculate point light effect
@@ -142,7 +142,7 @@ void main() {
     if(fIntensity < 0.0)
       continue;
 
-    illuminateDirected(vctDirection, vctView, vctNormal, u_point[i].vctColor * fIntensity, vctDiffuse, vctSpecular);
+    illuminateDirected(vctDirection, vctView, vctNormal, u_point[i].vctColor.rgb * fIntensity, vctDiffuse, vctSpecular);
   }
 
   // calculate spot light effect
@@ -158,10 +158,11 @@ void main() {
     if(fIntensity < 0.0)
       continue;
 
-    illuminateDirected(vctDirection, vctView, vctNormal, u_spot[i].vctColor * fIntensity, vctDiffuse, vctSpecular);
+    illuminateDirected(vctDirection, vctView, vctNormal, u_spot[i].vctColor.rgb * fIntensity, vctDiffuse, vctSpecular);
   }
 
-  vctFrag = vctDiffuse + vctSpecular * u_fMetallic;
+  vctFrag.rgb = vctDiffuse + vctSpecular * u_fMetallic;
+  vctFrag.a = 1.0;
 
   #ifdef TEXTURE
 
@@ -171,8 +172,7 @@ void main() {
   #endif
 
   vctFrag *= u_vctColor * v_vctColor;
-  vctFrag += vctSpecular * (1.0 - u_fMetallic);
-  vctFrag.a = 1.0 * u_vctColor.a * v_vctColor.a; // restore alpha value
+  vctFrag.rgb += vctSpecular * (1.0 - u_fMetallic);
 
   if(vctFrag.a < 0.01)
     discard;

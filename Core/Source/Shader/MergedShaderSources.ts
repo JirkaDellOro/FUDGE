@@ -337,7 +337,7 @@ vec4 showVectorAsColor(vec3 _vector, bool _clamp) {
   return vec4(_vector.x, _vector.y, _vector.z, 1);
 }
 
-void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec4 _vctColor, out vec4 _vctDiffuse, out vec4 _vctSpecular) {
+void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec3 _vctColor, out vec3 _vctDiffuse, out vec3 _vctSpecular) {
   vec3 vctDirection = normalize(_vctDirection);
   float fIllumination = -dot(_vctNormal, vctDirection);
   if(fIllumination > 0.0) {
@@ -385,13 +385,13 @@ void main() {
 
   #endif
 
-  vec4 vctDiffuse = u_fDiffuse * u_ambient.vctColor;
-  vec4 vctSpecular = vec4(0, 0, 0, 1);
+  vec3 vctDiffuse = u_fDiffuse * u_ambient.vctColor.rgb;
+  vec3 vctSpecular = vec3(0, 0, 0);
 
   // calculate directional light effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
-    illuminateDirected(vctDirection, vctView, vctNormal, u_directional[i].vctColor, vctDiffuse, vctSpecular);
+    illuminateDirected(vctDirection, vctView, vctNormal, u_directional[i].vctColor.rgb, vctDiffuse, vctSpecular);
   }
 
   // calculate point light effect
@@ -402,7 +402,7 @@ void main() {
     if(fIntensity < 0.0)
       continue;
 
-    illuminateDirected(vctDirection, vctView, vctNormal, u_point[i].vctColor * fIntensity, vctDiffuse, vctSpecular);
+    illuminateDirected(vctDirection, vctView, vctNormal, u_point[i].vctColor.rgb * fIntensity, vctDiffuse, vctSpecular);
   }
 
   // calculate spot light effect
@@ -418,10 +418,11 @@ void main() {
     if(fIntensity < 0.0)
       continue;
 
-    illuminateDirected(vctDirection, vctView, vctNormal, u_spot[i].vctColor * fIntensity, vctDiffuse, vctSpecular);
+    illuminateDirected(vctDirection, vctView, vctNormal, u_spot[i].vctColor.rgb * fIntensity, vctDiffuse, vctSpecular);
   }
 
-  vctFrag = vctDiffuse + vctSpecular * u_fMetallic;
+  vctFrag.rgb = vctDiffuse + vctSpecular * u_fMetallic;
+  vctFrag.a = 1.0;
 
   #ifdef TEXTURE
 
@@ -431,8 +432,7 @@ void main() {
   #endif
 
   vctFrag *= u_vctColor * v_vctColor;
-  vctFrag += vctSpecular * (1.0 - u_fMetallic);
-  vctFrag.a = 1.0 * u_vctColor.a * v_vctColor.a; // restore alpha value
+  vctFrag.rgb += vctSpecular * (1.0 - u_fMetallic);
 
   if(vctFrag.a < 0.01)
     discard;
@@ -628,8 +628,8 @@ in vec4 v_vctColor;
 #ifdef LIGHT
 
   uniform float u_fMetallic;
-  in vec4 v_vctDiffuse;
-  in vec4 v_vctSpecular;
+  in vec3 v_vctDiffuse;
+  in vec3 v_vctSpecular;
 
 #endif
 
@@ -644,10 +644,11 @@ in vec4 v_vctColor;
 out vec4 vctFrag;
 
 void main() {
-
+  
   #ifdef LIGHT
 
-    vctFrag = v_vctDiffuse + v_vctSpecular * u_fMetallic;
+    vctFrag.rgb = v_vctDiffuse + v_vctSpecular * u_fMetallic;
+    vctFrag.a = 1.0;
 
   #else
 
@@ -667,8 +668,7 @@ void main() {
   #ifdef LIGHT
 
     vctFrag *= u_vctColor * v_vctColor;
-    vctFrag += v_vctSpecular * (1.0 - u_fMetallic);
-    vctFrag.a = 1.0 * u_vctColor.a * v_vctColor.a; // restore alpha value
+    vctFrag.rgb += v_vctSpecular * (1.0 - u_fMetallic);
   
   #endif
 
@@ -708,8 +708,8 @@ uniform float u_fIntensity;
 in vec3 a_vctNormal;
 
     #if !defined(PHONG) && !defined(FLAT) // gouraud
-out vec4 v_vctDiffuse;
-out vec4 v_vctSpecular;
+out vec3 v_vctDiffuse;
+out vec3 v_vctSpecular;
     #endif
 
     #if defined(NORMALMAP)
@@ -738,7 +738,7 @@ layout(std140) uniform Lights {
   Light u_spot[MAX_LIGHTS_SPOT];
 };
 
-void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec4 _vctColor, out vec4 _vctDiffuse, out vec4 _vctSpecular) {
+void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec3 _vctColor, out vec3 _vctDiffuse, out vec3 _vctSpecular) {
   vec3 vctDirection = normalize(_vctDirection);
   float fIllumination = -dot(_vctNormal, vctDirection);
   if(fIllumination > 0.0) {
@@ -822,88 +822,88 @@ float fetchRandomNumber(int _iIndex, int _iParticleSystemRandomNumbersSize, int 
   _iIndex = _iIndex % _iParticleSystemRandomNumbersLength;
   return texelFetch(u_fParticleSystemRandomNumbers, ivec2(_iIndex % _iParticleSystemRandomNumbersSize, _iIndex / _iParticleSystemRandomNumbersSize), 0).r;
 }
-  #endif
+  #endif // PARTICLE
 
 void main() {
   vec4 vctPosition = vec4(a_vctPosition, 1.0);
 
     #if defined(CAMERA) || defined(PARTICLE) || defined(SKIN) || defined(MATCAP)
-mat4 mtxMeshToWorld = u_mtxMeshToWorld;
+  mat4 mtxMeshToWorld = u_mtxMeshToWorld;
     #endif
 
     #if defined(PARTICLE)
-float fParticleId = float(gl_InstanceID);
-int iParticleSystemRandomNumbersSize = textureSize(u_fParticleSystemRandomNumbers, 0).x; // the dimension of the quadratic texture
-int iParticleSystemRandomNumbersLength = iParticleSystemRandomNumbersSize * iParticleSystemRandomNumbersSize; // the total number of texels in the texture
+  float fParticleId = float(gl_InstanceID);
+  int iParticleSystemRandomNumbersSize = textureSize(u_fParticleSystemRandomNumbers, 0).x; // the dimension of the quadratic texture
+  int iParticleSystemRandomNumbersLength = iParticleSystemRandomNumbersSize * iParticleSystemRandomNumbersSize; // the total number of texels in the texture
   /*$variables*/
   /*$mtxLocal*/
   /*$mtxWorld*/
-mtxMeshToWorld = /*$mtxWorld*/ mtxMeshToWorld /*$mtxLocal*/;
-if(u_bParticleSystemFaceCamera) mtxMeshToWorld = lookAt(vec3(mtxMeshToWorld[3][0], mtxMeshToWorld[3][1], mtxMeshToWorld[3][2]), u_vctCamera) *
-  mat4(length(vec3(mtxMeshToWorld[0][0], mtxMeshToWorld[1][0], mtxMeshToWorld[2][0])), 0.0, 0.0, 0.0, 0.0, length(vec3(mtxMeshToWorld[0][1], mtxMeshToWorld[1][1], mtxMeshToWorld[2][1])), 0.0, 0.0, 0.0, 0.0, length(vec3(mtxMeshToWorld[0][2], mtxMeshToWorld[1][2], mtxMeshToWorld[2][2])), 0.0, 0.0, 0.0, 0.0, 1.0);
-mat4 mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
+  mtxMeshToWorld = /*$mtxWorld*/ mtxMeshToWorld /*$mtxLocal*/;
+  if(u_bParticleSystemFaceCamera) mtxMeshToWorld = lookAt(vec3(mtxMeshToWorld[3][0], mtxMeshToWorld[3][1], mtxMeshToWorld[3][2]), u_vctCamera) *
+    mat4(length(vec3(mtxMeshToWorld[0][0], mtxMeshToWorld[1][0], mtxMeshToWorld[2][0])), 0.0, 0.0, 0.0, 0.0, length(vec3(mtxMeshToWorld[0][1], mtxMeshToWorld[1][1], mtxMeshToWorld[2][1])), 0.0, 0.0, 0.0, 0.0, length(vec3(mtxMeshToWorld[0][2], mtxMeshToWorld[1][2], mtxMeshToWorld[2][2])), 0.0, 0.0, 0.0, 0.0, 1.0);
+  mat4 mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
     #else
-mat4 mtxMeshToView = u_mtxMeshToView;
+  mat4 mtxMeshToView = u_mtxMeshToView;
     #endif
 
     #if defined(LIGHT) || defined(MATCAP)
-vec3 vctNormal = a_vctNormal;
+  vec3 vctNormal = a_vctNormal;
       #if defined(PARTICLE)
-mat4 mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
+  mat4 mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
       #else
-mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
+  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
       #endif
     #endif
 
     #if defined(SKIN)
-mtxMeshToWorld = a_vctWeights.x * u_mtxBones[a_vctBones.x] +
-  a_vctWeights.y * u_mtxBones[a_vctBones.y] +
-  a_vctWeights.z * u_mtxBones[a_vctBones.z] +
-  a_vctWeights.w * u_mtxBones[a_vctBones.w];
+  mtxMeshToWorld = a_vctWeights.x * u_mtxBones[a_vctBones.x] +
+    a_vctWeights.y * u_mtxBones[a_vctBones.y] +
+    a_vctWeights.z * u_mtxBones[a_vctBones.z] +
+    a_vctWeights.w * u_mtxBones[a_vctBones.w];
 
-mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
-mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
+  mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
+  mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
     #endif
 
-gl_Position = mtxMeshToView * vctPosition;
+  gl_Position = mtxMeshToView * vctPosition;
 
-v_vctColor = a_vctColor;
+  v_vctColor = a_vctColor;
 
     #if defined(PARTICLE_COLOR)
-v_vctColor *= /*$color*/;
+  v_vctColor *= /*$color*/;
     #endif
 
     #if defined(CAMERA) || defined(MATCAP)
-vec3 vctView = normalize(vec3(mtxMeshToWorld * vctPosition) - u_vctCamera);
+  vec3 vctView = normalize(vec3(mtxMeshToWorld * vctPosition) - u_vctCamera);
     #endif
 
     #if defined(LIGHT) // light
-vctNormal = mat3(mtxNormalMeshToWorld) * vctNormal;
+  vctNormal = mat3(mtxNormalMeshToWorld) * vctNormal;
 
       #if defined(PHONG)
-v_vctNormal = vctNormal; // pass normal to fragment shader
-v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+  v_vctNormal = vctNormal; // pass normal to fragment shader
+  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
       #endif
 
       #if defined(FLAT)
-v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
-v_vctPositionFlat = v_vctPosition;
+  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+  v_vctPositionFlat = v_vctPosition;
       #endif
 
       #if defined(NORMALMAP)
-v_vctTangent = mat3(mtxNormalMeshToWorld) * a_vctTangent.xyz;
-v_vctBitangent = cross(vctNormal, v_vctTangent) * a_vctTangent.w;
+  v_vctTangent = mat3(mtxNormalMeshToWorld) * a_vctTangent.xyz;
+  v_vctBitangent = cross(vctNormal, v_vctTangent) * a_vctTangent.w;
       #endif
 
       #if !defined(PHONG) && !defined(FLAT) // gouraud
-vctNormal = normalize(vctNormal);
-v_vctDiffuse = u_fDiffuse * u_ambient.vctColor;
-v_vctSpecular = vec4(0, 0, 0, 1);
+  vctNormal = normalize(vctNormal);
+  v_vctDiffuse = u_fDiffuse * u_ambient.vctColor.rgb;
+  v_vctSpecular = vec3(0, 0, 0);
 
   // calculate directional light effect
 for(uint i = 0u; i < u_nLightsDirectional; i ++) {
   vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
-  illuminateDirected(vctDirection, vctView, vctNormal, u_directional[i].vctColor, v_vctDiffuse, v_vctSpecular);
+  illuminateDirected(vctDirection, vctView, vctNormal, u_directional[i].vctColor.rgb, v_vctDiffuse, v_vctSpecular);
 }
 
   // calculate point light effect
@@ -913,7 +913,7 @@ for(uint i = 0u;i < u_nLightsPoint;i ++) {
   float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
   if(fIntensity < 0.0) continue;
 
-  illuminateDirected(vctDirection, vctView, vctNormal, u_point[i].vctColor * fIntensity, v_vctDiffuse, v_vctSpecular);
+  illuminateDirected(vctDirection, vctView, vctNormal, u_point[i].vctColor.rgb * fIntensity, v_vctDiffuse, v_vctSpecular);
 }
 
   // calculate spot light effect
@@ -927,31 +927,31 @@ for(uint i = 0u;i < u_nLightsSpot;i ++) {
   fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);                                                 //Prevents harsh lighting artifacts at boundary of the given spotlight
   if(fIntensity < 0.0) continue;
 
-  illuminateDirected(vctDirection, vctView, vctNormal, u_spot[i].vctColor * fIntensity, v_vctDiffuse, v_vctSpecular);
+  illuminateDirected(vctDirection, vctView, vctNormal, u_spot[i].vctColor.rgb * fIntensity, v_vctDiffuse, v_vctSpecular);
 }
       #endif // gouraud
     #endif // light
 
     // TEXTURE: transform UVs
     #if defined(TEXTURE) || defined(NORMALMAP)
-v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
     #endif
 
     #if defined(MATCAP)
-vec4 vctVertexInCamera = normalize(u_mtxWorldToCamera * vctPosition);
-vctVertexInCamera.xy *= - 1.0;
-mat4 mtx_RotX = mat4(1, 0, 0, 0, 0, vctVertexInCamera.z, vctVertexInCamera.y, 0, 0, - vctVertexInCamera.y, vctVertexInCamera.z, 0, 0, 0, 0, 1);
-mat4 mtx_RotY = mat4(vctVertexInCamera.z, 0, - vctVertexInCamera.x, 0, 0, 1, 0, 0, vctVertexInCamera.x, 0, vctVertexInCamera.z, 0, 0, 0, 0, 1);
+  vec4 vctVertexInCamera = normalize(u_mtxWorldToCamera * vctPosition);
+  vctVertexInCamera.xy *= - 1.0;
+  mat4 mtx_RotX = mat4(1, 0, 0, 0, 0, vctVertexInCamera.z, vctVertexInCamera.y, 0, 0, - vctVertexInCamera.y, vctVertexInCamera.z, 0, 0, 0, 0, 1);
+  mat4 mtx_RotY = mat4(vctVertexInCamera.z, 0, - vctVertexInCamera.x, 0, 0, 1, 0, 0, vctVertexInCamera.x, 0, vctVertexInCamera.z, 0, 0, 0, 0, 1);
 
-vctNormal = mat3(u_mtxNormalMeshToWorld) * a_vctNormal;
+  vctNormal = mat3(u_mtxNormalMeshToWorld) * a_vctNormal;
 
-  // adds correction for things being far and to the side, but distortion for things being close
-vctNormal = mat3(mtx_RotX * mtx_RotY) * vctNormal;
+    // adds correction for things being far and to the side, but distortion for things being close
+  vctNormal = mat3(mtx_RotX * mtx_RotY) * vctNormal;
 
-vec3 vctReflection = normalize(mat3(u_mtxWorldToCamera) * normalize(vctNormal));
-vctReflection.y = - vctReflection.y;
+  vec3 vctReflection = normalize(mat3(u_mtxWorldToCamera) * normalize(vctNormal));
+  vctReflection.y = - vctReflection.y;
 
-v_vctTexture = 0.5 * vctReflection.xy + 0.5;
+  v_vctTexture = 0.5 * vctReflection.xy + 0.5;
     #endif
 }`;
   shaderSources["ShaderUpsample.frag"] = /*glsl*/ `#version 300 es
