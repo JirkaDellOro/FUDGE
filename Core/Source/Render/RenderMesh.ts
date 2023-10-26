@@ -163,10 +163,10 @@ namespace FudgeCore {
             let deltaUV1: Vector2 = Vector2.DIFFERENCE(uv2, uv0);
 
             //...and compute the tangent
-            let r: number = 1 / (deltaUV0.x * deltaUV1.y - deltaUV0.y * deltaUV1.x); // correct
+            let r: number = 1 / Vector2.CROSS(deltaUV0, deltaUV1);
             let faceTangent: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(Vector3.SCALE(deltaPos0, deltaUV1.y), Vector3.SCALE(deltaPos1, deltaUV0.y)), r);
-            let faceBitangent: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(Vector3.SCALE(deltaPos1, deltaUV0.x), Vector3.SCALE(deltaPos0, deltaUV1.x)), r);
-
+            let faceBitangent: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(Vector3.SCALE(deltaPos1, -deltaUV0.x), Vector3.SCALE(deltaPos0, -deltaUV1.x)), r); // for winding order counter clockwise
+            
             tangents[i0].add(Vector3.SCALE(faceTangent, face.angles[0]));
             tangents[i1].add(Vector3.SCALE(faceTangent, face.angles[1]));
             tangents[i2].add(Vector3.SCALE(faceTangent, face.angles[2]));
@@ -190,19 +190,6 @@ namespace FudgeCore {
 
             _vertex.tangent = new Vector4(tangent.x, tangent.y, tangent.z, handedness);
           });
-
-          //TODO: In some cases (when uvs are mirrored) the tangents would have to be flipped in order to work properly
-
-          //All faces have their individual tangents, which leads to shading artifacts, which is accounted for here
-          // for (let vertex of this.mesh.vertices) {
-          //   if (typeof vertex.referTo !== "undefined") {
-          //     if (vertex.uv.equals(this.mesh.vertices[vertex.referTo].uv)) {
-          //       //TODO: It would be ideal to compare all vertices first and average out the different tangents between the ones with the same position, UV-position and vertex-normal but this approach is taken for its lower computational impact
-          //       vertex.tangent = this.mesh.vertices[vertex.referTo].tangent;
-          //       //This however leeds to minor artifacts along UV-seams
-          //     }
-          //   }
-          // }
         }
 
         this.#tangents = new Float32Array(
@@ -211,6 +198,9 @@ namespace FudgeCore {
       }
 
       return this.#tangents;
+    }
+    public set tangents(_tangents: Float32Array) {
+      this.#tangents = _tangents;
     }
 
     public get textureUVs(): Float32Array {

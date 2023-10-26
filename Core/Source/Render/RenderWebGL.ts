@@ -36,12 +36,12 @@ namespace FudgeCore {
 
   export const TEXTURE_LOCATION: { [name: string]: { UNIFORM: string; UNIT: number; INDEX: number} } = {
     ALBEDO: {
-      UNIFORM: "u_texture", // TODO: mabye rename to u_albedo?
+      UNIFORM: "u_texture", // TODO: mabye rename to u_albedo? or u_baseColorTexture? 
       UNIT: WebGL2RenderingContext.TEXTURE0,
       INDEX: 0 // could compute these by WebGL2RenderingContext.TEXTURE0 - UNIT
     },
     NORMAL: {
-      UNIFORM: "u_normalMap",
+      UNIFORM: "u_normalMap", // TODO: mabye rename to u_normal? or u_normalTexture? baseColorTexture and normalTexture are used in gltf
       UNIT: WebGL2RenderingContext.TEXTURE1,
       INDEX: 1
     },

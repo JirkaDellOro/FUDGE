@@ -4377,7 +4377,7 @@ declare namespace FudgeCore {
         /**
          * Returns an array with the components of this vector.
          */
-        get(): number[];
+        get(): [number, number, number, number];
         /**
          * Copies the values of the given vector into this vector.
          */

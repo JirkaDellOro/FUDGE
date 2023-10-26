@@ -441,16 +441,22 @@ namespace FudgeCore {
         // TODO: add support for other gltf material properties: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#reference-material
         // e.g. normal, occlusion and emissive textures; alphaMode; alphaCutoff; doubleSided
         const gltfBaseColorTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
+        const gltfNormalTexture: GLTF.MaterialNormalTextureInfo = gltfMaterial.normalTexture;
 
         const color: Color = new Color(...gltfMaterial.pbrMetallicRoughness?.baseColorFactor || [1, 1, 1, 1]);
+
         const coat: Coat = gltfBaseColorTexture ?
-          new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index), 1, 1) :
-          new CoatRemissive(color, 1, 0.5);
+          gltfNormalTexture ?
+            new CoatRemissiveTexturedNormals(color, await this.getTextureByIndex(gltfBaseColorTexture.index), await this.getTextureByIndex(gltfNormalTexture.index)) :
+            new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index)) :
+          new CoatRemissive(color);
 
         const material: Material = new Material(
           gltfMaterial.name,
           gltfBaseColorTexture ?
-            (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
+            gltfNormalTexture ?
+              (_skin ? ShaderPhongTexturedNormalsSkin : ShaderPhongTexturedNormals) :
+              (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
             (_skin ? ShaderPhongSkin : ShaderPhong),
           coat);
 
@@ -699,8 +705,8 @@ namespace FudgeCore {
 
       if (byteStride != undefined) {
         // TODO: instead of creating new buffers maybe rather pass stride into the render mesh? and set it when data is passed to the gpu?
-        const nComponentsPerElement: number = toAccessorTypeLength[_accessorType]; // amount of components per element of the accessor type, i.e. 3 for VEC3
-        const nElements: number = byteLength / byteStride; // amount of elements, i.e. n*VEC3 
+        const nComponentsPerElement: number = toAccessorTypeLength[_accessorType]; // amount of components per element of the accessor type, e.g. 3 for VEC3
+        const nElements: number = byteLength / byteStride; // amount of elements, e.g. n*VEC3 
         const stride: number = byteStride / arrayConstructor.BYTES_PER_ELEMENT;
         const newArray: TypedArray = new arrayConstructor(nElements * nComponentsPerElement);
         for (let iNewElement: number = 0; iNewElement < nElements; iNewElement++) {

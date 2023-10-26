@@ -50,8 +50,7 @@ namespace FudgeCore {
       if (gltfPrimitive.attributes.NORMAL != undefined)
         normals = await loader.getFloat32Array(gltfPrimitive.attributes.NORMAL);
 
-      // TODO: add tangents to RenderMesh
-      if (gltfPrimitive.attributes.TANGENT)
+      if (gltfPrimitive.attributes.TANGENT != undefined)
         tangents = await loader.getFloat32Array(gltfPrimitive.attributes.TANGENT);
 
       if (gltfPrimitive.attributes.TEXCOORD_1 != undefined)
@@ -78,7 +77,7 @@ namespace FudgeCore {
               new Vector3(normals[iVector3 + 0], normals[iVector3 + 1], normals[iVector3 + 2]) :
               undefined,
             tangents ?
-              new Vector4(tangents[iVector3 + 0], tangents[iVector3 + 1], tangents[iVector3 + 2], tangents[iVector3 + 4]) :
+              new Vector4(tangents[iVector4 + 0], tangents[iVector4 + 1], tangents[iVector4 + 2], tangents[iVector4 + 3]) :
               undefined,
             colors ?
               new Color(colors[iVector4 + 0], colors[iVector4 + 1], colors[iVector4 + 2], colors[iVector4 + 3]) :
@@ -112,7 +111,7 @@ namespace FudgeCore {
       renderMesh.indices = indices;
       renderMesh.vertices = vertices;
       renderMesh.normals = normals;
-      // renderMesh.tangents = tangents;
+      renderMesh.tangents = tangents;
       renderMesh.textureUVs = textureUVs;
       renderMesh.colors = colors;
       renderMesh.bones = bones;

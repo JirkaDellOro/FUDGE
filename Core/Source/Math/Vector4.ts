@@ -47,7 +47,7 @@ namespace FudgeCore {
     /**
      * Returns an array with the components of this vector.
      */
-    public get(): number[] {
+    public get(): [number, number, number, number] {
       return [this.x, this.y, this.z, this.w];
     }
 
