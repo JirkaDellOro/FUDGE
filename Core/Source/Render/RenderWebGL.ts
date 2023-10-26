@@ -36,7 +36,7 @@ namespace FudgeCore {
 
   export const TEXTURE_LOCATION: { [name: string]: { UNIFORM: string; UNIT: number; INDEX: number} } = {
     ALBEDO: {
-      UNIFORM: "u_texture",
+      UNIFORM: "u_texture", // TODO: mabye rename to u_albedo?
       UNIT: WebGL2RenderingContext.TEXTURE0,
       INDEX: 0 // could compute these by WebGL2RenderingContext.TEXTURE0 - UNIT
     },

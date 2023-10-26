@@ -56,7 +56,7 @@
     "ƒ.Material": {
       "name": "Stone_Phong",
       "idResource": "Material|2023-04-27T20:04:46.034Z|15615",
-      "shader": "ShaderPhongTextured",
+      "shader": "ShaderPhongTexturedNormals",
       "coat": {
         "ƒ.CoatRemissiveTexturedNormals": {
           "color": "[1, 1, 1, 1]",
@@ -96,7 +96,7 @@
     "ƒ.Material": {
       "name": "Gold_Phong",
       "idResource": "Material|2023-04-27T20:09:22.884Z|29193",
-      "shader": "ShaderPhongTextured",
+      "shader": "ShaderPhongTexturedNormals",
       "coat": {
         "ƒ.CoatRemissiveTexturedNormals": {
           "color": "[1, 1, 1, 1]",
@@ -134,7 +134,7 @@
     "ƒ.Material": {
       "name": "Wood_Phong",
       "idResource": "Material|2023-04-27T20:10:47.163Z|70545",
-      "shader": "ShaderPhongTextured",
+      "shader": "ShaderPhongTexturedNormals",
       "coat": {
         "ƒ.CoatRemissiveTexturedNormals": {
           "color": "[1, 1, 1, 1]",
@@ -179,9 +179,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 10.500000000000002,
-          "metallic": 0.9999999999999999,
           "specular": 1.0000000000000036,
-          "intensity": 0.7000000000000007
+          "intensity": 0.7000000000000007,
+          "metallic": 0.9999999999999999
         }
       }
     }
@@ -230,7 +230,7 @@
     "ƒ.Material": {
       "name": "steelPhong",
       "idResource": "Material|2023-05-06T12:15:24.432Z|50642",
-      "shader": "ShaderPhongTextured",
+      "shader": "ShaderPhongTexturedNormals",
       "coat": {
         "ƒ.CoatRemissiveTexturedNormals": {
           "color": "[0.7607843137254902, 0.9294117647058824, 1, 1]",
@@ -279,7 +279,7 @@
     "ƒ.Material": {
       "name": "cordPhong",
       "idResource": "Material|2023-05-08T10:47:16.964Z|61089",
-      "shader": "ShaderPhongTextured",
+      "shader": "ShaderPhongTexturedNormals",
       "coat": {
         "ƒ.CoatRemissiveTexturedNormals": {
           "color": "[1, 1, 1, 1]",
@@ -362,9 +362,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 11,
-          "metallic": 0,
           "specular": 0.5,
-          "intensity": 0.7
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -390,9 +390,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "metallic": 0.5,
           "specular": 0.30000000000000004,
-          "intensity": 0.7
+          "intensity": 0.7,
+          "metallic": 0.5
         }
       }
     }
@@ -432,9 +432,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "metallic": 0,
           "specular": 0.5,
-          "intensity": 0.7
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -1149,6 +1149,22 @@
       ],
       "idResource": "Graph|2023-03-22T12:13:41.839Z|18963",
       "type": "Graph"
+    }
+  },
+  "Material|2023-10-26T12:43:51.551Z|85617": {
+    "ƒ.Material": {
+      "name": "ShaderPhong",
+      "idResource": "Material|2023-10-26T12:43:51.551Z|85617",
+      "shader": "ShaderPhong",
+      "coat": {
+        "ƒ.CoatRemissive": {
+          "color": "[1, 0, 0, 1]",
+          "diffuse": 1,
+          "specular": 0.5,
+          "intensity": 0.7,
+          "metallic": 0
+        }
+      }
     }
   }
 }

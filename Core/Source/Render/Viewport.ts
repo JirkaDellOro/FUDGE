@@ -390,7 +390,7 @@ namespace FudgeCore {
     /**
     * Returns a ComponentPostFX object based on the given Post-FX type, as long as the camaera has a component of this type
      */
-    private getComponentPost(_camera: ComponentCamera, _cmpType: string): Component {
+    private getComponentPost(_camera: ComponentCamera, _cmpType: string): Component { //TODO: remove this function, just call getComponent directly
       let camParentNode: Node = _camera.node;
       if (camParentNode != null) {
         if (_cmpType == "AO")return camParentNode.getComponent(ComponentAmbientOcclusion);

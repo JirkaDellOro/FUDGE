@@ -37,11 +37,10 @@ namespace FudgeCore {
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization);
-      await this.color.deserialize(_serialization.color);
       this.diffuse = _serialization.diffuse;
       this.specular = _serialization.specular;
       this.intensity = _serialization.intensity ?? this.intensity;
-      this.metallic = _serialization.metallic ?? this.metallic; // default constructor value
+      this.metallic = _serialization.metallic ?? this.metallic;
       return this;
     }
 

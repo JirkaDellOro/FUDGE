@@ -3208,13 +3208,16 @@ declare namespace FudgeCore {
      * A {@link Coat} providing a texture and additional data for texturing
      */
     class CoatRemissiveTextured extends CoatTextured {
+        #private;
         diffuse: number;
-        metallic: number;
         specular: number;
         intensity: number;
         constructor(_color?: Color, _texture?: Texture, _diffuse?: number, _specular?: number, _metallic?: number, _intensity?: number);
+        get metallic(): number;
+        set metallic(_value: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
     }
 }
 declare namespace FudgeCore {
@@ -7799,6 +7802,22 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     abstract class ShaderPhongTextured extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderPhongTexturedNormals extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderPhongTexturedNormalsSkin extends Shader {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;

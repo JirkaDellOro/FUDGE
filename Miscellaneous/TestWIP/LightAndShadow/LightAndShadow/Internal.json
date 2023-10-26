@@ -12,7 +12,7 @@
     "ƒ.Material": {
       "name": "chairPhong",
       "idResource": "Material|2023-06-14T23:29:05.625Z|35796",
-      "shader": "ShaderPhongTextured",
+      "shader": "ShaderPhongTexturedNormals",
       "coat": {
         "ƒ.CoatRemissiveTexturedNormals": {
           "color": "[1, 1, 1, 1]",
@@ -61,7 +61,7 @@
     "ƒ.Material": {
       "name": "chairMetalPhong",
       "idResource": "Material|2023-06-14T23:29:58.995Z|23832",
-      "shader": "ShaderPhongTextured",
+      "shader": "ShaderPhongTexturedNormals",
       "coat": {
         "ƒ.CoatRemissiveTexturedNormals": {
           "color": "[1, 1, 1, 1]",
