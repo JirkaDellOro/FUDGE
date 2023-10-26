@@ -35,23 +35,23 @@ namespace FudgeCore {
       RenderInjectorCoat.injectCoatColored.call(this, _shader, _cmpMaterial);
 
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      this.texture.useRenderData(0);
-      crc3.uniform1i(_shader.uniforms["u_texture"], 0);
+      this.texture.useRenderData(TEXTURE_LOCATION.ALBEDO.UNIT);
+      crc3.uniform1i(_shader.uniforms[TEXTURE_LOCATION.ALBEDO.UNIFORM], TEXTURE_LOCATION.ALBEDO.INDEX);
       crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, _cmpMaterial.mtxPivot.get());
     }
     protected static injectCoatWebGlTextured(this: CoatTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
-      this.texture.useRenderData(0);
-      crc3.uniform1i(_shader.uniforms["u_texture"], 0);
+      this.texture.useRenderData(TEXTURE_LOCATION.ALBEDO.UNIT);
+      crc3.uniform1i(_shader.uniforms[TEXTURE_LOCATION.ALBEDO.UNIFORM], TEXTURE_LOCATION.ALBEDO.INDEX);
       crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, _cmpMaterial.mtxPivot.get());
     }
     protected static injectCoatRemissiveTextured(this: CoatRemissiveTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
       RenderInjectorCoat.injectCoatRemissive.call(this, _shader, _cmpMaterial);
 
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      this.texture.useRenderData(0);
-      crc3.uniform1i(_shader.uniforms["u_texture"], 0);
+      this.texture.useRenderData(TEXTURE_LOCATION.ALBEDO.UNIT);
+      crc3.uniform1i(_shader.uniforms[TEXTURE_LOCATION.ALBEDO.UNIFORM], TEXTURE_LOCATION.ALBEDO.INDEX);
       crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, _cmpMaterial.mtxPivot.get());
     }
     protected static injectCoatRemissiveTexturedNormals(this: CoatRemissiveTexturedNormals, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
@@ -59,8 +59,8 @@ namespace FudgeCore {
 
       //Since the texture slot 0 is reserved for albedo textures, and the texture slot 1 is already utilized by the particle System, the texture slot 2 is used for normal maps
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      this.normalMap.useRenderData(2);
-      crc3.uniform1i(_shader.uniforms["u_normalMap"], 2);
+      this.normalMap.useRenderData(TEXTURE_LOCATION.NORMAL.UNIT);
+      crc3.uniform1i(_shader.uniforms[TEXTURE_LOCATION.NORMAL.UNIFORM], TEXTURE_LOCATION.NORMAL.INDEX);
     }
   }
 }

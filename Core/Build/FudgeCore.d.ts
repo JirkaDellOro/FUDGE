@@ -1072,6 +1072,13 @@ declare namespace FudgeCore {
             BINDING: number;
         };
     };
+    const TEXTURE_LOCATION: {
+        [name: string]: {
+            UNIFORM: string;
+            UNIT: number;
+            INDEX: number;
+        };
+    };
     interface PostBufferdata {
         fbo: WebGLFramebuffer;
         texture: WebGLTexture;

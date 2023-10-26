@@ -33,6 +33,24 @@ namespace FudgeCore {
       BINDING: 1
     }
   };
+
+  export const TEXTURE_LOCATION: { [name: string]: { UNIFORM: string; UNIT: number; INDEX: number} } = {
+    ALBEDO: {
+      UNIFORM: "u_texture",
+      UNIT: WebGL2RenderingContext.TEXTURE0,
+      INDEX: 0 // could compute these by WebGL2RenderingContext.TEXTURE0 - UNIT
+    },
+    NORMAL: {
+      UNIFORM: "u_normalMap",
+      UNIT: WebGL2RenderingContext.TEXTURE1,
+      INDEX: 1
+    },
+    PARTICLE: {
+      UNIFORM: "u_particleSystemRandomNumbers",
+      UNIT: WebGL2RenderingContext.TEXTURE2,
+      INDEX: 2
+    }
+  };
   
   // Interface for transfering needed buffer data
   export interface PostBufferdata {
@@ -619,6 +637,7 @@ namespace FudgeCore {
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       }
     }
+
     /**
      * Draw all of the given nodes using the normal shader to be used in AO-calculations
     */
@@ -733,7 +752,7 @@ namespace FudgeCore {
       RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemDuration"], _cmpParticleSystem.duration);
       RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemSize"], _cmpParticleSystem.size);
       RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemTime"], _cmpParticleSystem.time);
-      RenderWebGL.crc3.uniform1i(_shader.uniforms["u_fParticleSystemRandomNumbers"], 1); // ATTENTION!: changing this id (the second argument) requires changing of corresponding texture id in component particle system render injector
+      RenderWebGL.crc3.uniform1i(_shader.uniforms[TEXTURE_LOCATION.PARTICLE.UNIFORM], TEXTURE_LOCATION.PARTICLE.INDEX);
 
       let faceCamera: boolean = _cmpFaceCamera && _cmpFaceCamera.isActive;
       RenderWebGL.crc3.uniform1i(_shader.uniforms["u_bParticleSystemFaceCamera"], faceCamera ? 1 : 0);

@@ -12,21 +12,10 @@ namespace FudgeCore {
       });
     }
 
-    protected static injectTexture(this: Texture, _textureslot: number = 0): void {
+    protected static injectTexture(this: Texture, _textureUnit: number = WebGL2RenderingContext.TEXTURE0): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       if (this.renderData) {
-        // buffers exist
-        switch (_textureslot) {
-          case 0:
-            crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
-            break;
-          case 2:
-            crc3.activeTexture(WebGL2RenderingContext.TEXTURE2);
-            break;
-          default:
-            console.log("there is no textureslot '" + _textureslot + "', textureslot '0' is used instead");
-            crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
-        }
+        crc3.activeTexture(_textureUnit);
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
       } else {
         this.renderData = {};
@@ -64,7 +53,7 @@ namespace FudgeCore {
 
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
 
-        this.useRenderData(_textureslot);
+        this.useRenderData(_textureUnit);
       }
     }
 

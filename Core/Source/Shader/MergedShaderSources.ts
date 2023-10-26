@@ -804,7 +804,7 @@ uniform mat4 u_mtxWorldToView;
 uniform float u_fParticleSystemDuration;
 uniform float u_fParticleSystemSize;
 uniform float u_fParticleSystemTime;
-uniform sampler2D u_fParticleSystemRandomNumbers;
+uniform sampler2D u_particleSystemRandomNumbers;
 uniform bool u_bParticleSystemFaceCamera;
 uniform bool u_bParticleSystemRestrict;
 
@@ -820,7 +820,7 @@ mat4 lookAt(vec3 _vctTranslation, vec3 _vctTarget) {
 
 float fetchRandomNumber(int _iIndex, int _iParticleSystemRandomNumbersSize, int _iParticleSystemRandomNumbersLength) {
   _iIndex = _iIndex % _iParticleSystemRandomNumbersLength;
-  return texelFetch(u_fParticleSystemRandomNumbers, ivec2(_iIndex % _iParticleSystemRandomNumbersSize, _iIndex / _iParticleSystemRandomNumbersSize), 0).r;
+  return texelFetch(u_particleSystemRandomNumbers, ivec2(_iIndex % _iParticleSystemRandomNumbersSize, _iIndex / _iParticleSystemRandomNumbersSize), 0).r;
 }
   #endif // PARTICLE
 
@@ -833,7 +833,7 @@ void main() {
 
     #if defined(PARTICLE)
   float fParticleId = float(gl_InstanceID);
-  int iParticleSystemRandomNumbersSize = textureSize(u_fParticleSystemRandomNumbers, 0).x; // the dimension of the quadratic texture
+  int iParticleSystemRandomNumbersSize = textureSize(u_particleSystemRandomNumbers, 0).x; // the dimension of the quadratic texture
   int iParticleSystemRandomNumbersLength = iParticleSystemRandomNumbersSize * iParticleSystemRandomNumbersSize; // the total number of texels in the texture
   /*$variables*/
   /*$mtxLocal*/
