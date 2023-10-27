@@ -434,8 +434,6 @@ void main() {
   vctFrag *= u_vctColor * v_vctColor;
   vctFrag.rgb += vctSpecular * (1.0 - u_fMetallic);
 
-  // vctFrag = showVectorAsColor(mtxTBN[1], true);
-
   if(vctFrag.a < 0.01)
     discard;
 }`;

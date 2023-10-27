@@ -8,22 +8,6 @@
       "filetype": "OBJ"
     }
   },
-  "Material|2023-10-13T07:11:17.681Z|28686": {
-    "ƒ.Material": {
-      "name": "ShaderPhong",
-      "idResource": "Material|2023-10-13T07:11:17.681Z|28686",
-      "shader": "ShaderPhong",
-      "coat": {
-        "ƒ.CoatRemissive": {
-          "color": "[1, 1, 1, 1]",
-          "diffuse": 1,
-          "metallic": 0,
-          "specular": 0,
-          "intensity": 0.7
-        }
-      }
-    }
-  },
   "MeshImport|2023-10-13T07:18:17.274Z|05163": {
     "ƒ.MeshImport": {
       "idResource": "MeshImport|2023-10-13T07:18:17.274Z|05163",
@@ -87,6 +71,34 @@
       "filetype": "OBJ"
     }
   },
+  "Material|2023-10-27T07:42:28.907Z|54148": {
+    "ƒ.Material": {
+      "name": "ShaderPhongTextured",
+      "idResource": "Material|2023-10-27T07:42:28.907Z|54148",
+      "shader": "ShaderPhongTextured",
+      "coat": {
+        "ƒ.CoatRemissiveTextured": {
+          "color": "[1, 1, 1, 1]",
+          "idTexture": "TextureImage|2023-10-27T07:42:17.897Z|03527",
+          "diffuse": 1,
+          "specular": 0.5,
+          "intensity": 0.7,
+          "metallic": 0
+        }
+      }
+    }
+  },
+  "TextureImage|2023-10-27T07:42:17.897Z|03527": {
+    "ƒ.TextureImage": {
+      "url": "TEXTURE\\monastery_stone_floor_diff_2k.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-10-27T07:42:17.897Z|03527",
+        "name": "TEXTURE\\monastery_stone_floor_diff_2k.png",
+        "mipmap": "CRISP"
+      }
+    }
+  },
   "Graph|2023-07-25T08:47:48.755Z|05108": {
     "ƒ.Graph": {
       "name": "Scene",
@@ -108,11 +120,11 @@
                     },
                     "light": {
                       "ƒ.LightAmbient": {
-                        "color": "[0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1]"
+                        "color": "[0.3215686274509804, 0.3215686274509804, 0.3215686274509804, 1]"
                       }
                     },
                     "Component": {
-                      "active": false
+                      "active": true
                     }
                   }
                 },
@@ -172,7 +184,7 @@
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2023-10-13T07:11:17.681Z|28686"
+                    "idMaterial": "Material|2023-10-27T07:42:28.907Z|54148"
                   }
                 }
               ],
@@ -228,7 +240,7 @@
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2023-10-13T07:11:17.681Z|28686"
+                    "idMaterial": "Material|2023-10-27T07:42:28.907Z|54148"
                   }
                 }
               ],
@@ -284,7 +296,7 @@
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2023-10-13T07:11:17.681Z|28686"
+                    "idMaterial": "Material|2023-10-27T07:42:28.907Z|54148"
                   }
                 }
               ],
@@ -340,7 +352,7 @@
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2023-10-13T07:11:17.681Z|28686"
+                    "idMaterial": "Material|2023-10-27T07:42:28.907Z|54148"
                   }
                 }
               ],
@@ -396,7 +408,7 @@
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2023-10-13T07:11:17.681Z|28686"
+                    "idMaterial": "Material|2023-10-27T07:42:28.907Z|54148"
                   }
                 }
               ],
@@ -452,7 +464,7 @@
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2023-10-13T07:11:17.681Z|28686"
+                    "idMaterial": "Material|2023-10-27T07:42:28.907Z|54148"
                   }
                 }
               ],
@@ -508,7 +520,7 @@
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2023-10-13T07:11:17.681Z|28686"
+                    "idMaterial": "Material|2023-10-27T07:42:28.907Z|54148"
                   }
                 }
               ],
@@ -564,7 +576,7 @@
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2023-10-13T07:11:17.681Z|28686"
+                    "idMaterial": "Material|2023-10-27T07:42:28.907Z|54148"
                   }
                 }
               ],

@@ -8,8 +8,8 @@ namespace FudgeCore {
   export class CoatRemissiveTexturedNormals extends CoatRemissiveTextured {
     public normalMap: Texture = null;
 
-    public constructor(_color: Color = new Color(), _texture: Texture = TextureDefault.texture, _normalMap: Texture = TextureNormalDefault.texture, _diffuse: number = 1, _specular: number = 0, _metallic: number = 0.5, _intensity: number = 0.5) {
-      super(_color, _texture, _diffuse, _specular, _metallic, _intensity);
+    public constructor(_color: Color = new Color(), _texture: Texture = TextureDefault.texture, _normalMap: Texture = TextureNormalDefault.texture, _diffuse?: number, _specular: number = undefined, _intensity: number = undefined, _metallic: number = undefined) {
+      super(_color, _texture, _diffuse, _specular, _intensity, _metallic);
       this.normalMap = _normalMap;
     }
 

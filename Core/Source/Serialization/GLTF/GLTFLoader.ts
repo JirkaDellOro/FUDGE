@@ -439,17 +439,57 @@ namespace FudgeCore {
           throw new Error(`${this}: Couldn't find material with index ${_iMaterial}.`);
 
         // TODO: add support for other gltf material properties: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#reference-material
-        // e.g. normal, occlusion and emissive textures; alphaMode; alphaCutoff; doubleSided
+        // e.g. occlusion and emissive textures; alphaMode; alphaCutoff; doubleSided
+        const gltfBaseColorFactor: number[] = gltfMaterial.pbrMetallicRoughness?.baseColorFactor ?? [1, 1, 1, 1];
+        let gltfMetallicFactor: number = gltfMaterial.pbrMetallicRoughness?.metallicFactor ?? 1;
+        let gltfRoughnessFactor: number = gltfMaterial.pbrMetallicRoughness?.roughnessFactor ?? 1;
+
+        const gltfMetallicRoughnessTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.metallicRoughnessTexture;
+        if (gltfMetallicRoughnessTexture) {
+          // TODO: maybe throw this out if it costs too much performance, or add the texture to the material
+          // average metallic and roughness values
+          const metallicRoughnessTexture: TextureImage = await this.getTextureByIndex(gltfMetallicRoughnessTexture.index) as TextureImage;
+          let image: HTMLImageElement = metallicRoughnessTexture.image;
+          let canvas: HTMLCanvasElement = document.createElement("canvas");
+          canvas.width = image.width;
+          canvas.height = image.height;
+          let ctx: CanvasRenderingContext2D = canvas.getContext("2d");
+          ctx.drawImage(image, 0, 0);
+          let imageData: ImageData = ctx.getImageData(0, 0, image.width, image.height);
+          let data: Uint8ClampedArray = imageData.data;
+
+          let sumMetallic: number = 0;
+          let sumRoughness: number = 0;
+          for (let iPixel: number = 0; iPixel < data.length; iPixel += 4) {
+            sumMetallic += data[iPixel + 2] / 255;
+            sumRoughness += data[iPixel + 1] / 255;
+          }
+
+          const averageMetallic: number = sumMetallic / (data.length / 4);
+          const averageRoughness: number = sumRoughness / (data.length / 4);
+
+          gltfMetallicFactor *= averageMetallic;
+          gltfRoughnessFactor *= averageRoughness;
+        }
+
         const gltfBaseColorTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
         const gltfNormalTexture: GLTF.MaterialNormalTextureInfo = gltfMaterial.normalTexture;
 
-        const color: Color = new Color(...gltfMaterial.pbrMetallicRoughness?.baseColorFactor || [1, 1, 1, 1]);
+        // The diffuse contribution in the Phong shading model. Represents how much light is scattered in different directions due to the material's surface properties.
+        const diffuse: number = 1;
+        // The shininess of the material. Influences the sharpness or broadness of the specular highlight. Higher specular values result in a sharper and more concentrated specular highlight.
+        const specular: number = 1.8 * (1 - gltfRoughnessFactor) + 0.6 * gltfMetallicFactor;
+        // The strength/intensity of the specular reflection
+        const intensity: number = 0.7 * (1 - gltfRoughnessFactor) + 1.2 * gltfMetallicFactor;
+        // Influences how much the material's color affects the specular reflection. When metallic is higher, the specular reflection takes on the color of the material, creating a metallic appearance. Range from 0.0 to 1.0.
+        const metallic: number = gltfMetallicFactor;
 
+        const color: Color = new Color(...gltfBaseColorFactor);
         const coat: Coat = gltfBaseColorTexture ?
           gltfNormalTexture ?
-            new CoatRemissiveTexturedNormals(color, await this.getTextureByIndex(gltfBaseColorTexture.index), await this.getTextureByIndex(gltfNormalTexture.index)) :
-            new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index)) :
-          new CoatRemissive(color);
+            new CoatRemissiveTexturedNormals(color, await this.getTextureByIndex(gltfBaseColorTexture.index), await this.getTextureByIndex(gltfNormalTexture.index), diffuse, specular, intensity, metallic) :
+            new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index), diffuse, specular, intensity, metallic) :
+          new CoatRemissive(color, diffuse, specular, intensity, metallic);
 
         const material: Material = new Material(
           gltfMaterial.name,

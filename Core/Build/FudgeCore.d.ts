@@ -3184,7 +3184,7 @@ declare namespace FudgeCore {
         diffuse: number;
         specular: number;
         intensity: number;
-        constructor(_color?: Color, _diffuse?: number, _specular?: number, _metallic?: number, _intensity?: number);
+        constructor(_color?: Color, _diffuse?: number, _specular?: number, _intensity?: number, _metallic?: number);
         get metallic(): number;
         set metallic(_value: number);
         serialize(): Serialization;
@@ -3212,7 +3212,7 @@ declare namespace FudgeCore {
         diffuse: number;
         specular: number;
         intensity: number;
-        constructor(_color?: Color, _texture?: Texture, _diffuse?: number, _specular?: number, _metallic?: number, _intensity?: number);
+        constructor(_color?: Color, _texture?: Texture, _diffuse?: number, _specular?: number, _intensity?: number, _metallic?: number);
         get metallic(): number;
         set metallic(_value: number);
         serialize(): Serialization;
@@ -3226,7 +3226,7 @@ declare namespace FudgeCore {
      */
     class CoatRemissiveTexturedNormals extends CoatRemissiveTextured {
         normalMap: Texture;
-        constructor(_color?: Color, _texture?: Texture, _normalMap?: Texture, _diffuse?: number, _specular?: number, _metallic?: number, _intensity?: number);
+        constructor(_color?: Color, _texture?: Texture, _normalMap?: Texture, _diffuse?: number, _specular?: number, _intensity?: number, _metallic?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
