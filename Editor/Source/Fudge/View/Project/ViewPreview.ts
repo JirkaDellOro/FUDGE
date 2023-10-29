@@ -25,7 +25,7 @@ namespace Fudge {
       // cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
       // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
       cmpCamera.projectCentral(1, 45);
-      let canvas: HTMLCanvasElement = ƒAid.Canvas.create(false, ƒAid.IMAGE_RENDERING.PIXELATED);
+      let canvas: HTMLCanvasElement = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("Preview", null, cmpCamera, canvas);
       // ƒ.RenderWebGL.setCanvasSize(1, 1);
