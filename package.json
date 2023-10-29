@@ -25,7 +25,7 @@
     "@types/node": "^20.3.1",
     "@types/webxr": "^0.5.2",
     "@types/ws": "^8.5.5",
-    "electron": "^25.1.1",
+    "electron": "^25.9.3",
     "webrtc-adapter": "^8.2.3",
     "websocket": "^1.0.34",
     "ws": "^8.13.0"

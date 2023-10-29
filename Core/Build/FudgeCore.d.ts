@@ -3077,8 +3077,10 @@ declare namespace FudgeCore {
      */
     class GraphInstance extends Node {
         #private;
+        /** id of the resource that instance was created from */
+        static count: number;
         /**
-         * This constructor allone will not create a reconstruction, but only save the id.
+         * This constructor alone will not create a reconstruction, but only save the id.
          * To create an instance of the graph, call reset on this or set with a graph as parameter.
          * Prefer Project.createGraphInstance(_graph).
          */
@@ -5893,8 +5895,6 @@ declare namespace FudgeCore {
         private static drawList;
         private static transformByPhysics;
     }
-}
-declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     interface RenderBuffers {
