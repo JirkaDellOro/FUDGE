@@ -63,8 +63,8 @@
           "idTexture": "TextureImage|2023-05-04T21:59:51.010Z|42790",
           "diffuse": 0.9999999999999999,
           "specular": 0.8000000000000004,
-          "metallic": 0,
           "intensity": 0.4,
+          "metallic": 0,
           "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767"
         }
       }
@@ -103,8 +103,8 @@
           "idTexture": "TextureImage|2023-05-06T12:08:07.692Z|03709",
           "diffuse": 0.2,
           "specular": 1,
-          "metallic": 1,
           "intensity": 0.5,
+          "metallic": 1,
           "idNormalMap": "TextureImage|2023-04-27T23:08:03.539Z|44767"
         }
       }
@@ -141,8 +141,8 @@
           "idTexture": "TextureImage|2023-05-06T12:10:25.370Z|13576",
           "diffuse": 1,
           "specular": 0.7,
-          "metallic": 0,
           "intensity": 0.9,
+          "metallic": 0,
           "idNormalMap": "TextureImage|2023-05-06T12:10:26.706Z|14819"
         }
       }
@@ -237,8 +237,8 @@
           "idTexture": "TextureImage|2023-05-06T12:15:39.923Z|04384",
           "diffuse": 0.3,
           "specular": 0.9999999999999994,
-          "metallic": 1,
           "intensity": 0.8,
+          "metallic": 1,
           "idNormalMap": "TextureImage|2023-05-06T12:15:42.376Z|22575"
         }
       }
@@ -286,8 +286,8 @@
           "idTexture": "TextureImage|2023-05-08T10:47:34.883Z|92794",
           "diffuse": 1,
           "specular": 0.6,
-          "metallic": 0,
           "intensity": 0.4,
+          "metallic": 0,
           "idNormalMap": "TextureImage|2023-05-08T10:47:36.502Z|91380"
         }
       }
@@ -326,8 +326,8 @@
           "idTexture": "TextureImage|2023-04-27T15:13:24.776Z|64130",
           "diffuse": 0,
           "specular": 1.5,
-          "metallic": 0,
-          "intensity": 0.7
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -417,8 +417,8 @@
           "idTexture": "TextureImage|2023-05-06T12:10:25.370Z|13576",
           "diffuse": 1,
           "specular": 0.20000000000000004,
-          "metallic": 0,
-          "intensity": 0.7
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -1097,7 +1097,7 @@
                     "direction": "diagonal",
                     "near": 1,
                     "far": 1000,
-                    "aspect": 1.5617283950617284,
+                    "aspect": 1.7990074441687345,
                     "pivot": {
                       "translation": "[0, 0, -3.889984130859375]",
                       "rotation": "[0, 0, 0]",
@@ -1112,11 +1112,11 @@
               "ComponentMist": [
                 {
                   "ƒ.ComponentMist": {
-                    "clrMist": "[0, 0, 0, 0.45]",
+                    "clrMist": "[0, 0, 0, 1]",
                     "nearPlane": 1,
                     "farPlane": 10,
                     "Component": {
-                      "active": false
+                      "active": true
                     }
                   }
                 }
@@ -1124,9 +1124,12 @@
               "ComponentAmbientOcclusion": [
                 {
                   "ƒ.ComponentAmbientOcclusion": {
-                    "clrAO": "[1, 1, 1, 1]",
+                    "clrAO": "[0, 0, 0, 1]",
+                    "samples": 64,
+                    "radius": 1.5,
+                    "distance": 85,
                     "Component": {
-                      "active": true
+                      "active": false
                     }
                   }
                 }
@@ -1134,10 +1137,11 @@
               "ComponentBloom": [
                 {
                   "ƒ.ComponentBloom": {
-                    "threshold": 0.6,
-                    "intensity": 1,
+                    "threshold": 0.9,
+                    "intensity": 0.20000000000000015,
+                    "desaturateHighlights": 0,
                     "Component": {
-                      "active": false
+                      "active": true
                     }
                   }
                 }

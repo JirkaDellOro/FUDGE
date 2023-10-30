@@ -204,26 +204,23 @@ namespace FudgeCore {
 
       _cmpCamera.resetWorldToView();
 
-      Render.drawList(_cmpCamera, this.nodesSimple);
-      Render.drawListAlpha(_cmpCamera);
-    }
+      drawList(this.nodesSimple) ;
+      drawListAlpha();
 
-    private static drawListAlpha(_cmpCamera: ComponentCamera): void {
-      function sort(_a: Node, _b: Node): number {
-        return (Reflect.get(_a, "zCamera") < Reflect.get(_b, "zCamera")) ? 1 : -1;
+      function drawList(_list: RecycableArray<Node> | Array<Node>): void {
+        for (let node of _list) 
+          Render.drawNode(node, _cmpCamera);
       }
-      for (let node of Render.nodesAlpha)
-        Reflect.set(node, "zCamera", _cmpCamera.pointWorldToClip(node.getComponent(ComponentMesh).mtxWorld.translation).z);
 
-      let sorted: Node[] = Render.nodesAlpha.getSorted(sort);
-      Render.drawList(_cmpCamera, sorted);
-    }
-    /**
-     * Draws a given list of nodes. A @param _cmpMat can be passed to render every node of the list with the same Material (useful for PostFX)
-     */
-    private static drawList(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>): void {
-      for (let node of _list) {
-        Render.drawNode(node, _cmpCamera);
+      function drawListAlpha(): void {
+        function sort(_a: Node, _b: Node): number {
+          return (Reflect.get(_a, "zCamera") < Reflect.get(_b, "zCamera")) ? 1 : -1;
+        }
+        for (let node of Render.nodesAlpha)
+          Reflect.set(node, "zCamera", _cmpCamera.pointWorldToClip(node.getComponent(ComponentMesh).mtxWorld.translation).z);
+  
+        let sorted: Node[] = Render.nodesAlpha.getSorted(sort); // TODO: maybe sort them in prepare so that postprocessing can use the sorted list as well
+        drawList(sorted);
       }
     }
     //#endregion

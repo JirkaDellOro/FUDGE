@@ -1,10 +1,11 @@
 {
   "MeshObj|2023-08-20T09:31:06.747Z|48018": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2023-08-20T09:31:06.747Z|48018",
       "name": "BloomText",
-      "type": "MeshObj",
-      "url": "obj\\untitled.obj"
+      "type": "MeshImport",
+      "url": "obj\\untitled.obj",
+      "filetype": "OBJ"
     }
   },
   "Material|2023-08-20T09:31:26.653Z|92013": {
@@ -20,11 +21,12 @@
     }
   },
   "MeshObj|2023-08-20T09:33:43.219Z|34106": {
-    "ƒ.MeshObj": {
+    "ƒ.MeshImport": {
       "idResource": "MeshObj|2023-08-20T09:33:43.219Z|34106",
       "name": "BloomOBJ",
-      "type": "MeshObj",
-      "url": "obj\\bloom.obj"
+      "type": "MeshImport",
+      "url": "obj\\bloom.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshSphere|2023-08-20T09:55:37.174Z|17948": {
@@ -86,6 +88,8 @@
                 "rotation": "[90, 0, 0]",
                 "scaling": "[1, 1, 1]"
               },
+              "near": 1,
+              "far": 10000,
               "Component": {
                 "active": true
               }

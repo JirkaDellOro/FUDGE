@@ -6050,11 +6050,6 @@ declare namespace FudgeCore {
          * Draws the scene from the point of view of the given camera
          */
         static draw(_cmpCamera: ComponentCamera): void;
-        private static drawListAlpha;
-        /**
-         * Draws a given list of nodes. A @param _cmpMat can be passed to render every node of the list with the same Material (useful for PostFX)
-         */
-        private static drawList;
         /**
          * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
          */

@@ -212,51 +212,43 @@ void main() {
 }`;
   shaderSources["ShaderMist.frag"] = /*glsl*/ `#version 300 es
 /**
-*Calculates depth from camera based on near- and farplane
-*@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
+* Calculates depth from camera based on near- and farplane
+* @authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023 | Jonas Plotzky, HFU, 2023
 */
 precision mediump float;
 precision highp int;
 
 uniform float u_nearPlane;
 uniform float u_farPlane;
+uniform vec3 u_vctCamera;
 
-in vec3 v_vctCamera;
-in mat4 v_mtxMeshToWorld;
-in vec4 v_vctPosition;
-
+in vec3 v_vctPosition;
 out vec4 vctFrag;
 
 void main() {
-    float dist = length((v_mtxMeshToWorld * v_vctPosition).xyz - v_vctCamera);
-    float fogAmount = min(max((dist - u_nearPlane) / (u_farPlane - u_nearPlane), 0.0),1.0);
-    vec3 fog = vec3(-pow(fogAmount, 2.0) + (2.0 * fogAmount)); //lets Fog appear quicker and fall off slower results in a more gradual falloff
-    vctFrag = vec4(fog, 1.0);
+  float distance = length(v_vctPosition - u_vctCamera);
+  float fogAmount = min(max((distance - u_nearPlane) / (u_farPlane - u_nearPlane), 0.0), 1.0);
+  vec3 vctfog = vec3(-pow(fogAmount, 2.0) + (2.0 * fogAmount)); //lets Fog appear quicker and fall off slower results in a more gradual falloff
+  vctFrag = vec4(vctfog, 1.0);
 }
 `;
   shaderSources["ShaderMist.vert"] = /*glsl*/ `#version 300 es
 
 /**
 * Mist vertexshader. Sets values for mist fragmentshader
-* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
+* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023 | Jonas Plotzky, HFU, 2023
 */
 
-uniform vec3 u_vctCamera;
 uniform mat4 u_mtxMeshToView;
 uniform mat4 u_mtxMeshToWorld;
-in vec3 a_vctPosition;
 
-out vec4 v_vctPosition;
-out mat4 v_mtxMeshToWorld;
-out vec3 v_vctCamera;
+in vec3 a_vctPosition;
+out vec3 v_vctPosition;
 
 void main() {
-    vec4 vctPosition = vec4(a_vctPosition, 1.0);
-    mat4 mtxMeshToView = u_mtxMeshToView;
-    v_mtxMeshToWorld = u_mtxMeshToWorld;
-    v_vctCamera = u_vctCamera;
-    gl_Position = mtxMeshToView * vctPosition;
-    v_vctPosition = vctPosition;
+  vec4 vctPosition = vec4(a_vctPosition, 1.0);
+  v_vctPosition = vec3(u_mtxMeshToWorld * vctPosition);
+  gl_Position = u_mtxMeshToView * vctPosition;
 }`;
   shaderSources["ShaderPhong.frag"] = /*glsl*/ `#version 300 es
 /**
