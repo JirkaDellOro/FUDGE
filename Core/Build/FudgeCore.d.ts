@@ -7558,7 +7558,7 @@ declare namespace FudgeCore {
         /**
          * Returns the {@link Material} for the given material index.
          */
-        getMaterialByIndex(_iMaterial: number, _skin?: boolean): Promise<Material>;
+        getMaterialByIndex(_iMaterial: number, _skin?: boolean, _flat?: boolean): Promise<Material>;
         /**
          * Returns the {@link Texture} for the given texture index.
          */

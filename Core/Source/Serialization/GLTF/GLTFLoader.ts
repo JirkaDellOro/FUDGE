@@ -243,12 +243,14 @@ namespace FudgeCore {
 
             let cmpMaterial: ComponentMaterial;
             const iMaterial: number = gltfMesh.primitives?.[iPrimitive]?.material;
+            const isSkin: boolean = cmpMesh.mesh instanceof MeshSkin;
             if (iMaterial == undefined) {
-              cmpMaterial = new ComponentMaterial(cmpMesh.mesh instanceof MeshSkin ?
+              cmpMaterial = new ComponentMaterial(isSkin ?
                 GLTFLoader.defaultSkinMaterial :
                 GLTFLoader.defaultMaterial);
             } else {
-              cmpMaterial = new ComponentMaterial(await this.getMaterialByIndex(iMaterial, cmpMesh.mesh instanceof MeshSkin));
+              const isFlat: boolean = gltfMesh.primitives[iPrimitive].attributes.NORMAL == undefined;
+              cmpMaterial = new ComponentMaterial(await this.getMaterialByIndex(iMaterial, isSkin, isFlat));
             }
 
             subComponents.push([cmpMesh, cmpMaterial]);
@@ -428,7 +430,7 @@ namespace FudgeCore {
     /**
      * Returns the {@link Material} for the given material index.
      */
-    public async getMaterialByIndex(_iMaterial: number, _skin: boolean = false): Promise<Material> {
+    public async getMaterialByIndex(_iMaterial: number, _skin: boolean = false, _flat: boolean = false): Promise<Material> {
       if (!this.#materials)
         this.#materials = [];
       if (!this.#materials[_iMaterial]) {
@@ -480,7 +482,7 @@ namespace FudgeCore {
         // The shininess of the material. Influences the sharpness or broadness of the specular highlight. Higher specular values result in a sharper and more concentrated specular highlight.
         const specular: number = 1.8 * (1 - gltfRoughnessFactor) + 0.6 * gltfMetallicFactor;
         // The strength/intensity of the specular reflection
-        const intensity: number = 0.7 * (1 - gltfRoughnessFactor) + 1.2 * gltfMetallicFactor;
+        const intensity: number = 0.7 * (1 - gltfRoughnessFactor) + gltfMetallicFactor;
         // Influences how much the material's color affects the specular reflection. When metallic is higher, the specular reflection takes on the color of the material, creating a metallic appearance. Range from 0.0 to 1.0.
         const metallic: number = gltfMetallicFactor;
 
@@ -491,16 +493,20 @@ namespace FudgeCore {
             new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index), diffuse, specular, intensity, metallic) :
           new CoatRemissive(color, diffuse, specular, intensity, metallic);
 
-        const material: Material = new Material(
-          gltfMaterial.name,
-          gltfBaseColorTexture ?
+        let shader: typeof Shader;
+        if (_flat) { // TODO: make flat a flag in the material so that we can have flat mesh with phong shading gradients
+          shader = gltfBaseColorTexture ?
+            (_skin ? ShaderFlatTexturedSkin : ShaderFlatTextured) :
+            (_skin ? ShaderFlatSkin : ShaderFlat);
+        } else {
+          shader = gltfBaseColorTexture ?
             gltfNormalTexture ?
               (_skin ? ShaderPhongTexturedNormalsSkin : ShaderPhongTexturedNormals) :
               (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
-            (_skin ? ShaderPhongSkin : ShaderPhong),
-          coat);
+            (_skin ? ShaderPhongSkin : ShaderPhong);
+        }
 
-        this.#materials[_iMaterial] = material;
+        this.#materials[_iMaterial] = new Material(gltfMaterial.name, shader, coat);;
       }
 
       return this.#materials[_iMaterial];
@@ -885,5 +891,4 @@ namespace FudgeCore {
     [GLTF.COMPONENT_TYPE.UNSIGNED_INT]: Uint32Array,
     [GLTF.COMPONENT_TYPE.FLOAT]: Float32Array
   };
-
 }
