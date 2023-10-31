@@ -10,43 +10,18 @@ namespace FudgeCore {
    */
   export abstract class Render extends RenderWebGL {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
-    public static pickBuffer: Int32Array;
+    public static pickBuffer: Int32Array;   // TODO: research if picking should be optimized using radius picking to filter
     public static readonly nodesPhysics: RecycableArray<Node> = new RecycableArray();
     public static readonly componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
-    public static readonly lights: MapLightTypeToLightList = new Map();
-
-
-    //Objects and variables used for post effects.
-    public static mainFBO: WebGLFramebuffer;
-    public static mainTexture: WebGLTexture;
-
-    public static mistFBO: WebGLFramebuffer;
-    public static mistTexture: WebGLTexture;
-    public static cmpMistMaterial: ComponentMaterial;
-
-    public static aoNormalFBO: WebGLFramebuffer;
-    public static aoNormalTexture: WebGLTexture;
-    public static aoDepthTexture: WebGLTexture;
-    public static aoFBO: WebGLFramebuffer;
-    public static aoTexture: WebGLTexture;
-    public static aoSamplePoints: Vector3[] = [];
-    public static cmpSmoothNormalMaterial: ComponentMaterial;
-    public static cmpFlatNormalMaterial: ComponentMaterial;
-
-    public static downsamplingDepth: number = 7;
-    public static bloomDownsamplingFBOs: WebGLFramebuffer[] = [];
-    public static bloomDownsamplingTextures: WebGLTexture[] = [];
-    public static bloomUpsamplingFBOs: WebGLFramebuffer[] = [];
-    public static bloomUpsamplingTextures: WebGLTexture[] = [];
-
-    public static screenQuad: Float32Array;
-    public static screenQuadUV: Float32Array;
-    // TODO: research if picking should be optimized using radius picking to filter
-
+    private static readonly lights: MapLightTypeToLightList = new Map();
     private static readonly nodesSimple: RecycableArray<Node> = new RecycableArray();
     private static readonly nodesAlpha: RecycableArray<Node> = new RecycableArray();
     private static readonly skeletons: RecycableArray<SkeletonInstance> = new RecycableArray();
     private static timestampUpdate: number;
+
+    // TODO: move these to RenderWebGL
+    private static screenQuad: Float32Array;
+    private static screenQuadUV: Float32Array;
 
     //#region Prepare
     /**
@@ -97,7 +72,7 @@ namespace FudgeCore {
       }
 
       let cmpLights: ComponentLight[] = _branch.getComponents(ComponentLight);
-      Render.addLights(cmpLights);
+      addLights(cmpLights);
 
       let cmpMesh: ComponentMesh = _branch.getComponent(ComponentMesh);
       let cmpMaterial: ComponentMaterial = _branch.getComponent(ComponentMaterial);
@@ -141,23 +116,20 @@ namespace FudgeCore {
         _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
         Render.updateLightsUBO(Render.lights);
       }
-    }
 
-    /**
-     * Add the given lights to the {@link Render.lights}-map, sorted by type.
-     */
-    public static addLights(_cmpLights: ComponentLight[]): void {
-      for (let cmpLight of _cmpLights) {
-        if (!cmpLight.isActive)
-          continue;
-
-        let type: TypeOfLight = cmpLight.light.getType();
-        let lightsOfType: RecycableArray<ComponentLight> = Render.lights.get(type);
-        if (!lightsOfType) {
-          lightsOfType = new RecycableArray<ComponentLight>();
-          Render.lights.set(type, lightsOfType);
+      function addLights(_cmpLights: ComponentLight[]): void {
+        for (let cmpLight of _cmpLights) {
+          if (!cmpLight.isActive)
+            continue;
+  
+          let type: TypeOfLight = cmpLight.light.getType();
+          let lightsOfType: RecycableArray<ComponentLight> = Render.lights.get(type);
+          if (!lightsOfType) {
+            lightsOfType = new RecycableArray<ComponentLight>();
+            Render.lights.set(type, lightsOfType);
+          }
+          lightsOfType.push(cmpLight);
         }
-        lightsOfType.push(cmpLight);
       }
     }
     //#endregion
@@ -187,7 +159,7 @@ namespace FudgeCore {
       Render.setBlendMode(BLEND.TRANSPARENT);
 
       let picks: Pick[] = Render.getPicks(size, _cmpCamera);
-      Render.resetFrameBuffer();
+      Render.resetFramebuffer();
       return picks;
     }
     //#endregion
@@ -197,7 +169,7 @@ namespace FudgeCore {
      * Draws the scene from the point of view of the given camera
      */
     public static draw(_cmpCamera: ComponentCamera): void {
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mainFBO);
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.mainFramebuffer);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
       Render.setDepthTest(true);
       Render.clear(_cmpCamera.clrBackground);
@@ -233,7 +205,7 @@ namespace FudgeCore {
 
       this.calcNormalPass(_cmpCamera, _cmpAO);
 
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.aoFBO);              //set Framebuffer to AO-FBO
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.aoFramebuffer); //set Framebuffer to AO-FBO
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
       Render.setDepthTest(false);
       Render.clear(new Color(1));
@@ -255,8 +227,8 @@ namespace FudgeCore {
       RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
     }
 
-    protected static calcNormalPass(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion) {
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.aoNormalFBO);
+    protected static calcNormalPass(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void {
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.aoNormalFramebuffer);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
       Render.setDepthTest(true);
       Render.clear(new Color(1));
@@ -268,9 +240,9 @@ namespace FudgeCore {
       Render.drawNodesNormal(_cmpCamera, this.nodesAlpha, _cmpAO);
     }
 
-    protected static feedAOUniforms(_bindTexture: Function, _cmpAO: ComponentAmbientOcclusion, _cmpCamera: ComponentCamera, _shader: typeof Shader) {
-      _bindTexture(Render.aoNormalTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_normalTexture");
-      _bindTexture(Render.aoDepthTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_depthTexture");
+    protected static feedAOUniforms(_bindTexture: Function, _cmpAO: ComponentAmbientOcclusion, _cmpCamera: ComponentCamera, _shader: typeof Shader): void {
+      _bindTexture(RenderWebGL.aoNormalTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_normalTexture");
+      _bindTexture(RenderWebGL.aoDepthTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_depthTexture");
       RenderWebGL.getRenderingContext().uniform1f(_shader.uniforms["u_nearPlane"], _cmpCamera.getNear());
       RenderWebGL.getRenderingContext().uniform1f(_shader.uniforms["u_farPlane"], _cmpCamera.getFar());
       RenderWebGL.getRenderingContext().uniform1f(_shader.uniforms["u_radius"], _cmpAO.radius);
@@ -283,37 +255,40 @@ namespace FudgeCore {
       this.feedNoiseTexture(_bindTexture);
     }
 
-    protected static feedSamplePoints(_samples: number, _shader: typeof Shader) {
-      if (_samples != Render.aoSamplePoints.length) {
+    protected static feedSamplePoints(_samples: number, _shader: typeof Shader): void {
+      if (_samples != RenderWebGL.aoSamplePoints.length) {
         RenderWebGL.generateNewSamplePoints(_samples);
       }
       let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
       let i: number = 0;
-      for (let sample of Render.aoSamplePoints) {
+      for (let sample of RenderWebGL.aoSamplePoints) {
         RenderWebGL.getRenderingContext().uniform3fv(uni[`u_samples[${i}].vct`], new Float32Array([sample.x, sample.y, sample.z]));
         i++;
       }
     }
 
-    protected static feedNoiseTexture(_bindTexture: Function) {
-      let noiseTex: WebGLTexture = RenderWebGL.getRenderingContext().createTexture();
+    // rename to bufferNoiseTexture?
+    protected static feedNoiseTexture(_bindTexture: Function): void {
+      const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+      let noiseTex: WebGLTexture = crc3.createTexture();
       let pixelInformation: Uint8Array = new Uint8Array(100); //100 values are needed to get a 5 by 5 texture with 4 color channels
       for (let i: number = 0; i < 100 * 4; i++) {
         pixelInformation[i] = Math.floor(Math.random() * 256);
       }
       _bindTexture(noiseTex, WebGL2RenderingContext.TEXTURE2, 2, "u_noiseTexture");
-      RenderWebGL.getRenderingContext().texImage2D(WebGLRenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, 5, 5, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, pixelInformation);
-      RenderWebGL.getRenderingContext().texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
-      RenderWebGL.getRenderingContext().texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST);
-      RenderWebGL.getRenderingContext().texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.REPEAT);
-      RenderWebGL.getRenderingContext().texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.REPEAT);
+
+      crc3.texImage2D(WebGLRenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, 5, 5, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, pixelInformation);
+      crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
+      crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST);
+      crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.REPEAT);
+      crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.REPEAT);
     }
 
     /**
-    * Calculates the mist-effect
+     * Calculates the mist-effect
      */
-    public static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.mistFBO);
+    public static drawMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.mistFramebuffer);
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
       Render.setDepthTest(true);
       Render.clear(new Color(1));
@@ -328,7 +303,7 @@ namespace FudgeCore {
     /**
     * Calculates the bloom-effect
      */
-    public static calcBloom(_cmpBloom: ComponentBloom): void {
+    public static drawBloom(_cmpBloom: ComponentBloom): void {
 
       //feed texture and uniform matrix in textureslot 0
       function bindTextureSlot0(_texture: WebGLTexture): void {
@@ -343,7 +318,7 @@ namespace FudgeCore {
         RenderWebGL.crc3.uniform1i(shader.uniforms["u_texture2"], 1);
       }
 
-      let tempTexture: WebGLTexture = Render.mainTexture;   //Temporary texture that gets progressively smaller while downsampling.
+      let tempTexture: WebGLTexture = RenderWebGL.mainTexture;   //Temporary texture that gets progressively smaller while downsampling.
       let div: number = 2;                                  //Divider that is increased x2 every next downsampling-stage
 
       let shader: typeof Shader = ShaderDownsample;
@@ -351,11 +326,11 @@ namespace FudgeCore {
       Render.useScreenQuadRenderData(shader);               //set a rectangle that spans the whole renderarea for the texture to be rendered on
 
       //Downsampling
-      for (let i: number = 0; i < Render.bloomDownsamplingFBOs.length; i++) {
+      for (let i: number = 0; i < RenderWebGL.bloomDownsamplingFramebufferss.length; i++) {
         let width: number = Math.max(Render.crc3.canvas.width / div, 1);
         let height: number = Math.max(Render.crc3.canvas.height / div, 1);
 
-        Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.bloomDownsamplingFBOs[i]);
+        Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.bloomDownsamplingFramebufferss[i]);
         Render.crc3.viewport(0, 0, Math.round(width), Math.round(height));
         Render.clear(new Color(0, 0, 0, 1));
 
@@ -366,7 +341,7 @@ namespace FudgeCore {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_lvl"], i);
         RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
 
-        tempTexture = Render.bloomDownsamplingTextures[i];      //set the new destinationTexture to be rendered on in the next pass
+        tempTexture = RenderWebGL.bloomDownsamplingTextures[i];      //set the new destinationTexture to be rendered on in the next pass
         div *= 2;
       }
 
@@ -376,11 +351,11 @@ namespace FudgeCore {
       div /= 4;
 
       //Upsampling and combining Downsamplingpasses
-      for (let i: number = Render.bloomUpsamplingFBOs.length - 1; i >= 0; i--) {
+      for (let i: number = RenderWebGL.bloomUpsamplingFramebuffers.length - 1; i >= 0; i--) {
         let width: number = Math.max(Render.crc3.canvas.width / div, 1);
         let height: number = Math.max(Render.crc3.canvas.height / div, 1);
 
-        Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, Render.bloomUpsamplingFBOs[i]);
+        Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.bloomUpsamplingFramebuffers[i]);
         Render.crc3.viewport(0, 0, Math.round(width), Math.round(height));
         Render.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
 
@@ -391,7 +366,7 @@ namespace FudgeCore {
 
         RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLE_STRIP, 0, 4);
 
-        tempTexture = Render.bloomUpsamplingTextures[i];
+        tempTexture = RenderWebGL.bloomUpsamplingTextures[i];
         div /= 2;
       }
 

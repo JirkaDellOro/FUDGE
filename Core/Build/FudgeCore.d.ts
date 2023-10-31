@@ -1093,6 +1093,21 @@ declare namespace FudgeCore {
         static uboLightsVariableOffsets: {
             [_name: string]: number;
         };
+        protected static mainFramebuffer: WebGLFramebuffer;
+        protected static mainTexture: WebGLTexture;
+        protected static mistFramebuffer: WebGLFramebuffer;
+        protected static mistTexture: WebGLTexture;
+        protected static aoNormalFramebuffer: WebGLFramebuffer;
+        protected static aoNormalTexture: WebGLTexture;
+        protected static aoDepthTexture: WebGLTexture;
+        protected static aoFramebuffer: WebGLFramebuffer;
+        protected static aoTexture: WebGLTexture;
+        protected static aoSamplePoints: Vector3[];
+        protected static bloomDownsamplingFramebufferss: WebGLFramebuffer[];
+        protected static bloomDownsamplingTextures: WebGLTexture[];
+        protected static bloomUpsamplingFramebuffers: WebGLFramebuffer[];
+        protected static bloomUpsamplingTextures: WebGLTexture[];
+        protected static bloomDownsamplingDepth: number;
         protected static crc3: WebGL2RenderingContext;
         protected static ƒpicked: Pick[];
         private static rectRender;
@@ -1141,7 +1156,7 @@ declare namespace FudgeCore {
         /**
          * Reset the offscreen framebuffer to the original RenderingContext
          */
-        static resetFrameBuffer(_frameBuffer?: WebGLFramebuffer): void;
+        static resetFramebuffer(_buffer?: WebGLFramebuffer): void;
         /**
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
@@ -1154,6 +1169,10 @@ declare namespace FudgeCore {
          * Set the blend mode to render with
          */
         static setBlendMode(_mode: BLEND): void;
+        /**
+         * Adjusts the size of the set framebuffers corresponding textures
+         */
+        static adjustFramebuffers(_main?: boolean, _ao?: boolean, _mist?: boolean, _bloom?: boolean): void;
         /**
          * Creates a texture buffer to be used as pick-buffer
          */
@@ -1172,23 +1191,13 @@ declare namespace FudgeCore {
         /**
          * Creates and stores texture buffers to be used for Post-FX
          */
-        static initFBOs(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
+        static initializeFramebuffers(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
         /**
         * Calculates sample points to be used in AO-calculations, based on the specified samplecount
          */
         protected static generateNewSamplePoints(_nSamples?: number): void;
-        /**
-         * Sets up and configures framebuffers and textures for post-fx
-        */
-        protected static setupFBO(_fbo?: WebGLFramebuffer, _tex?: WebGLTexture, _depthTexture?: WebGLTexture, _divider?: number): PostBufferdata;
-        /**
-         * updates texture and renderbuffer sizes for given FBO
-         */
-        static adjustBufferSize(_fbo: WebGLFramebuffer, _tex: WebGLTexture, _depth: WebGLTexture, _divider?: number): void;
-        /**
-         * updates all off the bloom FBOs and textures
-         */
-        static adjustBlooomBufferSize(): void;
+        protected static createFramebuffer(_depthType: typeof WebGLTexture | typeof WebGLRenderbuffer, _divider?: number): [WebGLFramebuffer, WebGLTexture, WebGLTexture | WebGLRenderbuffer];
+        protected static updateFramebuffer(_framebuffer: WebGLFramebuffer, _texture?: WebGLTexture, _depth?: WebGLTexture | WebGLRenderbuffer, _divider?: number): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
         */
@@ -1202,7 +1211,7 @@ declare namespace FudgeCore {
         */
         static drawNodesMist(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpMist: ComponentMist): void;
         /**
-        * composites all effects that are used in the scene to a final render.
+         * composites all effects that are used in the scene to a final render.
          */
         static compositeEffects(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist, _cmpAO: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
         protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
@@ -6006,41 +6015,19 @@ declare namespace FudgeCore {
         static pickBuffer: Int32Array;
         static readonly nodesPhysics: RecycableArray<Node>;
         static readonly componentsPick: RecycableArray<ComponentPick>;
-        static readonly lights: MapLightTypeToLightList;
-        static mainFBO: WebGLFramebuffer;
-        static mainTexture: WebGLTexture;
-        static mistFBO: WebGLFramebuffer;
-        static mistTexture: WebGLTexture;
-        static cmpMistMaterial: ComponentMaterial;
-        static aoNormalFBO: WebGLFramebuffer;
-        static aoNormalTexture: WebGLTexture;
-        static aoDepthTexture: WebGLTexture;
-        static aoFBO: WebGLFramebuffer;
-        static aoTexture: WebGLTexture;
-        static aoSamplePoints: Vector3[];
-        static cmpSmoothNormalMaterial: ComponentMaterial;
-        static cmpFlatNormalMaterial: ComponentMaterial;
-        static downsamplingDepth: number;
-        static bloomDownsamplingFBOs: WebGLFramebuffer[];
-        static bloomDownsamplingTextures: WebGLTexture[];
-        static bloomUpsamplingFBOs: WebGLFramebuffer[];
-        static bloomUpsamplingTextures: WebGLTexture[];
-        static screenQuad: Float32Array;
-        static screenQuadUV: Float32Array;
+        private static readonly lights;
         private static readonly nodesSimple;
         private static readonly nodesAlpha;
         private static readonly skeletons;
         private static timestampUpdate;
+        private static screenQuad;
+        private static screenQuadUV;
         /**
          * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
          * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
          * render passes.
          */
         static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _shadersUsed?: (ShaderInterface)[]): void;
-        /**
-         * Add the given lights to the {@link Render.lights}-map, sorted by type.
-         */
-        static addLights(_cmpLights: ComponentLight[]): void;
         /**
          * Used with a {@link Picker}-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted {@link Pick}-array
@@ -6059,13 +6046,13 @@ declare namespace FudgeCore {
         protected static feedSamplePoints(_samples: number, _shader: typeof Shader): void;
         protected static feedNoiseTexture(_bindTexture: Function): void;
         /**
-        * Calculates the mist-effect
+         * Calculates the mist-effect
          */
-        static calcMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
+        static drawMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
         /**
         * Calculates the bloom-effect
          */
-        static calcBloom(_cmpBloom: ComponentBloom): void;
+        static drawBloom(_cmpBloom: ComponentBloom): void;
         /**
         * Sets up the "ScreenQuad" that is used to render a texture over the whole screen area
          */
@@ -6220,7 +6207,7 @@ declare namespace FudgeCore {
          */
         pointClientToScreen(_client: Vector2): Vector2;
         /**
-        * Returns a ComponentPostFX object based on the given Post-FX type, as long as the camaera has a component of this type
+         * Returns a ComponentPostFX object based on the given Post-FX type, as long as the camaera has a component of this type
          */
         private getComponentPost;
     }

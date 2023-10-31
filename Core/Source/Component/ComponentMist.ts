@@ -23,7 +23,7 @@ namespace FudgeCore {
         nearPlane: this.nearPlane,
         farPlane: this.farPlane
       };
-serialization[super.constructor.name] = super.serialize();
+      serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
 

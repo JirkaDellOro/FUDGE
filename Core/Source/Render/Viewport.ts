@@ -73,7 +73,7 @@ namespace FudgeCore {
       this.rectDestination = this.getClientRectangle();
 
       //TODO: Only setup needed FBOs. This proofs a bit complicated because the initialization might happen before a ComponentCamera with a ComponentPostFX exists. Therefore Postbuffers are initialized regardless for now. 
-      Render.initFBOs();
+      Render.initializeFramebuffers();
 
       this.setBranch(_branch);
     }
@@ -127,11 +127,11 @@ namespace FudgeCore {
       }
       let cmpMist: ComponentMist = <ComponentMist> this.getComponentPost(this.camera, "Mist");
       if (cmpMist != null) if (cmpMist.isActive) {
-        Render.calcMist(this.camera, cmpMist);
+        Render.drawMist(this.camera, cmpMist);
       }
       let cmpBloom: ComponentBloom = <ComponentBloom> this.getComponentPost(this.camera, "Bloom");
       if (cmpBloom != null) if (cmpBloom.isActive) {
-        Render.calcBloom(cmpBloom);
+        Render.drawBloom(cmpBloom);
       }
 
       Render.setDepthTest(false);
@@ -150,7 +150,7 @@ namespace FudgeCore {
     public computeDrawing(_calculateTransforms: boolean = true): void {
       if (!this.#branch)
         return;
-      Render.resetFrameBuffer();
+      Render.resetFramebuffer();
       if (!this.camera.isActive)
         return;
       if (this.adjustingFrames)
@@ -239,23 +239,11 @@ namespace FudgeCore {
         this.lastRectRenderSize.set(rectRender.size.x, rectRender.size.y);
         this.lastCamera = this.camera;
         if (rectRender.size.x >= 1 || rectRender.size.y >= 1) {
-          Render.adjustBufferSize(Render.mainFBO, Render.mainTexture, null);
-
           let cmpAO: ComponentAmbientOcclusion = <ComponentAmbientOcclusion> this.getComponentPost(this.camera, "AO");
-          if (cmpAO != null) if (cmpAO.isActive) {
-            Render.adjustBufferSize(Render.aoNormalFBO, Render.aoNormalTexture, Render.aoDepthTexture);
-            Render.adjustBufferSize(Render.aoFBO, Render.aoTexture, null);
-          }
-          
           let cmpMist: ComponentMist = <ComponentMist> this.getComponentPost(this.camera, "Mist");
-          if (cmpMist != null) if (cmpMist.isActive) {
-            Render.adjustBufferSize(Render.mistFBO, Render.mistTexture, null);
-          }
-
           let cmpBloom: ComponentBloom = <ComponentBloom> this.getComponentPost(this.camera, "Bloom");
-          if (cmpBloom != null) if (cmpBloom.isActive) {
-            Render.adjustBlooomBufferSize();
-          }
+
+          Render.adjustFramebuffers(true, cmpAO?.isActive, cmpMist?.isActive, cmpBloom?.isActive);
         }
       }
 
@@ -387,8 +375,9 @@ namespace FudgeCore {
       let screen: Vector2 = new Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
       return screen;
     }
+
     /**
-    * Returns a ComponentPostFX object based on the given Post-FX type, as long as the camaera has a component of this type
+     * Returns a ComponentPostFX object based on the given Post-FX type, as long as the camaera has a component of this type
      */
     private getComponentPost(_camera: ComponentCamera, _cmpType: string): Component { //TODO: remove this function, just call getComponent directly
       let camParentNode: Node = _camera.node;

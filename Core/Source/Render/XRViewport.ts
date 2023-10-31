@@ -107,7 +107,7 @@ namespace FudgeCore {
       super.computeDrawing(_calculateTransforms);
 
       let glLayer: XRWebGLLayer = this.session.renderState.baseLayer;
-      Render.resetFrameBuffer(glLayer.framebuffer);
+      Render.resetFramebuffer(glLayer.framebuffer);
       Render.clear(this.camera.clrBackground);
       for (let view of pose.views) {
         let viewport: globalThis.XRViewport = glLayer.getViewport(view);
