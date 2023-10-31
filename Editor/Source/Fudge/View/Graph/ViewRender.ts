@@ -153,7 +153,7 @@ namespace Fudge {
       this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
       try {
         this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
-      } catch (_error: unknown) { /* view should load even if rendering fails... */ }; 
+      } catch (_error: unknown) { /* view should load even if rendering fails... */ };
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       this.viewport.addEventListener(ƒ.EVENT.RENDER_PREPARE_START, this.hndPrepare);
 
@@ -185,6 +185,10 @@ namespace Fudge {
       this.viewport.setBranch(this.graph);
       this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: this.graph } });
       // this.redraw();
+
+      this.graph.addEventListener(ƒ.EVENT.MUTATE_INSTANCE,
+        () => this.dispatch(EVENT_EDITOR.UPDATE, {})
+      );
     }
 
     private setCameraOrthographic(_on: boolean = false): void {
@@ -232,6 +236,7 @@ namespace Fudge {
         case EVENT_EDITOR.CLOSE:
           this.setRenderContinously(false);
       }
+      console.log("ViewRender received", _event.type);
       this.redraw();
     };
 

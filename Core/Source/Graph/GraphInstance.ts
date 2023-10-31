@@ -119,6 +119,8 @@ namespace FudgeCore {
       // console.log("Add", _graph.name, this.name, _graph.listeners);
       // graph.addEventListener(EVENT.MUTATE_GRAPH_DONE, () => { console.log("Done", this.name); /* this.#sync = true; */ });
 
+      //@ts-ignore
+      console.log(_graph?.listeners);
       this.broadcastEvent(new Event(EVENT.GRAPH_INSTANTIATED));
     }
 
@@ -145,7 +147,7 @@ namespace FudgeCore {
 
       this.#sync = SYNC.GRAPH_SYNCED; // do not sync again, since mutation is already a synchronization
       await this.reflectMutation(_event, <Graph>_event.currentTarget, this, _event.detail.path);
-      this.dispatchEvent(new Event(EVENT.MUTATE_INSTANCE, { bubbles: false }));
+      this.dispatchEvent(new Event(EVENT.MUTATE_INSTANCE, { bubbles: true }));
     };
 
     /**

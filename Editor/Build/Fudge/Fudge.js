@@ -4464,6 +4464,7 @@ var Fudge;
             this.viewport.setBranch(this.graph);
             this.dispatch(Fudge.EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: this.graph } });
             // this.redraw();
+            this.graph.addEventListener("mutateGraphDone" /* ƒ.EVENT.MUTATE_INSTANCE */, () => this.dispatch(Fudge.EVENT_EDITOR.UPDATE, {}));
         }
         setCameraOrthographic(_on = false) {
             this.viewport.camera = this.cmrOrbit.cmpCamera;
@@ -4510,6 +4511,7 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.CLOSE:
                     this.setRenderContinously(false);
             }
+            console.log("ViewRender received", _event.type);
             this.redraw();
         };
         hndPick = (_event) => {
