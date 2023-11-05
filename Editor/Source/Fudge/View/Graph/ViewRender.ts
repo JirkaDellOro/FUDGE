@@ -132,7 +132,7 @@ namespace Fudge {
     protected hndDrop(_event: DragEvent, _viewSource: View): void {
       let source: Object = _viewSource.getDragDropSources()[0];
       if (source instanceof ƒ.ComponentCamera) {
-        this.setCameraOrthographic(false);
+        // this.setCameraOrthographic(false);
         this.viewport.camera = source;
         this.redraw();
       } else
@@ -183,12 +183,10 @@ namespace Fudge {
       ƒ.Physics.connectJoints();
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       this.viewport.setBranch(this.graph);
-      this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: this.graph } });
-      // this.redraw();
 
-      // this.graph.addEventListener(ƒ.EVENT.MUTATE_INSTANCE,
-      //   () => this.dispatch(EVENT_EDITOR.UPDATE, {})
-      // );
+      this.viewport.camera = this.cmrOrbit.cmpCamera;
+
+      this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: this.graph } });
     }
 
     private setCameraOrthographic(_on: boolean = false): void {
@@ -235,8 +233,11 @@ namespace Fudge {
           break;
         case EVENT_EDITOR.CLOSE:
           this.setRenderContinously(false);
+          break;
+        case EVENT_EDITOR.UPDATE:
+          if (!this.viewport.camera.isActive)
+            this.viewport.camera = this.cmrOrbit.cmpCamera;
       }
-      console.log("ViewRender received", _event.type);
       this.redraw();
     };
 
