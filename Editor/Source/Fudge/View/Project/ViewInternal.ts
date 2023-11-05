@@ -24,6 +24,7 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.REMOVE_CHILD, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
@@ -202,6 +203,7 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
+      console.log(_event.type);
       if (_event.detail?.sender && _event.type != EVENT_EDITOR.OPEN && _event.type != EVENT_EDITOR.CREATE)
         return;
       switch (_event.type) {
@@ -218,6 +220,9 @@ namespace Fudge {
           _event.stopPropagation();
           this.dispatchToParent(EVENT_EDITOR.DELETE, {});
           this.listResources();
+          break;
+        case ƒui.EVENT.RENAME:
+          this.dispatchToParent(EVENT_EDITOR.UPDATE, {});
           break;
       }
     };

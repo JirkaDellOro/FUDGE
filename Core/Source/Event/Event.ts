@@ -43,6 +43,8 @@ namespace FudgeCore {
     GRAPH_INSTANTIATED = "graphInstantiated",
     /** dispatched to a {@link Graph} when it's finished deserializing  */
     GRAPH_DESERIALIZED = "graphDeserialized",
+    /** dispatched by a {@link Graph} when it and its connected instances have finished mutating  */
+    GRAPH_MUTATED = "graphMutated",
     /** dispatched to {@link Time} when it's scaling changed  */
     TIME_SCALED = "timeScaled",
     /** dispatched to {@link FileIoBrowserLocal} when a list of files has been loaded  */

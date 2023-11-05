@@ -55,6 +55,11 @@ namespace FudgeCore {
           this.deregister(_resource);
       _resource.idResource = _idResource || Project.generateId(_resource);
       Project.resources[_resource.idResource] = _resource;
+
+      if (_resource instanceof Graph)
+        _resource.addEventListener(EVENT.GRAPH_MUTATED,
+          (_event: Event) => this.dispatchEvent(new CustomEvent(EVENT.GRAPH_MUTATED, { detail: _resource }))
+        );
     }
 
     /**

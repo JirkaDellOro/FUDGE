@@ -186,9 +186,9 @@ namespace Fudge {
       this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: this.graph } });
       // this.redraw();
 
-      this.graph.addEventListener(ƒ.EVENT.MUTATE_INSTANCE,
-        () => this.dispatch(EVENT_EDITOR.UPDATE, {})
-      );
+      // this.graph.addEventListener(ƒ.EVENT.MUTATE_INSTANCE,
+      //   () => this.dispatch(EVENT_EDITOR.UPDATE, {})
+      // );
     }
 
     private setCameraOrthographic(_on: boolean = false): void {

@@ -155,17 +155,14 @@ namespace Fudge {
           this.redraw();
           break;
         case "Graph":
-          ƒ.Project.createGraphInstance(<ƒ.Graph>this.resource).then(
-            (_instance: ƒ.GraphInstance) => {
-              previewObject.appendChild(_instance);
-              ƒ.Render.prepare(_instance);
-              lightsPresent = false;
-              ƒ.Render.lights.forEach((_array: ƒ.RecycableArray<ƒ.ComponentLight>) => lightsPresent ||= _array.length > 0);
-              this.illuminate(!lightsPresent);
-              this.setTitle(`${lightsPresent ? "PREVIEW" : "Preview"} | ${this.resource.name}`);
-              this.redraw();
-            }
-          );
+          previewObject.appendChild(<ƒ.Graph>this.resource);
+          ƒ.Render.prepare(<ƒ.Graph>this.resource);
+          lightsPresent = false;
+          ƒ.Render.lights.forEach((_array: ƒ.RecycableArray<ƒ.ComponentLight>) => lightsPresent ||= _array.length > 0);
+          this.illuminate(!lightsPresent);
+          this.setTitle(`${lightsPresent ? "PREVIEW" : "Preview"} | ${this.resource.name}`);
+          this.redraw();
+          
           ƒ.Physics.activeInstance = Page.getPhysics(<ƒ.Graph>this.resource);
           this.setViewObject(previewObject);
           previewObject.addEventListener(ƒ.EVENT.MUTATE, (_event: Event) => {

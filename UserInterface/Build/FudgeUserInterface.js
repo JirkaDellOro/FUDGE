@@ -2155,7 +2155,7 @@ var FudgeUserInterface;
             this.addEventListener("escape" /* EVENT.ESCAPE */, this.hndEscape);
             this.addEventListener("delete" /* EVENT.DELETE */, this.hndDelete);
             // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
-            // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
+            this.addEventListener("change" /* EVENT.CHANGE */, this.hndChange);
             // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
             // this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
             // this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
@@ -2268,6 +2268,12 @@ var FudgeUserInterface;
         //   // if (renamed)
         //   //   item.setLabel(this.controller.getLabel(item.data));
         // }
+        hndChange = (_event) => {
+            let target = _event.target;
+            console.log(_event);
+            _event.stopPropagation();
+            target.dispatchEvent(new Event("rename" /* EVENT.RENAME */, { bubbles: true }));
+        };
         hndSelect(_event) {
             // _event.stopPropagation();
             let detail = _event.detail;

@@ -579,6 +579,9 @@ var Fudge;
             this.name = _base.toString().split("/").slice(-2, -1)[0];
             this.fileIndex = _base.toString().split("/").pop() || this.fileIndex;
             ƒ.Project.clear();
+            ƒ.Project.addEventListener("graphMutated" /* ƒ.EVENT.GRAPH_MUTATED */, 
+            //@ts-ignore
+            (_event) => Fudge.Page.broadcast(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.UPDATE)));
         }
         async openDialog() {
             let promise = ƒui.Dialog.prompt(Fudge.project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
@@ -1150,6 +1153,7 @@ var Fudge;
             this.dom.addEventListener("mutate" /* ƒui.EVENT.MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* ƒui.EVENT.SELECT */, this.hndEvent);
             this.dom.addEventListener("removeChild" /* ƒui.EVENT.REMOVE_CHILD */, this.hndEvent);
+            this.dom.addEventListener("rename" /* ƒui.EVENT.RENAME */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* ƒui.EVENT.CONTEXTMENU */, this.openContextMenu);
         }
         listResources() {
@@ -1302,6 +1306,7 @@ var Fudge;
             this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
         }
         hndEvent = (_event) => {
+            console.log(_event.type);
             if (_event.detail?.sender && _event.type != Fudge.EVENT_EDITOR.OPEN && _event.type != Fudge.EVENT_EDITOR.CREATE)
                 return;
             switch (_event.type) {
@@ -1318,6 +1323,9 @@ var Fudge;
                     _event.stopPropagation();
                     this.dispatchToParent(Fudge.EVENT_EDITOR.DELETE, {});
                     this.listResources();
+                    break;
+                case "rename" /* ƒui.EVENT.RENAME */:
+                    this.dispatchToParent(Fudge.EVENT_EDITOR.UPDATE, {});
                     break;
             }
         };
@@ -4464,7 +4472,9 @@ var Fudge;
             this.viewport.setBranch(this.graph);
             this.dispatch(Fudge.EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: this.graph } });
             // this.redraw();
-            this.graph.addEventListener("mutateGraphDone" /* ƒ.EVENT.MUTATE_INSTANCE */, () => this.dispatch(Fudge.EVENT_EDITOR.UPDATE, {}));
+            // this.graph.addEventListener(ƒ.EVENT.MUTATE_INSTANCE,
+            //   () => this.dispatch(EVENT_EDITOR.UPDATE, {})
+            // );
         }
         setCameraOrthographic(_on = false) {
             this.viewport.camera = this.cmrOrbit.cmpCamera;
@@ -4717,15 +4727,13 @@ var Fudge;
                     this.redraw();
                     break;
                 case "Graph":
-                    ƒ.Project.createGraphInstance(this.resource).then((_instance) => {
-                        previewObject.appendChild(_instance);
-                        ƒ.Render.prepare(_instance);
-                        lightsPresent = false;
-                        ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
-                        this.illuminate(!lightsPresent);
-                        this.setTitle(`${lightsPresent ? "PREVIEW" : "Preview"} | ${this.resource.name}`);
-                        this.redraw();
-                    });
+                    previewObject.appendChild(this.resource);
+                    ƒ.Render.prepare(this.resource);
+                    lightsPresent = false;
+                    ƒ.Render.lights.forEach((_array) => lightsPresent ||= _array.length > 0);
+                    this.illuminate(!lightsPresent);
+                    this.setTitle(`${lightsPresent ? "PREVIEW" : "Preview"} | ${this.resource.name}`);
+                    this.redraw();
                     ƒ.Physics.activeInstance = Fudge.Page.getPhysics(this.resource);
                     this.setViewObject(previewObject);
                     previewObject.addEventListener("mutate" /* ƒ.EVENT.MUTATE */, (_event) => {
@@ -4899,6 +4907,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
         }
         fillContent() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -4943,6 +4952,9 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.SELECT:
                 case Fudge.EVENT_EDITOR.DELETE:
                     this.resource = (_event.detail.data);
+                    this.fillContent();
+                    break;
+                case Fudge.EVENT_EDITOR.UPDATE:
                     this.fillContent();
                     break;
                 case "mutate" /* ƒui.EVENT.MUTATE */:

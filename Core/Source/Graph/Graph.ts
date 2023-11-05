@@ -42,6 +42,7 @@ namespace FudgeCore {
       // this.#syncing = true;
       _event.detail.path = Reflect.get(_event, "path"); // save path to target in detail
       this.dispatchEvent(new CustomEvent(EVENT.MUTATE_GRAPH, { detail: _event.detail }));
+      this.dispatchEvent(new CustomEvent(EVENT.GRAPH_MUTATED, { detail: _event.detail }));
       // this.dispatchEvent(new Event(EVENT.MUTATE_INSTANCE));
       // this.#syncing = false;
     };

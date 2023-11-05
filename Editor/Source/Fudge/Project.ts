@@ -25,6 +25,10 @@ namespace Fudge {
       this.fileIndex = _base.toString().split("/").pop() || this.fileIndex;
 
       ƒ.Project.clear();
+      ƒ.Project.addEventListener(ƒ.EVENT.GRAPH_MUTATED,
+        //@ts-ignore
+        (_event: Event) => Page.broadcast(new EditorEvent(EVENT_EDITOR.UPDATE))
+      );
     }
 
     public async openDialog(): Promise<boolean> {
