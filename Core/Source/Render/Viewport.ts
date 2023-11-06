@@ -4,7 +4,7 @@ namespace FudgeCore {
    * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
    * through a series of {@link Framing} objects. The stages involved are in order of rendering
    * {@link Render}.viewport -> {@link Viewport}.source -> {@link Viewport}.destination -> DOM-Canvas -> Client(CSS)
-   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022 | Jonas Plotzky, HFU, 2023
    * @link https://github.com/JirkaDellOro/FUDGE/wiki/Viewport
    */
   export class Viewport extends EventTargetUnified {
@@ -27,11 +27,11 @@ namespace FudgeCore {
     public adjustingCamera: boolean = true;
     public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
 
+    public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
+
     //Variables to check if the FBOs need to be recalculated
     private lastRectRenderSize: Vector2 = new Vector2(0, 0);
     private lastCamera: ComponentCamera;
-
-    public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
 
     #branch: Node = null; // The to render with all its descendants.
     #crc2: CanvasRenderingContext2D = null;
@@ -115,27 +115,27 @@ namespace FudgeCore {
      */
     public draw(_calculateTransforms: boolean = true): void {
       this.computeDrawing(_calculateTransforms);
+
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
         Physics.draw(this.camera, this.physicsDebugMode);
       }
 
-      let cmpAO: ComponentAmbientOcclusion = <ComponentAmbientOcclusion> this.getComponentPost(this.camera, "AO");
-      if (cmpAO != null) if (cmpAO.isActive) {
-        Render.calcAO(this.camera, cmpAO);
+      let cmpAmbientOcclusion: ComponentAmbientOcclusion = <ComponentAmbientOcclusion>this.getComponentPost(this.camera, "AO");
+      if (cmpAmbientOcclusion != null) if (cmpAmbientOcclusion.isActive) {
+        Render.drawAO(this.camera, cmpAmbientOcclusion);
       }
-      let cmpMist: ComponentMist = <ComponentMist> this.getComponentPost(this.camera, "Mist");
+      let cmpMist: ComponentMist = <ComponentMist>this.getComponentPost(this.camera, "Mist");
       if (cmpMist != null) if (cmpMist.isActive) {
         Render.drawMist(this.camera, cmpMist);
       }
-      let cmpBloom: ComponentBloom = <ComponentBloom> this.getComponentPost(this.camera, "Bloom");
+      let cmpBloom: ComponentBloom = <ComponentBloom>this.getComponentPost(this.camera, "Bloom");
       if (cmpBloom != null) if (cmpBloom.isActive) {
         Render.drawBloom(cmpBloom);
       }
 
-      Render.setDepthTest(false);
-      Render.compositeEffects(this.camera, cmpMist, cmpAO, cmpBloom);
+      Render.compositeEffects(this.camera, cmpMist, cmpAmbientOcclusion, cmpBloom);
 
       this.#crc2.imageSmoothingEnabled = false;
       this.#crc2.drawImage(
@@ -144,35 +144,35 @@ namespace FudgeCore {
         this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
       );
     }
+
     /**
-    * The transforms in the branch are recalculated here.
+    * Adjusts all frames and the camera to fit the current size of the canvas. Prepares the scene for rendering.
     */
-    public computeDrawing(_calculateTransforms: boolean = true): void {
+    public computeDrawing(_calculateTransforms: boolean = true): void { // TODO: rename this
       if (!this.#branch)
         return;
-      Render.resetFramebuffer();
       if (!this.camera.isActive)
         return;
+
       if (this.adjustingFrames)
         this.adjustFrames();
       if (this.adjustingCamera)
         this.adjustCamera();
       if (_calculateTransforms)
         this.calculateTransforms();
-
-      Render.clear(this.camera.clrBackground);
     }
+
     /**
      * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh}es 
      */
-    public calculateTransforms(): void {
+    public calculateTransforms(): void { // TODO: Render.prepare does far more than just calculating transforms, so rename?
       let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
-      // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START)); // TODO: these events seem to get fired in Render.prepare aswell, check where the should get fired
-      this.adjustFrames();
+      // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START)); // TODO: these events seem to get fired in Render.prepare aswell, check where they should get fired
+      // this.adjustFrames(); // called in computeDrawing?
       Render.prepare(this.#branch, null, mtxRoot);
-      // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END)); // TODO: these events seem to get fired in Render.prepare aswell, check where the should get fired
+      // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END)); // TODO: these events seem to get fired in Render.prepare aswell, check where they should get fired
       this.componentsPick = Render.componentsPick;
     }
 
@@ -190,7 +190,11 @@ namespace FudgeCore {
       let cameraPicks: Node[] = [];
       let otherPicks: ComponentPick[] = [];
       for (let cmpPick of this.componentsPick)
-        cmpPick.pick == PICK.CAMERA ? cameraPicks.push(cmpPick.node) : otherPicks.push(cmpPick);
+        if (cmpPick.pick == PICK.CAMERA)
+          cameraPicks.push(cmpPick.node);
+        else
+          otherPicks.push(cmpPick);
+
 
       if (cameraPicks.length) {
         let picks: Pick[] = Picker.pickCamera(cameraPicks, this.camera, this.pointClientToProjection(posClient));
@@ -239,9 +243,9 @@ namespace FudgeCore {
         this.lastRectRenderSize.set(rectRender.size.x, rectRender.size.y);
         this.lastCamera = this.camera;
         if (rectRender.size.x >= 1 || rectRender.size.y >= 1) {
-          let cmpAO: ComponentAmbientOcclusion = <ComponentAmbientOcclusion> this.getComponentPost(this.camera, "AO");
-          let cmpMist: ComponentMist = <ComponentMist> this.getComponentPost(this.camera, "Mist");
-          let cmpBloom: ComponentBloom = <ComponentBloom> this.getComponentPost(this.camera, "Bloom");
+          let cmpAO: ComponentAmbientOcclusion = <ComponentAmbientOcclusion>this.getComponentPost(this.camera, "AO");
+          let cmpMist: ComponentMist = <ComponentMist>this.getComponentPost(this.camera, "Mist");
+          let cmpBloom: ComponentBloom = <ComponentBloom>this.getComponentPost(this.camera, "Bloom");
 
           Render.adjustFramebuffers(true, cmpAO?.isActive, cmpMist?.isActive, cmpBloom?.isActive);
         }
@@ -253,7 +257,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Adjust the camera parameters to fit the rendering into the render vieport
+     * Adjust the camera parameters to fit the rendering into the render viewport
      */
     public adjustCamera(): void {
       let rect: Rectangle = Render.getRenderRectangle();
@@ -263,6 +267,7 @@ namespace FudgeCore {
       this.camera.projectCentral(
         rect.width / rect.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar()
       );
+      this.camera.resetWorldToView();
     }
     // #endregion
 
@@ -279,7 +284,7 @@ namespace FudgeCore {
       let cameraNode: Node = this.camera.node;
       if (cameraNode)
         ray.transform(cameraNode.mtxWorld);
-        
+
       return ray;
     }
 
@@ -382,9 +387,9 @@ namespace FudgeCore {
     private getComponentPost(_camera: ComponentCamera, _cmpType: string): Component { //TODO: remove this function, just call getComponent directly
       let camParentNode: Node = _camera.node;
       if (camParentNode != null) {
-        if (_cmpType == "AO")return camParentNode.getComponent(ComponentAmbientOcclusion);
-        if (_cmpType == "Mist")return camParentNode.getComponent(ComponentMist);
-        if (_cmpType == "Bloom")return camParentNode.getComponent(ComponentBloom);
+        if (_cmpType == "AO") return camParentNode.getComponent(ComponentAmbientOcclusion);
+        if (_cmpType == "Mist") return camParentNode.getComponent(ComponentMist);
+        if (_cmpType == "Bloom") return camParentNode.getComponent(ComponentBloom);
       }
       return null;
     }

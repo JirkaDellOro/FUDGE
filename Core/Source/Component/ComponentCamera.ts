@@ -46,6 +46,7 @@ namespace FudgeCore {
         mtxCamera = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
       } catch (_error) {
         // no container node or no world transformation found -> continue with pivot only
+        // TODO: maybe use if () then instead of try catch
       }
       return mtxCamera;
     }

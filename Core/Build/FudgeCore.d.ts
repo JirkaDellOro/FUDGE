@@ -1079,11 +1079,6 @@ declare namespace FudgeCore {
             INDEX: number;
         };
     };
-    interface PostBufferdata {
-        fbo: WebGLFramebuffer;
-        texture: WebGLTexture;
-        depthTexture: WebGLTexture;
-    }
     /**
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
      * Methods and attributes of this class should not be called directly, only through {@link Render}
@@ -1103,7 +1098,7 @@ declare namespace FudgeCore {
         protected static aoFramebuffer: WebGLFramebuffer;
         protected static aoTexture: WebGLTexture;
         protected static aoSamplePoints: Vector3[];
-        protected static bloomDownsamplingFramebufferss: WebGLFramebuffer[];
+        protected static bloomDownsamplingFramebuffers: WebGLFramebuffer[];
         protected static bloomDownsamplingTextures: WebGLTexture[];
         protected static bloomUpsamplingFramebuffers: WebGLFramebuffer[];
         protected static bloomUpsamplingTextures: WebGLTexture[];
@@ -1122,6 +1117,10 @@ declare namespace FudgeCore {
          * @param _bufferSpecification  Interface passing datapullspecifications to the buffer.
          */
         static setAttributeStructure(_attributeLocation: number, _bufferSpecification: BufferSpecification): void;
+        /**
+         * Creates a {@link WebGLBuffer}.
+         */
+        static createBuffer(_type: GLenum, _array: Float32Array | Uint16Array): WebGLBuffer;
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
         * @param _value  value to check against null
@@ -1170,9 +1169,24 @@ declare namespace FudgeCore {
          */
         static setBlendMode(_mode: BLEND): void;
         /**
+         * Creates and stores texture buffers to be used for Post-FX
+         */
+        static initializeFramebuffers(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
+        /**
          * Adjusts the size of the set framebuffers corresponding textures
          */
         static adjustFramebuffers(_main?: boolean, _ao?: boolean, _mist?: boolean, _bloom?: boolean): void;
+        /**
+         * Composites all effects that are used in the scene to a final render.
+         */
+        static compositeEffects(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist, _cmpAmbientOcclusion: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
+        /**
+         * Draws the bloom-effect into the bloom texture, using the given camera-component and the given bloom-component
+         */
+        static drawBloom(_cmpBloom: ComponentBloom): void;
+        /**
+         * Sets up the "ScreenQuad" that is used to render a texture over the whole screen area
+         */
         /**
          * Creates a texture buffer to be used as pick-buffer
          */
@@ -1187,11 +1201,7 @@ declare namespace FudgeCore {
         /**
          * Buffer the data from the lights in the scenegraph into the lights ubo
          */
-        protected static updateLightsUBO(_lights: MapLightTypeToLightList): void;
-        /**
-         * Creates and stores texture buffers to be used for Post-FX
-         */
-        static initializeFramebuffers(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
+        protected static bufferLights(_lights: MapLightTypeToLightList): void;
         /**
         * Calculates sample points to be used in AO-calculations, based on the specified samplecount
          */
@@ -1205,15 +1215,12 @@ declare namespace FudgeCore {
         /**
          * Draw all of the given nodes using the normal shader to be used in AO-calculations
         */
-        static drawNodesNormal(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpAO: ComponentAmbientOcclusion): void;
+        protected static drawNodesNormal(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpAO: ComponentAmbientOcclusion): void;
         /**
          * Draw all of the given nodes using the mist shader.
         */
-        static drawNodesMist(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpMist: ComponentMist): void;
-        /**
-         * composites all effects that are used in the scene to a final render.
-         */
-        static compositeEffects(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist, _cmpAO: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
+        protected static useMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
+        protected static drawNodeMist(_node: Node, _cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
         protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
         private static calcMeshToView;
     }
@@ -6020,8 +6027,6 @@ declare namespace FudgeCore {
         private static readonly nodesAlpha;
         private static readonly skeletons;
         private static timestampUpdate;
-        private static screenQuad;
-        private static screenQuadUV;
         /**
          * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
          * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
@@ -6037,30 +6042,20 @@ declare namespace FudgeCore {
          * Draws the scene from the point of view of the given camera
          */
         static draw(_cmpCamera: ComponentCamera): void;
+        static drawList(_list: RecycableArray<Node> | Array<Node>, _cmpCamera: ComponentCamera, _drawNode: Function): void;
+        static drawListAlpha(_list: RecycableArray<Node>, _cmpCamera: ComponentCamera, _drawNode: Function): void;
+        /**
+         * Draws the mist-effect into the mist texture, using the given camera and the given mist-component
+         */
+        static drawMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
         /**
          * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
          */
-        static calcAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
+        static drawAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
         protected static calcNormalPass(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
         protected static feedAOUniforms(_bindTexture: Function, _cmpAO: ComponentAmbientOcclusion, _cmpCamera: ComponentCamera, _shader: typeof Shader): void;
         protected static feedSamplePoints(_samples: number, _shader: typeof Shader): void;
         protected static feedNoiseTexture(_bindTexture: Function): void;
-        /**
-         * Calculates the mist-effect
-         */
-        static drawMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
-        /**
-        * Calculates the bloom-effect
-         */
-        static drawBloom(_cmpBloom: ComponentBloom): void;
-        /**
-        * Sets up the "ScreenQuad" that is used to render a texture over the whole screen area
-         */
-        static initScreenQuad(_texture: WebGLTexture): void;
-        /**
-        * Sets all necessary data in the shader for the screen quad to be rendered on
-         */
-        static useScreenQuadRenderData(_shader: typeof Shader): void;
         private static transformByPhysics;
     }
 }
@@ -6085,7 +6080,7 @@ declare namespace FudgeCore {
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
      * through a series of {@link Framing} objects. The stages involved are in order of rendering
      * {@link Render}.viewport -> {@link Viewport}.source -> {@link Viewport}.destination -> DOM-Canvas -> Client(CSS)
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022 | Jonas Plotzky, HFU, 2023
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Viewport
      */
     class Viewport extends EventTargetUnified {
@@ -6102,9 +6097,9 @@ declare namespace FudgeCore {
         adjustingFrames: boolean;
         adjustingCamera: boolean;
         physicsDebugMode: PHYSICS_DEBUGMODE;
+        componentsPick: RecycableArray<ComponentPick>;
         private lastRectRenderSize;
         private lastCamera;
-        componentsPick: RecycableArray<ComponentPick>;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
@@ -6143,7 +6138,7 @@ declare namespace FudgeCore {
          */
         draw(_calculateTransforms?: boolean): void;
         /**
-        * The transforms in the branch are recalculated here.
+        * Adjusts all frames and the camera to fit the current size of the canvas. Prepares the scene for rendering.
         */
         computeDrawing(_calculateTransforms?: boolean): void;
         /**
@@ -6163,7 +6158,7 @@ declare namespace FudgeCore {
          */
         adjustFrames(): void;
         /**
-         * Adjust the camera parameters to fit the rendering into the render vieport
+         * Adjust the camera parameters to fit the rendering into the render viewport
          */
         adjustCamera(): void;
         /**

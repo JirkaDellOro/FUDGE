@@ -1,11 +1,8 @@
 #version 300 es
 /**
 * Sets up the data for the ShaderScreen fragmentshader
-* @authors Roland Heer, HFU, 2023
+* @authors Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
 */
-in vec2 a_vctPosition;
-in vec2 a_vctTexture;
-
 uniform float u_width;
 uniform float u_height;
 
@@ -13,8 +10,11 @@ out vec2 v_vctTexture;
 out vec2 v_vctOffsets[25];
 
 void main() {
-  gl_Position = vec4(a_vctPosition, 0.0, 1.0);
-  v_vctTexture = a_vctTexture;
+  // fullscreen triangle, contains screen quad
+  float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
+  float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
+  gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
+  v_vctTexture = vec2(x * 0.5, y * 0.5); // (0, 0), (2, 0), (0, 2)
 
   vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
 

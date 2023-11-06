@@ -85,16 +85,16 @@ void main() {
 
 /**
 * AO vertexshader. Sets values for AO fragmentshader
-* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
+* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023 | Jonas Plotzky, HFU, 2023
 */
-in vec2 a_vctPosition;
-in vec2 a_vctTexture;
-
 out vec2 v_vctTexture;
 
 void main() {
-    gl_Position = vec4(a_vctPosition, 0.0, 1.0);
-    v_vctTexture = a_vctTexture;
+  // fullscreen triangle, contains screen quad
+  float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
+  float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
+  gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
+  v_vctTexture = vec2(x * 0.5, y * 0.5); // (0, 0), (2, 0), (0, 2)
 }`;
   shaderSources["ShaderAONormal.frag"] = /*glsl*/ `#version 300 es
 /**
@@ -186,11 +186,8 @@ void main() {
   shaderSources["ShaderDownsample.vert"] = /*glsl*/ `#version 300 es
 /**
 * ShaderDownsample sets values for downsampling fragmentshader and applies a small gaussian blur
-* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
+* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023 | Jonas Plotzky, HFU, 2023
 */
-in vec2 a_vctPosition;
-in vec2 a_vctTexture;
-
 uniform float u_width;
 uniform float u_height;
 
@@ -198,17 +195,19 @@ out vec2 v_vctTexture;
 out vec2[9] v_vctOffsets;
 
 void main() {
-    gl_Position = vec4(a_vctPosition, 0.0f, 1.0f);
-    v_vctTexture = a_vctTexture;
+  // fullscreen triangle, contains screen quad
+  float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
+  float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
+  gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
+  v_vctTexture = vec2(x * 0.5, y * 0.5); // (0, 0), (2, 0), (0, 2)
 
-    vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
+  vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
 
-    v_vctOffsets = vec2[]
-    (
-        vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
-        vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
-        vec2(-offset.x, -offset.y), vec2(0.0, -offset.y),  vec2(offset.x, -offset.y)
-    );
+  v_vctOffsets = vec2[](
+    vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
+    vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
+    vec2(-offset.x, -offset.y), vec2(0.0, -offset.y),  vec2(offset.x, -offset.y)
+  );
 }`;
   shaderSources["ShaderMist.frag"] = /*glsl*/ `#version 300 es
 /**
@@ -508,8 +507,8 @@ void main() {
 }`;
   shaderSources["ShaderScreen.frag"] = /*glsl*/ `#version 300 es
 /**
-*Composites all Post-FX on to the main-render and renders it to the main Renderbuffer
-*@authors Roland Heer, HFU, 2023
+* Composites all Post-FX on to the main-render and renders it to the main Renderbuffer
+* @authors Roland Heer, HFU, 2023
 */
 precision mediump float;
 precision highp int;
@@ -540,46 +539,43 @@ float gaussianKernel[25] = float[]( 0.00366, 0.01465, 0.02564, 0.01465, 0.00366,
 out vec4 vctFrag;
 
 void main() {
-    vec4 mainTex = texture(u_mainTexture, v_vctTexture);
-    vec4 vctTempFrag = mainTex;
-    if(u_ao > 0.5f) {
-        vec4 aoTex = vec4(0.0f);
-        for(int i = 0; i < 25; i++) {
-            aoTex += vec4(texture(u_aoTexture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
-        }
-        aoTex = mix(vec4(u_vctAOColor.rgb, 1.0f), vec4(1.0f), aoTex.r);
-        vctTempFrag = mix(vctTempFrag, vctTempFrag * aoTex, u_vctAOColor.a);
+  vec4 mainTex = texture(u_mainTexture, v_vctTexture);
+  vec4 vctTempFrag = mainTex;
+  if(u_ao > 0.5f) {
+    vec4 aoTex = vec4(0.0f);
+    for(int i = 0; i < 25; i++) {
+        aoTex += vec4(texture(u_aoTexture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
     }
-    if(u_mist > 0.5f) {
-        vec4 mistTex = texture(u_mistTexture, v_vctTexture);
-        vctTempFrag = mix(vctTempFrag, vec4(u_vctMistColor.rgb, 1.0f), mistTex.r * u_vctMistColor.a);
-    }
-    if(u_bloom > 0.5f) {
-        float intensity = max(u_bloomIntensity, 0.0f);
-        vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
-        vctTempFrag += (bloomTex * intensity);
+    aoTex = mix(vec4(u_vctAOColor.rgb, 1.0f), vec4(1.0f), aoTex.r);
+    vctTempFrag = mix(vctTempFrag, vctTempFrag * aoTex, u_vctAOColor.a);
+  }
+  if(u_mist > 0.5f) {
+    vec4 mistTex = texture(u_mistTexture, v_vctTexture);
+    vctTempFrag = mix(vctTempFrag, vec4(u_vctMistColor.rgb, 1.0f), mistTex.r * u_vctMistColor.a);
+  }
+  if(u_bloom > 0.5f) {
+    float intensity = max(u_bloomIntensity, 0.0f);
+    vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
+    vctTempFrag += (bloomTex * intensity);
 
-        float factor = min(max(u_highlightDesaturation, 0.0f), 1.0f);
-        float r = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
-        float g = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
-        float b = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
+    float factor = min(max(u_highlightDesaturation, 0.0f), 1.0f);
+    float r = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
+    float g = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
+    float b = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
 
-        vctTempFrag.r += g + b;
-        vctTempFrag.g += r + b;
-        vctTempFrag.b += r + g;
-    }
+    vctTempFrag.r += g + b;
+    vctTempFrag.g += r + b;
+    vctTempFrag.b += r + g;
+  }
 
-    vctFrag = vctTempFrag;
+  vctFrag = vctTempFrag;
 }
 `;
   shaderSources["ShaderScreen.vert"] = /*glsl*/ `#version 300 es
 /**
-*Sets up the data for the ShaderScreen fragmentshader
-*@authors Roland Heer, HFU, 2023
+* Sets up the data for the ShaderScreen fragmentshader
+* @authors Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
 */
-in vec2 a_vctPosition;
-in vec2 a_vctTexture;
-
 uniform float u_width;
 uniform float u_height;
 
@@ -587,20 +583,23 @@ out vec2 v_vctTexture;
 out vec2 v_vctOffsets[25];
 
 void main() {
-    gl_Position = vec4(a_vctPosition, 0.0, 1.0);
-    v_vctTexture = a_vctTexture;
+  // fullscreen triangle, contains screen quad
+  float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
+  float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
+  gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
+  v_vctTexture = vec2(x * 0.5, y * 0.5); // (0, 0), (2, 0), (0, 2)
 
-    vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
+  vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
 
-    //TODO: Maybe try Downsampling instead of this giant gaussian kernel
-    v_vctOffsets = vec2[]
-    (
-        vec2(-2.0*offset.x, 2.0*offset.y),  vec2(-offset.x, 2.0*offset.y),  vec2(0.0, 2.0*offset.y),    vec2(offset.x,2.0* offset.y),   vec2(2.0*offset.x,2.0* offset.y), 
-        vec2(-2.0*offset.x, offset.y),      vec2(-offset.x, offset.y),      vec2(0.0, offset.y),        vec2(offset.x, offset.y),       vec2(2.0*offset.x, offset.y),
-        vec2(-2.0*offset.x, 0.0),           vec2(-offset.x, 0.0),           vec2(0.0, 0.0),             vec2(offset.x, 0.0),            vec2(2.0*offset.x, 0.0),
-        vec2(-2.0*offset.x, -offset.y),     vec2(-offset.x, -offset.y),     vec2(0.0, -offset.y),       vec2(offset.x, -offset.y),      vec2(2.0*offset.x, -offset.y),
-        vec2(-2.0*offset.x, -2.0*offset.y), vec2(-offset.x, -2.0*offset.y), vec2(0.0, -2.0*offset.y),   vec2(offset.x,-2.0* offset.y), vec2(2.0*offset.x,-2.0* offset.y)
-    );
+  //TODO: Maybe try Downsampling instead of this giant gaussian kernel
+  v_vctOffsets = vec2[]
+  (
+    vec2(-2.0*offset.x, 2.0*offset.y),  vec2(-offset.x, 2.0*offset.y),  vec2(0.0, 2.0*offset.y),    vec2(offset.x,2.0* offset.y),   vec2(2.0*offset.x,2.0* offset.y), 
+    vec2(-2.0*offset.x, offset.y),      vec2(-offset.x, offset.y),      vec2(0.0, offset.y),        vec2(offset.x, offset.y),       vec2(2.0*offset.x, offset.y),
+    vec2(-2.0*offset.x, 0.0),           vec2(-offset.x, 0.0),           vec2(0.0, 0.0),             vec2(offset.x, 0.0),            vec2(2.0*offset.x, 0.0),
+    vec2(-2.0*offset.x, -offset.y),     vec2(-offset.x, -offset.y),     vec2(0.0, -offset.y),       vec2(offset.x, -offset.y),      vec2(2.0*offset.x, -offset.y),
+    vec2(-2.0*offset.x, -2.0*offset.y), vec2(-offset.x, -2.0*offset.y), vec2(0.0, -2.0*offset.y),   vec2(offset.x,-2.0* offset.y), vec2(2.0*offset.x,-2.0* offset.y)
+  );
 }
 `;
   shaderSources["ShaderUniversal.frag"] = /*glsl*/ `#version 300 es
@@ -974,11 +973,8 @@ void main() {
   shaderSources["ShaderUpsample.vert"] = /*glsl*/ `#version 300 es
 /**
 * ShaderUpsample sets values for upsampling fragmentshader
-* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
+* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023 | Jonas Plotzky, HFU, 2023
 */
-in vec2 a_vctPosition;
-in vec2 a_vctTexture;
-
 uniform float u_width;
 uniform float u_height;
 
@@ -986,17 +982,19 @@ out vec2 v_vctTexture;
 out vec2[9] v_vctOffsets;
 
 void main() {
-    gl_Position = vec4(a_vctPosition, 0.0, 1.0);
-    v_vctTexture = a_vctTexture;
+  // fullscreen triangle, contains screen quad
+  float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
+  float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
+  gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
+  v_vctTexture = vec2(x * 0.5, y * 0.5); // (0, 0), (2, 0), (0, 2)
 
-    vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
+  vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
 
-    v_vctOffsets = vec2[]
-    (
-        vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
-        vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
-        vec2(-offset.x, -offset.y), vec2(0.0, -offset.y),  vec2(offset.x, -offset.y)
-    );
+  v_vctOffsets = vec2[](
+    vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
+    vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
+    vec2(-offset.x, -offset.y), vec2(0.0, -offset.y),  vec2(offset.x, -offset.y)
+  );
 }`;
 
 }

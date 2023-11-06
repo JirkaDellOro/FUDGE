@@ -69,7 +69,7 @@ namespace FudgeCore {
      * Used by the render system.
      * @internal
      */
-    public getRenderBuffers(_shader: ShaderInterface): RenderBuffers { return null; /* injected by RenderInjector*/ }
+    public getRenderBuffers(): RenderBuffers { return null; /* injected by RenderInjector*/ }
     /**
      * Injected by {@link RenderInjectorMesh}.
      * Used by the render system.
