@@ -89,11 +89,11 @@ namespace FudgeCore {
       return mutator;
     }
 
-    public async mutate(_mutator: Mutator): Promise<void> {
+    public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
       if (typeof (_mutator.motorTorque) !== "undefined")
         this.motorTorque = _mutator.motorTorque;
       delete _mutator.motorTorque;
-      super.mutate(_mutator);
+      await super.mutate(_mutator, _selection, _dispatchMutate);
     }
     //#endregion
 

@@ -109,7 +109,7 @@ namespace FudgeCore {
 
     //#region transfer
     public async mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void> {
-      super.mutate(_mutator);
+      super.mutate(_mutator, _selection, _dispatchMutate);
       this.create(this.texture, this.frames, this.wrapAfter, this.start, this.size, this.next, this.wrap, this.framesPerSecond);
     }
 

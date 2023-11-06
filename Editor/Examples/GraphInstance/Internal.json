@@ -243,5 +243,97 @@
       "idResource": "Graph|2022-03-25T08:21:20.464Z|71700",
       "type": "Graph"
     }
+  },
+  "Graph|2023-11-06T16:46:41.194Z|50027": {
+    "ƒ.Graph": {
+      "name": "CamTest",
+      "active": true,
+      "components": {},
+      "children": [
+        {
+          "ƒ.GraphInstance": {
+            "deserializeFromSource": true,
+            "idSource": "Graph|2023-11-06T16:47:21.440Z|02246"
+          }
+        }
+      ],
+      "idResource": "Graph|2023-11-06T16:46:41.194Z|50027",
+      "type": "Graph"
+    }
+  },
+  "Graph|2023-11-06T16:47:21.440Z|02246": {
+    "ƒ.Graph": {
+      "name": "Camera",
+      "active": true,
+      "components": {
+        "ComponentMaterial": [
+          {
+            "ƒ.ComponentMaterial": {
+              "sortForAlpha": false,
+              "clrPrimary": "[0.8862745098039215, 0.9019607843137255, 0.0196078431372549, 0.62]",
+              "clrSecondary": "[1, 1, 1, 1]",
+              "pivot": {
+                "translation": "[0, 0]",
+                "rotation": 0,
+                "scaling": "[1, 1]"
+              },
+              "Component": {
+                "active": true
+              },
+              "idMaterial": "Material|2022-03-21T10:06:45.579Z|58150"
+            }
+          }
+        ],
+        "ComponentCamera": [
+          {
+            "ƒ.ComponentCamera": {
+              "backgroundColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 1
+              },
+              "backgroundEnabled": true,
+              "projection": "central",
+              "fieldOfView": 45,
+              "direction": "diagonal",
+              "near": 1,
+              "far": 2000,
+              "aspect": 1,
+              "pivot": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "Component": {
+                "active": true
+              }
+            }
+          }
+        ],
+        "ComponentLight": [
+          {
+            "ƒ.ComponentLight": {
+              "pivot": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "light": {
+                "ƒ.LightAmbient": {
+                  "color": "[1, 1, 1, 1]"
+                }
+              },
+              "Component": {
+                "active": true
+              }
+            }
+          }
+        ]
+      },
+      "children": [],
+      "idResource": "Graph|2023-11-06T16:47:21.440Z|02246",
+      "type": "Graph"
+    }
   }
 }

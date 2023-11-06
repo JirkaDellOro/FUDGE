@@ -71,12 +71,12 @@ namespace FudgeCore {
       return types;
     }
 
-    public async mutate(_mutator: Mutator): Promise<void> {
+    public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
       let type: string = _mutator.type;
       if (typeof (type) !== "undefined" && type != this.light.constructor.name)
         this.setType(Serializer.getConstructor<Light>(type));
       delete (_mutator.type); // exclude light type from further mutation
-      super.mutate(_mutator);
+      super.mutate(_mutator, _selection, _dispatchMutate);
       _mutator.type = type; // reconstruct mutator
     }
   }

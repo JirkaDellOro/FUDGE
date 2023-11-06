@@ -59,8 +59,8 @@ namespace FudgeCore {
       return this;
     }
 
-    public async mutate(_mutator: Mutator): Promise<void> {
-      super.mutate(_mutator);
+    public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
+      super.mutate(_mutator, _selection, _dispatchMutate);
       this.create(this.longitudes, this.latitudes);
     }
 

@@ -120,13 +120,13 @@ namespace FudgeCore {
       return this;
     }
 
-    public async mutate(_mutator: Mutator): Promise<void> {
+    public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
       if (typeof (_mutator.axis) !== "undefined")
         this.axis = new Vector3(...<number[]>(Object.values(_mutator.axis)));
       delete _mutator.axis;
       this.#mutate(_mutator);
       this.deleteFromMutator(_mutator, this.#getMutator());
-      super.mutate(_mutator);
+      await super.mutate(_mutator, _selection, _dispatchMutate);
     }
 
     public getMutator(): Mutator {

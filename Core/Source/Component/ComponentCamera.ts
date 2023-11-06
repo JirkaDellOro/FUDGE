@@ -271,8 +271,8 @@ namespace FudgeCore {
       return types;
     }
 
-    public async mutate(_mutator: Mutator): Promise<void> {
-      super.mutate(_mutator);
+    public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
+      await super.mutate(_mutator, _selection, _dispatchMutate);
 
       switch (this.projection) {
         case PROJECTION.CENTRAL:

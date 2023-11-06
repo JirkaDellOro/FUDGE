@@ -1,2 +1,2 @@
-npm run-script run
+npm start
 pause
