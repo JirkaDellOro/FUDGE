@@ -39,7 +39,9 @@ namespace Fudge {
       this.tree = new ƒUi.Tree<ƒ.Node>(new ControllerTreeHierarchy(), this.graph);
       this.tree.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
+      this.tree.addEventListener(ƒUi.EVENT.RENAME, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.append(this.tree);
       this.dom.title = "● Right click on existing node to create child node.\n● Use Copy/Paste to duplicate nodes.";
       this.tree.title = "Select node to edit or duplicate.";
@@ -156,6 +158,12 @@ namespace Fudge {
         case ƒUi.EVENT.DELETE:
           this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
           break;
+        case ƒUi.EVENT.RENAME:
+          if (_event.detail.data instanceof ƒ.Graph) {
+            // _event.detail.data.name = (<HTMLInputElement>_event.target).value;
+            this.dispatch(EVENT_EDITOR.UPDATE, { bubbles: true });
+          }
+          break;
         case ƒUi.EVENT.SELECT:
           //only dispatch the event to focus the node, if the node is in the current and the previous selection  
           let node: ƒ.Node = _event.detail["data"];
@@ -177,6 +185,16 @@ namespace Fudge {
             break;
           }
           break;
+        case EVENT_EDITOR.UPDATE:
+          if (_event.detail.view instanceof ViewInternal) {
+            if (_event.detail.data == this.graph) {
+              console.log("Update Graph");
+              let item: ƒUi.TreeItem<ƒ.Node> = this.tree.findItem(this.graph);
+              item.setLabel(this.graph.name);
+            }
+          }
+          break;
+
       }
     }
     //#endregion

@@ -255,7 +255,7 @@ namespace FudgeUserInterface {
         case "text":
           target.disabled = true;
           item.focus();
-          target.dispatchEvent(new Event(EVENT.RENAME, { bubbles: true }));
+          target.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { data: this.data } }));
           break;
         case "default":
           // console.log(target);

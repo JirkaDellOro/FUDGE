@@ -35,7 +35,7 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT.ESCAPE, this.hndEscape);
       this.addEventListener(EVENT.DELETE, this.hndDelete);
       // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
-      this.addEventListener(EVENT.CHANGE, this.hndChange);
+      // this.addEventListener(EVENT.CHANGE, this.hndChange);
       // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
       // this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
       // this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
@@ -166,12 +166,12 @@ namespace FudgeUserInterface {
     //   //   item.setLabel(this.controller.getLabel(item.data));
     // }
 
-    private hndChange = (_event: Event): void => {
-      let target: HTMLInputElement = <HTMLInputElement>_event.target;
-      console.log(_event);
-      _event.stopPropagation();
-      target.dispatchEvent(new Event(EVENT.RENAME, { bubbles: true }));
-    };
+    // private hndChange = (_event: Event): void => {
+    //   let target: HTMLInputElement = <HTMLInputElement>_event.target;
+    //   console.log(_event);
+    //   _event.stopPropagation();
+    //   target.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: {data: this.data} }));
+    // };
 
     private hndSelect(_event: Event): void {
       // _event.stopPropagation();

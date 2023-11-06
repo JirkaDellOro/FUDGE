@@ -33,7 +33,6 @@
               {
                 "ƒ.GraphInstance": {
                   "deserializeFromSource": true,
-                  "name": "Cube",
                   "idSource": "Graph|2022-03-21T09:59:57.684Z|37738"
                 }
               }
@@ -64,7 +63,6 @@
               {
                 "ƒ.GraphInstance": {
                   "deserializeFromSource": true,
-                  "name": "Cube",
                   "idSource": "Graph|2022-03-21T09:59:57.684Z|37738"
                 }
               }
@@ -91,7 +89,6 @@
               {
                 "ƒ.GraphInstance": {
                   "deserializeFromSource": true,
-                  "name": "Bar",
                   "idSource": "Graph|2022-03-23T07:10:04.239Z|10820"
                 }
               }
@@ -122,7 +119,6 @@
               {
                 "ƒ.GraphInstance": {
                   "deserializeFromSource": true,
-                  "name": "Bar",
                   "idSource": "Graph|2022-03-23T07:10:04.239Z|10820"
                 }
               }
@@ -200,7 +196,7 @@
       "children": [
         {
           "ƒ.Node": {
-            "name": "Grid_0",
+            "name": "Grid_0x",
             "active": true,
             "components": {
               "ComponentTransform": [
@@ -222,7 +218,6 @@
               {
                 "ƒ.GraphInstance": {
                   "deserializeFromSource": true,
-                  "name": "Grid",
                   "idSource": "Graph|2022-03-24T09:04:15.422Z|70854"
                 }
               }
@@ -238,7 +233,6 @@
               {
                 "ƒ.GraphInstance": {
                   "deserializeFromSource": true,
-                  "name": "Grid",
                   "idSource": "Graph|2022-03-24T09:04:15.422Z|70854"
                 }
               }

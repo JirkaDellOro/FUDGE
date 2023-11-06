@@ -1148,6 +1148,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.OPEN, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CREATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
             this.dom.addEventListener("mutate" /* ƒui.EVENT.MUTATE */, this.hndEvent);
@@ -1306,15 +1307,15 @@ var Fudge;
             this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
         }
         hndEvent = (_event) => {
-            console.log(_event.type);
-            if (_event.detail?.sender && _event.type != Fudge.EVENT_EDITOR.OPEN && _event.type != Fudge.EVENT_EDITOR.CREATE)
-                return;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.OPEN:
-                case Fudge.EVENT_EDITOR.SELECT:
                 case Fudge.EVENT_EDITOR.CREATE:
+                case Fudge.EVENT_EDITOR.UPDATE:
                     this.listResources();
-                    break;
+            }
+            if (_event.detail?.sender)
+                return;
+            switch (_event.type) {
                 case "mutate" /* ƒui.EVENT.MUTATE */:
                     _event.stopPropagation();
                     this.dispatchToParent(Fudge.EVENT_EDITOR.MODIFY, {});
@@ -1322,10 +1323,11 @@ var Fudge;
                 case "removeChild" /* ƒui.EVENT.REMOVE_CHILD */:
                     _event.stopPropagation();
                     this.dispatchToParent(Fudge.EVENT_EDITOR.DELETE, {});
+                case Fudge.EVENT_EDITOR.SELECT:
                     this.listResources();
                     break;
                 case "rename" /* ƒui.EVENT.RENAME */:
-                    this.dispatchToParent(Fudge.EVENT_EDITOR.UPDATE, {});
+                    this.dispatchToParent(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true, detail: _event.detail });
                     break;
             }
         };
@@ -1590,7 +1592,8 @@ var Fudge;
             return "";
         }
         rename(_object, _new) {
-            return false;
+            // console.log("Check rename", _object.name, _new);
+            return (_object.name != _new);
         }
         copy(_originals) { return null; }
         async delete(_focussed) {
@@ -4167,7 +4170,9 @@ var Fudge;
             this.tree = new ƒUi.Tree(new Fudge.ControllerTreeHierarchy(), this.graph);
             this.tree.addEventListener("itemselect" /* ƒUi.EVENT.SELECT */, this.hndEvent);
             this.tree.addEventListener("delete" /* ƒUi.EVENT.DELETE */, this.hndEvent);
+            this.tree.addEventListener("rename" /* ƒUi.EVENT.RENAME */, this.hndEvent);
             this.tree.addEventListener("contextmenu" /* ƒUi.EVENT.CONTEXTMENU */, this.openContextMenu);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.append(this.tree);
             this.dom.title = "● Right click on existing node to create child node.\n● Use Copy/Paste to duplicate nodes.";
             this.tree.title = "Select node to edit or duplicate.";
@@ -4265,6 +4270,12 @@ var Fudge;
                 case "delete" /* ƒUi.EVENT.DELETE */:
                     this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
                     break;
+                case "rename" /* ƒUi.EVENT.RENAME */:
+                    if (_event.detail.data instanceof ƒ.Graph) {
+                        // _event.detail.data.name = (<HTMLInputElement>_event.target).value;
+                        this.dispatch(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true });
+                    }
+                    break;
                 case "itemselect" /* ƒUi.EVENT.SELECT */:
                     //only dispatch the event to focus the node, if the node is in the current and the previous selection  
                     let node = _event.detail["data"];
@@ -4284,6 +4295,15 @@ var Fudge;
                     else {
                         this.setGraph(_event.detail.graph);
                         break;
+                    }
+                    break;
+                case Fudge.EVENT_EDITOR.UPDATE:
+                    if (_event.detail.view instanceof Fudge.ViewInternal) {
+                        if (_event.detail.data == this.graph) {
+                            console.log("Update Graph");
+                            let item = this.tree.findItem(this.graph);
+                            item.setLabel(this.graph.name);
+                        }
                     }
                     break;
             }

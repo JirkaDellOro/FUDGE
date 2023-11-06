@@ -2155,7 +2155,7 @@ var FudgeUserInterface;
             this.addEventListener("escape" /* EVENT.ESCAPE */, this.hndEscape);
             this.addEventListener("delete" /* EVENT.DELETE */, this.hndDelete);
             // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
-            this.addEventListener("change" /* EVENT.CHANGE */, this.hndChange);
+            // this.addEventListener(EVENT.CHANGE, this.hndChange);
             // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
             // this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
             // this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
@@ -2268,12 +2268,12 @@ var FudgeUserInterface;
         //   // if (renamed)
         //   //   item.setLabel(this.controller.getLabel(item.data));
         // }
-        hndChange = (_event) => {
-            let target = _event.target;
-            console.log(_event);
-            _event.stopPropagation();
-            target.dispatchEvent(new Event("rename" /* EVENT.RENAME */, { bubbles: true }));
-        };
+        // private hndChange = (_event: Event): void => {
+        //   let target: HTMLInputElement = <HTMLInputElement>_event.target;
+        //   console.log(_event);
+        //   _event.stopPropagation();
+        //   target.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: {data: this.data} }));
+        // };
         hndSelect(_event) {
             // _event.stopPropagation();
             let detail = _event.detail;
@@ -2451,11 +2451,17 @@ var FudgeUserInterface;
             input.focus();
         };
         hndChange = (_event) => {
+            this.focus();
             let target = _event.target;
             target.readOnly = true;
             let key = target.getAttribute("key");
-            Reflect.set(this.data, key, target.value);
-            this.focus();
+            // let previousValue: ƒ.General = Reflect.get(this.data, key);
+            if (this.controller.rename(this.data, target.value)) {
+                Reflect.set(this.data, key, target.value);
+                // console.log("Dispatch Rename");
+                this.parentElement.dispatchEvent(new CustomEvent("rename" /* EVENT.RENAME */, { bubbles: true, detail: { data: this.data } }));
+            }
+            return;
         };
         hndKey = (_event) => {
             _event.stopPropagation();
@@ -3078,7 +3084,7 @@ var FudgeUserInterface;
                 case "text":
                     target.disabled = true;
                     item.focus();
-                    target.dispatchEvent(new Event("rename" /* EVENT.RENAME */, { bubbles: true }));
+                    target.dispatchEvent(new CustomEvent("rename" /* EVENT.RENAME */, { bubbles: true, detail: { data: this.data } }));
                     break;
                 case "default":
                     // console.log(target);

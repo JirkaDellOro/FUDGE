@@ -88,11 +88,18 @@ namespace FudgeUserInterface {
     }
 
     private hndChange = (_event: Event): void => {
+      this.focus();
       let target: HTMLInputElement = <HTMLInputElement>_event.target;
       target.readOnly = true;
       let key: string = target.getAttribute("key");
-      Reflect.set(this.data, key, target.value);
-      this.focus();
+      // let previousValue: ƒ.General = Reflect.get(this.data, key);
+
+      if (this.controller.rename(this.data, target.value)) {
+        Reflect.set(this.data, key, target.value);
+        // console.log("Dispatch Rename");
+        this.parentElement.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { data: this.data } }));
+      }
+      return;
     }
 
     private hndKey = (_event: KeyboardEvent): void => {

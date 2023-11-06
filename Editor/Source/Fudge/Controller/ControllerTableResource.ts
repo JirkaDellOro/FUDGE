@@ -19,9 +19,12 @@ namespace Fudge {
     public getLabel(_object: ƒ.SerializableResource): string {
       return "";
     }
+
     public rename(_object: ƒ.SerializableResource, _new: string): boolean {
-      return false;
+      // console.log("Check rename", _object.name, _new);
+      return (_object.name != _new);
     }
+    
     public copy(_originals: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]> { return null; }
 
     public async delete(_focussed: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]> {

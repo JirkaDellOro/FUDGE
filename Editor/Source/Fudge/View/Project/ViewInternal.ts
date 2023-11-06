@@ -19,6 +19,7 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.OPEN, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.CREATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
@@ -203,15 +204,17 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      console.log(_event.type);
-      if (_event.detail?.sender && _event.type != EVENT_EDITOR.OPEN && _event.type != EVENT_EDITOR.CREATE)
-        return;
       switch (_event.type) {
         case EVENT_EDITOR.OPEN:
-        case EVENT_EDITOR.SELECT:
         case EVENT_EDITOR.CREATE:
+        case EVENT_EDITOR.UPDATE:
           this.listResources();
-          break;
+      }
+
+      if (_event.detail?.sender)
+        return;
+
+      switch (_event.type) {
         case ƒui.EVENT.MUTATE:
           _event.stopPropagation();
           this.dispatchToParent(EVENT_EDITOR.MODIFY, {});
@@ -219,10 +222,11 @@ namespace Fudge {
         case ƒui.EVENT.REMOVE_CHILD:
           _event.stopPropagation();
           this.dispatchToParent(EVENT_EDITOR.DELETE, {});
+        case EVENT_EDITOR.SELECT:
           this.listResources();
           break;
         case ƒui.EVENT.RENAME:
-          this.dispatchToParent(EVENT_EDITOR.UPDATE, {});
+          this.dispatchToParent(EVENT_EDITOR.UPDATE, {bubbles: true, detail: _event.detail});
           break;
       }
     };
