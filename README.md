@@ -40,7 +40,7 @@ git clone --depth=1 https://github.com/JirkaDellOro/FUDGE.git
 To start the FUDGE editor, you have multiple options:
 
 - Type `electron Editor/Electron` in the terminal.
-- Run `npm run-script run` in the terminal.
+- Run `npm start` in the terminal.
 - Double-click the `FUDGE.bat` file (on Windows).
 
 ![FUDGE Editor](https://JirkaDellOro.github.io/FUDGE/Miscellaneous/Screenshots/Editor.png)
