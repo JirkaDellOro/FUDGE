@@ -9,10 +9,6 @@ precision highp int;
 in vec2 v_vctTexture;
 uniform sampler2D u_mainTexture;
 
-uniform float u_mist;
-uniform sampler2D u_mistTexture;
-uniform vec4 u_vctMistColor;
-
 uniform float u_ao;
 uniform sampler2D u_aoTexture;
 uniform vec4 u_vctAOColor;
@@ -22,7 +18,7 @@ uniform sampler2D u_bloomTexture;
 uniform float u_bloomIntensity;
 uniform float u_highlightDesaturation;
 
-in vec2[25] v_vctOffsets;
+flat in vec2[25] v_vctOffsets;
 float gaussianKernel[25] = float[]( 0.00366, 0.01465, 0.02564, 0.01465, 0.00366,
                                     0.01465, 0.05860, 0.09523, 0.05860, 0.01465, 
                                     0.02564, 0.09523, 0.15018, 0.09523, 0.02564, 
@@ -41,10 +37,6 @@ void main() {
     }
     aoTex = mix(vec4(u_vctAOColor.rgb, 1.0f), vec4(1.0f), aoTex.r);
     vctTempFrag = mix(vctTempFrag, vctTempFrag * aoTex, u_vctAOColor.a);
-  }
-  if(u_mist > 0.5f) {
-    vec4 mistTex = texture(u_mistTexture, v_vctTexture);
-    vctTempFrag = mix(vctTempFrag, vec4(u_vctMistColor.rgb, 1.0f), mistTex.r * u_vctMistColor.a);
   }
   if(u_bloom > 0.5f) {
     float intensity = max(u_bloomIntensity, 0.0f);

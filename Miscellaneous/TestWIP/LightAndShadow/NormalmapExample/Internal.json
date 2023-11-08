@@ -1109,12 +1109,12 @@
                   }
                 }
               ],
-              "ComponentMist": [
+              "ComponentFog": [
                 {
-                  "ƒ.ComponentMist": {
-                    "clrMist": "[0, 0, 0, 1]",
-                    "nearPlane": 1,
-                    "farPlane": 10,
+                  "ƒ.ComponentFog": {
+                    "color": "[0, 0, 0, 1]",
+                    "near": 1,
+                    "far": 10,
                     "Component": {
                       "active": true
                     }

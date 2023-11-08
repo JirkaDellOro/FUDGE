@@ -94,7 +94,7 @@ void main() {
   float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
   float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
   gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
-  v_vctTexture = vec2(x * 0.5, y * 0.5); // (0, 0), (2, 0), (0, 2)
+  v_vctTexture = vec2(x / 2.0, y / 2.0); // (0, 0), (2, 0), (0, 2)
 }`;
   shaderSources["ShaderAONormal.frag"] = /*glsl*/ `#version 300 es
 /**
@@ -158,7 +158,7 @@ precision mediump float;
 precision highp int;
 
 in vec2 v_vctTexture;
-in vec2[9] v_vctOffsets;
+flat in vec2[9] v_vctOffsets;
 
 uniform sampler2D u_texture;
 uniform float u_threshold;
@@ -169,19 +169,19 @@ float gaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f
 out vec4 vctFrag;
 
 void main() {
-    vec4 tex1 = vec4(0.0f);
-    for(int i = 0; i < 9; i++) {
-        tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
-    }
-    if(u_lvl < 1.0f) {
-        float threshold = min(max(u_threshold, 0.0f), 0.999999999f);     //None of the rendered values can exeed 1.0 therefor the bloom effect won't work if the threshold is >= 1.0
-        tex1 -= threshold;
-        tex1 /= 1.0f - threshold;
-        float averageBrightness = (((tex1.r + tex1.g + tex1.b) / 3.0f) * 0.2f) + 0.8f; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.8
-        tex1 = tex1 * averageBrightness * 2.0f;
-    }
-    tex1 *= 1.3f;
-    vctFrag = tex1;
+  vec4 tex1 = vec4(0.0f);
+  for (int i = 0; i < 9; i++) {
+    tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
+  }
+  if (u_lvl < 1.0f) {
+    float threshold = min(max(u_threshold, 0.0f), 0.999999999f);     //None of the rendered values can exeed 1.0 therefor the bloom effect won't work if the threshold is >= 1.0
+    tex1 -= threshold;
+    tex1 /= 1.0f - threshold;
+    float averageBrightness = (((tex1.r + tex1.g + tex1.b) / 3.0f) * 0.2f) + 0.8f; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.8
+    tex1 = tex1 * averageBrightness * 2.0f;
+  }
+  tex1 *= 1.3f;
+  vctFrag = tex1;
 }`;
   shaderSources["ShaderDownsample.vert"] = /*glsl*/ `#version 300 es
 /**
@@ -192,14 +192,14 @@ uniform float u_width;
 uniform float u_height;
 
 out vec2 v_vctTexture;
-out vec2[9] v_vctOffsets;
+flat out vec2[9] v_vctOffsets;
 
 void main() {
   // fullscreen triangle, contains screen quad
   float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
   float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
   gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
-  v_vctTexture = vec2(x * 0.5, y * 0.5); // (0, 0), (2, 0), (0, 2)
+  v_vctTexture = vec2(x / 2.0, y / 2.0); // (0, 0), (2, 0), (0, 2)
 
   vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
 
@@ -208,46 +208,6 @@ void main() {
     vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
     vec2(-offset.x, -offset.y), vec2(0.0, -offset.y),  vec2(offset.x, -offset.y)
   );
-}`;
-  shaderSources["ShaderMist.frag"] = /*glsl*/ `#version 300 es
-/**
-* Calculates depth from camera based on near- and farplane
-* @authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023 | Jonas Plotzky, HFU, 2023
-*/
-precision mediump float;
-precision highp int;
-
-uniform float u_nearPlane;
-uniform float u_farPlane;
-uniform vec3 u_vctCamera;
-
-in vec3 v_vctPosition;
-out vec4 vctFrag;
-
-void main() {
-  float distance = length(v_vctPosition - u_vctCamera);
-  float fogAmount = min(max((distance - u_nearPlane) / (u_farPlane - u_nearPlane), 0.0), 1.0);
-  vec3 vctfog = vec3(-pow(fogAmount, 2.0) + (2.0 * fogAmount)); //lets Fog appear quicker and fall off slower results in a more gradual falloff
-  vctFrag = vec4(vctfog, 1.0);
-}
-`;
-  shaderSources["ShaderMist.vert"] = /*glsl*/ `#version 300 es
-
-/**
-* Mist vertexshader. Sets values for mist fragmentshader
-* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023 | Jonas Plotzky, HFU, 2023
-*/
-
-uniform mat4 u_mtxMeshToView;
-uniform mat4 u_mtxMeshToWorld;
-
-in vec3 a_vctPosition;
-out vec3 v_vctPosition;
-
-void main() {
-  vec4 vctPosition = vec4(a_vctPosition, 1.0);
-  v_vctPosition = vec3(u_mtxMeshToWorld * vctPosition);
-  gl_Position = u_mtxMeshToView * vctPosition;
 }`;
   shaderSources["ShaderPhong.frag"] = /*glsl*/ `#version 300 es
 /**
@@ -264,6 +224,11 @@ uniform float u_fSpecular;
 uniform float u_fIntensity;
 uniform float u_fMetallic;
 uniform vec3 u_vctCamera;
+
+uniform bool u_bFog;
+uniform vec4 u_vctFogColor;
+uniform float u_fNear;
+uniform float u_fFar;
 
 in vec4 v_vctColor;
 in vec3 v_vctPosition;
@@ -425,6 +390,13 @@ void main() {
   vctFrag *= u_vctColor * v_vctColor;
   vctFrag.rgb += vctSpecular * (1.0 - u_fMetallic);
 
+  if (u_bFog) {
+    float distance = length(v_vctPosition - u_vctCamera);
+    float fogAmount = min(max((distance - u_fNear) / (u_fFar - u_fNear), 0.0), 1.0);
+    fogAmount = -pow(fogAmount, 2.0) + (2.0 * fogAmount); //lets Fog appear quicker and fall off slower results in a more gradual falloff
+    vctFrag = mix(vctFrag, vec4(u_vctFogColor.rgb, 1.0f), fogAmount * u_vctFogColor.a);
+  }
+
   if(vctFrag.a < 0.01)
     discard;
 }`;
@@ -516,10 +488,6 @@ precision highp int;
 in vec2 v_vctTexture;
 uniform sampler2D u_mainTexture;
 
-uniform float u_mist;
-uniform sampler2D u_mistTexture;
-uniform vec4 u_vctMistColor;
-
 uniform float u_ao;
 uniform sampler2D u_aoTexture;
 uniform vec4 u_vctAOColor;
@@ -529,7 +497,7 @@ uniform sampler2D u_bloomTexture;
 uniform float u_bloomIntensity;
 uniform float u_highlightDesaturation;
 
-in vec2[25] v_vctOffsets;
+flat in vec2[25] v_vctOffsets;
 float gaussianKernel[25] = float[]( 0.00366, 0.01465, 0.02564, 0.01465, 0.00366,
                                     0.01465, 0.05860, 0.09523, 0.05860, 0.01465, 
                                     0.02564, 0.09523, 0.15018, 0.09523, 0.02564, 
@@ -548,10 +516,6 @@ void main() {
     }
     aoTex = mix(vec4(u_vctAOColor.rgb, 1.0f), vec4(1.0f), aoTex.r);
     vctTempFrag = mix(vctTempFrag, vctTempFrag * aoTex, u_vctAOColor.a);
-  }
-  if(u_mist > 0.5f) {
-    vec4 mistTex = texture(u_mistTexture, v_vctTexture);
-    vctTempFrag = mix(vctTempFrag, vec4(u_vctMistColor.rgb, 1.0f), mistTex.r * u_vctMistColor.a);
   }
   if(u_bloom > 0.5f) {
     float intensity = max(u_bloomIntensity, 0.0f);
@@ -580,20 +544,19 @@ uniform float u_width;
 uniform float u_height;
 
 out vec2 v_vctTexture;
-out vec2 v_vctOffsets[25];
+flat out vec2 v_vctOffsets[25];
 
 void main() {
   // fullscreen triangle, contains screen quad
   float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
   float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
   gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
-  v_vctTexture = vec2(x * 0.5, y * 0.5); // (0, 0), (2, 0), (0, 2)
+  v_vctTexture = vec2(x / 2.0, y / 2.0); // (0, 0), (2, 0), (0, 2)
 
   vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
 
   //TODO: Maybe try Downsampling instead of this giant gaussian kernel
-  v_vctOffsets = vec2[]
-  (
+  v_vctOffsets = vec2[](
     vec2(-2.0*offset.x, 2.0*offset.y),  vec2(-offset.x, 2.0*offset.y),  vec2(0.0, 2.0*offset.y),    vec2(offset.x,2.0* offset.y),   vec2(2.0*offset.x,2.0* offset.y), 
     vec2(-2.0*offset.x, offset.y),      vec2(-offset.x, offset.y),      vec2(0.0, offset.y),        vec2(offset.x, offset.y),       vec2(2.0*offset.x, offset.y),
     vec2(-2.0*offset.x, 0.0),           vec2(-offset.x, 0.0),           vec2(0.0, 0.0),             vec2(offset.x, 0.0),            vec2(2.0*offset.x, 0.0),
@@ -954,7 +917,7 @@ precision mediump float;
 precision highp int;
 
 in vec2 v_vctTexture;
-in vec2[9] v_vctOffsets;
+flat in vec2[9] v_vctOffsets;
 uniform sampler2D u_texture;
 uniform sampler2D u_texture2;
 
@@ -963,12 +926,12 @@ float gaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f
 out vec4 vctFrag;
 
 void main() {
-    vec4 tex1 = vec4(0.0f);
-    for(int i = 0; i < 9; i++) {
-        tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
-    }
-    vec4 tex2 = texture(u_texture2, v_vctTexture);
-    vctFrag = tex2 + tex1;
+  vec4 tex1 = vec4(0.0f);
+  for(int i = 0; i < 9; i++) {
+    tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
+  }
+  vec4 tex2 = texture(u_texture2, v_vctTexture);
+  vctFrag = tex2 + tex1;
 }`;
   shaderSources["ShaderUpsample.vert"] = /*glsl*/ `#version 300 es
 /**
@@ -979,14 +942,14 @@ uniform float u_width;
 uniform float u_height;
 
 out vec2 v_vctTexture;
-out vec2[9] v_vctOffsets;
+flat out vec2[9] v_vctOffsets;
 
 void main() {
   // fullscreen triangle, contains screen quad
   float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
   float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
   gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
-  v_vctTexture = vec2(x * 0.5, y * 0.5); // (0, 0), (2, 0), (0, 2)
+  v_vctTexture = vec2(x / 2.0, y / 2.0); // (0, 0), (2, 0), (0, 2)
 
   vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
 

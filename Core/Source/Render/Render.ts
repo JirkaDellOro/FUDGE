@@ -13,7 +13,7 @@ namespace FudgeCore {
     public static pickBuffer: Int32Array;   // TODO: research if picking should be optimized using radius picking to filter
     public static readonly nodesPhysics: RecycableArray<Node> = new RecycableArray();
     public static readonly componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
-    private static readonly lights: MapLightTypeToLightList = new Map();
+    public static readonly lights: MapLightTypeToLightList = new Map();
     private static readonly nodesSimple: RecycableArray<Node> = new RecycableArray();
     private static readonly nodesAlpha: RecycableArray<Node> = new RecycableArray();
     private static readonly skeletons: RecycableArray<SkeletonInstance> = new RecycableArray();
@@ -68,7 +68,7 @@ namespace FudgeCore {
       }
 
       let cmpLights: ComponentLight[] = _branch.getComponents(ComponentLight);
-      addLights(cmpLights);
+      Render.addLights(cmpLights);
 
       let cmpMesh: ComponentMesh = _branch.getComponent(ComponentMesh);
       let cmpMaterial: ComponentMaterial = _branch.getComponent(ComponentMaterial);
@@ -112,20 +112,20 @@ namespace FudgeCore {
         Render.bufferLights(Render.lights);
         _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
       }
+    }
 
-      function addLights(_cmpLights: ComponentLight[]): void {
-        for (let cmpLight of _cmpLights) {
-          if (!cmpLight.isActive)
-            continue;
+    public static addLights(_cmpLights: ComponentLight[]): void {
+      for (let cmpLight of _cmpLights) {
+        if (!cmpLight.isActive)
+          continue;
 
-          let type: TypeOfLight = cmpLight.light.getType();
-          let lightsOfType: RecycableArray<ComponentLight> = Render.lights.get(type);
-          if (!lightsOfType) {
-            lightsOfType = new RecycableArray<ComponentLight>();
-            Render.lights.set(type, lightsOfType);
-          }
-          lightsOfType.push(cmpLight);
+        let type: TypeOfLight = cmpLight.light.getType();
+        let lightsOfType: RecycableArray<ComponentLight> = Render.lights.get(type);
+        if (!lightsOfType) {
+          lightsOfType = new RecycableArray<ComponentLight>();
+          Render.lights.set(type, lightsOfType);
         }
+        lightsOfType.push(cmpLight);
       }
     }
     //#endregion
@@ -190,16 +190,8 @@ namespace FudgeCore {
     //#endregion
 
     //#region PostFXA
-    /**
-     * Draws the mist-effect into the mist texture, using the given camera and the given mist-component
-     */
-    public static drawMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {
-      Render.useMist(_cmpCamera, _cmpMist);
-      Render.drawList(Render.nodesSimple, _cmpCamera, Render.drawNodeMist);
-      //TODO: Implement alpha-mist-calculation. For now they are drawn fully opaque
-      Render.drawList(Render.nodesAlpha, _cmpCamera, Render.drawNodeMist);
-    }
 
+    // TODO: move to RenderWebGL
     /**
      * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
      */

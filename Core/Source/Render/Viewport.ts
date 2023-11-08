@@ -23,15 +23,11 @@ namespace FudgeCore {
     public frameDestinationToSource: FramingScaled = new FramingScaled();
     public frameSourceToRender: FramingScaled = new FramingScaled();
 
-    public adjustingFrames: boolean = true;
+    public adjustingFrames: boolean = true; // TODO: maybe only adjust frames when anything changes instead of every drawn frame?
     public adjustingCamera: boolean = true;
     public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
 
     public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
-
-    //Variables to check if the FBOs need to be recalculated
-    private lastRectRenderSize: Vector2 = new Vector2(0, 0);
-    private lastCamera: ComponentCamera;
 
     #branch: Node = null; // The to render with all its descendants.
     #crc2: CanvasRenderingContext2D = null;
@@ -64,7 +60,7 @@ namespace FudgeCore {
      */
     public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
       this.name = _name;
-      this.camera = this.lastCamera = _camera;
+      this.camera = _camera;
       this.#canvas = _canvas;
       this.#crc2 = _canvas.getContext("2d");
       this.#canvas.tabIndex = 0; // can get focus and receive keyboard events
@@ -122,20 +118,16 @@ namespace FudgeCore {
         Physics.draw(this.camera, this.physicsDebugMode);
       }
 
-      let cmpAmbientOcclusion: ComponentAmbientOcclusion = <ComponentAmbientOcclusion>this.getComponentPost(this.camera, "AO");
-      if (cmpAmbientOcclusion != null) if (cmpAmbientOcclusion.isActive) {
+      const cmpAmbientOcclusion: ComponentAmbientOcclusion = this.camera.node?.getComponent(ComponentAmbientOcclusion);
+      if (cmpAmbientOcclusion?.isActive) {
         Render.drawAO(this.camera, cmpAmbientOcclusion);
       }
-      let cmpMist: ComponentMist = <ComponentMist>this.getComponentPost(this.camera, "Mist");
-      if (cmpMist != null) if (cmpMist.isActive) {
-        Render.drawMist(this.camera, cmpMist);
-      }
-      let cmpBloom: ComponentBloom = <ComponentBloom>this.getComponentPost(this.camera, "Bloom");
-      if (cmpBloom != null) if (cmpBloom.isActive) {
+      const cmpBloom: ComponentBloom = this.camera.node?.getComponent(ComponentBloom);
+      if (cmpBloom?.isActive) {
         Render.drawBloom(cmpBloom);
       }
 
-      Render.compositeEffects(this.camera, cmpMist, cmpAmbientOcclusion, cmpBloom);
+      Render.compositeEffects(this.camera, cmpAmbientOcclusion, cmpBloom);
 
       this.#crc2.imageSmoothingEnabled = false;
       this.#crc2.drawImage(
@@ -238,18 +230,10 @@ namespace FudgeCore {
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
       Render.setCanvasSize(rectRender.width, rectRender.height);
 
-      // setting the new canvas size on the FBO-Textures
-      if (rectRender.size.x != this.lastRectRenderSize.x || rectRender.size.y != this.lastRectRenderSize.y || this.camera != this.lastCamera) {
-        this.lastRectRenderSize.set(rectRender.size.x, rectRender.size.y);
-        this.lastCamera = this.camera;
-        if (rectRender.size.x >= 1 || rectRender.size.y >= 1) {
-          let cmpAO: ComponentAmbientOcclusion = <ComponentAmbientOcclusion>this.getComponentPost(this.camera, "AO");
-          let cmpMist: ComponentMist = <ComponentMist>this.getComponentPost(this.camera, "Mist");
-          let cmpBloom: ComponentBloom = <ComponentBloom>this.getComponentPost(this.camera, "Bloom");
+      const cmpAO: ComponentAmbientOcclusion = this.camera.node?.getComponent(ComponentAmbientOcclusion);
+      const cmpBloom: ComponentBloom = this.camera.node?.getComponent(ComponentBloom);
 
-          Render.adjustFramebuffers(true, cmpAO?.isActive, cmpMist?.isActive, cmpBloom?.isActive);
-        }
-      }
+      Render.adjustFramebuffers(true, cmpAO?.isActive, cmpBloom?.isActive);
 
       Recycler.store(rectClient);
       Recycler.store(rectCanvas);
@@ -379,19 +363,6 @@ namespace FudgeCore {
     public pointClientToScreen(_client: Vector2): Vector2 {
       let screen: Vector2 = new Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
       return screen;
-    }
-
-    /**
-     * Returns a ComponentPostFX object based on the given Post-FX type, as long as the camaera has a component of this type
-     */
-    private getComponentPost(_camera: ComponentCamera, _cmpType: string): Component { //TODO: remove this function, just call getComponent directly
-      let camParentNode: Node = _camera.node;
-      if (camParentNode != null) {
-        if (_cmpType == "AO") return camParentNode.getComponent(ComponentAmbientOcclusion);
-        if (_cmpType == "Mist") return camParentNode.getComponent(ComponentMist);
-        if (_cmpType == "Bloom") return camParentNode.getComponent(ComponentBloom);
-      }
-      return null;
     }
   }
 }

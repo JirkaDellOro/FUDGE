@@ -1090,8 +1090,7 @@ declare namespace FudgeCore {
         };
         protected static mainFramebuffer: WebGLFramebuffer;
         protected static mainTexture: WebGLTexture;
-        protected static mistFramebuffer: WebGLFramebuffer;
-        protected static mistTexture: WebGLTexture;
+        protected static mainRect: Rectangle;
         protected static aoNormalFramebuffer: WebGLFramebuffer;
         protected static aoNormalTexture: WebGLTexture;
         protected static aoDepthTexture: WebGLTexture;
@@ -1171,15 +1170,15 @@ declare namespace FudgeCore {
         /**
          * Creates and stores texture buffers to be used for Post-FX
          */
-        static initializeFramebuffers(_mist?: boolean, _ao?: boolean, _bloom?: boolean): void;
+        static initializeFramebuffers(_ao?: boolean, _bloom?: boolean): void;
         /**
          * Adjusts the size of the set framebuffers corresponding textures
          */
-        static adjustFramebuffers(_main?: boolean, _ao?: boolean, _mist?: boolean, _bloom?: boolean): void;
+        static adjustFramebuffers(_main?: boolean, _ao?: boolean, _bloom?: boolean): void;
         /**
          * Composites all effects that are used in the scene to a final render.
          */
-        static compositeEffects(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist, _cmpAmbientOcclusion: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
+        static compositeEffects(_cmpCamera: ComponentCamera, _cmpAmbientOcclusion: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
         /**
          * Draws the bloom-effect into the bloom texture, using the given camera-component and the given bloom-component
          */
@@ -1206,8 +1205,8 @@ declare namespace FudgeCore {
         * Calculates sample points to be used in AO-calculations, based on the specified samplecount
          */
         protected static generateNewSamplePoints(_nSamples?: number): void;
-        protected static createFramebuffer(_depthType: typeof WebGLTexture | typeof WebGLRenderbuffer, _divider?: number): [WebGLFramebuffer, WebGLTexture, WebGLTexture | WebGLRenderbuffer];
-        protected static updateFramebuffer(_framebuffer: WebGLFramebuffer, _texture?: WebGLTexture, _depth?: WebGLTexture | WebGLRenderbuffer, _divider?: number): void;
+        protected static createFramebuffer(_depthType: typeof WebGLTexture | typeof WebGLRenderbuffer, _divisor?: number): [WebGLFramebuffer, WebGLTexture, WebGLTexture | WebGLRenderbuffer];
+        protected static updateFramebuffer(_framebuffer: WebGLFramebuffer, _texture?: WebGLTexture, _depth?: WebGLTexture | WebGLRenderbuffer, _divisor?: number): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
         */
@@ -1216,11 +1215,6 @@ declare namespace FudgeCore {
          * Draw all of the given nodes using the normal shader to be used in AO-calculations
         */
         protected static drawNodesNormal(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpAO: ComponentAmbientOcclusion): void;
-        /**
-         * Draw all of the given nodes using the mist shader.
-        */
-        protected static useMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
-        protected static drawNodeMist(_node: Node, _cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
         protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
         private static calcMeshToView;
     }
@@ -2331,6 +2325,20 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Attaches a {@link Material} to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
+     */
+    class ComponentFog extends Component {
+        static readonly iSubclass: number;
+        color: Color;
+        near: number;
+        far: number;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Filters synchronization between a graph instance and the graph it is connected to. If active, no synchronization occurs.
      * Maybe more finegrained in the future...
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
@@ -2472,21 +2480,6 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Attaches a {@link Material} to the node
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
-     */
-    class ComponentMist extends Component {
-        static readonly iSubclass: number;
-        clrMist: Color;
-        nearPlane: number;
-        farPlane: number;
-        constructor(_mist?: boolean, _clrMist?: Color, _nearPlane?: number, _farPlane?: number);
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -6022,7 +6015,7 @@ declare namespace FudgeCore {
         static pickBuffer: Int32Array;
         static readonly nodesPhysics: RecycableArray<Node>;
         static readonly componentsPick: RecycableArray<ComponentPick>;
-        private static readonly lights;
+        static readonly lights: MapLightTypeToLightList;
         private static readonly nodesSimple;
         private static readonly nodesAlpha;
         private static readonly skeletons;
@@ -6033,6 +6026,7 @@ declare namespace FudgeCore {
          * render passes.
          */
         static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _shadersUsed?: (ShaderInterface)[]): void;
+        static addLights(_cmpLights: ComponentLight[]): void;
         /**
          * Used with a {@link Picker}-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted {@link Pick}-array
@@ -6044,10 +6038,6 @@ declare namespace FudgeCore {
         static draw(_cmpCamera: ComponentCamera): void;
         static drawList(_list: RecycableArray<Node> | Array<Node>, _cmpCamera: ComponentCamera, _drawNode: Function): void;
         static drawListAlpha(_list: RecycableArray<Node>, _cmpCamera: ComponentCamera, _drawNode: Function): void;
-        /**
-         * Draws the mist-effect into the mist texture, using the given camera and the given mist-component
-         */
-        static drawMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void;
         /**
          * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
          */
@@ -6098,8 +6088,6 @@ declare namespace FudgeCore {
         adjustingCamera: boolean;
         physicsDebugMode: PHYSICS_DEBUGMODE;
         componentsPick: RecycableArray<ComponentPick>;
-        private lastRectRenderSize;
-        private lastCamera;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
@@ -6201,10 +6189,6 @@ declare namespace FudgeCore {
          * Returns a point in the browser page matching the given point of the viewport
          */
         pointClientToScreen(_client: Vector2): Vector2;
-        /**
-         * Returns a ComponentPostFX object based on the given Post-FX type, as long as the camaera has a component of this type
-         */
-        private getComponentPost;
     }
 }
 declare namespace FudgeCore {
@@ -7750,15 +7734,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderMist extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
-        static getVertexShaderSource(): string;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {

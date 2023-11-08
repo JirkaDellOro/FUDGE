@@ -14,6 +14,11 @@ uniform float u_fIntensity;
 uniform float u_fMetallic;
 uniform vec3 u_vctCamera;
 
+uniform bool u_bFog;
+uniform vec4 u_vctFogColor;
+uniform float u_fNear;
+uniform float u_fFar;
+
 in vec4 v_vctColor;
 in vec3 v_vctPosition;
 
@@ -173,6 +178,13 @@ void main() {
 
   vctFrag *= u_vctColor * v_vctColor;
   vctFrag.rgb += vctSpecular * (1.0 - u_fMetallic);
+
+  if (u_bFog) {
+    float distance = length(v_vctPosition - u_vctCamera);
+    float fogAmount = min(max((distance - u_fNear) / (u_fFar - u_fNear), 0.0), 1.0);
+    fogAmount = -pow(fogAmount, 2.0) + (2.0 * fogAmount); //lets Fog appear quicker and fall off slower results in a more gradual falloff
+    vctFrag = mix(vctFrag, vec4(u_vctFogColor.rgb, 1.0f), fogAmount * u_vctFogColor.a);
+  }
 
   if(vctFrag.a < 0.01)
     discard;

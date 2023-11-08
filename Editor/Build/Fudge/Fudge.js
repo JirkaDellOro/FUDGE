@@ -15,7 +15,11 @@ var Fudge;
                 let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(_id), click: _callback });
                 //@ts-ignore
                 item.overrideProperty("iSubclass", iSubclass);
-                menu.append(item);
+                let name = subclass.name;
+                //TODO: Implement option to exclude shaders from list from within the shader class
+                if (name != "ShaderAmbientOcclusion" && name != "ShaderBloom" && name != "ShaderDownsample" && name != "ShaderScreen" && name != "ShaderUpsample" && name != "ShaderAONormalFlat" && name != "ShaderAONormal") {
+                    menu.append(item);
+                }
             }
             return menu;
         }
@@ -1463,7 +1467,20 @@ var Fudge;
                 return true;
             };
             let setTexture = (_sources) => {
-                this.mutable["coat"]["texture"] = _sources[0];
+                let event = _event; //.path does not exist on type DragEvent therefore it is set as any
+                let i = 0;
+                let key = "";
+                while (key == "") {
+                    let tempKey = event.path[i].getAttribute("key");
+                    if (tempKey == "texture" || tempKey == "normalMap") {
+                        key = tempKey;
+                    }
+                    else if (tempKey == "Material") {
+                        return false;
+                    }
+                    i++;
+                }
+                this.mutable["coat"][key] = _sources[0];
                 this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
@@ -3860,17 +3877,27 @@ var Fudge;
             }
             //@ts-ignore
             let cmpNew = new component();
-            if (cmpNew instanceof ƒ.ComponentRigidbody || cmpNew instanceof ƒ.ComponentVRDevice)
-                if (!this.node.cmpTransform) {
-                    alert("To attach this Component, first attach ComponentTransform!");
-                    return;
-                }
-            if (cmpNew instanceof ƒ.ComponentGraphFilter)
-                if (!(this.node instanceof ƒ.Graph || this.node instanceof ƒ.GraphInstance)) {
-                    alert("Attach ComponentGraphFilter only to GraphInstances or Graph");
-                    console.log(this.node);
-                    return;
-                }
+            if ((cmpNew instanceof ƒ.ComponentRigidbody || cmpNew instanceof ƒ.ComponentVRDevice) && !this.node.cmpTransform) {
+                alert(`To attach a ${cmpNew.type}, first attach a ${ƒ.ComponentTransform.name}.`);
+                return;
+            }
+            if (cmpNew instanceof ƒ.ComponentGraphFilter && !(this.node instanceof ƒ.Graph || this.node instanceof ƒ.GraphInstance)) {
+                alert(`Attach ${ƒ.ComponentGraphFilter.name} only to ${ƒ.Graph.name} or ${ƒ.GraphInstance.name}s`);
+                // console.log(this.node);
+                return;
+            }
+            if (cmpNew instanceof ƒ.ComponentFog && this.node.getComponent(ƒ.ComponentCamera) == null) {
+                alert(`To attach a ${ƒ.ComponentFog.name}, first attach a ${ƒ.ComponentCamera.name}.`);
+                return;
+            }
+            if (cmpNew instanceof ƒ.ComponentAmbientOcclusion && this.node.getComponent(ƒ.ComponentCamera) == null) {
+                alert(`To attach a ${ƒ.ComponentAmbientOcclusion.name}, first attach a ${ƒ.ComponentCamera.name}.`);
+                return;
+            }
+            if (cmpNew instanceof ƒ.ComponentBloom && this.node.getComponent(ƒ.ComponentCamera) == null) {
+                alert(`To attach a ${ƒ.ComponentBloom.name}, first attach a ${ƒ.ComponentCamera.name}.`);
+                return;
+            }
             ƒ.Debug.info(cmpNew.type, cmpNew);
             this.node.addComponent(cmpNew);
             this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });

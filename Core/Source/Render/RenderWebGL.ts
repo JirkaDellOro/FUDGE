@@ -63,10 +63,7 @@ namespace FudgeCore {
     // main
     protected static mainFramebuffer: WebGLFramebuffer;
     protected static mainTexture: WebGLTexture;
-
-    // mist
-    protected static mistFramebuffer: WebGLFramebuffer;
-    protected static mistTexture: WebGLTexture;
+    protected static mainRect: Rectangle = new Rectangle(0, 0, 0, 0);
 
     // ambient Occlusion
     protected static aoNormalFramebuffer: WebGLFramebuffer;
@@ -253,14 +250,8 @@ namespace FudgeCore {
     /**
      * Creates and stores texture buffers to be used for Post-FX
      */
-    public static initializeFramebuffers(_mist: boolean = true, _ao: boolean = true, _bloom: boolean = true): void {
+    public static initializeFramebuffers(_ao: boolean = true, _bloom: boolean = true): void { // TODO: refactor this
       [RenderWebGL.mainFramebuffer, RenderWebGL.mainTexture, RenderWebGL.aoDepthTexture] = RenderWebGL.createFramebuffer(WebGLTexture); //TODO: Since the normalcalculations for the AO pass as of for now do not support transparent materials the depthTexture is taken from the main render for transparency support in the depth pass
-
-      // Render.initScreenQuad();
-
-      if (_mist)
-        [RenderWebGL.mistFramebuffer, RenderWebGL.mistTexture] = RenderWebGL.createFramebuffer(WebGLRenderbuffer);
-
 
       if (_ao) {
         [RenderWebGL.aoFramebuffer, RenderWebGL.aoTexture] = RenderWebGL.createFramebuffer(WebGLRenderbuffer);
@@ -291,7 +282,10 @@ namespace FudgeCore {
     /**
      * Adjusts the size of the set framebuffers corresponding textures
      */
-    public static adjustFramebuffers(_main: boolean = true, _ao: boolean = false, _mist: boolean = false, _bloom: boolean = false): void {
+    public static adjustFramebuffers(_main: boolean = true, _ao: boolean = false, _bloom: boolean = false): void {
+      if (RenderWebGL.mainRect.width == RenderWebGL.crc3.canvas.width && RenderWebGL.mainRect.height == RenderWebGL.crc3.canvas.height)
+        return;
+
       if (_main)
         RenderWebGL.updateFramebuffer(RenderWebGL.mainFramebuffer);
 
@@ -299,9 +293,6 @@ namespace FudgeCore {
         RenderWebGL.updateFramebuffer(RenderWebGL.aoNormalFramebuffer);
         RenderWebGL.updateFramebuffer(RenderWebGL.aoFramebuffer);
       }
-
-      if (_mist)
-        RenderWebGL.updateFramebuffer(RenderWebGL.mistFramebuffer);
 
       if (_bloom) {
         let div: number = 2;
@@ -315,17 +306,12 @@ namespace FudgeCore {
           div *= 2;
         }
       }
-
-      // function adjustFramebuffer(_buffer: WebGLFramebuffer, _texture: WebGLTexture, _depth: WebGLTexture = undefined, _divider: number = 1): void {
-      // let bufferData: PostBufferdata = RenderWebGL.updateFramebuffer(_buffer, _texture, _depth, _divider);
-      // _texture = bufferData.texture; // does this achieve anything?
-      // }
     }
 
     /**
      * Composites all effects that are used in the scene to a final render.
      */
-    public static compositeEffects(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist, _cmpAmbientOcclusion: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void {
+    public static compositeEffects(_cmpCamera: ComponentCamera, _cmpAmbientOcclusion: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void {
       RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);              //Reset to main color buffer
       RenderWebGL.setDepthTest(false);
 
@@ -345,7 +331,7 @@ namespace FudgeCore {
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Render.crc3.canvas.height);
 
       //set ao-texture and color if available
-      if (_cmpAmbientOcclusion != null) if (_cmpAmbientOcclusion.isActive) {
+      if (_cmpAmbientOcclusion?.isActive) {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_ao"], 1);
         bindTexture(RenderWebGL.aoTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_aoTexture");
         RenderWebGL.getRenderingContext().uniform4fv(shader.uniforms["u_vctAOColor"], _cmpAmbientOcclusion.clrAO.getArray());
@@ -353,17 +339,8 @@ namespace FudgeCore {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_ao"], 0);
       }
 
-      //set mist-texture and color if available
-      if (_cmpMist != null) if (_cmpMist.isActive) {
-        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_mist"], 1);
-        bindTexture(RenderWebGL.mistTexture, WebGL2RenderingContext.TEXTURE2, 2, "u_mistTexture");
-        RenderWebGL.getRenderingContext().uniform4fv(shader.uniforms["u_vctMistColor"], _cmpMist.clrMist.getArray());
-      } else {
-        RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_mist"], 0);
-      }
-
       //set bloom-texture, intensity and highlight desaturation if available
-      if (_cmpBloom != null) if (_cmpBloom.isActive) {
+      if (_cmpBloom?.isActive) {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bloom"], 1);
         bindTexture(RenderWebGL.bloomUpsamplingTextures[0], WebGL2RenderingContext.TEXTURE3, 3, "u_bloomTexture");
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_bloomIntensity"], _cmpBloom.intensity);
@@ -662,24 +639,24 @@ namespace FudgeCore {
       }
     }
 
-    protected static createFramebuffer(_depthType: typeof WebGLTexture | typeof WebGLRenderbuffer, _divider: number = 1): [WebGLFramebuffer, WebGLTexture, WebGLTexture | WebGLRenderbuffer] {
+    protected static createFramebuffer(_depthType: typeof WebGLTexture | typeof WebGLRenderbuffer, _divisor: number = 1): [WebGLFramebuffer, WebGLTexture, WebGLTexture | WebGLRenderbuffer] {
       const crc3: WebGL2RenderingContext = RenderWebGL.crc3;
       const framebuffer: WebGLFramebuffer = RenderWebGL.assert<WebGLFramebuffer>(crc3.createFramebuffer());
       const texture: WebGLTexture = RenderWebGL.assert<WebGLTexture>(crc3.createTexture());
       const depth: WebGLTexture | WebGLRenderbuffer = _depthType === WebGLTexture ? RenderWebGL.assert<WebGLTexture>(crc3.createTexture()) : RenderWebGL.assert<WebGLRenderbuffer>(crc3.createRenderbuffer());
 
-      RenderWebGL.updateFramebuffer(framebuffer, texture, depth, _divider);
+      RenderWebGL.updateFramebuffer(framebuffer, texture, depth, _divisor);
 
       return [framebuffer, texture, depth];
     }
 
-    protected static updateFramebuffer(_framebuffer: WebGLFramebuffer, _texture?: WebGLTexture, _depth?: WebGLTexture | WebGLRenderbuffer, _divider: number = 1): void {
+    protected static updateFramebuffer(_framebuffer: WebGLFramebuffer, _texture?: WebGLTexture, _depth?: WebGLTexture | WebGLRenderbuffer, _divisor: number = 1): void {
       _texture = _texture ?? getFramebufferAttachment(_framebuffer, WebGL2RenderingContext.COLOR_ATTACHMENT0);
       _depth = _depth ?? getFramebufferAttachment(_framebuffer, WebGL2RenderingContext.DEPTH_ATTACHMENT);
 
       const crc3: WebGL2RenderingContext = RenderWebGL.crc3;
-      const width: number = Math.max(Math.round(crc3.canvas.width / _divider), 1);         //the _divider variable is used for Downsampling (for bloom shader)
-      const height: number = Math.max(Math.round(crc3.canvas.height / _divider), 1);
+      const width: number = Math.max(Math.round(crc3.canvas.width / _divisor), 1);         //the _divisor variable is used for Downsampling (for bloom shader)
+      const height: number = Math.max(Math.round(crc3.canvas.height / _divisor), 1);
 
       crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, _framebuffer);
 
@@ -760,6 +737,17 @@ namespace FudgeCore {
         RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
       }
 
+      let cmpFog: ComponentFog = _cmpCamera.node?.getComponent(ComponentFog);
+      if (cmpFog?.isActive) {
+        uniform = shader.uniforms["u_bFog"];
+        RenderWebGL.crc3.uniform1i(uniform, 1);
+        uniform = shader.uniforms["u_fNear"];
+        RenderWebGL.crc3.uniform1f(uniform, cmpFog.near);
+        uniform = shader.uniforms["u_fFar"];
+        RenderWebGL.crc3.uniform1f(uniform, cmpFog.far);
+        RenderWebGL.crc3.uniform4fv(shader.uniforms["u_vctFogColor"], cmpFog.color.getArray());
+      }
+
       if (drawParticles) {
         RenderWebGL.drawParticles(cmpParticleSystem, shader, renderBuffers, _node.getComponent(ComponentFaceCamera), cmpMaterial.sortForAlpha);
       } else {
@@ -788,53 +776,6 @@ namespace FudgeCore {
       }
     }
 
-    /**
-     * Draw all of the given nodes using the mist shader.
-    */
-    // protected static drawNodesMist(_list: RecycableArray<Node> | Array<Node>, _cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {
-    //   Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.mistFramebuffer);
-    //   Render.clear(new Color(1));
-
-    //   let shader: ShaderInterface = ShaderMist;
-    //   shader.useProgram();
-
-    //   let uniform: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
-    //   RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
-    //   uniform = shader.uniforms["u_nearPlane"];
-    //   RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpMist.nearPlane);
-    //   uniform = shader.uniforms["u_farPlane"];
-    //   RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpMist.farPlane);
-
-    //   for (let node of _list) {
-    //     let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
-    //     let mtxMeshToView: Matrix4x4 = RenderWebGL.calcMeshToView(node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
-    //     let renderBuffers: RenderBuffers = cmpMesh.mesh.useRenderBuffers(shader, cmpMesh.mtxWorld, mtxMeshToView);
-    //     RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
-    //   }
-    // }
-
-    protected static useMist(_cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {
-      RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.mistFramebuffer);
-      Render.clear(new Color(1));
-
-      let shader: ShaderInterface = ShaderMist;
-      shader.useProgram();
-
-      let uniform: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
-      RenderWebGL.crc3.uniform3fv(uniform, _cmpCamera.mtxWorld.translation.get());
-      uniform = shader.uniforms["u_nearPlane"];
-      RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpMist.nearPlane);
-      uniform = shader.uniforms["u_farPlane"];
-      RenderWebGL.getRenderingContext().uniform1f(uniform, _cmpMist.farPlane);
-    }
-
-    protected static drawNodeMist(_node: Node, _cmpCamera: ComponentCamera, _cmpMist: ComponentMist): void {
-      let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-      let mtxMeshToView: Matrix4x4 = RenderWebGL.calcMeshToView(_node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
-      let renderBuffers: RenderBuffers = cmpMesh.mesh.useRenderBuffers(ShaderMist, cmpMesh.mtxWorld, mtxMeshToView);
-      RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
-    }
-
     protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void {
       RenderWebGL.crc3.depthMask(_cmpParticleSystem.depthMask);
       RenderWebGL.setBlendMode(_cmpParticleSystem.blendMode);
@@ -856,8 +797,7 @@ namespace FudgeCore {
     }
 
     private static calcMeshToView(_node: Node, _cmpMesh: ComponentMesh, _mtxWorldToView: Matrix4x4, _target?: Vector3): Matrix4x4 {
-      // TODO: meshToView should be calculated only once per frame per node. But now that we have postprocessing effects e.g. mist, it is recalculated for each effect for each node...
-      // also this should not be a RenderWebGL method
+      // TODO: This could be a Render function as it does not do anything with WebGL
       let cmpFaceCamera: ComponentFaceCamera = _node.getComponent(ComponentFaceCamera);
       if (cmpFaceCamera && cmpFaceCamera.isActive) {
         let mtxMeshToView: Matrix4x4;

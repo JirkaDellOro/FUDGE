@@ -586,12 +586,12 @@
                         }
                       }
                     ],
-                    "ComponentMist": [
+                    "ComponentFog": [
                       {
-                        "ƒ.ComponentMist": {
-                          "clrMist": "[0, 0.06666666666666667, 0.09803921568627451, 1]",
-                          "nearPlane": 2,
-                          "farPlane": 19.99999999999997,
+                        "ƒ.ComponentFog": {
+                          "color": "[0, 0.06666666666666667, 0.09803921568627451, 1]",
+                          "near": 2,
+                          "far": 19.99999999999997,
                           "Component": {
                             "active": true
                           }
