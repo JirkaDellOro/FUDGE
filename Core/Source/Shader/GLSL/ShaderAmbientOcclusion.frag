@@ -12,7 +12,7 @@ uniform sampler2D u_depthTexture;
 uniform sampler2D u_noiseTexture;
 
 struct Sample {
-    vec3 vct;
+  vec3 vct;
 };
 
 const uint MAX_SAMPLES = 128u;
@@ -42,39 +42,38 @@ float linearizeDepth(float _originalDepth) {
 }
 
 void main() {
-    float depth = linearizeDepth(texture(u_depthTexture, v_vctTexture).r);
-    vec3 vct_FragPos = getFragPos(gl_FragCoord.xy, depth);
+  float depth = linearizeDepth(texture(u_depthTexture, v_vctTexture).r);
+  vec3 vctFragPos = getFragPos(gl_FragCoord.xy, depth);
 
-    vec3 vct_Normal = texture(u_normalTexture, v_vctTexture).rgb;
-    vct_Normal = 1.0f - (vct_Normal * 2.0f);    //set normals into -1 to 1 range
-    vct_Normal = normalize(vct_Normal);
+  vec3 vctNormal = texture(u_normalTexture, v_vctTexture).rgb;
+  vctNormal = 1.0f - (vctNormal * 2.0f);    //set normals into -1 to 1 range
+  vctNormal = normalize(vctNormal);
 
-    vec2 noiseScale = vec2(u_width / 4.0f, u_height / 4.0f);
+  vec2 noiseScale = vec2(u_width / 4.0f, u_height / 4.0f);
 
-    vec3 vct_Random = normalize(texture(u_noiseTexture, v_vctTexture * noiseScale).rgb);
+  vec3 vctRandom = normalize(texture(u_noiseTexture, v_vctTexture * noiseScale).rgb);
+  vec3 vctTangent = normalize(vctRandom - vctNormal * dot(vctRandom, vctNormal));
+  vec3 vctBitangent = cross(vctNormal, vctTangent);
+  mat3 mtxTBN = mat3(vctTangent, vctBitangent, vctNormal);
 
-    vec3 vct_Tangent = normalize(vct_Random - vct_Normal * dot(vct_Random, vct_Normal));
-    vec3 vct_Bitangent = cross(vct_Normal, vct_Tangent);
-    mat3 mtxTBN = mat3(vct_Tangent, vct_Bitangent, vct_Normal);
+  //calculation of the occlusion-factor   
+  float occlusion = 0.0f;
+  for(int i = 0; i < u_nSamples; i++) {
+    //get sample position
+    vec3 vctSample = mtxTBN * u_samples[i].vct;
+    vctSample = vctFragPos + (vctSample * u_radius);
 
-    //calculation of the occlusion-factor   
-    float occlusion = 0.0f;
-    for(int i = 0; i < u_nSamples; i++) {
-        //get sample position
-        vec3 vct_Sample = mtxTBN * u_samples[i].vct;
-        vct_Sample = vct_FragPos + (vct_Sample * u_radius);
+    vec3 offset = vec3(vctSample);
+    offset = offset * 0.5f + 0.5f;
 
-        vec3 offset = vec3(vct_Sample);
-        offset = offset * 0.5f + 0.5f;
+    float occluderDepth = linearizeDepth(texture(u_depthTexture, offset.xy).r);
 
-        float occluderDepth = linearizeDepth(texture(u_depthTexture, offset.xy).r);
+    float rangeCheck = (vctSample.z - occluderDepth > u_radius * u_shadowDistance * 10.0f ? 0.0f : 1.0f);  
+    occlusion += (occluderDepth <= vctSample.z ? 1.0f : 0.0f) * rangeCheck;
+  }
 
-        float rangeCheck = (vct_Sample.z - occluderDepth > u_radius * u_shadowDistance * 10.0f ? 0.0f : 1.0f);  
-        occlusion += (occluderDepth <= vct_Sample.z ? 1.0f : 0.0f) * rangeCheck;
-    }
-
-    float nSamples = float(u_nSamples);
-    occlusion = min((1.0f - (occlusion / nSamples)) * 1.5f, 1.0f);
-    occlusion *= occlusion;
-    vctFrag = vec4(vec3(occlusion), 1.0f);
+  float nSamples = float(u_nSamples);
+  occlusion = min((1.0f - (occlusion / nSamples)) * 1.5f, 1.0f);
+  occlusion *= occlusion;
+  vctFrag = vec4(vec3(occlusion), 1.0f);
 }

@@ -17,7 +17,7 @@ var Fudge;
                 item.overrideProperty("iSubclass", iSubclass);
                 let name = subclass.name;
                 //TODO: Implement option to exclude shaders from list from within the shader class
-                if (name != "ShaderAmbientOcclusion" && name != "ShaderBloom" && name != "ShaderDownsample" && name != "ShaderScreen" && name != "ShaderUpsample" && name != "ShaderAONormalFlat" && name != "ShaderAONormal") {
+                if (name != "ShaderAmbientOcclusion" && name != "ShaderBloom" && name != "ShaderDownsample" && name != "ShaderScreen" && name != "ShaderUpsample") {
                     menu.append(item);
                 }
             }

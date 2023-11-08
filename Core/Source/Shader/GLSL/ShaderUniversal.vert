@@ -95,7 +95,7 @@ out vec2 v_vctTexture;
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
 in vec3 a_vctNormal;
 uniform mat4 u_mtxNormalMeshToWorld;
-uniform mat4 u_mtxWorldToCamera;
+uniform mat4 u_mtxWorldToCamera; // view matrix
 out vec2 v_vctTexture;
   #endif
 
@@ -110,7 +110,7 @@ flat out vec3 v_vctPositionFlat;
   #endif
 
   #if defined(SKIN)
-uniform mat4 u_mtxWorldToView; // 
+uniform mat4 u_mtxWorldToView; // view projection matrix?
 // Bones
 // https://github.com/mrdoob/three.js/blob/dev/src/renderers/shaders/ShaderChunk/skinning_pars_vertex.glsl.js
 in uvec4 a_vctBones;
@@ -122,7 +122,7 @@ mat4 u_mtxBones[MAX_BONES];
   #endif
 
   #if defined(PARTICLE)
-uniform mat4 u_mtxWorldToView;
+uniform mat4 u_mtxWorldToView; // view projection matrix?
 uniform float u_fParticleSystemDuration;
 uniform float u_fParticleSystemSize;
 uniform float u_fParticleSystemTime;
@@ -169,7 +169,7 @@ void main() {
     #endif
 
     #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
+      vec3 vctNormal = a_vctNormal;
       #if defined(PARTICLE)
   mat4 mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
       #else
@@ -200,7 +200,7 @@ void main() {
     #endif
 
     #if defined(LIGHT) // light
-  vctNormal = mat3(mtxNormalMeshToWorld) * vctNormal;
+      vctNormal = mat3(mtxNormalMeshToWorld) * vctNormal;
 
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader

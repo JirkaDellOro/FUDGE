@@ -1088,14 +1088,13 @@ declare namespace FudgeCore {
         static uboLightsVariableOffsets: {
             [_name: string]: number;
         };
-        protected static mainFramebuffer: WebGLFramebuffer;
-        protected static mainTexture: WebGLTexture;
+        protected static colorFramebuffer: WebGLFramebuffer;
+        protected static colorTexture: WebGLTexture;
+        protected static normalTexture: WebGLTexture;
+        protected static depthTexture: WebGLTexture;
         protected static mainRect: Rectangle;
-        protected static aoNormalFramebuffer: WebGLFramebuffer;
-        protected static aoNormalTexture: WebGLTexture;
-        protected static aoDepthTexture: WebGLTexture;
-        protected static aoFramebuffer: WebGLFramebuffer;
-        protected static aoTexture: WebGLTexture;
+        protected static occlusionFramebuffer: WebGLFramebuffer;
+        protected static occlusionTexture: WebGLTexture;
         protected static aoSamplePoints: Vector3[];
         protected static bloomDownsamplingFramebuffers: WebGLFramebuffer[];
         protected static bloomDownsamplingTextures: WebGLTexture[];
@@ -1205,16 +1204,12 @@ declare namespace FudgeCore {
         * Calculates sample points to be used in AO-calculations, based on the specified samplecount
          */
         protected static generateNewSamplePoints(_nSamples?: number): void;
-        protected static createFramebuffer(_depthType: typeof WebGLTexture | typeof WebGLRenderbuffer, _divisor?: number): [WebGLFramebuffer, WebGLTexture, WebGLTexture | WebGLRenderbuffer];
-        protected static updateFramebuffer(_framebuffer: WebGLFramebuffer, _texture?: WebGLTexture, _depth?: WebGLTexture | WebGLRenderbuffer, _divisor?: number): void;
+        protected static createFramebuffer(_depthType: typeof WebGLTexture | typeof WebGLRenderbuffer, _normal?: boolean, _divisor?: number): [WebGLFramebuffer, WebGLTexture, WebGLTexture | WebGLRenderbuffer, WebGLTexture];
+        protected static updateFramebuffer(_framebuffer: WebGLFramebuffer, _color?: WebGLTexture, _normal?: WebGLTexture, _depth?: WebGLTexture | WebGLRenderbuffer, _divisor?: number): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
         */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
-        /**
-         * Draw all of the given nodes using the normal shader to be used in AO-calculations
-        */
-        protected static drawNodesNormal(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpAO: ComponentAmbientOcclusion): void;
         protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
         private static calcMeshToView;
     }
@@ -2333,6 +2328,7 @@ declare namespace FudgeCore {
         color: Color;
         near: number;
         far: number;
+        constructor(_color?: Color, _near?: number, _far?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -6042,7 +6038,6 @@ declare namespace FudgeCore {
          * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
          */
         static drawAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
-        protected static calcNormalPass(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
         protected static feedAOUniforms(_bindTexture: Function, _cmpAO: ComponentAmbientOcclusion, _cmpCamera: ComponentCamera, _shader: typeof Shader): void;
         protected static feedSamplePoints(_samples: number, _shader: typeof Shader): void;
         protected static feedNoiseTexture(_bindTexture: Function): void;
@@ -7596,24 +7591,6 @@ declare namespace FudgeCore {
         static getFragmentShaderSource(): string;
         protected static registerSubclass(_subclass: typeof Shader): number;
         protected static insertDefines(_shader: string, _defines: string[]): string;
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderAONormal extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
-        static getVertexShaderSource(): string;
-        static getFragmentShaderSource(): string;
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderAONormalFlat extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
-        static getVertexShaderSource(): string;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {

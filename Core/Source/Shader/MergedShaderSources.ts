@@ -14,7 +14,7 @@ uniform sampler2D u_depthTexture;
 uniform sampler2D u_noiseTexture;
 
 struct Sample {
-    vec3 vct;
+  vec3 vct;
 };
 
 const uint MAX_SAMPLES = 128u;
@@ -44,41 +44,40 @@ float linearizeDepth(float _originalDepth) {
 }
 
 void main() {
-    float depth = linearizeDepth(texture(u_depthTexture, v_vctTexture).r);
-    vec3 vct_FragPos = getFragPos(gl_FragCoord.xy, depth);
+  float depth = linearizeDepth(texture(u_depthTexture, v_vctTexture).r);
+  vec3 vctFragPos = getFragPos(gl_FragCoord.xy, depth);
 
-    vec3 vct_Normal = texture(u_normalTexture, v_vctTexture).rgb;
-    vct_Normal = 1.0f - (vct_Normal * 2.0f);    //set normals into -1 to 1 range
-    vct_Normal = normalize(vct_Normal);
+  vec3 vctNormal = texture(u_normalTexture, v_vctTexture).rgb;
+  vctNormal = 1.0f - (vctNormal * 2.0f);    //set normals into -1 to 1 range
+  vctNormal = normalize(vctNormal);
 
-    vec2 noiseScale = vec2(u_width / 4.0f, u_height / 4.0f);
+  vec2 noiseScale = vec2(u_width / 4.0f, u_height / 4.0f);
 
-    vec3 vct_Random = normalize(texture(u_noiseTexture, v_vctTexture * noiseScale).rgb);
+  vec3 vctRandom = normalize(texture(u_noiseTexture, v_vctTexture * noiseScale).rgb);
+  vec3 vctTangent = normalize(vctRandom - vctNormal * dot(vctRandom, vctNormal));
+  vec3 vctBitangent = cross(vctNormal, vctTangent);
+  mat3 mtxTBN = mat3(vctTangent, vctBitangent, vctNormal);
 
-    vec3 vct_Tangent = normalize(vct_Random - vct_Normal * dot(vct_Random, vct_Normal));
-    vec3 vct_Bitangent = cross(vct_Normal, vct_Tangent);
-    mat3 mtxTBN = mat3(vct_Tangent, vct_Bitangent, vct_Normal);
+  //calculation of the occlusion-factor   
+  float occlusion = 0.0f;
+  for(int i = 0; i < u_nSamples; i++) {
+    //get sample position
+    vec3 vctSample = mtxTBN * u_samples[i].vct;
+    vctSample = vctFragPos + (vctSample * u_radius);
 
-    //calculation of the occlusion-factor   
-    float occlusion = 0.0f;
-    for(int i = 0; i < u_nSamples; i++) {
-        //get sample position
-        vec3 vct_Sample = mtxTBN * u_samples[i].vct;
-        vct_Sample = vct_FragPos + (vct_Sample * u_radius);
+    vec3 offset = vec3(vctSample);
+    offset = offset * 0.5f + 0.5f;
 
-        vec3 offset = vec3(vct_Sample);
-        offset = offset * 0.5f + 0.5f;
+    float occluderDepth = linearizeDepth(texture(u_depthTexture, offset.xy).r);
 
-        float occluderDepth = linearizeDepth(texture(u_depthTexture, offset.xy).r);
+    float rangeCheck = (vctSample.z - occluderDepth > u_radius * u_shadowDistance * 10.0f ? 0.0f : 1.0f);  
+    occlusion += (occluderDepth <= vctSample.z ? 1.0f : 0.0f) * rangeCheck;
+  }
 
-        float rangeCheck = (vct_Sample.z - occluderDepth > u_radius * u_shadowDistance * 10.0f ? 0.0f : 1.0f);  
-        occlusion += (occluderDepth <= vct_Sample.z ? 1.0f : 0.0f) * rangeCheck;
-    }
-
-    float nSamples = float(u_nSamples);
-    occlusion = min((1.0f - (occlusion / nSamples)) * 1.5f, 1.0f);
-    occlusion *= occlusion;
-    vctFrag = vec4(vec3(occlusion), 1.0f);
+  float nSamples = float(u_nSamples);
+  occlusion = min((1.0f - (occlusion / nSamples)) * 1.5f, 1.0f);
+  occlusion *= occlusion;
+  vctFrag = vec4(vec3(occlusion), 1.0f);
 }
 `;
   shaderSources["ShaderAmbientOcclusion.vert"] = /*glsl*/ `#version 300 es
@@ -96,59 +95,6 @@ void main() {
   gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
   v_vctTexture = vec2(x / 2.0, y / 2.0); // (0, 0), (2, 0), (0, 2)
 }`;
-  shaderSources["ShaderAONormal.frag"] = /*glsl*/ `#version 300 es
-/**
-*Renders normalinformation onto texture
-*@authors Roland Heer, HFU, 2023
-*/
-precision mediump float;
-precision highp int;
-
-#if defined(FLAT)
-flat in vec4 v_vctNormal;
-#else
-in vec4 v_vctNormal;
-#endif
-
-out vec4 vctFrag;
-
-void main() {
-    vctFrag = vec4(0.0f);
-
-    #if defined(FLAT)
-    vctFrag += v_vctNormal;
-#else
-    vctFrag += v_vctNormal;
-#endif
-}
-`;
-  shaderSources["ShaderAONormal.vert"] = /*glsl*/ `#version 300 es
-/**
-*Calculates the normal information relative to the Camera
-*@authors Roland Heer, HFU, 2023
-*/
-uniform mat4 u_mtxMeshToView;
-uniform mat4 u_mtxWorldToCamera;
-uniform mat4 u_mtxNormalMeshToWorld;
-in vec3 a_vctPosition;
-in vec3 a_vctNormal;
-
-#if defined(FLAT)
-flat out vec4 v_vctNormal;
-#else
-out vec4 v_vctNormal;
-#endif
-
-void main() {
-    gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0f);
-
-    vec3 vctNormal = a_vctNormal;
-    vctNormal = normalize(mat3(u_mtxWorldToCamera) * mat3(u_mtxNormalMeshToWorld) * vctNormal);
-    vctNormal.g = vctNormal.g * -1.0f;
-    vctNormal.b = vctNormal.b * -1.0f;
-    v_vctNormal = vec4((vctNormal + 1.0f) / 2.0f, 1.0f);
-}
-`;
   shaderSources["ShaderDownsample.frag"] = /*glsl*/ `#version 300 es
 /**
 *Downsamples a given texture to the current FBOs texture
@@ -224,6 +170,7 @@ uniform float u_fSpecular;
 uniform float u_fIntensity;
 uniform float u_fMetallic;
 uniform vec3 u_vctCamera;
+uniform mat4 u_mtxWorldToCamera;
 
 uniform bool u_bFog;
 uniform vec4 u_vctFogColor;
@@ -233,7 +180,8 @@ uniform float u_fFar;
 in vec4 v_vctColor;
 in vec3 v_vctPosition;
 
-out vec4 vctFrag;
+layout(location = 0) out vec4 vctFrag;
+layout(location = 1) out vec4 vctFragNormal;
 
 #ifdef PHONG
 
@@ -389,6 +337,11 @@ void main() {
 
   vctFrag *= u_vctColor * v_vctColor;
   vctFrag.rgb += vctSpecular * (1.0 - u_fMetallic);
+
+  vctNormal = normalize(mat3(u_mtxWorldToCamera) * vctNormal); // might need to use transpose inverse
+  vctNormal.y = vctNormal.y * -1.0;
+  vctNormal.z = vctNormal.z * -1.0;
+  vctFragNormal = vec4((vctNormal + 1.0) / 2.0, 1.0);
 
   if (u_bFog) {
     float distance = length(v_vctPosition - u_vctCamera);
@@ -576,7 +529,11 @@ precision highp int;
 
 // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;
+
 in vec4 v_vctColor;
+
+layout(location = 0) out vec4 vctFrag;
+layout(location = 1) out vec4 vctFragNormal;
 
 // LIGHT: include light parameters
 #ifdef LIGHT
@@ -594,8 +551,6 @@ in vec4 v_vctColor;
   uniform sampler2D u_texture;
 
 #endif
-
-out vec4 vctFrag;
 
 void main() {
   
@@ -626,7 +581,10 @@ void main() {
   
   #endif
 
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
+  // for now just pass nothing as normal
+  vctFragNormal = vec4(0.0); 
+
+  // discard pixel alltogether when transparent: don't show in Z-Buffer
   if(vctFrag.a < 0.01)
     discard;
 }`;
@@ -727,7 +685,7 @@ out vec2 v_vctTexture;
   #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
 in vec3 a_vctNormal;
 uniform mat4 u_mtxNormalMeshToWorld;
-uniform mat4 u_mtxWorldToCamera;
+uniform mat4 u_mtxWorldToCamera; // view matrix
 out vec2 v_vctTexture;
   #endif
 
@@ -742,7 +700,7 @@ flat out vec3 v_vctPositionFlat;
   #endif
 
   #if defined(SKIN)
-uniform mat4 u_mtxWorldToView; // 
+uniform mat4 u_mtxWorldToView; // view projection matrix?
 // Bones
 // https://github.com/mrdoob/three.js/blob/dev/src/renderers/shaders/ShaderChunk/skinning_pars_vertex.glsl.js
 in uvec4 a_vctBones;
@@ -754,7 +712,7 @@ mat4 u_mtxBones[MAX_BONES];
   #endif
 
   #if defined(PARTICLE)
-uniform mat4 u_mtxWorldToView;
+uniform mat4 u_mtxWorldToView; // view projection matrix?
 uniform float u_fParticleSystemDuration;
 uniform float u_fParticleSystemSize;
 uniform float u_fParticleSystemTime;
@@ -801,7 +759,7 @@ void main() {
     #endif
 
     #if defined(LIGHT) || defined(MATCAP)
-  vec3 vctNormal = a_vctNormal;
+      vec3 vctNormal = a_vctNormal;
       #if defined(PARTICLE)
   mat4 mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
       #else
@@ -832,7 +790,7 @@ void main() {
     #endif
 
     #if defined(LIGHT) // light
-  vctNormal = mat3(mtxNormalMeshToWorld) * vctNormal;
+      vctNormal = mat3(mtxNormalMeshToWorld) * vctNormal;
 
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader

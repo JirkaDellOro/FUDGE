@@ -60,17 +60,20 @@ namespace FudgeCore {
     public static uboLights: WebGLBuffer;
     public static uboLightsVariableOffsets: { [_name: string]: number }; // Maps the names of the variables inside the Lights uniform block to their respective byte offset
 
+
     // main
-    protected static mainFramebuffer: WebGLFramebuffer;
-    protected static mainTexture: WebGLTexture;
+    protected static colorFramebuffer: WebGLFramebuffer;
+    protected static colorTexture: WebGLTexture;
+
+    protected static normalTexture: WebGLTexture;
+    protected static depthTexture: WebGLTexture;
+
+
     protected static mainRect: Rectangle = new Rectangle(0, 0, 0, 0);
 
     // ambient Occlusion
-    protected static aoNormalFramebuffer: WebGLFramebuffer;
-    protected static aoNormalTexture: WebGLTexture;
-    protected static aoDepthTexture: WebGLTexture;
-    protected static aoFramebuffer: WebGLFramebuffer;
-    protected static aoTexture: WebGLTexture;
+    protected static occlusionFramebuffer: WebGLFramebuffer;
+    protected static occlusionTexture: WebGLTexture;
     protected static aoSamplePoints: Vector3[] = [];
 
     // bloom
@@ -251,11 +254,10 @@ namespace FudgeCore {
      * Creates and stores texture buffers to be used for Post-FX
      */
     public static initializeFramebuffers(_ao: boolean = true, _bloom: boolean = true): void { // TODO: refactor this
-      [RenderWebGL.mainFramebuffer, RenderWebGL.mainTexture, RenderWebGL.aoDepthTexture] = RenderWebGL.createFramebuffer(WebGLTexture); //TODO: Since the normalcalculations for the AO pass as of for now do not support transparent materials the depthTexture is taken from the main render for transparency support in the depth pass
+      [RenderWebGL.colorFramebuffer, RenderWebGL.colorTexture, RenderWebGL.depthTexture, RenderWebGL.normalTexture] = RenderWebGL.createFramebuffer(WebGLTexture, true); //TODO: Since the normalcalculations for the AO pass as of for now do not support transparent materials the depthTexture is taken from the main render for transparency support in the depth pass
 
       if (_ao) {
-        [RenderWebGL.aoFramebuffer, RenderWebGL.aoTexture] = RenderWebGL.createFramebuffer(WebGLRenderbuffer);
-        [RenderWebGL.aoNormalFramebuffer, RenderWebGL.aoNormalTexture] = RenderWebGL.createFramebuffer(WebGLRenderbuffer);
+        [RenderWebGL.occlusionFramebuffer, RenderWebGL.occlusionTexture] = RenderWebGL.createFramebuffer(WebGLRenderbuffer);
         RenderWebGL.generateNewSamplePoints();
       }
 
@@ -267,13 +269,13 @@ namespace FudgeCore {
 
         let div: number = 2;
         for (let i: number = 0; i < RenderWebGL.bloomDownsamplingDepth; i++) {
-          [RenderWebGL.bloomDownsamplingFramebuffers[i], RenderWebGL.bloomDownsamplingTextures[i]] = RenderWebGL.createFramebuffer(WebGLRenderbuffer, div);
+          [RenderWebGL.bloomDownsamplingFramebuffers[i], RenderWebGL.bloomDownsamplingTextures[i]] = RenderWebGL.createFramebuffer(WebGLRenderbuffer, undefined, div);
           div *= 2;
         }
 
         div = 2;
         for (let i: number = 0; i < RenderWebGL.bloomDownsamplingDepth - 1; i++) {
-          [RenderWebGL.bloomUpsamplingFramebuffers[i], RenderWebGL.bloomUpsamplingTextures[i]] = RenderWebGL.createFramebuffer(WebGLRenderbuffer, div);
+          [RenderWebGL.bloomUpsamplingFramebuffers[i], RenderWebGL.bloomUpsamplingTextures[i]] = RenderWebGL.createFramebuffer(WebGLRenderbuffer, undefined, div);
           div *= 2;
         }
       }
@@ -287,22 +289,20 @@ namespace FudgeCore {
         return;
 
       if (_main)
-        RenderWebGL.updateFramebuffer(RenderWebGL.mainFramebuffer);
+        RenderWebGL.updateFramebuffer(RenderWebGL.colorFramebuffer);
 
-      if (_ao) {
-        RenderWebGL.updateFramebuffer(RenderWebGL.aoNormalFramebuffer);
-        RenderWebGL.updateFramebuffer(RenderWebGL.aoFramebuffer);
-      }
+      if (_ao) 
+        RenderWebGL.updateFramebuffer(RenderWebGL.occlusionFramebuffer);
 
       if (_bloom) {
         let div: number = 2;
         for (let i: number = 0; i < RenderWebGL.bloomDownsamplingFramebuffers.length; i++) {
-          RenderWebGL.updateFramebuffer(RenderWebGL.bloomDownsamplingFramebuffers[i], undefined, undefined, div);
+          RenderWebGL.updateFramebuffer(RenderWebGL.bloomDownsamplingFramebuffers[i], undefined, undefined, undefined, div);
           div *= 2;
         }
         div = 2;
         for (let i: number = 0; i < RenderWebGL.bloomUpsamplingFramebuffers.length; i++) {
-          RenderWebGL.updateFramebuffer(RenderWebGL.bloomUpsamplingFramebuffers[i], undefined, undefined, div);
+          RenderWebGL.updateFramebuffer(RenderWebGL.bloomUpsamplingFramebuffers[i], undefined, undefined, undefined, div);
           div *= 2;
         }
       }
@@ -326,14 +326,14 @@ namespace FudgeCore {
       shader.useProgram();
 
       //set main-render
-      bindTexture(RenderWebGL.mainTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_mainTexture");
+      bindTexture(RenderWebGL.colorTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_mainTexture");
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_width"], Render.crc3.canvas.width);
       RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_height"], Render.crc3.canvas.height);
 
       //set ao-texture and color if available
       if (_cmpAmbientOcclusion?.isActive) {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_ao"], 1);
-        bindTexture(RenderWebGL.aoTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_aoTexture");
+        bindTexture(RenderWebGL.occlusionTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_aoTexture");
         RenderWebGL.getRenderingContext().uniform4fv(shader.uniforms["u_vctAOColor"], _cmpAmbientOcclusion.clrAO.getArray());
       } else {
         RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_ao"], 0);
@@ -357,7 +357,7 @@ namespace FudgeCore {
      * Draws the bloom-effect into the bloom texture, using the given camera-component and the given bloom-component
      */
     public static drawBloom(_cmpBloom: ComponentBloom): void {
-      let tempTexture: WebGLTexture = RenderWebGL.mainTexture;    // Temporary texture that gets progressively smaller while downsampling.
+      let tempTexture: WebGLTexture = RenderWebGL.colorTexture;    // Temporary texture that gets progressively smaller while downsampling.
       let divisor: number = 2;                                        // Divisor is increased by x2 every downsampling-stage
 
       let shader: typeof Shader = ShaderDownsample;
@@ -639,19 +639,22 @@ namespace FudgeCore {
       }
     }
 
-    protected static createFramebuffer(_depthType: typeof WebGLTexture | typeof WebGLRenderbuffer, _divisor: number = 1): [WebGLFramebuffer, WebGLTexture, WebGLTexture | WebGLRenderbuffer] {
+    protected static createFramebuffer(_depthType: typeof WebGLTexture | typeof WebGLRenderbuffer, _normal: boolean = false, _divisor: number = 1): [WebGLFramebuffer, WebGLTexture, WebGLTexture | WebGLRenderbuffer, WebGLTexture] {
       const crc3: WebGL2RenderingContext = RenderWebGL.crc3;
       const framebuffer: WebGLFramebuffer = RenderWebGL.assert<WebGLFramebuffer>(crc3.createFramebuffer());
-      const texture: WebGLTexture = RenderWebGL.assert<WebGLTexture>(crc3.createTexture());
+      const color: WebGLTexture = RenderWebGL.assert<WebGLTexture>(crc3.createTexture());
       const depth: WebGLTexture | WebGLRenderbuffer = _depthType === WebGLTexture ? RenderWebGL.assert<WebGLTexture>(crc3.createTexture()) : RenderWebGL.assert<WebGLRenderbuffer>(crc3.createRenderbuffer());
+      let normal: WebGLTexture;
+      if (_normal)
+        normal = RenderWebGL.assert<WebGLTexture>(crc3.createTexture());
+      RenderWebGL.updateFramebuffer(framebuffer, color, normal, depth, _divisor);
 
-      RenderWebGL.updateFramebuffer(framebuffer, texture, depth, _divisor);
-
-      return [framebuffer, texture, depth];
+      return [framebuffer, color, depth, normal];
     }
 
-    protected static updateFramebuffer(_framebuffer: WebGLFramebuffer, _texture?: WebGLTexture, _depth?: WebGLTexture | WebGLRenderbuffer, _divisor: number = 1): void {
-      _texture = _texture ?? getFramebufferAttachment(_framebuffer, WebGL2RenderingContext.COLOR_ATTACHMENT0);
+    protected static updateFramebuffer(_framebuffer: WebGLFramebuffer, _color?: WebGLTexture, _normal?: WebGLTexture, _depth?: WebGLTexture | WebGLRenderbuffer, _divisor: number = 1): void {
+      _color = _color ?? getFramebufferAttachment(_framebuffer, WebGL2RenderingContext.COLOR_ATTACHMENT0);
+      _normal = _normal ?? getFramebufferAttachment(_framebuffer, WebGL2RenderingContext.COLOR_ATTACHMENT1);
       _depth = _depth ?? getFramebufferAttachment(_framebuffer, WebGL2RenderingContext.DEPTH_ATTACHMENT);
 
       const crc3: WebGL2RenderingContext = RenderWebGL.crc3;
@@ -660,13 +663,28 @@ namespace FudgeCore {
 
       crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, _framebuffer);
 
-      crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, _texture);
-      crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR);
+      crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, _color);
+      crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR); // TODO: why linear?
       crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.LINEAR);
       crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.CLAMP_TO_EDGE);
       crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.CLAMP_TO_EDGE);
       crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, width, height, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, null);
-      crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, _texture, 0);
+      crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, _color, 0);
+
+      if (_normal) {
+        crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, _normal);
+        crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.LINEAR);
+        crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR);
+        crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.CLAMP_TO_EDGE);
+        crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.CLAMP_TO_EDGE);
+        crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGB, width, height, 0, WebGL2RenderingContext.RGB, WebGL2RenderingContext.UNSIGNED_BYTE, null);
+        crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT1, WebGL2RenderingContext.TEXTURE_2D, _normal, 0);
+
+        crc3.drawBuffers([
+          WebGL2RenderingContext.COLOR_ATTACHMENT0,
+          WebGL2RenderingContext.COLOR_ATTACHMENT1
+        ]);
+      }
 
       if (_depth instanceof WebGLTexture) {
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, _depth);
@@ -684,9 +702,16 @@ namespace FudgeCore {
         crc3.bindRenderbuffer(WebGL2RenderingContext.RENDERBUFFER, null);
       }
 
+      //Check if FBO is configured correctly
+      let e: number = RenderWebGL.crc3.checkFramebufferStatus(WebGL2RenderingContext.FRAMEBUFFER);
+      if (WebGL2RenderingContext.FRAMEBUFFER_COMPLETE !== e) {
+        console.log("FBO is incomplete: " + e.toString());
+        return;
+      }
+
       crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
 
-      function getFramebufferAttachment(_framebuffer: WebGLFramebuffer, _attachment: WebGL2RenderingContext["COLOR_ATTACHMENT0"] | WebGL2RenderingContext["DEPTH_ATTACHMENT"]): WebGLTexture {
+      function getFramebufferAttachment(_framebuffer: WebGLFramebuffer, _attachment: number): WebGLTexture {
         RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, _framebuffer);
         const attachment: WebGLRenderbuffer | WebGLTexture = RenderWebGL.crc3.getFramebufferAttachmentParameter(WebGL2RenderingContext.FRAMEBUFFER, _attachment, WebGL2RenderingContext.FRAMEBUFFER_ATTACHMENT_OBJECT_NAME);
         RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
@@ -738,9 +763,9 @@ namespace FudgeCore {
       }
 
       let cmpFog: ComponentFog = _cmpCamera.node?.getComponent(ComponentFog);
+      uniform = shader.uniforms["u_bFog"];
+      RenderWebGL.crc3.uniform1i(uniform, cmpFog?.isActive ? 1 : 0);
       if (cmpFog?.isActive) {
-        uniform = shader.uniforms["u_bFog"];
-        RenderWebGL.crc3.uniform1i(uniform, 1);
         uniform = shader.uniforms["u_fNear"];
         RenderWebGL.crc3.uniform1f(uniform, cmpFog.near);
         uniform = shader.uniforms["u_fFar"];
@@ -751,27 +776,6 @@ namespace FudgeCore {
       if (drawParticles) {
         RenderWebGL.drawParticles(cmpParticleSystem, shader, renderBuffers, _node.getComponent(ComponentFaceCamera), cmpMaterial.sortForAlpha);
       } else {
-        RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
-      }
-    }
-
-    /**
-     * Draw all of the given nodes using the normal shader to be used in AO-calculations
-    */
-    protected static drawNodesNormal(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>, _cmpAO: ComponentAmbientOcclusion): void {
-      for (let node of _list) {
-        let shader: ShaderInterface = node.getComponent(ComponentMaterial).material.getShader().define.includes("FLAT") ?
-          ShaderAONormalFlat :// TODO: remove flat shading stuff     //since Shaders handle Flat materials differently we use the different defines of these two materials
-          ShaderAONormal;
-
-        shader.useProgram();
-
-        let uniform = shader.uniforms["u_mtxWorldToCamera"];
-        RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
-
-        let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
-        let mtxMeshToView: Matrix4x4 = RenderWebGL.calcMeshToView(node, cmpMesh, _cmpCamera.mtxWorldToView, _cmpCamera.mtxWorld.translation);
-        let renderBuffers: RenderBuffers = cmpMesh.mesh.useRenderBuffers(shader, cmpMesh.mtxWorld, mtxMeshToView);
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       }
     }

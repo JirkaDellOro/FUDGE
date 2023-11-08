@@ -13,6 +13,7 @@ uniform float u_fSpecular;
 uniform float u_fIntensity;
 uniform float u_fMetallic;
 uniform vec3 u_vctCamera;
+uniform mat4 u_mtxWorldToCamera;
 
 uniform bool u_bFog;
 uniform vec4 u_vctFogColor;
@@ -22,7 +23,8 @@ uniform float u_fFar;
 in vec4 v_vctColor;
 in vec3 v_vctPosition;
 
-out vec4 vctFrag;
+layout(location = 0) out vec4 vctFrag;
+layout(location = 1) out vec4 vctFragNormal;
 
 #ifdef PHONG
 
@@ -178,6 +180,11 @@ void main() {
 
   vctFrag *= u_vctColor * v_vctColor;
   vctFrag.rgb += vctSpecular * (1.0 - u_fMetallic);
+
+  vctNormal = normalize(mat3(u_mtxWorldToCamera) * vctNormal); // might need to use transpose inverse
+  vctNormal.y = vctNormal.y * -1.0;
+  vctNormal.z = vctNormal.z * -1.0;
+  vctFragNormal = vec4((vctNormal + 1.0) / 2.0, 1.0);
 
   if (u_bFog) {
     float distance = length(v_vctPosition - u_vctCamera);

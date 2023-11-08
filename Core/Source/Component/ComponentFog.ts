@@ -5,9 +5,16 @@ namespace FudgeCore {
    */
   export class ComponentFog extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentFog);
-    public color: Color = new Color(1, 1, 1, 1);
-    public near: number = 1;
-    public far: number = 50;
+    public color: Color;
+    public near: number;
+    public far: number;
+
+    public constructor(_color: Color = new Color(1, 1, 1, 1), _near: number = 1, _far: number = 50) {
+      super();
+      this.color = _color;
+      this.near = _near;
+      this.far = _far;
+    }
 
     //#region Transfer
     public serialize(): Serialization {

@@ -165,7 +165,7 @@ namespace FudgeCore {
      * Draws the scene from the point of view of the given camera
      */
     public static draw(_cmpCamera: ComponentCamera): void {
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.mainFramebuffer); // TODO: this should happen in REnderWebGL...
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.colorFramebuffer); // TODO: this should happen in REnderWebGL...
       Render.clear(_cmpCamera.clrBackground);
 
       Render.drawList(Render.nodesSimple, _cmpCamera, Render.drawNode);
@@ -196,9 +196,9 @@ namespace FudgeCore {
      * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
      */
     public static drawAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void {
-      this.calcNormalPass(_cmpCamera, _cmpAO);
+      // this.calcNormalPass(_cmpCamera, _cmpAO);
       Render.setDepthTest(false);
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.aoFramebuffer); //set Framebuffer to AO-FBO
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.occlusionFramebuffer); //set Framebuffer to AO-FBO
       Render.clear(new Color(1));
 
 
@@ -218,19 +218,9 @@ namespace FudgeCore {
       Render.setDepthTest(true);
     }
 
-    protected static calcNormalPass(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void {
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.aoNormalFramebuffer);
-      Render.clear(new Color(1));
-
-      //TODO: Also send the normalmap to the shader if the material has one. This could lead to even better AO.
-      Render.drawNodesNormal(_cmpCamera, this.nodesSimple, _cmpAO);
-      //TODO: Implement Normal Calculation for non or partially opaque materials
-      Render.drawNodesNormal(_cmpCamera, this.nodesAlpha, _cmpAO);
-    }
-
     protected static feedAOUniforms(_bindTexture: Function, _cmpAO: ComponentAmbientOcclusion, _cmpCamera: ComponentCamera, _shader: typeof Shader): void {
-      _bindTexture(RenderWebGL.aoNormalTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_normalTexture");
-      _bindTexture(RenderWebGL.aoDepthTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_depthTexture");
+      _bindTexture(RenderWebGL.normalTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_normalTexture");
+      _bindTexture(RenderWebGL.depthTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_depthTexture");
       RenderWebGL.getRenderingContext().uniform1f(_shader.uniforms["u_nearPlane"], _cmpCamera.getNear());
       RenderWebGL.getRenderingContext().uniform1f(_shader.uniforms["u_farPlane"], _cmpCamera.getFar());
       RenderWebGL.getRenderingContext().uniform1f(_shader.uniforms["u_radius"], _cmpAO.radius);

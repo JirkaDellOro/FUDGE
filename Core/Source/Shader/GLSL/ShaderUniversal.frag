@@ -9,7 +9,11 @@ precision highp int;
 
 // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;
+
 in vec4 v_vctColor;
+
+layout(location = 0) out vec4 vctFrag;
+layout(location = 1) out vec4 vctFragNormal;
 
 // LIGHT: include light parameters
 #ifdef LIGHT
@@ -27,8 +31,6 @@ in vec4 v_vctColor;
   uniform sampler2D u_texture;
 
 #endif
-
-out vec4 vctFrag;
 
 void main() {
   
@@ -59,7 +61,10 @@ void main() {
   
   #endif
 
-    // discard pixel alltogether when transparent: don't show in Z-Buffer
+  // for now just pass nothing as normal
+  vctFragNormal = vec4(0.0); 
+
+  // discard pixel alltogether when transparent: don't show in Z-Buffer
   if(vctFrag.a < 0.01)
     discard;
 }
