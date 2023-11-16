@@ -120,7 +120,7 @@ namespace FudgeCore {
 
       const cmpAmbientOcclusion: ComponentAmbientOcclusion = this.camera.node?.getComponent(ComponentAmbientOcclusion);
       if (cmpAmbientOcclusion?.isActive) {
-        Render.drawAO(this.camera, cmpAmbientOcclusion);
+        Render.drawAmbientOcclusion(this.camera, cmpAmbientOcclusion);
       }
       const cmpBloom: ComponentBloom = this.camera.node?.getComponent(ComponentBloom);
       if (cmpBloom?.isActive) {

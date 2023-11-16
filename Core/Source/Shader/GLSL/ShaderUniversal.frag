@@ -29,7 +29,7 @@ layout(location = 2) out vec4 vctFragNormal;
 #if defined(TEXTURE) || defined(MATCAP)
 
   in vec2 v_vctTexture;
-  uniform sampler2D u_texture;
+  uniform sampler2D u_texColor;
 
 #endif
 
@@ -50,7 +50,7 @@ void main() {
   #if defined(TEXTURE) || defined(MATCAP)
     
     // TEXTURE: multiply with texel color
-    vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+    vec4 vctColorTexture = texture(u_texColor, v_vctTexture);
     vctFrag *= vctColorTexture;
 
   #endif

@@ -165,7 +165,7 @@ namespace FudgeCore {
      * Draws the scene from the point of view of the given camera
      */
     public static draw(_cmpCamera: ComponentCamera): void {
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.colorFramebuffer); // TODO: this should happen in REnderWebGL...
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.bffColor); // TODO: this should happen in REnderWebGL...
       Render.clear(_cmpCamera.clrBackground);
 
       Render.drawList(Render.nodesSimple, _cmpCamera, Render.drawNode);
@@ -186,51 +186,6 @@ namespace FudgeCore {
 
       let sorted: Node[] = _list.getSorted(sort);
       Render.drawList(sorted, _cmpCamera, _drawNode);
-    }
-    //#endregion
-
-    //#region PostFXA
-
-    // TODO: move to RenderWebGL, refactor
-    /**
-     * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
-     */
-    public static drawAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void {
-      // this.calcNormalPass(_cmpCamera, _cmpAO);
-      Render.setDepthTest(false);
-      // RenderWebGL.crc3.disable(WebGL2RenderingContext.BLEND);
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.occlusionFramebuffer); //set Framebuffer to AO-FBO
-      Render.clear(new Color(0, 0, 0, 1));
-
-      //feed texture and uniform matrix
-      function bindTexture(_texture: WebGLTexture, _texSlot: number, _texSlotNumber: number, _texVarName: string): void {
-        RenderWebGL.crc3.activeTexture(_texSlot);
-        RenderWebGL.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, _texture);
-        RenderWebGL.crc3.uniform1i(shader.uniforms[_texVarName], _texSlotNumber);
-      }
-
-      let shader: typeof Shader = ShaderAmbientOcclusion;
-      shader.useProgram();
-
-      bindTexture(RenderWebGL.positionTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_positionTexture");
-      bindTexture(RenderWebGL.normalTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_normalTexture");
-      bindTexture(RenderWebGL.noiseTexture, WebGL2RenderingContext.TEXTURE2, 2, "u_noiseTexture");
-      bindTexture(RenderWebGL.depthTexture, WebGL2RenderingContext.TEXTURE3, 3, "u_depthTexture");
-
-      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fNear"], _cmpCamera.getNear());
-      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fFar"], _cmpCamera.getFar());
-      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fBias"], _cmpAO.bias);
-      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fSampleRadius"], _cmpAO.sampleRadius);
-      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fAttenuationConstant"], _cmpAO.attenuationConstant);
-      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fAttenuationLinear"], _cmpAO.attenuationLinear);
-      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fAttenuationQuadratic"], _cmpAO.attenuationQuadratic);
-      RenderWebGL.getRenderingContext().uniform2f(shader.uniforms["u_vctResolution"], RenderWebGL.getCanvas().width, RenderWebGL.getCanvas().height);
-      RenderWebGL.crc3.uniform3fv(shader.uniforms["u_vctCamera"], _cmpCamera.mtxWorld.translation.get());
-      
-
-      RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLES, 0, 3);
-      Render.setDepthTest(true);
-
     }
     //#endregion
 

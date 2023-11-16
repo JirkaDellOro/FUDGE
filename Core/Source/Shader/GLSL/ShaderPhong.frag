@@ -63,7 +63,7 @@ layout(std140) uniform Lights {
 #ifdef TEXTURE
 
   in vec2 v_vctTexture;
-  uniform sampler2D u_texture;
+  uniform sampler2D u_texColor;
 
 #endif
 
@@ -72,7 +72,7 @@ layout(std140) uniform Lights {
 
   in vec3 v_vctTangent;
   in vec3 v_vctBitangent;
-  uniform sampler2D u_normalMap;
+  uniform sampler2D u_texNormal;
 
 #endif
 
@@ -109,7 +109,7 @@ void main() {
     #ifdef NORMALMAP
 
       mat3 mtxTBN = mat3(normalize(v_vctTangent), normalize(v_vctBitangent), normalize(v_vctNormal));
-      vec3 vctNormal = texture(u_normalMap, v_vctTexture).xyz * 2.0 - 1.0;
+      vec3 vctNormal = texture(u_texNormal, v_vctTexture).xyz * 2.0 - 1.0;
       vctNormal = normalize(mtxTBN * vctNormal);
 
     #else
@@ -174,7 +174,7 @@ void main() {
 
   #ifdef TEXTURE
 
-    vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+    vec4 vctColorTexture = texture(u_texColor, v_vctTexture);
     vctFrag *= vctColorTexture;
 
   #endif

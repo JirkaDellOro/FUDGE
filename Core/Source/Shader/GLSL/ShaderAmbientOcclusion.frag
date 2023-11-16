@@ -21,29 +21,27 @@ uniform float u_fAttenuationQuadratic;
 
 uniform vec2 u_vctResolution;
 uniform vec3 u_vctCamera;
-// uniform vec3 u_vctCameraForward;
 // uniform mat4 u_mtxViewProjectionInverse;
 
-uniform sampler2D u_positionTexture; // world space position
-uniform sampler2D u_normalTexture; // world space normal
-uniform sampler2D u_noiseTexture;
-// uniform sampler2D u_depthTexture;
+uniform sampler2D u_texPosition; // world space position
+uniform sampler2D u_texNormal; // world space normal
+uniform sampler2D u_texNoise;
+// uniform sampler2D u_texDepth;
 
 in vec2 v_vctTexture;
-in vec3 v_vctViewDirection;
 
 out vec4 vctFrag;
 
 // Both of these functions could be used to calculate the position from the depth texture, but mobile devices seems to lack in precision to do this
 // vec3 getPosition(vec2 _vctTexture) {
-//   float fDepth = texture(u_depthTexture, _vctTexture).r;
+//   float fDepth = texture(u_texDepth, _vctTexture).r;
 //   vec4 clipSpacePosition = vec4(_vctTexture * 2.0 - 1.0, fDepth * 2.0 - 1.0, 1.0);
 //   vec4 worldSpacePosition = u_mtxViewProjectionInverse * clipSpacePosition;
 //   return worldSpacePosition.xyz / worldSpacePosition.w;
 // }
 
 float getOcclusion(vec3 _vctPosition, vec3 _vctNormal, vec2 _vctTexture) {
-  vec3 vctOccluder = texture(u_positionTexture, _vctTexture).xyz;
+  vec3 vctOccluder = texture(u_texPosition, _vctTexture).xyz;
   vec3 vctDistance = vctOccluder - _vctPosition;
   float fIntensity = max(dot(_vctNormal, normalize(vctDistance)) - u_fBias, 0.0);
 
@@ -54,9 +52,9 @@ float getOcclusion(vec3 _vctPosition, vec3 _vctNormal, vec2 _vctTexture) {
 }
 
 void main() {
-  vec3 vctPosition = texture(u_positionTexture, v_vctTexture).xyz;
-  vec3 vctNormal = texture(u_normalTexture, v_vctTexture).xyz;
-  vec2 vctRandom = normalize(texture(u_noiseTexture, v_vctTexture).xy * 2.0 - 1.0);
+  vec3 vctPosition = texture(u_texPosition, v_vctTexture).xyz;
+  vec3 vctNormal = texture(u_texNormal, v_vctTexture).xyz;
+  vec2 vctRandom = normalize(texture(u_texNoise, v_vctTexture).xy * 2.0 - 1.0);
   float fDepth = (length(vctPosition - u_vctCamera) - u_fNear) / (u_fFar - u_fNear); // linear euclidean depth in range [0,1] TODO: when changing to view space, don't subtract camera position
   float fKernelRadius = u_fSampleRadius * (1.0 - fDepth);
 

@@ -23,29 +23,27 @@ uniform float u_fAttenuationQuadratic;
 
 uniform vec2 u_vctResolution;
 uniform vec3 u_vctCamera;
-// uniform vec3 u_vctCameraForward;
 // uniform mat4 u_mtxViewProjectionInverse;
 
-uniform sampler2D u_positionTexture; // world space position
-uniform sampler2D u_normalTexture; // world space normal
-uniform sampler2D u_noiseTexture;
-// uniform sampler2D u_depthTexture;
+uniform sampler2D u_texPosition; // world space position
+uniform sampler2D u_texNormal; // world space normal
+uniform sampler2D u_texNoise;
+// uniform sampler2D u_texDepth;
 
 in vec2 v_vctTexture;
-in vec3 v_vctViewDirection;
 
 out vec4 vctFrag;
 
 // Both of these functions could be used to calculate the position from the depth texture, but mobile devices seems to lack in precision to do this
 // vec3 getPosition(vec2 _vctTexture) {
-//   float fDepth = texture(u_depthTexture, _vctTexture).r;
+//   float fDepth = texture(u_texDepth, _vctTexture).r;
 //   vec4 clipSpacePosition = vec4(_vctTexture * 2.0 - 1.0, fDepth * 2.0 - 1.0, 1.0);
 //   vec4 worldSpacePosition = u_mtxViewProjectionInverse * clipSpacePosition;
 //   return worldSpacePosition.xyz / worldSpacePosition.w;
 // }
 
 float getOcclusion(vec3 _vctPosition, vec3 _vctNormal, vec2 _vctTexture) {
-  vec3 vctOccluder = texture(u_positionTexture, _vctTexture).xyz;
+  vec3 vctOccluder = texture(u_texPosition, _vctTexture).xyz;
   vec3 vctDistance = vctOccluder - _vctPosition;
   float fIntensity = max(dot(_vctNormal, normalize(vctDistance)) - u_fBias, 0.0);
 
@@ -56,9 +54,9 @@ float getOcclusion(vec3 _vctPosition, vec3 _vctNormal, vec2 _vctTexture) {
 }
 
 void main() {
-  vec3 vctPosition = texture(u_positionTexture, v_vctTexture).xyz;
-  vec3 vctNormal = texture(u_normalTexture, v_vctTexture).xyz;
-  vec2 vctRandom = normalize(texture(u_noiseTexture, v_vctTexture).xy * 2.0 - 1.0);
+  vec3 vctPosition = texture(u_texPosition, v_vctTexture).xyz;
+  vec3 vctNormal = texture(u_texNormal, v_vctTexture).xyz;
+  vec2 vctRandom = normalize(texture(u_texNoise, v_vctTexture).xy * 2.0 - 1.0);
   float fDepth = (length(vctPosition - u_vctCamera) - u_fNear) / (u_fFar - u_fNear); // linear euclidean depth in range [0,1] TODO: when changing to view space, don't subtract camera position
   float fKernelRadius = u_fSampleRadius * (1.0 - fDepth);
 
@@ -85,63 +83,37 @@ void main() {
 }`;
   shaderSources["ShaderDownsample.frag"] = /*glsl*/ `#version 300 es
 /**
-*Downsamples a given texture to the current FBOs texture
-*@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
-*/
+ * Downsamples a given texture to the current FBOs texture
+ * @authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
+ */
 precision mediump float;
 precision highp int;
 
 in vec2 v_vctTexture;
 flat in vec2[9] v_vctOffsets;
 
-uniform sampler2D u_texture;
+uniform sampler2D u_tex0;
 uniform float u_threshold;
 uniform float u_lvl;
 
-float gaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f, 0.045f, 0.122f, 0.045f);
+float gaussianKernel[9] = float[](0.045, 0.122, 0.045, 0.122, 0.332, 0.122, 0.045, 0.122, 0.045);
 
 out vec4 vctFrag;
 
 void main() {
-  vec4 tex1 = vec4(0.0f);
-  for (int i = 0; i < 9; i++) {
-    tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
+  vec4 tex1 = vec4(0.0);
+  for(int i = 0; i < 9; i++) {
+    tex1 += vec4(texture(u_tex0, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
   }
-  if (u_lvl < 1.0f) {
-    float threshold = min(max(u_threshold, 0.0f), 0.999999999f);     //None of the rendered values can exeed 1.0 therefor the bloom effect won't work if the threshold is >= 1.0
+  if(u_lvl < 1.0) {
+    float threshold = min(max(u_threshold, 0.0), 0.999999999);     //None of the rendered values can exeed 1.0 therefor the bloom effect won't work if the threshold is >= 1.0
     tex1 -= threshold;
-    tex1 /= 1.0f - threshold;
-    float averageBrightness = (((tex1.r + tex1.g + tex1.b) / 3.0f) * 0.2f) + 0.8f; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.8
-    tex1 = tex1 * averageBrightness * 2.0f;
+    tex1 /= 1.0 - threshold;
+    float averageBrightness = (((tex1.r + tex1.g + tex1.b) / 3.0) * 0.2) + 0.8; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.8
+    tex1 = tex1 * averageBrightness * 2.0;
   }
-  tex1 *= 1.3f;
+  tex1 *= 1.3;
   vctFrag = tex1;
-}`;
-  shaderSources["ShaderDownsample.vert"] = /*glsl*/ `#version 300 es
-/**
-* ShaderDownsample sets values for downsampling fragmentshader and applies a small gaussian blur
-* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023 | Jonas Plotzky, HFU, 2023
-*/
-uniform float u_width;
-uniform float u_height;
-
-out vec2 v_vctTexture;
-flat out vec2[9] v_vctOffsets;
-
-void main() {
-  // fullscreen triangle, contains screen quad
-  float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
-  float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
-  gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
-  v_vctTexture = vec2(x / 2.0, y / 2.0); // (0, 0), (2, 0), (0, 2)
-
-  vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
-
-  v_vctOffsets = vec2[](
-    vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
-    vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
-    vec2(-offset.x, -offset.y), vec2(0.0, -offset.y),  vec2(offset.x, -offset.y)
-  );
 }`;
   shaderSources["ShaderPhong.frag"] = /*glsl*/ `#version 300 es
 /**
@@ -208,7 +180,7 @@ layout(std140) uniform Lights {
 #ifdef TEXTURE
 
   in vec2 v_vctTexture;
-  uniform sampler2D u_texture;
+  uniform sampler2D u_texColor;
 
 #endif
 
@@ -217,7 +189,7 @@ layout(std140) uniform Lights {
 
   in vec3 v_vctTangent;
   in vec3 v_vctBitangent;
-  uniform sampler2D u_normalMap;
+  uniform sampler2D u_texNormal;
 
 #endif
 
@@ -254,7 +226,7 @@ void main() {
     #ifdef NORMALMAP
 
       mat3 mtxTBN = mat3(normalize(v_vctTangent), normalize(v_vctBitangent), normalize(v_vctNormal));
-      vec3 vctNormal = texture(u_normalMap, v_vctTexture).xyz * 2.0 - 1.0;
+      vec3 vctNormal = texture(u_texNormal, v_vctTexture).xyz * 2.0 - 1.0;
       vctNormal = normalize(mtxTBN * vctNormal);
 
     #else
@@ -319,7 +291,7 @@ void main() {
 
   #ifdef TEXTURE
 
-    vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+    vec4 vctColorTexture = texture(u_texColor, v_vctTexture);
     vctFrag *= vctColorTexture;
 
   #endif
@@ -390,7 +362,7 @@ uniform int u_id;
 uniform vec2 u_vctSize;
 in vec2 v_vctTexture;
 uniform vec4 u_vctColor;
-uniform sampler2D u_texture;
+uniform sampler2D u_texColor;
 
 out ivec4 vctFrag;
 
@@ -400,7 +372,7 @@ void main() {
     if (pixel != u_id)
       discard;
     
-    vec4 vctColor = u_vctColor * texture(u_texture, v_vctTexture);
+    vec4 vctColor = u_vctColor * texture(u_texColor, v_vctTexture);
     uint icolor = uint(vctColor.r * 255.0) << 24 | uint(vctColor.g * 255.0) << 16 | uint(vctColor.b * 255.0) << 8 | uint(vctColor.a * 255.0);
   
   vctFrag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, floatBitsToInt(v_vctTexture.x), floatBitsToInt(v_vctTexture.y));
@@ -424,20 +396,20 @@ void main() {
   shaderSources["ShaderScreen.frag"] = /*glsl*/ `#version 300 es
 /**
 * Composites all Post-FX on to the main-render and renders it to the main Renderbuffer
-* @authors Roland Heer, HFU, 2023
+* @authors Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
 */
 precision mediump float;
 precision highp int;
 
 in vec2 v_vctTexture;
-uniform sampler2D u_colorTexture;
 
-uniform float u_ao;
-uniform sampler2D u_occlusionTexture;
-uniform vec4 u_vctAOColor;
+uniform sampler2D u_texColor;
+
+uniform float u_occlusion;
+uniform sampler2D u_texOcclusion;
 
 uniform float u_bloom;
-uniform sampler2D u_bloomTexture;
+uniform sampler2D u_texBloom;
 uniform float u_bloomIntensity;
 uniform float u_highlightDesaturation;
 
@@ -445,14 +417,14 @@ out vec4 vctFrag;
 
 void main() {
   ivec2 vctFragCoord = ivec2(gl_FragCoord.xy);
-  vctFrag = texelFetch(u_colorTexture, vctFragCoord, 0);
+  vctFrag = texelFetch(u_texColor, vctFragCoord, 0);
 
-  if (u_ao > 0.5f) 
-    vctFrag.rgb = clamp(vctFrag.rgb - texelFetch(u_occlusionTexture, vctFragCoord, 0).r, 0.0, 1.0);
+  if (u_occlusion > 0.5f) 
+    vctFrag.rgb = clamp(vctFrag.rgb - texelFetch(u_texOcclusion, vctFragCoord, 0).r, 0.0, 1.0);
   
   if (u_bloom > 0.5f) {
     float intensity = max(u_bloomIntensity, 0.0f);
-    vctFrag += (texture(u_bloomTexture, v_vctTexture) * intensity);
+    vctFrag += (texture(u_texBloom, v_vctTexture) * intensity);
 
     float factor = min(max(u_highlightDesaturation, 0.0f), 1.0f);
     float r = max(vctFrag.r - 1.0f, 0.0f) * factor;
@@ -470,7 +442,7 @@ precision mediump float;
 precision highp int;
 /**
  * Creates a fullscreen triangle which cotains the screen quad and sets the texture coordinates accordingly.
- * @authors Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
+ * @authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023 | Jonas Plotzky, HFU, 2023
  *
  *  2  3 .
  *       .  .
@@ -486,13 +458,34 @@ precision highp int;
  *  p == postion
  *  t == texture coordinate
  */
+
+uniform float u_width;
+uniform float u_height;
+
 out vec2 v_vctTexture;
+
+#ifdef SAMPLE
+
+  flat out vec2[9] v_vctOffsets;
+
+#endif
 
 void main() {
   float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
   float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
   gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
   v_vctTexture = vec2(x / 2.0, y / 2.0);  // (0, 0), (2, 0), (0, 2) -> interpolation will yield (0, 0), (1, 0), (0, 1) as the positions are double the size of the screen
+
+  #ifdef SAMPLE
+
+    vec2 offset = vec2(1.0 / u_width, 1.0 / u_height);
+    v_vctOffsets = vec2[](
+      vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
+      vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
+      vec2(-offset.x, -offset.y), vec2(0.0, -offset.y),  vec2(offset.x, -offset.y)
+    );
+
+  #endif
 }`;
   shaderSources["ShaderUniversal.frag"] = /*glsl*/ `#version 300 es
 /**
@@ -525,7 +518,7 @@ layout(location = 2) out vec4 vctFragNormal;
 #if defined(TEXTURE) || defined(MATCAP)
 
   in vec2 v_vctTexture;
-  uniform sampler2D u_texture;
+  uniform sampler2D u_texColor;
 
 #endif
 
@@ -546,7 +539,7 @@ void main() {
   #if defined(TEXTURE) || defined(MATCAP)
     
     // TEXTURE: multiply with texel color
-    vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+    vec4 vctColorTexture = texture(u_texColor, v_vctTexture);
     vctFrag *= vctColorTexture;
 
   #endif
@@ -846,54 +839,28 @@ for(uint i = 0u;i < u_nLightsSpot;i ++) {
 }`;
   shaderSources["ShaderUpsample.frag"] = /*glsl*/ `#version 300 es
 /**
-*upsamples a given texture onto the current FBOs texture and applies a small gaussian blur
-*@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
-*/
+ * Upsamples a given texture onto the current FBOs texture and applies a small gaussian blur
+ * @authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
+ */
 precision mediump float;
 precision highp int;
 
 in vec2 v_vctTexture;
 flat in vec2[9] v_vctOffsets;
-uniform sampler2D u_texture;
-uniform sampler2D u_texture2;
+uniform sampler2D u_tex0;
+uniform sampler2D u_tex1;
 
-float gaussianKernel[9] = float[](0.045f, 0.122f, 0.045f, 0.122f, 0.332f, 0.122f, 0.045f, 0.122f, 0.045f);
+float gaussianKernel[9] = float[](0.045, 0.122, 0.045, 0.122, 0.332, 0.122, 0.045, 0.122, 0.045);
 
 out vec4 vctFrag;
 
 void main() {
-  vec4 tex1 = vec4(0.0f);
+  vec4 tex1 = vec4(0.0);
   for(int i = 0; i < 9; i++) {
-    tex1 += vec4(texture(u_texture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
+    tex1 += vec4(texture(u_tex0, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
   }
-  vec4 tex2 = texture(u_texture2, v_vctTexture);
+  vec4 tex2 = texture(u_tex1, v_vctTexture);
   vctFrag = tex2 + tex1;
-}`;
-  shaderSources["ShaderUpsample.vert"] = /*glsl*/ `#version 300 es
-/**
-* ShaderUpsample sets values for upsampling fragmentshader
-* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023 | Jonas Plotzky, HFU, 2023
-*/
-uniform float u_width;
-uniform float u_height;
-
-out vec2 v_vctTexture;
-flat out vec2[9] v_vctOffsets;
-
-void main() {
-  // fullscreen triangle, contains screen quad
-  float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
-  float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
-  gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
-  v_vctTexture = vec2(x / 2.0, y / 2.0); // (0, 0), (2, 0), (0, 2)
-
-  vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
-
-  v_vctOffsets = vec2[](
-    vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
-    vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),
-    vec2(-offset.x, -offset.y), vec2(0.0, -offset.y),  vec2(offset.x, -offset.y)
-  );
 }`;
 
 }

@@ -1067,15 +1067,59 @@ declare namespace FudgeCore {
         offset: number;
     }
     const UNIFORM_BLOCKS: {
-        [block: string]: {
+        LIGHTS: {
+            NAME: string;
+            BINDING: number;
+        };
+        SKIN: {
             NAME: string;
             BINDING: number;
         };
     };
     const TEXTURE_LOCATION: {
-        [name: string]: {
+        COLOR: {
             UNIFORM: string;
-            UNIT: number;
+            UNIT: 33984;
+            INDEX: number;
+        };
+        NORMAL: {
+            UNIFORM: string;
+            UNIT: 33985;
+            INDEX: number;
+        };
+        PARTICLE: {
+            UNIFORM: string;
+            UNIT: 33986;
+            INDEX: number;
+        };
+        SCREEN_COLOR: {
+            UNIFORM: string;
+            UNIT: 33987;
+            INDEX: number;
+        };
+        SCREEN_POSITION: {
+            UNIFORM: string;
+            UNIT: 33988;
+            INDEX: number;
+        };
+        SCREEN_NORMAL: {
+            UNIFORM: string;
+            UNIT: 33989;
+            INDEX: number;
+        };
+        SCREEN_NOISE: {
+            UNIFORM: string;
+            UNIT: 33990;
+            INDEX: number;
+        };
+        SCREEN_OCCLUSION: {
+            UNIFORM: string;
+            UNIT: 33991;
+            INDEX: number;
+        };
+        SCREEN_BLOOM: {
+            UNIFORM: string;
+            UNIT: 33992;
             INDEX: number;
         };
     };
@@ -1088,20 +1132,20 @@ declare namespace FudgeCore {
         static uboLightsVariableOffsets: {
             [_name: string]: number;
         };
-        protected static colorFramebuffer: WebGLFramebuffer;
-        protected static colorTexture: WebGLTexture;
-        protected static positionTexture: WebGLTexture;
-        protected static normalTexture: WebGLTexture;
-        protected static noiseTexture: WebGLTexture;
-        protected static depthTexture: WebGLTexture;
+        protected static bffColor: WebGLFramebuffer;
+        protected static scrColor: WebGLTexture;
+        protected static scrPosition: WebGLTexture;
+        protected static scrNormal: WebGLTexture;
+        protected static scrNoise: WebGLTexture;
+        protected static scrDepth: WebGLTexture;
         protected static mainRect: Rectangle;
-        protected static occlusionFramebuffer: WebGLFramebuffer;
-        protected static occlusionTexture: WebGLTexture;
-        protected static bloomDownsamplingFramebuffers: WebGLFramebuffer[];
-        protected static bloomDownsamplingTextures: WebGLTexture[];
-        protected static bloomUpsamplingFramebuffers: WebGLFramebuffer[];
-        protected static bloomUpsamplingTextures: WebGLTexture[];
+        protected static bffOcclusion: WebGLFramebuffer;
+        protected static scrOcclusion: WebGLTexture;
         protected static bloomDownsamplingDepth: number;
+        protected static bffBloomDownsamplings: WebGLFramebuffer[];
+        protected static bffBloomUpsamplings: WebGLFramebuffer[];
+        protected static scrBloomDownsamplings: WebGLTexture[];
+        protected static scrBloomUpsamplings: WebGLTexture[];
         protected static crc3: WebGL2RenderingContext;
         protected static ƒpicked: Pick[];
         private static rectRender;
@@ -1179,6 +1223,10 @@ declare namespace FudgeCore {
          * Composites all effects that are used in the scene to a final render.
          */
         static compositeEffects(_cmpCamera: ComponentCamera, _cmpAmbientOcclusion: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
+        /**
+         * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
+         */
+        static drawAmbientOcclusion(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
         /**
          * Draws the bloom-effect into the bloom texture, using the given camera-component and the given bloom-component
          */
@@ -6027,10 +6075,6 @@ declare namespace FudgeCore {
         static draw(_cmpCamera: ComponentCamera): void;
         static drawList(_list: RecycableArray<Node> | Array<Node>, _cmpCamera: ComponentCamera, _drawNode: Function): void;
         static drawListAlpha(_list: RecycableArray<Node>, _cmpCamera: ComponentCamera, _drawNode: Function): void;
-        /**
-         * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
-         */
-        static drawAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
         private static transformByPhysics;
     }
 }
