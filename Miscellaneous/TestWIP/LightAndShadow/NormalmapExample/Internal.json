@@ -1124,12 +1124,13 @@
               "ComponentAmbientOcclusion": [
                 {
                   "ƒ.ComponentAmbientOcclusion": {
-                    "clrAO": "[0, 0, 0, 1]",
-                    "samples": 64,
-                    "radius": 1.5,
-                    "distance": 85,
+                    "sampleRadius": 10,
+                    "bias": 0.05,
+                    "attenuationConstant": 2,
+                    "attenuationLinear": 1,
+                    "attenuationQuadratic": 1,
                     "Component": {
-                      "active": false
+                      "active": true
                     }
                   }
                 }

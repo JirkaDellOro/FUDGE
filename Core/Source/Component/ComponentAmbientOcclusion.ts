@@ -5,36 +5,41 @@ namespace FudgeCore {
    */
   export class ComponentAmbientOcclusion extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentAmbientOcclusion);
-    public clrAO: Color = new Color(0, 0, 0, 1); // Ambient occlusion color
-    public radius: number;
-    public samples: number;
-    public shadowDistance: number;
 
-    public constructor(_clrAO: Color = new Color(0, 0, 0, 1), _radius: number = 1.5, _samples: number = 64, _distance: number = 85.0) {
+    public sampleRadius: number;
+    public bias: number;
+    public attenuationConstant: number;
+    public attenuationLinear: number;
+    public attenuationQuadratic: number;
+
+    public constructor(_sampleRadius: number = 16, _bias: number = 0.07, _attenuationConstant: number = 2.5, _attenuationLinear: number = 1, _attenuationQuadratic: number = 1) {
       super();
-      this.clrAO = _clrAO;
-      this.radius = _radius;
-      this.samples = _samples;
-      this.shadowDistance = _distance;
+      this.sampleRadius = _sampleRadius;
+      this.bias = _bias;
+      this.attenuationConstant = _attenuationConstant;
+      this.attenuationLinear = _attenuationLinear;
+      this.attenuationQuadratic = _attenuationQuadratic;
     }
 
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = {
-        clrAO: this.clrAO.serialize(),
-        samples: this.samples,
-        radius: this.radius,
-        distance: this.shadowDistance,
+        sampleRadius: this.sampleRadius,
+        bias: this.bias,
+        attenuationConstant: this.attenuationConstant,
+        attenuationLinear: this.attenuationLinear,
+        attenuationQuadratic: this.attenuationQuadratic
       };
       serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      await this.clrAO.deserialize(_serialization.clrAO);
-      this.samples = _serialization.samples;
-      this.radius = _serialization.radius;
-      this.shadowDistance = _serialization.distance;
+      this.sampleRadius = _serialization.sampleRadius;
+      this.bias = _serialization.bias;
+      this.attenuationConstant = _serialization.attenuationConstant;
+      this.attenuationLinear = _serialization.attenuationLinear;
+      this.attenuationQuadratic = _serialization.attenuationQuadratic;
       await super.deserialize(_serialization[super.constructor.name]);
       return this;
     }

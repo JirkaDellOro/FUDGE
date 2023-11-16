@@ -17,14 +17,15 @@ uniform mat4 u_mtxWorldToCamera;
 
 uniform bool u_bFog;
 uniform vec4 u_vctFogColor;
-uniform float u_fNear;
-uniform float u_fFar;
+uniform float u_fFogNear;
+uniform float u_fFogFar;
 
 in vec4 v_vctColor;
 in vec3 v_vctPosition;
 
 layout(location = 0) out vec4 vctFrag;
-layout(location = 1) out vec4 vctFragNormal;
+layout(location = 1) out vec4 vctFragPosition;
+layout(location = 2) out vec4 vctFragNormal;
 
 #ifdef PHONG
 
@@ -181,14 +182,16 @@ void main() {
   vctFrag *= u_vctColor * v_vctColor;
   vctFrag.rgb += vctSpecular * (1.0 - u_fMetallic);
 
-  vctNormal = normalize(mat3(u_mtxWorldToCamera) * vctNormal); // might need to use transpose inverse
-  vctNormal.y = vctNormal.y * -1.0;
-  vctNormal.z = vctNormal.z * -1.0;
-  vctFragNormal = vec4((vctNormal + 1.0) / 2.0, 1.0);
+  // write into fragment buffers TODO: do this in vertex shader
+  // vctFragNormal = vec4(normalize(mat3(u_mtxWorldToCamera) * vctNormal), 1.0); // maybe do all shading in view space so we can move this to the vertex shader
+  // vctFragPosition = u_mtxWorldToCamera * vec4(vctPosition, 1.0);
+
+  vctFragPosition = vec4(v_vctPosition, 1.0); // don't use flat here, because we want to interpolate the position
+  vctFragNormal = vec4(vctNormal, 1.0);
 
   if (u_bFog) {
-    float distance = length(v_vctPosition - u_vctCamera);
-    float fogAmount = min(max((distance - u_fNear) / (u_fFar - u_fNear), 0.0), 1.0);
+    float distance = length(vctPosition - u_vctCamera); // maybe use z-depth instead of euclidean depth
+    float fogAmount = min(max((distance - u_fFogNear) / (u_fFogFar - u_fFogNear), 0.0), 1.0);
     fogAmount = -pow(fogAmount, 2.0) + (2.0 * fogAmount); //lets Fog appear quicker and fall off slower results in a more gradual falloff
     vctFrag = mix(vctFrag, vec4(u_vctFogColor.rgb, 1.0f), fogAmount * u_vctFogColor.a);
   }

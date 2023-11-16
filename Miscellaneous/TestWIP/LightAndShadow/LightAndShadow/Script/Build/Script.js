@@ -120,7 +120,7 @@ var Script;
         for (let i = 0; i < gouraud.getChildren().length; i++) {
             gouraud.getChildren()[i].getComponent(ƒ.ComponentMesh).activate(toggleShading);
         }
-        camNode.getChildren()[0].getComponent(ƒ.ComponentMist).activate(!toggleMist);
+        camNode.getChildren()[0].getComponent(ƒ.ComponentFog).activate(!toggleMist);
         camNode.getChildren()[0].getComponent(ƒ.ComponentBloom).activate(!toggleBloom);
         camNode.getChildren()[0].getComponent(ƒ.ComponentAmbientOcclusion).activate(!toggleAo);
         crc2.fillStyle = "#fff";

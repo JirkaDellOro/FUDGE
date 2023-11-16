@@ -1,29 +1,29 @@
 #version 300 es
+precision mediump float;
+precision highp int;
 /**
-* Sets up the data for the ShaderScreen fragmentshader
-* @authors Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
-*/
-uniform float u_width;
-uniform float u_height;
-
+ * Creates a fullscreen triangle which cotains the screen quad and sets the texture coordinates accordingly.
+ * @authors Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
+ *
+ *  2  3 .
+ *       .  .
+ *       .     .  
+ *       .        .
+ *  1  1 ..........  .
+ *       . screen .     .
+ *       .  quad  .        .
+ *  0 -1 ..........  .  .  .  .
+ *    p -1        1           3
+ *  t    0        1           2
+ *  
+ *  p == postion
+ *  t == texture coordinate
+ */
 out vec2 v_vctTexture;
-flat out vec2 v_vctOffsets[25];
 
 void main() {
-  // fullscreen triangle, contains screen quad
   float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
   float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
   gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
-  v_vctTexture = vec2(x / 2.0, y / 2.0); // (0, 0), (2, 0), (0, 2)
-
-  vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
-
-  //TODO: Maybe try Downsampling instead of this giant gaussian kernel
-  v_vctOffsets = vec2[](
-    vec2(-2.0*offset.x, 2.0*offset.y),  vec2(-offset.x, 2.0*offset.y),  vec2(0.0, 2.0*offset.y),    vec2(offset.x,2.0* offset.y),   vec2(2.0*offset.x,2.0* offset.y), 
-    vec2(-2.0*offset.x, offset.y),      vec2(-offset.x, offset.y),      vec2(0.0, offset.y),        vec2(offset.x, offset.y),       vec2(2.0*offset.x, offset.y),
-    vec2(-2.0*offset.x, 0.0),           vec2(-offset.x, 0.0),           vec2(0.0, 0.0),             vec2(offset.x, 0.0),            vec2(2.0*offset.x, 0.0),
-    vec2(-2.0*offset.x, -offset.y),     vec2(-offset.x, -offset.y),     vec2(0.0, -offset.y),       vec2(offset.x, -offset.y),      vec2(2.0*offset.x, -offset.y),
-    vec2(-2.0*offset.x, -2.0*offset.y), vec2(-offset.x, -2.0*offset.y), vec2(0.0, -2.0*offset.y),   vec2(offset.x,-2.0* offset.y), vec2(2.0*offset.x,-2.0* offset.y)
-  );
+  v_vctTexture = vec2(x / 2.0, y / 2.0);  // (0, 0), (2, 0), (0, 2) -> interpolation will yield (0, 0), (1, 0), (0, 1) as the positions are double the size of the screen
 }

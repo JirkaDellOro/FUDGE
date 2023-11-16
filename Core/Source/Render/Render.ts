@@ -191,16 +191,16 @@ namespace FudgeCore {
 
     //#region PostFXA
 
-    // TODO: move to RenderWebGL
+    // TODO: move to RenderWebGL, refactor
     /**
      * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
      */
     public static drawAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void {
       // this.calcNormalPass(_cmpCamera, _cmpAO);
       Render.setDepthTest(false);
+      // RenderWebGL.crc3.disable(WebGL2RenderingContext.BLEND);
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.occlusionFramebuffer); //set Framebuffer to AO-FBO
-      Render.clear(new Color(1));
-
+      Render.clear(new Color(0, 0, 0, 1));
 
       //feed texture and uniform matrix
       function bindTexture(_texture: WebGLTexture, _texSlot: number, _texSlotNumber: number, _texVarName: string): void {
@@ -212,56 +212,26 @@ namespace FudgeCore {
       let shader: typeof Shader = ShaderAmbientOcclusion;
       shader.useProgram();
 
-      this.feedAOUniforms(bindTexture, _cmpAO, _cmpCamera, shader);
+      bindTexture(RenderWebGL.positionTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_positionTexture");
+      bindTexture(RenderWebGL.normalTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_normalTexture");
+      bindTexture(RenderWebGL.noiseTexture, WebGL2RenderingContext.TEXTURE2, 2, "u_noiseTexture");
+      bindTexture(RenderWebGL.depthTexture, WebGL2RenderingContext.TEXTURE3, 3, "u_depthTexture");
+
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fNear"], _cmpCamera.getNear());
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fFar"], _cmpCamera.getFar());
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fBias"], _cmpAO.bias);
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fSampleRadius"], _cmpAO.sampleRadius);
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fAttenuationConstant"], _cmpAO.attenuationConstant);
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fAttenuationLinear"], _cmpAO.attenuationLinear);
+      RenderWebGL.getRenderingContext().uniform1f(shader.uniforms["u_fAttenuationQuadratic"], _cmpAO.attenuationQuadratic);
+      RenderWebGL.getRenderingContext().uniform2f(shader.uniforms["u_vctResolution"], RenderWebGL.getCanvas().width, RenderWebGL.getCanvas().height);
+      RenderWebGL.crc3.uniform3fv(shader.uniforms["u_vctCamera"], _cmpCamera.mtxWorld.translation.get());
+      
 
       RenderWebGL.crc3.drawArrays(WebGL2RenderingContext.TRIANGLES, 0, 3);
       Render.setDepthTest(true);
+
     }
-
-    protected static feedAOUniforms(_bindTexture: Function, _cmpAO: ComponentAmbientOcclusion, _cmpCamera: ComponentCamera, _shader: typeof Shader): void {
-      _bindTexture(RenderWebGL.normalTexture, WebGL2RenderingContext.TEXTURE0, 0, "u_normalTexture");
-      _bindTexture(RenderWebGL.depthTexture, WebGL2RenderingContext.TEXTURE1, 1, "u_depthTexture");
-      RenderWebGL.getRenderingContext().uniform1f(_shader.uniforms["u_nearPlane"], _cmpCamera.getNear());
-      RenderWebGL.getRenderingContext().uniform1f(_shader.uniforms["u_farPlane"], _cmpCamera.getFar());
-      RenderWebGL.getRenderingContext().uniform1f(_shader.uniforms["u_radius"], _cmpAO.radius);
-      RenderWebGL.getRenderingContext().uniform1i(_shader.uniforms["u_nSamples"], _cmpAO.samples);
-      RenderWebGL.getRenderingContext().uniform1f(_shader.uniforms["u_shadowDistance"], _cmpAO.shadowDistance);
-      RenderWebGL.getRenderingContext().uniform1f(_shader.uniforms["u_width"], Render.crc3.canvas.width);
-      RenderWebGL.getRenderingContext().uniform1f(_shader.uniforms["u_height"], Render.crc3.canvas.height);
-
-      this.feedSamplePoints(_cmpAO.samples, _shader);
-      this.feedNoiseTexture(_bindTexture);
-    }
-
-    protected static feedSamplePoints(_samples: number, _shader: typeof Shader): void {
-      if (_samples != RenderWebGL.aoSamplePoints.length) {
-        RenderWebGL.generateNewSamplePoints(_samples);
-      }
-      let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
-      let i: number = 0;
-      for (let sample of RenderWebGL.aoSamplePoints) {
-        RenderWebGL.getRenderingContext().uniform3fv(uni[`u_samples[${i}].vct`], new Float32Array([sample.x, sample.y, sample.z]));
-        i++;
-      }
-    }
-
-    // rename to bufferNoiseTexture?
-    protected static feedNoiseTexture(_bindTexture: Function): void {
-      const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      let noiseTex: WebGLTexture = crc3.createTexture();
-      let pixelInformation: Uint8Array = new Uint8Array(100); //100 values are needed to get a 5 by 5 texture with 4 color channels
-      for (let i: number = 0; i < 100 * 4; i++) {
-        pixelInformation[i] = Math.floor(Math.random() * 256);
-      }
-      _bindTexture(noiseTex, WebGL2RenderingContext.TEXTURE2, 2, "u_noiseTexture");
-
-      crc3.texImage2D(WebGLRenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, 5, 5, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, pixelInformation);
-      crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
-      crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST);
-      crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.REPEAT);
-      crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.REPEAT);
-    }
-
     //#endregion
 
     //#region Physics

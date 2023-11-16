@@ -2,7 +2,7 @@
   "MeshObj|2023-06-14T23:27:37.374Z|48561": {
     "ƒ.MeshImport": {
       "idResource": "MeshObj|2023-06-14T23:27:37.374Z|48561",
-      "name": "obj\\chair.obj",
+      "name": "chair.obj",
       "type": "MeshImport",
       "url": "obj\\chair.obj",
       "filetype": "OBJ"
@@ -19,8 +19,8 @@
           "idTexture": "TextureImage|2023-06-14T23:29:14.638Z|60519",
           "diffuse": 1,
           "specular": 0.6,
-          "metallic": 0.2,
           "intensity": 0.7,
+          "metallic": 0.2,
           "idNormalMap": "TextureImage|2023-06-14T23:29:16.470Z|79328"
         }
       }
@@ -51,7 +51,7 @@
   "MeshObj|2023-06-14T23:28:05.534Z|27668": {
     "ƒ.MeshImport": {
       "idResource": "MeshObj|2023-06-14T23:28:05.534Z|27668",
-      "name": "obj\\chair1.obj",
+      "name": "chair1.obj",
       "type": "MeshImport",
       "url": "obj\\chair1.obj",
       "filetype": "OBJ"
@@ -68,8 +68,8 @@
           "idTexture": "TextureImage|2023-06-14T23:29:14.638Z|60519",
           "diffuse": 0.20000000000000004,
           "specular": 0.4999999999999998,
-          "metallic": 1,
           "intensity": 0.9999999999999999,
+          "metallic": 1,
           "idNormalMap": "TextureImage|2023-06-14T23:29:16.470Z|79328"
         }
       }
@@ -107,8 +107,8 @@
           "idTexture": "TextureImage|2023-06-14T23:29:14.638Z|60519",
           "diffuse": 1,
           "specular": 3.7000000000000015,
-          "metallic": 0,
-          "intensity": 0.7
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -124,8 +124,8 @@
           "idTexture": "TextureImage|2023-06-14T23:29:14.638Z|60519",
           "diffuse": 1,
           "specular": 3.200000000000001,
-          "metallic": 0,
-          "intensity": 10
+          "intensity": 10,
+          "metallic": 0
         }
       }
     }
@@ -145,9 +145,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "metallic": 0,
           "specular": 1.8999999999999995,
-          "intensity": 0.20000000000000004
+          "intensity": 0.20000000000000004,
+          "metallic": 0
         }
       }
     }
@@ -161,9 +161,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "metallic": 0,
           "specular": 0.5,
-          "intensity": 0.7
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -561,14 +561,14 @@
                           "projection": "central",
                           "fieldOfView": 45,
                           "direction": "diagonal",
+                          "near": 1,
+                          "far": 1000,
                           "aspect": 1.7024922118380061,
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
                             "scaling": "[1, 1, 1]"
                           },
-                          "near": 1,
-                          "far": 1000,
                           "Component": {
                             "active": true
                           }
@@ -589,7 +589,7 @@
                     "ComponentFog": [
                       {
                         "ƒ.ComponentFog": {
-                          "color": "[0, 0.06666666666666667, 0.09803921568627451, 1]",
+                          "color": "[0, 0, 0, 1]",
                           "near": 2,
                           "far": 19.99999999999997,
                           "Component": {
@@ -601,10 +601,11 @@
                     "ComponentAmbientOcclusion": [
                       {
                         "ƒ.ComponentAmbientOcclusion": {
-                          "clrAO": "[0, 0, 0, 1]",
-                          "samples": 128,
-                          "radius": 1.7000000000000002,
-                          "distance": 7,
+                          "sampleRadius": 16,
+                          "bias": 0.09999999999999999,
+                          "attenuationConstant": 2,
+                          "attenuationLinear": 1,
+                          "attenuationQuadratic": 1,
                           "Component": {
                             "active": true
                           }

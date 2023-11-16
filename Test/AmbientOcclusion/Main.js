@@ -1,6 +1,7 @@
-var ImportOBJTest;
-(function (ImportOBJTest) {
+var AmbientOcclusionTest;
+(function (AmbientOcclusionTest) {
     var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
     var ƒAid = FudgeAid;
     window.addEventListener("load", init);
     async function init() {
@@ -19,19 +20,31 @@ var ImportOBJTest;
         let cmpCamera = new ƒ.ComponentCamera();
         // cmpCamera.clrBackground = ƒ.Color.CSS("SKYBLUE");
         let canvas = document.querySelector("canvas");
-        ImportOBJTest.viewport = new ƒ.Viewport();
-        ImportOBJTest.viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
-        ƒ.Debug.log("Viewport:", ImportOBJTest.viewport);
+        AmbientOcclusionTest.viewport = new ƒ.Viewport();
+        AmbientOcclusionTest.viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
+        ƒ.Debug.log("Viewport:", AmbientOcclusionTest.viewport);
         // hide the cursor when interacting, also suppressing right-click menu
         canvas.addEventListener("mousedown", canvas.requestPointerLock);
         canvas.addEventListener("mouseup", function () { document.exitPointerLock(); });
         // make the camera interactive (complex method in ƒAid)
-        ƒAid.Viewport.expandCameraToInteractiveOrbit(ImportOBJTest.viewport);
+        ƒAid.Viewport.expandCameraToInteractiveOrbit(AmbientOcclusionTest.viewport);
+        let cmpAmbientOcclusion = new ƒ.ComponentAmbientOcclusion();
+        cmpCamera.node.addComponent(cmpAmbientOcclusion);
+        let ui = ƒui.Generator.createInterfaceFromMutable(cmpAmbientOcclusion);
+        let controller = new ƒui.Controller(cmpAmbientOcclusion, ui);
+        document.body.appendChild(ui);
+        let fpsSpan = document.getElementById("fps");
+        let lastUpdateTime = 0;
+        const updateInterval = 200;
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start();
         function update(_event) {
-            ImportOBJTest.viewport.draw();
+            if (ƒ.Loop.timeFrameStartReal - lastUpdateTime > updateInterval) {
+                fpsSpan.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
+                lastUpdateTime = ƒ.Loop.timeFrameStartReal;
+            }
+            AmbientOcclusionTest.viewport.draw();
         }
     }
-})(ImportOBJTest || (ImportOBJTest = {}));
-//# sourceMappingURL=ImportOBJ.js.map
+})(AmbientOcclusionTest || (AmbientOcclusionTest = {}));
+//# sourceMappingURL=Main.js.map

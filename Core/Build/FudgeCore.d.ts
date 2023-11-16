@@ -1090,12 +1090,13 @@ declare namespace FudgeCore {
         };
         protected static colorFramebuffer: WebGLFramebuffer;
         protected static colorTexture: WebGLTexture;
+        protected static positionTexture: WebGLTexture;
         protected static normalTexture: WebGLTexture;
+        protected static noiseTexture: WebGLTexture;
         protected static depthTexture: WebGLTexture;
         protected static mainRect: Rectangle;
         protected static occlusionFramebuffer: WebGLFramebuffer;
         protected static occlusionTexture: WebGLTexture;
-        protected static aoSamplePoints: Vector3[];
         protected static bloomDownsamplingFramebuffers: WebGLFramebuffer[];
         protected static bloomDownsamplingTextures: WebGLTexture[];
         protected static bloomUpsamplingFramebuffers: WebGLFramebuffer[];
@@ -1169,11 +1170,11 @@ declare namespace FudgeCore {
         /**
          * Creates and stores texture buffers to be used for Post-FX
          */
-        static initializeFramebuffers(_ao?: boolean, _bloom?: boolean): void;
+        static initializeFramebuffers(): void;
         /**
          * Adjusts the size of the set framebuffers corresponding textures
          */
-        static adjustFramebuffers(_main?: boolean, _ao?: boolean, _bloom?: boolean): void;
+        static adjustFramebuffers(): void;
         /**
          * Composites all effects that are used in the scene to a final render.
          */
@@ -1182,9 +1183,6 @@ declare namespace FudgeCore {
          * Draws the bloom-effect into the bloom texture, using the given camera-component and the given bloom-component
          */
         static drawBloom(_cmpBloom: ComponentBloom): void;
-        /**
-         * Sets up the "ScreenQuad" that is used to render a texture over the whole screen area
-         */
         /**
          * Creates a texture buffer to be used as pick-buffer
          */
@@ -1200,12 +1198,6 @@ declare namespace FudgeCore {
          * Buffer the data from the lights in the scenegraph into the lights ubo
          */
         protected static bufferLights(_lights: MapLightTypeToLightList): void;
-        /**
-        * Calculates sample points to be used in AO-calculations, based on the specified samplecount
-         */
-        protected static generateNewSamplePoints(_nSamples?: number): void;
-        protected static createFramebuffer(_depthType: typeof WebGLTexture | typeof WebGLRenderbuffer, _normal?: boolean, _divisor?: number): [WebGLFramebuffer, WebGLTexture, WebGLTexture | WebGLRenderbuffer, WebGLTexture];
-        protected static updateFramebuffer(_framebuffer: WebGLFramebuffer, _color?: WebGLTexture, _normal?: WebGLTexture, _depth?: WebGLTexture | WebGLRenderbuffer, _divisor?: number): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
         */
@@ -1967,11 +1959,12 @@ declare namespace FudgeCore {
      */
     class ComponentAmbientOcclusion extends Component {
         static readonly iSubclass: number;
-        clrAO: Color;
-        radius: number;
-        samples: number;
-        shadowDistance: number;
-        constructor(_clrAO?: Color, _radius?: number, _samples?: number, _distance?: number);
+        sampleRadius: number;
+        bias: number;
+        attenuationConstant: number;
+        attenuationLinear: number;
+        attenuationQuadratic: number;
+        constructor(_sampleRadius?: number, _bias?: number, _attenuationConstant?: number, _attenuationLinear?: number, _attenuationQuadratic?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -6038,9 +6031,6 @@ declare namespace FudgeCore {
          * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
          */
         static drawAO(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
-        protected static feedAOUniforms(_bindTexture: Function, _cmpAO: ComponentAmbientOcclusion, _cmpCamera: ComponentCamera, _shader: typeof Shader): void;
-        protected static feedSamplePoints(_samples: number, _shader: typeof Shader): void;
-        protected static feedNoiseTexture(_bindTexture: Function): void;
         private static transformByPhysics;
     }
 }

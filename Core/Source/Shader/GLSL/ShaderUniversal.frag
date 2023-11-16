@@ -13,7 +13,8 @@ uniform vec4 u_vctColor;
 in vec4 v_vctColor;
 
 layout(location = 0) out vec4 vctFrag;
-layout(location = 1) out vec4 vctFragNormal;
+layout(location = 1) out vec4 vctFragPosition;
+layout(location = 2) out vec4 vctFragNormal;
 
 // LIGHT: include light parameters
 #ifdef LIGHT
@@ -62,6 +63,7 @@ void main() {
   #endif
 
   // for now just pass nothing as normal
+  vctFragPosition = vec4(0.0);
   vctFragNormal = vec4(0.0); 
 
   // discard pixel alltogether when transparent: don't show in Z-Buffer

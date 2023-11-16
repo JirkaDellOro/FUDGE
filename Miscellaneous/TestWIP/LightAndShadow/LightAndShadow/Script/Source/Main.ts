@@ -98,7 +98,7 @@ namespace Script {
       gouraud.getChildren()[i].getComponent(ƒ.ComponentMesh).activate(toggleShading);
     }
 
-    camNode.getChildren()[0].getComponent(ƒ.ComponentMist).activate(!toggleMist);
+    camNode.getChildren()[0].getComponent(ƒ.ComponentFog).activate(!toggleMist);
     camNode.getChildren()[0].getComponent(ƒ.ComponentBloom).activate(!toggleBloom);
     camNode.getChildren()[0].getComponent(ƒ.ComponentAmbientOcclusion).activate(!toggleAo);
 

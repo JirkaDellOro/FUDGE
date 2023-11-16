@@ -3,22 +3,25 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta charset="utf-8" />
-  <meta type="settings" autoview="Graph|2023-07-25T08:47:48.755Z|05108" project="{'name':'ImportOBJTest','graphAutoView':'Graph|2023-07-25T08:47:48.755Z|05108'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-07-25T08:47:48.755Z|05108'}}]" />
-  <title>ImportOBJTest</title>
+  <meta type="settings" autoview="Graph|2023-11-13T11:42:50.294Z|18191" project="{'name':'AmbientOcclusionTest','graphAutoView':'Graph|2023-11-13T11:42:50.294Z|18191'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-11-13T11:42:50.294Z|18191'}}]" />
+  <title>AmbientOcclusionTest</title>
   <!--Load FUDGE-->
   <script src="./../../../Core/Build/FudgeCore.js"></script>
   <script src="./../../../Aid/Build/FudgeAid.js"></script>
+  <script src="./../../UserInterface/Build/FudgeUserInterface.js"></script>
 
   <!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
   <link type="resources" src="Internal.json" />
 
   <!--Load scripts-->
-  <script src="ImportOBJ.js" editor="true"></script>
+  <script src="Main.js" editor="true"></script>
   <style>
     html,
     body {
       margin: 0;
       padding: 0;
+      color: yellow;
+      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
     }
 
     canvas.fullscreen {
@@ -35,22 +38,16 @@
       left: 0;
     }
 
-    span#time {
-      position: absolute;
-      top: 1rem;
-      left: 0;
-    }
-
-    span {
-      color: yellow;
-      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
-    }
-
-    #file {
+    div {
       position: absolute;
       top: 0;
       right: 0;
     }
+
+    div > * {
+      display: block;
+    }
+
   </style>
 </head>
 
@@ -58,5 +55,7 @@
   <!--Canvas for FUDGE to render to-->
   <canvas class="fullscreen">
   </canvas>
+  <span id="fps">
+  </span>
 </body>
 </html>

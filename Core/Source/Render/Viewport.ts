@@ -230,10 +230,7 @@ namespace FudgeCore {
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
       Render.setCanvasSize(rectRender.width, rectRender.height);
 
-      const cmpAO: ComponentAmbientOcclusion = this.camera.node?.getComponent(ComponentAmbientOcclusion);
-      const cmpBloom: ComponentBloom = this.camera.node?.getComponent(ComponentBloom);
-
-      Render.adjustFramebuffers(true, cmpAO?.isActive, cmpBloom?.isActive);
+      Render.adjustFramebuffers();
 
       Recycler.store(rectClient);
       Recycler.store(rectCanvas);

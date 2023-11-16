@@ -2,98 +2,86 @@ namespace FudgeCore {
   export let shaderSources: {[source: string]: string} = {};
   shaderSources["ShaderAmbientOcclusion.frag"] = /*glsl*/ `#version 300 es
 /**
-*Calculates AO based on depthmap
-*@authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
+ * Calculates ambient occlusion for a given fragment
+ * @authors Jonas Plotzky, HFU, 2023
+ * adaption of https://github.com/tsherif/webgl2examples/blob/da1153a15ebc09bb13498e5f732ef2036507740c/ssao.html
+ * see here for an in depth explanation: 
 */
 precision mediump float;
 precision highp int;
 
-in vec2 v_vctTexture;
-uniform sampler2D u_normalTexture;
-uniform sampler2D u_depthTexture;
+const float sin45 = 0.707107; // 45 degrees in radians
+const vec2 kernel[4] = vec2[4](vec2(0.0, 1.0), vec2(1.0, 0.0), vec2(0.0, -1.0), vec2(-1.0, 0.0));
+
+uniform float u_fNear;
+uniform float u_fFar;
+uniform float u_fSampleRadius;
+uniform float u_fBias;
+uniform float u_fAttenuationConstant;
+uniform float u_fAttenuationLinear;
+uniform float u_fAttenuationQuadratic;
+
+uniform vec2 u_vctResolution;
+uniform vec3 u_vctCamera;
+// uniform vec3 u_vctCameraForward;
+// uniform mat4 u_mtxViewProjectionInverse;
+
+uniform sampler2D u_positionTexture; // world space position
+uniform sampler2D u_normalTexture; // world space normal
 uniform sampler2D u_noiseTexture;
+// uniform sampler2D u_depthTexture;
 
-struct Sample {
-  vec3 vct;
-};
-
-const uint MAX_SAMPLES = 128u;
-uniform int u_nSamples;
-uniform Sample u_samples[MAX_SAMPLES];
-
-uniform float u_nearPlane;
-uniform float u_farPlane;
-uniform float u_radius;
-uniform float u_shadowDistance;
-
-uniform float u_width;
-uniform float u_height;
+in vec2 v_vctTexture;
+in vec3 v_vctViewDirection;
 
 out vec4 vctFrag;
 
-vec3 getFragPos(vec2 _vct_xy, float _depth) {
-    _vct_xy.x /= u_width;
-    _vct_xy.y /= u_height;
-    _vct_xy = (_vct_xy - 0.5f) * 2.0f; //set coordinates to clip space
-    return vec3(_vct_xy, _depth);
-}
+// Both of these functions could be used to calculate the position from the depth texture, but mobile devices seems to lack in precision to do this
+// vec3 getPosition(vec2 _vctTexture) {
+//   float fDepth = texture(u_depthTexture, _vctTexture).r;
+//   vec4 clipSpacePosition = vec4(_vctTexture * 2.0 - 1.0, fDepth * 2.0 - 1.0, 1.0);
+//   vec4 worldSpacePosition = u_mtxViewProjectionInverse * clipSpacePosition;
+//   return worldSpacePosition.xyz / worldSpacePosition.w;
+// }
 
-float linearizeDepth(float _originalDepth) {
-    return (pow(u_farPlane + 1.0f, _originalDepth) - 1.0f) + u_nearPlane;
-    //return _originalDepth;
+float getOcclusion(vec3 _vctPosition, vec3 _vctNormal, vec2 _vctTexture) {
+  vec3 vctOccluder = texture(u_positionTexture, _vctTexture).xyz;
+  vec3 vctDistance = vctOccluder - _vctPosition;
+  float fIntensity = max(dot(_vctNormal, normalize(vctDistance)) - u_fBias, 0.0);
+
+  float fDistance = length(vctDistance);
+  float fAttenuation = 1.0 / (u_fAttenuationConstant + u_fAttenuationLinear * fDistance + u_fAttenuationQuadratic * fDistance * fDistance);
+
+  return fIntensity * fAttenuation;
 }
 
 void main() {
-  float depth = linearizeDepth(texture(u_depthTexture, v_vctTexture).r);
-  vec3 vctFragPos = getFragPos(gl_FragCoord.xy, depth);
+  vec3 vctPosition = texture(u_positionTexture, v_vctTexture).xyz;
+  vec3 vctNormal = texture(u_normalTexture, v_vctTexture).xyz;
+  vec2 vctRandom = normalize(texture(u_noiseTexture, v_vctTexture).xy * 2.0 - 1.0);
+  float fDepth = (length(vctPosition - u_vctCamera) - u_fNear) / (u_fFar - u_fNear); // linear euclidean depth in range [0,1] TODO: when changing to view space, don't subtract camera position
+  float fKernelRadius = u_fSampleRadius * (1.0 - fDepth);
 
-  vec3 vctNormal = texture(u_normalTexture, v_vctTexture).rgb;
-  vctNormal = 1.0f - (vctNormal * 2.0f);    //set normals into -1 to 1 range
-  vctNormal = normalize(vctNormal);
+  float fOcclusion = 0.0;
+  for(int i = 0; i < 4; ++i) {
+    vec2 vctK1 = reflect(kernel[i], vctRandom);
+    vec2 vctK2 = vec2(vctK1.x * sin45 - vctK1.y * sin45, vctK1.x * sin45 + vctK1.y * sin45);
 
-  vec2 noiseScale = vec2(u_width / 4.0f, u_height / 4.0f);
+    vctK1 /= u_vctResolution;
+    vctK2 /= u_vctResolution;
 
-  vec3 vctRandom = normalize(texture(u_noiseTexture, v_vctTexture * noiseScale).rgb);
-  vec3 vctTangent = normalize(vctRandom - vctNormal * dot(vctRandom, vctNormal));
-  vec3 vctBitangent = cross(vctNormal, vctTangent);
-  mat3 mtxTBN = mat3(vctTangent, vctBitangent, vctNormal);
+    vctK1 *= fKernelRadius;
+    vctK2 *= fKernelRadius;
 
-  //calculation of the occlusion-factor   
-  float occlusion = 0.0f;
-  for(int i = 0; i < u_nSamples; i++) {
-    //get sample position
-    vec3 vctSample = mtxTBN * u_samples[i].vct;
-    vctSample = vctFragPos + (vctSample * u_radius);
-
-    vec3 offset = vec3(vctSample);
-    offset = offset * 0.5f + 0.5f;
-
-    float occluderDepth = linearizeDepth(texture(u_depthTexture, offset.xy).r);
-
-    float rangeCheck = (vctSample.z - occluderDepth > u_radius * u_shadowDistance * 10.0f ? 0.0f : 1.0f);  
-    occlusion += (occluderDepth <= vctSample.z ? 1.0f : 0.0f) * rangeCheck;
+    fOcclusion += getOcclusion(vctPosition, vctNormal, v_vctTexture + vctK1);
+    fOcclusion += getOcclusion(vctPosition, vctNormal, v_vctTexture + vctK2 * 0.75);
+    fOcclusion += getOcclusion(vctPosition, vctNormal, v_vctTexture + vctK1 * 0.5);
+    fOcclusion += getOcclusion(vctPosition, vctNormal, v_vctTexture + vctK2 * 0.25);
   }
 
-  float nSamples = float(u_nSamples);
-  occlusion = min((1.0f - (occlusion / nSamples)) * 1.5f, 1.0f);
-  occlusion *= occlusion;
-  vctFrag = vec4(vec3(occlusion), 1.0f);
-}
-`;
-  shaderSources["ShaderAmbientOcclusion.vert"] = /*glsl*/ `#version 300 es
-
-/**
-* AO vertexshader. Sets values for AO fragmentshader
-* @authors 2023, Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023 | Jonas Plotzky, HFU, 2023
-*/
-out vec2 v_vctTexture;
-
-void main() {
-  // fullscreen triangle, contains screen quad
-  float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
-  float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
-  gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
-  v_vctTexture = vec2(x / 2.0, y / 2.0); // (0, 0), (2, 0), (0, 2)
+  // vctFrag.rgb = vctNormal;
+  vctFrag.r = clamp(fOcclusion / 16.0, 0.0, 1.0);
+  vctFrag.a = 1.0;
 }`;
   shaderSources["ShaderDownsample.frag"] = /*glsl*/ `#version 300 es
 /**
@@ -174,14 +162,15 @@ uniform mat4 u_mtxWorldToCamera;
 
 uniform bool u_bFog;
 uniform vec4 u_vctFogColor;
-uniform float u_fNear;
-uniform float u_fFar;
+uniform float u_fFogNear;
+uniform float u_fFogFar;
 
 in vec4 v_vctColor;
 in vec3 v_vctPosition;
 
 layout(location = 0) out vec4 vctFrag;
-layout(location = 1) out vec4 vctFragNormal;
+layout(location = 1) out vec4 vctFragPosition;
+layout(location = 2) out vec4 vctFragNormal;
 
 #ifdef PHONG
 
@@ -338,14 +327,16 @@ void main() {
   vctFrag *= u_vctColor * v_vctColor;
   vctFrag.rgb += vctSpecular * (1.0 - u_fMetallic);
 
-  vctNormal = normalize(mat3(u_mtxWorldToCamera) * vctNormal); // might need to use transpose inverse
-  vctNormal.y = vctNormal.y * -1.0;
-  vctNormal.z = vctNormal.z * -1.0;
-  vctFragNormal = vec4((vctNormal + 1.0) / 2.0, 1.0);
+  // write into fragment buffers TODO: do this in vertex shader
+  // vctFragNormal = vec4(normalize(mat3(u_mtxWorldToCamera) * vctNormal), 1.0); // maybe do all shading in view space so we can move this to the vertex shader
+  // vctFragPosition = u_mtxWorldToCamera * vec4(vctPosition, 1.0);
+
+  vctFragPosition = vec4(v_vctPosition, 1.0); // don't use flat here, because we want to interpolate the position
+  vctFragNormal = vec4(vctNormal, 1.0);
 
   if (u_bFog) {
-    float distance = length(v_vctPosition - u_vctCamera);
-    float fogAmount = min(max((distance - u_fNear) / (u_fFar - u_fNear), 0.0), 1.0);
+    float distance = length(vctPosition - u_vctCamera); // maybe use z-depth instead of euclidean depth
+    float fogAmount = min(max((distance - u_fFogNear) / (u_fFogFar - u_fFogNear), 0.0), 1.0);
     fogAmount = -pow(fogAmount, 2.0) + (2.0 * fogAmount); //lets Fog appear quicker and fall off slower results in a more gradual falloff
     vctFrag = mix(vctFrag, vec4(u_vctFogColor.rgb, 1.0f), fogAmount * u_vctFogColor.a);
   }
@@ -439,10 +430,10 @@ precision mediump float;
 precision highp int;
 
 in vec2 v_vctTexture;
-uniform sampler2D u_mainTexture;
+uniform sampler2D u_colorTexture;
 
 uniform float u_ao;
-uniform sampler2D u_aoTexture;
+uniform sampler2D u_occlusionTexture;
 uniform vec4 u_vctAOColor;
 
 uniform float u_bloom;
@@ -450,74 +441,59 @@ uniform sampler2D u_bloomTexture;
 uniform float u_bloomIntensity;
 uniform float u_highlightDesaturation;
 
-flat in vec2[25] v_vctOffsets;
-float gaussianKernel[25] = float[]( 0.00366, 0.01465, 0.02564, 0.01465, 0.00366,
-                                    0.01465, 0.05860, 0.09523, 0.05860, 0.01465, 
-                                    0.02564, 0.09523, 0.15018, 0.09523, 0.02564, 
-                                    0.01465, 0.05860, 0.09523, 0.05860, 0.01465,
-                                    0.00366, 0.01465, 0.02564, 0.01465, 0.00366);
-
 out vec4 vctFrag;
 
 void main() {
-  vec4 mainTex = texture(u_mainTexture, v_vctTexture);
-  vec4 vctTempFrag = mainTex;
-  if(u_ao > 0.5f) {
-    vec4 aoTex = vec4(0.0f);
-    for(int i = 0; i < 25; i++) {
-        aoTex += vec4(texture(u_aoTexture, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
-    }
-    aoTex = mix(vec4(u_vctAOColor.rgb, 1.0f), vec4(1.0f), aoTex.r);
-    vctTempFrag = mix(vctTempFrag, vctTempFrag * aoTex, u_vctAOColor.a);
-  }
-  if(u_bloom > 0.5f) {
+  ivec2 vctFragCoord = ivec2(gl_FragCoord.xy);
+  vctFrag = texelFetch(u_colorTexture, vctFragCoord, 0);
+
+  if (u_ao > 0.5f) 
+    vctFrag.rgb = clamp(vctFrag.rgb - texelFetch(u_occlusionTexture, vctFragCoord, 0).r, 0.0, 1.0);
+  
+  if (u_bloom > 0.5f) {
     float intensity = max(u_bloomIntensity, 0.0f);
-    vec4 bloomTex = texture(u_bloomTexture, v_vctTexture);
-    vctTempFrag += (bloomTex * intensity);
+    vctFrag += (texture(u_bloomTexture, v_vctTexture) * intensity);
 
     float factor = min(max(u_highlightDesaturation, 0.0f), 1.0f);
-    float r = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
-    float g = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
-    float b = max(vctTempFrag.r - 1.0f, 0.0f) * factor;
+    float r = max(vctFrag.r - 1.0f, 0.0f) * factor;
+    float g = max(vctFrag.r - 1.0f, 0.0f) * factor;
+    float b = max(vctFrag.r - 1.0f, 0.0f) * factor;
 
-    vctTempFrag.r += g + b;
-    vctTempFrag.g += r + b;
-    vctTempFrag.b += r + g;
+    vctFrag.r += g + b;
+    vctFrag.g += r + b;
+    vctFrag.b += r + g;
   }
-
-  vctFrag = vctTempFrag;
 }
 `;
   shaderSources["ShaderScreen.vert"] = /*glsl*/ `#version 300 es
+precision mediump float;
+precision highp int;
 /**
-* Sets up the data for the ShaderScreen fragmentshader
-* @authors Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
-*/
-uniform float u_width;
-uniform float u_height;
-
+ * Creates a fullscreen triangle which cotains the screen quad and sets the texture coordinates accordingly.
+ * @authors Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
+ *
+ *  2  3 .
+ *       .  .
+ *       .     .  
+ *       .        .
+ *  1  1 ..........  .
+ *       . screen .     .
+ *       .  quad  .        .
+ *  0 -1 ..........  .  .  .  .
+ *    p -1        1           3
+ *  t    0        1           2
+ *  
+ *  p == postion
+ *  t == texture coordinate
+ */
 out vec2 v_vctTexture;
-flat out vec2 v_vctOffsets[25];
 
 void main() {
-  // fullscreen triangle, contains screen quad
   float x = float((gl_VertexID % 2) * 4); // 0, 4, 0
   float y = float((gl_VertexID / 2) * 4); // 0, 0, 4
   gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0); // (-1, -1), (3, -1), (-1, 3)
-  v_vctTexture = vec2(x / 2.0, y / 2.0); // (0, 0), (2, 0), (0, 2)
-
-  vec2 offset = vec2(1.0f / u_width, 1.0f / u_height);
-
-  //TODO: Maybe try Downsampling instead of this giant gaussian kernel
-  v_vctOffsets = vec2[](
-    vec2(-2.0*offset.x, 2.0*offset.y),  vec2(-offset.x, 2.0*offset.y),  vec2(0.0, 2.0*offset.y),    vec2(offset.x,2.0* offset.y),   vec2(2.0*offset.x,2.0* offset.y), 
-    vec2(-2.0*offset.x, offset.y),      vec2(-offset.x, offset.y),      vec2(0.0, offset.y),        vec2(offset.x, offset.y),       vec2(2.0*offset.x, offset.y),
-    vec2(-2.0*offset.x, 0.0),           vec2(-offset.x, 0.0),           vec2(0.0, 0.0),             vec2(offset.x, 0.0),            vec2(2.0*offset.x, 0.0),
-    vec2(-2.0*offset.x, -offset.y),     vec2(-offset.x, -offset.y),     vec2(0.0, -offset.y),       vec2(offset.x, -offset.y),      vec2(2.0*offset.x, -offset.y),
-    vec2(-2.0*offset.x, -2.0*offset.y), vec2(-offset.x, -2.0*offset.y), vec2(0.0, -2.0*offset.y),   vec2(offset.x,-2.0* offset.y), vec2(2.0*offset.x,-2.0* offset.y)
-  );
-}
-`;
+  v_vctTexture = vec2(x / 2.0, y / 2.0);  // (0, 0), (2, 0), (0, 2) -> interpolation will yield (0, 0), (1, 0), (0, 1) as the positions are double the size of the screen
+}`;
   shaderSources["ShaderUniversal.frag"] = /*glsl*/ `#version 300 es
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
@@ -533,7 +509,8 @@ uniform vec4 u_vctColor;
 in vec4 v_vctColor;
 
 layout(location = 0) out vec4 vctFrag;
-layout(location = 1) out vec4 vctFragNormal;
+layout(location = 1) out vec4 vctFragPosition;
+layout(location = 2) out vec4 vctFragNormal;
 
 // LIGHT: include light parameters
 #ifdef LIGHT
@@ -582,6 +559,7 @@ void main() {
   #endif
 
   // for now just pass nothing as normal
+  vctFragPosition = vec4(0.0);
   vctFragNormal = vec4(0.0); 
 
   // discard pixel alltogether when transparent: don't show in Z-Buffer

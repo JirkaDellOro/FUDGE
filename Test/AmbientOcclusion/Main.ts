@@ -1,5 +1,6 @@
-namespace ImportOBJTest {
+namespace AmbientOcclusionTest {
   import ƒ = FudgeCore;
+  import ƒui = FudgeUserInterface;
   import ƒAid = FudgeAid;
 
   window.addEventListener("load", init);
@@ -22,6 +23,7 @@ namespace ImportOBJTest {
     }
     // setup the viewport
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+    
     // cmpCamera.clrBackground = ƒ.Color.CSS("SKYBLUE");
     let canvas: HTMLCanvasElement = document.querySelector("canvas");
     viewport = new ƒ.Viewport();
@@ -33,10 +35,26 @@ namespace ImportOBJTest {
     // make the camera interactive (complex method in ƒAid)
     ƒAid.Viewport.expandCameraToInteractiveOrbit(viewport);
 
+    let cmpAmbientOcclusion: ƒ.ComponentAmbientOcclusion = new ƒ.ComponentAmbientOcclusion();
+    cmpCamera.node.addComponent(cmpAmbientOcclusion);
+
+    let ui: HTMLDivElement = ƒui.Generator.createInterfaceFromMutable(cmpAmbientOcclusion);
+    let controller: ƒui.Controller = new ƒui.Controller(cmpAmbientOcclusion, ui);
+    document.body.appendChild(ui);
+
+    let fpsSpan: HTMLSpanElement = document.getElementById("fps") as HTMLElement;
+
+    let lastUpdateTime: number = 0;
+    const updateInterval: number = 200;
+
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start();
 
     function update(_event: Event): void {
+      if (ƒ.Loop.timeFrameStartReal - lastUpdateTime > updateInterval) {
+        fpsSpan.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
+        lastUpdateTime = ƒ.Loop.timeFrameStartReal;
+      }
 
       viewport.draw();
     }
