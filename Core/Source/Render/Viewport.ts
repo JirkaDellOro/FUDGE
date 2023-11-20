@@ -109,26 +109,15 @@ namespace FudgeCore {
      * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
      * Pass `false` if calculation was already done for this frame 
      */
-    public draw(_calculateTransforms: boolean = true): void {
-      this.computeDrawing(_calculateTransforms);
+    public draw(_prepareBranch: boolean = true): void {
+      this.prepare(_prepareBranch);
 
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
         Physics.draw(this.camera, this.physicsDebugMode);
       }
-
-      const cmpAmbientOcclusion: ComponentAmbientOcclusion = this.camera.node?.getComponent(ComponentAmbientOcclusion);
-      if (cmpAmbientOcclusion?.isActive) {
-        Render.drawAmbientOcclusion(this.camera, cmpAmbientOcclusion);
-      }
-      const cmpBloom: ComponentBloom = this.camera.node?.getComponent(ComponentBloom);
-      if (cmpBloom?.isActive) {
-        Render.drawBloom(cmpBloom);
-      }
-
-      Render.compositeEffects(this.camera, cmpAmbientOcclusion, cmpBloom);
-
+      
       this.#crc2.imageSmoothingEnabled = false;
       this.#crc2.drawImage(
         Render.getCanvas(),
@@ -138,9 +127,9 @@ namespace FudgeCore {
     }
 
     /**
-    * Adjusts all frames and the camera to fit the current size of the canvas. Prepares the scene for rendering.
+    * Adjusts all frames and the camera to fit the current size of the canvas. Prepares the branch for rendering.
     */
-    public computeDrawing(_calculateTransforms: boolean = true): void { // TODO: rename this
+    public prepare(_prepareBranch: boolean = true): void {
       if (!this.#branch)
         return;
       if (!this.camera.isActive)
@@ -150,19 +139,18 @@ namespace FudgeCore {
         this.adjustFrames();
       if (this.adjustingCamera)
         this.adjustCamera();
-      if (_calculateTransforms)
-        this.calculateTransforms();
+      if (_prepareBranch)
+        this.prepareBranch();
     }
 
     /**
-     * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh}es 
+     * Prepares all nodes in the branch for rendering by updating their world transforms etc.
      */
-    public calculateTransforms(): void { // TODO: Render.prepare does far more than just calculating transforms, so rename?
+    public prepareBranch(): void { // TODO: Render.prepare does far more than just calculating transforms, so rename?
       let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
       // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START)); // TODO: these events seem to get fired in Render.prepare aswell, check where they should get fired
-      // this.adjustFrames(); // called in computeDrawing?
       Render.prepare(this.#branch, null, mtxRoot);
       // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END)); // TODO: these events seem to get fired in Render.prepare aswell, check where they should get fired
       this.componentsPick = Render.componentsPick;

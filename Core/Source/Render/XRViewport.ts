@@ -78,7 +78,7 @@ namespace FudgeCore {
 
       this.session = session;
 
-      this.calculateTransforms();
+      this.prepareBranch();
     }
 
     /**
@@ -93,9 +93,9 @@ namespace FudgeCore {
      * Pass `false` if calculation was already done for this frame 
      * Called from loop method {@link Loop} again with the xrFrame parameter handover, as soon as FRAME_REQUEST_XR is called from creator.
      */
-    public draw(_calculateTransforms: boolean = true, _xrFrame: XRFrame = null): void {
+    public draw(_prepareBranch: boolean = true, _xrFrame: XRFrame = null): void {
       if (!this.session) {
-        super.draw(_calculateTransforms);
+        super.draw(_prepareBranch);
         return;
       }
 
@@ -104,10 +104,10 @@ namespace FudgeCore {
         return;
 
       this.vrDevice.mtxLocal.set(pose.transform.matrix);
-      super.computeDrawing(_calculateTransforms);
+      super.prepare(_prepareBranch);
 
       let glLayer: XRWebGLLayer = this.session.renderState.baseLayer;
-      Render.resetFramebuffer(glLayer.framebuffer);
+      Render.resetFramebuffer(glLayer.framebuffer); // TODO: inspect this
       Render.clear(this.camera.clrBackground);
       for (let view of pose.views) {
         let viewport: globalThis.XRViewport = glLayer.getViewport(view);
@@ -117,7 +117,6 @@ namespace FudgeCore {
           this.setControllerConfigs(_xrFrame);
         this.camera.mtxProjection.set(view.projectionMatrix);
         this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
-
 
         if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
           Render.draw(this.camera);

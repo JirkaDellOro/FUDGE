@@ -3,8 +3,8 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta charset="utf-8" />
-  <meta type="settings" autoview="Graph|2023-11-13T11:42:50.294Z|18191" project="{'name':'AmbientOcclusionTest','graphAutoView':'Graph|2023-11-13T11:42:50.294Z|18191'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-11-13T11:42:50.294Z|18191'}}]" />
-  <title>AmbientOcclusionTest</title>
+  <meta type="settings" autoview="Graph|2023-11-13T11:42:50.294Z|18191" project="{'name':'Postprocessing','graphAutoView':'Graph|2023-11-13T11:42:50.294Z|18191'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-11-13T11:42:50.294Z|18191'}}]" />
+  <title>Postprocessing</title>
   <!--Load FUDGE-->
   <script src="./../../../Core/Build/FudgeCore.js"></script>
   <script src="./../../../Aid/Build/FudgeAid.js"></script>
@@ -32,19 +32,19 @@
       height: 100vh;
     }
 
-    span#fps {
+    #fps {
       position: absolute;
       top: 0;
       left: 0;
     }
 
-    div {
+    #ui {
       position: absolute;
       top: 0;
       right: 0;
     }
 
-    div > * {
+    fudge-boolean, fudge-color, fudge-stepper, fudge-select {
       display: block;
     }
 
@@ -57,5 +57,8 @@
   </canvas>
   <span id="fps">
   </span>
+  <div id="ui">
+    <!--UI-Elements, will be filled dynamically-->
+  </div>
 </body>
 </html>

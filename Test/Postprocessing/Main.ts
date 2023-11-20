@@ -38,9 +38,28 @@ namespace AmbientOcclusionTest {
     let cmpAmbientOcclusion: ƒ.ComponentAmbientOcclusion = new ƒ.ComponentAmbientOcclusion();
     cmpCamera.node.addComponent(cmpAmbientOcclusion);
 
-    let ui: HTMLDivElement = ƒui.Generator.createInterfaceFromMutable(cmpAmbientOcclusion);
-    let controller: ƒui.Controller = new ƒui.Controller(cmpAmbientOcclusion, ui);
-    document.body.appendChild(ui);
+    let cmpBloom: ƒ.ComponentBloom = new ƒ.ComponentBloom();
+    cmpBloom.activate(false);
+    cmpCamera.node.addComponent(cmpBloom);
+
+    let cmpFog: ƒ.ComponentFog = new ƒ.ComponentFog();
+    cmpFog.activate(false);
+    cmpCamera.node.addComponent(cmpFog);
+
+    let ui: HTMLElement = document.getElementById("ui");
+
+    let uiAmbientOcclusion: HTMLElement = ƒui.Generator.createDetailsFromMutable(cmpAmbientOcclusion);
+    new ƒui.Controller(cmpAmbientOcclusion, uiAmbientOcclusion);
+    ui.appendChild(uiAmbientOcclusion);
+
+    let uiBloom: HTMLElement = ƒui.Generator.createDetailsFromMutable(cmpBloom);
+    new ƒui.Controller(cmpBloom, uiBloom);
+    ui.appendChild(uiBloom);
+
+    let uiFog: HTMLElement = ƒui.Generator.createDetailsFromMutable(cmpFog);
+    new ƒui.Controller(cmpFog, uiFog);
+    ui.appendChild(uiFog);
+    
 
     let fpsSpan: HTMLSpanElement = document.getElementById("fps") as HTMLElement;
 

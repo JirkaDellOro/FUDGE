@@ -196,6 +196,8 @@ void main() {
     vctFrag = mix(vctFrag, vec4(u_vctFogColor.rgb, 1.0f), fogAmount * u_vctFogColor.a);
   }
 
+  vctFrag.rgb *= vctFrag.a;
+
   if(vctFrag.a < 0.01)
     discard;
 }

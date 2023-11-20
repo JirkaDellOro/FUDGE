@@ -1092,36 +1092,6 @@ declare namespace FudgeCore {
             UNIT: 33986;
             INDEX: number;
         };
-        SCREEN_COLOR: {
-            UNIFORM: string;
-            UNIT: 33987;
-            INDEX: number;
-        };
-        SCREEN_POSITION: {
-            UNIFORM: string;
-            UNIT: 33988;
-            INDEX: number;
-        };
-        SCREEN_NORMAL: {
-            UNIFORM: string;
-            UNIT: 33989;
-            INDEX: number;
-        };
-        SCREEN_NOISE: {
-            UNIFORM: string;
-            UNIT: 33990;
-            INDEX: number;
-        };
-        SCREEN_OCCLUSION: {
-            UNIFORM: string;
-            UNIT: 33991;
-            INDEX: number;
-        };
-        SCREEN_BLOOM: {
-            UNIFORM: string;
-            UNIT: 33992;
-            INDEX: number;
-        };
     };
     /**
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
@@ -1132,24 +1102,27 @@ declare namespace FudgeCore {
         static uboLightsVariableOffsets: {
             [_name: string]: number;
         };
-        protected static bffColor: WebGLFramebuffer;
-        protected static scrColor: WebGLTexture;
-        protected static scrPosition: WebGLTexture;
-        protected static scrNormal: WebGLTexture;
-        protected static scrNoise: WebGLTexture;
-        protected static scrDepth: WebGLTexture;
+        protected static fboColor: WebGLFramebuffer;
+        protected static texColor: WebGLTexture;
+        protected static texPosition: WebGLTexture;
+        protected static texNormal: WebGLTexture;
+        protected static texNoise: WebGLTexture;
+        protected static texDepth: WebGLTexture;
         protected static mainRect: Rectangle;
-        protected static bffOcclusion: WebGLFramebuffer;
-        protected static scrOcclusion: WebGLTexture;
-        protected static bloomDownsamplingDepth: number;
-        protected static bffBloomDownsamplings: WebGLFramebuffer[];
-        protected static bffBloomUpsamplings: WebGLFramebuffer[];
-        protected static scrBloomDownsamplings: WebGLTexture[];
-        protected static scrBloomUpsamplings: WebGLTexture[];
+        protected static fboTransparent: WebGLFramebuffer;
+        protected static texTransparent: WebGLTexture;
+        protected static fboOcclusion: WebGLFramebuffer;
+        protected static texOcclusion: WebGLTexture;
+        protected static bloomDownsampleDepth: number;
+        protected static fboBloomDownsamples: WebGLFramebuffer[];
+        protected static fboBloomUpsamples: WebGLFramebuffer[];
+        protected static texBloomDownsamples: WebGLTexture[];
+        protected static texBloomUpsamples: WebGLTexture[];
         protected static crc3: WebGL2RenderingContext;
         protected static ƒpicked: Pick[];
         private static rectRender;
         private static sizePick;
+        private static fboBloom;
         /**
          * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
          */
@@ -1194,11 +1167,12 @@ declare namespace FudgeCore {
         /**
          * Clear the offscreen renderbuffer with the given {@link Color}
          */
-        static clear(_color?: Color): void;
+        static clear(_color?: Color, _depth?: boolean): void;
         /**
          * Reset the offscreen framebuffer to the original RenderingContext
          */
-        static resetFramebuffer(_buffer?: WebGLFramebuffer): void;
+        static resetFramebuffer(): void;
+        static bindFramebufferColor(): void;
         /**
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
@@ -1222,15 +1196,15 @@ declare namespace FudgeCore {
         /**
          * Composites all effects that are used in the scene to a final render.
          */
-        static compositeEffects(_cmpCamera: ComponentCamera, _cmpAmbientOcclusion: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
+        protected static composite(_cmpAmbientOcclusion: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
         /**
          * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
          */
-        static drawAmbientOcclusion(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
+        protected static drawAmbientOcclusion(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
         /**
          * Draws the bloom-effect into the bloom texture, using the given camera-component and the given bloom-component
          */
-        static drawBloom(_cmpBloom: ComponentBloom): void;
+        protected static drawBloom(_cmpBloom: ComponentBloom): void;
         /**
          * Creates a texture buffer to be used as pick-buffer
          */
@@ -1252,6 +1226,7 @@ declare namespace FudgeCore {
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
         protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
         private static calcMeshToView;
+        private static bindTexture;
     }
 }
 declare namespace FudgeCore {
@@ -6073,8 +6048,8 @@ declare namespace FudgeCore {
          * Draws the scene from the point of view of the given camera
          */
         static draw(_cmpCamera: ComponentCamera): void;
-        static drawList(_list: RecycableArray<Node> | Array<Node>, _cmpCamera: ComponentCamera, _drawNode: Function): void;
-        static drawListAlpha(_list: RecycableArray<Node>, _cmpCamera: ComponentCamera, _drawNode: Function): void;
+        private static drawList;
+        private static drawListAlpha;
         private static transformByPhysics;
     }
 }
@@ -6153,15 +6128,15 @@ declare namespace FudgeCore {
          * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
          * Pass `false` if calculation was already done for this frame
          */
-        draw(_calculateTransforms?: boolean): void;
+        draw(_prepareBranch?: boolean): void;
         /**
-        * Adjusts all frames and the camera to fit the current size of the canvas. Prepares the scene for rendering.
+        * Adjusts all frames and the camera to fit the current size of the canvas. Prepares the branch for rendering.
         */
-        computeDrawing(_calculateTransforms?: boolean): void;
+        prepare(_prepareBranch?: boolean): void;
         /**
-         * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh}es
+         * Prepares all nodes in the branch for rendering by updating their world transforms etc.
          */
-        calculateTransforms(): void;
+        prepareBranch(): void;
         /**
          * Performs a pick on all {@link ComponentPick}s in the branch of this viewport
          * using a ray from its camera through the client coordinates given in the event.
@@ -6269,7 +6244,7 @@ declare namespace FudgeCore {
          * Pass `false` if calculation was already done for this frame
          * Called from loop method {@link Loop} again with the xrFrame parameter handover, as soon as FRAME_REQUEST_XR is called from creator.
          */
-        draw(_calculateTransforms?: boolean, _xrFrame?: XRFrame): void;
+        draw(_prepareBranch?: boolean, _xrFrame?: XRFrame): void;
         /**
          * Move the reference space to set the initial position/orientation of the vr device in accordance to the node the vr device is attached to.
          */

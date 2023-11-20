@@ -22,6 +22,7 @@ precision highp int;
 
 uniform float u_width;
 uniform float u_height;
+uniform vec2 u_vctResolution;
 
 out vec2 v_vctTexture;
 
@@ -39,7 +40,7 @@ void main() {
 
   #ifdef SAMPLE
 
-    vec2 offset = vec2(1.0 / u_width, 1.0 / u_height);
+    vec2 offset = vec2(1.0 / u_vctResolution.x, 1.0 / u_vctResolution.y);
     v_vctOffsets = vec2[](
       vec2(-offset.x, offset.y),  vec2(0.0, offset.y),  vec2(offset.x, offset.y),
       vec2(-offset.x, 0.0),       vec2(0.0, 0.0),       vec2(offset.x, 0.0),

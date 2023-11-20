@@ -62,6 +62,8 @@ void main() {
   
   #endif
 
+  vctFrag.rgb *= vctFrag.a;
+
   // for now just pass nothing as normal
   vctFragPosition = vec4(0.0);
   vctFragNormal = vec4(0.0); 
