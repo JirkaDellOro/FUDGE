@@ -18,6 +18,7 @@ var AmbientOcclusionTest;
         }
         // setup the viewport
         let cmpCamera = new ƒ.ComponentCamera();
+        cmpCamera.clrBackground = ƒ.Color.CSS("SKYBLUE");
         // cmpCamera.clrBackground = ƒ.Color.CSS("SKYBLUE");
         let canvas = document.querySelector("canvas");
         AmbientOcclusionTest.viewport = new ƒ.Viewport();

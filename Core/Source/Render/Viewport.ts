@@ -68,8 +68,7 @@ namespace FudgeCore {
       this.rectSource = Render.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
 
-      //TODO: Only setup needed FBOs. This proofs a bit complicated because the initialization might happen before a ComponentCamera with a ComponentPostFX exists. Therefore Postbuffers are initialized regardless for now. 
-      Render.initializeFramebuffers();
+      Render.initializeAttachments();
 
       this.setBranch(_branch);
     }
@@ -218,7 +217,7 @@ namespace FudgeCore {
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
       Render.setCanvasSize(rectRender.width, rectRender.height);
 
-      Render.adjustFramebuffers();
+      Render.adjustAttachments();
 
       Recycler.store(rectClient);
       Recycler.store(rectCanvas);

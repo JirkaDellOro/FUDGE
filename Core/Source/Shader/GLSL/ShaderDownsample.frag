@@ -18,17 +18,19 @@ float gaussianKernel[9] = float[](0.045, 0.122, 0.045, 0.122, 0.332, 0.122, 0.04
 out vec4 vctFrag;
 
 void main() {
-  vec4 tex1 = vec4(0.0);
-  for(int i = 0; i < 9; i++) 
-    tex1 += vec4(texture(u_tex0, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
+  vctFrag = vec4(0.0);
+  for (int i = 0; i < 9; i++) 
+    vctFrag += vec4(texture(u_tex0, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
   
-  if(u_flvl < 1.0) {
-    float threshold = min(max(u_fThreshold, 0.0), 0.999999999);     //None of the rendered values can exeed 1.0 therefor the bloom effect won't work if the threshold is >= 1.0
-    tex1 -= threshold;
-    tex1 /= 1.0 - threshold;
-    float averageBrightness = (((tex1.r + tex1.g + tex1.b) / 3.0) * 0.2) + 0.8; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.8
-    tex1 = tex1 * averageBrightness * 2.0;
+  if (u_flvl < 1.0) {
+    //None of the rendered values can exeed 1.0 therefor the bloom effect won't work if the threshold is >= 1.0
+    if (u_fThreshold >= 1.0) 
+      discard;
+
+    vctFrag -= u_fThreshold;
+    vctFrag /= 1.0 - u_fThreshold;
+    float averageBrightness = (((vctFrag.r + vctFrag.g + vctFrag.b) / 3.0) * 0.2) + 0.8; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.8
+    vctFrag *= averageBrightness * 2.0;
   }
-  tex1 *= 1.3;
-  vctFrag = tex1;
+  vctFrag *= 1.3;
 }

@@ -14,8 +14,8 @@ namespace FudgeCore {
     public static readonly nodesPhysics: RecycableArray<Node> = new RecycableArray();
     public static readonly componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
     public static readonly lights: MapLightTypeToLightList = new Map();
-    private static readonly nodesSimple: RecycableArray<Node> = new RecycableArray();
-    private static readonly nodesAlpha: RecycableArray<Node> = new RecycableArray();
+    private static readonly nodesSimple: RecycableArray<Node> = new RecycableArray(); // TODO: maybe rename to nodesOpaque?
+    private static readonly nodesAlpha: RecycableArray<Node> = new RecycableArray(); // TODO: maybe rename to nodesTransparent?
     private static readonly skeletons: RecycableArray<SkeletonInstance> = new RecycableArray();
     private static timestampUpdate: number;
 
@@ -165,21 +165,12 @@ namespace FudgeCore {
      * Draws the scene from the point of view of the given camera
      */
     public static draw(_cmpCamera: ComponentCamera): void {
-      const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+      Render.resetFramebuffer();
 
-      // TODO: move to RenderWebGL, basically move the draw list methods
-      Render.bindFramebufferColor();
-      // crc3.bindFramebuffer(crc3.FRAMEBUFFER, null);
-      Render.clear(_cmpCamera.clrBackground);
-      Render.drawList(Render.nodesSimple, _cmpCamera);
-
-      // TODO: put this in a RenderWebGL method with _nodelist as parameter
-      crc3.bindFramebuffer(crc3.FRAMEBUFFER, RenderWebGL.fboTransparent);
-      crc3.clearColor(0, 0, 0, 0);
-      crc3.clear(crc3.COLOR_BUFFER_BIT);
-      crc3.blendFunc(WebGL2RenderingContext.ONE, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
-      Render.drawListAlpha(Render.nodesAlpha, _cmpCamera);
-      crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
+      for (let node of Render.nodesAlpha)
+        Reflect.set(node, "zCamera", _cmpCamera.pointWorldToClip(node.getComponent(ComponentMesh).mtxWorld.translation).z);
+      const sorted: Node[] = Render.nodesAlpha.getSorted((_a: Node, _b: Node) => Reflect.get(_b, "zCamera") - Reflect.get(_a, "zCamera"));
+      Render.drawNodes(Render.nodesSimple, sorted, _cmpCamera);
 
       const cmpAmbientOcclusion: ComponentAmbientOcclusion = _cmpCamera.node?.getComponent(ComponentAmbientOcclusion);
       if (cmpAmbientOcclusion?.isActive)
@@ -189,23 +180,8 @@ namespace FudgeCore {
       if (cmpBloom?.isActive)
         Render.drawBloom(cmpBloom);
 
+      Render.resetFramebuffer(null);
       Render.composite(cmpAmbientOcclusion, cmpBloom);
-    }
-
-    private static drawList(_list: RecycableArray<Node> | Array<Node>, _cmpCamera: ComponentCamera): void {
-      for (let node of _list)
-        Render.drawNode(node, _cmpCamera);
-    }
-
-    private static drawListAlpha(_list: RecycableArray<Node>, _cmpCamera: ComponentCamera): void {
-      function sort(_a: Node, _b: Node): number {
-        return (Reflect.get(_a, "zCamera") < Reflect.get(_b, "zCamera")) ? 1 : -1;
-      }
-      for (let node of _list)
-        Reflect.set(node, "zCamera", _cmpCamera.pointWorldToClip(node.getComponent(ComponentMesh).mtxWorld.translation).z);
-
-      let sorted: Node[] = _list.getSorted(sort);
-      Render.drawList(sorted, _cmpCamera);
     }
     //#endregion
 

@@ -161,7 +161,9 @@
         "ƒ.CoatRemissiveTextured": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -193,7 +195,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -208,7 +212,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-11-29T10:08:00.199Z|27557",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -243,7 +249,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-11-29T10:21:37.378Z|28859",
           "diffuse": 0.7000000000000001,
-          "specular": 0.168
+          "specular": 0.168,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -278,7 +286,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-11-29T10:33:53.009Z|42179",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -304,7 +314,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-11-29T10:49:00.461Z|36877",
           "diffuse": 1,
-          "specular": 1
+          "specular": 1,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -330,7 +342,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-11-29T11:01:00.240Z|41766",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -356,7 +370,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-11-29T11:09:46.803Z|84833",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -389,7 +405,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-11-29T10:57:48.941Z|20511",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -441,7 +459,9 @@
         "ƒ.CoatRemissive": {
           "color": "[0.12941176470588237, 0.12941176470588237, 0.12941176470588237, 1]",
           "diffuse": 1,
-          "specular": 1
+          "specular": 1,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -465,7 +485,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-11-29T13:29:10.553Z|74675",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -491,7 +513,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-11-29T13:35:34.542Z|34324",
           "diffuse": 1,
-          "specular": 1
+          "specular": 1,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -517,7 +541,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-11-29T10:53:43.709Z|37364",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -570,7 +596,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-11-29T13:40:15.821Z|50504",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -596,7 +624,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-11-29T10:21:37.378Z|28859",
           "diffuse": 0.5000000000000001,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -637,7 +667,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -658,7 +690,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-12-06T13:08:51.384Z|38779",
           "diffuse": 16,
-          "specular": 1
+          "specular": 1,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -684,7 +718,9 @@
           "color": "[1, 1, 1, 1]",
           "idTexture": "TextureImage|2022-12-14T13:31:40.277Z|98724",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -3933,16 +3969,18 @@
                 {
                   "ƒ.ComponentVRDevice": {
                     "backgroundColor": {
-                      "r": 0,
-                      "g": 0,
-                      "b": 0,
+                      "r": 0.5294117647058824,
+                      "g": 0.807843137254902,
+                      "b": 0.9215686274509803,
                       "a": 1
                     },
                     "backgroundEnabled": true,
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
-                    "aspect": 1,
+                    "near": 1,
+                    "far": 2000,
+                    "aspect": 1.7791563275434243,
                     "pivot": {
                       "translation": "[0, 0, 0]",
                       "rotation": "[0, 0, 0]",

@@ -7,7 +7,7 @@ namespace ImmersiveSceneVR {
   let cmpVRDevice: f.ComponentVRDevice = null;
   window.addEventListener("load", init);
 
-  async function init() {
+  async function init(): Promise<void> {
     await FudgeCore.Project.loadResources("Internal.json");
     graph = <f.Graph>f.Project.resources[document.head.querySelector("meta[autoView]").getAttribute("autoView")];
     FudgeCore.Debug.log("Graph:", graph);
@@ -17,7 +17,6 @@ namespace ImmersiveSceneVR {
     }
     let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector("canvas");
     cmpVRDevice = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentVRDevice);
-    cmpVRDevice.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
 
     xrViewport.initialize("Viewport", graph, cmpVRDevice, canvas);
 
@@ -29,8 +28,8 @@ namespace ImmersiveSceneVR {
   }
   // check device/browser capabilities for XR Session 
   function checkForVRSupport(): void {
-    navigator.xr.isSessionSupported(f.XR_SESSION_MODE.IMMERSIVE_VR).then((supported: boolean) => {
-      if (supported)
+    navigator.xr.isSessionSupported(f.XR_SESSION_MODE.IMMERSIVE_VR).then((_supported: boolean) => {
+      if (_supported)
         setupVR();
       else
         console.log("Session not supported");

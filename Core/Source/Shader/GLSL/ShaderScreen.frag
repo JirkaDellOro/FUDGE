@@ -29,13 +29,11 @@ void main() {
     vctFrag.rgb = clamp(vctFrag.rgb - texelFetch(u_texOcclusion, vctFragCoord, 0).r, 0.0, 1.0);
 
   if (u_bBloom) {
-    float intensity = max(u_fBloomIntensity, 0.0); // TODO: enforce range in component?
-    vctFrag += (texture(u_texBloom, v_vctTexture) * intensity);
+    vctFrag += (texture(u_texBloom, v_vctTexture) * u_fBloomIntensity);
 
-    float factor = min(max(u_fHighlightDesaturation, 0.0), 1.0); // TODO: enforce range in component?
-    float r = max(vctFrag.r - 1.0, 0.0) * factor;
-    float g = max(vctFrag.r - 1.0, 0.0) * factor;
-    float b = max(vctFrag.r - 1.0, 0.0) * factor;
+    float r = max(vctFrag.r - 1.0, 0.0) * u_fHighlightDesaturation;
+    float g = max(vctFrag.g - 1.0, 0.0) * u_fHighlightDesaturation;
+    float b = max(vctFrag.b - 1.0, 0.0) * u_fHighlightDesaturation;
 
     vctFrag.r += g + b;
     vctFrag.g += r + b;

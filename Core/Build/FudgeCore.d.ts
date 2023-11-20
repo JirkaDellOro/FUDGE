@@ -1102,27 +1102,22 @@ declare namespace FudgeCore {
         static uboLightsVariableOffsets: {
             [_name: string]: number;
         };
-        protected static fboColor: WebGLFramebuffer;
-        protected static texColor: WebGLTexture;
-        protected static texPosition: WebGLTexture;
-        protected static texNormal: WebGLTexture;
-        protected static texNoise: WebGLTexture;
-        protected static texDepth: WebGLTexture;
         protected static mainRect: Rectangle;
-        protected static fboTransparent: WebGLFramebuffer;
-        protected static texTransparent: WebGLTexture;
-        protected static fboOcclusion: WebGLFramebuffer;
-        protected static texOcclusion: WebGLTexture;
-        protected static bloomDownsampleDepth: number;
-        protected static fboBloomDownsamples: WebGLFramebuffer[];
-        protected static fboBloomUpsamples: WebGLFramebuffer[];
-        protected static texBloomDownsamples: WebGLTexture[];
-        protected static texBloomUpsamples: WebGLTexture[];
         protected static crc3: WebGL2RenderingContext;
         protected static ƒpicked: Pick[];
         private static rectRender;
         private static sizePick;
-        private static fboBloom;
+        private static framebuffer;
+        private static texOpaque;
+        private static texTransparent;
+        private static texPosition;
+        private static texNormal;
+        private static texNoise;
+        private static texDepth;
+        private static texOcclusion;
+        private static bloomDownsampleDepth;
+        private static texBloomDownsamples;
+        private static texBloomUpsamples;
         /**
          * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
          */
@@ -1167,12 +1162,11 @@ declare namespace FudgeCore {
         /**
          * Clear the offscreen renderbuffer with the given {@link Color}
          */
-        static clear(_color?: Color, _depth?: boolean): void;
+        static clear(_color?: Color): void;
         /**
          * Reset the offscreen framebuffer to the original RenderingContext
          */
-        static resetFramebuffer(): void;
-        static bindFramebufferColor(): void;
+        static resetFramebuffer(_framebuffer?: WebGLFramebuffer): void;
         /**
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
@@ -1181,6 +1175,8 @@ declare namespace FudgeCore {
          * Enable / Disable WebGLs depth test
          */
         static setDepthTest(_test: boolean): void;
+        static setScissorTest(_test: boolean, _x: number, _y: number, _width: number, _height: number): void;
+        static setViewport(_x: number, _y: number, _width: number, _height: number): void;
         /**
          * Set the blend mode to render with
          */
@@ -1188,15 +1184,16 @@ declare namespace FudgeCore {
         /**
          * Creates and stores texture buffers to be used for Post-FX
          */
-        static initializeFramebuffers(): void;
+        static initializeAttachments(): void;
         /**
          * Adjusts the size of the set framebuffers corresponding textures
          */
-        static adjustFramebuffers(): void;
+        static adjustAttachments(): void;
         /**
          * Composites all effects that are used in the scene to a final render.
          */
         protected static composite(_cmpAmbientOcclusion: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
+        protected static drawNodes(_nodesOpaque: Iterable<Node>, _nodesAlpha: Iterable<Node>, _cmpCamera: ComponentCamera): void;
         /**
          * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
          */
@@ -2196,13 +2193,18 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
      */
     class ComponentBloom extends Component {
+        #private;
         static readonly iSubclass: number;
-        threshold: number;
-        intensity: number;
-        desaturateHighlights: number;
         constructor(_threshold?: number, _intensity?: number, _desaturateHighlights?: number);
+        get threshold(): number;
+        set threshold(_value: number);
+        get intensity(): number;
+        set intensity(_value: number);
+        get highlightDesaturation(): number;
+        set highlightDesaturation(_value: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
     }
 }
 declare namespace FudgeCore {
@@ -6048,8 +6050,6 @@ declare namespace FudgeCore {
          * Draws the scene from the point of view of the given camera
          */
         static draw(_cmpCamera: ComponentCamera): void;
-        private static drawList;
-        private static drawListAlpha;
         private static transformByPhysics;
     }
 }
@@ -6220,7 +6220,6 @@ declare namespace FudgeCore {
         session: XRSession;
         referenceSpace: XRReferenceSpace;
         private useVRController;
-        private crc3;
         constructor();
         /**
          * To retrieve private static instance of xr viewport, readonly.
