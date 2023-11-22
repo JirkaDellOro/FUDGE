@@ -7,6 +7,7 @@ namespace TestInstructions {
   }
 
   let dialog: HTMLDialogElement;
+  let closeButton: HTMLDivElement
   let instructions: object;
 
   export function display(_instructions: object, _open: boolean = true): void {
@@ -47,17 +48,38 @@ namespace TestInstructions {
         dialog.show();
     }
     dialog.className = "dialog";
+
+    closeButton = document.createElement("div");
+    closeButton.classList.add("dialog-button");
+    closeButton.innerHTML = `<div class="a"></div><div class="b"></div><div class="c"></div>`;
+    document.body.appendChild(closeButton);
+    closeButton.classList.add("open");
+    closeButton.addEventListener("click", toggleDialog);
+
+    let viewportMeta: HTMLMetaElement = document.createElement("meta");
+    viewportMeta.name = "viewport";
+    viewportMeta.content = "width=device-width, initial-scale=1.0";
+    // viewportMeta.outerHTML = `<meta name="viewport" content=>`;
+    document.head.appendChild(viewportMeta);
   }
 
   function handleKeypress(_event: KeyboardEvent): void {
-    if (_event.code == "F1" && _event.ctrlKey)
+    if (_event.code == "F1" && _event.ctrlKey) toggleDialog();
+  }
+
+  function toggleDialog() {
+
+    //@ts-ignore
+    if (dialog.open) {
       //@ts-ignore
-      if (dialog.open)
-        //@ts-ignore
-        dialog.close();
-      else
-        //@ts-ignore
-        dialog.show();
+      dialog.close();
+      closeButton.classList.remove("open");
+    }
+    else {
+      //@ts-ignore
+      dialog.show();
+      closeButton.classList.add("open");
+    }
   }
 
   export function get(_key: string): HTMLUListElement | string {

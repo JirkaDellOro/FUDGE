@@ -11,3 +11,40 @@ fieldset.dialog {
 legend.dialog {
   color: gray;
 }
+
+div.dialog-button {
+  --size: 2em;
+  position: absolute;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: var(--size);
+  height: var(--size);
+  padding: calc(var(--size) / 8);
+  cursor: pointer;
+  background-color: rgba(256,256,256,0.5);
+}
+
+div.dialog-button > div {
+  width: var(--size);
+  height: calc(var(--size) / 4);
+  background: black;
+  display: block;
+  margin-bottom: calc(var(--size) / 8);
+}
+
+div.dialog-button > div.a {
+  transform-origin: bottom left;
+}
+div.dialog-button > div.c {
+  transform-origin: top left;
+}
+div.dialog-button.open > div.a {
+  transform: rotate(45deg);
+}
+div.dialog-button.open > div.b {
+  opacity: 0;
+}
+div.dialog-button.open > div.c {
+  transform: rotate(-45deg);
+}

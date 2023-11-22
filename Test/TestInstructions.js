@@ -3,6 +3,7 @@ var TestInstructions;
     // TODO: extend with form for comment. POST with automatically collected data to https://api.github.com/repos/JirkaDellOro/FUDGE/issues
     // see: https://developer.github.com/v3/issues/#create-an-issue
     let dialog;
+    let closeButton;
     let instructions;
     function display(_instructions, _open = true) {
         instructions = _instructions;
@@ -40,17 +41,35 @@ var TestInstructions;
                 dialog.show();
         }
         dialog.className = "dialog";
+        closeButton = document.createElement("div");
+        closeButton.classList.add("dialog-button");
+        closeButton.innerHTML = `<div class="a"></div><div class="b"></div><div class="c"></div>`;
+        document.body.appendChild(closeButton);
+        closeButton.classList.add("open");
+        closeButton.addEventListener("click", toggleDialog);
+        let viewportMeta = document.createElement("meta");
+        viewportMeta.name = "viewport";
+        viewportMeta.content = "width=device-width, initial-scale=1.0";
+        // viewportMeta.outerHTML = `<meta name="viewport" content=>`;
+        document.head.appendChild(viewportMeta);
     }
     TestInstructions.display = display;
     function handleKeypress(_event) {
         if (_event.code == "F1" && _event.ctrlKey)
+            toggleDialog();
+    }
+    function toggleDialog() {
+        //@ts-ignore
+        if (dialog.open) {
             //@ts-ignore
-            if (dialog.open)
-                //@ts-ignore
-                dialog.close();
-            else
-                //@ts-ignore
-                dialog.show();
+            dialog.close();
+            closeButton.classList.remove("open");
+        }
+        else {
+            //@ts-ignore
+            dialog.show();
+            closeButton.classList.add("open");
+        }
     }
     function get(_key) {
         return dialog.querySelector("ul#" + _key);
