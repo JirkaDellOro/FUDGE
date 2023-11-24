@@ -1115,9 +1115,7 @@ declare namespace FudgeCore {
         private static texNoise;
         private static texDepth;
         private static texOcclusion;
-        private static bloomDownsampleDepth;
-        private static texBloomDownsamples;
-        private static texBloomUpsamples;
+        private static texBloomSamples;
         /**
          * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
          */
@@ -1172,10 +1170,16 @@ declare namespace FudgeCore {
          */
         static getRenderRectangle(): Rectangle;
         /**
-         * Enable / Disable WebGLs depth test
+         * Enable / Disable WebGLs depth test.
          */
         static setDepthTest(_test: boolean): void;
+        /**
+         * Enable / Disable WebGLs scissor test.
+         */
         static setScissorTest(_test: boolean, _x: number, _y: number, _width: number, _height: number): void;
+        /**
+         * Set WebGLs viewport.
+         */
         static setViewport(_x: number, _y: number, _width: number, _height: number): void;
         /**
          * Set the blend mode to render with
@@ -1189,19 +1193,19 @@ declare namespace FudgeCore {
          * Adjusts the size of the set framebuffers corresponding textures
          */
         static adjustAttachments(): void;
-        /**
-         * Composites all effects that are used in the scene to a final render.
-         */
-        protected static composite(_cmpAmbientOcclusion: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
         protected static drawNodes(_nodesOpaque: Iterable<Node>, _nodesAlpha: Iterable<Node>, _cmpCamera: ComponentCamera): void;
         /**
          * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
          */
-        protected static drawAmbientOcclusion(_cmpCamera: ComponentCamera, _cmpAO: ComponentAmbientOcclusion): void;
+        protected static drawAmbientOcclusion(_cmpCamera: ComponentCamera, _cmpAmbientOcclusion: ComponentAmbientOcclusion): void;
         /**
          * Draws the bloom-effect into the bloom texture, using the given camera-component and the given bloom-component
          */
         protected static drawBloom(_cmpBloom: ComponentBloom): void;
+        /**
+         * Composites all effects that are used in the scene to a final render.
+         */
+        protected static composite(_cmpAmbientOcclusion: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
         /**
          * Creates a texture buffer to be used as pick-buffer
          */
@@ -7620,15 +7624,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    abstract class ShaderDownsample extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
-        static getVertexShaderSource(): string;
-        static getFragmentShaderSource(): string;
-    }
-}
-declare namespace FudgeCore {
     abstract class ShaderFlat extends Shader {
         static readonly iSubclass: number;
         static define: string[];
@@ -7785,15 +7780,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     abstract class ShaderScreen extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
-        static getVertexShaderSource(): string;
-        static getFragmentShaderSource(): string;
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderUpsample extends Shader {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;

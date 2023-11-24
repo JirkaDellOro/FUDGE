@@ -320,7 +320,7 @@
                             {
                               "ƒ.ComponentMaterial": {
                                 "sortForAlpha": false,
-                                "clrPrimary": "[0.8745098039215686, 1, 1, 1]",
+                                "clrPrimary": "[0.8627450980392157, 1, 1, 1]",
                                 "clrSecondary": "[1, 1, 1, 1]",
                                 "pivot": {
                                   "translation": "[0, 0]",
@@ -395,7 +395,7 @@
                             {
                               "ƒ.ComponentMaterial": {
                                 "sortForAlpha": false,
-                                "clrPrimary": "[1, 0.9921568627450981, 0.8666666666666667, 1]",
+                                "clrPrimary": "[1, 1, 0.8627450980392157, 1]",
                                 "clrSecondary": "[1, 1, 1, 1]",
                                 "pivot": {
                                   "translation": "[0, 0]",
@@ -470,7 +470,7 @@
                             {
                               "ƒ.ComponentMaterial": {
                                 "sortForAlpha": false,
-                                "clrPrimary": "[1, 0.9215686274509803, 1, 1]",
+                                "clrPrimary": "[1, 0.8627450980392157, 1, 1]",
                                 "clrSecondary": "[1, 1, 1, 1]",
                                 "pivot": {
                                   "translation": "[0, 0]",
@@ -578,8 +578,9 @@
                     "ComponentBloom": [
                       {
                         "ƒ.ComponentBloom": {
-                          "threshold": 0.9669999999999997,
+                          "threshold": 0.9699999999999999,
                           "intensity": 0.8,
+                          "desaturateHighlights": 1,
                           "Component": {
                             "active": true
                           }
@@ -590,8 +591,8 @@
                       {
                         "ƒ.ComponentFog": {
                           "color": "[0, 0, 0, 1]",
-                          "near": 2,
-                          "far": 19.99999999999997,
+                          "near": 5,
+                          "far": 24.99999999999997,
                           "Component": {
                             "active": true
                           }

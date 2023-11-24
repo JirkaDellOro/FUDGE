@@ -29,7 +29,7 @@ void main() {
     vctFrag.rgb = clamp(vctFrag.rgb - texelFetch(u_texOcclusion, vctFragCoord, 0).r, 0.0, 1.0);
 
   if (u_bBloom) {
-    vctFrag += (texture(u_texBloom, v_vctTexture) * u_fBloomIntensity);
+    vctFrag.rgb += clamp(texture(u_texBloom, v_vctTexture).rgb * u_fBloomIntensity, 0.0, 1.0);
 
     float r = max(vctFrag.r - 1.0, 0.0) * u_fHighlightDesaturation;
     float g = max(vctFrag.g - 1.0, 0.0) * u_fHighlightDesaturation;

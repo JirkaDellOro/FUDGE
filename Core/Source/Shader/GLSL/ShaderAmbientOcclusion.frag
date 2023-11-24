@@ -18,19 +18,23 @@ uniform float u_fBias;
 uniform float u_fAttenuationConstant;
 uniform float u_fAttenuationLinear;
 uniform float u_fAttenuationQuadratic;
-
 uniform vec2 u_vctResolution;
 uniform vec3 u_vctCamera;
 // uniform mat4 u_mtxViewProjectionInverse;
 
-uniform sampler2D u_texPosition; // world space position
-uniform sampler2D u_texNormal; // world space normal
+uniform sampler2D u_texPosition;
+uniform sampler2D u_texNormal;
 uniform sampler2D u_texNoise;
 // uniform sampler2D u_texDepth;
 
 in vec2 v_vctTexture;
-
 out vec4 vctFrag;
+
+// fog
+uniform bool u_bFog;
+uniform vec4 u_vctFogColor;
+uniform float u_fFogNear;
+uniform float u_fFogFar;
 
 // Both of these functions could be used to calculate the position from the depth texture, but mobile devices seems to lack in precision to do this
 // vec3 getPosition(vec2 _vctTexture) {
@@ -51,6 +55,13 @@ float getOcclusion(vec3 _vctPosition, vec3 _vctNormal, vec2 _vctTexture) {
   return fIntensity * fAttenuation;
 }
 
+float getFog(vec3 _vctPosition) {
+  float fDistance = length(_vctPosition - u_vctCamera); // maybe use z-depth instead of euclidean depth
+  float fFog = clamp((fDistance - u_fFogNear) / (u_fFogFar - u_fFogNear), 0.0, 1.0);
+  fFog = -pow(fFog, 2.0) + (2.0 * fFog); // lets fog appear quicker and fall off slower results in a more gradual falloff
+  return fFog;
+}
+
 void main() {
   vec3 vctPosition = texture(u_texPosition, v_vctTexture).xyz;
   vec3 vctNormal = texture(u_texNormal, v_vctTexture).xyz;
@@ -59,7 +70,7 @@ void main() {
   float fKernelRadius = u_fSampleRadius * (1.0 - fDepth);
 
   float fOcclusion = 0.0;
-  for(int i = 0; i < 4; ++i) {
+  for (int i = 0; i < 4; ++i) {
     vec2 vctK1 = reflect(kernel[i], vctRandom);
     vec2 vctK2 = vec2(vctK1.x * sin45 - vctK1.y * sin45, vctK1.x * sin45 + vctK1.y * sin45);
 
@@ -75,7 +86,9 @@ void main() {
     fOcclusion += getOcclusion(vctPosition, vctNormal, v_vctTexture + vctK2 * 0.25);
   }
 
-  // vctFrag.rgb = vctNormal;
   vctFrag.r = clamp(fOcclusion / 16.0, 0.0, 1.0);
   vctFrag.a = 1.0;
+
+  if (u_bFog && vctFrag.r > 0.0) // correct occlusion by fog factor
+    vctFrag.r = mix(vctFrag.r, 0.0, getFog(vctPosition) * u_vctFogColor.a);
 }

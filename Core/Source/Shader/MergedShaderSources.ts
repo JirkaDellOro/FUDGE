@@ -20,19 +20,23 @@ uniform float u_fBias;
 uniform float u_fAttenuationConstant;
 uniform float u_fAttenuationLinear;
 uniform float u_fAttenuationQuadratic;
-
 uniform vec2 u_vctResolution;
 uniform vec3 u_vctCamera;
 // uniform mat4 u_mtxViewProjectionInverse;
 
-uniform sampler2D u_texPosition; // world space position
-uniform sampler2D u_texNormal; // world space normal
+uniform sampler2D u_texPosition;
+uniform sampler2D u_texNormal;
 uniform sampler2D u_texNoise;
 // uniform sampler2D u_texDepth;
 
 in vec2 v_vctTexture;
-
 out vec4 vctFrag;
+
+// fog
+uniform bool u_bFog;
+uniform vec4 u_vctFogColor;
+uniform float u_fFogNear;
+uniform float u_fFogFar;
 
 // Both of these functions could be used to calculate the position from the depth texture, but mobile devices seems to lack in precision to do this
 // vec3 getPosition(vec2 _vctTexture) {
@@ -53,6 +57,13 @@ float getOcclusion(vec3 _vctPosition, vec3 _vctNormal, vec2 _vctTexture) {
   return fIntensity * fAttenuation;
 }
 
+float getFog(vec3 _vctPosition) {
+  float fDistance = length(_vctPosition - u_vctCamera); // maybe use z-depth instead of euclidean depth
+  float fFog = clamp((fDistance - u_fFogNear) / (u_fFogFar - u_fFogNear), 0.0, 1.0);
+  fFog = -pow(fFog, 2.0) + (2.0 * fFog); // lets fog appear quicker and fall off slower results in a more gradual falloff
+  return fFog;
+}
+
 void main() {
   vec3 vctPosition = texture(u_texPosition, v_vctTexture).xyz;
   vec3 vctNormal = texture(u_texNormal, v_vctTexture).xyz;
@@ -61,7 +72,7 @@ void main() {
   float fKernelRadius = u_fSampleRadius * (1.0 - fDepth);
 
   float fOcclusion = 0.0;
-  for(int i = 0; i < 4; ++i) {
+  for (int i = 0; i < 4; ++i) {
     vec2 vctK1 = reflect(kernel[i], vctRandom);
     vec2 vctK2 = vec2(vctK1.x * sin45 - vctK1.y * sin45, vctK1.x * sin45 + vctK1.y * sin45);
 
@@ -77,45 +88,117 @@ void main() {
     fOcclusion += getOcclusion(vctPosition, vctNormal, v_vctTexture + vctK2 * 0.25);
   }
 
-  // vctFrag.rgb = vctNormal;
   vctFrag.r = clamp(fOcclusion / 16.0, 0.0, 1.0);
   vctFrag.a = 1.0;
+
+  if (u_bFog && vctFrag.r > 0.0) // correct occlusion by fog factor
+    vctFrag.r = mix(vctFrag.r, 0.0, getFog(vctPosition) * u_vctFogColor.a);
 }`;
-  shaderSources["ShaderDownsample.frag"] = /*glsl*/ `#version 300 es
+  shaderSources["ShaderBloom.frag"] = /*glsl*/ `#version 300 es
 /**
- * Downsamples a given texture
- * @authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
+ * Extracts colors, downsamples and upsamples a texture
+ * Adaption of the "dual filtering kawase" method described in SIGGRAPH 2015 by Marius Bjørge
+ * https://community.arm.com/cfs-file/__key/communityserver-blogs-components-weblogfiles/00-00-00-20-66/siggraph2015_2D00_mmg_2D00_marius_2D00_notes.pdf
+ * @authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023 | Jonas Plotzky, HFU, 2023
  */
 precision mediump float;
 precision highp int;
 
-in vec2 v_vctTexture;
-flat in vec2[9] v_vctOffsets;
-
-uniform sampler2D u_tex0;
+uniform int u_iMode; // 0: extract, 1: downsample, 2: upsample
 uniform float u_fThreshold;
-uniform float u_flvl;
+uniform vec2 u_vctTexel;
 
-float gaussianKernel[9] = float[](0.045, 0.122, 0.045, 0.122, 0.332, 0.122, 0.045, 0.122, 0.045);
+uniform sampler2D u_texSource;
 
+in vec2 v_vctTexture;
 out vec4 vctFrag;
 
-void main() {
-  vctFrag = vec4(0.0);
-  for (int i = 0; i < 9; i++) 
-    vctFrag += vec4(texture(u_tex0, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
-  
-  if (u_flvl < 1.0) {
-    //None of the rendered values can exeed 1.0 therefor the bloom effect won't work if the threshold is >= 1.0
-    if (u_fThreshold >= 1.0) 
-      discard;
+// old gaussian blur
+// flat in vec2[9] v_vctOffsets;
+// const float gaussianKernel[9] = float[](0.045, 0.122, 0.045, 0.122, 0.332, 0.122, 0.045, 0.122, 0.045);
+// vec4 downsample(vec2 _vctTexture) {
+//   vec4 vctColor = vec4(0.0);
+//   for (int i = 0; i < 9; i++) 
+//     vctColor += texture(u_texSource, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i];
+//   return vctColor;
+// }
+// vec4 upsample(vec2 _vctTexture) {
+//   vec4 vctColor = vec4(0.0);
+//   for (int i = 0; i < 9; i++) 
+//     vctColor += texture(u_texSource, _vctTexture + v_vctOffsets[i]) * gaussianKernel[i];
+//   return vctColor;
+// }
 
-    vctFrag -= u_fThreshold;
-    vctFrag /= 1.0 - u_fThreshold;
-    float averageBrightness = (((vctFrag.r + vctFrag.g + vctFrag.b) / 3.0) * 0.2) + 0.8; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.8
-    vctFrag *= averageBrightness * 2.0;
+// vec3 extract(vec2 _vctTexture) {
+//   vec3 vctColor = texture(u_texSource, _vctTexture).rgb;
+//   if(any(greaterThan(vctColor, vec3(u_fThreshold))))
+//     return vctColor;
+//   discard;
+// }
+
+// vec3 extract(vec2 _vctTexture) {
+//   vec3 vctColor = texture(u_texSource, _vctTexture).rgb;
+//   float luminance = dot(vctColor, vec3(0.299, 0.587, 0.114));
+//   if(luminance > u_fThreshold)
+//     return vctColor;
+//   discard;
+// }
+
+// old extraction with average brightness
+vec3 extract(vec2 _vctTexture) {
+  vec3 vctColor = texture(u_texSource, _vctTexture).rgb;
+  if(u_fThreshold >= 1.0)
+    discard;
+
+  vctColor -= u_fThreshold;
+  vctColor /= 1.0 - u_fThreshold;
+  float averageBrightness = (((vctColor.r + vctColor.g + vctColor.b) / 3.0) * 0.2) + 0.8; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.8
+  vctColor = clamp(vctColor, 0.0, 1.0) * clamp(averageBrightness, 0.0, 1.0);
+  return vctColor;
+}
+
+vec4 downsample(vec2 _vctTexture) {
+  vec4 sum = texture(u_texSource, _vctTexture) * 4.0;
+  sum += texture(u_texSource, _vctTexture - u_vctTexel.xy);
+  sum += texture(u_texSource, _vctTexture + u_vctTexel.xy);
+  sum += texture(u_texSource, _vctTexture + vec2(u_vctTexel.x, -u_vctTexel.y));
+  sum += texture(u_texSource, _vctTexture - vec2(u_vctTexel.x, -u_vctTexel.y));
+
+  return sum / 8.0;
+}
+
+vec4 upsample(vec2 _vctTexture) {
+  vec4 sum = texture(u_texSource, _vctTexture + vec2(-u_vctTexel.x * 2.0, 0.0));
+  sum += texture(u_texSource, _vctTexture + vec2(-u_vctTexel.x, u_vctTexel.y)) * 2.0;
+  sum += texture(u_texSource, _vctTexture + vec2(0.0, u_vctTexel.y * 2.0));
+  sum += texture(u_texSource, _vctTexture + vec2(u_vctTexel.x, u_vctTexel.y)) * 2.0;
+  sum += texture(u_texSource, _vctTexture + vec2(u_vctTexel.x * 2.0, 0.0));
+  sum += texture(u_texSource, _vctTexture + vec2(u_vctTexel.x, -u_vctTexel.y)) * 2.0;
+  sum += texture(u_texSource, _vctTexture + vec2(0.0, -u_vctTexel.y * 2.0));
+  sum += texture(u_texSource, _vctTexture + vec2(-u_vctTexel.x, -u_vctTexel.y)) * 2.0;
+  return sum / 12.0;
+}
+
+void main() {
+  if(u_iMode == 0) {
+    vctFrag.rgb = extract(v_vctTexture);
+    vctFrag.a = 1.0;
+    return;
   }
-  vctFrag *= 1.3;
+
+  vec2 vctHalfPixel;
+
+  switch(u_iMode) {
+    case 1:
+      vctFrag = downsample(v_vctTexture);
+      return;
+    case 2:
+      vctFrag = upsample(v_vctTexture);
+      return;
+    default:
+      vctFrag = texture(u_texSource, v_vctTexture);
+      return;
+  }
 }`;
   shaderSources["ShaderPhong.frag"] = /*glsl*/ `#version 300 es
 /**
@@ -132,7 +215,6 @@ uniform float u_fSpecular;
 uniform float u_fIntensity;
 uniform float u_fMetallic;
 uniform vec3 u_vctCamera;
-uniform mat4 u_mtxWorldToCamera;
 
 uniform bool u_bFog;
 uniform vec4 u_vctFogColor;
@@ -222,6 +304,13 @@ void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec3
   }
 }
 
+float getFog(vec3 _vctPosition) {
+  float fDistance = length(_vctPosition - u_vctCamera); // maybe use z-depth instead of euclidean depth
+  float fFog = clamp((fDistance - u_fFogNear) / (u_fFogFar - u_fFogNear), 0.0, 1.0);
+  fFog = -pow(fFog, 2.0) + (2.0 * fFog); // lets fog appear quicker and fall off slower results in a more gradual falloff
+  return fFog;
+}
+
 void main() {
   #if defined(PHONG) && !defined(FLAT)
 
@@ -301,19 +390,11 @@ void main() {
   vctFrag *= u_vctColor * v_vctColor;
   vctFrag.rgb += vctSpecular * (1.0 - u_fMetallic);
 
-  // write into fragment buffers TODO: do this in vertex shader
-  // vctFragNormal = vec4(normalize(mat3(u_mtxWorldToCamera) * vctNormal), 1.0); // maybe do all shading in view space so we can move this to the vertex shader
-  // vctFragPosition = u_mtxWorldToCamera * vec4(vctPosition, 1.0);
-
   vctFragPosition = vec4(v_vctPosition, 1.0); // don't use flat here, because we want to interpolate the position
   vctFragNormal = vec4(vctNormal, 1.0);
 
-  if (u_bFog) {
-    float distance = length(vctPosition - u_vctCamera); // maybe use z-depth instead of euclidean depth
-    float fogAmount = min(max((distance - u_fFogNear) / (u_fFogFar - u_fFogNear), 0.0), 1.0);
-    fogAmount = -pow(fogAmount, 2.0) + (2.0 * fogAmount); //lets Fog appear quicker and fall off slower results in a more gradual falloff
-    vctFrag = mix(vctFrag, vec4(u_vctFogColor.rgb, 1.0f), fogAmount * u_vctFogColor.a);
-  }
+  if (u_bFog) 
+    vctFrag.rgb = mix(vctFrag.rgb, u_vctFogColor.rgb, getFog(vctPosition) * u_vctFogColor.a);
 
   vctFrag.rgb *= vctFrag.a;
 
@@ -428,7 +509,7 @@ void main() {
     vctFrag.rgb = clamp(vctFrag.rgb - texelFetch(u_texOcclusion, vctFragCoord, 0).r, 0.0, 1.0);
 
   if (u_bBloom) {
-    vctFrag += (texture(u_texBloom, v_vctTexture) * u_fBloomIntensity);
+    vctFrag.rgb += clamp(texture(u_texBloom, v_vctTexture).rgb * u_fBloomIntensity, 0.0, 1.0);
 
     float r = max(vctFrag.r - 1.0, 0.0) * u_fHighlightDesaturation;
     float g = max(vctFrag.g - 1.0, 0.0) * u_fHighlightDesaturation;
@@ -505,8 +586,15 @@ precision highp int;
 
 // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;
+uniform vec3 u_vctCamera;
+
+uniform bool u_bFog;
+uniform vec4 u_vctFogColor;
+uniform float u_fFogNear;
+uniform float u_fFogFar;
 
 in vec4 v_vctColor;
+in vec3 v_vctPosition;
 
 layout(location = 0) out vec4 vctFrag;
 layout(location = 1) out vec4 vctFragPosition;
@@ -528,6 +616,13 @@ layout(location = 2) out vec4 vctFragNormal;
   uniform sampler2D u_texColor;
 
 #endif
+
+float getFog(vec3 _vctPosition) {
+  float fDistance = length(_vctPosition - u_vctCamera); // maybe use z-depth instead of euclidean depth
+  float fFog = clamp((fDistance - u_fFogNear) / (u_fFogFar - u_fFogNear), 0.0, 1.0);
+  fFog = -pow(fFog, 2.0) + (2.0 * fFog); // lets fog appear quicker and fall off slower results in a more gradual falloff
+  return fFog;
+}
 
 void main() {
   
@@ -558,11 +653,13 @@ void main() {
   
   #endif
 
-  vctFrag.rgb *= vctFrag.a;
+  vctFragPosition = vec4(v_vctPosition, 1.0);
+  vctFragNormal = vec4(normalize(cross(dFdx(v_vctPosition), dFdy(v_vctPosition))), 1.0);
 
-  // for now just pass nothing as normal
-  vctFragPosition = vec4(0.0);
-  vctFragNormal = vec4(0.0); 
+  if (u_bFog) 
+    vctFrag.rgb = mix(vctFrag.rgb, u_vctFogColor.rgb, getFog(v_vctPosition) * u_vctFogColor.a);
+
+  vctFrag.rgb *= vctFrag.a;
 
   // discard pixel alltogether when transparent: don't show in Z-Buffer
   if(vctFrag.a < 0.01)
@@ -583,13 +680,14 @@ in vec3 a_vctPosition;
 // TODO: think about making vertex color optional
 in vec4 a_vctColor;
 out vec4 v_vctColor;
+out vec3 v_vctPosition;
 
   // PARTICLE: offer buffer and functionality for in shader position calculation
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA) || defined(PARTICLE)
+  // #if defined(CAMERA) || defined(PARTICLE)
 uniform mat4 u_mtxMeshToWorld;
 uniform vec3 u_vctCamera;
-  #endif
+  // #endif
 
   // LIGHT: offer buffers for lighting vertices with different light types
   #if defined(LIGHT)
@@ -671,11 +769,11 @@ out vec2 v_vctTexture;
 
   #if defined(PHONG)
 out vec3 v_vctNormal;
-out vec3 v_vctPosition;
+// out vec3 v_vctPosition;
   #endif
 
   #if defined(FLAT)
-out vec3 v_vctPosition;
+// out vec3 v_vctPosition;
 flat out vec3 v_vctPositionFlat;
   #endif
 
@@ -719,9 +817,9 @@ float fetchRandomNumber(int _iIndex, int _iParticleSystemRandomNumbersSize, int 
 void main() {
   vec4 vctPosition = vec4(a_vctPosition, 1.0);
 
-    #if defined(CAMERA) || defined(PARTICLE) || defined(SKIN) || defined(MATCAP)
+    // #if defined(CAMERA) || defined(PARTICLE) || defined(SKIN) || defined(MATCAP)
   mat4 mtxMeshToWorld = u_mtxMeshToWorld;
-    #endif
+    // #endif
 
     #if defined(PARTICLE)
   float fParticleId = float(gl_InstanceID);
@@ -760,6 +858,7 @@ void main() {
   gl_Position = mtxMeshToView * vctPosition;
 
   v_vctColor = a_vctColor;
+  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
 
     #if defined(PARTICLE_COLOR)
   v_vctColor *= /*$color*/;
@@ -774,11 +873,11 @@ void main() {
 
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader
-  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+  // v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
       #endif
 
       #if defined(FLAT)
-  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+  // v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
   v_vctPositionFlat = v_vctPosition;
       #endif
 
@@ -845,31 +944,6 @@ for(uint i = 0u;i < u_nLightsSpot;i ++) {
 
   v_vctTexture = 0.5 * vctReflection.xy + 0.5;
     #endif
-}`;
-  shaderSources["ShaderUpsample.frag"] = /*glsl*/ `#version 300 es
-/**
- * Upsamples a given texture onto the current FBOs texture and applies a small gaussian blur
- * @authors Roland Heer, HFU, 2023 | Jirka Dell'Oro-Friedl, HFU, 2023
- */
-precision mediump float;
-precision highp int;
-
-in vec2 v_vctTexture;
-flat in vec2[9] v_vctOffsets;
-uniform sampler2D u_tex0;
-uniform sampler2D u_tex1;
-
-float gaussianKernel[9] = float[](0.045, 0.122, 0.045, 0.122, 0.332, 0.122, 0.045, 0.122, 0.045);
-
-out vec4 vctFrag;
-
-void main() {
-  vec4 tex1 = vec4(0.0);
-  for(int i = 0; i < 9; i++) {
-    tex1 += vec4(texture(u_tex0, v_vctTexture + v_vctOffsets[i]) * gaussianKernel[i]);
-  }
-  vec4 tex2 = texture(u_tex1, v_vctTexture);
-  vctFrag = tex2 + tex1;
 }`;
 
 }

@@ -13,13 +13,14 @@ in vec3 a_vctPosition;
 // TODO: think about making vertex color optional
 in vec4 a_vctColor;
 out vec4 v_vctColor;
+out vec3 v_vctPosition;
 
   // PARTICLE: offer buffer and functionality for in shader position calculation
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
-  #if defined(CAMERA) || defined(PARTICLE)
+  // #if defined(CAMERA) || defined(PARTICLE)
 uniform mat4 u_mtxMeshToWorld;
 uniform vec3 u_vctCamera;
-  #endif
+  // #endif
 
   // LIGHT: offer buffers for lighting vertices with different light types
   #if defined(LIGHT)
@@ -101,11 +102,11 @@ out vec2 v_vctTexture;
 
   #if defined(PHONG)
 out vec3 v_vctNormal;
-out vec3 v_vctPosition;
+// out vec3 v_vctPosition;
   #endif
 
   #if defined(FLAT)
-out vec3 v_vctPosition;
+// out vec3 v_vctPosition;
 flat out vec3 v_vctPositionFlat;
   #endif
 
@@ -149,9 +150,9 @@ float fetchRandomNumber(int _iIndex, int _iParticleSystemRandomNumbersSize, int 
 void main() {
   vec4 vctPosition = vec4(a_vctPosition, 1.0);
 
-    #if defined(CAMERA) || defined(PARTICLE) || defined(SKIN) || defined(MATCAP)
+    // #if defined(CAMERA) || defined(PARTICLE) || defined(SKIN) || defined(MATCAP)
   mat4 mtxMeshToWorld = u_mtxMeshToWorld;
-    #endif
+    // #endif
 
     #if defined(PARTICLE)
   float fParticleId = float(gl_InstanceID);
@@ -190,6 +191,7 @@ void main() {
   gl_Position = mtxMeshToView * vctPosition;
 
   v_vctColor = a_vctColor;
+  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
 
     #if defined(PARTICLE_COLOR)
   v_vctColor *= /*$color*/;
@@ -204,11 +206,11 @@ void main() {
 
       #if defined(PHONG)
   v_vctNormal = vctNormal; // pass normal to fragment shader
-  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+  // v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
       #endif
 
       #if defined(FLAT)
-  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+  // v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
   v_vctPositionFlat = v_vctPosition;
       #endif
 

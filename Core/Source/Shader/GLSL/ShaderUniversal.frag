@@ -9,8 +9,15 @@ precision highp int;
 
 // MINIMAL (no define needed): include base color
 uniform vec4 u_vctColor;
+uniform vec3 u_vctCamera;
+
+uniform bool u_bFog;
+uniform vec4 u_vctFogColor;
+uniform float u_fFogNear;
+uniform float u_fFogFar;
 
 in vec4 v_vctColor;
+in vec3 v_vctPosition;
 
 layout(location = 0) out vec4 vctFrag;
 layout(location = 1) out vec4 vctFragPosition;
@@ -32,6 +39,13 @@ layout(location = 2) out vec4 vctFragNormal;
   uniform sampler2D u_texColor;
 
 #endif
+
+float getFog(vec3 _vctPosition) {
+  float fDistance = length(_vctPosition - u_vctCamera); // maybe use z-depth instead of euclidean depth
+  float fFog = clamp((fDistance - u_fFogNear) / (u_fFogFar - u_fFogNear), 0.0, 1.0);
+  fFog = -pow(fFog, 2.0) + (2.0 * fFog); // lets fog appear quicker and fall off slower results in a more gradual falloff
+  return fFog;
+}
 
 void main() {
   
@@ -62,11 +76,13 @@ void main() {
   
   #endif
 
-  vctFrag.rgb *= vctFrag.a;
+  vctFragPosition = vec4(v_vctPosition, 1.0);
+  vctFragNormal = vec4(normalize(cross(dFdx(v_vctPosition), dFdy(v_vctPosition))), 1.0);
 
-  // for now just pass nothing as normal
-  vctFragPosition = vec4(0.0);
-  vctFragNormal = vec4(0.0); 
+  if (u_bFog) 
+    vctFrag.rgb = mix(vctFrag.rgb, u_vctFogColor.rgb, getFog(v_vctPosition) * u_vctFogColor.a);
+
+  vctFrag.rgb *= vctFrag.a;
 
   // discard pixel alltogether when transparent: don't show in Z-Buffer
   if(vctFrag.a < 0.01)
