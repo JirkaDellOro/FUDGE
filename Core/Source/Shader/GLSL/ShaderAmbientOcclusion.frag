@@ -1,7 +1,7 @@
 #version 300 es
 /**
  * Calculates ambient occlusion for a given fragment
- * @authors Jonas Plotzky, HFU, 2023
+ * @authors Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
  * adaption of https://github.com/tsherif/webgl2examples/blob/da1153a15ebc09bb13498e5f732ef2036507740c/ssao.html
  * see here for an in depth explanation: 
 */
@@ -36,7 +36,7 @@ uniform vec4 u_vctFogColor;
 uniform float u_fFogNear;
 uniform float u_fFogFar;
 
-// Both of these functions could be used to calculate the position from the depth texture, but mobile devices seems to lack in precision to do this
+// This function could be used to calculate the position from the depth texture, but mobile devices seems to lack in precision to do this
 // vec3 getPosition(vec2 _vctTexture) {
 //   float fDepth = texture(u_texDepth, _vctTexture).r;
 //   vec4 clipSpacePosition = vec4(_vctTexture * 2.0 - 1.0, fDepth * 2.0 - 1.0, 1.0);
@@ -66,7 +66,7 @@ void main() {
   vec3 vctPosition = texture(u_texPosition, v_vctTexture).xyz;
   vec3 vctNormal = texture(u_texNormal, v_vctTexture).xyz;
   vec2 vctRandom = normalize(texture(u_texNoise, v_vctTexture).xy * 2.0 - 1.0);
-  float fDepth = (length(vctPosition - u_vctCamera) - u_fNear) / (u_fFar - u_fNear); // linear euclidean depth in range [0,1] TODO: when changing to view space, don't subtract camera position
+  float fDepth = (length(vctPosition - u_vctCamera) - u_fNear) / (u_fFar - u_fNear); // linear euclidean depth in range [0,1], when changing to view space, don't subtract camera position
   float fKernelRadius = u_fSampleRadius * (1.0 - fDepth);
 
   float fOcclusion = 0.0;

@@ -55,13 +55,14 @@ layout(std140) uniform Lights {
   uint u_nLightsDirectional;
   uint u_nLightsPoint;
   uint u_nLightsSpot;
+  uint padding; // Add padding to align to 16 bytes
   Light u_ambient;
   Light u_directional[MAX_LIGHTS_DIRECTIONAL];
   Light u_point[MAX_LIGHTS_POINT];
   Light u_spot[MAX_LIGHTS_SPOT];
 };
 
-void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec3 _vctColor, out vec3 _vctDiffuse, out vec3 _vctSpecular) {
+void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec3 _vctColor, inout vec3 _vctDiffuse, inout vec3 _vctSpecular) {
   vec3 vctDirection = normalize(_vctDirection);
   float fIllumination = -dot(_vctNormal, vctDirection);
   if(fIllumination > 0.0) {

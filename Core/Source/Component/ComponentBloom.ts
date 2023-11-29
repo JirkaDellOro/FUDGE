@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
-   * Attaches a {@link Material} to the node
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
+   * Attached to a {@link Node} with an attached {@link ComponentCamera} this causes the rendered image to receive a bloom-effect.
+   * @authors Roland Heer, HFU, 2023
    */
   export class ComponentBloom extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentBloom);
@@ -10,7 +10,7 @@ namespace FudgeCore {
     #intensity: number;
     #highlightDesaturation: number;
 
-    public constructor(_threshold: number = 0.9, _intensity: number = 1.0, _desaturateHighlights: number = 0.5) {
+    public constructor(_threshold: number = 0.95, _intensity: number = 1.0, _desaturateHighlights: number = 0.5) {
       super();
       this.#threshold = _threshold;
       this.#intensity = _intensity;

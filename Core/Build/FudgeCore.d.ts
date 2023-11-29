@@ -1978,8 +1978,8 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Attaches a {@link Material} to the node
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
+     * Attached to a {@link Node} with an attached {@link ComponentCamera} this causes the rendered image to receive an ambient occlusion effect.
+     * @authors Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
      */
     class ComponentAmbientOcclusion extends Component {
         static readonly iSubclass: number;
@@ -2193,8 +2193,8 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Attaches a {@link Material} to the node
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
+     * Attached to a {@link Node} with an attached {@link ComponentCamera} this causes the rendered image to receive a bloom-effect.
+     * @authors Roland Heer, HFU, 2023
      */
     class ComponentBloom extends Component {
         #private;

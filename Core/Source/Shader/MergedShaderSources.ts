@@ -3,7 +3,7 @@ namespace FudgeCore {
   shaderSources["ShaderAmbientOcclusion.frag"] = /*glsl*/ `#version 300 es
 /**
  * Calculates ambient occlusion for a given fragment
- * @authors Jonas Plotzky, HFU, 2023
+ * @authors Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
  * adaption of https://github.com/tsherif/webgl2examples/blob/da1153a15ebc09bb13498e5f732ef2036507740c/ssao.html
  * see here for an in depth explanation: 
 */
@@ -38,7 +38,7 @@ uniform vec4 u_vctFogColor;
 uniform float u_fFogNear;
 uniform float u_fFogFar;
 
-// Both of these functions could be used to calculate the position from the depth texture, but mobile devices seems to lack in precision to do this
+// This function could be used to calculate the position from the depth texture, but mobile devices seems to lack in precision to do this
 // vec3 getPosition(vec2 _vctTexture) {
 //   float fDepth = texture(u_texDepth, _vctTexture).r;
 //   vec4 clipSpacePosition = vec4(_vctTexture * 2.0 - 1.0, fDepth * 2.0 - 1.0, 1.0);
@@ -68,7 +68,7 @@ void main() {
   vec3 vctPosition = texture(u_texPosition, v_vctTexture).xyz;
   vec3 vctNormal = texture(u_texNormal, v_vctTexture).xyz;
   vec2 vctRandom = normalize(texture(u_texNoise, v_vctTexture).xy * 2.0 - 1.0);
-  float fDepth = (length(vctPosition - u_vctCamera) - u_fNear) / (u_fFar - u_fNear); // linear euclidean depth in range [0,1] TODO: when changing to view space, don't subtract camera position
+  float fDepth = (length(vctPosition - u_vctCamera) - u_fNear) / (u_fFar - u_fNear); // linear euclidean depth in range [0,1], when changing to view space, don't subtract camera position
   float fKernelRadius = u_fSampleRadius * (1.0 - fDepth);
 
   float fOcclusion = 0.0;
@@ -147,11 +147,13 @@ out vec4 vctFrag;
 // old extraction with average brightness
 vec3 extract(vec2 _vctTexture) {
   vec3 vctColor = texture(u_texSource, _vctTexture).rgb;
-  if(u_fThreshold >= 1.0)
-    discard;
+  float fThreshold = u_fThreshold;
+  if(fThreshold >= 1.0)
+    fThreshold = 0.999999;
 
-  vctColor -= u_fThreshold;
-  vctColor /= 1.0 - u_fThreshold;
+  vctColor = vctColor - fThreshold;
+  vctColor = vctColor / (1.0 - fThreshold); // negative values might receive values above 1.0...
+  
   float averageBrightness = (((vctColor.r + vctColor.g + vctColor.b) / 3.0) * 0.2) + 0.8; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.8
   vctColor = clamp(vctColor, 0.0, 1.0) * clamp(averageBrightness, 0.0, 1.0);
   return vctColor;
@@ -254,6 +256,7 @@ layout(std140) uniform Lights {
   uint u_nLightsDirectional;
   uint u_nLightsPoint;
   uint u_nLightsSpot;
+  uint padding; // Add padding to align to 16 bytes
   Light u_ambient;
   Light u_directional[MAX_LIGHTS_DIRECTIONAL];
   Light u_point[MAX_LIGHTS_POINT];
@@ -286,7 +289,7 @@ vec4 showVectorAsColor(vec3 _vector, bool _clamp) {
   return vec4(_vector.x, _vector.y, _vector.z, 1);
 }
 
-void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec3 _vctColor, out vec3 _vctDiffuse, out vec3 _vctSpecular) {
+void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec3 _vctColor, inout vec3 _vctDiffuse, inout vec3 _vctSpecular) {
   vec3 vctDirection = normalize(_vctDirection);
   float fIllumination = -dot(_vctNormal, vctDirection);
   if(fIllumination > 0.0) {
@@ -509,15 +512,21 @@ void main() {
     vctFrag.rgb = clamp(vctFrag.rgb - texelFetch(u_texOcclusion, vctFragCoord, 0).r, 0.0, 1.0);
 
   if (u_bBloom) {
-    vctFrag.rgb += clamp(texture(u_texBloom, v_vctTexture).rgb * u_fBloomIntensity, 0.0, 1.0);
+    vec3 vctBloom = clamp(texture(u_texBloom, v_vctTexture).rgb, 0.0, 1.0);
 
-    float r = max(vctFrag.r - 1.0, 0.0) * u_fHighlightDesaturation;
-    float g = max(vctFrag.g - 1.0, 0.0) * u_fHighlightDesaturation;
-    float b = max(vctFrag.b - 1.0, 0.0) * u_fHighlightDesaturation;
-
-    vctFrag.r += g + b;
-    vctFrag.g += r + b;
-    vctFrag.b += r + g;
+    if (vctBloom.r >= 1.0 || vctBloom.g >= 1.0 || vctBloom.b >= 1.0) // maybe use threshold instead of 1.0?
+      vctBloom = mix(vctBloom, vec3(1.0), u_fHighlightDesaturation);
+    
+    vctFrag.rgb += clamp(vctBloom * u_fBloomIntensity, 0.0, 1.0);
+    
+    // old desaturation, was dependent on the background color...
+    // vctFrag.rgb += clamp(texture(u_texBloom, v_vctTexture).rgb * u_fBloomIntensity, 0.0, 1.0);
+    // float r = max(vctFrag.r - 1.0, 0.0) * u_fHighlightDesaturation;
+    // float g = max(vctFrag.g - 1.0, 0.0) * u_fHighlightDesaturation;
+    // float b = max(vctFrag.b - 1.0, 0.0) * u_fHighlightDesaturation;
+    // vctFrag.r += g + b;
+    // vctFrag.g += r + b;
+    // vctFrag.b += r + g;
   }
 
   // blend by ONE, ONE_MINUS_SRC_ALPHA for premultiplied alpha from color shading
@@ -722,13 +731,14 @@ layout(std140) uniform Lights {
   uint u_nLightsDirectional;
   uint u_nLightsPoint;
   uint u_nLightsSpot;
+  uint padding; // Add padding to align to 16 bytes
   Light u_ambient;
   Light u_directional[MAX_LIGHTS_DIRECTIONAL];
   Light u_point[MAX_LIGHTS_POINT];
   Light u_spot[MAX_LIGHTS_SPOT];
 };
 
-void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec3 _vctColor, out vec3 _vctDiffuse, out vec3 _vctSpecular) {
+void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec3 _vctColor, inout vec3 _vctDiffuse, inout vec3 _vctSpecular) {
   vec3 vctDirection = normalize(_vctDirection);
   float fIllumination = -dot(_vctNormal, vctDirection);
   if(fIllumination > 0.0) {

@@ -315,7 +315,7 @@ namespace FudgeCore {
       crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, width, height, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, null);
 
       crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texPosition);
-      // TODO: after changing light shaders to view space use RGBA16F instead of RGBA32F, as in view space 16F is precise enough
+      // In view space 16F would be precise enough... but we want to use world space for calculations
       crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA32F, width, height, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.FLOAT, null);
 
       crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texNormal);
@@ -346,7 +346,7 @@ namespace FudgeCore {
       }
 
       crc3.bindTexture(crc3.TEXTURE_2D, RenderWebGL.texNoise);
-      crc3.texImage2D(crc3.TEXTURE_2D, 0, crc3.RG8, width, height, 0, crc3.RG, crc3.UNSIGNED_BYTE, noiseData);
+      crc3.texImage2D(crc3.TEXTURE_2D, 0, crc3.RGBA, width, height, 0, crc3.RGBA, crc3.UNSIGNED_BYTE, noiseData);
       crc3.bindTexture(crc3.TEXTURE_2D, null);
     }
 
@@ -616,14 +616,14 @@ namespace FudgeCore {
       // fill the buffer with the ambient light color
       let cmpLights: RecycableArray<ComponentLight> = _lights.get(LightAmbient);
       if (cmpLights) {
-        let result: Color = new Color(0, 0, 0, 0);
+        let clrSum: Color = new Color(0, 0, 0, 0);
         for (let cmpLight of cmpLights)
-          result.add(cmpLight.light.color);
+          clrSum.add(cmpLight.light.color);
 
         RenderWebGL.crc3.bufferSubData(
           RenderWebGL.crc3.UNIFORM_BUFFER,
           RenderWebGL.uboLightsVariableOffsets["u_ambient.vctColor"], // byte offset of the struct Light "u_ambient" inside the ubo
-          new Float32Array(result.getArray())
+          new Float32Array(clrSum.getArray())
         );
       }
 

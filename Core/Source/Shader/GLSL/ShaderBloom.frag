@@ -51,11 +51,13 @@ out vec4 vctFrag;
 // old extraction with average brightness
 vec3 extract(vec2 _vctTexture) {
   vec3 vctColor = texture(u_texSource, _vctTexture).rgb;
-  if(u_fThreshold >= 1.0)
-    discard;
+  float fThreshold = u_fThreshold;
+  if(fThreshold >= 1.0)
+    fThreshold = 0.999999;
 
-  vctColor -= u_fThreshold;
-  vctColor /= 1.0 - u_fThreshold;
+  vctColor = vctColor - fThreshold;
+  vctColor = vctColor / (1.0 - fThreshold); // negative values might receive values above 1.0...
+  
   float averageBrightness = (((vctColor.r + vctColor.g + vctColor.b) / 3.0) * 0.2) + 0.8; //the effect is reduced by first setting it to a 0.0-0.2 range and then adding 0.8
   vctColor = clamp(vctColor, 0.0, 1.0) * clamp(averageBrightness, 0.0, 1.0);
   return vctColor;
