@@ -7628,7 +7628,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7636,7 +7635,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7644,7 +7642,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7652,7 +7649,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7721,7 +7717,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7729,7 +7724,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7737,7 +7731,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7745,7 +7738,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7753,7 +7745,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7761,7 +7752,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
