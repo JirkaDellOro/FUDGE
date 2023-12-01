@@ -3,7 +3,6 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderPhong);
 
     public static define: string[] = [
-      "LIGHT",
       "PHONG"
     ];
 

@@ -6,44 +6,44 @@
 precision mediump float;
 precision highp int;
 
-  // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxMeshToWorld; // needed for FOG
 uniform mat4 u_mtxMeshToView;
 
 in vec3 a_vctPosition;
 in vec4 a_vctColor; // TODO: think about making vertex color optional
 
-out vec4 v_vctColor;
 out vec3 v_vctPosition;
+out vec4 v_vctColor;
 
-// LIGHT: offer buffers for lighting vertices with different light types
-#if defined(LIGHT)
+#if defined(FLAT) || defined(GOURAUD) || defined(PHONG) || defined(PARTICLE) || defined(MATCAP)
+
+  uniform vec3 u_vctCamera;
+
+#endif
+
+#if defined(FLAT) || defined(GOURAUD) || defined(PHONG)
 
   uniform mat4 u_mtxNormalMeshToWorld;
-  uniform vec3 u_vctCamera;
+
+  in vec3 a_vctNormal;
+  out vec3 v_vctNormal;
+
+#endif
+
+#if defined(FLAT)
+
+  flat out vec3 v_vctPositionFlat;
+
+#endif
+
+#if defined(GOURAUD)
 
   uniform float u_fDiffuse;
   uniform float u_fSpecular;
   uniform float u_fIntensity;
 
-  in vec3 a_vctNormal;
-
-  out vec3 v_vctNormal;
-
-  #if !defined(PHONG) && !defined(FLAT) // gouraud
-
-    out vec3 v_vctDiffuse;
-    out vec3 v_vctSpecular;
-
-  #endif
-
-  #if defined(NORMALMAP)
-
-    in vec4 a_vctTangent;
-    out vec3 v_vctTangent;
-    out vec3 v_vctBitangent;
-
-  #endif
+  out vec3 v_vctDiffuse;
+  out vec3 v_vctSpecular;
 
   struct Light {
     vec4 vctColor;
@@ -89,14 +89,22 @@ out vec3 v_vctPosition;
     }
   }
 
-#endif 
+#endif
 
-// TEXTURE and NORMALMAP: texture coordinates for texturemaps
 #if defined(TEXTURE) || defined(NORMALMAP)
 
   uniform mat3 u_mtxPivot;
+
   in vec2 a_vctTexture;
   out vec2 v_vctTexture;
+
+#endif
+
+#if defined(NORMALMAP)
+
+  in vec4 a_vctTangent;
+  out vec3 v_vctTangent;
+  out vec3 v_vctBitangent;
 
 #endif
 
@@ -105,15 +113,9 @@ out vec3 v_vctPosition;
   
   uniform mat4 u_mtxWorldToCamera;
   uniform mat4 u_mtxNormalMeshToWorld;
-  uniform vec3 u_vctCamera;
+
   in vec3 a_vctNormal;
   out vec2 v_vctTexture;
-
-#endif
-
-#if defined(FLAT)
-
-  flat out vec3 v_vctPositionFlat;
 
 #endif
 
@@ -164,6 +166,12 @@ void main() {
   mat4 mtxMeshToWorld = u_mtxMeshToWorld;
   mat4 mtxMeshToView = u_mtxMeshToView;
 
+  #if defined(FLAT) || defined(GOURAUD) || defined(PHONG) // only these work with particle and skinning
+
+    mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
+
+  #endif
+
   #if defined(PARTICLE)
   
     float fParticleId = float(gl_InstanceID);
@@ -177,20 +185,10 @@ void main() {
       mat4(length(vec3(mtxMeshToWorld[0][0], mtxMeshToWorld[1][0], mtxMeshToWorld[2][0])), 0.0, 0.0, 0.0, 0.0, length(vec3(mtxMeshToWorld[0][1], mtxMeshToWorld[1][1], mtxMeshToWorld[2][1])), 0.0, 0.0, 0.0, 0.0, length(vec3(mtxMeshToWorld[0][2], mtxMeshToWorld[1][2], mtxMeshToWorld[2][2])), 0.0, 0.0, 0.0, 0.0, 1.0);
     mtxMeshToView = u_mtxWorldToView * mtxMeshToWorld;
 
-  #endif
+    #if defined(FLAT) || defined(GOURAUD) || defined(PHONG)
 
-  #if defined(LIGHT) || defined(MATCAP)
+      mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
 
-    vec3 vctNormal = a_vctNormal;
-
-    #if defined(PARTICLE)
-
-      mat4 mtxNormalMeshToWorld = transpose(inverse(mtxMeshToWorld));
-
-    #else
-
-      mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
-      
     #endif
 
   #endif
@@ -207,10 +205,11 @@ void main() {
 
   #endif
 
-  gl_Position = mtxMeshToView * vctPosition;
+  gl_Position = mtxMeshToView * vctPosition; 
+  vctPosition = mtxMeshToWorld * vctPosition;
 
   v_vctColor = a_vctColor;
-  v_vctPosition = vec3(mtxMeshToWorld * vctPosition);
+  v_vctPosition = vctPosition.xyz;
 
   #if defined(PARTICLE_COLOR)
 
@@ -218,69 +217,63 @@ void main() {
 
   #endif
 
-  #if defined(LIGHT) || defined(MATCAP)
+  #if defined(FLAT)
 
-    vec3 vctView = normalize(vec3(mtxMeshToWorld * vctPosition) - u_vctCamera);
+    v_vctPositionFlat = v_vctPosition;
+    
+  #endif
+
+  #if defined(FLAT) || defined(GOURAUD) || defined(PHONG)
+
+    v_vctNormal = mat3(mtxNormalMeshToWorld) * a_vctNormal; // unnormalized as it must be normalized in the fragment shader anyway
+
+  #endif 
+
+  #if defined(NORMALMAP)
+
+    v_vctTangent = mat3(mtxNormalMeshToWorld) * a_vctTangent.xyz;
+    v_vctBitangent = cross(v_vctNormal, v_vctTangent) * a_vctTangent.w;
 
   #endif
 
-  #if defined(LIGHT) // light
+  #if defined(GOURAUD)
+  
+    vec3 vctView = normalize(vctPosition.xyz - u_vctCamera);
+    vec3 vctNormal = normalize(v_vctNormal);
+    v_vctDiffuse = u_fDiffuse * u_ambient.vctColor.rgb;
+    v_vctSpecular = vec3(0, 0, 0);
 
-    vctNormal = mat3(mtxNormalMeshToWorld) * vctNormal;
-    v_vctNormal = vctNormal;
+    // calculate directional light effect
+    for(uint i = 0u; i < u_nLightsDirectional; i ++) {
+      vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
+      illuminateDirected(vctDirection, vctView, vctNormal, u_directional[i].vctColor.rgb, v_vctDiffuse, v_vctSpecular);
+    }
 
-    #if defined(FLAT)
+    // calculate point light effect
+    for(uint i = 0u;i < u_nLightsPoint;i ++) {
+      vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
+      vec3 vctDirection = vctPosition.xyz - vctPositionLight;
+      float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
+      if(fIntensity < 0.0) continue;
 
-      v_vctPositionFlat = v_vctPosition;
-    
-    #endif
+      illuminateDirected(vctDirection, vctView, vctNormal, u_point[i].vctColor.rgb * fIntensity, v_vctDiffuse, v_vctSpecular);
+    }
 
-    #if defined(NORMALMAP)
+    // calculate spot light effect
+    for(uint i = 0u;i < u_nLightsSpot;i ++) {
+      vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
+      vec3 vctDirection = vctPosition.xyz - vctPositionLight;
+      vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
+      if(vctDirectionInverted.z <= 0.0) continue;
 
-      v_vctTangent = mat3(mtxNormalMeshToWorld) * a_vctTangent.xyz;
-      v_vctBitangent = cross(vctNormal, v_vctTangent) * a_vctTangent.w;
+      float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);    //Coneshape that is brightest in the center. Possible TODO: "Variable Spotlightsoftness"
+      fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);                                                 //Prevents harsh lighting artifacts at boundary of the given spotlight
+      if(fIntensity < 0.0) continue;
 
-    #endif
+      illuminateDirected(vctDirection, vctView, vctNormal, u_spot[i].vctColor.rgb * fIntensity, v_vctDiffuse, v_vctSpecular);
+    }
 
-    #if !defined(PHONG) && !defined(FLAT) // gouraud
-
-      vctNormal = normalize(vctNormal);
-      v_vctDiffuse = u_fDiffuse * u_ambient.vctColor.rgb;
-      v_vctSpecular = vec3(0, 0, 0);
-
-      // calculate directional light effect
-      for(uint i = 0u; i < u_nLightsDirectional; i ++) {
-        vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
-        illuminateDirected(vctDirection, vctView, vctNormal, u_directional[i].vctColor.rgb, v_vctDiffuse, v_vctSpecular);
-      }
-
-      // calculate point light effect
-      for(uint i = 0u;i < u_nLightsPoint;i ++) {
-        vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-        vec3 vctDirection = vec3(mtxMeshToWorld * vctPosition) - vctPositionLight;
-        float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
-        if(fIntensity < 0.0) continue;
-
-        illuminateDirected(vctDirection, vctView, vctNormal, u_point[i].vctColor.rgb * fIntensity, v_vctDiffuse, v_vctSpecular);
-      }
-
-      // calculate spot light effect
-      for(uint i = 0u;i < u_nLightsSpot;i ++) {
-        vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-        vec3 vctDirection = vec3(mtxMeshToWorld * vctPosition) - vctPositionLight;
-        vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
-        if(vctDirectionInverted.z <= 0.0) continue;
-
-        float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);    //Coneshape that is brightest in the center. Possible TODO: "Variable Spotlightsoftness"
-        fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);                                                 //Prevents harsh lighting artifacts at boundary of the given spotlight
-        if(fIntensity < 0.0) continue;
-
-        illuminateDirected(vctDirection, vctView, vctNormal, u_spot[i].vctColor.rgb * fIntensity, v_vctDiffuse, v_vctSpecular);
-      }
-
-    #endif // gouraud
-
-  #endif // light
+  #endif
 
     // TEXTURE: transform UVs
   #if defined(TEXTURE) || defined(NORMALMAP)
@@ -296,15 +289,15 @@ void main() {
     mat4 mtx_RotX = mat4(1, 0, 0, 0, 0, vctVertexInCamera.z, vctVertexInCamera.y, 0, 0, - vctVertexInCamera.y, vctVertexInCamera.z, 0, 0, 0, 0, 1);
     mat4 mtx_RotY = mat4(vctVertexInCamera.z, 0, - vctVertexInCamera.x, 0, 0, 1, 0, 0, vctVertexInCamera.x, 0, vctVertexInCamera.z, 0, 0, 0, 0, 1);
 
-    vctNormal = mat3(u_mtxNormalMeshToWorld) * a_vctNormal;
+    vec3 vctNormal = mat3(u_mtxNormalMeshToWorld) * a_vctNormal;
 
-      // adds correction for things being far and to the side, but distortion for things being close
+    // adds correction for things being far and to the side, but distortion for things being close
     vctNormal = mat3(mtx_RotX * mtx_RotY) * vctNormal;
 
     vec3 vctReflection = normalize(mat3(u_mtxWorldToCamera) * normalize(vctNormal));
     vctReflection.y = - vctReflection.y;
 
     v_vctTexture = 0.5 * vctReflection.xy + 0.5;
-    
+
   #endif
 }

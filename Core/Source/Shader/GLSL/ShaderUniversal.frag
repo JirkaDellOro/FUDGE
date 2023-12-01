@@ -3,38 +3,51 @@
 * Universal Shader as base for many others. Controlled by compiler directives
 * @authors Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2023
 */
-
 precision mediump float;
 precision highp int;
 
 // MINIMAL
 uniform vec4 u_vctColor;
-uniform vec3 u_vctCamera;
+uniform vec3 u_vctCamera; // needed for fog
 
 uniform bool u_bFog; // TODO: maybe make fog optional?
 uniform vec4 u_vctFogColor;
 uniform float u_fFogNear;
 uniform float u_fFogFar;
 
-in vec4 v_vctColor;
 in vec3 v_vctPosition;
-
+in vec4 v_vctColor;
 
 layout(location = 0) out vec4 vctFrag;
 layout(location = 1) out vec4 vctFragPosition; // TODO: make these optional?
 layout(location = 2) out vec4 vctFragNormal;
 
-#ifdef LIGHT
+#if defined(FLAT) || defined(GOURAUD) || defined(PHONG)
 
   in vec3 v_vctNormal;
 
-  #if !defined(PHONG) && !defined(FLAT)
+#endif
+
+#if defined(FLAT)
+
+  flat in vec3 v_vctPositionFlat;
+
+#endif
+
+#if defined(GOURAUD)
 
     uniform float u_fMetallic;
     in vec3 v_vctDiffuse;
     in vec3 v_vctSpecular;
 
-  #endif
+#endif
+
+#if defined(PHONG) || defined(FLAT)
+
+  uniform float u_fDiffuse;
+  uniform float u_fSpecular;
+  uniform float u_fIntensity;
+  uniform float u_fMetallic;
 
   struct Light {
     vec4 vctColor;
@@ -57,36 +70,6 @@ layout(location = 2) out vec4 vctFragNormal;
     Light u_spot[MAX_LIGHTS_SPOT];
   };
 
-#endif
-
-#if defined(TEXTURE) || defined(MATCAP)
-
-  uniform sampler2D u_texColor;
-  in vec2 v_vctTexture;
-
-#endif
-
-#ifdef NORMALMAP
-
-  uniform sampler2D u_texNormal;
-  in vec3 v_vctTangent;
-  in vec3 v_vctBitangent;
-
-#endif
-
-#if defined(PHONG) || defined(FLAT)
-
-  uniform float u_fDiffuse;
-  uniform float u_fSpecular;
-  uniform float u_fIntensity;
-  uniform float u_fMetallic;
-
-  #ifdef FLAT
-
-    flat in vec3 v_vctPositionFlat;
-
-  #endif
-
   void illuminateDirected(vec3 _vctDirection, vec3 _vctView, vec3 _vctNormal, vec3 _vctColor, inout vec3 _vctDiffuse, inout vec3 _vctSpecular) {
     vec3 vctDirection = normalize(_vctDirection);
     float fIllumination = -dot(_vctNormal, vctDirection);
@@ -107,6 +90,21 @@ layout(location = 2) out vec4 vctFragNormal;
 
 #endif
 
+#if defined(TEXTURE) || defined(MATCAP)
+
+  uniform sampler2D u_texColor;
+  in vec2 v_vctTexture;
+
+#endif
+
+#if defined(NORMALMAP)
+
+  uniform sampler2D u_texNormal;
+  in vec3 v_vctTangent;
+  in vec3 v_vctBitangent;
+
+#endif
+
 float getFog(vec3 _vctPosition) {
   float fDistance = length(_vctPosition - u_vctCamera); // maybe use z-depth instead of euclidean depth
   float fFog = clamp((fDistance - u_fFogNear) / (u_fFogFar - u_fFogNear), 0.0, 1.0);
@@ -116,26 +114,7 @@ float getFog(vec3 _vctPosition) {
 
 void main() {
 
-  #ifdef PHONG
-
-    #ifdef NORMALMAP
-
-      mat3 mtxTBN = mat3(normalize(v_vctTangent), normalize(v_vctBitangent), normalize(v_vctNormal));
-      vec3 vctNormal = texture(u_texNormal, v_vctTexture).xyz * 2.0 - 1.0;
-      vctNormal = normalize(mtxTBN * vctNormal);
-
-    #else
-
-      vec3 vctNormal = normalize(v_vctNormal);
-
-    #endif
-
-    vec3 vctView = normalize(v_vctPosition - u_vctCamera);
-    vec3 vctPosition = v_vctPosition;
-
-  #endif
-
-  #ifdef FLAT
+  #if defined(FLAT)
 
     vec3 vctFdx = dFdx(v_vctPosition);
     vec3 vctFdy = dFdy(v_vctPosition);
@@ -145,75 +124,80 @@ void main() {
 
   #endif
 
-  #if !defined(PHONG) && !defined(FLAT) && defined(LIGHT) // GOURAUD
+  #if (defined(PHONG) || defined(GOURAUD)) && !defined(NORMALMAP)
 
     vec3 vctNormal = normalize(v_vctNormal);
-  
+
   #endif
 
-  #if !defined(PHONG) && !defined(FLAT) && !defined(LIGHT) // MINIMAL
+  #if defined(PHONG)
 
-    vctFragPosition = vec4(0.0, 0.0, 0.0, 0.5); // use alpha channel to indicate no position for ssao
-    vctFragNormal = vec4(0.0, 0.0, 0.0, 1.0); // (0, 0, 0) normal will yield not occlusion in ssao
-  
+    vec3 vctView = normalize(v_vctPosition - u_vctCamera);
+    vec3 vctPosition = v_vctPosition;
+
+  #endif
+
+  #if defined(NORMALMAP)
+
+    mat3 mtxTBN = mat3(normalize(v_vctTangent), normalize(v_vctBitangent), normalize(v_vctNormal));
+    vec3 vctNormal = texture(u_texNormal, v_vctTexture).xyz * 2.0 - 1.0;
+    vctNormal = normalize(mtxTBN * vctNormal);
+
   #endif
   
-  #ifdef LIGHT
+  #if defined(FLAT) || defined(PHONG)
 
-    vctFragPosition = vec4(v_vctPosition, 1.0);
-    vctFragNormal = vec4(vctNormal, 1.0);
+    vec3 vctDiffuse = u_fDiffuse * u_ambient.vctColor.rgb;
+    vec3 vctSpecular = vec3(0, 0, 0);
 
-    #if defined(PHONG) || defined(FLAT) // PHONG AND FLAT
+    // directional lights
+    for(uint i = 0u; i < u_nLightsDirectional; i++) {
+      vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
+      illuminateDirected(vctDirection, vctView, vctNormal, u_directional[i].vctColor.rgb, vctDiffuse, vctSpecular);
+    }
 
-      vec3 vctDiffuse = u_fDiffuse * u_ambient.vctColor.rgb;
-      vec3 vctSpecular = vec3(0, 0, 0);
+    // point lights
+    for(uint i = 0u; i < u_nLightsPoint; i++) {
+      vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
+      vec3 vctDirection = vctPosition - vctPositionLight;
+      float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
+      if(fIntensity < 0.0)
+        continue;
 
-      // directional lights
-      for(uint i = 0u; i < u_nLightsDirectional; i++) {
-        vec3 vctDirection = vec3(u_directional[i].mtxShape * vec4(0.0, 0.0, 1.0, 1.0));
-        illuminateDirected(vctDirection, vctView, vctNormal, u_directional[i].vctColor.rgb, vctDiffuse, vctSpecular);
-      }
+      illuminateDirected(vctDirection, vctView, vctNormal, u_point[i].vctColor.rgb * fIntensity, vctDiffuse, vctSpecular);
+    }
 
-      // point lights
-      for(uint i = 0u; i < u_nLightsPoint; i++) {
-        vec3 vctPositionLight = vec3(u_point[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-        vec3 vctDirection = vctPosition - vctPositionLight;
-        float fIntensity = 1.0 - length(mat3(u_point[i].mtxShapeInverse) * vctDirection);
-        if(fIntensity < 0.0)
-          continue;
+    // spot lights
+    for(uint i = 0u; i < u_nLightsSpot; i++) {
+      vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
+      vec3 vctDirection = vctPosition - vctPositionLight;
+      vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
+      if(vctDirectionInverted.z <= 0.0)
+        continue;
 
-        illuminateDirected(vctDirection, vctView, vctNormal, u_point[i].vctColor.rgb * fIntensity, vctDiffuse, vctSpecular);
-      }
+      float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);    //Coneshape that is brightest in the center. Possible TODO: "Variable Spotlightsoftness"
+      fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);                                                 //Prevents harsh lighting artifacts at boundary of the given spotlight
+      if(fIntensity < 0.0)
+        continue;
 
-      // spot lights
-      for(uint i = 0u; i < u_nLightsSpot; i++) {
-        vec3 vctPositionLight = vec3(u_spot[i].mtxShape * vec4(0.0, 0.0, 0.0, 1.0));
-        vec3 vctDirection = vctPosition - vctPositionLight;
-        vec3 vctDirectionInverted = mat3(u_spot[i].mtxShapeInverse) * vctDirection;
-        if(vctDirectionInverted.z <= 0.0)
-          continue;
+      illuminateDirected(vctDirection, vctView, vctNormal, u_spot[i].vctColor.rgb * fIntensity, vctDiffuse, vctSpecular);
+    }
 
-        float fIntensity = 1.0 - min(1.0, 2.0 * length(vctDirectionInverted.xy) / vctDirectionInverted.z);    //Coneshape that is brightest in the center. Possible TODO: "Variable Spotlightsoftness"
-        fIntensity *= 1.0 - pow(vctDirectionInverted.z, 2.0);                                                 //Prevents harsh lighting artifacts at boundary of the given spotlight
-        if(fIntensity < 0.0)
-          continue;
+  #endif
 
-        illuminateDirected(vctDirection, vctView, vctNormal, u_spot[i].vctColor.rgb * fIntensity, vctDiffuse, vctSpecular);
-      }
+  #if defined(GOURAUD)
 
-    #else
-      // GOURAUD
-      vec3 vctDiffuse = v_vctDiffuse;
-      vec3 vctSpecular = v_vctSpecular;
+    vec3 vctDiffuse = v_vctDiffuse;
+    vec3 vctSpecular = v_vctSpecular;
 
-    #endif
+  #endif
+
+  #if defined(FLAT) || defined(GOURAUD) || defined(PHONG)
 
     vctFrag.rgb = vctDiffuse + vctSpecular * u_fMetallic;
     vctFrag.a = 1.0;
 
-  #endif
-
-  #if !defined(LIGHT) && !defined(PHONG) && !defined(FLAT)
+  #else
 
     // MINIMAL: set the base color
     vctFrag = u_vctColor * v_vctColor;
@@ -228,10 +212,20 @@ void main() {
 
   #endif
 
-  #ifdef LIGHT
+  #if defined(FLAT) || defined(GOURAUD) || defined(PHONG)
 
     vctFrag *= u_vctColor * v_vctColor;
     vctFrag.rgb += vctSpecular * (1.0 - u_fMetallic);
+
+    vctFragPosition = vec4(v_vctPosition, 1.0);
+    vctFragNormal = vec4(vctNormal, 1.0);
+  
+  #endif
+
+  #if !defined(PHONG) && !defined(FLAT) && !defined(GOURAUD) // MINIMAL
+
+    vctFragPosition = vec4(0.0, 0.0, 0.0, 0.5); // use alpha channel to indicate no position for ssao
+    vctFragNormal = vec4(0.0, 0.0, 0.0, 1.0); // (0, 0, 0) normal will yield not occlusion in ssao
   
   #endif
 

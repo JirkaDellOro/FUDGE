@@ -71,7 +71,7 @@ namespace FudgeCore {
           crc3.uniformBlockBinding(program, blockIndex, UNIFORM_BLOCKS.SKIN.BINDING);
         }
 
-        if (this.define.includes("LIGHT")) {
+        if (this.define.find(_define => ["FLAT", "GOURAUD", "PHONG"].includes(_define))) {
           if (!RenderWebGL.uboLights)
             RenderWebGL.uboLights = createUBOLights();
           if (!RenderWebGL.uboLightsVariableOffsets)

@@ -3,7 +3,6 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderFlat);
 
     public static define: string[] = [
-      "LIGHT",
       "FLAT"
     ];
 

@@ -3,7 +3,6 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderFlatTexturedSkin);
 
     public static define: string[] = [
-      "LIGHT",
       "FLAT",
       "TEXTURE",
       "SKIN"
