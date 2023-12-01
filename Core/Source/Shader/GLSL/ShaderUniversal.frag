@@ -19,11 +19,14 @@ uniform float u_fFogFar;
 in vec4 v_vctColor;
 in vec3 v_vctPosition;
 
+
 layout(location = 0) out vec4 vctFrag;
 layout(location = 1) out vec4 vctFragPosition; // TODO: make these optional?
 layout(location = 2) out vec4 vctFragNormal;
 
 #ifdef LIGHT
+
+  in vec3 v_vctNormal;
 
   #if !defined(PHONG) && !defined(FLAT)
 
@@ -78,12 +81,6 @@ layout(location = 2) out vec4 vctFragNormal;
   uniform float u_fIntensity;
   uniform float u_fMetallic;
 
-  #ifdef PHONG
-
-    in vec3 v_vctNormal;
-
-  #endif
-
   #ifdef FLAT
 
     flat in vec3 v_vctPositionFlat;
@@ -119,12 +116,6 @@ float getFog(vec3 _vctPosition) {
 
 void main() {
 
-  #if !defined(PHONG) && !defined(FLAT)
-
-    vec3 vctNormal = normalize(cross(dFdx(v_vctPosition), dFdy(v_vctPosition))); // TODO: buffer this
-
-  #endif
-
   #ifdef PHONG
 
     #ifdef NORMALMAP
@@ -153,8 +144,24 @@ void main() {
     vec3 vctPosition = v_vctPositionFlat;
 
   #endif
+
+  #if !defined(PHONG) && !defined(FLAT) && defined(LIGHT) // GOURAUD
+
+    vec3 vctNormal = normalize(v_vctNormal);
+  
+  #endif
+
+  #if !defined(PHONG) && !defined(FLAT) && !defined(LIGHT) // MINIMAL
+
+    vctFragPosition = vec4(0.0, 0.0, 0.0, 0.5); // use alpha channel to indicate no position for ssao
+    vctFragNormal = vec4(0.0, 0.0, 0.0, 1.0); // (0, 0, 0) normal will yield not occlusion in ssao
+  
+  #endif
   
   #ifdef LIGHT
+
+    vctFragPosition = vec4(v_vctPosition, 1.0);
+    vctFragNormal = vec4(vctNormal, 1.0);
 
     #if defined(PHONG) || defined(FLAT) // PHONG AND FLAT
 
@@ -227,9 +234,6 @@ void main() {
     vctFrag.rgb += vctSpecular * (1.0 - u_fMetallic);
   
   #endif
-
-  vctFragPosition = vec4(v_vctPosition, 1.0);
-  vctFragNormal = vec4(vctNormal, 1.0);
 
   if (u_bFog) 
     vctFrag.rgb = mix(vctFrag.rgb, u_vctFogColor.rgb, getFog(v_vctPosition) * u_vctFogColor.a);

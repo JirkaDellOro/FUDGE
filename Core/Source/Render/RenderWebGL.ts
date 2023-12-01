@@ -360,9 +360,10 @@ namespace FudgeCore {
 
       crc3.drawBuffers([WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.COLOR_ATTACHMENT1, WebGL2RenderingContext.COLOR_ATTACHMENT2, WebGL2RenderingContext.COLOR_ATTACHMENT3]);
 
-      RenderWebGL.clear(_cmpCamera.clrBackground);
+      RenderWebGL.clear(_cmpCamera.clrBackground); // TODO: could disable blending for opaque objects
       for (let node of _nodesOpaque)
         RenderWebGL.drawNode(node, _cmpCamera);
+
 
       crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texTransparent, 0);
       crc3.drawBuffers([WebGL2RenderingContext.COLOR_ATTACHMENT0]);

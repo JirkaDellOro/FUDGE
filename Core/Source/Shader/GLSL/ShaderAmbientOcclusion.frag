@@ -45,8 +45,12 @@ uniform float u_fFogFar;
 // }
 
 float getOcclusion(vec3 _vctPosition, vec3 _vctNormal, vec2 _vctTexture) {
-  vec3 vctOccluder = texture(u_texPosition, _vctTexture).xyz;
-  vec3 vctDistance = vctOccluder - _vctPosition;
+  vec4 vctOccluder = texture(u_texPosition, _vctTexture);
+
+  if (vctOccluder.a < 1.0) // no occluder at this position
+    return 0.0;
+
+  vec3 vctDistance = vctOccluder.xyz - _vctPosition;
   float fIntensity = max(dot(_vctNormal, normalize(vctDistance)) - u_fBias, 0.0);
 
   float fDistance = length(vctDistance);

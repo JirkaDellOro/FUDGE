@@ -3,8 +3,7 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderMatCap);
 
     public static define: string[] = [
-      "MATCAP",
-      "CAMERA"
+      "MATCAP"
     ];
 
     public static getCoat(): typeof Coat { return CoatTextured; }
