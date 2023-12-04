@@ -47,12 +47,12 @@ uniform float u_fFogFar;
 // }
 
 float getOcclusion(vec3 _vctPosition, vec3 _vctNormal, vec2 _vctTexture) {
-  vec4 vctOccluder = texture(u_texPosition, _vctTexture);
+  vec3 vctOccluder = texture(u_texPosition, _vctTexture).xyz;
 
-  if (vctOccluder.a < 1.0) // no occluder at this position
+  if (vctOccluder.x == 0.0 && vctOccluder.y == 0.0 && vctOccluder.z == 0.0) // no occluder at this position
     return 0.0;
 
-  vec3 vctDistance = vctOccluder.xyz - _vctPosition;
+  vec3 vctDistance = vctOccluder - _vctPosition;
   float fIntensity = max(dot(_vctNormal, normalize(vctDistance)) - u_fBias, 0.0);
 
   float fDistance = length(vctDistance);
@@ -516,10 +516,11 @@ void main() {
     vctFrag.rgb = clamp(vctFrag.rgb - texelFetch(u_texOcclusion, vctFragCoord, 0).r, 0.0, 1.0);
 
   if (u_bBloom) {
-    vec3 vctBloom = clamp(texture(u_texBloom, v_vctTexture).rgb, 0.0, 1.0);
+    vec3 vctBloom = texture(u_texBloom, v_vctTexture).rgb;
     if (vctBloom.r >= 1.0 || vctBloom.g >= 1.0 || vctBloom.b >= 1.0) // maybe use threshold instead of 1.0?
       vctBloom = mix(vctBloom, vec3(1.0), u_fHighlightDesaturation);
     vctFrag.rgb += clamp(vctBloom * u_fBloomIntensity, 0.0, 1.0);
+    
     
     // old desaturation, was dependent on the background color...
     // vctFrag.rgb += clamp(texture(u_texBloom, v_vctTexture).rgb * u_fBloomIntensity, 0.0, 1.0);
@@ -596,7 +597,7 @@ precision highp int;
 
 // MINIMAL
 uniform vec4 u_vctColor;
-uniform vec3 u_vctCamera;
+uniform vec3 u_vctCamera; // needed for fog
 
 uniform bool u_bFog; // TODO: maybe make fog optional?
 uniform vec4 u_vctFogColor;
@@ -812,7 +813,7 @@ void main() {
 
   #if !defined(PHONG) && !defined(FLAT) && !defined(GOURAUD) // MINIMAL
 
-    vctFragPosition = vec4(0.0, 0.0, 0.0, 0.5); // use alpha channel to indicate no position for ssao
+    vctFragPosition = vec4(0.0, 0.0, 0.0, 1.0); // (0, 0, 0) will treat occluders as non existing in ssao
     vctFragNormal = vec4(0.0, 0.0, 0.0, 1.0); // (0, 0, 0) normal will yield not occlusion in ssao
   
   #endif
@@ -820,11 +821,12 @@ void main() {
   if (u_bFog) 
     vctFrag.rgb = mix(vctFrag.rgb, u_vctFogColor.rgb, getFog(v_vctPosition) * u_vctFogColor.a);
 
-  vctFrag.rgb *= vctFrag.a;
-
   // discard pixel alltogether when transparent: don't show in Z-Buffer
   if(vctFrag.a < 0.01)
     discard;
+
+  // premultiply alpha for blending
+  vctFrag.rgb *= vctFrag.a;
 }`;
   shaderSources["ShaderUniversal.vert"] = /*glsl*/ `#version 300 es
 /**

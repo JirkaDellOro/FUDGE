@@ -1971,7 +1971,7 @@ var Fudge;
                 for (let data of _children) {
                     let index = container.indexOf(data); // _at needs to be corrected if we are moving within same parent
                     let hasParent = this.childToParent.has(data);
-                    let name = this.data.variableNames[index];
+                    let name = this.data.variableNames?.[index];
                     if (hasParent && !this.deleteData(data))
                         continue;
                     if (!hasParent)

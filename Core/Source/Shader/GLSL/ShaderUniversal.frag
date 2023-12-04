@@ -224,7 +224,7 @@ void main() {
 
   #if !defined(PHONG) && !defined(FLAT) && !defined(GOURAUD) // MINIMAL
 
-    vctFragPosition = vec4(0.0, 0.0, 0.0, 0.5); // use alpha channel to indicate no position for ssao
+    vctFragPosition = vec4(0.0, 0.0, 0.0, 1.0); // (0, 0, 0) will treat occluders as non existing in ssao
     vctFragNormal = vec4(0.0, 0.0, 0.0, 1.0); // (0, 0, 0) normal will yield not occlusion in ssao
   
   #endif
@@ -232,9 +232,10 @@ void main() {
   if (u_bFog) 
     vctFrag.rgb = mix(vctFrag.rgb, u_vctFogColor.rgb, getFog(v_vctPosition) * u_vctFogColor.a);
 
-  vctFrag.rgb *= vctFrag.a;
-
   // discard pixel alltogether when transparent: don't show in Z-Buffer
   if(vctFrag.a < 0.01)
     discard;
+
+  // premultiply alpha for blending
+  vctFrag.rgb *= vctFrag.a;
 }

@@ -234,6 +234,7 @@ namespace FudgeCore {
      * Set the blend mode to render with
      */
     public static setBlendMode(_mode: BLEND): void {
+      // ⚠️ CAUTION: all blending is done with premultiplied alpha in the shader, so the blend function is set accordingly
       switch (_mode) {
         case BLEND.OPAQUE:
           RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
@@ -241,16 +242,18 @@ namespace FudgeCore {
           break;
         case BLEND.TRANSPARENT:
           RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
-          RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
-          // RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
+          RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.ONE, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
+          // RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
           break;
         case BLEND.ADDITIVE:
           RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
-          RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.DST_ALPHA);
+          RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.ONE, WebGL2RenderingContext.ONE);
+          // RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.DST_ALPHA);
           break;
         case BLEND.SUBTRACTIVE:
           RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_REVERSE_SUBTRACT);
-          RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.DST_ALPHA);
+          RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.ONE, WebGL2RenderingContext.ONE);
+          // RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.DST_ALPHA);
           break;
         case BLEND.MODULATE: // color gets multiplied, tried to copy unitys "Particle Shader: Blending Option: Rendering Mode: Modulate"
           RenderWebGL.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
@@ -360,10 +363,9 @@ namespace FudgeCore {
 
       crc3.drawBuffers([WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.COLOR_ATTACHMENT1, WebGL2RenderingContext.COLOR_ATTACHMENT2, WebGL2RenderingContext.COLOR_ATTACHMENT3]);
 
-      RenderWebGL.clear(_cmpCamera.clrBackground); // TODO: could disable blending for opaque objects
+      RenderWebGL.clear(_cmpCamera.clrBackground);
       for (let node of _nodesOpaque)
         RenderWebGL.drawNode(node, _cmpCamera);
-
 
       crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texTransparent, 0);
       crc3.drawBuffers([WebGL2RenderingContext.COLOR_ATTACHMENT0]);
@@ -371,10 +373,16 @@ namespace FudgeCore {
       crc3.clearColor(0, 0, 0, 0);
       crc3.clear(crc3.COLOR_BUFFER_BIT);
 
-      crc3.blendFunc(WebGL2RenderingContext.ONE, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
-      for (let node of _nodesAlpha)
+      for (let node of _nodesAlpha) {
+        if (node.getComponent(ComponentParticleSystem)) {
+          // TODO: think about how to handle transparency sorting with particles
+          RenderWebGL.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texOpaque, 0);
+          RenderWebGL.drawNode(node, _cmpCamera);
+          RenderWebGL.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texTransparent, 0);
+        }
+
         RenderWebGL.drawNode(node, _cmpCamera);
-      crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
+      }
 
       crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT1, WebGL2RenderingContext.TEXTURE_2D, null, 0);
       crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT2, WebGL2RenderingContext.TEXTURE_2D, null, 0);
@@ -382,7 +390,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
+     * Draws the occlusion values into the occlusion texture, using the given camera and ambient-occlusion component
      */
     protected static drawAmbientOcclusion(_cmpCamera: ComponentCamera, _cmpAmbientOcclusion: ComponentAmbientOcclusion): void {
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
@@ -416,7 +424,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Draws the bloom-effect into the bloom texture, using the given camera-component and the given bloom-component
+     * Draws the bloom-effect into the bloom texture, using the given bloom-component
      */
     protected static drawBloom(_cmpBloom: ComponentBloom): void {
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
@@ -455,7 +463,7 @@ namespace FudgeCore {
       }
 
       // upsample
-      crc3.blendFunc(WebGL2RenderingContext.ONE, WebGL2RenderingContext.ONE);
+      RenderWebGL.setBlendMode(BLEND.ADDITIVE);
       for (let i: number = iterations - 1, divisor: number = 2 ** (iterations - 2); i > 0; i--, divisor /= 2) {
         let width: number = Math.max(Math.round(crc3.canvas.width / divisor), 1);
         let height: number = Math.max(Math.round(crc3.canvas.height / divisor), 1);
@@ -472,7 +480,7 @@ namespace FudgeCore {
         crc3.drawArrays(WebGL2RenderingContext.TRIANGLES, 0, 3);
 
       }
-      crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
+      RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
 
       Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
     }
@@ -726,11 +734,10 @@ namespace FudgeCore {
         RenderWebGL.crc3.uniform4fv(shader.uniforms["u_vctFogColor"], cmpFog.color.getArray());
       }
 
-      if (drawParticles) {
+      if (drawParticles)
         RenderWebGL.drawParticles(cmpParticleSystem, shader, renderBuffers, _node.getComponent(ComponentFaceCamera), cmpMaterial.sortForAlpha);
-      } else {
+      else
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
-      }
     }
 
     protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void {

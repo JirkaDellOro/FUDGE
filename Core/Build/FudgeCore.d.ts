@@ -1195,11 +1195,11 @@ declare namespace FudgeCore {
         static adjustAttachments(): void;
         protected static drawNodes(_nodesOpaque: Iterable<Node>, _nodesAlpha: Iterable<Node>, _cmpCamera: ComponentCamera): void;
         /**
-         * Draws the necessary Buffers for AO-calculation and calculates the AO-Effect
+         * Draws the occlusion values into the occlusion texture, using the given camera and ambient-occlusion component
          */
         protected static drawAmbientOcclusion(_cmpCamera: ComponentCamera, _cmpAmbientOcclusion: ComponentAmbientOcclusion): void;
         /**
-         * Draws the bloom-effect into the bloom texture, using the given camera-component and the given bloom-component
+         * Draws the bloom-effect into the bloom texture, using the given bloom-component
          */
         protected static drawBloom(_cmpBloom: ComponentBloom): void;
         /**
