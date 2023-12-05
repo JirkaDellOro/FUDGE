@@ -90,9 +90,11 @@ void main() {
     fOcclusion += getOcclusion(vctPosition, vctNormal, v_vctTexture + vctK2 * 0.25);
   }
 
-  vctFrag.r = clamp(fOcclusion / 16.0, 0.0, 1.0);
-  vctFrag.a = 1.0;
+  fOcclusion = clamp(fOcclusion / 16.0, 0.0, 1.0);
 
-  if (u_bFog && vctFrag.r > 0.0) // correct occlusion by fog factor
-    vctFrag.r = mix(vctFrag.r, 0.0, getFog(vctPosition) * u_vctFogColor.a);
+  if (u_bFog && fOcclusion > 0.0) // correct occlusion by fog factor
+    fOcclusion = mix(fOcclusion, 0.0, getFog(vctPosition) * u_vctFogColor.a);
+  
+  vctFrag.rgb = vec3(fOcclusion);
+  vctFrag.a = 1.0;
 }

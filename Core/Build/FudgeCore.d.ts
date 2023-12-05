@@ -1108,13 +1108,11 @@ declare namespace FudgeCore {
         private static rectRender;
         private static sizePick;
         private static framebuffer;
-        private static texOpaque;
-        private static texTransparent;
+        private static texColor;
         private static texPosition;
         private static texNormal;
         private static texNoise;
         private static texDepth;
-        private static texOcclusion;
         private static texBloomSamples;
         /**
          * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
@@ -1202,10 +1200,6 @@ declare namespace FudgeCore {
          * Draws the bloom-effect into the bloom texture, using the given bloom-component
          */
         protected static drawBloom(_cmpBloom: ComponentBloom): void;
-        /**
-         * Composites all effects that are used in the scene to a final render.
-         */
-        protected static composite(_cmpAmbientOcclusion: ComponentAmbientOcclusion, _cmpBloom: ComponentBloom): void;
         /**
          * Creates a texture buffer to be used as pick-buffer
          */
@@ -7764,15 +7758,6 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     abstract class ShaderPickTextured extends Shader {
         static define: string[];
-        static getVertexShaderSource(): string;
-        static getFragmentShaderSource(): string;
-    }
-}
-declare namespace FudgeCore {
-    abstract class ShaderScreen extends Shader {
-        static readonly iSubclass: number;
-        static define: string[];
-        static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }

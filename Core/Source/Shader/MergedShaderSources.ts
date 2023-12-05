@@ -92,11 +92,13 @@ void main() {
     fOcclusion += getOcclusion(vctPosition, vctNormal, v_vctTexture + vctK2 * 0.25);
   }
 
-  vctFrag.r = clamp(fOcclusion / 16.0, 0.0, 1.0);
-  vctFrag.a = 1.0;
+  fOcclusion = clamp(fOcclusion / 16.0, 0.0, 1.0);
 
-  if (u_bFog && vctFrag.r > 0.0) // correct occlusion by fog factor
-    vctFrag.r = mix(vctFrag.r, 0.0, getFog(vctPosition) * u_vctFogColor.a);
+  if (u_bFog && fOcclusion > 0.0) // correct occlusion by fog factor
+    fOcclusion = mix(fOcclusion, 0.0, getFog(vctPosition) * u_vctFogColor.a);
+  
+  vctFrag.rgb = vec3(fOcclusion);
+  vctFrag.a = 1.0;
 }`;
   shaderSources["ShaderBloom.frag"] = /*glsl*/ `#version 300 es
 /**
@@ -108,8 +110,10 @@ void main() {
 precision mediump float;
 precision highp int;
 
-uniform int u_iMode; // 0: extract, 1: downsample, 2: upsample
+uniform int u_iMode; // 0: extract, 1: downsample, 2: upsample, 3: apply
 uniform float u_fThreshold;
+uniform float u_fIntensity;
+uniform float u_fHighlightDesaturation;
 uniform vec2 u_vctTexel;
 
 uniform sampler2D u_texSource;
@@ -185,21 +189,29 @@ vec4 upsample(vec2 _vctTexture) {
   return sum / 12.0;
 }
 
+vec3 apply(vec2 _vctTexture) {
+  vec3 vctBloom = texture(u_texSource, _vctTexture).rgb;
+  if (vctBloom.r >= 1.0 || vctBloom.g >= 1.0 || vctBloom.b >= 1.0) // maybe use threshold instead of 1.0?
+    vctBloom = mix(vctBloom, vec3(1.0), u_fHighlightDesaturation);
+  vctBloom = clamp(vctBloom * u_fIntensity, 0.0, 1.0);
+  return vctBloom;
+}
+
 void main() {
-  if(u_iMode == 0) {
-    vctFrag.rgb = extract(v_vctTexture);
-    vctFrag.a = 1.0;
-    return;
-  }
-
-  vec2 vctHalfPixel;
-
   switch(u_iMode) {
+    case 0:
+      vctFrag.rgb = extract(v_vctTexture);
+      vctFrag.a = 1.0;
+      return;
     case 1:
       vctFrag = downsample(v_vctTexture);
       return;
     case 2:
       vctFrag = upsample(v_vctTexture);
+      return;
+    case 3:
+      vctFrag.rgb = apply(v_vctTexture);
+      vctFrag.a = 1.0;
       return;
     default:
       vctFrag = texture(u_texSource, v_vctTexture);
@@ -484,57 +496,6 @@ out vec2 v_vctTexture;
 void main() {   
     gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
     v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
-}`;
-  shaderSources["ShaderScreen.frag"] = /*glsl*/ `#version 300 es
-/**
-* Composites all Post-FX on to the main-render and renders it to the main Renderbuffer
-* @authors Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
-*/
-precision mediump float;
-precision highp int;
-
-in vec2 v_vctTexture;
-
-uniform sampler2D u_texColor;
-uniform sampler2D u_texTransparent;
-
-uniform bool u_bOcclusion;
-uniform sampler2D u_texOcclusion;
-
-uniform bool u_bBloom;
-uniform sampler2D u_texBloom;
-uniform float u_fBloomIntensity;
-uniform float u_fHighlightDesaturation;
-
-out vec4 vctFrag;
-
-void main() {
-  ivec2 vctFragCoord = ivec2(gl_FragCoord.xy);
-  vctFrag = texelFetch(u_texColor, vctFragCoord, 0);
-
-  if (u_bOcclusion)
-    vctFrag.rgb = clamp(vctFrag.rgb - texelFetch(u_texOcclusion, vctFragCoord, 0).r, 0.0, 1.0);
-
-  if (u_bBloom) {
-    vec3 vctBloom = texture(u_texBloom, v_vctTexture).rgb;
-    if (vctBloom.r >= 1.0 || vctBloom.g >= 1.0 || vctBloom.b >= 1.0) // maybe use threshold instead of 1.0?
-      vctBloom = mix(vctBloom, vec3(1.0), u_fHighlightDesaturation);
-    vctFrag.rgb += clamp(vctBloom * u_fBloomIntensity, 0.0, 1.0);
-    
-    
-    // old desaturation, was dependent on the background color...
-    // vctFrag.rgb += clamp(texture(u_texBloom, v_vctTexture).rgb * u_fBloomIntensity, 0.0, 1.0);
-    // float r = max(vctFrag.r - 1.0, 0.0) * u_fHighlightDesaturation;
-    // float g = max(vctFrag.g - 1.0, 0.0) * u_fHighlightDesaturation;
-    // float b = max(vctFrag.b - 1.0, 0.0) * u_fHighlightDesaturation;
-    // vctFrag.r += g + b;
-    // vctFrag.g += r + b;
-    // vctFrag.b += r + g;
-  }
-
-  // blend by ONE, ONE_MINUS_SRC_ALPHA for premultiplied alpha from color shading
-  vec4 vctTransparent = texelFetch(u_texTransparent, vctFragCoord, 0);
-  vctFrag.rgb = vctTransparent.rgb + (vctFrag.rgb * (1.0 - vctTransparent.a));
 }`;
   shaderSources["ShaderScreen.vert"] = /*glsl*/ `#version 300 es
 precision mediump float;

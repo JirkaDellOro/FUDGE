@@ -8,8 +8,10 @@
 precision mediump float;
 precision highp int;
 
-uniform int u_iMode; // 0: extract, 1: downsample, 2: upsample
+uniform int u_iMode; // 0: extract, 1: downsample, 2: upsample, 3: apply
 uniform float u_fThreshold;
+uniform float u_fIntensity;
+uniform float u_fHighlightDesaturation;
 uniform vec2 u_vctTexel;
 
 uniform sampler2D u_texSource;
@@ -85,21 +87,29 @@ vec4 upsample(vec2 _vctTexture) {
   return sum / 12.0;
 }
 
+vec3 apply(vec2 _vctTexture) {
+  vec3 vctBloom = texture(u_texSource, _vctTexture).rgb;
+  if (vctBloom.r >= 1.0 || vctBloom.g >= 1.0 || vctBloom.b >= 1.0) // maybe use threshold instead of 1.0?
+    vctBloom = mix(vctBloom, vec3(1.0), u_fHighlightDesaturation);
+  vctBloom = clamp(vctBloom * u_fIntensity, 0.0, 1.0);
+  return vctBloom;
+}
+
 void main() {
-  if(u_iMode == 0) {
-    vctFrag.rgb = extract(v_vctTexture);
-    vctFrag.a = 1.0;
-    return;
-  }
-
-  vec2 vctHalfPixel;
-
   switch(u_iMode) {
+    case 0:
+      vctFrag.rgb = extract(v_vctTexture);
+      vctFrag.a = 1.0;
+      return;
     case 1:
       vctFrag = downsample(v_vctTexture);
       return;
     case 2:
       vctFrag = upsample(v_vctTexture);
+      return;
+    case 3:
+      vctFrag.rgb = apply(v_vctTexture);
+      vctFrag.a = 1.0;
       return;
     default:
       vctFrag = texture(u_texSource, v_vctTexture);

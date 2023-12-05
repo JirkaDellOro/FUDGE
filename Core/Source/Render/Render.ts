@@ -165,23 +165,12 @@ namespace FudgeCore {
      * Draws the scene from the point of view of the given camera
      */
     public static draw(_cmpCamera: ComponentCamera): void {
-      Render.resetFramebuffer();
-
       for (let node of Render.nodesAlpha)
         Reflect.set(node, "zCamera", _cmpCamera.pointWorldToClip(node.getComponent(ComponentMesh).mtxWorld.translation).z);
+
       const sorted: Node[] = Render.nodesAlpha.getSorted((_a: Node, _b: Node) => Reflect.get(_b, "zCamera") - Reflect.get(_a, "zCamera"));
+
       Render.drawNodes(Render.nodesSimple, sorted, _cmpCamera);
-
-      const cmpAmbientOcclusion: ComponentAmbientOcclusion = _cmpCamera.node?.getComponent(ComponentAmbientOcclusion);
-      if (cmpAmbientOcclusion?.isActive)
-        Render.drawAmbientOcclusion(_cmpCamera, cmpAmbientOcclusion);
-
-      const cmpBloom: ComponentBloom = _cmpCamera.node?.getComponent(ComponentBloom);
-      if (cmpBloom?.isActive)
-        Render.drawBloom(cmpBloom);
-
-      Render.resetFramebuffer(null);
-      Render.composite(cmpAmbientOcclusion, cmpBloom);
     }
     //#endregion
 
