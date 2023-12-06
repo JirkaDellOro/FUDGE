@@ -119,7 +119,7 @@ namespace FudgeCore {
      * Generates the source code for the fragment shader of the {@link ShaderParticleSystem} from the set {@link ShaderParticleSystem.data} and the original {@link ShaderParticleSystem.fragmentShaderSource}.
      */
     protected static getFragmentShaderSource(this: ShaderParticleSystem): string {
-      return this.fragmentShaderSource.replace("#version 300 es", `#version 300 es${this.data.color ? "\n#define PARTICLE_COLOR" : ""}`);
+      return this.fragmentShaderSource.replace("#version 300 es", `#version 300 es\n#define ${this.define[0]}${this.data.color ? "\n#define PARTICLE_COLOR" : ""}`)
     }
 
     //#region code generation

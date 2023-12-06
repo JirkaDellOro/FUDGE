@@ -30,11 +30,13 @@ uniform sampler2D u_texNoise;
 in vec2 v_vctTexture;
 out vec4 vctFrag;
 
-// fog
-uniform bool u_bFog;
-uniform vec4 u_vctFogColor;
-uniform float u_fFogNear;
-uniform float u_fFogFar;
+layout(std140) uniform Fog {
+  bool u_bFogActive;
+  float u_fFogNear;
+  float u_fFogFar;
+  float pading;
+  vec4 u_vctFogColor;
+};
 
 // This function could be used to calculate the position from the depth texture, but mobile devices seems to lack in precision to do this
 // vec3 getPosition(vec2 _vctTexture) {
@@ -63,7 +65,7 @@ float getFog(vec3 _vctPosition) {
   float fDistance = length(_vctPosition - u_vctCamera); // maybe use z-depth instead of euclidean depth
   float fFog = clamp((fDistance - u_fFogNear) / (u_fFogFar - u_fFogNear), 0.0, 1.0);
   fFog = -pow(fFog, 2.0) + (2.0 * fFog); // lets fog appear quicker and fall off slower results in a more gradual falloff
-  return fFog;
+  return fFog * u_vctFogColor.a;
 }
 
 void main() {
@@ -92,8 +94,8 @@ void main() {
 
   fOcclusion = clamp(fOcclusion / 16.0, 0.0, 1.0);
 
-  if (u_bFog && fOcclusion > 0.0) // correct occlusion by fog factor
-    fOcclusion = mix(fOcclusion, 0.0, getFog(vctPosition) * u_vctFogColor.a);
+  if (u_bFogActive && fOcclusion > 0.0) // correct occlusion by fog factor
+    fOcclusion = mix(fOcclusion, 0.0, getFog(vctPosition));
   
   vctFrag.rgb = vec3(fOcclusion);
   vctFrag.a = 1.0;

@@ -76,11 +76,16 @@ namespace FudgeCore {
             RenderWebGL.uboLights = createUBOLights();
           if (!RenderWebGL.uboLightsVariableOffsets)
             RenderWebGL.uboLightsVariableOffsets = detectUBOLightsVariableOffsets();
-  
+
           // bind lights UBO to shader program
           const blockIndex: number = crc3.getUniformBlockIndex(program, UNIFORM_BLOCKS.LIGHTS.NAME);
           crc3.uniformBlockBinding(program, blockIndex, UNIFORM_BLOCKS.LIGHTS.BINDING);
         }
+
+        const blockIndex: number = crc3.getUniformBlockIndex(program, UNIFORM_BLOCKS.FOG.NAME);
+        if (blockIndex != WebGL2RenderingContext.INVALID_INDEX)
+          crc3.uniformBlockBinding(program, blockIndex, UNIFORM_BLOCKS.FOG.BINDING);
+
       } catch (_error) {
         Debug.error(_error);
         debugger;
@@ -137,7 +142,7 @@ namespace FudgeCore {
       function createUBOLights(): WebGLBuffer {
         const blockIndex: number = crc3.getUniformBlockIndex(program, UNIFORM_BLOCKS.LIGHTS.NAME);
         const blockSize: number = crc3.getActiveUniformBlockParameter(program, blockIndex, crc3.UNIFORM_BLOCK_DATA_SIZE);
-        
+
         const ubo: WebGLBuffer = RenderWebGL.assert(crc3.createBuffer());
         crc3.bindBuffer(WebGL2RenderingContext.UNIFORM_BUFFER, ubo);
         crc3.bufferData(WebGL2RenderingContext.UNIFORM_BUFFER, blockSize, crc3.DYNAMIC_DRAW);

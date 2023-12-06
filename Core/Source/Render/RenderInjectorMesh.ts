@@ -26,23 +26,24 @@ namespace FudgeCore {
 
       if (this.renderMesh.buffers == null)
         this.renderMesh.buffers = {
-          vertices: RenderWebGL.createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.vertices),
-          indices: RenderWebGL.createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indices),
-          normals: RenderWebGL.createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normals),
-          textureUVs: RenderWebGL.createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVs),
-          colors: RenderWebGL.createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.colors),
-          tangents: RenderWebGL.createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.tangents),
+          vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.vertices),
+          indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indices),
+          normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normals),
+          textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVs),
+          colors: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.colors),
+          tangents: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.tangents),
           nIndices: this.renderMesh.indices.length
         };
         
       return this.renderMesh.buffers;
 
-      // function createBuffer(_type: GLenum, _array: Float32Array | Uint16Array): WebGLBuffer {
-      //   let buffer: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
-      //   crc3.bindBuffer(_type, buffer);
-      //   crc3.bufferData(_type, _array, WebGL2RenderingContext.STATIC_DRAW);
-      //   return buffer;
-      // }
+      function createBuffer(_type: GLenum, _array: Float32Array | Uint16Array): WebGLBuffer {
+        const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+        let buffer: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
+        crc3.bindBuffer(_type, buffer);
+        crc3.bufferData(_type, _array, WebGL2RenderingContext.STATIC_DRAW);
+        return buffer;
+      }
     }
 
     protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers {

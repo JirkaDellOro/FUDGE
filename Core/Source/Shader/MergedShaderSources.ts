@@ -32,11 +32,13 @@ uniform sampler2D u_texNoise;
 in vec2 v_vctTexture;
 out vec4 vctFrag;
 
-// fog
-uniform bool u_bFog;
-uniform vec4 u_vctFogColor;
-uniform float u_fFogNear;
-uniform float u_fFogFar;
+layout(std140) uniform Fog {
+  bool u_bFogActive;
+  float u_fFogNear;
+  float u_fFogFar;
+  float pading;
+  vec4 u_vctFogColor;
+};
 
 // This function could be used to calculate the position from the depth texture, but mobile devices seems to lack in precision to do this
 // vec3 getPosition(vec2 _vctTexture) {
@@ -65,7 +67,7 @@ float getFog(vec3 _vctPosition) {
   float fDistance = length(_vctPosition - u_vctCamera); // maybe use z-depth instead of euclidean depth
   float fFog = clamp((fDistance - u_fFogNear) / (u_fFogFar - u_fFogNear), 0.0, 1.0);
   fFog = -pow(fFog, 2.0) + (2.0 * fFog); // lets fog appear quicker and fall off slower results in a more gradual falloff
-  return fFog;
+  return fFog * u_vctFogColor.a;
 }
 
 void main() {
@@ -94,8 +96,8 @@ void main() {
 
   fOcclusion = clamp(fOcclusion / 16.0, 0.0, 1.0);
 
-  if (u_bFog && fOcclusion > 0.0) // correct occlusion by fog factor
-    fOcclusion = mix(fOcclusion, 0.0, getFog(vctPosition) * u_vctFogColor.a);
+  if (u_bFogActive && fOcclusion > 0.0) // correct occlusion by fog factor
+    fOcclusion = mix(fOcclusion, 0.0, getFog(vctPosition));
   
   vctFrag.rgb = vec3(fOcclusion);
   vctFrag.a = 1.0;
@@ -560,10 +562,13 @@ precision highp int;
 uniform vec4 u_vctColor;
 uniform vec3 u_vctCamera; // needed for fog
 
-uniform bool u_bFog; // TODO: maybe make fog optional?
-uniform vec4 u_vctFogColor;
-uniform float u_fFogNear;
-uniform float u_fFogFar;
+layout(std140) uniform Fog {
+  bool u_bFogActive;
+  float u_fFogNear;
+  float u_fFogFar;
+  float fogPadding; // add padding to align to 16 bytes
+  vec4 u_vctFogColor;
+};
 
 in vec3 v_vctPosition;
 in vec4 v_vctColor;
@@ -613,7 +618,7 @@ layout(location = 2) out vec4 vctFragNormal;
     uint u_nLightsDirectional;
     uint u_nLightsPoint;
     uint u_nLightsSpot;
-    uint padding; // Add padding to align to 16 bytes
+    uint ligthsPadding; // Add padding to align to 16 bytes
     Light u_ambient;
     Light u_directional[MAX_LIGHTS_DIRECTIONAL];
     Light u_point[MAX_LIGHTS_POINT];
@@ -655,11 +660,17 @@ layout(location = 2) out vec4 vctFragNormal;
 
 #endif
 
+#if defined(PARTICLE)
+
+  uniform int u_iBlendMode;
+
+#endif
+
 float getFog(vec3 _vctPosition) {
   float fDistance = length(_vctPosition - u_vctCamera); // maybe use z-depth instead of euclidean depth
   float fFog = clamp((fDistance - u_fFogNear) / (u_fFogFar - u_fFogNear), 0.0, 1.0);
   fFog = -pow(fFog, 2.0) + (2.0 * fFog); // lets fog appear quicker and fall off slower results in a more gradual falloff
-  return fFog;
+  return fFog * u_vctFogColor.a;
 }
 
 void main() {
@@ -779,8 +790,17 @@ void main() {
   
   #endif
 
-  if (u_bFog) 
-    vctFrag.rgb = mix(vctFrag.rgb, u_vctFogColor.rgb, getFog(v_vctPosition) * u_vctFogColor.a);
+  if (u_bFogActive) {
+    float fFog = getFog(v_vctPosition);
+    vctFrag.rgb = mix(vctFrag.rgb, u_vctFogColor.rgb, fFog);
+
+    #if defined(PARTICLE)
+
+      if (u_iBlendMode == 2 || u_iBlendMode == 3 || u_iBlendMode == 4) // blend additive, subtractive, modulate
+        vctFrag.a = mix(vctFrag.a, 0.0, fFog);
+
+    #endif
+  }
 
   // discard pixel alltogether when transparent: don't show in Z-Buffer
   if(vctFrag.a < 0.01)

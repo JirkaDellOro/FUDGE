@@ -32,6 +32,10 @@ namespace FudgeCore {
     SKIN: {
       NAME: "Skin",
       BINDING: 1
+    },
+    FOG: {
+      NAME: "Fog",
+      BINDING: 2
     }
   };
   /* eslint-enable */
@@ -81,6 +85,8 @@ namespace FudgeCore {
     private static texDepth: WebGLTexture; // stores the depth of each pixel
     private static texBloomSamples: WebGLTexture[] = new Array(6); // stores down and upsampled versions of the color texture, used for bloom
 
+    private static uboFog: WebGLBuffer = RenderWebGL.assert(RenderWebGL.crc3.createBuffer()); // stores the fog data
+
     /**
      * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
      */
@@ -116,16 +122,6 @@ namespace FudgeCore {
      */
     public static setAttributeStructure(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
       RenderWebGL.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
-    }
-
-    /**
-     * Creates a {@link WebGLBuffer}.
-     */
-    public static createBuffer(_type: GLenum, _array: Float32Array | Uint16Array): WebGLBuffer {
-      let buffer: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(RenderWebGL.crc3.createBuffer());
-      RenderWebGL.crc3.bindBuffer(_type, buffer);
-      RenderWebGL.crc3.bufferData(_type, _array, WebGL2RenderingContext.STATIC_DRAW);
-      return buffer;
     }
 
     /**
@@ -351,6 +347,10 @@ namespace FudgeCore {
 
     protected static drawNodes(_nodesOpaque: Iterable<Node>, _nodesAlpha: Iterable<Node>, _cmpCamera: ComponentCamera): void {
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+
+      const cmpFog: ComponentFog = _cmpCamera.node?.getComponent(ComponentFog);
+      RenderWebGL.bufferFog(cmpFog);
+
       RenderWebGL.resetFramebuffer();
 
       crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texColor, 0);
@@ -409,14 +409,6 @@ namespace FudgeCore {
       crc3.uniform1f(ShaderAmbientOcclusion.uniforms["u_fAttenuationQuadratic"], _cmpAmbientOcclusion.attenuationQuadratic);
       crc3.uniform2f(ShaderAmbientOcclusion.uniforms["u_vctResolution"], RenderWebGL.getCanvas().width, RenderWebGL.getCanvas().height);
       crc3.uniform3fv(ShaderAmbientOcclusion.uniforms["u_vctCamera"], _cmpCamera.mtxWorld.translation.get());
-
-      let cmpFog: ComponentFog = _cmpCamera.node?.getComponent(ComponentFog);
-      crc3.uniform1i(ShaderAmbientOcclusion.uniforms["u_bFog"], cmpFog?.isActive ? 1 : 0);
-      if (cmpFog?.isActive) {
-        crc3.uniform1f(ShaderAmbientOcclusion.uniforms["u_fFogNear"], cmpFog.near);
-        crc3.uniform1f(ShaderAmbientOcclusion.uniforms["u_fFogFar"], cmpFog.far);
-        crc3.uniform4fv(ShaderAmbientOcclusion.uniforms["u_vctFogColor"], cmpFog.color.getArray());
-      }
 
       crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texColor, 0);
       RenderWebGL.setBlendMode(BLEND.SUBTRACTIVE);
@@ -593,6 +585,26 @@ namespace FudgeCore {
     }
     //#endregion
 
+    protected static bufferFog(_cmpFog: ComponentFog): void {
+      const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+
+      const data: Float32Array = new Float32Array(8);
+
+      data[0] = _cmpFog?.isActive ? 1 : 0;
+      if (_cmpFog) {
+        data[1] = _cmpFog.near;
+        data[2] = _cmpFog.far;
+        data.set(_cmpFog.color.getArray(), 4);
+      }
+
+      // buffer data to bound buffer
+      crc3.bindBuffer(WebGL2RenderingContext.UNIFORM_BUFFER, RenderWebGL.uboFog);
+      crc3.bufferData(WebGL2RenderingContext.UNIFORM_BUFFER, data, WebGL2RenderingContext.STATIC_DRAW);
+
+      // bind buffer to binding point
+      crc3.bindBufferBase(WebGL2RenderingContext.UNIFORM_BUFFER, UNIFORM_BLOCKS.FOG.BINDING, RenderWebGL.uboFog);
+    }
+
     /**
      * Buffer the data from the lights in the scenegraph into the lights ubo
      */
@@ -706,14 +718,6 @@ namespace FudgeCore {
         RenderWebGL.crc3.uniformMatrix4fv(uniform, false, _cmpCamera.mtxCameraInverse.get());
       }
 
-      let cmpFog: ComponentFog = _cmpCamera.node?.getComponent(ComponentFog);
-      RenderWebGL.crc3.uniform1i(shader.uniforms["u_bFog"], cmpFog?.isActive ? 1 : 0);
-      if (cmpFog?.isActive) {
-        RenderWebGL.crc3.uniform1f(shader.uniforms["u_fFogNear"], cmpFog.near);
-        RenderWebGL.crc3.uniform1f(shader.uniforms["u_fFogFar"], cmpFog.far);
-        RenderWebGL.crc3.uniform4fv(shader.uniforms["u_vctFogColor"], cmpFog.color.getArray());
-      }
-
       if (drawParticles)
         RenderWebGL.drawParticles(cmpParticleSystem, shader, renderBuffers, _node.getComponent(ComponentFaceCamera), cmpMaterial.sortForAlpha);
       else
@@ -721,23 +725,26 @@ namespace FudgeCore {
     }
 
     protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void {
-      RenderWebGL.crc3.depthMask(_cmpParticleSystem.depthMask);
+      const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+
+      crc3.depthMask(_cmpParticleSystem.depthMask);
       RenderWebGL.setBlendMode(_cmpParticleSystem.blendMode);
+      crc3.uniform1i(_shader.uniforms["u_iBlendMode"], _cmpParticleSystem.blendMode);
       _cmpParticleSystem.useRenderData();
 
-      RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemDuration"], _cmpParticleSystem.duration);
-      RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemSize"], _cmpParticleSystem.size);
-      RenderWebGL.crc3.uniform1f(_shader.uniforms["u_fParticleSystemTime"], _cmpParticleSystem.time);
-      RenderWebGL.crc3.uniform1i(_shader.uniforms[TEXTURE_LOCATION.PARTICLE.UNIFORM], TEXTURE_LOCATION.PARTICLE.INDEX);
+      crc3.uniform1f(_shader.uniforms["u_fParticleSystemDuration"], _cmpParticleSystem.duration);
+      crc3.uniform1f(_shader.uniforms["u_fParticleSystemSize"], _cmpParticleSystem.size);
+      crc3.uniform1f(_shader.uniforms["u_fParticleSystemTime"], _cmpParticleSystem.time);
+      crc3.uniform1i(_shader.uniforms[TEXTURE_LOCATION.PARTICLE.UNIFORM], TEXTURE_LOCATION.PARTICLE.INDEX);
 
       let faceCamera: boolean = _cmpFaceCamera && _cmpFaceCamera.isActive;
-      RenderWebGL.crc3.uniform1i(_shader.uniforms["u_bParticleSystemFaceCamera"], faceCamera ? 1 : 0);
-      RenderWebGL.crc3.uniform1i(_shader.uniforms["u_bParticleSystemRestrict"], faceCamera && _cmpFaceCamera.restrict ? 1 : 0);
+      crc3.uniform1i(_shader.uniforms["u_bParticleSystemFaceCamera"], faceCamera ? 1 : 0);
+      crc3.uniform1i(_shader.uniforms["u_bParticleSystemRestrict"], faceCamera && _cmpFaceCamera.restrict ? 1 : 0);
 
-      RenderWebGL.crc3.drawElementsInstanced(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0, _cmpParticleSystem.size);
+      crc3.drawElementsInstanced(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0, _cmpParticleSystem.size);
 
       RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
-      RenderWebGL.crc3.depthMask(true);
+      crc3.depthMask(true);
     }
 
     private static calcMeshToView(_node: Node, _cmpMesh: ComponentMesh, _mtxWorldToView: Matrix4x4, _target?: Vector3): Matrix4x4 {

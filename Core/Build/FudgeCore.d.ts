@@ -1075,6 +1075,10 @@ declare namespace FudgeCore {
             NAME: string;
             BINDING: number;
         };
+        FOG: {
+            NAME: string;
+            BINDING: number;
+        };
     };
     const TEXTURE_LOCATION: {
         COLOR: {
@@ -1114,6 +1118,7 @@ declare namespace FudgeCore {
         private static texNoise;
         private static texDepth;
         private static texBloomSamples;
+        private static uboFog;
         /**
          * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
          */
@@ -1124,10 +1129,6 @@ declare namespace FudgeCore {
          * @param _bufferSpecification  Interface passing datapullspecifications to the buffer.
          */
         static setAttributeStructure(_attributeLocation: number, _bufferSpecification: BufferSpecification): void;
-        /**
-         * Creates a {@link WebGLBuffer}.
-         */
-        static createBuffer(_type: GLenum, _array: Float32Array | Uint16Array): WebGLBuffer;
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
         * @param _value  value to check against null
@@ -1211,6 +1212,7 @@ declare namespace FudgeCore {
         * but the fragment shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
         */
         protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _cmpCamera: ComponentCamera): void;
+        protected static bufferFog(_cmpFog: ComponentFog): void;
         /**
          * Buffer the data from the lights in the scenegraph into the lights ubo
          */
