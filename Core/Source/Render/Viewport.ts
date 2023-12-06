@@ -69,6 +69,7 @@ namespace FudgeCore {
       this.rectDestination = this.getClientRectangle();
 
       Render.initializeAttachments();
+      Render.adjustAttachments();
 
       this.setBranch(_branch);
     }
@@ -206,6 +207,7 @@ namespace FudgeCore {
       Recycler.store(rectTemp);
       // adjust the area on the source-canvas to render from by applying the framing to destination area
       rectTemp = this.frameDestinationToSource.getRect(this.rectDestination);
+
       this.rectSource.copy(rectTemp);
       Recycler.store(rectTemp);
 
@@ -214,14 +216,19 @@ namespace FudgeCore {
       // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport. For now, it's always adjusted to the current viewport
       let rectRender: Rectangle = this.frameSourceToRender.getRect(this.rectSource);
       Render.setRenderRectangle(rectRender);
+
+      let rectOffscreenCanvas: Rectangle = Render.getCanvasRect(); // there are far to many rectangles involved here...
+      
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
       Render.setCanvasSize(rectRender.width, rectRender.height);
 
-      Render.adjustAttachments();
+      if (rectRender.width != rectOffscreenCanvas.width || rectRender.height != rectOffscreenCanvas.height) 
+        Render.adjustAttachments();
 
       Recycler.store(rectClient);
       Recycler.store(rectCanvas);
       Recycler.store(rectRender);
+      Recycler.store(rectOffscreenCanvas);
     }
 
     /**

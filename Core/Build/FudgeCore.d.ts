@@ -1106,12 +1106,12 @@ declare namespace FudgeCore {
         static uboLightsVariableOffsets: {
             [_name: string]: number;
         };
-        protected static mainRect: Rectangle;
         protected static crc3: WebGL2RenderingContext;
         protected static ƒpicked: Pick[];
         private static rectRender;
         private static sizePick;
-        private static framebuffer;
+        private static framebufferMain;
+        private static framebufferPost;
         private static texColor;
         private static texPosition;
         private static texNormal;
@@ -1161,9 +1161,9 @@ declare namespace FudgeCore {
          */
         static clear(_color?: Color): void;
         /**
-         * Reset the offscreen framebuffer to the original RenderingContext
+         * Reset the framebuffer to the main color buffer.
          */
-        static resetFramebuffer(_framebuffer?: WebGLFramebuffer): void;
+        static resetFramebuffer(): void;
         /**
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
@@ -1185,22 +1185,14 @@ declare namespace FudgeCore {
          */
         static setBlendMode(_mode: BLEND): void;
         /**
-         * Creates and stores texture buffers to be used for Post-FX
+         * Initializes different framebuffers aswell as texture attachments to use as render targets
          */
         static initializeAttachments(): void;
         /**
-         * Adjusts the size of the set framebuffers corresponding textures
+         * Adjusts the size of the different texture attachments (render targets) to the canvas size
+         * ⚠️ CAUTION: Expensive operation, use only when canvas size changed
          */
         static adjustAttachments(): void;
-        protected static drawNodes(_nodesOpaque: Iterable<Node>, _nodesAlpha: Iterable<Node>, _cmpCamera: ComponentCamera): void;
-        /**
-         * Draws the occlusion values into the occlusion texture, using the given camera and ambient-occlusion component
-         */
-        protected static drawAmbientOcclusion(_cmpCamera: ComponentCamera, _cmpAmbientOcclusion: ComponentAmbientOcclusion): void;
-        /**
-         * Draws the bloom-effect into the bloom texture, using the given bloom-component
-         */
-        protected static drawBloom(_cmpBloom: ComponentBloom): void;
         /**
          * Creates a texture buffer to be used as pick-buffer
          */
@@ -1212,11 +1204,23 @@ declare namespace FudgeCore {
         * but the fragment shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
         */
         protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _cmpCamera: ComponentCamera): void;
+        /**
+         * Buffer the fog parameters into the fog ubo
+         */
         protected static bufferFog(_cmpFog: ComponentFog): void;
         /**
          * Buffer the data from the lights in the scenegraph into the lights ubo
          */
         protected static bufferLights(_lights: MapLightTypeToLightList): void;
+        protected static drawNodes(_nodesOpaque: Iterable<Node>, _nodesAlpha: Iterable<Node>, _cmpCamera: ComponentCamera): void;
+        /**
+         * Draws the occlusion over the color-buffer, using the given ambient-occlusion-component
+         */
+        protected static drawAmbientOcclusion(_cmpCamera: ComponentCamera, _cmpAmbientOcclusion: ComponentAmbientOcclusion): void;
+        /**
+         * Draws the bloom-effect into the bloom texture, using the given bloom-component
+         */
+        protected static drawBloom(_cmpBloom: ComponentBloom): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
         */
