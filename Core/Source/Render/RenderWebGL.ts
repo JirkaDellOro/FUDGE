@@ -81,8 +81,8 @@ namespace FudgeCore {
     private static texPosition: WebGLTexture; // stores the position of each pixel in world space
     private static texNormal: WebGLTexture; // stores the normal of each pixel in world space
     private static texNoise: WebGLTexture; // stores random values for each pixel, used for ambient occlusion
-    private static texDepth: WebGLTexture; // stores the depth of each pixel
-    private static texBloomSamples: WebGLTexture[] = new Array(6); // stores down and upsampled versions of the color texture, used for bloom
+    private static texDepth: WebGLTexture; // stores the depth of each pixel, currently unused
+    private static texBloomSamples: WebGLTexture[]; // stores down and upsampled versions of the color texture, used for bloom
 
     private static uboFog: WebGLBuffer = RenderWebGL.assert(RenderWebGL.crc3.createBuffer()); // stores the fog parameters
 
@@ -110,6 +110,9 @@ namespace FudgeCore {
       crc3.enable(WebGL2RenderingContext.BLEND);
       RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
       RenderWebGL.rectRender = RenderWebGL.getCanvasRect();
+
+      RenderWebGL.initializeAttachments();
+      RenderWebGL.adjustAttachments();
 
       return crc3;
     }
@@ -271,6 +274,7 @@ namespace FudgeCore {
       RenderWebGL.texDepth = createTexture(WebGL2RenderingContext.NEAREST, WebGL2RenderingContext.CLAMP_TO_EDGE);
       RenderWebGL.texNoise = createTexture(WebGL2RenderingContext.NEAREST, WebGL2RenderingContext.CLAMP_TO_EDGE);
 
+      RenderWebGL.texBloomSamples = new Array(6);
       for (let i: number = 0; i < RenderWebGL.texBloomSamples.length; i++)
         RenderWebGL.texBloomSamples[i] = createTexture(WebGL2RenderingContext.LINEAR, WebGL2RenderingContext.CLAMP_TO_EDGE);
 
@@ -540,6 +544,10 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * Draws the given nodes using the given camera and the post process components attached to the same node as the camera
+     * The opaque nodes are drawn first, then ssao is applied, then bloom is applied, then nodes alpha (sortForAlpha) are drawn.
+     */
     protected static drawNodes(_nodesOpaque: Iterable<Node>, _nodesAlpha: Iterable<Node>, _cmpCamera: ComponentCamera): void {
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
@@ -549,7 +557,9 @@ namespace FudgeCore {
 
       RenderWebGL.bufferFog(cmpFog);
 
-      // opaque pass TODO: think about disabling blending for all opaque objects
+      // opaque pass 
+      // TODO: think about disabling blending for all opaque objects, this might improve performance 
+      // as otherwise the 3 color attachments (color, position and normals) all need to be blended
       crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.framebufferMain);
       crc3.drawBuffers(cmpAmbientOcclusion?.isActive ? // only use position and normal textures if ambient occlusion is active
         [WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.COLOR_ATTACHMENT1, WebGL2RenderingContext.COLOR_ATTACHMENT2] :
@@ -579,6 +589,7 @@ namespace FudgeCore {
         RenderWebGL.drawNode(node, _cmpCamera);
       // crc3.depthMask(true);
 
+      // copy framebuffer to canvas
       crc3.bindFramebuffer(WebGL2RenderingContext.READ_FRAMEBUFFER, RenderWebGL.framebufferMain);
       crc3.bindFramebuffer(WebGL2RenderingContext.DRAW_FRAMEBUFFER, null);
       crc3.blitFramebuffer(0, 0, crc3.canvas.width, crc3.canvas.height, 0, 0, crc3.canvas.width, crc3.canvas.height, WebGL2RenderingContext.COLOR_BUFFER_BIT, WebGL2RenderingContext.NEAREST);
@@ -613,7 +624,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Draws the bloom-effect into the bloom texture, using the given bloom-component
+     * Draws the bloom-effect over the color-buffer, using the given bloom-component
      */
     protected static drawBloom(_cmpBloom: ComponentBloom): void {
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();

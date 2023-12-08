@@ -1,7 +1,6 @@
-var PostprocessingTest;
-(function (PostprocessingTest) {
+var ShaderTest;
+(function (ShaderTest) {
     var ƒ = FudgeCore;
-    var ƒui = FudgeUserInterface;
     var ƒAid = FudgeAid;
     window.addEventListener("load", init);
     let viewport;
@@ -30,24 +29,6 @@ var PostprocessingTest;
         canvas.addEventListener("mouseup", function () { document.exitPointerLock(); });
         // make the camera interactive (complex method in ƒAid)
         ƒAid.Viewport.expandCameraToInteractiveOrbit(viewport);
-        let cmpAmbientOcclusion = new ƒ.ComponentAmbientOcclusion();
-        cmpCamera.node.addComponent(cmpAmbientOcclusion);
-        let cmpBloom = new ƒ.ComponentBloom();
-        cmpBloom.activate(false);
-        cmpCamera.node.addComponent(cmpBloom);
-        let cmpFog = new ƒ.ComponentFog();
-        cmpFog.activate(false);
-        cmpCamera.node.addComponent(cmpFog);
-        let ui = document.getElementById("ui");
-        let uiAmbientOcclusion = ƒui.Generator.createDetailsFromMutable(cmpAmbientOcclusion);
-        new ƒui.Controller(cmpAmbientOcclusion, uiAmbientOcclusion);
-        ui.appendChild(uiAmbientOcclusion);
-        let uiBloom = ƒui.Generator.createDetailsFromMutable(cmpBloom);
-        new ƒui.Controller(cmpBloom, uiBloom);
-        ui.appendChild(uiBloom);
-        let uiFog = ƒui.Generator.createDetailsFromMutable(cmpFog);
-        new ƒui.Controller(cmpFog, uiFog);
-        ui.appendChild(uiFog);
         let fpsSpan = document.getElementById("fps");
         let lastUpdateTime = 0;
         const updateInterval = 200;
@@ -61,5 +42,5 @@ var PostprocessingTest;
             viewport.draw();
         }
     }
-})(PostprocessingTest || (PostprocessingTest = {}));
+})(ShaderTest || (ShaderTest = {}));
 //# sourceMappingURL=Main.js.map

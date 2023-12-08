@@ -68,9 +68,6 @@ namespace FudgeCore {
       this.rectSource = Render.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
 
-      Render.initializeAttachments();
-      Render.adjustAttachments();
-
       this.setBranch(_branch);
     }
     /**
