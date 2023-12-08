@@ -3,25 +3,25 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta charset="utf-8" />
-  <meta type="settings" autoview="Graph|2023-11-30T11:08:19.277Z|94880" project="{'name':'Postprocessing','graphAutoView':'Graph|2023-11-30T11:08:19.277Z|94880'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-11-30T11:08:19.277Z|94880'}}]" />
-  <title>Postprocessing</title>
-  <!--Load FUDGE-->
+  <meta type="settings" autoview="Graph|2023-11-30T11:08:19.277Z|94880" project="{'name':'Shader','graphAutoView':'Graph|2023-11-30T11:08:19.277Z|94880'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-11-30T11:08:19.277Z|94880'}}]" />
+
   <script src="./../../../Core/Build/FudgeCore.js"></script>
   <script src="./../../../Aid/Build/FudgeAid.js"></script>
   <script src="./../../UserInterface/Build/FudgeUserInterface.js"></script>
 
-  <!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
   <link type="resources" src="Internal.json" />
 
-  <!--Load scripts-->
   <script src="Main.js" editor="true"></script>
+
+  <link rel="stylesheet" href="../TestInstructions.css" />
+  <script src="../dialog-polyfill.min.js"></script>
+  <script src="../TestInstructions.js"></script>
+  
   <style>
     html,
     body {
       margin: 0;
       padding: 0;
-      color: yellow;
-      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
     }
 
     canvas.fullscreen {
@@ -33,25 +33,43 @@
     }
 
     #fps {
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: bold;
+      color: yellow;
+      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+      padding: 0.2rem;
+    }
+
+    #fps {
       position: absolute;
       top: 0;
       left: 0;
     }
 
-    #ui {
-      position: absolute;
-      top: 0;
-      right: 0;
-    }
-
-    fudge-boolean, fudge-color, fudge-stepper, fudge-select {
-      display: block;
-    }
-
   </style>
+<title>Shader</title>
 </head>
 
 <body>
+  <script>
+    TestInstructions.display({
+      Name: "Shader",
+      Test: [
+        "Shows the different material shaders."
+      ],
+      Setup: [
+        "From left to right the material shaders are: Lit, Flat, Gouraud and Phong.",
+        "The upper row shows the materials with a texture, the middle row without.",
+        "The lower row shows the MatCap material."
+      ],
+      Act: [
+        "Move the camera around."
+      ],
+      Observe: [
+        "Shading should be correct for each material."
+      ]
+    });
+  </script>
   <!--Canvas for FUDGE to render to-->
   <canvas class="fullscreen">
   </canvas>

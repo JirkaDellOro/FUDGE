@@ -19,8 +19,6 @@ var PostprocessingTest;
         }
         // setup the viewport
         let cmpCamera = new ƒ.ComponentCamera();
-        cmpCamera.clrBackground = ƒ.Color.CSS("SKYBLUE");
-        // cmpCamera.clrBackground = ƒ.Color.CSS("SKYBLUE");
         let canvas = document.querySelector("canvas");
         viewport = new ƒ.Viewport();
         viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);

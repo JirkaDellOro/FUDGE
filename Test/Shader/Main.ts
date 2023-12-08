@@ -19,9 +19,7 @@ namespace ShaderTest {
     }
     // setup the viewport
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-    cmpCamera.clrBackground = ƒ.Color.CSS("SKYBLUE");
     
-    // cmpCamera.clrBackground = ƒ.Color.CSS("SKYBLUE");
     let canvas: HTMLCanvasElement = document.querySelector("canvas");
     viewport = new ƒ.Viewport();
     viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);

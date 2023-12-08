@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta charset="utf-8" />
-  <meta type="settings" autoview="Graph|2023-07-25T08:47:48.755Z|05108" project="{'name':'ImportOBJTest','graphAutoView':'Graph|2023-07-25T08:47:48.755Z|05108'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-07-25T08:47:48.755Z|05108'}}]" />
-  <title>ImportOBJTest</title>
-  <!--Load FUDGE-->
+  <meta type="settings" autoview="Graph|2023-07-25T08:47:48.755Z|05108"
+    project="{'name':'ImportOBJTest','graphAutoView':'Graph|2023-07-25T08:47:48.755Z|05108'}"
+    panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-07-25T08:47:48.755Z|05108'}}]" />
+
+
   <script src="./../../../Core/Build/FudgeCore.js"></script>
   <script src="./../../../Aid/Build/FudgeAid.js"></script>
 
-  <!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
   <link type="resources" src="Internal.json" />
 
-  <!--Load scripts-->
   <script src="ImportOBJ.js" editor="true"></script>
+
+  <link rel="stylesheet" href="../../TestInstructions.css">
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+
   <style>
     html,
     body {
@@ -28,35 +34,36 @@
       width: 100vw;
       height: 100vh;
     }
-
-    span#fps {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-
-    span#time {
-      position: absolute;
-      top: 1rem;
-      left: 0;
-    }
-
-    span {
-      color: yellow;
-      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
-    }
-
-    #file {
-      position: absolute;
-      top: 0;
-      right: 0;
-    }
   </style>
 </head>
 
 <body>
+  <script>
+    TestInstructions.display({
+      Name: "OBJ Import",
+      Test: [
+        "Shows multiple cubes exported from Blender as OBJ files.",
+        "Each cube was exported using different settings."
+      ],
+      Setup: [
+        "From left to right the cubes were exported with: no uvs and no normals, uvs only, normals only, uvs and normals",
+        "The cubes in the upper row where exported using flat shading",
+        "The cubes in the lower row where exported using smooth shading.",
+        "All cubes use phong shading.",
+        "All cubes have a stone texture applied to them."
+      ],
+      Act: [
+        "Move the camera around."
+      ],
+      Expect: [
+        "The cubes with uvs have their texture applied correctly.",
+        "Only the flat cubes with normals should appear flat shaded. All other cubes should appear smooth shaded."
+      ]
+    });
+  </script>
   <!--Canvas for FUDGE to render to-->
   <canvas class="fullscreen">
   </canvas>
 </body>
+
 </html>

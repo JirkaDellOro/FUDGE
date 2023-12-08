@@ -100,10 +100,7 @@
                 "code": "0"
               },
               {
-                "value": 1
-              },
-              {
-                "code": "mod(systemTime * 0.001, systemDuration)"
+                "code": "mod(systemTime * 0.0005 + particleId * 1.5, systemDuration)"
               }
             ]
           }
@@ -1013,7 +1010,7 @@
               "ComponentMaterial": [
                 {
                   "ƒ.ComponentMaterial": {
-                    "sortForAlpha": false,
+                    "sortForAlpha": true,
                     "clrPrimary": "[1, 0.6274509803921569, 0.19607843137254902, 0.47]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
@@ -1210,8 +1207,8 @@
                     "depthMask": true,
                     "blendMode": 0,
                     "playMode": 0,
-                    "duration": 1000,
-                    "size": 10
+                    "duration": 25000,
+                    "size": 5
                   }
                 }
               ],
@@ -1234,7 +1231,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[-1.500000238418579, 0, 4.000000476837158]",
+                      "translation": "[0, 0, -3.500000476837158]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[0.49999991059303284, 0.49999991059303284, 0.49999991059303284]"
                     },
@@ -1247,7 +1244,7 @@
               "ComponentMaterial": [
                 {
                   "ƒ.ComponentMaterial": {
-                    "sortForAlpha": true,
+                    "sortForAlpha": false,
                     "clrPrimary": "[1, 0.6274509803921569, 0.19607843137254902, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {

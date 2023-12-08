@@ -1212,13 +1212,17 @@ declare namespace FudgeCore {
          * Buffer the data from the lights in the scenegraph into the lights ubo
          */
         protected static bufferLights(_lights: MapLightTypeToLightList): void;
+        /**
+         * Draws the given nodes using the given camera and the post process components attached to the same node as the camera
+         * The opaque nodes are drawn first, then ssao is applied, then bloom is applied, then nodes alpha (sortForAlpha) are drawn.
+         */
         protected static drawNodes(_nodesOpaque: Iterable<Node>, _nodesAlpha: Iterable<Node>, _cmpCamera: ComponentCamera): void;
         /**
          * Draws the occlusion over the color-buffer, using the given ambient-occlusion-component
          */
         protected static drawAmbientOcclusion(_cmpCamera: ComponentCamera, _cmpAmbientOcclusion: ComponentAmbientOcclusion): void;
         /**
-         * Draws the bloom-effect into the bloom texture, using the given bloom-component
+         * Draws the bloom-effect over the color-buffer, using the given bloom-component
          */
         protected static drawBloom(_cmpBloom: ComponentBloom): void;
         /**
