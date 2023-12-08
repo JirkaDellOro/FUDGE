@@ -694,7 +694,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "specular": 0.5
+          "specular": 0.5,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }

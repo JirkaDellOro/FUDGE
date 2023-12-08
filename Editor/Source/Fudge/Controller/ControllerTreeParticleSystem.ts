@@ -201,7 +201,7 @@ namespace Fudge {
         for (let data of _children) {
           let index: number = container.indexOf(data); // _at needs to be corrected if we are moving within same parent
           let hasParent: boolean = this.childToParent.has(data);
-          let name: string = this.data.variableNames[index];
+          let name: string = this.data.variableNames?.[index];
 
           if (hasParent && !this.deleteData(data)) 
             continue;

@@ -32,6 +32,13 @@ namespace FudgeCore {
     }
 
     /**
+     * returns the tangent associated with the vertex addressed
+     */
+    public tangent(_index: number): Vector4 {
+      return this[_index].tangent; // tangents can not be shared as they are dependent on the uv-coordinates
+    }
+
+    /**
      * returns the uv-coordinates associated with the vertex addressed
      */
     public uv(_index: number): Vector2 {

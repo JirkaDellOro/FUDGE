@@ -10,7 +10,7 @@ namespace FudgeCore {
    */
   export abstract class Render extends RenderWebGL {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
-    public static pickBuffer: Int32Array;
+    public static pickBuffer: Int32Array;   // TODO: research if picking should be optimized using radius picking to filter
     public static readonly nodesPhysics: RecycableArray<Node> = new RecycableArray();
     public static readonly componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
     public static readonly lights: MapLightTypeToLightList = new Map();
@@ -18,8 +18,6 @@ namespace FudgeCore {
     private static readonly nodesAlpha: RecycableArray<Node> = new RecycableArray();
     private static readonly componentsSkeleton: RecycableArray<ComponentSkeleton> = new RecycableArray();
     private static timestampUpdate: number;
-
-    // TODO: research if picking should be optimized using radius picking to filter
 
     //#region Prepare
     /**
@@ -113,15 +111,11 @@ namespace FudgeCore {
           cmpSkeleton.update();
           cmpSkeleton.updateRenderBuffer();
         }
-
+        Render.bufferLights(Render.lights);
         _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
-        Render.updateLightsUBO(Render.lights);
       }
     }
 
-    /**
-     * Add the given lights to the {@link Render.lights}-map, sorted by type.
-     */
     public static addLights(_cmpLights: ComponentLight[]): void {
       for (let cmpLight of _cmpLights) {
         if (!cmpLight.isActive)
@@ -163,7 +157,7 @@ namespace FudgeCore {
       Render.setBlendMode(BLEND.TRANSPARENT);
 
       let picks: Pick[] = Render.getPicks(size, _cmpCamera);
-      Render.resetFrameBuffer();
+      Render.resetFramebuffer();
       return picks;
     }
     //#endregion
@@ -173,27 +167,14 @@ namespace FudgeCore {
      * Draws the scene from the point of view of the given camera
      */
     public static draw(_cmpCamera: ComponentCamera): void {
-      _cmpCamera.resetWorldToView();
-      Render.drawList(_cmpCamera, this.nodesSimple);
-      Render.drawListAlpha(_cmpCamera);
-    }
-
-    private static drawListAlpha(_cmpCamera: ComponentCamera): void {
-      function sort(_a: Node, _b: Node): number {
-        return (Reflect.get(_a, "zCamera") < Reflect.get(_b, "zCamera")) ? 1 : -1;
-      }
       for (let node of Render.nodesAlpha)
         Reflect.set(node, "zCamera", _cmpCamera.pointWorldToClip(node.getComponent(ComponentMesh).mtxWorld.translation).z);
 
-      let sorted: Node[] = Render.nodesAlpha.getSorted(sort);
-      Render.drawList(_cmpCamera, sorted);
-    }
+      const sorted: Node[] = Render.nodesAlpha.getSorted((_a: Node, _b: Node) => Reflect.get(_b, "zCamera") - Reflect.get(_a, "zCamera"));
 
-    private static drawList(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>): void {
-      for (let node of _list) {
-        Render.drawNode(node, _cmpCamera);
-      }
+      Render.drawNodes(Render.nodesSimple, sorted, _cmpCamera);
     }
+    //#endregion
 
     //#region Physics
     private static transformByPhysics(_node: Node, _cmpRigidbody: ComponentRigidbody): void {

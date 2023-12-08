@@ -1080,9 +1080,34 @@ declare namespace FudgeCore {
         offset: number;
     }
     const UNIFORM_BLOCKS: {
-        [block: string]: {
+        LIGHTS: {
             NAME: string;
             BINDING: number;
+        };
+        SKIN: {
+            NAME: string;
+            BINDING: number;
+        };
+        FOG: {
+            NAME: string;
+            BINDING: number;
+        };
+    };
+    const TEXTURE_LOCATION: {
+        COLOR: {
+            UNIFORM: string;
+            UNIT: 33984;
+            INDEX: number;
+        };
+        NORMAL: {
+            UNIFORM: string;
+            UNIT: 33985;
+            INDEX: number;
+        };
+        PARTICLE: {
+            UNIFORM: string;
+            UNIT: 33986;
+            INDEX: number;
         };
     };
     /**
@@ -1098,6 +1123,15 @@ declare namespace FudgeCore {
         protected static ƒpicked: Pick[];
         private static rectRender;
         private static sizePick;
+        private static framebufferMain;
+        private static framebufferPost;
+        private static texColor;
+        private static texPosition;
+        private static texNormal;
+        private static texNoise;
+        private static texDepth;
+        private static texBloomSamples;
+        private static uboFog;
         /**
          * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
          */
@@ -1140,21 +1174,38 @@ declare namespace FudgeCore {
          */
         static clear(_color?: Color): void;
         /**
-         * Reset the offscreen framebuffer to the original RenderingContext
+         * Reset the framebuffer to the main color buffer.
          */
-        static resetFrameBuffer(_frameBuffer?: WebGLFramebuffer): void;
+        static resetFramebuffer(): void;
         /**
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
         static getRenderRectangle(): Rectangle;
         /**
-         * Enable / Disable WebGLs depth test
+         * Enable / Disable WebGLs depth test.
          */
         static setDepthTest(_test: boolean): void;
+        /**
+         * Enable / Disable WebGLs scissor test.
+         */
+        static setScissorTest(_test: boolean, _x: number, _y: number, _width: number, _height: number): void;
+        /**
+         * Set WebGLs viewport.
+         */
+        static setViewport(_x: number, _y: number, _width: number, _height: number): void;
         /**
          * Set the blend mode to render with
          */
         static setBlendMode(_mode: BLEND): void;
+        /**
+         * Initializes different framebuffers aswell as texture attachments to use as render targets
+         */
+        static initializeAttachments(): void;
+        /**
+         * Adjusts the size of the different texture attachments (render targets) to the canvas size
+         * ⚠️ CAUTION: Expensive operation, use only when canvas size changed
+         */
+        static adjustAttachments(): void;
         /**
          * Creates a texture buffer to be used as pick-buffer
          */
@@ -1167,15 +1218,33 @@ declare namespace FudgeCore {
         */
         protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _cmpCamera: ComponentCamera): void;
         /**
+         * Buffer the fog parameters into the fog ubo
+         */
+        protected static bufferFog(_cmpFog: ComponentFog): void;
+        /**
          * Buffer the data from the lights in the scenegraph into the lights ubo
          */
-        protected static updateLightsUBO(_lights: MapLightTypeToLightList): void;
+        protected static bufferLights(_lights: MapLightTypeToLightList): void;
+        /**
+         * Draws the given nodes using the given camera and the post process components attached to the same node as the camera
+         * The opaque nodes are drawn first, then ssao is applied, then bloom is applied, then nodes alpha (sortForAlpha) are drawn.
+         */
+        protected static drawNodes(_nodesOpaque: Iterable<Node>, _nodesAlpha: Iterable<Node>, _cmpCamera: ComponentCamera): void;
+        /**
+         * Draws the occlusion over the color-buffer, using the given ambient-occlusion-component
+         */
+        protected static drawAmbientOcclusion(_cmpCamera: ComponentCamera, _cmpAmbientOcclusion: ComponentAmbientOcclusion): void;
+        /**
+         * Draws the bloom-effect over the color-buffer, using the given bloom-component
+         */
+        protected static drawBloom(_cmpBloom: ComponentBloom): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
-         */
+        */
         protected static drawNode(_node: Node, _cmpCamera: ComponentCamera): void;
         protected static drawParticles(_cmpParticleSystem: ComponentParticleSystem, _shader: ShaderInterface, _renderBuffers: RenderBuffers, _cmpFaceCamera: ComponentFaceCamera, _sortForAlpha: boolean): void;
         private static calcMeshToView;
+        private static bindTexture;
     }
 }
 declare namespace FudgeCore {
@@ -1926,6 +1995,23 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Attached to a {@link Node} with an attached {@link ComponentCamera} this causes the rendered image to receive an ambient occlusion effect.
+     * @authors Roland Heer, HFU, 2023 | Jonas Plotzky, HFU, 2023
+     */
+    class ComponentAmbientOcclusion extends Component {
+        static readonly iSubclass: number;
+        sampleRadius: number;
+        bias: number;
+        attenuationConstant: number;
+        attenuationLinear: number;
+        attenuationQuadratic: number;
+        constructor(_sampleRadius?: number, _bias?: number, _attenuationConstant?: number, _attenuationLinear?: number, _attenuationQuadratic?: number);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Holds a reference to an {@link Animation} and controls it. Controls quantization and playmode as well as speed.
      * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021 | Jonas Plotzky, HFU, 2022
      */
@@ -2123,6 +2209,26 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Attached to a {@link Node} with an attached {@link ComponentCamera} this causes the rendered image to receive a bloom-effect.
+     * @authors Roland Heer, HFU, 2023
+     */
+    class ComponentBloom extends Component {
+        #private;
+        static readonly iSubclass: number;
+        constructor(_threshold?: number, _intensity?: number, _desaturateHighlights?: number);
+        get threshold(): number;
+        set threshold(_value: number);
+        get intensity(): number;
+        set intensity(_value: number);
+        get highlightDesaturation(): number;
+        set highlightDesaturation(_value: number);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
+    }
+}
+declare namespace FudgeCore {
     enum FIELD_OF_VIEW {
         HORIZONTAL = "horizontal",
         VERTICAL = "vertical",
@@ -2249,6 +2355,21 @@ declare namespace FudgeCore {
         up: Vector3;
         restrict: boolean;
         constructor();
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Attaches a {@link Material} to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
+     */
+    class ComponentFog extends Component {
+        static readonly iSubclass: number;
+        color: Color;
+        near: number;
+        far: number;
+        constructor(_color?: Color, _near?: number, _far?: number);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -3146,11 +3267,16 @@ declare namespace FudgeCore {
      * The simplest {@link Coat} providing just a color
      */
     class CoatRemissive extends CoatColored {
-        specular: number;
+        #private;
         diffuse: number;
-        constructor(_color?: Color, _diffuse?: number, _specular?: number);
+        specular: number;
+        intensity: number;
+        constructor(_color?: Color, _diffuse?: number, _specular?: number, _intensity?: number, _metallic?: number);
+        get metallic(): number;
+        set metallic(_value: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
     }
 }
 declare namespace FudgeCore {
@@ -3169,11 +3295,36 @@ declare namespace FudgeCore {
      * A {@link Coat} providing a texture and additional data for texturing
      */
     class CoatRemissiveTextured extends CoatTextured {
-        specular: number;
+        #private;
         diffuse: number;
-        constructor(_color?: Color, _texture?: Texture, _diffuse?: number, _specular?: number);
+        specular: number;
+        intensity: number;
+        constructor(_color?: Color, _texture?: Texture, _diffuse?: number, _specular?: number, _intensity?: number, _metallic?: number);
+        get metallic(): number;
+        set metallic(_value: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * A {@link Coat} providing a texture and additional data for texturing
+     */
+    class CoatRemissiveTexturedNormals extends CoatRemissiveTextured {
+        normalMap: Texture;
+        constructor(_color?: Color, _texture?: Texture, _normalMap?: Texture, _diffuse?: number, _specular?: number, _intensity?: number, _metallic?: number);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * A {@link Coat} providing only a texture
+     */
+    class CoatWebGlTextured extends Coat {
+        texture: WebGLTexture;
+        constructor(_texture?: WebGLTexture);
     }
 }
 declare namespace FudgeCore {
@@ -4285,12 +4436,74 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Stores and manipulates a fourdimensional vector comprised of the components x, y, z and w.
+     * @authors Jonas Plotzky, HFU, 2023
+     */
+    class Vector4 extends Mutable implements Serializable, Recycable {
+        x: number;
+        y: number;
+        z: number;
+        w: number;
+        constructor(_x?: number, _y?: number, _z?: number, _w?: number);
+        /**
+         * The magnitude (length) of the vector.
+         */
+        get magnitude(): number;
+        /**
+         * The squared magnitude (length) of the vector. Faster for simple proximity evaluation.
+         */
+        get magnitudeSquared(): number;
+        /**
+         * Creates and returns a clone of this vector
+         */
+        get clone(): Vector4;
+        /**
+         * Sets the components of this vector.
+         */
+        set(_x: number, _y: number, _z: number, _w: number): void;
+        /**
+         * Returns an array with the components of this vector.
+         */
+        get(): [number, number, number, number];
+        /**
+         * Copies the values of the given vector into this vector.
+         */
+        copy(_original: Vector4): void;
+        /**
+         * Adds the given vector to this vector.
+         */
+        add(_addend: Vector4): Vector4;
+        /**
+         * Subtracts the given vector from this vector.
+         */
+        subtract(_subtrahend: Vector4): Vector4;
+        /**
+         * Scales this vector by the given scalar.
+         */
+        scale(_scalar: number): Vector4;
+        /**
+         * Normalizes this vector to the given length, 1 by default.
+         */
+        normalize(_length?: number): Vector4;
+        /**
+         * Calculates the dot product of this instance and another vector.
+         */
+        dot(_other: Vector4): number;
+        recycle(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Vector4>;
+        protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Describes a face of a {@link Mesh} by referencing three {@link Vertices} with their indizes
      * and calculates face normals.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
      */
     class Face {
         indices: number[];
+        angles: number[];
         normalUnscaled: Vector3;
         normal: Vector3;
         private vertices;
@@ -4693,12 +4906,19 @@ declare namespace FudgeCore {
      */
     class Vertex {
         position: Vector3;
-        uv: Vector2;
+        uv: Vector2 | null;
         normal: Vector3;
         color: Color;
+        tangent: Vector4 | null;
         referTo: number;
         bones: Bone[];
-        constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3, _color?: Color, _bones?: Bone[]);
+        /**
+         * Represents a vertex of a mesh with extended information such as the uv coordinates the vertex normal and its tangents.
+         * It may refer to another vertex via an index into some array, in which case the position and the normal are stored there.
+         * This way, vertex position and normal is a 1:1 association, vertex to texture coordinates a 1:n association.
+       * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+         */
+        constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3, _tangent?: Vector4, _color?: Color, _bones?: Bone[]);
     }
 }
 declare namespace FudgeCore {
@@ -4720,6 +4940,10 @@ declare namespace FudgeCore {
          * returns the normal associated with the vertex addressed, resolving references between vertices
          */
         normal(_index: number): Vector3;
+        /**
+         * returns the tangent associated with the vertex addressed
+         */
+        tangent(_index: number): Vector4;
         /**
          * returns the uv-coordinates associated with the vertex addressed
          */
@@ -4774,7 +4998,7 @@ declare namespace FudgeCore {
      * static LOAD Method. Currently only works with triangulated Meshes
      * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
      * @todo Load Materials, Support Quads
-     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Matthias Roming, HFU, 2023
+     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
      */
     class MeshLoaderOBJ extends MeshLoader {
         static load(_mesh: MeshImport): Promise<MeshImport>;
@@ -5880,9 +6104,6 @@ declare namespace FudgeCore {
          * render passes.
          */
         static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _shadersUsed?: (ShaderInterface)[]): void;
-        /**
-         * Add the given lights to the {@link Render.lights}-map, sorted by type.
-         */
         static addLights(_cmpLights: ComponentLight[]): void;
         /**
          * Used with a {@link Picker}-camera, this method renders one pixel with picking information
@@ -5893,8 +6114,6 @@ declare namespace FudgeCore {
          * Draws the scene from the point of view of the given camera
          */
         static draw(_cmpCamera: ComponentCamera): void;
-        private static drawListAlpha;
-        private static drawList;
         private static transformByPhysics;
     }
 }
@@ -5906,6 +6125,7 @@ declare namespace FudgeCore {
         normals?: WebGLBuffer;
         colors?: WebGLBuffer;
         bones?: WebGLBuffer;
+        tangents?: WebGLBuffer;
         weights?: WebGLBuffer;
         nIndices?: number;
     }
@@ -5916,7 +6136,7 @@ declare namespace FudgeCore {
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
      * through a series of {@link Framing} objects. The stages involved are in order of rendering
      * {@link Render}.viewport -> {@link Viewport}.source -> {@link Viewport}.destination -> DOM-Canvas -> Client(CSS)
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022 | Jonas Plotzky, HFU, 2023
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Viewport
      */
     class Viewport extends EventTargetUnified {
@@ -5970,15 +6190,15 @@ declare namespace FudgeCore {
          * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
          * Pass `false` if calculation was already done for this frame
          */
-        draw(_calculateTransforms?: boolean): void;
+        draw(_prepareBranch?: boolean): void;
         /**
-        * The transforms in the branch are recalculated here.
+        * Adjusts all frames and the camera to fit the current size of the canvas. Prepares the branch for rendering.
         */
-        computeDrawing(_calculateTransforms?: boolean): void;
+        prepare(_prepareBranch?: boolean): void;
         /**
-         * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh}es
+         * Prepares all nodes in the branch for rendering by updating their world transforms etc.
          */
-        calculateTransforms(): void;
+        prepareBranch(): void;
         /**
          * Performs a pick on all {@link ComponentPick}s in the branch of this viewport
          * using a ray from its camera through the client coordinates given in the event.
@@ -5992,7 +6212,7 @@ declare namespace FudgeCore {
          */
         adjustFrames(): void;
         /**
-         * Adjust the camera parameters to fit the rendering into the render vieport
+         * Adjust the camera parameters to fit the rendering into the render viewport
          */
         adjustCamera(): void;
         /**
@@ -6062,7 +6282,6 @@ declare namespace FudgeCore {
         session: XRSession;
         referenceSpace: XRReferenceSpace;
         private useVRController;
-        private crc3;
         constructor();
         /**
          * To retrieve private static instance of xr viewport, readonly.
@@ -6086,7 +6305,7 @@ declare namespace FudgeCore {
          * Pass `false` if calculation was already done for this frame
          * Called from loop method {@link Loop} again with the xrFrame parameter handover, as soon as FRAME_REQUEST_XR is called from creator.
          */
-        draw(_calculateTransforms?: boolean, _xrFrame?: XRFrame): void;
+        draw(_prepareBranch?: boolean, _xrFrame?: XRFrame): void;
         /**
          * Move the reference space to set the initial position/orientation of the vr device in accordance to the node the vr device is attached to.
          */
@@ -7351,7 +7570,7 @@ declare namespace FudgeCore {
         /**
          * Returns the {@link Material} for the given material index.
          */
-        getMaterialByIndex(_iMaterial: number, _skin?: boolean): Promise<Material>;
+        getMaterialByIndex(_iMaterial: number, _skin?: boolean, _flat?: boolean): Promise<Material>;
         /**
          * Returns the {@link Texture} for the given texture index.
          */
@@ -7431,11 +7650,28 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    abstract class ShaderAmbientOcclusion extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderBloom extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
     abstract class ShaderFlat extends Shader {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7443,7 +7679,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7451,7 +7686,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7459,7 +7693,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7528,7 +7761,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7536,7 +7768,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7544,7 +7775,20 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderPhongTexturedNormals extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderPhongTexturedNormalsSkin extends Shader {
+        static readonly iSubclass: number;
+        static define: string[];
+        static getCoat(): typeof Coat;
     }
 }
 declare namespace FudgeCore {
@@ -7552,7 +7796,6 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
@@ -7647,6 +7890,12 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class TextureDefault extends TextureBase64 {
+        static texture: TextureBase64;
+        private static get;
+    }
+}
+declare namespace FudgeCore {
+    class TextureNormalDefault extends TextureBase64 {
         static texture: TextureBase64;
         private static get;
     }

@@ -123,7 +123,7 @@ var FudgePhysics_Communication;
         viewPort = new f.Viewport();
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
         f.Debug.branch(viewPort.getBranch());
-        f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
+        f.Loop.addEventListener("loopFrame" /* f.EVENT.LOOP_FRAME */, update);
         f.Physics.adjustTransforms(hierarchy);
         f.Loop.start();
         // f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;

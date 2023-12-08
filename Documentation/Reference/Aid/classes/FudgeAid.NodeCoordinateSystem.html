@@ -31,7 +31,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">NodeCoordinateSystem</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/454d6feed/Aid/Source/Geometry/NodeCoordinateSystem.ts#L4">Aid/Source/Geometry/NodeCoordinateSystem.ts:4</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/f89e082a3/Aid/Source/Geometry/NodeCoordinateSystem.ts#L4">Aid/Source/Geometry/NodeCoordinateSystem.ts:4</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -93,6 +93,8 @@
 <a href="FudgeAid.NodeCoordinateSystem.html#replaceChild" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>replace<wbr/>Child</span></a>
 <a href="FudgeAid.NodeCoordinateSystem.html#serialize" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>serialize</span></a>
 <a href="FudgeAid.NodeCoordinateSystem.html#toHierarchyString" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>to<wbr/>Hierarchy<wbr/>String</span></a>
+<a href="FudgeAid.NodeCoordinateSystem.html#FIND" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>FIND</span></a>
+<a href="FudgeAid.NodeCoordinateSystem.html#PATH_FROM_TO" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>PATH_<wbr/>FROM_<wbr/>TO</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Constructors</h2>
@@ -111,7 +113,7 @@
 <h4 class="tsd-returns-title">Returns <a href="FudgeAid.NodeCoordinateSystem.html" class="tsd-signature-type tsd-kind-class">NodeCoordinateSystem</a></h4><aside class="tsd-sources">
 <p>Overrides <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/454d6feed/Aid/Source/Geometry/NodeCoordinateSystem.ts#L5">Aid/Source/Geometry/NodeCoordinateSystem.ts:5</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/f89e082a3/Aid/Source/Geometry/NodeCoordinateSystem.ts#L5">Aid/Source/Geometry/NodeCoordinateSystem.ts:5</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="appendChild" class="tsd-anchor"></a>
@@ -136,13 +138,13 @@ See and preferably use <a href="FudgeAid.CameraOrbit.html#addChild" class="tsd-k
 <div class="tsd-comment tsd-typography"></div></li></ul></li></ul></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#appendChild">appendChild</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:532</li></ul></aside></section>
+<li>Defined in core/build/fudgecore.d.ts:545</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="mtxWorld" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagReadonly">Readonly</code> <span>mtx<wbr/>World</span><a href="#mtxWorld" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">mtx<wbr/>World</span><span class="tsd-signature-symbol">:</span> <a href="_.Matrix4x4.html" class="tsd-signature-type tsd-kind-class">Matrix4x4</a></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#mtxWorld">mtxWorld</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:460</li></ul></aside></section>
+<li>Defined in core/build/fudgecore.d.ts:462</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="nNodesInBranch" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>n<wbr/>Nodes<wbr/>In<wbr/>Branch</span><a href="#nNodesInBranch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">n<wbr/>Nodes<wbr/>In<wbr/>Branch</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
@@ -151,13 +153,13 @@ See and preferably use <a href="FudgeAid.CameraOrbit.html#addChild" class="tsd-k
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#nNodesInBranch">nNodesInBranch</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:463</li></ul></aside></section>
+<li>Defined in core/build/fudgecore.d.ts:465</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="name" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>name</span><a href="#name" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#name">name</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:459</li></ul></aside></section>
+<li>Defined in core/build/fudgecore.d.ts:461</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="radius" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>radius</span><a href="#radius" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">radius</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
@@ -166,13 +168,13 @@ See and preferably use <a href="FudgeAid.CameraOrbit.html#addChild" class="tsd-k
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#radius">radius</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:465</li></ul></aside></section>
+<li>Defined in core/build/fudgecore.d.ts:467</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="timestampUpdate" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>timestamp<wbr/>Update</span><a href="#timestampUpdate" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">timestamp<wbr/>Update</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#timestampUpdate">timestampUpdate</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:461</li></ul></aside></section></section>
+<li>Defined in core/build/fudgecore.d.ts:463</li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Accessors</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="cmpTransform" class="tsd-anchor"></a>
@@ -186,7 +188,7 @@ See and preferably use <a href="FudgeAid.CameraOrbit.html#addChild" class="tsd-k
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from Node.cmpTransform</p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:480</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:493</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="isActive" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>is<wbr/>Active</span><a href="#isActive" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -195,7 +197,7 @@ See and preferably use <a href="FudgeAid.CameraOrbit.html#addChild" class="tsd-k
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <p>Inherited from Node.isActive</p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:476</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:489</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="mtxLocal" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>mtx<wbr/>Local</span><a href="#mtxLocal" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -208,7 +210,7 @@ Fails if no <a href="_.ComponentTransform.html" class="tsd-kind-class">Component
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from Node.mtxLocal</p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:485</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:498</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="mtxMeshPivot" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>mtx<wbr/>Mesh<wbr/>Pivot</span><a href="#mtxMeshPivot" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -217,7 +219,7 @@ Fails if no <a href="_.ComponentTransform.html" class="tsd-kind-class">Component
 <h4 class="tsd-returns-title">Returns <a href="_.Matrix4x4.html" class="tsd-signature-type tsd-kind-class">Matrix4x4</a></h4><aside class="tsd-sources">
 <p>Inherited from Node.mtxMeshPivot</p>
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/454d6feed/Aid/Source/Geometry/Node.ts#L21">Aid/Source/Geometry/Node.ts:21</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/f89e082a3/Aid/Source/Geometry/Node.ts#L21">Aid/Source/Geometry/Node.ts:21</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="mtxWorldInverse" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>mtx<wbr/>World<wbr/>Inverse</span><a href="#mtxWorldInverse" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -226,7 +228,7 @@ Fails if no <a href="_.ComponentTransform.html" class="tsd-kind-class">Component
 <h4 class="tsd-returns-title">Returns <a href="_.Matrix4x4.html" class="tsd-signature-type tsd-kind-class">Matrix4x4</a></h4><aside class="tsd-sources">
 <p>Inherited from Node.mtxWorldInverse</p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:486</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:499</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="nChildren" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>n<wbr/>Children</span><a href="#nChildren" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -238,7 +240,7 @@ Fails if no <a href="_.ComponentTransform.html" class="tsd-kind-class">Component
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from Node.nChildren</p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:490</li></ul></aside></li></ul></section></section>
+<li>Defined in core/build/fudgecore.d.ts:503</li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="_iterator_" class="tsd-anchor"></a>
@@ -252,7 +254,7 @@ Fails if no <a href="_.ComponentTransform.html" class="tsd-kind-class">Component
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#_iterator_">[iterator]</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:499</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:512</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="activate" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>activate</span><a href="#activate" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -269,7 +271,7 @@ Fails if no <a href="_.ComponentTransform.html" class="tsd-kind-class">Component
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#activate">activate</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:503</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:516</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="addChild" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>add<wbr/>Child</span><a href="#addChild" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -288,7 +290,7 @@ Fails if no <a href="_.ComponentTransform.html" class="tsd-kind-class">Component
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#addChild">addChild</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:537</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:550</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="addComponent" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>add<wbr/>Component</span><a href="#addComponent" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -305,7 +307,7 @@ Fails if no <a href="_.ComponentTransform.html" class="tsd-kind-class">Component
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#addComponent">addComponent</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:585</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:598</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="addEventListener" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>add<wbr/>Event<wbr/>Listener</span><a href="#addEventListener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -327,7 +329,7 @@ Deviating from the standard EventTarget, here the _handler must be a function an
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#addEventListener">addEventListener</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:604</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:617</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="applyAnimation" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>apply<wbr/>Animation</span><a href="#applyAnimation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -344,7 +346,7 @@ Deviating from the standard EventTarget, here the _handler must be a function an
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#applyAnimation">applyAnimation</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:565</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:578</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="attach" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>attach</span><a href="#attach" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -361,7 +363,7 @@ Deviating from the standard EventTarget, here the _handler must be a function an
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#attach">attach</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:581</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:594</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="broadcastEvent" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>broadcast<wbr/>Event</span><a href="#broadcastEvent" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -379,7 +381,7 @@ invoking matching handlers of the nodes listening to the capture phase. Watch pe
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#broadcastEvent">broadcastEvent</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:623</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:636</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="deserialize" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>deserialize</span><a href="#deserialize" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -396,7 +398,7 @@ invoking matching handlers of the nodes listening to the capture phase. Watch pe
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#deserialize">deserialize</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/454d6feed/Aid/Source/Geometry/Node.ts#L26">Aid/Source/Geometry/Node.ts:26</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/f89e082a3/Aid/Source/Geometry/Node.ts#L26">Aid/Source/Geometry/Node.ts:26</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="detach" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>detach</span><a href="#detach" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -413,7 +415,7 @@ invoking matching handlers of the nodes listening to the capture phase. Watch pe
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#detach">detach</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:589</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:602</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="dispatchEvent" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>dispatch<wbr/>Event</span><a href="#dispatchEvent" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -432,7 +434,7 @@ than the matching handler of the target node in the target phase, and back out o
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#dispatchEvent">dispatchEvent</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:614</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:627</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="dispatchEventToTargetOnly" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>dispatch<wbr/>Event<wbr/>To<wbr/>Target<wbr/>Only</span><a href="#dispatchEventToTargetOnly" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -449,7 +451,7 @@ than the matching handler of the target node in the target phase, and back out o
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#dispatchEventToTargetOnly">dispatchEventToTargetOnly</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:618</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:631</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="findChild" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>find<wbr/>Child</span><a href="#findChild" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -466,7 +468,7 @@ than the matching handler of the target node in the target phase, and back out o
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#findChild">findChild</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:549</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:562</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getAllComponents" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>All<wbr/>Components</span><a href="#getAllComponents" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -478,7 +480,7 @@ than the matching handler of the target node in the target phase, and back out o
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#getAllComponents">getAllComponents</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:569</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:582</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getAncestor" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Ancestor</span><a href="#getAncestor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -490,7 +492,7 @@ than the matching handler of the target node in the target phase, and back out o
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#getAncestor">getAncestor</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:511</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:524</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getChild" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Child</span><a href="#getChild" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -507,7 +509,7 @@ than the matching handler of the target node in the target phase, and back out o
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#getChild">getChild</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:519</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:532</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getChildren" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Children</span><a href="#getChildren" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -519,7 +521,7 @@ than the matching handler of the target node in the target phase, and back out o
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#getChildren">getChildren</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:523</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:536</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getChildrenByName" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Children<wbr/>By<wbr/>Name</span><a href="#getChildrenByName" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -536,7 +538,7 @@ than the matching handler of the target node in the target phase, and back out o
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#getChildrenByName">getChildrenByName</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:527</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:540</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getComponent" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Component</span><a href="#getComponent" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -564,7 +566,7 @@ than the matching handler of the target node in the target phase, and back out o
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#getComponent">getComponent</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:577</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:590</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getComponents" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Components</span><a href="#getComponents" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -592,7 +594,7 @@ than the matching handler of the target node in the target phase, and back out o
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#getComponents">getComponents</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:573</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:586</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getIterator" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Iterator</span><a href="#getIterator" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -610,7 +612,7 @@ Inactive nodes and their descendants can be filtered</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#getIterator">getIterator</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:495</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:508</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getParent" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Parent</span><a href="#getParent" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -622,7 +624,7 @@ Inactive nodes and their descendants can be filtered</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#getParent">getParent</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:507</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:520</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getPath" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Path</span><a href="#getPath" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -634,7 +636,7 @@ Inactive nodes and their descendants can be filtered</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#getPath">getPath</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:515</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:528</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="isDescendantOf" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>is<wbr/>Descendant<wbr/>Of</span><a href="#isDescendantOf" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -651,7 +653,7 @@ Inactive nodes and their descendants can be filtered</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#isDescendantOf">isDescendantOf</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:561</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:574</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="isUpdated" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>is<wbr/>Updated</span><a href="#isUpdated" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -668,7 +670,7 @@ Inactive nodes and their descendants can be filtered</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#isUpdated">isUpdated</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:557</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:570</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="removeAllChildren" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>remove<wbr/>All<wbr/>Children</span><a href="#removeAllChildren" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -680,7 +682,7 @@ Inactive nodes and their descendants can be filtered</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#removeAllChildren">removeAllChildren</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:545</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:558</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="removeChild" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>remove<wbr/>Child</span><a href="#removeChild" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -697,7 +699,7 @@ Inactive nodes and their descendants can be filtered</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#removeChild">removeChild</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:541</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:554</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="removeComponent" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>remove<wbr/>Component</span><a href="#removeComponent" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -714,7 +716,7 @@ Inactive nodes and their descendants can be filtered</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#removeComponent">removeComponent</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:593</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:606</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="removeEventListener" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>remove<wbr/>Event<wbr/>Listener</span><a href="#removeEventListener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -735,7 +737,7 @@ Inactive nodes and their descendants can be filtered</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#removeEventListener">removeEventListener</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:608</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:621</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="replaceChild" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>replace<wbr/>Child</span><a href="#replaceChild" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -754,7 +756,7 @@ Inactive nodes and their descendants can be filtered</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#replaceChild">replaceChild</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:553</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:566</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="serialize" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>serialize</span><a href="#serialize" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -766,7 +768,7 @@ Inactive nodes and their descendants can be filtered</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#serialize">serialize</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:594</li></ul></aside></li></ul></section>
+<li>Defined in core/build/fudgecore.d.ts:607</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="toHierarchyString" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>to<wbr/>Hierarchy<wbr/>String</span><a href="#toHierarchyString" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -785,7 +787,47 @@ Inactive nodes and their descendants can be filtered</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#toHierarchyString">toHierarchyString</a></p>
 <ul>
-<li>Defined in core/build/fudgecore.d.ts:599</li></ul></aside></li></ul></section></section></div>
+<li>Defined in core/build/fudgecore.d.ts:612</li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited"><a id="FIND" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>FIND</span><a href="#FIND" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-signature tsd-anchor-link" id="FIND.FIND-1"><span class="tsd-kind-call-signature">FIND</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">_from</span>, <span class="tsd-kind-parameter">_path</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_.html" class="tsd-signature-type tsd-kind-namespace">ƒ</a><span class="tsd-signature-symbol">.</span><a href="_.Node.html" class="tsd-signature-type tsd-kind-class">Node</a><span class="tsd-signature-symbol"> | </span><a href="_.Component.html" class="tsd-signature-type tsd-kind-class">Component</a><a href="#FIND.FIND-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Return the <a href="_.Node.html" class="tsd-kind-class">Node</a> or <a href="_.Component.html" class="tsd-kind-class">Component</a> found at the given path starting from the given node or undefined if not found</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">_from</span>: <a href="../modules/_.html" class="tsd-signature-type tsd-kind-namespace">ƒ</a><span class="tsd-signature-symbol">.</span><a href="_.Node.html" class="tsd-signature-type tsd-kind-class">Node</a><span class="tsd-signature-symbol"> | </span><a href="_.Component.html" class="tsd-signature-type tsd-kind-class">Component</a></h5></li>
+<li>
+<h5><span class="tsd-kind-parameter">_path</span>: <span class="tsd-signature-type">string</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../modules/_.html" class="tsd-signature-type tsd-kind-namespace">ƒ</a><span class="tsd-signature-symbol">.</span><a href="_.Node.html" class="tsd-signature-type tsd-kind-class">Node</a><span class="tsd-signature-symbol"> | </span><a href="_.Component.html" class="tsd-signature-type tsd-kind-class">Component</a></h4>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#FIND">FIND</a></p>
+<ul>
+<li>Defined in core/build/fudgecore.d.ts:488</li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited"><a id="PATH_FROM_TO" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>PATH_<wbr/>FROM_<wbr/>TO</span><a href="#PATH_FROM_TO" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-signature tsd-anchor-link" id="PATH_FROM_TO.PATH_FROM_TO-1"><span class="tsd-kind-call-signature">PATH_<wbr/>FROM_<wbr/>TO</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">_from</span>, <span class="tsd-kind-parameter">_to</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><a href="#PATH_FROM_TO.PATH_FROM_TO-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Return the mutator path string to get from one node to another or null if no path is found e.g.:</p>
+<pre><code class="language-typescript"><span class="hl-0">&quot;node/parent/children/1/components/ComponentSkeleton/0&quot;</span>
+</code><button>Copy</button></pre>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">_from</span>: <a href="../modules/_.html" class="tsd-signature-type tsd-kind-namespace">ƒ</a><span class="tsd-signature-symbol">.</span><a href="_.Node.html" class="tsd-signature-type tsd-kind-class">Node</a><span class="tsd-signature-symbol"> | </span><a href="_.Component.html" class="tsd-signature-type tsd-kind-class">Component</a></h5></li>
+<li>
+<h5><span class="tsd-kind-parameter">_to</span>: <a href="../modules/_.html" class="tsd-signature-type tsd-kind-namespace">ƒ</a><span class="tsd-signature-symbol">.</span><a href="_.Node.html" class="tsd-signature-type tsd-kind-class">Node</a><span class="tsd-signature-symbol"> | </span><a href="_.Component.html" class="tsd-signature-type tsd-kind-class">Component</a></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<p>Inherited from <a href="FudgeAid.Node.html">Node</a>.<a href="FudgeAid.Node.html#PATH_FROM_TO">PATH_FROM_TO</a></p>
+<ul>
+<li>Defined in core/build/fudgecore.d.ts:484</li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -847,7 +889,9 @@ Inactive nodes and their descendants can be filtered</p>
 <li><a href="#removeEventListener" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>remove<wbr/>Event<wbr/>Listener</span></a></li>
 <li><a href="#replaceChild" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>replace<wbr/>Child</span></a></li>
 <li><a href="#serialize" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>serialize</span></a></li>
-<li><a href="#toHierarchyString" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>to<wbr/>Hierarchy<wbr/>String</span></a></li></ul></div></details></div>
+<li><a href="#toHierarchyString" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>to<wbr/>Hierarchy<wbr/>String</span></a></li>
+<li><a href="#FIND" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>FIND</span></a></li>
+<li><a href="#PATH_FROM_TO" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>PATH_<wbr/>FROM_<wbr/>TO</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../index.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-4"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)"></path></g></svg><span>Fudge <wbr/>Aid</span></a>
 <ul class="tsd-small-nested-navigation">

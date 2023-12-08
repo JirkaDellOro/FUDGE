@@ -218,12 +218,14 @@ namespace FudgeCore {
 
             let cmpMaterial: ComponentMaterial;
             const iMaterial: number = gltfMesh.primitives?.[iPrimitive]?.material;
+            const isSkin: boolean = cmpMesh.mesh instanceof MeshSkin;
             if (iMaterial == undefined) {
-              cmpMaterial = new ComponentMaterial(cmpMesh.mesh instanceof MeshSkin ?
+              cmpMaterial = new ComponentMaterial(isSkin ?
                 GLTFLoader.defaultSkinMaterial :
                 GLTFLoader.defaultMaterial);
             } else {
-              cmpMaterial = new ComponentMaterial(await this.getMaterialByIndex(iMaterial, cmpMesh.mesh instanceof MeshSkin));
+              const isFlat: boolean = gltfMesh.primitives[iPrimitive].attributes.NORMAL == undefined;
+              cmpMaterial = new ComponentMaterial(await this.getMaterialByIndex(iMaterial, isSkin, isFlat));
             }
 
             subComponents.push([cmpMesh, cmpMaterial]);
@@ -391,7 +393,7 @@ namespace FudgeCore {
     /**
      * Returns the {@link Material} for the given material index.
      */
-    public async getMaterialByIndex(_iMaterial: number, _skin: boolean = false): Promise<Material> {
+    public async getMaterialByIndex(_iMaterial: number, _skin: boolean = false, _flat: boolean = false): Promise<Material> {
       if (!this.#materials)
         this.#materials = [];
       if (!this.#materials[_iMaterial]) {
@@ -402,22 +404,72 @@ namespace FudgeCore {
           throw new Error(`${this}: Couldn't find material with index ${_iMaterial}.`);
 
         // TODO: add support for other gltf material properties: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#reference-material
-        // e.g. normal, occlusion and emissive textures; alphaMode; alphaCutoff; doubleSided
+        // e.g. occlusion and emissive textures; alphaMode; alphaCutoff; doubleSided
+        const gltfBaseColorFactor: number[] = gltfMaterial.pbrMetallicRoughness?.baseColorFactor ?? [1, 1, 1, 1];
+        let gltfMetallicFactor: number = gltfMaterial.pbrMetallicRoughness?.metallicFactor ?? 1;
+        let gltfRoughnessFactor: number = gltfMaterial.pbrMetallicRoughness?.roughnessFactor ?? 1;
+
+        const gltfMetallicRoughnessTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.metallicRoughnessTexture;
+        if (gltfMetallicRoughnessTexture) {
+          // TODO: maybe throw this out if it costs too much performance, or add the texture to the material
+          // average metallic and roughness values
+          const metallicRoughnessTexture: TextureImage = await this.getTextureByIndex(gltfMetallicRoughnessTexture.index) as TextureImage;
+          let image: HTMLImageElement = metallicRoughnessTexture.image;
+          let canvas: HTMLCanvasElement = document.createElement("canvas");
+          canvas.width = image.width;
+          canvas.height = image.height;
+          let ctx: CanvasRenderingContext2D = canvas.getContext("2d");
+          ctx.drawImage(image, 0, 0);
+          let imageData: ImageData = ctx.getImageData(0, 0, image.width, image.height);
+          let data: Uint8ClampedArray = imageData.data;
+
+          let sumMetallic: number = 0;
+          let sumRoughness: number = 0;
+          for (let iPixel: number = 0; iPixel < data.length; iPixel += 4) {
+            sumMetallic += data[iPixel + 2] / 255;
+            sumRoughness += data[iPixel + 1] / 255;
+          }
+
+          const averageMetallic: number = sumMetallic / (data.length / 4);
+          const averageRoughness: number = sumRoughness / (data.length / 4);
+
+          gltfMetallicFactor *= averageMetallic;
+          gltfRoughnessFactor *= averageRoughness;
+        }
+
         const gltfBaseColorTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
+        const gltfNormalTexture: GLTF.MaterialNormalTextureInfo = gltfMaterial.normalTexture;
 
-        const color: Color = new Color(...gltfMaterial.pbrMetallicRoughness?.baseColorFactor || [1, 1, 1, 1]);
+        // The diffuse contribution in the Phong shading model. Represents how much light is scattered in different directions due to the material's surface properties.
+        const diffuse: number = 1;
+        // The shininess of the material. Influences the sharpness or broadness of the specular highlight. Higher specular values result in a sharper and more concentrated specular highlight.
+        const specular: number = 1.8 * (1 - gltfRoughnessFactor) + 0.6 * gltfMetallicFactor;
+        // The strength/intensity of the specular reflection
+        const intensity: number = 0.7 * (1 - gltfRoughnessFactor) + gltfMetallicFactor;
+        // Influences how much the material's color affects the specular reflection. When metallic is higher, the specular reflection takes on the color of the material, creating a metallic appearance. Range from 0.0 to 1.0.
+        const metallic: number = gltfMetallicFactor;
+
+        const color: Color = new Color(...gltfBaseColorFactor);
         const coat: Coat = gltfBaseColorTexture ?
-          new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index), 1, 1) :
-          new CoatRemissive(color, 1, 0.5);
+          gltfNormalTexture ?
+            new CoatRemissiveTexturedNormals(color, await this.getTextureByIndex(gltfBaseColorTexture.index), await this.getTextureByIndex(gltfNormalTexture.index), diffuse, specular, intensity, metallic) :
+            new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index), diffuse, specular, intensity, metallic) :
+          new CoatRemissive(color, diffuse, specular, intensity, metallic);
 
-        const material: Material = new Material(
-          gltfMaterial.name,
-          gltfBaseColorTexture ?
-            (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
-            (_skin ? ShaderPhongSkin : ShaderPhong),
-          coat);
+        let shader: typeof Shader;
+        if (_flat) { // TODO: make flat a flag in the material so that we can have flat mesh with phong shading gradients
+          shader = gltfBaseColorTexture ?
+            (_skin ? ShaderFlatTexturedSkin : ShaderFlatTextured) :
+            (_skin ? ShaderFlatSkin : ShaderFlat);
+        } else {
+          shader = gltfBaseColorTexture ?
+            gltfNormalTexture ?
+              (_skin ? ShaderPhongTexturedNormalsSkin : ShaderPhongTexturedNormals) :
+              (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
+            (_skin ? ShaderPhongSkin : ShaderPhong);
+        }
 
-        this.#materials[_iMaterial] = material;
+        this.#materials[_iMaterial] = new Material(gltfMaterial.name, shader, coat);;
       }
 
       return this.#materials[_iMaterial];
@@ -664,8 +716,8 @@ namespace FudgeCore {
 
       if (byteStride != undefined) {
         // TODO: instead of creating new buffers maybe rather pass stride into the render mesh? and set it when data is passed to the gpu?
-        const nComponentsPerElement: number = toAccessorTypeLength[_accessorType]; // amount of components per element of the accessor type, i.e. 3 for VEC3
-        const nElements: number = byteLength / byteStride; // amount of elements, i.e. n*VEC3 
+        const nComponentsPerElement: number = toAccessorTypeLength[_accessorType]; // amount of components per element of the accessor type, e.g. 3 for VEC3
+        const nElements: number = byteLength / byteStride; // amount of elements, e.g. n*VEC3 
         const stride: number = byteStride / arrayConstructor.BYTES_PER_ELEMENT;
         const newArray: TypedArray = new arrayConstructor(nElements * nComponentsPerElement);
         for (let iNewElement: number = 0; iNewElement < nElements; iNewElement++) {
@@ -804,5 +856,4 @@ namespace FudgeCore {
     [GLTF.COMPONENT_TYPE.UNSIGNED_INT]: Uint32Array,
     [GLTF.COMPONENT_TYPE.FLOAT]: Float32Array
   };
-
 }

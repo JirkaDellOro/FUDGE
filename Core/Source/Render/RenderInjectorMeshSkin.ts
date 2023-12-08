@@ -18,8 +18,8 @@ namespace FudgeCore {
       });
     }
 
-    protected static getRenderBuffers(this: MeshSkin, _shader: typeof Shader): RenderBuffers {
-      let renderBuffers: RenderBuffers = super.getRenderBuffers.call(this, _shader);
+    protected static getRenderBuffers(this: MeshSkin): RenderBuffers {
+      let renderBuffers: RenderBuffers = super.getRenderBuffers.call(this);
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
       if (!renderBuffers.bones) {

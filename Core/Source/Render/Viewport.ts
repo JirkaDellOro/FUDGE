@@ -4,7 +4,7 @@ namespace FudgeCore {
    * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
    * through a series of {@link Framing} objects. The stages involved are in order of rendering
    * {@link Render}.viewport -> {@link Viewport}.source -> {@link Viewport}.destination -> DOM-Canvas -> Client(CSS)
-   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022 | Jonas Plotzky, HFU, 2023
    * @link https://github.com/JirkaDellOro/FUDGE/wiki/Viewport
    */
   export class Viewport extends EventTargetUnified {
@@ -23,7 +23,7 @@ namespace FudgeCore {
     public frameDestinationToSource: FramingScaled = new FramingScaled();
     public frameSourceToRender: FramingScaled = new FramingScaled();
 
-    public adjustingFrames: boolean = true;
+    public adjustingFrames: boolean = true; // TODO: maybe only adjust frames when anything changes instead of every drawn frame?
     public adjustingCamera: boolean = true;
     public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
 
@@ -106,14 +106,15 @@ namespace FudgeCore {
      * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
      * Pass `false` if calculation was already done for this frame 
      */
-    public draw(_calculateTransforms: boolean = true): void {
-      this.computeDrawing(_calculateTransforms);
+    public draw(_prepareBranch: boolean = true): void {
+      this.prepare(_prepareBranch);
+
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
         Physics.draw(this.camera, this.physicsDebugMode);
       }
-
+      
       this.#crc2.imageSmoothingEnabled = false;
       this.#crc2.drawImage(
         Render.getCanvas(),
@@ -121,36 +122,34 @@ namespace FudgeCore {
         this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
       );
     }
+
     /**
-    * The transforms in the branch are recalculated here.
+    * Adjusts all frames and the camera to fit the current size of the canvas. Prepares the branch for rendering.
     */
-    public computeDrawing(_calculateTransforms: boolean = true): void {
+    public prepare(_prepareBranch: boolean = true): void {
       if (!this.#branch)
         return;
-      Render.resetFrameBuffer();
       if (!this.camera.isActive)
         return;
+
       if (this.adjustingFrames)
         this.adjustFrames();
       if (this.adjustingCamera)
         this.adjustCamera();
-
-      if (_calculateTransforms)
-        this.calculateTransforms();
-
-      Render.clear(this.camera.clrBackground);
+      if (_prepareBranch)
+        this.prepareBranch();
     }
+
     /**
-     * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh}es 
+     * Prepares all nodes in the branch for rendering by updating their world transforms etc.
      */
-    public calculateTransforms(): void {
+    public prepareBranch(): void { // TODO: Render.prepare does far more than just calculating transforms, so rename?
       let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
-      // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START)); // TODO: these events seem to get fired in Render.prepare aswell, check where the should get fired
-      // this.adjustFrames(); // TODO: this got called twice per computeDrawing, check if it's necessary
+      // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START)); // TODO: these events seem to get fired in Render.prepare aswell, check where they should get fired
       Render.prepare(this.#branch, null, mtxRoot);
-      // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END)); // TODO: these events seem to get fired in Render.prepare aswell, check where the should get fired
+      // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END)); // TODO: these events seem to get fired in Render.prepare aswell, check where they should get fired
       this.componentsPick = Render.componentsPick;
     }
 
@@ -168,7 +167,11 @@ namespace FudgeCore {
       let cameraPicks: Node[] = [];
       let otherPicks: ComponentPick[] = [];
       for (let cmpPick of this.componentsPick)
-        cmpPick.pick == PICK.CAMERA ? cameraPicks.push(cmpPick.node) : otherPicks.push(cmpPick);
+        if (cmpPick.pick == PICK.CAMERA)
+          cameraPicks.push(cmpPick.node);
+        else
+          otherPicks.push(cmpPick);
+
 
       if (cameraPicks.length) {
         let picks: Pick[] = Picker.pickCamera(cameraPicks, this.camera, this.pointClientToProjection(posClient));
@@ -201,6 +204,7 @@ namespace FudgeCore {
       Recycler.store(rectTemp);
       // adjust the area on the source-canvas to render from by applying the framing to destination area
       rectTemp = this.frameDestinationToSource.getRect(this.rectDestination);
+
       this.rectSource.copy(rectTemp);
       Recycler.store(rectTemp);
 
@@ -209,16 +213,23 @@ namespace FudgeCore {
       // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport. For now, it's always adjusted to the current viewport
       let rectRender: Rectangle = this.frameSourceToRender.getRect(this.rectSource);
       Render.setRenderRectangle(rectRender);
+
+      let rectOffscreenCanvas: Rectangle = Render.getCanvasRect(); // there are far to many rectangles involved here...
+      
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
       Render.setCanvasSize(rectRender.width, rectRender.height);
+
+      if (rectRender.width != rectOffscreenCanvas.width || rectRender.height != rectOffscreenCanvas.height) 
+        Render.adjustAttachments();
 
       Recycler.store(rectClient);
       Recycler.store(rectCanvas);
       Recycler.store(rectRender);
+      Recycler.store(rectOffscreenCanvas);
     }
 
     /**
-     * Adjust the camera parameters to fit the rendering into the render vieport
+     * Adjust the camera parameters to fit the rendering into the render viewport
      */
     public adjustCamera(): void {
       let rect: Rectangle = Render.getRenderRectangle();
@@ -228,6 +239,7 @@ namespace FudgeCore {
       this.camera.projectCentral(
         rect.width / rect.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar()
       );
+      this.camera.resetWorldToView();
     }
     // #endregion
 
@@ -244,7 +256,7 @@ namespace FudgeCore {
       let cameraNode: Node = this.camera.node;
       if (cameraNode)
         ray.transform(cameraNode.mtxWorld);
-        
+
       return ray;
     }
 

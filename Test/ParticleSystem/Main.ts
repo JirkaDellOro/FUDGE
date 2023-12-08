@@ -1,6 +1,7 @@
 namespace ParticleSystemTest {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
+  import ƒui = FudgeUserInterface;
 
   ƒ.Project.registerScriptNamespace(ParticleSystemTest);
 

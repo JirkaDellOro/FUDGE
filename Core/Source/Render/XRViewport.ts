@@ -30,13 +30,11 @@ namespace FudgeCore {
     public session: XRSession = null;
     public referenceSpace: XRReferenceSpace = null;
     private useVRController: boolean = false;
-    private crc3: WebGL2RenderingContext = null;
 
     // private poseMtx: Matrix4x4 = new Matrix4x4();
     public constructor() {
       super();
       XRViewport.xrViewportInstance = this;
-      this.crc3 = RenderWebGL.getRenderingContext();
     }
 
     /**
@@ -62,10 +60,10 @@ namespace FudgeCore {
                               _vrController: boolean = false): Promise<void> {
       let session: XRSession = await navigator.xr.requestSession(_vrSessionMode);
       this.referenceSpace = await session.requestReferenceSpace(_vrReferenceSpaceType);
-      await this.crc3.makeXRCompatible();
+      await Render.getRenderingContext().makeXRCompatible();
       let nativeScaleFactor: number = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
       //TODO:  Field of view könnte an der Stelle noch verändert werden.
-      await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, this.crc3, { framebufferScaleFactor: nativeScaleFactor }) });
+      await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, Render.getRenderingContext(), { framebufferScaleFactor: nativeScaleFactor }) });
 
       this.vrDevice = <ComponentVRDevice>this.camera;
       this.initializeReferenceSpace();
@@ -78,7 +76,7 @@ namespace FudgeCore {
 
       this.session = session;
 
-      this.calculateTransforms();
+      this.prepareBranch();
     }
 
     /**
@@ -93,9 +91,9 @@ namespace FudgeCore {
      * Pass `false` if calculation was already done for this frame 
      * Called from loop method {@link Loop} again with the xrFrame parameter handover, as soon as FRAME_REQUEST_XR is called from creator.
      */
-    public draw(_calculateTransforms: boolean = true, _xrFrame: XRFrame = null): void {
+    public draw(_prepareBranch: boolean = true, _xrFrame: XRFrame = null): void {
       if (!this.session) {
-        super.draw(_calculateTransforms);
+        super.draw(_prepareBranch);
         return;
       }
 
@@ -104,20 +102,21 @@ namespace FudgeCore {
         return;
 
       this.vrDevice.mtxLocal.set(pose.transform.matrix);
-      super.computeDrawing(_calculateTransforms);
+      super.prepare(_prepareBranch);
 
       let glLayer: XRWebGLLayer = this.session.renderState.baseLayer;
-      Render.resetFrameBuffer(glLayer.framebuffer);
-      Render.clear(this.camera.clrBackground);
+      // Render.resetFramebuffer(glLayer.framebuffer); // this won't work with the new rendering system
+
       for (let view of pose.views) {
         let viewport: globalThis.XRViewport = glLayer.getViewport(view);
-        this.crc3.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+        Render.setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+        Render.setScissorTest(true, viewport.x, viewport.y, viewport.width, viewport.height);
 
         if (this.useVRController)
           this.setControllerConfigs(_xrFrame);
-        this.camera.mtxProjection.set(view.projectionMatrix);
+        this.camera.resetWorldToView(); // TODO: find a less expensive way to do this, maybe use two cameras
+        this.camera.mtxProjection.set(view.projectionMatrix); 
         this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
-
 
         if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
           Render.draw(this.camera);
@@ -125,7 +124,8 @@ namespace FudgeCore {
           Physics.draw(this.camera, this.physicsDebugMode);
         }
       }
-      Render.setRenderRectangle(Render.getRenderRectangle());
+
+      Render.setRenderRectangle(Render.getRenderRectangle()); // TODO: check if this is necessary
     }
 
     /**

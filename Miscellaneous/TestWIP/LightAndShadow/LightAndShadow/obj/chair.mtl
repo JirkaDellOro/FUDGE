@@ -1,0 +1,13 @@
+# Blender 3.5.0 MTL File: 'example.blend'
+# www.blender.org
+
+newmtl BarberShopChair_01
+Ns 401.420105
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/rolan/Downloads/BarberShopChair_01_4k/textures/BarberShopChair_01_diff_4k.jpg
+map_Bump -bm 1.000000 C:/Users/rolan/Downloads/BarberShopChair_01_4k/textures/BarberShopChair_01_nor_gl_4k.png

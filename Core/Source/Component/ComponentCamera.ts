@@ -46,6 +46,7 @@ namespace FudgeCore {
         mtxCamera = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
       } catch (_error) {
         // no container node or no world transformation found -> continue with pivot only
+        // TODO: maybe use if () then instead of try catch
       }
       return mtxCamera;
     }
@@ -247,8 +248,8 @@ namespace FudgeCore {
       this.fieldOfView = _serialization.fieldOfView;
       this.aspectRatio = _serialization.aspect;
       this.direction = _serialization.direction;
-      this.near = _serialization.near;
-      this.far = _serialization.far;
+      this.near = _serialization.near ?? this.near;
+      this.far = _serialization.far ?? this.far;
       await this.mtxPivot.deserialize(_serialization.pivot);
       await super.deserialize(_serialization[super.constructor.name]);
       switch (this.projection) {

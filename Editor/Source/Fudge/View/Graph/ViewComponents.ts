@@ -104,17 +104,27 @@ namespace Fudge {
 
       //@ts-ignore
       let cmpNew: ƒ.Component = new component();
-      if (cmpNew instanceof ƒ.ComponentRigidbody || cmpNew instanceof ƒ.ComponentVRDevice)
-        if (!this.node.cmpTransform) {
-          alert("To attach this Component, first attach ComponentTransform!");
-          return;
-        }
-      if (cmpNew instanceof ƒ.ComponentGraphFilter)
-        if (!(this.node instanceof ƒ.Graph || this.node instanceof ƒ.GraphInstance)) {
-          alert("Attach ComponentGraphFilter only to GraphInstances or Graph");
-          console.log(this.node);
-          return;
-        }
+      if ((cmpNew instanceof ƒ.ComponentRigidbody || cmpNew instanceof ƒ.ComponentVRDevice) && !this.node.cmpTransform) {
+        alert(`To attach a ${cmpNew.type}, first attach a ${ƒ.ComponentTransform.name}.`);
+        return;
+      }
+      if (cmpNew instanceof ƒ.ComponentGraphFilter && !(this.node instanceof ƒ.Graph || this.node instanceof ƒ.GraphInstance)) {
+        alert(`Attach ${ƒ.ComponentGraphFilter.name} only to ${ƒ.Graph.name} or ${ƒ.GraphInstance.name}s`);
+        // console.log(this.node);
+        return;
+      }
+      if (cmpNew instanceof ƒ.ComponentFog && this.node.getComponent(ƒ.ComponentCamera) == null) {
+        alert(`To attach a ${ƒ.ComponentFog.name}, first attach a ${ƒ.ComponentCamera.name}.`);
+        return;
+      }
+      if (cmpNew instanceof ƒ.ComponentAmbientOcclusion && this.node.getComponent(ƒ.ComponentCamera) == null) {
+        alert(`To attach a ${ƒ.ComponentAmbientOcclusion.name}, first attach a ${ƒ.ComponentCamera.name}.`);
+        return;
+      }
+      if (cmpNew instanceof ƒ.ComponentBloom && this.node.getComponent(ƒ.ComponentCamera) == null) {
+        alert(`To attach a ${ƒ.ComponentBloom.name}, first attach a ${ƒ.ComponentCamera.name}.`);
+        return;
+      }
       ƒ.Debug.info(cmpNew.type, cmpNew);
 
       this.node.addComponent(cmpNew);

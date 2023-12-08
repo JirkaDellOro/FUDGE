@@ -3,15 +3,9 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderPhong);
 
     public static define: string[] = [
-      "LIGHT",
-      "CAMERA",
       "PHONG"
     ];
 
     public static getCoat(): typeof Coat { return CoatRemissive; }
-
-    public static getFragmentShaderSource(): string {
-      return this.insertDefines(shaderSources["ShaderPhong.frag"], this.define);
-    }
   }
 }

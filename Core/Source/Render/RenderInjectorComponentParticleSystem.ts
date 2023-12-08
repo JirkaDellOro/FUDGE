@@ -22,7 +22,7 @@ namespace FudgeCore {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       if (this.renderData) {
         // buffers exist
-        crc3.activeTexture(WebGL2RenderingContext.TEXTURE1); // ATTENTION!: changing this id requires changing of corresponding id in particle render method, use ctrl + shift + f search!
+        crc3.activeTexture(TEXTURE_LOCATION.PARTICLE.UNIT); // ATTENTION!: changing this id requires changing of corresponding id in particle render method, use ctrl + shift + f search!
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData);
       } else {
         const texture: WebGLTexture = Render.assert<WebGLTexture>(crc3.createTexture());

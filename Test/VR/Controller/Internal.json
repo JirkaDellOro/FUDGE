@@ -43,7 +43,8 @@
       "idResource": "MeshObj|2022-12-12T11:05:32.406Z|14446",
       "name": "trigger.obj",
       "type": "MeshObj",
-      "url": "trigger.obj"
+      "url": "trigger.obj",
+      "filetype": "OBJ"
     }
   },
   "MeshObj|2022-12-12T11:36:32.933Z|22290": {

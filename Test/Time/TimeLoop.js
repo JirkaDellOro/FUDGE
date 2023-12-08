@@ -7,7 +7,7 @@ var TimeLoop;
         document.forms[0].addEventListener("change", handleChangeTime);
         document.forms[1].addEventListener("change", handleChangeLoop);
         document.querySelector("[name=start]").addEventListener("click", handleButtonClick);
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, handleFrame);
+        ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, handleFrame);
         loop();
         handleChangeLoop(null);
     }

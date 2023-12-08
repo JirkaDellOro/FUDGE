@@ -16,16 +16,15 @@ var ImmersiveSceneVR;
         }
         let canvas = document.querySelector("canvas");
         cmpVRDevice = graph.getChildrenByName("Camera")[0].getComponent(f.ComponentVRDevice);
-        cmpVRDevice.clrBackground = f.Color.CSS("lightsteelblue", 0.25);
         xrViewport.initialize("Viewport", graph, cmpVRDevice, canvas);
-        f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
+        f.Loop.addEventListener("loopFrame" /* f.EVENT.LOOP_FRAME */, update);
         f.Loop.start(f.LOOP_MODE.FRAME_REQUEST);
         checkForVRSupport();
     }
     // check device/browser capabilities for XR Session 
     function checkForVRSupport() {
-        navigator.xr.isSessionSupported(f.XR_SESSION_MODE.IMMERSIVE_VR).then((supported) => {
-            if (supported)
+        navigator.xr.isSessionSupported(f.XR_SESSION_MODE.IMMERSIVE_VR).then((_supported) => {
+            if (_supported)
                 setupVR();
             else
                 console.log("Session not supported");

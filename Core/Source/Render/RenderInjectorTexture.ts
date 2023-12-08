@@ -12,11 +12,10 @@ namespace FudgeCore {
       });
     }
 
-    protected static injectTexture(this: Texture): void {
+    protected static injectTexture(this: Texture, _textureUnit: number = WebGL2RenderingContext.TEXTURE0): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       if (this.renderData) {
-        // buffers exist
-        crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
+        crc3.activeTexture(_textureUnit);
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
       } else {
         this.renderData = {};
@@ -49,11 +48,12 @@ namespace FudgeCore {
             crc3.generateMipmap(crc3.TEXTURE_2D);
             break;
         }
+
         this.renderData["texture0"] = texture;
 
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
 
-        this.useRenderData();
+        this.useRenderData(_textureUnit);
       }
     }
 

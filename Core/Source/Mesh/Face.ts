@@ -6,6 +6,7 @@ namespace FudgeCore {
    */
   export class Face {
     public indices: number[] = [];
+    public angles: number[] = [];
     public normalUnscaled: Vector3;
     public normal: Vector3;
     private vertices: Vertices;
@@ -48,6 +49,11 @@ namespace FudgeCore {
       let v2: Vector3 = Vector3.DIFFERENCE(trigon[2], trigon[0]);
       this.normalUnscaled = Vector3.CROSS(v1, v2);
       this.normal = Vector3.NORMALIZATION(this.normalUnscaled);
+      this.angles.push(
+        Vector3.ANGLE(v1, v2),
+        Vector3.ANGLE(Vector3.DIFFERENCE(trigon[2], trigon[1]), Vector3.DIFFERENCE(trigon[0], trigon[1])),
+        Vector3.ANGLE(Vector3.DIFFERENCE(trigon[0], trigon[2]), Vector3.DIFFERENCE(trigon[1], trigon[2]))
+      );
     }
   }
 }

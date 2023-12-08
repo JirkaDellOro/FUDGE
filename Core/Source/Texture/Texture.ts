@@ -32,7 +32,7 @@ namespace FudgeCore {
      * Injected by {@link RenderInjectorTexture}. Used by the render system.
      * @internal
      */
-    public useRenderData(): void {/* injected by RenderInjector*/ }
+    public useRenderData(_textureslot: number = 0): void {/* injected by RenderInjector*/ }
 
     /**
      * Deletes the texture in WebGL freeing the allocated gpu memory.

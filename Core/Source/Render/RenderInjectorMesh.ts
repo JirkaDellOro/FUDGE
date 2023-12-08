@@ -21,9 +21,7 @@ namespace FudgeCore {
       });
     }
 
-    protected static getRenderBuffers(this: Mesh, _shader: typeof Shader): RenderBuffers {
-      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-
+    protected static getRenderBuffers(this: Mesh): RenderBuffers {
       this.renderMesh = this.renderMesh || new RenderMesh(this);
 
       if (this.renderMesh.buffers == null)
@@ -33,12 +31,14 @@ namespace FudgeCore {
           normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normals),
           textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVs),
           colors: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.colors),
+          tangents: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.tangents),
           nIndices: this.renderMesh.indices.length
         };
+        
       return this.renderMesh.buffers;
 
-
       function createBuffer(_type: GLenum, _array: Float32Array | Uint16Array): WebGLBuffer {
+        const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
         let buffer: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
         crc3.bindBuffer(_type, buffer);
         crc3.bufferData(_type, _array, WebGL2RenderingContext.STATIC_DRAW);
@@ -47,7 +47,7 @@ namespace FudgeCore {
     }
 
     protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers {
-      let renderBuffers: RenderBuffers = this.getRenderBuffers(_shader);
+      let renderBuffers: RenderBuffers = this.getRenderBuffers();
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
       function setBuffer(_name: string, _buffer: WebGLBuffer, _size: number): void {
@@ -79,6 +79,7 @@ namespace FudgeCore {
 
       setBuffer("a_vctPosition", renderBuffers.vertices, 3);
       setBuffer("a_vctNormal", renderBuffers.normals, 3);
+      setBuffer("a_vctTangent", renderBuffers.tangents, 4);
       setBuffer("a_vctColor", renderBuffers.colors, 4);
 
       // feed in texture coordinates if shader accepts a_vctTexture

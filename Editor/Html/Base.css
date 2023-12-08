@@ -226,6 +226,10 @@ details.selected>summary {
   font-weight: bold;
 }
 
+details[key=ComponentLight] fudge-color input[type=range] {
+  display: none;
+}
+
 /* Dialog */
 
 dialog {

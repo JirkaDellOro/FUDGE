@@ -142,7 +142,19 @@ namespace Fudge {
         return true;
       };
       let setTexture: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
-        this.mutable["coat"]["texture"] = _sources[0];
+        let event: any = _event;    //.path does not exist on type DragEvent therefore it is set as any
+        let i: number = 0;
+        let key: string = "";
+        while(key == ""){
+          let tempKey: string = event.path[i].getAttribute("key");
+          if(tempKey == "texture" || tempKey == "normalMap"){
+            key = tempKey
+          }else if(tempKey == "Material"){
+            return false;
+          }
+          i++
+        }
+        this.mutable["coat"][key] = _sources[0];
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };
