@@ -109,6 +109,8 @@ namespace FudgeCore {
     public draw(_prepareBranch: boolean = true): void {
       this.prepare(_prepareBranch);
 
+      Render.clear();
+
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
