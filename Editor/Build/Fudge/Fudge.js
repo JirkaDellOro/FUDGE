@@ -3115,6 +3115,7 @@ var Fudge;
             this.eventInput.type = "text";
             this.eventInput.hidden = true;
             this.eventInput.onfocus = () => this.scrollContainer.onpointerdown = undefined;
+            this.eventInput.onblur = () => this.scrollContainer.onpointerdown = this.hndPointerDown;
             this.eventInput.onchange = () => {
                 if (this.selectedEvent.type == "event") {
                     let time = this.animation.events[this.selectedEvent.data];
@@ -3127,7 +3128,6 @@ var Fudge;
                     this.animation.labels[this.eventInput.value] = time;
                 }
                 this.selectedEvent.data = this.eventInput.value;
-                this.scrollContainer.onpointerdown = this.hndPointerDown;
                 this.draw();
             };
             this.dom.appendChild(this.eventInput);

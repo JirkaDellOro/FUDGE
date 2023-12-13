@@ -25,7 +25,7 @@
       "idResource": "Animation|2022-07-26T11:23:41.662Z|33257",
       "name": "SolarSystem",
       "labels": {
-        "questionable-dog": 3483.3333333333335
+        "questionable-dog": 3560.9818382108288
       },
       "events": {
         "green-cat": 7100.000000000001
@@ -102,7 +102,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0.5,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
