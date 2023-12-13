@@ -100,9 +100,7 @@ namespace Fudge {
 
       this.eventInput.type = "text";
       this.eventInput.hidden = true;
-      this.eventInput.onfocus = () => this.scrollContainer.onpointerdown = undefined;
-      this.eventInput.onblur = () => this.scrollContainer.onpointerdown = this.hndPointerDown;
-      this.eventInput.onchange = () => {
+      this.eventInput.oninput = () => {
         if (this.selectedEvent.type == "event") {
           let time: number = this.animation.events[this.selectedEvent.data];
           this.animation.removeEvent(this.selectedEvent.data);
