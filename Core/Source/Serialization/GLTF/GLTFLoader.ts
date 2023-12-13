@@ -138,8 +138,9 @@ namespace FudgeCore {
         // if (this.gltf.skins?.length > 0)
         //   for (let iSkin: number = 0; iSkin < this.gltf.skins.length; iSkin++)
         //     scene.addComponent(await this.getSkeletonByIndex(iSkin));
-        for (const skeleton of this.#skeletons) 
-          scene.addComponent(skeleton);
+        if (this.#skeletons)
+          for (const skeleton of this.#skeletons)
+            scene.addComponent(skeleton);
 
         Project.register(scene);
         this.#scenes[_iScene] = scene;

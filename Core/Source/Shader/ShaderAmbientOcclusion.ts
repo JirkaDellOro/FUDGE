@@ -4,8 +4,6 @@ namespace FudgeCore {
 
     public static define: string[] = [];
 
-    public static getCoat(): typeof Coat { return CoatColored; }
-
     public static getVertexShaderSource(): string {
       return this.insertDefines(shaderSources["ShaderScreen.vert"], this.define);
     }

@@ -3320,15 +3320,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * A {@link Coat} providing only a texture
-     */
-    class CoatWebGlTextured extends Coat {
-        texture: WebGLTexture;
-        constructor(_texture?: WebGLTexture);
-    }
-}
-declare namespace FudgeCore {
-    /**
      * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
      */
     class Color extends Mutable implements Serializable {
@@ -7653,7 +7644,6 @@ declare namespace FudgeCore {
     abstract class ShaderAmbientOcclusion extends Shader {
         static readonly iSubclass: number;
         static define: string[];
-        static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
@@ -7662,7 +7652,6 @@ declare namespace FudgeCore {
     abstract class ShaderBloom extends Shader {
         static readonly iSubclass: number;
         static define: string[];
-        static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
