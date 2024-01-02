@@ -41,7 +41,7 @@ namespace PickRadius {
     viewport.canvas.addEventListener("mousemove", pick);
 
     function pick(_event: PointerEvent): void {
-      document.querySelector("div").innerHTML = "";
+      document.getElementById("info").innerHTML = "";
       viewport.draw();
       viewport.dispatchPointerEvent(_event);
     }
@@ -50,7 +50,7 @@ namespace PickRadius {
       let node: ƒ.Node = (<ƒ.Node>_event.target);
       let cmpPick: ƒ.ComponentPick = node.getComponent(ƒ.ComponentPick);
 
-      document.querySelector("div").innerHTML += cmpPick.pick + ":" + node.name + "<br/>";
+      document.getElementById("info").innerHTML += cmpPick.pick + ":" + node.name + "<br/>";
     }
   }
 }

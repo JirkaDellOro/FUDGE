@@ -12,7 +12,7 @@ canvas.fullscreen {
   height: 100vh;
 }
 
-div {
+#info {
   position: absolute;
   left: 10px;
   top: 10px;

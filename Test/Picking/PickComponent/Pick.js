@@ -28,14 +28,14 @@ var PickRadius;
         ƒ.Debug.branch(root);
         viewport.canvas.addEventListener("mousemove", pick);
         function pick(_event) {
-            document.querySelector("div").innerHTML = "";
+            document.getElementById("info").innerHTML = "";
             viewport.draw();
             viewport.dispatchPointerEvent(_event);
         }
         function hit(_event) {
             let node = _event.target;
             let cmpPick = node.getComponent(ƒ.ComponentPick);
-            document.querySelector("div").innerHTML += cmpPick.pick + ":" + node.name + "<br/>";
+            document.getElementById("info").innerHTML += cmpPick.pick + ":" + node.name + "<br/>";
         }
     }
 })(PickRadius || (PickRadius = {}));

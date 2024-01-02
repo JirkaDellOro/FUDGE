@@ -34,7 +34,7 @@ var PickRadius;
                 let cmpMesh = node.getComponent(ƒ.ComponentMesh);
                 let position = cmpMesh ? cmpMesh.mtxWorld.translation : node.mtxWorld.translation;
                 if (ray.getDistance(position).magnitude < node.radius) {
-                    ƒ.Debug.fudge(node.name);
+                    ƒ.Debug.info(node.name);
                 }
             }
             ƒ.Debug.groupEnd();

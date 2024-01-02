@@ -45,7 +45,7 @@ namespace PickRadius {
         let cmpMesh: ƒ.ComponentMesh = node.getComponent(ƒ.ComponentMesh);
         let position: ƒ.Vector3 = cmpMesh ? cmpMesh.mtxWorld.translation : node.mtxWorld.translation;
         if (ray.getDistance(position).magnitude < node.radius) {
-          ƒ.Debug.fudge(node.name);
+          ƒ.Debug.info(node.name);
         }
       }
       ƒ.Debug.groupEnd();
