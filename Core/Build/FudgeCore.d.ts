@@ -195,6 +195,8 @@ declare namespace FudgeCore {
         RENDER_PREPARE_START = "renderPrepareStart",
         /** dispatched to {@link Viewport} and {@link Node} when recalculation of the branch to render ends. The branch dispatches before the lights are transmitted to the shaders  */
         RENDER_PREPARE_END = "renderPrepareEnd",
+        /** dispatched to {@link Viewport} when it finished rendering its attached branch. */
+        RENDER_FINISHED = "renderFinished",
         /** dispatched to {@link Joint}-Components in order to disconnect */
         DISCONNECT_JOINT = "disconnectJoint",
         /** dispatched to {@link Node} when it gets attached to a viewport for rendering */
@@ -784,6 +786,10 @@ declare namespace FudgeCore {
          */
         static store(_instance: Object): void;
         /**
+         * Stores the provided objects using the {@link Recycler.store} method
+         */
+        static storeMultiple(..._instances: Object[]): void;
+        /**
          * Emptys the depot of a given type, leaving the objects for the garbage collector. May result in a short stall when many objects were in
          * @param _t
          */
@@ -1129,9 +1135,9 @@ declare namespace FudgeCore {
         private static texPosition;
         private static texNormal;
         private static texNoise;
-        private static texDepth;
+        private static texDepthStencil;
         private static texBloomSamples;
-        private static uboFog;
+        private static readonly uboFog;
         /**
          * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
          */
@@ -3332,7 +3338,7 @@ declare namespace FudgeCore {
         /**
          * Returns a {@link Uint8ClampedArray} with the 8-bit color channel values in the order RGBA.
          */
-        static getBytesRGBAFromCSSKeyword(_keyword: string): Uint8ClampedArray;
+        static getBytesRGBAFromCSS(_keyword: string): Uint8ClampedArray;
         /**
          * Returns a new {@link Color} object created from the given css color keyword.
          * Passing an _alpha value will override the alpha value specified in the keyword.
@@ -3342,6 +3348,7 @@ declare namespace FudgeCore {
          * Computes and retruns the product of two colors.
          */
         static MULTIPLY(_color1: Color, _color2: Color): Color;
+        setCSS(_keyword: string, _alpha?: number): void;
         /**
          * Clamps the given color channel values bewteen 0 and 1 and sets them.
          */
@@ -4077,6 +4084,10 @@ declare namespace FudgeCore {
          * Rotation occurs around the axis in the order Z-Y-X.
          */
         static ROTATION(_eulerAngles: Vector3): Quaternion;
+        /**
+         * Returns a quaternion that rotates coordinates when multiplied by, using the axis and angle given.
+         * ⚠️ UNTESTED!
+         */
         /**
          * Computes and returns the product of two passed quaternions.
          * @param _mtxLeft The quaternion to multiply.
@@ -6072,6 +6083,67 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class Gizmos extends RenderWebGL {
+        #private;
+        /** The {@link Color} used to draw gizmos. Use colors set methods to apply your color. */
+        static readonly color: Color;
+        /** The {@link Matrix4x4} used to draw gizmos. Use matrixs set method to apply your transform. */
+        static readonly mtxWorld: Matrix4x4;
+        static depthTest: boolean;
+        private static readonly arrayBuffer;
+        private static readonly indexBuffer;
+        private static get quad();
+        private static get cube();
+        private static get sphere();
+        /**
+         * Draws a camera frustum for the given parameters. The frustum is oriented along the z-axis, with the tip of the truncated pyramid at the origin.
+         */
+        static drawWireFrustum(_aspect: number, _fov: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): void;
+        /**
+         * Draws a wireframe cube.
+         */
+        static drawWireCube(_size?: number): void;
+        /**
+         * Draws a wireframe sphere.
+         */
+        static drawWireSphere(_radius?: number): void;
+        /**
+         * Draws a cone for the given parameters. The cone is oriented along the z-axis with the tip at the origin.
+         */
+        static drawWireCone(_height?: number, _radius?: number, _segments?: number): void;
+        /**
+         * Draws a circle for the given parameters. The circle lies in the x-y plane, with its center at the origin.
+         */
+        static drawWireCircle(_radius?: number, _segments?: number): void;
+        /**
+         * Draws lines between each pair of the given vertices.
+         * Vertices are paired sequentially, so for example, lines will be drawn between vertices 0 and 1, 2 and 3, 4 and 5, etc.
+         */
+        static drawLines(_vertices: Vector3[]): void;
+        /**
+         * Draws a wireframe mesh.
+         */
+        static drawWireMesh(_mesh: Mesh): void;
+        /**
+         * Draws a solid cube.
+         */
+        static drawCube(): void;
+        /**
+         * Draws a solid sphere.
+         */
+        static drawSphere(): void;
+        /**
+         * Draws a solid mesh.
+         */
+        static drawMesh(_mesh: Mesh): void;
+        /**
+         * Draws a {@link Texture} on a {@link MeshQuad}. The texture can be used as an alpha mask.
+         */
+        static drawIcon(_texture: Texture, _asMask?: boolean): void;
+        private static buffer;
+    }
+}
+declare namespace FudgeCore {
     type MapLightTypeToLightList = Map<TypeOfLight, RecycableArray<ComponentLight>>;
     interface RenderPrepareOptions {
         ignorePhysics?: boolean;
@@ -6080,6 +6152,7 @@ declare namespace FudgeCore {
      * The main interface to the render engine, here WebGL (see superclass {@link RenderWebGL} and the RenderInjectors
      */
     abstract class Render extends RenderWebGL {
+        #private;
         static rectClip: Rectangle;
         static pickBuffer: Int32Array;
         static readonly nodesPhysics: RecycableArray<Node>;
@@ -6089,6 +6162,10 @@ declare namespace FudgeCore {
         private static readonly nodesAlpha;
         private static readonly componentsSkeleton;
         private static timestampUpdate;
+        /**
+         * The camera which is currently used to render.
+         */
+        static get camera(): ComponentCamera;
         /**
          * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
          * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
@@ -7682,6 +7759,20 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         static define: string[];
         static getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderGizmo extends Shader {
+        static define: string[];
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderGizmoTextured extends Shader {
+        static define: string[];
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {

@@ -1,5 +1,5 @@
 namespace FudgeCore {
-  
+
   /**
    * Interface to be implemented by objects that can be recycled, i.e. to avoid garbage collection by reusing the object instead of replacing it with a new one.
    */
@@ -67,6 +67,14 @@ namespace FudgeCore {
       Recycler.depot[key] = instances;
       // Debug.log(`ObjectManager.depot[${key}]: ${ObjectManager.depot[key].length}`);
       //Debug.log(this.depot);
+    }
+
+    /**
+     * Stores the provided objects using the {@link Recycler.store} method
+     */
+    public static storeMultiple(..._instances: Object[]): void { // TODO: maybe make this the default store method
+      for (const instance of _instances)
+        Recycler.store(instance);
     }
 
     /**

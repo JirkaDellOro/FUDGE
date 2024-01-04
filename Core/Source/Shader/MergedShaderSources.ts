@@ -220,6 +220,71 @@ void main() {
       return;
   }
 }`;
+  shaderSources["ShaderGizmo.frag"] = /*glsl*/ `#version 300 es
+/**
+* ...
+* @authors Jonas Plotzky, HFU, 2023
+*/
+precision mediump float;
+precision highp int;
+
+uniform vec4 u_vctColor;
+
+out vec4 vctFrag;
+
+#if defined(TEXTURE)
+  uniform sampler2D u_texColor;
+  uniform bool u_bMask;
+  in vec2 v_vctTexture;
+#endif
+
+void main() {
+  vctFrag = u_vctColor;
+
+  #if defined(TEXTURE)
+
+    if (u_bMask)
+      vctFrag.a *= texture(u_texColor, v_vctTexture).a;
+    else
+      vctFrag *= texture(u_texColor, v_vctTexture);
+      
+  #endif
+
+  if (vctFrag.a < 0.01)
+    discard;
+
+  // premultiply alpha for blending
+  vctFrag.rgb *= vctFrag.a;
+}`;
+  shaderSources["ShaderGizmo.vert"] = /*glsl*/ `#version 300 es
+/**
+* ...
+* @authors Jonas Plotzky, HFU, 2023
+*/
+precision mediump float;
+precision highp int;
+
+uniform mat4 u_mtxViewProjection;
+uniform mat4 u_mtxModel;
+
+in vec3 a_vctPosition;
+
+#if defined(TEXTURE)
+
+  in vec2 a_vctTexture;
+  out vec2 v_vctTexture;
+
+#endif
+
+void main() {
+  gl_Position = u_mtxViewProjection * u_mtxModel * vec4(a_vctPosition, 1.0);
+
+  #if defined(TEXTURE)
+
+    v_vctTexture = a_vctTexture;
+
+  #endif
+}`;
   shaderSources["ShaderPhong.frag"] = /*glsl*/ `#version 300 es
 /**
 * Phong shading

@@ -50,7 +50,7 @@ namespace FudgeCore {
      */
     public static ZERO(): Vector3 {
       const vector: Vector3 = Recycler.get(Vector3);
-      vector.set(0, 0, 0);
+      vector.set(0, 0, 0); // should be set to 0 by recycler already?
       return vector;
     }
 
@@ -62,7 +62,6 @@ namespace FudgeCore {
       vector.set(_scale, _scale, _scale);
       return vector;
     }
-
 
     /**
      * Creates and returns a vector through transformation of the given vector by the given matrix or rotation quaternion.

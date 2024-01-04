@@ -19,6 +19,15 @@ namespace FudgeCore {
     private static readonly componentsSkeleton: RecycableArray<ComponentSkeleton> = new RecycableArray();
     private static timestampUpdate: number;
 
+    static #camera: ComponentCamera;
+
+    /**
+     * The camera which is currently used to render.
+     */
+    public static get camera(): ComponentCamera {
+      return Render.#camera;
+    }
+
     //#region Prepare
     /**
      * Recursively iterates over the branch starting with the node given, recalculates all world transforms, 
@@ -167,12 +176,15 @@ namespace FudgeCore {
      * Draws the scene from the point of view of the given camera
      */
     public static draw(_cmpCamera: ComponentCamera): void {
+      Render.#camera = _cmpCamera;
+
       for (let node of Render.nodesAlpha)
         Reflect.set(node, "zCamera", _cmpCamera.pointWorldToClip(node.getComponent(ComponentMesh).mtxWorld.translation).z);
 
       const sorted: Node[] = Render.nodesAlpha.getSorted((_a: Node, _b: Node) => Reflect.get(_b, "zCamera") - Reflect.get(_a, "zCamera"));
 
       Render.drawNodes(Render.nodesSimple, sorted, _cmpCamera);
+      Render.#camera = null;
     }
     //#endregion
 

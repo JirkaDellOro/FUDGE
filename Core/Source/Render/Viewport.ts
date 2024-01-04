@@ -149,9 +149,9 @@ namespace FudgeCore {
       let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
-      // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START)); // TODO: these events seem to get fired in Render.prepare aswell, check where they should get fired
+      this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
       Render.prepare(this.#branch, null, mtxRoot);
-      // this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END)); // TODO: these events seem to get fired in Render.prepare aswell, check where they should get fired
+      this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
       this.componentsPick = Render.componentsPick;
     }
 
@@ -354,5 +354,6 @@ namespace FudgeCore {
       let screen: Vector2 = new Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
       return screen;
     }
+    // #endregion
   }
 }

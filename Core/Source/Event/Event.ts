@@ -57,6 +57,8 @@ namespace FudgeCore {
     RENDER_PREPARE_START = "renderPrepareStart",
     /** dispatched to {@link Viewport} and {@link Node} when recalculation of the branch to render ends. The branch dispatches before the lights are transmitted to the shaders  */
     RENDER_PREPARE_END = "renderPrepareEnd",
+    /** dispatched to {@link Viewport} when it finished rendering its attached branch. */
+    RENDER_FINISHED = "renderFinished",
     /** dispatched to {@link Joint}-Components in order to disconnect */
     DISCONNECT_JOINT = "disconnectJoint",
     /** dispatched to {@link Node} when it gets attached to a viewport for rendering */

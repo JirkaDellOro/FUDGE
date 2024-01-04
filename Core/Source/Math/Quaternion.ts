@@ -12,7 +12,7 @@ namespace FudgeCore {
     public z: number;
     public w: number;
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
-    
+
     readonly #eulerAngles: Vector3 = Vector3.ZERO(); // euler angle representation of this quaternion in degrees.
     #eulerAnglesDirty: boolean;
 
@@ -45,6 +45,30 @@ namespace FudgeCore {
       result.eulerAngles = _eulerAngles;
       return result;
     }
+
+    /**
+     * Returns a quaternion that rotates coordinates when multiplied by, using the axis and angle given.
+     * ⚠️ UNTESTED!
+     */
+    // public static ROTATION(_axis: Vector3, _angle: number): Quaternion {
+    //   const result: Quaternion = Recycler.get(Quaternion);
+
+    //   // Normalize the axis
+    //   const axis: Vector3 = _axis.clone;
+    //   axis.normalize();
+
+    //   // Calculate the quaternion components
+    //   const halfAngle: number = _angle / 2;
+    //   const s: number = Math.sin(halfAngle);
+    //   result.x = axis.x * s;
+    //   result.y = axis.y * s;
+    //   result.z = axis.z * s;
+    //   result.w = Math.cos(halfAngle);
+
+    //   Recycler.store(axis);
+
+    //   return result;
+    // }
 
     /**
      * Computes and returns the product of two passed quaternions.

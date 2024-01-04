@@ -33,7 +33,7 @@ namespace FudgeCore {
     /**
      * Returns a {@link Uint8ClampedArray} with the 8-bit color channel values in the order RGBA.
      */
-    public static getBytesRGBAFromCSSKeyword(_keyword: string): Uint8ClampedArray {
+    public static getBytesRGBAFromCSS(_keyword: string): Uint8ClampedArray {
       Color.crc2.fillStyle = _keyword;
       Color.crc2.fillRect(0, 0, 1, 1);
       return Color.crc2.getImageData(0, 0, 1, 1).data;
@@ -44,10 +44,7 @@ namespace FudgeCore {
      * Passing an _alpha value will override the alpha value specified in the keyword.
      */
     public static CSS(_keyword: string, _alpha?: number): Color {
-      const bytesRGBA: Uint8ClampedArray = Color.getBytesRGBAFromCSSKeyword(_keyword);
-      // // conserve the input alpha value from keyword when rgba() or hsla() is used, otherwise "rgba(..., 0.3)" results in color.a = ~0.30196 conversion
-      // if (_keyword.toLocaleLowerCase().match(/(rgba|hsla)\(.*\)/)) 
-      //   _alpha = parseFloat(_keyword.match(/[^,]+(?=\))/)[0]);
+      const bytesRGBA: Uint8ClampedArray = Color.getBytesRGBAFromCSS(_keyword);
       const color: Color = new Color(
         bytesRGBA[0] / 255,
         bytesRGBA[1] / 255,
@@ -62,6 +59,11 @@ namespace FudgeCore {
      */
     public static MULTIPLY(_color1: Color, _color2: Color): Color {
       return new Color(_color1.r * _color2.r, _color1.g * _color2.g, _color1.b * _color2.b, _color1.a * _color2.a);
+    }
+
+    public setCSS(_keyword: string, _alpha?: number): void {
+      const bytesRGBA: Uint8ClampedArray = Color.getBytesRGBAFromCSS(_keyword);
+      this.setBytesRGBA(bytesRGBA[0], bytesRGBA[1], bytesRGBA[2], _alpha ?? bytesRGBA[3]);
     }
 
     // TODO: rename to setClampedRGBA? Norm is misleading, since it is not normalized but clamped
