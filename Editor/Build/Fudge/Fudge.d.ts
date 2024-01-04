@@ -690,11 +690,14 @@ declare namespace Fudge {
      */
     class ViewRender extends View {
         #private;
+        private static iconLight;
+        private static iconCamera;
         private cmrOrbit;
         private viewport;
         private canvas;
         private graph;
         private nodeLight;
+        private selection;
         private redrawId;
         constructor(_container: ComponentContainer, _state: JsonValue);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
@@ -712,6 +715,7 @@ declare namespace Fudge {
         private activeViewport;
         private redraw;
         private setRenderContinously;
+        private hndDrawGizmoSelection;
     }
 }
 declare namespace Fudge {

@@ -4364,11 +4364,26 @@ var Fudge;
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewRender extends Fudge.View {
+        static iconLight = (() => {
+            let img = new Image(256, 256);
+            img.src = "../Html/Icon/Light.svg";
+            let tex = new ƒ.TextureImage();
+            tex.image = img;
+            return tex;
+        })();
+        static iconCamera = (() => {
+            let img = new Image(256, 256);
+            img.src = "../Html/Icon/Camera.svg";
+            let tex = new ƒ.TextureImage();
+            tex.image = img;
+            return tex;
+        })();
         cmrOrbit;
         viewport;
         canvas;
         graph;
         nodeLight = new ƒ.Node("Illumination"); // keeps light components for dark graphs
+        selection;
         redrawId;
         #pointerMoved = false;
         constructor(_container, _state) {
@@ -4494,6 +4509,7 @@ var Fudge;
             ;
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             this.viewport.addEventListener("renderPrepareStart" /* ƒ.EVENT.RENDER_PREPARE_START */, this.hndPrepare);
+            ƒ.Render.addEventListener("renderFinished" /* ƒ.EVENT.RENDER_FINISHED */, this.hndDrawGizmoSelection);
             this.setGraph(null);
             this.canvas.addEventListener("pointerdown", this.activeViewport);
             this.canvas.addEventListener("pick", this.hndPick);
@@ -4550,6 +4566,7 @@ var Fudge;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
                     if (detail.node) {
+                        this.selection = detail.node;
                         if (detail.view == this)
                             return;
                     }
@@ -4562,6 +4579,7 @@ var Fudge;
                     break;
                 case Fudge.EVENT_EDITOR.CLOSE:
                     this.setRenderContinously(false);
+                    ƒ.Render.removeEventListener("renderFinished" /* ƒ.EVENT.RENDER_FINISHED */, this.hndDrawGizmoSelection);
                     break;
                 case Fudge.EVENT_EDITOR.UPDATE:
                     if (!this.viewport.camera.isActive)
@@ -4630,9 +4648,102 @@ var Fudge;
             }
             this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.RENDER_CONTINUOUSLY)).checked = _on;
         }
+        hndDrawGizmoSelection = (_event) => {
+            const selection = this.selection;
+            if (!selection)
+                return;
+            drawMesh();
+            drawCamera();
+            drawLight();
+            drawTranslation(); // TODO: make this a setting
+            function drawTranslation() {
+                const scale = ƒ.Vector3.DIFFERENCE(ƒ.Render.camera.mtxWorld.translation, selection.mtxWorld.translation).magnitude * 0.1;
+                const origin = ƒ.Vector3.ZERO();
+                const vctX = ƒ.Vector3.X(1);
+                const vctY = ƒ.Vector3.Y(1);
+                const vctZ = ƒ.Vector3.Z(1);
+                ƒ.Gizmos.mtxWorld.set(selection.mtxWorld);
+                ƒ.Gizmos.mtxWorld.scaling = new ƒ.Vector3(scale, scale, scale);
+                ƒ.Gizmos.depthTest = false;
+                ƒ.Gizmos.color.setCSS("red");
+                ƒ.Gizmos.drawLines([origin, vctX]);
+                ƒ.Gizmos.color.setCSS("lime");
+                ƒ.Gizmos.drawLines([origin, vctY]);
+                ƒ.Gizmos.color.setCSS("blue");
+                ƒ.Gizmos.drawLines([origin, vctZ]);
+                ƒ.Gizmos.depthTest = true;
+                ƒ.Recycler.storeMultiple(vctX, vctY, vctZ, origin);
+            }
+            ;
+            function drawMesh() {
+                const cmpMesh = selection.getComponent(ƒ.ComponentMesh);
+                if (!cmpMesh)
+                    return;
+                ƒ.Gizmos.mtxWorld.set(cmpMesh.mtxWorld);
+                ƒ.Gizmos.color.setCSS("salmon");
+                ƒ.Gizmos.drawWireMesh(cmpMesh.mesh);
+            }
+            function drawCamera() {
+                const cmpCamera = selection.getComponent(ƒ.ComponentCamera);
+                if (!cmpCamera)
+                    return;
+                ƒ.Gizmos.mtxWorld.set(cmpCamera.mtxWorld);
+                ƒ.Gizmos.color.setCSS("lightgrey");
+                ƒ.Gizmos.drawWireFrustum(cmpCamera.getAspect(), cmpCamera.getFieldOfView(), cmpCamera.getNear(), cmpCamera.getFar(), cmpCamera.getDirection());
+                ƒ.Gizmos.mtxWorld.scaling = new ƒ.Vector3(0.75, 0.75, 0.75);
+                ƒ.Gizmos.drawIcon(ViewRender.iconCamera, true);
+            }
+            function drawLight() {
+                const cmpLight = selection.getComponent(ƒ.ComponentLight);
+                if (!cmpLight)
+                    return;
+                let mtxShape = ƒ.Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
+                ƒ.Gizmos.color.setCSS("yellow");
+                ƒ.Gizmos.mtxWorld.set(mtxShape);
+                switch (cmpLight.light.getType()) {
+                    case ƒ.LightDirectional:
+                        const radius = 0.5;
+                        ƒ.Gizmos.drawWireCircle(radius);
+                        const lines = new Array(10).fill(null).map(() => ƒ.Recycler.get(ƒ.Vector3));
+                        lines[0].set(0, 0, 0);
+                        lines[1].set(0, 0, 1);
+                        lines[2].set(0, radius, 0);
+                        lines[3].set(0, radius, 1);
+                        lines[6].set(0, -radius, 0);
+                        lines[7].set(0, -radius, 1);
+                        lines[4].set(radius, 0, 0);
+                        lines[5].set(radius, 0, 1);
+                        lines[8].set(-radius, 0, 0);
+                        lines[9].set(-radius, 0, 1);
+                        ƒ.Gizmos.drawLines(lines);
+                        ƒ.Recycler.storeMultiple(...lines);
+                        break;
+                    case ƒ.LightPoint:
+                        ƒ.Gizmos.drawWireSphere(1);
+                        break;
+                    case ƒ.LightSpot:
+                        ƒ.Gizmos.drawWireCone(1, 0.5);
+                        break;
+                }
+                ƒ.Gizmos.depthTest = false;
+                ƒ.Gizmos.mtxWorld.scaling = new ƒ.Vector3(0.75, 0.75, 0.75);
+                ƒ.Gizmos.drawIcon(ViewRender.iconLight, true);
+                ƒ.Gizmos.depthTest = true;
+                ƒ.Recycler.store(mtxShape);
+            }
+        };
     }
     Fudge.ViewRender = ViewRender;
 })(Fudge || (Fudge = {}));
+// "Red",
+// "Lime",
+// "Blue",
+// "Cyan",
+// "Magenta",
+// "Yellow",
+// "Salmon",
+// "LightGreen",
+// "CornflowerBlue"
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
