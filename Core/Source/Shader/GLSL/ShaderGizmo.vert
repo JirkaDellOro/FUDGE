@@ -11,6 +11,7 @@ uniform mat4 u_mtxModel;
 
 in vec3 a_vctPosition;
 
+
 #if defined(TEXTURE)
 
   in vec2 a_vctTexture;

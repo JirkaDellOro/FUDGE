@@ -590,13 +590,12 @@ namespace FudgeCore {
       crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.framebufferMain);
       crc3.drawBuffers([WebGL2RenderingContext.COLOR_ATTACHMENT0]);
 
-      Render.dispatchEvent(new Event(EVENT.RENDER_FINISHED));
-      // gizmo, text
-
       // crc3.depthMask(false);
       for (let node of _nodesAlpha)
         RenderWebGL.drawNode(node, _cmpCamera);
       // crc3.depthMask(true);
+
+      Render.dispatchEvent(new Event(EVENT.RENDER_FINISHED));
 
       // copy framebuffer to canvas
       crc3.bindFramebuffer(WebGL2RenderingContext.READ_FRAMEBUFFER, RenderWebGL.framebufferMain);

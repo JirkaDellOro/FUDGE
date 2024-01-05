@@ -3327,8 +3327,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
-     */
-    class Color extends Mutable implements Serializable {
+     */ class Color extends Mutable implements Serializable, Recycable {
         private static crc2;
         r: number;
         g: number;
@@ -3348,6 +3347,10 @@ declare namespace FudgeCore {
          * Computes and retruns the product of two colors.
          */
         static MULTIPLY(_color1: Color, _color2: Color): Color;
+        /**
+         * Creates and returns a clone of this color
+         */
+        get clone(): Color;
         setCSS(_keyword: string, _alpha?: number): void;
         /**
          * Clamps the given color channel values bewteen 0 and 1 and sets them.
@@ -3389,6 +3392,7 @@ declare namespace FudgeCore {
          * Sets this color from the given hex string color.
          */
         setHex(_hex: string): void;
+        recycle(): void;
         /**
          * Set this color to the values given by the color provided
          */
@@ -3455,6 +3459,7 @@ declare namespace FudgeCore {
          * Returns one of the values passed in, either _value if within _min and _max or the boundary being exceeded by _value
          */
         static clamp<T>(_value: T, _min: T, _max: T, _isSmaller?: (_value1: T, _value2: T) => boolean): T;
+        static lerp<T extends Number>(_value1: T, _value2: T, _f: number): T;
     }
 }
 declare namespace FudgeCore {
@@ -6089,7 +6094,13 @@ declare namespace FudgeCore {
         static readonly color: Color;
         /** The {@link Matrix4x4} used to draw gizmos. Use matrixs set method to apply your transform. */
         static readonly mtxWorld: Matrix4x4;
-        static depthTest: boolean;
+        /**
+         * The opacity of occluded gizmo parts.
+         * Use this to control the visibility of gizmos behind objects.
+         * Set to 0 to make occluded gizmo parts disappear.
+         * Set to 1 to make occluded gizmo parts fully visible.
+         */
+        static occlusionAlpha: number;
         private static readonly arrayBuffer;
         private static readonly indexBuffer;
         private static get quad();
@@ -6137,10 +6148,16 @@ declare namespace FudgeCore {
          */
         static drawMesh(_mesh: Mesh): void;
         /**
-         * Draws a {@link Texture} on a {@link MeshQuad}. The texture can be used as an alpha mask.
+         * Draws an icon from a {@link Texture} on a {@link MeshQuad}. The texture can be used as an alpha mask.
          */
         static drawIcon(_texture: Texture, _asMask?: boolean): void;
         private static buffer;
+        private static bufferColor;
+        private static bufferMatrices;
+        private static draw;
+        private static drawElementsTrianlges;
+        private static drawElementsLines;
+        private static drawArrays;
     }
 }
 declare namespace FudgeCore {

@@ -5,7 +5,13 @@ namespace FudgeCore {
     public static readonly color: Color = Color.CSS("white");
     /** The {@link Matrix4x4} used to draw gizmos. Use matrixs set method to apply your transform. */
     public static readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
-    public static depthTest: boolean = true;
+    /** 
+     * The opacity of occluded gizmo parts.
+     * Use this to control the visibility of gizmos behind objects.
+     * Set to 0 to make occluded gizmo parts disappear.
+     * Set to 1 to make occluded gizmo parts fully visible.
+     */
+    public static occlusionAlpha: number = 0.2;
 
     private static readonly arrayBuffer: WebGLBuffer = RenderWebGL.assert(RenderWebGL.crc3.createBuffer());
     private static readonly indexBuffer: WebGLBuffer = RenderWebGL.assert(RenderWebGL.crc3.createBuffer());
@@ -115,11 +121,18 @@ namespace FudgeCore {
      * Draws a wireframe sphere.
      */
     public static drawWireSphere(_radius: number = 0.5): void {
+      let mtxWorld: Matrix4x4 = Gizmos.mtxWorld.clone;
+
       Gizmos.drawWireCircle(_radius);
       Gizmos.mtxWorld.rotateY(90);
       Gizmos.drawWireCircle(_radius);
       Gizmos.mtxWorld.rotateX(90);
       Gizmos.drawWireCircle(_radius);
+      Gizmos.mtxWorld.lookAt(Render.camera.mtxWorld.translation, Vector3.Y());
+      Gizmos.drawWireCircle(_radius);
+
+      Gizmos.mtxWorld.set(mtxWorld);
+      Recycler.store(mtxWorld);
     }
 
     /**
@@ -181,11 +194,10 @@ namespace FudgeCore {
         lineData.set(point.get(), i * 3);
       }
 
-      Gizmos.buffer(shader, Gizmos.arrayBuffer, lineData);
+      Gizmos.buffer(shader, Gizmos.arrayBuffer);
+      crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, lineData, WebGL2RenderingContext.DYNAMIC_DRAW);
 
-      Render.setDepthTest(Gizmos.depthTest);
-      crc3.drawArrays(WebGL2RenderingContext.LINES, 0, _vertices.length);
-      Render.setDepthTest(!Gizmos.depthTest);
+      Gizmos.draw(shader, Gizmos.drawArrays, _vertices.length);
     }
 
     /**
@@ -213,9 +225,7 @@ namespace FudgeCore {
 
       Gizmos.buffer(shader, renderBuffers.vertices);
 
-      Render.setDepthTest(Gizmos.depthTest);
-      crc3.drawElements(WebGL2RenderingContext.LINES, indices.length, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
-      Render.setDepthTest(!Gizmos.depthTest);
+      Gizmos.draw(shader, Gizmos.drawElementsLines, indices.length);
     }
 
     /**
@@ -244,52 +254,107 @@ namespace FudgeCore {
       crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, renderBuffers.indices);
       Gizmos.buffer(shader, renderBuffers.vertices);
 
-      Render.setDepthTest(Gizmos.depthTest);
-      crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
-      Render.setDepthTest(!Gizmos.depthTest);
+      Gizmos.draw(shader, Gizmos.drawElementsTrianlges, renderBuffers.nIndices);
     }
 
     /**
-     * Draws a {@link Texture} on a {@link MeshQuad}. The texture can be used as an alpha mask.
+     * Draws an icon from a {@link Texture} on a {@link MeshQuad}. The texture can be used as an alpha mask.
      */
     public static drawIcon(_texture: Texture, _asMask: boolean = false): void {
       const crc3: WebGL2RenderingContext = Gizmos.getRenderingContext();
       const shader: typeof Shader = ShaderGizmoTextured;
       shader.useProgram();
 
+      // cache clones to avoid side effects
+      let mtxWorld: Matrix4x4 = Gizmos.mtxWorld.clone;
+      let color: Color = Gizmos.color.clone;
+
       Gizmos.mtxWorld.lookAt(Render.camera.mtxWorld.translation, Vector3.Y());
 
+      let distance: number = Vector3.DIFFERENCE(Render.camera.mtxWorld.translation, Gizmos.mtxWorld.translation).magnitude;
+      if (distance > 0 && distance < 4) {
+        distance = (distance - 1) / 3;
+        Gizmos.color.a = Calc.lerp(0, Gizmos.color.a, distance);
+      }
+
       // TODO: mostly copied from Mesh Render Injector, find a way to reuse code
-      const renderBuffers: RenderBuffers = Gizmos.quad.getRenderBuffers();
+      let renderBuffers: RenderBuffers = Gizmos.quad.getRenderBuffers();
       crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, renderBuffers.indices);
       let attribute: number = shader.attributes["a_vctTexture"];
       crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.textureUVs);
       crc3.enableVertexAttribArray(attribute); // enable the buffer
       crc3.vertexAttribPointer(attribute, 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
+
       Gizmos.buffer(shader, renderBuffers.vertices);
 
       _texture.useRenderData(TEXTURE_LOCATION.COLOR.UNIT);
       crc3.uniform1i(shader.uniforms[TEXTURE_LOCATION.COLOR.UNIFORM], TEXTURE_LOCATION.COLOR.INDEX);
       crc3.uniform1i(shader.uniforms["u_bMask"], _asMask ? 1 : 0);
 
-      Render.setDepthTest(Gizmos.depthTest);
-      crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
-      Render.setDepthTest(!Gizmos.depthTest);
+      Gizmos.draw(shader, Gizmos.drawElementsTrianlges, renderBuffers.nIndices);
+
+      Gizmos.mtxWorld.set(mtxWorld);
+      Gizmos.color.copy(color);
+      Recycler.storeMultiple(mtxWorld, color);
     }
 
-    private static buffer(_shader: typeof Shader, _buffer: WebGLBuffer, _data?: Float32Array): void {
+    private static buffer(_shader: typeof Shader, _buffer: WebGLBuffer): void {
       const crc3: WebGL2RenderingContext = Gizmos.getRenderingContext();
 
       crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _buffer);
       let attribute: number = _shader.attributes["a_vctPosition"];
       crc3.enableVertexAttribArray(attribute);
       crc3.vertexAttribPointer(attribute, 3, WebGL2RenderingContext.FLOAT, false, 0, 0);
-      if (_data)
-        crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _data, WebGL2RenderingContext.DYNAMIC_DRAW);
 
-      crc3.uniformMatrix4fv(_shader.uniforms["u_mtxModel"], false, Gizmos.mtxWorld.get());
-      crc3.uniformMatrix4fv(_shader.uniforms["u_mtxViewProjection"], false, Render.camera.mtxWorldToView.get());
-      crc3.uniform4fv(_shader.uniforms["u_vctColor"], Gizmos.color.getArray());
+      Gizmos.bufferMatrices(_shader);
+      Gizmos.bufferColor(_shader);
+    }
+
+    private static bufferColor(_shader: typeof Shader): void {
+      Gizmos.crc3.uniform4fv(_shader.uniforms["u_vctColor"], Gizmos.color.getArray());
+    }
+
+    private static bufferMatrices(_shader: typeof Shader): void {
+      Gizmos.crc3.uniformMatrix4fv(_shader.uniforms["u_mtxModel"], false, Gizmos.mtxWorld.get());
+      Gizmos.crc3.uniformMatrix4fv(_shader.uniforms["u_mtxViewProjection"], false, Render.camera.mtxWorldToView.get());
+    }
+
+    private static draw(_shader: typeof Shader, _draw: Function, _count: number): void {
+      const crc3: WebGL2RenderingContext = Gizmos.getRenderingContext();
+
+      // stencil stuff is for semi-transparent gizmos to have correct self occlusion
+      // first draw the gizmo opaque with depth test and set drawn pixels to 1 in stencil buffer
+      crc3.clear(WebGL2RenderingContext.STENCIL_BUFFER_BIT);
+      crc3.stencilFunc(WebGL2RenderingContext.ALWAYS, 1, 0xFF);
+      crc3.stencilOp(WebGL2RenderingContext.KEEP, WebGL2RenderingContext.KEEP, WebGL2RenderingContext.REPLACE);
+      crc3.enable(WebGL2RenderingContext.STENCIL_TEST);
+      _draw(_count);
+
+      // then draw the gizmo again with reduced alpha and without depth test where stencil buffer is 0
+      crc3.stencilFunc(WebGL2RenderingContext.EQUAL, 0, 0xFF);
+      crc3.stencilOp(WebGL2RenderingContext.KEEP, WebGL2RenderingContext.KEEP, WebGL2RenderingContext.KEEP);
+      let color: Color = Gizmos.color.clone;
+      Gizmos.color.a *= Gizmos.occlusionAlpha;
+      Gizmos.bufferColor(_shader);
+      Render.setDepthTest(false);
+      _draw(_count);
+      Render.setDepthTest(true);
+      crc3.disable(WebGL2RenderingContext.STENCIL_TEST);
+      
+      Gizmos.color.copy(color);
+      Recycler.store(color);
+    }
+
+    private static drawElementsTrianlges(_count: number): void {
+      Gizmos.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _count, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+    }
+
+    private static drawElementsLines(_count: number): void {
+      Gizmos.crc3.drawElements(WebGL2RenderingContext.LINES, _count, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+    }
+
+    private static drawArrays(_count: number): void {
+      Gizmos.crc3.drawArrays(WebGL2RenderingContext.LINES, 0, _count);
     }
   }
 }

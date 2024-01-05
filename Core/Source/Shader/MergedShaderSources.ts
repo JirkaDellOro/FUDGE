@@ -232,6 +232,7 @@ uniform vec4 u_vctColor;
 
 out vec4 vctFrag;
 
+// uniform sampler2D u_texDepthStencil;
 #if defined(TEXTURE)
   uniform sampler2D u_texColor;
   uniform bool u_bMask;
@@ -247,8 +248,14 @@ void main() {
       vctFrag.a *= texture(u_texColor, v_vctTexture).a;
     else
       vctFrag *= texture(u_texColor, v_vctTexture);
+
+
       
   #endif
+
+  // float depth = texelFetch(u_texDepthStencil, ivec2(gl_FragCoord.xy), 0).r;
+  // if (gl_FragCoord.z > depth) 
+  //   vctFrag.a *= 0.2;
 
   if (vctFrag.a < 0.01)
     discard;
@@ -268,6 +275,7 @@ uniform mat4 u_mtxViewProjection;
 uniform mat4 u_mtxModel;
 
 in vec3 a_vctPosition;
+
 
 #if defined(TEXTURE)
 
