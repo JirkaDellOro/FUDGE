@@ -16,5 +16,9 @@ namespace FudgeCore {
       if (_isSmaller(_max, _value)) return _max;
       return _value;
     }
+
+    public static lerp<T extends Number>(_value1: T, _value2: T, _f: number): T {
+      return <T><unknown>(_value1.valueOf() + (_value2.valueOf() - _value1.valueOf()) * _f);
+    }
   }
 }

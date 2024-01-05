@@ -1,8 +1,8 @@
 namespace FudgeCore {
   /**
    * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
-   */
-  export class Color extends Mutable implements Serializable {
+   */ // TODO: cleanup, harmonize with Vector3, Matrix4x4 e.g. naming and logic of set, get (getArray), clone, copy etc.
+  export class Color extends Mutable implements Serializable, Recycable {
     // crc2 only used for converting colors from strings predefined by CSS
     private static crc2: CanvasRenderingContext2D = (() => {
       const crc2: CanvasRenderingContext2D = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
@@ -61,9 +61,19 @@ namespace FudgeCore {
       return new Color(_color1.r * _color2.r, _color1.g * _color2.g, _color1.b * _color2.b, _color1.a * _color2.a);
     }
 
+    /**
+     * Creates and returns a clone of this color
+     */
+    public get clone(): Color {
+      let clone: Color = Recycler.get(Color);
+      clone.copy(this);
+      return clone;
+    }
+
     public setCSS(_keyword: string, _alpha?: number): void {
       const bytesRGBA: Uint8ClampedArray = Color.getBytesRGBAFromCSS(_keyword);
-      this.setBytesRGBA(bytesRGBA[0], bytesRGBA[1], bytesRGBA[2], _alpha ?? bytesRGBA[3]);
+      this.setBytesRGBA(bytesRGBA[0], bytesRGBA[1], bytesRGBA[2], bytesRGBA[3]);
+      this.a = _alpha ?? this.a;
     }
 
     // TODO: rename to setClampedRGBA? Norm is misleading, since it is not normalized but clamped
@@ -150,6 +160,10 @@ namespace FudgeCore {
       for (let byte in bytes)
         bytes[byte] = parseInt(_hex.substr(channel++ * 2, 2), 16);
       this.setArrayBytesRGBA(bytes);
+    }
+
+    public recycle(): void {
+      this.r = 1; this.g = 1; this.b = 1; this.a = 1;
     }
 
     /**
