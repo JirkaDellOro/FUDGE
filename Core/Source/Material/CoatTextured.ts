@@ -6,7 +6,7 @@ namespace FudgeCore {
   export class CoatTextured extends CoatColored {
     public texture: Texture = null;
 
-    public constructor(_color: Color = new Color(), _texture: Texture = TextureDefault.texture) {
+    public constructor(_color: Color = new Color(), _texture: Texture = TextureDefault.color) {
       super(_color);
       this.texture = _texture;
     }

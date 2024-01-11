@@ -489,7 +489,7 @@ namespace FudgeCore {
 
         if (gltfImage == undefined) {
           Debug.warn(`${this}: Texture with index ${_iTexture} has no image.`);
-          return TextureDefault.texture;
+          return TextureDefault.color;
         }
 
         if (gltfSampler?.wrapS != undefined && gltfSampler?.wrapS != WebGL2RenderingContext.REPEAT)

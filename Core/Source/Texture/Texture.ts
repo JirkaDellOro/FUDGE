@@ -104,6 +104,8 @@ namespace FudgeCore {
     public async load(_url: RequestInfo): Promise<void> {
       this.url = _url;
       this.image = new Image();
+
+      
       // const response: Response = await window.fetch(this.url);
       // const blob: Blob = await response.blob();
       // let objectURL: string = URL.createObjectURL(blob);
@@ -152,11 +154,14 @@ namespace FudgeCore {
   export class TextureBase64 extends Texture {
     public image: HTMLImageElement = new Image();
 
-    public constructor(_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP) {
+    public constructor(_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP, _width: number = 64, _height: number = 64) {
       super(_name);
       this.image.src = _base64;
       this.mipmap = _mipmap;
+      this.image.width = _width;
+      this.image.height = _height;
     }
+    
     public get texImageSource(): ImageSource {
       return this.image;
     }

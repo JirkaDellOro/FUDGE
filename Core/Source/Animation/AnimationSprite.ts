@@ -1,7 +1,7 @@
 namespace FudgeCore {
   export class AnimationSprite extends Animation {
     public static readonly iSubclass: number = Animation.registerSubclass(AnimationSprite);
-    public texture: Texture = TextureDefault.texture;
+    public texture: Texture = TextureDefault.color;
     private idTexture: string;
     private frames: number = 25;
     private wrapAfter: number = 5;
@@ -135,7 +135,7 @@ namespace FudgeCore {
       if (_s.idTexture)
         this.texture = <Texture>await Project.getResource(_s.idTexture);
       else
-        this.texture = TextureDefault.texture;
+        this.texture = TextureDefault.color;
 
       for (let name of ["start", "size", "next", "wrap"])
         (<Vector2>Reflect.get(this, name)).deserialize(_s[name]);
