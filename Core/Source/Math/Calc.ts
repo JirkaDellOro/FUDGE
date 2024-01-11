@@ -17,8 +17,11 @@ namespace FudgeCore {
       return _value;
     }
 
-    public static lerp<T extends Number>(_value1: T, _value2: T, _f: number): T {
-      return <T><unknown>(_value1.valueOf() + (_value2.valueOf() - _value1.valueOf()) * _f);
+    /**
+     * Returns the linear interpolation between two values (_a, _b) for the given interpolation factor (_f). f is clamped between 0 and 1.
+     */
+    public static lerp(_a: number, _b: number, _f: number): number {
+      return _a + (_b - _a) * Calc.clamp(_f, 0, 1);
     }
   }
 }
