@@ -14,7 +14,7 @@ namespace FudgeCore {
    * @author Jonas Plotzky, HFU, 2022
    */
   @RenderInjectorComponentParticleSystem.decorate
-  export class ComponentParticleSystem extends Component {
+  export class ComponentParticleSystem extends Component implements Gizmo {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
     public particleSystem: ParticleSystem;
     /** When disabled try enabling {@link ComponentMaterial.sortForAlpha} */
@@ -91,6 +91,14 @@ namespace FudgeCore {
      * @internal
      */
     public deleteRenderData(): void {/* injected by RenderInjector*/ }
+
+    public drawGizmos(): void {
+      Gizmos.mtxWorld.set(this.node.mtxWorld);
+      Gizmos.color.setCSS("cyan");
+      Gizmos.occlusionAlpha = 0.3;
+      Gizmos.mtxWorld.scaling = new Vector3(0.5, 0.5, 0.5);
+      Gizmos.drawIcon(TextureDefault.iconParticles);
+    }
 
     //#region transfer
     public serialize(): Serialization {

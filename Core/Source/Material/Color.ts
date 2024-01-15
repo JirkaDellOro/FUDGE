@@ -44,12 +44,14 @@ namespace FudgeCore {
      * Passing an _alpha value will override the alpha value specified in the keyword.
      */
     public static CSS(_keyword: string, _alpha?: number): Color {
-      const bytesRGBA: Uint8ClampedArray = Color.getBytesRGBAFromCSS(_keyword);
-      const color: Color = new Color(
-        bytesRGBA[0] / 255,
-        bytesRGBA[1] / 255,
-        bytesRGBA[2] / 255,
-        _alpha ?? bytesRGBA[3] / 255);
+      // const bytesRGBA: Uint8ClampedArray = Color.getBytesRGBAFromCSS(_keyword);
+      const color: Color = Recycler.get(Color);
+      color.setCSS(_keyword, _alpha);
+      // const color: Color = new Color(
+      //   bytesRGBA[0] / 255,
+      //   bytesRGBA[1] / 255,
+      //   bytesRGBA[2] / 255,
+      //   _alpha ?? bytesRGBA[3] / 255);
       return color;
     }
 

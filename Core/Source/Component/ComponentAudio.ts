@@ -28,7 +28,7 @@ namespace FudgeCore {
    * ```
    * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class ComponentAudio extends Component {
+  export class ComponentAudio extends Component implements Gizmo {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentAudio);
     /** places and directs the panner relative to the world transform of the {@link Node}  */
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
@@ -196,6 +196,16 @@ namespace FudgeCore {
       else
         this.gain.disconnect(this.audioManager.gain);
     }
+
+    public drawGizmos(): void {
+      let mtxShape: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
+      Gizmos.color.setCSS("cornflowerblue");
+      Gizmos.occlusionAlpha = 0.3;
+      Gizmos.mtxWorld.set(mtxShape);
+      Gizmos.mtxWorld.scaling = new Vector3(0.5, 0.5, 0.5);
+      Gizmos.drawIcon(TextureDefault.iconAudio);
+      Recycler.store(mtxShape);
+    };
 
     //#region Transfer
     public serialize(): Serialization {

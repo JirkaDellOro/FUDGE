@@ -94,7 +94,7 @@ namespace FudgeCore {
       let contextAttributes: WebGLContextAttributes = {
         alpha: (_alpha != undefined) ? _alpha : fudgeConfig.alpha || false,
         antialias: (_antialias != undefined) ? _antialias : fudgeConfig.antialias || false,
-        premultipliedAlpha: false
+        premultipliedAlpha: false, stencil: true
       };
       Debug.fudge("Initialize RenderWebGL", contextAttributes);
       let canvas: HTMLCanvasElement = document.createElement("canvas");
@@ -421,7 +421,7 @@ namespace FudgeCore {
     * A cameraprojection with extremely narrow focus is used, so each pixel of the buffer would hold the same information from the node,  
     * but the fragment shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
     */
-    protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _cmpCamera: ComponentCamera): void { // create Texture to render to, int-rgba
+    protected static pick(_node: Node, _cmpCamera: ComponentCamera): void { // create Texture to render to, int-rgba
       try {
         let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
@@ -436,13 +436,33 @@ namespace FudgeCore {
         RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, [RenderWebGL.sizePick, RenderWebGL.sizePick]);
 
         let mesh: Mesh = cmpMesh.mesh;
-        let renderBuffers: RenderBuffers = mesh.useRenderBuffers(shader, _mtxMeshToWorld, mtxMeshToView, Render.ƒpicked.length);
+        let renderBuffers: RenderBuffers = mesh.useRenderBuffers(shader, _node.mtxWorld, mtxMeshToView, Render.ƒpicked.length);
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
 
         let pick: Pick = new Pick(_node);
         Render.ƒpicked.push(pick);
       } catch (_error) {
         //
+      }
+    }
+
+    protected static pickGizmos(_node: Node, _cmpCamera: ComponentCamera): void {
+      const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+      let shader: ShaderInterface = ShaderPickTextured;
+      shader.useProgram();
+
+      for (let gizmo of _node.getAllComponents()) {
+        if (!gizmo.isActive || !Gizmos.filter.get(gizmo.type))
+          continue;
+
+        crc3.uniform2fv(shader.uniforms["u_vctSize"], [RenderWebGL.sizePick, RenderWebGL.sizePick]);
+        crc3.uniformMatrix3fv(shader.uniforms["u_mtxPivot"], false, Matrix3x3.IDENTITY().get());
+  
+        Gizmos.pick(gizmo, _cmpCamera, shader, Render.ƒpicked.length);
+  
+        let pick: Pick = new Pick(_node);
+        pick.gizmo = gizmo;
+        Render.ƒpicked.push(pick);
       }
     }
     //#endregion
@@ -595,12 +615,10 @@ namespace FudgeCore {
         RenderWebGL.drawNode(node, _cmpCamera);
       // crc3.depthMask(true);
 
-      Render.dispatchEvent(new Event(EVENT.RENDER_FINISHED));
-
       // copy framebuffer to canvas
       crc3.bindFramebuffer(WebGL2RenderingContext.READ_FRAMEBUFFER, RenderWebGL.framebufferMain);
       crc3.bindFramebuffer(WebGL2RenderingContext.DRAW_FRAMEBUFFER, null);
-      crc3.blitFramebuffer(0, 0, crc3.canvas.width, crc3.canvas.height, 0, 0, crc3.canvas.width, crc3.canvas.height, WebGL2RenderingContext.COLOR_BUFFER_BIT, WebGL2RenderingContext.NEAREST);
+      crc3.blitFramebuffer(0, 0, crc3.canvas.width, crc3.canvas.height, 0, 0, crc3.canvas.width, crc3.canvas.height, WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT, WebGL2RenderingContext.NEAREST);
     }
 
     /**
@@ -766,7 +784,7 @@ namespace FudgeCore {
       // TODO: This could be a Render function as it does not do anything with WebGL
       let cmpFaceCamera: ComponentFaceCamera = _node.getComponent(ComponentFaceCamera);
       if (cmpFaceCamera && cmpFaceCamera.isActive) {
-        let mtxMeshToView: Matrix4x4;
+        let mtxMeshToView: Matrix4x4; // mesh to world?
         mtxMeshToView = _cmpMesh.mtxWorld.clone;
         mtxMeshToView.lookAt(_target, cmpFaceCamera.upLocal ? null : cmpFaceCamera.up, cmpFaceCamera.restrict);
         return Matrix4x4.MULTIPLICATION(_mtxWorldToView, mtxMeshToView);

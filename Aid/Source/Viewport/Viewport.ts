@@ -134,7 +134,15 @@ namespace FudgeAid {
         let picks: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, pos);
         if (picks.length == 0)
           return;
-        picks.sort((_a: ƒ.Pick, _b: ƒ.Pick) => _a.zBuffer < _b.zBuffer ? -1 : 1);
+        // picks.sort((_a: ƒ.Pick, _b: ƒ.Pick) => (_a.zBuffer < _b.zBuffer && _a.gizmo) ? -1 : 1);
+        picks.sort((_a, _b) => {
+          if (_a.gizmo && !_b.gizmo) 
+            return -1;
+          if (!_a.gizmo && _b.gizmo) 
+            return 1;
+          // If both picks have a gizmo property or if neither does, prioritize based on zBuffer value
+          return _a.zBuffer - _b.zBuffer;
+        });
 
         // let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation;
         // camera.mtxLocal.translation = picks[0].posWorld;

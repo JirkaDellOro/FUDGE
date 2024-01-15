@@ -8,23 +8,6 @@ namespace Fudge {
    * @author Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class ViewRender extends View {
-    private static iconLight: ƒ.TextureImage = (() => {
-      let img: HTMLImageElement = new Image(256, 256);
-      img.src = "../Html/Icon/Light.svg";
-      
-      let tex: ƒ.TextureImage = new ƒ.TextureImage();
-      tex.image = img;
-      return tex;
-    })();
-
-    private static iconCamera: ƒ.TextureImage = (() => {
-      let img: HTMLImageElement = new Image(256, 256);
-      img.src = "../Html/Icon/Camera.svg";
-      let tex: ƒ.TextureImage = new ƒ.TextureImage();
-      tex.image = img;
-      return tex;
-    })();
-
     private cmrOrbit: ƒAid.CameraOrbit;
     private viewport: ƒ.Viewport;
     private canvas: HTMLCanvasElement;
@@ -35,6 +18,7 @@ namespace Fudge {
     #pointerMoved: boolean = false;
 
     public constructor(_container: ComponentContainer, _state: JsonValue) {
+      loadGizmosFilter();
       super(_container, _state);
       this.graph = <ƒ.Graph>ƒ.Project.resources[_state["graph"]];
 
@@ -61,6 +45,15 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
       this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move
+
+      function loadGizmosFilter(): void {
+        try {
+          let gizmosFilter: Map<string, boolean> = new Map(JSON.parse(_state["gizmosFilter"]));
+          for (const [key, value] of gizmosFilter)
+            if (ƒ.Gizmos.filter.has(key))
+              ƒ.Gizmos.filter.set(key, value);
+        } catch (_error: unknown) { ƒ.Debug.warn(_error); }
+      }
     }
 
     //#region  ContextMenu
@@ -92,6 +85,15 @@ namespace Fudge {
       item = new remote.MenuItem({ label: "Render Continuously", id: String(CONTEXTMENU.RENDER_CONTINUOUSLY), type: "checkbox", click: _callback });
       menu.append(item);
 
+      let submenu: Electron.MenuItemConstructorOptions[] = [];
+      for (const [filter, active] of ƒ.Gizmos.filter)
+        submenu.push({ label: filter, id: filter, type: "checkbox", checked: active, click: _callback });
+
+      item = new remote.MenuItem({
+        label: "Gizmos", submenu: submenu
+      });
+      menu.append(item);
+
       return menu;
     }
 
@@ -114,11 +116,17 @@ namespace Fudge {
           this.redraw();
           break;
         case String(CONTEXTMENU.ORTHGRAPHIC_CAMERA):
-          let on: boolean = this.contextMenu.getMenuItemById(String(CONTEXTMENU.ORTHGRAPHIC_CAMERA)).checked;
-          this.setCameraOrthographic(on);
+          this.setCameraOrthographic(_item.checked);
           break;
         case String(CONTEXTMENU.RENDER_CONTINUOUSLY):
-          this.setRenderContinously(this.contextMenu.getMenuItemById(String(CONTEXTMENU.RENDER_CONTINUOUSLY)).checked);
+          this.setRenderContinously(_item.checked);
+          break;
+        default:
+          if (!ƒ[_item.id])
+            break;
+
+          ƒ.Gizmos.filter.set(_item.id, _item.checked);
+          this.redraw();
           break;
       }
     }
@@ -168,13 +176,16 @@ namespace Fudge {
 
 
       this.viewport = new ƒ.Viewport();
+      this.viewport.renderingGizmos = true;
       this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
       try {
         this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
       } catch (_error: unknown) { /* view should load even if rendering fails... */ };
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       this.viewport.addEventListener(ƒ.EVENT.RENDER_PREPARE_START, this.hndPrepare);
-      ƒ.Render.addEventListener(ƒ.EVENT.RENDER_FINISHED, this.hndDrawGizmoSelection);
+      this.viewport.addEventListener(ƒ.EVENT.RENDER_END, this.drawTranslation);
+      this.viewport.addEventListener(ƒ.EVENT.RENDER_END, this.drawMesh);
+
 
       this.setGraph(null);
 
@@ -240,9 +251,10 @@ namespace Fudge {
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
           if (detail.node) {
+            // if (detail.view == this)
+            //   return;
             this.selection = detail.node;
-            if (detail.view == this)
-              return;
+            ƒ.Gizmos.selected = this.selection;
           } else
             this.setGraph(_event.detail.graph);
           break;
@@ -252,7 +264,11 @@ namespace Fudge {
           break;
         case EVENT_EDITOR.CLOSE:
           this.setRenderContinously(false);
-          ƒ.Render.removeEventListener(ƒ.EVENT.RENDER_FINISHED, this.hndDrawGizmoSelection);
+          this.viewport.removeEventListener(ƒ.EVENT.RENDER_END, this.drawTranslation);
+          this.viewport.removeEventListener(ƒ.EVENT.RENDER_END, this.drawMesh);
+
+
+          // ƒ.Render.removeEventListener(ƒ.EVENT.RENDER_FINISHED, this.hndDrawGizmoSelection);
           break;
         case EVENT_EDITOR.UPDATE:
           if (!this.viewport.camera.isActive)
@@ -330,97 +346,40 @@ namespace Fudge {
       this.contextMenu.getMenuItemById(String(CONTEXTMENU.RENDER_CONTINUOUSLY)).checked = _on;
     }
 
-    private hndDrawGizmoSelection = (_event: Event): void => {
-      const selection: ƒ.Node = this.selection;
-
-      if (!selection)
+    private drawTranslation = (): void => {
+      if (!this.selection)
         return;
-      
-      drawMesh();
-      drawCamera();
-      drawLight();
-      drawTranslation(); // TODO: make this a setting
 
-      function drawTranslation(): void {
-        const scale: number = ƒ.Vector3.DIFFERENCE(ƒ.Render.camera.mtxWorld.translation, selection.mtxWorld.translation).magnitude * 0.1;
-        const origin: ƒ.Vector3 = ƒ.Vector3.ZERO();
-        const vctX: ƒ.Vector3 = ƒ.Vector3.X(1);
-        const vctY: ƒ.Vector3 = ƒ.Vector3.Y(1);
-        const vctZ: ƒ.Vector3 = ƒ.Vector3.Z(1);
-        ƒ.Gizmos.mtxWorld.set(selection.mtxWorld);
-        ƒ.Gizmos.mtxWorld.scaling = new ƒ.Vector3(scale, scale, scale);
-        ƒ.Gizmos.depthTest = false;
-        ƒ.Gizmos.color.setCSS("red");
-        ƒ.Gizmos.drawLines([origin, vctX]);
-        ƒ.Gizmos.color.setCSS("lime");
-        ƒ.Gizmos.drawLines([origin, vctY]);
-        ƒ.Gizmos.color.setCSS("blue");
-        ƒ.Gizmos.drawLines([origin, vctZ]);
-        ƒ.Gizmos.depthTest = true;
-        ƒ.Recycler.storeMultiple(vctX, vctY, vctZ, origin);
-      };
+      const scale: number = ƒ.Vector3.DIFFERENCE(ƒ.Gizmos.camera.mtxWorld.translation, this.selection.mtxWorld.translation).magnitude * 0.1;
+      const origin: ƒ.Vector3 = ƒ.Vector3.ZERO();
+      const vctX: ƒ.Vector3 = ƒ.Vector3.X(1);
+      const vctY: ƒ.Vector3 = ƒ.Vector3.Y(1);
+      const vctZ: ƒ.Vector3 = ƒ.Vector3.Z(1);
+      ƒ.Gizmos.mtxWorld.set(this.selection.mtxWorld);
+      ƒ.Gizmos.mtxWorld.scaling = new ƒ.Vector3(scale, scale, scale);
+      ƒ.Gizmos.occlusionAlpha = 0.3;
+      ƒ.Gizmos.color.setCSS("red");
+      ƒ.Gizmos.drawLines([origin, vctX]);
+      ƒ.Gizmos.color.setCSS("lime");
+      ƒ.Gizmos.drawLines([origin, vctY]);
+      ƒ.Gizmos.color.setCSS("blue");
+      ƒ.Gizmos.drawLines([origin, vctZ]);
 
-      function drawMesh(): void {
-        const cmpMesh: ƒ.ComponentMesh = selection.getComponent(ƒ.ComponentMesh);
-        if (!cmpMesh)
-          return;
+      ƒ.Recycler.storeMultiple(vctX, vctY, vctZ, origin);
+    };
 
-        ƒ.Gizmos.mtxWorld.set(cmpMesh.mtxWorld);
-        ƒ.Gizmos.color.setCSS("salmon");
-        ƒ.Gizmos.drawWireMesh(cmpMesh.mesh);
-      }
+    private drawMesh = (): void => {
+      const cmpMesh: ƒ.ComponentMesh = this.selection?.getComponent(ƒ.ComponentMesh);
+      if (!cmpMesh)
+        return;
 
-      function drawCamera(): void {
-        const cmpCamera: ƒ.ComponentCamera = selection.getComponent(ƒ.ComponentCamera);
-        if (!cmpCamera)
-          return;
-
-        ƒ.Gizmos.mtxWorld.set(cmpCamera.mtxWorld);
-        ƒ.Gizmos.color.setCSS("lightgrey");
-        ƒ.Gizmos.drawWireFrustum(cmpCamera.getAspect(), cmpCamera.getFieldOfView(), cmpCamera.getNear(), cmpCamera.getFar(), cmpCamera.getDirection());
-        ƒ.Gizmos.mtxWorld.scaling = new ƒ.Vector3(0.75, 0.75, 0.75);
-        ƒ.Gizmos.drawIcon(ViewRender.iconCamera, true);
-      }
-
-      function drawLight(): void {
-        const cmpLight: ƒ.ComponentLight = selection.getComponent(ƒ.ComponentLight);
-        if (!cmpLight)
-          return;
-
-        let mtxShape: ƒ.Matrix4x4 = ƒ.Matrix4x4.MULTIPLICATION(cmpLight.node.mtxWorld, cmpLight.mtxPivot);
-
-        ƒ.Gizmos.color.setCSS("yellow");
-        ƒ.Gizmos.mtxWorld.set(mtxShape);
-        switch (cmpLight.light.getType()) {
-          case ƒ.LightDirectional:
-            const radius: number = 0.5;
-            ƒ.Gizmos.drawWireCircle(radius);
-            const lines: ƒ.Vector3[] = new Array(10).fill(null).map(() => ƒ.Recycler.get(ƒ.Vector3));
-            lines[0].set(0, 0, 0); lines[1].set(0, 0, 1);
-            lines[2].set(0, radius, 0); lines[3].set(0, radius, 1);
-            lines[6].set(0, -radius, 0); lines[7].set(0, -radius, 1);
-            lines[4].set(radius, 0, 0); lines[5].set(radius, 0, 1);
-            lines[8].set(-radius, 0, 0); lines[9].set(-radius, 0, 1);
-            ƒ.Gizmos.drawLines(lines);
-            ƒ.Recycler.storeMultiple(...lines);
-            break;
-          case ƒ.LightPoint:
-            ƒ.Gizmos.drawWireSphere(1);
-            break;
-          case ƒ.LightSpot:
-            ƒ.Gizmos.drawWireCone(1, 0.5);
-            break;
-        }
-        ƒ.Gizmos.depthTest = false;
-        ƒ.Gizmos.mtxWorld.scaling = new ƒ.Vector3(0.75, 0.75, 0.75);
-        ƒ.Gizmos.drawIcon(ViewRender.iconLight, true);
-        ƒ.Gizmos.depthTest = true;
-        ƒ.Recycler.store(mtxShape);
-      }
+      ƒ.Gizmos.mtxWorld.set(cmpMesh.mtxWorld);
+      ƒ.Gizmos.color.setCSS("salmon");
+      ƒ.Gizmos.occlusionAlpha = 0.1;
+      ƒ.Gizmos.drawWireMesh(cmpMesh.mesh);
     };
   }
 }
-
 
 // "Red",
 // "Lime",

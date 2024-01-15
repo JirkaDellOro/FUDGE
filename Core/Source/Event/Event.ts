@@ -41,7 +41,7 @@ namespace FudgeCore {
     NODE_DESERIALIZED = "nodeDeserialized",
     /** dispatched to {@link GraphInstance} when it's content is set according to a serialization of a {@link Graph}  */
     GRAPH_INSTANTIATED = "graphInstantiated",
-    /** dispatched to a {@link Graph} when it's finished deserializing  */
+    /** dispatched to a {@link Graph} when it's finished deserializing */
     GRAPH_DESERIALIZED = "graphDeserialized",
     /** dispatched by a {@link Graph} when it and its connected instances have finished mutating  */
     GRAPH_MUTATED = "graphMutated",
@@ -57,8 +57,8 @@ namespace FudgeCore {
     RENDER_PREPARE_START = "renderPrepareStart",
     /** dispatched to {@link Viewport} and {@link Node} when recalculation of the branch to render ends. The branch dispatches before the lights are transmitted to the shaders  */
     RENDER_PREPARE_END = "renderPrepareEnd",
-    /** dispatched to {@link Viewport} when it finished rendering its attached branch. */
-    RENDER_FINISHED = "renderFinished",
+    /** dispatched to {@link Viewport} at the end of a rendered frame right before it gets displayed. At this point {@link Gizmos} can still be drawn. */
+    RENDER_END = "renderGizmosEnd",
     /** dispatched to {@link Joint}-Components in order to disconnect */
     DISCONNECT_JOINT = "disconnectJoint",
     /** dispatched to {@link Node} when it gets attached to a viewport for rendering */
@@ -119,7 +119,7 @@ namespace FudgeCore {
     public static addEventListener(_type: string, _handler: EventListener): void {
       EventTargetStatic.targetStatic.addEventListener(_type, _handler);
     }
-    
+
     /**
      * Remove an event listener from {@link targetStatic}.
      */

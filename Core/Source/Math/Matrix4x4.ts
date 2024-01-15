@@ -235,6 +235,20 @@ namespace FudgeCore {
       return mtxResult;
     }
 
+    public static LOOK_IN(_translation: Vector3, _direction: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
+      let zAxis: Vector3 = Vector3.NORMALIZATION(_direction);
+      let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
+      let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      mtxResult.data.set([
+        xAxis.x, xAxis.y, xAxis.z, 0,
+        yAxis.x, yAxis.y, yAxis.z, 0,
+        zAxis.x, zAxis.y, zAxis.z, 0,
+        _translation.x, _translation.y, _translation.z, 1
+      ]);
+      return mtxResult;
+    }
+
     /**
      * Computes and returns a matrix with the given translation, its y-axis matching the given up-{@link Vector3}
      * and its z-axis facing towards the given target at a minimal angle, respetively calculating yaw only.
@@ -753,6 +767,18 @@ namespace FudgeCore {
       _up = _up ? Vector3.NORMALIZATION(_up) : Vector3.NORMALIZATION(this.getY());
 
       const mtxResult: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up, _restrict);
+      mtxResult.scale(this.scaling);
+      this.set(mtxResult);
+      Recycler.store(mtxResult);
+    }
+
+    /**
+     * Adjusts the rotation of this matrix to align the z-axis with the given direction and tilts it to accord with the given up-{@link Vector3}
+     */
+    public lookIn(_direction: Vector3, _up?: Vector3): void {
+      _up = _up ? Vector3.NORMALIZATION(_up) : Vector3.NORMALIZATION(this.getY());
+
+      const mtxResult: Matrix4x4 = Matrix4x4.LOOK_IN(this.translation, _direction, _up);
       mtxResult.scale(this.scaling);
       this.set(mtxResult);
       Recycler.store(mtxResult);

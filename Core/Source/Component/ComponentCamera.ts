@@ -19,8 +19,9 @@ namespace FudgeCore {
    * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class ComponentCamera extends Component {
+  export class ComponentCamera extends Component implements Gizmo {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentCamera);
+
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public clrBackground: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
     //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
@@ -280,6 +281,21 @@ namespace FudgeCore {
           this.projectCentral(this.aspectRatio, this.fieldOfView, this.direction, this.near, this.far);
           break;
       }
+    }
+
+    public drawGizmosSelected(): void {
+      Gizmos.mtxWorld.set(this.mtxWorld);
+      Gizmos.color.setCSS("lightgrey");
+      Gizmos.occlusionAlpha = 0.3;
+      Gizmos.drawWireFrustum(this.getAspect(), this.getFieldOfView(), this.getNear(), this.getFar(), this.getDirection());
+    };
+
+    public drawGizmos(): void {
+      Gizmos.mtxWorld.set(this.mtxWorld);
+      Gizmos.color.setCSS("lightgrey");
+      Gizmos.occlusionAlpha = 0.3;
+      Gizmos.mtxWorld.scaling = new Vector3(0.5, 0.5, 0.5);
+      Gizmos.drawIcon(TextureDefault.iconCamera);
     }
 
     protected reduceMutator(_mutator: Mutator): void {

@@ -75,6 +75,7 @@ namespace Fudge {
 
     public getState(): { [key: string]: string } {
       let state: PanelState = {};
+      state.gizmosFilter = JSON.stringify(Array.from(ƒ.Gizmos.filter.entries()));
       if (this.graph) {
         state.graph = this.graph.idResource;
         return state;
