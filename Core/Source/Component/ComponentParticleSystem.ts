@@ -92,14 +92,6 @@ namespace FudgeCore {
      */
     public deleteRenderData(): void {/* injected by RenderInjector*/ }
 
-    public drawGizmos(): void {
-      Gizmos.mtxWorld.set(this.node.mtxWorld);
-      Gizmos.color.setCSS("cyan");
-      Gizmos.occlusionAlpha = 0.3;
-      Gizmos.mtxWorld.scaling = new Vector3(0.5, 0.5, 0.5);
-      Gizmos.drawIcon(TextureDefault.iconParticles);
-    }
-
     //#region transfer
     public serialize(): Serialization {
       let serialization: Serialization = {

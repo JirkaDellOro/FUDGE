@@ -148,10 +148,23 @@ namespace FudgeCore {
      * for each node in the line of sight and return that as an unsorted {@link Pick}-array
      */
     public static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera, _pickGizmos: boolean = false): Pick[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+      /**
+       * TODO: maybe move this whole function to RenderWebGL? 
+       * It seems to mostly rely on RenderWebGL e.g.: ƒpicked, createPickTexture(), setBlendMode(), pick(), pickGizmos(), getPicks(), resetFramebuffer()
+       * They only not WebGL thing it does is filtering the nodes to pick, which could be done in pick() itself...
+       * -> or make this method only collect the nodes and gizmos from branch and then pass them to an appropriate method in RenderWebGL?
+       * 
+       * Also {@link Render.ƒpicked} and {@link Render.sizePick} seem to only ever be used in the methods called from this method. 
+       * sizePick gets set in createPickTexture() and used in pick() via the property but passed as a parameter to getPicks().
+       * ƒpicked is only used in getPicks(), pick() and pickGizmos() and only ever set to an empty array in this method.
+       * -> both could be local variables and passed as parameters to the methods that need them.
+       */ 
       Render.ƒpicked = [];
-      let size: number = Math.ceil(Math.sqrt(_nodes.length + Render.gizmos.length));
+      let size: number = Math.ceil(Math.sqrt(_nodes.length + Render.gizmos.length)); // gizmos.length might be bigger than needed...
       Render.createPickTexture(size);
       Render.setBlendMode(BLEND.OPAQUE);
+
+      let gizmos: Gizmo[] = [];
 
       for (let node of _nodes) {
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
@@ -159,9 +172,18 @@ namespace FudgeCore {
         if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive)
           Render.pick(node, _cmpCamera);
 
-        if (_pickGizmos)
-          Render.pickGizmos(node, _cmpCamera);
+        if (_pickGizmos) {
+          for (let gizmo of node.getAllComponents()) {
+            if (!gizmo.isActive || !Gizmos.filter.get(gizmo.type))
+              continue;
+      
+            gizmos.push(gizmo);
+          }
+        }
       }
+
+      if (_pickGizmos)
+        Render.pickGizmos(gizmos, _cmpCamera);
 
       Render.setBlendMode(BLEND.TRANSPARENT);
 

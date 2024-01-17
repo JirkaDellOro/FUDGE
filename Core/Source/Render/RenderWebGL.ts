@@ -350,7 +350,7 @@ namespace FudgeCore {
      */
     protected static createPickTexture(_size: number): RenderTexture {
       // create to render to
-      const targetTexture: RenderTexture = Render.crc3.createTexture();
+      const targetTexture: RenderTexture = RenderWebGL.assert(Render.crc3.createTexture());
       Render.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, targetTexture); // TODO: check if superclass (RenderWebGL) should refer downwards to subclass (Render) like this
 
       {
@@ -446,24 +446,19 @@ namespace FudgeCore {
       }
     }
 
-    protected static pickGizmos(_node: Node, _cmpCamera: ComponentCamera): void {
+    protected static pickGizmos(_gizmos: Gizmo[], _cmpCamera: ComponentCamera): void {
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      let shader: ShaderInterface = ShaderPickTextured;
+
+      // buffer these into both shaders as we don't know which one will be used for the gizmo
+      let shader: ShaderInterface = ShaderPick;
       shader.useProgram();
+      crc3.uniform2fv(shader.uniforms["u_vctSize"], [RenderWebGL.sizePick, RenderWebGL.sizePick]);
+      shader = ShaderPickTextured;
+      shader.useProgram();
+      crc3.uniform2fv(shader.uniforms["u_vctSize"], [RenderWebGL.sizePick, RenderWebGL.sizePick]);
+      crc3.uniformMatrix3fv(shader.uniforms["u_mtxPivot"], false, Matrix3x3.IDENTITY().get()); // only needed for textured pick shader, but gizmos have no pivot
 
-      for (let gizmo of _node.getAllComponents()) {
-        if (!gizmo.isActive || !Gizmos.filter.get(gizmo.type))
-          continue;
-
-        crc3.uniform2fv(shader.uniforms["u_vctSize"], [RenderWebGL.sizePick, RenderWebGL.sizePick]);
-        crc3.uniformMatrix3fv(shader.uniforms["u_mtxPivot"], false, Matrix3x3.IDENTITY().get());
-  
-        Gizmos.pick(gizmo, _cmpCamera, shader, Render.ƒpicked.length);
-  
-        let pick: Pick = new Pick(_node);
-        pick.gizmo = gizmo;
-        Render.ƒpicked.push(pick);
-      }
+      Gizmos.pick(_gizmos, _cmpCamera, Render.ƒpicked);
     }
     //#endregion
 

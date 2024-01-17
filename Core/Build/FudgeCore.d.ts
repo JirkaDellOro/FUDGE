@@ -1223,7 +1223,7 @@ declare namespace FudgeCore {
         * but the fragment shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
         */
         protected static pick(_node: Node, _cmpCamera: ComponentCamera): void;
-        protected static pickGizmos(_node: Node, _cmpCamera: ComponentCamera): void;
+        protected static pickGizmos(_gizmos: Gizmo[], _cmpCamera: ComponentCamera): void;
         /**
          * Buffer the fog parameters into the fog ubo
          */
@@ -2348,8 +2348,8 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
-        drawGizmosSelected(): void;
         drawGizmos(): void;
+        drawGizmosSelected(): void;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -2564,7 +2564,6 @@ declare namespace FudgeCore {
         set time(_time: number);
         get timeScale(): number;
         set timeScale(_scale: number);
-        drawGizmos(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(_extendable?: boolean): Mutator;
@@ -3752,7 +3751,7 @@ declare namespace FudgeCore {
          */
         static IDENTITY(): Matrix4x4;
         /**
-         * Construct a new matrix according to the given translation, rotation and scaling.
+         * Composes a new matrix according to the given translation, rotation and scaling.
          */
         static CONSTRUCTION(_translation?: Vector3, _rotation?: Vector3 | Quaternion, _scaling?: Vector3): Matrix4x4;
         /**
@@ -3776,6 +3775,10 @@ declare namespace FudgeCore {
          * The pitch may be restricted to the up-vector to only calculate yaw.
          */
         static LOOK_AT(_translation: Vector3, _target: Vector3, _up?: Vector3, _restrict?: boolean): Matrix4x4;
+        /**
+         * Computes and returns a matrix with the given translation, its z-axis pointing directly in the given direction,
+         * and a minimal angle between its y-axis and the given up-{@link Vector3}. Ideally up should be perpendicular to the given direction.
+         */
         static LOOK_IN(_translation: Vector3, _direction: Vector3, _up?: Vector3): Matrix4x4;
         /**
          * Computes and returns a matrix with the given translation, its y-axis matching the given up-{@link Vector3}
@@ -3867,6 +3870,18 @@ declare namespace FudgeCore {
          */
         get clone(): Matrix4x4;
         /**
+         * Returns the normalized cardinal x-axis.
+         */
+        get right(): Vector3;
+        /**
+         * Returns the normalized cardinal y-axis.
+         */
+        get up(): Vector3;
+        /**
+         * Returns the normalized cardinal z-axis.
+         */
+        get forward(): Vector3;
+        /**
          * Resets the matrix to the identity-matrix and clears cache. Used by the recycler to reset.
          */
         recycle(): void;
@@ -3906,7 +3921,8 @@ declare namespace FudgeCore {
          */
         lookAt(_target: Vector3, _up?: Vector3, _restrict?: boolean): void;
         /**
-         * Adjusts the rotation of this matrix to align the z-axis with the given direction and tilts it to accord with the given up-{@link Vector3}
+         * Adjusts the rotation of this matrix to align the z-axis with the given direction and tilts it to accord with the given up-{@link Vector3}.
+         * Up should be perpendicular to the given direction. If no up-vector is provided, (0, 1, 0) is used.
          */
         lookIn(_direction: Vector3, _up?: Vector3): void;
         /**
@@ -4402,6 +4418,10 @@ declare namespace FudgeCore {
          * Normalizes this to the given length, 1 by default
          */
         normalize(_length?: number): void;
+        /**
+         * Negates this vector by flipping the signs of its components
+         */
+        negate(): Vector3;
         /**
          * Defines the components of this vector with the given numbers
          */
@@ -6111,23 +6131,19 @@ declare namespace FudgeCore {
     }
     class Gizmos {
         #private;
-        /** The {@link Color} used to draw gizmos. Use colors set methods to apply your color. */
-        static color: Color;
-        /** The {@link Matrix4x4} used to draw gizmos. Use matrixs set method to apply your transform. */
-        static mtxWorld: Matrix4x4;
-        /**
-         * The opacity of occluded gizmo parts. Use this to control the visibility of gizmos behind objects.
-         * Set to 0 to make occluded gizmo parts disappear. Set to 1 to make occluded gizmo parts fully visible.
-         */
-        static occlusionAlpha: number;
         static selected: Node;
         static readonly filter: Map<string, boolean>;
+        /**
+         * The default opacity of occluded gizmo parts. Use this to control the visibility of gizmos behind objects.
+         * Set to 0 to make occluded gizmo parts disappear. Set to 1 to make occluded gizmo parts fully visible.
+         */
+        private static alphaOccluded;
         private static pickId;
         private static readonly posIcons;
         private static readonly arrayBuffer;
         private static readonly indexBuffer;
         /**
-         * The camera which is currently used to render.
+         * The camera which is currently used to draw gizmos.
          */
         static get camera(): ComponentCamera;
         private static get quad();
@@ -6144,48 +6160,48 @@ declare namespace FudgeCore {
         /**
          * Draws a camera frustum for the given parameters. The frustum is oriented along the z-axis, with the tip of the truncated pyramid at the origin.
          */
-        static drawWireFrustum(_aspect: number, _fov: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): void;
+        static drawWireFrustum(_aspect: number, _fov: number, _near: number, _far: number, _direction: FIELD_OF_VIEW, _mtxWorld: Matrix4x4, _color: Color, _alphaOccluded?: number): void;
         /**
          * Draws a wireframe cube. The cube has a side-length of 1 and is centered around the origin.
          */
-        static drawWireCube(): void;
+        static drawWireCube(_mtxWorld: Matrix4x4, _color: Color, _alphaOccluded?: number): void;
         /**
          * Draws a wireframe sphere. The sphere has a diameter of 1 and is centered around the origin.
          */
-        static drawWireSphere(): void;
+        static drawWireSphere(_mtxWorld: Matrix4x4, _color: Color, _alphaOccluded?: number): void;
         /**
          * Draws a cone with a height and diameter of 1. The cone is oriented along the z-axis with the tip at the origin.
          */
-        static drawWireCone(): void;
+        static drawWireCone(_mtxWorld: Matrix4x4, _color: Color, _alphaOccluded?: number): void;
         /**
          * Draws a circle with a diameter of 1. The circle lies in the x-y plane, with its center at the origin.
          */
-        static drawWireCircle(): void;
+        static drawWireCircle(_mtxWorld: Matrix4x4, _color: Color, _alphaOccluded?: number): void;
         /**
          * Draws lines between each pair of the given vertices.
          * Vertices are paired sequentially, so for example, lines will be drawn between vertices 0 and 1, 2 and 3, 4 and 5, etc.
          */
-        static drawLines(_vertices: Vector3[]): void;
+        static drawLines(_vertices: Vector3[], _mtxWorld: Matrix4x4, _color: Color, _alphaOccluded?: number): void;
         /**
          * Draws a wireframe mesh.
          */
-        static drawWireMesh(_mesh: Mesh): void;
+        static drawWireMesh(_mesh: Mesh, _mtxWorld: Matrix4x4, _color: Color, _alphaOccluded?: number): void;
         /**
          * Draws a solid cube.
          */
-        static drawCube(): void;
+        static drawCube(_mtxWorld: Matrix4x4, _color: Color, _alphaOccluded?: number): void;
         /**
          * Draws a solid sphere.
          */
-        static drawSphere(): void;
+        static drawSphere(_mtxWorld: Matrix4x4, _color: Color, _alphaOccluded?: number): void;
         /**
          * Draws a solid mesh.
          */
-        static drawMesh(_mesh: Mesh): void;
+        static drawMesh(_mesh: Mesh, _mtxWorld: Matrix4x4, _color: Color, _alphaOccluded?: number): void;
         /**
-         * Draws an icon from a {@link Texture} on a {@link MeshQuad}. The texture can be used as an alpha mask.
+         * Draws an icon from a {@link Texture} on a {@link MeshQuad}. The icon is affected by the given transform and color.
          */
-        static drawIcon(_texture: Texture): void;
+        static drawIcon(_texture: Texture, _mtxWorld: Matrix4x4, _color: Color, _alphaOccluded?: number): void;
         private static bufferPositions;
         private static bufferColor;
         private static bufferMatrix;
@@ -8025,13 +8041,11 @@ declare namespace FudgeCore {
         static iconLight: TextureBase64;
         static iconCamera: TextureBase64;
         static iconAudio: TextureBase64;
-        static iconParticles: TextureBase64;
         private static getColor;
         private static getNormal;
         private static getIconLight;
         private static getIconCamera;
         private static getIconAudio;
-        private static getIconParticles;
     }
 }
 declare namespace FudgeCore {

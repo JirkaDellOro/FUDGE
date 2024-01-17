@@ -6,21 +6,17 @@ namespace FudgeCore {
   }
 
   export class Gizmos {
-    /** The {@link Color} used to draw gizmos. Use colors set methods to apply your color. */
-    public static color: Color = Color.CSS("white");
-    /** The {@link Matrix4x4} used to draw gizmos. Use matrixs set method to apply your transform. */
-    public static mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
-    /** 
-     * The opacity of occluded gizmo parts. Use this to control the visibility of gizmos behind objects.
-     * Set to 0 to make occluded gizmo parts disappear. Set to 1 to make occluded gizmo parts fully visible.
-     */
-    public static occlusionAlpha: number = 0.3;
-
     public static selected: Node;
     public static readonly filter: Map<string, boolean> = new Map(Component.subclasses
       .filter((_class: typeof Component) => (<Gizmo>_class.prototype).drawGizmos || (<Gizmo>_class.prototype).drawGizmosSelected)
       .map((_class: typeof Component) => [_class.name, true])
     );
+
+    /** 
+     * The default opacity of occluded gizmo parts. Use this to control the visibility of gizmos behind objects.
+     * Set to 0 to make occluded gizmo parts disappear. Set to 1 to make occluded gizmo parts fully visible.
+     */
+    private static alphaOccluded: number = 0.3; // currently gizmos can always be picked even if this is set to 0...
 
     private static pickId: number;
     private static readonly posIcons: Set<string> = new Set(); // cache the positions of icons to avoid drawing them within each other
@@ -31,7 +27,7 @@ namespace FudgeCore {
     static #camera: ComponentCamera;
 
     /**
-     * The camera which is currently used to render.
+     * The camera which is currently used to draw gizmos.
      */
     public static get camera(): ComponentCamera {
       return Gizmos.#camera;
@@ -58,6 +54,7 @@ namespace FudgeCore {
       return Gizmos.sphere;
     }
 
+    // TODO: think about drawing these on the fly instead of caching them. Then we could accept a position, radius etc. parameter and draw them independent from the mtxWorld
     private static get wireCircle(): Vector3[] {
       const radius: number = 0.5;
       const segments: number = 45;
@@ -102,7 +99,7 @@ namespace FudgeCore {
       let lines: Vector3[] = Gizmos.wireCircle.map((_point: Vector3) => Vector3.TRANSFORMATION(_point, Matrix4x4.TRANSLATION(Vector3.Z(1))));
 
       lines.push(...[apex, quad[0], apex, quad[1], apex, quad[2], apex, quad[3]]);
-      
+
       Reflect.defineProperty(Gizmos, "wireCone", { value: lines });
       return Gizmos.wireCone;
     }
@@ -140,8 +137,10 @@ namespace FudgeCore {
     public static draw(_cmpCamera: ComponentCamera): void {
       Gizmos.#camera = _cmpCamera;
       Gizmos.posIcons.clear();
+
       for (const gizmo of Render.gizmos)
         Reflect.set(gizmo.node, "zCamera", _cmpCamera.pointWorldToClip(gizmo.node.mtxWorld.translation).z);
+      
       const sorted: Gizmo[] = Render.gizmos.getSorted((_a, _b) => Reflect.get(_b.node, "zCamera") - Reflect.get(_a.node, "zCamera"));
       for (const gizmo of sorted) {
         gizmo.drawGizmos?.();
@@ -153,18 +152,25 @@ namespace FudgeCore {
     /**
      * @internal
      */
-    public static pick(_gizmo: Gizmo, _cmpCamera: ComponentCamera, _shader: ShaderInterface, _id: number): void {
+    public static pick(_gizmos: Gizmo[], _cmpCamera: ComponentCamera, _picked: Pick[]): void {
       Gizmos.#camera = _cmpCamera;
-      Gizmos.pickId = _id;
       Gizmos.posIcons.clear();
-      _gizmo.drawGizmos();
+      
+      for (let gizmo of _gizmos) {
+        Gizmos.pickId = _picked.length;
+        gizmo.drawGizmos();
+        let pick: Pick = new Pick(gizmo.node);
+        pick.gizmo = gizmo;
+        _picked.push(pick);
+      }
+
       Gizmos.pickId = null;
     }
 
     /**
      * Draws a camera frustum for the given parameters. The frustum is oriented along the z-axis, with the tip of the truncated pyramid at the origin.
      */
-    public static drawWireFrustum(_aspect: number, _fov: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): void {
+    public static drawWireFrustum(_aspect: number, _fov: number, _near: number, _far: number, _direction: FIELD_OF_VIEW, _mtxWorld: Matrix4x4, _color: Color, _alphaOccluded: number = Gizmos.alphaOccluded): void {
       const f: number = Math.tan(Calc.deg2rad * _fov / 2);
 
       let scaleX: number = f;
@@ -205,7 +211,7 @@ namespace FudgeCore {
         frustum[0], frustum[1], frustum[1], frustum[2], frustum[2], frustum[3], frustum[3], frustum[0], // near plane
         frustum[4], frustum[5], frustum[5], frustum[6], frustum[6], frustum[7], frustum[7], frustum[4], // far plane
         frustum[0], frustum[4], frustum[1], frustum[5], frustum[2], frustum[6], frustum[3], frustum[7]  // sides
-      ]);
+      ], _mtxWorld, _color, _alphaOccluded);
 
       Recycler.storeMultiple(...frustum);
     }
@@ -213,43 +219,43 @@ namespace FudgeCore {
     /**
      * Draws a wireframe cube. The cube has a side-length of 1 and is centered around the origin.
      */
-    public static drawWireCube(): void {
-      Gizmos.drawLines(Gizmos.wireCube);
+    public static drawWireCube(_mtxWorld: Matrix4x4, _color: Color, _alphaOccluded: number = Gizmos.alphaOccluded): void {
+      Gizmos.drawLines(Gizmos.wireCube, _mtxWorld, _color, _alphaOccluded);
     }
+
 
     /**
      * Draws a wireframe sphere. The sphere has a diameter of 1 and is centered around the origin.
      */
-    public static drawWireSphere(): void {
-      let mtxWorld: Matrix4x4 = Gizmos.mtxWorld.clone;
+    public static drawWireSphere(_mtxWorld: Matrix4x4, _color: Color, _alphaOccluded: number = Gizmos.alphaOccluded): void {
+      let mtxWorld: Matrix4x4 = _mtxWorld.clone;
 
-      Gizmos.drawLines(Gizmos.wireSphere);
-      Gizmos.mtxWorld.lookAt(Gizmos.camera.mtxWorld.translation, Vector3.Y());
-      Gizmos.drawWireCircle();
+      Gizmos.drawLines(Gizmos.wireSphere, mtxWorld, _color, _alphaOccluded);
+      mtxWorld.lookAt(Gizmos.camera.mtxWorld.translation);
+      Gizmos.drawWireCircle(mtxWorld, _color, _alphaOccluded);
 
-      Gizmos.mtxWorld.set(mtxWorld);
       Recycler.store(mtxWorld);
     }
 
     /**
      * Draws a cone with a height and diameter of 1. The cone is oriented along the z-axis with the tip at the origin.
      */
-    public static drawWireCone(): void {
-      Gizmos.drawLines(Gizmos.wireCone);
+    public static drawWireCone(_mtxWorld: Matrix4x4, _color: Color, _alphaOccluded: number = Gizmos.alphaOccluded): void {
+      Gizmos.drawLines(Gizmos.wireCone, _mtxWorld, _color, _alphaOccluded);
     }
 
     /**
      * Draws a circle with a diameter of 1. The circle lies in the x-y plane, with its center at the origin.
      */
-    public static drawWireCircle(): void {
-      Gizmos.drawLines(Gizmos.wireCircle);
+    public static drawWireCircle(_mtxWorld: Matrix4x4, _color: Color, _alphaOccluded: number = Gizmos.alphaOccluded): void {
+      Gizmos.drawLines(Gizmos.wireCircle, _mtxWorld, _color, _alphaOccluded);
     }
 
     /**
      * Draws lines between each pair of the given vertices. 
      * Vertices are paired sequentially, so for example, lines will be drawn between vertices 0 and 1, 2 and 3, 4 and 5, etc.
      */
-    public static drawLines(_vertices: Vector3[]): void {
+    public static drawLines(_vertices: Vector3[], _mtxWorld: Matrix4x4, _color: Color, _alphaOccluded: number = Gizmos.alphaOccluded): void {
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       const shader: typeof Shader = ShaderGizmo;
       shader.useProgram();
@@ -261,16 +267,16 @@ namespace FudgeCore {
       }
 
       Gizmos.bufferPositions(shader, Gizmos.arrayBuffer);
-      Gizmos.bufferMatrix(shader, Gizmos.mtxWorld);
+      Gizmos.bufferMatrix(shader, _mtxWorld);
       crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, lineData, WebGL2RenderingContext.DYNAMIC_DRAW);
 
-      Gizmos.drawGizmos(shader, Gizmos.drawArrays, _vertices.length, Gizmos.color);
+      Gizmos.drawGizmos(shader, Gizmos.drawArrays, _vertices.length, _color, _alphaOccluded);
     }
 
     /**
      * Draws a wireframe mesh.
      */
-    public static drawWireMesh(_mesh: Mesh): void {
+    public static drawWireMesh(_mesh: Mesh, _mtxWorld: Matrix4x4, _color: Color, _alphaOccluded: number = Gizmos.alphaOccluded): void {
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       const shader: typeof Shader = ShaderGizmo;
       shader.useProgram();
@@ -291,43 +297,42 @@ namespace FudgeCore {
       crc3.bufferData(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), WebGL2RenderingContext.DYNAMIC_DRAW);
 
       Gizmos.bufferPositions(shader, renderBuffers.vertices);
-      Gizmos.bufferMatrix(shader, Gizmos.mtxWorld);
+      Gizmos.bufferMatrix(shader, _mtxWorld);
 
-      Gizmos.drawGizmos(shader, Gizmos.drawElementsLines, indices.length, Gizmos.color);
+      Gizmos.drawGizmos(shader, Gizmos.drawElementsLines, indices.length, _color, _alphaOccluded);
     }
 
     /**
      * Draws a solid cube.
      */
-    public static drawCube(): void {
-      Gizmos.drawMesh(Gizmos.cube);
+    public static drawCube(_mtxWorld: Matrix4x4, _color: Color, _alphaOccluded: number = Gizmos.alphaOccluded): void {
+      Gizmos.drawMesh(Gizmos.cube, _mtxWorld, _color, _alphaOccluded);
     }
 
     /**
      * Draws a solid sphere.
      */
-    public static drawSphere(): void {
-      Gizmos.drawMesh(Gizmos.sphere);
+    public static drawSphere(_mtxWorld: Matrix4x4, _color: Color, _alphaOccluded: number = Gizmos.alphaOccluded): void {
+      Gizmos.drawMesh(Gizmos.sphere, _mtxWorld, _color, _alphaOccluded);
     }
 
     /**
      * Draws a solid mesh.
      */
-    public static drawMesh(_mesh: Mesh): void {
-      const shader: ShaderInterface = Gizmos.picking ? ShaderPickTextured : ShaderGizmo;
-      if (!Gizmos.picking)
-        shader.useProgram();
+    public static drawMesh(_mesh: Mesh, _mtxWorld: Matrix4x4, _color: Color, _alphaOccluded: number = Gizmos.alphaOccluded): void {
+      const shader: ShaderInterface = Gizmos.picking ? ShaderPick : ShaderGizmo;
+      shader.useProgram();
 
-      let renderBuffers: RenderBuffers = _mesh.useRenderBuffers(shader, Gizmos.mtxWorld, Matrix4x4.MULTIPLICATION(Gizmos.camera.mtxWorldToView, Gizmos.mtxWorld), Gizmos.pickId);
+      let renderBuffers: RenderBuffers = _mesh.useRenderBuffers(shader, _mtxWorld, Matrix4x4.MULTIPLICATION(Gizmos.camera.mtxWorldToView, _mtxWorld), Gizmos.pickId);
 
-      Gizmos.drawGizmos(shader, Gizmos.drawElementsTrianlges, renderBuffers.nIndices, Gizmos.color);
+      Gizmos.drawGizmos(shader, Gizmos.drawElementsTrianlges, renderBuffers.nIndices, _color, _alphaOccluded);
     }
 
     /**
-     * Draws an icon from a {@link Texture} on a {@link MeshQuad}. The texture can be used as an alpha mask.
+     * Draws an icon from a {@link Texture} on a {@link MeshQuad}. The icon is affected by the given transform and color.
      */
-    public static drawIcon(_texture: Texture): void {
-      let position: string = Gizmos.mtxWorld.translation.toString();
+    public static drawIcon(_texture: Texture, _mtxWorld: Matrix4x4, _color: Color, _alphaOccluded: number = Gizmos.alphaOccluded): void {
+      let position: string = _mtxWorld.translation.toString();
       if (Gizmos.posIcons.has(position))
         return;
       Gizmos.posIcons.add(position);
@@ -335,15 +340,14 @@ namespace FudgeCore {
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
       const shader: ShaderInterface = Gizmos.picking ? ShaderPickTextured : ShaderGizmoTextured;
-      if (!Gizmos.picking)
-        shader.useProgram();
+      shader.useProgram();
 
-      // cache clones to avoid side effects
-      let mtxWorld: Matrix4x4 = Gizmos.mtxWorld.clone;
-      let color: Color = Gizmos.color.clone;
+      let mtxWorld: Matrix4x4 = _mtxWorld.clone;
+      let color: Color = _color.clone;
 
-      let direction: Vector3 = Vector3.TRANSFORMATION(Vector3.Z(-1), Matrix4x4.ROTATION(Gizmos.camera.mtxWorld.rotation));
-      mtxWorld.lookIn(direction);
+      let back: Vector3 = Gizmos.camera.mtxWorld.forward.negate();
+      let up: Vector3 = Gizmos.camera.mtxWorld.up;
+      mtxWorld.lookIn(back, up);
 
       let distance: number = Vector3.DIFFERENCE(Gizmos.camera.mtxWorld.translation, mtxWorld.translation).magnitude;
       let fadeFar: number = 4;
@@ -352,14 +356,14 @@ namespace FudgeCore {
         distance = (distance - fadeNear) / (fadeFar - fadeNear);
         color.a = Calc.lerp(0, color.a, distance);
       }
-
+      
       let renderBuffers: RenderBuffers = Gizmos.quad.useRenderBuffers(shader, mtxWorld, Matrix4x4.MULTIPLICATION(Gizmos.camera.mtxWorldToView, mtxWorld), Gizmos.pickId);
       _texture.useRenderData(TEXTURE_LOCATION.COLOR.UNIT);
       crc3.uniform1i(shader.uniforms[TEXTURE_LOCATION.COLOR.UNIFORM], TEXTURE_LOCATION.COLOR.INDEX);
 
-      Gizmos.drawGizmos(shader, Gizmos.drawElementsTrianlges, renderBuffers.nIndices, color);
+      Gizmos.drawGizmos(shader, Gizmos.drawElementsTrianlges, renderBuffers.nIndices, color, _alphaOccluded);
 
-      Recycler.storeMultiple(mtxWorld, color);
+      Recycler.storeMultiple(mtxWorld, color, back, up);
     }
 
     private static bufferPositions(_shader: ShaderInterface, _buffer: WebGLBuffer): void {
@@ -381,7 +385,7 @@ namespace FudgeCore {
       Recycler.store(mtxMeshToView);
     }
 
-    private static drawGizmos(_shader: ShaderInterface, _draw: Function, _count: number, _color: Color): void {
+    private static drawGizmos(_shader: ShaderInterface, _draw: Function, _count: number, _color: Color, _alphaOccluded: number = Gizmos.alphaOccluded): void {
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       let color: Color = _color.clone;
       Gizmos.bufferColor(_shader, color);
@@ -395,7 +399,7 @@ namespace FudgeCore {
       _draw(_count);
 
       // then draw the gizmo again with reduced alpha and without depth test where stencil buffer is 0
-      color.a *= Gizmos.occlusionAlpha;
+      color.a *= _alphaOccluded;
       Gizmos.bufferColor(_shader, color);
 
       crc3.stencilFunc(WebGL2RenderingContext.EQUAL, 0, 0xFF);

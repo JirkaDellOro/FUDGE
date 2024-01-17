@@ -349,6 +349,14 @@ namespace FudgeCore {
     }
 
     /**
+     * Negates this vector by flipping the signs of its components
+     */
+    public negate(): Vector3 {
+      this.data.set([-this.x, -this.y, -this.z]);
+      return this;
+    }
+
+    /**
      * Defines the components of this vector with the given numbers
      */
     public set(_x: number = 0, _y: number = 0, _z: number = 0): void {

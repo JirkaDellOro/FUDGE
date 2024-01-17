@@ -199,12 +199,10 @@ namespace FudgeCore {
 
     public drawGizmos(): void {
       let mtxShape: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
-      Gizmos.color.setCSS("cornflowerblue");
-      Gizmos.occlusionAlpha = 0.3;
-      Gizmos.mtxWorld.set(mtxShape);
-      Gizmos.mtxWorld.scaling = new Vector3(0.5, 0.5, 0.5);
-      Gizmos.drawIcon(TextureDefault.iconAudio);
-      Recycler.store(mtxShape);
+      mtxShape.scaling = new Vector3(0.5, 0.5, 0.5);
+      let color: Color = Color.CSS("cornflowerblue");
+      Gizmos.drawIcon(TextureDefault.iconAudio, mtxShape, color);
+      Recycler.storeMultiple(mtxShape, color);
     };
 
     //#region Transfer

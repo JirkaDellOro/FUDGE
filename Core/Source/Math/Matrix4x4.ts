@@ -40,7 +40,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Construct a new matrix according to the given translation, rotation and scaling.
+     * Composes a new matrix according to the given translation, rotation and scaling.
      */
     public static CONSTRUCTION(_translation?: Vector3, _rotation?: Vector3 | Quaternion, _scaling?: Vector3): Matrix4x4 {
       let result: Matrix4x4 = Matrix4x4.IDENTITY();
@@ -235,6 +235,10 @@ namespace FudgeCore {
       return mtxResult;
     }
 
+    /**
+     * Computes and returns a matrix with the given translation, its z-axis pointing directly in the given direction,
+     * and a minimal angle between its y-axis and the given up-{@link Vector3}. Ideally up should be perpendicular to the given direction.
+     */
     public static LOOK_IN(_translation: Vector3, _direction: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
       let zAxis: Vector3 = Vector3.NORMALIZATION(_direction);
       let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
@@ -589,6 +593,33 @@ namespace FudgeCore {
       mtxClone.set(this);
       return mtxClone;
     }
+
+    /**
+     * Returns the normalized cardinal x-axis.
+     */
+    public get right(): Vector3 {
+      let right: Vector3 = this.getX();
+      right.normalize();
+      return right;
+    }
+
+    /**
+     * Returns the normalized cardinal y-axis.
+     */
+    public get up(): Vector3 {
+      let up: Vector3 = this.getY();
+      up.normalize();
+      return up;
+    }
+
+    /**
+     * Returns the normalized cardinal z-axis.
+     */
+    public get forward(): Vector3 {
+      let forward: Vector3 = this.getZ();
+      forward.normalize();
+      return forward;
+    }
     //#endregion
 
     /**
@@ -764,7 +795,7 @@ namespace FudgeCore {
      * The pitch may be restricted to the up-vector to only calculate yaw.
      */
     public lookAt(_target: Vector3, _up?: Vector3, _restrict: boolean = false): void {
-      _up = _up ? Vector3.NORMALIZATION(_up) : Vector3.NORMALIZATION(this.getY());
+      _up = _up ? Vector3.NORMALIZATION(_up) : Vector3.NORMALIZATION(this.up);
 
       const mtxResult: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up, _restrict);
       mtxResult.scale(this.scaling);
@@ -773,11 +804,10 @@ namespace FudgeCore {
     }
 
     /**
-     * Adjusts the rotation of this matrix to align the z-axis with the given direction and tilts it to accord with the given up-{@link Vector3}
+     * Adjusts the rotation of this matrix to align the z-axis with the given direction and tilts it to accord with the given up-{@link Vector3}.
+     * Up should be perpendicular to the given direction. If no up-vector is provided, (0, 1, 0) is used.
      */
-    public lookIn(_direction: Vector3, _up?: Vector3): void {
-      _up = _up ? Vector3.NORMALIZATION(_up) : Vector3.NORMALIZATION(this.getY());
-
+    public lookIn(_direction: Vector3, _up: Vector3 = Vector3.Y()): void {
       const mtxResult: Matrix4x4 = Matrix4x4.LOOK_IN(this.translation, _direction, _up);
       mtxResult.scale(this.scaling);
       this.set(mtxResult);

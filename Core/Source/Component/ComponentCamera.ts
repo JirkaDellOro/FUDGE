@@ -283,20 +283,17 @@ namespace FudgeCore {
       }
     }
 
-    public drawGizmosSelected(): void {
-      Gizmos.mtxWorld.set(this.mtxWorld);
-      Gizmos.color.setCSS("lightgrey");
-      Gizmos.occlusionAlpha = 0.3;
-      Gizmos.drawWireFrustum(this.getAspect(), this.getFieldOfView(), this.getNear(), this.getFar(), this.getDirection());
-    };
-
     public drawGizmos(): void {
-      Gizmos.mtxWorld.set(this.mtxWorld);
-      Gizmos.color.setCSS("lightgrey");
-      Gizmos.occlusionAlpha = 0.3;
-      Gizmos.mtxWorld.scaling = new Vector3(0.5, 0.5, 0.5);
-      Gizmos.drawIcon(TextureDefault.iconCamera);
+      let mtxWorld: Matrix4x4 = this.mtxWorld.clone;
+      mtxWorld.scaling = new Vector3(0.5, 0.5, 0.5);
+      let color: Color = Color.CSS("lightgrey");
+      Gizmos.drawIcon(TextureDefault.iconCamera, mtxWorld, color);
+      Recycler.storeMultiple(mtxWorld, color);
     }
+
+    public drawGizmosSelected(): void {
+      Gizmos.drawWireFrustum(this.getAspect(), this.getFieldOfView(), this.getNear(), this.getFar(), this.getDirection(), this.mtxWorld, Color.CSS("lightgrey"));
+    };
 
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.transform;
