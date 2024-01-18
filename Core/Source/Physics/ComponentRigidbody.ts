@@ -632,14 +632,14 @@ namespace FudgeCore {
     }
 
     /** Change properties by an associative array */
-    public async mutate(_mutator: Mutator): Promise<void> {
+    public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
       if (_mutator.typeBody != undefined)
         _mutator.typeBody = parseInt(_mutator.typeBody);
       if (_mutator.typeCollider != undefined)
         _mutator.typeCollider = parseInt(_mutator.typeCollider);
       if (_mutator.initialization != undefined)
         _mutator.initialization = parseInt(_mutator.initialization);
-      await super.mutate(_mutator);
+      await super.mutate(_mutator, _selection, _dispatchMutate);
       if (_mutator.initialization != undefined && this.isActive)
         this.initialize();
       // TODO: see if this alternative should be, at least partially, done with mutateSelection

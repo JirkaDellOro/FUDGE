@@ -5298,7 +5298,7 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /** Change properties by an associative array */
-        mutate(_mutator: Mutator): Promise<void>;
+        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
         getMutator(): Mutator;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
