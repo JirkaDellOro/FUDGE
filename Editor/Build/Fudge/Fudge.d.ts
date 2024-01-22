@@ -83,6 +83,10 @@ declare namespace Fudge {
         ROTATE = "rotate",
         SCALE = "scale"
     }
+    enum GIZMOS {
+        TRANSFORM = "Transform",
+        WIRE_MESH = "WireMesh"
+    }
 }
 declare namespace Fudge {
     export enum MIME {
@@ -210,6 +214,8 @@ declare namespace Fudge {
         fileStyles: string;
         private graphAutoView;
         constructor(_base: URL);
+        private get gizmosFilter();
+        private set gizmosFilter(value);
         openDialog(): Promise<boolean>;
         hndChange: (_event: Event) => void;
         load(_htmlContent: string): Promise<void>;
@@ -695,6 +701,7 @@ declare namespace Fudge {
         private canvas;
         private graph;
         private nodeLight;
+        private selected;
         private redrawId;
         constructor(_container: ComponentContainer, _state: JsonValue);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
@@ -712,6 +719,8 @@ declare namespace Fudge {
         private activeViewport;
         private redraw;
         private setRenderContinously;
+        private drawTranslation;
+        private drawMesh;
     }
 }
 declare namespace Fudge {

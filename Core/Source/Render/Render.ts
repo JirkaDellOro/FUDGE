@@ -3,6 +3,7 @@ namespace FudgeCore {
 
   export interface RenderPrepareOptions {
     ignorePhysics?: boolean;
+    collectGizmos?: boolean;
   }
 
   /**
@@ -14,19 +15,11 @@ namespace FudgeCore {
     public static readonly nodesPhysics: RecycableArray<Node> = new RecycableArray();
     public static readonly componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
     public static readonly lights: MapLightTypeToLightList = new Map();
+    public static readonly gizmos: RecycableArray<Gizmo> = new RecycableArray();
     private static readonly nodesSimple: RecycableArray<Node> = new RecycableArray();
     private static readonly nodesAlpha: RecycableArray<Node> = new RecycableArray();
     private static readonly componentsSkeleton: RecycableArray<ComponentSkeleton> = new RecycableArray();
     private static timestampUpdate: number;
-
-    static #camera: ComponentCamera;
-
-    /**
-     * The camera which is currently used to render.
-     */
-    public static get camera(): ComponentCamera {
-      return Render.#camera;
-    }
 
     //#region Prepare
     /**
@@ -45,6 +38,8 @@ namespace FudgeCore {
         Render.componentsPick.reset();
         Render.componentsSkeleton.reset();
         Render.lights.forEach(_array => _array.reset());
+        if (_options?.collectGizmos)
+          Render.gizmos.reset();
         _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
       }
 
@@ -100,9 +95,15 @@ namespace FudgeCore {
       }
 
       let cmpSkeletons: ComponentSkeleton[] = _branch.getComponents(ComponentSkeleton);
-      for (let cmpSkeleton of cmpSkeletons) 
+      for (let cmpSkeleton of cmpSkeletons)
         if (cmpSkeleton && cmpSkeleton.isActive)
           Render.componentsSkeleton.push(cmpSkeleton);
+
+      if (_options?.collectGizmos) {
+        for (const component of _branch.getAllComponents())
+          if (component.isActive && Gizmos.filter.get(component.type))
+            Render.gizmos.push(component);
+      }
 
       for (let child of _branch.getChildren()) {
         Render.prepare(child, _options, _branch.mtxWorld, _shadersUsed);
@@ -116,12 +117,12 @@ namespace FudgeCore {
       }
 
       if (firstLevel) {
+        _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
         for (const cmpSkeleton of Render.componentsSkeleton) {
           cmpSkeleton.update();
           cmpSkeleton.updateRenderBuffer();
         }
         Render.bufferLights(Render.lights);
-        _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
       }
     }
 
@@ -146,22 +147,43 @@ namespace FudgeCore {
      * Used with a {@link Picker}-camera, this method renders one pixel with picking information 
      * for each node in the line of sight and return that as an unsorted {@link Pick}-array
      */
-    public static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera): Pick[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+    public static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera, _pickGizmos: boolean = false): Pick[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+      /**
+       * TODO: maybe move this whole function to RenderWebGL? 
+       * It seems to mostly rely on RenderWebGL e.g.: ƒpicked, createPickTexture(), setBlendMode(), pick(), pickGizmos(), getPicks(), resetFramebuffer()
+       * They only not WebGL thing it does is filtering the nodes to pick, which could be done in pick() itself...
+       * -> or make this method only collect the nodes and gizmos from branch and then pass them to an appropriate method in RenderWebGL?
+       * 
+       * Also {@link Render.ƒpicked} and {@link Render.sizePick} seem to only ever be used in the methods called from this method. 
+       * sizePick gets set in createPickTexture() and used in pick() via the property but passed as an argument to getPicks().
+       * ƒpicked is only used in getPicks(), pick() and pickGizmos() and only ever set to an empty array in this method.
+       * -> both could be local variables and passed as arguments to the methods that need them.
+       */ 
       Render.ƒpicked = [];
-      let size: number = Math.ceil(Math.sqrt(_nodes.length));
+      let size: number = Math.ceil(Math.sqrt(_nodes.length + Render.gizmos.length)); // gizmos.length might be bigger than needed...
       Render.createPickTexture(size);
       Render.setBlendMode(BLEND.OPAQUE);
+
+      let gizmos: Gizmo[] = [];
 
       for (let node of _nodes) {
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
         let cmpMaterial: ComponentMaterial = node.getComponent(ComponentMaterial);
-        if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
-          // let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
-          Render.pick(node, node.mtxWorld, _cmpCamera);
-          // RenderParticles.drawParticles();
-          // Recycler.store(mtxMeshToView);
+        if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive)
+          Render.pick(node, _cmpCamera);
+
+        if (_pickGizmos) {
+          for (let gizmo of node.getAllComponents()) {
+            if (!gizmo.isActive || !Gizmos.filter.get(gizmo.type))
+              continue;
+      
+            gizmos.push(gizmo);
+          }
         }
       }
+
+      if (_pickGizmos)
+        Render.pickGizmos(gizmos, _cmpCamera);
 
       Render.setBlendMode(BLEND.TRANSPARENT);
 
@@ -176,15 +198,12 @@ namespace FudgeCore {
      * Draws the scene from the point of view of the given camera
      */
     public static draw(_cmpCamera: ComponentCamera): void {
-      Render.#camera = _cmpCamera;
-
       for (let node of Render.nodesAlpha)
         Reflect.set(node, "zCamera", _cmpCamera.pointWorldToClip(node.getComponent(ComponentMesh).mtxWorld.translation).z);
 
       const sorted: Node[] = Render.nodesAlpha.getSorted((_a: Node, _b: Node) => Reflect.get(_b, "zCamera") - Reflect.get(_a, "zCamera"));
 
       Render.drawNodes(Render.nodesSimple, sorted, _cmpCamera);
-      Render.#camera = null;
     }
     //#endregion
 

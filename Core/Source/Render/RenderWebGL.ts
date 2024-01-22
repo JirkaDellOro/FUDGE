@@ -94,7 +94,7 @@ namespace FudgeCore {
       let contextAttributes: WebGLContextAttributes = {
         alpha: (_alpha != undefined) ? _alpha : fudgeConfig.alpha || false,
         antialias: (_antialias != undefined) ? _antialias : fudgeConfig.antialias || false,
-        premultipliedAlpha: false
+        premultipliedAlpha: false, stencil: true
       };
       Debug.fudge("Initialize RenderWebGL", contextAttributes);
       let canvas: HTMLCanvasElement = document.createElement("canvas");
@@ -350,7 +350,7 @@ namespace FudgeCore {
      */
     protected static createPickTexture(_size: number): RenderTexture {
       // create to render to
-      const targetTexture: RenderTexture = Render.crc3.createTexture();
+      const targetTexture: RenderTexture = RenderWebGL.assert(Render.crc3.createTexture());
       Render.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, targetTexture); // TODO: check if superclass (RenderWebGL) should refer downwards to subclass (Render) like this
 
       {
@@ -421,7 +421,7 @@ namespace FudgeCore {
     * A cameraprojection with extremely narrow focus is used, so each pixel of the buffer would hold the same information from the node,  
     * but the fragment shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
     */
-    protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _cmpCamera: ComponentCamera): void { // create Texture to render to, int-rgba
+    protected static pick(_node: Node, _cmpCamera: ComponentCamera): void { // create Texture to render to, int-rgba
       try {
         let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
@@ -436,7 +436,7 @@ namespace FudgeCore {
         RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, [RenderWebGL.sizePick, RenderWebGL.sizePick]);
 
         let mesh: Mesh = cmpMesh.mesh;
-        let renderBuffers: RenderBuffers = mesh.useRenderBuffers(shader, _mtxMeshToWorld, mtxMeshToView, Render.ƒpicked.length);
+        let renderBuffers: RenderBuffers = mesh.useRenderBuffers(shader, _node.mtxWorld, mtxMeshToView, Render.ƒpicked.length);
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
 
         let pick: Pick = new Pick(_node);
@@ -444,6 +444,21 @@ namespace FudgeCore {
       } catch (_error) {
         //
       }
+    }
+
+    protected static pickGizmos(_gizmos: Gizmo[], _cmpCamera: ComponentCamera): void {
+      const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+
+      // buffer these into both shaders as we don't know which one will be used for the gizmo
+      let shader: ShaderInterface = ShaderPick;
+      shader.useProgram();
+      crc3.uniform2fv(shader.uniforms["u_vctSize"], [RenderWebGL.sizePick, RenderWebGL.sizePick]);
+      shader = ShaderPickTextured;
+      shader.useProgram();
+      crc3.uniform2fv(shader.uniforms["u_vctSize"], [RenderWebGL.sizePick, RenderWebGL.sizePick]);
+      crc3.uniformMatrix3fv(shader.uniforms["u_mtxPivot"], false, Matrix3x3.IDENTITY().get()); // only needed for textured pick shader, but gizmos have no pivot
+
+      Gizmos.pick(_gizmos, _cmpCamera, Render.ƒpicked);
     }
     //#endregion
 
@@ -590,9 +605,6 @@ namespace FudgeCore {
       crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.framebufferMain);
       crc3.drawBuffers([WebGL2RenderingContext.COLOR_ATTACHMENT0]);
 
-      Render.dispatchEvent(new Event(EVENT.RENDER_FINISHED));
-      // gizmo, text
-
       // crc3.depthMask(false);
       for (let node of _nodesAlpha)
         RenderWebGL.drawNode(node, _cmpCamera);
@@ -601,7 +613,7 @@ namespace FudgeCore {
       // copy framebuffer to canvas
       crc3.bindFramebuffer(WebGL2RenderingContext.READ_FRAMEBUFFER, RenderWebGL.framebufferMain);
       crc3.bindFramebuffer(WebGL2RenderingContext.DRAW_FRAMEBUFFER, null);
-      crc3.blitFramebuffer(0, 0, crc3.canvas.width, crc3.canvas.height, 0, 0, crc3.canvas.width, crc3.canvas.height, WebGL2RenderingContext.COLOR_BUFFER_BIT, WebGL2RenderingContext.NEAREST);
+      crc3.blitFramebuffer(0, 0, crc3.canvas.width, crc3.canvas.height, 0, 0, crc3.canvas.width, crc3.canvas.height, WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT, WebGL2RenderingContext.NEAREST);
     }
 
     /**
@@ -767,7 +779,7 @@ namespace FudgeCore {
       // TODO: This could be a Render function as it does not do anything with WebGL
       let cmpFaceCamera: ComponentFaceCamera = _node.getComponent(ComponentFaceCamera);
       if (cmpFaceCamera && cmpFaceCamera.isActive) {
-        let mtxMeshToView: Matrix4x4;
+        let mtxMeshToView: Matrix4x4; // mesh to world?
         mtxMeshToView = _cmpMesh.mtxWorld.clone;
         mtxMeshToView.lookAt(_target, cmpFaceCamera.upLocal ? null : cmpFaceCamera.up, cmpFaceCamera.restrict);
         return Matrix4x4.MULTIPLICATION(_mtxWorldToView, mtxMeshToView);

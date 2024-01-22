@@ -34,7 +34,7 @@ namespace FudgeCore {
           tangents: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.tangents),
           nIndices: this.renderMesh.indices.length
         };
-        
+
       return this.renderMesh.buffers;
 
       function createBuffer(_type: GLenum, _array: Float32Array | Uint16Array): WebGLBuffer {
@@ -47,20 +47,8 @@ namespace FudgeCore {
     }
 
     protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers {
-      let renderBuffers: RenderBuffers = this.getRenderBuffers();
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-
-      function setBuffer(_name: string, _buffer: WebGLBuffer, _size: number): void {
-        let attribute: number = _shader.attributes[_name];
-        if (attribute == undefined)
-          return;
-        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _buffer);
-        crc3.enableVertexAttribArray(attribute);
-        RenderWebGL.setAttributeStructure(
-          attribute,
-          { size: _size, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 }
-        );
-      }
+      let renderBuffers: RenderBuffers = this.getRenderBuffers();
 
       let uniform: WebGLUniformLocation;
 
@@ -77,26 +65,32 @@ namespace FudgeCore {
         crc3.uniformMatrix4fv(uniform, false, normalMatrix.get());
       }
 
-      setBuffer("a_vctPosition", renderBuffers.vertices, 3);
-      setBuffer("a_vctNormal", renderBuffers.normals, 3);
-      setBuffer("a_vctTangent", renderBuffers.tangents, 4);
-      setBuffer("a_vctColor", renderBuffers.colors, 4);
-
-      // feed in texture coordinates if shader accepts a_vctTexture
-      let attribute: number = _shader.attributes["a_vctTexture"];
-      if (attribute) {
-        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.textureUVs);
-        crc3.enableVertexAttribArray(attribute); // enable the buffer
-        crc3.vertexAttribPointer(attribute, 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
-      }
-
       // feed in an id of the node if shader accepts u_id. Used for picking
       uniform = _shader.uniforms["u_id"];
       if (uniform)
-        RenderWebGL.getRenderingContext().uniform1i(uniform, _id);
+        crc3.uniform1i(uniform, _id);
+
+      setBuffer("a_vctPosition", renderBuffers.vertices, 3);
+      setBuffer("a_vctColor", renderBuffers.colors, 4);
+      setBuffer("a_vctTexture", renderBuffers.textureUVs, 2);
+      setBuffer("a_vctNormal", renderBuffers.normals, 3);
+      setBuffer("a_vctTangent", renderBuffers.tangents, 4);
 
       crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, renderBuffers.indices);
+
       return renderBuffers;
+
+      function setBuffer(_name: string, _buffer: WebGLBuffer, _size: number): void {
+        let attribute: number = _shader.attributes[_name];
+        if (attribute == undefined)
+          return;
+        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _buffer);
+        crc3.enableVertexAttribArray(attribute);
+        RenderWebGL.setAttributeStructure(
+          attribute,
+          { size: _size, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 }
+        );
+      }
     }
 
     protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void {

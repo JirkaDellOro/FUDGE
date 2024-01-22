@@ -16,8 +16,9 @@ namespace FudgeCore {
     * The pivot matrix has different effects depending on the type of the {@link Light}. See there for details.
     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
     */
-  export class ComponentLight extends Component {
+  export class ComponentLight extends Component implements Gizmo {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentLight);
+
     // private static constructors: { [type: string]: General } = { [LIGHT_TYPE.AMBIENT]: LightAmbient, [LIGHT_TYPE.DIRECTIONAL]: LightDirectional, [LIGHT_TYPE.POINT]: LightPoint, [LIGHT_TYPE.SPOT]: LightSpot };
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public light: Light = null;
@@ -78,6 +79,42 @@ namespace FudgeCore {
       delete (_mutator.type); // exclude light type from further mutation
       super.mutate(_mutator, _selection, _dispatchMutate);
       _mutator.type = type; // reconstruct mutator
+    }
+
+    public drawGizmos(): void {
+      let mtxShape: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
+      mtxShape.scaling = new Vector3(0.5, 0.5, 0.5);
+      Gizmos.drawIcon(TextureDefault.iconLight, mtxShape, this.light.color);
+      Recycler.store(mtxShape);
+    };
+
+    public drawGizmosSelected(): void {
+      let mtxShape: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
+      let color: Color = Color.CSS("yellow");
+
+      switch (this.light.getType()) {
+        case LightDirectional:
+          const radius: number = 0.5;
+          Gizmos.drawWireCircle(mtxShape, color);
+          const lines: Vector3[] = new Array(10).fill(null).map(() => Recycler.get(Vector3));
+          lines[0].set(0, 0, 0); lines[1].set(0, 0, 1);
+          lines[2].set(0, radius, 0); lines[3].set(0, radius, 1);
+          lines[6].set(0, -radius, 0); lines[7].set(0, -radius, 1);
+          lines[4].set(radius, 0, 0); lines[5].set(radius, 0, 1);
+          lines[8].set(-radius, 0, 0); lines[9].set(-radius, 0, 1);
+          Gizmos.drawLines(lines, mtxShape, color);
+          Recycler.storeMultiple(...lines);
+          break;
+        case LightPoint:
+          mtxShape.scale(new Vector3(2, 2, 2));
+          Gizmos.drawWireSphere(mtxShape, color);
+          break;
+        case LightSpot:
+          Gizmos.drawWireCone(mtxShape, color);
+          break;
+      }
+
+      Recycler.storeMultiple(mtxShape, color);
     }
   }
 }

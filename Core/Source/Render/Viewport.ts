@@ -26,6 +26,7 @@ namespace FudgeCore {
     public adjustingFrames: boolean = true; // TODO: maybe only adjust frames when anything changes instead of every drawn frame?
     public adjustingCamera: boolean = true;
     public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
+    public renderingGizmos: boolean = false;
 
     public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
 
@@ -111,12 +112,19 @@ namespace FudgeCore {
 
       Render.clear();
 
-      if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
+      if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) {
         Render.draw(this.camera);
+
+        if (this.renderingGizmos)
+          Gizmos.draw(this.camera);
+      }
+
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
         Physics.draw(this.camera, this.physicsDebugMode);
       }
-      
+
+      this.dispatchEvent(new Event(EVENT.RENDER_END));
+
       this.#crc2.imageSmoothingEnabled = false;
       this.#crc2.drawImage(
         Render.getCanvas(),
@@ -150,7 +158,7 @@ namespace FudgeCore {
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
       this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
-      Render.prepare(this.#branch, null, mtxRoot);
+      Render.prepare(this.#branch, { collectGizmos: this.renderingGizmos }, mtxRoot);
       this.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
       this.componentsPick = Render.componentsPick;
     }
@@ -176,7 +184,7 @@ namespace FudgeCore {
 
 
       if (cameraPicks.length) {
-        let picks: Pick[] = Picker.pickCamera(cameraPicks, this.camera, this.pointClientToProjection(posClient));
+        let picks: Pick[] = Picker.pickCamera(cameraPicks, this.camera, this.pointClientToProjection(posClient), this.renderingGizmos);
         for (let pick of picks) {
           Reflect.set(_event, "pick", pick);
           pick.node.dispatchEvent(_event);
@@ -217,11 +225,11 @@ namespace FudgeCore {
       Render.setRenderRectangle(rectRender);
 
       let rectOffscreenCanvas: Rectangle = Render.getCanvasRect(); // there are far to many rectangles involved here...
-      
+
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
       Render.setCanvasSize(rectRender.width, rectRender.height);
 
-      if (rectRender.width != rectOffscreenCanvas.width || rectRender.height != rectOffscreenCanvas.height) 
+      if (rectRender.width != rectOffscreenCanvas.width || rectRender.height != rectOffscreenCanvas.height)
         Render.adjustAttachments();
 
       Recycler.store(rectClient);

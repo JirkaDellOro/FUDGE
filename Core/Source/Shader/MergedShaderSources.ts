@@ -232,23 +232,45 @@ uniform vec4 u_vctColor;
 
 out vec4 vctFrag;
 
+// uniform sampler2D u_texDepthStencil;
 #if defined(TEXTURE)
   uniform sampler2D u_texColor;
-  uniform bool u_bMask;
   in vec2 v_vctTexture;
 #endif
+
+// // 4x4 Bayer matrix for dithering
+// const float mtxDither[16] = float[](
+//   1.0 / 17.0,  9.0 / 17.0,  3.0 / 17.0, 11.0 / 17.0,
+//   13.0 / 17.0,  5.0 / 17.0, 15.0 / 17.0,  7.0 / 17.0,
+//   4.0 / 17.0, 12.0 / 17.0,  2.0 / 17.0, 10.0 / 17.0,
+//   16.0 / 17.0,  8.0 / 17.0, 14.0 / 17.0,  6.0 / 17.0
+// );
 
 void main() {
   vctFrag = u_vctColor;
 
   #if defined(TEXTURE)
 
-    if (u_bMask)
-      vctFrag.a *= texture(u_texColor, v_vctTexture).a;
-    else
       vctFrag *= texture(u_texColor, v_vctTexture);
-      
+
   #endif
+
+  // int x = int(gl_FragCoord.x) % 4;
+  // int y = int(gl_FragCoord.y) % 4;
+  // int index = y * 4 + x;
+  // // Discard the fragment if its alpha is less than the corresponding value in the dithering matrix
+  // if (vctFrag.a < mtxDither[index]) 
+  //   discard;
+
+  // // Discard the fragment if its alpha is 0
+  // if (vctFrag.a == 0.0)
+  //   discard;
+
+  // // Create a checkerboard pattern for alpha values less than 0.5
+  // else if (vctFrag.a < 0.5 && ((x + y) % 2 == 0))
+  //   discard;
+
+  // vctFrag.a = 1.0;
 
   if (vctFrag.a < 0.01)
     discard;
@@ -264,8 +286,9 @@ void main() {
 precision mediump float;
 precision highp int;
 
-uniform mat4 u_mtxViewProjection;
-uniform mat4 u_mtxModel;
+// uniform mat4 u_mtxViewProjection;
+// uniform mat4 u_mtxModel;
+uniform mat4 u_mtxMeshToView; // model-view-projection matrix
 
 in vec3 a_vctPosition;
 
@@ -277,7 +300,7 @@ in vec3 a_vctPosition;
 #endif
 
 void main() {
-  gl_Position = u_mtxViewProjection * u_mtxModel * vec4(a_vctPosition, 1.0);
+  gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
 
   #if defined(TEXTURE)
 
@@ -538,13 +561,13 @@ uniform sampler2D u_texColor;
 out ivec4 vctFrag;
 
 void main() {
-    int pixel = int(trunc(gl_FragCoord.x) + u_vctSize.x * trunc(gl_FragCoord.y));
+  int pixel = int(trunc(gl_FragCoord.x) + u_vctSize.x * trunc(gl_FragCoord.y));
 
-    if (pixel != u_id)
-      discard;
-    
-    vec4 vctColor = u_vctColor * texture(u_texColor, v_vctTexture);
-    uint icolor = uint(vctColor.r * 255.0) << 24 | uint(vctColor.g * 255.0) << 16 | uint(vctColor.b * 255.0) << 8 | uint(vctColor.a * 255.0);
+  if (pixel != u_id)
+    discard;
+  
+  vec4 vctColor = u_vctColor * texture(u_texColor, v_vctTexture);
+  uint icolor = uint(vctColor.r * 255.0) << 24 | uint(vctColor.g * 255.0) << 16 | uint(vctColor.b * 255.0) << 8 | uint(vctColor.a * 255.0);
   
   vctFrag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, floatBitsToInt(v_vctTexture.x), floatBitsToInt(v_vctTexture.y));
 }`;
@@ -561,8 +584,8 @@ uniform mat3 u_mtxPivot;
 out vec2 v_vctTexture;
 
 void main() {   
-    gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
-    v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+  gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
+  v_vctTexture = (u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
 }`;
   shaderSources["ShaderScreen.vert"] = /*glsl*/ `#version 300 es
 precision mediump float;

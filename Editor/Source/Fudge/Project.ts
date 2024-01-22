@@ -31,6 +31,22 @@ namespace Fudge {
       );
     }
 
+    private get gizmosFilter(): string {
+      return JSON.stringify(Array.from(ƒ.Gizmos.filter.entries()));
+    }
+
+    private set gizmosFilter(_filter: string) {
+      let gizmosFilter: Map<string, boolean> = new Map(JSON.parse(_filter));
+
+      // add default values for view render gizmos
+      ƒ.Gizmos.filter.set(GIZMOS.TRANSFORM, true);
+      ƒ.Gizmos.filter.set(GIZMOS.WIRE_MESH, false);
+
+      for (const [key, value] of gizmosFilter)
+        if (ƒ.Gizmos.filter.has(key))
+          ƒ.Gizmos.filter.set(key, value);
+    }
+
     public async openDialog(): Promise<boolean> {
       let promise: Promise<boolean> = ƒui.Dialog.prompt(project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
 
@@ -282,7 +298,10 @@ namespace Fudge {
     // }
 
     private settingsStringify(): string {
-      let settings: string = JSON.stringify(project.getMutator());
+      let mutator: ƒ.Mutator = project.getMutator(true);
+      mutator.gizmosFilter = this.gizmosFilter;
+
+      let settings: string = JSON.stringify(mutator);
       settings = settings.replace(/"/g, "'");
       return settings;
     }
