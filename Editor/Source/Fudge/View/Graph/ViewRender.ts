@@ -340,16 +340,16 @@ namespace Fudge {
     }
 
     private drawTranslation = (): void => {
-      if (!this.selected || !ƒ.Gizmos.filter.get("MtxWorld"))
+      if (!this.selected || !ƒ.Gizmos.filter.get(GIZMOS.TRANSFORM))
         return;
 
-      const scale: number = ƒ.Vector3.DIFFERENCE(ƒ.Gizmos.camera.mtxWorld.translation, this.selected.mtxWorld.translation).magnitude * 0.1;
+      const scaling: ƒ.Vector3 = ƒ.Vector3.ONE(ƒ.Vector3.DIFFERENCE(ƒ.Gizmos.camera.mtxWorld.translation, this.selected.mtxWorld.translation).magnitude * 0.1);
       const origin: ƒ.Vector3 = ƒ.Vector3.ZERO();
       const vctX: ƒ.Vector3 = ƒ.Vector3.X(1);
       const vctY: ƒ.Vector3 = ƒ.Vector3.Y(1);
       const vctZ: ƒ.Vector3 = ƒ.Vector3.Z(1);
       let mtxWorld: ƒ.Matrix4x4 = this.selected.mtxWorld.clone;
-      mtxWorld.scaling = ƒ.Vector3.ONE(scale);
+      mtxWorld.scaling = scaling;
       let color: ƒ.Color = ƒ.Color.CSS("red");
       ƒ.Gizmos.drawLines([origin, vctX], mtxWorld, color);
       color.setCSS("lime");
@@ -357,12 +357,12 @@ namespace Fudge {
       color.setCSS("blue");
       ƒ.Gizmos.drawLines([origin, vctZ], mtxWorld, color);
 
-      ƒ.Recycler.storeMultiple(vctX, vctY, vctZ, origin, mtxWorld, color, scale);
+      ƒ.Recycler.storeMultiple(vctX, vctY, vctZ, origin, mtxWorld, color, scaling);
     };
 
     private drawMesh = (): void => {
       const cmpMesh: ƒ.ComponentMesh = this.selected?.getComponent(ƒ.ComponentMesh);
-      if (!cmpMesh || !ƒ.Gizmos.filter.get("WireMesh"))
+      if (!cmpMesh || !ƒ.Gizmos.filter.get(GIZMOS.WIRE_MESH))
         return;
 
       ƒ.Gizmos.drawWireMesh(cmpMesh.mesh, cmpMesh.mtxWorld, ƒ.Color.CSS("salmon"), 0.1);

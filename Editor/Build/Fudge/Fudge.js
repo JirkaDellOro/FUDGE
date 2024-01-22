@@ -104,6 +104,11 @@ var Fudge;
         TRANSFORM["ROTATE"] = "rotate";
         TRANSFORM["SCALE"] = "scale";
     })(TRANSFORM = Fudge.TRANSFORM || (Fudge.TRANSFORM = {}));
+    let GIZMOS;
+    (function (GIZMOS) {
+        GIZMOS["TRANSFORM"] = "Transform";
+        GIZMOS["WIRE_MESH"] = "WireMesh";
+    })(GIZMOS = Fudge.GIZMOS || (Fudge.GIZMOS = {}));
 })(Fudge || (Fudge = {}));
 // /<reference types="../../../node_modules/@types/node/fs"/>
 var Fudge;
@@ -592,10 +597,9 @@ var Fudge;
         }
         set gizmosFilter(_filter) {
             let gizmosFilter = new Map(JSON.parse(_filter));
-            if (!ƒ.Gizmos.filter.has("MtxWorld"))
-                ƒ.Gizmos.filter.set("MtxWorld", true);
-            if (!ƒ.Gizmos.filter.has("WireMesh"))
-                ƒ.Gizmos.filter.set("WireMesh", false);
+            // add default values for view render gizmos
+            ƒ.Gizmos.filter.set(Fudge.GIZMOS.TRANSFORM, true);
+            ƒ.Gizmos.filter.set(Fudge.GIZMOS.WIRE_MESH, false);
             for (const [key, value] of gizmosFilter)
                 if (ƒ.Gizmos.filter.has(key))
                     ƒ.Gizmos.filter.set(key, value);
@@ -4670,26 +4674,26 @@ var Fudge;
             this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.RENDER_CONTINUOUSLY)).checked = _on;
         }
         drawTranslation = () => {
-            if (!this.selected || !ƒ.Gizmos.filter.get("MtxWorld"))
+            if (!this.selected || !ƒ.Gizmos.filter.get(Fudge.GIZMOS.TRANSFORM))
                 return;
-            const scale = ƒ.Vector3.DIFFERENCE(ƒ.Gizmos.camera.mtxWorld.translation, this.selected.mtxWorld.translation).magnitude * 0.1;
+            const scaling = ƒ.Vector3.ONE(ƒ.Vector3.DIFFERENCE(ƒ.Gizmos.camera.mtxWorld.translation, this.selected.mtxWorld.translation).magnitude * 0.1);
             const origin = ƒ.Vector3.ZERO();
             const vctX = ƒ.Vector3.X(1);
             const vctY = ƒ.Vector3.Y(1);
             const vctZ = ƒ.Vector3.Z(1);
             let mtxWorld = this.selected.mtxWorld.clone;
-            mtxWorld.scaling = ƒ.Vector3.ONE(scale);
+            mtxWorld.scaling = scaling;
             let color = ƒ.Color.CSS("red");
             ƒ.Gizmos.drawLines([origin, vctX], mtxWorld, color);
             color.setCSS("lime");
             ƒ.Gizmos.drawLines([origin, vctY], mtxWorld, color);
             color.setCSS("blue");
             ƒ.Gizmos.drawLines([origin, vctZ], mtxWorld, color);
-            ƒ.Recycler.storeMultiple(vctX, vctY, vctZ, origin, mtxWorld, color, scale);
+            ƒ.Recycler.storeMultiple(vctX, vctY, vctZ, origin, mtxWorld, color, scaling);
         };
         drawMesh = () => {
             const cmpMesh = this.selected?.getComponent(ƒ.ComponentMesh);
-            if (!cmpMesh || !ƒ.Gizmos.filter.get("WireMesh"))
+            if (!cmpMesh || !ƒ.Gizmos.filter.get(Fudge.GIZMOS.WIRE_MESH))
                 return;
             ƒ.Gizmos.drawWireMesh(cmpMesh.mesh, cmpMesh.mtxWorld, ƒ.Color.CSS("salmon"), 0.1);
         };

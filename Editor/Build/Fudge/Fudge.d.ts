@@ -83,6 +83,10 @@ declare namespace Fudge {
         ROTATE = "rotate",
         SCALE = "scale"
     }
+    enum GIZMOS {
+        TRANSFORM = "Transform",
+        WIRE_MESH = "WireMesh"
+    }
 }
 declare namespace Fudge {
     export enum MIME {

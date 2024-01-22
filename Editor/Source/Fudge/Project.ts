@@ -38,10 +38,9 @@ namespace Fudge {
     private set gizmosFilter(_filter: string) {
       let gizmosFilter: Map<string, boolean> = new Map(JSON.parse(_filter));
 
-      if (!ƒ.Gizmos.filter.has("MtxWorld"))
-        ƒ.Gizmos.filter.set("MtxWorld", true);
-      if (!ƒ.Gizmos.filter.has("WireMesh"))
-        ƒ.Gizmos.filter.set("WireMesh", false);
+      // add default values for view render gizmos
+      ƒ.Gizmos.filter.set(GIZMOS.TRANSFORM, true);
+      ƒ.Gizmos.filter.set(GIZMOS.WIRE_MESH, false);
 
       for (const [key, value] of gizmosFilter)
         if (ƒ.Gizmos.filter.has(key))
