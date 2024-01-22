@@ -1179,6 +1179,7 @@ var Fudge;
             this.dom.addEventListener("removeChild" /* ƒui.EVENT.REMOVE_CHILD */, this.hndEvent);
             this.dom.addEventListener("rename" /* ƒui.EVENT.RENAME */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* ƒui.EVENT.CONTEXTMENU */, this.openContextMenu);
+            this.dom.addEventListener("keyup", this.hndKeyboardEvent);
         }
         listResources() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -1329,6 +1330,16 @@ var Fudge;
             }
             this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
         }
+        hndKeyboardEvent = (_event) => {
+            if (_event.code != ƒ.KEYBOARD_CODE.F2)
+                return;
+            // let cell: HTMLTableCellElement = this.table.querySelector(".selected");
+            let input = document.activeElement.querySelector("input");
+            if (!input)
+                return;
+            input.readOnly = false;
+            input.focus();
+        };
         hndEvent = (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.OPEN:
