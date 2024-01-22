@@ -117,12 +117,12 @@ namespace FudgeCore {
       }
 
       if (firstLevel) {
+        _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
         for (const cmpSkeleton of Render.componentsSkeleton) {
           cmpSkeleton.update();
           cmpSkeleton.updateRenderBuffer();
         }
         Render.bufferLights(Render.lights);
-        _branch.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
       }
     }
 
@@ -155,9 +155,9 @@ namespace FudgeCore {
        * -> or make this method only collect the nodes and gizmos from branch and then pass them to an appropriate method in RenderWebGL?
        * 
        * Also {@link Render.ƒpicked} and {@link Render.sizePick} seem to only ever be used in the methods called from this method. 
-       * sizePick gets set in createPickTexture() and used in pick() via the property but passed as a parameter to getPicks().
+       * sizePick gets set in createPickTexture() and used in pick() via the property but passed as an argument to getPicks().
        * ƒpicked is only used in getPicks(), pick() and pickGizmos() and only ever set to an empty array in this method.
-       * -> both could be local variables and passed as parameters to the methods that need them.
+       * -> both could be local variables and passed as arguments to the methods that need them.
        */ 
       Render.ƒpicked = [];
       let size: number = Math.ceil(Math.sqrt(_nodes.length + Render.gizmos.length)); // gizmos.length might be bigger than needed...

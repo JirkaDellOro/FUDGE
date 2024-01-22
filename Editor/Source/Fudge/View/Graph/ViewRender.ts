@@ -13,12 +13,11 @@ namespace Fudge {
     private canvas: HTMLCanvasElement;
     private graph: ƒ.Graph;
     private nodeLight: ƒ.Node = new ƒ.Node("Illumination"); // keeps light components for dark graphs
-    private selection: ƒ.Node;
+    private selected: ƒ.Node;
     private redrawId: number;
     #pointerMoved: boolean = false;
 
     public constructor(_container: ComponentContainer, _state: JsonValue) {
-      loadGizmosFilter();
       super(_container, _state);
       this.graph = <ƒ.Graph>ƒ.Project.resources[_state["graph"]];
 
@@ -45,15 +44,6 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
       this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move
-
-      function loadGizmosFilter(): void {
-        try {
-          let gizmosFilter: Map<string, boolean> = new Map(JSON.parse(_state["gizmosFilter"]));
-          for (const [key, value] of gizmosFilter)
-            if (ƒ.Gizmos.filter.has(key))
-              ƒ.Gizmos.filter.set(key, value);
-        } catch (_error: unknown) { ƒ.Debug.warn(_error); }
-      }
     }
 
     //#region  ContextMenu
@@ -86,8 +76,8 @@ namespace Fudge {
       menu.append(item);
 
       let submenu: Electron.MenuItemConstructorOptions[] = [];
-      for (const [filter, active] of ƒ.Gizmos.filter)
-        submenu.push({ label: filter, id: filter, type: "checkbox", checked: active, click: _callback });
+      for (const [filter] of ƒ.Gizmos.filter)
+        submenu.push({ label: filter, id: filter, type: "checkbox", click: _callback });
 
       item = new remote.MenuItem({
         label: "Gizmos", submenu: submenu
@@ -122,7 +112,7 @@ namespace Fudge {
           this.setRenderContinously(_item.checked);
           break;
         default:
-          if (!ƒ[_item.id])
+          if (!ƒ.Gizmos.filter.has(_item.id))
             break;
 
           ƒ.Gizmos.filter.set(_item.id, _item.checked);
@@ -132,8 +122,11 @@ namespace Fudge {
     }
 
     protected openContextMenu = (_event: Event): void => {
-      if (!this.#pointerMoved)
+      if (!this.#pointerMoved) {
+        for (const [filter, active] of ƒ.Gizmos.filter)
+          this.contextMenu.getMenuItemById(filter).checked = active;
         this.contextMenu.popup();
+      }
       this.#pointerMoved = false;
     };
     //#endregion
@@ -253,8 +246,8 @@ namespace Fudge {
           if (detail.node) {
             // if (detail.view == this)
             //   return;
-            this.selection = detail.node;
-            ƒ.Gizmos.selected = this.selection;
+            this.selected = detail.node;
+            ƒ.Gizmos.selected = this.selected;
           } else
             this.setGraph(_event.detail.graph);
           break;
@@ -347,46 +340,32 @@ namespace Fudge {
     }
 
     private drawTranslation = (): void => {
-      if (!this.selection)
+      if (!this.selected || !ƒ.Gizmos.filter.get("MtxWorld"))
         return;
 
-      const scale: number = ƒ.Vector3.DIFFERENCE(ƒ.Gizmos.camera.mtxWorld.translation, this.selection.mtxWorld.translation).magnitude * 0.1;
+      const scale: number = ƒ.Vector3.DIFFERENCE(ƒ.Gizmos.camera.mtxWorld.translation, this.selected.mtxWorld.translation).magnitude * 0.1;
       const origin: ƒ.Vector3 = ƒ.Vector3.ZERO();
       const vctX: ƒ.Vector3 = ƒ.Vector3.X(1);
       const vctY: ƒ.Vector3 = ƒ.Vector3.Y(1);
       const vctZ: ƒ.Vector3 = ƒ.Vector3.Z(1);
-      ƒ.Gizmos.mtxWorld.set(this.selection.mtxWorld);
-      ƒ.Gizmos.mtxWorld.scaling = new ƒ.Vector3(scale, scale, scale);
-      ƒ.Gizmos.occlusionAlpha = 0.3;
-      ƒ.Gizmos.color.setCSS("red");
-      ƒ.Gizmos.drawLines([origin, vctX]);
-      ƒ.Gizmos.color.setCSS("lime");
-      ƒ.Gizmos.drawLines([origin, vctY]);
-      ƒ.Gizmos.color.setCSS("blue");
-      ƒ.Gizmos.drawLines([origin, vctZ]);
+      let mtxWorld: ƒ.Matrix4x4 = this.selected.mtxWorld.clone;
+      mtxWorld.scaling = ƒ.Vector3.ONE(scale);
+      let color: ƒ.Color = ƒ.Color.CSS("red");
+      ƒ.Gizmos.drawLines([origin, vctX], mtxWorld, color);
+      color.setCSS("lime");
+      ƒ.Gizmos.drawLines([origin, vctY], mtxWorld, color);
+      color.setCSS("blue");
+      ƒ.Gizmos.drawLines([origin, vctZ], mtxWorld, color);
 
-      ƒ.Recycler.storeMultiple(vctX, vctY, vctZ, origin);
+      ƒ.Recycler.storeMultiple(vctX, vctY, vctZ, origin, mtxWorld, color, scale);
     };
 
     private drawMesh = (): void => {
-      const cmpMesh: ƒ.ComponentMesh = this.selection?.getComponent(ƒ.ComponentMesh);
-      if (!cmpMesh)
+      const cmpMesh: ƒ.ComponentMesh = this.selected?.getComponent(ƒ.ComponentMesh);
+      if (!cmpMesh || !ƒ.Gizmos.filter.get("WireMesh"))
         return;
 
-      ƒ.Gizmos.mtxWorld.set(cmpMesh.mtxWorld);
-      ƒ.Gizmos.color.setCSS("salmon");
-      ƒ.Gizmos.occlusionAlpha = 0.1;
-      ƒ.Gizmos.drawWireMesh(cmpMesh.mesh);
+      ƒ.Gizmos.drawWireMesh(cmpMesh.mesh, cmpMesh.mtxWorld, ƒ.Color.CSS("salmon"), 0.1);
     };
   }
 }
-
-// "Red",
-// "Lime",
-// "Blue",
-// "Cyan",
-// "Magenta",
-// "Yellow",
-// "Salmon",
-// "LightGreen",
-// "CornflowerBlue"

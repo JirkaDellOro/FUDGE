@@ -210,6 +210,8 @@ declare namespace Fudge {
         fileStyles: string;
         private graphAutoView;
         constructor(_base: URL);
+        private get gizmosFilter();
+        private set gizmosFilter(value);
         openDialog(): Promise<boolean>;
         hndChange: (_event: Event) => void;
         load(_htmlContent: string): Promise<void>;
@@ -695,7 +697,7 @@ declare namespace Fudge {
         private canvas;
         private graph;
         private nodeLight;
-        private selection;
+        private selected;
         private redrawId;
         constructor(_container: ComponentContainer, _state: JsonValue);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
