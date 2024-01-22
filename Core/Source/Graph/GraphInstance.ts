@@ -1,8 +1,8 @@
 namespace FudgeCore {
 
-  enum SYNC {
-    READY, GRAPH_SYNCED, GRAPH_DONE, INSTANCE
-  }
+  // enum SYNC {
+  //   READY, GRAPH_SYNCED, GRAPH_DONE, INSTANCE
+  // }
 
   /**
    * An instance of a {@link Graph}.  
@@ -15,7 +15,7 @@ namespace FudgeCore {
     // TODO: examine, if this should be a direct reference to the Graph, instead of the id
     public static count: number = 0;
     #idSource: string = undefined;
-    #sync: SYNC = SYNC.READY;
+    // #sync: SYNC = SYNC.READY;
     #deserializeFromSource: boolean = true;
 
     /**
@@ -145,7 +145,7 @@ namespace FudgeCore {
       if (this.isFiltered())
         return;
 
-      this.#sync = SYNC.GRAPH_SYNCED; // do not sync again, since mutation is already a synchronization
+      // this.#sync = SYNC.GRAPH_SYNCED; // do not sync again, since mutation is already a synchronization
       await this.reflectMutation(_event, <Graph>_event.currentTarget, this, _event.detail.path);
       this.dispatchEvent(new Event(EVENT.MUTATE_INSTANCE, { bubbles: true }));
     };
@@ -169,7 +169,7 @@ namespace FudgeCore {
       if (this.isFiltered())
         return;
 
-      this.#sync = SYNC.INSTANCE; // do not sync again, since mutation is already a synchronization
+      // this.#sync = SYNC.INSTANCE; // do not sync again, since mutation is already a synchronization
       await this.reflectMutation(_event, this, this.get(), Reflect.get(_event, "path"));
       this.get().dispatchEvent(new CustomEvent(EVENT.MUTATE, { detail: _event.detail }));
     };
