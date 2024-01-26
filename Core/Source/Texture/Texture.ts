@@ -13,13 +13,26 @@ namespace FudgeCore {
   export abstract class Texture extends Mutable implements SerializableResource {
     public name: string;
     public idResource: string = undefined;
-    public mipmap: MIPMAP = MIPMAP.CRISP;
-    /** @internal A map of textures. Used by the render engine */
-    protected renderData: { [key: string]: unknown }; // TODO: check if a map is necessary here, the corresponding render injector only ever accesses "texture0"
+
+    protected renderData: unknown;
+
+    protected textureDirty: boolean = true;
+    protected mimapDirty: boolean = true;
+
+    #mipmap: MIPMAP = MIPMAP.CRISP;
 
     public constructor(_name: string = "Texture") {
       super();
       this.name = _name;
+    }
+
+    public set mipmap(_mipmap: MIPMAP) {
+      this.#mipmap = _mipmap;
+      this.mimapDirty = true;
+    }
+
+    public get mipmap(): MIPMAP {
+      return this.#mipmap;
     }
 
     /**
@@ -32,7 +45,7 @@ namespace FudgeCore {
      * Injected by {@link RenderInjectorTexture}. Used by the render system.
      * @internal
      */
-    public useRenderData(_textureslot: number = 0): void {/* injected by RenderInjector*/ }
+    public useRenderData(_textureUnit: number = 0): void {/* injected by RenderInjector*/ }
 
     /**
      * Deletes the texture in WebGL freeing the allocated gpu memory.
@@ -45,7 +58,7 @@ namespace FudgeCore {
      * Refreshes the image data in the render engine.
      */
     public refresh(): void {
-      this.deleteRenderData();
+      this.textureDirty = true;
     }
 
     //#region Transfer
@@ -53,15 +66,21 @@ namespace FudgeCore {
       let serialization: Serialization = {
         idResource: this.idResource,
         name: this.name,
-        mipmap: MIPMAP[this.mipmap]
+        mipmap: MIPMAP[this.#mipmap]
       };
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       Project.register(this, _serialization.idResource);
       this.name = _serialization.name;
-      this.mipmap = <number><unknown>MIPMAP[_serialization.mipmap];
+      this.#mipmap = <number><unknown>MIPMAP[_serialization.mipmap];
       return this;
+    }
+
+    public getMutator(_extendable?: boolean): Mutator {
+      let mutator: Mutator = super.getMutator(true);
+      mutator.mipmap = this.#mipmap;
+      return mutator;
     }
 
     public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
@@ -74,6 +93,8 @@ namespace FudgeCore {
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.idResource;
       delete _mutator.renderData;
+      delete _mutator.textureDirty;
+      delete _mutator.mimapDirty;
     }
   }
 
