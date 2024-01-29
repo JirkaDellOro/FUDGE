@@ -20,21 +20,21 @@ namespace FudgeCore {
       crc3.activeTexture(_textureUnit);
       crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData);
 
-      if (!this.textureDirty && !this.mimapDirty)
-        return;
-
       if (this.textureDirty) {
         try {
           crc3.texImage2D(
             WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE,
             this.texImageSource
           );
+
+          this.mipmapDirty = true;
+          this.textureDirty = false;
         } catch (_error) {
           Debug.error(_error);
         }
       }
 
-      if (this.mimapDirty) {
+      if (this.mipmapDirty) {
         switch (this.mipmap) {
           case MIPMAP.CRISP:
             crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
@@ -43,19 +43,36 @@ namespace FudgeCore {
           case MIPMAP.MEDIUM:
             crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
             crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST_MIPMAP_LINEAR);
+            crc3.generateMipmap(WebGL2RenderingContext.TEXTURE_2D);
             break;
           case MIPMAP.BLURRY:
             crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.LINEAR);
             crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR);
+            crc3.generateMipmap(WebGL2RenderingContext.TEXTURE_2D);
             break;
         }
+
+        this.mipmapDirty = false;
       }
 
-      if (this.mipmap !== MIPMAP.CRISP) 
-        crc3.generateMipmap(WebGL2RenderingContext.TEXTURE_2D);
+      if (this.wrapDirty) {
+        switch (this.wrap) {
+          case WRAP.REPEAT:
+            crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.REPEAT);
+            crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.REPEAT);
+            break;
+          case WRAP.CLAMP:
+            crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.CLAMP_TO_EDGE);
+            crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.CLAMP_TO_EDGE);
+            break;
+          case WRAP.MIRROR:
+            crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.MIRRORED_REPEAT);
+            crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.MIRRORED_REPEAT);
+            break;
+        }
 
-      this.textureDirty = false;
-      this.mimapDirty = false;
+        this.wrapDirty = false;
+      }
     }
 
     protected static deleteRenderData(this: Texture): void {
@@ -67,7 +84,8 @@ namespace FudgeCore {
       crc3.deleteTexture(this.renderData);
       this.renderData = null;
       this.textureDirty = true;
-      this.mimapDirty = true;
+      this.mipmapDirty = true;
+      this.wrapDirty = true;
     }
   }
 }
