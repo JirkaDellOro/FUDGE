@@ -115,7 +115,7 @@ namespace FudgeCore {
       delete _mutator.idResource;
       delete _mutator.renderData;
       delete _mutator.textureDirty;
-      delete _mutator.mimapDirty;
+      delete _mutator.mipmapDirty;
       delete _mutator.mipmapGenerated;
       delete _mutator.wrapDirty;
     }
@@ -198,7 +198,7 @@ namespace FudgeCore {
   export class TextureBase64 extends Texture {
     public image: HTMLImageElement = new Image();
 
-    public constructor(_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP, _width: number = 64, _height: number = 64) {
+    public constructor(_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP, _wrap: WRAP = WRAP.REPEAT, _width: number = 64, _height: number = 64) {
       super(_name);
       this.image.src = _base64;
       this.mipmap = _mipmap;
@@ -227,6 +227,7 @@ namespace FudgeCore {
 
   /**
    * Texture created from a text. Texture upates when the text or font changes. The texture is resized to fit the text.
+   * @authors Jonas Plotzky, HFU, 2024
    */
   export class TextureText extends Texture {
     protected crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
@@ -251,8 +252,9 @@ namespace FudgeCore {
 
     public set font(_font: string) {
       this.#font = _font;
-      this.textureDirty = true;
-      document.fonts.load(this.#font);
+      document.fonts.load(this.#font)
+        .catch((_error) => Debug.error(`${TextureText.name}: ${_error}`))
+        .finally(() => this.textureDirty = true);
     }
 
     public get font(): string {
@@ -276,14 +278,14 @@ namespace FudgeCore {
     }
 
     public useRenderData(_textureUnit?: number): void {
-      if (this.textureDirty && document.fonts.check(this.font)) {
+      if (this.textureDirty) {
         this.crc2.font = this.font;
 
         let metrics: TextMetrics = this.crc2.measureText(this.text);
         let width: number = metrics.width;
         let height: number = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
 
-        this.canvas.width = width + this.crc2.measureText(" ").width;
+        this.canvas.width = width + this.crc2.measureText("  ").width;
         this.canvas.height = height * 1.1; // padding, otherwise on some glyphs might get cut off
         if (this.canvas.width == 0)
           return;

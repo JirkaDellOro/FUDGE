@@ -22,10 +22,13 @@ namespace FudgeCore {
 
       if (this.textureDirty) {
         try {
+          // Always premultiply alpha while loading textures
+          crc3.pixelStorei(crc3.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
           crc3.texImage2D(
             WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE,
             this.texImageSource
           );
+          crc3.pixelStorei(crc3.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
 
           this.mipmapDirty = true;
           this.textureDirty = false;
