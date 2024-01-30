@@ -6,52 +6,16 @@ namespace FudgeCore {
   export class ComponentText extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentText);
 
-    public readonly texture: TextureCanvas = new TextureCanvas("ComponentTextTexture", document.createElement("canvas").getContext("2d"));
-    public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
+    public readonly texture: TextureText;
+    public readonly mtxWorld: Matrix4x4;
 
-    #text: string;
-    #font: string = "20px monospace";
-    #scaling: Vector3 = Vector3.ONE();
+    public fixedSize: boolean;
 
-    #dirty: boolean = true;
-
-    public constructor(_text: string = "", _font: string = "20px monospace") {
+    public constructor(_text?: string, _font?: string) {
       super();
-      this.text = _text;
-      this.font = _font;
-    }
-
-    public set text(_text: string) {
-      if (this.#text == _text || _text == null)
-        return;
-      this.#text = _text;
-      this.#dirty = true;
-    }
-
-    public get text(): string {
-      return this.#text;
-    }
-
-    public set font(_font: string) {
-      if (this.#font == _font || _font == null)
-        return;
-      this.#font = _font;
-      this.#dirty = true;
-    }
-
-    public get font(): string {
-      return this.#font;
-    }
-
-    private get canvas(): HTMLCanvasElement {
-      return <HTMLCanvasElement>this.texture.crc2.canvas;
-    }
-
-    public getMutator(_extendable?: boolean): Mutator {
-      let mutator: Mutator = super.getMutator(true);
-      mutator.text = this.text;
-      mutator.font = this.font;
-      return mutator;
+      this.texture = new TextureText(ComponentText.name, _text, _font);
+      this.mtxWorld = Matrix4x4.IDENTITY();
+      this.fixedSize = false;
     }
 
     public serialize(): Serialization {
@@ -63,13 +27,38 @@ namespace FudgeCore {
       return this;
     }
 
-    public useRenderData(_mtxMeshToWorld: Matrix4x4): Matrix4x4 {
-      this.refresh();
+    public useRenderData(_mtxMeshToWorld: Matrix4x4, _cmpCamera: ComponentCamera): Matrix4x4 {
       this.texture.useRenderData(TEXTURE_LOCATION.COLOR.UNIT);
       this.mtxWorld.set(_mtxMeshToWorld);
-      let pixelsPerUnit: number = 1 / this.canvas.height;
-      this.#scaling.set(this.canvas.width * pixelsPerUnit, this.canvas.height * pixelsPerUnit, 1);
-      this.mtxWorld.scale(this.#scaling);
+
+      let scaling: Vector3 = Recycler.get(Vector3);
+
+      if (this.fixedSize) {
+        let scale: number;
+        let rect: Rectangle = Render.getRenderRectangle();
+        switch (_cmpCamera.getDirection()) {
+          case FIELD_OF_VIEW.VERTICAL:
+            scale = 1 / rect.height;
+            break;
+          case FIELD_OF_VIEW.HORIZONTAL:
+            scale = 1 / rect.width;
+            break;
+          case FIELD_OF_VIEW.DIAGONAL:
+            scale = 1 / Math.sqrt(rect.width * rect.height);
+            break;
+        }
+
+        let distance: number = Vector3.DIFFERENCE(_cmpCamera.mtxWorld.translation, _mtxMeshToWorld.translation).magnitude;
+        scale = scale * distance;
+        scaling.set(this.texture.width * scale, this.texture.height * scale, 1);
+        Recycler.store(distance);
+      } else {
+        let pixelsToUnits: number = 1 / this.texture.height;
+        scaling.set(this.texture.width * pixelsToUnits, this.texture.height * pixelsToUnits, 1);
+      }
+
+      this.mtxWorld.scale(scaling);
+      Recycler.store(scaling);
       return this.mtxWorld;
     }
 
@@ -84,42 +73,7 @@ namespace FudgeCore {
 
     protected reduceMutator(_mutator: Mutator): void {
       super.reduceMutator(_mutator);
-      // delete _mutator.texture;
-      delete _mutator.mtxWorld;
-    }
-
-    // TODO: make async an wait for font to be loaded using document.fonts
-    private refresh(): void {
-      if (!this.#dirty)
-        return;
-
-      const crc2: CanvasRenderingContext2D = <CanvasRenderingContext2D>this.texture.crc2;
-      crc2.font = this.#font;
-      crc2.textAlign = "center";
-      crc2.textBaseline = "middle";
-
-      const lines: string[] = this.#text.split("\n");
-
-      let [width, height] = lines.reduce(([_width, _height], _line) => {
-        let metrics: TextMetrics = crc2.measureText(_line);
-        let width: number = metrics.width;
-        let height: number = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-        return [_width > width ? _width : width, _height + height];
-      }, [0, 0]);
-
-      crc2.canvas.width = width;
-      crc2.canvas.height = height * 1.1; // padding, otherwise on some glyphs might get cut off
-      if (crc2.canvas.width == 0)
-        return;
-
-      crc2.font = this.#font;
-      crc2.textAlign = "center";
-      crc2.textBaseline = "middle";
-      crc2.fillStyle = "white";
-      crc2.clearRect(0, 0, crc2.canvas.width, crc2.canvas.height);
-      crc2.fillText(this.#text, crc2.canvas.width / 2, crc2.canvas.height / 2);
-      this.texture.refresh();
-      this.#dirty = false;
+      delete _mutator.texture.name;
     }
   }
 }

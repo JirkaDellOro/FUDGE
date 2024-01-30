@@ -1100,20 +1100,25 @@ declare namespace FudgeCore {
         };
     };
     const TEXTURE_LOCATION: {
-        COLOR: {
-            UNIFORM: string;
-            UNIT: 33984;
-            INDEX: number;
+        readonly COLOR: {
+            readonly UNIFORM: "u_texColor";
+            readonly UNIT: 33984;
+            readonly INDEX: 0;
         };
-        NORMAL: {
-            UNIFORM: string;
-            UNIT: 33985;
-            INDEX: number;
+        readonly NORMAL: {
+            readonly UNIFORM: "u_texNormal";
+            readonly UNIT: 33985;
+            readonly INDEX: 1;
         };
-        PARTICLE: {
-            UNIFORM: string;
-            UNIT: 33986;
-            INDEX: number;
+        readonly PARTICLE: {
+            readonly UNIFORM: "u_particleSystemRandomNumbers";
+            readonly UNIT: 33986;
+            readonly INDEX: 2;
+        };
+        readonly TEXT: {
+            readonly UNIFORM: "u_texText";
+            readonly UNIT: 33987;
+            readonly INDEX: 3;
         };
     };
     /**
@@ -2650,6 +2655,24 @@ declare namespace FudgeCore {
         resetPose(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<ComponentSkeleton>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * TODO:
+     * @authors Jonas Plotzky, HFU, 2024
+     */
+    class ComponentText extends Component {
+        static readonly iSubclass: number;
+        readonly texture: TextureText;
+        readonly mtxWorld: Matrix4x4;
+        fixedSize: boolean;
+        constructor(_text?: string, _font?: string);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        useRenderData(_mtxMeshToWorld: Matrix4x4, _cmpCamera: ComponentCamera): Matrix4x4;
+        drawGizmosSelected(): void;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -7966,15 +7989,28 @@ declare namespace FudgeCore {
         MEDIUM = 1,
         BLURRY = 2
     }
+    export enum WRAP {
+        REPEAT = 0,
+        CLAMP = 1,
+        MIRROR = 2
+    }
     /**
      * Baseclass for different kinds of textures.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export abstract class Texture extends Mutable implements SerializableResource {
+        #private;
         name: string;
         idResource: string;
-        mipmap: MIPMAP;
+        protected renderData: unknown;
+        protected textureDirty: boolean;
+        protected mipmapDirty: boolean;
+        protected wrapDirty: boolean;
         constructor(_name?: string);
+        set mipmap(_mipmap: MIPMAP);
+        get mipmap(): MIPMAP;
+        set wrap(_wrap: WRAP);
+        get wrap(): WRAP;
         /**
          * Returns the image source of this texture.
          */
@@ -7985,6 +8021,7 @@ declare namespace FudgeCore {
         refresh(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(_extendable?: boolean): Mutator;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -8009,7 +8046,7 @@ declare namespace FudgeCore {
      */
     export class TextureBase64 extends Texture {
         image: HTMLImageElement;
-        constructor(_name: string, _base64: string, _mipmap?: MIPMAP, _width?: number, _height?: number);
+        constructor(_name: string, _base64: string, _mipmap?: MIPMAP, _wrap?: WRAP, _width?: number, _height?: number);
         get texImageSource(): ImageSource;
     }
     /**
@@ -8019,6 +8056,27 @@ declare namespace FudgeCore {
         crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
         constructor(_name: string, _crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D);
         get texImageSource(): ImageSource;
+    }
+    /**
+     * Texture created from a text. Texture upates when the text or font changes. The texture is resized to fit the text.
+     * @authors Jonas Plotzky, HFU, 2024
+     */
+    export class TextureText extends Texture {
+        #private;
+        protected crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+        constructor(_name: string, _text?: string, _font?: string);
+        set text(_text: string);
+        get text(): string;
+        set font(_font: string);
+        get font(): string;
+        get texImageSource(): ImageSource;
+        get width(): number;
+        get height(): number;
+        private get canvas();
+        useRenderData(_textureUnit?: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(_extendable?: boolean): Mutator;
     }
     /**
      * Texture created from a FUDGE-Sketch
