@@ -67,6 +67,10 @@ declare namespace Fudge {
         ROTATE = "rotate",
         SCALE = "scale"
     }
+    enum GIZMOS {
+        TRANSFORM = "Transform",
+        WIRE_MESH = "WireMesh"
+    }
 }
 /**
  * Main electron application running node. Starts the browser window to contain Fudge and sets up the main menu.

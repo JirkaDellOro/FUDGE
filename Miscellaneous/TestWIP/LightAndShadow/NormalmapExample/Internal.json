@@ -1114,7 +1114,7 @@
                   "ƒ.ComponentFog": {
                     "color": "[0, 0, 0, 1]",
                     "near": 1,
-                    "far": 10,
+                    "far": 50,
                     "Component": {
                       "active": true
                     }
@@ -1124,9 +1124,9 @@
               "ComponentAmbientOcclusion": [
                 {
                   "ƒ.ComponentAmbientOcclusion": {
-                    "sampleRadius": 10,
-                    "bias": 0.05,
-                    "attenuationConstant": 2,
+                    "sampleRadius": 16,
+                    "bias": 0.07,
+                    "attenuationConstant": 2.5,
                     "attenuationLinear": 1,
                     "attenuationQuadratic": 1,
                     "Component": {
@@ -1138,9 +1138,9 @@
               "ComponentBloom": [
                 {
                   "ƒ.ComponentBloom": {
-                    "threshold": 0.9,
-                    "intensity": 0.20000000000000015,
-                    "desaturateHighlights": 0,
+                    "threshold": 0.95,
+                    "intensity": 1,
+                    "desaturateHighlights": 0.5,
                     "Component": {
                       "active": true
                     }

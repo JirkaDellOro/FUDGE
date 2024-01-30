@@ -229,6 +229,7 @@ declare namespace Fudge {
         private settingsStringify;
         private panelsStringify;
         private stringifyHTML;
+        private loadFonts;
     }
 }
 declare namespace Fudge {
