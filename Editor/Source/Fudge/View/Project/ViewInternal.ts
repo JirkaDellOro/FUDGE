@@ -13,7 +13,7 @@ namespace Fudge {
   export class ViewInternal extends View {
     private table: ƒui.Table<ƒ.SerializableResource>;
 
-    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
       this.dom.addEventListener(EVENT_EDITOR.OPEN, this.hndEvent);
@@ -27,6 +27,8 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.REMOVE_CHILD, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+
+      this.dom.addEventListener("keyup", this.hndKeyboardEvent);
     }
 
     public listResources(): void {
@@ -203,6 +205,19 @@ namespace Fudge {
       this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
     }
 
+    private hndKeyboardEvent = (_event: KeyboardEvent): void => {
+      if (_event.code != ƒ.KEYBOARD_CODE.F2)
+        return;
+
+      // let cell: HTMLTableCellElement = this.table.querySelector(".selected");
+      let input: HTMLInputElement = document.activeElement.querySelector("input");
+      if (!input)
+        return;
+
+      input.readOnly = false;
+      input.focus();
+    };
+
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
         case EVENT_EDITOR.OPEN:
@@ -226,7 +241,7 @@ namespace Fudge {
           this.listResources();
           break;
         case ƒui.EVENT.RENAME:
-          this.dispatchToParent(EVENT_EDITOR.UPDATE, {bubbles: true, detail: _event.detail});
+          this.dispatchToParent(EVENT_EDITOR.UPDATE, { bubbles: true, detail: _event.detail });
           break;
       }
     };

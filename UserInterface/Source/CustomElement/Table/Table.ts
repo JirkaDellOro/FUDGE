@@ -20,7 +20,7 @@ namespace FudgeUserInterface {
     public data: T[];
     public icon: string;
 
-    constructor(_controller: TableController<T>, _data: T[], _icon?: string) {
+    public constructor(_controller: TableController<T>, _data: T[], _icon?: string) {
       super();
       this.controller = _controller;
       this.data = _data;
