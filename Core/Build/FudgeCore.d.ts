@@ -196,7 +196,7 @@ declare namespace FudgeCore {
         /** dispatched to {@link Viewport} and {@link Node} when recalculation of the branch to render ends. The branch dispatches before the lights are transmitted to the shaders  */
         RENDER_PREPARE_END = "renderPrepareEnd",
         /** dispatched to {@link Viewport} at the end of a rendered frame right before it gets displayed. At this point {@link Gizmos} can still be drawn. */
-        RENDER_END = "renderGizmosEnd",
+        RENDER_END = "renderEnd",
         /** dispatched to {@link Joint}-Components in order to disconnect */
         DISCONNECT_JOINT = "disconnectJoint",
         /** dispatched to {@link Node} when it gets attached to a viewport for rendering */
@@ -1208,6 +1208,11 @@ declare namespace FudgeCore {
          * Set the blend mode to render with
          */
         static setBlendMode(_mode: BLEND): void;
+        /**
+         * Read the (world) position from the pixel at the given point on the render-rectangle (origin top left).
+         * ⚠️ CAUTION: Currently only works when ambient occlusion is active due to writing to the position texture being disabled otherwise.
+         */
+        static pointRenderToWorld(_render: Vector2): Vector3;
         /**
          * Initializes different framebuffers aswell as texture attachments to use as render targets
          */

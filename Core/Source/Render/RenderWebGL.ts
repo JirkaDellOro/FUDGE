@@ -265,6 +265,22 @@ namespace FudgeCore {
     }
 
     /**
+     * Read the (world) position from the pixel at the given point on the render-rectangle (origin top left).
+     * ⚠️ CAUTION: Currently only works when ambient occlusion is active due to writing to the position texture being disabled otherwise.
+     */
+    public static pointRenderToWorld(_render: Vector2): Vector3 {
+      const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
+      const data: Float32Array = new Float32Array(4);
+      crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.framebufferMain);
+      crc3.readBuffer(WebGL2RenderingContext.COLOR_ATTACHMENT1);
+      crc3.readPixels(_render.x, RenderWebGL.rectRender.height - _render.y, 1, 1, crc3.RGBA, crc3.FLOAT, data);
+      crc3.readBuffer(WebGL2RenderingContext.COLOR_ATTACHMENT0);
+      let position: Vector3 = Recycler.get(Vector3);
+      position.set(data[0], data[1], data[2]);
+      return position;
+    }
+
+    /**
      * Initializes different framebuffers aswell as texture attachments to use as render targets
      */
     public static initializeAttachments(): void {

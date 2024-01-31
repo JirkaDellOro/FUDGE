@@ -4554,8 +4554,8 @@ var Fudge;
             ;
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             this.viewport.addEventListener("renderPrepareStart" /* ƒ.EVENT.RENDER_PREPARE_START */, this.hndPrepare);
-            this.viewport.addEventListener("renderGizmosEnd" /* ƒ.EVENT.RENDER_END */, this.drawTranslation);
-            this.viewport.addEventListener("renderGizmosEnd" /* ƒ.EVENT.RENDER_END */, this.drawMesh);
+            this.viewport.addEventListener("renderEnd" /* ƒ.EVENT.RENDER_END */, this.drawTranslation);
+            this.viewport.addEventListener("renderEnd" /* ƒ.EVENT.RENDER_END */, this.drawMesh);
             this.setGraph(null);
             this.canvas.addEventListener("pointerdown", this.activeViewport);
             this.canvas.addEventListener("pick", this.hndPick);
@@ -4626,8 +4626,8 @@ var Fudge;
                     break;
                 case Fudge.EVENT_EDITOR.CLOSE:
                     this.setRenderContinously(false);
-                    this.viewport.removeEventListener("renderGizmosEnd" /* ƒ.EVENT.RENDER_END */, this.drawTranslation);
-                    this.viewport.removeEventListener("renderGizmosEnd" /* ƒ.EVENT.RENDER_END */, this.drawMesh);
+                    this.viewport.removeEventListener("renderEnd" /* ƒ.EVENT.RENDER_END */, this.drawTranslation);
+                    this.viewport.removeEventListener("renderEnd" /* ƒ.EVENT.RENDER_END */, this.drawMesh);
                     // ƒ.Render.removeEventListener(ƒ.EVENT.RENDER_FINISHED, this.hndDrawGizmoSelection);
                     break;
                 case Fudge.EVENT_EDITOR.UPDATE:

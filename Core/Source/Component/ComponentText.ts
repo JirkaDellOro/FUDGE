@@ -38,17 +38,17 @@ namespace FudgeCore {
         let rect: Rectangle = Render.getRenderRectangle();
         switch (_cmpCamera.getDirection()) {
           case FIELD_OF_VIEW.VERTICAL:
-            scale = 1 / rect.height;
+            scale = 1 / rect.height * window.devicePixelRatio;
             break;
           case FIELD_OF_VIEW.HORIZONTAL:
-            scale = 1 / rect.width;
+            scale = 1 / rect.width * window.devicePixelRatio;
             break;
           case FIELD_OF_VIEW.DIAGONAL:
-            scale = 1 / Math.sqrt(rect.width * rect.height);
+            scale = 1 / Math.sqrt((rect.width * rect.height) * window.devicePixelRatio);
             break;
         }
 
-        let distance: number = Vector3.DIFFERENCE(_cmpCamera.mtxWorld.translation, _mtxMeshToWorld.translation).magnitude;
+        let distance: number = _cmpCamera.mtxWorld.translation.getDistance(_mtxMeshToWorld.translation);
         scale = scale * distance;
         scaling.set(this.texture.width * scale, this.texture.height * scale, 1);
         Recycler.store(distance);
