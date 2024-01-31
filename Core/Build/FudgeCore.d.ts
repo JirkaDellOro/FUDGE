@@ -2664,13 +2664,19 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * TODO:
+     * Attaches a {@link TextureText} to the node.
+     * Works in conjunction with {@link ComponentMesh} and {@link ComponentMaterial} to create a text node.
+     * A 'textured' {@link Material} (e.g. {@link ShaderLitTextured}) must be used to display the text properly. Ideally a {@link MeshQuad} should be used to render the text onto.
+     * Additionally a {@link ComponentFaceCamera} can be attached to make the text face the camera.
      * @authors Jonas Plotzky, HFU, 2024
      */
     class ComponentText extends Component {
         static readonly iSubclass: number;
         readonly texture: TextureText;
         readonly mtxWorld: Matrix4x4;
+        /** - on: The texts size is fixed to match the set font size
+         *  - off: The font size is stretched to match the attached meshes size
+         */
         fixedSize: boolean;
         constructor(_text?: string, _font?: string);
         serialize(): Serialization;
