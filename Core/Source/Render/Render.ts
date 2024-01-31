@@ -174,7 +174,7 @@ namespace FudgeCore {
 
         if (_pickGizmos) {
           for (let gizmo of node.getAllComponents()) {
-            if (!gizmo.isActive || !Gizmos.filter.get(gizmo.type))
+            if (!gizmo.isActive || !Gizmos.filter.get(gizmo.type) || !(<Gizmo>gizmo).drawGizmos)
               continue;
       
             gizmos.push(gizmo);

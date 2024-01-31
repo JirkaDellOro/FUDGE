@@ -51,13 +51,15 @@ namespace FudgeCore {
         let distance: number = _cmpCamera.mtxWorld.translation.getDistance(_mtxMeshToWorld.translation);
         scale = scale * distance;
         scaling.set(this.texture.width * scale, this.texture.height * scale, 1);
+        this.mtxWorld.scaling = scaling;
         Recycler.store(distance);
       } else {
         let pixelsToUnits: number = 1 / this.texture.height;
         scaling.set(this.texture.width * pixelsToUnits, this.texture.height * pixelsToUnits, 1);
+        this.mtxWorld.scale(scaling);
       }
 
-      this.mtxWorld.scale(scaling);
+
       Recycler.store(scaling);
       return this.mtxWorld;
     }
