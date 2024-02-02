@@ -19,32 +19,30 @@ namespace FudgeCore {
       Object.defineProperty(_constructor.prototype, "deleteRenderBuffers", {
         value: RenderInjectorMesh.deleteRenderBuffers
       });
-      Object.defineProperty(_constructor.prototype, "setRenderMesh", {
-        value: RenderInjectorMesh.setRenderMesh
-      });
     }
 
     protected static getRenderBuffers(this: Mesh): RenderBuffers {
-      this.ƒrenderMesh = this.ƒrenderMesh || new RenderMesh(this);
 
-      if (this.ƒrenderMesh.buffers == null)
-        this.ƒrenderMesh.buffers = {
-          vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.ƒrenderMesh.vertices),
-          indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.ƒrenderMesh.indices),
-          normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.ƒrenderMesh.normals),
-          textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.ƒrenderMesh.textureUVs),
-          colors: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.ƒrenderMesh.colors),
-          tangents: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.ƒrenderMesh.tangents),
-          nIndices: this.ƒrenderMesh.indices.length
+
+      if (this.renderMesh.buffers == null) {
+        this.renderMesh.buffers = {
+          vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.vertices),
+          indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indices),
+          normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normals),
+          textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVs),
+          colors: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.colors),
+          tangents: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.tangents),
+          nIndices: this.renderMesh.indices.length
         };
+        
+        if (this.renderMesh.bones)
+          this.renderMesh.buffers.bones = createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.bones);
+  
+        if (this.renderMesh.weights)
+          this.renderMesh.buffers.weights = createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.weights);
+      }
 
-      if (this.ƒrenderMesh.bones)
-        this.ƒrenderMesh.buffers.bones = createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.ƒrenderMesh.bones);
-
-      if (this.ƒrenderMesh.weights)
-        this.ƒrenderMesh.buffers.weights = createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.ƒrenderMesh.weights);
-
-      return this.ƒrenderMesh.buffers;
+      return this.renderMesh.buffers;
 
       function createBuffer(_type: GLenum, _array: Float32Array | Uint16Array | Uint8Array): WebGLBuffer {
         const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
@@ -120,63 +118,6 @@ namespace FudgeCore {
         crc3.deleteBuffer(_renderBuffers.tangents);
         crc3.deleteBuffer(_renderBuffers.bones);
         crc3.deleteBuffer(_renderBuffers.weights);
-      }
-    }
-
-    protected static setRenderMesh(this: Mesh, _renderMesh: RenderMesh): void {
-      const vertices: Float32Array = _renderMesh.vertices;
-      const indices: Uint16Array = _renderMesh.indices;
-      const normals: Float32Array = _renderMesh.normals;
-      const textureUVs: Float32Array = _renderMesh.textureUVs;
-      const colors: Float32Array = _renderMesh.colors;
-      const tangents: Float32Array = _renderMesh.tangents;
-      const bones: Uint8Array = _renderMesh.bones;
-      const weights: Float32Array = _renderMesh.weights;
-
-      // Clear the mesh
-      this.vertices.length = 0;
-      this.faces.length = 0;
-
-      // Create mesh vertices and faces so that normals and tangents can be calculated if missing. If they are not missing this could be omitted.
-      for (let iVector2: number = 0, iVector3: number = 0, iVector4: number = 0; iVector3 < vertices?.length; iVector2 += 2, iVector3 += 3, iVector4 += 4) {
-        this.vertices.push(
-          new Vertex(
-            new Vector3(vertices[iVector3 + 0], vertices[iVector3 + 1], vertices[iVector3 + 2]),
-            textureUVs ?
-              new Vector2(textureUVs[iVector2 + 0], textureUVs[iVector2 + 1]) :
-              undefined,
-            normals ?
-              new Vector3(normals[iVector3 + 0], normals[iVector3 + 1], normals[iVector3 + 2]) :
-              undefined,
-            tangents ?
-              new Vector4(tangents[iVector4 + 0], tangents[iVector4 + 1], tangents[iVector4 + 2], tangents[iVector4 + 3]) :
-              undefined,
-            colors ?
-              new Color(colors[iVector4 + 0], colors[iVector4 + 1], colors[iVector4 + 2], colors[iVector4 + 3]) :
-              undefined,
-            bones && weights ?
-              [
-                { index: bones[iVector4 + 0], weight: weights[iVector4 + 0] },
-                { index: bones[iVector4 + 1], weight: weights[iVector4 + 1] },
-                { index: bones[iVector4 + 2], weight: weights[iVector4 + 2] },
-                { index: bones[iVector4 + 3], weight: weights[iVector4 + 3] }
-              ] :
-              undefined
-          )
-        );
-      }
-
-      for (let iFaceVertexIndex: number = 0; iFaceVertexIndex < indices?.length; iFaceVertexIndex += 3) {
-        try {
-          this.faces.push(new Face(
-            this.vertices,
-            indices[iFaceVertexIndex + 0],
-            indices[iFaceVertexIndex + 1],
-            indices[iFaceVertexIndex + 2]
-          ));
-        } catch (_e: unknown) {
-          Debug.fudge("Face excluded", (<Error>_e).message);
-        }
       }
     }
   }

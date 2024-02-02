@@ -21,14 +21,14 @@ namespace FudgeCore {
     public faces: Face[] = [];
 
     // public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
-    /** @internal */
-    protected ƒrenderMesh: RenderMesh; /* defined by RenderInjector */
 
     /** bounding box AABB */
     protected ƒbox: Box;
     // TODO: explore mathematics for easy transformations of radius 
     /** bounding radius */
     protected ƒradius: number;
+
+    #renderMesh: RenderMesh;
 
     public constructor(_name: string = "Mesh") {
       super();
@@ -40,7 +40,10 @@ namespace FudgeCore {
     protected static registerSubclass(_subClass: typeof Mesh): number { return Mesh.subclasses.push(_subClass) - 1; }
 
     public get renderMesh(): RenderMesh {
-      return this.ƒrenderMesh;
+      if (this.#renderMesh == null)
+        this.#renderMesh = new RenderMesh(this);
+
+      return this.#renderMesh;
     }
 
     public get type(): string {
@@ -60,10 +63,6 @@ namespace FudgeCore {
       return this.ƒradius;
     }
 
-    public setRenderMesh(_renderMesh: RenderMesh): void {
-      /* injected by RenderInjector*/
-    }
-
     /**
      * Injected by {@link RenderInjectorMesh}.
      * Used by the render system.
@@ -81,7 +80,7 @@ namespace FudgeCore {
      * Used by the render system.
      * @internal
      */
-    public deleteRenderBuffers(_shader: ShaderInterface): void {/* injected by RenderInjector*/ }
+    public deleteRenderBuffers(_renderBuffers: RenderBuffers): void {/* injected by RenderInjector*/ }
 
     /**
      * Clears the bounds of this mesh aswell as the buffers of the associated {@link RenderMesh}.
@@ -90,7 +89,9 @@ namespace FudgeCore {
       this.ƒbox = undefined;
       this.ƒradius = undefined;
 
-      this.ƒrenderMesh?.clear();
+      this.deleteRenderBuffers(this.renderMesh.buffers);
+      this.renderMesh.clear();
+      // this.#renderMesh?.clear();
     }
 
     //#region Transfer

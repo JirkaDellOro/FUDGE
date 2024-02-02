@@ -21,15 +21,13 @@ namespace FudgeCore {
     public async load(_url: RequestInfo = this.url): Promise<MeshImport> {
       this.clear();
       this.url = _url;
-      if (!this.ƒrenderMesh)
-        this.ƒrenderMesh = new RenderMesh(this); // TODO: maybe create this with an lazy getter?
       return this;
     }
 
     public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
       super.mutate(_mutator, _selection, _dispatchMutate);
       if (typeof (_mutator.url) !== "undefined")
-        this.load(_mutator.url);
+        this.load();
     }
   }
 }

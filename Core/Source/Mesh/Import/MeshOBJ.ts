@@ -73,7 +73,7 @@ namespace FudgeCore {
       this.vertices = vertices;
       this.faces = faces;
       if (norms.length > 0) // TODO: rendermesh should be able to handle undefined normals correctly, i.e. calculate them only if they are not present in the vertices
-        this.ƒrenderMesh.normals = new Float32Array(norms);
+        this.renderMesh.normals = new Float32Array(norms);
       // _mesh.renderMesh.indices = new Uint16Array(indices); // doens't seem to affect scene loading time...
 
       return this;

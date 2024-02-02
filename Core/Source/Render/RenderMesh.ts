@@ -40,34 +40,6 @@ namespace FudgeCore {
       this.mesh = _mesh;
     }
 
-    public get bones(): Uint8Array {
-      return this.#bones || ( // return cache or ...
-        this.#bones = this.mesh.vertices.some(_vertex => _vertex.bones) ?
-          new Uint8Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
-            const bones: Bone[] = this.mesh.vertices.bones(_index);
-            return [bones?.[0]?.index || 0, bones?.[1]?.index || 0, bones?.[2]?.index || 0, bones?.[3]?.index || 0];
-          })) :
-          undefined
-      );
-    }
-    public set bones(_iBones: Uint8Array) {
-      this.#bones = _iBones;
-    }
-
-    public get weights(): Float32Array {
-      return this.#weights || ( // return cache or ...
-        this.#weights = this.mesh.vertices.some(_vertex => _vertex.bones) ?
-          new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
-            const bones: Bone[] = this.mesh.vertices.bones(_index);
-            return [bones?.[0]?.weight || 0, bones?.[1]?.weight || 0, bones?.[2]?.weight || 0, bones?.[3]?.weight || 0];
-          })) :
-          undefined
-      );
-    }
-    public set weights(_weights: Float32Array) {
-      this.#weights = _weights;
-    }
-
     public get vertices(): Float32Array {
       return this.#vertices || ( // return cache or ...
         // ... flatten all vertex positions from cloud into a typed array
@@ -226,11 +198,40 @@ namespace FudgeCore {
       this.#colors = _colors;
     }
 
+    public get bones(): Uint8Array {
+      return this.#bones || ( // return cache or ...
+        this.#bones = this.mesh.vertices.some(_vertex => _vertex.bones) ?
+          new Uint8Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
+            const bones: Bone[] = this.mesh.vertices.bones(_index);
+            return [bones?.[0]?.index || 0, bones?.[1]?.index || 0, bones?.[2]?.index || 0, bones?.[3]?.index || 0];
+          })) :
+          undefined
+      );
+    }
+    public set bones(_iBones: Uint8Array) {
+      this.#bones = _iBones;
+    }
+
+    public get weights(): Float32Array {
+      return this.#weights || ( // return cache or ...
+        this.#weights = this.mesh.vertices.some(_vertex => _vertex.bones) ?
+          new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
+            const bones: Bone[] = this.mesh.vertices.bones(_index);
+            return [bones?.[0]?.weight || 0, bones?.[1]?.weight || 0, bones?.[2]?.weight || 0, bones?.[3]?.weight || 0];
+          })) :
+          undefined
+      );
+    }
+    public set weights(_weights: Float32Array) {
+      this.#weights = _weights;
+    }
+
     /**
      * Clears this render mesh and all its buffers
      */
     public clear(): void {
       this.buffers = null;
+
       this.#vertices = null;
       this.#indices = null;
       this.#textureUVs = null;

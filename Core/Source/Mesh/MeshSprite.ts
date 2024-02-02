@@ -27,9 +27,9 @@ namespace FudgeCore {
       ];
     }
 
-    // flat is standard here
-    public get verticesFlat(): Float32Array { return this.ƒrenderMesh.vertices; }
-    public get indicesFlat(): Uint16Array { return this.ƒrenderMesh.indices; }
+    // flat is standard here // TODO: is this still needed?
+    public get verticesFlat(): Float32Array { return this.renderMesh.vertices; }
+    public get indicesFlat(): Uint16Array { return this.renderMesh.indices; }
 
     // instead, smooth shading would need extra attention but is not relevant...
 
