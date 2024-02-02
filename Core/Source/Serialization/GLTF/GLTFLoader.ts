@@ -359,9 +359,9 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns the first {@link MeshImport} with the given mesh name.
+     * Returns the first {@link MeshGLTF} with the given mesh name.
      */
-    public async getMesh(_name: string): Promise<MeshImport> {
+    public async getMesh(_name: string): Promise<MeshGLTF> {
       const iMesh: number = this.gltf.meshes.findIndex(_mesh => _mesh.name == _name);
       if (iMesh == -1)
         throw new Error(`${this}: Couldn't find name '${_name}' in gltf meshes.`);
@@ -369,9 +369,9 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns the {@link MeshImport} for the given mesh index.
+     * Returns the {@link MeshGLTF} for the given mesh index and primitive index.
      */
-    public async getMeshByIndex(_iMesh: number, _iPrimitive: number = 0, _mesh?: MeshGLTF): Promise<MeshGLTF> {
+    public async getMeshByIndex(_iMesh: number, _iPrimitive: number = 0): Promise<MeshGLTF> {
       if (!this.#meshes)
         this.#meshes = [];
       if (!this.#meshes[_iMesh])
@@ -380,6 +380,16 @@ namespace FudgeCore {
       if (this.#meshes[_iMesh][_iPrimitive])
         return this.#meshes[_iMesh][_iPrimitive];
 
+      await this.loadMesh(_iMesh, _iPrimitive);
+
+      return this.#meshes[_iMesh][_iPrimitive];
+    }
+
+    /**
+     * Creates a new {@link MeshGLTF} for the given mesh index and primitive index and returns it. Replaces the cached mesh affecting {@link getMeshByIndex}. If a mesh is provided, it will be used instead of creating a new one.
+     * @internal
+     */
+    public async loadMesh(_iMesh: number, _iPrimitive: number = 0, _mesh?: MeshGLTF): Promise<MeshGLTF> {
       const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
       const gltfPrimitive: GLTF.MeshPrimitive = gltfMesh.primitives[_iPrimitive];
 
@@ -400,45 +410,98 @@ namespace FudgeCore {
       _mesh = _mesh ?? new MeshGLTF();
       _mesh.name = gltfMesh.name;
 
-      const renderMesh: RenderMesh = new RenderMesh(_mesh);
+      let vertices: Float32Array, indices: Uint16Array;
+      let normals: Float32Array, tangents: Float32Array;
+      let colors: Float32Array, textureUVs: Float32Array;
+      let bones: Uint8Array, weights: Float32Array;
 
       if (gltfPrimitive.indices != undefined) {
-        renderMesh.indices = await this.getVertexIndices(gltfPrimitive.indices);
-        for (let i: number = 0; i < renderMesh.indices.length; i += 3) {
-          const temp: number = renderMesh.indices[i + 2];
-          renderMesh.indices[i + 2] = renderMesh.indices[i + 0];
-          renderMesh.indices[i + 0] = renderMesh.indices[i + 1];
-          renderMesh.indices[i + 1] = temp;
+        indices = await this.getVertexIndices(gltfPrimitive.indices);
+        for (let i: number = 0; i < indices.length; i += 3) {
+          const temp: number = indices[i + 2];
+          indices[i + 2] = indices[i + 0];
+          indices[i + 0] = indices[i + 1];
+          indices[i + 1] = temp;
         }
       } else {
         Debug.warn(`${this}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has no indices. FUDGE does not support non-indexed meshes.`);
       }
 
       if (gltfPrimitive.attributes.POSITION != undefined)
-        renderMesh.vertices = await this.getFloat32Array(gltfPrimitive.attributes.POSITION);
+        vertices = await this.getFloat32Array(gltfPrimitive.attributes.POSITION);
       else
         Debug.warn(`${this}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has no position attribute. Primitive will be ignored.`);
 
       if (gltfPrimitive.attributes.NORMAL != undefined)
-        renderMesh.normals = await this.getFloat32Array(gltfPrimitive.attributes.NORMAL);
+        normals = await this.getFloat32Array(gltfPrimitive.attributes.NORMAL);
 
       if (gltfPrimitive.attributes.TANGENT != undefined)
-        renderMesh.tangents = await this.getFloat32Array(gltfPrimitive.attributes.TANGENT);
+        tangents = await this.getFloat32Array(gltfPrimitive.attributes.TANGENT);
 
       if (gltfPrimitive.attributes.TEXCOORD_1 != undefined)
-        renderMesh.textureUVs = await this.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_1);
+        textureUVs = await this.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_1);
       else if (gltfPrimitive.attributes.TEXCOORD_0 != undefined)
-        renderMesh.textureUVs = await this.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_0);
+        textureUVs = await this.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_0);
 
       if (gltfPrimitive.attributes.COLOR_0 != undefined)
-        renderMesh.colors = await this.getVertexColors(gltfPrimitive.attributes.COLOR_0);
+        colors = await this.getVertexColors(gltfPrimitive.attributes.COLOR_0);
 
       if (gltfPrimitive.attributes.JOINTS_0 != undefined && gltfPrimitive.attributes.WEIGHTS_0 != undefined) {
-        renderMesh.bones = await this.getBoneIndices(gltfPrimitive.attributes.JOINTS_0);
-        renderMesh.weights = await this.getFloat32Array(gltfPrimitive.attributes.WEIGHTS_0);
+        bones = await this.getBoneIndices(gltfPrimitive.attributes.JOINTS_0);
+        weights = await this.getFloat32Array(gltfPrimitive.attributes.WEIGHTS_0);
       }
 
-      _mesh.setRenderMesh(renderMesh);
+      // Create mesh vertices and faces so that normals and tangents can be calculated if missing. If they are not missing this could be omitted.
+      for (let iVector2: number = 0, iVector3: number = 0, iVector4: number = 0; iVector3 < vertices?.length; iVector2 += 2, iVector3 += 3, iVector4 += 4) {
+        _mesh.vertices.push(
+          new Vertex(
+            new Vector3(vertices[iVector3 + 0], vertices[iVector3 + 1], vertices[iVector3 + 2]),
+            textureUVs ?
+              new Vector2(textureUVs[iVector2 + 0], textureUVs[iVector2 + 1]) :
+              undefined,
+            normals ?
+              new Vector3(normals[iVector3 + 0], normals[iVector3 + 1], normals[iVector3 + 2]) :
+              undefined,
+            tangents ?
+              new Vector4(tangents[iVector4 + 0], tangents[iVector4 + 1], tangents[iVector4 + 2], tangents[iVector4 + 3]) :
+              undefined,
+            colors ?
+              new Color(colors[iVector4 + 0], colors[iVector4 + 1], colors[iVector4 + 2], colors[iVector4 + 3]) :
+              undefined,
+            bones && weights ?
+              [
+                { index: bones[iVector4 + 0], weight: weights[iVector4 + 0] },
+                { index: bones[iVector4 + 1], weight: weights[iVector4 + 1] },
+                { index: bones[iVector4 + 2], weight: weights[iVector4 + 2] },
+                { index: bones[iVector4 + 3], weight: weights[iVector4 + 3] }
+              ] :
+              undefined
+          )
+        );
+      }
+
+      for (let iFaceVertexIndex: number = 0; iFaceVertexIndex < indices?.length; iFaceVertexIndex += 3) {
+        try {
+          _mesh.faces.push(new Face(
+            _mesh.vertices,
+            indices[iFaceVertexIndex + 0],
+            indices[iFaceVertexIndex + 1],
+            indices[iFaceVertexIndex + 2]
+          ));
+        } catch (_e: unknown) {
+          Debug.fudge("Face excluded", (<Error>_e).message);
+        }
+      }
+
+      _mesh.renderMesh.vertices = vertices;
+      _mesh.renderMesh.indices = indices;
+      _mesh.renderMesh.normals = normals;
+      _mesh.renderMesh.tangents = tangents;
+      _mesh.renderMesh.textureUVs = textureUVs;
+      _mesh.renderMesh.colors = colors;
+      _mesh.renderMesh.bones = bones;
+      _mesh.renderMesh.weights = weights;
+
       this.#meshes[_iMesh][_iPrimitive] = _mesh;
 
       return _mesh;
@@ -447,7 +510,6 @@ namespace FudgeCore {
         if (Object.keys(gltfPrimitive.attributes).filter((_key: string) => _key.startsWith(_check)).length > _max)
           Debug.warn(`${_loader}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has more than ${_max} sets of '${_check}' associated with it. FUGDE only supports up to ${_max} ${_check} sets per primitve.`);
       }
-
     }
 
     /**

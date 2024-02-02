@@ -4590,6 +4590,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019/22
      */
     abstract class Mesh extends Mutable implements SerializableResource {
+        #private;
         /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
         static readonly baseClass: typeof Mesh;
         /** list of all the subclasses derived from this class, if they registered properly*/
@@ -4608,7 +4609,6 @@ declare namespace FudgeCore {
         get type(): string;
         get boundingBox(): Box;
         get radius(): number;
-        setRenderMesh(_renderMesh: RenderMesh): void;
         /**
          * Clears the bounds of this mesh aswell as the buffers of the associated {@link RenderMesh}.
          */
@@ -7696,13 +7696,13 @@ declare namespace FudgeCore {
          */
         getAnimationByIndex(_iAnimation: number): Promise<Animation>;
         /**
-         * Returns the first {@link MeshImport} with the given mesh name.
+         * Returns the first {@link MeshGLTF} with the given mesh name.
          */
-        getMesh(_name: string): Promise<MeshImport>;
+        getMesh(_name: string): Promise<MeshGLTF>;
         /**
-         * Returns the {@link MeshImport} for the given mesh index.
+         * Returns the {@link MeshGLTF} for the given mesh index and primitive index.
          */
-        getMeshByIndex(_iMesh: number, _iPrimitive?: number, _mesh?: MeshGLTF): Promise<MeshGLTF>;
+        getMeshByIndex(_iMesh: number, _iPrimitive?: number): Promise<MeshGLTF>;
         /**
          * Returns the {@link Material} for the given material index.
          */

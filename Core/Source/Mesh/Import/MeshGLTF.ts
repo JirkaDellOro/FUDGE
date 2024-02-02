@@ -14,8 +14,7 @@ namespace FudgeCore {
       this.iMesh = _iMesh;
       this.iPrimitive = _iPrimitive;
       const loader: GLTFLoader = await GLTFLoader.LOAD(_url.toString());
-      
-      return await loader.getMeshByIndex(_iMesh, _iPrimitive, this);
+      return await loader.loadMesh(_iMesh, _iPrimitive, this);
     }
 
     public serialize(): Serialization {
