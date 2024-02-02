@@ -15,14 +15,6 @@ namespace FudgeCore {
     OPAQUE, TRANSPARENT, ADDITIVE, SUBTRACTIVE, MODULATE
   }
 
-  export interface BufferSpecification {
-    size: number;   // The size of the datasample.
-    dataType: number; // The datatype of the sample (e.g. gl.FLOAT, gl.BYTE, etc.)
-    normalize: boolean; // Flag to normalize the data.
-    stride: number; // Number of indices that will be skipped each iteration.
-    offset: number; // Index of the element to begin with.
-  }
-
   /* eslint-disable */ // we want type inference here so we can use vs code to search for references
   export const UNIFORM_BLOCKS = {
     LIGHTS: {
@@ -120,15 +112,6 @@ namespace FudgeCore {
       RenderWebGL.adjustAttachments();
 
       return crc3;
-    }
-
-    /** 
-     * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-     * @param _attributeLocation  The location of the attribute on the shader, to which they data will be passed.
-     * @param _bufferSpecification  Interface passing datapullspecifications to the buffer.
-     */
-    public static setAttributeStructure(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
-      RenderWebGL.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
     }
 
     /**

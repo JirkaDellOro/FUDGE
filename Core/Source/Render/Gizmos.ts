@@ -283,7 +283,7 @@ namespace FudgeCore {
 
       const indices: number[] = [];
       const renderBuffers: RenderBuffers = _mesh.getRenderBuffers();
-      const renderMesh: RenderMesh = _mesh.renderMesh;
+      const renderMesh: RenderMesh = _mesh.renderMesh; // TODO: don't breach encapsulation here...
       for (let i: number = 0; i < renderMesh.indices.length; i += 3) { // TODO: think about caching this in the mesh
         const a: number = renderMesh.indices[i];
         const b: number = renderMesh.indices[i + 1];

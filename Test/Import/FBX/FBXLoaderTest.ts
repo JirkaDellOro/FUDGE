@@ -1,5 +1,5 @@
-/// <reference types="../../Core/Build/FudgeCore"/>
-///<reference types="../../Aid/Build/FudgeAid"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
 namespace SkeletonTest {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;

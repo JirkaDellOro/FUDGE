@@ -9,14 +9,14 @@ namespace FudgeCore {
     static #defaultMaterial: Material;
     static #defaultSkinMaterial: Material;
 
-    public readonly gltf: GLTF.GlTf;
     public readonly url: string;
+    private readonly gltf: GLTF.GlTf;
 
     #scenes: Graph[];
     #nodes: Node[] = [];
     #cameras: ComponentCamera[];
     #animations: Animation[];
-    #meshes: MeshImport[][];
+    #meshes: MeshGLTF[][];
     #materials: Material[];
     #skeletons: ComponentSkeleton[];
     #textures: Texture[];
@@ -212,14 +212,13 @@ namespace FudgeCore {
           const subComponents: [ComponentMesh, ComponentMaterial][] = [];
           for (let iPrimitive: number = 0; iPrimitive < gltfMesh.primitives.length; iPrimitive++) {
             const cmpMesh: ComponentMesh = new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh, iPrimitive));
+            const isSkin: boolean = gltfNode.skin != undefined;
 
-            // check for skeleton
-            if (gltfNode.skin != undefined)
+            if (isSkin)
               cmpMesh.skeleton = await this.getSkeletonByIndex(gltfNode.skin);
 
             let cmpMaterial: ComponentMaterial;
             const iMaterial: number = gltfMesh.primitives?.[iPrimitive]?.material;
-            const isSkin: boolean = cmpMesh.mesh instanceof MeshSkin;
             if (iMaterial == undefined) {
               cmpMaterial = new ComponentMaterial(isSkin ?
                 GLTFLoader.defaultSkinMaterial :
@@ -372,23 +371,83 @@ namespace FudgeCore {
     /**
      * Returns the {@link MeshImport} for the given mesh index.
      */
-    public async getMeshByIndex(_iMesh: number, _iPrimitive: number = 0): Promise<MeshImport> {
+    public async getMeshByIndex(_iMesh: number, _iPrimitive: number = 0, _mesh?: MeshGLTF): Promise<MeshGLTF> {
       if (!this.#meshes)
         this.#meshes = [];
       if (!this.#meshes[_iMesh])
         this.#meshes[_iMesh] = [];
 
-      if (!this.#meshes[_iMesh][_iPrimitive]) {
-        const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
+      if (this.#meshes[_iMesh][_iPrimitive])
+        return this.#meshes[_iMesh][_iPrimitive];
 
-        this.#meshes[_iMesh][_iPrimitive] = await (
-          gltfMesh.primitives[_iPrimitive].attributes.JOINTS_0 != undefined ?
-            new MeshSkin() :
-            new MeshImport()
-        ).load(MeshLoaderGLTF, this.url, { iMesh: _iMesh, iPrimitive: _iPrimitive });
+      const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
+      const gltfPrimitive: GLTF.MeshPrimitive = gltfMesh.primitives[_iPrimitive];
+
+      if (gltfPrimitive.indices == undefined)
+        Debug.warn(`${this}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has no indices. FUDGE does not support non-indexed meshes.`);
+
+      if (gltfPrimitive.attributes.POSITION == undefined)
+        Debug.warn(`${this}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has no position attribute. Primitive will be ignored.`);
+
+      if (gltfPrimitive.mode != undefined && gltfPrimitive.mode != GLTF.MESH_PRIMITIVE_MODE.TRIANGLES)
+        Debug.warn(`${this}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has topology type mode ${GLTF.MESH_PRIMITIVE_MODE[gltfPrimitive.mode]}. FUDGE only supports ${GLTF.MESH_PRIMITIVE_MODE[4]}.`);
+
+      checkMaxSupport(this, "TEXCOORD", 2);
+      checkMaxSupport(this, "COLOR", 1);
+      checkMaxSupport(this, "JOINTS", 1);
+      checkMaxSupport(this, "WEIGHTS", 1);
+
+      _mesh = _mesh ?? new MeshGLTF();
+      _mesh.name = gltfMesh.name;
+
+      const renderMesh: RenderMesh = new RenderMesh(_mesh);
+
+      if (gltfPrimitive.indices != undefined) {
+        renderMesh.indices = await this.getVertexIndices(gltfPrimitive.indices);
+        for (let i: number = 0; i < renderMesh.indices.length; i += 3) {
+          const temp: number = renderMesh.indices[i + 2];
+          renderMesh.indices[i + 2] = renderMesh.indices[i + 0];
+          renderMesh.indices[i + 0] = renderMesh.indices[i + 1];
+          renderMesh.indices[i + 1] = temp;
+        }
+      } else {
+        Debug.warn(`${this}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has no indices. FUDGE does not support non-indexed meshes.`);
       }
 
-      return this.#meshes[_iMesh][_iPrimitive];
+      if (gltfPrimitive.attributes.POSITION != undefined)
+        renderMesh.vertices = await this.getFloat32Array(gltfPrimitive.attributes.POSITION);
+      else
+        Debug.warn(`${this}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has no position attribute. Primitive will be ignored.`);
+
+      if (gltfPrimitive.attributes.NORMAL != undefined)
+        renderMesh.normals = await this.getFloat32Array(gltfPrimitive.attributes.NORMAL);
+
+      if (gltfPrimitive.attributes.TANGENT != undefined)
+        renderMesh.tangents = await this.getFloat32Array(gltfPrimitive.attributes.TANGENT);
+
+      if (gltfPrimitive.attributes.TEXCOORD_1 != undefined)
+        renderMesh.textureUVs = await this.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_1);
+      else if (gltfPrimitive.attributes.TEXCOORD_0 != undefined)
+        renderMesh.textureUVs = await this.getFloat32Array(gltfPrimitive.attributes.TEXCOORD_0);
+
+      if (gltfPrimitive.attributes.COLOR_0 != undefined)
+        renderMesh.colors = await this.getVertexColors(gltfPrimitive.attributes.COLOR_0);
+
+      if (gltfPrimitive.attributes.JOINTS_0 != undefined && gltfPrimitive.attributes.WEIGHTS_0 != undefined) {
+        renderMesh.bones = await this.getBoneIndices(gltfPrimitive.attributes.JOINTS_0);
+        renderMesh.weights = await this.getFloat32Array(gltfPrimitive.attributes.WEIGHTS_0);
+      }
+
+      _mesh.setRenderMesh(renderMesh);
+      this.#meshes[_iMesh][_iPrimitive] = _mesh;
+
+      return _mesh;
+
+      function checkMaxSupport(_loader: GLTFLoader, _check: string, _max: number): void {
+        if (Object.keys(gltfPrimitive.attributes).filter((_key: string) => _key.startsWith(_check)).length > _max)
+          Debug.warn(`${_loader}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has more than ${_max} sets of '${_check}' associated with it. FUGDE only supports up to ${_max} ${_check} sets per primitve.`);
+      }
+
     }
 
     /**
@@ -575,11 +634,15 @@ namespace FudgeCore {
       return this.#skeletons[_iSkeleton];
     }
 
+    public toString(): string {
+      return `${GLTFLoader.name} | ${this.url}`;
+    }
+
     /**
      * Returns a {@link Uint8Array} for the given accessor index.
      * @internal
      */
-    public async getBoneIndices(_iAccessor: number): Promise<Uint8Array> {
+    private async getBoneIndices(_iAccessor: number): Promise<Uint8Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
       const componentType: GLTF.COMPONENT_TYPE = this.gltf.accessors[_iAccessor]?.componentType;
 
@@ -598,7 +661,7 @@ namespace FudgeCore {
      * Returns a {@link Float32Array} for the given accessor index.
      * @internal
      */
-    public async getFloat32Array(_iAccessor: number): Promise<Float32Array> {
+    private async getFloat32Array(_iAccessor: number): Promise<Float32Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
       const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
 
@@ -629,7 +692,7 @@ namespace FudgeCore {
      * Returns a {@link Uint16Array} for the given accessor index. Only used to get the vertex indices.
      * @internal
      */
-    public async getVertexIndices(_iAccessor: number): Promise<Uint16Array> {
+    private async getVertexIndices(_iAccessor: number): Promise<Uint16Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
       const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
 
@@ -650,7 +713,7 @@ namespace FudgeCore {
      * Return a {@link Float32Array} for the given accessor index. The array contains the vertex colors in RGBA format.
      * @internal
      */
-    public async getVertexColors(_iAccessor: number): Promise<Float32Array> {
+    private async getVertexColors(_iAccessor: number): Promise<Float32Array> {
       const array: Float32Array = await this.getFloat32Array(_iAccessor);
       const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
 
@@ -666,10 +729,6 @@ namespace FudgeCore {
       }
 
       return array;
-    }
-
-    public toString(): string {
-      return `${GLTFLoader.name} | ${this.url}`;
     }
 
     private async getBufferData(_iAccessor: number): Promise<TypedArray> {

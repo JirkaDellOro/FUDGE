@@ -100,7 +100,7 @@ namespace FudgeCore {
             const mesh: MeshImport = await this.getMesh(this.fbx.objects.geometries.indexOf(childFBX));
             const cmpMesh: ComponentMesh = new ComponentMesh(mesh);
             node.addComponent(new ComponentMaterial(FBXLoader.defaultMaterial));
-            if (mesh instanceof MeshSkin) {
+            if (mesh.renderMesh.bones) {
               cmpMesh.skeleton = await this.getSkeleton(childFBX.children[0].children[0].children[0]);
               // for (const subDeformerFBX of childFBX.children[0].children as FBX.SubDeformer[]) {
               //   const bone: Node = cmpMesh.skeleton.bones[subDeformerFBX.children[0].name];
@@ -115,7 +115,7 @@ namespace FudgeCore {
             // TODO: additional skin materials get created here, check if the original material is still needed
             const iMaterial: number = this.fbx.objects.materials.indexOf(childFBX);
             const material: Material = await this.getMaterial(iMaterial);
-            node.getComponent(ComponentMaterial).material = node.getComponent(ComponentMesh).mesh instanceof MeshSkin ?
+            node.getComponent(ComponentMaterial).material = node.getComponent(ComponentMesh).mesh.renderMesh.bones ?
               this.#skinMaterials[iMaterial] || (this.#skinMaterials[iMaterial] = new Material(
                 material.name,
                 material.getShader() == ShaderPhong ?
@@ -134,11 +134,7 @@ namespace FudgeCore {
       if (!this.#meshes)
         this.#meshes = [];
       if (!this.#meshes[_index])
-        this.#meshes[_index] = await (
-          this.fbx.objects.geometries[_index].children?.[0].type == "Deformer" ?
-            new MeshSkin() :
-            new MeshImport()
-        ).load(MeshLoaderFBX, this.uri, this.fbx.objects.geometries[_index]);
+        this.#meshes[_index] = await new MeshFBX().load(this.uri, _index);
       return this.#meshes[_index];
     }
 

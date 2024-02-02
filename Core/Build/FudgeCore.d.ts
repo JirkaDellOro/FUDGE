@@ -1078,13 +1078,6 @@ declare namespace FudgeCore {
         SUBTRACTIVE = 3,
         MODULATE = 4
     }
-    interface BufferSpecification {
-        size: number;
-        dataType: number;
-        normalize: boolean;
-        stride: number;
-        offset: number;
-    }
     const UNIFORM_BLOCKS: {
         LIGHTS: {
             NAME: string;
@@ -1147,12 +1140,6 @@ declare namespace FudgeCore {
          * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
          */
         static initialize(_antialias?: boolean, _alpha?: boolean): WebGL2RenderingContext;
-        /**
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation  The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification  Interface passing datapullspecifications to the buffer.
-         */
-        static setAttributeStructure(_attributeLocation: number, _bufferSpecification: BufferSpecification): void;
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
         * @param _value  value to check against null
@@ -4617,9 +4604,11 @@ declare namespace FudgeCore {
         protected ƒradius: number;
         constructor(_name?: string);
         protected static registerSubclass(_subClass: typeof Mesh): number;
+        get renderMesh(): RenderMesh;
         get type(): string;
         get boundingBox(): Box;
         get radius(): number;
+        setRenderMesh(_renderMesh: RenderMesh): void;
         /**
          * Clears the bounds of this mesh aswell as the buffers of the associated {@link RenderMesh}.
          */
@@ -4712,23 +4701,6 @@ declare namespace FudgeCore {
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createFlatNormals(): Float32Array;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Mesh loaded from a file
-     * @author Matthias Roming, HFU, 2022-2023
-     */
-    class MeshImport extends Mesh {
-        url: RequestInfo;
-        private loader;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        /**
-         * Load mesh from file
-         */
-        load(_loader?: typeof MeshLoader, _url?: RequestInfo, _data?: Object): Promise<MeshImport>;
-        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
     }
 }
 declare namespace FudgeCore {
@@ -4874,16 +4846,6 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
         protected rotate(_shape: Vector2[], _longitudes: number): void;
-    }
-}
-declare namespace FudgeCore {
-}
-declare namespace FudgeCore {
-    /**
-     * Mesh influenced by a skeleton and loaded from a file
-     * @authors Matthias Roming, HFU, 2022-2023 | Jonas Plotzky, HFU, 2023
-     */
-    class MeshSkin extends MeshImport {
     }
 }
 declare namespace FudgeCore {
@@ -5036,24 +4998,29 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Base class for MeshImport-loaders
-     * @author Matthias Roming, HFU, 2023
+     * Mesh loaded from a file
+     * @authors Matthias Roming, HFU, 2022-2023 | Jonas Plotzky, HFU, 2024
      */
-    abstract class MeshLoader {
-        /**
-         * Loads the given data into the given mesh
-         */
-        static load(_mesh: MeshImport | MeshSkin, _data?: Object): Promise<MeshImport>;
+    abstract class MeshImport extends Mesh {
+        url: RequestInfo;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        load(_url?: RequestInfo): Promise<MeshImport>;
+        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
     }
 }
 declare namespace FudgeCore {
     /**
      * Filmbox mesh import
      * @authors Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
-     * @ignore currently not working
      */
-    class MeshLoaderFBX extends MeshLoader {
-        static load(_mesh: MeshImport | MeshSkin, _data: FBX.Geometry): Promise<MeshImport>;
+    class MeshFBX extends MeshImport {
+        iMesh: number;
+        load(_url?: RequestInfo, _iMesh?: number): Promise<MeshFBX>;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        private getDataIndex;
+        private createBones;
     }
 }
 declare namespace FudgeCore {
@@ -5061,11 +5028,12 @@ declare namespace FudgeCore {
      * gl Transfer Format mesh import
      * @authors Matthias Roming, HFU, 2022-2023 | Jonas Plotzky, HFU, 2023
      */
-    class MeshLoaderGLTF extends MeshLoader {
-        static load(_mesh: MeshImport | MeshSkin, _data?: {
-            iMesh: number;
-            iPrimitive: number;
-        }): Promise<MeshImport>;
+    class MeshGLTF extends MeshImport {
+        iMesh: number;
+        iPrimitive: number;
+        load(_url?: RequestInfo, _iMesh?: number, _iPrimitive?: number): Promise<MeshGLTF>;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -5076,8 +5044,8 @@ declare namespace FudgeCore {
      * @todo Load Materials, Support Quads
      * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
      */
-    class MeshLoaderOBJ extends MeshLoader {
-        static load(_mesh: MeshImport): Promise<MeshImport>;
+    class MeshOBJ extends MeshImport {
+        load(_url?: RequestInfo): Promise<MeshOBJ>;
     }
 }
 declare namespace FudgeCore {
@@ -7684,8 +7652,8 @@ declare namespace FudgeCore {
     class GLTFLoader {
         #private;
         private static loaders;
-        readonly gltf: GLTF.GlTf;
         readonly url: string;
+        private readonly gltf;
         private constructor();
         private static get defaultMaterial();
         private static get defaultSkinMaterial();
@@ -7734,7 +7702,7 @@ declare namespace FudgeCore {
         /**
          * Returns the {@link MeshImport} for the given mesh index.
          */
-        getMeshByIndex(_iMesh: number, _iPrimitive?: number): Promise<MeshImport>;
+        getMeshByIndex(_iMesh: number, _iPrimitive?: number, _mesh?: MeshGLTF): Promise<MeshGLTF>;
         /**
          * Returns the {@link Material} for the given material index.
          */

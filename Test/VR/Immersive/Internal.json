@@ -1,155 +1,138 @@
 {
-  "MeshObj|2022-11-29T08:27:28.149Z|19233": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:27:28.149Z|19233",
+  "MeshOBJ|2022-11-29T08:27:28.149Z|19233": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:27:28.149Z|19233",
       "name": "chairtrippy.obj",
-      "type": "MeshImport",
-      "url": "objs\\chairtrippy.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\chairtrippy.obj"
     }
   },
-  "MeshObj|2022-11-29T08:27:28.149Z|81090": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:27:28.149Z|81090",
+  "MeshOBJ|2022-11-29T08:27:28.149Z|81090": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:27:28.149Z|81090",
       "name": "cookingfront.obj",
-      "type": "MeshImport",
-      "url": "objs\\cookingfront.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\cookingfront.obj"
     }
   },
-  "MeshObj|2022-11-29T08:27:28.150Z|59657": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:27:28.150Z|59657",
+  "MeshOBJ|2022-11-29T08:27:28.150Z|59657": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:27:28.150Z|59657",
       "name": "crazyhighbottles.obj",
-      "type": "MeshImport",
-      "url": "objs\\crazyhighbottles.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\crazyhighbottles.obj"
     }
   },
-  "MeshObj|2022-11-29T08:27:28.150Z|21206": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:27:28.150Z|21206",
+  "MeshOBJ|2022-11-29T08:27:28.150Z|21206": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:27:28.150Z|21206",
       "name": "dampfabzug.obj",
-      "type": "MeshImport",
-      "url": "objs\\dampfabzug.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\dampfabzug.obj"
     }
   },
-  "MeshObj|2022-11-29T08:27:28.151Z|20749": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:27:28.151Z|20749",
+  "MeshOBJ|2022-11-29T08:27:28.151Z|20749": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:27:28.151Z|20749",
       "name": "lamptop.obj",
-      "type": "MeshImport",
-      "url": "objs\\lamptop.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\lamptop.obj"
     }
   },
-  "MeshObj|2022-11-29T08:27:28.152Z|43348": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:27:28.152Z|43348",
+  "MeshOBJ|2022-11-29T08:27:28.152Z|43348": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:27:28.152Z|43348",
       "name": "sofa01.obj",
-      "type": "MeshImport",
-      "url": "objs\\sofa01.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\sofa01.obj"
     }
   },
-  "MeshObj|2022-11-29T08:27:28.153Z|39311": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:27:28.153Z|39311",
+  "MeshOBJ|2022-11-29T08:27:28.153Z|39311": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:27:28.153Z|39311",
       "name": "sofa_pillow.obj",
-      "type": "MeshImport",
-      "url": "objs\\sofa_pillow.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\sofa_pillow.obj"
     }
   },
-  "MeshObj|2022-11-29T08:27:28.153Z|57538": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:27:28.153Z|57538",
+  "MeshOBJ|2022-11-29T08:27:28.153Z|57538": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:27:28.153Z|57538",
       "name": "tv.obj",
-      "type": "MeshImport",
-      "url": "objs\\tv.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\tv.obj"
     }
   },
-  "MeshObj|2022-11-29T08:27:28.154Z|81543": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:27:28.154Z|81543",
+  "MeshOBJ|2022-11-29T08:27:28.154Z|81543": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:27:28.154Z|81543",
       "name": "vase_blender.obj",
-      "type": "MeshImport",
-      "url": "objs\\vase_blender.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\vase_blender.obj"
     }
   },
-  "MeshObj|2022-11-29T08:27:28.155Z|86045": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:27:28.155Z|86045",
+  "MeshOBJ|2022-11-29T08:27:28.155Z|86045": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:27:28.155Z|86045",
       "name": "wooden_cube.obj",
-      "type": "MeshImport",
-      "url": "objs\\wooden_cube.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\wooden_cube.obj"
     }
   },
-  "MeshObj|2022-11-29T08:47:44.602Z|75216": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:47:44.602Z|75216",
+  "MeshOBJ|2022-11-29T08:47:44.602Z|75216": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:47:44.602Z|75216",
       "name": "tvFront.obj",
-      "type": "MeshImport",
-      "url": "objs\\tvFront.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\tvFront.obj"
     }
   },
-  "MeshObj|2022-11-29T08:50:05.953Z|51783": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:50:05.953Z|51783",
+  "MeshOBJ|2022-11-29T08:50:05.953Z|51783": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:50:05.953Z|51783",
       "name": "backpillow_sofa.obj",
-      "type": "MeshImport",
-      "url": "objs\\backpillow_sofa.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\backpillow_sofa.obj"
     }
   },
-  "MeshObj|2022-11-29T08:51:20.045Z|75128": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:51:20.045Z|75128",
+  "MeshOBJ|2022-11-29T08:51:20.045Z|75128": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:51:20.045Z|75128",
       "name": "cooking_space.obj",
-      "type": "MeshImport",
-      "url": "objs\\cooking_space.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\cooking_space.obj"
     }
   },
-  "MeshObj|2022-11-29T08:57:39.794Z|02727": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T08:57:39.794Z|02727",
+  "MeshOBJ|2022-11-29T08:57:39.794Z|02727": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T08:57:39.794Z|02727",
       "name": "cooking_interior.obj",
-      "type": "MeshImport",
-      "url": "objs\\cooking_interior.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\cooking_interior.obj"
     }
   },
-  "MeshObj|2022-11-29T09:00:42.254Z|78108": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T09:00:42.254Z|78108",
+  "MeshOBJ|2022-11-29T09:00:42.254Z|78108": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T09:00:42.254Z|78108",
       "name": "floor.obj",
-      "type": "MeshImport",
-      "url": "objs\\floor.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\floor.obj"
     }
   },
-  "MeshObj|2022-11-29T09:02:49.211Z|53790": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T09:02:49.211Z|53790",
+  "MeshOBJ|2022-11-29T09:02:49.211Z|53790": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T09:02:49.211Z|53790",
       "name": "table.obj",
-      "type": "MeshImport",
-      "url": "objs\\table.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\table.obj"
     }
   },
-  "MeshObj|2022-11-29T09:05:59.249Z|33773": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T09:05:59.249Z|33773",
+  "MeshOBJ|2022-11-29T09:05:59.249Z|33773": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T09:05:59.249Z|33773",
       "name": "curtain.obj",
-      "type": "MeshImport",
-      "url": "objs\\curtain.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\curtain.obj"
     }
   },
   "Material|2022-11-29T09:49:24.859Z|40573": {
@@ -168,22 +151,20 @@
       }
     }
   },
-  "MeshObj|2022-11-29T09:47:05.308Z|51663": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T09:47:05.308Z|51663",
+  "MeshOBJ|2022-11-29T09:47:05.308Z|51663": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T09:47:05.308Z|51663",
       "name": "faucet.obj",
-      "type": "MeshImport",
-      "url": "objs\\faucet.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\faucet.obj"
     }
   },
-  "MeshObj|2022-11-29T09:58:36.888Z|09564": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T09:58:36.888Z|09564",
+  "MeshOBJ|2022-11-29T09:58:36.888Z|09564": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T09:58:36.888Z|09564",
       "name": "cooking_inline.obj",
-      "type": "MeshImport",
-      "url": "objs\\cooking_inline.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\cooking_inline.obj"
     }
   },
   "Material|2022-11-29T10:04:46.080Z|68749": {
@@ -230,13 +211,12 @@
       }
     }
   },
-  "MeshObj|2022-11-29T10:01:52.289Z|37393": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T10:01:52.289Z|37393",
+  "MeshOBJ|2022-11-29T10:01:52.289Z|37393": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T10:01:52.289Z|37393",
       "name": "cooking_downpart.obj",
-      "type": "MeshImport",
-      "url": "objs\\cooking_downpart.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\cooking_downpart.obj"
     }
   },
   "Material|2022-11-29T10:21:53.096Z|13145": {
@@ -267,13 +247,12 @@
       }
     }
   },
-  "MeshObj|2022-11-29T10:16:48.218Z|62813": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T10:16:48.218Z|62813",
+  "MeshOBJ|2022-11-29T10:16:48.218Z|62813": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T10:16:48.218Z|62813",
       "name": "cooking_washing.obj",
-      "type": "MeshImport",
-      "url": "objs\\cooking_washing.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\cooking_washing.obj"
     }
   },
   "Material|2022-11-29T10:33:43.348Z|09665": {
@@ -423,31 +402,28 @@
       }
     }
   },
-  "MeshObj|2022-11-29T12:50:20.197Z|73863": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T12:50:20.197Z|73863",
+  "MeshOBJ|2022-11-29T12:50:20.197Z|73863": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T12:50:20.197Z|73863",
       "name": "house.obj",
-      "type": "MeshImport",
-      "url": "objs\\house.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\house.obj"
     }
   },
-  "MeshObj|2022-11-29T12:52:49.155Z|25966": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T12:52:49.155Z|25966",
+  "MeshOBJ|2022-11-29T12:52:49.155Z|25966": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T12:52:49.155Z|25966",
       "name": "window.obj",
-      "type": "MeshImport",
-      "url": "objs\\window.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\window.obj"
     }
   },
-  "MeshObj|2022-11-29T13:14:26.221Z|58407": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T13:14:26.221Z|58407",
+  "MeshOBJ|2022-11-29T13:14:26.221Z|58407": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T13:14:26.221Z|58407",
       "name": "table.obj",
-      "type": "MeshImport",
-      "url": "objs\\table.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\table.obj"
     }
   },
   "Material|2022-11-29T13:04:38.325Z|77167": {
@@ -466,13 +442,12 @@
       }
     }
   },
-  "MeshObj|2022-11-29T13:11:22.163Z|97222": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T13:11:22.163Z|97222",
+  "MeshOBJ|2022-11-29T13:11:22.163Z|97222": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T13:11:22.163Z|97222",
       "name": "lightskitchen.obj",
-      "type": "MeshImport",
-      "url": "objs\\lightskitchen.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\lightskitchen.obj"
     }
   },
   "Material|2022-11-29T13:28:39.441Z|33083": {
@@ -559,31 +534,28 @@
       }
     }
   },
-  "MeshObj|2022-11-29T13:20:57.844Z|47808": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T13:20:57.844Z|47808",
+  "MeshOBJ|2022-11-29T13:20:57.844Z|47808": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T13:20:57.844Z|47808",
       "name": "firstLivingroomTable.obj",
-      "type": "MeshImport",
-      "url": "objs\\firstLivingroomTable.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\firstLivingroomTable.obj"
     }
   },
-  "MeshObj|2022-11-29T13:21:46.499Z|65302": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T13:21:46.499Z|65302",
+  "MeshOBJ|2022-11-29T13:21:46.499Z|65302": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T13:21:46.499Z|65302",
       "name": "secondLivingroomTable.obj",
-      "type": "MeshImport",
-      "url": "objs\\secondLivingroomTable.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\secondLivingroomTable.obj"
     }
   },
-  "MeshObj|2022-11-29T13:30:56.683Z|85792": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T13:30:56.683Z|85792",
+  "MeshOBJ|2022-11-29T13:30:56.683Z|85792": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T13:30:56.683Z|85792",
       "name": "sofarightpillow.obj",
-      "type": "MeshImport",
-      "url": "objs\\sofarightpillow.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\sofarightpillow.obj"
     }
   },
   "Material|2022-11-29T13:44:11.264Z|62265": {
@@ -631,31 +603,28 @@
       }
     }
   },
-  "MeshObj|2022-11-29T13:49:30.957Z|06519": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T13:49:30.957Z|06519",
+  "MeshOBJ|2022-11-29T13:49:30.957Z|06519": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T13:49:30.957Z|06519",
       "name": "woodenchair.obj",
-      "type": "MeshImport",
-      "url": "objs\\woodenchair.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\woodenchair.obj"
     }
   },
-  "MeshObj|2022-11-29T13:55:53.778Z|73434": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T13:55:53.778Z|73434",
+  "MeshOBJ|2022-11-29T13:55:53.778Z|73434": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T13:55:53.778Z|73434",
       "name": "bowl_livingroom.obj",
-      "type": "MeshImport",
-      "url": "objs\\bowl_livingroom.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\bowl_livingroom.obj"
     }
   },
-  "MeshObj|2022-11-29T14:04:27.940Z|82033": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T14:04:27.940Z|82033",
+  "MeshOBJ|2022-11-29T14:04:27.940Z|82033": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T14:04:27.940Z|82033",
       "name": "door.obj",
-      "type": "MeshImport",
-      "url": "objs\\door.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\door.obj"
     }
   },
   "Material|2022-11-30T10:54:25.936Z|01925": {
@@ -901,7 +870,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.149Z|19233",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.149Z|19233",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -957,7 +926,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.149Z|81090",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.149Z|81090",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1013,7 +982,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.150Z|59657",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.150Z|59657",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1069,7 +1038,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.150Z|21206",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.150Z|21206",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1125,7 +1094,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.151Z|20749",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.151Z|20749",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1181,7 +1150,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.152Z|43348",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.152Z|43348",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1237,7 +1206,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.153Z|39311",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.153Z|39311",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1293,7 +1262,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.153Z|57538",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.153Z|57538",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1406,7 +1375,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.154Z|81543",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.154Z|81543",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1462,7 +1431,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:47:44.602Z|75216",
+                          "idMesh": "MeshOBJ|2022-11-29T08:47:44.602Z|75216",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1518,7 +1487,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:50:05.953Z|51783",
+                          "idMesh": "MeshOBJ|2022-11-29T08:50:05.953Z|51783",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1574,7 +1543,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:51:20.045Z|75128",
+                          "idMesh": "MeshOBJ|2022-11-29T08:51:20.045Z|75128",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1630,7 +1599,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:57:39.794Z|02727",
+                          "idMesh": "MeshOBJ|2022-11-29T08:57:39.794Z|02727",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1686,7 +1655,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T09:00:42.254Z|78108",
+                          "idMesh": "MeshOBJ|2022-11-29T09:00:42.254Z|78108",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1742,7 +1711,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T09:02:49.211Z|53790",
+                          "idMesh": "MeshOBJ|2022-11-29T09:02:49.211Z|53790",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1798,7 +1767,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T09:05:59.249Z|33773",
+                          "idMesh": "MeshOBJ|2022-11-29T09:05:59.249Z|33773",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1854,7 +1823,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T09:47:05.308Z|51663",
+                          "idMesh": "MeshOBJ|2022-11-29T09:47:05.308Z|51663",
                           "pivot": {
                             "translation": "[-1.4700000286102295, 1.6999999284744263, 0.4000000059604645]",
                             "rotation": "[0, 180, 0]",
@@ -1910,7 +1879,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T09:58:36.888Z|09564",
+                          "idMesh": "MeshOBJ|2022-11-29T09:58:36.888Z|09564",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -1966,7 +1935,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T10:01:52.289Z|37393",
+                          "idMesh": "MeshOBJ|2022-11-29T10:01:52.289Z|37393",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -2022,7 +1991,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T10:16:48.218Z|62813",
+                          "idMesh": "MeshOBJ|2022-11-29T10:16:48.218Z|62813",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -2078,7 +2047,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.149Z|19233",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.149Z|19233",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, -40, 0]",
@@ -2134,7 +2103,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.149Z|19233",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.149Z|19233",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 200, 0]",
@@ -2228,7 +2197,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T12:50:20.197Z|73863",
+                          "idMesh": "MeshOBJ|2022-11-29T12:50:20.197Z|73863",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -2284,7 +2253,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T12:52:49.155Z|25966",
+                          "idMesh": "MeshOBJ|2022-11-29T12:52:49.155Z|25966",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -2414,7 +2383,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.151Z|20749",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.151Z|20749",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 90, 0]",
@@ -2470,7 +2439,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T13:11:22.163Z|97222",
+                          "idMesh": "MeshOBJ|2022-11-29T13:11:22.163Z|97222",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -2524,7 +2493,7 @@
                           "ComponentMesh": [
                             {
                               "ƒ.ComponentMesh": {
-                                "idMesh": "MeshObj|2022-11-29T13:11:22.163Z|97222",
+                                "idMesh": "MeshOBJ|2022-11-29T13:11:22.163Z|97222",
                                 "pivot": {
                                   "translation": "[0, 0, 0]",
                                   "rotation": "[0, 0, 0]",
@@ -2580,7 +2549,7 @@
                           "ComponentMesh": [
                             {
                               "ƒ.ComponentMesh": {
-                                "idMesh": "MeshObj|2022-11-29T13:11:22.163Z|97222",
+                                "idMesh": "MeshOBJ|2022-11-29T13:11:22.163Z|97222",
                                 "pivot": {
                                   "translation": "[0, 0, 0]",
                                   "rotation": "[0, 0, 0]",
@@ -2639,7 +2608,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T13:20:57.844Z|47808",
+                          "idMesh": "MeshOBJ|2022-11-29T13:20:57.844Z|47808",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -2695,7 +2664,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T13:21:46.499Z|65302",
+                          "idMesh": "MeshOBJ|2022-11-29T13:21:46.499Z|65302",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -2751,7 +2720,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.152Z|43348",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.152Z|43348",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -2807,7 +2776,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T13:30:56.683Z|85792",
+                          "idMesh": "MeshOBJ|2022-11-29T13:30:56.683Z|85792",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -2863,7 +2832,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:50:05.953Z|51783",
+                          "idMesh": "MeshOBJ|2022-11-29T08:50:05.953Z|51783",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -2919,7 +2888,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:50:05.953Z|51783",
+                          "idMesh": "MeshOBJ|2022-11-29T08:50:05.953Z|51783",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -2975,7 +2944,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:50:05.953Z|51783",
+                          "idMesh": "MeshOBJ|2022-11-29T08:50:05.953Z|51783",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3031,7 +3000,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.153Z|39311",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.153Z|39311",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3087,7 +3056,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.153Z|39311",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.153Z|39311",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3143,7 +3112,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.153Z|39311",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.153Z|39311",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3199,7 +3168,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.153Z|39311",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.153Z|39311",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3255,7 +3224,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.153Z|39311",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.153Z|39311",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3311,7 +3280,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T13:49:30.957Z|06519",
+                          "idMesh": "MeshOBJ|2022-11-29T13:49:30.957Z|06519",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3367,7 +3336,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T13:49:30.957Z|06519",
+                          "idMesh": "MeshOBJ|2022-11-29T13:49:30.957Z|06519",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3423,7 +3392,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T13:49:30.957Z|06519",
+                          "idMesh": "MeshOBJ|2022-11-29T13:49:30.957Z|06519",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3479,7 +3448,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T13:49:30.957Z|06519",
+                          "idMesh": "MeshOBJ|2022-11-29T13:49:30.957Z|06519",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3535,7 +3504,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T08:27:28.150Z|59657",
+                          "idMesh": "MeshOBJ|2022-11-29T08:27:28.150Z|59657",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3591,7 +3560,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T13:55:53.778Z|73434",
+                          "idMesh": "MeshOBJ|2022-11-29T13:55:53.778Z|73434",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3647,7 +3616,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T09:05:59.249Z|33773",
+                          "idMesh": "MeshOBJ|2022-11-29T09:05:59.249Z|33773",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3703,7 +3672,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T09:05:59.249Z|33773",
+                          "idMesh": "MeshOBJ|2022-11-29T09:05:59.249Z|33773",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3759,7 +3728,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T09:00:42.254Z|78108",
+                          "idMesh": "MeshOBJ|2022-11-29T09:00:42.254Z|78108",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3815,7 +3784,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T14:04:27.940Z|82033",
+                          "idMesh": "MeshOBJ|2022-11-29T14:04:27.940Z|82033",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3871,7 +3840,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T14:04:27.940Z|82033",
+                          "idMesh": "MeshOBJ|2022-11-29T14:04:27.940Z|82033",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -3927,7 +3896,7 @@
                     "ComponentMesh": [
                       {
                         "ƒ.ComponentMesh": {
-                          "idMesh": "MeshObj|2022-11-29T14:04:27.940Z|82033",
+                          "idMesh": "MeshOBJ|2022-11-29T14:04:27.940Z|82033",
                           "pivot": {
                             "translation": "[0, 0, 0]",
                             "rotation": "[0, 0, 0]",
@@ -4001,13 +3970,12 @@
       "type": "Graph"
     }
   },
-  "MeshObj|2022-11-29T09:04:15.779Z|05631": {
-    "ƒ.MeshImport": {
-      "idResource": "MeshObj|2022-11-29T09:04:15.779Z|05631",
+  "MeshOBJ|2022-11-29T09:04:15.779Z|05631": {
+    "ƒ.MeshOBJ": {
+      "idResource": "MeshOBJ|2022-11-29T09:04:15.779Z|05631",
       "name": "woodenchair.obj",
-      "type": "MeshImport",
-      "url": "objs\\woodenchair.obj",
-      "filetype": "OBJ"
+      "type": "MeshOBJ",
+      "url": "objs\\woodenchair.obj"
     }
   },
   "TextureImage|2022-11-29T10:51:42.049Z|68862": {

@@ -1,8 +1,8 @@
-/// <reference types="../../Core/Build/FudgeCore"/>
-///<reference types="../../Aid/Build/FudgeAid"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
 var SkeletonTest;
-/// <reference types="../../Core/Build/FudgeCore"/>
-///<reference types="../../Aid/Build/FudgeAid"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
 (function (SkeletonTest) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;

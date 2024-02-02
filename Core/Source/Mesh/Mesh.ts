@@ -12,9 +12,7 @@ namespace FudgeCore {
     /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Mesh[] = [];
 
-    // TODO: at this time, creating the buffers for flat shading is a brute force algorithm and should be optimized in the different subclasses
     // TODO: rename vertices to verticesSmooth or just cloud, and cloud to vertices
-    // 
 
     public idResource: string = undefined;
     public name: string = "Mesh";
@@ -24,7 +22,7 @@ namespace FudgeCore {
 
     // public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
     /** @internal */
-    public renderMesh: RenderMesh; /* defined by RenderInjector*/
+    protected ƒrenderMesh: RenderMesh; /* defined by RenderInjector */
 
     /** bounding box AABB */
     protected ƒbox: Box;
@@ -41,6 +39,10 @@ namespace FudgeCore {
 
     protected static registerSubclass(_subClass: typeof Mesh): number { return Mesh.subclasses.push(_subClass) - 1; }
 
+    public get renderMesh(): RenderMesh {
+      return this.ƒrenderMesh;
+    }
+
     public get type(): string {
       return this.constructor.name;
     }
@@ -56,6 +58,10 @@ namespace FudgeCore {
         this.ƒradius = this.createRadius();
 
       return this.ƒradius;
+    }
+
+    public setRenderMesh(_renderMesh: RenderMesh): void {
+      /* injected by RenderInjector*/
     }
 
     /**
@@ -84,7 +90,7 @@ namespace FudgeCore {
       this.ƒbox = undefined;
       this.ƒradius = undefined;
 
-      this.renderMesh?.clear();
+      this.ƒrenderMesh?.clear();
     }
 
     //#region Transfer
