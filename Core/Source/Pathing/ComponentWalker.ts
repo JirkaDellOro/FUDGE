@@ -20,8 +20,8 @@ namespace FudgeCore {
     public constructor() {
       super();
 
-      // if (Project.mode == MODE.EDITOR)
-      //   return;
+      if (Project.mode == MODE.EDITOR)
+        return;
       this.addEventListener(EVENT.COMPONENT_ADD, this.#handleAttach.bind(this));
       this.addEventListener(EVENT.COMPONENT_REMOVE, this.#handleDetach.bind(this));
     }
