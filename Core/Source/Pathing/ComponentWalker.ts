@@ -20,8 +20,8 @@ namespace FudgeCore {
     public constructor() {
       super();
 
-      if (Project.mode == MODE.EDITOR)
-        return;
+      // if (Project.mode == MODE.EDITOR)
+      //   return;
       this.addEventListener(EVENT.COMPONENT_ADD, this.#handleAttach.bind(this));
       this.addEventListener(EVENT.COMPONENT_REMOVE, this.#handleDetach.bind(this));
     }
@@ -93,9 +93,17 @@ namespace FudgeCore {
         this.node.mtxWorld.translation
       );
 
+      let scale: Vector3 = Vector3.DIFFERENCE(
+        currentPath.waypoint.mtxWorld.scaling,
+        this.node.mtxWorld.scaling
+      );
+
       if (delta * delta < step.magnitudeSquared) { // won't reach next waypoint yet. Using squares because that's faster to compute than sqrt
         step.normalize(delta);
         this.node.mtxLocal.translate(step);
+        scale.normalize(delta);
+        this.node.mtxLocal.scaling = Vector3.SUM(scale, this.node.mtxLocal.scaling);
+        // this.node.mtxLocal.scale(Vector3.SUM(scale, this.node.mtxLocal.scaling));
         // TODO implement movement through physics
         return;
       }
@@ -103,6 +111,7 @@ namespace FudgeCore {
       this.dispatchEvent(new CustomEvent(EVENT.WAYPOINT_REACHED, { bubbles: true, detail: currentPath.waypoint }));
       (<ComponentWaypoint>currentPath.waypoint).dispatchEvent(new CustomEvent(EVENT.WAYPOINT_REACHED, { bubbles: true, detail: this }));
       this.node.mtxLocal.translate(step);
+      this.node.mtxLocal.scaling = currentPath.waypoint.mtxWorld.scaling;
       this.#walkData.totalProgress++;
 
       // reached final point, finished walking

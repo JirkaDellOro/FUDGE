@@ -3940,7 +3940,7 @@ var Fudge;
             }
             //@ts-ignore
             let cmpNew = new component();
-            if ((cmpNew instanceof ƒ.ComponentRigidbody || cmpNew instanceof ƒ.ComponentVRDevice || cmpNew instanceof ƒ.Pathing.ComponentWaypoint) && !this.node.cmpTransform) {
+            if ((cmpNew instanceof ƒ.ComponentRigidbody || cmpNew instanceof ƒ.ComponentVRDevice || cmpNew instanceof ƒ.ComponentWalker) && !this.node.cmpTransform) {
                 alert(`To attach a ${cmpNew.type}, first attach a ${ƒ.ComponentTransform.name}.`);
                 return;
             }
