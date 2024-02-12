@@ -64,7 +64,11 @@ namespace FudgeCore {
     /** dispatched to {@link Node} when it gets attached to a viewport for rendering */
     ATTACH_BRANCH = "attachBranch",
     /** dispatched to {@link Project} when it's done loading resources from a url */
-    RESOURCES_LOADED = "resourcesLoaded"
+    RESOURCES_LOADED = "resourcesLoaded",
+    /** dispatched to {@link ComponentWalker} and {@link ComponentWaypoint} when a {@link ComponentWalker} reaches a {@link Waypoint} or {@link ComponentWaypoint} */
+    WAYPOINT_REACHED = "waypointReached",
+    /** dispatched to {@link ComponentWalker} when the final {@link Waypoint} in the current path has been reached */
+    PATHING_CONCLUDED = "pathingConcluded"
   }
 
   /** Union type of other event types serving as annotation for listeners and handlers */
