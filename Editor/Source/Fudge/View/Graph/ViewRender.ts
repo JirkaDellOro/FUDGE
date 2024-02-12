@@ -362,7 +362,7 @@ namespace Fudge {
 
     private drawMesh = (): void => {
       const cmpMesh: ƒ.ComponentMesh = this.selected?.getComponent(ƒ.ComponentMesh);
-      if (!cmpMesh || !ƒ.Gizmos.filter.get(GIZMOS.WIRE_MESH))
+      if (!cmpMesh?.mesh || !ƒ.Gizmos.filter.get(GIZMOS.WIRE_MESH))
         return;
 
       ƒ.Gizmos.drawWireMesh(cmpMesh.mesh, cmpMesh.mtxWorld, ƒ.Color.CSS("salmon"), 0.1);

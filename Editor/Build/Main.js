@@ -76,6 +76,11 @@ var Fudge;
         TRANSFORM["ROTATE"] = "rotate";
         TRANSFORM["SCALE"] = "scale";
     })(TRANSFORM = Fudge.TRANSFORM || (Fudge.TRANSFORM = {}));
+    let GIZMOS;
+    (function (GIZMOS) {
+        GIZMOS["TRANSFORM"] = "Transform";
+        GIZMOS["WIRE_MESH"] = "WireMesh";
+    })(GIZMOS = Fudge.GIZMOS || (Fudge.GIZMOS = {}));
 })(Fudge || (Fudge = {}));
 ///<reference types="../../node_modules/electron"/>
 /**

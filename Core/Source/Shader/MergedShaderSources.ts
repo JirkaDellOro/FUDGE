@@ -834,6 +834,9 @@ void main() {
 
   #endif
 
+  vec4 vctColor = u_vctColor * v_vctColor;
+  vctColor.rgb *= vctColor.a; // premultiply alpha
+
   #if defined(GOURAUD)
 
     vec3 vctDiffuse = v_vctDiffuse;
@@ -849,7 +852,7 @@ void main() {
   #else
 
     // MINIMAL: set the base color
-    vctFrag = u_vctColor * v_vctColor;
+    vctFrag = vctColor;
 
   #endif
 
@@ -863,7 +866,7 @@ void main() {
 
   #if defined(FLAT) || defined(GOURAUD) || defined(PHONG)
 
-    vctFrag *= u_vctColor * v_vctColor;
+    vctFrag *= vctColor;
     vctFrag.rgb += vctSpecular * (1.0 - u_fMetallic);
 
     vctFragPosition = vec4(v_vctPosition, 1.0);
@@ -878,8 +881,13 @@ void main() {
   
   #endif
 
+  // discard pixel alltogether when transparent: don't show in Z-Buffer
+  if(vctFrag.a < 0.01)
+    discard;
+
   if (u_bFogActive) {
     float fFog = getFog(v_vctPosition);
+    vctFrag.rgb /= vctFrag.a; // unpremultiply alpha
     vctFrag.rgb = mix(vctFrag.rgb, u_vctFogColor.rgb, fFog);
 
     #if defined(PARTICLE)
@@ -888,14 +896,10 @@ void main() {
         vctFrag.a = mix(vctFrag.a, 0.0, fFog);                          // fade out particle when in fog to make it disappear completely
 
     #endif
+    vctFrag.rgb *= vctFrag.a; // premultiply alpha
   }
 
-  // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(vctFrag.a < 0.01)
-    discard;
 
-  // premultiply alpha for blending
-  vctFrag.rgb *= vctFrag.a;
 }`;
   shaderSources["ShaderUniversal.vert"] = /*glsl*/ `#version 300 es
 /**

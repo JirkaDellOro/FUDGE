@@ -105,7 +105,8 @@ namespace FudgeCore {
       super.prepare(_prepareBranch);
 
       let glLayer: XRWebGLLayer = this.session.renderState.baseLayer;
-      // Render.resetFramebuffer(glLayer.framebuffer); // this won't work with the new rendering system
+      // Render.resetFramebuffer(glLayer.framebuffer); // ⚠️ TODO: this won't work with the new rendering system, find a way to fix this. 
+      // In the past this would change the framebuffer into which fudge rendered but now fudge has its own framebuffers for post processing effects...
 
       for (let view of pose.views) {
         let viewport: globalThis.XRViewport = glLayer.getViewport(view);

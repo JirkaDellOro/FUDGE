@@ -88,7 +88,7 @@ namespace FudgeCore {
         if (_shadersUsed.indexOf(shader) < 0)
           _shadersUsed.push(shader);
         _branch.radius = cmpMesh.radius;
-        if (cmpMaterial.sortForAlpha)
+        if (cmpMaterial.sortForAlpha || _branch.getComponent(ComponentText)) // always sort text for alpha
           Render.nodesAlpha.push(_branch); // add this node to render list
         else
           Render.nodesSimple.push(_branch); // add this node to render list
@@ -174,7 +174,7 @@ namespace FudgeCore {
 
         if (_pickGizmos) {
           for (let gizmo of node.getAllComponents()) {
-            if (!gizmo.isActive || !Gizmos.filter.get(gizmo.type))
+            if (!gizmo.isActive || !Gizmos.filter.get(gizmo.type) || !(<Gizmo>gizmo).drawGizmos)
               continue;
       
             gizmos.push(gizmo);

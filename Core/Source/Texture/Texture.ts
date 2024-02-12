@@ -5,6 +5,11 @@ namespace FudgeCore {
   export enum MIPMAP {
     CRISP, MEDIUM, BLURRY
   }
+
+  export enum WRAP {
+    REPEAT, CLAMP, MIRROR
+  }
+
   /**
    * Baseclass for different kinds of textures. 
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -13,13 +18,37 @@ namespace FudgeCore {
   export abstract class Texture extends Mutable implements SerializableResource {
     public name: string;
     public idResource: string = undefined;
-    public mipmap: MIPMAP = MIPMAP.CRISP;
-    /** @internal A map of textures. Used by the render engine */
-    protected renderData: { [key: string]: unknown }; // TODO: check if a map is necessary here, the corresponding render injector only ever accesses "texture0"
+
+    protected renderData: unknown;
+
+    protected textureDirty: boolean = true;
+    protected mipmapDirty: boolean = true;
+    protected wrapDirty: boolean = true;
+
+    #mipmap: MIPMAP = MIPMAP.CRISP;
+    #wrap: WRAP = WRAP.REPEAT;
 
     public constructor(_name: string = "Texture") {
       super();
       this.name = _name;
+    }
+
+    public set mipmap(_mipmap: MIPMAP) {
+      this.#mipmap = _mipmap;
+      this.mipmapDirty = true;
+    }
+
+    public get mipmap(): MIPMAP {
+      return this.#mipmap;
+    }
+
+    public set wrap(_wrap: WRAP) {
+      this.#wrap = _wrap;
+      this.wrapDirty = true;
+    }
+
+    public get wrap(): WRAP {
+      return this.#wrap;
     }
 
     /**
@@ -32,7 +61,7 @@ namespace FudgeCore {
      * Injected by {@link RenderInjectorTexture}. Used by the render system.
      * @internal
      */
-    public useRenderData(_textureslot: number = 0): void {/* injected by RenderInjector*/ }
+    public useRenderData(_textureUnit: number = 0): void {/* injected by RenderInjector*/ }
 
     /**
      * Deletes the texture in WebGL freeing the allocated gpu memory.
@@ -45,7 +74,7 @@ namespace FudgeCore {
      * Refreshes the image data in the render engine.
      */
     public refresh(): void {
-      this.deleteRenderData();
+      this.textureDirty = true;
     }
 
     //#region Transfer
@@ -53,27 +82,42 @@ namespace FudgeCore {
       let serialization: Serialization = {
         idResource: this.idResource,
         name: this.name,
-        mipmap: MIPMAP[this.mipmap]
+        mipmap: MIPMAP[this.#mipmap],
+        wrap: WRAP[this.#wrap]
       };
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       Project.register(this, _serialization.idResource);
       this.name = _serialization.name;
-      this.mipmap = <number><unknown>MIPMAP[_serialization.mipmap];
+      this.#mipmap = <number><unknown>MIPMAP[_serialization.mipmap];
+      this.#wrap = <number><unknown>WRAP[_serialization.wrap];
       return this;
+    }
+
+    public getMutator(_extendable?: boolean): Mutator {
+      let mutator: Mutator = super.getMutator(true);
+      mutator.mipmap = this.#mipmap;
+      mutator.wrap = this.#wrap;
+      return mutator;
     }
 
     public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
       let types: MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
       if (types.mipmap)
         types.mipmap = MIPMAP;
+      if (types.wrap)
+        types.wrap = WRAP;
       return types;
     }
 
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.idResource;
       delete _mutator.renderData;
+      delete _mutator.textureDirty;
+      delete _mutator.mipmapDirty;
+      delete _mutator.mipmapGenerated;
+      delete _mutator.wrapDirty;
     }
   }
 
@@ -105,7 +149,7 @@ namespace FudgeCore {
       this.url = _url;
       this.image = new Image();
 
-      
+
       // const response: Response = await window.fetch(this.url);
       // const blob: Blob = await response.blob();
       // let objectURL: string = URL.createObjectURL(blob);
@@ -154,14 +198,14 @@ namespace FudgeCore {
   export class TextureBase64 extends Texture {
     public image: HTMLImageElement = new Image();
 
-    public constructor(_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP, _width: number = 64, _height: number = 64) {
+    public constructor(_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP, _wrap: WRAP = WRAP.REPEAT, _width: number = 64, _height: number = 64) {
       super(_name);
       this.image.src = _base64;
       this.mipmap = _mipmap;
       this.image.width = _width;
       this.image.height = _height;
     }
-    
+
     public get texImageSource(): ImageSource {
       return this.image;
     }
@@ -180,6 +224,106 @@ namespace FudgeCore {
       return this.crc2.canvas;
     }
   }
+
+  /**
+   * Texture created from a text. Texture upates when the text or font changes. The texture is resized to fit the text.
+   * @authors Jonas Plotzky, HFU, 2024
+   */
+  export class TextureText extends Texture {
+    protected crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+    #text: string;
+    #font: string;
+
+    public constructor(_name: string, _text: string = "Text", _font: string = "20px monospace") {
+      super(_name);
+      this.crc2 = document.createElement("canvas").getContext("2d");
+      this.text = _text;
+      this.font = _font;
+    }
+
+    public set text(_text: string) {
+      this.#text = _text;
+      this.textureDirty = true;
+    }
+
+    public get text(): string {
+      return this.#text;
+    }
+
+    public set font(_font: string) {
+      this.#font = _font;
+      document.fonts.load(this.#font)
+        .catch((_error) => Debug.error(`${TextureText.name}: ${_error}`))
+        .finally(() => this.textureDirty = true);
+    }
+
+    public get font(): string {
+      return this.#font;
+    }
+
+    public get texImageSource(): ImageSource {
+      return this.canvas;
+    }
+
+    public get width(): number {
+      return this.canvas.width;
+    }
+
+    public get height(): number {
+      return this.canvas.height;
+    }
+
+    private get canvas(): HTMLCanvasElement | OffscreenCanvas {
+      return this.crc2.canvas;
+    }
+
+    public useRenderData(_textureUnit?: number): void {
+      if (this.textureDirty) {
+        this.crc2.font = this.font;
+
+        let metrics: TextMetrics = this.crc2.measureText(this.text);
+        let width: number = metrics.width;
+        let height: number = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+
+        this.canvas.width = width + this.crc2.measureText("  ").width;
+        this.canvas.height = height * 1.1; // padding, otherwise on some glyphs might get cut off
+        if (this.canvas.width == 0)
+          return;
+
+        this.crc2.font = this.font; // TODO: wait for font to be loaded using document.fonts
+        this.crc2.textAlign = "center";
+        this.crc2.textBaseline = "middle";
+        this.crc2.fillStyle = "white";
+        this.crc2.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.crc2.fillText(this.#text, this.canvas.width / 2, this.canvas.height / 2);
+      }
+
+      super.useRenderData(_textureUnit);
+    }
+
+    public serialize(): Serialization {
+      return {
+        [super.constructor.name]: super.serialize(),
+        text: this.text,
+        font: this.font
+      };
+    }
+
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization[super.constructor.name]);
+      this.text = _serialization.text;
+      this.font = _serialization.font;
+      return this;
+    }
+
+    public getMutator(_extendable?: boolean): Mutator {
+      let mutator: Mutator = super.getMutator(true);
+      mutator.text = this.text;
+      mutator.font = this.font;
+      return mutator;
+    }
+  }
+
   /**
    * Texture created from a FUDGE-Sketch
    */

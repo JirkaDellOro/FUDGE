@@ -624,6 +624,7 @@ var Fudge;
             const parser = new DOMParser();
             this.#document = parser.parseFromString(_htmlContent, "text/html");
             const head = this.#document.querySelector("head");
+            this.loadFonts(head);
             const scripts = head.querySelectorAll("script");
             for (let script of scripts) {
                 if (script.getAttribute("editor") == "true") {
@@ -830,6 +831,29 @@ var Fudge;
             result = result.replace(/">\n<\/script/g, `"></script`);
             result = result.replace(/\n*<\/body>/g, "\n<\/body>"); // remove line breaks added by serializeToString before closing body-tag
             return result;
+        }
+        async loadFonts(_head) {
+            // collect all fonts from _head and add them to the head of the editors document so that they are available for component text
+            const fonts = document.createElement('style');
+            const cssLinks = _head.querySelectorAll('link[rel="stylesheet"]');
+            const cssStyles = _head.querySelectorAll('style');
+            const cssRules = [];
+            for (let link of cssLinks) {
+                let url = new URL(link.getAttribute("href"), this.base).toString();
+                let cssText = await (await fetch(url)).text(); // TODO: use FileIO
+                cssRules.push(...getRules(cssText));
+            }
+            for (let style of cssStyles)
+                cssRules.push(...getRules(style.innerHTML));
+            for (let rule of cssRules)
+                if (rule instanceof CSSFontFaceRule)
+                    fonts.appendChild(document.createTextNode(rule.cssText));
+            document.head.appendChild(fonts);
+            function getRules(_text) {
+                let styleSheet = new CSSStyleSheet();
+                styleSheet.replaceSync(_text);
+                return styleSheet.cssRules;
+            }
         }
     }
     Fudge.Project = Project;
@@ -4541,8 +4565,8 @@ var Fudge;
             ;
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             this.viewport.addEventListener("renderPrepareStart" /* ƒ.EVENT.RENDER_PREPARE_START */, this.hndPrepare);
-            this.viewport.addEventListener("renderGizmosEnd" /* ƒ.EVENT.RENDER_END */, this.drawTranslation);
-            this.viewport.addEventListener("renderGizmosEnd" /* ƒ.EVENT.RENDER_END */, this.drawMesh);
+            this.viewport.addEventListener("renderEnd" /* ƒ.EVENT.RENDER_END */, this.drawTranslation);
+            this.viewport.addEventListener("renderEnd" /* ƒ.EVENT.RENDER_END */, this.drawMesh);
             this.setGraph(null);
             this.canvas.addEventListener("pointerdown", this.activeViewport);
             this.canvas.addEventListener("pick", this.hndPick);
@@ -4613,8 +4637,8 @@ var Fudge;
                     break;
                 case Fudge.EVENT_EDITOR.CLOSE:
                     this.setRenderContinously(false);
-                    this.viewport.removeEventListener("renderGizmosEnd" /* ƒ.EVENT.RENDER_END */, this.drawTranslation);
-                    this.viewport.removeEventListener("renderGizmosEnd" /* ƒ.EVENT.RENDER_END */, this.drawMesh);
+                    this.viewport.removeEventListener("renderEnd" /* ƒ.EVENT.RENDER_END */, this.drawTranslation);
+                    this.viewport.removeEventListener("renderEnd" /* ƒ.EVENT.RENDER_END */, this.drawMesh);
                     // ƒ.Render.removeEventListener(ƒ.EVENT.RENDER_FINISHED, this.hndDrawGizmoSelection);
                     break;
                 case Fudge.EVENT_EDITOR.UPDATE:
@@ -4704,7 +4728,7 @@ var Fudge;
         };
         drawMesh = () => {
             const cmpMesh = this.selected?.getComponent(ƒ.ComponentMesh);
-            if (!cmpMesh || !ƒ.Gizmos.filter.get(Fudge.GIZMOS.WIRE_MESH))
+            if (!cmpMesh?.mesh || !ƒ.Gizmos.filter.get(Fudge.GIZMOS.WIRE_MESH))
                 return;
             ƒ.Gizmos.drawWireMesh(cmpMesh.mesh, cmpMesh.mtxWorld, ƒ.Color.CSS("salmon"), 0.1);
         };

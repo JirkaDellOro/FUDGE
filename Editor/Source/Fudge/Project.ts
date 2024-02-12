@@ -71,6 +71,8 @@ namespace Fudge {
       this.#document = parser.parseFromString(_htmlContent, "text/html");
       const head: HTMLHeadElement = this.#document.querySelector("head");
 
+      this.loadFonts(head);
+
       const scripts: NodeListOf<HTMLScriptElement> = head.querySelectorAll("script");
       for (let script of scripts) {
         if (script.getAttribute("editor") == "true") {
@@ -319,6 +321,35 @@ namespace Fudge {
       result = result.replace(/">\n<\/script/g, `"></script`);
       result = result.replace(/\n*<\/body>/g, "\n<\/body>"); // remove line breaks added by serializeToString before closing body-tag
       return result;
+    }
+
+    private async loadFonts(_head: HTMLHeadElement): Promise<void> {
+      // collect all fonts from _head and add them to the head of the editors document so that they are available for component text
+      const fonts: HTMLStyleElement = document.createElement('style');
+      const cssLinks: NodeListOf<HTMLLinkElement> = _head.querySelectorAll('link[rel="stylesheet"]');
+      const cssStyles: NodeListOf<HTMLStyleElement> = _head.querySelectorAll('style');
+      const cssRules: CSSRule[] = [];
+
+      for (let link of cssLinks) {
+        let url: string = new URL(link.getAttribute("href"), this.base).toString();
+        let cssText: string = await (await fetch(url)).text(); // TODO: use FileIO
+        cssRules.push(...getRules(cssText));
+      }
+
+      for (let style of cssStyles) 
+        cssRules.push(...getRules(style.innerHTML));
+      
+      for (let rule of cssRules)
+        if (rule instanceof CSSFontFaceRule)
+          fonts.appendChild(document.createTextNode(rule.cssText));
+
+      document.head.appendChild(fonts);
+
+      function getRules(_text: string): CSSRuleList {
+        let styleSheet: CSSStyleSheet = new CSSStyleSheet();
+        styleSheet.replaceSync(_text);
+        return styleSheet.cssRules;
+      }
     }
   }
 }
