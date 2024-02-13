@@ -33,11 +33,12 @@ namespace FudgeCore {
      * Makes this material reference the given {@link Coat} if it is compatible with the referenced {@link Shader}
      */
     public set coat(_coat: Coat) {
-      if (_coat.constructor != this.shaderType.getCoat())
-        if (_coat instanceof this.shaderType.getCoat())
-          Debug.fudge("Coat is extension of Coat required by shader");
-        else
-          throw (new Error("Shader and coat don't match"));
+      if (this.shaderType)
+        if (_coat.constructor != this.shaderType.getCoat())
+          if (_coat instanceof this.shaderType.getCoat())
+            Debug.fudge("Coat is extension of Coat required by shader");
+          else
+            throw (new Error("Shader and coat don't match"));
       this.#coat = _coat;
     }
 
@@ -57,7 +58,7 @@ namespace FudgeCore {
     public setShader(_shaderType: typeof Shader): void {
       this.shaderType = _shaderType;
       let coat: Coat = this.createCoatMatchingShader();
-      coat.mutate(this.#coat.getMutator());
+      coat.mutate(this.#coat?.getMutator());
       this.coat = coat;
     }
 

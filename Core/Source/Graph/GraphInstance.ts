@@ -62,6 +62,10 @@ namespace FudgeCore {
       this.#idSource = _serialization.idSource ?? _serialization.idResource;
       if (!_serialization.deserializeFromSource) {
         await super.deserialize(_serialization); // instance is deserialized from individual data
+        let graph: Graph = this.get();
+        if (graph instanceof GraphGLTF) 
+          await GLTFLoader.loadResource(this, _serialization.url);
+        
         this.#deserializeFromSource = false;
       }
 

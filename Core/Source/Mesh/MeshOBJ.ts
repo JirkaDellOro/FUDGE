@@ -1,18 +1,19 @@
 namespace FudgeCore {
-
   /**
+   * A mesh loaded from an OBJ-file.
    * Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
    * static LOAD Method. Currently only works with triangulated Meshes
    * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
    * @todo Load Materials, Support Quads
    * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
    */
-  export class MeshOBJ extends MeshImport {
+  export class MeshOBJ extends mixinSerializableResourceExternal(Mesh) {
+
     public async load(_url: RequestInfo = this.url): Promise<MeshOBJ> {
-      super.load(_url);
-      const url: string = new URL(this.url.toString(), Project.baseURL).toString();
+      const url: string = new URL(_url.toString(), Project.baseURL).toString();
       const data: string = await (await fetch(url)).text();
       this.name = url.split("/").pop();
+      this.url = _url;
 
       const lines: string[] = data.split("\n");
 
@@ -70,6 +71,8 @@ namespace FudgeCore {
             break;
         }
       }
+      
+      this.clear();
       this.vertices = vertices;
       this.faces = faces;
       if (norms.length > 0) // TODO: rendermesh should be able to handle undefined normals correctly, i.e. calculate them only if they are not present in the vertices

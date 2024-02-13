@@ -103,7 +103,7 @@ namespace FudgeCore {
     public totalTime: number = 0;
     public labels: AnimationLabel = {}; // a label marks a specific time to conveniently jump to using a text identifier
     // stepsPerSecond: number = 10;
-    public animationStructure: AnimationStructure;
+    public animationStructure: AnimationStructure; // TODO: if set the cache needs to be adjusted (animationStructuresProcessed)
     public events: AnimationEventTrigger = {};
     protected framesPerSecond: number = 60; // TODO: change this and its accessors to #framesPerSecond?
 

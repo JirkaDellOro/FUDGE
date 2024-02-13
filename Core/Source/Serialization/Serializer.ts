@@ -253,4 +253,54 @@ namespace FudgeCore {
       return null;
     }
   }
+
+
+  type Constructor<T> = abstract new (...args: General[]) => T;
+
+  /**
+   * Creates a new (abstract) class implementing {@link SerializableResourceExternal} from any class that implements {@link SerializableResource} by mixing in the functionality to load the resource from an external source.
+   * @internal
+   * @authors Jonas Plotzky, HFU, 2024
+   */
+  export function mixinSerializableResourceExternal<TBase extends Constructor<SerializableResource>>(_base: TBase) { /* eslint-disable-line */ //disable eslint because only type inference seems to be able to handle mixin abstract classes correctly
+    abstract class SerializableResourceExternal extends _base implements FudgeCore.SerializableResourceExternal {
+      public url: RequestInfo;
+
+      public serialize(): Serialization {
+        const serialization: Serialization = super.serialize();
+        serialization.url = this.url.toString();
+        return serialization;
+      }
+
+      public async deserialize(_serialization: Serialization): Promise<Serializable> {
+        this.url = _serialization.url;
+        await super.deserialize(_serialization);
+        return this.load();
+      }
+
+      public abstract load(): Promise<SerializableResourceExternal>;
+    };
+
+    if (_base.prototype instanceof Mutable) {
+      /**
+       * Mixin the {@link Mutable} functionality into the class
+       * @authors Jonas Plotzky, HFU, 2024
+       */
+      function mixinMutableSerializableResourceExternal<TBase extends Constructor<SerializableResourceExternal & Mutable>>(_base: TBase) { // eslint-disable-line
+        abstract class MutableSerializableResourceExternal extends _base {
+          public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
+            super.mutate(_mutator, _selection, _dispatchMutate);
+            if (_mutator.url != undefined || _mutator.name != undefined)
+              this.load();
+          }
+        }
+
+        return MutableSerializableResourceExternal;
+      }
+
+      return mixinMutableSerializableResourceExternal(<TBase & Constructor<SerializableResourceExternal & Mutable>>SerializableResourceExternal);
+    }
+
+    return SerializableResourceExternal;
+  }
 }

@@ -1,14 +1,15 @@
-///<reference path="./MeshImport.ts"/>
 namespace FudgeCore {
 
   /**
-   * Filmbox mesh import
+   * A mesh loaded from an FBX-File.
    * @authors Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
    */
-  export class MeshFBX extends MeshImport {
+  export class MeshFBX extends mixinSerializableResourceExternal(Mesh) {
+    // public url: RequestInfo;
     public iMesh: number;
     public async load(_url: RequestInfo = this.url, _iMesh: number = this.iMesh): Promise<MeshFBX> {
-      super.load(_url);
+      this.clear();
+      this.url = _url;
       this.iMesh = _iMesh;
       const loader: FBXLoader = await FBXLoader.LOAD(this.url.toString());
       const geometryFBX: FBX.Geometry = (

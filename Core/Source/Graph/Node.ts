@@ -38,7 +38,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Return the mutator path string to get from one node to another or null if no path is found e.g.:
+     * Return the mutator-like path string to get from one node to another or null if no path is found e.g.:
      * ```typescript
      * "node/parent/children/1/components/ComponentSkeleton/0"
      * ```

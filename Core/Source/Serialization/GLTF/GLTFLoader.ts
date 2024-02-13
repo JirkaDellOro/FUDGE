@@ -1,4 +1,5 @@
 namespace FudgeCore {
+
   /**
    * Asset loader for gl Transfer Format files.
    * @authors Matthias Roming, HFU, 2022 | Jonas Plotzky, HFU, 2023
@@ -9,22 +10,20 @@ namespace FudgeCore {
     static #defaultMaterial: Material;
     static #defaultSkinMaterial: Material;
 
-    public readonly url: string;
-    private readonly gltf: GLTF.GlTf;
+    readonly #url: string;
+    readonly #gltf: GLTF.GlTf;
 
-    #scenes: Graph[];
+    #resources: Resources = {};
+
     #nodes: Node[] = [];
     #cameras: ComponentCamera[];
-    #animations: Animation[];
-    #meshes: MeshGLTF[][];
-    #materials: Material[];
     #skeletons: ComponentSkeleton[];
-    #textures: Texture[];
+
     #buffers: ArrayBuffer[];
 
     private constructor(_gltf: GLTF.GlTf, _url: string) {
-      this.gltf = _gltf;
-      this.url = _url;
+      this.#gltf = _gltf;
+      this.#url = _url;
     }
 
     private static get defaultMaterial(): Material {
@@ -40,25 +39,57 @@ namespace FudgeCore {
     }
 
     /**
+     * Handles the loading of an external resource from a glTF file. Used by the {@link SerializableResourceExternal}GLTF specializations to load themselves.
+     * @internal
+     */
+    public static async loadResource<T extends GraphGLTF | MeshGLTF | MaterialGLTF | AnimationGLTF | GraphInstance>(_resource: T, _url?: RequestInfo): Promise<T> {
+      const loader: GLTFLoader = await GLTFLoader.LOAD(((<SerializableResourceExternal>_resource).url ?? _url).toString());
+
+      let loaded: T;
+
+      if (_resource instanceof Graph)
+        loaded = <T><unknown>await loader.getGraph(_resource.name, _resource);
+      else if (_resource instanceof GraphInstance)
+        loaded = <T><unknown>await loader.getGraph(_resource.get().name, _resource);
+      else if (_resource instanceof MeshGLTF)
+        loaded = <T><unknown>await loader.getMesh(_resource.name, _resource.iPrimitive, _resource);
+      else if (_resource instanceof MaterialGLTF)
+        loaded = <T><unknown>await loader.getMaterial(_resource.name, _resource);
+      else if (_resource instanceof AnimationGLTF)
+        loaded = <T><unknown>await loader.getAnimation(_resource.name, _resource);
+
+      let idResource: string = _resource instanceof GraphInstance ? _resource.idSource : _resource.idResource;
+      if (!loaded)
+        Debug.error(`${_resource.constructor.name} | ${idResource}: Failed to load resource.`);
+
+      // if (loaded && !Project.resources[loaded.idResource]) {
+      //   loaded.idResource = _resource.idResource;
+      //   return loaded;
+      // }
+
+      // Debug.error(`${_resource.type} | ${_resource.idResource}: Failed to load resource. Either '${_resource.name}' does not exist in the glTF file or has already been loaded by another ${_resource.type}.`);
+
+      return loaded;
+    }
+
+    /**
      * Returns a {@link GLTFLoader} instance for the given url.
      */
-    public static async LOAD(_url: string): Promise<GLTFLoader> {
-      const url: string = new URL(_url, Project.baseURL).toString();
-
+    public static async LOAD(_url: string, _registerResources: boolean = false): Promise<GLTFLoader> {
       if (!this.loaders)
         GLTFLoader.loaders = {};
 
-      if (!this.loaders[url]) {
-        const response: Response = await fetch(url);
+      if (!this.loaders[_url]) {
+        const response: Response = await fetch(new URL(_url, Project.baseURL));
         const gltf: GLTF.GlTf = await response.json();
 
-        GLTFLoader.checkCompatibility(gltf, url);
-        GLTFLoader.preProcess(gltf, url);
+        GLTFLoader.checkCompatibility(gltf, _url);
+        GLTFLoader.preProcess(gltf, _url);
 
-        GLTFLoader.loaders[url] = new GLTFLoader(gltf, url);
+        GLTFLoader.loaders[_url] = new GLTFLoader(gltf, _url);
       }
 
-      return GLTFLoader.loaders[url];
+      return GLTFLoader.loaders[_url];
     }
 
     private static checkCompatibility(_gltf: GLTF.GlTf, _url: string): void {
@@ -73,6 +104,12 @@ namespace FudgeCore {
     }
 
     private static preProcess(_gltf: GLTF.GlTf, _url: string): void {
+      // add a name to each scene
+      if (_gltf.scenes) {
+        _gltf.scene = _gltf.scene ?? 0;
+        addNames("Scene", _gltf.scenes);
+      }
+
       if (_gltf.nodes) {
         // mark all nodes that are animated
         _gltf.animations?.forEach(_animation => {
@@ -88,7 +125,7 @@ namespace FudgeCore {
 
         _gltf.nodes.forEach((_node, _iNode) => {
           // add names to nodes that don't have one
-          if (!_node.name)
+          if (_node.name == undefined)
             _node.name = `Node${_iNode}`;
 
           if (_node.isAnimated) {
@@ -105,56 +142,122 @@ namespace FudgeCore {
 
         });
       }
-    }
 
-    /**
-     * Returns a {@link GraphInstance} for the given scene name or the default scene if no name is given.
-     */
-    public async getScene(_name?: string): Promise<Graph> {
-      const iScene: number = _name ? this.gltf.scenes.findIndex(_scene => _scene.name == _name) : this.gltf.scene;
-      if (iScene == -1)
-        throw new Error(`${this}: Couldn't find name '${_name}' in gltf scenes.`);
-      return await this.getSceneByIndex(iScene);
-    }
+      if (_gltf.materials)
+        addNames("Material", _gltf.materials);
 
-    /**
-     * Returns a {@link GraphInstance} for the given scene index or the default scene if no index is given.
-     */
-    public async getSceneByIndex(_iScene: number = this.gltf.scene): Promise<Graph> {
-      if (!this.#scenes)
-        this.#scenes = [];
-      if (!this.#scenes[_iScene]) {
-        const gltfScene: GLTF.Scene = this.gltf.scenes[_iScene];
-        const scene: Graph = new Graph(gltfScene.name);
+      if (_gltf.meshes)
+        addNames("Mesh", _gltf.meshes);
 
-        for (const iNode of gltfScene.nodes)
-          scene.addChild(await this.getNodeByIndex(iNode));
+      if (_gltf.animations)
+        addNames("Animation", _gltf.animations);
 
-        if (this.gltf.animations?.length > 0)
-          scene.addComponent(new ComponentAnimator(await this.getAnimationByIndex(0)));
-        // TODO: load all animations, not just the first one
-
-        // TODO: load only skeletons which belong to the scene???
-        // if (this.gltf.skins?.length > 0)
-        //   for (let iSkin: number = 0; iSkin < this.gltf.skins.length; iSkin++)
-        //     scene.addComponent(await this.getSkeletonByIndex(iSkin));
-        if (this.#skeletons)
-          for (const skeleton of this.#skeletons)
-            scene.addComponent(skeleton);
-
-        Project.register(scene);
-        this.#scenes[_iScene] = scene;
+      function addNames(_template: string, _target: { name?: string }[]): void {
+        _target.forEach((_item, _index) => {
+          if (_item.name == undefined)
+            _item.name = `${_template}${_index}`;
+        });
       }
-      return this.#scenes[_iScene];
+    }
+
+    /**
+     * Returns the glTF file name.
+     */
+    public get name(): string {
+      return this.#url.split("/").pop();
+    }
+
+    /**
+     * Returns all resources of the given type.
+     */
+    public async loadResources<T extends Serializable>(_class: new () => T): Promise<T[]> {
+      let resources: Serializable[] = [];
+      switch (_class.name) {
+        case Graph.name:
+          for (let iScene: number = 0; iScene < this.#gltf.scenes.length; iScene++)
+            resources.push(await this.getGraph(iScene, new GraphGLTF()));
+          break;
+        case Mesh.name:
+          for (let iMesh: number = 0; iMesh < this.#gltf.meshes.length; iMesh++)
+            for (let iPrimitive: number = 0; iPrimitive < this.#gltf.meshes[iMesh].primitives.length; iPrimitive++)
+              resources.push(await this.getMesh(iMesh, iPrimitive, new MeshGLTF()));
+          break;
+        case Material.name:
+          for (let iMaterial: number = 0; iMaterial < this.#gltf.materials.length; iMaterial++)
+            resources.push(await this.getMaterial(iMaterial, new MaterialGLTF("Hi :)")));
+          break;
+        case Animation.name:
+          for (let iAnimation: number = 0; iAnimation < this.#gltf.animations.length; iAnimation++)
+            resources.push(await this.getAnimation(iAnimation, new AnimationGLTF()));
+          break;
+      }
+
+      return <T[]>resources;
+    }
+
+    /**
+     * Returns a {@link Graph} for the given scene name or the default scene if no name is given.
+     */
+    public async getGraph(_name?: string, _graph?: Node): Promise<Node>;
+    /**
+     * Returns a {@link Graph} for the given scene index or the default scene if no index is given.
+     */
+    public async getGraph(_iScene?: number, _graph?: Node): Promise<Node>;
+    public async getGraph(_iScene: number | string = this.#gltf.scene, _graph?: Node): Promise<Node> {
+      _iScene = this.getIndex(_iScene, this.#gltf.scenes);
+
+      if (_iScene == -1)
+        return null;
+
+      const id: string = `${GraphGLTF.name}|${_iScene}`;
+
+      if (!_graph && this.#resources[id])
+        return <Node><unknown>this.#resources[id];
+
+      this.#nodes = [];
+      this.#cameras = [];
+      this.#skeletons = [];
+
+      const gltfScene: GLTF.Scene = this.#gltf.scenes[_iScene];
+      const graph: Node = _graph ?? new GraphGLTF();
+      graph.name = gltfScene.name;
+      if (graph instanceof GraphGLTF)
+        graph.url = this.#url;
+
+      if (_graph) {
+        graph.removeAllChildren();
+        graph.getComponents(ComponentAnimator).forEach(_animator => graph.removeComponent(_animator));
+        graph.getComponents(ComponentSkeleton).forEach(_skeleton => graph.removeComponent(_skeleton));
+      }
+
+      for (const iNode of gltfScene.nodes)
+        graph.addChild(await this.getNodeByIndex(iNode));
+
+      if (this.#gltf.animations?.length > 0)
+        graph.addComponent(new ComponentAnimator(await this.getAnimation(0)));
+      // TODO: load all animations, not just the first one
+
+      // TODO: load only skeletons which belong to the scene???
+      // if (this.gltf.skins?.length > 0)
+      //   for (let iSkin: number = 0; iSkin < this.gltf.skins.length; iSkin++)
+      //     scene.addComponent(await this.getSkeletonByIndex(iSkin));
+      if (this.#skeletons)
+        for (const skeleton of this.#skeletons)
+          graph.addComponent(skeleton);
+
+      if (!_graph)
+        this.#resources[id] = <GraphGLTF>graph;
+
+      return graph;
     }
 
     /**
      * Returns the first {@link Node} with the given name.
      */
     public async getNode(_name: string): Promise<Node> {
-      const iNode: number = this.gltf.nodes.findIndex(_node => _node.name == _name);
+      const iNode: number = this.#gltf.nodes.findIndex(_node => _node.name == _name);
       if (iNode == -1)
-        throw new Error(`${this}: Couldn't find name '${_name}' in gltf nodes.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in glTF nodes.`);
       return await this.getNodeByIndex(iNode);
     }
 
@@ -163,7 +266,7 @@ namespace FudgeCore {
      */
     public async getNodeByIndex(_iNode: number): Promise<Node> {
       if (!this.#nodes[_iNode]) {
-        const gltfNode: GLTF.Node = this.gltf.nodes[_iNode];
+        const gltfNode: GLTF.Node = this.#gltf.nodes[_iNode];
         const node: Node = new Node(gltfNode.name);
 
         this.#nodes[_iNode] = node;
@@ -207,11 +310,11 @@ namespace FudgeCore {
 
         // check for mesh and material
         if (gltfNode.mesh != undefined) {
-          const gltfMesh: GLTF.Mesh = this.gltf.meshes?.[gltfNode.mesh];
+          const gltfMesh: GLTF.Mesh = this.#gltf.meshes?.[gltfNode.mesh];
           // TODO: review this
           const subComponents: [ComponentMesh, ComponentMaterial][] = [];
           for (let iPrimitive: number = 0; iPrimitive < gltfMesh.primitives.length; iPrimitive++) {
-            const cmpMesh: ComponentMesh = new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh, iPrimitive));
+            const cmpMesh: ComponentMesh = new ComponentMesh(await this.getMesh(gltfNode.mesh, iPrimitive));
             const isSkin: boolean = gltfNode.skin != undefined;
 
             if (isSkin)
@@ -225,7 +328,7 @@ namespace FudgeCore {
                 GLTFLoader.defaultMaterial);
             } else {
               const isFlat: boolean = gltfMesh.primitives[iPrimitive].attributes.NORMAL == undefined;
-              cmpMaterial = new ComponentMaterial(await this.getMaterialByIndex(iMaterial, isSkin, isFlat));
+              cmpMaterial = new ComponentMaterial(await this.getMaterial(iMaterial, null, isSkin, isFlat));
             }
 
             subComponents.push([cmpMesh, cmpMaterial]);
@@ -236,7 +339,7 @@ namespace FudgeCore {
             node.addComponent(subComponents[0][1]);
           } else {
             subComponents.forEach(([_cmpMesh, _cmpMaterial], _i) => {
-              const nodePart: Node = new Node(node.name + "_primitive" + _i);
+              const nodePart: Node = new Node(`${node.name}_Primitive${_i}`);
               nodePart.addComponent(_cmpMesh);
               nodePart.addComponent(_cmpMaterial);
               node.addChild(nodePart);
@@ -252,9 +355,9 @@ namespace FudgeCore {
      * Returns the first {@link ComponentCamera} with the given camera name.
      */
     public async getCamera(_name: string): Promise<ComponentCamera> {
-      const iCamera: number = this.gltf.cameras.findIndex(_camera => _camera.name == _name);
+      const iCamera: number = this.#gltf.cameras.findIndex(_camera => _camera.name == _name);
       if (iCamera == -1)
-        throw new Error(`${this}: Couldn't find name '${_name}' in gltf cameras.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in glTF cameras.`);
       return await this.getCameraByIndex(iCamera);
     }
 
@@ -265,7 +368,7 @@ namespace FudgeCore {
       if (!this.#cameras)
         this.#cameras = [];
       if (!this.#cameras[_iCamera]) {
-        const gltfCamera: GLTF.Camera = this.gltf.cameras[_iCamera];
+        const gltfCamera: GLTF.Camera = this.#gltf.cameras[_iCamera];
         const camera: ComponentCamera = new ComponentCamera();
 
         if (gltfCamera.perspective)
@@ -292,105 +395,103 @@ namespace FudgeCore {
     /**
      * Returns the first {@link Animation} with the given animation name.
      */
-    public async getAnimation(_name: string): Promise<Animation> {
-      const iAnimation: number = this.gltf.animations.findIndex(_animation => _animation.name == _name);
-      if (iAnimation == -1)
-        throw new Error(`${this}: Couldn't find name '${_name}' in gltf animations.`);
-      return await this.getAnimationByIndex(iAnimation);
-    }
-
+    public async getAnimation(_name: string, _animation?: Animation): Promise<Animation>;
     /**
      * Returns the {@link Animation} for the given animation index.
      */
-    public async getAnimationByIndex(_iAnimation: number): Promise<Animation> {
-      if (!this.#animations)
-        this.#animations = [];
-      if (!this.#animations[_iAnimation]) {
-        const gltfAnimation: GLTF.Animation = this.gltf.animations?.[_iAnimation];
+    public async getAnimation(_iAnimation: number, _animation?: Animation): Promise<Animation>;
+    public async getAnimation(_iAnimation: number | string, _animation?: Animation): Promise<Animation> {
+      _iAnimation = this.getIndex(_iAnimation, this.#gltf.animations);
 
-        if (!gltfAnimation)
-          throw new Error(`${this}: Couldn't find animation with index ${_iAnimation}.`);
+      if (_iAnimation == -1)
+        return null;
 
-        // group channels by node
-        let gltfChannelsGrouped: GLTF.AnimationChannel[][] = []; // TODO: maybe change this to map or js object
-        for (const gltfChannel of gltfAnimation.channels) {
-          const iNode: number = gltfChannel.target.node;
-          if (iNode == undefined)
-            continue;
-          if (!gltfChannelsGrouped[iNode])
-            gltfChannelsGrouped[iNode] = [];
-          gltfChannelsGrouped[iNode].push(gltfChannel);
-        }
-        // remove empty entries
-        gltfChannelsGrouped = gltfChannelsGrouped.filter(_channels => _channels != undefined);
+      const id: string = `${Animation.name}|${_iAnimation}`;
 
-        const animationStructure: AnimationStructure = {};
-        for (const gltfChannels of gltfChannelsGrouped) {
-          const gltfNode: GLTF.Node = this.gltf.nodes[gltfChannels[0].target.node];
+      if (!_animation && this.#resources[id])
+        return <Animation>this.#resources[id];
 
-          let currentStructure: AnimationStructure = animationStructure;
-          for (const iPathNode of gltfNode.path.reverse()) {
-            const pathNode: GLTF.Node = this.gltf.nodes[iPathNode];
+      const gltfAnimation: GLTF.Animation = this.#gltf.animations?.[_iAnimation];
 
-            if (currentStructure.children == undefined)
-              currentStructure.children = {};
+      if (!gltfAnimation)
+        throw new Error(`${this}: Couldn't find animation with index ${_iAnimation}.`);
 
-            if ((currentStructure.children as AnimationStructure)[pathNode.name] == undefined)
-              (currentStructure.children as AnimationStructure)[pathNode.name] = {};
-            currentStructure = (currentStructure.children as AnimationStructure)[pathNode.name] as AnimationStructure;
+      // group channels by node
+      let gltfChannelsGrouped: GLTF.AnimationChannel[][] = []; // TODO: maybe change this to map or js object
+      for (const gltfChannel of gltfAnimation.channels) {
+        const iNode: number = gltfChannel.target.node;
+        if (iNode == undefined)
+          continue;
+        if (!gltfChannelsGrouped[iNode])
+          gltfChannelsGrouped[iNode] = [];
+        gltfChannelsGrouped[iNode].push(gltfChannel);
+      }
+      // remove empty entries
+      gltfChannelsGrouped = gltfChannelsGrouped.filter(_channels => _channels != undefined);
 
-            if (pathNode == gltfNode) {
-              const mtxLocal: AnimationSequenceMatrix4x4 = {};
-              for (const gltfChannel of gltfChannels)
-                mtxLocal[toInternTransformation[gltfChannel.target.path]] =
-                  await this.getAnimationSequenceVector(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
-              currentStructure.components = {
-                ComponentTransform: [
-                  { mtxLocal: mtxLocal }
-                ]
-              };
-            }
+      const animationStructure: AnimationStructure = {};
+      for (const gltfChannels of gltfChannelsGrouped) {
+        const gltfNode: GLTF.Node = this.#gltf.nodes[gltfChannels[0].target.node];
+
+        let currentStructure: AnimationStructure = animationStructure;
+        for (const iPathNode of gltfNode.path.reverse()) {
+          const pathNode: GLTF.Node = this.#gltf.nodes[iPathNode];
+
+          if (currentStructure.children == undefined)
+            currentStructure.children = {};
+
+          if ((currentStructure.children as AnimationStructure)[pathNode.name] == undefined)
+            (currentStructure.children as AnimationStructure)[pathNode.name] = {};
+          currentStructure = (currentStructure.children as AnimationStructure)[pathNode.name] as AnimationStructure;
+
+          if (pathNode == gltfNode) {
+            const mtxLocal: AnimationSequenceMatrix4x4 = {};
+            for (const gltfChannel of gltfChannels)
+              mtxLocal[toInternTransformation[gltfChannel.target.path]] =
+                await this.getAnimationSequenceVector(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
+            currentStructure.components = {
+              ComponentTransform: [
+                { mtxLocal: mtxLocal }
+              ]
+            };
           }
         }
-
-        this.#animations[_iAnimation] = new Animation(gltfAnimation.name, animationStructure);
       }
-      return this.#animations[_iAnimation];
+
+      const animation: Animation = _animation ?? new AnimationGLTF();
+      animation.animationStructure = animationStructure;
+      animation.clearCache();
+      animation.name = gltfAnimation.name;
+      if (animation instanceof AnimationGLTF)
+        animation.url = this.#url;
+      if (!_animation) {
+        Project.deregister(animation);
+        this.#resources[id] = animation;
+      }
+
+      return animation;
     }
 
     /**
-     * Returns the first {@link MeshGLTF} with the given mesh name.
+     * Returns the first {@link MeshGLTF} with the given name.
      */
-    public async getMesh(_name: string): Promise<MeshGLTF> {
-      const iMesh: number = this.gltf.meshes.findIndex(_mesh => _mesh.name == _name);
-      if (iMesh == -1)
-        throw new Error(`${this}: Couldn't find name '${_name}' in gltf meshes.`);
-      return await this.getMeshByIndex(iMesh);
-    }
-
+    public async getMesh(_name: string, _iPrimitive?: number, _mesh?: Mesh): Promise<Mesh>;
     /**
      * Returns the {@link MeshGLTF} for the given mesh index and primitive index.
      */
-    public async getMeshByIndex(_iMesh: number, _iPrimitive: number = 0): Promise<MeshGLTF> {
-      if (!this.#meshes)
-        this.#meshes = [];
-      if (!this.#meshes[_iMesh])
-        this.#meshes[_iMesh] = [];
+    public async getMesh(_iMesh: number, _iPrimitive?: number, _mesh?: Mesh): Promise<Mesh>;
+    public async getMesh(_iMesh: number | string, _iPrimitive: number = 0, _mesh?: Mesh): Promise<Mesh> {
+      _iMesh = this.getIndex(_iMesh, this.#gltf.meshes);
 
-      if (this.#meshes[_iMesh][_iPrimitive])
-        return this.#meshes[_iMesh][_iPrimitive];
+      if (_iMesh == -1)
+        return null;
 
-      await this.loadMesh(_iMesh, _iPrimitive);
+      const id: string = `${MeshGLTF.name}|${_iMesh}|${_iPrimitive}`;
 
-      return this.#meshes[_iMesh][_iPrimitive];
-    }
+      if (!_mesh && this.#resources[id])
+        return <MeshGLTF>this.#resources[id];
 
-    /**
-     * Creates a new {@link MeshGLTF} for the given mesh index and primitive index and returns it. Replaces the cached mesh affecting {@link getMeshByIndex}. If a mesh is provided, it will be used instead of creating a new one.
-     * @internal
-     */
-    public async loadMesh(_iMesh: number, _iPrimitive: number = 0, _mesh?: MeshGLTF): Promise<MeshGLTF> {
-      const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
+      const gltfMesh: GLTF.Mesh = this.#gltf.meshes[_iMesh];
       const gltfPrimitive: GLTF.MeshPrimitive = gltfMesh.primitives[_iPrimitive];
 
       if (gltfPrimitive.indices == undefined)
@@ -406,9 +507,6 @@ namespace FudgeCore {
       checkMaxSupport(this, "COLOR", 1);
       checkMaxSupport(this, "JOINTS", 1);
       checkMaxSupport(this, "WEIGHTS", 1);
-
-      _mesh = _mesh ?? new MeshGLTF();
-      _mesh.name = gltfMesh.name;
 
       let vertices: Float32Array, indices: Uint16Array;
       let normals: Float32Array, tangents: Float32Array;
@@ -451,9 +549,17 @@ namespace FudgeCore {
         weights = await this.getFloat32Array(gltfPrimitive.attributes.WEIGHTS_0);
       }
 
+      const mesh: Mesh = _mesh ?? new MeshGLTF();
+      mesh.name = gltfMesh.name;
+      if (mesh instanceof MeshGLTF) {
+        mesh.iPrimitive = _iPrimitive;
+        mesh.url = this.#url;
+      }
+      _mesh?.clear();
+
       // Create mesh vertices and faces so that normals and tangents can be calculated if missing. If they are not missing this could be omitted.
       for (let iVector2: number = 0, iVector3: number = 0, iVector4: number = 0; iVector3 < vertices?.length; iVector2 += 2, iVector3 += 3, iVector4 += 4) {
-        _mesh.vertices.push(
+        mesh.vertices.push(
           new Vertex(
             new Vector3(vertices[iVector3 + 0], vertices[iVector3 + 1], vertices[iVector3 + 2]),
             textureUVs ?
@@ -482,8 +588,8 @@ namespace FudgeCore {
 
       for (let iFaceVertexIndex: number = 0; iFaceVertexIndex < indices?.length; iFaceVertexIndex += 3) {
         try {
-          _mesh.faces.push(new Face(
-            _mesh.vertices,
+          mesh.faces.push(new Face(
+            mesh.vertices,
             indices[iFaceVertexIndex + 0],
             indices[iFaceVertexIndex + 1],
             indices[iFaceVertexIndex + 2]
@@ -493,171 +599,216 @@ namespace FudgeCore {
         }
       }
 
-      _mesh.renderMesh.vertices = vertices;
-      _mesh.renderMesh.indices = indices;
-      _mesh.renderMesh.normals = normals;
-      _mesh.renderMesh.tangents = tangents;
-      _mesh.renderMesh.textureUVs = textureUVs;
-      _mesh.renderMesh.colors = colors;
-      _mesh.renderMesh.bones = bones;
-      _mesh.renderMesh.weights = weights;
+      mesh.renderMesh.vertices = vertices;
+      mesh.renderMesh.indices = indices;
+      mesh.renderMesh.normals = normals;
+      mesh.renderMesh.tangents = tangents;
+      mesh.renderMesh.textureUVs = textureUVs;
+      mesh.renderMesh.colors = colors;
+      mesh.renderMesh.bones = bones;
+      mesh.renderMesh.weights = weights;
 
-      this.#meshes[_iMesh][_iPrimitive] = _mesh;
+      if (!_mesh) {
+        Project.deregister(mesh);
+        // mesh.idResource = id;
+        this.#resources[id] = mesh;
+      }
 
-      return _mesh;
+      return mesh;
 
       function checkMaxSupport(_loader: GLTFLoader, _check: string, _max: number): void {
         if (Object.keys(gltfPrimitive.attributes).filter((_key: string) => _key.startsWith(_check)).length > _max)
-          Debug.warn(`${_loader}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has more than ${_max} sets of '${_check}' associated with it. FUGDE only supports up to ${_max} ${_check} sets per primitve.`);
+          Debug.warn(`${_loader}: Mesh with index ${_iMesh} primitive ${_iPrimitive} has more than ${_max} sets of '${_check}' associated with it. FUGDE only supports up to ${_max} ${_check} sets per primitive.`);
       }
     }
 
     /**
+     * Returns the first {@link MaterialGLTF} with the given material name.
+     */
+    public async getMaterial(_name: string, _material?: Material): Promise<Material>;
+    /**
      * Returns the {@link Material} for the given material index.
      */
-    public async getMaterialByIndex(_iMaterial: number, _skin: boolean = false, _flat: boolean = false): Promise<Material> {
-      if (!this.#materials)
-        this.#materials = [];
-      if (!this.#materials[_iMaterial]) {
-        // TODO: in the future create an appropriate shader based on the gltf material properties
-        const gltfMaterial: GLTF.Material = this.gltf.materials[_iMaterial];
+    public async getMaterial(_iMaterial: number, _material?: Material): Promise<Material>;
+    /**
+     * @internal
+     */
+    public async getMaterial(_iMaterial: number, _material?: Material, _skin?: boolean, _flat?: boolean): Promise<Material>;
+    public async getMaterial(_iMaterial: number | string, _material?: Material, _skin: boolean = false, _flat: boolean = false): Promise<Material> {
+      _iMaterial = this.getIndex(_iMaterial, this.#gltf.materials);
 
-        if (!gltfMaterial)
-          throw new Error(`${this}: Couldn't find material with index ${_iMaterial}.`);
+      if (_iMaterial == -1)
+        return null;
 
-        // TODO: add support for other gltf material properties: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#reference-material
-        // e.g. occlusion and emissive textures; alphaMode; alphaCutoff; doubleSided
-        const gltfBaseColorFactor: number[] = gltfMaterial.pbrMetallicRoughness?.baseColorFactor ?? [1, 1, 1, 1];
-        let gltfMetallicFactor: number = gltfMaterial.pbrMetallicRoughness?.metallicFactor ?? 1;
-        let gltfRoughnessFactor: number = gltfMaterial.pbrMetallicRoughness?.roughnessFactor ?? 1;
+      const id: string = `${Material.name}|${_iMaterial}`;
 
-        const gltfMetallicRoughnessTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.metallicRoughnessTexture;
-        if (gltfMetallicRoughnessTexture) {
-          // TODO: maybe throw this out if it costs too much performance, or add the texture to the material
-          // average metallic and roughness values
-          const metallicRoughnessTexture: TextureImage = await this.getTextureByIndex(gltfMetallicRoughnessTexture.index) as TextureImage;
-          let image: HTMLImageElement = metallicRoughnessTexture.image;
-          let canvas: HTMLCanvasElement = document.createElement("canvas");
-          canvas.width = image.width;
-          canvas.height = image.height;
-          let ctx: CanvasRenderingContext2D = canvas.getContext("2d");
-          ctx.drawImage(image, 0, 0);
-          let imageData: ImageData = ctx.getImageData(0, 0, image.width, image.height);
-          let data: Uint8ClampedArray = imageData.data;
+      if (this.#resources[id] && !_material)
+        return <Material>this.#resources[id];
 
-          let sumMetallic: number = 0;
-          let sumRoughness: number = 0;
-          for (let iPixel: number = 0; iPixel < data.length; iPixel += 4) {
-            sumMetallic += data[iPixel + 2] / 255;
-            sumRoughness += data[iPixel + 1] / 255;
-          }
+      // TODO: in the future create an appropriate shader based on the glTF material properties
+      const gltfMaterial: GLTF.Material = this.#gltf.materials[_iMaterial];
 
-          const averageMetallic: number = sumMetallic / (data.length / 4);
-          const averageRoughness: number = sumRoughness / (data.length / 4);
+      if (!gltfMaterial)
+        throw new Error(`${this}: Couldn't find material with index ${_iMaterial}.`);
 
-          gltfMetallicFactor *= averageMetallic;
-          gltfRoughnessFactor *= averageRoughness;
+      // TODO: add support for other glTF material properties: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#reference-material
+      // e.g. occlusion and emissive textures; alphaMode; alphaCutoff; doubleSided
+      const gltfBaseColorFactor: number[] = gltfMaterial.pbrMetallicRoughness?.baseColorFactor ?? [1, 1, 1, 1];
+      let gltfMetallicFactor: number = gltfMaterial.pbrMetallicRoughness?.metallicFactor ?? 1;
+      let gltfRoughnessFactor: number = gltfMaterial.pbrMetallicRoughness?.roughnessFactor ?? 1;
+
+      const gltfMetallicRoughnessTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.metallicRoughnessTexture;
+      if (gltfMetallicRoughnessTexture) {
+        // TODO: maybe throw this out if it costs too much performance, or add the texture to the material
+        // average metallic and roughness values
+        const metallicRoughnessTexture: TextureImage = await this.getTexture(gltfMetallicRoughnessTexture.index) as TextureImage;
+        let image: HTMLImageElement = metallicRoughnessTexture.image;
+        let canvas: HTMLCanvasElement = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+        let ctx: CanvasRenderingContext2D = canvas.getContext("2d");
+        ctx.drawImage(image, 0, 0);
+        let imageData: ImageData = ctx.getImageData(0, 0, image.width, image.height);
+        let data: Uint8ClampedArray = imageData.data;
+
+        let sumMetallic: number = 0;
+        let sumRoughness: number = 0;
+        for (let iPixel: number = 0; iPixel < data.length; iPixel += 4) {
+          sumMetallic += data[iPixel + 2] / 255;
+          sumRoughness += data[iPixel + 1] / 255;
         }
 
-        const gltfBaseColorTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
-        const gltfNormalTexture: GLTF.MaterialNormalTextureInfo = gltfMaterial.normalTexture;
+        const averageMetallic: number = sumMetallic / (data.length / 4);
+        const averageRoughness: number = sumRoughness / (data.length / 4);
 
-        // The diffuse contribution in the Phong shading model. Represents how much light is scattered in different directions due to the material's surface properties.
-        const diffuse: number = 1;
-        // The shininess of the material. Influences the sharpness or broadness of the specular highlight. Higher specular values result in a sharper and more concentrated specular highlight.
-        const specular: number = 1.8 * (1 - gltfRoughnessFactor) + 0.6 * gltfMetallicFactor;
-        // The strength/intensity of the specular reflection
-        const intensity: number = 0.7 * (1 - gltfRoughnessFactor) + gltfMetallicFactor;
-        // Influences how much the material's color affects the specular reflection. When metallic is higher, the specular reflection takes on the color of the material, creating a metallic appearance. Range from 0.0 to 1.0.
-        const metallic: number = gltfMetallicFactor;
-
-        const color: Color = new Color(...gltfBaseColorFactor);
-        const coat: Coat = gltfBaseColorTexture ?
-          gltfNormalTexture ?
-            new CoatRemissiveTexturedNormals(color, await this.getTextureByIndex(gltfBaseColorTexture.index), await this.getTextureByIndex(gltfNormalTexture.index), diffuse, specular, intensity, metallic) :
-            new CoatRemissiveTextured(color, await this.getTextureByIndex(gltfBaseColorTexture.index), diffuse, specular, intensity, metallic) :
-          new CoatRemissive(color, diffuse, specular, intensity, metallic);
-
-        let shader: typeof Shader;
-        if (_flat) { // TODO: make flat a flag in the material so that we can have flat mesh with phong shading gradients
-          shader = gltfBaseColorTexture ?
-            (_skin ? ShaderFlatTexturedSkin : ShaderFlatTextured) :
-            (_skin ? ShaderFlatSkin : ShaderFlat);
-        } else {
-          shader = gltfBaseColorTexture ?
-            gltfNormalTexture ?
-              (_skin ? ShaderPhongTexturedNormalsSkin : ShaderPhongTexturedNormals) :
-              (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
-            (_skin ? ShaderPhongSkin : ShaderPhong);
-        }
-
-        this.#materials[_iMaterial] = new Material(gltfMaterial.name, shader, coat);;
+        gltfMetallicFactor *= averageMetallic;
+        gltfRoughnessFactor *= averageRoughness;
       }
 
-      return this.#materials[_iMaterial];
+      const gltfBaseColorTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
+      const gltfNormalTexture: GLTF.MaterialNormalTextureInfo = gltfMaterial.normalTexture;
+
+      // The diffuse contribution in the Phong shading model. Represents how much light is scattered in different directions due to the material's surface properties.
+      const diffuse: number = 1;
+      // The shininess of the material. Influences the sharpness or broadness of the specular highlight. Higher specular values result in a sharper and more concentrated specular highlight.
+      const specular: number = 1.8 * (1 - gltfRoughnessFactor) + 0.6 * gltfMetallicFactor;
+      // The strength/intensity of the specular reflection
+      const intensity: number = 0.7 * (1 - gltfRoughnessFactor) + gltfMetallicFactor;
+      // Influences how much the material's color affects the specular reflection. When metallic is higher, the specular reflection takes on the color of the material, creating a metallic appearance. Range from 0.0 to 1.0.
+      const metallic: number = gltfMetallicFactor;
+
+      const color: Color = new Color(...gltfBaseColorFactor);
+      const coat: Coat = gltfBaseColorTexture ?
+        gltfNormalTexture ?
+          new CoatRemissiveTexturedNormals(color, await this.getTexture(gltfBaseColorTexture.index), await this.getTexture(gltfNormalTexture.index), diffuse, specular, intensity, metallic) :
+          new CoatRemissiveTextured(color, await this.getTexture(gltfBaseColorTexture.index), diffuse, specular, intensity, metallic) :
+        new CoatRemissive(color, diffuse, specular, intensity, metallic);
+
+      let shader: typeof Shader;
+      if (_flat) { // TODO: make flat a flag in the material so that we can have flat mesh with phong shading gradients
+        shader = gltfBaseColorTexture ?
+          (_skin ? ShaderFlatTexturedSkin : ShaderFlatTextured) :
+          (_skin ? ShaderFlatSkin : ShaderFlat);
+      } else {
+        shader = gltfBaseColorTexture ?
+          gltfNormalTexture ?
+            (_skin ? ShaderPhongTexturedNormalsSkin : ShaderPhongTexturedNormals) :
+            (_skin ? ShaderPhongTexturedSkin : ShaderPhongTextured) :
+          (_skin ? ShaderPhongSkin : ShaderPhong);
+      }
+
+      const material: Material = _material ?? new MaterialGLTF(gltfMaterial.name);
+      material.name = gltfMaterial.name;
+      material.coat = coat;
+      Reflect.set(material, "shaderType", shader);
+      // material.setShader(shader);
+      if (material instanceof MaterialGLTF)
+        material.url = this.#url;
+
+      if (!_material) {
+        Project.deregister(material);
+        this.#resources[id] = material;
+      }
+
+      return material;
     }
 
     /**
      * Returns the {@link Texture} for the given texture index.
      */
-    public async getTextureByIndex(_iTexture: number): Promise<Texture> {
-      if (!this.#textures)
-        this.#textures = [];
-      if (!this.#textures[_iTexture]) {
-        const gltfTexture: GLTF.Texture = this.gltf.textures[_iTexture];
-        const gltfSampler: GLTF.Sampler = this.gltf.samplers?.[gltfTexture.sampler];
-        const gltfImage: GLTF.Image = this.gltf.images?.[gltfTexture.source];
+    public async getTexture(_iTexture: number): Promise<Texture> {
+      const id: string = `${Texture.name}|${_iTexture}`;
 
-        if (gltfImage == undefined) {
-          Debug.warn(`${this}: Texture with index ${_iTexture} has no image.`);
-          return TextureDefault.color;
-        }
+      if (this.#resources[id])
+        return <Texture>this.#resources[id];
 
-        if (gltfSampler?.wrapS != undefined && gltfSampler?.wrapS != WebGL2RenderingContext.REPEAT)
-          Debug.warn(`${this}: Texture with index ${_iTexture} has a wrapS of '${getWebGLParameterName(gltfSampler.wrapS)}'. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`);
-        if (gltfSampler?.wrapT != undefined && gltfSampler?.wrapT != WebGL2RenderingContext.REPEAT)
-          Debug.warn(`${this}: Texture with index ${_iTexture} has a wrapT of '${getWebGLParameterName(gltfSampler.wrapT)}'. FUDGE only supports the default behavior of '${getWebGLParameterName(WebGL2RenderingContext.REPEAT)}'.`);
+      const gltfTexture: GLTF.Texture = this.#gltf.textures[_iTexture];
+      const gltfSampler: GLTF.Sampler = this.#gltf.samplers?.[gltfTexture.sampler];
+      const gltfImage: GLTF.Image = this.#gltf.images?.[gltfTexture.source];
 
-        let url: string = new URL(gltfImage.uri, this.url).toString();
-
-        if (!gltfImage.uri && gltfImage.bufferView) {
-          // TODO: this is duplicate code from getBufferData, maybe refactor getBufferData to handle bufferViewIndex input
-          const gltfBufferView: GLTF.BufferView = this.gltf.bufferViews[gltfImage.bufferView];
-
-          const buffer: ArrayBuffer = await this.getBuffer(gltfBufferView.buffer);
-          const byteOffset: number = gltfBufferView.byteOffset || 0;
-          const byteLength: number = gltfBufferView.byteLength || 0;
-
-          url = URL.createObjectURL(new Blob(
-            [new Uint8Array(buffer, byteOffset, byteLength / Uint8Array.BYTES_PER_ELEMENT)],
-            { type: gltfImage.mimeType }
-          ));
-        }
-
-        const texture: TextureImage = new TextureImage();
-        await texture.load(url);
-        if (gltfSampler && gltfSampler.magFilter == WebGL2RenderingContext.NEAREST && gltfSampler.minFilter == WebGL2RenderingContext.NEAREST)
-          texture.mipmap = MIPMAP.CRISP;
-        else if (gltfSampler && gltfSampler.magFilter == WebGL2RenderingContext.NEAREST && gltfSampler.minFilter == WebGL2RenderingContext.NEAREST_MIPMAP_LINEAR)
-          texture.mipmap = MIPMAP.MEDIUM;
-        else if (gltfSampler && gltfSampler.magFilter == WebGL2RenderingContext.LINEAR && gltfSampler.minFilter == WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR)
-          texture.mipmap = MIPMAP.BLURRY;
-        else if (gltfSampler && (gltfSampler.magFilter != undefined || gltfSampler.minFilter != undefined))
-          Debug.warn(`${this}: Texture with index ${_iTexture} has a magFilter and minFilter of '${getWebGLParameterName(gltfSampler.magFilter)}' and '${getWebGLParameterName(gltfSampler.minFilter)}' respectively. FUDGE only supports the following combinations: NEAREST and NEAREST | NEAREST and NEAREST_MIPMAP_LINEAR | LINEAR and LINEAR_MIPMAP_LINEAR.`);
-
-        this.#textures[_iTexture] = texture;
+      if (gltfImage == undefined) {
+        Debug.warn(`${this}: Texture with index ${_iTexture} has no image.`);
+        return TextureDefault.color;
       }
 
-      return this.#textures[_iTexture];
+      let url: string = new URL(gltfImage.uri, new URL(this.#url, Project.baseURL)).toString();
+
+      if (!gltfImage.uri && gltfImage.bufferView) {
+        // TODO: this is duplicate code from getBufferData, maybe refactor getBufferData to handle bufferViewIndex input
+        const gltfBufferView: GLTF.BufferView = this.#gltf.bufferViews[gltfImage.bufferView];
+
+        const buffer: ArrayBuffer = await this.getBuffer(gltfBufferView.buffer);
+        const byteOffset: number = gltfBufferView.byteOffset || 0;
+        const byteLength: number = gltfBufferView.byteLength || 0;
+
+        url = URL.createObjectURL(new Blob(
+          [new Uint8Array(buffer, byteOffset, byteLength / Uint8Array.BYTES_PER_ELEMENT)],
+          { type: gltfImage.mimeType }
+        ));
+      }
+
+      const texture: TextureImage = new TextureImage();
+      await texture.load(url);
+
+      if (gltfSampler) {
+        gltfSampler.magFilter = gltfSampler.magFilter ?? WebGL2RenderingContext.NEAREST; // default value
+        gltfSampler.minFilter = gltfSampler.minFilter ?? WebGL2RenderingContext.NEAREST; // default value
+
+        if (gltfSampler.magFilter == WebGL2RenderingContext.NEAREST && gltfSampler.minFilter == WebGL2RenderingContext.NEAREST)
+          texture.mipmap = MIPMAP.CRISP;
+        else if (gltfSampler.magFilter == WebGL2RenderingContext.NEAREST && gltfSampler.minFilter == WebGL2RenderingContext.NEAREST_MIPMAP_LINEAR)
+          texture.mipmap = MIPMAP.MEDIUM;
+        else if (gltfSampler.magFilter == WebGL2RenderingContext.LINEAR && gltfSampler.minFilter == WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR)
+          texture.mipmap = MIPMAP.BLURRY;
+        else
+          Debug.warn(`${this}: Texture with index ${_iTexture} has a magFilter and minFilter of '${getWebGLParameterName(gltfSampler.magFilter)}' and '${getWebGLParameterName(gltfSampler.minFilter)}' respectively. FUDGE only supports the following combinations: NEAREST and NEAREST | NEAREST and NEAREST_MIPMAP_LINEAR | LINEAR and LINEAR_MIPMAP_LINEAR.`);
+
+        gltfSampler.wrapS = gltfSampler.wrapS ?? WebGL2RenderingContext.REPEAT; // default value
+        gltfSampler.wrapT = gltfSampler.wrapT ?? WebGL2RenderingContext.REPEAT; // default value
+
+        if (gltfSampler.wrapS == WebGL2RenderingContext.REPEAT && gltfSampler.wrapT == WebGL2RenderingContext.REPEAT)
+          texture.wrap = WRAP.REPEAT;
+        else if (gltfSampler.wrapS == WebGL2RenderingContext.CLAMP_TO_EDGE && gltfSampler.wrapT == WebGL2RenderingContext.CLAMP_TO_EDGE)
+          texture.wrap = WRAP.CLAMP;
+        else if (gltfSampler.wrapS == WebGL2RenderingContext.MIRRORED_REPEAT && gltfSampler.wrapT == WebGL2RenderingContext.MIRRORED_REPEAT)
+          texture.wrap = WRAP.MIRROR;
+        else
+          Debug.warn(`${this}: Texture with index ${_iTexture} has a wrapS and wrapT of '${getWebGLParameterName(gltfSampler.wrapS)}' and '${getWebGLParameterName(gltfSampler.wrapT)}' respectively. FUDGE only supports the following combinations: REPEAT and REPEAT | CLAMP_TO_EDGE and CLAMP_TO_EDGE | MIRRORED_REPEAT and MIRRORED_REPEAT.`);
+      }
+
+      Project.deregister(texture);
+      this.#resources[id] = texture;
+
+      return texture;
     }
 
     /**
     * Returns the first {@link ComponentSkeleton} with the given skeleton name.
     */
     public async getSkeleton(_name: string): Promise<ComponentSkeleton> {
-      const iSkeleton: number = this.gltf.skins.findIndex(_skeleton => _skeleton.name == _name);
+      const iSkeleton: number = this.#gltf.skins.findIndex(_skeleton => _skeleton.name == _name);
       if (iSkeleton == -1)
-        throw new Error(`${this}: Couldn't find name '${_name}' in gltf skins.`);
+        throw new Error(`${this}: Couldn't find name '${_name}' in glTF skins.`);
       return await this.getSkeletonByIndex(iSkeleton);
     }
 
@@ -668,7 +819,7 @@ namespace FudgeCore {
       if (!this.#skeletons)
         this.#skeletons = [];
       if (!this.#skeletons[_iSkeleton]) {
-        const gltfSkin: GLTF.Skin = this.gltf.skins[_iSkeleton];
+        const gltfSkin: GLTF.Skin = this.#gltf.skins[_iSkeleton];
         const bones: Node[] = [];
 
         // convert float array to array of matrices and register bones
@@ -697,7 +848,19 @@ namespace FudgeCore {
     }
 
     public toString(): string {
-      return `${GLTFLoader.name} | ${this.url}`;
+      return `${GLTFLoader.name} | ${this.#url}`;
+    }
+
+    private getIndex(_nameOrIndex: string | number, _array: { name?: string }[]): number {
+      let index: number =
+        typeof _nameOrIndex == "number" ?
+          _nameOrIndex :
+          _array.findIndex(_object => _object.name == _nameOrIndex);
+      if (index == -1) {
+        let arrayName: string = Object.entries(this.#gltf).find(([_key, _value]) => _value == _array)?.[0];
+        Debug.error(`${this}: Couldn't find name '${_nameOrIndex}' in glTF ${arrayName}.`);
+      }
+      return index;
     }
 
     /**
@@ -706,7 +869,7 @@ namespace FudgeCore {
      */
     private async getBoneIndices(_iAccessor: number): Promise<Uint8Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      const componentType: GLTF.COMPONENT_TYPE = this.gltf.accessors[_iAccessor]?.componentType;
+      const componentType: GLTF.COMPONENT_TYPE = this.#gltf.accessors[_iAccessor]?.componentType;
 
       if (componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE)
         return array as Uint8Array;
@@ -725,7 +888,7 @@ namespace FudgeCore {
      */
     private async getFloat32Array(_iAccessor: number): Promise<Float32Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
+      const gltfAccessor: GLTF.Accessor = this.#gltf.accessors[_iAccessor];
 
       if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.FLOAT)
         return array as Float32Array;
@@ -756,7 +919,7 @@ namespace FudgeCore {
      */
     private async getVertexIndices(_iAccessor: number): Promise<Uint16Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
+      const gltfAccessor: GLTF.Accessor = this.#gltf.accessors[_iAccessor];
 
       if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_SHORT)
         return array as Uint16Array;
@@ -767,7 +930,7 @@ namespace FudgeCore {
       if (gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_BYTE || gltfAccessor.componentType == GLTF.COMPONENT_TYPE.UNSIGNED_INT)
         return Uint16Array.from(array);
 
-      Debug.warn(`${this}: Expected an unsigned integer component type but was '${GLTF.COMPONENT_TYPE[this.gltf.accessors[_iAccessor]?.componentType]}'.`);
+      Debug.warn(`${this}: Expected an unsigned integer component type but was '${GLTF.COMPONENT_TYPE[this.#gltf.accessors[_iAccessor]?.componentType]}'.`);
       return Uint16Array.from(array);
     }
 
@@ -777,7 +940,7 @@ namespace FudgeCore {
      */
     private async getVertexColors(_iAccessor: number): Promise<Float32Array> {
       const array: Float32Array = await this.getFloat32Array(_iAccessor);
-      const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
+      const gltfAccessor: GLTF.Accessor = this.#gltf.accessors[_iAccessor];
 
       if (gltfAccessor.type == GLTF.ACCESSOR_TYPE.VEC3) {
         const rgbaArray: Float32Array = new Float32Array(array.length * 4 / 3);
@@ -794,7 +957,7 @@ namespace FudgeCore {
     }
 
     private async getBufferData(_iAccessor: number): Promise<TypedArray> {
-      const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
+      const gltfAccessor: GLTF.Accessor = this.#gltf.accessors[_iAccessor];
       if (!gltfAccessor)
         throw new Error(`${this}: Couldn't find accessor with index ${_iAccessor}.`);
 
@@ -803,11 +966,11 @@ namespace FudgeCore {
       const accessorType: GLTF.ACCESSOR_TYPE = gltfAccessor.type;
 
       if (gltfAccessor.bufferView != undefined)
-        array = await this.getBufferViewData(this.gltf.bufferViews[gltfAccessor.bufferView], gltfAccessor.byteOffset, componentType, accessorType);
+        array = await this.getBufferViewData(this.#gltf.bufferViews[gltfAccessor.bufferView], gltfAccessor.byteOffset, componentType, accessorType);
 
       if (gltfAccessor.sparse) {
-        const gltfBufferViewIndices: GLTF.BufferView = this.gltf.bufferViews[gltfAccessor.sparse.indices.bufferView];
-        const gltfBufferViewValues: GLTF.BufferView = this.gltf.bufferViews[gltfAccessor.sparse.values.bufferView];
+        const gltfBufferViewIndices: GLTF.BufferView = this.#gltf.bufferViews[gltfAccessor.sparse.indices.bufferView];
+        const gltfBufferViewValues: GLTF.BufferView = this.#gltf.bufferViews[gltfAccessor.sparse.values.bufferView];
 
         if (!gltfBufferViewIndices || !gltfBufferViewValues)
           throw new Error(`${this}: Couldn't find buffer views for sparse indices or values of accessor with index ${_iAccessor}.`);
@@ -857,14 +1020,14 @@ namespace FudgeCore {
     }
 
     private async getBuffer(_iBuffer: number): Promise<ArrayBuffer> {
-      const gltfBuffer: GLTF.Buffer = this.gltf.buffers[_iBuffer];
+      const gltfBuffer: GLTF.Buffer = this.#gltf.buffers[_iBuffer];
       if (!gltfBuffer)
         throw new Error(`${this}: Couldn't find buffer with index ${_iBuffer}.`);
 
       if (!this.#buffers)
         this.#buffers = [];
       if (!this.#buffers[_iBuffer]) {
-        const response: Response = await fetch(new URL(gltfBuffer.uri, this.url));
+        const response: Response = await fetch(new URL(gltfBuffer.uri, new URL(this.#url, Project.baseURL)));
         this.#buffers[_iBuffer] = await response.arrayBuffer();
       }
 

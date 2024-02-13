@@ -15,8 +15,8 @@ namespace FudgeCore {
     OPAQUE, TRANSPARENT, ADDITIVE, SUBTRACTIVE, MODULATE
   }
 
-  /* eslint-disable */ // we want type inference here so we can use vs code to search for references
-  export const UNIFORM_BLOCKS = {
+  // we want type inference here so we can use vs code to search for references
+  export const UNIFORM_BLOCKS = { // eslint-disable-line
     LIGHTS: {
       NAME: "Lights",
       BINDING: 0
@@ -30,10 +30,8 @@ namespace FudgeCore {
       BINDING: 2
     }
   };
-  /* eslint-enable */
 
-  /* eslint-disable */
-  export const TEXTURE_LOCATION = {
+  export const TEXTURE_LOCATION = { // eslint-disable-line
     COLOR: {
       UNIFORM: "u_texColor",
       UNIT: WebGL2RenderingContext.TEXTURE0,
@@ -55,7 +53,6 @@ namespace FudgeCore {
       INDEX: 3
     }
   } as const;
-  /* eslint-enable */
 
   /**
    * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.

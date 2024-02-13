@@ -6,12 +6,15 @@ namespace FudgeCore {
    */
   export class Graph extends Node implements SerializableResource {
     public idResource: string = undefined;
-    public type: string = "Graph";
     // #syncing: boolean = false;
 
     public constructor(_name: string = "Graph") {
       super(_name);
       this.addEventListener(EVENT.MUTATE, this.hndMutate);
+    }
+
+    public get type(): string {
+      return this.constructor.name;
     }
 
     public serialize(): Serialization {

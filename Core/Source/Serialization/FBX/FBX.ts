@@ -1,4 +1,3 @@
-/** @ignore currently not working */
 namespace FudgeCore.FBX {
   /**
    * Interface to represent fbx files containing its documents, definitions, objects and connections.

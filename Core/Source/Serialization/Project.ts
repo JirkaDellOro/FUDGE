@@ -3,10 +3,15 @@ namespace FudgeCore {
     EDITOR, RUNTIME
   }
 
+  export interface SerializableResourceExternal extends SerializableResource {
+    url: RequestInfo;
+    load(): Promise<SerializableResourceExternal>;
+  }
+
   export interface SerializableResource extends Serializable {
     name: string;
-    type: string;
     idResource: string;
+    readonly type: string;
   }
 
   export interface Resources {

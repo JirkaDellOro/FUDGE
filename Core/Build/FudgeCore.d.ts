@@ -478,7 +478,7 @@ declare namespace FudgeCore {
          */
         constructor(_name: string);
         /**
-         * Return the mutator path string to get from one node to another or null if no path is found e.g.:
+         * Return the mutator-like path string to get from one node to another or null if no path is found e.g.:
          * ```typescript
          * "node/parent/children/1/components/ComponentSkeleton/0"
          * ```
@@ -1777,6 +1777,25 @@ declare namespace FudgeCore {
          */
         calculate(): void;
     }
+}
+declare namespace FudgeCore {
+    const AnimationGLTF_base: (abstract new (...args: any[]) => {
+        url: RequestInfo;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        load(): Promise<any>;
+        name: string;
+        idResource: string;
+        readonly type: string;
+    }) & typeof Animation;
+    /**
+     * An {@link Animation} loaded from a glTF-File.
+     * @authors Jonas Plotzky
+     */
+    export class AnimationGLTF extends AnimationGLTF_base {
+        load(_url?: RequestInfo, _name?: string): Promise<AnimationGLTF>;
+    }
+    export {};
 }
 declare namespace FudgeCore {
     enum ANIMATION_INTERPOLATION {
@@ -3217,12 +3236,32 @@ declare namespace FudgeCore {
      */
     class Graph extends Node implements SerializableResource {
         idResource: string;
-        type: string;
         constructor(_name?: string);
+        get type(): string;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         private hndMutate;
     }
+}
+declare namespace FudgeCore {
+    const GraphGLTF_base: (abstract new (...args: any[]) => {
+        url: RequestInfo;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        load(): Promise<any>;
+        name: string;
+        idResource: string;
+        readonly type: string;
+    }) & typeof Graph;
+    /**
+     * A {@link Graph} loaded from a glTF-File.
+     * @authors Jonas Plotzky, HFU, 2024
+     */
+    export class GraphGLTF extends GraphGLTF_base {
+        load(_url?: RequestInfo, _name?: string): Promise<GraphGLTF>;
+        serialize(): Serialization;
+    }
+    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -3472,6 +3511,25 @@ declare namespace FudgeCore {
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
+}
+declare namespace FudgeCore {
+    const MaterialGLTF_base: (abstract new (...args: any[]) => {
+        url: RequestInfo;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        load(): Promise<any>;
+        name: string;
+        idResource: string;
+        readonly type: string;
+    }) & typeof Material;
+    /**
+     * A {@link Material} loaded from a glTF-File.
+     * @authors Jonas Plotzky, HFU, 2024
+     */
+    export class MaterialGLTF extends MaterialGLTF_base {
+        load(_url?: RequestInfo, _name?: string): Promise<MaterialGLTF>;
+    }
+    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -4606,7 +4664,6 @@ declare namespace FudgeCore {
         constructor(_name?: string);
         protected static registerSubclass(_subClass: typeof Mesh): number;
         get renderMesh(): RenderMesh;
-        get type(): string;
         get boundingBox(): Box;
         get radius(): number;
         /**
@@ -4690,6 +4747,30 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    const MeshFBX_base: (abstract new (...args: any[]) => {
+        url: RequestInfo;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        load(): Promise<any>;
+        name: string;
+        idResource: string;
+        readonly type: string;
+    }) & typeof Mesh;
+    /**
+     * A mesh loaded from an FBX-File.
+     * @authors Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
+     */
+    export class MeshFBX extends MeshFBX_base {
+        iMesh: number;
+        load(_url?: RequestInfo, _iMesh?: number): Promise<MeshFBX>;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        private getDataIndex;
+        private createBones;
+    }
+    export {};
+}
+declare namespace FudgeCore {
     /** Allows to create custom meshes from given Data */
     class MeshFromData extends Mesh {
         protected verticesToSet: Float32Array;
@@ -4702,6 +4783,51 @@ declare namespace FudgeCore {
         protected createIndices(): Uint16Array;
         protected createFlatNormals(): Float32Array;
     }
+}
+declare namespace FudgeCore {
+    const MeshGLTF_base: (abstract new (...args: any[]) => {
+        url: RequestInfo;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        load(): Promise<any>;
+        name: string;
+        idResource: string;
+        readonly type: string;
+    }) & typeof Mesh;
+    /**
+     * A {@link Mesh} loaded from a glTF-File.
+     * @authors Jonas Plotzky, HFU, 2024
+     */
+    export class MeshGLTF extends MeshGLTF_base {
+        iPrimitive: number;
+        load(_url?: RequestInfo, _name?: string, _iPrimitive?: number): Promise<MeshGLTF>;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+    export {};
+}
+declare namespace FudgeCore {
+    const MeshOBJ_base: (abstract new (...args: any[]) => {
+        url: RequestInfo;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        load(): Promise<any>;
+        name: string;
+        idResource: string;
+        readonly type: string;
+    }) & typeof Mesh;
+    /**
+     * A mesh loaded from an OBJ-file.
+     * Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
+     * static LOAD Method. Currently only works with triangulated Meshes
+     * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
+     * @todo Load Materials, Support Quads
+     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
+     */
+    export class MeshOBJ extends MeshOBJ_base {
+        load(_url?: RequestInfo): Promise<MeshOBJ>;
+    }
+    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -4994,58 +5120,6 @@ declare namespace FudgeCore {
          * returns the bones associated with the vertex addressed, resolving references between vertices
          */
         bones(_index: number): Bone[];
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Mesh loaded from a file
-     * @authors Matthias Roming, HFU, 2022-2023 | Jonas Plotzky, HFU, 2024
-     */
-    abstract class MeshImport extends Mesh {
-        url: RequestInfo;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        load(_url?: RequestInfo): Promise<MeshImport>;
-        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Filmbox mesh import
-     * @authors Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
-     */
-    class MeshFBX extends MeshImport {
-        iMesh: number;
-        load(_url?: RequestInfo, _iMesh?: number): Promise<MeshFBX>;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        private getDataIndex;
-        private createBones;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * gl Transfer Format mesh import
-     * @authors Matthias Roming, HFU, 2022-2023 | Jonas Plotzky, HFU, 2023
-     */
-    class MeshGLTF extends MeshImport {
-        iMesh: number;
-        iPrimitive: number;
-        load(_url?: RequestInfo, _iMesh?: number, _iPrimitive?: number): Promise<MeshGLTF>;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
-     * static LOAD Method. Currently only works with triangulated Meshes
-     * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
-     * @todo Load Materials, Support Quads
-     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Matthias Roming, HFU, 2023 | Jonas Plotzky, HFU, 2023
-     */
-    class MeshOBJ extends MeshImport {
-        load(_url?: RequestInfo): Promise<MeshOBJ>;
     }
 }
 declare namespace FudgeCore {
@@ -6514,10 +6588,14 @@ declare namespace FudgeCore {
         EDITOR = 0,
         RUNTIME = 1
     }
+    export interface SerializableResourceExternal extends SerializableResource {
+        url: RequestInfo;
+        load(): Promise<SerializableResourceExternal>;
+    }
     export interface SerializableResource extends Serializable {
         name: string;
-        type: string;
         idResource: string;
+        readonly type: string;
     }
     export interface Resources {
         [idResource: string]: SerializableResource;
@@ -6663,7 +6741,6 @@ declare namespace FudgeCore.FBX {
         getSequence<T extends number | bigint>(_getter: () => T, _length: number, _offset?: number): Generator<T>;
     }
 }
-/** @ignore currently not working */
 declare namespace FudgeCore.FBX {
     /**
      * Interface to represent fbx files containing its documents, definitions, objects and connections.
@@ -6847,7 +6924,6 @@ declare namespace FudgeCore {
     /**
      * Asset loader for Filmbox files.
      * @author Matthias Roming, HFU, 2023
-     * @ignore currently not working
      */
     class FBXLoader {
         #private;
@@ -6861,7 +6937,7 @@ declare namespace FudgeCore {
         static LOAD(_uri: string): Promise<FBXLoader>;
         getScene(_index?: number): Promise<Graph>;
         getNode(_index: number): Promise<Node>;
-        getMesh(_index: number): Promise<MeshImport>;
+        getMesh(_index: number): Promise<MeshFBX>;
         getMaterial(_index: number): Promise<Material>;
         getTexture(_index: number): Promise<Texture>;
         /**
@@ -7652,25 +7728,31 @@ declare namespace FudgeCore {
     class GLTFLoader {
         #private;
         private static loaders;
-        readonly url: string;
-        private readonly gltf;
         private constructor();
         private static get defaultMaterial();
         private static get defaultSkinMaterial();
         /**
          * Returns a {@link GLTFLoader} instance for the given url.
          */
-        static LOAD(_url: string): Promise<GLTFLoader>;
+        static LOAD(_url: string, _registerResources?: boolean): Promise<GLTFLoader>;
         private static checkCompatibility;
         private static preProcess;
         /**
-         * Returns a {@link GraphInstance} for the given scene name or the default scene if no name is given.
+         * Returns the glTF file name.
          */
-        getScene(_name?: string): Promise<Graph>;
+        get name(): string;
         /**
-         * Returns a {@link GraphInstance} for the given scene index or the default scene if no index is given.
+         * Returns all resources of the given type.
          */
-        getSceneByIndex(_iScene?: number): Promise<Graph>;
+        loadResources<T extends Serializable>(_class: new () => T): Promise<T[]>;
+        /**
+         * Returns a {@link Graph} for the given scene name or the default scene if no name is given.
+         */
+        getGraph(_name?: string, _graph?: Node): Promise<Node>;
+        /**
+         * Returns a {@link Graph} for the given scene index or the default scene if no index is given.
+         */
+        getGraph(_iScene?: number, _graph?: Node): Promise<Node>;
         /**
          * Returns the first {@link Node} with the given name.
          */
@@ -7690,27 +7772,31 @@ declare namespace FudgeCore {
         /**
          * Returns the first {@link Animation} with the given animation name.
          */
-        getAnimation(_name: string): Promise<Animation>;
+        getAnimation(_name: string, _animation?: Animation): Promise<Animation>;
         /**
          * Returns the {@link Animation} for the given animation index.
          */
-        getAnimationByIndex(_iAnimation: number): Promise<Animation>;
+        getAnimation(_iAnimation: number, _animation?: Animation): Promise<Animation>;
         /**
-         * Returns the first {@link MeshGLTF} with the given mesh name.
+         * Returns the first {@link MeshGLTF} with the given name.
          */
-        getMesh(_name: string): Promise<MeshGLTF>;
+        getMesh(_name: string, _iPrimitive?: number, _mesh?: Mesh): Promise<Mesh>;
         /**
          * Returns the {@link MeshGLTF} for the given mesh index and primitive index.
          */
-        getMeshByIndex(_iMesh: number, _iPrimitive?: number): Promise<MeshGLTF>;
+        getMesh(_iMesh: number, _iPrimitive?: number, _mesh?: Mesh): Promise<Mesh>;
+        /**
+         * Returns the first {@link MaterialGLTF} with the given material name.
+         */
+        getMaterial(_name: string, _material?: Material): Promise<Material>;
         /**
          * Returns the {@link Material} for the given material index.
          */
-        getMaterialByIndex(_iMaterial: number, _skin?: boolean, _flat?: boolean): Promise<Material>;
+        getMaterial(_iMaterial: number, _material?: Material): Promise<Material>;
         /**
          * Returns the {@link Texture} for the given texture index.
          */
-        getTextureByIndex(_iTexture: number): Promise<Texture>;
+        getTexture(_iTexture: number): Promise<Texture>;
         /**
         * Returns the first {@link ComponentSkeleton} with the given skeleton name.
         */
@@ -7720,6 +7806,7 @@ declare namespace FudgeCore {
          */
         getSkeletonByIndex(_iSkeleton: number): Promise<ComponentSkeleton>;
         toString(): string;
+        private getIndex;
         private getBufferData;
         private getBufferViewData;
         private getBuffer;

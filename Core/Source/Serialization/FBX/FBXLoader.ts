@@ -2,7 +2,6 @@ namespace FudgeCore {
   /**
    * Asset loader for Filmbox files.
    * @author Matthias Roming, HFU, 2023
-   * @ignore currently not working
    */
   export class FBXLoader {
     private static loaders: { [uri: string]: FBXLoader };
@@ -16,7 +15,7 @@ namespace FudgeCore {
 
     #scenes: Graph[];
     #nodes: Node[];
-    #meshes: MeshImport[];
+    #meshes: MeshFBX[];
     #materials: Material[];
     #skinMaterials: Material[] = [];
     #textures: Texture[];
@@ -97,7 +96,7 @@ namespace FudgeCore {
           if (childFBX.type == "Model") {
             node.addChild(await this.getNode(this.fbx.objects.models.indexOf(childFBX)));
           } else if (childFBX.type == "Geometry") {
-            const mesh: MeshImport = await this.getMesh(this.fbx.objects.geometries.indexOf(childFBX));
+            const mesh: MeshFBX = await this.getMesh(this.fbx.objects.geometries.indexOf(childFBX));
             const cmpMesh: ComponentMesh = new ComponentMesh(mesh);
             node.addComponent(new ComponentMaterial(FBXLoader.defaultMaterial));
             if (mesh.renderMesh.bones) {
@@ -130,7 +129,7 @@ namespace FudgeCore {
       return this.#nodes[_index];
     }
 
-    public async getMesh(_index: number): Promise<MeshImport> {
+    public async getMesh(_index: number): Promise<MeshFBX> {
       if (!this.#meshes)
         this.#meshes = [];
       if (!this.#meshes[_index])

@@ -46,10 +46,6 @@ namespace FudgeCore {
       return this.#renderMesh;
     }
 
-    public get type(): string {
-      return this.constructor.name;
-    }
-
     public get boundingBox(): Box {
       if (this.ƒbox == null)
         this.ƒbox = this.createBoundingBox();
