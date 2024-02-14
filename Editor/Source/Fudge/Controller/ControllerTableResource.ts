@@ -22,9 +22,13 @@ namespace Fudge {
 
     public rename(_object: ƒ.SerializableResource, _new: string): boolean {
       // console.log("Check rename", _object.name, _new);
-      return (_object.name != _new);
+      let rename: boolean = _object.name != _new;
+      if (rename)
+        (<ƒ.SerializableResourceExternal>_object).load?.();
+
+      return rename;
     }
-    
+
     public copy(_originals: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]> { return null; }
 
     public async delete(_focussed: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]> {

@@ -87,7 +87,6 @@ namespace FudgeCore {
 
       this.deleteRenderBuffers(this.renderMesh.buffers);
       this.renderMesh.clear();
-      // this.#renderMesh?.clear();
     }
 
     //#region Transfer

@@ -193,7 +193,7 @@ namespace Fudge {
           }
           if (_event.detail.node != null) {
             this.node = _event.detail.node;
-            this.cmpAnimator = this.node?.getComponent(ƒ.ComponentAnimator);
+            this.cmpAnimator = this.node.getComponent(ƒ.ComponentAnimator);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             if (this.cmpAnimator?.animation != this.animation)
               this.setAnimation(this.cmpAnimator?.animation);

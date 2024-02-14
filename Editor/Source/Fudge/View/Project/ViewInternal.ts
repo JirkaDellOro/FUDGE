@@ -169,9 +169,11 @@ namespace Fudge {
 
       if (_viewSource instanceof ViewExternal) {
         let sources: DirectoryEntry[] = _viewSource.getDragDropSources();
-        for (let source of sources)
-          if (source.getMimeType() != MIME.AUDIO && source.getMimeType() != MIME.IMAGE && source.getMimeType() != MIME.MESH)
-            return;
+        if (sources.some(_source => ![MIME.AUDIO, MIME.IMAGE, MIME.MESH, MIME.GLTF].includes(_source.getMimeType())))
+          return;
+        // for (let source of sources)
+        //   if (source.getMimeType() != MIME.AUDIO && source.getMimeType() != MIME.IMAGE && source.getMimeType() != MIME.MESH)
+        //     return;
       }
 
       _event.dataTransfer.dropEffect = "link";
@@ -196,7 +198,29 @@ namespace Fudge {
               console.log(new ƒ.TextureImage(source.pathRelative));
               break;
             case MIME.MESH:
-              console.log(await new ƒ.MeshImport().load(ƒ.MeshLoaderOBJ, source.pathRelative));
+              ƒ.Debug.log(await new ƒ.MeshOBJ().load(source.pathRelative));
+              break;
+            case
+              MIME.GLTF:
+              let settings: {} = {
+                [ƒ.Graph.name]: true,
+                [ƒ.Mesh.name]: false,
+                [ƒ.Material.name]: false,
+                [ƒ.Animation.name]: false
+              };
+              let loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD(source.pathRelative);
+              let load: boolean = await ƒui.Dialog.prompt(settings, false, `Select what to import from '${loader.name}'`, "Adjust settings and press OK", "OK", "Cancel");
+              if (!load)
+                break;
+
+              for (let type in settings) if (settings[type]) {
+                let resources: ƒ.SerializableResource[] = await loader.loadResources(ƒ[type]);
+                for (let resource of resources) {
+                  if (!ƒ.Project.resources[resource.idResource])
+                    ƒ.Project.register(resource);
+                }
+              }
+
               break;
           }
         }
@@ -245,5 +269,23 @@ namespace Fudge {
           break;
       }
     };
+
+    // private async openDialog(): Promise<boolean> {
+
+
+    //   // ƒui.Dialog.dom.addEventListener(ƒui.EVENT.CHANGE, this.hndChange);
+
+    //   if (await promise) {
+    //     let mutator: ƒ.Mutator = ƒui.Controller.getMutator(settings, ƒui.Dialog.dom, this.getMutator());
+    //     this.mutate(mutator);
+    //     return true;
+    //   } else
+    //     return false;
+    // }
+
+    // private hndChange = (_event: Event): void => {
+    //   let mutator: ƒ.Mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
+    //   console.log(mutator, this);
+    // };
   }
 }

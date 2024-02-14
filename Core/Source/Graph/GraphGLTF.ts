@@ -13,7 +13,6 @@ namespace FudgeCore {
 
     public serialize(): Serialization {
       const serialization: Serialization = super.serialize();
-      delete serialization.components[ComponentAnimator.name];
       delete serialization.components[ComponentSkeleton.name];
       delete serialization.children;
       return serialization;

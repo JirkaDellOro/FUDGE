@@ -17,8 +17,9 @@ namespace Fudge {
 
   let filter: { [name: string]: DragDropFilter } = {
     UrlOnTexture: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: DirectoryEntry, dropEffect: "link" },
-    UrlOnMeshObj: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "MeshObj", ofType: DirectoryEntry, dropEffect: "link" },
+    UrlOnMeshOBJ: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "MeshOBJ", ofType: DirectoryEntry, dropEffect: "link" },
     UrlOnAudio: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: DirectoryEntry, dropEffect: "link" },
+    UrlOnMeshGLTF: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "MeshGLTF", ofType: DirectoryEntry, dropEffect: "link" },
     MaterialOnComponentMaterial: { fromViews: [ViewInternal], onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
     MeshOnComponentMesh: { fromViews: [ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
     AnimationOnComponentAnimator: { fromViews: [ViewInternal], onType: ƒ.ComponentAnimator, ofType: ƒ.Animation, dropEffect: "link" },
@@ -82,9 +83,11 @@ namespace Fudge {
       // url on texture
       if (this.filterDragDrop(_event, filter.UrlOnTexture, checkMimeType(MIME.IMAGE))) return;
       // url on meshobj
-      if (this.filterDragDrop(_event, filter.UrlOnMeshObj, checkMimeType(MIME.MESH))) return;
+      if (this.filterDragDrop(_event, filter.UrlOnMeshOBJ, checkMimeType(MIME.MESH))) return;
       // url on audio
       if (this.filterDragDrop(_event, filter.UrlOnAudio, checkMimeType(MIME.AUDIO))) return;
+      // url on meshgltf
+      if (this.filterDragDrop(_event, filter.UrlOnMeshGLTF, checkMimeType(MIME.GLTF))) return;
 
       // Material on ComponentMaterial
       if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial)) return;
@@ -187,7 +190,7 @@ namespace Fudge {
       // texture
       if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink)) return;
       // texture
-      if (this.filterDragDrop(_event, filter.UrlOnMeshObj, setExternalLink)) return;
+      if (this.filterDragDrop(_event, filter.UrlOnMeshOBJ, setExternalLink)) return;
       // audio
       if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink)) return;
 

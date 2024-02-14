@@ -7742,17 +7742,17 @@ declare namespace FudgeCore {
          */
         get name(): string;
         /**
-         * Returns all resources of the given type.
-         */
+            * Returns all resources of the given type.
+            */
         loadResources<T extends Serializable>(_class: new () => T): Promise<T[]>;
         /**
          * Returns a {@link Graph} for the given scene name or the default scene if no name is given.
          */
-        getGraph(_name?: string, _graph?: Node): Promise<Node>;
+        getGraph(_name?: string): Promise<Node>;
         /**
          * Returns a {@link Graph} for the given scene index or the default scene if no index is given.
          */
-        getGraph(_iScene?: number, _graph?: Node): Promise<Node>;
+        getGraph(_iScene?: number): Promise<Node>;
         /**
          * Returns the first {@link Node} with the given name.
          */
@@ -7772,27 +7772,27 @@ declare namespace FudgeCore {
         /**
          * Returns the first {@link Animation} with the given animation name.
          */
-        getAnimation(_name: string, _animation?: Animation): Promise<Animation>;
+        getAnimation(_name: string): Promise<Animation>;
         /**
          * Returns the {@link Animation} for the given animation index.
          */
-        getAnimation(_iAnimation: number, _animation?: Animation): Promise<Animation>;
+        getAnimation(_iAnimation: number): Promise<Animation>;
         /**
          * Returns the first {@link MeshGLTF} with the given name.
          */
-        getMesh(_name: string, _iPrimitive?: number, _mesh?: Mesh): Promise<Mesh>;
+        getMesh(_name: string, _iPrimitive?: number): Promise<Mesh>;
         /**
          * Returns the {@link MeshGLTF} for the given mesh index and primitive index.
          */
-        getMesh(_iMesh: number, _iPrimitive?: number, _mesh?: Mesh): Promise<Mesh>;
+        getMesh(_iMesh: number, _iPrimitive?: number): Promise<Mesh>;
         /**
          * Returns the first {@link MaterialGLTF} with the given material name.
          */
-        getMaterial(_name: string, _material?: Material): Promise<Material>;
+        getMaterial(_name: string): Promise<Material>;
         /**
          * Returns the {@link Material} for the given material index.
          */
-        getMaterial(_iMaterial: number, _material?: Material): Promise<Material>;
+        getMaterial(_iMaterial: number): Promise<Material>;
         /**
          * Returns the {@link Texture} for the given texture index.
          */

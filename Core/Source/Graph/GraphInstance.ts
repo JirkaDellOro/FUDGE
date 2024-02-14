@@ -49,10 +49,19 @@ namespace FudgeCore {
       let filter: ComponentGraphFilter = this.getComponent(ComponentGraphFilter);
       let serialization: Serialization = {};
 
-      if (filter && filter.isActive) // if graph synchronisation is unfiltered, knowing the source is sufficient for serialization
+      if (filter && filter.isActive) { // if graph synchronisation is unfiltered, knowing the source is sufficient for serialization
         serialization = super.serialize();
-      else
+        let graph: Graph = this.get();
+        if (graph instanceof GraphGLTF) { // like for the GraphGLTF: children and components loaded from gltf must never be serialized
+          delete serialization.components[ComponentSkeleton.name];
+          delete serialization.children;
+          serialization.url = graph.url;
+        }
+      } else {
         serialization.deserializeFromSource = true;
+      }
+
+
 
       serialization.idSource = this.#idSource;
       return serialization;
@@ -62,10 +71,10 @@ namespace FudgeCore {
       this.#idSource = _serialization.idSource ?? _serialization.idResource;
       if (!_serialization.deserializeFromSource) {
         await super.deserialize(_serialization); // instance is deserialized from individual data
-        let graph: Graph = this.get();
-        if (graph instanceof GraphGLTF) 
+        let graph: Graph = await <Graph><unknown>Project.getResource(this.#idSource);
+        if (graph instanceof GraphGLTF)
           await GLTFLoader.loadResource(this, _serialization.url);
-        
+
         this.#deserializeFromSource = false;
       }
 

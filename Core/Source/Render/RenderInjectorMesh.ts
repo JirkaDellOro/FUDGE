@@ -22,8 +22,6 @@ namespace FudgeCore {
     }
 
     protected static getRenderBuffers(this: Mesh): RenderBuffers {
-
-
       if (this.renderMesh.buffers == null) {
         this.renderMesh.buffers = {
           vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.vertices),
@@ -34,10 +32,10 @@ namespace FudgeCore {
           tangents: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.tangents),
           nIndices: this.renderMesh.indices.length
         };
-        
+
         if (this.renderMesh.bones)
           this.renderMesh.buffers.bones = createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.bones);
-  
+
         if (this.renderMesh.weights)
           this.renderMesh.buffers.weights = createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.weights);
       }
@@ -110,14 +108,10 @@ namespace FudgeCore {
       if (_renderBuffers) {
         crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
         crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, null);
-        crc3.deleteBuffer(_renderBuffers.indices);
-        crc3.deleteBuffer(_renderBuffers.vertices);
-        crc3.deleteBuffer(_renderBuffers.colors);
-        crc3.deleteBuffer(_renderBuffers.textureUVs);
-        crc3.deleteBuffer(_renderBuffers.normals);
-        crc3.deleteBuffer(_renderBuffers.tangents);
-        crc3.deleteBuffer(_renderBuffers.bones);
-        crc3.deleteBuffer(_renderBuffers.weights);
+        Object.values(_renderBuffers).filter(_buffer => _buffer instanceof WebGLBuffer).forEach((_buffer, _index) => {
+          crc3.deleteBuffer(_buffer);
+          crc3.disableVertexAttribArray(_index);
+        });
       }
     }
   }

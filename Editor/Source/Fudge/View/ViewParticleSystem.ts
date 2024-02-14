@@ -8,29 +8,29 @@ namespace Fudge {
    */
   export class ViewParticleSystem extends View {
     public static readonly PROPERTY_KEYS: (keyof ƒ.ParticleData.System)[] = ["variables", "mtxLocal", "mtxWorld", "color"];
-    
+
     private cmpParticleSystem: ƒ.ComponentParticleSystem;
     private particleSystem: ƒ.ParticleSystem;
     private data: ƒ.ParticleData.System;
-    
+
     private toolbar: HTMLDivElement;
     private toolbarIntervalId: number;
     private timeScalePlay: number;
-    
+
     private tree: ƒui.CustomTree<ƒ.ParticleData.Recursive>;
     private controller: ControllerTreeParticleSystem;
     private errors: [ƒ.ParticleData.Expression, string][] = [];
     private variables: HTMLDataListElement;
 
-    constructor(_container: ComponentContainer, _state: Object) {
-        super(_container, _state);
-        this.createToolbar();
-        this.setParticleSystem(null);
-        this.dom.addEventListener(EVENT_EDITOR.CREATE, this.hndEvent);
-        this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
-        this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
-        this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
-        document.addEventListener(ƒui.EVENT.KEY_DOWN, this.hndEvent);
+    public constructor(_container: ComponentContainer, _state: Object) {
+      super(_container, _state);
+      this.createToolbar();
+      this.setParticleSystem(null);
+      this.dom.addEventListener(EVENT_EDITOR.CREATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
+      document.addEventListener(ƒui.EVENT.KEY_DOWN, this.hndEvent);
     }
 
     //#region context menu
@@ -50,7 +50,7 @@ namespace Fudge {
           .forEach(_label => item.submenu.items.find(_item => _item.label == _label).visible = true);
         popup = true;
       }
-      
+
       if (focus == this.data.variables || focus == this.data.color || ƒ.ParticleData.isFunction(focus) || ƒ.ParticleData.isTransformation(focus)) {
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_CONSTANT)).visible = true;
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.ADD_PARTICLE_FUNCTION)).visible = true;
@@ -67,19 +67,19 @@ namespace Fudge {
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.DELETE_PARTICLE_DATA)).visible = true;
         popup = true;
       }
-      
+
       if (popup)
         this.contextMenu.popup();
-    }
+    };
 
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
       let options: string[] = ViewParticleSystem.PROPERTY_KEYS;
-      
-      item = new remote.MenuItem({ 
-        label: "Add Property", 
-        id: String(CONTEXTMENU.ADD_PARTICLE_PROPERTY), 
+
+      item = new remote.MenuItem({
+        label: "Add Property",
+        id: String(CONTEXTMENU.ADD_PARTICLE_PROPERTY),
         submenu: generateSubMenu(options, String(CONTEXTMENU.ADD_PARTICLE_PROPERTY), _callback)
       });
       menu.append(item);
@@ -91,9 +91,9 @@ namespace Fudge {
       item = new remote.MenuItem({ label: "Add Code", id: String(CONTEXTMENU.ADD_PARTICLE_CODE), click: _callback });
       menu.append(item);
 
-      item = new remote.MenuItem({ 
-        label: "Add Transformation", 
-        id: String(CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION), 
+      item = new remote.MenuItem({
+        label: "Add Transformation",
+        id: String(CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION),
         submenu: generateSubMenu([ƒ.Matrix4x4.prototype.translate.name, ƒ.Matrix4x4.prototype.rotate.name, ƒ.Matrix4x4.prototype.scale.name], String(CONTEXTMENU.ADD_PARTICLE_TRANSFORMATION), _callback)
       });
       menu.append(item);
@@ -131,7 +131,7 @@ namespace Fudge {
             child = { value: 1 };
         case CONTEXTMENU.ADD_PARTICLE_FUNCTION:
           if (!child)
-            child = { function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: []};
+            child = { function: ƒ.ParticleData.FUNCTION.ADDITION, parameters: [] };
         case CONTEXTMENU.ADD_PARTICLE_CODE:
           if (!child)
             child = { code: "1" };
@@ -142,12 +142,10 @@ namespace Fudge {
             focus[_item.label] = child;
             if (_item.label == "variables")
               this.data.variableNames = [];
-          }
-          else if (focus == this.data.variables) {
+          } else if (focus == this.data.variables) {
             this.data.variables.push(<ƒ.ParticleData.Expression>child);
             this.data.variableNames.push(this.controller.generateNewVariableName());
-          }
-          else if (focus == this.data.color)
+          } else if (focus == this.data.color)
             this.data.color.push(<ƒ.ParticleData.Expression>child);
 
           this.controller.childToParent.set(child, focus);
@@ -180,7 +178,7 @@ namespace Fudge {
 
       let source: Object = _viewSource.getDragDropSources()[0];
       if (source instanceof ƒ.Node)
-        source = source.getComponent(ƒ.ComponentParticleSystem)
+        source = source.getComponent(ƒ.ComponentParticleSystem);
       if (!(source instanceof ƒ.ComponentParticleSystem))
         return;
 
@@ -244,7 +242,7 @@ namespace Fudge {
           this.enableSave(this.errors.length == 0);
           break;
       }
-    }
+    };
     //#endregion
 
     //#region toolbar
@@ -282,16 +280,16 @@ namespace Fudge {
           return button;
         })
         .forEach(_button => buttons.appendChild(_button));
-        this.toolbar.appendChild(buttons);
+      this.toolbar.appendChild(buttons);
 
-      let timeScaleStepper: ƒui.CustomElementStepper = new ƒui.CustomElementStepper({key: "timeScale", label: "timeScale"});
-      timeScaleStepper.id = "timescale"
+      let timeScaleStepper: ƒui.CustomElementStepper = new ƒui.CustomElementStepper({ key: "timeScale", label: "timeScale" });
+      timeScaleStepper.id = "timescale";
       timeScaleStepper.oninput = () => {
         this.setTimeScale(timeScaleStepper.getMutatorValue());
       };
       this.toolbar.appendChild(timeScaleStepper);
 
-      let timeStepper: ƒui.CustomElementStepper = new ƒui.CustomElementStepper({key: "time", label: "time", value: "0"});
+      let timeStepper: ƒui.CustomElementStepper = new ƒui.CustomElementStepper({ key: "time", label: "time", value: "0" });
       timeStepper.id = "time";
       timeStepper.title = "The time (in seconds) of the particle system";
       timeStepper.oninput = () => {
@@ -320,7 +318,7 @@ namespace Fudge {
           let timeInSeconds: number = this.cmpParticleSystem.time / 1000;
           timeScaleStepper.setMutatorValue(this.cmpParticleSystem.timeScale);
           timeStepper.setMutatorValue(timeInSeconds);
-          
+
           let duration: number = this.cmpParticleSystem.duration / 1000;
           if (parseFloat(timeSlider.max) != duration * 1.1) { // value has changed
             timeSlider.max = (duration * 1.1).toString();
@@ -332,17 +330,17 @@ namespace Fudge {
         }
       }, 1000 / 30);
     }
-    
-    private setTime(_timeInSeconds: number) {
+
+    private setTime(_timeInSeconds: number): void {
       this.setTimeScale(0);
       this.cmpParticleSystem.time = _timeInSeconds * 1000;
     }
 
-    private setTimeScale(_timeScale: number) {
+    private setTimeScale(_timeScale: number): void {
       _timeScale = parseFloat(_timeScale.toFixed(15)); // round so forward and backward button don't miss zero
       if (_timeScale != 0)
         this.timeScalePlay = _timeScale;
-        this.cmpParticleSystem.timeScale = _timeScale;
+      this.cmpParticleSystem.timeScale = _timeScale;
 
       let playButton: Element = this.toolbar.querySelector("#play") || this.toolbar.querySelector("#pause");
       playButton.id = _timeScale == 0 ? "play" : "pause";
@@ -394,7 +392,7 @@ namespace Fudge {
             invalid.push([_data, error]);
           }
         }
-       
+
         Object.entries(ƒ.ParticleData.isFunction(_data) ? _data.parameters : _data).forEach(([_key, _value]) => {
           if (typeof _value == "object")
             validateRecursive(_value, _path.concat(_key));
