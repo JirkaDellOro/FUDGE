@@ -102,6 +102,9 @@ namespace Fudge {
           return;
       }
 
+      if (!component) // experimental fix for the sporadic "component is not a constructor" bug
+        component = ƒ[_item.label];
+
       //@ts-ignore
       let cmpNew: ƒ.Component = new component();
       if ((cmpNew instanceof ƒ.ComponentRigidbody || cmpNew instanceof ƒ.ComponentVRDevice) && !this.node.cmpTransform) {
@@ -279,9 +282,9 @@ namespace Fudge {
           break;
         case ƒUi.EVENT.MUTATE:
           let cmpRigidbody: ƒ.ComponentRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
-          if (cmpRigidbody)
+          if (cmpRigidbody) 
             cmpRigidbody.initialize();
-          this.dispatch(EVENT_EDITOR.UPDATE, { bubbles: true, detail: { node: this.node } });
+          // this.dispatch(EVENT_EDITOR.UPDATE, { bubbles: true, detail: { node: this.node } }); // TODO: check if this was necessary, EVENT_EDITOR.UPDATE gets broadcasted by project on ƒ.EVENT.GRAPH_MUTATED, so this was causing a double broadcast of EVENT_EDITOR.UPDATE to ALL views on any change to any component
           break;
         case ƒUi.EVENT.REARRANGE_ARRAY:
           this.fillContent();
