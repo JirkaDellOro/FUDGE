@@ -20,11 +20,13 @@ namespace Fudge {
       return "";
     }
 
-    public rename(_object: ƒ.SerializableResource, _new: string): boolean {
+    public async rename(_object: ƒ.SerializableResource, _new: string): Promise<boolean> {
       // console.log("Check rename", _object.name, _new);
       let rename: boolean = _object.name != _new;
-      if (rename)
-        (<ƒ.SerializableResourceExternal>_object).load?.();
+      if (rename) {
+        _object.name = _new; // must rename before loading, TODO: WHY is it that the renaming is supposed to be handled by the actual table???
+        await (<ƒ.SerializableResourceExternal>_object).load?.();
+      }
 
       return rename;
     }

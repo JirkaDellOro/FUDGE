@@ -85,22 +85,22 @@ namespace FudgeUserInterface {
       let input: HTMLInputElement = <HTMLInputElement>_event.target;
       input.readOnly = false;
       input.focus();
-    }
+    };
 
-    private hndChange = (_event: Event): void => {
+    private hndChange = async (_event: Event): Promise<void> => {
       this.focus();
       let target: HTMLInputElement = <HTMLInputElement>_event.target;
       target.readOnly = true;
-      let key: string = target.getAttribute("key");
+      // let key: string = target.getAttribute("key");
       // let previousValue: ƒ.General = Reflect.get(this.data, key);
 
-      if (this.controller.rename(this.data, target.value)) {
-        Reflect.set(this.data, key, target.value);
+      if (await this.controller.rename(this.data, target.value)) {
+        // Reflect.set(this.data, key, target.value); // why shouldn't the controller do this?
         // console.log("Dispatch Rename");
         this.parentElement.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { data: this.data } }));
       }
       return;
-    }
+    };
 
     private hndKey = (_event: KeyboardEvent): void => {
       _event.stopPropagation();

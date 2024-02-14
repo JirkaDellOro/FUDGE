@@ -2450,14 +2450,14 @@ var FudgeUserInterface;
             input.readOnly = false;
             input.focus();
         };
-        hndChange = (_event) => {
+        hndChange = async (_event) => {
             this.focus();
             let target = _event.target;
             target.readOnly = true;
-            let key = target.getAttribute("key");
+            // let key: string = target.getAttribute("key");
             // let previousValue: ƒ.General = Reflect.get(this.data, key);
-            if (this.controller.rename(this.data, target.value)) {
-                Reflect.set(this.data, key, target.value);
+            if (await this.controller.rename(this.data, target.value)) {
+                // Reflect.set(this.data, key, target.value); // why shouldn't the controller do this?
                 // console.log("Dispatch Rename");
                 this.parentElement.dispatchEvent(new CustomEvent("rename" /* EVENT.RENAME */, { bubbles: true, detail: { data: this.data } }));
             }

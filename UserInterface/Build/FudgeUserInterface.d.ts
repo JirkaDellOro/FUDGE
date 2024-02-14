@@ -656,8 +656,8 @@ declare namespace FudgeUserInterface {
         };
         /** Retrieve a string to create a label for the table item representing the object (appears not to be called yet)  */
         abstract getLabel(_object: T): string;
-        /** Return false to disallow renaming the item/object, or processes the proposed new label (appears not to be called yet) */
-        abstract rename(_object: T, _new: string): boolean;
+        /** Return false if renaming of object is not possibile, or true if the object was renamed */
+        abstract rename(_object: T, _new: string): Promise<boolean>;
         delete(_focussed: T[]): Promise<T[]>;
         /**
          * Return a list of copies of the objects given for copy & paste
