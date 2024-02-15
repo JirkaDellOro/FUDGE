@@ -5,6 +5,11 @@
   font-size: 14px;
 }
 
+:root {
+  --color-error: red; /* default error color */
+  --color-warning: yellow; /* default warning color */
+}
+
 object {
   width: 100%;
   height: 100%;
@@ -170,6 +175,10 @@ table.sortable td {
 table.sortable td>input:disabled {
   /* TODO: indicate tha]t enabled (not disabled) fields can be doubleclicked to alter content */
   cursor: default;
+}
+
+.table.error {
+  outline: 1px outset var(--color-error);
 }
 
 /* Text input */

@@ -12,4 +12,6 @@
   --color-highlight: var(--color-bright);
   --color-signal: var(--color-brightest);
   --color-focus: var(--color-bright);
+  --color-error: red;
+  --color-warning: yellow;
 }

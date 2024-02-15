@@ -120,13 +120,15 @@ var Fudge;
         MIME["AUDIO"] = "audio";
         MIME["IMAGE"] = "image";
         MIME["MESH"] = "mesh";
+        MIME["GLTF"] = "gltf";
         MIME["UNKNOWN"] = "unknown";
     })(MIME = Fudge.MIME || (Fudge.MIME = {}));
     let mime = new Map([
         [MIME.TEXT, ["ts", "json", "html", "htm", "css", "js", "txt"]],
         [MIME.MESH, ["obj"]],
         [MIME.AUDIO, ["mp3", "wav", "ogg"]],
-        [MIME.IMAGE, ["png", "jpg", "jpeg", "tif", "tga", "gif"]]
+        [MIME.IMAGE, ["png", "jpg", "jpeg", "tif", "tga", "gif"]],
+        [MIME.GLTF, ["gltf", "glb"]]
     ]);
     const fs = require("fs");
     const { Dirent, PathLike, renameSync, removeSync, readdirSync, readFileSync, copySync } = require("fs");
@@ -459,7 +461,6 @@ var Fudge;
             document.addEventListener(Fudge.EVENT_EDITOR.MODIFY, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
-            document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CREATE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
@@ -1218,6 +1219,11 @@ var Fudge;
                     continue;
                 tds[1].classList.add("icon");
                 tds[1].setAttribute("icon", tds[1].children[0].value);
+                if (tr instanceof ƒui.TableItem && tr.data.status == ƒ.RESOURCE_STATUS.ERROR) {
+                    tr.classList.add("error");
+                    tr.title = "Failed to load resource from file check the console for details.";
+                    break;
+                }
             }
         }
         getSelection() {
@@ -1321,9 +1327,11 @@ var Fudge;
                 return;
             if (_viewSource instanceof Fudge.ViewExternal) {
                 let sources = _viewSource.getDragDropSources();
-                for (let source of sources)
-                    if (source.getMimeType() != Fudge.MIME.AUDIO && source.getMimeType() != Fudge.MIME.IMAGE && source.getMimeType() != Fudge.MIME.MESH)
-                        return;
+                if (sources.some(_source => ![Fudge.MIME.AUDIO, Fudge.MIME.IMAGE, Fudge.MIME.MESH, Fudge.MIME.GLTF].includes(_source.getMimeType())))
+                    return;
+                // for (let source of sources)
+                //   if (source.getMimeType() != MIME.AUDIO && source.getMimeType() != MIME.IMAGE && source.getMimeType() != MIME.MESH)
+                //     return;
             }
             _event.dataTransfer.dropEffect = "link";
             _event.preventDefault();
@@ -1347,7 +1355,27 @@ var Fudge;
                             console.log(new ƒ.TextureImage(source.pathRelative));
                             break;
                         case Fudge.MIME.MESH:
-                            console.log(await new ƒ.MeshImport().load(ƒ.MeshLoaderOBJ, source.pathRelative));
+                            ƒ.Debug.log(await new ƒ.MeshOBJ().load(source.pathRelative));
+                            break;
+                        case Fudge.MIME.GLTF:
+                            let settings = {
+                                [ƒ.Graph.name]: true,
+                                [ƒ.Mesh.name]: false,
+                                [ƒ.Material.name]: false,
+                                [ƒ.Animation.name]: false
+                            };
+                            let loader = await ƒ.GLTFLoader.LOAD(source.pathRelative);
+                            let load = await ƒui.Dialog.prompt(settings, false, `Select what to import from '${loader.name}'`, "Adjust settings and press OK", "OK", "Cancel");
+                            if (!load)
+                                break;
+                            for (let type in settings)
+                                if (settings[type]) {
+                                    let resources = await loader.loadResources(ƒ[type]);
+                                    for (let resource of resources) {
+                                        if (!ƒ.Project.resources[resource.idResource])
+                                            ƒ.Project.register(resource);
+                                    }
+                                }
                             break;
                     }
                 }
@@ -1385,6 +1413,7 @@ var Fudge;
                     this.listResources();
                     break;
                 case "rename" /* ƒui.EVENT.RENAME */:
+                    this.listResources();
                     this.dispatchToParent(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true, detail: _event.detail });
                     break;
             }
@@ -1404,8 +1433,9 @@ var Fudge;
     var ƒUi = FudgeUserInterface;
     let filter = {
         UrlOnTexture: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
-        UrlOnMeshObj: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "MeshObj", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
+        UrlOnMeshOBJ: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "MeshOBJ", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         UrlOnAudio: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
+        UrlOnMeshGLTF: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "MeshGLTF", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
         MeshOnComponentMesh: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
         AnimationOnComponentAnimator: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentAnimator, ofType: ƒ.Animation, dropEffect: "link" },
@@ -1465,10 +1495,13 @@ var Fudge;
             if (this.filterDragDrop(_event, filter.UrlOnTexture, checkMimeType(Fudge.MIME.IMAGE)))
                 return;
             // url on meshobj
-            if (this.filterDragDrop(_event, filter.UrlOnMeshObj, checkMimeType(Fudge.MIME.MESH)))
+            if (this.filterDragDrop(_event, filter.UrlOnMeshOBJ, checkMimeType(Fudge.MIME.MESH)))
                 return;
             // url on audio
             if (this.filterDragDrop(_event, filter.UrlOnAudio, checkMimeType(Fudge.MIME.AUDIO)))
+                return;
+            // url on meshgltf
+            if (this.filterDragDrop(_event, filter.UrlOnMeshGLTF, checkMimeType(Fudge.MIME.GLTF)))
                 return;
             // Material on ComponentMaterial
             if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial))
@@ -1577,7 +1610,7 @@ var Fudge;
             if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink))
                 return;
             // texture
-            if (this.filterDragDrop(_event, filter.UrlOnMeshObj, setExternalLink))
+            if (this.filterDragDrop(_event, filter.UrlOnMeshOBJ, setExternalLink))
                 return;
             // audio
             if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink))
@@ -1662,9 +1695,14 @@ var Fudge;
         getLabel(_object) {
             return "";
         }
-        rename(_object, _new) {
+        async rename(_object, _new) {
             // console.log("Check rename", _object.name, _new);
-            return (_object.name != _new);
+            let rename = _object.name != _new;
+            if (rename) {
+                _object.name = _new; // must rename before loading, TODO: WHY is it that the renaming is supposed to be handled by the actual table???
+                await _object.load?.();
+            }
+            return rename;
         }
         copy(_originals) { return null; }
         async delete(_focussed) {
@@ -1748,7 +1786,7 @@ var Fudge;
             return ControllerTableScript.head;
         }
         getLabel(_object) { return ""; }
-        rename(_object, _new) { return false; }
+        async rename(_object, _new) { return false; }
         delete(_focussed) { return null; }
         copy(_originals) { return null; }
         sort(_data, _key, _direction) {
@@ -2276,7 +2314,7 @@ var Fudge;
         }
         setGraph(_graph) {
             if (_graph) {
-                this.setTitle("Graph | " + _graph.name);
+                this.setTitle(`${_graph.type} | ${_graph.name}`);
                 this.graph = _graph;
                 return;
             }
@@ -2657,7 +2695,7 @@ var Fudge;
                         .forEach(_item => {
                         if (!_item)
                             return;
-                        _item.classList.remove("invalid");
+                        _item.classList.remove("warning");
                         _item.title = "";
                     });
                     this.errors = invalid;
@@ -2669,7 +2707,7 @@ var Fudge;
                             let item = this.tree.findVisible(_data);
                             if (!item)
                                 return;
-                            item.classList.add("invalid");
+                            item.classList.add("warning");
                             item.title = _error;
                         });
                     }
@@ -2992,7 +3030,7 @@ var Fudge;
                     }
                     if (_event.detail.node != null) {
                         this.node = _event.detail.node;
-                        this.cmpAnimator = this.node?.getComponent(ƒ.ComponentAnimator);
+                        this.cmpAnimator = this.node.getComponent(ƒ.ComponentAnimator);
                         this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
                         if (this.cmpAnimator?.animation != this.animation)
                             this.setAnimation(this.cmpAnimator?.animation);
@@ -3938,6 +3976,8 @@ var Fudge;
                     } while (element);
                     return;
             }
+            if (!component) // experimental fix for the sporadic "component is not a constructor" bug
+                component = ƒ[_item.label];
             //@ts-ignore
             let cmpNew = new component();
             if ((cmpNew instanceof ƒ.ComponentRigidbody || cmpNew instanceof ƒ.ComponentVRDevice) && !this.node.cmpTransform) {
@@ -4105,7 +4145,7 @@ var Fudge;
                     let cmpRigidbody = this.node.getComponent(ƒ.ComponentRigidbody);
                     if (cmpRigidbody)
                         cmpRigidbody.initialize();
-                    this.dispatch(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true, detail: { node: this.node } });
+                    // this.dispatch(EVENT_EDITOR.UPDATE, { bubbles: true, detail: { node: this.node } }); // TODO: check if this was necessary, EVENT_EDITOR.UPDATE gets broadcasted by project on ƒ.EVENT.GRAPH_MUTATED, so this was causing a double broadcast of EVENT_EDITOR.UPDATE to ALL views on any change to any component
                     break;
                 case "rearrangeArray" /* ƒUi.EVENT.REARRANGE_ARRAY */:
                     this.fillContent();

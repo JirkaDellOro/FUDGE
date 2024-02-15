@@ -225,7 +225,7 @@ namespace Fudge {
             .map(([_data]) => this.tree.findVisible(_data))
             .forEach(_item => {
               if (!_item) return;
-              _item.classList.remove("invalid");
+              _item.classList.remove("warning");
               _item.title = "";
             });
           this.errors = invalid;
@@ -235,7 +235,7 @@ namespace Fudge {
             this.errors.forEach(([_data, _error]) => {
               let item: ƒui.CustomTreeItem<ƒ.ParticleData.Recursive> = this.tree.findVisible(_data);
               if (!item) return;
-              item.classList.add("invalid");
+              item.classList.add("warning");
               item.title = _error;
             });
           }

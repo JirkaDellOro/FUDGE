@@ -44,6 +44,11 @@ namespace Fudge {
           continue;
         tds[1].classList.add("icon");
         tds[1].setAttribute("icon", (<HTMLInputElement>tds[1].children[0]).value);
+        if (tr instanceof ƒui.TableItem && (<ƒ.SerializableResourceExternal>tr.data).status == ƒ.RESOURCE_STATUS.ERROR) {
+          tr.classList.add("error");
+          tr.title = "Failed to load resource from file check the console for details.";
+          break;
+        }
       }
     }
 
@@ -265,6 +270,7 @@ namespace Fudge {
           this.listResources();
           break;
         case ƒui.EVENT.RENAME:
+          this.listResources();
           this.dispatchToParent(EVENT_EDITOR.UPDATE, { bubbles: true, detail: _event.detail });
           break;
       }

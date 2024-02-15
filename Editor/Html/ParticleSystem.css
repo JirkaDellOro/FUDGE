@@ -82,8 +82,8 @@ div[view=ViewParticleSystem] ul.tree li[attributes~="variable"]>form>input:first
 }
 
 
-div[view=ViewParticleSystem] ul.tree li.invalid {
-  outline: 1px outset yellow; /* maybe add this to theme vars */
+div[view=ViewParticleSystem] ul.tree li.warning {
+  outline: 1px outset var(--color-warning);
 }
 
 div[view=ViewParticleSystem] li[attributes~="random"] > ul.tree > li:nth-of-type(1) > form::before {

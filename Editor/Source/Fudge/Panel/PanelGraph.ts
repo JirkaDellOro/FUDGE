@@ -65,7 +65,7 @@ namespace Fudge {
 
     public setGraph(_graph: ƒ.Graph): void {
       if (_graph) {
-        this.setTitle("Graph | " + _graph.name);
+        this.setTitle(`${_graph.type} | ${_graph.name}`);
         this.graph = _graph;
         return;
       }
