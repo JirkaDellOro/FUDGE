@@ -45,6 +45,12 @@ namespace FudgeCore {
     public static async loadResource<T extends GraphGLTF | MeshGLTF | MaterialGLTF | AnimationGLTF | GraphInstance>(_resource: T, _url?: RequestInfo): Promise<T> {
       const loader: GLTFLoader = await GLTFLoader.LOAD(((<SerializableResourceExternal>_resource).url ?? _url).toString());
 
+      if (!loader) {
+        if (!(_resource instanceof GraphInstance))
+          _resource.status = RESOURCE_STATUS.ERROR;
+        return _resource;
+      }
+
       let loaded: T;
 
       if (_resource instanceof GraphInstance)
@@ -60,7 +66,14 @@ namespace FudgeCore {
 
       if (!loaded) {
         Debug.error(`${_resource.constructor.name} | ${_resource instanceof GraphInstance ? _resource.idSource : _resource.idResource}: Failed to load resource.`);
+        if (!(_resource instanceof GraphInstance))
+          _resource.status = RESOURCE_STATUS.ERROR;
+
         return _resource;
+      }
+
+      if (!(loaded instanceof GraphInstance)) {
+        loaded.status = RESOURCE_STATUS.READY;
       }
 
       // if (cached && !(_resource instanceof GraphInstance)) {
@@ -80,15 +93,21 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a {@link GLTFLoader} instance for the given url.
+     * Returns a {@link GLTFLoader} instance for the given url or null if the url can't be resolved.
      */
     public static async LOAD(_url: string, _registerResources: boolean = false): Promise<GLTFLoader> {
       if (!this.loaders)
         GLTFLoader.loaders = {};
 
       if (!this.loaders[_url]) {
-        const response: Response = await fetch(new URL(_url, Project.baseURL));
-        const gltf: GLTF.GlTf = await response.json();
+        let gltf: GLTF.GlTf;
+        try {
+          const response: Response = await fetch(new URL(_url, Project.baseURL));
+          gltf = await response.json();
+        } catch (error: unknown) {
+          Debug.error(`${GLTFLoader.name} | ${_url}: Failed to load file. ${error}`);
+          return null;
+        }
 
         GLTFLoader.checkCompatibility(gltf, _url);
         GLTFLoader.preProcess(gltf, _url);

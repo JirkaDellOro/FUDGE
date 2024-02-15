@@ -1781,6 +1781,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     const AnimationGLTF_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
+        status: RESOURCE_STATUS;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
@@ -3246,6 +3247,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     const GraphGLTF_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
+        status: RESOURCE_STATUS;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
@@ -3515,6 +3517,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     const MaterialGLTF_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
+        status: RESOURCE_STATUS;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
@@ -4749,6 +4752,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     const MeshFBX_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
+        status: RESOURCE_STATUS;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
@@ -4787,6 +4791,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     const MeshGLTF_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
+        status: RESOURCE_STATUS;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
@@ -4809,6 +4814,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     const MeshOBJ_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
+        status: RESOURCE_STATUS;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
@@ -6338,6 +6344,35 @@ declare namespace FudgeCore {
         weights?: WebGLBuffer;
         nIndices?: number;
     }
+    /**
+     * Inserted into a {@link Mesh}, an instance of this class calculates and represents the mesh data in the form needed by the render engine
+     */
+    class RenderMesh {
+        #private;
+        buffers: RenderBuffers;
+        mesh: Mesh;
+        constructor(_mesh: Mesh);
+        get vertices(): Float32Array;
+        set vertices(_vertices: Float32Array);
+        get indices(): Uint16Array;
+        set indices(_indices: Uint16Array);
+        get normals(): Float32Array;
+        set normals(_normals: Float32Array);
+        get tangents(): Float32Array;
+        set tangents(_tangents: Float32Array);
+        get textureUVs(): Float32Array;
+        set textureUVs(_textureUVs: Float32Array);
+        get colors(): Float32Array;
+        set colors(_colors: Float32Array);
+        get bones(): Uint8Array;
+        set bones(_iBones: Uint8Array);
+        get weights(): Float32Array;
+        set weights(_weights: Float32Array);
+        /**
+         * Clears this render mesh and all its buffers
+         */
+        clear(): void;
+    }
 }
 declare namespace FudgeCore {
     /**
@@ -6588,8 +6623,14 @@ declare namespace FudgeCore {
         EDITOR = 0,
         RUNTIME = 1
     }
+    export enum RESOURCE_STATUS {
+        PENDING = 0,
+        READY = 1,
+        ERROR = 2
+    }
     export interface SerializableResourceExternal extends SerializableResource {
         url: RequestInfo;
+        status: RESOURCE_STATUS;
         load(): Promise<SerializableResourceExternal>;
     }
     export interface SerializableResource extends Serializable {
@@ -7732,7 +7773,7 @@ declare namespace FudgeCore {
         private static get defaultMaterial();
         private static get defaultSkinMaterial();
         /**
-         * Returns a {@link GLTFLoader} instance for the given url.
+         * Returns a {@link GLTFLoader} instance for the given url or null if the url can't be resolved.
          */
         static LOAD(_url: string, _registerResources?: boolean): Promise<GLTFLoader>;
         private static checkCompatibility;

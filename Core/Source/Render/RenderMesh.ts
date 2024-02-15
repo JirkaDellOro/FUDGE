@@ -14,7 +14,6 @@ namespace FudgeCore {
 
   /**
    * Inserted into a {@link Mesh}, an instance of this class calculates and represents the mesh data in the form needed by the render engine
-   * @internal
    */
   export class RenderMesh {
     public buffers: RenderBuffers = null;

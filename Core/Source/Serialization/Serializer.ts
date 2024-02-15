@@ -266,6 +266,8 @@ namespace FudgeCore {
     abstract class SerializableResourceExternal extends _base implements FudgeCore.SerializableResourceExternal {
       public url: RequestInfo;
 
+      public status: RESOURCE_STATUS = RESOURCE_STATUS.PENDING;
+
       public serialize(): Serialization {
         const serialization: Serialization = super.serialize();
         serialization.url = this.url.toString();
@@ -289,9 +291,9 @@ namespace FudgeCore {
       function mixinMutableSerializableResourceExternal<TBase extends Constructor<SerializableResourceExternal & Mutable>>(_base: TBase) { // eslint-disable-line
         abstract class MutableSerializableResourceExternal extends _base {
           public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
-            super.mutate(_mutator, _selection, _dispatchMutate);
+            await super.mutate(_mutator, _selection, false);
             if (_mutator.url != undefined || _mutator.name != undefined)
-              this.load();
+              await this.load();
           }
         }
 

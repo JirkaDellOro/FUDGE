@@ -3,8 +3,13 @@ namespace FudgeCore {
     EDITOR, RUNTIME
   }
 
+  export enum RESOURCE_STATUS {
+    PENDING, READY, ERROR
+  }
+
   export interface SerializableResourceExternal extends SerializableResource {
     url: RequestInfo;
+    status: RESOURCE_STATUS;
     load(): Promise<SerializableResourceExternal>;
   }
 
