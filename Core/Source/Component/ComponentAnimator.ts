@@ -158,7 +158,8 @@ namespace FudgeCore {
      * May also be called from updateAnimation().
      */
     private updateAnimationLoop = (_e: Event, _time?: number): Mutator => {
-      if (this.animation.totalTime == 0) return null;
+      if (this.animation.totalTime == 0) 
+        return null;
 
       let time: number = _time || _time === 0 ? _time : this.#timeLocal.get();
       if (this.quantization == ANIMATION_QUANTIZATION.FRAMES) {

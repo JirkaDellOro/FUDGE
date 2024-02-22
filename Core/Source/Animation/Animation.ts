@@ -215,8 +215,8 @@ namespace FudgeCore {
     public calculateTotalTime(): void {
       this.totalTime = 0;
       this.traverseStructureForTime(this.animationStructure);
-      if (this.totalTime == 0) // animations with one keyframe need a total time != 0 to work
-        this.totalTime = 1;
+      // if (this.totalTime == 0) // animations with one keyframe need a total time != 0 to work
+      //   this.totalTime = 1;
     }
 
     /**
