@@ -202,7 +202,11 @@ declare namespace FudgeCore {
         /** dispatched to {@link Node} when it gets attached to a viewport for rendering */
         ATTACH_BRANCH = "attachBranch",
         /** dispatched to {@link Project} when it's done loading resources from a url */
-        RESOURCES_LOADED = "resourcesLoaded"
+        RESOURCES_LOADED = "resourcesLoaded",
+        /** dispatched to {@link ComponentWalker} and {@link ComponentWaypoint} when a {@link ComponentWalker} reaches a {@link Waypoint} or {@link ComponentWaypoint} */
+        WAYPOINT_REACHED = "waypointReached",
+        /** dispatched to {@link ComponentWalker} when the final {@link Waypoint} in the current path has been reached */
+        PATHING_CONCLUDED = "pathingConcluded"
     }
     /** Union type of other event types serving as annotation for listeners and handlers */
     type EventUnified = Event | CustomEvent | EventPhysics;
@@ -5208,6 +5212,131 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+}
+declare namespace FudgeCore {
+    /**
+     * Enables this node to access the waypoint grid established through {@link ComponentWaypoint}s and their {@link Connection}s,
+     * find a path through them and even walk down the path.
+     * @author Lukas Scheuerle, HFU, 2024
+     */
+    export class ComponentWalker extends Component {
+        #private;
+        static readonly iSubclass: number;
+        /** The speed the walker should move with. Corresponds to units/s. */
+        speed: number;
+        constructor();
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        /**
+         * Teleports (moves instantly) to the _target Waypoint.
+         * @param _target
+         * @returns a Promise that resolves immediately.
+         */
+        moveTo(_target: Waypoint): Promise<void>;
+        /**
+         * Moves the walker from the _start to the _end Waypoint.
+         * Teleports (moves instantly) to the _start point, then moves through the waypoint connections to the _end point.
+         * @param _start
+         * @param _end
+         * @returns a Promise that resolves when the _end point is reached. Rejects if _end can't be reached (no path found).
+         */
+        moveTo(_start: Waypoint, _end: Waypoint): Promise<void>;
+        /** Takes care of the moving algorithm by calculating the next step and moving along this step */
+        protected moving(): void;
+        /** find the path between two given waypoints */
+        protected getPath(_start: Waypoint, _end: Waypoint): PathingNode[];
+        /**
+         * Checks whether a connection is usable by this specific walker.
+         * **Always returns true, unless overwritten in a custom Walker subclass.**
+         * Can be used to influence the pathfinding algorithm for custom waypoint / connection systems.
+         * @param _connection A connection to check
+         * @returns true if the connection is usable by this walker, false if not
+         */
+        protected isConnectionUsable(_connection: Connection): boolean;
+        /**
+         * Calculates the new distance based on a connection.
+         * **Always returns the plain connections cost unless overwritten in a custom walker subclass.**
+         * Can be used to influence the pathfinding algorithm for custom waypoint / connection systems.
+         * @param _connection A connection to check
+         * @returns the amount of cost a connection encurs to the current walker or 0 if cost is negative.
+         */
+        protected calculateConnectionCost(_connection: Connection): number;
+        private pathingNodeToPath;
+    }
+    /**
+     * An internal interface to manage pathing data inside the Walker
+     */
+    interface PathingNode {
+        waypoint: Waypoint;
+        distance: number;
+        previous: PathingNode;
+        previousConnection: Connection;
+    }
+    export {};
+}
+declare namespace FudgeCore {
+    /**
+     * Unifies Waypoints of the pathing algorithms
+     * @author Lukas Scheuerle, HFU, 2024
+     */
+    interface Waypoint {
+        connections: Connection[];
+        mtxLocal: Matrix4x4;
+        mtxWorld: Matrix4x4;
+        isActive: boolean;
+    }
+    /**
+     * Sets a position that a {@link ComponentWalker} can use as a target point.
+     * Implements {@link Waypoint}.
+     * Registers itself to a static list of all available waypoints
+     * @author Lukas Scheuerle, HFU, 2024
+     */
+    class ComponentWaypoint extends Component implements Waypoint, Gizmo {
+        #private;
+        static readonly iSubclass: number;
+        mtxLocal: Matrix4x4;
+        constructor(_mtxInit?: Matrix4x4, _connections?: Connection[]);
+        /** All the waypoints that are currently loaded in the scene. **Do not edit, treat as readonly!** */
+        static get waypoints(): ComponentWaypoint[];
+        /**
+         * A shorthand to create a connection between two {@link ComponentWaypoint}s
+         * @param _start The {@link ComponentWaypoint} from which to start the connection.
+         * @param _end The {@link ComponentWaypoint} to which the connection leads.
+         * @param _cost The cost of the connection. The higher the value, the less likely it is to be taken. Cannot be negative.
+         * @param _speedModifier How fast the connection can be walked on. Defaults to 1
+         * @param _bothWays If true, creates a connection in both directions. Default: false
+         */
+        static addConnection(_start: ComponentWaypoint, _end: ComponentWaypoint, _cost: number, _speedModifier?: number, _bothWays?: boolean): void;
+        get isActive(): boolean;
+        get connections(): Connection[];
+        /** The current world position of the Waypoint. Returns a new Matrix without connection to the Waypoint */
+        get mtxWorld(): Matrix4x4;
+        /** Adds a new {@link Connection} to this waypoint */
+        addConnection(_connection: Connection): void;
+        /** Removes a {@link Connection} from this waypoint */
+        removeConnection(_connection: Connection): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        drawGizmos(): void;
+        /** An internal function to help the deserializaztion process. */
+        private serializedWaypointToWaypoint;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * A directed connection between two waypoints
+     * @author Lukas Scheuerle, HFU, 2024
+     */
+    interface Connection {
+        /** The start / origin waypoint of this connection. */
+        start: Waypoint;
+        /** The end / target waypoint of this connection. */
+        end: Waypoint;
+        /** The cost of the connection, the higher the less likely to be taken. Cannot be negative. */
+        cost: number;
+        /** Modifies the speed that a walker can walk past this connection by multiplying the speed with this value. Needs to be >0 */
+        speedModifier: number;
+    }
 }
 declare namespace FudgeCore {
     /**
