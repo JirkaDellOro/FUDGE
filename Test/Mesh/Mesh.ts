@@ -58,8 +58,8 @@ namespace Mesh {
 
       let mesh: ƒ.Mesh;
       switch (subclass[i].name) {
-        case "MeshObj":
-          mesh = new ƒ.MeshObj("Icosphere", "Icosphere.obj");
+        case ƒ.MeshOBJ.name:
+          mesh = await new ƒ.MeshOBJ("Icosphere").load("Icosphere.obj");
           break;
         default:
           //@ts-ignore

@@ -38,8 +38,8 @@ var Mesh;
             let node = new ƒ.Node(subclass[i].name.replace("Mesh", ""));
             let mesh;
             switch (subclass[i].name) {
-                case "MeshObj":
-                    mesh = new ƒ.MeshObj("Icosphere", "Icosphere.obj");
+                case ƒ.MeshOBJ.name:
+                    mesh = await new ƒ.MeshOBJ("Icosphere").load("Icosphere.obj");
                     break;
                 default:
                     //@ts-ignore

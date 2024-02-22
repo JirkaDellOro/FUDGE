@@ -128,11 +128,11 @@ async function load(): Promise<void> {
 
   const amount: number = parseInt(SkeletonTest.slcAmount.value);
   if (amount == 1) {
-    SkeletonTest.loaded = await SkeletonTest.loader.getScene();
+    SkeletonTest.loaded = await SkeletonTest.loader.getGraph();
   } else {
     SkeletonTest.loaded = new ƒ.Node("loaded");
     for (let i: number = 0; i < amount; i++) {
-      let instance: ƒ.GraphInstance = await ƒ.Project.createGraphInstance(await SkeletonTest.loader.getScene());
+      let instance: ƒ.GraphInstance = await ƒ.Project.createGraphInstance(<ƒ.Graph>await SkeletonTest.loader.getGraph());
       instance.addComponent(new ƒ.ComponentTransform());
       instance.name = "instance" + i;
       instance.mtxLocal.translateX((i * 2 - (amount - 1)) * 1.5);

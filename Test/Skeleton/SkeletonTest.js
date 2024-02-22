@@ -38,7 +38,7 @@ var SkeletonTest;
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal, cylinder.getComponent(ƒ.ComponentMaterial).material));
         ƒ.Loop.start();
     }
-    class MeshSkinCylinder extends ƒ.MeshSkin {
+    class MeshSkinCylinder extends ƒ.Mesh {
         static #skeleton;
         constructor() {
             super();

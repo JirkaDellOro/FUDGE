@@ -106,12 +106,12 @@ async function load() {
     SkeletonTest.loader = await ƒ.GLTFLoader.LOAD(SkeletonTest.slcFile.value);
     const amount = parseInt(SkeletonTest.slcAmount.value);
     if (amount == 1) {
-        SkeletonTest.loaded = await SkeletonTest.loader.getScene();
+        SkeletonTest.loaded = await SkeletonTest.loader.getGraph();
     }
     else {
         SkeletonTest.loaded = new ƒ.Node("loaded");
         for (let i = 0; i < amount; i++) {
-            let instance = await ƒ.Project.createGraphInstance(await SkeletonTest.loader.getScene());
+            let instance = await ƒ.Project.createGraphInstance(await SkeletonTest.loader.getGraph());
             instance.addComponent(new ƒ.ComponentTransform());
             instance.name = "instance" + i;
             instance.mtxLocal.translateX((i * 2 - (amount - 1)) * 1.5);

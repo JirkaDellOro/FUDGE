@@ -51,7 +51,7 @@ namespace SkeletonTest {
     ƒ.Loop.start();
   }
 
-  class MeshSkinCylinder extends ƒ.MeshSkin {
+  class MeshSkinCylinder extends ƒ.Mesh {
     static #skeleton: ƒ.Node;
 
     public constructor() {
@@ -198,7 +198,7 @@ namespace SkeletonTest {
     cylinder.addChild(skeleton);
 
     // setup component mesh
-    const mesh: ƒ.MeshSkin = new MeshSkinCylinder();
+    const mesh: ƒ.Mesh = new MeshSkinCylinder();
     const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
     cmpMesh.mtxPivot.translateY(-2);
     cmpMesh.skeleton = skeleton.getComponent(ƒ.ComponentSkeleton);
