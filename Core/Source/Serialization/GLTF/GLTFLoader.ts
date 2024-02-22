@@ -21,9 +21,11 @@ namespace FudgeCore {
 
     #buffers: ArrayBuffer[];
 
-    private constructor(_gltf: GLTF.GlTf, _url: string) {
+    private constructor(_gltf: GLTF.GlTf, _url: string, _bufferChunk?: ArrayBuffer) {
       this.#gltf = _gltf;
       this.#url = _url;
+      if (_bufferChunk)
+        this.#buffers = [_bufferChunk];
     }
 
     private static get defaultMaterial(): Material {
@@ -101,9 +103,46 @@ namespace FudgeCore {
 
       if (!this.loaders[_url]) {
         let gltf: GLTF.GlTf;
+        let buffer: ArrayBuffer;
         try {
           const response: Response = await fetch(new URL(_url, Project.baseURL));
-          gltf = await response.json();
+          const fileExtension: string = _url.split('.').pop()?.toLowerCase();
+
+          if (fileExtension == "gltf")
+            gltf = await response.json();
+
+          if (fileExtension == "glb") {
+            const arrayBuffer: ArrayBuffer = await response.arrayBuffer();
+            const dataView: DataView = new DataView(arrayBuffer);
+
+            const magic: number = dataView.getUint32(0, true);
+            if (magic !== 0x46546C67)
+              throw new Error(`${GLTFLoader.name} | ${_url}: Invalid magic number in GLB file.`);
+
+            const version: number = dataView.getUint32(4, true);
+            if (version != 2)
+              throw new Error(`${GLTFLoader.name} | ${_url}: Unsupported version in GLB file.`);
+
+            const jsonLength: number = dataView.getUint32(12, true);
+            const jsonFormat: number = dataView.getUint32(16, true);
+
+            if (jsonFormat !== 0x4E4F534A)
+              throw new Error('Invalid format. The first chunk of the file is not in JSON format.');
+
+            const decoder: TextDecoder = new TextDecoder();
+            const jsonChunk: string = decoder.decode(new Uint8Array(arrayBuffer, 20, jsonLength));
+            gltf = JSON.parse(jsonChunk);
+
+            if (arrayBuffer.byteLength >= 20 + jsonLength) {
+              const binaryLength: number = dataView.getUint32(20 + jsonLength, true);
+              const binaryFormat: number = dataView.getUint32(24 + jsonLength, true);
+
+              if (binaryFormat !== 0x004E4942)
+                throw new Error('Invalid format. The second chunk of the file is not in binary format.');
+
+              buffer = arrayBuffer.slice(28 + jsonLength, 28 + jsonLength + binaryLength);
+            }
+          }
         } catch (error: unknown) {
           Debug.error(`${GLTFLoader.name} | ${_url}: Failed to load file. ${error}`);
           return null;
@@ -112,7 +151,7 @@ namespace FudgeCore {
         GLTFLoader.checkCompatibility(gltf, _url);
         GLTFLoader.preProcess(gltf, _url);
 
-        GLTFLoader.loaders[_url] = new GLTFLoader(gltf, _url);
+        GLTFLoader.loaders[_url] = new GLTFLoader(gltf, _url, buffer);
       }
 
       return GLTFLoader.loaders[_url];
