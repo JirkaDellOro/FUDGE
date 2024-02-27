@@ -15,7 +15,7 @@ namespace FudgeUserInterface {
     public dragDropDivider: HTMLHRElement = document.createElement("hr");
 
     /** Create an HTMLFormElement for the tree item representing the object */
-    public abstract createContent(_object: T): HTMLFormElement;
+    public abstract createContent(_object: T): HTMLFieldSetElement;
 
     /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
     public abstract getAttributes(_object: T): string;

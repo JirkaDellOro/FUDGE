@@ -483,7 +483,7 @@ declare namespace FudgeUserInterface {
         /** Used by the tree to indicate the drop position while dragging */
         dragDropDivider: HTMLHRElement;
         /** Create an HTMLFormElement for the tree item representing the object */
-        abstract createContent(_object: T): HTMLFormElement;
+        abstract createContent(_object: T): HTMLFieldSetElement;
         /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
         abstract getAttributes(_object: T): string;
         /** Process the proposed new name */
@@ -547,11 +547,11 @@ declare namespace FudgeUserInterface {
         /**
          * Returns the content representing the attached {@link data}
          */
-        get content(): HTMLFormElement;
+        get content(): HTMLFieldSetElement;
         /**
          * Set the content representing the attached {@link data}
          */
-        set content(_content: HTMLFormElement);
+        set content(_content: HTMLFieldSetElement);
         refreshAttributes(): void;
         refreshContent(): void;
         /**

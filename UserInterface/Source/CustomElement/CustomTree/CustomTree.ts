@@ -63,8 +63,8 @@ namespace FudgeUserInterface {
         return;
 
       let branch: CustomTreeList<T> = this.createBranch(children);
-      item.setBranch(branch); 
-      this.displaySelection(<T[]>this.controller.selection);
+      item.setBranch(branch);
+      // this.displaySelection(<T[]>this.controller.selection);
     }  
 
     private createBranch(_data: T[]): CustomTreeList<T> {

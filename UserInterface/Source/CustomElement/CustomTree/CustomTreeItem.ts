@@ -9,10 +9,10 @@ namespace FudgeUserInterface {
     public classes: CSS_CLASS[] = [];
     public data: T = null;
     public controller: CustomTreeController<T>;
-    
+
     private checkbox: HTMLInputElement;
-    #content: HTMLFormElement;
-    
+    #content: HTMLFieldSetElement;
+
     public constructor(_controller: CustomTreeController<T>, _data: T) {
       super();
       this.controller = _controller;
@@ -70,14 +70,14 @@ namespace FudgeUserInterface {
     /**
      * Returns the content representing the attached {@link data}
      */
-    public get content(): HTMLFormElement {
+    public get content(): HTMLFieldSetElement {
       return this.#content;
     }
 
     /**
      * Set the content representing the attached {@link data}
      */
-    public set content(_content: HTMLFormElement) {
+    public set content(_content: HTMLFieldSetElement) {
       if (this.contains(this.#content))
         this.replaceChild(_content, this.#content);
       else
@@ -86,7 +86,7 @@ namespace FudgeUserInterface {
       this.#content.onsubmit = (_event) => {
         _event.preventDefault();
         return false;
-      };    
+      };
     }
 
     public refreshAttributes(): void {
@@ -95,6 +95,7 @@ namespace FudgeUserInterface {
 
     public refreshContent(): void {
       this.content = this.controller.createContent(this.data);
+      this.content.disabled = true;
     }
 
     /**
@@ -108,8 +109,11 @@ namespace FudgeUserInterface {
       if (_expand)
         this.dispatchEvent(new Event(EVENT.EXPAND, { bubbles: true }));
 
-      (<HTMLInputElement>this.querySelector("input[type='checkbox']")).checked = _expand;
-    }   
+
+      this.checkbox.checked = _expand;
+      this.hasChildren = this.controller.hasChildren(this.data);
+      // (<HTMLInputElement>this.querySelector("input[type='checkbox']")).checked = _expand;
+    }
 
     /**
      * Returns a list of all data referenced by the items succeeding this
@@ -170,16 +174,18 @@ namespace FudgeUserInterface {
 
     private hndFocus = (_event: Event): void => {
       _event.stopPropagation();
-      if (!(_event.target instanceof HTMLInputElement) || _event.target == this.checkbox) return;
 
-      _event.target.disabled = true;
+      if (_event.target == this.checkbox)
+        return;
+
+      if (_event.target != this)
+        this.content.disabled = true;
     };
 
     private hndKey = (_event: KeyboardEvent): void => {
       _event.stopPropagation();
-      for (const iterator of this.content.elements) {
-        if (iterator instanceof HTMLInputElement && !iterator.disabled) return;
-      }
+      if (!this.content.disabled)
+        return;
 
       let content: CustomTreeList<T> = <CustomTreeList<T>>this.querySelector("ul");
 
@@ -237,22 +243,26 @@ namespace FudgeUserInterface {
     };
 
     private startTypingInput(_inputElement?: HTMLElement): void {
-      if (!_inputElement) _inputElement = <HTMLElement>this.content.elements.item(0);
-      if (_inputElement instanceof HTMLInputElement) {
-        _inputElement.disabled = false;
-        _inputElement.focus();  
-      } 
+      if (!_inputElement)
+        _inputElement = <HTMLElement>this.content.elements.item(0);
+      this.content.disabled = false;
+      _inputElement.focus();
+      // if (_inputElement instanceof HTMLInputElement) {
+      //   _inputElement.disabled = false;
+      //   _inputElement.focus();  
+      // } 
     }
 
     private hndDblClick = (_event: Event): void => {
       _event.stopPropagation();
-      if (_event.target != this.checkbox)
+      if (_event.target != this.checkbox) {
         this.startTypingInput(<HTMLElement>_event.target);
+      }
     };
 
     private hndChange = (_event: Event): void => {
       let target: HTMLInputElement | HTMLSelectElement = <HTMLInputElement | HTMLSelectElement>_event.target;
-      let item: HTMLLIElement = <HTMLLIElement>target.form?.parentNode;
+      // let item: HTMLLIElement = <HTMLLIElement>target.form?.parentNode;
       _event.stopPropagation();
 
       if (target instanceof HTMLInputElement) {
@@ -261,19 +271,20 @@ namespace FudgeUserInterface {
             this.expand(target.checked);
             break;
           case "text":
-            target.disabled = true;
-            item.focus();
-            this.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { id: target.id, value: target.value }}));
+            // target.disabled = true;
+            this.content.disabled = true;
+            this.focus();
+            this.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { id: target.id, value: target.value } }));
             break;
           case "default":
             // console.log(target);
             break;
         }
       }
-      
-      if (target instanceof HTMLSelectElement) 
+
+      if (target instanceof HTMLSelectElement)
         this.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { id: target.id, value: target.value } }));
-        
+
     };
 
     private hndDragStart = (_event: DragEvent): void => {
@@ -299,7 +310,7 @@ namespace FudgeUserInterface {
       _event.dataTransfer.dropEffect = "move";
     };
 
-    private hndDragOver = (_event: DragEvent): void => {      
+    private hndDragOver = (_event: DragEvent): void => {
       let rect: DOMRect = this.content.getBoundingClientRect();
       let upper: number = rect.top + rect.height * (1 / 3);
       let lower: number = rect.top + rect.height * (2 / 3);

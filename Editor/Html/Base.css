@@ -84,8 +84,15 @@ ul.tree {
   list-style: none;
 }
 
-ul.tree form {
+/* ul.tree form {
+  vertical-align: middle;
   display: inline;
+} */
+
+ul.tree fieldset {
+  vertical-align: middle;
+  display: inline;
+  border: none;
 }
 
 ul.tree li {
@@ -102,6 +109,10 @@ ul.tree li[attributes~="GraphInstance"]>input {
 
 ul.tree ul {
   padding-left: 1em;
+}
+
+ul.tree input {
+  vertical-align: inherit;
 }
 
 ul.tree input[type=checkbox] {
@@ -124,6 +135,9 @@ ul.tree input[type="checkbox"]~ul {
   display: none;
 }
 
+ul.tree input[type="checkbox"]:has(+ fieldset[icon]) {
+  display: none;
+}
 
 /* Table */
 

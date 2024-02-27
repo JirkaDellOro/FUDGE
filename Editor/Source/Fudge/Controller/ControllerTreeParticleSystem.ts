@@ -20,8 +20,8 @@ namespace Fudge {
       this.view = _view;
     }
 
-    public createContent(_data: ƒ.ParticleData.Recursive): HTMLFormElement {
-      let content: HTMLFormElement = document.createElement("form");
+    public createContent(_data: ƒ.ParticleData.Recursive): HTMLFieldSetElement {
+      let content: HTMLFieldSetElement = document.createElement("fieldset");
       let parentData: ƒ.ParticleData.Recursive = this.childToParent.get(_data);
       let key: string = this.getKey(_data);
       
@@ -34,7 +34,7 @@ namespace Fudge {
       if (parentData && parentData == this.data.variables) {
         let input: HTMLInputElement = document.createElement("input");
         input.type = "text";
-        input.disabled = true;
+        // input.disabled = true;
         input.value = this.data.variableNames[key];
         input.id = ID.NAME;
         content.appendChild(input);
@@ -55,7 +55,7 @@ namespace Fudge {
         } else {
           let input: HTMLInputElement = document.createElement("input");
           input.type = "text";
-          input.disabled = true;
+          // input.disabled = true;
           input.id = ID.VALUE;
           if (ƒ.ParticleData.isCode(_data)) {
             input.value = _data.code;

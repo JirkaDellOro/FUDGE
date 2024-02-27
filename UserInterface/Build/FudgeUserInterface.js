@@ -1682,7 +1682,7 @@ var FudgeUserInterface;
                 return;
             let branch = this.createBranch(children);
             item.setBranch(branch);
-            this.displaySelection(this.controller.selection);
+            // this.displaySelection(<T[]>this.controller.selection);
         }
         createBranch(_data) {
             let branch = new FudgeUserInterface.CustomTreeList(this.controller, []);
@@ -1917,6 +1917,7 @@ var FudgeUserInterface;
         }
         refreshContent() {
             this.content = this.controller.createContent(this.data);
+            this.content.disabled = true;
         }
         /**
          * Tries to expanding the {@link CustomTreeList} of children, by dispatching {@link EVENT.EXPAND}.
@@ -1927,7 +1928,9 @@ var FudgeUserInterface;
             // this.removeBranch();
             if (_expand)
                 this.dispatchEvent(new Event("expand" /* EVENT.EXPAND */, { bubbles: true }));
-            this.querySelector("input[type='checkbox']").checked = _expand;
+            this.checkbox.checked = _expand;
+            this.hasChildren = this.controller.hasChildren(this.data);
+            // (<HTMLInputElement>this.querySelector("input[type='checkbox']")).checked = _expand;
         }
         /**
          * Returns a list of all data referenced by the items succeeding this
@@ -1981,16 +1984,15 @@ var FudgeUserInterface;
         }
         hndFocus = (_event) => {
             _event.stopPropagation();
-            if (!(_event.target instanceof HTMLInputElement) || _event.target == this.checkbox)
+            if (_event.target == this.checkbox)
                 return;
-            _event.target.disabled = true;
+            if (_event.target != this)
+                this.content.disabled = true;
         };
         hndKey = (_event) => {
             _event.stopPropagation();
-            for (const iterator of this.content.elements) {
-                if (iterator instanceof HTMLInputElement && !iterator.disabled)
-                    return;
-            }
+            if (!this.content.disabled)
+                return;
             let content = this.querySelector("ul");
             switch (_event.code) {
                 // TODO: repair arrow key navigation
@@ -2047,19 +2049,22 @@ var FudgeUserInterface;
         startTypingInput(_inputElement) {
             if (!_inputElement)
                 _inputElement = this.content.elements.item(0);
-            if (_inputElement instanceof HTMLInputElement) {
-                _inputElement.disabled = false;
-                _inputElement.focus();
-            }
+            this.content.disabled = false;
+            _inputElement.focus();
+            // if (_inputElement instanceof HTMLInputElement) {
+            //   _inputElement.disabled = false;
+            //   _inputElement.focus();  
+            // } 
         }
         hndDblClick = (_event) => {
             _event.stopPropagation();
-            if (_event.target != this.checkbox)
+            if (_event.target != this.checkbox) {
                 this.startTypingInput(_event.target);
+            }
         };
         hndChange = (_event) => {
             let target = _event.target;
-            let item = target.form?.parentNode;
+            // let item: HTMLLIElement = <HTMLLIElement>target.form?.parentNode;
             _event.stopPropagation();
             if (target instanceof HTMLInputElement) {
                 switch (target.type) {
@@ -2067,8 +2072,9 @@ var FudgeUserInterface;
                         this.expand(target.checked);
                         break;
                     case "text":
-                        target.disabled = true;
-                        item.focus();
+                        // target.disabled = true;
+                        this.content.disabled = true;
+                        this.focus();
                         this.dispatchEvent(new CustomEvent("rename" /* EVENT.RENAME */, { bubbles: true, detail: { id: target.id, value: target.value } }));
                         break;
                     case "default":
