@@ -482,12 +482,16 @@ declare namespace FudgeUserInterface {
         };
         /** Used by the tree to indicate the drop position while dragging */
         dragDropDivider: HTMLHRElement;
+        /**
+         * Override if some objects should not be draggable
+         */
+        draggable(_object: T): boolean;
         /** Create an HTMLFormElement for the tree item representing the object */
         abstract createContent(_object: T): HTMLFieldSetElement;
         /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
         abstract getAttributes(_object: T): string;
         /** Process the proposed new name */
-        abstract rename(_object: T, _id: string, _new: string): boolean;
+        abstract rename(_object: T, _id: string, _new: string): Promise<boolean>;
         /** Return true if the object has children that must be shown when unfolding the tree item */
         abstract hasChildren(_object: T): boolean;
         /** Return the object's children to show when unfolding the tree item */
@@ -510,10 +514,6 @@ declare namespace FudgeUserInterface {
          * @param _focussed The object currently having focus
          */
         abstract copy(_originals: T[]): Promise<T[]>;
-        /**
-         * Override if some objects should not be draggable
-         */
-        draggable(_object: T): boolean;
     }
 }
 declare namespace FudgeUserInterface {

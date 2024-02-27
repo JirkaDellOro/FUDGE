@@ -15,7 +15,7 @@ namespace FudgeUserInterface {
    */  
   export class CustomTree<T> extends CustomTreeList<T> {
 
-    constructor(_controller: CustomTreeController<T>, _root: T) {
+    public constructor(_controller: CustomTreeController<T>, _root: T) {
       super(_controller, []);
       let root: CustomTreeItem<T> = new CustomTreeItem<T>(this.controller, _root);
       this.appendChild(root);
@@ -76,9 +76,9 @@ namespace FudgeUserInterface {
     } 
 
     // Callback / Eventhandler in Tree
-    private hndRename(_event: Event): void {
+    private async hndRename(_event: Event): Promise<void> {
       let item: CustomTreeItem<T> = <CustomTreeItem<T>>_event.target;
-      let renamed: boolean = this.controller.rename(item.data, (<CustomEvent>_event).detail.id, (<CustomEvent>_event).detail.value);
+      let renamed: boolean = await this.controller.rename(item.data, (<CustomEvent>_event).detail.id, (<CustomEvent>_event).detail.value);
       if (!renamed)
         item.refreshContent();
       item.refreshAttributes();

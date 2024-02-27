@@ -97,7 +97,7 @@ namespace Fudge {
       return attributes.join(" ");
     }
     
-    public rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): boolean {
+    public async rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): Promise<boolean> {
       let inputAsNumber: number = Number.parseFloat(_new);
 
       if (_id == ID.NAME && ƒ.ParticleData.isExpression(_data)) {
@@ -254,7 +254,7 @@ namespace Fudge {
       if (ƒ.ParticleData.isFunction(parent) || ƒ.ParticleData.isTransformation(parent))
         parent = parent.parameters;
 
-      return Object.entries(parent).find(entry => entry[1] == _data)?.shift();
+      return Object.entries(parent).find(_entry => _entry[1] == _data)?.shift();
     }
 
     private deleteData(_data: ƒ.ParticleData.Recursive): boolean {

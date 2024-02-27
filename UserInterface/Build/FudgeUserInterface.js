@@ -1692,9 +1692,9 @@ var FudgeUserInterface;
             return branch;
         }
         // Callback / Eventhandler in Tree
-        hndRename(_event) {
+        async hndRename(_event) {
             let item = _event.target;
-            let renamed = this.controller.rename(item.data, _event.detail.id, _event.detail.value);
+            let renamed = await this.controller.rename(item.data, _event.detail.id, _event.detail.value);
             if (!renamed)
                 item.refreshContent();
             item.refreshAttributes();

@@ -14,6 +14,13 @@ namespace FudgeUserInterface {
     /** Used by the tree to indicate the drop position while dragging */
     public dragDropDivider: HTMLHRElement = document.createElement("hr");
 
+    /**
+     * Override if some objects should not be draggable
+     */
+    public draggable(_object: T): boolean {
+      return true;
+    }
+
     /** Create an HTMLFormElement for the tree item representing the object */
     public abstract createContent(_object: T): HTMLFieldSetElement;
 
@@ -21,7 +28,7 @@ namespace FudgeUserInterface {
     public abstract getAttributes(_object: T): string;
 
     /** Process the proposed new name */
-    public abstract rename(_object: T, _id: string, _new: string): boolean;
+    public abstract rename(_object: T, _id: string, _new: string): Promise<boolean>;
 
     /** Return true if the object has children that must be shown when unfolding the tree item */
     public abstract hasChildren(_object: T): boolean;
@@ -50,11 +57,6 @@ namespace FudgeUserInterface {
      */
     public abstract /* async */ copy(_originals: T[]): Promise<T[]>;
 
-    /**
-     * Override if some objects should not be draggable
-     */
-    public draggable(_object: T): boolean {
-      return true;
-    }
+
   }
 }
