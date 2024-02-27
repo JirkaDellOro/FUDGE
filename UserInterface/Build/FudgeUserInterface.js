@@ -1751,10 +1751,10 @@ var FudgeUserInterface;
             _target = null;
             _at = null;
         }
-        hndDelete = (_event) => {
+        hndDelete = async (_event) => {
             let target = _event.target;
             _event.stopPropagation();
-            let remove = this.controller.delete([target.data]);
+            let remove = await this.controller.delete([target.data]);
             this.delete(remove);
         };
         hndEscape = (_event) => {
@@ -1773,7 +1773,7 @@ var FudgeUserInterface;
                     break;
                 case "cut" /* EVENT.CUT */:
                     this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
-                    let cut = this.controller.delete(this.controller.selection);
+                    let cut = await this.controller.delete(this.controller.selection);
                     this.delete(cut);
                     break;
             }

@@ -148,10 +148,10 @@ namespace FudgeUserInterface {
       _at = null;
     }
 
-    private hndDelete = (_event: Event): void => {
+    private hndDelete = async (_event: Event): Promise<void> => {
       let target: CustomTreeItem<T> = <CustomTreeItem<T>>_event.target;
       _event.stopPropagation();
-      let remove: T[] = this.controller.delete([target.data]);
+      let remove: T[] = await this.controller.delete([target.data]);
 
       this.delete(remove);
     };
@@ -173,7 +173,7 @@ namespace FudgeUserInterface {
           break;
         case EVENT.CUT:
           this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
-          let cut: T[] = this.controller.delete(this.controller.selection);
+          let cut: T[] = await this.controller.delete(this.controller.selection);
           this.delete(cut);
           break;
       }

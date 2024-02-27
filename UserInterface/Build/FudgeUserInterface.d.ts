@@ -504,7 +504,7 @@ declare namespace FudgeUserInterface {
          * return a list of those objects in order for the according {@link CustomTreeItem} to be deleted also
          * @param _focussed The object currently having focus
          */
-        abstract delete(_focussed: T[]): T[];
+        abstract delete(_focussed: T[]): Promise<T[]>;
         /**
          * Return a list of copies of the objects given for copy & paste
          * @param _focussed The object currently having focus

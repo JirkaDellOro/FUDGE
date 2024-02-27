@@ -171,7 +171,7 @@ namespace Fudge {
       return children;
     }
 
-    public delete(_focused: (ƒ.ParticleData.Recursive)[]): (ƒ.ParticleData.Recursive)[] {
+    public async delete(_focused: (ƒ.ParticleData.Recursive)[]): Promise<ƒ.ParticleData.Recursive[]> {
       // delete selection independend of focussed item
       let deleted: (ƒ.ParticleData.Recursive)[] = [];
       let expend: (ƒ.ParticleData.Recursive)[] = this.selection.length > 0 ? this.selection : _focused;
