@@ -101,7 +101,9 @@ namespace FudgeCore {
       if (delta * delta < step.magnitudeSquared) { // won't reach next waypoint yet. Using squares because that's faster to compute than sqrt
         step.normalize(delta);
         this.node.mtxLocal.translate(step);
-        scale.normalize(delta);
+        if(scale.magnitudeSquared > 0){
+          scale.normalize(delta);
+        }
         this.node.mtxLocal.scaling = Vector3.SUM(scale, this.node.mtxLocal.scaling);
         // this.node.mtxLocal.scale(Vector3.SUM(scale, this.node.mtxLocal.scaling));
         // TODO implement movement through physics
