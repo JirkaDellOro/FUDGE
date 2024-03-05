@@ -70,10 +70,11 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.#idSource = _serialization.idSource ?? _serialization.idResource;
       if (!_serialization.deserializeFromSource) {
-        await super.deserialize(_serialization); // instance is deserialized from individual data
-        let graph: Graph = await <Graph><unknown>Project.getResource(this.#idSource);
+        let graph: Graph = <Graph><unknown>await Project.getResource(this.#idSource);
         if (graph instanceof GraphGLTF)
           await GLTFLoader.loadResource(this, _serialization.url);
+
+        await super.deserialize(_serialization); // instance is deserialized from individual data
 
         this.#deserializeFromSource = false;
       }

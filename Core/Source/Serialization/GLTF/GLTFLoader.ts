@@ -29,14 +29,18 @@ namespace FudgeCore {
     }
 
     private static get defaultMaterial(): Material {
-      if (!this.#defaultMaterial)
+      if (!this.#defaultMaterial) {
         this.#defaultMaterial = new Material("GLTFDefaultMaterial", ShaderPhong, new CoatRemissive(Color.CSS("white"), 1, 0.5));
+        Project.deregister(this.#defaultMaterial);
+      }
       return this.#defaultMaterial;
     }
 
     private static get defaultSkinMaterial(): Material {
-      if (!this.#defaultSkinMaterial)
+      if (!this.#defaultSkinMaterial) {
         this.#defaultSkinMaterial = new Material("GLTFDefaultSkinMaterial", ShaderPhongSkin, new CoatRemissive(Color.CSS("white"), 1, 0.5));
+        Project.deregister(this.#defaultSkinMaterial);
+      }
       return this.#defaultSkinMaterial;
     }
 
@@ -239,20 +243,20 @@ namespace FudgeCore {
       let resources: Serializable[] = [];
       switch (_class.name) {
         case Graph.name:
-          for (let iScene: number = 0; iScene < this.#gltf.scenes.length; iScene++)
+          for (let iScene: number = 0; iScene < this.#gltf.scenes?.length; iScene++)
             resources.push(await this.getGraph(iScene, new GraphGLTF()));
           break;
         case Mesh.name:
-          for (let iMesh: number = 0; iMesh < this.#gltf.meshes.length; iMesh++)
+          for (let iMesh: number = 0; iMesh < this.#gltf.meshes?.length; iMesh++)
             for (let iPrimitive: number = 0; iPrimitive < this.#gltf.meshes[iMesh].primitives.length; iPrimitive++)
               resources.push(await this.getMesh(iMesh, iPrimitive, new MeshGLTF()));
           break;
         case Material.name:
-          for (let iMaterial: number = 0; iMaterial < this.#gltf.materials.length; iMaterial++)
+          for (let iMaterial: number = 0; iMaterial < this.#gltf.materials?.length; iMaterial++)
             resources.push(await this.getMaterial(iMaterial, new MaterialGLTF("Hi :)")));
           break;
         case Animation.name:
-          for (let iAnimation: number = 0; iAnimation < this.#gltf.animations.length; iAnimation++)
+          for (let iAnimation: number = 0; iAnimation < this.#gltf.animations?.length; iAnimation++)
             resources.push(await this.getAnimation(iAnimation, new AnimationGLTF()));
           break;
       }
@@ -533,6 +537,7 @@ namespace FudgeCore {
       animation.animationStructure = animationStructure;
       animation.clearCache();
       animation.name = gltfAnimation.name;
+      animation.calculateTotalTime();
       if (animation instanceof AnimationGLTF)
         animation.url = this.#url;
       if (!_animation) {

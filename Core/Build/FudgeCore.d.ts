@@ -1786,7 +1786,7 @@ declare namespace FudgeCore {
     const AnimationGLTF_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
         status: RESOURCE_STATUS;
-        serialize(): Serialization;
+        serialize(_super?: boolean): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
         name: string;
@@ -1799,6 +1799,7 @@ declare namespace FudgeCore {
      */
     export class AnimationGLTF extends AnimationGLTF_base {
         load(_url?: RequestInfo, _name?: string): Promise<AnimationGLTF>;
+        serialize(): Serialization;
     }
     export {};
 }
@@ -3252,7 +3253,7 @@ declare namespace FudgeCore {
     const GraphGLTF_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
         status: RESOURCE_STATUS;
-        serialize(): Serialization;
+        serialize(_super?: boolean): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
         name: string;
@@ -3522,7 +3523,7 @@ declare namespace FudgeCore {
     const MaterialGLTF_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
         status: RESOURCE_STATUS;
-        serialize(): Serialization;
+        serialize(_super?: boolean): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
         name: string;
@@ -4757,7 +4758,7 @@ declare namespace FudgeCore {
     const MeshFBX_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
         status: RESOURCE_STATUS;
-        serialize(): Serialization;
+        serialize(_super?: boolean): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
         name: string;
@@ -4796,7 +4797,7 @@ declare namespace FudgeCore {
     const MeshGLTF_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
         status: RESOURCE_STATUS;
-        serialize(): Serialization;
+        serialize(_super?: boolean): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
         name: string;
@@ -4819,7 +4820,7 @@ declare namespace FudgeCore {
     const MeshOBJ_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
         status: RESOURCE_STATUS;
-        serialize(): Serialization;
+        serialize(_super?: boolean): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
         name: string;
