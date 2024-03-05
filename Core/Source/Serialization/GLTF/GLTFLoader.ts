@@ -56,15 +56,15 @@ namespace FudgeCore {
       let loaded: T;
 
       if (_resource instanceof GraphInstance)
-        loaded = <T>await loader.getGraph(_resource.get().name, _resource);
+        loaded = await loader.getGraph(_resource.get().name, _resource);
       else if (_resource instanceof GraphGLTF)
-        loaded = <T>await loader.getGraph(_resource.name, _resource);
+        loaded = await loader.getGraph(_resource.name, _resource);
       else if (_resource instanceof MeshGLTF)
-        loaded = <T>await loader.getMesh(_resource.name, _resource.iPrimitive, _resource);
+        loaded = await loader.getMesh(_resource.name, _resource.iPrimitive, _resource);
       else if (_resource instanceof MaterialGLTF)
-        loaded = <T>await loader.getMaterial(_resource.name, _resource);
+        loaded = await loader.getMaterial(_resource.name, _resource);
       else if (_resource instanceof AnimationGLTF)
-        loaded = <T>await loader.getAnimation(_resource.name, _resource);
+        loaded = await loader.getAnimation(_resource.name, _resource);
 
       if (!loaded) {
         Debug.error(`${_resource.constructor.name} | ${_resource instanceof GraphInstance ? _resource.idSource : _resource.idResource}: Failed to load resource.`);
@@ -233,8 +233,8 @@ namespace FudgeCore {
     }
 
     /**
-        * Returns all resources of the given type.
-        */
+     * Returns new instances of all resources of the given type.
+     */
     public async loadResources<T extends Serializable>(_class: new () => T): Promise<T[]> {
       let resources: Serializable[] = [];
       switch (_class.name) {
@@ -263,16 +263,16 @@ namespace FudgeCore {
     /**
      * Returns a {@link Graph} for the given scene name or the default scene if no name is given.
      */
-    public async getGraph(_name?: string): Promise<Node>;
+    public async getGraph(_name?: string): Promise<Graph>;
     /**
      * Returns a {@link Graph} for the given scene index or the default scene if no index is given.
      */
-    public async getGraph(_iScene?: number): Promise<Node>;
+    public async getGraph(_iScene?: number): Promise<Graph>;
     /**
      * Loads a scene from the glTF file into the given {@link Graph}.
      * @internal
      */
-    public async getGraph(_iScene: number | string, _graph: Node): Promise<Node>;
+    public async getGraph<T extends Node>(_iScene: number | string, _graph: T): Promise<T>;
     public async getGraph(_iScene: number | string = this.#gltf.scene, _graph?: Node): Promise<Node> {
       _iScene = this.getIndex(_iScene, this.#gltf.scenes);
 
@@ -297,11 +297,11 @@ namespace FudgeCore {
       for (const iNode of gltfScene.nodes)
         graph.addChild(await this.getNodeByIndex(iNode));
 
-      if (this.#gltf.animations?.length > 0 && !graph.getComponent(ComponentAnimator)) {
-        let animation: Animation = await this.getAnimation(0);
-        Project.register(animation);
-        graph.addComponent(new ComponentAnimator(animation));
-      }
+      // if (this.#gltf.animations?.length > 0 && !graph.getComponent(ComponentAnimator)) {
+      //   let animation: Animation = await this.getAnimation(0);
+      //   Project.register(animation);
+      //   graph.addComponent(new ComponentAnimator(animation));
+      // }
 
       // TODO: load only skeletons which belong to the scene???
       // if (this.gltf.skins?.length > 0)
@@ -470,7 +470,7 @@ namespace FudgeCore {
      * Loads an animation from the glTF file into the given {@link Animation}.
      * @internal
      */
-    public async getAnimation(_iAnimation: number | string, _animation: Animation): Promise<Animation>;
+    public async getAnimation<T extends Animation>(_iAnimation: number | string, _animation: T): Promise<T>;
     public async getAnimation(_iAnimation: number | string, _animation?: Animation): Promise<Animation> {
       _iAnimation = this.getIndex(_iAnimation, this.#gltf.animations);
 
@@ -555,7 +555,7 @@ namespace FudgeCore {
      * Loads a mesh from the glTF file into the given {@link Mesh}
      * @internal
     */
-    public async getMesh(_iMesh: number | string, _iPrimitive: number, _mesh: Mesh): Promise<Mesh>;
+    public async getMesh<T extends Mesh>(_iMesh: number | string, _iPrimitive: number, _mesh: T): Promise<T>;
     public async getMesh(_iMesh: number | string, _iPrimitive: number = 0, _mesh?: Mesh): Promise<Mesh> {
       _iMesh = this.getIndex(_iMesh, this.#gltf.meshes);
 
@@ -716,7 +716,7 @@ namespace FudgeCore {
      * Loads a material from the glTF file into the given {@link Material}.
      * @internal
      */
-    public async getMaterial(_iMaterial: number | string, _material?: Material, _skin?: boolean, _flat?: boolean): Promise<Material>;
+    public async getMaterial<T extends Material>(_iMaterial: number | string, _material?: T, _skin?: boolean, _flat?: boolean): Promise<T>;
     public async getMaterial(_iMaterial: number | string, _material?: Material, _skin: boolean = false, _flat: boolean = false): Promise<Material> {
       _iMaterial = this.getIndex(_iMaterial, this.#gltf.materials);
 

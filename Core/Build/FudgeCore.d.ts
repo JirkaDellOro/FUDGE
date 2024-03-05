@@ -7912,17 +7912,17 @@ declare namespace FudgeCore {
          */
         get name(): string;
         /**
-            * Returns all resources of the given type.
-            */
+         * Returns new instances of all resources of the given type.
+         */
         loadResources<T extends Serializable>(_class: new () => T): Promise<T[]>;
         /**
          * Returns a {@link Graph} for the given scene name or the default scene if no name is given.
          */
-        getGraph(_name?: string): Promise<Node>;
+        getGraph(_name?: string): Promise<Graph>;
         /**
          * Returns a {@link Graph} for the given scene index or the default scene if no index is given.
          */
-        getGraph(_iScene?: number): Promise<Node>;
+        getGraph(_iScene?: number): Promise<Graph>;
         /**
          * Returns the first {@link Node} with the given name.
          */
