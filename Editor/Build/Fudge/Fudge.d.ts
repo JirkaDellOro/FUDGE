@@ -777,6 +777,7 @@ declare namespace Fudge {
         getDragDropSources(): ƒ.SerializableResource[];
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void>;
+        protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         private hndKeyboardEvent;

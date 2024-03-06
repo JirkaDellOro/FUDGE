@@ -63,18 +63,21 @@ namespace Fudge {
 
       item = new remote.MenuItem({
         label: "Create Mesh",
+        id: String(CONTEXTMENU.CREATE_MESH),
         submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.CREATE_MESH, ƒ.Mesh, _callback)
       });
       menu.append(item);
 
       item = new remote.MenuItem({
         label: "Create Material",
+        id: String(CONTEXTMENU.CREATE_MATERIAL),
         submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader, _callback)
       });
       menu.append(item);
 
       item = new remote.MenuItem({
         label: "Create Animation",
+        id: String(CONTEXTMENU.CREATE_ANIMATION),
         submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.CREATE_ANIMATION, ƒ.Animation, _callback)
       });
       menu.append(item);
@@ -100,7 +103,7 @@ namespace Fudge {
       let focus: ResourceNode = this.tree.getFocussed();
 
       if (choice == CONTEXTMENU.DELETE_RESOURCE) {
-        if (((await this.controller.delete([this.tree.getFocussed()])).length > 0))
+        if (((await this.controller.delete([focus])).length > 0))
           this.dispatch(EVENT_EDITOR.DELETE, { bubbles: true });
         return;
       }
@@ -138,12 +141,37 @@ namespace Fudge {
 
       if (resource) {
         this.dispatchToParent(EVENT_EDITOR.CREATE, { bubbles: true });
-        // this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
         this.controller.addChildren([resource], focus);
         this.tree.findVisible(focus).expand(true);
         this.tree.findVisible(resource).focus();
       }
     }
+
+    protected openContextMenu = (_event: Event): void => {
+      let item: HTMLElement = <HTMLElement>_event.target;
+      while (item != this.dom && !(item instanceof ƒui.CustomTreeItem))
+        item = item.parentElement;
+
+      this.contextMenu.items.forEach(_item => _item.visible = true);
+
+      if (item == this.dom) {
+        item = this.tree.findVisible(this.resources);
+        item.focus();
+        this.contextMenu.getMenuItemById(String(CONTEXTMENU.DELETE_RESOURCE)).visible = false;
+      }
+
+      if (!(item instanceof ƒui.CustomTreeItem))
+        return;
+
+      if (!(item.data instanceof ResourceFolder)) {
+        const createOptions: CONTEXTMENU[] = [CONTEXTMENU.CREATE_FOLDER, CONTEXTMENU.CREATE_GRAPH, CONTEXTMENU.CREATE_MESH, CONTEXTMENU.CREATE_MATERIAL, CONTEXTMENU.CREATE_ANIMATION, CONTEXTMENU.CREATE_PARTICLE_EFFECT];
+        createOptions.forEach(_id => {
+          this.contextMenu.getMenuItemById(String(_id)).visible = false;
+        });
+      }
+
+      this.contextMenu.popup();
+    };
     //#endregion
 
     protected hndDragOver(_event: DragEvent, _viewSource: View): void {
@@ -202,7 +230,7 @@ namespace Fudge {
 
             for (let type in settings) if (settings[type])
               resources.push(...await loader.loadResources<ƒ.SerializableResource>(ƒ[type]));
-            
+
             break;
         }
       }
@@ -212,7 +240,7 @@ namespace Fudge {
       // ideally this view should listen during capture phase to avoid the double dispatch to the tree.
       this.tree.dispatchEvent(new Event(ƒui.EVENT.DROP, { bubbles: false }));
 
-      this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
+      this.dispatchToParent(EVENT_EDITOR.CREATE, { bubbles: true });
     }
 
     private hndKeyboardEvent = (_event: KeyboardEvent): void => {
@@ -234,20 +262,24 @@ namespace Fudge {
       this.dom.appendChild(this.tree);
       this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
       this.tree.title = "● Select to edit in \"Properties\"\n● Drag to \"Properties\" or \"Components\" to use if applicable.";
-      this.tree.findVisible(this.resources).expand(true);
       this.hndCreate();
     };
 
     private hndCreate = (): void => {
+      // add new resources to root folder
       for (let idResource in ƒ.Project.resources) {
         let resource: ƒ.SerializableResource = ƒ.Project.resources[idResource];
         if (!this.resources.contains(resource))
           this.controller.addChildren([resource], this.resources);
       }
       this.hndUpdate();
+      let rootItem: ƒui.CustomTreeItem<ResourceNode> = this.tree.findVisible(this.resources);
+      if (!rootItem.expanded)
+        rootItem.expand(true);
     };
 
     private hndDelete = (): void => {
+      // remove resources that are no longer registered in the project
       for (const descendant of this.resources)
         if (!(descendant instanceof ResourceFolder) && !ƒ.Project.resources[descendant.idResource])
           this.controller.remove(descendant);

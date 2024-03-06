@@ -2274,19 +2274,20 @@ var Fudge;
         }
         async delete(_focussed) {
             // TODO: unify with delete in ControllerTableResource
-            console.log(_focussed, this.selection);
-            let expendables = this.selection.concat();
+            let iRoot = _focussed.indexOf(Fudge.project.resources);
+            if (iRoot > -1)
+                _focussed.splice(iRoot, 1);
             let serializations = ƒ.Project.serialize();
             let serializationStrings = new Map();
             let usages = {};
             for (let idResource in serializations)
                 serializationStrings.set(ƒ.Project.resources[idResource], JSON.stringify(serializations[idResource]));
-            for (let expendable of expendables) {
+            for (let expendable of _focussed) {
                 if (expendable instanceof ResourceFolder) {
                     let usage = [];
                     for (const child of expendable.children)
                         usage.push(child.name);
-                    usages[expendables.indexOf(expendable) + " " + expendable.name] = usage;
+                    usages[_focussed.indexOf(expendable) + " " + expendable.name] = usage;
                 }
                 else {
                     usages[expendable.idResource] = [];
@@ -2296,7 +2297,7 @@ var Fudge;
                                 usages[expendable.idResource].push(resource.name + " " + resource.type);
                 }
             }
-            if (await openDialog()) {
+            if (_focussed.length > 0 && await openDialog()) {
                 let deleted = [];
                 for (const selected of this.selection) {
                     let key = selected instanceof ResourceFolder ? this.selection.indexOf(selected) + " " + selected.name : selected.idResource;
@@ -5027,16 +5028,19 @@ var Fudge;
             menu.append(item);
             item = new Fudge.remote.MenuItem({
                 label: "Create Mesh",
+                id: String(Fudge.CONTEXTMENU.CREATE_MESH),
                 submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MESH, ƒ.Mesh, _callback)
             });
             menu.append(item);
             item = new Fudge.remote.MenuItem({
                 label: "Create Material",
+                id: String(Fudge.CONTEXTMENU.CREATE_MATERIAL),
                 submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader, _callback)
             });
             menu.append(item);
             item = new Fudge.remote.MenuItem({
                 label: "Create Animation",
+                id: String(Fudge.CONTEXTMENU.CREATE_ANIMATION),
                 submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_ANIMATION, ƒ.Animation, _callback)
             });
             menu.append(item);
@@ -5056,7 +5060,7 @@ var Fudge;
             }
             let focus = this.tree.getFocussed();
             if (choice == Fudge.CONTEXTMENU.DELETE_RESOURCE) {
-                if (((await this.controller.delete([this.tree.getFocussed()])).length > 0))
+                if (((await this.controller.delete([focus])).length > 0))
                     this.dispatch(Fudge.EVENT_EDITOR.DELETE, { bubbles: true });
                 return;
             }
@@ -5089,12 +5093,31 @@ var Fudge;
             }
             if (resource) {
                 this.dispatchToParent(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
-                // this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
                 this.controller.addChildren([resource], focus);
                 this.tree.findVisible(focus).expand(true);
                 this.tree.findVisible(resource).focus();
             }
         }
+        openContextMenu = (_event) => {
+            let item = _event.target;
+            while (item != this.dom && !(item instanceof ƒui.CustomTreeItem))
+                item = item.parentElement;
+            this.contextMenu.items.forEach(_item => _item.visible = true);
+            if (item == this.dom) {
+                item = this.tree.findVisible(this.resources);
+                item.focus();
+                this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.DELETE_RESOURCE)).visible = false;
+            }
+            if (!(item instanceof ƒui.CustomTreeItem))
+                return;
+            if (!(item.data instanceof Fudge.ResourceFolder)) {
+                const createOptions = [Fudge.CONTEXTMENU.CREATE_FOLDER, Fudge.CONTEXTMENU.CREATE_GRAPH, Fudge.CONTEXTMENU.CREATE_MESH, Fudge.CONTEXTMENU.CREATE_MATERIAL, Fudge.CONTEXTMENU.CREATE_ANIMATION, Fudge.CONTEXTMENU.CREATE_PARTICLE_EFFECT];
+                createOptions.forEach(_id => {
+                    this.contextMenu.getMenuItemById(String(_id)).visible = false;
+                });
+            }
+            this.contextMenu.popup();
+        };
         //#endregion
         hndDragOver(_event, _viewSource) {
             _event.dataTransfer.dropEffect = "none";
@@ -5152,7 +5175,7 @@ var Fudge;
             // TODO: this is awkward as the tree gets the drop event first, then the view gets it and then we must dispatch it to the tree again.
             // ideally this view should listen during capture phase to avoid the double dispatch to the tree.
             this.tree.dispatchEvent(new Event("drop" /* ƒui.EVENT.DROP */, { bubbles: false }));
-            this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
+            this.dispatchToParent(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
         }
         hndKeyboardEvent = (_event) => {
             if (_event.code != ƒ.KEYBOARD_CODE.F2)
@@ -5170,18 +5193,22 @@ var Fudge;
             this.dom.appendChild(this.tree);
             this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
             this.tree.title = "● Select to edit in \"Properties\"\n● Drag to \"Properties\" or \"Components\" to use if applicable.";
-            this.tree.findVisible(this.resources).expand(true);
             this.hndCreate();
         };
         hndCreate = () => {
+            // add new resources to root folder
             for (let idResource in ƒ.Project.resources) {
                 let resource = ƒ.Project.resources[idResource];
                 if (!this.resources.contains(resource))
                     this.controller.addChildren([resource], this.resources);
             }
             this.hndUpdate();
+            let rootItem = this.tree.findVisible(this.resources);
+            if (!rootItem.expanded)
+                rootItem.expand(true);
         };
         hndDelete = () => {
+            // remove resources that are no longer registered in the project
             for (const descendant of this.resources)
                 if (!(descendant instanceof Fudge.ResourceFolder) && !ƒ.Project.resources[descendant.idResource])
                     this.controller.remove(descendant);

@@ -133,21 +133,23 @@ namespace Fudge {
 
     public async delete(_focussed: ResourceNode[]): Promise<ResourceNode[]> {
       // TODO: unify with delete in ControllerTableResource
-      console.log(_focussed, this.selection);
-      let expendables: ResourceNode[] = this.selection.concat();
+      let iRoot: number = _focussed.indexOf(project.resources);
+      if (iRoot > -1)
+        _focussed.splice(iRoot, 1);
+
       let serializations: ƒ.SerializationOfResources = ƒ.Project.serialize();
       let serializationStrings: Map<ƒ.SerializableResource, string> = new Map();
       let usages: ƒ.Mutator = {};
       for (let idResource in serializations)
         serializationStrings.set(ƒ.Project.resources[idResource], JSON.stringify(serializations[idResource]));
 
-      for (let expendable of expendables) {
+      for (let expendable of _focussed) {
         if (expendable instanceof ResourceFolder) {
           let usage: string[] = [];
           for (const child of expendable.children)
             usage.push(child.name);
 
-          usages[expendables.indexOf(expendable) + " " + expendable.name] = usage;
+          usages[_focussed.indexOf(expendable) + " " + expendable.name] = usage;
         } else {
           usages[expendable.idResource] = [];
           for (let resource of serializationStrings.keys())
@@ -157,7 +159,7 @@ namespace Fudge {
         }
       }
 
-      if (await openDialog()) {
+      if (_focussed.length > 0 && await openDialog()) {
         let deleted: ResourceNode[] = [];
 
         for (const selected of this.selection) {
