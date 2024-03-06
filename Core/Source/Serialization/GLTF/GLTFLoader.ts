@@ -239,8 +239,8 @@ namespace FudgeCore {
     /**
      * Returns new instances of all resources of the given type.
      */
-    public async loadResources<T extends Serializable>(_class: new () => T): Promise<T[]> {
-      let resources: Serializable[] = [];
+    public async loadResources<T extends SerializableResource>(_class: new () => T): Promise<T[]> {
+      let resources: SerializableResource[] = [];
       switch (_class.name) {
         case Graph.name:
           for (let iScene: number = 0; iScene < this.#gltf.scenes?.length; iScene++)
@@ -259,6 +259,11 @@ namespace FudgeCore {
           for (let iAnimation: number = 0; iAnimation < this.#gltf.animations?.length; iAnimation++)
             resources.push(await this.getAnimation(iAnimation, new AnimationGLTF()));
           break;
+      }
+
+      for (const resource of resources) {
+        if (!Project.resources[resource.idResource])
+          Project.register(resource);
       }
 
       return <T[]>resources;

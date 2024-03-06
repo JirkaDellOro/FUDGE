@@ -7915,7 +7915,7 @@ declare namespace FudgeCore {
         /**
          * Returns new instances of all resources of the given type.
          */
-        loadResources<T extends Serializable>(_class: new () => T): Promise<T[]>;
+        loadResources<T extends SerializableResource>(_class: new () => T): Promise<T[]>;
         /**
          * Returns a {@link Graph} for the given scene name or the default scene if no name is given.
          */
