@@ -132,7 +132,7 @@ namespace Fudge {
     }
 
     public async delete(_focussed: ResourceNode[]): Promise<ResourceNode[]> {
-      // TODO: unify with delete in ControllerTableResource
+      // TODO: add delete selection isntead of _focussed? Why doesn't the Tree class handle this?
       let iRoot: number = _focussed.indexOf(project.resources);
       if (iRoot > -1)
         _focussed.splice(iRoot, 1);
@@ -162,7 +162,7 @@ namespace Fudge {
       if (_focussed.length > 0 && await openDialog()) {
         let deleted: ResourceNode[] = [];
 
-        for (const selected of this.selection) {
+        for (const selected of _focussed) {
           let key: string = selected instanceof ResourceFolder ? this.selection.indexOf(selected) + " " + selected.name : selected.idResource;
           if (usages[key].length == 0)  // delete only unused
             deleted.push(selected);

@@ -2,11 +2,22 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
+  export abstract class ViewInternal extends View {
+    public static readonly gltfImportSettings: Record<string, boolean> = { // TODO: save these settings?
+      [ƒ.Graph.name]: true,
+      [ƒ.Animation.name]: true,
+      [ƒ.Material.name]: false,
+      [ƒ.Mesh.name]: false
+    };
+
+    // TODO: either remove ViewInternalTable or unify common functionality with ViewInternalFolder into ViewInternal...
+  }
+
   /**
-   * List the internal resources
+   * Displays the internal resources as a folder tree.
    * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jonas Plotzky, HFU, 2024 
    */
-  export class ViewInternalFolder extends View {
+  export class ViewInternalFolder extends ViewInternal {
     private tree: ƒui.CustomTree<ResourceNode>;
 
     public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
@@ -18,7 +29,6 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndDelete);
 
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
-      // this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent); // ???
       this.dom.addEventListener(ƒui.EVENT.REMOVE_CHILD, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
@@ -219,18 +229,12 @@ namespace Fudge {
             resources.push(await new ƒ.MeshOBJ().load(source.pathRelative));
             break;
           case MIME.GLTF:
-            let settings: {} = { // TODO: save these settings?
-              [ƒ.Graph.name]: true,
-              [ƒ.Animation.name]: true,
-              [ƒ.Material.name]: false,
-              [ƒ.Mesh.name]: false
-            };
             let loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD(source.pathRelative);
-            let load: boolean = await ƒui.Dialog.prompt(settings, false, `Select what to import from '${loader.name}'`, "Adjust settings and press OK", "OK", "Cancel");
+            let load: boolean = await ƒui.Dialog.prompt(ViewInternal.gltfImportSettings, false, `Select which resources to import from '${loader.name}'`, "Adjust settings and press OK", "OK", "Cancel");
             if (!load)
               break;
 
-            for (let type in settings) if (settings[type])
+            for (let type in ViewInternal.gltfImportSettings) if (ViewInternal.gltfImportSettings[type])
               resources.push(...await loader.loadResources<ƒ.SerializableResource>(ƒ[type]));
 
             break;

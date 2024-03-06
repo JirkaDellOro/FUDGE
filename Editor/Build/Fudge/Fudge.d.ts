@@ -72,7 +72,7 @@ declare namespace Fudge {
         RENDER = "ViewRender",
         COMPONENTS = "ViewComponents",
         CAMERA = "ViewCamera",
-        INTERNAL = "ViewInternal",
+        INTERNAL_TABLE = "ViewInternalTable",
         INTERNAL_FOLDER = "ViewInternalFolder",
         EXTERNAL = "ViewExternal",
         PROPERTIES = "ViewProperties",
@@ -300,22 +300,30 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    let typesOfResources: ƒ.General[];
+    abstract class ViewInternal extends View {
+        static readonly gltfImportSettings: Record<string, boolean>;
+    }
     /**
-     * List the internal resources
-     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     * Displays the internal resources as a folder tree.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jonas Plotzky, HFU, 2024
      */
-    class ViewInternal extends View {
-        private table;
+    class ViewInternalFolder extends ViewInternal {
+        private tree;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
-        listResources(): void;
+        get controller(): ControllerTreeResource;
+        get resources(): ResourceFolder;
         getSelection(): ƒ.SerializableResource[];
         getDragDropSources(): ƒ.SerializableResource[];
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void>;
+        protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         private hndKeyboardEvent;
+        private hndOpen;
+        private hndCreate;
+        private hndDelete;
+        private hndUpdate;
         private hndEvent;
     }
 }
@@ -764,27 +772,22 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    let typesOfResources: ƒ.General[];
     /**
      * List the internal resources
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jonas Plotzky, HFU, 2024
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    class ViewInternalFolder extends View {
-        private tree;
+    class ViewInternalTable extends ViewInternal {
+        private table;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
-        get controller(): ControllerTreeResource;
-        get resources(): ResourceFolder;
+        listResources(): void;
         getSelection(): ƒ.SerializableResource[];
         getDragDropSources(): ƒ.SerializableResource[];
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void>;
-        protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         private hndKeyboardEvent;
-        private hndOpen;
-        private hndCreate;
-        private hndDelete;
-        private hndUpdate;
         private hndEvent;
     }
 }

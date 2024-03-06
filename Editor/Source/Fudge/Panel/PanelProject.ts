@@ -11,7 +11,7 @@ namespace Fudge {
     public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
-      this.goldenLayout.registerComponentConstructor(VIEW.INTERNAL, ViewInternal);
+      this.goldenLayout.registerComponentConstructor(VIEW.INTERNAL_TABLE, ViewInternalTable);
       this.goldenLayout.registerComponentConstructor(VIEW.INTERNAL_FOLDER, ViewInternalFolder);
       this.goldenLayout.registerComponentConstructor(VIEW.EXTERNAL, ViewExternal);
       this.goldenLayout.registerComponentConstructor(VIEW.PROPERTIES, ViewProperties);
@@ -57,7 +57,7 @@ namespace Fudge {
               title: "Internal"
             }, {
               type: "component",
-              componentType: VIEW.INTERNAL,
+              componentType: VIEW.INTERNAL_TABLE,
               componentState: _state,
               title: "Table"
             }]

@@ -10,7 +10,7 @@ namespace Fudge {
    * List the internal resources
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
    */
-  export class ViewInternal extends View {
+  export class ViewInternalTable extends ViewInternal {
     private table: ƒui.Table<ƒ.SerializableResource>;
 
     public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
@@ -209,18 +209,12 @@ namespace Fudge {
               break;
             case
               MIME.GLTF:
-              let settings: {} = {
-                [ƒ.Graph.name]: true,
-                [ƒ.Mesh.name]: false,
-                [ƒ.Material.name]: false,
-                [ƒ.Animation.name]: false
-              };
               let loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD(source.pathRelative);
-              let load: boolean = await ƒui.Dialog.prompt(settings, false, `Select what to import from '${loader.name}'`, "Adjust settings and press OK", "OK", "Cancel");
+              let load: boolean = await ƒui.Dialog.prompt(ViewInternal.gltfImportSettings, false, `Select what to import from '${loader.name}'`, "Adjust settings and press OK", "OK", "Cancel");
               if (!load)
                 break;
 
-              for (let type in settings) if (settings[type]) {
+              for (let type in ViewInternal.gltfImportSettings) if (ViewInternal.gltfImportSettings[type]) {
                 let resources: ƒ.SerializableResource[] = await loader.loadResources(ƒ[type]);
                 for (let resource of resources) {
                   if (!ƒ.Project.resources[resource.idResource])

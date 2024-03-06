@@ -62,7 +62,7 @@ var Fudge;
         VIEW["RENDER"] = "ViewRender";
         VIEW["COMPONENTS"] = "ViewComponents";
         VIEW["CAMERA"] = "ViewCamera";
-        VIEW["INTERNAL"] = "ViewInternal";
+        VIEW["INTERNAL_TABLE"] = "ViewInternalTable";
         VIEW["INTERNAL_FOLDER"] = "ViewInternalFolder";
         VIEW["EXTERNAL"] = "ViewExternal";
         VIEW["PROPERTIES"] = "ViewProperties";

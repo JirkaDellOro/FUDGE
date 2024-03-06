@@ -78,7 +78,7 @@ namespace Fudge {
       if (_event.target == this.dom)
         return;
 
-      if (!(_viewSource instanceof ViewInternal || _viewSource instanceof ViewInternalFolder))
+      if (!(_viewSource instanceof ViewInternal))
         return;
 
       let source: Object = _viewSource.getDragDropSources()[0];
@@ -186,7 +186,7 @@ namespace Fudge {
           }
           break;
         case EVENT_EDITOR.UPDATE:
-          if (_event.detail.view instanceof ViewInternal) {
+          if (_event.detail.view instanceof ViewInternalTable) {
             if (_event.detail.data == this.graph) {
               console.log("Update Graph");
               let item: ƒUi.TreeItem<ƒ.Node> = this.tree.findItem(this.graph);

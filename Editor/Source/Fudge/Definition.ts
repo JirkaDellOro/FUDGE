@@ -62,7 +62,7 @@ namespace Fudge {
     RENDER = "ViewRender",
     COMPONENTS = "ViewComponents",
     CAMERA = "ViewCamera",
-    INTERNAL = "ViewInternal",
+    INTERNAL_TABLE = "ViewInternalTable",
     INTERNAL_FOLDER = "ViewInternalFolder",
     EXTERNAL = "ViewExternal",
     PROPERTIES = "ViewProperties",
