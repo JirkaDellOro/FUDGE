@@ -12,7 +12,7 @@ namespace FudgeUserInterface {
    * │   └ treeItem <li>
    * └ treeItem <li>
    * ```
-   */  
+   */
   export class CustomTree<T> extends CustomTreeList<T> {
 
     public constructor(_controller: CustomTreeController<T>, _root: T) {
@@ -21,7 +21,6 @@ namespace FudgeUserInterface {
       this.appendChild(root);
 
       this.addEventListener(EVENT.EXPAND, this.hndExpand);
-      this.addEventListener(EVENT.RENAME, this.hndRename);
       this.addEventListener(EVENT.SELECT, this.hndSelect);
       this.addEventListener(EVENT.DROP, this.hndDrop, true);
       this.addEventListener(EVENT.DRAG_LEAVE, this.hndDragLeave);
@@ -45,7 +44,7 @@ namespace FudgeUserInterface {
     }
 
     /**
-     * Return the object in focus
+     * Return the object in focus or null if none is focussed
      */
     public getFocussed(): T {
       let items: CustomTreeItem<T>[] = <CustomTreeItem<T>[]>Array.from(this.querySelectorAll("li"));
@@ -56,6 +55,19 @@ namespace FudgeUserInterface {
       return null;
     }
 
+    /**
+     * Refresh the whole tree to synchronize with the data the tree is based on
+     */
+    public refresh(): void {
+      for (const item of this) {
+        if (!item.expanded)
+          continue;
+
+        let branch: CustomTreeList<T> = this.createBranch(this.controller.getChildren(item.data));
+        item.getBranch().restructure(branch);
+      }
+    }
+
     private hndExpand(_event: Event): void {
       let item: CustomTreeItem<T> = <CustomTreeItem<T>>_event.target;
       let children: T[] = this.controller.getChildren(item.data);
@@ -64,8 +76,8 @@ namespace FudgeUserInterface {
 
       let branch: CustomTreeList<T> = this.createBranch(children);
       item.setBranch(branch);
-      // this.displaySelection(<T[]>this.controller.selection);
-    }  
+      this.displaySelection(this.controller.selection);
+    }
 
     private createBranch(_data: T[]): CustomTreeList<T> {
       let branch: CustomTreeList<T> = new CustomTreeList<T>(this.controller, []);
@@ -73,17 +85,9 @@ namespace FudgeUserInterface {
         branch.addItems([new CustomTreeItem(this.controller, child)]);
       }
       return branch;
-    } 
-
-    // Callback / Eventhandler in Tree
-    private async hndRename(_event: Event): Promise<void> {
-      let item: CustomTreeItem<T> = <CustomTreeItem<T>>_event.target;
-      let renamed: boolean = await this.controller.rename(item.data, (<CustomEvent>_event).detail.id, (<CustomEvent>_event).detail.value);
-      if (!renamed)
-        item.refreshContent();
-      item.refreshAttributes();
     }
 
+    // Callback / Eventhandler in Tree
     private hndSelect(_event: Event): void {
       // _event.stopPropagation();
       let detail: { data: Object; interval: boolean; additive: boolean } = (<CustomEvent>_event).detail;
@@ -109,8 +113,8 @@ namespace FudgeUserInterface {
     }
 
     private hndDrop(_event: DragEvent): void {
-      this.controller.dragDropDivider.remove();
       this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target, this.controller.dragDrop.at);
+      this.controller.dragDrop.sources = [];
     }
 
     private hndDragLeave = (_event: DragEvent): void => {
@@ -125,10 +129,11 @@ namespace FudgeUserInterface {
         return;
 
       // add only the objects the addChildren-method of the controller returns
-      let move: T[] = this.controller.addChildren(<T[]>_children, <T>_target, _at);
+      let move: T[] = this.controller.addChildren(_children, _target, _at);
       if (!move || move.length == 0)
         return;
 
+      let focus: T = this.getFocussed();
       // TODO: don't, when copying or coming from another source
       this.delete(move);
 
@@ -143,16 +148,13 @@ namespace FudgeUserInterface {
       else
         targetItem.expand(true);
 
-      _children = [];
-      _target = null;
-      _at = null;
+      this.findVisible(focus)?.focus();
     }
 
     private hndDelete = async (_event: Event): Promise<void> => {
       let target: CustomTreeItem<T> = <CustomTreeItem<T>>_event.target;
       _event.stopPropagation();
       let remove: T[] = await this.controller.delete([target.data]);
-
       this.delete(remove);
     };
 

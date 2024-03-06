@@ -422,6 +422,7 @@ declare namespace FudgeUserInterface {
         selectInterval(_dataStart: T, _dataEnd: T): void;
         delete(_data: T[]): CustomTreeItem<T>[];
         findVisible(_data: T): CustomTreeItem<T>;
+        [Symbol.iterator](): Iterator<CustomTreeItem<T>>;
         private hndDragOver;
     }
 }
@@ -445,12 +446,15 @@ declare namespace FudgeUserInterface {
          */
         clearSelection(): void;
         /**
-         * Return the object in focus
+         * Return the object in focus or null if none is focussed
          */
         getFocussed(): T;
+        /**
+         * Refresh the whole tree to synchronize with the data the tree is based on
+         */
+        refresh(): void;
         private hndExpand;
         private createBranch;
-        private hndRename;
         private hndSelect;
         private hndDrop;
         private hndDragLeave;
@@ -552,6 +556,10 @@ declare namespace FudgeUserInterface {
          * Set the content representing the attached {@link data}
          */
         set content(_content: HTMLFieldSetElement);
+        /**
+         * Returns whether this item is expanded, showing it's children, or closed
+         */
+        get expanded(): boolean;
         refreshAttributes(): void;
         refreshContent(): void;
         /**

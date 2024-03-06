@@ -89,6 +89,13 @@ namespace FudgeUserInterface {
       };
     }
 
+    /**
+     * Returns whether this item is expanded, showing it's children, or closed
+     */
+    public get expanded(): boolean {
+      return this.getBranch() && this.checkbox.checked;
+    }
+
     public refreshAttributes(): void {
       this.setAttribute("attributes", this.controller.getAttributes(this.data));
     }
@@ -104,11 +111,10 @@ namespace FudgeUserInterface {
      * in order to create that {@link CustomTreeList} and add it as branch to this item
      */
     public expand(_expand: boolean): void {
-      // this.removeBranch();
+      this.removeBranch();
 
       if (_expand)
         this.dispatchEvent(new Event(EVENT.EXPAND, { bubbles: true }));
-
 
       this.checkbox.checked = _expand;
       this.hasChildren = this.controller.hasChildren(this.data);
@@ -260,31 +266,22 @@ namespace FudgeUserInterface {
       }
     };
 
-    private hndChange = (_event: Event): void => {
+    private hndChange = async (_event: Event): Promise<void> => {
       let target: HTMLInputElement | HTMLSelectElement = <HTMLInputElement | HTMLSelectElement>_event.target;
-      // let item: HTMLLIElement = <HTMLLIElement>target.form?.parentNode;
       _event.stopPropagation();
 
-      if (target instanceof HTMLInputElement) {
-        switch (target.type) {
-          case "checkbox":
-            this.expand(target.checked);
-            break;
-          case "text":
-            // target.disabled = true;
-            this.content.disabled = true;
-            this.focus();
-            this.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { id: target.id, value: target.value } }));
-            break;
-          case "default":
-            // console.log(target);
-            break;
-        }
+      if (target instanceof HTMLInputElement && target.type == "checkbox") {
+        this.expand(target.checked);
+        return;
       }
 
-      if (target instanceof HTMLSelectElement)
-        this.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { id: target.id, value: target.value } }));
-
+      // if (target instanceof HTMLSelectElement || target instanceof HTMLInputElement && target.type == "text") {
+      if (await this.controller.rename(this.data, target.id, target.value)) {
+        this.refreshContent();
+        this.refreshAttributes();
+        this.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { data: this.data } }));
+      }
+      // }
     };
 
     private hndDragStart = (_event: DragEvent): void => {
@@ -333,9 +330,10 @@ namespace FudgeUserInterface {
     };
 
     private hndRemove = (_event: Event): void => {
-      if (_event.currentTarget == _event.target)
-        return;
-      _event.stopPropagation();
+      // the views might need to know about this event
+      // if (_event.currentTarget == _event.target)
+      //   return;
+      // _event.stopPropagation();
       this.hasChildren = this.controller.hasChildren(this.data);
     };
   }

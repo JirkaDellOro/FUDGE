@@ -25,12 +25,11 @@ namespace FudgeUserInterface {
       for (let data of _path) {
         let item: CustomTreeItem<T> = currentTree.findItem(data);
         item.focus();
-        let content: CustomTreeList<T> = item.getBranch();
-        if (!content) {
+
+        if (!item.expanded)
           item.expand(true);
-          content = item.getBranch();
-        }
-        currentTree = content;
+
+        currentTree = item.getBranch();
       }
     }
 
@@ -44,8 +43,7 @@ namespace FudgeUserInterface {
       for (let item of _tree.getItems()) {
         let found: CustomTreeItem<T> = this.findItem(item.data);
         if (found) {
-          // found.content = item.content;
-          // found.refreshContent();
+          found.refreshContent();
           found.hasChildren = item.hasChildren;
           if (!found.hasChildren)
             found.expand(false);
@@ -56,6 +54,7 @@ namespace FudgeUserInterface {
 
       this.innerHTML = "";
       this.addItems(items);
+      this.displaySelection(this.controller.selection);
     }
 
     /**
@@ -122,7 +121,7 @@ namespace FudgeUserInterface {
           item.dispatchEvent(new Event(EVENT.REMOVE_CHILD, { bubbles: true }));
           deleted.push(item.parentNode.removeChild(item));
         }
-      
+
       return deleted;
     }
 
@@ -132,6 +131,12 @@ namespace FudgeUserInterface {
         if (_data == item.data)
           return item;
       return null;
+    }
+
+    public *[Symbol.iterator](): Iterator<CustomTreeItem<T>> {
+      let items: NodeListOf<CustomTreeItem<T>> = <NodeListOf<CustomTreeItem<T>>>this.querySelectorAll("li");
+      for (let i: number = 0; i < items.length; i++)
+        yield items[i];
     }
 
     private hndDragOver = (_event: DragEvent): void => {
@@ -147,8 +152,11 @@ namespace FudgeUserInterface {
           let rect: DOMRect = target.content.getBoundingClientRect();
           let addBefore: boolean = _event.clientY < rect.top + rect.height / 2;
           let sibling: Element = addBefore ? target.previousElementSibling : target.nextElementSibling;
-          if (sibling != this.controller.dragDropDivider) 
-            addBefore ? target.before(this.controller.dragDropDivider) : target.after(this.controller.dragDropDivider);
+          if (sibling != this.controller.dragDropDivider)
+            if (addBefore)
+              target.before(this.controller.dragDropDivider);
+            else
+              target.after(this.controller.dragDropDivider);
         }
       }
 

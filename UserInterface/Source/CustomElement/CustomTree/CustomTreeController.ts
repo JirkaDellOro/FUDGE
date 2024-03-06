@@ -7,9 +7,9 @@ namespace FudgeUserInterface {
     /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
     public selection: T[] = [];
     /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
-    public dragDrop: { sources: T[], target: T, at?: number } = { sources: [], target: null };
+    public dragDrop: { sources: T[]; target: T; at?: number } = { sources: [], target: null };
     /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
-    public copyPaste: { sources: T[], target: T } = { sources: [], target: null };
+    public copyPaste: { sources: T[]; target: T } = { sources: [], target: null };
 
     /** Used by the tree to indicate the drop position while dragging */
     public dragDropDivider: HTMLHRElement = document.createElement("hr");
