@@ -7,11 +7,11 @@ namespace Fudge {
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
    */
   export class ViewHierarchy extends View {
-    #selectionPrevious: ƒ.Node[] = [];
     private graph: ƒ.Graph;
     private tree: ƒUi.Tree<ƒ.Node>;
+    #selectionPrevious: ƒ.Node[] = [];
 
-    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
       // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
 
@@ -78,7 +78,7 @@ namespace Fudge {
       if (_event.target == this.dom)
         return;
 
-      if (!(_viewSource instanceof ViewInternal))
+      if (!(_viewSource instanceof ViewInternal || _viewSource instanceof ViewInternalFolder))
         return;
 
       let source: Object = _viewSource.getDragDropSources()[0];

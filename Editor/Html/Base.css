@@ -84,13 +84,7 @@ ul.tree {
   list-style: none;
 }
 
-/* ul.tree form {
-  vertical-align: middle;
-  display: inline;
-} */
-
 ul.tree fieldset {
-  vertical-align: middle;
   display: inline;
   border: none;
 }
@@ -109,10 +103,6 @@ ul.tree li[attributes~="GraphInstance"]>input {
 
 ul.tree ul {
   padding-left: 1em;
-}
-
-ul.tree input {
-  vertical-align: inherit;
 }
 
 ul.tree input[type=checkbox] {
@@ -219,6 +209,10 @@ input {
 *:focus {
   outline: 1px outset var(--color-focus);
   /* background-color: var(--color-focus); */
+}
+
+ul.tree li:has(>fieldset.error) {
+  outline: 1px outset var(--color-error);
 }
 
 input[type="number"] {

@@ -38,26 +38,27 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["DELETE_COMPONENT"] = 4] = "DELETE_COMPONENT";
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 5] = "ADD_COMPONENT_SCRIPT";
         CONTEXTMENU[CONTEXTMENU["EDIT"] = 6] = "EDIT";
-        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 7] = "CREATE_MESH";
-        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 8] = "CREATE_MATERIAL";
-        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 9] = "CREATE_GRAPH";
-        CONTEXTMENU[CONTEXTMENU["CREATE_ANIMATION"] = 10] = "CREATE_ANIMATION";
-        CONTEXTMENU[CONTEXTMENU["CREATE_PARTICLE_EFFECT"] = 11] = "CREATE_PARTICLE_EFFECT";
-        CONTEXTMENU[CONTEXTMENU["SYNC_INSTANCES"] = 12] = "SYNC_INSTANCES";
-        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 13] = "REMOVE_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 14] = "ADD_JOINT";
-        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 15] = "DELETE_RESOURCE";
-        CONTEXTMENU[CONTEXTMENU["ORTHGRAPHIC_CAMERA"] = 16] = "ORTHGRAPHIC_CAMERA";
-        CONTEXTMENU[CONTEXTMENU["RENDER_CONTINUOUSLY"] = 17] = "RENDER_CONTINUOUSLY";
-        CONTEXTMENU[CONTEXTMENU["ADD_PROPERTY"] = 18] = "ADD_PROPERTY";
-        CONTEXTMENU[CONTEXTMENU["DELETE_PROPERTY"] = 19] = "DELETE_PROPERTY";
-        CONTEXTMENU[CONTEXTMENU["CONVERT_ANIMATION"] = 20] = "CONVERT_ANIMATION";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_PROPERTY"] = 21] = "ADD_PARTICLE_PROPERTY";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION"] = 22] = "ADD_PARTICLE_FUNCTION";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT"] = 23] = "ADD_PARTICLE_CONSTANT";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CODE"] = 24] = "ADD_PARTICLE_CODE";
-        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_TRANSFORMATION"] = 25] = "ADD_PARTICLE_TRANSFORMATION";
-        CONTEXTMENU[CONTEXTMENU["DELETE_PARTICLE_DATA"] = 26] = "DELETE_PARTICLE_DATA";
+        CONTEXTMENU[CONTEXTMENU["CREATE_FOLDER"] = 7] = "CREATE_FOLDER";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 8] = "CREATE_MESH";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 9] = "CREATE_MATERIAL";
+        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 10] = "CREATE_GRAPH";
+        CONTEXTMENU[CONTEXTMENU["CREATE_ANIMATION"] = 11] = "CREATE_ANIMATION";
+        CONTEXTMENU[CONTEXTMENU["CREATE_PARTICLE_EFFECT"] = 12] = "CREATE_PARTICLE_EFFECT";
+        CONTEXTMENU[CONTEXTMENU["SYNC_INSTANCES"] = 13] = "SYNC_INSTANCES";
+        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 14] = "REMOVE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 15] = "ADD_JOINT";
+        CONTEXTMENU[CONTEXTMENU["DELETE_RESOURCE"] = 16] = "DELETE_RESOURCE";
+        CONTEXTMENU[CONTEXTMENU["ORTHGRAPHIC_CAMERA"] = 17] = "ORTHGRAPHIC_CAMERA";
+        CONTEXTMENU[CONTEXTMENU["RENDER_CONTINUOUSLY"] = 18] = "RENDER_CONTINUOUSLY";
+        CONTEXTMENU[CONTEXTMENU["ADD_PROPERTY"] = 19] = "ADD_PROPERTY";
+        CONTEXTMENU[CONTEXTMENU["DELETE_PROPERTY"] = 20] = "DELETE_PROPERTY";
+        CONTEXTMENU[CONTEXTMENU["CONVERT_ANIMATION"] = 21] = "CONVERT_ANIMATION";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_PROPERTY"] = 22] = "ADD_PARTICLE_PROPERTY";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_FUNCTION"] = 23] = "ADD_PARTICLE_FUNCTION";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CONSTANT"] = 24] = "ADD_PARTICLE_CONSTANT";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_CODE"] = 25] = "ADD_PARTICLE_CODE";
+        CONTEXTMENU[CONTEXTMENU["ADD_PARTICLE_TRANSFORMATION"] = 26] = "ADD_PARTICLE_TRANSFORMATION";
+        CONTEXTMENU[CONTEXTMENU["DELETE_PARTICLE_DATA"] = 27] = "DELETE_PARTICLE_DATA";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -90,6 +91,7 @@ var Fudge;
         VIEW["COMPONENTS"] = "ViewComponents";
         VIEW["CAMERA"] = "ViewCamera";
         VIEW["INTERNAL"] = "ViewInternal";
+        VIEW["INTERNAL_FOLDER"] = "ViewInternalFolder";
         VIEW["EXTERNAL"] = "ViewExternal";
         VIEW["PROPERTIES"] = "ViewProperties";
         VIEW["PREVIEW"] = "ViewPreview";
@@ -582,6 +584,7 @@ var Fudge;
         fileStyles = "styles.css";
         graphAutoView = "";
         // private includeAutoViewScript: boolean = true;
+        #resources;
         #document;
         constructor(_base) {
             super();
@@ -592,6 +595,11 @@ var Fudge;
             ƒ.Project.addEventListener("graphMutated" /* ƒ.EVENT.GRAPH_MUTATED */, 
             //@ts-ignore
             (_event) => Fudge.Page.broadcast(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.UPDATE)));
+        }
+        get resources() {
+            if (!this.#resources)
+                this.#resources = new Fudge.ResourceFolder("Resources");
+            return this.#resources;
         }
         get gizmosFilter() {
             return JSON.stringify(Array.from(ƒ.Gizmos.filter.entries()));
@@ -647,7 +655,7 @@ var Fudge;
             let settings = head.querySelector("meta[type=settings]");
             let projectSettings = settings?.getAttribute("project");
             projectSettings = projectSettings?.replace(/'/g, "\"");
-            Fudge.project.mutate(JSON.parse(projectSettings || "{}"));
+            await Fudge.project.mutate(JSON.parse(projectSettings || "{}"));
             let panelInfo = settings?.getAttribute("panels");
             panelInfo = panelInfo?.replace(/'/g, "\"");
             Fudge.Page.setPanelInfo(panelInfo || "[]");
@@ -682,6 +690,11 @@ var Fudge;
             //   if (autoViewScript)
             //     this.#document.head.removeChild(autoViewScript);
             return this.stringifyHTML(this.#document);
+        }
+        async mutate(_mutator, _selection, _dispatchMutate) {
+            if (_mutator.resources)
+                await this.resources.deserialize(ƒ.Serializer.parse(_mutator.resources));
+            return super.mutate(_mutator, _selection, _dispatchMutate);
         }
         getMutatorAttributeTypes(_mutator) {
             let types = super.getMutatorAttributeTypes(_mutator);
@@ -816,6 +829,7 @@ var Fudge;
         settingsStringify() {
             let mutator = Fudge.project.getMutator(true);
             mutator.gizmosFilter = this.gizmosFilter;
+            mutator.resources = ƒ.Serializer.stringify(this.resources.serialize());
             let settings = JSON.stringify(mutator);
             settings = settings.replace(/"/g, "'");
             return settings;
@@ -1197,6 +1211,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CREATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
             this.dom.addEventListener("mutate" /* ƒui.EVENT.MUTATE */, this.hndEvent);
@@ -1314,7 +1329,7 @@ var Fudge;
                     break;
                 case Fudge.CONTEXTMENU.DELETE_RESOURCE:
                     await this.table.controller.delete([this.table.getFocussed()]);
-                    this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
+                    this.dispatch(Fudge.EVENT_EDITOR.DELETE, { bubbles: true });
                     break;
             }
         }
@@ -1397,6 +1412,7 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.OPEN:
                 case Fudge.EVENT_EDITOR.CREATE:
                 case Fudge.EVENT_EDITOR.UPDATE:
+                case Fudge.EVENT_EDITOR.DELETE:
                     this.listResources();
             }
             if (_event.detail?.sender)
@@ -1409,7 +1425,7 @@ var Fudge;
                 case "removeChild" /* ƒui.EVENT.REMOVE_CHILD */:
                     _event.stopPropagation();
                     this.dispatchToParent(Fudge.EVENT_EDITOR.DELETE, {});
-                case Fudge.EVENT_EDITOR.SELECT:
+                case Fudge.EVENT_EDITOR.SELECT: // TODO: is this reachable? Is it still needed?
                     this.listResources();
                     break;
                 case "rename" /* ƒui.EVENT.RENAME */:
@@ -1916,7 +1932,7 @@ var Fudge;
             this.view = _view;
         }
         createContent(_data) {
-            let content = document.createElement("form");
+            let content = document.createElement("fieldset");
             let parentData = this.childToParent.get(_data);
             let key = this.getKey(_data);
             if (!ƒ.ParticleData.isExpression(_data) && !ƒ.ParticleData.isTransformation(_data)) {
@@ -1927,7 +1943,7 @@ var Fudge;
             if (parentData && parentData == this.data.variables) {
                 let input = document.createElement("input");
                 input.type = "text";
-                input.disabled = true;
+                // input.disabled = true;
                 input.value = this.data.variableNames[key];
                 input.id = "name" /* ID.NAME */;
                 content.appendChild(input);
@@ -1948,7 +1964,7 @@ var Fudge;
                 else {
                     let input = document.createElement("input");
                     input.type = "text";
-                    input.disabled = true;
+                    // input.disabled = true;
                     input.id = "value" /* ID.VALUE */;
                     if (ƒ.ParticleData.isCode(_data)) {
                         input.value = _data.code;
@@ -1988,7 +2004,7 @@ var Fudge;
                 attributes.push("code");
             return attributes.join(" ");
         }
-        rename(_data, _id, _new) {
+        async rename(_data, _id, _new) {
             let inputAsNumber = Number.parseFloat(_new);
             if (_id == "name" /* ID.NAME */ && ƒ.ParticleData.isExpression(_data)) {
                 let errors = [];
@@ -2048,7 +2064,7 @@ var Fudge;
             });
             return children;
         }
-        delete(_focused) {
+        async delete(_focused) {
             // delete selection independend of focussed item
             let deleted = [];
             let expend = this.selection.length > 0 ? this.selection : _focused;
@@ -2118,7 +2134,7 @@ var Fudge;
             let parent = this.childToParent.get(_data) || {};
             if (ƒ.ParticleData.isFunction(parent) || ƒ.ParticleData.isTransformation(parent))
                 parent = parent.parameters;
-            return Object.entries(parent).find(entry => entry[1] == _data)?.shift();
+            return Object.entries(parent).find(_entry => _entry[1] == _data)?.shift();
         }
         deleteData(_data) {
             if (_data == this.data)
@@ -2150,6 +2166,182 @@ var Fudge;
         }
     }
     Fudge.ControllerTreeParticleSystem = ControllerTreeParticleSystem;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒui = FudgeUserInterface;
+    class ResourceFolder {
+        name;
+        resourceParent;
+        children = [];
+        constructor(_name = "New Folder") {
+            this.name = _name;
+        }
+        /**
+         * Returns true if this or any of its descendants contain the given resource.
+         */
+        contains(_resource) {
+            for (let child of this.children)
+                if (child == _resource || child instanceof ResourceFolder && child.contains(_resource))
+                    return true;
+            return false;
+        }
+        serialize() {
+            let serialization = { name: this.name, children: [] };
+            for (let child of this.children) {
+                if (child instanceof ResourceFolder)
+                    serialization.children.push(child.serialize());
+                else
+                    serialization.children.push({ idResource: child.idResource });
+            }
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            this.name = _serialization.name;
+            for (let childSerialization of _serialization.children) {
+                let child;
+                if ("idResource" in childSerialization)
+                    child = await ƒ.Project.getResource(childSerialization.idResource);
+                else
+                    child = await new ResourceFolder().deserialize(childSerialization);
+                if (child) {
+                    this.children.push(child);
+                    child.resourceParent = this;
+                }
+            }
+            return this;
+        }
+        *[Symbol.iterator]() {
+            yield this;
+            for (let child of this.children) {
+                if (child instanceof ResourceFolder)
+                    yield* child;
+                else
+                    yield child;
+            }
+        }
+    }
+    Fudge.ResourceFolder = ResourceFolder;
+    class ControllerTreeResource extends ƒui.CustomTreeController {
+        createContent(_object) {
+            let content = document.createElement("fieldset");
+            let name = document.createElement("input");
+            name.value = _object.name;
+            content.appendChild(name);
+            if (!(_object instanceof ResourceFolder)) {
+                content.setAttribute("icon", _object.type);
+                if (_object.status == ƒ.RESOURCE_STATUS.ERROR) {
+                    content.classList.add("error");
+                    content.title = "Failed to load resource from file. Check the console for details.";
+                }
+            }
+            return content;
+        }
+        getAttributes(_object) {
+            return "";
+        }
+        async rename(_object, _id, _new) {
+            let rename = _object.name != _new;
+            if (rename) {
+                _object.name = _new;
+                await _object.load?.();
+            }
+            return rename;
+        }
+        hasChildren(_object) {
+            return _object instanceof ResourceFolder && _object.children.length > 0;
+        }
+        getChildren(_object) {
+            return _object instanceof ResourceFolder ? _object.children : [];
+        }
+        addChildren(_sources, _target, _at) {
+            if (!(_target instanceof ResourceFolder))
+                return [];
+            let move = [];
+            for (let source of _sources) {
+                let index = _target.children.indexOf(source); // _at needs to be corrected if we are moving within same parent
+                if (index > -1 && _at > index)
+                    _at -= 1;
+                this.remove(source);
+                source.resourceParent = _target;
+                move.push(source);
+                if (_at == null)
+                    _target.children.push(source);
+                else
+                    _target.children.splice(_at + _sources.indexOf(source), 0, source);
+            }
+            return move;
+        }
+        async delete(_focussed) {
+            // TODO: unify with delete in ControllerTableResource
+            console.log(_focussed, this.selection);
+            let expendables = this.selection.concat();
+            let serializations = ƒ.Project.serialize();
+            let serializationStrings = new Map();
+            let usages = {};
+            for (let idResource in serializations)
+                serializationStrings.set(ƒ.Project.resources[idResource], JSON.stringify(serializations[idResource]));
+            for (let expendable of expendables) {
+                if (expendable instanceof ResourceFolder) {
+                    let usage = [];
+                    for (const child of expendable.children)
+                        usage.push(child.name);
+                    usages[expendables.indexOf(expendable) + " " + expendable.name] = usage;
+                }
+                else {
+                    usages[expendable.idResource] = [];
+                    for (let resource of serializationStrings.keys())
+                        if (resource.idResource != expendable.idResource)
+                            if (serializationStrings.get(resource).indexOf(expendable.idResource) > -1)
+                                usages[expendable.idResource].push(resource.name + " " + resource.type);
+                }
+            }
+            if (await openDialog()) {
+                let deleted = [];
+                for (const selected of this.selection) {
+                    let key = selected instanceof ResourceFolder ? this.selection.indexOf(selected) + " " + selected.name : selected.idResource;
+                    if (usages[key].length == 0) // delete only unused
+                        deleted.push(selected);
+                }
+                for (let resource of deleted) {
+                    if (!(resource instanceof ResourceFolder))
+                        ƒ.Project.deregister(resource);
+                    this.remove(resource);
+                    this.selection.splice(this.selection.indexOf(resource), 1);
+                }
+                return deleted;
+            }
+            return [];
+            async function openDialog() {
+                let promise = ƒui.Dialog.prompt(usages, true, "Review references, delete dependend resources first if applicable", "To delete unused resources, press OK", "OK", "Cancel");
+                if (await promise) {
+                    return true;
+                }
+                else
+                    return false;
+            }
+        }
+        async copy(_originals) {
+            return [];
+        }
+        getPath(_resource) {
+            let path = [];
+            let current = _resource;
+            while (current) {
+                path.unshift(current);
+                current = current.resourceParent;
+            }
+            return path;
+        }
+        remove(_resource) {
+            let parent = _resource.resourceParent;
+            if (!parent)
+                return;
+            let index = parent.children.indexOf(_resource);
+            parent.children.splice(index, 1);
+        }
+    }
+    Fudge.ControllerTreeResource = ControllerTreeResource;
 })(Fudge || (Fudge = {}));
 ///<reference path="../View/View.ts"/>
 var Fudge;
@@ -2425,11 +2617,11 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.INTERNAL, Fudge.ViewInternal);
+            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.INTERNAL_FOLDER, Fudge.ViewInternalFolder);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.EXTERNAL, Fudge.ViewExternal);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.PROPERTIES, Fudge.ViewProperties);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.PREVIEW, Fudge.ViewPreview);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.SCRIPT, Fudge.ViewScript);
-            let inner = this.goldenLayout.rootItem.contentItems[0];
             const config = {
                 type: "column",
                 content: [{
@@ -2461,10 +2653,18 @@ var Fudge;
                                         title: "Script"
                                     }]
                             }, {
-                                type: "component",
-                                componentType: Fudge.VIEW.INTERNAL,
-                                componentState: _state,
-                                title: "Internal"
+                                type: "stack",
+                                content: [{
+                                        type: "component",
+                                        componentType: Fudge.VIEW.INTERNAL_FOLDER,
+                                        componentState: _state,
+                                        title: "Internal"
+                                    }, {
+                                        type: "component",
+                                        componentType: Fudge.VIEW.INTERNAL,
+                                        componentState: _state,
+                                        title: "Table"
+                                    }]
                             }]
                     }]
             };
@@ -2482,7 +2682,7 @@ var Fudge;
             return {};
         }
         hndEvent = (_event) => {
-            if (_event.type != Fudge.EVENT_EDITOR.UPDATE && _event.type != Fudge.EVENT_EDITOR.CREATE)
+            if (_event.type != Fudge.EVENT_EDITOR.UPDATE && _event.type != Fudge.EVENT_EDITOR.CREATE && _event.type != Fudge.EVENT_EDITOR.DELETE)
                 _event.stopPropagation();
             this.setTitle("Project | " + Fudge.project.name); //why here and everytime?
             if (_event.type == "itemselect" /* ƒui.EVENT.SELECT */) {
@@ -2592,7 +2792,7 @@ var Fudge;
                 return submenu;
             }
         }
-        contextMenuCallback(_item, _window, _event) {
+        async contextMenuCallback(_item, _window, _event) {
             ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
             let focus = this.tree.getFocussed();
             if (!focus)
@@ -2637,7 +2837,7 @@ var Fudge;
                     this.dispatch(Fudge.EVENT_EDITOR.CREATE, {});
                     break;
                 case Fudge.CONTEXTMENU.DELETE_PARTICLE_DATA:
-                    let remove = this.controller.delete([focus]);
+                    let remove = await this.controller.delete([focus]);
                     this.tree.delete(remove);
                     this.tree.clearSelection();
                     this.dispatch(Fudge.EVENT_EDITOR.DELETE, {});
@@ -4012,7 +4212,7 @@ var Fudge;
                 return;
             if (this.dom != _event.target)
                 return;
-            if (!(_viewSource instanceof Fudge.ViewInternal || _viewSource instanceof Fudge.ViewScript))
+            if (!(_viewSource instanceof Fudge.ViewInternal || _viewSource instanceof Fudge.ViewInternalFolder || _viewSource instanceof Fudge.ViewScript))
                 return;
             for (let source of _viewSource.getDragDropSources()) {
                 if (source instanceof Fudge.ScriptInfo) {
@@ -4264,9 +4464,9 @@ var Fudge;
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewHierarchy extends Fudge.View {
-        #selectionPrevious = [];
         graph;
         tree;
+        #selectionPrevious = [];
         constructor(_container, _state) {
             super(_container, _state);
             // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
@@ -4320,7 +4520,7 @@ var Fudge;
             }
             if (_event.target == this.dom)
                 return;
-            if (!(_viewSource instanceof Fudge.ViewInternal))
+            if (!(_viewSource instanceof Fudge.ViewInternal || _viewSource instanceof Fudge.ViewInternalFolder))
                 return;
             let source = _viewSource.getDragDropSources()[0];
             if (!(source instanceof ƒ.Graph) && !(source instanceof ƒ.GraphInstance))
@@ -4568,7 +4768,7 @@ var Fudge;
         hndDragOver(_event, _viewSource) {
             _event.dataTransfer.dropEffect = "none";
             if (!(_viewSource instanceof Fudge.ViewComponents)) { // allow dropping cameracomponent to see through that camera (at this time, the only draggable)
-                if (!(_viewSource instanceof Fudge.ViewInternal)) // allow dropping a graph
+                if (!(_viewSource instanceof Fudge.ViewInternal || _viewSource instanceof Fudge.ViewInternalFolder)) // allow dropping a graph
                     return;
                 let source = _viewSource.getDragDropSources()[0];
                 if (!(source instanceof ƒ.Graph))
@@ -4774,6 +4974,245 @@ var Fudge;
         };
     }
     Fudge.ViewRender = ViewRender;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
+    /**
+     * List the internal resources
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jonas Plotzky, HFU, 2024
+     */
+    class ViewInternalFolder extends Fudge.View {
+        tree;
+        constructor(_container, _state) {
+            super(_container, _state);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.OPEN, this.hndOpen);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndUpdate);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.CREATE, this.hndCreate);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndDelete);
+            this.dom.addEventListener("mutate" /* ƒui.EVENT.MUTATE */, this.hndEvent);
+            // this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent); // ???
+            this.dom.addEventListener("removeChild" /* ƒui.EVENT.REMOVE_CHILD */, this.hndEvent);
+            this.dom.addEventListener("rename" /* ƒui.EVENT.RENAME */, this.hndEvent);
+            this.dom.addEventListener("contextmenu" /* ƒui.EVENT.CONTEXTMENU */, this.openContextMenu);
+            this.dom.addEventListener("keyup", this.hndKeyboardEvent);
+        }
+        get controller() {
+            return this.tree.controller;
+        }
+        get resources() {
+            return Fudge.project.resources;
+        }
+        getSelection() {
+            return this.controller.selection.filter(_element => !(_element instanceof Fudge.ResourceFolder));
+        }
+        getDragDropSources() {
+            return this.controller.dragDrop.sources.filter(_source => !(_source instanceof Fudge.ResourceFolder));
+        }
+        // TODO: this is a preparation for syncing a graph with its instances after structural changes
+        // protected openContextMenu = (_event: Event): void => {
+        //   let row: HTMLTableRowElement = <HTMLTableRowElement>_event.composedPath().find((_element) => (<HTMLElement>_element).tagName == "TR");
+        //   if (row)
+        //     this.contextMenu.getMenuItemById(String(CONTEXTMENU.SYNC_INSTANCES)).enabled = (row.getAttribute("icon") == "Graph");
+        //   this.contextMenu.popup();
+        // }
+        // #region  ContextMenu
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            item = new Fudge.remote.MenuItem({ label: "Create Folder", id: String(Fudge.CONTEXTMENU.CREATE_FOLDER), click: _callback });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Create Graph", id: String(Fudge.CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({
+                label: "Create Mesh",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MESH, ƒ.Mesh, _callback)
+            });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({
+                label: "Create Material",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader, _callback)
+            });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({
+                label: "Create Animation",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_ANIMATION, ƒ.Animation, _callback)
+            });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: `Create ${ƒ.ParticleSystem.name}`, id: String(Fudge.CONTEXTMENU.CREATE_PARTICLE_EFFECT), click: _callback });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Delete Resource", id: String(Fudge.CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
+            menu.append(item);
+            return menu;
+        }
+        async contextMenuCallback(_item, _window, _event) {
+            let choice = Number(_item.id);
+            ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
+            let iSubclass = _item["iSubclass"];
+            if (!iSubclass && (choice == Fudge.CONTEXTMENU.CREATE_MESH || choice == Fudge.CONTEXTMENU.CREATE_MATERIAL)) {
+                alert("Funky Electron-Error... please try again");
+                return;
+            }
+            let focus = this.tree.getFocussed();
+            if (choice == Fudge.CONTEXTMENU.DELETE_RESOURCE) {
+                if (((await this.controller.delete([this.tree.getFocussed()])).length > 0))
+                    this.dispatch(Fudge.EVENT_EDITOR.DELETE, { bubbles: true });
+                return;
+            }
+            if (!(focus instanceof Fudge.ResourceFolder))
+                return;
+            let resource;
+            switch (choice) {
+                case Fudge.CONTEXTMENU.CREATE_FOLDER:
+                    resource = new Fudge.ResourceFolder();
+                    break;
+                case Fudge.CONTEXTMENU.CREATE_MESH:
+                    let typeMesh = ƒ.Mesh.subclasses[iSubclass];
+                    //@ts-ignore
+                    resource = new typeMesh();
+                    break;
+                case Fudge.CONTEXTMENU.CREATE_MATERIAL:
+                    let typeShader = ƒ.Shader.subclasses[iSubclass];
+                    resource = new ƒ.Material(typeShader.name, typeShader);
+                    break;
+                case Fudge.CONTEXTMENU.CREATE_GRAPH:
+                    resource = await ƒ.Project.registerAsGraph(new ƒ.Node("NewGraph"));
+                    break;
+                case Fudge.CONTEXTMENU.CREATE_ANIMATION:
+                    let typeAnimation = ƒ.Animation.subclasses[iSubclass];
+                    resource = new typeAnimation();
+                    break;
+                case Fudge.CONTEXTMENU.CREATE_PARTICLE_EFFECT:
+                    resource = new ƒ.ParticleSystem();
+                    break;
+            }
+            if (resource) {
+                this.dispatchToParent(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
+                // this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
+                this.controller.addChildren([resource], focus);
+                this.tree.findVisible(focus).expand(true);
+                this.tree.findVisible(resource).focus();
+            }
+        }
+        //#endregion
+        hndDragOver(_event, _viewSource) {
+            _event.dataTransfer.dropEffect = "none";
+            if (this.dom != _event.target)
+                return;
+            if (!(_viewSource instanceof Fudge.ViewExternal || _viewSource instanceof Fudge.ViewHierarchy))
+                return;
+            if (_viewSource instanceof Fudge.ViewExternal) {
+                let sources = _viewSource.getDragDropSources();
+                if (sources.some(_source => ![Fudge.MIME.AUDIO, Fudge.MIME.IMAGE, Fudge.MIME.MESH, Fudge.MIME.GLTF].includes(_source.getMimeType())))
+                    return;
+                this.controller.dragDrop.sources.splice(0);
+            }
+            _event.dataTransfer.dropEffect = "link";
+            _event.preventDefault();
+            _event.stopPropagation();
+        }
+        async hndDrop(_event, _viewSource) {
+            if (!(_viewSource instanceof Fudge.ViewHierarchy || _viewSource instanceof Fudge.ViewExternal))
+                return;
+            let resources = [];
+            for (const source of _viewSource.getDragDropSources()) {
+                if (source instanceof ƒ.Node) {
+                    resources.push(await ƒ.Project.registerAsGraph(source, true));
+                    continue;
+                }
+                switch (source.getMimeType()) {
+                    case Fudge.MIME.AUDIO:
+                        resources.push(new ƒ.Audio(source.pathRelative));
+                        break;
+                    case Fudge.MIME.IMAGE:
+                        resources.push(new ƒ.TextureImage(source.pathRelative));
+                        break;
+                    case Fudge.MIME.MESH:
+                        resources.push(await new ƒ.MeshOBJ().load(source.pathRelative));
+                        break;
+                    case Fudge.MIME.GLTF:
+                        let settings = {
+                            [ƒ.Graph.name]: true,
+                            [ƒ.Animation.name]: true,
+                            [ƒ.Material.name]: false,
+                            [ƒ.Mesh.name]: false
+                        };
+                        let loader = await ƒ.GLTFLoader.LOAD(source.pathRelative);
+                        let load = await ƒui.Dialog.prompt(settings, false, `Select what to import from '${loader.name}'`, "Adjust settings and press OK", "OK", "Cancel");
+                        if (!load)
+                            break;
+                        for (let type in settings)
+                            if (settings[type])
+                                resources.push(...await loader.loadResources(ƒ[type]));
+                        break;
+                }
+            }
+            this.controller.dragDrop.sources = resources;
+            // TODO: this is awkward as the tree gets the drop event first, then the view gets it and then we must dispatch it to the tree again.
+            // ideally this view should listen during capture phase to avoid the double dispatch to the tree.
+            this.tree.dispatchEvent(new Event("drop" /* ƒui.EVENT.DROP */, { bubbles: false }));
+            this.dispatch(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
+        }
+        hndKeyboardEvent = (_event) => {
+            if (_event.code != ƒ.KEYBOARD_CODE.F2)
+                return;
+            let input = document.activeElement.querySelector("input");
+            if (!input)
+                return;
+            input.readOnly = false;
+            input.focus();
+        };
+        hndOpen = (_event) => {
+            // while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
+            this.dom.innerHTML = "";
+            this.tree = new ƒui.CustomTree(new Fudge.ControllerTreeResource(), this.resources);
+            this.dom.appendChild(this.tree);
+            this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
+            this.tree.title = "● Select to edit in \"Properties\"\n● Drag to \"Properties\" or \"Components\" to use if applicable.";
+            this.tree.findVisible(this.resources).expand(true);
+            this.hndCreate();
+        };
+        hndCreate = () => {
+            for (let idResource in ƒ.Project.resources) {
+                let resource = ƒ.Project.resources[idResource];
+                if (!this.resources.contains(resource))
+                    this.controller.addChildren([resource], this.resources);
+            }
+            this.hndUpdate();
+        };
+        hndDelete = () => {
+            for (const descendant of this.resources)
+                if (!(descendant instanceof Fudge.ResourceFolder) && !ƒ.Project.resources[descendant.idResource])
+                    this.controller.remove(descendant);
+            this.hndUpdate();
+        };
+        hndUpdate = () => {
+            this.tree.refresh();
+            Object.values(ƒ.Project.resources)
+                .filter(_resource => _resource.status == ƒ.RESOURCE_STATUS.ERROR)
+                .map(_resource => this.controller.getPath(_resource))
+                .forEach(_path => this.tree.show(_path));
+        };
+        hndEvent = (_event) => {
+            if (_event.detail?.sender)
+                return;
+            switch (_event.type) {
+                case "mutate" /* ƒui.EVENT.MUTATE */:
+                    _event.stopPropagation();
+                    this.dispatchToParent(Fudge.EVENT_EDITOR.MODIFY, {});
+                    break;
+                case "removeChild" /* ƒui.EVENT.REMOVE_CHILD */:
+                    _event.stopPropagation();
+                    this.dispatchToParent(Fudge.EVENT_EDITOR.DELETE, {});
+                    break;
+                case "rename" /* ƒui.EVENT.RENAME */:
+                    this.dispatchToParent(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true, detail: _event.detail });
+                    break;
+            }
+        };
+    }
+    Fudge.ViewInternalFolder = ViewInternalFolder;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

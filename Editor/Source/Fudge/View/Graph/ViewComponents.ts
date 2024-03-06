@@ -142,7 +142,7 @@ namespace Fudge {
       if (this.dom != _event.target)
         return;
 
-      if (!(_viewSource instanceof ViewInternal || _viewSource instanceof ViewScript))
+      if (!(_viewSource instanceof ViewInternal || _viewSource instanceof ViewInternalFolder || _viewSource instanceof ViewScript))
         return;
 
       for (let source of _viewSource.getDragDropSources()) {

@@ -16,6 +16,7 @@ namespace Fudge {
     private graphAutoView: string = "";
     // private includeAutoViewScript: boolean = true;
 
+    #resources: ResourceFolder;
     #document: Document;
 
     public constructor(_base: URL) {
@@ -29,6 +30,12 @@ namespace Fudge {
         //@ts-ignore
         (_event: Event) => Page.broadcast(new EditorEvent(EVENT_EDITOR.UPDATE))
       );
+    }
+
+    public get resources(): ResourceFolder {
+      if (!this.#resources)
+        this.#resources = new ResourceFolder("Resources");
+      return this.#resources;
     }
 
     private get gizmosFilter(): string {
@@ -97,7 +104,7 @@ namespace Fudge {
       let settings: HTMLMetaElement = head.querySelector("meta[type=settings]");
       let projectSettings: string = settings?.getAttribute("project");
       projectSettings = projectSettings?.replace(/'/g, "\"");
-      project.mutate(JSON.parse(projectSettings || "{}"));
+      await project.mutate(JSON.parse(projectSettings || "{}"));
       let panelInfo: string = settings?.getAttribute("panels");
       panelInfo = panelInfo?.replace(/'/g, "\"");
       Page.setPanelInfo(panelInfo || "[]");
@@ -141,6 +148,12 @@ namespace Fudge {
       //     this.#document.head.removeChild(autoViewScript);
 
       return this.stringifyHTML(this.#document);
+    }
+
+    public async mutate(_mutator: ƒ.Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void> {
+      if (_mutator.resources)
+        await this.resources.deserialize(ƒ.Serializer.parse(_mutator.resources));
+      return super.mutate(_mutator, _selection, _dispatchMutate);
     }
 
     public getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes {
@@ -302,6 +315,7 @@ namespace Fudge {
     private settingsStringify(): string {
       let mutator: ƒ.Mutator = project.getMutator(true);
       mutator.gizmosFilter = this.gizmosFilter;
+      mutator.resources = ƒ.Serializer.stringify(this.resources.serialize());
 
       let settings: string = JSON.stringify(mutator);
       settings = settings.replace(/"/g, "'");
@@ -336,9 +350,9 @@ namespace Fudge {
         cssRules.push(...getRules(cssText));
       }
 
-      for (let style of cssStyles) 
+      for (let style of cssStyles)
         cssRules.push(...getRules(style.innerHTML));
-      
+
       for (let rule of cssRules)
         if (rule instanceof CSSFontFaceRule)
           fonts.appendChild(document.createTextNode(rule.cssText));

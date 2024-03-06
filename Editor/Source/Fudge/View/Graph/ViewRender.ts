@@ -135,7 +135,7 @@ namespace Fudge {
       _event.dataTransfer.dropEffect = "none";
 
       if (!(_viewSource instanceof ViewComponents)) { // allow dropping cameracomponent to see through that camera (at this time, the only draggable)
-        if (!(_viewSource instanceof ViewInternal)) // allow dropping a graph
+        if (!(_viewSource instanceof ViewInternal || _viewSource instanceof ViewInternalFolder)) // allow dropping a graph
           return;
 
         let source: Object = _viewSource.getDragDropSources()[0];

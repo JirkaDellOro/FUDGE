@@ -20,6 +20,8 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.CREATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
+
       // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
@@ -158,7 +160,7 @@ namespace Fudge {
           break;
         case CONTEXTMENU.DELETE_RESOURCE:
           await this.table.controller.delete([this.table.getFocussed()]);
-          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
+          this.dispatch(EVENT_EDITOR.DELETE, { bubbles: true });
           break;
       }
     }
@@ -252,6 +254,7 @@ namespace Fudge {
         case EVENT_EDITOR.OPEN:
         case EVENT_EDITOR.CREATE:
         case EVENT_EDITOR.UPDATE:
+        case EVENT_EDITOR.DELETE:
           this.listResources();
       }
 
@@ -266,7 +269,7 @@ namespace Fudge {
         case ƒui.EVENT.REMOVE_CHILD:
           _event.stopPropagation();
           this.dispatchToParent(EVENT_EDITOR.DELETE, {});
-        case EVENT_EDITOR.SELECT:
+        case EVENT_EDITOR.SELECT: // TODO: is this reachable? Is it still needed?
           this.listResources();
           break;
         case ƒui.EVENT.RENAME:
