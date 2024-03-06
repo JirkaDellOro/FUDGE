@@ -5046,7 +5046,7 @@ var Fudge;
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: `Create ${ƒ.ParticleSystem.name}`, id: String(Fudge.CONTEXTMENU.CREATE_PARTICLE_EFFECT), click: _callback });
             menu.append(item);
-            item = new Fudge.remote.MenuItem({ label: "Delete Resource", id: String(Fudge.CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
+            item = new Fudge.remote.MenuItem({ label: "Delete", id: String(Fudge.CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "Delete" });
             menu.append(item);
             return menu;
         }
@@ -5102,20 +5102,21 @@ var Fudge;
             let item = _event.target;
             while (item != this.dom && !(item instanceof ƒui.CustomTreeItem))
                 item = item.parentElement;
-            this.contextMenu.items.forEach(_item => _item.visible = true);
             if (item == this.dom) {
                 item = this.tree.findVisible(this.resources);
                 item.focus();
-                this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.DELETE_RESOURCE)).visible = false;
             }
             if (!(item instanceof ƒui.CustomTreeItem))
                 return;
+            this.contextMenu.items.forEach(_item => _item.visible = true);
             if (!(item.data instanceof Fudge.ResourceFolder)) {
                 const createOptions = [Fudge.CONTEXTMENU.CREATE_FOLDER, Fudge.CONTEXTMENU.CREATE_GRAPH, Fudge.CONTEXTMENU.CREATE_MESH, Fudge.CONTEXTMENU.CREATE_MATERIAL, Fudge.CONTEXTMENU.CREATE_ANIMATION, Fudge.CONTEXTMENU.CREATE_PARTICLE_EFFECT];
                 createOptions.forEach(_id => {
                     this.contextMenu.getMenuItemById(String(_id)).visible = false;
                 });
             }
+            if (item.data == this.resources)
+                this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.DELETE_RESOURCE)).visible = false;
             this.contextMenu.popup();
         };
         //#endregion

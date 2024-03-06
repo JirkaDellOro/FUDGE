@@ -1688,6 +1688,8 @@ var FudgeUserInterface;
                     continue;
                 let branch = this.createBranch(this.controller.getChildren(item.data));
                 item.getBranch().restructure(branch);
+                if (!this.controller.hasChildren(item.data))
+                    item.expand(false);
             }
         }
         hndExpand(_event) {

@@ -85,7 +85,7 @@ namespace Fudge {
       item = new remote.MenuItem({ label: `Create ${ƒ.ParticleSystem.name}`, id: String(CONTEXTMENU.CREATE_PARTICLE_EFFECT), click: _callback });
       menu.append(item);
 
-      item = new remote.MenuItem({ label: "Delete Resource", id: String(CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "R" });
+      item = new remote.MenuItem({ label: "Delete", id: String(CONTEXTMENU.DELETE_RESOURCE), click: _callback, accelerator: "Delete" });
       menu.append(item);
 
       return menu;
@@ -152,16 +152,15 @@ namespace Fudge {
       while (item != this.dom && !(item instanceof ƒui.CustomTreeItem))
         item = item.parentElement;
 
-      this.contextMenu.items.forEach(_item => _item.visible = true);
-
       if (item == this.dom) {
         item = this.tree.findVisible(this.resources);
         item.focus();
-        this.contextMenu.getMenuItemById(String(CONTEXTMENU.DELETE_RESOURCE)).visible = false;
       }
 
       if (!(item instanceof ƒui.CustomTreeItem))
         return;
+
+      this.contextMenu.items.forEach(_item => _item.visible = true);
 
       if (!(item.data instanceof ResourceFolder)) {
         const createOptions: CONTEXTMENU[] = [CONTEXTMENU.CREATE_FOLDER, CONTEXTMENU.CREATE_GRAPH, CONTEXTMENU.CREATE_MESH, CONTEXTMENU.CREATE_MATERIAL, CONTEXTMENU.CREATE_ANIMATION, CONTEXTMENU.CREATE_PARTICLE_EFFECT];
@@ -169,6 +168,9 @@ namespace Fudge {
           this.contextMenu.getMenuItemById(String(_id)).visible = false;
         });
       }
+
+      if (item.data == this.resources)
+        this.contextMenu.getMenuItemById(String(CONTEXTMENU.DELETE_RESOURCE)).visible = false;
 
       this.contextMenu.popup();
     };

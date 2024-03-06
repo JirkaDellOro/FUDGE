@@ -65,6 +65,8 @@ namespace FudgeUserInterface {
 
         let branch: CustomTreeList<T> = this.createBranch(this.controller.getChildren(item.data));
         item.getBranch().restructure(branch);
+        if (!this.controller.hasChildren(item.data))
+          item.expand(false);
       }
     }
 
