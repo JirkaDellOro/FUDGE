@@ -658,10 +658,12 @@ var Fudge;
             ƒ.Debug.groupEnd();
             try {
                 const resourceFolderContent = await (await fetch(new URL(this.fileInternalFolder, this.base).toString())).text();
-                this.#resourceFolder = await ƒ.Serializer.deserialize(ƒ.Serializer.parse(resourceFolderContent));
+                const resourceFolder = await ƒ.Serializer.deserialize(ƒ.Serializer.parse(resourceFolderContent));
+                if (resourceFolder instanceof Fudge.ResourceFolder)
+                    this.#resourceFolder = resourceFolder;
             }
             catch (_error) {
-                ƒ.Debug.warn(`Failed to load the resource folder. A new resource folder was created and will be saved. |`, _error);
+                ƒ.Debug.warn(`Failed to load '${this.fileInternalFolder}'. A new resource folder was created and will be saved.`, _error);
             }
             let settings = head.querySelector("meta[type=settings]");
             let projectSettings = settings?.getAttribute("project");

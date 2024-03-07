@@ -35,7 +35,7 @@ namespace Fudge {
     }
 
     public get resourceFolder(): ResourceFolder {
-      if (!this.#resourceFolder) 
+      if (!this.#resourceFolder)
         this.#resourceFolder = new ResourceFolder("Resources");
       return this.#resourceFolder;
     }
@@ -105,9 +105,11 @@ namespace Fudge {
 
       try {
         const resourceFolderContent: string = await (await fetch(new URL(this.fileInternalFolder, this.base).toString())).text();
-        this.#resourceFolder = <ResourceFolder>await ƒ.Serializer.deserialize(ƒ.Serializer.parse(resourceFolderContent));
+        const resourceFolder: ƒ.Serializable = await ƒ.Serializer.deserialize(ƒ.Serializer.parse(resourceFolderContent));
+        if (resourceFolder instanceof ResourceFolder)
+          this.#resourceFolder = resourceFolder;
       } catch (_error) {
-        ƒ.Debug.warn(`Failed to load the resource folder. A new resource folder was created and will be saved. |`, _error);
+        ƒ.Debug.warn(`Failed to load '${this.fileInternalFolder}'. A new resource folder was created and will be saved.`, _error);
       }
 
       let settings: HTMLMetaElement = head.querySelector("meta[type=settings]");
