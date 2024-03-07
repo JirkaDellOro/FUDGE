@@ -5238,9 +5238,10 @@ declare namespace FudgeCore {
          * Teleports (moves instantly) to the _start point, then moves through the waypoint connections to the _end point.
          * @param _start
          * @param _end
+         * @param _rotate Rotates the walker to look in the direction of the waypoint
          * @returns a Promise that resolves when the _end point is reached. Rejects if _end can't be reached (no path found).
          */
-        moveTo(_start: Waypoint, _end: Waypoint): Promise<void>;
+        moveTo(_start: Waypoint, _end: Waypoint, _rotate?: boolean): Promise<void>;
         /** Takes care of the moving algorithm by calculating the next step and moving along this step */
         protected moving(): void;
         /** find the path between two given waypoints */
@@ -5262,6 +5263,7 @@ declare namespace FudgeCore {
          */
         protected calculateConnectionCost(_connection: Connection): number;
         private pathingNodeToPath;
+        private rotateTowards;
     }
     /**
      * An internal interface to manage pathing data inside the Walker

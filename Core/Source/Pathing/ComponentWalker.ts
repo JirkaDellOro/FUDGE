@@ -15,6 +15,8 @@ namespace FudgeCore {
     #walkData: WalkData = { path: [], totalProgress: -1 };
     /** keeps the promise to resolve when the walker has reached the goal */
     #promiseResolverOnWalkFinished: () => void;
+    /** status of whether it should rotate the walker to the walking direction */
+    #rotateInWalkDirection: boolean = false;
 
 
     public constructor() {
@@ -54,10 +56,11 @@ namespace FudgeCore {
      * Teleports (moves instantly) to the _start point, then moves through the waypoint connections to the _end point.
      * @param _start 
      * @param _end
+     * @param _rotate Rotates the walker to look in the direction of the waypoint
      * @returns a Promise that resolves when the _end point is reached. Rejects if _end can't be reached (no path found).
      */
-    public async moveTo(_start: Waypoint, _end: Waypoint): Promise<void>;
-    public async moveTo(_start: Waypoint, _end?: Waypoint): Promise<void> {
+    public async moveTo(_start: Waypoint, _end: Waypoint, _rotate?: boolean): Promise<void>;
+    public async moveTo(_start: Waypoint, _end?: Waypoint, _rotate: boolean = false): Promise<void> {
       if (!_start) return;
       let translate: Vector3 = Vector3.DIFFERENCE(_start.mtxWorld.translation, this.node.mtxWorld.translation);
       this.node.mtxLocal.translate(translate);
@@ -65,6 +68,7 @@ namespace FudgeCore {
         this.#walkData = { path: [], totalProgress: -1 };
         return;
       }
+      this.#rotateInWalkDirection = _rotate;
 
       return new Promise((_resolve, _reject) => {
         let path: PathingNode[] | null = this.getPath(_start, _end);
@@ -74,6 +78,10 @@ namespace FudgeCore {
         }
         this.#walkData = { path, totalProgress: 0 };
         this.#promiseResolverOnWalkFinished = _resolve;
+
+        if (this.#rotateInWalkDirection) {
+          this.rotateTowards(this.#walkData.path[1].waypoint);
+        }
       });
     }
 
@@ -93,6 +101,10 @@ namespace FudgeCore {
         this.node.mtxWorld.translation
       );
 
+      // let stepRotation: Matrix4x4 = Matrix4x4.CONSTRUCTION(step);
+      // stepRotation.rotate(this.node.mtxWorld.rotation);
+      // step = stepRotation.translation;
+
       let scale: Vector3 = Vector3.DIFFERENCE(
         currentPath.waypoint.mtxWorld.scaling,
         this.node.mtxWorld.scaling
@@ -100,8 +112,8 @@ namespace FudgeCore {
 
       if (delta * delta < step.magnitudeSquared) { // won't reach next waypoint yet. Using squares because that's faster to compute than sqrt
         step.normalize(delta);
-        this.node.mtxLocal.translate(step);
-        if(scale.magnitudeSquared > 0){
+        this.node.mtxLocal.translate(step, false);
+        if (scale.magnitudeSquared > 0) {
           scale.normalize(delta);
         }
         this.node.mtxLocal.scaling = Vector3.SUM(scale, this.node.mtxLocal.scaling);
@@ -112,7 +124,7 @@ namespace FudgeCore {
       // reached next point
       this.dispatchEvent(new CustomEvent(EVENT.WAYPOINT_REACHED, { bubbles: true, detail: currentPath.waypoint }));
       (<ComponentWaypoint>currentPath.waypoint).dispatchEvent(new CustomEvent(EVENT.WAYPOINT_REACHED, { bubbles: true, detail: this }));
-      this.node.mtxLocal.translate(step);
+      this.node.mtxLocal.translation = currentPath.waypoint.mtxWorld.translation;
       this.node.mtxLocal.scaling = currentPath.waypoint.mtxWorld.scaling;
       this.#walkData.totalProgress++;
 
@@ -120,6 +132,12 @@ namespace FudgeCore {
       if (this.#walkData.totalProgress >= this.#walkData.path.length) {
         if (this.#promiseResolverOnWalkFinished) this.#promiseResolverOnWalkFinished();
         this.dispatchEvent(new CustomEvent(EVENT.PATHING_CONCLUDED, { bubbles: true, detail: currentPath.waypoint }));
+        return;
+      }
+
+      // should we rotate walker?
+      if (this.#rotateInWalkDirection) {
+        this.rotateTowards(this.#walkData.path[this.#walkData.totalProgress].waypoint);
       }
     }
 
@@ -194,6 +212,10 @@ namespace FudgeCore {
         _node = _node.previous;
       } while (_node?.previous);
       return path.reverse();
+    }
+
+    private rotateTowards(_waypoint: Waypoint): void {
+      this.node.mtxLocal.lookAt(_waypoint.mtxWorld.translation);
     }
 
     #handleAttach(): void {
