@@ -133,7 +133,7 @@ namespace Fudge {
 
     public async delete(_focussed: ResourceNode[]): Promise<ResourceNode[]> {
       // TODO: add delete selection isntead of _focussed? Why doesn't the Tree class handle this?
-      let iRoot: number = _focussed.indexOf(project.resources);
+      let iRoot: number = _focussed.indexOf(project.resourceFolder);
       if (iRoot > -1)
         _focussed.splice(iRoot, 1);
 

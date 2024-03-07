@@ -290,6 +290,8 @@ var Fudge;
         fs.writeFileSync(htmlFileName, html);
         let jsonFileName = new URL(Fudge.project.fileInternal, base);
         fs.writeFileSync(jsonFileName, Fudge.project.getProjectJSON());
+        jsonFileName = new URL(Fudge.project.fileInternalFolder, base);
+        fs.writeFileSync(jsonFileName, Fudge.project.getResourceFolderJSON());
         watchFolder();
         return true;
     }
@@ -574,17 +576,19 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
+    ƒ.Serializer.registerNamespace(Fudge);
     class Project extends ƒ.Mutable {
         // public title: string = "NewProject";
         base;
         name;
         fileIndex = "index.html";
         fileInternal = "Internal.json";
+        fileInternalFolder = "InternalFolder.json";
         fileScript = "Script/Build/Script.js";
         fileStyles = "styles.css";
         graphAutoView = "";
         // private includeAutoViewScript: boolean = true;
-        #resources;
+        #resourceFolder;
         #document;
         constructor(_base) {
             super();
@@ -596,10 +600,10 @@ var Fudge;
             //@ts-ignore
             (_event) => Fudge.Page.broadcast(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.UPDATE)));
         }
-        get resources() {
-            if (!this.#resources)
-                this.#resources = new Fudge.ResourceFolder("Resources");
-            return this.#resources;
+        get resourceFolder() {
+            if (!this.#resourceFolder)
+                this.#resourceFolder = new Fudge.ResourceFolder("Resources");
+            return this.#resourceFolder;
         }
         get gizmosFilter() {
             return JSON.stringify(Array.from(ƒ.Gizmos.filter.entries()));
@@ -652,6 +656,13 @@ var Fudge;
             ƒ.Debug.groupCollapsed("Deserialized");
             ƒ.Debug.info(reconstruction);
             ƒ.Debug.groupEnd();
+            try {
+                const resourceFolderContent = await (await fetch(new URL(this.fileInternalFolder, this.base).toString())).text();
+                this.#resourceFolder = await ƒ.Serializer.deserialize(ƒ.Serializer.parse(resourceFolderContent));
+            }
+            catch (_error) {
+                ƒ.Debug.warn(`Failed to load the resource folder. A new resource folder was created and will be saved. |`, _error);
+            }
             let settings = head.querySelector("meta[type=settings]");
             let projectSettings = settings?.getAttribute("project");
             projectSettings = projectSettings?.replace(/'/g, "\"");
@@ -665,6 +676,9 @@ var Fudge;
             let serialization = ƒ.Project.serialize();
             let json = ƒ.Serializer.stringify(serialization);
             return json;
+        }
+        getResourceFolderJSON() {
+            return ƒ.Serializer.stringify(ƒ.Serializer.serialize(this.#resourceFolder));
         }
         getProjectCSS() {
             let content = "";
@@ -691,11 +705,6 @@ var Fudge;
             //     this.#document.head.removeChild(autoViewScript);
             return this.stringifyHTML(this.#document);
         }
-        async mutate(_mutator, _selection, _dispatchMutate) {
-            if (_mutator.resources)
-                await this.resources.deserialize(ƒ.Serializer.parse(_mutator.resources));
-            return super.mutate(_mutator, _selection, _dispatchMutate);
-        }
         getMutatorAttributeTypes(_mutator) {
             let types = super.getMutatorAttributeTypes(_mutator);
             if (types.graphAutoView)
@@ -706,6 +715,7 @@ var Fudge;
             delete _mutator.base;
             delete _mutator.fileIndex;
             delete _mutator.fileInternal;
+            delete _mutator.fileResourceFolder;
             delete _mutator.fileScript;
             delete _mutator.fileStyles;
         }
@@ -829,7 +839,6 @@ var Fudge;
         settingsStringify() {
             let mutator = Fudge.project.getMutator(true);
             mutator.gizmosFilter = this.gizmosFilter;
-            mutator.resources = ƒ.Serializer.stringify(this.resources.serialize());
             let settings = JSON.stringify(mutator);
             settings = settings.replace(/"/g, "'");
             return settings;
@@ -1226,8 +1235,8 @@ var Fudge;
         get controller() {
             return this.tree.controller;
         }
-        get resources() {
-            return Fudge.project.resources;
+        get resourceFolder() {
+            return Fudge.project.resourceFolder;
         }
         getSelection() {
             return this.controller.selection.filter(_element => !(_element instanceof Fudge.ResourceFolder));
@@ -1327,7 +1336,7 @@ var Fudge;
             while (item != this.dom && !(item instanceof ƒui.CustomTreeItem))
                 item = item.parentElement;
             if (item == this.dom) {
-                item = this.tree.findVisible(this.resources);
+                item = this.tree.findVisible(this.resourceFolder);
                 item.focus();
             }
             if (!(item instanceof ƒui.CustomTreeItem))
@@ -1339,7 +1348,7 @@ var Fudge;
                     this.contextMenu.getMenuItemById(String(_id)).visible = false;
                 });
             }
-            if (item.data == this.resources)
+            if (item.data == this.resourceFolder)
                 this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.DELETE_RESOURCE)).visible = false;
             this.contextMenu.popup();
         };
@@ -1408,7 +1417,7 @@ var Fudge;
         hndOpen = (_event) => {
             // while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
             this.dom.innerHTML = "";
-            this.tree = new ƒui.CustomTree(new Fudge.ControllerTreeResource(), this.resources);
+            this.tree = new ƒui.CustomTree(new Fudge.ControllerTreeResource(), this.resourceFolder);
             this.dom.appendChild(this.tree);
             this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
             this.tree.title = "● Select to edit in \"Properties\"\n● Drag to \"Properties\" or \"Components\" to use if applicable.";
@@ -1418,17 +1427,17 @@ var Fudge;
             // add new resources to root folder
             for (let idResource in ƒ.Project.resources) {
                 let resource = ƒ.Project.resources[idResource];
-                if (!this.resources.contains(resource))
-                    this.controller.addChildren([resource], this.resources);
+                if (!this.resourceFolder.contains(resource))
+                    this.controller.addChildren([resource], this.resourceFolder);
             }
             this.hndUpdate();
-            let rootItem = this.tree.findVisible(this.resources);
+            let rootItem = this.tree.findVisible(this.resourceFolder);
             if (!rootItem.expanded)
                 rootItem.expand(true);
         };
         hndDelete = () => {
             // remove resources that are no longer registered in the project
-            for (const descendant of this.resources)
+            for (const descendant of this.resourceFolder)
                 if (!(descendant instanceof Fudge.ResourceFolder) && !ƒ.Project.resources[descendant.idResource])
                     this.controller.remove(descendant);
             this.hndUpdate();
@@ -2295,7 +2304,7 @@ var Fudge;
         }
         async delete(_focussed) {
             // TODO: add delete selection isntead of _focussed? Why doesn't the Tree class handle this?
-            let iRoot = _focussed.indexOf(Fudge.project.resources);
+            let iRoot = _focussed.indexOf(Fudge.project.resourceFolder);
             if (iRoot > -1)
                 _focussed.splice(iRoot, 1);
             let serializations = ƒ.Project.serialize();

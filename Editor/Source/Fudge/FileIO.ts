@@ -79,6 +79,9 @@ namespace Fudge {
     let jsonFileName: URL = new URL(project.fileInternal, base);
     fs.writeFileSync(jsonFileName, project.getProjectJSON());
 
+    jsonFileName = new URL(project.fileInternalFolder, base);
+    fs.writeFileSync(jsonFileName, project.getResourceFolderJSON());
+
     watchFolder();
     return true;
   }

@@ -40,8 +40,8 @@ namespace Fudge {
       return <ControllerTreeResource>this.tree.controller;
     }
 
-    public get resources(): ResourceFolder {
-      return project.resources;
+    public get resourceFolder(): ResourceFolder {
+      return project.resourceFolder;
     }
 
     public getSelection(): ƒ.SerializableResource[] {
@@ -163,7 +163,7 @@ namespace Fudge {
         item = item.parentElement;
 
       if (item == this.dom) {
-        item = this.tree.findVisible(this.resources);
+        item = this.tree.findVisible(this.resourceFolder);
         item.focus();
       }
 
@@ -179,7 +179,7 @@ namespace Fudge {
         });
       }
 
-      if (item.data == this.resources)
+      if (item.data == this.resourceFolder)
         this.contextMenu.getMenuItemById(String(CONTEXTMENU.DELETE_RESOURCE)).visible = false;
 
       this.contextMenu.popup();
@@ -264,7 +264,7 @@ namespace Fudge {
     private hndOpen = (_event: Event): void => {
       // while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
       this.dom.innerHTML = "";
-      this.tree = new ƒui.CustomTree<ResourceNode>(new ControllerTreeResource(), this.resources);
+      this.tree = new ƒui.CustomTree<ResourceNode>(new ControllerTreeResource(), this.resourceFolder);
       this.dom.appendChild(this.tree);
       this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
       this.tree.title = "● Select to edit in \"Properties\"\n● Drag to \"Properties\" or \"Components\" to use if applicable.";
@@ -275,18 +275,18 @@ namespace Fudge {
       // add new resources to root folder
       for (let idResource in ƒ.Project.resources) {
         let resource: ƒ.SerializableResource = ƒ.Project.resources[idResource];
-        if (!this.resources.contains(resource))
-          this.controller.addChildren([resource], this.resources);
+        if (!this.resourceFolder.contains(resource))
+          this.controller.addChildren([resource], this.resourceFolder);
       }
       this.hndUpdate();
-      let rootItem: ƒui.CustomTreeItem<ResourceNode> = this.tree.findVisible(this.resources);
+      let rootItem: ƒui.CustomTreeItem<ResourceNode> = this.tree.findVisible(this.resourceFolder);
       if (!rootItem.expanded)
         rootItem.expand(true);
     };
 
     private hndDelete = (): void => {
       // remove resources that are no longer registered in the project
-      for (const descendant of this.resources)
+      for (const descendant of this.resourceFolder)
         if (!(descendant instanceof ResourceFolder) && !ƒ.Project.resources[descendant.idResource])
           this.controller.remove(descendant);
 
