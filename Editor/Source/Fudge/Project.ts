@@ -129,7 +129,7 @@ namespace Fudge {
     }
 
     public getResourceFolderJSON(): string {
-      return ƒ.Serializer.stringify(ƒ.Serializer.serialize(this.#resourceFolder));
+      return ƒ.Serializer.stringify(ƒ.Serializer.serialize(this.resourceFolder));
     }
 
 

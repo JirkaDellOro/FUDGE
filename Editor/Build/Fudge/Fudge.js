@@ -680,7 +680,7 @@ var Fudge;
             return json;
         }
         getResourceFolderJSON() {
-            return ƒ.Serializer.stringify(ƒ.Serializer.serialize(this.#resourceFolder));
+            return ƒ.Serializer.stringify(ƒ.Serializer.serialize(this.resourceFolder));
         }
         getProjectCSS() {
             let content = "";
