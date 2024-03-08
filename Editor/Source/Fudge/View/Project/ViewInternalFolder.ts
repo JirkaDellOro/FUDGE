@@ -235,7 +235,7 @@ namespace Fudge {
               break;
 
             for (let type in ViewInternal.gltfImportSettings) if (ViewInternal.gltfImportSettings[type])
-              resources.push(...await loader.loadResources<ƒ.SerializableResource>(ƒ[type]));
+              resources.push(...await loader.loadResources<ƒ.SerializableResourceExternal>(ƒ[type]));
 
             break;
         }

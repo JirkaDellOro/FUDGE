@@ -298,6 +298,10 @@ namespace FudgeCore {
             if (_mutator.url != undefined || _mutator.name != undefined)
               await this.load();
           }
+
+          protected reduceMutator(_mutator: Mutator): void {
+            delete _mutator.status;
+          }
         }
 
         return MutableSerializableResourceExternal;

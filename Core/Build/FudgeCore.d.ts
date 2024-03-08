@@ -1854,6 +1854,7 @@ declare namespace FudgeCore {
      */
     class AnimationSequence extends Mutable implements Serializable {
         private keys;
+        constructor(_keys?: AnimationKey[]);
         get length(): number;
         /**
          * Evaluates the sequence at the given point in time.
@@ -7734,6 +7735,7 @@ declare namespace GLTF {
          */
         parent?: number;
         /**
+         * Path from the root node to this node.
          * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
          */
         path?: number[];
@@ -7915,7 +7917,7 @@ declare namespace FudgeCore {
         /**
          * Returns new instances of all resources of the given type.
          */
-        loadResources<T extends SerializableResource>(_class: new () => T): Promise<T[]>;
+        loadResources<T extends SerializableResourceExternal>(_class: new () => T): Promise<T[]>;
         /**
          * Returns a {@link Graph} for the given scene name or the default scene if no name is given.
          */

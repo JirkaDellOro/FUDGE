@@ -12,7 +12,7 @@ namespace FudgeCore {
 
     public serialize(): Serialization {
       const serialization: Serialization = super.serialize();
-      serialization.fps = this.fps;
+      serialization.framesPerSecond = this.fps;
       return serialization;
     }
   }

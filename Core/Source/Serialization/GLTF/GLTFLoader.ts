@@ -206,7 +206,7 @@ namespace FudgeCore {
               path.push(iParent);
               iParent = _gltf.nodes[iParent].parent;
             }
-            _node.path = path;
+            _node.path = path.reverse();
           }
 
         });
@@ -239,8 +239,8 @@ namespace FudgeCore {
     /**
      * Returns new instances of all resources of the given type.
      */
-    public async loadResources<T extends SerializableResource>(_class: new () => T): Promise<T[]> {
-      let resources: SerializableResource[] = [];
+    public async loadResources<T extends SerializableResourceExternal>(_class: new () => T): Promise<T[]> {
+      let resources: SerializableResourceExternal[] = [];
       switch (_class.name) {
         case Graph.name:
           for (let iScene: number = 0; iScene < this.#gltf.scenes?.length; iScene++)
@@ -264,6 +264,8 @@ namespace FudgeCore {
       for (const resource of resources) {
         if (!Project.resources[resource.idResource])
           Project.register(resource);
+
+        resource.status = RESOURCE_STATUS.READY;
       }
 
       return <T[]>resources;
@@ -496,46 +498,23 @@ namespace FudgeCore {
       if (!gltfAnimation)
         throw new Error(`${this}: Couldn't find animation with index ${_iAnimation}.`);
 
-      // group channels by node
-      let gltfChannelsGrouped: GLTF.AnimationChannel[][] = []; // TODO: maybe change this to map or js object
-      for (const gltfChannel of gltfAnimation.channels) {
-        const iNode: number = gltfChannel.target.node;
-        if (iNode == undefined)
-          continue;
-        if (!gltfChannelsGrouped[iNode])
-          gltfChannelsGrouped[iNode] = [];
-        gltfChannelsGrouped[iNode].push(gltfChannel);
-      }
-      // remove empty entries
-      gltfChannelsGrouped = gltfChannelsGrouped.filter(_channels => _channels != undefined);
-
       const animationStructure: AnimationStructure = {};
-      for (const gltfChannels of gltfChannelsGrouped) {
-        const gltfNode: GLTF.Node = this.#gltf.nodes[gltfChannels[0].target.node];
+      for (const gltfChannel of gltfAnimation.channels) {
+        const gltfNode: GLTF.Node = this.#gltf.nodes[gltfChannel.target.node];
+        if (!gltfNode)
+          continue;
 
-        let currentStructure: AnimationStructure = animationStructure;
-        for (const iPathNode of gltfNode.path.reverse()) {
-          const pathNode: GLTF.Node = this.#gltf.nodes[iPathNode];
-
-          if (currentStructure.children == undefined)
-            currentStructure.children = {};
-
-          if ((currentStructure.children as AnimationStructure)[pathNode.name] == undefined)
-            (currentStructure.children as AnimationStructure)[pathNode.name] = {};
-          currentStructure = (currentStructure.children as AnimationStructure)[pathNode.name] as AnimationStructure;
-
-          if (pathNode == gltfNode) {
-            const mtxLocal: AnimationSequenceMatrix4x4 = {};
-            for (const gltfChannel of gltfChannels)
-              mtxLocal[toInternTransformation[gltfChannel.target.path]] =
-                await this.getAnimationSequenceVector(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
-            currentStructure.components = {
-              ComponentTransform: [
-                { mtxLocal: mtxLocal }
-              ]
-            };
-          }
+        let node: General = animationStructure;
+        for (const iNode of gltfNode.path) {
+          const childName: string = this.#gltf.nodes[iNode].name;
+          // node.children[childName]
+          node = (node.children ??= {})[childName] ??= {};
         }
+
+        // node.components.ComponentTransform[0].mtxLocal
+        let mtxLocal: AnimationSequenceMatrix4x4 = <AnimationSequenceMatrix4x4>((((node.components ??= {}).ComponentTransform ??= [])[0] ??= {}).mtxLocal ??= {});
+        mtxLocal[toInternTransformation[gltfChannel.target.path]] =
+          await this.getAnimationSequenceVector(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
       }
 
       const animation: Animation = _animation ?? new AnimationGLTF();
@@ -1142,12 +1121,9 @@ namespace FudgeCore {
       let lastRotation: Quaternion;
       let nextRotation: Quaternion;
 
-      const sequenceVector: AnimationSequenceVector3 | AnimationSequenceVector4 = {};
-      sequenceVector.x = new AnimationSequence();
-      sequenceVector.y = new AnimationSequence();
-      sequenceVector.z = new AnimationSequence();
+      const sequences: AnimationKey[][] = [[], [], []];
       if (isRotation) {
-        sequenceVector.w = new AnimationSequence();
+        sequences.push([]);
         lastRotation = Recycler.get(Quaternion);
         nextRotation = Recycler.get(Quaternion);
       }
@@ -1171,10 +1147,11 @@ namespace FudgeCore {
           lastRotation.set(nextRotation.x, nextRotation.y, nextRotation.z, nextRotation.w);
         }
 
-        sequenceVector.x.addKey(new AnimationKey(time, output[iOutput + 0], interpolation, isCubic && output[iOutputSlopeIn + 0] / millisPerSecond, isCubic && output[iOutputSlopeOut + 0] / millisPerSecond));
-        sequenceVector.y.addKey(new AnimationKey(time, output[iOutput + 1], interpolation, isCubic && output[iOutputSlopeIn + 1] / millisPerSecond, isCubic && output[iOutputSlopeOut + 1] / millisPerSecond));
-        sequenceVector.z.addKey(new AnimationKey(time, output[iOutput + 2], interpolation, isCubic && output[iOutputSlopeIn + 2] / millisPerSecond, isCubic && output[iOutputSlopeOut + 2] / millisPerSecond));
-        (<AnimationSequenceVector4>sequenceVector).w?.addKey(new AnimationKey(time, output[iOutput + 3], interpolation, isCubic && output[iOutputSlopeIn + 3] / millisPerSecond, isCubic && output[iOutputSlopeOut + 3] / millisPerSecond));
+        sequences[0].push(new AnimationKey(time, output[iOutput + 0], interpolation, isCubic && output[iOutputSlopeIn + 0] / millisPerSecond, isCubic && output[iOutputSlopeOut + 0] / millisPerSecond));
+        sequences[1].push(new AnimationKey(time, output[iOutput + 1], interpolation, isCubic && output[iOutputSlopeIn + 1] / millisPerSecond, isCubic && output[iOutputSlopeOut + 1] / millisPerSecond));
+        sequences[2].push(new AnimationKey(time, output[iOutput + 2], interpolation, isCubic && output[iOutputSlopeIn + 2] / millisPerSecond, isCubic && output[iOutputSlopeOut + 2] / millisPerSecond));
+        if (isRotation)
+          sequences[3].push(new AnimationKey(time, output[iOutput + 3], interpolation, isCubic && output[iOutputSlopeIn + 3] / millisPerSecond, isCubic && output[iOutputSlopeOut + 3] / millisPerSecond));
       }
 
       if (isRotation) {
@@ -1182,7 +1159,7 @@ namespace FudgeCore {
         Recycler.store(nextRotation);
       }
 
-      return sequenceVector;
+      return { x: new AnimationSequence(sequences[0]), y: new AnimationSequence(sequences[1]), z: new AnimationSequence(sequences[2]), w: new AnimationSequence(sequences[3]) };
     }
 
     private toInternInterpolation(_interpolation: GLTF.AnimationSampler["interpolation"]): ANIMATION_INTERPOLATION {

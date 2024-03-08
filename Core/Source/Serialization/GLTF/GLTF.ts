@@ -574,6 +574,7 @@ namespace GLTF {
      */
     parent?: number;
     /**
+     * Path from the root node to this node.
      * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
      */
     path?: number[];
