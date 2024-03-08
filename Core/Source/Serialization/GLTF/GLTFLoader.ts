@@ -29,14 +29,18 @@ namespace FudgeCore {
     }
 
     private static get defaultMaterial(): Material {
-      if (!this.#defaultMaterial)
+      if (!this.#defaultMaterial) {
         this.#defaultMaterial = new Material("GLTFDefaultMaterial", ShaderPhong, new CoatRemissive(Color.CSS("white"), 1, 0.5));
+        Project.deregister(this.#defaultMaterial);
+      }
       return this.#defaultMaterial;
     }
 
     private static get defaultSkinMaterial(): Material {
-      if (!this.#defaultSkinMaterial)
+      if (!this.#defaultSkinMaterial) {
         this.#defaultSkinMaterial = new Material("GLTFDefaultSkinMaterial", ShaderPhongSkin, new CoatRemissive(Color.CSS("white"), 1, 0.5));
+        Project.deregister(this.#defaultSkinMaterial);
+      }
       return this.#defaultSkinMaterial;
     }
 
@@ -56,15 +60,15 @@ namespace FudgeCore {
       let loaded: T;
 
       if (_resource instanceof GraphInstance)
-        loaded = <T>await loader.getGraph(_resource.get().name, _resource);
+        loaded = await loader.getGraph(_resource.get().name, _resource);
       else if (_resource instanceof GraphGLTF)
-        loaded = <T>await loader.getGraph(_resource.name, _resource);
+        loaded = await loader.getGraph(_resource.name, _resource);
       else if (_resource instanceof MeshGLTF)
-        loaded = <T>await loader.getMesh(_resource.name, _resource.iPrimitive, _resource);
+        loaded = await loader.getMesh(_resource.name, _resource.iPrimitive, _resource);
       else if (_resource instanceof MaterialGLTF)
-        loaded = <T>await loader.getMaterial(_resource.name, _resource);
+        loaded = await loader.getMaterial(_resource.name, _resource);
       else if (_resource instanceof AnimationGLTF)
-        loaded = <T>await loader.getAnimation(_resource.name, _resource);
+        loaded = await loader.getAnimation(_resource.name, _resource);
 
       if (!loaded) {
         Debug.error(`${_resource.constructor.name} | ${_resource instanceof GraphInstance ? _resource.idSource : _resource.idResource}: Failed to load resource.`);
@@ -202,7 +206,7 @@ namespace FudgeCore {
               path.push(iParent);
               iParent = _gltf.nodes[iParent].parent;
             }
-            _node.path = path;
+            _node.path = path.reverse();
           }
 
         });
@@ -233,28 +237,35 @@ namespace FudgeCore {
     }
 
     /**
-        * Returns all resources of the given type.
-        */
-    public async loadResources<T extends Serializable>(_class: new () => T): Promise<T[]> {
-      let resources: Serializable[] = [];
+     * Returns new instances of all resources of the given type.
+     */
+    public async loadResources<T extends SerializableResourceExternal>(_class: new () => T): Promise<T[]> {
+      let resources: SerializableResourceExternal[] = [];
       switch (_class.name) {
         case Graph.name:
-          for (let iScene: number = 0; iScene < this.#gltf.scenes.length; iScene++)
+          for (let iScene: number = 0; iScene < this.#gltf.scenes?.length; iScene++)
             resources.push(await this.getGraph(iScene, new GraphGLTF()));
           break;
         case Mesh.name:
-          for (let iMesh: number = 0; iMesh < this.#gltf.meshes.length; iMesh++)
+          for (let iMesh: number = 0; iMesh < this.#gltf.meshes?.length; iMesh++)
             for (let iPrimitive: number = 0; iPrimitive < this.#gltf.meshes[iMesh].primitives.length; iPrimitive++)
               resources.push(await this.getMesh(iMesh, iPrimitive, new MeshGLTF()));
           break;
         case Material.name:
-          for (let iMaterial: number = 0; iMaterial < this.#gltf.materials.length; iMaterial++)
+          for (let iMaterial: number = 0; iMaterial < this.#gltf.materials?.length; iMaterial++)
             resources.push(await this.getMaterial(iMaterial, new MaterialGLTF("Hi :)")));
           break;
         case Animation.name:
-          for (let iAnimation: number = 0; iAnimation < this.#gltf.animations.length; iAnimation++)
+          for (let iAnimation: number = 0; iAnimation < this.#gltf.animations?.length; iAnimation++)
             resources.push(await this.getAnimation(iAnimation, new AnimationGLTF()));
           break;
+      }
+
+      for (const resource of resources) {
+        if (!Project.resources[resource.idResource])
+          Project.register(resource);
+
+        resource.status = RESOURCE_STATUS.READY;
       }
 
       return <T[]>resources;
@@ -263,16 +274,16 @@ namespace FudgeCore {
     /**
      * Returns a {@link Graph} for the given scene name or the default scene if no name is given.
      */
-    public async getGraph(_name?: string): Promise<Node>;
+    public async getGraph(_name?: string): Promise<Graph>;
     /**
      * Returns a {@link Graph} for the given scene index or the default scene if no index is given.
      */
-    public async getGraph(_iScene?: number): Promise<Node>;
+    public async getGraph(_iScene?: number): Promise<Graph>;
     /**
      * Loads a scene from the glTF file into the given {@link Graph}.
      * @internal
      */
-    public async getGraph(_iScene: number | string, _graph: Node): Promise<Node>;
+    public async getGraph<T extends Node>(_iScene: number | string, _graph: T): Promise<T>;
     public async getGraph(_iScene: number | string = this.#gltf.scene, _graph?: Node): Promise<Node> {
       _iScene = this.getIndex(_iScene, this.#gltf.scenes);
 
@@ -297,11 +308,11 @@ namespace FudgeCore {
       for (const iNode of gltfScene.nodes)
         graph.addChild(await this.getNodeByIndex(iNode));
 
-      if (this.#gltf.animations?.length > 0 && !graph.getComponent(ComponentAnimator)) {
-        let animation: Animation = await this.getAnimation(0);
-        Project.register(animation);
-        graph.addComponent(new ComponentAnimator(animation));
-      }
+      // if (this.#gltf.animations?.length > 0 && !graph.getComponent(ComponentAnimator)) {
+      //   let animation: Animation = await this.getAnimation(0);
+      //   Project.register(animation);
+      //   graph.addComponent(new ComponentAnimator(animation));
+      // }
 
       // TODO: load only skeletons which belong to the scene???
       // if (this.gltf.skins?.length > 0)
@@ -470,7 +481,7 @@ namespace FudgeCore {
      * Loads an animation from the glTF file into the given {@link Animation}.
      * @internal
      */
-    public async getAnimation(_iAnimation: number | string, _animation: Animation): Promise<Animation>;
+    public async getAnimation<T extends Animation>(_iAnimation: number | string, _animation: T): Promise<T>;
     public async getAnimation(_iAnimation: number | string, _animation?: Animation): Promise<Animation> {
       _iAnimation = this.getIndex(_iAnimation, this.#gltf.animations);
 
@@ -487,52 +498,30 @@ namespace FudgeCore {
       if (!gltfAnimation)
         throw new Error(`${this}: Couldn't find animation with index ${_iAnimation}.`);
 
-      // group channels by node
-      let gltfChannelsGrouped: GLTF.AnimationChannel[][] = []; // TODO: maybe change this to map or js object
-      for (const gltfChannel of gltfAnimation.channels) {
-        const iNode: number = gltfChannel.target.node;
-        if (iNode == undefined)
-          continue;
-        if (!gltfChannelsGrouped[iNode])
-          gltfChannelsGrouped[iNode] = [];
-        gltfChannelsGrouped[iNode].push(gltfChannel);
-      }
-      // remove empty entries
-      gltfChannelsGrouped = gltfChannelsGrouped.filter(_channels => _channels != undefined);
-
       const animationStructure: AnimationStructure = {};
-      for (const gltfChannels of gltfChannelsGrouped) {
-        const gltfNode: GLTF.Node = this.#gltf.nodes[gltfChannels[0].target.node];
+      for (const gltfChannel of gltfAnimation.channels) {
+        const gltfNode: GLTF.Node = this.#gltf.nodes[gltfChannel.target.node];
+        if (!gltfNode)
+          continue;
 
-        let currentStructure: AnimationStructure = animationStructure;
-        for (const iPathNode of gltfNode.path.reverse()) {
-          const pathNode: GLTF.Node = this.#gltf.nodes[iPathNode];
-
-          if (currentStructure.children == undefined)
-            currentStructure.children = {};
-
-          if ((currentStructure.children as AnimationStructure)[pathNode.name] == undefined)
-            (currentStructure.children as AnimationStructure)[pathNode.name] = {};
-          currentStructure = (currentStructure.children as AnimationStructure)[pathNode.name] as AnimationStructure;
-
-          if (pathNode == gltfNode) {
-            const mtxLocal: AnimationSequenceMatrix4x4 = {};
-            for (const gltfChannel of gltfChannels)
-              mtxLocal[toInternTransformation[gltfChannel.target.path]] =
-                await this.getAnimationSequenceVector(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
-            currentStructure.components = {
-              ComponentTransform: [
-                { mtxLocal: mtxLocal }
-              ]
-            };
-          }
+        let node: General = animationStructure;
+        for (const iNode of gltfNode.path) {
+          const childName: string = this.#gltf.nodes[iNode].name;
+          // node.children[childName]
+          node = (node.children ??= {})[childName] ??= {};
         }
+
+        // node.components.ComponentTransform[0].mtxLocal
+        let mtxLocal: AnimationSequenceMatrix4x4 = <AnimationSequenceMatrix4x4>((((node.components ??= {}).ComponentTransform ??= [])[0] ??= {}).mtxLocal ??= {});
+        mtxLocal[toInternTransformation[gltfChannel.target.path]] =
+          await this.getAnimationSequenceVector(gltfAnimation.samplers[gltfChannel.sampler], gltfChannel.target.path);
       }
 
       const animation: Animation = _animation ?? new AnimationGLTF();
       animation.animationStructure = animationStructure;
       animation.clearCache();
       animation.name = gltfAnimation.name;
+      animation.calculateTotalTime();
       if (animation instanceof AnimationGLTF)
         animation.url = this.#url;
       if (!_animation) {
@@ -555,7 +544,7 @@ namespace FudgeCore {
      * Loads a mesh from the glTF file into the given {@link Mesh}
      * @internal
     */
-    public async getMesh(_iMesh: number | string, _iPrimitive: number, _mesh: Mesh): Promise<Mesh>;
+    public async getMesh<T extends Mesh>(_iMesh: number | string, _iPrimitive: number, _mesh: T): Promise<T>;
     public async getMesh(_iMesh: number | string, _iPrimitive: number = 0, _mesh?: Mesh): Promise<Mesh> {
       _iMesh = this.getIndex(_iMesh, this.#gltf.meshes);
 
@@ -716,7 +705,7 @@ namespace FudgeCore {
      * Loads a material from the glTF file into the given {@link Material}.
      * @internal
      */
-    public async getMaterial(_iMaterial: number | string, _material?: Material, _skin?: boolean, _flat?: boolean): Promise<Material>;
+    public async getMaterial<T extends Material>(_iMaterial: number | string, _material?: T, _skin?: boolean, _flat?: boolean): Promise<T>;
     public async getMaterial(_iMaterial: number | string, _material?: Material, _skin: boolean = false, _flat: boolean = false): Promise<Material> {
       _iMaterial = this.getIndex(_iMaterial, this.#gltf.materials);
 
@@ -1132,12 +1121,9 @@ namespace FudgeCore {
       let lastRotation: Quaternion;
       let nextRotation: Quaternion;
 
-      const sequenceVector: AnimationSequenceVector3 | AnimationSequenceVector4 = {};
-      sequenceVector.x = new AnimationSequence();
-      sequenceVector.y = new AnimationSequence();
-      sequenceVector.z = new AnimationSequence();
+      const sequences: AnimationKey[][] = [[], [], []];
       if (isRotation) {
-        sequenceVector.w = new AnimationSequence();
+        sequences.push([]);
         lastRotation = Recycler.get(Quaternion);
         nextRotation = Recycler.get(Quaternion);
       }
@@ -1161,10 +1147,11 @@ namespace FudgeCore {
           lastRotation.set(nextRotation.x, nextRotation.y, nextRotation.z, nextRotation.w);
         }
 
-        sequenceVector.x.addKey(new AnimationKey(time, output[iOutput + 0], interpolation, isCubic && output[iOutputSlopeIn + 0] / millisPerSecond, isCubic && output[iOutputSlopeOut + 0] / millisPerSecond));
-        sequenceVector.y.addKey(new AnimationKey(time, output[iOutput + 1], interpolation, isCubic && output[iOutputSlopeIn + 1] / millisPerSecond, isCubic && output[iOutputSlopeOut + 1] / millisPerSecond));
-        sequenceVector.z.addKey(new AnimationKey(time, output[iOutput + 2], interpolation, isCubic && output[iOutputSlopeIn + 2] / millisPerSecond, isCubic && output[iOutputSlopeOut + 2] / millisPerSecond));
-        (<AnimationSequenceVector4>sequenceVector).w?.addKey(new AnimationKey(time, output[iOutput + 3], interpolation, isCubic && output[iOutputSlopeIn + 3] / millisPerSecond, isCubic && output[iOutputSlopeOut + 3] / millisPerSecond));
+        sequences[0].push(new AnimationKey(time, output[iOutput + 0], interpolation, isCubic && output[iOutputSlopeIn + 0] / millisPerSecond, isCubic && output[iOutputSlopeOut + 0] / millisPerSecond));
+        sequences[1].push(new AnimationKey(time, output[iOutput + 1], interpolation, isCubic && output[iOutputSlopeIn + 1] / millisPerSecond, isCubic && output[iOutputSlopeOut + 1] / millisPerSecond));
+        sequences[2].push(new AnimationKey(time, output[iOutput + 2], interpolation, isCubic && output[iOutputSlopeIn + 2] / millisPerSecond, isCubic && output[iOutputSlopeOut + 2] / millisPerSecond));
+        if (isRotation)
+          sequences[3].push(new AnimationKey(time, output[iOutput + 3], interpolation, isCubic && output[iOutputSlopeIn + 3] / millisPerSecond, isCubic && output[iOutputSlopeOut + 3] / millisPerSecond));
       }
 
       if (isRotation) {
@@ -1172,7 +1159,7 @@ namespace FudgeCore {
         Recycler.store(nextRotation);
       }
 
-      return sequenceVector;
+      return { x: new AnimationSequence(sequences[0]), y: new AnimationSequence(sequences[1]), z: new AnimationSequence(sequences[2]), w: new AnimationSequence(sequences[3]) };
     }
 
     private toInternInterpolation(_interpolation: GLTF.AnimationSampler["interpolation"]): ANIMATION_INTERPOLATION {

@@ -422,6 +422,7 @@ declare namespace FudgeUserInterface {
         selectInterval(_dataStart: T, _dataEnd: T): void;
         delete(_data: T[]): CustomTreeItem<T>[];
         findVisible(_data: T): CustomTreeItem<T>;
+        [Symbol.iterator](): Iterator<CustomTreeItem<T>>;
         private hndDragOver;
     }
 }
@@ -445,12 +446,15 @@ declare namespace FudgeUserInterface {
          */
         clearSelection(): void;
         /**
-         * Return the object in focus
+         * Return the object in focus or null if none is focussed
          */
         getFocussed(): T;
+        /**
+         * Refresh the whole tree to synchronize with the data the tree is based on
+         */
+        refresh(): void;
         private hndExpand;
         private createBranch;
-        private hndRename;
         private hndSelect;
         private hndDrop;
         private hndDragLeave;
@@ -482,12 +486,16 @@ declare namespace FudgeUserInterface {
         };
         /** Used by the tree to indicate the drop position while dragging */
         dragDropDivider: HTMLHRElement;
+        /**
+         * Override if some objects should not be draggable
+         */
+        draggable(_object: T): boolean;
         /** Create an HTMLFormElement for the tree item representing the object */
-        abstract createContent(_object: T): HTMLFormElement;
+        abstract createContent(_object: T): HTMLFieldSetElement;
         /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
         abstract getAttributes(_object: T): string;
         /** Process the proposed new name */
-        abstract rename(_object: T, _id: string, _new: string): boolean;
+        abstract rename(_object: T, _id: string, _new: string): Promise<boolean>;
         /** Return true if the object has children that must be shown when unfolding the tree item */
         abstract hasChildren(_object: T): boolean;
         /** Return the object's children to show when unfolding the tree item */
@@ -504,16 +512,12 @@ declare namespace FudgeUserInterface {
          * return a list of those objects in order for the according {@link CustomTreeItem} to be deleted also
          * @param _focussed The object currently having focus
          */
-        abstract delete(_focussed: T[]): T[];
+        abstract delete(_focussed: T[]): Promise<T[]>;
         /**
          * Return a list of copies of the objects given for copy & paste
          * @param _focussed The object currently having focus
          */
         abstract copy(_originals: T[]): Promise<T[]>;
-        /**
-         * Override if some objects should not be draggable
-         */
-        draggable(_object: T): boolean;
     }
 }
 declare namespace FudgeUserInterface {
@@ -547,11 +551,15 @@ declare namespace FudgeUserInterface {
         /**
          * Returns the content representing the attached {@link data}
          */
-        get content(): HTMLFormElement;
+        get content(): HTMLFieldSetElement;
         /**
          * Set the content representing the attached {@link data}
          */
-        set content(_content: HTMLFormElement);
+        set content(_content: HTMLFieldSetElement);
+        /**
+         * Returns whether this item is expanded, showing it's children, or closed
+         */
+        get expanded(): boolean;
         refreshAttributes(): void;
         refreshContent(): void;
         /**

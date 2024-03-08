@@ -268,8 +268,11 @@ namespace FudgeCore {
 
       public status: RESOURCE_STATUS = RESOURCE_STATUS.PENDING;
 
-      public serialize(): Serialization {
-        const serialization: Serialization = super.serialize();
+      /**
+       * Returns a {@link Serialization} of this resource. By default only the data needed to load it from the external source is serialized ("url", "name", "idResource"). Set _super to true to serialize all data.
+       */
+      public serialize(_super: boolean = false): Serialization {
+        const serialization: Serialization = _super ? super.serialize() : { idResource: this.idResource, name: this.name };
         serialization.url = this.url.toString();
         return serialization;
       }
@@ -294,6 +297,10 @@ namespace FudgeCore {
             await super.mutate(_mutator, _selection, false);
             if (_mutator.url != undefined || _mutator.name != undefined)
               await this.load();
+          }
+
+          protected reduceMutator(_mutator: Mutator): void {
+            delete _mutator.status;
           }
         }
 

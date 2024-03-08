@@ -2,6 +2,7 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
+  ƒ.Serializer.registerNamespace(Fudge);
 
   export class Project extends ƒ.Mutable {
     // public title: string = "NewProject";
@@ -10,12 +11,14 @@ namespace Fudge {
 
     public fileIndex: string = "index.html";
     public fileInternal: string = "Internal.json";
+    public fileInternalFolder: string = "InternalFolder.json";
     public fileScript: string = "Script/Build/Script.js";
     public fileStyles: string = "styles.css";
 
     private graphAutoView: string = "";
     // private includeAutoViewScript: boolean = true;
 
+    #resourceFolder: ResourceFolder;
     #document: Document;
 
     public constructor(_base: URL) {
@@ -29,6 +32,12 @@ namespace Fudge {
         //@ts-ignore
         (_event: Event) => Page.broadcast(new EditorEvent(EVENT_EDITOR.UPDATE))
       );
+    }
+
+    public get resourceFolder(): ResourceFolder {
+      if (!this.#resourceFolder)
+        this.#resourceFolder = new ResourceFolder("Resources");
+      return this.#resourceFolder;
     }
 
     private get gizmosFilter(): string {
@@ -94,10 +103,19 @@ namespace Fudge {
       ƒ.Debug.info(reconstruction);
       ƒ.Debug.groupEnd();
 
+      try {
+        const resourceFolderContent: string = await (await fetch(new URL(this.fileInternalFolder, this.base).toString())).text();
+        const resourceFolder: ƒ.Serializable = await ƒ.Serializer.deserialize(ƒ.Serializer.parse(resourceFolderContent));
+        if (resourceFolder instanceof ResourceFolder)
+          this.#resourceFolder = resourceFolder;
+      } catch (_error) {
+        ƒ.Debug.warn(`Failed to load '${this.fileInternalFolder}'. A new resource folder was created and will be saved.`, _error);
+      }
+
       let settings: HTMLMetaElement = head.querySelector("meta[type=settings]");
       let projectSettings: string = settings?.getAttribute("project");
       projectSettings = projectSettings?.replace(/'/g, "\"");
-      project.mutate(JSON.parse(projectSettings || "{}"));
+      await project.mutate(JSON.parse(projectSettings || "{}"));
       let panelInfo: string = settings?.getAttribute("panels");
       panelInfo = panelInfo?.replace(/'/g, "\"");
       Page.setPanelInfo(panelInfo || "[]");
@@ -109,6 +127,11 @@ namespace Fudge {
       let json: string = ƒ.Serializer.stringify(serialization);
       return json;
     }
+
+    public getResourceFolderJSON(): string {
+      return ƒ.Serializer.stringify(ƒ.Serializer.serialize(this.#resourceFolder));
+    }
+
 
     public getProjectCSS(): string {
       let content: string = "";
@@ -154,6 +177,7 @@ namespace Fudge {
       delete _mutator.base;
       delete _mutator.fileIndex;
       delete _mutator.fileInternal;
+      delete _mutator.fileResourceFolder;
       delete _mutator.fileScript;
       delete _mutator.fileStyles;
     }
@@ -336,9 +360,9 @@ namespace Fudge {
         cssRules.push(...getRules(cssText));
       }
 
-      for (let style of cssStyles) 
+      for (let style of cssStyles)
         cssRules.push(...getRules(style.innerHTML));
-      
+
       for (let rule of cssRules)
         if (rule instanceof CSSFontFaceRule)
           fonts.appendChild(document.createTextNode(rule.cssText));

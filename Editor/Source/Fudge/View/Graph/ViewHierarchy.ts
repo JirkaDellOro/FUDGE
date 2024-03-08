@@ -7,11 +7,11 @@ namespace Fudge {
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
    */
   export class ViewHierarchy extends View {
-    #selectionPrevious: ƒ.Node[] = [];
     private graph: ƒ.Graph;
     private tree: ƒUi.Tree<ƒ.Node>;
+    #selectionPrevious: ƒ.Node[] = [];
 
-    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
       // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
 
@@ -186,7 +186,7 @@ namespace Fudge {
           }
           break;
         case EVENT_EDITOR.UPDATE:
-          if (_event.detail.view instanceof ViewInternal) {
+          if (_event.detail.view instanceof ViewInternalTable) {
             if (_event.detail.data == this.graph) {
               console.log("Update Graph");
               let item: ƒUi.TreeItem<ƒ.Node> = this.tree.findItem(this.graph);

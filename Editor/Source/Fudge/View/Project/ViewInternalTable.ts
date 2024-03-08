@@ -10,7 +10,7 @@ namespace Fudge {
    * List the internal resources
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
    */
-  export class ViewInternal extends View {
+  export class ViewInternalTable extends ViewInternal {
     private table: ƒui.Table<ƒ.SerializableResource>;
 
     public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
@@ -20,6 +20,8 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.CREATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
+
       // this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.TEST, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
@@ -158,7 +160,7 @@ namespace Fudge {
           break;
         case CONTEXTMENU.DELETE_RESOURCE:
           await this.table.controller.delete([this.table.getFocussed()]);
-          this.dispatch(EVENT_EDITOR.CREATE, { bubbles: true });
+          this.dispatch(EVENT_EDITOR.DELETE, { bubbles: true });
           break;
       }
     }
@@ -207,18 +209,12 @@ namespace Fudge {
               break;
             case
               MIME.GLTF:
-              let settings: {} = {
-                [ƒ.Graph.name]: true,
-                [ƒ.Mesh.name]: false,
-                [ƒ.Material.name]: false,
-                [ƒ.Animation.name]: false
-              };
               let loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD(source.pathRelative);
-              let load: boolean = await ƒui.Dialog.prompt(settings, false, `Select what to import from '${loader.name}'`, "Adjust settings and press OK", "OK", "Cancel");
+              let load: boolean = await ƒui.Dialog.prompt(ViewInternal.gltfImportSettings, false, `Select what to import from '${loader.name}'`, "Adjust settings and press OK", "OK", "Cancel");
               if (!load)
                 break;
 
-              for (let type in settings) if (settings[type]) {
+              for (let type in ViewInternal.gltfImportSettings) if (ViewInternal.gltfImportSettings[type]) {
                 let resources: ƒ.SerializableResource[] = await loader.loadResources(ƒ[type]);
                 for (let resource of resources) {
                   if (!ƒ.Project.resources[resource.idResource])
@@ -252,6 +248,7 @@ namespace Fudge {
         case EVENT_EDITOR.OPEN:
         case EVENT_EDITOR.CREATE:
         case EVENT_EDITOR.UPDATE:
+        case EVENT_EDITOR.DELETE:
           this.listResources();
       }
 
@@ -266,7 +263,7 @@ namespace Fudge {
         case ƒui.EVENT.REMOVE_CHILD:
           _event.stopPropagation();
           this.dispatchToParent(EVENT_EDITOR.DELETE, {});
-        case EVENT_EDITOR.SELECT:
+        case EVENT_EDITOR.SELECT: // TODO: is this reachable? Is it still needed?
           this.listResources();
           break;
         case ƒui.EVENT.RENAME:

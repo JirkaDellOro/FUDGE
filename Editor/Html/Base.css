@@ -84,8 +84,9 @@ ul.tree {
   list-style: none;
 }
 
-ul.tree form {
+ul.tree fieldset {
   display: inline;
+  border: none;
 }
 
 ul.tree li {
@@ -124,6 +125,9 @@ ul.tree input[type="checkbox"]~ul {
   display: none;
 }
 
+ul.tree input[type="checkbox"]:has(+ fieldset[icon]) {
+  display: none;
+}
 
 /* Table */
 
@@ -205,6 +209,10 @@ input {
 *:focus {
   outline: 1px outset var(--color-focus);
   /* background-color: var(--color-focus); */
+}
+
+ul.tree li:has(>fieldset.error) {
+  outline: 1px outset var(--color-error);
 }
 
 input[type="number"] {

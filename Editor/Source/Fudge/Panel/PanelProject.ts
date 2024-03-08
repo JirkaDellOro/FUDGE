@@ -8,16 +8,16 @@ namespace Fudge {
    */
   export class PanelProject extends Panel {
 
-    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
-      this.goldenLayout.registerComponentConstructor(VIEW.INTERNAL, ViewInternal);
+      this.goldenLayout.registerComponentConstructor(VIEW.INTERNAL_TABLE, ViewInternalTable);
+      this.goldenLayout.registerComponentConstructor(VIEW.INTERNAL_FOLDER, ViewInternalFolder);
       this.goldenLayout.registerComponentConstructor(VIEW.EXTERNAL, ViewExternal);
       this.goldenLayout.registerComponentConstructor(VIEW.PROPERTIES, ViewProperties);
       this.goldenLayout.registerComponentConstructor(VIEW.PREVIEW, ViewPreview);
       this.goldenLayout.registerComponentConstructor(VIEW.SCRIPT, ViewScript);
 
-      let inner: ContentItem = this.goldenLayout.rootItem.contentItems[0];
       const config: RowOrColumnItemConfig = {
         type: "column",
         content: [{
@@ -49,10 +49,18 @@ namespace Fudge {
               title: "Script"
             }]
           }, {
-            type: "component",
-            componentType: VIEW.INTERNAL,
-            componentState: _state,
-            title: "Internal"
+            type: "stack",
+            content: [{
+              type: "component",
+              componentType: VIEW.INTERNAL_FOLDER,
+              componentState: _state,
+              title: "Internal"
+            }, {
+              type: "component",
+              componentType: VIEW.INTERNAL_TABLE,
+              componentState: _state,
+              title: "Table"
+            }]
           }]
         }]
       };
@@ -75,7 +83,7 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      if (_event.type != EVENT_EDITOR.UPDATE && _event.type != EVENT_EDITOR.CREATE)
+      if (_event.type != EVENT_EDITOR.UPDATE && _event.type != EVENT_EDITOR.CREATE && _event.type != EVENT_EDITOR.DELETE)
         _event.stopPropagation();
       this.setTitle("Project | " + project.name); //why here and everytime?
       if (_event.type == ƒui.EVENT.SELECT) {
@@ -83,6 +91,6 @@ namespace Fudge {
       }
       else
         this.broadcast(_event);
-    }
+    };
   }
 }

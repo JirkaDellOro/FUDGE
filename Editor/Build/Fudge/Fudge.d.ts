@@ -23,26 +23,27 @@ declare namespace Fudge {
         DELETE_COMPONENT = 4,
         ADD_COMPONENT_SCRIPT = 5,
         EDIT = 6,
-        CREATE_MESH = 7,
-        CREATE_MATERIAL = 8,
-        CREATE_GRAPH = 9,
-        CREATE_ANIMATION = 10,
-        CREATE_PARTICLE_EFFECT = 11,
-        SYNC_INSTANCES = 12,
-        REMOVE_COMPONENT = 13,
-        ADD_JOINT = 14,
-        DELETE_RESOURCE = 15,
-        ORTHGRAPHIC_CAMERA = 16,
-        RENDER_CONTINUOUSLY = 17,
-        ADD_PROPERTY = 18,
-        DELETE_PROPERTY = 19,
-        CONVERT_ANIMATION = 20,
-        ADD_PARTICLE_PROPERTY = 21,
-        ADD_PARTICLE_FUNCTION = 22,
-        ADD_PARTICLE_CONSTANT = 23,
-        ADD_PARTICLE_CODE = 24,
-        ADD_PARTICLE_TRANSFORMATION = 25,
-        DELETE_PARTICLE_DATA = 26
+        CREATE_FOLDER = 7,
+        CREATE_MESH = 8,
+        CREATE_MATERIAL = 9,
+        CREATE_GRAPH = 10,
+        CREATE_ANIMATION = 11,
+        CREATE_PARTICLE_EFFECT = 12,
+        SYNC_INSTANCES = 13,
+        REMOVE_COMPONENT = 14,
+        ADD_JOINT = 15,
+        DELETE_RESOURCE = 16,
+        ORTHGRAPHIC_CAMERA = 17,
+        RENDER_CONTINUOUSLY = 18,
+        ADD_PROPERTY = 19,
+        DELETE_PROPERTY = 20,
+        CONVERT_ANIMATION = 21,
+        ADD_PARTICLE_PROPERTY = 22,
+        ADD_PARTICLE_FUNCTION = 23,
+        ADD_PARTICLE_CONSTANT = 24,
+        ADD_PARTICLE_CODE = 25,
+        ADD_PARTICLE_TRANSFORMATION = 26,
+        DELETE_PARTICLE_DATA = 27
     }
     enum MENU {
         QUIT = "quit",
@@ -71,7 +72,8 @@ declare namespace Fudge {
         RENDER = "ViewRender",
         COMPONENTS = "ViewComponents",
         CAMERA = "ViewCamera",
-        INTERNAL = "ViewInternal",
+        INTERNAL_TABLE = "ViewInternalTable",
+        INTERNAL_FOLDER = "ViewInternalFolder",
         EXTERNAL = "ViewExternal",
         PROPERTIES = "ViewProperties",
         PREVIEW = "ViewPreview",
@@ -211,16 +213,19 @@ declare namespace Fudge {
         name: string;
         fileIndex: string;
         fileInternal: string;
+        fileInternalFolder: string;
         fileScript: string;
         fileStyles: string;
         private graphAutoView;
         constructor(_base: URL);
+        get resourceFolder(): ResourceFolder;
         private get gizmosFilter();
         private set gizmosFilter(value);
         openDialog(): Promise<boolean>;
         hndChange: (_event: Event) => void;
         load(_htmlContent: string): Promise<void>;
         getProjectJSON(): string;
+        getResourceFolderJSON(): string;
         getProjectCSS(): string;
         getProjectHTML(_title: string): string;
         getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
@@ -296,22 +301,30 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    let typesOfResources: ƒ.General[];
+    abstract class ViewInternal extends View {
+        static readonly gltfImportSettings: Record<string, boolean>;
+    }
     /**
-     * List the internal resources
-     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     * Displays the internal resources as a folder tree.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jonas Plotzky, HFU, 2024
      */
-    class ViewInternal extends View {
-        private table;
+    class ViewInternalFolder extends ViewInternal {
+        private tree;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
-        listResources(): void;
+        get controller(): ControllerTreeResource;
+        get resourceFolder(): ResourceFolder;
         getSelection(): ƒ.SerializableResource[];
         getDragDropSources(): ƒ.SerializableResource[];
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void>;
+        protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         private hndKeyboardEvent;
+        private hndOpen;
+        private hndCreate;
+        private hndDelete;
+        private hndUpdate;
         private hndEvent;
     }
 }
@@ -399,12 +412,12 @@ declare namespace Fudge {
         private data;
         private view;
         constructor(_data: ƒ.ParticleData.System, _view: ViewParticleSystem);
-        createContent(_data: ƒ.ParticleData.Recursive): HTMLFormElement;
+        createContent(_data: ƒ.ParticleData.Recursive): HTMLFieldSetElement;
         getAttributes(_data: ƒ.ParticleData.Recursive): string;
-        rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): boolean;
+        rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): Promise<boolean>;
         hasChildren(_data: ƒ.ParticleData.Recursive): boolean;
         getChildren(_data: ƒ.ParticleData.Recursive): ƒ.ParticleData.Recursive[];
-        delete(_focused: (ƒ.ParticleData.Recursive)[]): (ƒ.ParticleData.Recursive)[];
+        delete(_focused: (ƒ.ParticleData.Recursive)[]): Promise<ƒ.ParticleData.Recursive[]>;
         addChildren(_children: ƒ.ParticleData.Recursive[], _target: ƒ.ParticleData.Recursive, _at?: number): ƒ.ParticleData.Recursive[];
         copy(_originals: ƒ.ParticleData.Recursive[]): Promise<ƒ.ParticleData.Recursive[]>;
         draggable(_target: ƒ.ParticleData.Recursive): boolean;
@@ -412,6 +425,38 @@ declare namespace Fudge {
         private getKey;
         private deleteData;
         private renameVariable;
+    }
+}
+declare namespace Fudge {
+    import ƒui = FudgeUserInterface;
+    type ResourceNode = ResourceFile | ResourceFolder;
+    interface ResourceFile extends ƒ.SerializableResource {
+        resourceParent?: ResourceFolder;
+    }
+    class ResourceFolder implements ƒ.Serializable {
+        name: string;
+        resourceParent: ResourceFolder;
+        children: ResourceNode[];
+        constructor(_name?: string);
+        /**
+         * Returns true if this or any of its descendants contain the given resource.
+         */
+        contains(_resource: ƒ.SerializableResource): boolean;
+        serialize(): ƒ.Serialization;
+        deserialize(_serialization: ƒ.Serialization): Promise<ƒ.Serializable>;
+        [Symbol.iterator](): IterableIterator<ResourceNode>;
+    }
+    class ControllerTreeResource extends ƒui.CustomTreeController<ResourceNode> {
+        createContent(_object: ResourceNode): HTMLFieldSetElement;
+        getAttributes(_object: ResourceNode): string;
+        rename(_object: ResourceNode, _id: string, _new: string): Promise<boolean>;
+        hasChildren(_object: ResourceNode): boolean;
+        getChildren(_object: ResourceNode): ResourceNode[];
+        addChildren(_sources: ResourceNode[], _target: ResourceNode, _at?: number): ResourceNode[];
+        delete(_focussed: ResourceNode[]): Promise<ResourceNode[]>;
+        copy(_originals: ResourceNode[]): Promise<ResourceNode[]>;
+        getPath(_resource: ResourceNode): ResourceNode[];
+        remove(_resource: ResourceNode): void;
     }
 }
 declare namespace Fudge {
@@ -429,8 +474,8 @@ declare namespace Fudge {
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         /** Send custom copies of the given event to the views */
         broadcast: (_event: EditorEvent) => void;
-        abstract getState(): PanelState;
         private addViewComponent;
+        abstract getState(): PanelState;
     }
 }
 declare namespace Fudge {
@@ -521,7 +566,7 @@ declare namespace Fudge {
         constructor(_container: ComponentContainer, _state: Object);
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
-        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void>;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private hndEvent;
@@ -724,6 +769,27 @@ declare namespace Fudge {
         private setRenderContinously;
         private drawTranslation;
         private drawMesh;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    let typesOfResources: ƒ.General[];
+    /**
+     * List the internal resources
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewInternalTable extends ViewInternal {
+        private table;
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        listResources(): void;
+        getSelection(): ƒ.SerializableResource[];
+        getDragDropSources(): ƒ.SerializableResource[];
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void>;
+        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
+        protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
+        private hndKeyboardEvent;
+        private hndEvent;
     }
 }
 declare namespace Fudge {

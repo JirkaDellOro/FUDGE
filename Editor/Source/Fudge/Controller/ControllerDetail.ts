@@ -1,6 +1,6 @@
 ///<reference path="../View/View.ts"/>
 ///<reference path="../View/Project/ViewExternal.ts"/>
-///<reference path="../View/Project/ViewInternal.ts"/>
+///<reference path="../View/Project/ViewInternalFolder.ts"/>
 
 namespace Fudge {
   import ƒ = FudgeCore;
@@ -40,7 +40,7 @@ namespace Fudge {
       this.domElement.addEventListener(ƒUi.EVENT.INSERT, this.hndInsert);
     }
 
-    protected mutateOnInput = async (_event: Event) => {
+    protected mutateOnInput = async (_event: Event): Promise<void> => {
       // TODO: move this to Ui.Controller as a general optimization to only mutate what has been changed...!
       this.getMutator = super.getMutator;
 
@@ -59,7 +59,7 @@ namespace Fudge {
         this.getMutator = super.getMutator; // reset
         return mutator;
       };
-    }
+    };
     //#endregion
 
     private hndInsert = (_event: CustomEvent): void => {
@@ -69,7 +69,8 @@ namespace Fudge {
       console.log(mutable.type);
       if (mutable instanceof ƒ.MutableArray)
         mutable.push(new mutable.type());
-    }
+    };
+
     private hndKey = (_event: KeyboardEvent): void => {
       _event.stopPropagation();
       switch (_event.code) {
@@ -77,7 +78,7 @@ namespace Fudge {
           this.domElement.dispatchEvent(new CustomEvent(ƒUi.EVENT.DELETE, { bubbles: true, detail: this }));
           break;
       }
-    }
+    };
 
     private hndDragOver = (_event: DragEvent): void => {
       // url on texture
@@ -117,7 +118,7 @@ namespace Fudge {
           return (sources.length == 1 && sources[0].getMimeType() == _mime);
         };
       }
-    }
+    };
 
     private hndDrop = (_event: DragEvent): void => {
       let setExternalLink: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
@@ -145,17 +146,17 @@ namespace Fudge {
         return true;
       };
       let setTexture: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
-        let event: any = _event;    //.path does not exist on type DragEvent therefore it is set as any
+        let event: ƒ.General = _event;    //.path does not exist on type DragEvent therefore it is set as any
         let i: number = 0;
         let key: string = "";
-        while(key == ""){
+        while (key == "") {
           let tempKey: string = event.path[i].getAttribute("key");
-          if(tempKey == "texture" || tempKey == "normalMap"){
-            key = tempKey
-          }else if(tempKey == "Material"){
+          if (tempKey == "texture" || tempKey == "normalMap") {
+            key = tempKey;
+          } else if (tempKey == "Material") {
             return false;
           }
-          i++
+          i++;
         }
         this.mutable["coat"][key] = _sources[0];
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
@@ -210,7 +211,7 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.AnimationOnComponentAnimator, setAnimation)) return;
       // ParticleSystem on ComponentParticleSystem
       if (this.filterDragDrop(_event, filter.ParticleSystemOnComponentParticleSystem, setParticleSystem)) return;
-    }
+    };
 
 
     private filterDragDrop(_event: DragEvent, _filter: DragDropFilter, _callback: (_sources: Object[]) => boolean = () => true): boolean {
@@ -224,10 +225,8 @@ namespace Fudge {
 
       let viewSource: View = View.getViewSource(_event);
 
-      if (filter.fromViews) {
-        if (!_filter.fromViews.find((_view) => viewSource instanceof _view))
-          return false;
-      }
+      if (!_filter.fromViews?.find((_view) => viewSource instanceof _view))
+        return false;
 
       let sources: Object[] = viewSource.getDragDropSources();
       if (!(sources[0] instanceof _filter.ofType))

@@ -9,5 +9,11 @@ namespace FudgeCore {
       this.name = _name;
       return GLTFLoader.loadResource(this);
     }
+
+    public serialize(): Serialization {
+      const serialization: Serialization = super.serialize();
+      serialization.framesPerSecond = this.fps;
+      return serialization;
+    }
   }
 }

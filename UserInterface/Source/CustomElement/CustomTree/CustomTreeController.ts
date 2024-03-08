@@ -7,21 +7,28 @@ namespace FudgeUserInterface {
     /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
     public selection: T[] = [];
     /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
-    public dragDrop: { sources: T[], target: T, at?: number } = { sources: [], target: null };
+    public dragDrop: { sources: T[]; target: T; at?: number } = { sources: [], target: null };
     /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
-    public copyPaste: { sources: T[], target: T } = { sources: [], target: null };
+    public copyPaste: { sources: T[]; target: T } = { sources: [], target: null };
 
     /** Used by the tree to indicate the drop position while dragging */
     public dragDropDivider: HTMLHRElement = document.createElement("hr");
 
+    /**
+     * Override if some objects should not be draggable
+     */
+    public draggable(_object: T): boolean {
+      return true;
+    }
+
     /** Create an HTMLFormElement for the tree item representing the object */
-    public abstract createContent(_object: T): HTMLFormElement;
+    public abstract createContent(_object: T): HTMLFieldSetElement;
 
     /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
     public abstract getAttributes(_object: T): string;
 
     /** Process the proposed new name */
-    public abstract rename(_object: T, _id: string, _new: string): boolean;
+    public abstract rename(_object: T, _id: string, _new: string): Promise<boolean>;
 
     /** Return true if the object has children that must be shown when unfolding the tree item */
     public abstract hasChildren(_object: T): boolean;
@@ -42,7 +49,7 @@ namespace FudgeUserInterface {
      * return a list of those objects in order for the according {@link CustomTreeItem} to be deleted also   
      * @param _focussed The object currently having focus
      */
-    public abstract delete(_focussed: T[]): T[];
+    public abstract delete(_focussed: T[]): Promise<T[]>;
 
     /** 
      * Return a list of copies of the objects given for copy & paste
@@ -50,11 +57,6 @@ namespace FudgeUserInterface {
      */
     public abstract /* async */ copy(_originals: T[]): Promise<T[]>;
 
-    /**
-     * Override if some objects should not be draggable
-     */
-    public draggable(_object: T): boolean {
-      return true;
-    }
+
   }
 }

@@ -116,7 +116,7 @@ namespace Fudge {
       }
     }
 
-    protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+    protected async contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void> {
       ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
       let focus: ƒ.ParticleData.Recursive = this.tree.getFocussed();
       if (!focus)
@@ -163,7 +163,7 @@ namespace Fudge {
           this.dispatch(EVENT_EDITOR.CREATE, {});
           break;
         case CONTEXTMENU.DELETE_PARTICLE_DATA:
-          let remove: ƒ.Serialization[] = this.controller.delete([focus]);
+          let remove: ƒ.Serialization[] = await this.controller.delete([focus]);
           this.tree.delete(remove);
           this.tree.clearSelection();
           this.dispatch(EVENT_EDITOR.DELETE, {});

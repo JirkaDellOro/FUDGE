@@ -1786,7 +1786,7 @@ declare namespace FudgeCore {
     const AnimationGLTF_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
         status: RESOURCE_STATUS;
-        serialize(): Serialization;
+        serialize(_super?: boolean): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
         name: string;
@@ -1799,6 +1799,7 @@ declare namespace FudgeCore {
      */
     export class AnimationGLTF extends AnimationGLTF_base {
         load(_url?: RequestInfo, _name?: string): Promise<AnimationGLTF>;
+        serialize(): Serialization;
     }
     export {};
 }
@@ -1853,6 +1854,7 @@ declare namespace FudgeCore {
      */
     class AnimationSequence extends Mutable implements Serializable {
         private keys;
+        constructor(_keys?: AnimationKey[]);
         get length(): number;
         /**
          * Evaluates the sequence at the given point in time.
@@ -3252,7 +3254,7 @@ declare namespace FudgeCore {
     const GraphGLTF_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
         status: RESOURCE_STATUS;
-        serialize(): Serialization;
+        serialize(_super?: boolean): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
         name: string;
@@ -3522,7 +3524,7 @@ declare namespace FudgeCore {
     const MaterialGLTF_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
         status: RESOURCE_STATUS;
-        serialize(): Serialization;
+        serialize(_super?: boolean): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
         name: string;
@@ -4757,7 +4759,7 @@ declare namespace FudgeCore {
     const MeshFBX_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
         status: RESOURCE_STATUS;
-        serialize(): Serialization;
+        serialize(_super?: boolean): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
         name: string;
@@ -4796,7 +4798,7 @@ declare namespace FudgeCore {
     const MeshGLTF_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
         status: RESOURCE_STATUS;
-        serialize(): Serialization;
+        serialize(_super?: boolean): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
         name: string;
@@ -4819,7 +4821,7 @@ declare namespace FudgeCore {
     const MeshOBJ_base: (abstract new (...args: any[]) => {
         url: RequestInfo;
         status: RESOURCE_STATUS;
-        serialize(): Serialization;
+        serialize(_super?: boolean): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(): Promise<any>;
         name: string;
@@ -7735,6 +7737,7 @@ declare namespace GLTF {
          */
         parent?: number;
         /**
+         * Path from the root node to this node.
          * Custom property set by FUDGE loader. Not part of glTF standard 2.0.
          */
         path?: number[];
@@ -7914,17 +7917,17 @@ declare namespace FudgeCore {
          */
         get name(): string;
         /**
-            * Returns all resources of the given type.
-            */
-        loadResources<T extends Serializable>(_class: new () => T): Promise<T[]>;
+         * Returns new instances of all resources of the given type.
+         */
+        loadResources<T extends SerializableResourceExternal>(_class: new () => T): Promise<T[]>;
         /**
          * Returns a {@link Graph} for the given scene name or the default scene if no name is given.
          */
-        getGraph(_name?: string): Promise<Node>;
+        getGraph(_name?: string): Promise<Graph>;
         /**
          * Returns a {@link Graph} for the given scene index or the default scene if no index is given.
          */
-        getGraph(_iScene?: number): Promise<Node>;
+        getGraph(_iScene?: number): Promise<Graph>;
         /**
          * Returns the first {@link Node} with the given name.
          */

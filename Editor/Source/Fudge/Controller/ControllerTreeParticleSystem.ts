@@ -20,8 +20,8 @@ namespace Fudge {
       this.view = _view;
     }
 
-    public createContent(_data: ƒ.ParticleData.Recursive): HTMLFormElement {
-      let content: HTMLFormElement = document.createElement("form");
+    public createContent(_data: ƒ.ParticleData.Recursive): HTMLFieldSetElement {
+      let content: HTMLFieldSetElement = document.createElement("fieldset");
       let parentData: ƒ.ParticleData.Recursive = this.childToParent.get(_data);
       let key: string = this.getKey(_data);
       
@@ -34,7 +34,7 @@ namespace Fudge {
       if (parentData && parentData == this.data.variables) {
         let input: HTMLInputElement = document.createElement("input");
         input.type = "text";
-        input.disabled = true;
+        // input.disabled = true;
         input.value = this.data.variableNames[key];
         input.id = ID.NAME;
         content.appendChild(input);
@@ -55,7 +55,7 @@ namespace Fudge {
         } else {
           let input: HTMLInputElement = document.createElement("input");
           input.type = "text";
-          input.disabled = true;
+          // input.disabled = true;
           input.id = ID.VALUE;
           if (ƒ.ParticleData.isCode(_data)) {
             input.value = _data.code;
@@ -97,7 +97,7 @@ namespace Fudge {
       return attributes.join(" ");
     }
     
-    public rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): boolean {
+    public async rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): Promise<boolean> {
       let inputAsNumber: number = Number.parseFloat(_new);
 
       if (_id == ID.NAME && ƒ.ParticleData.isExpression(_data)) {
@@ -171,7 +171,7 @@ namespace Fudge {
       return children;
     }
 
-    public delete(_focused: (ƒ.ParticleData.Recursive)[]): (ƒ.ParticleData.Recursive)[] {
+    public async delete(_focused: (ƒ.ParticleData.Recursive)[]): Promise<ƒ.ParticleData.Recursive[]> {
       // delete selection independend of focussed item
       let deleted: (ƒ.ParticleData.Recursive)[] = [];
       let expend: (ƒ.ParticleData.Recursive)[] = this.selection.length > 0 ? this.selection : _focused;
@@ -254,7 +254,7 @@ namespace Fudge {
       if (ƒ.ParticleData.isFunction(parent) || ƒ.ParticleData.isTransformation(parent))
         parent = parent.parameters;
 
-      return Object.entries(parent).find(entry => entry[1] == _data)?.shift();
+      return Object.entries(parent).find(_entry => _entry[1] == _data)?.shift();
     }
 
     private deleteData(_data: ƒ.ParticleData.Recursive): boolean {

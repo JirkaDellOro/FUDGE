@@ -1500,12 +1500,9 @@ var FudgeUserInterface;
             for (let data of _path) {
                 let item = currentTree.findItem(data);
                 item.focus();
-                let content = item.getBranch();
-                if (!content) {
+                if (!item.expanded)
                     item.expand(true);
-                    content = item.getBranch();
-                }
-                currentTree = content;
+                currentTree = item.getBranch();
             }
         }
         /**
@@ -1518,8 +1515,7 @@ var FudgeUserInterface;
             for (let item of _tree.getItems()) {
                 let found = this.findItem(item.data);
                 if (found) {
-                    // found.content = item.content;
-                    // found.refreshContent();
+                    found.refreshContent();
                     found.hasChildren = item.hasChildren;
                     if (!found.hasChildren)
                         found.expand(false);
@@ -1530,6 +1526,7 @@ var FudgeUserInterface;
             }
             this.innerHTML = "";
             this.addItems(items);
+            this.displaySelection(this.controller.selection);
         }
         /**
          * Returns the {@link CustomTreeItem} of this list referencing the given object or null, if not found
@@ -1597,6 +1594,11 @@ var FudgeUserInterface;
                     return item;
             return null;
         }
+        *[Symbol.iterator]() {
+            let items = this.querySelectorAll("li");
+            for (let i = 0; i < items.length; i++)
+                yield items[i];
+        }
         hndDragOver = (_event) => {
             _event.stopPropagation();
             _event.preventDefault();
@@ -1610,7 +1612,10 @@ var FudgeUserInterface;
                     let addBefore = _event.clientY < rect.top + rect.height / 2;
                     let sibling = addBefore ? target.previousElementSibling : target.nextElementSibling;
                     if (sibling != this.controller.dragDropDivider)
-                        addBefore ? target.before(this.controller.dragDropDivider) : target.after(this.controller.dragDropDivider);
+                        if (addBefore)
+                            target.before(this.controller.dragDropDivider);
+                        else
+                            target.after(this.controller.dragDropDivider);
                 }
             }
             this.controller.dragDrop.at = this.controller.dragDropDivider.isConnected ?
@@ -1644,7 +1649,6 @@ var FudgeUserInterface;
             let root = new FudgeUserInterface.CustomTreeItem(this.controller, _root);
             this.appendChild(root);
             this.addEventListener("expand" /* EVENT.EXPAND */, this.hndExpand);
-            this.addEventListener("rename" /* EVENT.RENAME */, this.hndRename);
             this.addEventListener("itemselect" /* EVENT.SELECT */, this.hndSelect);
             this.addEventListener("drop" /* EVENT.DROP */, this.hndDrop, true);
             this.addEventListener("dragleave" /* EVENT.DRAG_LEAVE */, this.hndDragLeave);
@@ -1666,7 +1670,7 @@ var FudgeUserInterface;
             this.displaySelection(this.controller.selection);
         }
         /**
-         * Return the object in focus
+         * Return the object in focus or null if none is focussed
          */
         getFocussed() {
             let items = Array.from(this.querySelectorAll("li"));
@@ -1674,6 +1678,19 @@ var FudgeUserInterface;
             if (found > -1)
                 return items[found].data;
             return null;
+        }
+        /**
+         * Refresh the whole tree to synchronize with the data the tree is based on
+         */
+        refresh() {
+            for (const item of this) {
+                if (!item.expanded)
+                    continue;
+                let branch = this.createBranch(this.controller.getChildren(item.data));
+                item.getBranch().restructure(branch);
+                if (!this.controller.hasChildren(item.data))
+                    item.expand(false);
+            }
         }
         hndExpand(_event) {
             let item = _event.target;
@@ -1692,13 +1709,6 @@ var FudgeUserInterface;
             return branch;
         }
         // Callback / Eventhandler in Tree
-        hndRename(_event) {
-            let item = _event.target;
-            let renamed = this.controller.rename(item.data, _event.detail.id, _event.detail.value);
-            if (!renamed)
-                item.refreshContent();
-            item.refreshAttributes();
-        }
         hndSelect(_event) {
             // _event.stopPropagation();
             let detail = _event.detail;
@@ -1720,8 +1730,8 @@ var FudgeUserInterface;
             this.displaySelection(this.controller.selection);
         }
         hndDrop(_event) {
-            this.controller.dragDropDivider.remove();
             this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target, this.controller.dragDrop.at);
+            this.controller.dragDrop.sources = [];
         }
         hndDragLeave = (_event) => {
             let relatedTarget = _event.relatedTarget;
@@ -1736,6 +1746,7 @@ var FudgeUserInterface;
             let move = this.controller.addChildren(_children, _target, _at);
             if (!move || move.length == 0)
                 return;
+            let focus = this.getFocussed();
             // TODO: don't, when copying or coming from another source
             this.delete(move);
             let targetData = _target;
@@ -1747,14 +1758,12 @@ var FudgeUserInterface;
                 old.restructure(branch);
             else
                 targetItem.expand(true);
-            _children = [];
-            _target = null;
-            _at = null;
+            this.findVisible(focus)?.focus();
         }
-        hndDelete = (_event) => {
+        hndDelete = async (_event) => {
             let target = _event.target;
             _event.stopPropagation();
-            let remove = this.controller.delete([target.data]);
+            let remove = await this.controller.delete([target.data]);
             this.delete(remove);
         };
         hndEscape = (_event) => {
@@ -1773,7 +1782,7 @@ var FudgeUserInterface;
                     break;
                 case "cut" /* EVENT.CUT */:
                     this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
-                    let cut = this.controller.delete(this.controller.selection);
+                    let cut = await this.controller.delete(this.controller.selection);
                     this.delete(cut);
                     break;
             }
@@ -1912,11 +1921,18 @@ var FudgeUserInterface;
                 return false;
             };
         }
+        /**
+         * Returns whether this item is expanded, showing it's children, or closed
+         */
+        get expanded() {
+            return this.getBranch() && this.checkbox.checked;
+        }
         refreshAttributes() {
             this.setAttribute("attributes", this.controller.getAttributes(this.data));
         }
         refreshContent() {
             this.content = this.controller.createContent(this.data);
+            this.content.disabled = true;
         }
         /**
          * Tries to expanding the {@link CustomTreeList} of children, by dispatching {@link EVENT.EXPAND}.
@@ -1924,10 +1940,12 @@ var FudgeUserInterface;
          * in order to create that {@link CustomTreeList} and add it as branch to this item
          */
         expand(_expand) {
-            // this.removeBranch();
+            this.removeBranch();
             if (_expand)
                 this.dispatchEvent(new Event("expand" /* EVENT.EXPAND */, { bubbles: true }));
-            this.querySelector("input[type='checkbox']").checked = _expand;
+            this.checkbox.checked = _expand;
+            this.hasChildren = this.controller.hasChildren(this.data);
+            // (<HTMLInputElement>this.querySelector("input[type='checkbox']")).checked = _expand;
         }
         /**
          * Returns a list of all data referenced by the items succeeding this
@@ -1981,16 +1999,15 @@ var FudgeUserInterface;
         }
         hndFocus = (_event) => {
             _event.stopPropagation();
-            if (!(_event.target instanceof HTMLInputElement) || _event.target == this.checkbox)
+            if (_event.target == this.checkbox)
                 return;
-            _event.target.disabled = true;
+            if (_event.target != this)
+                this.content.disabled = true;
         };
         hndKey = (_event) => {
             _event.stopPropagation();
-            for (const iterator of this.content.elements) {
-                if (iterator instanceof HTMLInputElement && !iterator.disabled)
-                    return;
-            }
+            if (!this.content.disabled)
+                return;
             let content = this.querySelector("ul");
             switch (_event.code) {
                 // TODO: repair arrow key navigation
@@ -2047,37 +2064,33 @@ var FudgeUserInterface;
         startTypingInput(_inputElement) {
             if (!_inputElement)
                 _inputElement = this.content.elements.item(0);
-            if (_inputElement instanceof HTMLInputElement) {
-                _inputElement.disabled = false;
-                _inputElement.focus();
-            }
+            this.content.disabled = false;
+            _inputElement.focus();
+            // if (_inputElement instanceof HTMLInputElement) {
+            //   _inputElement.disabled = false;
+            //   _inputElement.focus();  
+            // } 
         }
         hndDblClick = (_event) => {
             _event.stopPropagation();
-            if (_event.target != this.checkbox)
+            if (_event.target != this.checkbox) {
                 this.startTypingInput(_event.target);
-        };
-        hndChange = (_event) => {
-            let target = _event.target;
-            let item = target.form?.parentNode;
-            _event.stopPropagation();
-            if (target instanceof HTMLInputElement) {
-                switch (target.type) {
-                    case "checkbox":
-                        this.expand(target.checked);
-                        break;
-                    case "text":
-                        target.disabled = true;
-                        item.focus();
-                        this.dispatchEvent(new CustomEvent("rename" /* EVENT.RENAME */, { bubbles: true, detail: { id: target.id, value: target.value } }));
-                        break;
-                    case "default":
-                        // console.log(target);
-                        break;
-                }
             }
-            if (target instanceof HTMLSelectElement)
-                this.dispatchEvent(new CustomEvent("rename" /* EVENT.RENAME */, { bubbles: true, detail: { id: target.id, value: target.value } }));
+        };
+        hndChange = async (_event) => {
+            let target = _event.target;
+            _event.stopPropagation();
+            if (target instanceof HTMLInputElement && target.type == "checkbox") {
+                this.expand(target.checked);
+                return;
+            }
+            // if (target instanceof HTMLSelectElement || target instanceof HTMLInputElement && target.type == "text") {
+            if (await this.controller.rename(this.data, target.id, target.value)) {
+                this.refreshContent();
+                this.refreshAttributes();
+                this.dispatchEvent(new CustomEvent("rename" /* EVENT.RENAME */, { bubbles: true, detail: { data: this.data } }));
+            }
+            // }
         };
         hndDragStart = (_event) => {
             // _event.stopPropagation();
@@ -2119,9 +2132,10 @@ var FudgeUserInterface;
             this.select(_event.ctrlKey, _event.shiftKey);
         };
         hndRemove = (_event) => {
-            if (_event.currentTarget == _event.target)
-                return;
-            _event.stopPropagation();
+            // the views might need to know about this event
+            // if (_event.currentTarget == _event.target)
+            //   return;
+            // _event.stopPropagation();
             this.hasChildren = this.controller.hasChildren(this.data);
         };
     }

@@ -5,7 +5,13 @@ namespace FudgeCore {
    * @authors Lukas Scheuerle, HFU, 2019 | Jonas Plotzky, HFU, 2022
    */
   export class AnimationSequence extends Mutable implements Serializable {
-    private keys: AnimationKey[] = [];
+    private keys: AnimationKey[];
+
+    public constructor(_keys: AnimationKey[] = []) {
+      super();
+      this.keys = _keys;
+      this.regenerateFunctions();
+    }
 
     public get length(): number {
       return this.keys.length;

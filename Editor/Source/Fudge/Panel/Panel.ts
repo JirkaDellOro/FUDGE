@@ -20,7 +20,7 @@ namespace Fudge {
     protected views: View[] = [];
     //public dom; // muss vielleicht weg
 
-    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
       this.dom.style.width = "100%";
       this.dom.style.overflow = "visible";
@@ -52,9 +52,7 @@ namespace Fudge {
       for (let view of this.views)
         if (view != target) // don't send back to original target view
           view.dispatch(<EVENT_EDITOR>_event.type, { detail: detail });
-    }
-
-    public abstract getState(): PanelState;
+    };
 
     private addViewComponent = (_event: EventEmitter.BubblingEvent): void => {
       // adjustmens for GoldenLayout 2
@@ -62,6 +60,8 @@ namespace Fudge {
       if (target instanceof Page.goldenLayoutModule.ComponentItem) {
         this.views.push(<View>target.component);
       }
-    }
+    };
+
+    public abstract getState(): PanelState;
   }
 }
