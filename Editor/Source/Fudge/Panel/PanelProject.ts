@@ -7,16 +7,15 @@ namespace Fudge {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2020- 2023
    */
   export class PanelProject extends Panel {
-
     public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
-      super(_container, _state);
-
-      this.goldenLayout.registerComponentConstructor(VIEW.INTERNAL_TABLE, ViewInternalTable);
-      this.goldenLayout.registerComponentConstructor(VIEW.INTERNAL_FOLDER, ViewInternalFolder);
-      this.goldenLayout.registerComponentConstructor(VIEW.EXTERNAL, ViewExternal);
-      this.goldenLayout.registerComponentConstructor(VIEW.PROPERTIES, ViewProperties);
-      this.goldenLayout.registerComponentConstructor(VIEW.PREVIEW, ViewPreview);
-      this.goldenLayout.registerComponentConstructor(VIEW.SCRIPT, ViewScript);
+      const constructors = { /* eslint-disable-line */
+        [VIEW.INTERNAL_TABLE]: ViewInternalTable,
+        [VIEW.INTERNAL_FOLDER]: ViewInternalFolder,
+        [VIEW.EXTERNAL]: ViewExternal,
+        [VIEW.PROPERTIES]: ViewProperties,
+        [VIEW.PREVIEW]: ViewPreview,
+        [VIEW.SCRIPT]: ViewScript
+      };
 
       const config: RowOrColumnItemConfig = {
         type: "column",
@@ -25,12 +24,10 @@ namespace Fudge {
           content: [{
             type: "component",
             componentType: VIEW.PROPERTIES,
-            componentState: _state,
             title: "Properties"
           }, {
             type: "component",
             componentType: VIEW.PREVIEW,
-            componentState: _state,
             title: "Preview"
           }]
         }, {
@@ -40,12 +37,10 @@ namespace Fudge {
             content: [{
               type: "component",
               componentType: VIEW.EXTERNAL,
-              componentState: _state,
               title: "External"
             }, {
               type: "component",
               componentType: VIEW.SCRIPT,
-              componentState: _state,
               title: "Script"
             }]
           }, {
@@ -53,19 +48,17 @@ namespace Fudge {
             content: [{
               type: "component",
               componentType: VIEW.INTERNAL_FOLDER,
-              componentState: _state,
               title: "Internal"
             }, {
               type: "component",
               componentType: VIEW.INTERNAL_TABLE,
-              componentState: _state,
               title: "Table"
             }]
           }]
         }]
       };
 
-      this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+      super(_container, _state, constructors, config);
 
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
@@ -77,10 +70,10 @@ namespace Fudge {
       this.broadcast(new EditorEvent(EVENT_EDITOR.OPEN, {}));
     }
 
-    public getState(): { [key: string]: string } {
-      // TODO: iterate over views and collect their states for reconstruction 
-      return {};
-    }
+    // TODO: iterate over views and collect their states for reconstruction 
+    // public getState(): { [key: string]: string } {
+    //   return {};
+    // }
 
     private hndEvent = (_event: CustomEvent): void => {
       if (_event.type != EVENT_EDITOR.UPDATE && _event.type != EVENT_EDITOR.CREATE && _event.type != EVENT_EDITOR.DELETE)

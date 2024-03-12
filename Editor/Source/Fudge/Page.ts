@@ -26,7 +26,7 @@ namespace Fudge {
   export class Page {
     public static goldenLayoutModule: ƒ.General = (globalThis as ƒ.General).goldenLayout;  // ƒ.General is synonym for any... hack to get GoldenLayout to work
     public static modeTransform: TRANSFORM = TRANSFORM.TRANSLATE;
-    private static idCounter: number = 0;
+    // private static idCounter: number = 0;
     private static goldenLayout: GoldenLayout;
     private static panels: Panel[] = [];
     private static physics: { [idGraph: string]: ƒ.Physics } = {};
@@ -37,20 +37,12 @@ namespace Fudge {
         localStorage.setItem("project", project.base.toString());
     }
 
-    public static getPanelInfo(): string {
-      let panelInfos: PanelInfo[] = [];
-      for (let panel of Page.panels)
-        panelInfos.push({ type: panel.constructor.name, state: panel.getState() });
-      return JSON.stringify(panelInfos);
+    public static getLayout(): ResolvedLayoutConfig {
+      return Page.goldenLayout.saveLayout();
     }
 
-    public static setPanelInfo(_panelInfos: string): void {
-      Page.goldenLayout.clear();
-      Page.panels = [];
-
-      let panelInfos: PanelInfo[] = JSON.parse(_panelInfos);
-      for (let panelInfo of panelInfos)
-        Page.add(Fudge[panelInfo.type], panelInfo.state);
+    public static loadLayout(_layout: LayoutConfig): void {
+      Page.goldenLayout.loadLayout(_layout);
     }
 
     public static setTransform(_mode: TRANSFORM): void {
@@ -98,50 +90,44 @@ namespace Fudge {
       Page.goldenLayout.registerComponentConstructor(PANEL.ANIMATION, PanelAnimation);
       Page.goldenLayout.registerComponentConstructor(PANEL.PARTICLE_SYSTEM, PanelParticleSystem);
 
-      Page.loadLayout();
-    }
-
-    private static add(_panel: typeof Panel, _state?: JsonValue): void {
-      const panelConfig: RowOrColumnItemConfig = {
-        type: "row",
-        content: [
-          {
-            type: "component",
-            componentType: _panel.name,
-            componentState: _state,
-            title: "Panel",
-            id: Page.generateID(_panel.name)
-          }
-        ]
-      };
-
-      if (!Page.goldenLayout.rootItem)  // workaround because golden Layout loses rootItem...
-        Page.loadLayout(); // TODO: these two lines appear to be obsolete, the condition is not met
-
-      Page.goldenLayout.rootItem.layoutManager.addItemAtLocation(panelConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
-    }
-
-    private static find(_type: typeof Panel): Panel[] {
-      let result: Panel[] = [];
-      result = Page.panels.filter((_panel) => { return _panel instanceof _type; });
-      return result;
-    }
-
-    private static generateID(_name: string): string {
-      return _name + Page.idCounter++;
-    }
-
-    private static loadLayout(): void {
-      let config: LayoutConfig = {
+      const config: LayoutConfig = {
         settings: { showPopoutIcon: false, showMaximiseIcon: true },
         root: {
           type: "row",
           isClosable: false,
-          content: [
-          ]
+          content: []
         }
       };
-      Page.goldenLayout.loadLayout(config);
+
+      Page.loadLayout(config);
+    }
+
+    private static add(_panel: typeof Panel, _state?: JsonValue): void {
+      const panelConfig: ComponentItemConfig = {
+        type: "component",
+        componentType: _panel.name,
+        componentState: _state,
+        title: "Panel",
+        id: Page.generateID(_panel.name)
+      };
+
+      // if (!Page.goldenLayout.rootItem)  // workaround because golden Layout loses rootItem...
+      //   Page.loadLayout(); // TODO: these two lines appear to be obsolete, the condition is not met
+
+      Page.goldenLayout.addItemAtLocation(panelConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+    }
+
+    private static find(_type: typeof Panel): Panel[] {
+      let result: Panel[] = [];
+      result = Page.panels.filter(_panel => _panel instanceof _type);
+      return result;
+    }
+
+    private static generateID(_name: string): string {
+      let i: number = 0;
+      while (this.goldenLayout.findFirstComponentItemById(_name + i)) 
+        i++;
+      return _name + i; // _name + Page.idCounter++;
     }
 
     //#region Page-Events from DOM

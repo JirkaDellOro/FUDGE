@@ -20,7 +20,7 @@ namespace Fudge {
     protected views: View[] = [];
     //public dom; // muss vielleicht weg
 
-    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: JsonValue | undefined, _viewConstructors?: { [name: string]: new (...args: ƒ.General) => View }, _rootItemConfig?: RowOrColumnItemConfig) {
       super(_container, _state);
       this.dom.style.width = "100%";
       this.dom.style.overflow = "visible";
@@ -29,19 +29,20 @@ namespace Fudge {
 
       const config: LayoutConfig = {
         settings: { showPopoutIcon: false, showMaximiseIcon: false },
-        root: {
-          type: "row",
-          isClosable: false,
-          content: [
-          ]
-        }
+        root: _rootItemConfig
       };
 
       this.goldenLayout = new Page.goldenLayoutModule.GoldenLayout(this.dom);
 
+      for (const key in _viewConstructors)
+        this.goldenLayout.registerComponentFactoryFunction(key, _container => new _viewConstructors[key](_container, _state)); // this way all views receive/share their panels state
+
       this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
       this.goldenLayout.on("itemCreated", this.addViewComponent);
-      this.goldenLayout.loadLayout(config);
+
+      this.goldenLayout.loadLayout(_state["layout"] ? Page.goldenLayoutModule.LayoutConfig.fromResolved(_state["layout"]) : config);
+      
+      _container.stateRequestEvent = this.getState.bind(this);
     }
 
     /** Send custom copies of the given event to the views */
@@ -53,6 +54,12 @@ namespace Fudge {
         if (view != target) // don't send back to original target view
           view.dispatch(<EVENT_EDITOR>_event.type, { detail: detail });
     };
+    
+    protected getState(): JsonValue {
+      let state: JsonValue = {};
+      state["layout"] = this.goldenLayout.saveLayout();
+      return state;
+    }
 
     private addViewComponent = (_event: EventEmitter.BubblingEvent): void => {
       // adjustmens for GoldenLayout 2
@@ -62,6 +69,6 @@ namespace Fudge {
       }
     };
 
-    public abstract getState(): PanelState;
+    // public abstract getState(): PanelState;
   }
 }

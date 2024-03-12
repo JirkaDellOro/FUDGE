@@ -150,7 +150,7 @@ namespace Fudge {
       }
 
       if (resource) {
-        this.dispatchToParent(EVENT_EDITOR.CREATE, { bubbles: true });
+        this.dispatchToParent(EVENT_EDITOR.CREATE, {});
         this.controller.addChildren([resource], focus);
         this.tree.findVisible(focus).expand(true);
         this.tree.findVisible(resource).focus();
@@ -246,7 +246,7 @@ namespace Fudge {
       // ideally this view should listen during capture phase to avoid the double dispatch to the tree.
       this.tree.dispatchEvent(new Event(ƒui.EVENT.DROP, { bubbles: false }));
 
-      this.dispatchToParent(EVENT_EDITOR.CREATE, { bubbles: true });
+      this.dispatchToParent(EVENT_EDITOR.CREATE, {});
     }
 
     private hndKeyboardEvent = (_event: KeyboardEvent): void => {

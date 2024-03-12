@@ -25,7 +25,7 @@ object {
 }
 
 div[panel] .lm_close {
-  visibility: hidden;
+  display: none;
 }
 
 *[view] {

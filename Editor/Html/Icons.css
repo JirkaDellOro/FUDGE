@@ -4,6 +4,7 @@ div.lm_tab::before,
 details>summary::after,
 .lm_controls .lm_close::before,
 .lm_controls .lm_maximise::before,
+.lm_controls .lm_tabdropdown::before,
 .lm_maximised .lm_controls .lm_maximise::before,
 div[view=ViewAnimation] fudge-stepper::after,
 .buttonIcon::before,
@@ -16,7 +17,6 @@ fudge-boolean input[type="checkbox"]::before {
   margin-right: 5px;
   vertical-align: inherit;
 }
-
 
 /* Checkbox */
 fudge-boolean input[type="checkbox"] {
@@ -55,6 +55,12 @@ details>summary::after {
 .lm_controls .lm_maximise::before {
   mask: url(../Html/Icon/Maximize.svg);
   -webkit-mask: url(../Html/Icon/Maximize.svg);
+}
+
+.lm_controls .lm_tabdropdown::before {
+  mask: url(../Html/Icon/Dropdown.svg);
+  -webkit-mask: url(../Html/Icon/Dropdown.svg);
+  margin-left: 5px;
 }
 
 .lm_maximised .lm_controls .lm_maximise::before {

@@ -244,8 +244,6 @@ var Fudge;
             return;
         let base = new URL(new URL("file://" + filename[0]).toString() + "/");
         console.log("Path", base.toString());
-        if (Fudge.project) // reset panel info when we already have a project otherwise old panel state gets saved in new project when calling saveProject()
-            Fudge.Page.setPanelInfo("[]");
         Fudge.project = new Fudge.Project(base);
         await saveProject(true);
         let ƒPath = new URL("../../", location.href);
@@ -292,6 +290,8 @@ var Fudge;
         fs.writeFileSync(jsonFileName, Fudge.project.getProjectJSON());
         jsonFileName = new URL(Fudge.project.fileInternalFolder, base);
         fs.writeFileSync(jsonFileName, Fudge.project.getResourceFolderJSON());
+        jsonFileName = new URL(Fudge.project.fileSettings, base);
+        fs.writeFileSync(jsonFileName, Fudge.project.getSettingsJSON());
         watchFolder();
         return true;
     }
@@ -363,7 +363,7 @@ var Fudge;
     class Page {
         static goldenLayoutModule = globalThis.goldenLayout; // ƒ.General is synonym for any... hack to get GoldenLayout to work
         static modeTransform = Fudge.TRANSFORM.TRANSLATE;
-        static idCounter = 0;
+        // private static idCounter: number = 0;
         static goldenLayout;
         static panels = [];
         static physics = {};
@@ -372,18 +372,11 @@ var Fudge;
             if (Fudge.project)
                 localStorage.setItem("project", Fudge.project.base.toString());
         }
-        static getPanelInfo() {
-            let panelInfos = [];
-            for (let panel of Page.panels)
-                panelInfos.push({ type: panel.constructor.name, state: panel.getState() });
-            return JSON.stringify(panelInfos);
+        static getLayout() {
+            return Page.goldenLayout.saveLayout();
         }
-        static setPanelInfo(_panelInfos) {
-            Page.goldenLayout.clear();
-            Page.panels = [];
-            let panelInfos = JSON.parse(_panelInfos);
-            for (let panelInfo of panelInfos)
-                Page.add(Fudge[panelInfo.type], panelInfo.state);
+        static loadLayout(_layout) {
+            Page.goldenLayout.loadLayout(_layout);
         }
         static setTransform(_mode) {
             Page.modeTransform = _mode;
@@ -421,35 +414,7 @@ var Fudge;
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.HELP, Fudge.PanelHelp);
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.ANIMATION, Fudge.PanelAnimation);
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.PARTICLE_SYSTEM, Fudge.PanelParticleSystem);
-            Page.loadLayout();
-        }
-        static add(_panel, _state) {
-            const panelConfig = {
-                type: "row",
-                content: [
-                    {
-                        type: "component",
-                        componentType: _panel.name,
-                        componentState: _state,
-                        title: "Panel",
-                        id: Page.generateID(_panel.name)
-                    }
-                ]
-            };
-            if (!Page.goldenLayout.rootItem) // workaround because golden Layout loses rootItem...
-                Page.loadLayout(); // TODO: these two lines appear to be obsolete, the condition is not met
-            Page.goldenLayout.rootItem.layoutManager.addItemAtLocation(panelConfig, [{ typeId: 7 /* LayoutManager.LocationSelector.TypeId.Root */ }]);
-        }
-        static find(_type) {
-            let result = [];
-            result = Page.panels.filter((_panel) => { return _panel instanceof _type; });
-            return result;
-        }
-        static generateID(_name) {
-            return _name + Page.idCounter++;
-        }
-        static loadLayout() {
-            let config = {
+            const config = {
                 settings: { showPopoutIcon: false, showMaximiseIcon: true },
                 root: {
                     type: "row",
@@ -457,7 +422,30 @@ var Fudge;
                     content: []
                 }
             };
-            Page.goldenLayout.loadLayout(config);
+            Page.loadLayout(config);
+        }
+        static add(_panel, _state) {
+            const panelConfig = {
+                type: "component",
+                componentType: _panel.name,
+                componentState: _state,
+                title: "Panel",
+                id: Page.generateID(_panel.name)
+            };
+            // if (!Page.goldenLayout.rootItem)  // workaround because golden Layout loses rootItem...
+            //   Page.loadLayout(); // TODO: these two lines appear to be obsolete, the condition is not met
+            Page.goldenLayout.addItemAtLocation(panelConfig, [{ typeId: 7 /* LayoutManager.LocationSelector.TypeId.Root */ }]);
+        }
+        static find(_type) {
+            let result = [];
+            result = Page.panels.filter(_panel => _panel instanceof _type);
+            return result;
+        }
+        static generateID(_name) {
+            let i = 0;
+            while (this.goldenLayout.findFirstComponentItemById(_name + i))
+                i++;
+            return _name + i; // _name + Page.idCounter++;
         }
         //#region Page-Events from DOM
         static setupPageListeners() {
@@ -585,6 +573,7 @@ var Fudge;
         fileInternal = "Internal.json";
         fileInternalFolder = "InternalFolder.json";
         fileScript = "Script/Build/Script.js";
+        fileSettings = "settings.json";
         fileStyles = "styles.css";
         graphAutoView = "";
         // private includeAutoViewScript: boolean = true;
@@ -606,10 +595,10 @@ var Fudge;
             return this.#resourceFolder;
         }
         get gizmosFilter() {
-            return JSON.stringify(Array.from(ƒ.Gizmos.filter.entries()));
+            return Array.from(ƒ.Gizmos.filter.entries());
         }
         set gizmosFilter(_filter) {
-            let gizmosFilter = new Map(JSON.parse(_filter));
+            let gizmosFilter = new Map(_filter);
             // add default values for view render gizmos
             ƒ.Gizmos.filter.set(Fudge.GIZMOS.TRANSFORM, true);
             ƒ.Gizmos.filter.set(Fudge.GIZMOS.WIRE_MESH, false);
@@ -656,6 +645,7 @@ var Fudge;
             ƒ.Debug.groupCollapsed("Deserialized");
             ƒ.Debug.info(reconstruction);
             ƒ.Debug.groupEnd();
+            ƒ.Physics.cleanup(); // remove potential rigidbodies
             try {
                 const resourceFolderContent = await (await fetch(new URL(this.fileInternalFolder, this.base).toString())).text();
                 const resourceFolder = await ƒ.Serializer.deserialize(ƒ.Serializer.parse(resourceFolderContent));
@@ -669,10 +659,17 @@ var Fudge;
             let projectSettings = settings?.getAttribute("project");
             projectSettings = projectSettings?.replace(/'/g, "\"");
             await Fudge.project.mutate(JSON.parse(projectSettings || "{}"));
-            let panelInfo = settings?.getAttribute("panels");
-            panelInfo = panelInfo?.replace(/'/g, "\"");
-            Fudge.Page.setPanelInfo(panelInfo || "[]");
-            ƒ.Physics.cleanup(); // remove potential rigidbodies
+            try {
+                const settingsContent = await (await fetch(new URL(this.fileSettings, this.base).toString())).text();
+                const settings = JSON.parse(settingsContent);
+                // Page.setPanelInfo(settings.panels || []);
+                this.gizmosFilter = settings.gizmosFilter;
+                if (settings.layout)
+                    Fudge.Page.loadLayout(settings.layout);
+            }
+            catch (_error) {
+                ƒ.Debug.warn(`Failed to load '${this.fileSettings}'.`, _error);
+            }
         }
         getProjectJSON() {
             let serialization = ƒ.Project.serialize();
@@ -680,7 +677,14 @@ var Fudge;
             return json;
         }
         getResourceFolderJSON() {
-            return ƒ.Serializer.stringify(ƒ.Serializer.serialize(this.#resourceFolder));
+            return ƒ.Serializer.stringify(ƒ.Serializer.serialize(this.resourceFolder));
+        }
+        getSettingsJSON() {
+            let settings = {};
+            settings.gizmosFilter = this.gizmosFilter;
+            // settings.panels = Page.getPanelInfo();
+            settings.layout = Fudge.Page.getLayout();
+            return ƒ.Serializer.stringify(settings);
         }
         getProjectCSS() {
             let content = "";
@@ -696,7 +700,7 @@ var Fudge;
             let settings = this.#document.head.querySelector("meta[type=settings]");
             settings.setAttribute("autoview", this.graphAutoView);
             settings.setAttribute("project", this.settingsStringify());
-            settings.setAttribute("panels", this.panelsStringify());
+            // settings.setAttribute("panels", this.panelsStringify());
             // let autoViewScript: HTMLScriptElement = this.#document.querySelector("script[name=autoView]");
             // if (this.includeAutoViewScript) {
             //   if (!autoViewScript)
@@ -717,8 +721,9 @@ var Fudge;
             delete _mutator.base;
             delete _mutator.fileIndex;
             delete _mutator.fileInternal;
-            delete _mutator.fileResourceFolder;
+            delete _mutator.fileInternalFolder;
             delete _mutator.fileScript;
+            delete _mutator.fileSettings;
             delete _mutator.fileStyles;
         }
         getGraphs() {
@@ -736,7 +741,7 @@ var Fudge;
             html.head.appendChild(html.createComment("CRLF"));
             html.head.appendChild(html.createComment("Editor settings of this project"));
             html.head.appendChild(createTag("meta", {
-                type: "settings", autoview: this.graphAutoView, project: this.settingsStringify(), panels: this.panelsStringify()
+                type: "settings", autoview: this.graphAutoView, project: this.settingsStringify()
             }));
             html.head.appendChild(html.createComment("CRLF"));
             html.head.appendChild(html.createComment("Activate the following line to include the FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!"));
@@ -840,16 +845,16 @@ var Fudge;
         // }
         settingsStringify() {
             let mutator = Fudge.project.getMutator(true);
-            mutator.gizmosFilter = this.gizmosFilter;
+            // mutator.gizmosFilter = this.gizmosFilter;
             let settings = JSON.stringify(mutator);
             settings = settings.replace(/"/g, "'");
             return settings;
         }
-        panelsStringify() {
-            let panels = Fudge.Page.getPanelInfo();
-            panels = panels.replace(/"/g, "'");
-            return panels;
-        }
+        // private panelsStringify(): string {
+        //   let panels: string = Page.getPanelInfo();
+        //   panels = panels.replace(/"/g, "'");
+        //   return panels;
+        // }
         stringifyHTML(_html) {
             let result = (new XMLSerializer()).serializeToString(_html);
             result = result.replace(/></g, ">\n<");
@@ -1327,7 +1332,7 @@ var Fudge;
                     break;
             }
             if (resource) {
-                this.dispatchToParent(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
+                this.dispatchToParent(Fudge.EVENT_EDITOR.CREATE, {});
                 this.controller.addChildren([resource], focus);
                 this.tree.findVisible(focus).expand(true);
                 this.tree.findVisible(resource).focus();
@@ -1405,7 +1410,7 @@ var Fudge;
             // TODO: this is awkward as the tree gets the drop event first, then the view gets it and then we must dispatch it to the tree again.
             // ideally this view should listen during capture phase to avoid the double dispatch to the tree.
             this.tree.dispatchEvent(new Event("drop" /* ƒui.EVENT.DROP */, { bubbles: false }));
-            this.dispatchToParent(Fudge.EVENT_EDITOR.CREATE, { bubbles: true });
+            this.dispatchToParent(Fudge.EVENT_EDITOR.CREATE, {});
         }
         hndKeyboardEvent = (_event) => {
             if (_event.code != ƒ.KEYBOARD_CODE.F2)
@@ -2391,7 +2396,7 @@ var Fudge;
         goldenLayout;
         views = [];
         //public dom; // muss vielleicht weg
-        constructor(_container, _state) {
+        constructor(_container, _state, _viewConstructors, _rootItemConfig) {
             super(_container, _state);
             this.dom.style.width = "100%";
             this.dom.style.overflow = "visible";
@@ -2399,16 +2404,15 @@ var Fudge;
             this.dom.setAttribute("panel", this.constructor.name);
             const config = {
                 settings: { showPopoutIcon: false, showMaximiseIcon: false },
-                root: {
-                    type: "row",
-                    isClosable: false,
-                    content: []
-                }
+                root: _rootItemConfig
             };
             this.goldenLayout = new Fudge.Page.goldenLayoutModule.GoldenLayout(this.dom);
+            for (const key in _viewConstructors)
+                this.goldenLayout.registerComponentFactoryFunction(key, _container => new _viewConstructors[key](_container, _state)); // this way all views receive/share their panels state
             this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
             this.goldenLayout.on("itemCreated", this.addViewComponent);
-            this.goldenLayout.loadLayout(config);
+            this.goldenLayout.loadLayout(_state["layout"] ? Fudge.Page.goldenLayoutModule.LayoutConfig.fromResolved(_state["layout"]) : config);
+            _container.stateRequestEvent = this.getState.bind(this);
         }
         /** Send custom copies of the given event to the views */
         broadcast = (_event) => {
@@ -2419,6 +2423,11 @@ var Fudge;
                 if (view != target) // don't send back to original target view
                     view.dispatch(_event.type, { detail: detail });
         };
+        getState() {
+            let state = {};
+            state["layout"] = this.goldenLayout.saveLayout();
+            return state;
+        }
         addViewComponent = (_event) => {
             // adjustmens for GoldenLayout 2
             let target = _event.target;
@@ -2438,36 +2447,33 @@ var Fudge;
      */
     class PanelAnimation extends Fudge.Panel {
         constructor(_container, _state) {
-            super(_container, _state);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.ANIMATION, Fudge.ViewAnimation);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.ANIMATION_SHEET, Fudge.ViewAnimationSheet);
+            const constructors = {
+                [Fudge.VIEW.ANIMATION]: Fudge.ViewAnimation,
+                [Fudge.VIEW.ANIMATION_SHEET]: Fudge.ViewAnimationSheet
+            };
             const config = {
                 type: "row",
                 content: [
                     {
                         type: "component",
                         componentType: Fudge.VIEW.ANIMATION,
-                        componentState: _state,
                         title: "Properties"
                     },
                     {
                         type: "component",
-                        componentType: Fudge.VIEW.ANIMATION_SHEET,
-                        componentState: _state
+                        componentType: Fudge.VIEW.ANIMATION_SHEET
                     }
                 ]
             };
-            this.goldenLayout.addItemAtLocation(config, [
-                { typeId: 7 /* LayoutManager.LocationSelector.TypeId.Root */ }
-            ]);
+            super(_container, _state, constructors, config);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.setTitle("Animation | ");
         }
-        getState() {
-            // TODO: iterate over views and collect their states for reconstruction
-            return {};
-        }
+        // public getState(): { [key: string]: string } {
+        //   // TODO: iterate over views and collect their states for reconstruction
+        //   return {};
+        // }
         hndEvent = async (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
@@ -2492,35 +2498,32 @@ var Fudge;
     class PanelGraph extends Fudge.Panel {
         graph;
         constructor(_container, _state) {
-            super(_container, _state);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.RENDER, Fudge.ViewRender);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.COMPONENTS, Fudge.ViewComponents);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
-            this.setTitle("Graph");
+            const constructors = {
+                [Fudge.VIEW.RENDER]: Fudge.ViewRender,
+                [Fudge.VIEW.COMPONENTS]: Fudge.ViewComponents,
+                [Fudge.VIEW.HIERARCHY]: Fudge.ViewHierarchy
+            };
             const config = {
                 type: "column",
                 content: [{
                         type: "component",
                         componentType: Fudge.VIEW.RENDER,
-                        componentState: _state,
                         title: "Render"
                     }, {
                         type: "row",
                         content: [{
                                 type: "component",
                                 componentType: Fudge.VIEW.HIERARCHY,
-                                componentState: _state,
                                 title: "Hierarchy"
                             }, {
                                 type: "component",
                                 componentType: Fudge.VIEW.COMPONENTS,
-                                componentState: _state,
                                 title: "Components"
                             }]
                     }]
             };
-            this.goldenLayout.addItemAtLocation(config, [{ typeId: 7 /* LayoutManager.LocationSelector.TypeId.Root */ }]);
-            // this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+            super(_container, _state, constructors, config);
+            this.setTitle("Graph");
             //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
             this.dom.addEventListener("itemselect" /* ƒui.EVENT.SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
@@ -2546,11 +2549,10 @@ var Fudge;
             this.setTitle("Graph");
         }
         getState() {
-            let state = {};
-            if (this.graph) {
-                state.graph = this.graph.idResource;
-                return state;
-            }
+            let state = super.getState();
+            if (this.graph)
+                state["graph"] = this.graph.idResource;
+            return state;
             // TODO: iterate over views and collect their states for reconstruction 
         }
         hndEvent = async (_event) => {
@@ -2597,9 +2599,6 @@ var Fudge;
             // };
             // this.goldenLayout.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
         }
-        getState() {
-            return {};
-        }
     }
     Fudge.PanelHelp = PanelHelp;
 })(Fudge || (Fudge = {}));
@@ -2612,27 +2611,22 @@ var Fudge;
      */
     class PanelParticleSystem extends Fudge.Panel {
         constructor(_container, _state) {
-            super(_container, _state);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.PARTICLE_SYSTEM, Fudge.ViewParticleSystem);
             const config = {
                 type: "column",
                 content: [{
                         type: "component",
                         componentType: Fudge.VIEW.PARTICLE_SYSTEM,
-                        componentState: _state,
                         title: ƒ.ParticleSystem.name
                     }]
             };
-            this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [
-                { typeId: 7 /* LayoutManager.LocationSelector.TypeId.Root */ }
-            ]);
+            super(_container, _state, { [Fudge.VIEW.PARTICLE_SYSTEM]: Fudge.ViewParticleSystem }, config);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
             this.setTitle(ƒ.ParticleSystem.name);
         }
-        getState() {
-            // TODO: iterate over views and collect their states for reconstruction
-            return {};
-        }
+        // public getState(): { [key: string]: string } {
+        //   // TODO: iterate over views and collect their states for reconstruction
+        //   return {};
+        // }
         hndEvent = async (_event) => {
             this.broadcast(_event);
             // _event.stopPropagation();
@@ -2648,13 +2642,14 @@ var Fudge;
      */
     class PanelProject extends Fudge.Panel {
         constructor(_container, _state) {
-            super(_container, _state);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.INTERNAL_TABLE, Fudge.ViewInternalTable);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.INTERNAL_FOLDER, Fudge.ViewInternalFolder);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.EXTERNAL, Fudge.ViewExternal);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.PROPERTIES, Fudge.ViewProperties);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.PREVIEW, Fudge.ViewPreview);
-            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.SCRIPT, Fudge.ViewScript);
+            const constructors = {
+                [Fudge.VIEW.INTERNAL_TABLE]: Fudge.ViewInternalTable,
+                [Fudge.VIEW.INTERNAL_FOLDER]: Fudge.ViewInternalFolder,
+                [Fudge.VIEW.EXTERNAL]: Fudge.ViewExternal,
+                [Fudge.VIEW.PROPERTIES]: Fudge.ViewProperties,
+                [Fudge.VIEW.PREVIEW]: Fudge.ViewPreview,
+                [Fudge.VIEW.SCRIPT]: Fudge.ViewScript
+            };
             const config = {
                 type: "column",
                 content: [{
@@ -2662,12 +2657,10 @@ var Fudge;
                         content: [{
                                 type: "component",
                                 componentType: Fudge.VIEW.PROPERTIES,
-                                componentState: _state,
                                 title: "Properties"
                             }, {
                                 type: "component",
                                 componentType: Fudge.VIEW.PREVIEW,
-                                componentState: _state,
                                 title: "Preview"
                             }]
                     }, {
@@ -2677,12 +2670,10 @@ var Fudge;
                                 content: [{
                                         type: "component",
                                         componentType: Fudge.VIEW.EXTERNAL,
-                                        componentState: _state,
                                         title: "External"
                                     }, {
                                         type: "component",
                                         componentType: Fudge.VIEW.SCRIPT,
-                                        componentState: _state,
                                         title: "Script"
                                     }]
                             }, {
@@ -2690,18 +2681,16 @@ var Fudge;
                                 content: [{
                                         type: "component",
                                         componentType: Fudge.VIEW.INTERNAL_FOLDER,
-                                        componentState: _state,
                                         title: "Internal"
                                     }, {
                                         type: "component",
                                         componentType: Fudge.VIEW.INTERNAL_TABLE,
-                                        componentState: _state,
                                         title: "Table"
                                     }]
                             }]
                     }]
             };
-            this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: 7 /* LayoutManager.LocationSelector.TypeId.Root */ }]);
+            super(_container, _state, constructors, config);
             this.dom.addEventListener("itemselect" /* ƒui.EVENT.SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
@@ -2710,10 +2699,10 @@ var Fudge;
             this.setTitle("Project | " + Fudge.project.name);
             this.broadcast(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.OPEN, {}));
         }
-        getState() {
-            // TODO: iterate over views and collect their states for reconstruction 
-            return {};
-        }
+        // TODO: iterate over views and collect their states for reconstruction 
+        // public getState(): { [key: string]: string } {
+        //   return {};
+        // }
         hndEvent = (_event) => {
             if (_event.type != Fudge.EVENT_EDITOR.UPDATE && _event.type != Fudge.EVENT_EDITOR.CREATE && _event.type != Fudge.EVENT_EDITOR.DELETE)
                 _event.stopPropagation();

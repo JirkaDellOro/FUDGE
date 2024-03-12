@@ -1,7 +1,7 @@
 /// <reference types="../../../node_modules/electron/electron" />
 /// <reference types="../../core/build/fudgecore" />
-/// <reference types="../../../userinterface/build/fudgeuserinterface" />
 /// <reference types="../../GoldenLayout/golden-layout" />
+/// <reference types="../../../userinterface/build/fudgeuserinterface" />
 declare namespace Fudge {
     export type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     type Subclass<T> = {
@@ -180,13 +180,12 @@ declare namespace Fudge {
     class Page {
         static goldenLayoutModule: ƒ.General;
         static modeTransform: TRANSFORM;
-        private static idCounter;
         private static goldenLayout;
         private static panels;
         private static physics;
         static setDefaultProject(): void;
-        static getPanelInfo(): string;
-        static setPanelInfo(_panelInfos: string): void;
+        static getLayout(): ResolvedLayoutConfig;
+        static loadLayout(_layout: LayoutConfig): void;
         static setTransform(_mode: TRANSFORM): void;
         static getPhysics(_graph: ƒ.Graph): ƒ.Physics;
         private static start;
@@ -194,7 +193,6 @@ declare namespace Fudge {
         private static add;
         private static find;
         private static generateID;
-        private static loadLayout;
         private static setupPageListeners;
         /** Send custom copies of the given event to the panels */
         private static broadcast;
@@ -215,6 +213,7 @@ declare namespace Fudge {
         fileInternal: string;
         fileInternalFolder: string;
         fileScript: string;
+        fileSettings: string;
         fileStyles: string;
         private graphAutoView;
         constructor(_base: URL);
@@ -226,6 +225,7 @@ declare namespace Fudge {
         load(_htmlContent: string): Promise<void>;
         getProjectJSON(): string;
         getResourceFolderJSON(): string;
+        getSettingsJSON(): string;
         getProjectCSS(): string;
         getProjectHTML(_title: string): string;
         getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
@@ -233,7 +233,6 @@ declare namespace Fudge {
         private getGraphs;
         private createProjectHTML;
         private settingsStringify;
-        private panelsStringify;
         private stringifyHTML;
         private loadFonts;
     }
@@ -460,6 +459,7 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     interface PanelState {
         [key: string]: string;
     }
@@ -471,11 +471,13 @@ declare namespace Fudge {
     abstract class Panel extends View {
         protected goldenLayout: GoldenLayout;
         protected views: View[];
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined, _viewConstructors?: {
+            [name: string]: new (...args: ƒ.General) => View;
+        }, _rootItemConfig?: RowOrColumnItemConfig);
         /** Send custom copies of the given event to the views */
         broadcast: (_event: EditorEvent) => void;
+        protected getState(): JsonValue;
         private addViewComponent;
-        abstract getState(): PanelState;
     }
 }
 declare namespace Fudge {
@@ -485,9 +487,6 @@ declare namespace Fudge {
      */
     class PanelAnimation extends Panel {
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
-        getState(): {
-            [key: string]: string;
-        };
         private hndEvent;
     }
 }
@@ -501,9 +500,7 @@ declare namespace Fudge {
         private graph;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         setGraph(_graph: ƒ.Graph): void;
-        getState(): {
-            [key: string]: string;
-        };
+        getState(): JsonValue;
         private hndEvent;
     }
 }
@@ -514,9 +511,6 @@ declare namespace Fudge {
     */
     class PanelHelp extends Panel {
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
-        getState(): {
-            [key: string]: string;
-        };
     }
 }
 declare namespace Fudge {
@@ -526,9 +520,6 @@ declare namespace Fudge {
      */
     class PanelParticleSystem extends Panel {
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
-        getState(): {
-            [key: string]: string;
-        };
         private hndEvent;
     }
 }
@@ -539,9 +530,6 @@ declare namespace Fudge {
      */
     class PanelProject extends Panel {
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
-        getState(): {
-            [key: string]: string;
-        };
         private hndEvent;
     }
 }

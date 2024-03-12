@@ -13,6 +13,7 @@ namespace Fudge {
     public fileInternal: string = "Internal.json";
     public fileInternalFolder: string = "InternalFolder.json";
     public fileScript: string = "Script/Build/Script.js";
+    public fileSettings: string = "settings.json";
     public fileStyles: string = "styles.css";
 
     private graphAutoView: string = "";
@@ -40,12 +41,12 @@ namespace Fudge {
       return this.#resourceFolder;
     }
 
-    private get gizmosFilter(): string {
-      return JSON.stringify(Array.from(ƒ.Gizmos.filter.entries()));
+    private get gizmosFilter(): [string, boolean][] {
+      return Array.from(ƒ.Gizmos.filter.entries());
     }
 
-    private set gizmosFilter(_filter: string) {
-      let gizmosFilter: Map<string, boolean> = new Map(JSON.parse(_filter));
+    private set gizmosFilter(_filter: [string, boolean][]) {
+      let gizmosFilter: Map<string, boolean> = new Map(_filter);
 
       // add default values for view render gizmos
       ƒ.Gizmos.filter.set(GIZMOS.TRANSFORM, true);
@@ -103,6 +104,8 @@ namespace Fudge {
       ƒ.Debug.info(reconstruction);
       ƒ.Debug.groupEnd();
 
+      ƒ.Physics.cleanup(); // remove potential rigidbodies
+
       try {
         const resourceFolderContent: string = await (await fetch(new URL(this.fileInternalFolder, this.base).toString())).text();
         const resourceFolder: ƒ.Serializable = await ƒ.Serializer.deserialize(ƒ.Serializer.parse(resourceFolderContent));
@@ -116,10 +119,19 @@ namespace Fudge {
       let projectSettings: string = settings?.getAttribute("project");
       projectSettings = projectSettings?.replace(/'/g, "\"");
       await project.mutate(JSON.parse(projectSettings || "{}"));
-      let panelInfo: string = settings?.getAttribute("panels");
-      panelInfo = panelInfo?.replace(/'/g, "\"");
-      Page.setPanelInfo(panelInfo || "[]");
-      ƒ.Physics.cleanup(); // remove potential rigidbodies
+
+      try {
+        const settingsContent: string = await (await fetch(new URL(this.fileSettings, this.base).toString())).text();
+        const settings: ƒ.Serialization = JSON.parse(settingsContent);
+
+        // Page.setPanelInfo(settings.panels || []);
+        this.gizmosFilter = settings.gizmosFilter;
+
+        if (settings.layout)
+          Page.loadLayout(settings.layout);
+      } catch (_error) {
+        ƒ.Debug.warn(`Failed to load '${this.fileSettings}'.`, _error);
+      }
     }
 
     public getProjectJSON(): string {
@@ -129,9 +141,17 @@ namespace Fudge {
     }
 
     public getResourceFolderJSON(): string {
-      return ƒ.Serializer.stringify(ƒ.Serializer.serialize(this.#resourceFolder));
+      return ƒ.Serializer.stringify(ƒ.Serializer.serialize(this.resourceFolder));
     }
 
+    public getSettingsJSON(): string {
+      let settings: ƒ.Serialization = {};
+      settings.gizmosFilter = this.gizmosFilter;
+      // settings.panels = Page.getPanelInfo();
+      settings.layout = Page.getLayout();
+
+      return ƒ.Serializer.stringify(settings);
+    }
 
     public getProjectCSS(): string {
       let content: string = "";
@@ -152,7 +172,7 @@ namespace Fudge {
       let settings: HTMLElement = this.#document.head.querySelector("meta[type=settings]");
       settings.setAttribute("autoview", this.graphAutoView);
       settings.setAttribute("project", this.settingsStringify());
-      settings.setAttribute("panels", this.panelsStringify());
+      // settings.setAttribute("panels", this.panelsStringify());
 
       // let autoViewScript: HTMLScriptElement = this.#document.querySelector("script[name=autoView]");
       // if (this.includeAutoViewScript) {
@@ -177,8 +197,9 @@ namespace Fudge {
       delete _mutator.base;
       delete _mutator.fileIndex;
       delete _mutator.fileInternal;
-      delete _mutator.fileResourceFolder;
+      delete _mutator.fileInternalFolder;
       delete _mutator.fileScript;
+      delete _mutator.fileSettings;
       delete _mutator.fileStyles;
     }
 
@@ -200,7 +221,7 @@ namespace Fudge {
 
       html.head.appendChild(html.createComment("Editor settings of this project"));
       html.head.appendChild(createTag("meta", {
-        type: "settings", autoview: this.graphAutoView, project: this.settingsStringify(), panels: this.panelsStringify()
+        type: "settings", autoview: this.graphAutoView, project: this.settingsStringify()
       }));
       html.head.appendChild(html.createComment("CRLF"));
 
@@ -325,18 +346,18 @@ namespace Fudge {
 
     private settingsStringify(): string {
       let mutator: ƒ.Mutator = project.getMutator(true);
-      mutator.gizmosFilter = this.gizmosFilter;
+      // mutator.gizmosFilter = this.gizmosFilter;
 
       let settings: string = JSON.stringify(mutator);
       settings = settings.replace(/"/g, "'");
       return settings;
     }
 
-    private panelsStringify(): string {
-      let panels: string = Page.getPanelInfo();
-      panels = panels.replace(/"/g, "'");
-      return panels;
-    }
+    // private panelsStringify(): string {
+    //   let panels: string = Page.getPanelInfo();
+    //   panels = panels.replace(/"/g, "'");
+    //   return panels;
+    // }
 
     private stringifyHTML(_html: Document): string {
       let result: string = (new XMLSerializer()).serializeToString(_html);

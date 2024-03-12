@@ -17,9 +17,6 @@ namespace Fudge {
 
     let base: URL = new URL(new URL("file://" + filename[0]).toString() + "/");
     console.log("Path", base.toString());
-
-    if (project) // reset panel info when we already have a project otherwise old panel state gets saved in new project when calling saveProject()
-      Page.setPanelInfo("[]");
       
     project = new Project(base);
 
@@ -81,6 +78,9 @@ namespace Fudge {
 
     jsonFileName = new URL(project.fileInternalFolder, base);
     fs.writeFileSync(jsonFileName, project.getResourceFolderJSON());
+
+    jsonFileName = new URL(project.fileSettings, base);
+    fs.writeFileSync(jsonFileName, project.getSettingsJSON());
 
     watchFolder();
     return true;

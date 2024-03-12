@@ -7,7 +7,7 @@ namespace Fudge {
   * @authors Jirka Dell'Oro-Friedl, HFU, 2021
   */
   export class PanelHelp extends Panel {
-    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
       this.setTitle("Help");
       console.log(this.dom);
@@ -31,8 +31,8 @@ namespace Fudge {
       // this.goldenLayout.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
     }
 
-    public getState(): { [key: string]: string } {
-      return {};
-    }
+    // public getState(): { [key: string]: string } {
+    //   return {};
+    // }
   }
 }

@@ -10,40 +10,35 @@ namespace Fudge {
     private graph: ƒ.Graph;
 
     public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
-      super(_container, _state);
-
-      this.goldenLayout.registerComponentConstructor(VIEW.RENDER, ViewRender);
-      this.goldenLayout.registerComponentConstructor(VIEW.COMPONENTS, ViewComponents);
-      this.goldenLayout.registerComponentConstructor(VIEW.HIERARCHY, ViewHierarchy);
-
-      this.setTitle("Graph");
+      const constructors = { /* eslint-disable-line */
+        [VIEW.RENDER]: ViewRender,
+        [VIEW.COMPONENTS]: ViewComponents,
+        [VIEW.HIERARCHY]: ViewHierarchy
+      };
 
       const config: RowOrColumnItemConfig = {
         type: "column",
         content: [{
           type: "component",
           componentType: VIEW.RENDER,
-          componentState: _state,
           title: "Render"
         }, {
           type: "row",
           content: [{
             type: "component",
             componentType: VIEW.HIERARCHY,
-            componentState: _state,
             title: "Hierarchy"
           }, {
             type: "component",
             componentType: VIEW.COMPONENTS,
-            componentState: _state,
             title: "Components"
           }]
         }]
       };
 
+      super(_container, _state, constructors, config);
 
-      this.goldenLayout.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
-      // this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+      this.setTitle("Graph");
 
       //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
@@ -73,12 +68,12 @@ namespace Fudge {
       this.setTitle("Graph");
     }
 
-    public getState(): { [key: string]: string } {
-      let state: PanelState = {};
-      if (this.graph) {
-        state.graph = this.graph.idResource;
-        return state;
-      }
+    public getState(): JsonValue {
+      let state: JsonValue = super.getState();
+      if (this.graph) 
+        state["graph"] = this.graph.idResource;
+      
+      return state;
       // TODO: iterate over views and collect their states for reconstruction 
     }
 
