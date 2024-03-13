@@ -122,15 +122,15 @@ namespace Fudge {
 
       try {
         const settingsContent: string = await (await fetch(new URL(this.fileSettings, this.base).toString())).text();
-        const settings: ƒ.Serialization = JSON.parse(settingsContent);
+        const panelSettings: ƒ.Serialization = JSON.parse(settingsContent);
 
         // Page.setPanelInfo(settings.panels || []);
-        this.gizmosFilter = settings.gizmosFilter;
+        this.gizmosFilter = panelSettings.gizmosFilter;
 
-        if (settings.layout)
-          Page.loadLayout(settings.layout);
+        if (panelSettings.layout)
+          Page.loadLayout(panelSettings.layout);
       } catch (_error) {
-        ƒ.Debug.warn(`Failed to load '${this.fileSettings}'.`, _error);
+        ƒ.Debug.warn(`Failed to load '${this.fileSettings}'. A new settings file was created and will be saved.`, _error);
       }
     }
 

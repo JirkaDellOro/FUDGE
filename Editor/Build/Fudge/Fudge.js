@@ -661,14 +661,14 @@ var Fudge;
             await Fudge.project.mutate(JSON.parse(projectSettings || "{}"));
             try {
                 const settingsContent = await (await fetch(new URL(this.fileSettings, this.base).toString())).text();
-                const settings = JSON.parse(settingsContent);
+                const panelSettings = JSON.parse(settingsContent);
                 // Page.setPanelInfo(settings.panels || []);
-                this.gizmosFilter = settings.gizmosFilter;
-                if (settings.layout)
-                    Fudge.Page.loadLayout(settings.layout);
+                this.gizmosFilter = panelSettings.gizmosFilter;
+                if (panelSettings.layout)
+                    Fudge.Page.loadLayout(panelSettings.layout);
             }
             catch (_error) {
-                ƒ.Debug.warn(`Failed to load '${this.fileSettings}'.`, _error);
+                ƒ.Debug.warn(`Failed to load '${this.fileSettings}'. A new settings file was created and will be saved.`, _error);
             }
         }
         getProjectJSON() {
