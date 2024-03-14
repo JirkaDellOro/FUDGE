@@ -91,11 +91,11 @@ namespace Fudge {
       return "";
     }
 
-    public async rename(_object: ResourceNode, _id: string, _new: string): Promise<boolean> {
-      let rename: boolean = _object.name != _new;
+    public async setValue(_node: ResourceNode, _id: string, _new: string): Promise<boolean> {
+      let rename: boolean = _node.name != _new;
       if (rename) {
-        _object.name = _new;
-        await (<ƒ.SerializableResourceExternal>_object).load?.();
+        _node.name = _new;
+        await (<ƒ.SerializableResourceExternal>_node).load?.();
       }
 
       return rename;
@@ -109,24 +109,24 @@ namespace Fudge {
       return _object instanceof ResourceFolder ? _object.children : [];
     }
 
-    public addChildren(_sources: ResourceNode[], _target: ResourceNode, _at?: number): ResourceNode[] {
+    public addChildren(_sources: ResourceNode[], _target: ResourceNode, _index?: number): ResourceNode[] {
       if (!(_target instanceof ResourceFolder))
         return [];
 
       let move: ResourceNode[] = [];
       for (let source of _sources) {
-        let index: number = _target.children.indexOf(source); // _at needs to be corrected if we are moving within same parent
-        if (index > -1 && _at > index)
-          _at -= 1;
+        let currentIndex: number = _target.children.indexOf(source); // _index needs to be corrected if we are moving within same parent
+        if (currentIndex > -1 && _index > currentIndex)
+          _index -= 1;
 
         this.remove(source);
         source.resourceParent = _target;
         move.push(source);
 
-        if (_at == null)
+        if (_index == null)
           _target.children.push(source);
         else
-          _target.children.splice(_at + _sources.indexOf(source), 0, source);
+          _target.children.splice(_index + _sources.indexOf(source), 0, source);
       }
       return move;
     }

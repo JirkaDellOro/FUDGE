@@ -27,8 +27,8 @@ namespace FudgeUserInterface {
     /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
     public abstract getAttributes(_object: T): string;
 
-    /** Process the proposed new name */
-    public abstract rename(_object: T, _id: string, _new: string): Promise<boolean>;
+    /** Process the proposed new value. The id of the html element on which the change occured is passed */
+    public abstract setValue(_object: T, _id: string, _new: string): Promise<boolean>;
 
     /** Return true if the object has children that must be shown when unfolding the tree item */
     public abstract hasChildren(_object: T): boolean;
@@ -42,7 +42,7 @@ namespace FudgeUserInterface {
      * @param _children A list of objects the tree tries to add to the _target
      * @param _target The object referenced by the item the drop occurs on
      */
-    public abstract addChildren(_sources: T[], _target: T, _at?: number): T[];
+    public abstract addChildren(_sources: T[], _target: T, _index?: number): T[];
 
     /** 
      * Remove the objects to be deleted, e.g. the current selection, from the data structure the tree refers to and 

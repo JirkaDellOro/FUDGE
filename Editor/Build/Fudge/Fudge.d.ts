@@ -392,14 +392,14 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒUi = FudgeUserInterface;
-    class ControllerTreeHierarchy extends ƒUi.TreeController<ƒ.Node> {
-        getLabel(_node: ƒ.Node): string;
+    class ControllerTreeHierarchy extends ƒUi.CustomTreeController<ƒ.Node> {
+        createContent(_object: ƒ.Node): HTMLFieldSetElement;
         getAttributes(_node: ƒ.Node): string;
-        rename(_node: ƒ.Node, _new: string): boolean;
+        setValue(_node: ƒ.Node, _id: string, _new: string): Promise<boolean>;
         hasChildren(_node: ƒ.Node): boolean;
         getChildren(_node: ƒ.Node): ƒ.Node[];
-        delete(_focussed: ƒ.Node[]): ƒ.Node[];
-        addChildren(_children: ƒ.Node[], _target: ƒ.Node): ƒ.Node[];
+        delete(_focussed: ƒ.Node[]): Promise<ƒ.Node[]>;
+        addChildren(_children: ƒ.Node[], _target: ƒ.Node, _index?: number): ƒ.Node[];
         copy(_originals: ƒ.Node[]): Promise<ƒ.Node[]>;
     }
 }
@@ -413,7 +413,7 @@ declare namespace Fudge {
         constructor(_data: ƒ.ParticleData.System, _view: ViewParticleSystem);
         createContent(_data: ƒ.ParticleData.Recursive): HTMLFieldSetElement;
         getAttributes(_data: ƒ.ParticleData.Recursive): string;
-        rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): Promise<boolean>;
+        setValue(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): Promise<boolean>;
         hasChildren(_data: ƒ.ParticleData.Recursive): boolean;
         getChildren(_data: ƒ.ParticleData.Recursive): ƒ.ParticleData.Recursive[];
         delete(_focused: (ƒ.ParticleData.Recursive)[]): Promise<ƒ.ParticleData.Recursive[]>;
@@ -448,10 +448,10 @@ declare namespace Fudge {
     class ControllerTreeResource extends ƒui.CustomTreeController<ResourceNode> {
         createContent(_object: ResourceNode): HTMLFieldSetElement;
         getAttributes(_object: ResourceNode): string;
-        rename(_object: ResourceNode, _id: string, _new: string): Promise<boolean>;
+        setValue(_node: ResourceNode, _id: string, _new: string): Promise<boolean>;
         hasChildren(_object: ResourceNode): boolean;
         getChildren(_object: ResourceNode): ResourceNode[];
-        addChildren(_sources: ResourceNode[], _target: ResourceNode, _at?: number): ResourceNode[];
+        addChildren(_sources: ResourceNode[], _target: ResourceNode, _index?: number): ResourceNode[];
         delete(_focussed: ResourceNode[]): Promise<ResourceNode[]>;
         copy(_originals: ResourceNode[]): Promise<ResourceNode[]>;
         getPath(_resource: ResourceNode): ResourceNode[];
@@ -716,7 +716,6 @@ declare namespace Fudge {
         setGraph(_graph: ƒ.Graph): void;
         getSelection(): ƒ.Node[];
         getDragDropSources(): ƒ.Node[];
-        showNode(_node: ƒ.Node): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;

@@ -662,7 +662,7 @@ var Fudge;
             try {
                 const settingsContent = await (await fetch(new URL(this.fileSettings, this.base).toString())).text();
                 const panelSettings = JSON.parse(settingsContent);
-                // Page.setPanelInfo(settings.panels || []);
+                // TODO: maybe move gizmos filter to the view state of ViewRender
                 this.gizmosFilter = panelSettings.gizmosFilter;
                 if (panelSettings.layout)
                     Fudge.Page.loadLayout(panelSettings.layout);
@@ -1900,9 +1900,13 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
-    class ControllerTreeHierarchy extends ƒUi.TreeController {
-        getLabel(_node) {
-            return _node.name;
+    class ControllerTreeHierarchy extends ƒUi.CustomTreeController {
+        createContent(_object) {
+            let content = document.createElement("fieldset");
+            let name = document.createElement("input");
+            name.value = _object.name;
+            content.appendChild(name);
+            return content;
         }
         getAttributes(_node) {
             let attributes = [_node.isActive ? "active" : "inactive"];
@@ -1910,9 +1914,13 @@ var Fudge;
                 attributes.push("GraphInstance");
             return attributes.join(" ");
         }
-        rename(_node, _new) {
-            _node.name = _new;
-            return true;
+        async setValue(_node, _id, _new) {
+            let rename = _node.name != _new;
+            if (rename) {
+                _node.name = _new;
+                await _node.load?.();
+            }
+            return rename;
         }
         hasChildren(_node) {
             return _node.getChildren().length > 0;
@@ -1920,7 +1928,7 @@ var Fudge;
         getChildren(_node) {
             return _node.getChildren();
         }
-        delete(_focussed) {
+        async delete(_focussed) {
             // delete selection independend of focussed item
             let deleted = [];
             let expend = this.selection.length > 0 ? this.selection : _focussed;
@@ -1932,14 +1940,15 @@ var Fudge;
             this.selection.splice(0);
             return deleted;
         }
-        addChildren(_children, _target) {
+        addChildren(_children, _target, _index) {
             // disallow drop for sources being ancestor to target
             let move = [];
             for (let child of _children)
                 if (!_target.isDescendantOf(child))
                     move.push(child);
-            for (let node of move)
-                _target.addChild(node);
+            move.forEach((_node, _iMove) => _target.addChild(_node, _index == undefined ? _index : _index + _iMove));
+            // for (let node of move)
+            //   _target.addChild(node, _iTarget);
             return move;
         }
         async copy(_originals) {
@@ -2041,7 +2050,7 @@ var Fudge;
                 attributes.push("code");
             return attributes.join(" ");
         }
-        async rename(_data, _id, _new) {
+        async setValue(_data, _id, _new) {
             let inputAsNumber = Number.parseFloat(_new);
             if (_id == "name" /* ID.NAME */ && ƒ.ParticleData.isExpression(_data)) {
                 let errors = [];
@@ -2277,11 +2286,11 @@ var Fudge;
         getAttributes(_object) {
             return "";
         }
-        async rename(_object, _id, _new) {
-            let rename = _object.name != _new;
+        async setValue(_node, _id, _new) {
+            let rename = _node.name != _new;
             if (rename) {
-                _object.name = _new;
-                await _object.load?.();
+                _node.name = _new;
+                await _node.load?.();
             }
             return rename;
         }
@@ -2291,21 +2300,21 @@ var Fudge;
         getChildren(_object) {
             return _object instanceof ResourceFolder ? _object.children : [];
         }
-        addChildren(_sources, _target, _at) {
+        addChildren(_sources, _target, _index) {
             if (!(_target instanceof ResourceFolder))
                 return [];
             let move = [];
             for (let source of _sources) {
-                let index = _target.children.indexOf(source); // _at needs to be corrected if we are moving within same parent
-                if (index > -1 && _at > index)
-                    _at -= 1;
+                let currentIndex = _target.children.indexOf(source); // _index needs to be corrected if we are moving within same parent
+                if (currentIndex > -1 && _index > currentIndex)
+                    _index -= 1;
                 this.remove(source);
                 source.resourceParent = _target;
                 move.push(source);
-                if (_at == null)
+                if (_index == null)
                     _target.children.push(source);
                 else
-                    _target.children.splice(_at + _sources.indexOf(source), 0, source);
+                    _target.children.splice(_index + _sources.indexOf(source), 0, source);
             }
             return move;
         }
@@ -4508,7 +4517,7 @@ var Fudge;
             this.dom.innerHTML = "";
             this.graph = _graph;
             // this.selectedNode = null;
-            this.tree = new ƒUi.Tree(new Fudge.ControllerTreeHierarchy(), this.graph);
+            this.tree = new ƒUi.CustomTree(new Fudge.ControllerTreeHierarchy(), this.graph);
             this.tree.addEventListener("itemselect" /* ƒUi.EVENT.SELECT */, this.hndEvent);
             this.tree.addEventListener("delete" /* ƒUi.EVENT.DELETE */, this.hndEvent);
             this.tree.addEventListener("rename" /* ƒUi.EVENT.RENAME */, this.hndEvent);
@@ -4523,11 +4532,6 @@ var Fudge;
         }
         getDragDropSources() {
             return this.tree.controller.dragDrop.sources;
-        }
-        showNode(_node) {
-            let path = _node.getPath();
-            path = path.splice(path.indexOf(this.graph));
-            this.tree.show(path);
         }
         hndDragOver(_event, _viewSource) {
             _event.dataTransfer.dropEffect = "none";
@@ -4583,7 +4587,7 @@ var Fudge;
             switch (Number(_item.id)) {
                 case Fudge.CONTEXTMENU.ADD_NODE:
                     let child = new ƒ.Node("New Node");
-                    focus.addChild(child);
+                    this.tree.controller.addChildren([child], focus);
                     this.tree.findVisible(focus).expand(true);
                     this.tree.findVisible(child).focus();
                     break;
@@ -4623,15 +4627,14 @@ var Fudge;
                     if (this.#selectionPrevious.includes(node) && this.getSelection().includes(node))
                         this.dispatch(Fudge.EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: node, view: this } });
                     this.#selectionPrevious = this.getSelection().slice(0);
-                    this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: node, view: this } });
+                    this.dispatchToParent(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: node, view: this } });
                     break;
                 case Fudge.EVENT_EDITOR.SELECT:
                     if (_event.detail.node) {
-                        this.showNode(_event.detail.node);
-                        if (_event.detail.view != this) {
-                            this.tree.displaySelection([_event.detail.node]);
-                            this.#selectionPrevious = this.getSelection().slice(0);
-                        }
+                        this.tree.show(_event.detail.node.getPath());
+                        this.tree.controller.selection = [_event.detail.node];
+                        this.tree.displaySelection(this.tree.controller.selection);
+                        this.#selectionPrevious = this.getSelection().slice(0);
                     }
                     else {
                         this.setGraph(_event.detail.graph);
@@ -4639,12 +4642,10 @@ var Fudge;
                     }
                     break;
                 case Fudge.EVENT_EDITOR.UPDATE:
-                    if (_event.detail.view instanceof Fudge.ViewInternalTable) {
-                        if (_event.detail.data == this.graph) {
-                            console.log("Update Graph");
-                            let item = this.tree.findItem(this.graph);
-                            item.setLabel(this.graph.name);
-                        }
+                    if (_event.detail.view instanceof Fudge.ViewInternal && _event.detail.data == this.graph) {
+                        console.log("Update Graph");
+                        let item = this.tree.findItem(this.graph);
+                        item.refreshContent();
                     }
                     break;
             }

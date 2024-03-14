@@ -97,7 +97,7 @@ namespace Fudge {
       return attributes.join(" ");
     }
     
-    public async rename(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): Promise<boolean> {
+    public async setValue(_data: ƒ.ParticleData.Recursive, _id: string, _new: string): Promise<boolean> {
       let inputAsNumber: number = Number.parseFloat(_new);
 
       if (_id == ID.NAME && ƒ.ParticleData.isExpression(_data)) {

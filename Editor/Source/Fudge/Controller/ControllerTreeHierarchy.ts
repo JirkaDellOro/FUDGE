@@ -2,9 +2,14 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;
 
-  export class ControllerTreeHierarchy extends ƒUi.TreeController<ƒ.Node> {
-    public getLabel(_node: ƒ.Node): string {
-      return _node.name;
+  export class ControllerTreeHierarchy extends ƒUi.CustomTreeController<ƒ.Node> {
+
+    public createContent(_object: ƒ.Node): HTMLFieldSetElement {
+      let content: HTMLFieldSetElement = document.createElement("fieldset");
+      let name: HTMLInputElement = document.createElement("input");
+      name.value = _object.name;
+      content.appendChild(name);
+      return content;
     }
 
     public getAttributes(_node: ƒ.Node): string {
@@ -13,10 +18,15 @@ namespace Fudge {
         attributes.push("GraphInstance");
       return attributes.join(" ");
     }
-    
-    public rename(_node: ƒ.Node, _new: string): boolean {
-      _node.name = _new;
-      return true;
+
+    public async setValue(_node: ƒ.Node, _id: string, _new: string): Promise<boolean> {
+      let rename: boolean = _node.name != _new;
+      if (rename) {
+        _node.name = _new;
+        await (<ƒ.GraphGLTF>_node).load?.();
+      }
+
+      return rename;
     }
 
     public hasChildren(_node: ƒ.Node): boolean {
@@ -27,7 +37,7 @@ namespace Fudge {
       return _node.getChildren();
     }
 
-    public delete(_focussed: ƒ.Node[]): ƒ.Node[] {
+    public async delete(_focussed: ƒ.Node[]): Promise<ƒ.Node[]> {
       // delete selection independend of focussed item
       let deleted: ƒ.Node[] = [];
       let expend: ƒ.Node[] = this.selection.length > 0 ? this.selection : _focussed;
@@ -40,15 +50,16 @@ namespace Fudge {
       return deleted;
     }
 
-    public addChildren(_children: ƒ.Node[], _target: ƒ.Node): ƒ.Node[] {
+    public addChildren(_children: ƒ.Node[], _target: ƒ.Node, _index?: number): ƒ.Node[] {
       // disallow drop for sources being ancestor to target
       let move: ƒ.Node[] = [];
       for (let child of _children)
         if (!_target.isDescendantOf(child))
           move.push(child);
 
-      for (let node of move)
-        _target.addChild(node);
+      move.forEach((_node, _iMove) => _target.addChild(_node, _index == undefined ? _index : _index + _iMove));
+      // for (let node of move)
+      //   _target.addChild(node, _iTarget);
 
       return move;
     }

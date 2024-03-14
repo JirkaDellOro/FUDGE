@@ -276,7 +276,7 @@ namespace FudgeUserInterface {
       }
 
       // if (target instanceof HTMLSelectElement || target instanceof HTMLInputElement && target.type == "text") {
-      if (await this.controller.rename(this.data, target.id, target.value)) {
+      if (await this.controller.setValue(this.data, target.id, target.value)) {
         this.refreshContent();
         this.refreshAttributes();
         this.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { data: this.data } }));

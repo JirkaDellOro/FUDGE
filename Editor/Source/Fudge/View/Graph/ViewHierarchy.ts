@@ -8,7 +8,7 @@ namespace Fudge {
    */
   export class ViewHierarchy extends View {
     private graph: ƒ.Graph;
-    private tree: ƒUi.Tree<ƒ.Node>;
+    private tree: ƒUi.CustomTree<ƒ.Node>;
     #selectionPrevious: ƒ.Node[] = [];
 
     public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
@@ -36,7 +36,7 @@ namespace Fudge {
       this.graph = _graph;
       // this.selectedNode = null;
 
-      this.tree = new ƒUi.Tree<ƒ.Node>(new ControllerTreeHierarchy(), this.graph);
+      this.tree = new ƒUi.CustomTree<ƒ.Node>(new ControllerTreeHierarchy(), this.graph);
       this.tree.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.RENAME, this.hndEvent);
@@ -53,12 +53,6 @@ namespace Fudge {
 
     public getDragDropSources(): ƒ.Node[] {
       return this.tree.controller.dragDrop.sources;
-    }
-
-    public showNode(_node: ƒ.Node): void {
-      let path: ƒ.Node[] = _node.getPath();
-      path = path.splice(path.indexOf(this.graph));
-      this.tree.show(path);
     }
 
     protected hndDragOver(_event: DragEvent, _viewSource: View): void {
@@ -129,7 +123,7 @@ namespace Fudge {
       switch (Number(_item.id)) {
         case CONTEXTMENU.ADD_NODE:
           let child: ƒ.Node = new ƒ.Node("New Node");
-          focus.addChild(child);
+          this.tree.controller.addChildren([child], focus);
           this.tree.findVisible(focus).expand(true);
           this.tree.findVisible(child).focus();
           break;
@@ -170,28 +164,24 @@ namespace Fudge {
           if (this.#selectionPrevious.includes(node) && this.getSelection().includes(node))
             this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: node, view: this } });
           this.#selectionPrevious = this.getSelection().slice(0);
-          this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: node, view: this } });
+          this.dispatchToParent(EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: node, view: this } });
           break;
         case EVENT_EDITOR.SELECT:
           if (_event.detail.node) {
-            this.showNode(_event.detail.node);
-            if (_event.detail.view != this) {
-              this.tree.displaySelection([_event.detail.node]);
-              this.#selectionPrevious = this.getSelection().slice(0);
-            }
-          }
-          else {
+            this.tree.show(_event.detail.node.getPath());
+            this.tree.controller.selection = [_event.detail.node];
+            this.tree.displaySelection(this.tree.controller.selection);
+            this.#selectionPrevious = this.getSelection().slice(0);
+          } else {
             this.setGraph(_event.detail.graph);
             break;
           }
           break;
         case EVENT_EDITOR.UPDATE:
-          if (_event.detail.view instanceof ViewInternalTable) {
-            if (_event.detail.data == this.graph) {
-              console.log("Update Graph");
-              let item: ƒUi.TreeItem<ƒ.Node> = this.tree.findItem(this.graph);
-              item.setLabel(this.graph.name);
-            }
+          if (_event.detail.view instanceof ViewInternal && _event.detail.data == this.graph) {
+            console.log("Update Graph");
+            let item: ƒUi.CustomTreeItem<ƒ.Node> = this.tree.findItem(this.graph);
+            item.refreshContent();
           }
           break;
 

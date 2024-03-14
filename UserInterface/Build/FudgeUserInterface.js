@@ -1500,7 +1500,7 @@ var FudgeUserInterface;
             for (let data of _path) {
                 let item = currentTree.findItem(data);
                 item.focus();
-                if (!item.expanded)
+                if (!item.expanded && data != _path[_path.length - 1])
                     item.expand(true);
                 currentTree = item.getBranch();
             }
@@ -1718,6 +1718,7 @@ var FudgeUserInterface;
                 let dataEnd = detail.data;
                 this.clearSelection();
                 this.selectInterval(dataStart, dataEnd);
+                _event.stopImmediatePropagation(); // prevent double event handling (outside of this) as selectInterval will cause the same tree item to dispatch a select event again
                 return;
             }
             if (index >= 0 && detail.additive)
@@ -2085,7 +2086,7 @@ var FudgeUserInterface;
                 return;
             }
             // if (target instanceof HTMLSelectElement || target instanceof HTMLInputElement && target.type == "text") {
-            if (await this.controller.rename(this.data, target.id, target.value)) {
+            if (await this.controller.setValue(this.data, target.id, target.value)) {
                 this.refreshContent();
                 this.refreshAttributes();
                 this.dispatchEvent(new CustomEvent("rename" /* EVENT.RENAME */, { bubbles: true, detail: { data: this.data } }));

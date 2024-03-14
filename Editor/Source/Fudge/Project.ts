@@ -124,7 +124,7 @@ namespace Fudge {
         const settingsContent: string = await (await fetch(new URL(this.fileSettings, this.base).toString())).text();
         const panelSettings: ƒ.Serialization = JSON.parse(settingsContent);
 
-        // Page.setPanelInfo(settings.panels || []);
+        // TODO: maybe move gizmos filter to the view state of ViewRender
         this.gizmosFilter = panelSettings.gizmosFilter;
 
         if (panelSettings.layout)

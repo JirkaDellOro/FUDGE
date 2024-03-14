@@ -26,7 +26,7 @@ namespace FudgeUserInterface {
         let item: CustomTreeItem<T> = currentTree.findItem(data);
         item.focus();
 
-        if (!item.expanded)
+        if (!item.expanded && data != _path[_path.length - 1])
           item.expand(true);
 
         currentTree = item.getBranch();
