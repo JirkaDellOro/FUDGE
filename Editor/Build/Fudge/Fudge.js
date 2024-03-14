@@ -594,18 +594,6 @@ var Fudge;
                 this.#resourceFolder = new Fudge.ResourceFolder("Resources");
             return this.#resourceFolder;
         }
-        get gizmosFilter() {
-            return Array.from(ƒ.Gizmos.filter.entries());
-        }
-        set gizmosFilter(_filter) {
-            let gizmosFilter = new Map(_filter);
-            // add default values for view render gizmos
-            ƒ.Gizmos.filter.set(Fudge.GIZMOS.TRANSFORM, true);
-            ƒ.Gizmos.filter.set(Fudge.GIZMOS.WIRE_MESH, false);
-            for (const [key, value] of gizmosFilter)
-                if (ƒ.Gizmos.filter.has(key))
-                    ƒ.Gizmos.filter.set(key, value);
-        }
         async openDialog() {
             let promise = ƒui.Dialog.prompt(Fudge.project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
             ƒui.Dialog.dom.addEventListener("change" /* ƒui.EVENT.CHANGE */, this.hndChange);
@@ -663,7 +651,13 @@ var Fudge;
                 const settingsContent = await (await fetch(new URL(this.fileSettings, this.base).toString())).text();
                 const panelSettings = JSON.parse(settingsContent);
                 // TODO: maybe move gizmos filter to the view state of ViewRender
-                this.gizmosFilter = panelSettings.gizmosFilter;
+                let gizmosFilter = new Map(panelSettings.gizmosFilter);
+                // add default values for view render gizmos
+                ƒ.Gizmos.filter.set(Fudge.GIZMOS.TRANSFORM, true);
+                ƒ.Gizmos.filter.set(Fudge.GIZMOS.WIRE_MESH, false);
+                for (const [key, value] of gizmosFilter)
+                    if (ƒ.Gizmos.filter.has(key))
+                        ƒ.Gizmos.filter.set(key, value);
                 if (panelSettings.layout)
                     Fudge.Page.loadLayout(panelSettings.layout);
             }
@@ -681,7 +675,7 @@ var Fudge;
         }
         getSettingsJSON() {
             let settings = {};
-            settings.gizmosFilter = this.gizmosFilter;
+            settings.gizmosFilter = Array.from(ƒ.Gizmos.filter.entries());
             // settings.panels = Page.getPanelInfo();
             settings.layout = Fudge.Page.getLayout();
             return ƒ.Serializer.stringify(settings);
@@ -697,10 +691,11 @@ var Fudge;
             if (!this.#document)
                 return this.createProjectHTML(_title);
             this.#document.title = _title;
-            let settings = this.#document.head.querySelector("meta[type=settings]");
+            let settings = document.createElement("meta");
+            settings.setAttribute("type", "settings");
             settings.setAttribute("autoview", this.graphAutoView);
             settings.setAttribute("project", this.settingsStringify());
-            // settings.setAttribute("panels", this.panelsStringify());
+            this.#document.head.querySelector("meta[type=settings]").replaceWith(settings);
             // let autoViewScript: HTMLScriptElement = this.#document.querySelector("script[name=autoView]");
             // if (this.includeAutoViewScript) {
             //   if (!autoViewScript)

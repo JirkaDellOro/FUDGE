@@ -41,22 +41,6 @@ namespace Fudge {
       return this.#resourceFolder;
     }
 
-    private get gizmosFilter(): [string, boolean][] {
-      return Array.from(ƒ.Gizmos.filter.entries());
-    }
-
-    private set gizmosFilter(_filter: [string, boolean][]) {
-      let gizmosFilter: Map<string, boolean> = new Map(_filter);
-
-      // add default values for view render gizmos
-      ƒ.Gizmos.filter.set(GIZMOS.TRANSFORM, true);
-      ƒ.Gizmos.filter.set(GIZMOS.WIRE_MESH, false);
-
-      for (const [key, value] of gizmosFilter)
-        if (ƒ.Gizmos.filter.has(key))
-          ƒ.Gizmos.filter.set(key, value);
-    }
-
     public async openDialog(): Promise<boolean> {
       let promise: Promise<boolean> = ƒui.Dialog.prompt(project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
 
@@ -125,7 +109,15 @@ namespace Fudge {
         const panelSettings: ƒ.Serialization = JSON.parse(settingsContent);
 
         // TODO: maybe move gizmos filter to the view state of ViewRender
-        this.gizmosFilter = panelSettings.gizmosFilter;
+        let gizmosFilter: Map<string, boolean> = new Map(panelSettings.gizmosFilter);
+
+        // add default values for view render gizmos
+        ƒ.Gizmos.filter.set(GIZMOS.TRANSFORM, true);
+        ƒ.Gizmos.filter.set(GIZMOS.WIRE_MESH, false);
+  
+        for (const [key, value] of gizmosFilter)
+          if (ƒ.Gizmos.filter.has(key))
+            ƒ.Gizmos.filter.set(key, value);
 
         if (panelSettings.layout)
           Page.loadLayout(panelSettings.layout);
@@ -146,7 +138,7 @@ namespace Fudge {
 
     public getSettingsJSON(): string {
       let settings: ƒ.Serialization = {};
-      settings.gizmosFilter = this.gizmosFilter;
+      settings.gizmosFilter = Array.from(ƒ.Gizmos.filter.entries());
       // settings.panels = Page.getPanelInfo();
       settings.layout = Page.getLayout();
 
@@ -169,10 +161,11 @@ namespace Fudge {
 
       this.#document.title = _title;
 
-      let settings: HTMLElement = this.#document.head.querySelector("meta[type=settings]");
+      let settings: HTMLElement = document.createElement("meta");
+      settings.setAttribute("type", "settings");
       settings.setAttribute("autoview", this.graphAutoView);
       settings.setAttribute("project", this.settingsStringify());
-      // settings.setAttribute("panels", this.panelsStringify());
+      this.#document.head.querySelector("meta[type=settings]").replaceWith(settings);
 
       // let autoViewScript: HTMLScriptElement = this.#document.querySelector("script[name=autoView]");
       // if (this.includeAutoViewScript) {

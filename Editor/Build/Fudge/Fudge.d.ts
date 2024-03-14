@@ -218,8 +218,6 @@ declare namespace Fudge {
         private graphAutoView;
         constructor(_base: URL);
         get resourceFolder(): ResourceFolder;
-        private get gizmosFilter();
-        private set gizmosFilter(value);
         openDialog(): Promise<boolean>;
         hndChange: (_event: Event) => void;
         load(_htmlContent: string): Promise<void>;
