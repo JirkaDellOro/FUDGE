@@ -555,6 +555,10 @@ declare namespace FudgeCore {
          */
         addChild(_child: Node): void;
         /**
+         * Adds the given reference to a node to the list of children at the given index. If it is already a child, it is moved to the new position.
+         */
+        addChild(_child: Node, _index: number): void;
+        /**
          * Removes the reference to the give node from the list of children
          */
         removeChild(_child: Node): void;
@@ -606,6 +610,10 @@ declare namespace FudgeCore {
          * Detach the given component from this node. Identical to {@link removeComponent}
          */
         detach(_component: Component): void;
+        /**
+         * Removes all components of the given class attached to this node.
+         */
+        removeComponents(_class: new () => Component): void;
         /**
          * Removes the given component from the node, if it was attached, and sets its parent to null.
          */

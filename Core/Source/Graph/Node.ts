@@ -210,12 +210,18 @@ namespace FudgeCore {
     // eslint-disable-next-line @typescript-eslint/member-ordering
     public readonly appendChild: (_child: Node) => void = this.addChild;
 
+
     /**
      * Adds the given reference to a node to the list of children, if not already in
      * @throws Error when trying to add an ancestor of this 
      */
-    public addChild(_child: Node): void {
-      if (this.children.includes(_child))
+    public addChild(_child: Node): void;
+    /**
+     * Adds the given reference to a node to the list of children at the given index. If it is already a child, it is moved to the new position.
+     */
+    public addChild(_child: Node, _index: number): void;
+    public addChild(_child: Node, _index?: number): void {
+      if (this.children.includes(_child) && _index == undefined)
         // _node is already a child of this
         return;
 
@@ -232,9 +238,13 @@ namespace FudgeCore {
       }
 
       let previousParent: Node = _child.parent;
+      if (previousParent == this && _index > previousParent.findChild(_child))
+        _index--;
+
       if (previousParent)
         previousParent.removeChild(_child);
-      this.children.push(_child);
+
+      this.children.splice(_index ?? this.children.length, 0, _child);
       _child.parent = this;
       _child.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
       if (inAudioGraph)
@@ -371,6 +381,7 @@ namespace FudgeCore {
     public attach(_component: Component): void {
       this.addComponent(_component);
     }
+
     /**
      * Attach the given component to this node
      */
@@ -396,6 +407,14 @@ namespace FudgeCore {
     public detach(_component: Component): void {
       this.removeComponent(_component);
     }
+
+    /**
+     * Removes all components of the given class attached to this node.
+     */
+    public removeComponents(_class: new () => Component): void {
+      this.getComponents(_class).forEach(_component => this.removeComponent(_component));
+    }
+
     /** 
      * Removes the given component from the node, if it was attached, and sets its parent to null. 
      */

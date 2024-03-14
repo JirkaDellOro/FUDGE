@@ -304,6 +304,10 @@ namespace FudgeCore {
       graph.name = gltfScene.name;
       if (graph instanceof GraphGLTF)
         graph.url = this.#url;
+      if (_graph) {
+        _graph.removeAllChildren();
+        _graph.removeComponents(ComponentSkeleton);
+      }
 
       for (const iNode of gltfScene.nodes)
         graph.addChild(await this.getNodeByIndex(iNode));
