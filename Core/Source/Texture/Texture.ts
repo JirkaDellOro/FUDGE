@@ -216,7 +216,7 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
-      if (_mutator.url != this.url.toString())
+      if (_mutator.url && _mutator.url != this.url.toString())
         await this.load(_mutator.url);
       // except url from mutator for further processing
       delete (_mutator.url);
