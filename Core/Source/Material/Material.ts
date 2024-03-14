@@ -43,6 +43,15 @@ namespace FudgeCore {
     }
 
     /**
+     * Returns true if the material has any areas (color or texture) with alpha < 1.
+     * ⚠️ CAUTION: Computionally expensive for textured materials, see {@link Texture.hasTransparency}
+     */
+    public get hasTransparency(): boolean {
+      let coat: CoatTextured = <CoatTextured>this.coat;
+      return coat.color?.a < 1 || coat.texture?.hasTransparency;
+    }
+
+    /**
      * Creates a new {@link Coat} instance that is valid for the {@link Shader} referenced by this material
      */
     public createCoatMatchingShader(): Coat {
@@ -68,7 +77,6 @@ namespace FudgeCore {
     public getShader(): typeof Shader {
       return this.shaderType;
     }
-
 
     //#region Transfer
     // TODO: this type of serialization was implemented for implicit Material create. Check if obsolete when only one material class exists and/or materials are stored separately

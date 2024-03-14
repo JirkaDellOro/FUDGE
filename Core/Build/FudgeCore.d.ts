@@ -2538,6 +2538,11 @@ declare namespace FudgeCore {
         /** Support sorting of objects with transparency when rendering, render objects in the back first. When this component is used as a part of a {@link ParticleSystem}, try enabling this when disabling {@link ComponentParticleSystem.depthMask} */
         sortForAlpha: boolean;
         constructor(_material?: Material);
+        /**
+         * Returns true if the material has any areas (color or texture) with alpha < 1.
+         * ⚠️ CAUTION: Computionally expensive for textured materials, see {@link Texture.hasTransparency}
+         */
+        get hasTransparency(): boolean;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -3508,6 +3513,11 @@ declare namespace FudgeCore {
          * Makes this material reference the given {@link Coat} if it is compatible with the referenced {@link Shader}
          */
         set coat(_coat: Coat);
+        /**
+         * Returns true if the material has any areas (color or texture) with alpha < 1.
+         * ⚠️ CAUTION: Computionally expensive for textured materials, see {@link Texture.hasTransparency}
+         */
+        get hasTransparency(): boolean;
         /**
          * Creates a new {@link Coat} instance that is valid for the {@link Shader} referenced by this material
          */
@@ -8261,6 +8271,12 @@ declare namespace FudgeCore {
         set wrap(_wrap: WRAP);
         get wrap(): WRAP;
         /**
+         * Returns true if the texture has any texels with alpha < 1.
+         * ⚠️ CAUTION: Has to be recomputed whenever the texture/image data changes.
+         */
+        get hasTransparency(): boolean;
+        protected set hasTransparency(_hasTransparency: boolean);
+        /**
          * Returns the image source of this texture.
          */
         abstract get texImageSource(): ImageSource;
@@ -8321,6 +8337,7 @@ declare namespace FudgeCore {
         get texImageSource(): ImageSource;
         get width(): number;
         get height(): number;
+        get hasTransparency(): boolean;
         private get canvas();
         useRenderData(_textureUnit?: number): void;
         serialize(): Serialization;

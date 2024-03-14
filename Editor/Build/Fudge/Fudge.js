@@ -840,16 +840,10 @@ var Fudge;
         // }
         settingsStringify() {
             let mutator = Fudge.project.getMutator(true);
-            // mutator.gizmosFilter = this.gizmosFilter;
             let settings = JSON.stringify(mutator);
             settings = settings.replace(/"/g, "'");
             return settings;
         }
-        // private panelsStringify(): string {
-        //   let panels: string = Page.getPanelInfo();
-        //   panels = panels.replace(/"/g, "'");
-        //   return panels;
-        // }
         stringifyHTML(_html) {
             let result = (new XMLSerializer()).serializeToString(_html);
             result = result.replace(/></g, ">\n<");

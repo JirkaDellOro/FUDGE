@@ -410,6 +410,7 @@ namespace FudgeCore {
             } else {
               const isFlat: boolean = gltfMesh.primitives[iPrimitive].attributes.NORMAL == undefined;
               cmpMaterial = new ComponentMaterial(await this.getMaterial(iMaterial, null, isSkin, isFlat));
+              cmpMaterial.sortForAlpha = cmpMaterial.material.hasTransparency;
             }
 
             subComponents.push([cmpMesh, cmpMaterial]);
@@ -733,33 +734,33 @@ namespace FudgeCore {
       let gltfMetallicFactor: number = gltfMaterial.pbrMetallicRoughness?.metallicFactor ?? 1;
       let gltfRoughnessFactor: number = gltfMaterial.pbrMetallicRoughness?.roughnessFactor ?? 1;
 
-      const gltfMetallicRoughnessTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.metallicRoughnessTexture;
-      if (gltfMetallicRoughnessTexture) {
-        // TODO: maybe throw this out if it costs too much performance, or add the texture to the material
-        // average metallic and roughness values
-        const metallicRoughnessTexture: TextureImage = await this.getTexture(gltfMetallicRoughnessTexture.index) as TextureImage;
-        let image: HTMLImageElement = metallicRoughnessTexture.image;
-        let canvas: HTMLCanvasElement = document.createElement("canvas");
-        canvas.width = image.width;
-        canvas.height = image.height;
-        let ctx: CanvasRenderingContext2D = canvas.getContext("2d");
-        ctx.drawImage(image, 0, 0);
-        let imageData: ImageData = ctx.getImageData(0, 0, image.width, image.height);
-        let data: Uint8ClampedArray = imageData.data;
+      // const gltfMetallicRoughnessTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.metallicRoughnessTexture;
+      // if (gltfMetallicRoughnessTexture) {
+      //   // TODO: maybe throw this out if it costs too much performance, or add the texture to the material
+      //   // average metallic and roughness values
+      //   const metallicRoughnessTexture: TextureImage = await this.getTexture(gltfMetallicRoughnessTexture.index) as TextureImage;
+      //   let image: HTMLImageElement = metallicRoughnessTexture.image;
+      //   let canvas: HTMLCanvasElement = document.createElement("canvas");
+      //   canvas.width = image.width;
+      //   canvas.height = image.height;
+      //   let ctx: CanvasRenderingContext2D = canvas.getContext("2d");
+      //   ctx.drawImage(image, 0, 0);
+      //   let imageData: ImageData = ctx.getImageData(0, 0, image.width, image.height);
+      //   let data: Uint8ClampedArray = imageData.data;
 
-        let sumMetallic: number = 0;
-        let sumRoughness: number = 0;
-        for (let iPixel: number = 0; iPixel < data.length; iPixel += 4) {
-          sumMetallic += data[iPixel + 2] / 255;
-          sumRoughness += data[iPixel + 1] / 255;
-        }
+      //   let sumMetallic: number = 0;
+      //   let sumRoughness: number = 0;
+      //   for (let iPixel: number = 0; iPixel < data.length; iPixel += 4) {
+      //     sumMetallic += data[iPixel + 2] / 255;
+      //     sumRoughness += data[iPixel + 1] / 255;
+      //   }
 
-        const averageMetallic: number = sumMetallic / (data.length / 4);
-        const averageRoughness: number = sumRoughness / (data.length / 4);
+      //   const averageMetallic: number = sumMetallic / (data.length / 4);
+      //   const averageRoughness: number = sumRoughness / (data.length / 4);
 
-        gltfMetallicFactor *= averageMetallic;
-        gltfRoughnessFactor *= averageRoughness;
-      }
+      //   gltfMetallicFactor *= averageMetallic;
+      //   gltfRoughnessFactor *= averageRoughness;
+      // }
 
       const gltfBaseColorTexture: GLTF.TextureInfo = gltfMaterial.pbrMetallicRoughness?.baseColorTexture;
       const gltfNormalTexture: GLTF.MaterialNormalTextureInfo = gltfMaterial.normalTexture;

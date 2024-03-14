@@ -339,18 +339,10 @@ namespace Fudge {
 
     private settingsStringify(): string {
       let mutator: ƒ.Mutator = project.getMutator(true);
-      // mutator.gizmosFilter = this.gizmosFilter;
-
       let settings: string = JSON.stringify(mutator);
       settings = settings.replace(/"/g, "'");
       return settings;
     }
-
-    // private panelsStringify(): string {
-    //   let panels: string = Page.getPanelInfo();
-    //   panels = panels.replace(/"/g, "'");
-    //   return panels;
-    // }
 
     private stringifyHTML(_html: Document): string {
       let result: string = (new XMLSerializer()).serializeToString(_html);

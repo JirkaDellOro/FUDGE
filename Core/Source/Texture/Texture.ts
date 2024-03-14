@@ -28,6 +28,8 @@ namespace FudgeCore {
     #mipmap: MIPMAP = MIPMAP.CRISP;
     #wrap: WRAP = WRAP.REPEAT;
 
+    #hasTransparency: boolean;
+
     public constructor(_name: string = "Texture") {
       super();
       this.name = _name;
@@ -49,6 +51,38 @@ namespace FudgeCore {
 
     public get wrap(): WRAP {
       return this.#wrap;
+    }
+
+    /**
+     * Returns true if the texture has any texels with alpha < 1. 
+     * ⚠️ CAUTION: Has to be recomputed whenever the texture/image data changes.
+     */
+    public get hasTransparency(): boolean { // Only tested for texImageSource of type HTMLImageElement and HTMLCanvasElement
+      if (this.#hasTransparency != null)
+        return this.#hasTransparency;
+
+      let imageData: ImageData;
+
+      if (this.texImageSource instanceof ImageData) {
+        imageData = this.texImageSource;
+      } else {
+        const canvas: HTMLCanvasElement = document.createElement('canvas');
+        canvas.width = this.texImageSource.width;
+        canvas.height = this.texImageSource.height;
+        const crc2: CanvasRenderingContext2D = canvas.getContext('2d');
+        crc2.drawImage(this.texImageSource, 0, 0);
+        imageData = crc2.getImageData(0, 0, this.texImageSource.width, this.texImageSource.height);
+      }
+
+      for (let i: number = 0; i < imageData.data.length; i += 4) 
+        if (imageData.data[i + 3] < 255)
+          return this.#hasTransparency = true;
+      
+      return this.#hasTransparency = false;
+    }
+
+    protected set hasTransparency(_hasTransparency: boolean) {
+      this.#hasTransparency = _hasTransparency;
     }
 
     /**
@@ -158,6 +192,7 @@ namespace FudgeCore {
       return new Promise((_resolve, _reject) => {
         this.image.addEventListener("load", () => {
           this.renderData = null; // refresh render data on next draw call
+          this.hasTransparency = null; // reset transparency check
           _resolve();
         });
         this.image.addEventListener("error", () => _reject());
@@ -271,6 +306,10 @@ namespace FudgeCore {
 
     public get height(): number {
       return this.canvas.height;
+    }
+
+    public get hasTransparency(): boolean {
+      return true;
     }
 
     private get canvas(): HTMLCanvasElement | OffscreenCanvas {
