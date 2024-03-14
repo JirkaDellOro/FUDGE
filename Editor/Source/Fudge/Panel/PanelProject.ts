@@ -64,7 +64,9 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
-      document.addEventListener(EVENT_EDITOR.CREATE, this.hndEvent); // TODO: explain use of document
+      // document.addEventListener(EVENT_EDITOR.CREATE, this.hndEvent); // TODO: explain use of document // removed beacause this keeps the panels alive even when closed
+      this.dom.addEventListener(EVENT_EDITOR.CREATE, this.hndEvent);
+
 
       this.setTitle("Project | " + project.name);
       this.broadcast(new EditorEvent(EVENT_EDITOR.OPEN, {}));
