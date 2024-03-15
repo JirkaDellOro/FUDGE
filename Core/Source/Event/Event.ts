@@ -39,9 +39,9 @@ namespace FudgeCore {
     NODE_SERIALIZED = "nodeSerialized",
     /** dispatched to {@link Node} and all its {@link Component}s when it's done deserializing, so all components, children and attributes are available */
     NODE_DESERIALIZED = "nodeDeserialized",
-    /** dispatched to {@link GraphInstance} when it's content is set according to a serialization of a {@link Graph}  */
+    /** dispatched to {@link GraphInstance} when it's content is set according to a serialization of a {@link Graph}. Broadcasted, so needs to be caught in capture. */
     GRAPH_INSTANTIATED = "graphInstantiated",
-    /** dispatched to a {@link Graph} when it's finished deserializing */
+    /** dispatched to a {@link Graph} when it's finished deserializing. Broadcasted, so needs to be caught in capture. */
     GRAPH_DESERIALIZED = "graphDeserialized",
     /** dispatched by a {@link Graph} when it and its connected instances have finished mutating  */
     GRAPH_MUTATED = "graphMutated",
@@ -61,7 +61,7 @@ namespace FudgeCore {
     RENDER_END = "renderEnd",
     /** dispatched to {@link Joint}-Components in order to disconnect */
     DISCONNECT_JOINT = "disconnectJoint",
-    /** dispatched to {@link Node} when it gets attached to a viewport for rendering */
+    /** dispatched to {@link Node} when it gets attached to a viewport for rendering. Broadcasted, so needs to be caught in capture. */
     ATTACH_BRANCH = "attachBranch",
     /** dispatched to {@link Project} when it's done loading resources from a url */
     RESOURCES_LOADED = "resourcesLoaded",

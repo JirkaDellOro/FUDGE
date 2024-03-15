@@ -90,8 +90,9 @@ namespace FudgeCore {
      * Set the branch to be drawn in the viewport.
      */
     public setBranch(_branch: Node): void {
-      if (_branch)
-        _branch.dispatchEvent(new Event(EVENT.ATTACH_BRANCH));
+      if (_branch){
+        _branch.broadcastEvent(new Event(EVENT.ATTACH_BRANCH));
+      }
       this.#branch = _branch;
     }
 
