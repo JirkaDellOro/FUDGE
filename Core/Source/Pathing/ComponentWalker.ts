@@ -79,7 +79,7 @@ namespace FudgeCore {
         this.#walkData = { path, totalProgress: 0 };
         this.#promiseResolverOnWalkFinished = _resolve;
 
-        if (this.#rotateInWalkDirection) {
+        if (this.#rotateInWalkDirection && this.#walkData.path.length > 1) {
           this.rotateTowards(this.#walkData.path[1].waypoint);
         }
       });
