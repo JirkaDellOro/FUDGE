@@ -79,7 +79,10 @@ namespace FudgeCore {
     /**
      * Return the {@link Node} or {@link Component} found at the given path starting from the given node or undefined if not found
      */
-    public static FIND(_from: Node | Component, _path: string): Node | Component {
+    public static FIND<T = Node | Component>(_from: Node | Component, _path: string): T {
+      if (_path == "")
+        return <T>_from;
+
       let path: string[] = _path.split("/");
       let to: General = _from;
 

@@ -491,7 +491,7 @@ declare namespace FudgeCore {
         /**
          * Return the {@link Node} or {@link Component} found at the given path starting from the given node or undefined if not found
          */
-        static FIND(_from: Node | Component, _path: string): Node | Component;
+        static FIND<T = Node | Component>(_from: Node | Component, _path: string): T;
         get isActive(): boolean;
         /**
          * Shortcut to retrieve this nodes {@link ComponentTransform}
