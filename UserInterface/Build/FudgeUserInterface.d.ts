@@ -395,11 +395,13 @@ declare namespace FudgeUserInterface {
         controller: CustomTreeController<T>;
         constructor(_controller: CustomTreeController<T>, _items?: CustomTreeItem<T>[]);
         /**
-         * Expands the tree along the given path to show the objects the path includes
-         * @param _path An array of objects starting with one being contained in this treelist and following the correct hierarchy of successors
-         * @param _focus If true (default) the last object found in the tree gets the focus
+         * Expands the tree along the given paths to show the objects the paths include.
          */
-        show(_path: T[], _focus?: boolean): void;
+        expand(_paths: T[][]): void;
+        /**
+         * Expands the tree along the given path to show the objects the path includes.
+         */
+        show(_path: T[]): void;
         /**
          * Restructures the list to sync with the given list.
          * {@link CustomTreeItem}s referencing the same object remain in the list, new items get added in the order of appearance, obsolete ones are deleted.
@@ -422,6 +424,10 @@ declare namespace FudgeUserInterface {
         selectInterval(_dataStart: T, _dataEnd: T): void;
         delete(_data: T[]): CustomTreeItem<T>[];
         findVisible(_data: T): CustomTreeItem<T>;
+        /**
+         * Returns all expanded {@link CustomTreeItem}s that are a descendant of this list.
+         */
+        getExpanded(): CustomTreeItem<T>[];
         [Symbol.iterator](): Iterator<CustomTreeItem<T>>;
         private hndDragOver;
     }

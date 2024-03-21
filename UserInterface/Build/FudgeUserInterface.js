@@ -1491,16 +1491,21 @@ var FudgeUserInterface;
             this.className = "tree";
         }
         /**
-         * Expands the tree along the given path to show the objects the path includes
-         * @param _path An array of objects starting with one being contained in this treelist and following the correct hierarchy of successors
-         * @param _focus If true (default) the last object found in the tree gets the focus
+         * Expands the tree along the given paths to show the objects the paths include.
          */
-        show(_path, _focus = true) {
+        expand(_paths) {
+            for (let path of _paths)
+                this.show(path);
+        }
+        /**
+         * Expands the tree along the given path to show the objects the path includes.
+         */
+        show(_path) {
             let currentTree = this;
             for (let data of _path) {
                 let item = currentTree.findItem(data);
-                item.focus();
-                if (!item.expanded && data != _path[_path.length - 1])
+                // item.focus();
+                if (!item.expanded)
                     item.expand(true);
                 currentTree = item.getBranch();
             }
@@ -1593,6 +1598,12 @@ var FudgeUserInterface;
                 if (_data == item.data)
                     return item;
             return null;
+        }
+        /**
+         * Returns all expanded {@link CustomTreeItem}s that are a descendant of this list.
+         */
+        getExpanded() {
+            return [...this].filter(_item => _item.expanded);
         }
         *[Symbol.iterator]() {
             let items = this.querySelectorAll("li");

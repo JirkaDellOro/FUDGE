@@ -15,18 +15,24 @@ namespace FudgeUserInterface {
     }
 
     /**
-     * Expands the tree along the given path to show the objects the path includes
-     * @param _path An array of objects starting with one being contained in this treelist and following the correct hierarchy of successors
-     * @param _focus If true (default) the last object found in the tree gets the focus
+     * Expands the tree along the given paths to show the objects the paths include.
      */
-    public show(_path: T[], _focus: boolean = true): void {
+    public expand(_paths: T[][]): void {
+      for (let path of _paths)
+        this.show(path);
+    }
+
+    /**
+     * Expands the tree along the given path to show the objects the path includes.
+     */
+    public show(_path: T[]): void {
       let currentTree: CustomTreeList<T> = this;
 
       for (let data of _path) {
         let item: CustomTreeItem<T> = currentTree.findItem(data);
-        item.focus();
+        // item.focus();
 
-        if (!item.expanded && data != _path[_path.length - 1])
+        if (!item.expanded)
           item.expand(true);
 
         currentTree = item.getBranch();
@@ -131,6 +137,13 @@ namespace FudgeUserInterface {
         if (_data == item.data)
           return item;
       return null;
+    }
+
+    /**
+     * Returns all expanded {@link CustomTreeItem}s that are a descendant of this list.
+     */
+    public getExpanded(): CustomTreeItem<T>[] {
+      return [...this].filter(_item => _item.expanded);
     }
 
     public *[Symbol.iterator](): Iterator<CustomTreeItem<T>> {
