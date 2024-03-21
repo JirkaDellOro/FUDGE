@@ -14,11 +14,6 @@ namespace Fudge {
 
   export let project: Project; // = new Project();
 
-  export interface PanelInfo {
-    type: string;
-    state: PanelState;
-  }
-
   /**
    * The uppermost container for all panels controlling data flow between. 
    * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020

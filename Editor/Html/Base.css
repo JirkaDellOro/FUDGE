@@ -93,7 +93,8 @@ ul.tree li {
   white-space: nowrap;
 }
 
-ul.tree li[attributes~="inactive"]>input {
+ul.tree li[attributes~="inactive"]>input,
+ul.tree li[attributes~="inactive"]>fieldset>input {
   text-decoration: line-through;
 }
 

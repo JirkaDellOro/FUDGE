@@ -2,10 +2,6 @@
 namespace Fudge {
   import ƒ = FudgeCore;
 
-  export interface PanelState {
-    [key: string]: string;
-  }
-
   /**
    * Base class for all [[Panel]]s aggregating [[View]]s
    * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
@@ -35,14 +31,12 @@ namespace Fudge {
       this.goldenLayout = new Page.goldenLayoutModule.GoldenLayout(this.dom);
 
       for (const key in _viewConstructors)
-        this.goldenLayout.registerComponentFactoryFunction(key, _container => new _viewConstructors[key](_container, _state)); // this way all views receive/share their panels state
+        this.goldenLayout.registerComponentConstructor(key, _viewConstructors[key]);
 
       this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
       this.goldenLayout.on("itemCreated", this.addViewComponent);
 
       this.goldenLayout.loadLayout(_state["layout"] ? Page.goldenLayoutModule.LayoutConfig.fromResolved(_state["layout"]) : config);
-      
-      _container.stateRequestEvent = this.getState.bind(this);
     }
 
     /** Send custom copies of the given event to the views */
@@ -56,7 +50,7 @@ namespace Fudge {
     };
     
     protected getState(): JsonValue {
-      let state: JsonValue = {};
+      let state: JsonValue = super.getState();
       state["layout"] = this.goldenLayout.saveLayout();
       return state;
     }

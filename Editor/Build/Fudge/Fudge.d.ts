@@ -169,10 +169,6 @@ declare namespace Fudge {
     const ipcRenderer: Electron.IpcRenderer;
     const remote: Electron.RemoteMainInterface;
     let project: Project;
-    interface PanelInfo {
-        type: string;
-        state: PanelState;
-    }
     /**
      * The uppermost container for all panels controlling data flow between.
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -261,15 +257,15 @@ declare namespace Fudge {
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     abstract class View {
+        #private;
         private static views;
         private static idCount;
         dom: HTMLElement;
         protected contextMenu: Electron.Menu;
-        private container;
-        private id;
         constructor(_container: ComponentContainer, _state: JsonValue);
         static getViewSource(_event: DragEvent): View;
         private static registerViewForDragDrop;
+        protected get id(): number;
         setTitle(_title: string): void;
         getDragDropSources(): Object[];
         dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;
@@ -277,6 +273,7 @@ declare namespace Fudge {
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        protected getState(): JsonValue;
         protected hndDrop(_event: DragEvent, _source: View): void;
         protected hndDragOver(_event: DragEvent, _source: View): void;
         private hndEventCommon;
@@ -458,9 +455,6 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    interface PanelState {
-        [key: string]: string;
-    }
     /**
      * Base class for all [[Panel]]s aggregating [[View]]s
      * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
@@ -489,17 +483,20 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    import ƒ = FudgeCore;
     /**
     * Shows a graph and offers means for manipulation
     * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
     */
     class PanelGraph extends Panel {
-        private graph;
+        #private;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
-        setGraph(_graph: ƒ.Graph): void;
-        getState(): JsonValue;
+        protected getState(): JsonValue;
+        protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private hndEvent;
+        private storeNode;
+        private restoreNode;
+        private storeGraph;
+        private restoreGraph;
     }
 }
 declare namespace Fudge {
@@ -707,19 +704,25 @@ declare namespace Fudge {
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewHierarchy extends View {
-        #private;
         private graph;
         private tree;
+        private selectionPrevious;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        private get selection();
         setGraph(_graph: ƒ.Graph): void;
-        getSelection(): ƒ.Node[];
         getDragDropSources(): ƒ.Node[];
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        protected getState(): JsonValue;
+        private hndTreeEvent;
         private hndEvent;
         private checkGraphDrop;
+        private storeExpanded;
+        private restoreExpanded;
+        private getExpanded;
+        private expand;
     }
 }
 declare namespace Fudge {
@@ -733,8 +736,8 @@ declare namespace Fudge {
         private viewport;
         private canvas;
         private graph;
+        private node;
         private nodeLight;
-        private selected;
         private redrawId;
         constructor(_container: ComponentContainer, _state: JsonValue);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;

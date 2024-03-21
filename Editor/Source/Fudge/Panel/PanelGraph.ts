@@ -7,7 +7,8 @@ namespace Fudge {
   * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
   */
   export class PanelGraph extends Panel {
-    private graph: ƒ.Graph;
+    #graph: ƒ.Graph;
+    #node: ƒ.Node;
 
     public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       const constructors = { /* eslint-disable-line */
@@ -40,8 +41,6 @@ namespace Fudge {
 
       this.setTitle("Graph");
 
-      //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
-      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.DELETE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
@@ -50,46 +49,83 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
 
-      if (_state["graph"])
-        ƒ.Project.getResource(_state["graph"]).then((_graph: ƒ.Graph) => {
-          this.dispatch(EVENT_EDITOR.SELECT, { detail: { graph: _graph } });
-          // TODO: trace the node saved. The name is not sufficient, path is necessary...
-          // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { detail: _graph.findChild }));
-        });
-    }
-
-    public setGraph(_graph: ƒ.Graph): void {
-      if (_graph) {
-        this.setTitle(`${_graph.type} | ${_graph.name}`);
-        this.graph = _graph;
+      let graph: ƒ.Graph = this.restoreGraph();
+      if (graph) {
+        this.dispatch(EVENT_EDITOR.SELECT, { detail: { graph: graph, node: this.restoreNode(graph) } });
         return;
       }
 
-      this.setTitle("Graph");
+      if (_state["graph"]) {
+        ƒ.Project.getResource(_state["graph"]).then((_graph: ƒ.Graph) => {
+          const node: ƒ.Node = _state["node"] && ƒ.Node.FIND(_graph, _state["node"]);
+          this.dispatch(EVENT_EDITOR.SELECT, { detail: { graph: _graph, node: node } });
+        });
+      }
     }
 
-    public getState(): JsonValue {
+    protected getState(): JsonValue {
       let state: JsonValue = super.getState();
-      if (this.graph) 
-        state["graph"] = this.graph.idResource;
-      
+      state["graph"] = this.#graph.idResource;
+      state["node"] = ƒ.Node.PATH_FROM_TO(this.#graph, this.#node);
       return state;
-      // TODO: iterate over views and collect their states for reconstruction 
     }
 
-    private hndEvent = async (_event: EditorEvent | CustomEvent): Promise<void> => {
+    protected hndDrop(_event: DragEvent, _viewSource: View): void {
+      let source: Object = _viewSource.getDragDropSources()[0];
+      if (source instanceof ƒ.Graph)
+        this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source, node: this.restoreNode(source) } });
+    }
+
+    private hndEvent = async (_event: EditorEvent): Promise<void> => {
+      const detail: EventDetail = _event.detail;
       switch (_event.type) {
         case EVENT_EDITOR.UPDATE:
         case EVENT_EDITOR.MODIFY:
-        case EVENT_EDITOR.CLOSE:
           break;
         case EVENT_EDITOR.SELECT:
-          this.setGraph(_event.detail.graph);
+          const graph: ƒ.Graph = detail.graph;
+          if (graph && graph != this.#graph) {
+            this.storeGraph(graph);
+            this.setTitle(`${graph.type} | ${graph.name}`);
+            this.#graph = graph;
+          }
+          const node: ƒ.Node = detail.node;
+          if (node && node != this.#node) {
+            this.storeNode(this.#graph, node);
+            this.#node = node;
+          }
+          break;
+        case EVENT_EDITOR.CLOSE:
+          if (detail.view != this)
+            return;
+          if (this.#graph)
+            this.storeGraph(this.#graph);
+          if (this.#graph && this.#node)
+            this.storeNode(this.#graph, this.#node);
+          break;
         default:
           _event.stopPropagation();
       }
 
       this.broadcast(_event);
     };
+
+    private storeNode(_graph: ƒ.Graph, _selected: ƒ.Node): void {
+      sessionStorage.setItem(PanelGraph.name + this.id + _graph.idResource, ƒ.Node.PATH_FROM_TO(_graph, _selected));
+    }
+
+    private restoreNode(_graph: ƒ.Graph): ƒ.Node {
+      let selected: string = sessionStorage.getItem(PanelGraph.name + this.id + _graph.idResource);
+      return selected && ƒ.Node.FIND(_graph, selected);
+    }
+
+    private storeGraph(_graph: ƒ.Graph): void {
+      sessionStorage.setItem(PanelGraph.name + this.id, _graph.idResource);
+    }
+
+    private restoreGraph(): ƒ.Graph {
+      let id: string = sessionStorage.getItem(PanelGraph.name + this.id);
+      return id && <ƒ.Graph>ƒ.Project.resources[id];
+    }
   }
 }

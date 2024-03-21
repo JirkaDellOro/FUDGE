@@ -1066,21 +1066,22 @@ var Fudge;
         static idCount = 0;
         dom;
         contextMenu;
-        container;
-        id;
+        #container;
+        #id;
         constructor(_container, _state) {
             this.dom = document.createElement("div");
             this.dom.style.height = "100%";
             // this.dom.style.overflow = "auto";
             this.dom.setAttribute("view", this.constructor.name);
             //_container.getElement().append(this.dom); //old
-            _container.element.appendChild(this.dom);
-            this.container = _container;
-            this.container.on("destroy", () => this.dispatch(Fudge.EVENT_EDITOR.CLOSE, { bubbles: true }));
+            this.#container = _container;
+            this.#container.element.appendChild(this.dom);
+            this.#container.stateRequestEvent = this.getState.bind(this);
+            this.#container.on("destroy", () => this.dispatch(Fudge.EVENT_EDITOR.CLOSE, { bubbles: true }));
             // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
-            this.id = View.registerViewForDragDrop(this);
+            this.#id = View.registerViewForDragDrop(this);
         }
         static getViewSource(_event) {
             for (let item of _event.dataTransfer.items)
@@ -1093,7 +1094,7 @@ var Fudge;
             // when drag starts, add identifier to the event in a way that allows dragover to process the soure
             _this.dom.addEventListener("dragstart" /* ƒui.EVENT.DRAG_START */, (_event) => {
                 _event.stopPropagation();
-                _event.dataTransfer.setData("SourceView:" + _this.id.toString(), "typesHack");
+                _event.dataTransfer.setData("SourceView:" + _this.#id.toString(), "typesHack");
             });
             // when dragging over a view, get the original source view for dragging and call hndDragOver
             _this.dom.addEventListener("dragover" /* ƒui.EVENT.DRAG_OVER */, (_event) => {
@@ -1109,8 +1110,11 @@ var Fudge;
             }, false);
             return View.idCount++;
         }
+        get id() {
+            return this.#id;
+        }
         setTitle(_title) {
-            this.container.setTitle(_title);
+            this.#container.setTitle(_title);
         }
         getDragDropSources() {
             return [];
@@ -1140,6 +1144,9 @@ var Fudge;
         }
         //#endregion
         //#region Events
+        getState() {
+            return {};
+        }
         hndDrop(_event, _source) {
             // console.log(_source, _event);
         }
@@ -2406,11 +2413,10 @@ var Fudge;
             };
             this.goldenLayout = new Fudge.Page.goldenLayoutModule.GoldenLayout(this.dom);
             for (const key in _viewConstructors)
-                this.goldenLayout.registerComponentFactoryFunction(key, _container => new _viewConstructors[key](_container, _state)); // this way all views receive/share their panels state
+                this.goldenLayout.registerComponentConstructor(key, _viewConstructors[key]);
             this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
             this.goldenLayout.on("itemCreated", this.addViewComponent);
             this.goldenLayout.loadLayout(_state["layout"] ? Fudge.Page.goldenLayoutModule.LayoutConfig.fromResolved(_state["layout"]) : config);
-            _container.stateRequestEvent = this.getState.bind(this);
         }
         /** Send custom copies of the given event to the views */
         broadcast = (_event) => {
@@ -2422,7 +2428,7 @@ var Fudge;
                     view.dispatch(_event.type, { detail: detail });
         };
         getState() {
-            let state = {};
+            let state = super.getState();
             state["layout"] = this.goldenLayout.saveLayout();
             return state;
         }
@@ -2494,7 +2500,8 @@ var Fudge;
     * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
     */
     class PanelGraph extends Fudge.Panel {
-        graph;
+        #graph;
+        #node;
         constructor(_container, _state) {
             const constructors = {
                 [Fudge.VIEW.RENDER]: Fudge.ViewRender,
@@ -2522,8 +2529,6 @@ var Fudge;
             };
             super(_container, _state, constructors, config);
             this.setTitle("Graph");
-            //TODO: ƒui-Events should only be listened to in Views! If applicable, Views then dispatch EDITOR-Events
-            this.dom.addEventListener("itemselect" /* ƒui.EVENT.SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.DELETE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
@@ -2531,41 +2536,75 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
-            if (_state["graph"])
-                ƒ.Project.getResource(_state["graph"]).then((_graph) => {
-                    this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: _graph } });
-                    // TODO: trace the node saved. The name is not sufficient, path is necessary...
-                    // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { detail: _graph.findChild }));
-                });
-        }
-        setGraph(_graph) {
-            if (_graph) {
-                this.setTitle(`${_graph.type} | ${_graph.name}`);
-                this.graph = _graph;
+            let graph = this.restoreGraph();
+            if (graph) {
+                this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: graph, node: this.restoreNode(graph) } });
                 return;
             }
-            this.setTitle("Graph");
+            if (_state["graph"]) {
+                ƒ.Project.getResource(_state["graph"]).then((_graph) => {
+                    const node = _state["node"] && ƒ.Node.FIND(_graph, _state["node"]);
+                    this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: _graph, node: node } });
+                });
+            }
         }
         getState() {
             let state = super.getState();
-            if (this.graph)
-                state["graph"] = this.graph.idResource;
+            state["graph"] = this.#graph.idResource;
+            state["node"] = ƒ.Node.PATH_FROM_TO(this.#graph, this.#node);
             return state;
-            // TODO: iterate over views and collect their states for reconstruction 
+        }
+        hndDrop(_event, _viewSource) {
+            let source = _viewSource.getDragDropSources()[0];
+            if (source instanceof ƒ.Graph)
+                this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source, node: this.restoreNode(source) } });
         }
         hndEvent = async (_event) => {
+            const detail = _event.detail;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.UPDATE:
                 case Fudge.EVENT_EDITOR.MODIFY:
-                case Fudge.EVENT_EDITOR.CLOSE:
                     break;
                 case Fudge.EVENT_EDITOR.SELECT:
-                    this.setGraph(_event.detail.graph);
+                    const graph = detail.graph;
+                    if (graph && graph != this.#graph) {
+                        this.storeGraph(graph);
+                        this.setTitle(`${graph.type} | ${graph.name}`);
+                        this.#graph = graph;
+                    }
+                    const node = detail.node;
+                    if (node && node != this.#node) {
+                        this.storeNode(this.#graph, node);
+                        this.#node = node;
+                    }
+                    break;
+                case Fudge.EVENT_EDITOR.CLOSE:
+                    if (detail.view != this)
+                        return;
+                    if (this.#graph)
+                        this.storeGraph(this.#graph);
+                    if (this.#graph && this.#node)
+                        this.storeNode(this.#graph, this.#node);
+                    break;
                 default:
                     _event.stopPropagation();
             }
             this.broadcast(_event);
         };
+        storeNode(_graph, _selected) {
+            sessionStorage.setItem(PanelGraph.name + this.id + _graph.idResource, ƒ.Node.PATH_FROM_TO(_graph, _selected));
+        }
+        restoreNode(_graph) {
+            let selected = sessionStorage.getItem(PanelGraph.name + this.id + _graph.idResource);
+            return selected && ƒ.Node.FIND(_graph, selected);
+        }
+        storeGraph(_graph) {
+            sessionStorage.setItem(PanelGraph.name + this.id, _graph.idResource);
+        }
+        restoreGraph() {
+            let id = sessionStorage.getItem(PanelGraph.name + this.id);
+            return id && ƒ.Project.resources[id];
+        }
     }
     Fudge.PanelGraph = PanelGraph;
 })(Fudge || (Fudge = {}));
@@ -4327,7 +4366,7 @@ var Fudge;
         hndEvent = (_event) => {
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
-                    this.node = _event.detail.graph || _event.detail.node;
+                    this.node = _event.detail.node || _event.detail.graph;
                 case Fudge.EVENT_EDITOR.MODIFY:
                     this.fillContent();
                     break;
@@ -4487,14 +4526,18 @@ var Fudge;
     class ViewHierarchy extends Fudge.View {
         graph;
         tree;
-        #selectionPrevious = [];
+        selectionPrevious = [];
         constructor(_container, _state) {
             super(_container, _state);
-            // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
-            this.setGraph(_state.node);
-            // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
+            this.setGraph(null);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
-            // this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            if (_state["graph"] && _state["expanded"] && !this.restoreExpanded(_state["graph"]))
+                this.storeExpanded(_state["graph"], _state["expanded"]);
+        }
+        get selection() {
+            return this.tree.controller.selection;
         }
         setGraph(_graph) {
             if (!_graph) {
@@ -4505,20 +4548,22 @@ var Fudge;
             if (this.graph && this.tree)
                 this.dom.removeChild(this.tree);
             this.dom.innerHTML = "";
+            if (this.graph)
+                this.storeExpanded(this.graph.idResource, this.getExpanded());
             this.graph = _graph;
             // this.selectedNode = null;
             this.tree = new ƒUi.CustomTree(new Fudge.ControllerTreeHierarchy(), this.graph);
-            this.tree.addEventListener("itemselect" /* ƒUi.EVENT.SELECT */, this.hndEvent);
-            this.tree.addEventListener("delete" /* ƒUi.EVENT.DELETE */, this.hndEvent);
-            this.tree.addEventListener("rename" /* ƒUi.EVENT.RENAME */, this.hndEvent);
+            // this.tree.addEventListener(ƒUi.EVENT.FOCUS_OUT, this.hndTreeEvent);
+            this.tree.addEventListener("itemselect" /* ƒUi.EVENT.SELECT */, this.hndTreeEvent);
+            this.tree.addEventListener("delete" /* ƒUi.EVENT.DELETE */, this.hndTreeEvent);
+            this.tree.addEventListener("rename" /* ƒUi.EVENT.RENAME */, this.hndTreeEvent);
             this.tree.addEventListener("contextmenu" /* ƒUi.EVENT.CONTEXTMENU */, this.openContextMenu);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.append(this.tree);
             this.dom.title = "● Right click on existing node to create child node.\n● Use Copy/Paste to duplicate nodes.";
             this.tree.title = "Select node to edit or duplicate.";
-        }
-        getSelection() {
-            return this.tree.controller.selection;
+            let expanded = this.restoreExpanded(this.graph.idResource);
+            if (expanded)
+                this.expand(expanded);
         }
         getDragDropSources() {
             return this.tree.controller.dragDrop.sources;
@@ -4599,8 +4644,14 @@ var Fudge;
             }
         }
         //#endregion
+        getState() {
+            let state = super.getState();
+            state["graph"] = this.graph.idResource;
+            state["expanded"] = this.getExpanded();
+            return state;
+        }
         //#region EventHandlers
-        hndEvent = (_event) => {
+        hndTreeEvent = (_event) => {
             switch (_event.type) {
                 case "delete" /* ƒUi.EVENT.DELETE */:
                     this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
@@ -4614,30 +4665,31 @@ var Fudge;
                 case "itemselect" /* ƒUi.EVENT.SELECT */:
                     //only dispatch the event to focus the node, if the node is in the current and the previous selection  
                     let node = _event.detail["data"];
-                    if (this.#selectionPrevious.includes(node) && this.getSelection().includes(node))
+                    if (this.selectionPrevious.includes(node) && this.selection.includes(node))
                         this.dispatch(Fudge.EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: node, view: this } });
-                    this.#selectionPrevious = this.getSelection().slice(0);
+                    this.selectionPrevious = this.selection.slice(0);
                     this.dispatchToParent(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: node, view: this } });
                     break;
+            }
+        };
+        hndEvent = (_event) => {
+            switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
+                    if (_event.detail.graph)
+                        this.setGraph(_event.detail.graph);
                     if (_event.detail.node) {
                         this.tree.show(_event.detail.node.getPath());
                         this.tree.controller.selection = [_event.detail.node];
                         this.tree.displaySelection(this.tree.controller.selection);
-                        this.#selectionPrevious = this.getSelection().slice(0);
-                    }
-                    else {
-                        this.setGraph(_event.detail.graph);
-                        break;
+                        this.selectionPrevious = this.selection.slice(0);
                     }
                     break;
                 case Fudge.EVENT_EDITOR.UPDATE:
-                    if (_event.detail.view instanceof Fudge.ViewInternal && _event.detail.data == this.graph) {
-                        console.log("Update Graph");
-                        let item = this.tree.findItem(this.graph);
-                        item.refreshContent();
-                    }
+                    if (_event.detail.view instanceof Fudge.ViewInternal && _event.detail.data == this.graph)
+                        this.tree.findItem(this.graph)?.refreshContent();
                     break;
+                case Fudge.EVENT_EDITOR.CLOSE:
+                    this.storeExpanded(this.graph.idResource, this.getExpanded());
             }
         };
         //#endregion
@@ -4659,6 +4711,23 @@ var Fudge;
             } while (_target);
             return true;
         }
+        storeExpanded(_idGraph, _expanded) {
+            sessionStorage.setItem(ViewHierarchy.name + this.id + _idGraph, JSON.stringify(_expanded));
+        }
+        restoreExpanded(_idGraph) {
+            let stored = sessionStorage.getItem(ViewHierarchy.name + this.id + _idGraph);
+            return stored && JSON.parse(stored);
+        }
+        getExpanded() {
+            return this.tree?.getExpanded().map(_item => ƒ.Node.PATH_FROM_TO(this.graph, _item.data));
+        }
+        expand(_paths) {
+            const paths = _paths
+                .map(_path => ƒ.Node.FIND(this.graph, _path))
+                .filter(_node => _node)
+                .map(_node => _node.getPath());
+            this.tree?.expand(paths);
+        }
     }
     Fudge.ViewHierarchy = ViewHierarchy;
 })(Fudge || (Fudge = {}));
@@ -4675,13 +4744,12 @@ var Fudge;
         viewport;
         canvas;
         graph;
+        node;
         nodeLight = new ƒ.Node("Illumination"); // keeps light components for dark graphs
-        selected;
         redrawId;
         #pointerMoved = false;
         constructor(_container, _state) {
             super(_container, _state);
-            this.graph = ƒ.Project.resources[_state["graph"]];
             this.createUserInterface();
             let title = "● Drop a graph from \"Internal\" here.\n";
             title += "● Use mousebuttons and ctrl-, shift- or alt-key to navigate editor camera.\n";
@@ -4797,9 +4865,9 @@ var Fudge;
                 // this.setCameraOrthographic(false);
                 this.viewport.camera = source;
                 this.redraw();
+                _event.stopPropagation();
+                return;
             }
-            else
-                this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source } });
         }
         createUserInterface() {
             ƒAid.addStandardLightComponents(this.nodeLight);
@@ -4842,7 +4910,6 @@ var Fudge;
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             this.viewport.setBranch(this.graph);
             this.viewport.camera = this.cmrOrbit.cmpCamera;
-            this.dispatch(Fudge.EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: this.graph } });
         }
         setCameraOrthographic(_on = false) {
             this.viewport.camera = this.cmrOrbit.cmpCamera;
@@ -4875,14 +4942,14 @@ var Fudge;
             let detail = _event.detail;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SELECT:
-                    if (detail.node) {
-                        // if (detail.view == this)
-                        //   return;
-                        this.selected = detail.node;
-                        ƒ.Gizmos.selected = this.selected;
+                    if (detail.graph) {
+                        this.setGraph(detail.graph);
+                        this.dispatch(Fudge.EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: detail.node || this.graph } });
                     }
-                    else
-                        this.setGraph(_event.detail.graph);
+                    if (detail.node) {
+                        this.node = detail.node;
+                        ƒ.Gizmos.selected = this.node;
+                    }
                     break;
                 case Fudge.EVENT_EDITOR.FOCUS:
                     this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
@@ -4892,7 +4959,7 @@ var Fudge;
                     this.setRenderContinously(false);
                     this.viewport.removeEventListener("renderEnd" /* ƒ.EVENT.RENDER_END */, this.drawTranslation);
                     this.viewport.removeEventListener("renderEnd" /* ƒ.EVENT.RENDER_END */, this.drawMesh);
-                    // ƒ.Render.removeEventListener(ƒ.EVENT.RENDER_FINISHED, this.hndDrawGizmoSelection);
+                    ƒ.Gizmos.selected = null;
                     break;
                 case Fudge.EVENT_EDITOR.UPDATE:
                     if (!this.viewport.camera.isActive)
@@ -4962,14 +5029,14 @@ var Fudge;
             this.contextMenu.getMenuItemById(String(Fudge.CONTEXTMENU.RENDER_CONTINUOUSLY)).checked = _on;
         }
         drawTranslation = () => {
-            if (!this.selected || !ƒ.Gizmos.filter.get(Fudge.GIZMOS.TRANSFORM))
+            if (!this.node || !ƒ.Gizmos.filter.get(Fudge.GIZMOS.TRANSFORM))
                 return;
-            const scaling = ƒ.Vector3.ONE(ƒ.Vector3.DIFFERENCE(ƒ.Gizmos.camera.mtxWorld.translation, this.selected.mtxWorld.translation).magnitude * 0.1);
+            const scaling = ƒ.Vector3.ONE(ƒ.Vector3.DIFFERENCE(ƒ.Gizmos.camera.mtxWorld.translation, this.node.mtxWorld.translation).magnitude * 0.1);
             const origin = ƒ.Vector3.ZERO();
             const vctX = ƒ.Vector3.X(1);
             const vctY = ƒ.Vector3.Y(1);
             const vctZ = ƒ.Vector3.Z(1);
-            let mtxWorld = this.selected.mtxWorld.clone;
+            let mtxWorld = this.node.mtxWorld.clone;
             mtxWorld.scaling = scaling;
             let color = ƒ.Color.CSS("red");
             ƒ.Gizmos.drawLines([origin, vctX], mtxWorld, color);
@@ -4980,7 +5047,7 @@ var Fudge;
             ƒ.Recycler.storeMultiple(vctX, vctY, vctZ, origin, mtxWorld, color, scaling);
         };
         drawMesh = () => {
-            const cmpMesh = this.selected?.getComponent(ƒ.ComponentMesh);
+            const cmpMesh = this.node?.getComponent(ƒ.ComponentMesh);
             if (!cmpMesh?.mesh || !ƒ.Gizmos.filter.get(Fudge.GIZMOS.WIRE_MESH))
                 return;
             ƒ.Gizmos.drawWireMesh(cmpMesh.mesh, cmpMesh.mtxWorld, ƒ.Color.CSS("salmon"), 0.1);

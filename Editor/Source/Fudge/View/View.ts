@@ -2,6 +2,10 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
+  // export interface ViewState {
+  //   [key: string]: string;
+  // }
+
   type Views = { [id: string]: View };
   /**
    * Base class for all [[View]]s to support generic functionality
@@ -13,8 +17,8 @@ namespace Fudge {
 
     public dom: HTMLElement;
     protected contextMenu: Electron.Menu;
-    private container: ComponentContainer;
-    private id: number;
+    #container: ComponentContainer;
+    #id: number;
 
     public constructor(_container: ComponentContainer, _state: JsonValue) {
       this.dom = document.createElement("div");
@@ -23,16 +27,16 @@ namespace Fudge {
       this.dom.setAttribute("view", this.constructor.name);
 
       //_container.getElement().append(this.dom); //old
-      _container.element.appendChild(this.dom);
-      this.container = _container;
-
-      this.container.on("destroy", () => this.dispatch(EVENT_EDITOR.CLOSE, { bubbles: true }));
+      this.#container = _container;
+      this.#container.element.appendChild(this.dom);
+      this.#container.stateRequestEvent = this.getState.bind(this);
+      this.#container.on("destroy", () => this.dispatch(EVENT_EDITOR.CLOSE, { bubbles: true }));
 
       // console.log(this.contextMenuCallback);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
       // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
 
-      this.id = View.registerViewForDragDrop(this);
+      this.#id = View.registerViewForDragDrop(this);
     }
 
     public static getViewSource(_event: DragEvent): View {
@@ -48,7 +52,7 @@ namespace Fudge {
       // when drag starts, add identifier to the event in a way that allows dragover to process the soure
       _this.dom.addEventListener(ƒui.EVENT.DRAG_START, (_event: DragEvent) => {
         _event.stopPropagation();
-        _event.dataTransfer.setData("SourceView:" + _this.id.toString(), "typesHack");
+        _event.dataTransfer.setData("SourceView:" + _this.#id.toString(), "typesHack");
       });
 
       // when dragging over a view, get the original source view for dragging and call hndDragOver
@@ -71,8 +75,12 @@ namespace Fudge {
       return View.idCount++;
     }
 
+    protected get id(): number {
+      return this.#id;
+    }
+
     public setTitle(_title: string): void {
-      this.container.setTitle(_title);
+      this.#container.setTitle(_title);
     }
 
     public getDragDropSources(): Object[] {
@@ -109,6 +117,10 @@ namespace Fudge {
     //#endregion
 
     //#region Events
+    protected getState(): JsonValue {
+      return {};
+    }
+
     protected hndDrop(_event: DragEvent, _source: View): void {
       // console.log(_source, _event);
     }

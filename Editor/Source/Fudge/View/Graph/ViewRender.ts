@@ -12,14 +12,13 @@ namespace Fudge {
     private viewport: ƒ.Viewport;
     private canvas: HTMLCanvasElement;
     private graph: ƒ.Graph;
+    private node: ƒ.Node;
     private nodeLight: ƒ.Node = new ƒ.Node("Illumination"); // keeps light components for dark graphs
-    private selected: ƒ.Node;
     private redrawId: number;
     #pointerMoved: boolean = false;
 
     public constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
-      this.graph = <ƒ.Graph>ƒ.Project.resources[_state["graph"]];
 
       this.createUserInterface();
 
@@ -154,8 +153,9 @@ namespace Fudge {
         // this.setCameraOrthographic(false);
         this.viewport.camera = source;
         this.redraw();
-      } else
-        this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: <ƒ.Graph>source } });
+        _event.stopPropagation();
+        return;
+      }
     }
 
     private createUserInterface(): void {
@@ -167,7 +167,6 @@ namespace Fudge {
       container.style.borderWidth = "0px";
       document.body.appendChild(this.canvas);
 
-
       this.viewport = new ƒ.Viewport();
       this.viewport.renderingGizmos = true;
       this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
@@ -178,7 +177,6 @@ namespace Fudge {
       this.viewport.addEventListener(ƒ.EVENT.RENDER_PREPARE_START, this.hndPrepare);
       this.viewport.addEventListener(ƒ.EVENT.RENDER_END, this.drawTranslation);
       this.viewport.addEventListener(ƒ.EVENT.RENDER_END, this.drawMesh);
-
 
       this.setGraph(null);
 
@@ -207,8 +205,6 @@ namespace Fudge {
       this.viewport.setBranch(this.graph);
 
       this.viewport.camera = this.cmrOrbit.cmpCamera;
-
-      this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: this.graph } });
     }
 
     private setCameraOrthographic(_on: boolean = false): void {
@@ -243,13 +239,14 @@ namespace Fudge {
       let detail: EventDetail = <EventDetail>_event.detail;
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
+          if (detail.graph) {
+            this.setGraph(detail.graph);
+            this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: false, detail: { node: detail.node || this.graph } });
+          }
           if (detail.node) {
-            // if (detail.view == this)
-            //   return;
-            this.selected = detail.node;
-            ƒ.Gizmos.selected = this.selected;
-          } else
-            this.setGraph(_event.detail.graph);
+            this.node = detail.node;
+            ƒ.Gizmos.selected = this.node;
+          }
           break;
         case EVENT_EDITOR.FOCUS:
           this.cmrOrbit.mtxLocal.translation = detail.node.mtxWorld.translation;
@@ -259,9 +256,7 @@ namespace Fudge {
           this.setRenderContinously(false);
           this.viewport.removeEventListener(ƒ.EVENT.RENDER_END, this.drawTranslation);
           this.viewport.removeEventListener(ƒ.EVENT.RENDER_END, this.drawMesh);
-
-
-          // ƒ.Render.removeEventListener(ƒ.EVENT.RENDER_FINISHED, this.hndDrawGizmoSelection);
+          ƒ.Gizmos.selected = null;
           break;
         case EVENT_EDITOR.UPDATE:
           if (!this.viewport.camera.isActive)
@@ -340,15 +335,15 @@ namespace Fudge {
     }
 
     private drawTranslation = (): void => {
-      if (!this.selected || !ƒ.Gizmos.filter.get(GIZMOS.TRANSFORM))
+      if (!this.node || !ƒ.Gizmos.filter.get(GIZMOS.TRANSFORM))
         return;
 
-      const scaling: ƒ.Vector3 = ƒ.Vector3.ONE(ƒ.Vector3.DIFFERENCE(ƒ.Gizmos.camera.mtxWorld.translation, this.selected.mtxWorld.translation).magnitude * 0.1);
+      const scaling: ƒ.Vector3 = ƒ.Vector3.ONE(ƒ.Vector3.DIFFERENCE(ƒ.Gizmos.camera.mtxWorld.translation, this.node.mtxWorld.translation).magnitude * 0.1);
       const origin: ƒ.Vector3 = ƒ.Vector3.ZERO();
       const vctX: ƒ.Vector3 = ƒ.Vector3.X(1);
       const vctY: ƒ.Vector3 = ƒ.Vector3.Y(1);
       const vctZ: ƒ.Vector3 = ƒ.Vector3.Z(1);
-      let mtxWorld: ƒ.Matrix4x4 = this.selected.mtxWorld.clone;
+      let mtxWorld: ƒ.Matrix4x4 = this.node.mtxWorld.clone;
       mtxWorld.scaling = scaling;
       let color: ƒ.Color = ƒ.Color.CSS("red");
       ƒ.Gizmos.drawLines([origin, vctX], mtxWorld, color);
@@ -361,7 +356,7 @@ namespace Fudge {
     };
 
     private drawMesh = (): void => {
-      const cmpMesh: ƒ.ComponentMesh = this.selected?.getComponent(ƒ.ComponentMesh);
+      const cmpMesh: ƒ.ComponentMesh = this.node?.getComponent(ƒ.ComponentMesh);
       if (!cmpMesh?.mesh || !ƒ.Gizmos.filter.get(GIZMOS.WIRE_MESH))
         return;
 

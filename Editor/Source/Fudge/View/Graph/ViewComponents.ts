@@ -246,7 +246,7 @@ namespace Fudge {
     private hndEvent = (_event: EditorEvent): void => {
       switch (_event.type) {
         case EVENT_EDITOR.SELECT:
-          this.node = _event.detail.graph || _event.detail.node;
+          this.node = _event.detail.node || _event.detail.graph;
         case EVENT_EDITOR.MODIFY:
           this.fillContent();
           break;

@@ -9,17 +9,23 @@ namespace Fudge {
   export class ViewHierarchy extends View {
     private graph: ƒ.Graph;
     private tree: ƒUi.CustomTree<ƒ.Node>;
-    #selectionPrevious: ƒ.Node[] = [];
+    private selectionPrevious: ƒ.Node[] = [];
 
     public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
-      // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
 
-      this.setGraph((<ƒ.General>_state).node);
+      this.setGraph(null);
 
-      // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
-      // this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+
+      if (_state["graph"] && _state["expanded"] && !this.restoreExpanded(_state["graph"])) 
+        this.storeExpanded(_state["graph"], _state["expanded"]);
+    }
+
+    private get selection(): ƒ.Node[] {
+      return this.tree.controller.selection;
     }
 
     public setGraph(_graph: ƒ.Graph): void {
@@ -31,24 +37,27 @@ namespace Fudge {
 
       if (this.graph && this.tree)
         this.dom.removeChild(this.tree);
-
       this.dom.innerHTML = "";
+
+      if (this.graph)
+        this.storeExpanded(this.graph.idResource, this.getExpanded());
+
       this.graph = _graph;
       // this.selectedNode = null;
 
       this.tree = new ƒUi.CustomTree<ƒ.Node>(new ControllerTreeHierarchy(), this.graph);
-      this.tree.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
-      this.tree.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
-      this.tree.addEventListener(ƒUi.EVENT.RENAME, this.hndEvent);
+      // this.tree.addEventListener(ƒUi.EVENT.FOCUS_OUT, this.hndTreeEvent);
+      this.tree.addEventListener(ƒUi.EVENT.SELECT, this.hndTreeEvent);
+      this.tree.addEventListener(ƒUi.EVENT.DELETE, this.hndTreeEvent);
+      this.tree.addEventListener(ƒUi.EVENT.RENAME, this.hndTreeEvent);
       this.tree.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.append(this.tree);
       this.dom.title = "● Right click on existing node to create child node.\n● Use Copy/Paste to duplicate nodes.";
       this.tree.title = "Select node to edit or duplicate.";
-    }
 
-    public getSelection(): ƒ.Node[] {
-      return this.tree.controller.selection;
+      let expanded: string[] = this.restoreExpanded(this.graph.idResource);
+      if (expanded)
+        this.expand(expanded);
     }
 
     public getDragDropSources(): ƒ.Node[] {
@@ -146,8 +155,15 @@ namespace Fudge {
     }
     //#endregion
 
+    protected getState(): JsonValue {
+      let state: JsonValue = super.getState();
+      state["graph"] = this.graph.idResource;
+      state["expanded"] = this.getExpanded();
+      return state;
+    }
+
     //#region EventHandlers
-    private hndEvent = (_event: EditorEvent): void => {
+    private hndTreeEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
         case ƒUi.EVENT.DELETE:
           this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
@@ -161,32 +177,34 @@ namespace Fudge {
         case ƒUi.EVENT.SELECT:
           //only dispatch the event to focus the node, if the node is in the current and the previous selection  
           let node: ƒ.Node = _event.detail["data"];
-          if (this.#selectionPrevious.includes(node) && this.getSelection().includes(node))
+          if (this.selectionPrevious.includes(node) && this.selection.includes(node))
             this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: node, view: this } });
-          this.#selectionPrevious = this.getSelection().slice(0);
+          this.selectionPrevious = this.selection.slice(0);
           this.dispatchToParent(EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: node, view: this } });
           break;
+      }
+    };
+
+    private hndEvent = (_event: EditorEvent): void => {
+      switch (_event.type) {
         case EVENT_EDITOR.SELECT:
+          if (_event.detail.graph)
+            this.setGraph(_event.detail.graph);
           if (_event.detail.node) {
             this.tree.show(_event.detail.node.getPath());
             this.tree.controller.selection = [_event.detail.node];
             this.tree.displaySelection(this.tree.controller.selection);
-            this.#selectionPrevious = this.getSelection().slice(0);
-          } else {
-            this.setGraph(_event.detail.graph);
-            break;
+            this.selectionPrevious = this.selection.slice(0);
           }
           break;
         case EVENT_EDITOR.UPDATE:
-          if (_event.detail.view instanceof ViewInternal && _event.detail.data == this.graph) {
-            console.log("Update Graph");
-            let item: ƒUi.CustomTreeItem<ƒ.Node> = this.tree.findItem(this.graph);
-            item.refreshContent();
-          }
+          if (_event.detail.view instanceof ViewInternal && _event.detail.data == this.graph)
+            this.tree.findItem(this.graph)?.refreshContent();
           break;
-
+        case EVENT_EDITOR.CLOSE:
+          this.storeExpanded(this.graph.idResource, this.getExpanded());
       }
-    }
+    };
     //#endregion
 
     private checkGraphDrop(_source: ƒ.Node, _target: ƒ.Node): boolean {
@@ -209,6 +227,28 @@ namespace Fudge {
       } while (_target);
 
       return true;
+    }
+
+    private storeExpanded(_idGraph: string, _expanded: string[]): void {
+      sessionStorage.setItem(ViewHierarchy.name + this.id + _idGraph, JSON.stringify(_expanded));
+    }
+
+    private restoreExpanded(_idGraph: string): string[] {
+      let stored: string = sessionStorage.getItem(ViewHierarchy.name + this.id + _idGraph);
+      return stored && JSON.parse(stored);
+    }
+
+    private getExpanded(): string[] {
+      return this.tree?.getExpanded().map(_item => ƒ.Node.PATH_FROM_TO(this.graph, _item.data));
+    }
+
+    private expand(_paths: string[]): void {
+      const paths: ƒ.Node[][] = _paths
+        .map(_path => ƒ.Node.FIND<ƒ.Node>(this.graph, _path))
+        .filter(_node => _node)
+        .map(_node => _node.getPath());
+
+      this.tree?.expand(paths);
     }
   }
 }
