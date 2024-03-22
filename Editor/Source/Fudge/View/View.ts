@@ -2,6 +2,10 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
+  /**
+   * The view's state. During reconstruction, views receive a merged state object that combines the states of both their panel and the view itself.
+   * Ensure unique property names to avoid conflicts.
+   */
   export interface ViewState  {
     [key: string]: string;
   }

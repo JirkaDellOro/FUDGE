@@ -5,7 +5,7 @@ namespace Fudge {
   /**
    * Base class for all [[Panel]]s aggregating [[View]]s
    * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
-   * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+   * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020 | Jonas Plotzky, HFU, 2024
    */
 
   // TODO: class might become a customcomponent for HTML! = this.dom
@@ -16,8 +16,8 @@ namespace Fudge {
     protected views: View[] = [];
     //public dom; // muss vielleicht weg
 
-    public constructor(_container: ComponentContainer, _state: ViewState, _viewConstructors?: { [name: string]: new (...args: ƒ.General) => View }, _rootItemConfig?: RowOrColumnItemConfig) {
-      super(_container, _state);
+    public constructor(_container: ComponentContainer, _panelState: ViewState, _viewConstructors?: { [name: string]: new (...args: ƒ.General) => View }, _rootItemConfig?: RowOrColumnItemConfig) {
+      super(_container, _panelState);
       this.dom.style.width = "100%";
       this.dom.style.overflow = "visible";
       this.dom.removeAttribute("view");
@@ -31,14 +31,12 @@ namespace Fudge {
       this.goldenLayout = new Page.goldenLayoutModule.GoldenLayout(this.dom);
 
       for (const key in _viewConstructors)
-        this.goldenLayout.registerComponentFactoryFunction(key, (_container, _viewState: ViewState) => new _viewConstructors[key](_container, { ..._state, ..._viewState }));
-        // this.goldenLayout.registerComponentConstructor(key, _viewConstructors[key]);
+        this.goldenLayout.registerComponentFactoryFunction(key, (_container, _viewState: ViewState) => new _viewConstructors[key](_container, { ..._panelState, ..._viewState }));
 
       this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
       this.goldenLayout.on("itemCreated", this.addViewComponent);
 
-      const loadedConfig: ResolvedLayoutConfig = JSON.parse(_state["layout"]);
-      this.goldenLayout.loadLayout(_state["layout"] ? Page.goldenLayoutModule.LayoutConfig.fromResolved(loadedConfig) : config);
+      this.goldenLayout.loadLayout(_panelState["layout"] ? Page.goldenLayoutModule.LayoutConfig.fromResolved(JSON.parse(_panelState["layout"])) : config);
     }
 
     /** Send custom copies of the given event to the views */

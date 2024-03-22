@@ -20,7 +20,7 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
 
-      // TODO: pass state over from panel
+      // a select event will be recived from the panel during reconstruction so we only need to prepare our storage here
       if (_state["graph"] && _state["expanded"] && !this.restoreExpanded(_state["graph"]))
         this.storeExpanded(_state["graph"], JSON.parse(_state["expanded"]));
     }

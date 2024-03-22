@@ -2427,7 +2427,7 @@ var Fudge;
     /**
      * Base class for all [[Panel]]s aggregating [[View]]s
      * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
-     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020 | Jonas Plotzky, HFU, 2024
      */
     // TODO: class might become a customcomponent for HTML! = this.dom
     // extends view vorrübergehend entfernt
@@ -2435,8 +2435,8 @@ var Fudge;
         goldenLayout;
         views = [];
         //public dom; // muss vielleicht weg
-        constructor(_container, _state, _viewConstructors, _rootItemConfig) {
-            super(_container, _state);
+        constructor(_container, _panelState, _viewConstructors, _rootItemConfig) {
+            super(_container, _panelState);
             this.dom.style.width = "100%";
             this.dom.style.overflow = "visible";
             this.dom.removeAttribute("view");
@@ -2447,12 +2447,11 @@ var Fudge;
             };
             this.goldenLayout = new Fudge.Page.goldenLayoutModule.GoldenLayout(this.dom);
             for (const key in _viewConstructors)
-                this.goldenLayout.registerComponentFactoryFunction(key, (_container, _viewState) => new _viewConstructors[key](_container, { ..._state, ..._viewState }));
+                this.goldenLayout.registerComponentFactoryFunction(key, (_container, _viewState) => new _viewConstructors[key](_container, { ..._panelState, ..._viewState }));
             // this.goldenLayout.registerComponentConstructor(key, _viewConstructors[key]);
             this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
             this.goldenLayout.on("itemCreated", this.addViewComponent);
-            const loadedConfig = JSON.parse(_state["layout"]);
-            this.goldenLayout.loadLayout(_state["layout"] ? Fudge.Page.goldenLayoutModule.LayoutConfig.fromResolved(loadedConfig) : config);
+            this.goldenLayout.loadLayout(_panelState["layout"] ? Fudge.Page.goldenLayoutModule.LayoutConfig.fromResolved(JSON.parse(_panelState["layout"])) : config);
         }
         /** Send custom copies of the given event to the views */
         broadcast = (_event) => {
@@ -2626,7 +2625,7 @@ var Fudge;
                         this.storeGraph(this.#graph);
                     if (this.#graph && this.#node)
                         this.storeNode(this.#graph, this.#node);
-                    break;
+                    return;
                 default:
                     _event.stopPropagation();
             }
@@ -4574,7 +4573,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
-            // TODO: pass state over from panel
+            // a select event will be recived from the panel during reconstruction so we only need to prepare our storage here
             if (_state["graph"] && _state["expanded"] && !this.restoreExpanded(_state["graph"]))
                 this.storeExpanded(_state["graph"], JSON.parse(_state["expanded"]));
         }

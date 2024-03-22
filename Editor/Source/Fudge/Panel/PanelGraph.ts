@@ -108,7 +108,7 @@ namespace Fudge {
             this.storeGraph(this.#graph);
           if (this.#graph && this.#node)
             this.storeNode(this.#graph, this.#node);
-          break;
+          return;
         default:
           _event.stopPropagation();
       }

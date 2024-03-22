@@ -252,6 +252,10 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    /**
+     * The view's state. During reconstruction, views receive a merged state object that combines the states of both their panel and the view itself.
+     * Ensure unique property names to avoid conflicts.
+     */
     interface ViewState {
         [key: string]: string;
     }
@@ -464,12 +468,12 @@ declare namespace Fudge {
     /**
      * Base class for all [[Panel]]s aggregating [[View]]s
      * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
-     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020 | Jonas Plotzky, HFU, 2024
      */
     abstract class Panel extends View {
         protected goldenLayout: GoldenLayout;
         protected views: View[];
-        constructor(_container: ComponentContainer, _state: ViewState, _viewConstructors?: {
+        constructor(_container: ComponentContainer, _panelState: ViewState, _viewConstructors?: {
             [name: string]: new (...args: ƒ.General) => View;
         }, _rootItemConfig?: RowOrColumnItemConfig);
         /** Send custom copies of the given event to the views */
