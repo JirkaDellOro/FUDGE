@@ -1,6 +1,6 @@
 {
   "MeshObj|2023-06-14T23:27:37.374Z|48561": {
-    "ƒ.MeshImport": {
+    "ƒ.MeshOBJ": {
       "idResource": "MeshObj|2023-06-14T23:27:37.374Z|48561",
       "name": "chair.obj",
       "type": "MeshImport",
@@ -49,7 +49,7 @@
     }
   },
   "MeshObj|2023-06-14T23:28:05.534Z|27668": {
-    "ƒ.MeshImport": {
+    "ƒ.MeshOBJ": {
       "idResource": "MeshObj|2023-06-14T23:28:05.534Z|27668",
       "name": "chair1.obj",
       "type": "MeshImport",

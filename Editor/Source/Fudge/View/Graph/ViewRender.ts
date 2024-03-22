@@ -33,13 +33,10 @@ namespace Fudge {
       this.dom.tabIndex = 0;
 
       _container.on("resize", this.redraw);
-      this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
-      this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
       this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move

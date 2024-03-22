@@ -454,7 +454,7 @@ var Fudge;
             document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CLOSE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.CREATE, Page.hndEvent);
-            document.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, Page.hndEvent);
+            // document.addEventListener(EVENT_EDITOR.TRANSFORM, Page.hndEvent);
             document.addEventListener("keyup", Page.hndKey);
         }
         /** Send custom copies of the given event to the panels */
@@ -4209,7 +4209,6 @@ var Fudge;
             super(_container, _state);
             this.fillContent();
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndTransform);
             this.dom.addEventListener("delete" /* ƒUi.EVENT.DELETE */, this.hndEvent);
@@ -4445,9 +4444,9 @@ var Fudge;
                         cmpRigidbody.initialize();
                     // this.dispatch(EVENT_EDITOR.UPDATE, { bubbles: true, detail: { node: this.node } }); // TODO: check if this was necessary, EVENT_EDITOR.UPDATE gets broadcasted by project on ƒ.EVENT.GRAPH_MUTATED, so this was causing a double broadcast of EVENT_EDITOR.UPDATE to ALL views on any change to any component
                     break;
-                case "rearrangeArray" /* ƒUi.EVENT.REARRANGE_ARRAY */:
-                    this.fillContent();
-                    break;
+                // case ƒUi.EVENT.REARRANGE_ARRAY: // no listener for this event
+                //   this.fillContent();
+                //   break;
                 default:
                     break;
             }
@@ -4764,13 +4763,10 @@ var Fudge;
             this.dom.title = title;
             this.dom.tabIndex = 0;
             _container.on("resize", this.redraw);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
-            this.dom.addEventListener("mutate" /* ƒUi.EVENT.MUTATE */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* ƒUi.EVENT.CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("pointermove", this.hndPointer);
             this.dom.addEventListener("mousedown", () => this.#pointerMoved = false); // reset pointer move

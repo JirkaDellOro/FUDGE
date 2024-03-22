@@ -30,7 +30,6 @@ namespace Fudge {
       this.fillContent();
 
       this.dom.addEventListener(EVENT_EDITOR.SELECT, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.FOCUS, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.MODIFY, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndTransform);
       this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
@@ -286,9 +285,9 @@ namespace Fudge {
             cmpRigidbody.initialize();
           // this.dispatch(EVENT_EDITOR.UPDATE, { bubbles: true, detail: { node: this.node } }); // TODO: check if this was necessary, EVENT_EDITOR.UPDATE gets broadcasted by project on ƒ.EVENT.GRAPH_MUTATED, so this was causing a double broadcast of EVENT_EDITOR.UPDATE to ALL views on any change to any component
           break;
-        case ƒUi.EVENT.REARRANGE_ARRAY:
-          this.fillContent();
-          break;
+        // case ƒUi.EVENT.REARRANGE_ARRAY: // no listener for this event
+        //   this.fillContent();
+        //   break;
         default:
           break;
       }
