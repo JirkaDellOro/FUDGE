@@ -74,5 +74,34 @@ namespace Fudge {
       }
       return copies;
     }
+
+    public canDrop(_sources: ƒ.Node[], _target: ƒ.Node): boolean {
+      if (_sources.length == 0)
+        return false;
+
+      return _sources.every(_source => checkGraphDrop(_source, _target));
+
+      function checkGraphDrop(_source: ƒ.Node, _target: ƒ.Node): boolean {
+        let idSources: string[] = [];
+        for (let node of _source.getIterator())
+          if (node instanceof ƒ.GraphInstance)
+            idSources.push(node.idSource);
+          else if (node instanceof ƒ.Graph)
+            idSources.push(node.idResource);
+
+        do {
+          if (_target instanceof ƒ.Graph)
+            if (idSources.indexOf(_target.idResource) > -1)
+              return false;
+          if (_target instanceof ƒ.GraphInstance)
+            if (idSources.indexOf(_target.idSource) > -1)
+              return false;
+
+          _target = _target.getParent();
+        } while (_target);
+
+        return true;
+      }
+    }
   }
 }

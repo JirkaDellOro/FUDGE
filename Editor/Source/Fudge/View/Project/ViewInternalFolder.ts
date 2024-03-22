@@ -207,6 +207,7 @@ namespace Fudge {
       _event.stopPropagation();
     }
 
+    // TODO: there is now a hndDropCapture listener so we can use it, see comment down below
     protected async hndDrop(_event: DragEvent, _viewSource: View): Promise<void> {
       if (!(_viewSource instanceof ViewHierarchy || _viewSource instanceof ViewExternal))
         return;

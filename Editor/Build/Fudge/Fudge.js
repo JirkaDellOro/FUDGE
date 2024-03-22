@@ -1102,12 +1102,16 @@ var Fudge;
                 let viewSource = View.getViewSource(_event);
                 _this.hndDragOver(_event, viewSource);
             });
+            // drag over during capture phase, allows views to prevent event reaching the actual target
+            _this.dom.addEventListener("dragover" /* ƒui.EVENT.DRAG_OVER */, _event => _this.hndDragOverCapture(_event, View.getViewSource(_event)), true);
             // when dropping into a view, get the original source view for dragging and call hndDrop
             _this.dom.addEventListener("drop" /* ƒui.EVENT.DROP */, (_event) => {
                 // _event.stopPropagation();
                 let viewSource = View.getViewSource(_event);
                 _this.hndDrop(_event, viewSource);
             }, false);
+            // drop during capture phase, allows views manipulate the drop data before the actual target is reached
+            _this.dom.addEventListener("drop" /* ƒui.EVENT.DROP */, _event => _this.hndDropCapture(_event, View.getViewSource(_event)), true);
             return View.idCount++;
         }
         get id() {
@@ -1147,8 +1151,14 @@ var Fudge;
         getState() {
             return {};
         }
+        hndDropCapture(_event, _source) {
+            //
+        }
         hndDrop(_event, _source) {
             // console.log(_source, _event);
+        }
+        hndDragOverCapture(_event, _source) {
+            //
         }
         hndDragOver(_event, _source) {
             // _event.dataTransfer.dropEffect = "link";
@@ -1372,6 +1382,7 @@ var Fudge;
             _event.preventDefault();
             _event.stopPropagation();
         }
+        // TODO: there is now a hndDropCapture listener so we can use it, see comment down below
         async hndDrop(_event, _viewSource) {
             if (!(_viewSource instanceof Fudge.ViewHierarchy || _viewSource instanceof Fudge.ViewExternal))
                 return;
@@ -1957,6 +1968,29 @@ var Fudge;
             }
             return copies;
         }
+        canDrop(_sources, _target) {
+            if (_sources.length == 0)
+                return false;
+            return _sources.every(_source => checkGraphDrop(_source, _target));
+            function checkGraphDrop(_source, _target) {
+                let idSources = [];
+                for (let node of _source.getIterator())
+                    if (node instanceof ƒ.GraphInstance)
+                        idSources.push(node.idSource);
+                    else if (node instanceof ƒ.Graph)
+                        idSources.push(node.idResource);
+                do {
+                    if (_target instanceof ƒ.Graph)
+                        if (idSources.indexOf(_target.idResource) > -1)
+                            return false;
+                    if (_target instanceof ƒ.GraphInstance)
+                        if (idSources.indexOf(_target.idSource) > -1)
+                            return false;
+                    _target = _target.getParent();
+                } while (_target);
+                return true;
+            }
+        }
     }
     Fudge.ControllerTreeHierarchy = ControllerTreeHierarchy;
 })(Fudge || (Fudge = {}));
@@ -2536,25 +2570,30 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
-            let graph = this.restoreGraph();
-            if (graph) {
-                this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: graph, node: this.restoreNode(graph) } });
-                return;
-            }
-            if (_state["graph"]) {
-                ƒ.Project.getResource(_state["graph"]).then((_graph) => {
-                    const node = _state["node"] && ƒ.Node.FIND(_graph, _state["node"]);
-                    this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: _graph, node: node } });
-                });
-            }
+            this.restoreGraph().then(_graph => {
+                if (_graph) {
+                    this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: _graph, node: this.restoreNode(_graph) } });
+                    return;
+                }
+                if (_state["graph"]) {
+                    ƒ.Project.getResource(_state["graph"]).then((_graph) => {
+                        const node = _state["node"] && ƒ.Node.FIND(_graph, _state["node"]);
+                        this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: _graph, node: node } });
+                    });
+                }
+            });
         }
         getState() {
             let state = super.getState();
-            state["graph"] = this.#graph.idResource;
-            state["node"] = ƒ.Node.PATH_FROM_TO(this.#graph, this.#node);
+            if (this.#graph)
+                state["graph"] = this.#graph.idResource;
+            if (this.#node)
+                state["node"] = ƒ.Node.PATH_FROM_TO(this.#graph, this.#node);
             return state;
         }
         hndDrop(_event, _viewSource) {
+            if (!this.views.find(_view => _view instanceof Fudge.ViewRender).dom.contains(_event.target)) // accept drop only from render view
+                return;
             let source = _viewSource.getDragDropSources()[0];
             if (source instanceof ƒ.Graph)
                 this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source, node: this.restoreNode(source) } });
@@ -2601,9 +2640,9 @@ var Fudge;
         storeGraph(_graph) {
             sessionStorage.setItem(PanelGraph.name + this.id, _graph.idResource);
         }
-        restoreGraph() {
+        async restoreGraph() {
             let id = sessionStorage.getItem(PanelGraph.name + this.id);
-            return id && ƒ.Project.resources[id];
+            return id && ƒ.Project.getResource(id);
         }
     }
     Fudge.PanelGraph = PanelGraph;
@@ -4533,6 +4572,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SELECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.CLOSE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            // TODO: pass state over from panel
             if (_state["graph"] && _state["expanded"] && !this.restoreExpanded(_state["graph"]))
                 this.storeExpanded(_state["graph"], _state["expanded"]);
         }
@@ -4568,41 +4608,24 @@ var Fudge;
         getDragDropSources() {
             return this.tree.controller.dragDrop.sources;
         }
-        hndDragOver(_event, _viewSource) {
-            _event.dataTransfer.dropEffect = "none";
-            let target = this.tree?.controller.dragDrop.target;
-            if (_viewSource == this) {
-                for (let source of _viewSource.getDragDropSources())
-                    if (!this.checkGraphDrop(source, target))
-                        return;
-                _event.dataTransfer.dropEffect = "copy";
-                _event.stopPropagation();
-                return; // continue with standard tree behaviour
-            }
-            if (_event.target == this.dom)
-                return;
-            if (!(_viewSource instanceof Fudge.ViewInternal))
-                return;
-            let source = _viewSource.getDragDropSources()[0];
-            if (!(source instanceof ƒ.Graph) && !(source instanceof ƒ.GraphInstance))
-                return;
-            if (!this.checkGraphDrop(source, target))
-                return;
-            // gpt to this point -> allow drop
-            _event.dataTransfer.dropEffect = "copy";
-            _event.preventDefault();
-            _event.stopPropagation();
-        }
-        async hndDrop(_event, _viewSource) {
+        hndDragOverCapture(_event, _viewSource) {
             if (_viewSource == this)
                 return; // continue with standard tree behaviour
-            _event.stopPropagation(); // capture phase, don't pass further down
-            let graph = _viewSource.getDragDropSources()[0];
-            let instance = await ƒ.Project.createGraphInstance(graph);
-            let target = this.tree.controller.dragDrop.target;
-            target.appendChild(instance);
-            this.tree.findVisible(target).expand(true);
-            this.dispatch(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true });
+            if (_viewSource instanceof Fudge.ViewInternal) {
+                this.tree.controller.dragDrop.sources = _viewSource.getDragDropSources().filter((_source) => _source instanceof ƒ.Graph);
+                return;
+            }
+            _event.dataTransfer.dropEffect = "none";
+            _event.stopPropagation();
+        }
+        async hndDropCapture(_event, _viewSource) {
+            if (_viewSource == this)
+                return; // continue with standard tree behaviour
+            let instances = [];
+            for (let graph of this.tree.controller.dragDrop.sources)
+                if (graph instanceof ƒ.Graph)
+                    instances.push(await ƒ.Project.createGraphInstance(graph));
+            this.tree.controller.dragDrop.sources = instances;
         }
         //#region  ContextMenu
         getContextMenu(_callback) {
@@ -4646,7 +4669,6 @@ var Fudge;
         //#endregion
         getState() {
             let state = super.getState();
-            state["graph"] = this.graph.idResource;
             state["expanded"] = this.getExpanded();
             return state;
         }
@@ -4693,24 +4715,6 @@ var Fudge;
             }
         };
         //#endregion
-        checkGraphDrop(_source, _target) {
-            let idSources = [];
-            for (let node of _source.getIterator())
-                if (node instanceof ƒ.GraphInstance)
-                    idSources.push(node.idSource);
-                else if (node instanceof ƒ.Graph)
-                    idSources.push(node.idResource);
-            do {
-                if (_target instanceof ƒ.Graph)
-                    if (idSources.indexOf(_target.idResource) > -1)
-                        return false;
-                if (_target instanceof ƒ.GraphInstance)
-                    if (idSources.indexOf(_target.idSource) > -1)
-                        return false;
-                _target = _target.getParent();
-            } while (_target);
-            return true;
-        }
         storeExpanded(_idGraph, _expanded) {
             sessionStorage.setItem(ViewHierarchy.name + this.id + _idGraph, JSON.stringify(_expanded));
         }

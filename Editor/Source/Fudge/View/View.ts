@@ -75,9 +75,8 @@ namespace Fudge {
         },
         false);
 
-      // when dropping into a view, get the original source view for dragging and call hndDrop
+      // drop during capture phase, allows views manipulate the drop data before the actual target is reached
       _this.dom.addEventListener(ƒui.EVENT.DROP, _event => _this.hndDropCapture(_event, View.getViewSource(_event)), true);
-
 
       return View.idCount++;
     }

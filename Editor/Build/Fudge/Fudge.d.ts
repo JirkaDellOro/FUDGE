@@ -274,7 +274,9 @@ declare namespace Fudge {
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected getState(): JsonValue;
+        protected hndDropCapture(_event: DragEvent, _source: View): void;
         protected hndDrop(_event: DragEvent, _source: View): void;
+        protected hndDragOverCapture(_event: DragEvent, _source: View): void;
         protected hndDragOver(_event: DragEvent, _source: View): void;
         private hndEventCommon;
     }
@@ -396,6 +398,7 @@ declare namespace Fudge {
         delete(_focussed: ƒ.Node[]): Promise<ƒ.Node[]>;
         addChildren(_children: ƒ.Node[], _target: ƒ.Node, _index?: number): ƒ.Node[];
         copy(_originals: ƒ.Node[]): Promise<ƒ.Node[]>;
+        canDrop(_sources: ƒ.Node[], _target: ƒ.Node): boolean;
     }
 }
 declare namespace Fudge {
@@ -711,14 +714,13 @@ declare namespace Fudge {
         private get selection();
         setGraph(_graph: ƒ.Graph): void;
         getDragDropSources(): ƒ.Node[];
-        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
-        protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
+        protected hndDragOverCapture(_event: DragEvent, _viewSource: View): void;
+        protected hndDropCapture(_event: DragEvent, _viewSource: View): Promise<void>;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected getState(): JsonValue;
         private hndTreeEvent;
         private hndEvent;
-        private checkGraphDrop;
         private storeExpanded;
         private restoreExpanded;
         private getExpanded;

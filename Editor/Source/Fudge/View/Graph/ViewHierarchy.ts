@@ -20,7 +20,8 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
 
-      if (_state["graph"] && _state["expanded"] && !this.restoreExpanded(_state["graph"])) 
+      // TODO: pass state over from panel
+      if (_state["graph"] && _state["expanded"] && !this.restoreExpanded(_state["graph"]))
         this.storeExpanded(_state["graph"], _state["expanded"]);
     }
 
@@ -64,51 +65,29 @@ namespace Fudge {
       return this.tree.controller.dragDrop.sources;
     }
 
-    protected hndDragOver(_event: DragEvent, _viewSource: View): void {
-      _event.dataTransfer.dropEffect = "none";
-      let target: ƒ.Node = this.tree?.controller.dragDrop.target;
-
-      if (_viewSource == this) {
-        for (let source of _viewSource.getDragDropSources())
-          if (!this.checkGraphDrop(<ƒ.Node>source, target))
-            return;
-
-        _event.dataTransfer.dropEffect = "copy";
-        _event.stopPropagation();
-        return; // continue with standard tree behaviour
-      }
-
-      if (_event.target == this.dom)
-        return;
-
-      if (!(_viewSource instanceof ViewInternal))
-        return;
-
-      let source: Object = _viewSource.getDragDropSources()[0];
-      if (!(source instanceof ƒ.Graph) && !(source instanceof ƒ.GraphInstance))
-        return;
-
-      if (!this.checkGraphDrop(source, target))
-        return;
-
-      // gpt to this point -> allow drop
-      _event.dataTransfer.dropEffect = "copy";
-      _event.preventDefault();
-      _event.stopPropagation();
-    }
-
-    protected async hndDrop(_event: DragEvent, _viewSource: View): Promise<void> {
+    protected hndDragOverCapture(_event: DragEvent, _viewSource: View): void {
       if (_viewSource == this)
         return; // continue with standard tree behaviour
 
-      _event.stopPropagation(); // capture phase, don't pass further down
-      let graph: ƒ.Graph = <ƒ.Graph>_viewSource.getDragDropSources()[0];
-      let instance: ƒ.GraphInstance = await ƒ.Project.createGraphInstance(graph);
-      let target: ƒ.Node = this.tree.controller.dragDrop.target;
-      target.appendChild(instance);
-      this.tree.findVisible(target).expand(true);
+      if (_viewSource instanceof ViewInternal) {
+        this.tree.controller.dragDrop.sources = _viewSource.getDragDropSources().filter((_source): _source is ƒ.Graph => _source instanceof ƒ.Graph);
+        return;
+      }
 
-      this.dispatch(EVENT_EDITOR.MODIFY, { bubbles: true });
+      _event.dataTransfer.dropEffect = "none";
+      _event.stopPropagation();
+    }
+
+    protected async hndDropCapture(_event: DragEvent, _viewSource: View): Promise<void> {
+      if (_viewSource == this)
+        return; // continue with standard tree behaviour
+
+      let instances: ƒ.GraphInstance[] = [];
+      for (let graph of this.tree.controller.dragDrop.sources)
+        if (graph instanceof ƒ.Graph)
+          instances.push(await ƒ.Project.createGraphInstance(graph));
+
+      this.tree.controller.dragDrop.sources = instances;
     }
 
     //#region  ContextMenu
@@ -157,7 +136,6 @@ namespace Fudge {
 
     protected getState(): JsonValue {
       let state: JsonValue = super.getState();
-      state["graph"] = this.graph.idResource;
       state["expanded"] = this.getExpanded();
       return state;
     }
@@ -206,28 +184,6 @@ namespace Fudge {
       }
     };
     //#endregion
-
-    private checkGraphDrop(_source: ƒ.Node, _target: ƒ.Node): boolean {
-      let idSources: string[] = [];
-      for (let node of _source.getIterator())
-        if (node instanceof ƒ.GraphInstance)
-          idSources.push(node.idSource);
-        else if (node instanceof ƒ.Graph)
-          idSources.push(node.idResource);
-
-      do {
-        if (_target instanceof ƒ.Graph)
-          if (idSources.indexOf(_target.idResource) > -1)
-            return false;
-        if (_target instanceof ƒ.GraphInstance)
-          if (idSources.indexOf(_target.idSource) > -1)
-            return false;
-
-        _target = _target.getParent();
-      } while (_target);
-
-      return true;
-    }
 
     private storeExpanded(_idGraph: string, _expanded: string[]): void {
       sessionStorage.setItem(ViewHierarchy.name + this.id + _idGraph, JSON.stringify(_expanded));

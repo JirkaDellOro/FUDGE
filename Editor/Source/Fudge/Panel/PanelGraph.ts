@@ -49,28 +49,34 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.CLOSE, this.hndEvent);
 
-      let graph: ƒ.Graph = this.restoreGraph();
-      if (graph) {
-        this.dispatch(EVENT_EDITOR.SELECT, { detail: { graph: graph, node: this.restoreNode(graph) } });
-        return;
-      }
-
-      if (_state["graph"]) {
-        ƒ.Project.getResource(_state["graph"]).then((_graph: ƒ.Graph) => {
-          const node: ƒ.Node = _state["node"] && ƒ.Node.FIND(_graph, _state["node"]);
-          this.dispatch(EVENT_EDITOR.SELECT, { detail: { graph: _graph, node: node } });
-        });
-      }
+      this.restoreGraph().then(_graph => {
+        if (_graph) {
+          this.dispatch(EVENT_EDITOR.SELECT, { detail: { graph: _graph, node: this.restoreNode(_graph) } });
+          return;
+        }
+    
+        if (_state["graph"]) {
+          ƒ.Project.getResource(_state["graph"]).then((_graph: ƒ.Graph) => {
+            const node: ƒ.Node = _state["node"] && ƒ.Node.FIND(_graph, _state["node"]);
+            this.dispatch(EVENT_EDITOR.SELECT, { detail: { graph: _graph, node: node } });
+          });
+        }
+      });
     }
 
     protected getState(): JsonValue {
       let state: JsonValue = super.getState();
-      state["graph"] = this.#graph.idResource;
-      state["node"] = ƒ.Node.PATH_FROM_TO(this.#graph, this.#node);
+      if (this.#graph)
+        state["graph"] = this.#graph.idResource;
+      if (this.#node)
+        state["node"] = ƒ.Node.PATH_FROM_TO(this.#graph, this.#node);
       return state;
     }
 
     protected hndDrop(_event: DragEvent, _viewSource: View): void {
+      if (!this.views.find(_view => _view instanceof ViewRender).dom.contains(<Node>_event.target)) // accept drop only from render view
+        return;
+
       let source: Object = _viewSource.getDragDropSources()[0];
       if (source instanceof ƒ.Graph)
         this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source, node: this.restoreNode(source) } });
@@ -123,9 +129,9 @@ namespace Fudge {
       sessionStorage.setItem(PanelGraph.name + this.id, _graph.idResource);
     }
 
-    private restoreGraph(): ƒ.Graph {
+    private async restoreGraph(): Promise<ƒ.Graph> {
       let id: string = sessionStorage.getItem(PanelGraph.name + this.id);
-      return id && <ƒ.Graph>ƒ.Project.resources[id];
+      return id && <Promise<ƒ.Graph>>ƒ.Project.getResource(id);
     }
   }
 }
