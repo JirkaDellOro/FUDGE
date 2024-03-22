@@ -117,20 +117,20 @@ namespace Fudge {
     };
 
     private storeNode(_graph: ƒ.Graph, _selected: ƒ.Node): void {
-      sessionStorage.setItem(PanelGraph.name + this.id + _graph.idResource, ƒ.Node.PATH_FROM_TO(_graph, _selected));
+      sessionStorage.setItem(`${this.id}_${_graph.idResource}`, ƒ.Node.PATH_FROM_TO(_graph, _selected));
     }
 
     private restoreNode(_graph: ƒ.Graph): ƒ.Node {
-      let selected: string = sessionStorage.getItem(PanelGraph.name + this.id + _graph.idResource);
+      let selected: string = sessionStorage.getItem(`${this.id}_${_graph.idResource}`);
       return selected && ƒ.Node.FIND(_graph, selected);
     }
 
     private storeGraph(_graph: ƒ.Graph): void {
-      sessionStorage.setItem(PanelGraph.name + this.id, _graph.idResource);
+      sessionStorage.setItem(this.id, _graph.idResource);
     }
 
     private async restoreGraph(): Promise<ƒ.Graph> {
-      let id: string = sessionStorage.getItem(PanelGraph.name + this.id);
+      let id: string = sessionStorage.getItem(this.id);
       return id && <Promise<ƒ.Graph>>ƒ.Project.getResource(id);
     }
   }

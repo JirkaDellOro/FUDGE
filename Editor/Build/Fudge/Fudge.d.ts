@@ -271,7 +271,7 @@ declare namespace Fudge {
         constructor(_container: ComponentContainer, _state: ViewState);
         static getViewSource(_event: DragEvent): View;
         private static registerViewForDragDrop;
-        protected get id(): number;
+        protected get id(): string;
         setTitle(_title: string): void;
         getDragDropSources(): Object[];
         dispatch(_type: EVENT_EDITOR, _init: CustomEventInit<EventDetail>): void;

@@ -186,11 +186,11 @@ namespace Fudge {
     //#endregion
 
     private storeExpanded(_idGraph: string, _expanded: string[]): void {
-      sessionStorage.setItem(ViewHierarchy.name + this.id + _idGraph, JSON.stringify(_expanded));
+      sessionStorage.setItem(`${this.id}_${_idGraph}`, JSON.stringify(_expanded));
     }
 
     private restoreExpanded(_idGraph: string): string[] {
-      let stored: string = sessionStorage.getItem(ViewHierarchy.name + this.id + _idGraph);
+      let stored: string = sessionStorage.getItem(`${this.id}_${_idGraph}`);
       return stored && JSON.parse(stored);
     }
 

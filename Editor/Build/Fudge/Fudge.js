@@ -1114,7 +1114,7 @@ var Fudge;
             return View.idCount++;
         }
         get id() {
-            return this.#id;
+            return `${this.#id}_${this.constructor.name}`;
         }
         setTitle(_title) {
             this.#container.setTitle(_title);
@@ -2630,17 +2630,17 @@ var Fudge;
             this.broadcast(_event);
         };
         storeNode(_graph, _selected) {
-            sessionStorage.setItem(PanelGraph.name + this.id + _graph.idResource, ƒ.Node.PATH_FROM_TO(_graph, _selected));
+            sessionStorage.setItem(`${this.id}_${_graph.idResource}`, ƒ.Node.PATH_FROM_TO(_graph, _selected));
         }
         restoreNode(_graph) {
-            let selected = sessionStorage.getItem(PanelGraph.name + this.id + _graph.idResource);
+            let selected = sessionStorage.getItem(`${this.id}_${_graph.idResource}`);
             return selected && ƒ.Node.FIND(_graph, selected);
         }
         storeGraph(_graph) {
-            sessionStorage.setItem(PanelGraph.name + this.id, _graph.idResource);
+            sessionStorage.setItem(this.id, _graph.idResource);
         }
         async restoreGraph() {
-            let id = sessionStorage.getItem(PanelGraph.name + this.id);
+            let id = sessionStorage.getItem(this.id);
             return id && ƒ.Project.getResource(id);
         }
     }
@@ -4715,10 +4715,10 @@ var Fudge;
         };
         //#endregion
         storeExpanded(_idGraph, _expanded) {
-            sessionStorage.setItem(ViewHierarchy.name + this.id + _idGraph, JSON.stringify(_expanded));
+            sessionStorage.setItem(`${this.id}_${_idGraph}`, JSON.stringify(_expanded));
         }
         restoreExpanded(_idGraph) {
-            let stored = sessionStorage.getItem(ViewHierarchy.name + this.id + _idGraph);
+            let stored = sessionStorage.getItem(`${this.id}_${_idGraph}`);
             return stored && JSON.parse(stored);
         }
         getExpanded() {

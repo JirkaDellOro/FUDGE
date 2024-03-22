@@ -83,8 +83,8 @@ namespace Fudge {
       return View.idCount++;
     }
 
-    protected get id(): number {
-      return this.#id;
+    protected get id(): string {
+      return `${this.#id}_${this.constructor.name}`;
     }
 
     public setTitle(_title: string): void {

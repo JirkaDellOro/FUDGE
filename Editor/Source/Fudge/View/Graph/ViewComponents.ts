@@ -404,5 +404,9 @@ namespace Fudge {
         if (_resource instanceof entry[0])
           return entry[1];
     }
+
+    // private storeSelected(): void {
+    //   sessionStorage.setItem(this.id, this.selected);
+    // }
   }
 }
