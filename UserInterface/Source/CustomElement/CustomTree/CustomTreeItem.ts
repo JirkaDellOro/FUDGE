@@ -303,6 +303,9 @@ namespace FudgeUserInterface {
     };
 
     private hndDragEnter = (_event: DragEvent): void => { // this prevents cursor from flickering
+      if (!this.controller.canDrop(this.controller.dragDrop.sources, this.data))
+        return;
+      
       _event.preventDefault();
       _event.dataTransfer.dropEffect = "move";
     };
@@ -313,12 +316,14 @@ namespace FudgeUserInterface {
       let lower: number = rect.top + rect.height * (2 / 3);
       let offset: number = _event.clientY;
       if (this.parentElement instanceof CustomTree || (offset > upper && (offset < lower || this.checkbox.checked))) {
-        _event.preventDefault();
         _event.stopPropagation();
-        _event.dataTransfer.dropEffect = "move";
         this.controller.dragDropDivider.remove();
-        this.controller.dragDrop.at = null;
-        this.controller.dragDrop.target = this.data;
+        if (this.controller.canDrop(this.controller.dragDrop.sources, this.data)) {
+          _event.preventDefault();
+          _event.dataTransfer.dropEffect = "move";
+          this.controller.dragDrop.at = null;
+          this.controller.dragDrop.target = this.data;
+        }
       }
     };
 

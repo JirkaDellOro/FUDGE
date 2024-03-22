@@ -154,6 +154,9 @@ namespace FudgeUserInterface {
 
     private hndDragOver = (_event: DragEvent): void => {
       _event.stopPropagation();
+      if (this.controller.dragDrop.target == null || !this.controller.canDrop(this.controller.dragDrop.sources, this.controller.dragDrop.target))
+        return;
+
       _event.preventDefault();
       _event.dataTransfer.dropEffect = "move";
 

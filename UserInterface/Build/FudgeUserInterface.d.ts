@@ -496,6 +496,10 @@ declare namespace FudgeUserInterface {
          * Override if some objects should not be draggable
          */
         draggable(_object: T): boolean;
+        /**
+         * Override if some objects should not be droppable onto certain others
+         */
+        canDrop(_sources: T[], _target: T): boolean;
         /** Create an HTMLFormElement for the tree item representing the object */
         abstract createContent(_object: T): HTMLFieldSetElement;
         /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */

@@ -1612,6 +1612,8 @@ var FudgeUserInterface;
         }
         hndDragOver = (_event) => {
             _event.stopPropagation();
+            if (this.controller.dragDrop.target == null || !this.controller.canDrop(this.controller.dragDrop.sources, this.controller.dragDrop.target))
+                return;
             _event.preventDefault();
             _event.dataTransfer.dropEffect = "move";
             if (_event.target == this)
@@ -1848,6 +1850,12 @@ var FudgeUserInterface;
          * Override if some objects should not be draggable
          */
         draggable(_object) {
+            return true;
+        }
+        /**
+         * Override if some objects should not be droppable onto certain others
+         */
+        canDrop(_sources, _target) {
             return true;
         }
     }
@@ -2120,6 +2128,8 @@ var FudgeUserInterface;
             _event.dataTransfer.setData("dragstart", "dragstart");
         };
         hndDragEnter = (_event) => {
+            if (!this.controller.canDrop(this.controller.dragDrop.sources, this.data))
+                return;
             _event.preventDefault();
             _event.dataTransfer.dropEffect = "move";
         };
@@ -2129,12 +2139,14 @@ var FudgeUserInterface;
             let lower = rect.top + rect.height * (2 / 3);
             let offset = _event.clientY;
             if (this.parentElement instanceof FudgeUserInterface.CustomTree || (offset > upper && (offset < lower || this.checkbox.checked))) {
-                _event.preventDefault();
                 _event.stopPropagation();
-                _event.dataTransfer.dropEffect = "move";
                 this.controller.dragDropDivider.remove();
-                this.controller.dragDrop.at = null;
-                this.controller.dragDrop.target = this.data;
+                if (this.controller.canDrop(this.controller.dragDrop.sources, this.data)) {
+                    _event.preventDefault();
+                    _event.dataTransfer.dropEffect = "move";
+                    this.controller.dragDrop.at = null;
+                    this.controller.dragDrop.target = this.data;
+                }
             }
         };
         hndPointerUp = (_event) => {

@@ -21,6 +21,13 @@ namespace FudgeUserInterface {
       return true;
     }
 
+    /**
+     * Override if some objects should not be droppable onto certain others
+     */
+    public canDrop(_sources: T[], _target: T): boolean {
+      return true;
+    }
+
     /** Create an HTMLFormElement for the tree item representing the object */
     public abstract createContent(_object: T): HTMLFieldSetElement;
 
@@ -56,7 +63,5 @@ namespace FudgeUserInterface {
      * @param _focussed The object currently having focus
      */
     public abstract /* async */ copy(_originals: T[]): Promise<T[]>;
-
-
   }
 }
