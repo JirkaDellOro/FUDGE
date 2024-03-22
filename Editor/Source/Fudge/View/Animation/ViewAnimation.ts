@@ -22,7 +22,7 @@ namespace Fudge {
     private time: ƒ.Time = new ƒ.Time();
     private idInterval: number;
 
-    public constructor(_container: ComponentContainer, _state: Object) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
       this.setAnimation(null);
       this.createToolbar();

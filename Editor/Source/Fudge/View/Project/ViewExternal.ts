@@ -9,7 +9,7 @@ namespace Fudge {
   export class ViewExternal extends View {
     private tree: ƒui.Tree<DirectoryEntry>;
 
-    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
 
       this.dom.addEventListener(EVENT_EDITOR.OPEN, this.hndEvent);
@@ -41,6 +41,6 @@ namespace Fudge {
     private hndEvent = (_event: CustomEvent): void => {
       if (!_event.detail.data) // nothing actually selected...
         this.setProject();
-    }
+    };
   }
 }

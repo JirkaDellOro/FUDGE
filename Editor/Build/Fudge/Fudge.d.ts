@@ -252,6 +252,9 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    interface ViewState {
+        [key: string]: string;
+    }
     /**
      * Base class for all [[View]]s to support generic functionality
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -262,7 +265,7 @@ declare namespace Fudge {
         private static idCount;
         dom: HTMLElement;
         protected contextMenu: Electron.Menu;
-        constructor(_container: ComponentContainer, _state: JsonValue);
+        constructor(_container: ComponentContainer, _state: ViewState);
         static getViewSource(_event: DragEvent): View;
         private static registerViewForDragDrop;
         protected get id(): number;
@@ -273,7 +276,7 @@ declare namespace Fudge {
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        protected getState(): JsonValue;
+        protected getState(): ViewState;
         protected hndDropCapture(_event: DragEvent, _source: View): void;
         protected hndDrop(_event: DragEvent, _source: View): void;
         protected hndDragOverCapture(_event: DragEvent, _source: View): void;
@@ -288,7 +291,7 @@ declare namespace Fudge {
      */
     class ViewExternal extends View {
         private tree;
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        constructor(_container: ComponentContainer, _state: ViewState);
         setProject(): void;
         getSelection(): DirectoryEntry[];
         getDragDropSources(): DirectoryEntry[];
@@ -306,7 +309,7 @@ declare namespace Fudge {
      */
     class ViewInternalFolder extends ViewInternal {
         private tree;
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        constructor(_container: ComponentContainer, _state: ViewState);
         get controller(): ControllerTreeResource;
         get resourceFolder(): ResourceFolder;
         getSelection(): ƒ.SerializableResource[];
@@ -466,12 +469,12 @@ declare namespace Fudge {
     abstract class Panel extends View {
         protected goldenLayout: GoldenLayout;
         protected views: View[];
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined, _viewConstructors?: {
+        constructor(_container: ComponentContainer, _state: ViewState, _viewConstructors?: {
             [name: string]: new (...args: ƒ.General) => View;
         }, _rootItemConfig?: RowOrColumnItemConfig);
         /** Send custom copies of the given event to the views */
         broadcast: (_event: EditorEvent) => void;
-        protected getState(): JsonValue;
+        protected getState(): ViewState;
         private addViewComponent;
     }
 }
@@ -481,7 +484,7 @@ declare namespace Fudge {
      * @authors Jonas Plotzky, HFU, 2022
      */
     class PanelAnimation extends Panel {
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        constructor(_container: ComponentContainer, _state: ViewState);
         private hndEvent;
     }
 }
@@ -492,8 +495,8 @@ declare namespace Fudge {
     */
     class PanelGraph extends Panel {
         #private;
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
-        protected getState(): JsonValue;
+        constructor(_container: ComponentContainer, _state: ViewState);
+        protected getState(): ViewState;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private hndEvent;
         private storeNode;
@@ -508,7 +511,7 @@ declare namespace Fudge {
     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
     */
     class PanelHelp extends Panel {
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        constructor(_container: ComponentContainer, _state: ViewState);
     }
 }
 declare namespace Fudge {
@@ -517,7 +520,7 @@ declare namespace Fudge {
      * @authors Jonas Plotzky, HFU, 2022
      */
     class PanelParticleSystem extends Panel {
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        constructor(_container: ComponentContainer, _state: ViewState);
         private hndEvent;
     }
 }
@@ -527,7 +530,7 @@ declare namespace Fudge {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020- 2023
      */
     class PanelProject extends Panel {
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        constructor(_container: ComponentContainer, _state: ViewState);
         private hndEvent;
     }
 }
@@ -549,7 +552,7 @@ declare namespace Fudge {
         private controller;
         private errors;
         private variables;
-        constructor(_container: ComponentContainer, _state: Object);
+        constructor(_container: ComponentContainer, _state: ViewState);
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void>;
@@ -583,7 +586,7 @@ declare namespace Fudge {
         private frameInput;
         private time;
         private idInterval;
-        constructor(_container: ComponentContainer, _state: Object);
+        constructor(_container: ComponentContainer, _state: ViewState);
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
@@ -636,7 +639,7 @@ declare namespace Fudge {
         private documentStyle;
         private posPanStart;
         private posRightClick;
-        constructor(_container: ComponentContainer, _state: Object);
+        constructor(_container: ComponentContainer, _state: ViewState);
         private get mode();
         private set mode(value);
         protected openContextMenuSheet: (_event: Event) => void;
@@ -682,7 +685,7 @@ declare namespace Fudge {
         private expanded;
         private selected;
         private drag;
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        constructor(_container: ComponentContainer, _state: ViewState);
         getDragDropSources(): ƒ.ComponentCamera[];
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
@@ -710,7 +713,7 @@ declare namespace Fudge {
         private graph;
         private tree;
         private selectionPrevious;
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        constructor(_container: ComponentContainer, _state: ViewState);
         private get selection();
         setGraph(_graph: ƒ.Graph): void;
         getDragDropSources(): ƒ.Node[];
@@ -718,7 +721,7 @@ declare namespace Fudge {
         protected hndDropCapture(_event: DragEvent, _viewSource: View): Promise<void>;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        protected getState(): JsonValue;
+        protected getState(): ViewState;
         private hndTreeEvent;
         private hndEvent;
         private storeExpanded;
@@ -741,7 +744,7 @@ declare namespace Fudge {
         private node;
         private nodeLight;
         private redrawId;
-        constructor(_container: ComponentContainer, _state: JsonValue);
+        constructor(_container: ComponentContainer, _state: ViewState);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected openContextMenu: (_event: Event) => void;
@@ -770,7 +773,7 @@ declare namespace Fudge {
      */
     class ViewInternalTable extends ViewInternal {
         private table;
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        constructor(_container: ComponentContainer, _state: ViewState);
         listResources(): void;
         getSelection(): ƒ.SerializableResource[];
         getDragDropSources(): ƒ.SerializableResource[];
@@ -796,7 +799,7 @@ declare namespace Fudge {
         private previewNode;
         private mtxImage;
         private timeoutDefer;
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        constructor(_container: ComponentContainer, _state: ViewState);
         private static createStandardMaterial;
         private static createStandardMesh;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
@@ -825,7 +828,7 @@ declare namespace Fudge {
      */
     class ViewProperties extends View {
         private resource;
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        constructor(_container: ComponentContainer, _state: ViewState);
         private fillContent;
         private hndEvent;
     }
@@ -837,7 +840,7 @@ declare namespace Fudge {
      */
     class ViewScript extends View {
         private table;
-        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        constructor(_container: ComponentContainer, _state: ViewState);
         listScripts(): void;
         getSelection(): ScriptInfo[];
         getDragDropSources(): ScriptInfo[];

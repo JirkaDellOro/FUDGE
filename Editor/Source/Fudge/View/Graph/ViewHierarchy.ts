@@ -11,7 +11,7 @@ namespace Fudge {
     private tree: ƒUi.CustomTree<ƒ.Node>;
     private selectionPrevious: ƒ.Node[] = [];
 
-    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
 
       this.setGraph(null);
@@ -22,7 +22,7 @@ namespace Fudge {
 
       // TODO: pass state over from panel
       if (_state["graph"] && _state["expanded"] && !this.restoreExpanded(_state["graph"]))
-        this.storeExpanded(_state["graph"], _state["expanded"]);
+        this.storeExpanded(_state["graph"], JSON.parse(_state["expanded"]));
     }
 
     private get selection(): ƒ.Node[] {
@@ -134,9 +134,9 @@ namespace Fudge {
     }
     //#endregion
 
-    protected getState(): JsonValue {
-      let state: JsonValue = super.getState();
-      state["expanded"] = this.getExpanded();
+    protected getState(): ViewState {
+      let state: ViewState = super.getState();
+      state["expanded"] = JSON.stringify(this.getExpanded());
       return state;
     }
 

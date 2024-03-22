@@ -22,7 +22,7 @@ namespace Fudge {
     private errors: [ƒ.ParticleData.Expression, string][] = [];
     private variables: HTMLDataListElement;
 
-    public constructor(_container: ComponentContainer, _state: Object) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
       this.createToolbar();
       this.setParticleSystem(null);

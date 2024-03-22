@@ -7,7 +7,7 @@ namespace Fudge {
    * @authors Jonas Plotzky, HFU, 2022
    */
   export class PanelAnimation extends Panel {
-    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       const constructors = { /* eslint-disable-line */
         [VIEW.ANIMATION]: ViewAnimation,
         [VIEW.ANIMATION_SHEET]: ViewAnimationSheet

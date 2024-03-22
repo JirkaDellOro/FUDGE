@@ -9,7 +9,7 @@ namespace Fudge {
   export class ViewProperties extends View {
     private resource: ƒ.SerializableResource;
 
-    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
       this.fillContent();
 

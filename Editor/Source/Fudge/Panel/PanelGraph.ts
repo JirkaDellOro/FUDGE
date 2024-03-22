@@ -10,7 +10,7 @@ namespace Fudge {
     #graph: ƒ.Graph;
     #node: ƒ.Node;
 
-    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       const constructors = { /* eslint-disable-line */
         [VIEW.RENDER]: ViewRender,
         [VIEW.COMPONENTS]: ViewComponents,
@@ -64,8 +64,8 @@ namespace Fudge {
       });
     }
 
-    protected getState(): JsonValue {
-      let state: JsonValue = super.getState();
+    protected getState(): ViewState {
+      let state: ViewState = super.getState();
       if (this.#graph)
         state["graph"] = this.#graph.idResource;
       if (this.#node)

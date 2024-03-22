@@ -10,7 +10,7 @@ namespace Fudge {
     // TODO: consider script namespaces ƒ.ScriptNamespaces to find all scripts not just ComponentScripts
     private table: ƒui.Table<ScriptInfo>;
 
-    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
 
       this.dom.addEventListener(EVENT_EDITOR.OPEN, this.hndEvent);
@@ -61,6 +61,6 @@ namespace Fudge {
             this.listScripts();
           break;
       }
-    }
+    };
   }
 }

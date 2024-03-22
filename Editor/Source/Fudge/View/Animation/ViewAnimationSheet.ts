@@ -63,7 +63,7 @@ namespace Fudge {
 
     #mode: SHEET_MODE;
 
-    public constructor(_container: ComponentContainer, _state: Object) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
 
       // maybe use this solution for all views?

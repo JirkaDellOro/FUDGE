@@ -17,7 +17,7 @@ namespace Fudge {
     private mtxImage: ƒ.Matrix3x3 = ƒ.Matrix3x3.IDENTITY();
     private timeoutDefer: number;
 
-    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
 
       // create viewport for 3D-resources

@@ -2,9 +2,9 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
-  // export interface ViewState {
-  //   [key: string]: string;
-  // }
+  export interface ViewState  {
+    [key: string]: string;
+  }
 
   type Views = { [id: string]: View };
   /**
@@ -20,7 +20,7 @@ namespace Fudge {
     #container: ComponentContainer;
     #id: number;
 
-    public constructor(_container: ComponentContainer, _state: JsonValue) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       this.dom = document.createElement("div");
       this.dom.style.height = "100%";
       // this.dom.style.overflow = "auto";
@@ -123,7 +123,7 @@ namespace Fudge {
     //#endregion
 
     //#region Events
-    protected getState(): JsonValue {
+    protected getState(): ViewState {
       return {};
     }
 

@@ -17,7 +17,7 @@ namespace Fudge {
     private redrawId: number;
     #pointerMoved: boolean = false;
 
-    public constructor(_container: ComponentContainer, _state: JsonValue) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
 
       this.createUserInterface();

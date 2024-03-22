@@ -20,7 +20,7 @@ namespace Fudge {
   export class ViewInternalFolder extends ViewInternal {
     private tree: ƒui.CustomTree<ResourceNode>;
 
-    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
 
       this.dom.addEventListener(EVENT_EDITOR.OPEN, this.hndOpen);

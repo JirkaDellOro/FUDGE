@@ -13,7 +13,7 @@ namespace Fudge {
   export class ViewInternalTable extends ViewInternal {
     private table: ƒui.Table<ƒ.SerializableResource>;
 
-    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
 
       this.dom.addEventListener(EVENT_EDITOR.OPEN, this.hndEvent);

@@ -7,7 +7,7 @@ namespace Fudge {
    * @authors Jonas Plotzky, HFU, 2022
    */
   export class PanelParticleSystem extends Panel {
-    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       const config: RowOrColumnItemConfig = {
         type: "column",
         content: [{

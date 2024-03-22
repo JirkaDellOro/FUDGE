@@ -7,7 +7,7 @@ namespace Fudge {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2020- 2023
    */
   export class PanelProject extends Panel {
-    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       const constructors = { /* eslint-disable-line */
         [VIEW.INTERNAL_TABLE]: ViewInternalTable,
         [VIEW.INTERNAL_FOLDER]: ViewInternalFolder,

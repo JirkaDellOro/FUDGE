@@ -7,7 +7,7 @@ namespace Fudge {
   * @authors Jirka Dell'Oro-Friedl, HFU, 2021
   */
   export class PanelHelp extends Panel {
-    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
       this.setTitle("Help");
       console.log(this.dom);

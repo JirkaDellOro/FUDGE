@@ -16,7 +16,7 @@ namespace Fudge {
     protected views: View[] = [];
     //public dom; // muss vielleicht weg
 
-    public constructor(_container: ComponentContainer, _state: JsonValue | undefined, _viewConstructors?: { [name: string]: new (...args: ƒ.General) => View }, _rootItemConfig?: RowOrColumnItemConfig) {
+    public constructor(_container: ComponentContainer, _state: ViewState, _viewConstructors?: { [name: string]: new (...args: ƒ.General) => View }, _rootItemConfig?: RowOrColumnItemConfig) {
       super(_container, _state);
       this.dom.style.width = "100%";
       this.dom.style.overflow = "visible";
@@ -31,12 +31,14 @@ namespace Fudge {
       this.goldenLayout = new Page.goldenLayoutModule.GoldenLayout(this.dom);
 
       for (const key in _viewConstructors)
-        this.goldenLayout.registerComponentConstructor(key, _viewConstructors[key]);
+        this.goldenLayout.registerComponentFactoryFunction(key, (_container, _viewState: ViewState) => new _viewConstructors[key](_container, { ..._state, ..._viewState }));
+        // this.goldenLayout.registerComponentConstructor(key, _viewConstructors[key]);
 
       this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
       this.goldenLayout.on("itemCreated", this.addViewComponent);
 
-      this.goldenLayout.loadLayout(_state["layout"] ? Page.goldenLayoutModule.LayoutConfig.fromResolved(_state["layout"]) : config);
+      const loadedConfig: ResolvedLayoutConfig = JSON.parse(_state["layout"]);
+      this.goldenLayout.loadLayout(_state["layout"] ? Page.goldenLayoutModule.LayoutConfig.fromResolved(loadedConfig) : config);
     }
 
     /** Send custom copies of the given event to the views */
@@ -49,9 +51,9 @@ namespace Fudge {
           view.dispatch(<EVENT_EDITOR>_event.type, { detail: detail });
     };
     
-    protected getState(): JsonValue {
-      let state: JsonValue = super.getState();
-      state["layout"] = this.goldenLayout.saveLayout();
+    protected getState(): ViewState {
+      let state: ViewState = super.getState();
+      state["layout"] = JSON.stringify(this.goldenLayout.saveLayout());
       return state;
     }
 

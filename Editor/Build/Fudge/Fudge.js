@@ -2447,10 +2447,12 @@ var Fudge;
             };
             this.goldenLayout = new Fudge.Page.goldenLayoutModule.GoldenLayout(this.dom);
             for (const key in _viewConstructors)
-                this.goldenLayout.registerComponentConstructor(key, _viewConstructors[key]);
+                this.goldenLayout.registerComponentFactoryFunction(key, (_container, _viewState) => new _viewConstructors[key](_container, { ..._state, ..._viewState }));
+            // this.goldenLayout.registerComponentConstructor(key, _viewConstructors[key]);
             this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
             this.goldenLayout.on("itemCreated", this.addViewComponent);
-            this.goldenLayout.loadLayout(_state["layout"] ? Fudge.Page.goldenLayoutModule.LayoutConfig.fromResolved(_state["layout"]) : config);
+            const loadedConfig = JSON.parse(_state["layout"]);
+            this.goldenLayout.loadLayout(_state["layout"] ? Fudge.Page.goldenLayoutModule.LayoutConfig.fromResolved(loadedConfig) : config);
         }
         /** Send custom copies of the given event to the views */
         broadcast = (_event) => {
@@ -2463,7 +2465,7 @@ var Fudge;
         };
         getState() {
             let state = super.getState();
-            state["layout"] = this.goldenLayout.saveLayout();
+            state["layout"] = JSON.stringify(this.goldenLayout.saveLayout());
             return state;
         }
         addViewComponent = (_event) => {
@@ -4574,7 +4576,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             // TODO: pass state over from panel
             if (_state["graph"] && _state["expanded"] && !this.restoreExpanded(_state["graph"]))
-                this.storeExpanded(_state["graph"], _state["expanded"]);
+                this.storeExpanded(_state["graph"], JSON.parse(_state["expanded"]));
         }
         get selection() {
             return this.tree.controller.selection;
@@ -4669,7 +4671,7 @@ var Fudge;
         //#endregion
         getState() {
             let state = super.getState();
-            state["expanded"] = this.getExpanded();
+            state["expanded"] = JSON.stringify(this.getExpanded());
             return state;
         }
         //#region EventHandlers

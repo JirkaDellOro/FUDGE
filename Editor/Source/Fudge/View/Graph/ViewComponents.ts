@@ -25,7 +25,7 @@ namespace Fudge {
     private selected: string = "ComponentTransform";
     private drag: ƒ.ComponentCamera;
 
-    public constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+    public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
       this.fillContent();
 
