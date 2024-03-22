@@ -36,7 +36,7 @@ namespace Fudge {
       this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
       this.goldenLayout.on("itemCreated", this.addViewComponent);
 
-      this.goldenLayout.loadLayout(_panelState["layout"] ? Page.goldenLayoutModule.LayoutConfig.fromResolved(JSON.parse(_panelState["layout"])) : config);
+      this.goldenLayout.loadLayout(_panelState["layout"] ? Page.goldenLayoutModule.LayoutConfig.fromResolved(_panelState["layout"]) : config);
     }
 
     /** Send custom copies of the given event to the views */
@@ -51,7 +51,7 @@ namespace Fudge {
     
     protected getState(): ViewState {
       let state: ViewState = super.getState();
-      state["layout"] = JSON.stringify(this.goldenLayout.saveLayout());
+      state["layout"] = this.goldenLayout.saveLayout();
       return state;
     }
 

@@ -106,7 +106,7 @@ namespace Fudge {
 
       try {
         const settingsContent: string = await (await fetch(new URL(this.fileSettings, this.base).toString())).text();
-        const panelSettings: ƒ.Serialization = JSON.parse(settingsContent);
+        const panelSettings: ƒ.Serialization = ƒ.Serializer.parse(settingsContent);
 
         // TODO: maybe move gizmos filter to the view state of ViewRender
         let gizmosFilter: Map<string, boolean> = new Map(panelSettings.gizmosFilter);
@@ -139,7 +139,6 @@ namespace Fudge {
     public getSettingsJSON(): string {
       let settings: ƒ.Serialization = {};
       settings.gizmosFilter = Array.from(ƒ.Gizmos.filter.entries());
-      // settings.panels = Page.getPanelInfo();
       settings.layout = Page.getLayout();
 
       return ƒ.Serializer.stringify(settings);

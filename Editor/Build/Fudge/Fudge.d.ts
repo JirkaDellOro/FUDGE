@@ -252,13 +252,12 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     /**
      * The view's state. During reconstruction, views receive a merged state object that combines the states of both their panel and the view itself.
      * Ensure unique property names to avoid conflicts.
      */
-    interface ViewState {
-        [key: string]: string;
-    }
+    type ViewState = ƒ.Serialization;
     /**
      * Base class for all [[View]]s to support generic functionality
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020

@@ -649,7 +649,7 @@ var Fudge;
             await Fudge.project.mutate(JSON.parse(projectSettings || "{}"));
             try {
                 const settingsContent = await (await fetch(new URL(this.fileSettings, this.base).toString())).text();
-                const panelSettings = JSON.parse(settingsContent);
+                const panelSettings = ƒ.Serializer.parse(settingsContent);
                 // TODO: maybe move gizmos filter to the view state of ViewRender
                 let gizmosFilter = new Map(panelSettings.gizmosFilter);
                 // add default values for view render gizmos
@@ -676,7 +676,6 @@ var Fudge;
         getSettingsJSON() {
             let settings = {};
             settings.gizmosFilter = Array.from(ƒ.Gizmos.filter.entries());
-            // settings.panels = Page.getPanelInfo();
             settings.layout = Fudge.Page.getLayout();
             return ƒ.Serializer.stringify(settings);
         }
@@ -2448,10 +2447,9 @@ var Fudge;
             this.goldenLayout = new Fudge.Page.goldenLayoutModule.GoldenLayout(this.dom);
             for (const key in _viewConstructors)
                 this.goldenLayout.registerComponentFactoryFunction(key, (_container, _viewState) => new _viewConstructors[key](_container, { ..._panelState, ..._viewState }));
-            // this.goldenLayout.registerComponentConstructor(key, _viewConstructors[key]);
             this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
             this.goldenLayout.on("itemCreated", this.addViewComponent);
-            this.goldenLayout.loadLayout(_panelState["layout"] ? Fudge.Page.goldenLayoutModule.LayoutConfig.fromResolved(JSON.parse(_panelState["layout"])) : config);
+            this.goldenLayout.loadLayout(_panelState["layout"] ? Fudge.Page.goldenLayoutModule.LayoutConfig.fromResolved(_panelState["layout"]) : config);
         }
         /** Send custom copies of the given event to the views */
         broadcast = (_event) => {
@@ -2464,7 +2462,7 @@ var Fudge;
         };
         getState() {
             let state = super.getState();
-            state["layout"] = JSON.stringify(this.goldenLayout.saveLayout());
+            state["layout"] = this.goldenLayout.saveLayout();
             return state;
         }
         addViewComponent = (_event) => {
@@ -4575,7 +4573,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             // a select event will be recived from the panel during reconstruction so we only need to prepare our storage here
             if (_state["graph"] && _state["expanded"] && !this.restoreExpanded(_state["graph"]))
-                this.storeExpanded(_state["graph"], JSON.parse(_state["expanded"]));
+                this.storeExpanded(_state["graph"], _state["expanded"]);
         }
         get selection() {
             return this.tree.controller.selection;
@@ -4670,7 +4668,7 @@ var Fudge;
         //#endregion
         getState() {
             let state = super.getState();
-            state["expanded"] = JSON.stringify(this.getExpanded());
+            state["expanded"] = this.getExpanded();
             return state;
         }
         //#region EventHandlers

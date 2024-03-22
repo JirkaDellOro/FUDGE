@@ -22,7 +22,7 @@ namespace Fudge {
 
       // a select event will be recived from the panel during reconstruction so we only need to prepare our storage here
       if (_state["graph"] && _state["expanded"] && !this.restoreExpanded(_state["graph"]))
-        this.storeExpanded(_state["graph"], JSON.parse(_state["expanded"]));
+        this.storeExpanded(_state["graph"], _state["expanded"]);
     }
 
     private get selection(): ƒ.Node[] {
@@ -136,7 +136,7 @@ namespace Fudge {
 
     protected getState(): ViewState {
       let state: ViewState = super.getState();
-      state["expanded"] = JSON.stringify(this.getExpanded());
+      state["expanded"] = this.getExpanded();
       return state;
     }
 
