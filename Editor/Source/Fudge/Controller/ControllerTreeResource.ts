@@ -1,7 +1,7 @@
 namespace Fudge {
   import ƒui = FudgeUserInterface;
 
-  export type ResourceNode = ResourceFile | ResourceFolder;
+  export type ResourceEntry = ResourceFile | ResourceFolder;
 
   export interface ResourceFile extends ƒ.SerializableResource {
     resourceParent?: ResourceFolder; // dangerous as a SerializableResource must not have a property with this name itself
@@ -10,7 +10,8 @@ namespace Fudge {
   export class ResourceFolder implements ƒ.Serializable {
     public name: string;
     public resourceParent: ResourceFolder;
-    public children: ResourceNode[] = [];
+    public entries: ResourceEntry[] = [];
+    public readonly type: string = "Folder";
 
     public constructor(_name: string = "New Folder") {
       this.name = _name;
@@ -20,54 +21,54 @@ namespace Fudge {
      * Returns true if this or any of its descendants contain the given resource.
      */
     public contains(_resource: ƒ.SerializableResource): boolean {
-      for (let child of this.children) 
-        if (child == _resource || child instanceof ResourceFolder && child.contains(_resource))
+      for (let entry of this.entries) 
+        if (entry == _resource || entry instanceof ResourceFolder && entry.contains(_resource))
           return true;
       
       return false;
     }
 
     public serialize(): ƒ.Serialization {
-      let serialization: ƒ.Serialization = { name: this.name, children: [] };
-      for (let child of this.children) {
-        if (child instanceof ResourceFolder)
-          serialization.children.push(child.serialize());
+      let serialization: ƒ.Serialization = { name: this.name, entries: [] };
+      for (let entry of this.entries) {
+        if (entry instanceof ResourceFolder)
+          serialization.entries.push(entry.serialize());
         else
-          serialization.children.push({ idResource: child.idResource });
+          serialization.entries.push({ idResource: entry.idResource });
       }
       return serialization;
     }
 
     public async deserialize(_serialization: ƒ.Serialization): Promise<ƒ.Serializable> {
       this.name = _serialization.name;
-      for (let childSerialization of _serialization.children) {
-        let child: ResourceNode;
-        if ("idResource" in childSerialization)
-          child = await ƒ.Project.getResource(childSerialization.idResource);
+      for (let entrySerialization of _serialization.entries ?? _serialization.children) { // remove "?? _serialization.children" after a while
+        let entry: ResourceEntry;
+        if ("idResource" in entrySerialization)
+          entry = await ƒ.Project.getResource(entrySerialization.idResource);
         else
-          child = <ResourceFolder>await new ResourceFolder().deserialize(childSerialization);
+          entry = <ResourceFolder>await new ResourceFolder().deserialize(entrySerialization);
 
-        if (child) {
-          this.children.push(child);
-          child.resourceParent = this;
+        if (entry) {
+          this.entries.push(entry);
+          entry.resourceParent = this;
         }
       }
       return this;
     }
 
-    public *[Symbol.iterator](): IterableIterator<ResourceNode> {
+    public *[Symbol.iterator](): IterableIterator<ResourceEntry> {
       yield this;
-      for (let child of this.children) {
-        if (child instanceof ResourceFolder)
-          yield* child;
+      for (let entry of this.entries) {
+        if (entry instanceof ResourceFolder)
+          yield* entry;
         else
-          yield child;
+          yield entry;
       }
     }
   }
 
-  export class ControllerTreeResource extends ƒui.CustomTreeController<ResourceNode> {
-    public createContent(_object: ResourceNode): HTMLFieldSetElement {
+  export class ControllerTreeResource extends ƒui.CustomTreeController<ResourceEntry> {
+    public createContent(_object: ResourceEntry): HTMLFieldSetElement {
       let content: HTMLFieldSetElement = document.createElement("fieldset");
       let name: HTMLInputElement = document.createElement("input");
 
@@ -87,35 +88,35 @@ namespace Fudge {
       return content;
     }
 
-    public getAttributes(_object: ResourceNode): string {
+    public getAttributes(_object: ResourceEntry): string {
       return "";
     }
 
-    public async setValue(_node: ResourceNode, _id: string, _new: string): Promise<boolean> {
-      let rename: boolean = _node.name != _new;
+    public async setValue(_entry: ResourceEntry, _id: string, _new: string): Promise<boolean> {
+      let rename: boolean = _entry.name != _new;
       if (rename) {
-        _node.name = _new;
-        await (<ƒ.SerializableResourceExternal>_node).load?.();
+        _entry.name = _new;
+        await (<ƒ.SerializableResourceExternal>_entry).load?.();
       }
 
       return rename;
     }
 
-    public hasChildren(_object: ResourceNode): boolean {
-      return _object instanceof ResourceFolder && _object.children.length > 0;
+    public hasChildren(_entry: ResourceEntry): boolean {
+      return _entry instanceof ResourceFolder && _entry.entries.length > 0;
     }
 
-    public getChildren(_object: ResourceNode): ResourceNode[] {
-      return _object instanceof ResourceFolder ? _object.children : [];
+    public getChildren(_entry: ResourceEntry): ResourceEntry[] {
+      return _entry instanceof ResourceFolder ? _entry.entries : [];
     }
 
-    public addChildren(_sources: ResourceNode[], _target: ResourceNode, _index?: number): ResourceNode[] {
+    public addChildren(_sources: ResourceEntry[], _target: ResourceEntry, _index?: number): ResourceEntry[] {
       if (!(_target instanceof ResourceFolder))
         return [];
 
-      let move: ResourceNode[] = [];
+      let move: ResourceEntry[] = [];
       for (let source of _sources) {
-        let currentIndex: number = _target.children.indexOf(source); // _index needs to be corrected if we are moving within same parent
+        let currentIndex: number = _target.entries.indexOf(source); // _index needs to be corrected if we are moving within same parent
         if (currentIndex > -1 && _index > currentIndex)
           _index -= 1;
 
@@ -124,14 +125,14 @@ namespace Fudge {
         move.push(source);
 
         if (_index == null)
-          _target.children.push(source);
+          _target.entries.push(source);
         else
-          _target.children.splice(_index + _sources.indexOf(source), 0, source);
+          _target.entries.splice(_index + _sources.indexOf(source), 0, source);
       }
       return move;
     }
 
-    public async delete(_focussed: ResourceNode[]): Promise<ResourceNode[]> {
+    public async delete(_focussed: ResourceEntry[]): Promise<ResourceEntry[]> {
       // TODO: add delete selection isntead of _focussed? Why doesn't the Tree class handle this?
       let iRoot: number = _focussed.indexOf(project.resourceFolder);
       if (iRoot > -1)
@@ -146,8 +147,8 @@ namespace Fudge {
       for (let expendable of _focussed) {
         if (expendable instanceof ResourceFolder) {
           let usage: string[] = [];
-          for (const child of expendable.children)
-            usage.push(child.name);
+          for (const entry of expendable.entries)
+            usage.push(entry.name);
 
           usages[_focussed.indexOf(expendable) + " " + expendable.name] = usage;
         } else {
@@ -160,7 +161,7 @@ namespace Fudge {
       }
 
       if (_focussed.length > 0 && await openDialog()) {
-        let deleted: ResourceNode[] = [];
+        let deleted: ResourceEntry[] = [];
 
         for (const selected of _focussed) {
           let key: string = selected instanceof ResourceFolder ? this.selection.indexOf(selected) + " " + selected.name : selected.idResource;
@@ -191,13 +192,13 @@ namespace Fudge {
       }
     }
 
-    public async copy(_originals: ResourceNode[]): Promise<ResourceNode[]> {
+    public async copy(_originals: ResourceEntry[]): Promise<ResourceEntry[]> {
       return [];
     }
 
-    public getPath(_resource: ResourceNode): ResourceNode[] {
-      let path: ResourceNode[] = [];
-      let current: ResourceNode = _resource;
+    public getPath(_resource: ResourceEntry): ResourceEntry[] {
+      let path: ResourceEntry[] = [];
+      let current: ResourceEntry = _resource;
       while (current) {
         path.unshift(current);
         current = current.resourceParent;
@@ -205,13 +206,13 @@ namespace Fudge {
       return path;
     }
 
-    public remove(_resource: ResourceNode): void {
+    public remove(_resource: ResourceEntry): void {
       let parent: ResourceFolder = _resource.resourceParent;
       if (!parent)
         return;
 
-      let index: number = parent.children.indexOf(_resource);
-      parent.children.splice(index, 1);
+      let index: number = parent.entries.indexOf(_resource);
+      parent.entries.splice(index, 1);
     }
   }
 }

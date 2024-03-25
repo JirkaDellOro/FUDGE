@@ -18,7 +18,7 @@ namespace Fudge {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jonas Plotzky, HFU, 2024 
    */
   export class ViewInternalFolder extends ViewInternal {
-    private tree: ƒui.CustomTree<ResourceNode>;
+    private tree: ƒui.CustomTree<ResourceEntry>;
 
     public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
@@ -110,7 +110,7 @@ namespace Fudge {
         return;
       }
 
-      let focus: ResourceNode = this.tree.getFocussed();
+      let focus: ResourceEntry = this.tree.getFocussed();
 
       if (choice == CONTEXTMENU.DELETE_RESOURCE) {
         if (((await this.controller.delete([focus])).length > 0))
@@ -121,7 +121,7 @@ namespace Fudge {
       if (!(focus instanceof ResourceFolder))
         return;
 
-      let resource: ResourceNode;
+      let resource: ResourceEntry;
 
       switch (choice) {
         case CONTEXTMENU.CREATE_FOLDER:
@@ -265,7 +265,7 @@ namespace Fudge {
     private hndOpen = (_event: Event): void => {
       // while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
       this.dom.innerHTML = "";
-      this.tree = new ƒui.CustomTree<ResourceNode>(new ControllerTreeResource(), this.resourceFolder);
+      this.tree = new ƒui.CustomTree<ResourceEntry>(new ControllerTreeResource(), this.resourceFolder);
       this.dom.appendChild(this.tree);
       this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
       this.tree.title = "● Select to edit in \"Properties\"\n● Drag to \"Properties\" or \"Components\" to use if applicable.";
@@ -280,7 +280,7 @@ namespace Fudge {
           this.controller.addChildren([resource], this.resourceFolder);
       }
       this.hndUpdate();
-      let rootItem: ƒui.CustomTreeItem<ResourceNode> = this.tree.findVisible(this.resourceFolder);
+      let rootItem: ƒui.CustomTreeItem<ResourceEntry> = this.tree.findVisible(this.resourceFolder);
       if (!rootItem.expanded)
         rootItem.expand(true);
     };

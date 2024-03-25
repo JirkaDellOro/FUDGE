@@ -432,14 +432,15 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒui = FudgeUserInterface;
-    type ResourceNode = ResourceFile | ResourceFolder;
+    type ResourceEntry = ResourceFile | ResourceFolder;
     interface ResourceFile extends ƒ.SerializableResource {
         resourceParent?: ResourceFolder;
     }
     class ResourceFolder implements ƒ.Serializable {
         name: string;
         resourceParent: ResourceFolder;
-        children: ResourceNode[];
+        entries: ResourceEntry[];
+        readonly type: string;
         constructor(_name?: string);
         /**
          * Returns true if this or any of its descendants contain the given resource.
@@ -447,19 +448,19 @@ declare namespace Fudge {
         contains(_resource: ƒ.SerializableResource): boolean;
         serialize(): ƒ.Serialization;
         deserialize(_serialization: ƒ.Serialization): Promise<ƒ.Serializable>;
-        [Symbol.iterator](): IterableIterator<ResourceNode>;
+        [Symbol.iterator](): IterableIterator<ResourceEntry>;
     }
-    class ControllerTreeResource extends ƒui.CustomTreeController<ResourceNode> {
-        createContent(_object: ResourceNode): HTMLFieldSetElement;
-        getAttributes(_object: ResourceNode): string;
-        setValue(_node: ResourceNode, _id: string, _new: string): Promise<boolean>;
-        hasChildren(_object: ResourceNode): boolean;
-        getChildren(_object: ResourceNode): ResourceNode[];
-        addChildren(_sources: ResourceNode[], _target: ResourceNode, _index?: number): ResourceNode[];
-        delete(_focussed: ResourceNode[]): Promise<ResourceNode[]>;
-        copy(_originals: ResourceNode[]): Promise<ResourceNode[]>;
-        getPath(_resource: ResourceNode): ResourceNode[];
-        remove(_resource: ResourceNode): void;
+    class ControllerTreeResource extends ƒui.CustomTreeController<ResourceEntry> {
+        createContent(_object: ResourceEntry): HTMLFieldSetElement;
+        getAttributes(_object: ResourceEntry): string;
+        setValue(_entry: ResourceEntry, _id: string, _new: string): Promise<boolean>;
+        hasChildren(_entry: ResourceEntry): boolean;
+        getChildren(_entry: ResourceEntry): ResourceEntry[];
+        addChildren(_sources: ResourceEntry[], _target: ResourceEntry, _index?: number): ResourceEntry[];
+        delete(_focussed: ResourceEntry[]): Promise<ResourceEntry[]>;
+        copy(_originals: ResourceEntry[]): Promise<ResourceEntry[]>;
+        getPath(_resource: ResourceEntry): ResourceEntry[];
+        remove(_resource: ResourceEntry): void;
     }
 }
 declare namespace Fudge {

@@ -24,7 +24,10 @@ namespace Fudge {
       this.dom.setAttribute("panel", this.constructor.name);
 
       const config: LayoutConfig = {
-        settings: { showPopoutIcon: false, showMaximiseIcon: false },
+        header: {
+          popout: false,
+          maximise: false
+        },
         root: _rootItemConfig
       };
 
@@ -48,7 +51,7 @@ namespace Fudge {
         if (view != target) // don't send back to original target view
           view.dispatch(<EVENT_EDITOR>_event.type, { detail: detail });
     };
-    
+
     protected getState(): ViewState {
       let state: ViewState = super.getState();
       state["layout"] = this.goldenLayout.saveLayout();

@@ -4,7 +4,7 @@ namespace Fudge {
 
   ƒ.Serializer.registerNamespace(Fudge);
 
-  export class Project extends ƒ.Mutable {
+  export class Project extends ƒ.Mutable { // TODO: replace with serilizable
     // public title: string = "NewProject";
     public base: URL;
     public name: string;

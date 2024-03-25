@@ -46,6 +46,14 @@ namespace Fudge {
               value = "Array(" + value.length + ")";
             content.innerHTML += key + ": " + value + "<br/>";
           }
+        } else if (this.resource instanceof ResourceFolder) {
+          let entries: { [name: string]: number } = {} ;
+          for (const entry of this.resource.entries) {
+            entries[entry.type] = (entries[entry.type] ?? 0) + 1;
+          }
+          content.innerHTML = `Entries: ${this.resource.entries.length}<br/>`;
+          for (let type in entries)
+            content.innerHTML += `${type}: ${entries[type]}<br/>`;
         }
       }
       else {

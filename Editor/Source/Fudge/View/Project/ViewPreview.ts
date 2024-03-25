@@ -10,7 +10,7 @@ namespace Fudge {
   export class ViewPreview extends View {
     private static mtrStandard: ƒ.Material = ViewPreview.createStandardMaterial();
     private static meshStandard: ƒ.Mesh = ViewPreview.createStandardMesh();
-    private resource: ƒ.SerializableResource | DirectoryEntry | Function;
+    private resource: ƒ.SerializableResource | DirectoryEntry | ResourceFolder | Function;
     private viewport: ƒ.Viewport;
     private cmrOrbit: ƒAid.CameraOrbit;
     private previewNode: ƒ.Node;

@@ -86,7 +86,9 @@ namespace Fudge {
       Page.goldenLayout.registerComponentConstructor(PANEL.PARTICLE_SYSTEM, PanelParticleSystem);
 
       const config: LayoutConfig = {
-        settings: { showPopoutIcon: false, showMaximiseIcon: true },
+        header: {
+          popout: false
+        },
         root: {
           type: "row",
           isClosable: false,

@@ -415,7 +415,9 @@ var Fudge;
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.ANIMATION, Fudge.PanelAnimation);
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.PARTICLE_SYSTEM, Fudge.PanelParticleSystem);
             const config = {
-                settings: { showPopoutIcon: false, showMaximiseIcon: true },
+                header: {
+                    popout: false
+                },
                 root: {
                     type: "row",
                     isClosable: false,
@@ -2248,7 +2250,8 @@ var Fudge;
     class ResourceFolder {
         name;
         resourceParent;
-        children = [];
+        entries = [];
+        type = "Folder";
         constructor(_name = "New Folder") {
             this.name = _name;
         }
@@ -2256,43 +2259,43 @@ var Fudge;
          * Returns true if this or any of its descendants contain the given resource.
          */
         contains(_resource) {
-            for (let child of this.children)
-                if (child == _resource || child instanceof ResourceFolder && child.contains(_resource))
+            for (let entry of this.entries)
+                if (entry == _resource || entry instanceof ResourceFolder && entry.contains(_resource))
                     return true;
             return false;
         }
         serialize() {
-            let serialization = { name: this.name, children: [] };
-            for (let child of this.children) {
-                if (child instanceof ResourceFolder)
-                    serialization.children.push(child.serialize());
+            let serialization = { name: this.name, entries: [] };
+            for (let entry of this.entries) {
+                if (entry instanceof ResourceFolder)
+                    serialization.entries.push(entry.serialize());
                 else
-                    serialization.children.push({ idResource: child.idResource });
+                    serialization.entries.push({ idResource: entry.idResource });
             }
             return serialization;
         }
         async deserialize(_serialization) {
             this.name = _serialization.name;
-            for (let childSerialization of _serialization.children) {
-                let child;
-                if ("idResource" in childSerialization)
-                    child = await ƒ.Project.getResource(childSerialization.idResource);
+            for (let entrySerialization of _serialization.entries ?? _serialization.children) { // remove "?? _serialization.children" after a while
+                let entry;
+                if ("idResource" in entrySerialization)
+                    entry = await ƒ.Project.getResource(entrySerialization.idResource);
                 else
-                    child = await new ResourceFolder().deserialize(childSerialization);
-                if (child) {
-                    this.children.push(child);
-                    child.resourceParent = this;
+                    entry = await new ResourceFolder().deserialize(entrySerialization);
+                if (entry) {
+                    this.entries.push(entry);
+                    entry.resourceParent = this;
                 }
             }
             return this;
         }
         *[Symbol.iterator]() {
             yield this;
-            for (let child of this.children) {
-                if (child instanceof ResourceFolder)
-                    yield* child;
+            for (let entry of this.entries) {
+                if (entry instanceof ResourceFolder)
+                    yield* entry;
                 else
-                    yield child;
+                    yield entry;
             }
         }
     }
@@ -2315,35 +2318,35 @@ var Fudge;
         getAttributes(_object) {
             return "";
         }
-        async setValue(_node, _id, _new) {
-            let rename = _node.name != _new;
+        async setValue(_entry, _id, _new) {
+            let rename = _entry.name != _new;
             if (rename) {
-                _node.name = _new;
-                await _node.load?.();
+                _entry.name = _new;
+                await _entry.load?.();
             }
             return rename;
         }
-        hasChildren(_object) {
-            return _object instanceof ResourceFolder && _object.children.length > 0;
+        hasChildren(_entry) {
+            return _entry instanceof ResourceFolder && _entry.entries.length > 0;
         }
-        getChildren(_object) {
-            return _object instanceof ResourceFolder ? _object.children : [];
+        getChildren(_entry) {
+            return _entry instanceof ResourceFolder ? _entry.entries : [];
         }
         addChildren(_sources, _target, _index) {
             if (!(_target instanceof ResourceFolder))
                 return [];
             let move = [];
             for (let source of _sources) {
-                let currentIndex = _target.children.indexOf(source); // _index needs to be corrected if we are moving within same parent
+                let currentIndex = _target.entries.indexOf(source); // _index needs to be corrected if we are moving within same parent
                 if (currentIndex > -1 && _index > currentIndex)
                     _index -= 1;
                 this.remove(source);
                 source.resourceParent = _target;
                 move.push(source);
                 if (_index == null)
-                    _target.children.push(source);
+                    _target.entries.push(source);
                 else
-                    _target.children.splice(_index + _sources.indexOf(source), 0, source);
+                    _target.entries.splice(_index + _sources.indexOf(source), 0, source);
             }
             return move;
         }
@@ -2360,8 +2363,8 @@ var Fudge;
             for (let expendable of _focussed) {
                 if (expendable instanceof ResourceFolder) {
                     let usage = [];
-                    for (const child of expendable.children)
-                        usage.push(child.name);
+                    for (const entry of expendable.entries)
+                        usage.push(entry.name);
                     usages[_focussed.indexOf(expendable) + " " + expendable.name] = usage;
                 }
                 else {
@@ -2413,8 +2416,8 @@ var Fudge;
             let parent = _resource.resourceParent;
             if (!parent)
                 return;
-            let index = parent.children.indexOf(_resource);
-            parent.children.splice(index, 1);
+            let index = parent.entries.indexOf(_resource);
+            parent.entries.splice(index, 1);
         }
     }
     Fudge.ControllerTreeResource = ControllerTreeResource;
@@ -2441,7 +2444,10 @@ var Fudge;
             this.dom.removeAttribute("view");
             this.dom.setAttribute("panel", this.constructor.name);
             const config = {
-                settings: { showPopoutIcon: false, showMaximiseIcon: false },
+                header: {
+                    popout: false,
+                    maximise: false
+                },
                 root: _rootItemConfig
             };
             this.goldenLayout = new Fudge.Page.goldenLayoutModule.GoldenLayout(this.dom);
@@ -5644,6 +5650,15 @@ var Fudge;
                             value = "Array(" + value.length + ")";
                         content.innerHTML += key + ": " + value + "<br/>";
                     }
+                }
+                else if (this.resource instanceof Fudge.ResourceFolder) {
+                    let entries = {};
+                    for (const entry of this.resource.entries) {
+                        entries[entry.type] = (entries[entry.type] ?? 0) + 1;
+                    }
+                    content.innerHTML = `Entries: ${this.resource.entries.length}<br/>`;
+                    for (let type in entries)
+                        content.innerHTML += `${type}: ${entries[type]}<br/>`;
                 }
             }
             else {
