@@ -104,6 +104,7 @@ namespace Fudge {
       projectSettings = projectSettings?.replace(/'/g, "\"");
       await project.mutate(JSON.parse(projectSettings || "{}"));
 
+      let config: LayoutConfig;
       try {
         const settingsContent: string = await (await fetch(new URL(this.fileSettings, this.base).toString())).text();
         const panelSettings: ƒ.Serialization = ƒ.Serializer.parse(settingsContent);
@@ -114,16 +115,18 @@ namespace Fudge {
         // add default values for view render gizmos
         ƒ.Gizmos.filter.set(GIZMOS.TRANSFORM, true);
         ƒ.Gizmos.filter.set(GIZMOS.WIRE_MESH, false);
-  
+
         for (const [key, value] of gizmosFilter)
           if (ƒ.Gizmos.filter.has(key))
             ƒ.Gizmos.filter.set(key, value);
 
-        if (panelSettings.layout)
-          Page.loadLayout(panelSettings.layout);
+        config = Page.goldenLayoutModule.LayoutConfig.fromResolved(panelSettings.layout);
+
       } catch (_error) {
         ƒ.Debug.warn(`Failed to load '${this.fileSettings}'. A new settings file was created and will be saved.`, _error);
       }
+
+      Page.loadLayout(config);
     }
 
     public getProjectJSON(): string {

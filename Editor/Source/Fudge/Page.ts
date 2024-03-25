@@ -4,6 +4,7 @@
 ///<reference path="Definition.ts"/>
 
 
+
 namespace Fudge {
   import ƒ = FudgeCore;
   // import ƒaid = FudgeAid;
@@ -36,7 +37,18 @@ namespace Fudge {
       return Page.goldenLayout.saveLayout();
     }
 
-    public static loadLayout(_layout: LayoutConfig): void {
+    public static loadLayout(_layout?: LayoutConfig): void {
+      _layout ??= {
+        header: {
+          popout: false
+        },
+        root: {
+          type: "row",
+          isClosable: false,
+          content: []
+        }
+      };
+
       Page.goldenLayout.loadLayout(_layout);
     }
 
@@ -85,18 +97,7 @@ namespace Fudge {
       Page.goldenLayout.registerComponentConstructor(PANEL.ANIMATION, PanelAnimation);
       Page.goldenLayout.registerComponentConstructor(PANEL.PARTICLE_SYSTEM, PanelParticleSystem);
 
-      const config: LayoutConfig = {
-        header: {
-          popout: false
-        },
-        root: {
-          type: "row",
-          isClosable: false,
-          content: []
-        }
-      };
-
-      Page.loadLayout(config);
+      Page.loadLayout();
     }
 
     private static add(_panel: typeof Panel, _state?: JsonValue): void {
@@ -122,7 +123,7 @@ namespace Fudge {
 
     private static generateID(_name: string): string {
       let i: number = 0;
-      while (this.goldenLayout.findFirstComponentItemById(_name + i)) 
+      while (this.goldenLayout.findFirstComponentItemById(_name + i))
         i++;
       return _name + i; // _name + Page.idCounter++;
     }
@@ -172,7 +173,8 @@ namespace Fudge {
           let view: View = _event.detail.view;
           if (view instanceof Panel)
             Page.panels.splice(Page.panels.indexOf(view), 1);
-          console.log("Panels", Page.panels);
+
+          // console.log("Closed", view);
           break;
         default:
           Page.broadcast(_event);

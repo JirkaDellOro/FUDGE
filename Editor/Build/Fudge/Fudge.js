@@ -376,6 +376,16 @@ var Fudge;
             return Page.goldenLayout.saveLayout();
         }
         static loadLayout(_layout) {
+            _layout ??= {
+                header: {
+                    popout: false
+                },
+                root: {
+                    type: "row",
+                    isClosable: false,
+                    content: []
+                }
+            };
             Page.goldenLayout.loadLayout(_layout);
         }
         static setTransform(_mode) {
@@ -414,17 +424,7 @@ var Fudge;
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.HELP, Fudge.PanelHelp);
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.ANIMATION, Fudge.PanelAnimation);
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.PARTICLE_SYSTEM, Fudge.PanelParticleSystem);
-            const config = {
-                header: {
-                    popout: false
-                },
-                root: {
-                    type: "row",
-                    isClosable: false,
-                    content: []
-                }
-            };
-            Page.loadLayout(config);
+            Page.loadLayout();
         }
         static add(_panel, _state) {
             const panelConfig = {
@@ -490,7 +490,7 @@ var Fudge;
                     let view = _event.detail.view;
                     if (view instanceof Fudge.Panel)
                         Page.panels.splice(Page.panels.indexOf(view), 1);
-                    console.log("Panels", Page.panels);
+                    // console.log("Closed", view);
                     break;
                 default:
                     Page.broadcast(_event);
@@ -649,6 +649,7 @@ var Fudge;
             let projectSettings = settings?.getAttribute("project");
             projectSettings = projectSettings?.replace(/'/g, "\"");
             await Fudge.project.mutate(JSON.parse(projectSettings || "{}"));
+            let config;
             try {
                 const settingsContent = await (await fetch(new URL(this.fileSettings, this.base).toString())).text();
                 const panelSettings = ƒ.Serializer.parse(settingsContent);
@@ -660,12 +661,12 @@ var Fudge;
                 for (const [key, value] of gizmosFilter)
                     if (ƒ.Gizmos.filter.has(key))
                         ƒ.Gizmos.filter.set(key, value);
-                if (panelSettings.layout)
-                    Fudge.Page.loadLayout(panelSettings.layout);
+                config = Fudge.Page.goldenLayoutModule.LayoutConfig.fromResolved(panelSettings.layout);
             }
             catch (_error) {
                 ƒ.Debug.warn(`Failed to load '${this.fileSettings}'. A new settings file was created and will be saved.`, _error);
             }
+            Fudge.Page.loadLayout(config);
         }
         getProjectJSON() {
             let serialization = ƒ.Project.serialize();
@@ -1078,7 +1079,10 @@ var Fudge;
             this.#container = _container;
             this.#container.element.appendChild(this.dom);
             this.#container.stateRequestEvent = this.getState.bind(this);
-            this.#container.on("destroy", () => this.dispatch(Fudge.EVENT_EDITOR.CLOSE, { bubbles: true }));
+            this.#container.on("destroy", () => {
+                delete View.views[this.#id];
+                this.dispatch(Fudge.EVENT_EDITOR.CLOSE, { bubbles: true });
+            });
             // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             // this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
@@ -2438,6 +2442,7 @@ var Fudge;
         views = [];
         //public dom; // muss vielleicht weg
         constructor(_container, _panelState, _viewConstructors, _rootItemConfig) {
+            _container.on("destroy", () => this.goldenLayout.destroy()); // destroy from inside out
             super(_container, _panelState);
             this.dom.style.width = "100%";
             this.dom.style.overflow = "visible";

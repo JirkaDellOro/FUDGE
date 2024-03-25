@@ -181,7 +181,7 @@ declare namespace Fudge {
         private static physics;
         static setDefaultProject(): void;
         static getLayout(): ResolvedLayoutConfig;
-        static loadLayout(_layout: LayoutConfig): void;
+        static loadLayout(_layout?: LayoutConfig): void;
         static setTransform(_mode: TRANSFORM): void;
         static getPhysics(_graph: ƒ.Graph): ƒ.Physics;
         private static start;

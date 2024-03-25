@@ -17,6 +17,7 @@ namespace Fudge {
     //public dom; // muss vielleicht weg
 
     public constructor(_container: ComponentContainer, _panelState: ViewState, _viewConstructors?: { [name: string]: new (...args: ƒ.General) => View }, _rootItemConfig?: RowOrColumnItemConfig) {
+      _container.on("destroy", () => this.goldenLayout.destroy()); // destroy from inside out
       super(_container, _panelState);
       this.dom.style.width = "100%";
       this.dom.style.overflow = "visible";
@@ -65,7 +66,5 @@ namespace Fudge {
         this.views.push(<View>target.component);
       }
     };
-
-    // public abstract getState(): PanelState;
   }
 }

@@ -32,7 +32,10 @@ namespace Fudge {
       this.#container = _container;
       this.#container.element.appendChild(this.dom);
       this.#container.stateRequestEvent = this.getState.bind(this);
-      this.#container.on("destroy", () => this.dispatch(EVENT_EDITOR.CLOSE, { bubbles: true }));
+      this.#container.on("destroy", () => {
+        delete View.views[this.#id];
+        this.dispatch(EVENT_EDITOR.CLOSE, { bubbles: true });
+      });
 
       // console.log(this.contextMenuCallback);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
