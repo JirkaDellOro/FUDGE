@@ -186,32 +186,28 @@ namespace Fudge {
     };
     //#endregion
 
-    protected hndDragOver(_event: DragEvent, _viewSource: View): void {
+    protected hndDragOverCapture(_event: DragEvent, _viewSource: View): void {
+      if (_viewSource == this || _viewSource instanceof ViewHierarchy)
+        return;
+
+      if (_viewSource instanceof ViewExternal) {
+        let sources: DirectoryEntry[] = _viewSource.getDragDropSources();
+        if (sources.some(_source => [MIME.AUDIO, MIME.IMAGE, MIME.MESH, MIME.GLTF].includes(_source.getMimeType())))
+          return;
+      }
+
       _event.dataTransfer.dropEffect = "none";
-      if (this.dom != _event.target)
+      _event.stopPropagation();
+    }
+
+    protected async hndDropCapture(_event: DragEvent, _viewSource: View): Promise<void> {
+      if (_viewSource == this || _event.target == this.tree)
         return;
 
       if (!(_viewSource instanceof ViewExternal || _viewSource instanceof ViewHierarchy))
         return;
 
-      if (_viewSource instanceof ViewExternal) {
-        let sources: DirectoryEntry[] = _viewSource.getDragDropSources();
-        if (sources.some(_source => ![MIME.AUDIO, MIME.IMAGE, MIME.MESH, MIME.GLTF].includes(_source.getMimeType())))
-          return;
-
-        this.controller.dragDrop.sources.splice(0);
-      }
-
-      _event.dataTransfer.dropEffect = "link";
-      _event.preventDefault();
       _event.stopPropagation();
-    }
-
-    // TODO: there is now a hndDropCapture listener so we can use it, see comment down below
-    protected async hndDrop(_event: DragEvent, _viewSource: View): Promise<void> {
-      if (!(_viewSource instanceof ViewHierarchy || _viewSource instanceof ViewExternal))
-        return;
-
       let resources: ƒ.SerializableResource[] = [];
       for (const source of _viewSource.getDragDropSources()) {
         if (source instanceof ƒ.Node) {
@@ -243,10 +239,7 @@ namespace Fudge {
       }
 
       this.controller.dragDrop.sources = resources;
-      // TODO: this is awkward as the tree gets the drop event first, then the view gets it and then we must dispatch it to the tree again.
-      // ideally this view should listen during capture phase to avoid the double dispatch to the tree.
       this.tree.dispatchEvent(new Event(ƒui.EVENT.DROP, { bubbles: false }));
-
       this.dispatchToParent(EVENT_EDITOR.CREATE, {});
     }
 

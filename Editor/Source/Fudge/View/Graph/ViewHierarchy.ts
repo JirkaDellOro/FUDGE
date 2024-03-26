@@ -70,7 +70,8 @@ namespace Fudge {
         return; // continue with standard tree behaviour
 
       if (_viewSource instanceof ViewInternal) {
-        this.tree.controller.dragDrop.sources = _viewSource.getDragDropSources().filter((_source): _source is ƒ.Graph => _source instanceof ƒ.Graph);
+        if (this.tree)
+          this.tree.controller.dragDrop.sources = _viewSource.getDragDropSources().filter((_source): _source is ƒ.Graph => _source instanceof ƒ.Graph);
         return;
       }
 
@@ -79,15 +80,17 @@ namespace Fudge {
     }
 
     protected async hndDropCapture(_event: DragEvent, _viewSource: View): Promise<void> {
-      if (_viewSource == this)
+      if (_viewSource == this || _event.target == this.tree)
         return; // continue with standard tree behaviour
 
+      _event.stopPropagation();
       let instances: ƒ.GraphInstance[] = [];
       for (let graph of this.tree.controller.dragDrop.sources)
         if (graph instanceof ƒ.Graph)
           instances.push(await ƒ.Project.createGraphInstance(graph));
 
       this.tree.controller.dragDrop.sources = instances;
+      this.tree.dispatchEvent(new Event(ƒUi.EVENT.DROP, { bubbles: false }));
     }
 
     //#region  ContextMenu

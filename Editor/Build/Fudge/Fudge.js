@@ -1089,9 +1089,10 @@ var Fudge;
             this.#id = View.registerViewForDragDrop(this);
         }
         static getViewSource(_event) {
-            for (let item of _event.dataTransfer.items)
-                if (item.type.startsWith("sourceview"))
-                    return View.views[item.type.split(":").pop()];
+            if (_event.dataTransfer)
+                for (let item of _event.dataTransfer.items)
+                    if (item.type.startsWith("sourceview"))
+                        return View.views[item.type.split(":").pop()];
             return null;
         }
         static registerViewForDragDrop(_this) {
@@ -1371,26 +1372,23 @@ var Fudge;
             this.contextMenu.popup();
         };
         //#endregion
-        hndDragOver(_event, _viewSource) {
-            _event.dataTransfer.dropEffect = "none";
-            if (this.dom != _event.target)
-                return;
-            if (!(_viewSource instanceof Fudge.ViewExternal || _viewSource instanceof Fudge.ViewHierarchy))
+        hndDragOverCapture(_event, _viewSource) {
+            if (_viewSource == this || _viewSource instanceof Fudge.ViewHierarchy)
                 return;
             if (_viewSource instanceof Fudge.ViewExternal) {
                 let sources = _viewSource.getDragDropSources();
-                if (sources.some(_source => ![Fudge.MIME.AUDIO, Fudge.MIME.IMAGE, Fudge.MIME.MESH, Fudge.MIME.GLTF].includes(_source.getMimeType())))
+                if (sources.some(_source => [Fudge.MIME.AUDIO, Fudge.MIME.IMAGE, Fudge.MIME.MESH, Fudge.MIME.GLTF].includes(_source.getMimeType())))
                     return;
-                this.controller.dragDrop.sources.splice(0);
             }
-            _event.dataTransfer.dropEffect = "link";
-            _event.preventDefault();
+            _event.dataTransfer.dropEffect = "none";
             _event.stopPropagation();
         }
-        // TODO: there is now a hndDropCapture listener so we can use it, see comment down below
-        async hndDrop(_event, _viewSource) {
-            if (!(_viewSource instanceof Fudge.ViewHierarchy || _viewSource instanceof Fudge.ViewExternal))
+        async hndDropCapture(_event, _viewSource) {
+            if (_viewSource == this || _event.target == this.tree)
                 return;
+            if (!(_viewSource instanceof Fudge.ViewExternal || _viewSource instanceof Fudge.ViewHierarchy))
+                return;
+            _event.stopPropagation();
             let resources = [];
             for (const source of _viewSource.getDragDropSources()) {
                 if (source instanceof ƒ.Node) {
@@ -1419,8 +1417,6 @@ var Fudge;
                 }
             }
             this.controller.dragDrop.sources = resources;
-            // TODO: this is awkward as the tree gets the drop event first, then the view gets it and then we must dispatch it to the tree again.
-            // ideally this view should listen during capture phase to avoid the double dispatch to the tree.
             this.tree.dispatchEvent(new Event("drop" /* ƒui.EVENT.DROP */, { bubbles: false }));
             this.dispatchToParent(Fudge.EVENT_EDITOR.CREATE, {});
         }
@@ -4621,20 +4617,23 @@ var Fudge;
             if (_viewSource == this)
                 return; // continue with standard tree behaviour
             if (_viewSource instanceof Fudge.ViewInternal) {
-                this.tree.controller.dragDrop.sources = _viewSource.getDragDropSources().filter((_source) => _source instanceof ƒ.Graph);
+                if (this.tree)
+                    this.tree.controller.dragDrop.sources = _viewSource.getDragDropSources().filter((_source) => _source instanceof ƒ.Graph);
                 return;
             }
             _event.dataTransfer.dropEffect = "none";
             _event.stopPropagation();
         }
         async hndDropCapture(_event, _viewSource) {
-            if (_viewSource == this)
+            if (_viewSource == this || _event.target == this.tree)
                 return; // continue with standard tree behaviour
+            _event.stopPropagation();
             let instances = [];
             for (let graph of this.tree.controller.dragDrop.sources)
                 if (graph instanceof ƒ.Graph)
                     instances.push(await ƒ.Project.createGraphInstance(graph));
             this.tree.controller.dragDrop.sources = instances;
+            this.tree.dispatchEvent(new Event("drop" /* ƒUi.EVENT.DROP */, { bubbles: false }));
         }
         //#region  ContextMenu
         getContextMenu(_callback) {

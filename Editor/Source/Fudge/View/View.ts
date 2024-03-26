@@ -45,9 +45,10 @@ namespace Fudge {
     }
 
     public static getViewSource(_event: DragEvent): View {
-      for (let item of _event.dataTransfer.items)
-        if (item.type.startsWith("sourceview"))
-          return View.views[item.type.split(":").pop()];
+      if (_event.dataTransfer)
+        for (let item of _event.dataTransfer.items)
+          if (item.type.startsWith("sourceview"))
+            return View.views[item.type.split(":").pop()];
       return null;
     }
 
