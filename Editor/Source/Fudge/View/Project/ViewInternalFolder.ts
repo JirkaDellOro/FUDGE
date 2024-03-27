@@ -20,6 +20,8 @@ namespace Fudge {
   export class ViewInternalFolder extends ViewInternal {
     private tree: ƒui.CustomTree<ResourceEntry>;
 
+    #expanded: string[]; // cache state from constructor
+
     public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
 
@@ -31,9 +33,12 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.REMOVE_CHILD, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
 
       this.dom.addEventListener("keyup", this.hndKeyboardEvent);
+
+      this.#expanded = _state["expanded"];
     }
 
     public get controller(): ControllerTreeResource {
@@ -59,6 +64,12 @@ namespace Fudge {
     //     this.contextMenu.getMenuItemById(String(CONTEXTMENU.SYNC_INSTANCES)).enabled = (row.getAttribute("icon") == "Graph");
     //   this.contextMenu.popup();
     // }
+
+    protected getState(): ƒ.Serialization {
+      let state: ƒ.Serialization = super.getState();
+      state["expanded"] = this.getExpanded();
+      return state;
+    }
 
     // #region  ContextMenu
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
@@ -255,7 +266,7 @@ namespace Fudge {
       input.focus();
     };
 
-    private hndOpen = (_event: Event): void => {
+    private hndOpen = (): void => {
       // while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
       this.dom.innerHTML = "";
       this.tree = new ƒui.CustomTree<ResourceEntry>(new ControllerTreeResource(), this.resourceFolder);
@@ -263,6 +274,9 @@ namespace Fudge {
       this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
       this.tree.title = "● Select to edit in \"Properties\"\n● Drag to \"Properties\" or \"Components\" to use if applicable.";
       this.hndCreate();
+
+      if (this.#expanded)
+        this.expand(this.#expanded);
     };
 
     private hndCreate = (): void => {
@@ -314,5 +328,28 @@ namespace Fudge {
       }
     };
 
+    private expand(_paths: string[]): void {
+      const paths: ResourceEntry[][] = _paths
+        .map(_path =>
+          _path
+            .split("/")
+            .slice(1) // remove root as it is added as first element in reduce
+            .reduce((_path, _index) => [..._path, _path[_path.length - 1]?.entries?.[_index]], [this.resourceFolder])
+        );
+      this.tree.expand(paths);
+    }
+
+    private getExpanded(): string[] {
+      const expanded: string[] = [];
+      for (let item of this.tree) {
+        if (item.expanded)
+          expanded.push(this.getPath(item.data));
+      }
+      return expanded;
+    }
+
+    private getPath(_entry: ResourceEntry): string {
+      return this.controller.getPath(_entry).map(_entry => _entry.resourceParent?.entries.indexOf(_entry)).join("/");
+    }
   }
 }

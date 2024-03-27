@@ -311,12 +311,14 @@ declare namespace Fudge {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jonas Plotzky, HFU, 2024
      */
     class ViewInternalFolder extends ViewInternal {
+        #private;
         private tree;
         constructor(_container: ComponentContainer, _state: ViewState);
         get controller(): ControllerTreeResource;
         get resourceFolder(): ResourceFolder;
         getSelection(): ƒ.SerializableResource[];
         getDragDropSources(): ƒ.SerializableResource[];
+        protected getState(): ƒ.Serialization;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void>;
         protected openContextMenu: (_event: Event) => void;
@@ -328,6 +330,9 @@ declare namespace Fudge {
         private hndDelete;
         private hndUpdate;
         private hndEvent;
+        private expand;
+        private getExpanded;
+        private getPath;
     }
 }
 declare namespace Fudge {

@@ -200,8 +200,8 @@ namespace Fudge {
       ƒ.Physics.connectJoints();
       this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       this.viewport.setBranch(this.graph);
-
       this.viewport.camera = this.cmrOrbit.cmpCamera;
+      ƒ.Render.prepare(this.graph);
     }
 
     private setCameraOrthographic(_on: boolean = false): void {

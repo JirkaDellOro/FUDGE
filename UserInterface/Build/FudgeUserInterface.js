@@ -1731,7 +1731,6 @@ var FudgeUserInterface;
                 let dataEnd = detail.data;
                 this.clearSelection();
                 this.selectInterval(dataStart, dataEnd);
-                _event.stopImmediatePropagation(); // prevent double event handling (outside of this) as selectInterval will cause the same tree item to dispatch a select event again
                 return;
             }
             if (index >= 0 && detail.additive)

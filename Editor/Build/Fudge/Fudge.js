@@ -1239,6 +1239,7 @@ var Fudge;
      */
     class ViewInternalFolder extends ViewInternal {
         tree;
+        #expanded; // cache state from constructor
         constructor(_container, _state) {
             super(_container, _state);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.OPEN, this.hndOpen);
@@ -1248,8 +1249,10 @@ var Fudge;
             this.dom.addEventListener("mutate" /* ƒui.EVENT.MUTATE */, this.hndEvent);
             this.dom.addEventListener("removeChild" /* ƒui.EVENT.REMOVE_CHILD */, this.hndEvent);
             this.dom.addEventListener("rename" /* ƒui.EVENT.RENAME */, this.hndEvent);
+            this.dom.addEventListener("itemselect" /* ƒui.EVENT.SELECT */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* ƒui.EVENT.CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("keyup", this.hndKeyboardEvent);
+            this.#expanded = _state["expanded"];
         }
         get controller() {
             return this.tree.controller;
@@ -1270,6 +1273,11 @@ var Fudge;
         //     this.contextMenu.getMenuItemById(String(CONTEXTMENU.SYNC_INSTANCES)).enabled = (row.getAttribute("icon") == "Graph");
         //   this.contextMenu.popup();
         // }
+        getState() {
+            let state = super.getState();
+            state["expanded"] = this.getExpanded();
+            return state;
+        }
         // #region  ContextMenu
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
@@ -1429,7 +1437,7 @@ var Fudge;
             input.readOnly = false;
             input.focus();
         };
-        hndOpen = (_event) => {
+        hndOpen = () => {
             // while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
             this.dom.innerHTML = "";
             this.tree = new ƒui.CustomTree(new Fudge.ControllerTreeResource(), this.resourceFolder);
@@ -1437,6 +1445,8 @@ var Fudge;
             this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
             this.tree.title = "● Select to edit in \"Properties\"\n● Drag to \"Properties\" or \"Components\" to use if applicable.";
             this.hndCreate();
+            if (this.#expanded)
+                this.expand(this.#expanded);
         };
         hndCreate = () => {
             // add new resources to root folder
@@ -1481,6 +1491,25 @@ var Fudge;
                     break;
             }
         };
+        expand(_paths) {
+            const paths = _paths
+                .map(_path => _path
+                .split("/")
+                .slice(1) // remove root as it is added as first element in reduce
+                .reduce((_path, _index) => [..._path, _path[_path.length - 1]?.entries?.[_index]], [this.resourceFolder]));
+            this.tree.expand(paths);
+        }
+        getExpanded() {
+            const expanded = [];
+            for (let item of this.tree) {
+                if (item.expanded)
+                    expanded.push(this.getPath(item.data));
+            }
+            return expanded;
+        }
+        getPath(_entry) {
+            return this.controller.getPath(_entry).map(_entry => _entry.resourceParent?.entries.indexOf(_entry)).join("/");
+        }
     }
     Fudge.ViewInternalFolder = ViewInternalFolder;
 })(Fudge || (Fudge = {}));
@@ -2407,10 +2436,10 @@ var Fudge;
             let path = [];
             let current = _resource;
             while (current) {
-                path.unshift(current);
+                path.push(current);
                 current = current.resourceParent;
             }
-            return path;
+            return path.reverse();
         }
         remove(_resource) {
             let parent = _resource.resourceParent;
@@ -2782,10 +2811,6 @@ var Fudge;
             this.setTitle("Project | " + Fudge.project.name);
             this.broadcast(new Fudge.EditorEvent(Fudge.EVENT_EDITOR.OPEN, {}));
         }
-        // TODO: iterate over views and collect their states for reconstruction 
-        // public getState(): { [key: string]: string } {
-        //   return {};
-        // }
         hndEvent = (_event) => {
             if (_event.type != Fudge.EVENT_EDITOR.UPDATE && _event.type != Fudge.EVENT_EDITOR.CREATE && _event.type != Fudge.EVENT_EDITOR.DELETE)
                 _event.stopPropagation();
@@ -4919,6 +4944,7 @@ var Fudge;
             this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             this.viewport.setBranch(this.graph);
             this.viewport.camera = this.cmrOrbit.cmpCamera;
+            ƒ.Render.prepare(this.graph);
         }
         setCameraOrthographic(_on = false) {
             this.viewport.camera = this.cmrOrbit.cmpCamera;

@@ -72,11 +72,6 @@ namespace Fudge {
       this.broadcast(new EditorEvent(EVENT_EDITOR.OPEN, {}));
     }
 
-    // TODO: iterate over views and collect their states for reconstruction 
-    // public getState(): { [key: string]: string } {
-    //   return {};
-    // }
-
     private hndEvent = (_event: CustomEvent): void => {
       if (_event.type != EVENT_EDITOR.UPDATE && _event.type != EVENT_EDITOR.CREATE && _event.type != EVENT_EDITOR.DELETE)
         _event.stopPropagation();

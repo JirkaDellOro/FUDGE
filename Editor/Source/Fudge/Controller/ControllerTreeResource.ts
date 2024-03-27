@@ -200,10 +200,10 @@ namespace Fudge {
       let path: ResourceEntry[] = [];
       let current: ResourceEntry = _resource;
       while (current) {
-        path.unshift(current);
+        path.push(current);
         current = current.resourceParent;
       }
-      return path;
+      return path.reverse();
     }
 
     public remove(_resource: ResourceEntry): void {
