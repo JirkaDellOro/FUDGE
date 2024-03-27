@@ -1,4 +1,5 @@
 /// <reference types="../../../node_modules/electron/electron" />
+/// <reference types="node" />
 /// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../GoldenLayout/golden-layout" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
@@ -99,14 +100,15 @@ declare namespace Fudge {
         GLTF = "gltf",
         UNKNOWN = "unknown"
     }
-    const fs: ƒ.General;
+    const Dirent: typeof import("fs").Dirent;
+    type Dirent = import("fs").Dirent;
     export class DirectoryEntry {
-        path: typeof fs.PathLike;
-        pathRelative: typeof fs.PathLike;
-        dirent: typeof fs.Dirent;
+        path: string;
+        pathRelative: string;
+        dirent: Dirent;
         stats: Object;
-        constructor(_path: typeof fs.PathLike, _pathRelative: typeof fs.PathLike, _dirent: typeof fs.Dirent, _stats: Object);
-        static createRoot(_path: typeof fs.PathLike): DirectoryEntry;
+        constructor(_path: string, _pathRelative: string, _dirent: Dirent, _stats: Object);
+        static createRoot(_path: string): DirectoryEntry;
         get name(): string;
         set name(_name: string);
         get isDirectory(): boolean;

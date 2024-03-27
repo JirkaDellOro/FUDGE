@@ -1,5 +1,3 @@
-// /<reference types="../../../node_modules/@types/node/fs"/>
-
 namespace Fudge {
 
   export enum MIME {
@@ -19,27 +17,28 @@ namespace Fudge {
     [MIME.GLTF, ["gltf", "glb"]]
   ]);
 
-  const fs: ƒ.General = require("fs");
-  const { Dirent, PathLike, renameSync, removeSync, readdirSync, readFileSync, copySync } = require("fs");
-  const { basename, dirname, join } = require("path");
+  const { Dirent, renameSync, rmSync, readdirSync, readFileSync, copyFileSync, statSync } = require("fs") as typeof import("fs"); // eslint-disable-line
+  type Dirent = import("fs").Dirent;
+  // type PathLike = import("fs").PathLike;
+  const { basename, dirname, join } = require("path") as typeof import("path");
 
   export class DirectoryEntry {
-    public path: typeof fs.PathLike;
-    public pathRelative: typeof fs.PathLike;
-    public dirent: typeof fs.Dirent;
+    public path: string;
+    public pathRelative: string;
+    public dirent: Dirent;
     public stats: Object;
 
-    constructor(_path: typeof fs.PathLike, _pathRelative: typeof fs.PathLike, _dirent: typeof fs.Dirent, _stats: Object) {
+    public constructor(_path: string, _pathRelative: string, _dirent: Dirent, _stats: Object){
       this.path = _path;
       this.pathRelative = _pathRelative;
       this.dirent = _dirent;
       this.stats = _stats;
     }
 
-    public static createRoot(_path: typeof fs.PathLike): DirectoryEntry {
-      let dirent: typeof Dirent = new Dirent();
-      dirent.name = basename(<string>_path);
-      dirent.isRoot = true;
+    public static createRoot(_path: string): DirectoryEntry {
+      let dirent: Dirent = new Dirent();
+      dirent.name = basename(_path);
+      dirent.isDirectory = () => true;
       return new DirectoryEntry(_path, "", dirent, null);
     }
 
@@ -47,14 +46,14 @@ namespace Fudge {
       return this.dirent.name;
     }
     public set name(_name: string) {
-      let newPath: typeof PathLike = join(dirname(this.path), _name);
+      let newPath: string = join(dirname(this.path), _name);
       renameSync(this.path, newPath);
       this.path = newPath;
       this.dirent.name = _name;
     }
 
     public get isDirectory(): boolean {
-      return this.dirent.isDirectory() || this.dirent.isRoot;
+      return this.dirent.isDirectory();
     }
 
     public get type(): string {
@@ -62,16 +61,16 @@ namespace Fudge {
     }
 
     public delete(): void {
-      removeSync(this.path);
+      rmSync(this.path, { recursive: true });
     }
 
     public getDirectoryContent(): DirectoryEntry[] {
-      let dirents: (typeof Dirent)[] = readdirSync(this.path, { withFileTypes: true });
+      let dirents: Dirent[] = readdirSync(this.path, { withFileTypes: true });
       let content: DirectoryEntry[] = [];
       for (let dirent of dirents) {
         let path: string = join(this.path, dirent.name);
         let pathRelative: string = join(this.pathRelative, dirent.name);
-        let stats: Object = fs.statSync(path);
+        let stats: Object = statSync(path);
         let entry: DirectoryEntry = new DirectoryEntry(path, pathRelative, dirent, stats);
         content.push(entry);
       }
@@ -84,7 +83,7 @@ namespace Fudge {
     }
 
     public addEntry(_entry: DirectoryEntry): void {
-      copySync(_entry.path, join(this.path, _entry.name));
+      copyFileSync(_entry.path, join(this.path, _entry.name));
     }
 
     public getMimeType(): MIME {

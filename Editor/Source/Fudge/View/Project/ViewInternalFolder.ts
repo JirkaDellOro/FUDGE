@@ -330,12 +330,11 @@ namespace Fudge {
 
     private expand(_paths: string[]): void {
       const paths: ResourceEntry[][] = _paths
-        .map(_path =>
-          _path
-            .split("/")
-            .slice(1) // remove root as it is added as first element in reduce
-            .reduce((_path, _index) => [..._path, _path[_path.length - 1]?.entries?.[_index]], [this.resourceFolder])
-        );
+        .map(_path => _path
+          .split("/")
+          .slice(1) // remove root as it is added as first element in reduce
+          .reduce<ResourceFolder[]>((_path, _index) => [..._path, _path[_path.length - 1]?.entries?.[_index]], [this.resourceFolder]))
+        .filter(_path => !_path.some(_entry => !_entry)); // filter out invalid paths
       this.tree.expand(paths);
     }
 

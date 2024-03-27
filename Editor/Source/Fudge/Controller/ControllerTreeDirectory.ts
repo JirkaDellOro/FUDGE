@@ -9,7 +9,7 @@ namespace Fudge {
     }
 
     public getAttributes(_object: DirectoryEntry): string {
-        return "";
+      return "";
     }
 
     public rename(_entry: DirectoryEntry, _new: string): boolean {

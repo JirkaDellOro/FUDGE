@@ -112,9 +112,7 @@ var Fudge;
         GIZMOS["WIRE_MESH"] = "WireMesh";
     })(GIZMOS = Fudge.GIZMOS || (Fudge.GIZMOS = {}));
 })(Fudge || (Fudge = {}));
-// /<reference types="../../../node_modules/@types/node/fs"/>
 var Fudge;
-// /<reference types="../../../node_modules/@types/node/fs"/>
 (function (Fudge) {
     let MIME;
     (function (MIME) {
@@ -132,8 +130,8 @@ var Fudge;
         [MIME.IMAGE, ["png", "jpg", "jpeg", "tif", "tga", "gif"]],
         [MIME.GLTF, ["gltf", "glb"]]
     ]);
-    const fs = require("fs");
-    const { Dirent, PathLike, renameSync, removeSync, readdirSync, readFileSync, copySync } = require("fs");
+    const { Dirent, renameSync, rmSync, readdirSync, readFileSync, copyFileSync, statSync } = require("fs"); // eslint-disable-line
+    // type PathLike = import("fs").PathLike;
     const { basename, dirname, join } = require("path");
     class DirectoryEntry {
         path;
@@ -149,7 +147,7 @@ var Fudge;
         static createRoot(_path) {
             let dirent = new Dirent();
             dirent.name = basename(_path);
-            dirent.isRoot = true;
+            dirent.isDirectory = () => true;
             return new DirectoryEntry(_path, "", dirent, null);
         }
         get name() {
@@ -162,13 +160,13 @@ var Fudge;
             this.dirent.name = _name;
         }
         get isDirectory() {
-            return this.dirent.isDirectory() || this.dirent.isRoot;
+            return this.dirent.isDirectory();
         }
         get type() {
             return this.isDirectory ? "Directory" : "File";
         }
         delete() {
-            removeSync(this.path);
+            rmSync(this.path, { recursive: true });
         }
         getDirectoryContent() {
             let dirents = readdirSync(this.path, { withFileTypes: true });
@@ -176,7 +174,7 @@ var Fudge;
             for (let dirent of dirents) {
                 let path = join(this.path, dirent.name);
                 let pathRelative = join(this.pathRelative, dirent.name);
-                let stats = fs.statSync(path);
+                let stats = statSync(path);
                 let entry = new DirectoryEntry(path, pathRelative, dirent, stats);
                 content.push(entry);
             }
@@ -187,7 +185,7 @@ var Fudge;
             return content;
         }
         addEntry(_entry) {
-            copySync(_entry.path, join(this.path, _entry.name));
+            copyFileSync(_entry.path, join(this.path, _entry.name));
         }
         getMimeType() {
             let extension = this.name.split(".").pop();
@@ -1496,7 +1494,8 @@ var Fudge;
                 .map(_path => _path
                 .split("/")
                 .slice(1) // remove root as it is added as first element in reduce
-                .reduce((_path, _index) => [..._path, _path[_path.length - 1]?.entries?.[_index]], [this.resourceFolder]));
+                .reduce((_path, _index) => [..._path, _path[_path.length - 1]?.entries?.[_index]], [this.resourceFolder]))
+                .filter(_path => !_path.some(_entry => !_entry)); // filter out invalid paths
             this.tree.expand(paths);
         }
         getExpanded() {
@@ -5511,7 +5510,7 @@ var Fudge;
                     this.setTransform(div);
                     break;
                 case "Audio":
-                    let entry = new Fudge.DirectoryEntry(this.resource.path, "", null, null);
+                    let entry = new Fudge.DirectoryEntry(this.resource.path.toString(), "", null, null);
                     this.dom.appendChild(this.createAudioPreview(entry));
                     break;
                 default: break;

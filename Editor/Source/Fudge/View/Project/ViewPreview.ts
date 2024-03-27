@@ -198,7 +198,7 @@ namespace Fudge {
           this.setTransform(div);
           break;
         case "Audio":
-          let entry: DirectoryEntry = new DirectoryEntry((<ƒ.Audio>this.resource).path, "", null, null);
+          let entry: DirectoryEntry = new DirectoryEntry((<ƒ.Audio>this.resource).path.toString(), "", null, null);
           this.dom.appendChild(this.createAudioPreview(entry));
           break;
         default: break;
