@@ -2630,7 +2630,7 @@ var Fudge;
                 return;
             let source = _viewSource.getDragDropSources()[0];
             if (source instanceof ƒ.Graph)
-                this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source, node: this.restoreNode(source) } });
+                this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: false, detail: { graph: source, node: this.restoreNode(source) } });
         }
         hndEvent = async (_event) => {
             const detail = _event.detail;

@@ -79,7 +79,7 @@ namespace Fudge {
 
       let source: Object = _viewSource.getDragDropSources()[0];
       if (source instanceof ƒ.Graph)
-        this.dispatch(EVENT_EDITOR.SELECT, { bubbles: true, detail: { graph: source, node: this.restoreNode(source) } });
+        this.dispatch(EVENT_EDITOR.SELECT, { bubbles: false, detail: { graph: source, node: this.restoreNode(source) } });
     }
 
     private hndEvent = async (_event: EditorEvent): Promise<void> => {
