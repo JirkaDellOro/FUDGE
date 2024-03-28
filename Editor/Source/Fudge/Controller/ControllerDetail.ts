@@ -25,7 +25,9 @@ namespace Fudge {
     AnimationOnComponentAnimator: { fromViews: [ViewInternal], onType: ƒ.ComponentAnimator, ofType: ƒ.Animation, dropEffect: "link" },
     ParticleSystemOnComponentParticleSystem: { fromViews: [ViewInternal], onType: ƒ.ComponentParticleSystem, ofType: ƒ.ParticleSystem, dropEffect: "link" },
     // MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
-    TextureOnMaterial: { fromViews: [ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
+    TextureOnMaterialTexture: { fromViews: [ViewInternal], onKeyAttribute: "texture", onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
+    TextureOnMaterialNormalMap: { fromViews: [ViewInternal], onKeyAttribute: "normalMap", onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
+
     TextureOnAnimationSprite: { fromViews: [ViewInternal], onType: ƒ.AnimationSprite, ofType: ƒ.Texture, dropEffect: "link" },
     TextureOnMeshRelief: { fromViews: [ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
   };
@@ -100,8 +102,10 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.MeshOnComponentMesh)) return;
       // Mesh on MeshLabel
       // if (this.filterDragDrop(_event, filter.MeshOnMeshLabel)) return;
-      // Texture on Material
-      if (this.filterDragDrop(_event, filter.TextureOnMaterial)) return;
+      // Texture on Material texture
+      if (this.filterDragDrop(_event, filter.TextureOnMaterialTexture)) return;
+      // Texture on Material normal map
+      if (this.filterDragDrop(_event, filter.TextureOnMaterialNormalMap)) return;
       // Texture on MeshRelief
       if (this.filterDragDrop(_event, filter.TextureOnMeshRelief)) return;
       // Texture on AnimationSprite
@@ -146,19 +150,12 @@ namespace Fudge {
         return true;
       };
       let setTexture: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
-        let event: ƒ.General = _event;    //.path does not exist on type DragEvent therefore it is set as any
-        let i: number = 0;
-        let key: string = "";
-        while (key == "") {
-          let tempKey: string = event.path[i].getAttribute("key");
-          if (tempKey == "texture" || tempKey == "normalMap") {
-            key = tempKey;
-          } else if (tempKey == "Material") {
-            return false;
-          }
-          i++;
-        }
-        this.mutable["coat"][key] = _sources[0];
+        this.mutable["coat"]["texture"] = _sources[0];
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
+        return true;
+      };
+      let setNormalMap: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
+        this.mutable["coat"]["normalMap"] = _sources[0];
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };
@@ -201,8 +198,10 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, setMesh)) return;
       // Mesh on MeshLabel
       // if (this.filterDragDrop(_event, filter.MeshOnMeshLabel, setMesh)) return;
-      // Texture on Material
-      if (this.filterDragDrop(_event, filter.TextureOnMaterial, setTexture)) return;
+      // Texture on Material texture
+      if (this.filterDragDrop(_event, filter.TextureOnMaterialTexture, setTexture)) return;
+      // Texture on Material normal map
+      if (this.filterDragDrop(_event, filter.TextureOnMaterialNormalMap, setNormalMap)) return;
       // Texture on MeshRelief
       if (this.filterDragDrop(_event, filter.TextureOnMeshRelief, setHeightMap)) return;
       // Texture on AnimationSprite
