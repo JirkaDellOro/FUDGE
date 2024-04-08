@@ -275,10 +275,12 @@ namespace FudgeUserInterface {
         return;
       }
 
+      let renamed: boolean = await this.controller.setValue(this.data, target.id, target.value);
+
       this.refreshContent();
       this.refreshAttributes();
 
-      if (await this.controller.setValue(this.data, target.id, target.value))
+      if (renamed)
         this.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { data: this.data } }));
     };
 

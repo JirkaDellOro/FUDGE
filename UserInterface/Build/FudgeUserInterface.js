@@ -2105,9 +2105,10 @@ var FudgeUserInterface;
                 this.expand(target.checked);
                 return;
             }
+            let renamed = await this.controller.setValue(this.data, target.id, target.value);
             this.refreshContent();
             this.refreshAttributes();
-            if (await this.controller.setValue(this.data, target.id, target.value))
+            if (renamed)
                 this.dispatchEvent(new CustomEvent("rename" /* EVENT.RENAME */, { bubbles: true, detail: { data: this.data } }));
         };
         hndDragStart = (_event) => {
