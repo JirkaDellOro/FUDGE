@@ -17,7 +17,7 @@ namespace Fudge {
     [MIME.GLTF, ["gltf", "glb"]]
   ]);
 
-  const { Dirent, renameSync, rmSync, readdirSync, readFileSync, copyFileSync, statSync } = require("fs") as typeof import("fs"); // eslint-disable-line
+  const { Dirent, renameSync, existsSync, rmSync, readdirSync, readFileSync, copyFileSync, statSync, constants } = require("fs") as typeof import("fs"); // eslint-disable-line
   type Dirent = import("fs").Dirent;
   // type PathLike = import("fs").PathLike;
   const { basename, dirname, join } = require("path") as typeof import("path");
@@ -28,7 +28,7 @@ namespace Fudge {
     public dirent: Dirent;
     public stats: Object;
 
-    public constructor(_path: string, _pathRelative: string, _dirent: Dirent, _stats: Object){
+    public constructor(_path: string, _pathRelative: string, _dirent: Dirent, _stats: Object) {
       this.path = _path;
       this.pathRelative = _pathRelative;
       this.dirent = _dirent;
@@ -47,6 +47,8 @@ namespace Fudge {
     }
     public set name(_name: string) {
       let newPath: string = join(dirname(this.path), _name);
+      if (existsSync(newPath))
+        throw new Error(`There is already a file with the specified name '${_name}'. Specify a different name.`);
       renameSync(this.path, newPath);
       this.path = newPath;
       this.dirent.name = _name;
@@ -83,7 +85,7 @@ namespace Fudge {
     }
 
     public addEntry(_entry: DirectoryEntry): void {
-      copyFileSync(_entry.path, join(this.path, _entry.name));
+      copyFileSync(_entry.path, join(this.path, _entry.name), constants.COPYFILE_EXCL);
     }
 
     public getMimeType(): MIME {

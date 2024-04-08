@@ -388,13 +388,13 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒUi = FudgeUserInterface;
-    class ControllerTreeDirectory extends ƒUi.TreeController<DirectoryEntry> {
-        getLabel(_entry: DirectoryEntry): string;
+    class ControllerTreeDirectory extends ƒUi.CustomTreeController<DirectoryEntry> {
+        createContent(_entry: DirectoryEntry): HTMLFieldSetElement;
+        setValue(_entry: DirectoryEntry, _id: string, _new: string): Promise<boolean>;
         getAttributes(_object: DirectoryEntry): string;
-        rename(_entry: DirectoryEntry, _new: string): boolean;
         hasChildren(_entry: DirectoryEntry): boolean;
         getChildren(_entry: DirectoryEntry): DirectoryEntry[];
-        delete(_focussed: DirectoryEntry[]): DirectoryEntry[];
+        delete(_focussed: DirectoryEntry[]): Promise<DirectoryEntry[]>;
         addChildren(_entries: DirectoryEntry[], _target: DirectoryEntry): DirectoryEntry[];
         copy(_originals: DirectoryEntry[]): Promise<DirectoryEntry[]>;
     }
@@ -411,7 +411,7 @@ declare namespace Fudge {
         delete(_focussed: ƒ.Node[]): Promise<ƒ.Node[]>;
         addChildren(_children: ƒ.Node[], _target: ƒ.Node, _index?: number): ƒ.Node[];
         copy(_originals: ƒ.Node[]): Promise<ƒ.Node[]>;
-        canDrop(_sources: ƒ.Node[], _target: ƒ.Node): boolean;
+        canAddChildren(_sources: ƒ.Node[], _target: ƒ.Node): boolean;
     }
 }
 declare namespace Fudge {

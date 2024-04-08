@@ -3,18 +3,29 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;
 
-  export class ControllerTreeDirectory extends ƒUi.TreeController<DirectoryEntry> {
-    public getLabel(_entry: DirectoryEntry): string {
-      return _entry.name;
+  export class ControllerTreeDirectory extends ƒUi.CustomTreeController<DirectoryEntry> {
+
+    public createContent(_entry: DirectoryEntry): HTMLFieldSetElement {
+      let content: HTMLFieldSetElement = document.createElement("fieldset");
+      let name: HTMLInputElement = document.createElement("input");
+      name.value = _entry.name;
+      content.appendChild(name);
+      return content;
+    }
+
+    public async setValue(_entry: DirectoryEntry, _id: string, _new: string): Promise<boolean> {
+      try {
+        _entry.name = _new;
+      } catch (_error) {
+        ƒ.Debug.warn(`Could not rename file '${_entry.name}' to '${_new}'.`, _error);
+        return false;
+      }
+
+      return true;
     }
 
     public getAttributes(_object: DirectoryEntry): string {
       return "";
-    }
-
-    public rename(_entry: DirectoryEntry, _new: string): boolean {
-      _entry.name = _new;
-      return true;
     }
 
     public hasChildren(_entry: DirectoryEntry): boolean {
@@ -25,7 +36,7 @@ namespace Fudge {
       return _entry.getDirectoryContent();
     }
 
-    public delete(_focussed: DirectoryEntry[]): DirectoryEntry[] {
+    public async delete(_focussed: DirectoryEntry[]): Promise<DirectoryEntry[]> {
       // delete selection independend of focussed item
       let deleted: DirectoryEntry[] = [];
       let expend: DirectoryEntry[] = this.selection.length > 0 ? this.selection : _focussed;
@@ -38,11 +49,17 @@ namespace Fudge {
     }
 
     public addChildren(_entries: DirectoryEntry[], _target: DirectoryEntry): DirectoryEntry[] {
+      let move: DirectoryEntry[] = [];
       for (let entry of _entries) {
-        _target.addEntry(entry);
-        entry.delete();
+        try {
+          _target.addEntry(entry);
+          entry.delete();
+          move.push(entry);
+        } catch (_error) {
+          ƒ.Debug.warn(`Could not add file '${entry.name}' to '${_target.name}'.`, _error);
+        }
       }
-      return _entries;
+      return move;
     }
 
     public async copy(_originals: DirectoryEntry[]): Promise<DirectoryEntry[]> {

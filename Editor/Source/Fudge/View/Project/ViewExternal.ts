@@ -7,7 +7,7 @@ namespace Fudge {
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
    */
   export class ViewExternal extends View {
-    private tree: ƒui.Tree<DirectoryEntry>;
+    private tree: ƒui.CustomTree<DirectoryEntry>;
 
     public constructor(_container: ComponentContainer, _state: ViewState) {
       super(_container, _state);
@@ -23,7 +23,7 @@ namespace Fudge {
         path = path.substr(1); // strip leading slash
       }
       let root: DirectoryEntry = DirectoryEntry.createRoot(path);
-      this.tree = new ƒui.Tree<DirectoryEntry>(new ControllerTreeDirectory(), root);
+      this.tree = new ƒui.CustomTree<DirectoryEntry>(new ControllerTreeDirectory(), root);
       this.dom.appendChild(this.tree);
       this.tree.getItems()[0].expand(true);
 

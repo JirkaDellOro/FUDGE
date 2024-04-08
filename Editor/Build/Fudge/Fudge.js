@@ -130,7 +130,7 @@ var Fudge;
         [MIME.IMAGE, ["png", "jpg", "jpeg", "tif", "tga", "gif"]],
         [MIME.GLTF, ["gltf", "glb"]]
     ]);
-    const { Dirent, renameSync, rmSync, readdirSync, readFileSync, copyFileSync, statSync } = require("fs"); // eslint-disable-line
+    const { Dirent, renameSync, existsSync, rmSync, readdirSync, readFileSync, copyFileSync, statSync, constants } = require("fs"); // eslint-disable-line
     // type PathLike = import("fs").PathLike;
     const { basename, dirname, join } = require("path");
     class DirectoryEntry {
@@ -155,6 +155,8 @@ var Fudge;
         }
         set name(_name) {
             let newPath = join(dirname(this.path), _name);
+            if (existsSync(newPath))
+                throw new Error(`There is already a file with the specified name '${_name}'. Specify a different name.`);
             renameSync(this.path, newPath);
             this.path = newPath;
             this.dirent.name = _name;
@@ -185,7 +187,7 @@ var Fudge;
             return content;
         }
         addEntry(_entry) {
-            copyFileSync(_entry.path, join(this.path, _entry.name));
+            copyFileSync(_entry.path, join(this.path, _entry.name), constants.COPYFILE_EXCL);
         }
         getMimeType() {
             let extension = this.name.split(".").pop();
@@ -1200,7 +1202,7 @@ var Fudge;
                 path = path.substr(1); // strip leading slash
             }
             let root = Fudge.DirectoryEntry.createRoot(path);
-            this.tree = new ƒui.Tree(new Fudge.ControllerTreeDirectory(), root);
+            this.tree = new ƒui.CustomTree(new Fudge.ControllerTreeDirectory(), root);
             this.dom.appendChild(this.tree);
             this.tree.getItems()[0].expand(true);
             this.dom.title = `Drag & drop external image, audiofile etc. to the "Internal", to create a FUDGE-resource`;
@@ -1889,17 +1891,28 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
-    class ControllerTreeDirectory extends ƒUi.TreeController {
-        getLabel(_entry) {
-            return _entry.name;
+    class ControllerTreeDirectory extends ƒUi.CustomTreeController {
+        createContent(_entry) {
+            let content = document.createElement("fieldset");
+            let name = document.createElement("input");
+            name.value = _entry.name;
+            content.appendChild(name);
+            return content;
+        }
+        async setValue(_entry, _id, _new) {
+            try {
+                _entry.name = _new;
+            }
+            catch (_error) {
+                ƒ.Debug.warn(`Could not rename file '${_entry.name}' to '${_new}'.`, _error);
+                return false;
+            }
+            return true;
         }
         getAttributes(_object) {
             return "";
-        }
-        rename(_entry, _new) {
-            _entry.name = _new;
-            return true;
         }
         hasChildren(_entry) {
             return _entry.isDirectory;
@@ -1907,7 +1920,7 @@ var Fudge;
         getChildren(_entry) {
             return _entry.getDirectoryContent();
         }
-        delete(_focussed) {
+        async delete(_focussed) {
             // delete selection independend of focussed item
             let deleted = [];
             let expend = this.selection.length > 0 ? this.selection : _focussed;
@@ -1919,11 +1932,18 @@ var Fudge;
             return deleted;
         }
         addChildren(_entries, _target) {
+            let move = [];
             for (let entry of _entries) {
-                _target.addEntry(entry);
-                entry.delete();
+                try {
+                    _target.addEntry(entry);
+                    entry.delete();
+                    move.push(entry);
+                }
+                catch (_error) {
+                    ƒ.Debug.warn(`Could not add file '${entry.name}' to '${_target.name}'.`, _error);
+                }
             }
-            return _entries;
+            return move;
         }
         async copy(_originals) {
             // copies can not be created at this point, but when copying the files. See addChildren
@@ -1997,7 +2017,7 @@ var Fudge;
             }
             return copies;
         }
-        canDrop(_sources, _target) {
+        canAddChildren(_sources, _target) {
             if (_sources.length == 0)
                 return false;
             return _sources.every(_source => checkGraphDrop(_source, _target));

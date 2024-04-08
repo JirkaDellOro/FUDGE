@@ -75,7 +75,7 @@ namespace Fudge {
       return copies;
     }
 
-    public canDrop(_sources: ƒ.Node[], _target: ƒ.Node): boolean {
+    public canAddChildren(_sources: ƒ.Node[], _target: ƒ.Node): boolean {
       if (_sources.length == 0)
         return false;
 
