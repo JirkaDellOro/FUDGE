@@ -30,8 +30,8 @@ namespace FudgeUserInterface {
 
       this.draggable = this.controller.draggable(_data);
       this.addEventListener(EVENT.DRAG_START, this.hndDragStart);
-      this.addEventListener(EVENT.DRAG_ENTER, this.hndDragEnter);
-      this.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
+      this.addEventListener(EVENT.DRAG_ENTER, this.hndDrag); // this prevents cursor from flickering
+      this.addEventListener(EVENT.DRAG_OVER, this.hndDrag);
       this.addEventListener(EVENT.POINTER_UP, this.hndPointerUp);
       this.addEventListener(EVENT.REMOVE_CHILD, this.hndRemove);
     }
@@ -275,13 +275,11 @@ namespace FudgeUserInterface {
         return;
       }
 
-      // if (target instanceof HTMLSelectElement || target instanceof HTMLInputElement && target.type == "text") {
-      if (await this.controller.setValue(this.data, target.id, target.value)) {
-        this.refreshContent();
-        this.refreshAttributes();
+      this.refreshContent();
+      this.refreshAttributes();
+
+      if (await this.controller.setValue(this.data, target.id, target.value))
         this.dispatchEvent(new CustomEvent(EVENT.RENAME, { bubbles: true, detail: { data: this.data } }));
-      }
-      // }
     };
 
     private hndDragStart = (_event: DragEvent): void => {
@@ -302,23 +300,16 @@ namespace FudgeUserInterface {
       _event.dataTransfer.setData("dragstart", "dragstart");
     };
 
-    private hndDragEnter = (_event: DragEvent): void => { // this prevents cursor from flickering
-      if (!this.controller.canDrop(this.controller.dragDrop.sources, this.data))
-        return;
-      
-      _event.preventDefault();
-      _event.dataTransfer.dropEffect = "move";
-    };
-
-    private hndDragOver = (_event: DragEvent): void => {
+    private hndDrag = (_event: DragEvent): void => {
       let rect: DOMRect = this.content.getBoundingClientRect();
-      let upper: number = rect.top + rect.height * (1 / 3);
-      let lower: number = rect.top + rect.height * (2 / 3);
+      let upper: number = rect.top + rect.height * (1 / 4);
+      let lower: number = rect.top + rect.height * (3 / 4);
       let offset: number = _event.clientY;
       if (this.parentElement instanceof CustomTree || (offset > upper && (offset < lower || this.checkbox.checked))) {
         _event.stopPropagation();
-        this.controller.dragDropDivider.remove();
-        if (this.controller.canDrop(this.controller.dragDrop.sources, this.data)) {
+        if (_event.type == EVENT.DRAG_OVER)
+          this.controller.dragDropIndicator.remove();
+        if (this.controller.canAddChildren(this.controller.dragDrop.sources, this.data)) {
           _event.preventDefault();
           _event.dataTransfer.dropEffect = "move";
           this.controller.dragDrop.at = null;

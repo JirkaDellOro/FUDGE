@@ -154,32 +154,33 @@ namespace FudgeUserInterface {
 
     private hndDragOver = (_event: DragEvent): void => {
       _event.stopPropagation();
-      if (this.controller.dragDrop.target == null || !this.controller.canDrop(this.controller.dragDrop.sources, this.controller.dragDrop.target))
+      let target: T = (<CustomTreeItem<T>>this.parentElement).data;
+      if (target == null || !this.controller.canAddChildren(this.controller.dragDrop.sources, target))
         return;
 
       _event.preventDefault();
       _event.dataTransfer.dropEffect = "move";
 
       if (_event.target == this)
-        this.controller.dragDropDivider.remove();
+        this.controller.dragDropIndicator.remove();
       else {
-        let target: CustomTreeItem<T> = <CustomTreeItem<T>>_event.composedPath().find(_target => _target instanceof CustomTreeItem);
-        if (this.getItems().includes(target)) {
-          let rect: DOMRect = target.content.getBoundingClientRect();
+        let targetItem: CustomTreeItem<T> = <CustomTreeItem<T>>_event.composedPath().find(_target => _target instanceof CustomTreeItem);
+        if (this.getItems().includes(targetItem)) {
+          let rect: DOMRect = targetItem.content.getBoundingClientRect();
           let addBefore: boolean = _event.clientY < rect.top + rect.height / 2;
-          let sibling: Element = addBefore ? target.previousElementSibling : target.nextElementSibling;
-          if (sibling != this.controller.dragDropDivider)
+          let sibling: Element = addBefore ? targetItem.previousElementSibling : targetItem.nextElementSibling;
+          if (sibling != this.controller.dragDropIndicator)
             if (addBefore)
-              target.before(this.controller.dragDropDivider);
+              targetItem.before(this.controller.dragDropIndicator);
             else
-              target.after(this.controller.dragDropDivider);
+              targetItem.after(this.controller.dragDropIndicator);
         }
       }
 
-      this.controller.dragDrop.at = this.controller.dragDropDivider.isConnected ?
-        Array.from(this.children).indexOf(this.controller.dragDropDivider) :
+      this.controller.dragDrop.at = this.controller.dragDropIndicator.isConnected ?
+        Array.from(this.children).indexOf(this.controller.dragDropIndicator) :
         this.controller.dragDrop.at = null;
-      this.controller.dragDrop.target = (<CustomTreeItem<T>>this.parentElement).data;
+      this.controller.dragDrop.target = target;
     };
   }
 

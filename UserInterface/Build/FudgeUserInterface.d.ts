@@ -491,15 +491,15 @@ declare namespace FudgeUserInterface {
             target: T;
         };
         /** Used by the tree to indicate the drop position while dragging */
-        dragDropDivider: HTMLHRElement;
+        dragDropIndicator: HTMLHRElement;
         /**
          * Override if some objects should not be draggable
          */
         draggable(_object: T): boolean;
         /**
-         * Override if some objects should not be droppable onto certain others
+         * Override if some objects should not be addable to others
          */
-        canDrop(_sources: T[], _target: T): boolean;
+        canAddChildren(_sources: T[], _target: T): boolean;
         /** Create an HTMLFormElement for the tree item representing the object */
         abstract createContent(_object: T): HTMLFieldSetElement;
         /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
@@ -607,8 +607,7 @@ declare namespace FudgeUserInterface {
         private hndDblClick;
         private hndChange;
         private hndDragStart;
-        private hndDragEnter;
-        private hndDragOver;
+        private hndDrag;
         private hndPointerUp;
         private hndRemove;
     }

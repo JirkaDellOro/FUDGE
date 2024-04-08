@@ -12,7 +12,7 @@ namespace FudgeUserInterface {
     public copyPaste: { sources: T[]; target: T } = { sources: [], target: null };
 
     /** Used by the tree to indicate the drop position while dragging */
-    public dragDropDivider: HTMLHRElement = document.createElement("hr");
+    public dragDropIndicator: HTMLHRElement = document.createElement("hr");
 
     /**
      * Override if some objects should not be draggable
@@ -22,9 +22,9 @@ namespace FudgeUserInterface {
     }
 
     /**
-     * Override if some objects should not be droppable onto certain others
+     * Override if some objects should not be addable to others
      */
-    public canDrop(_sources: T[], _target: T): boolean {
+    public canAddChildren(_sources: T[], _target: T): boolean {
       return true;
     }
 
