@@ -124,7 +124,9 @@ namespace FudgeCore {
       // reached next point
       this.dispatchEvent(new CustomEvent(EVENT.WAYPOINT_REACHED, { bubbles: true, detail: currentPath.waypoint }));
       (<ComponentWaypoint>currentPath.waypoint).dispatchEvent(new CustomEvent(EVENT.WAYPOINT_REACHED, { bubbles: true, detail: this }));
-      this.node.mtxLocal.translation = currentPath.waypoint.mtxWorld.translation;
+      
+      let translate: Vector3 = Vector3.DIFFERENCE(currentPath.waypoint.mtxWorld.translation, this.node.mtxWorld.translation);
+      this.node.mtxLocal.translate(translate);
       this.node.mtxLocal.scaling = currentPath.waypoint.mtxWorld.scaling;
       this.#walkData.totalProgress++;
 
@@ -215,7 +217,8 @@ namespace FudgeCore {
     }
 
     private rotateTowards(_waypoint: Waypoint): void {
-      this.node.mtxLocal.lookAt(_waypoint.mtxWorld.translation);
+      let mtxLook: Matrix4x4 = Matrix4x4.LOOK_AT(this.node.mtxWorld.translation, _waypoint.mtxWorld.translation);
+      this.node.mtxLocal.rotation = mtxLook.rotation;
     }
 
     #handleAttach(): void {
