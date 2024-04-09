@@ -98,7 +98,7 @@ ul.tree li[attributes~="inactive"]>fieldset>input {
   text-decoration: line-through;
 }
 
-ul.tree li[attributes~="GraphInstance"]>input {
+ul.tree li[attributes~="GraphInstance"]>fieldset>input {
   font-style: italic;
 }
 

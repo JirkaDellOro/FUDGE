@@ -161,7 +161,7 @@ namespace Fudge {
           if (this.selectionPrevious.includes(node) && this.selection.includes(node))
             this.dispatch(EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: node, view: this } });
           this.selectionPrevious = this.selection.slice(0);
-          this.dispatchToParent(EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: node, view: this } });
+          this.dispatchToParent(EVENT_EDITOR.SELECT, { detail: { node: node, view: this } });
           break;
       }
     };
