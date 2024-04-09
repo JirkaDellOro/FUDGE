@@ -410,7 +410,10 @@ namespace FudgeCore {
             } else {
               const isFlat: boolean = gltfMesh.primitives[iPrimitive].attributes.NORMAL == undefined;
               cmpMaterial = new ComponentMaterial(await this.getMaterial(iMaterial, null, isSkin, isFlat));
-              cmpMaterial.sortForAlpha = cmpMaterial.material.hasTransparency;
+              const alphaMode: string = this.#gltf.materials[iMaterial]?.alphaMode;
+              if (alphaMode == "MASK")
+                Debug.warn(`${this}: Material with index ${iMaterial} uses alpha mode 'MASK'. FUDGE does not support this mode.`);
+              cmpMaterial.sortForAlpha = alphaMode == "BLEND";
             }
 
             subComponents.push([cmpMesh, cmpMaterial]);
