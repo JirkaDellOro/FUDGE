@@ -12,6 +12,20 @@ var AnimatorControleTest;
         root.appendChild(node);
         viewport = ƒAid.Viewport.create(root);
         viewport.draw();
+        let select = document.querySelector('select[name="mode"]');
+        for (let mode in ƒ.ANIMATION_PLAYMODE) {
+            let option = document.createElement('option');
+            option.value = mode;
+            option.text = mode;
+            select.appendChild(option);
+        }
+        select = document.querySelector('select[name="quantization"]');
+        for (let mode in ƒ.ANIMATION_QUANTIZATION) {
+            let option = document.createElement('option');
+            option.value = mode;
+            option.text = mode;
+            select.appendChild(option);
+        }
         initAnim();
         document.body.addEventListener("change", initAnim);
         document.querySelector("button[id=jump]").addEventListener("click", jump);
@@ -54,7 +68,7 @@ var AnimatorControleTest;
         animation.setEvent("event", parseInt(form.querySelector("input[name=event]").value));
         animation.labels["jump"] = parseInt(form.querySelector("input[name=label]").value);
         let playmode = String(formData.get("mode"));
-        let quantization = String(formData.get("back"));
+        let quantization = String(formData.get("quantization"));
         let cmpAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE[playmode], ƒ.ANIMATION_QUANTIZATION[quantization]);
         cmpAnimator.scale = 1;
         cmpAnimator.addEventListener("event", (_event) => {

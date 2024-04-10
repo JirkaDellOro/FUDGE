@@ -16,6 +16,22 @@ namespace AnimatorControleTest {
     viewport = ƒAid.Viewport.create(root);
     viewport.draw();
 
+    let select: HTMLSelectElement = document.querySelector('select[name="mode"]');
+    for (let mode in ƒ.ANIMATION_PLAYMODE) {
+      let option: HTMLOptionElement = document.createElement('option');
+      option.value = mode;
+      option.text = mode;
+      select.appendChild(option);
+    }
+
+    select = document.querySelector('select[name="quantization"]');
+    for (let mode in ƒ.ANIMATION_QUANTIZATION) {
+      let option: HTMLOptionElement = document.createElement('option');
+      option.value = mode;
+      option.text = mode;
+      select.appendChild(option);
+    }
+
     initAnim();
     document.body.addEventListener("change", initAnim);
     (<HTMLInputElement>document.querySelector("button[id=jump]")).addEventListener("click", jump);
@@ -67,7 +83,7 @@ namespace AnimatorControleTest {
     animation.labels["jump"] = parseInt((<HTMLInputElement>form.querySelector("input[name=label]")).value);
 
     let playmode: string = String(formData.get("mode"));
-    let quantization: string = String(formData.get("back"));
+    let quantization: string = String(formData.get("quantization"));
 
     let cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE[playmode], ƒ.ANIMATION_QUANTIZATION[quantization]);
     cmpAnimator.scale = 1;
