@@ -1129,9 +1129,9 @@ namespace FudgeCore {
       let lastRotation: Quaternion;
       let nextRotation: Quaternion;
 
-      const sequences: AnimationKey[][] = [[], [], []];
+      const sequences: { x: AnimationKey[]; y: AnimationKey[]; z: AnimationKey[]; w?: AnimationKey[] } = { x: [], y: [], z: [] };
       if (isRotation) {
-        sequences.push([]);
+        sequences.w = [];
         lastRotation = Recycler.get(Quaternion);
         nextRotation = Recycler.get(Quaternion);
       }
@@ -1155,11 +1155,11 @@ namespace FudgeCore {
           lastRotation.set(nextRotation.x, nextRotation.y, nextRotation.z, nextRotation.w);
         }
 
-        sequences[0].push(new AnimationKey(time, output[iOutput + 0], interpolation, isCubic && output[iOutputSlopeIn + 0] / millisPerSecond, isCubic && output[iOutputSlopeOut + 0] / millisPerSecond));
-        sequences[1].push(new AnimationKey(time, output[iOutput + 1], interpolation, isCubic && output[iOutputSlopeIn + 1] / millisPerSecond, isCubic && output[iOutputSlopeOut + 1] / millisPerSecond));
-        sequences[2].push(new AnimationKey(time, output[iOutput + 2], interpolation, isCubic && output[iOutputSlopeIn + 2] / millisPerSecond, isCubic && output[iOutputSlopeOut + 2] / millisPerSecond));
+        sequences.x.push(new AnimationKey(time, output[iOutput + 0], interpolation, isCubic && output[iOutputSlopeIn + 0] / millisPerSecond, isCubic && output[iOutputSlopeOut + 0] / millisPerSecond));
+        sequences.y.push(new AnimationKey(time, output[iOutput + 1], interpolation, isCubic && output[iOutputSlopeIn + 1] / millisPerSecond, isCubic && output[iOutputSlopeOut + 1] / millisPerSecond));
+        sequences.z.push(new AnimationKey(time, output[iOutput + 2], interpolation, isCubic && output[iOutputSlopeIn + 2] / millisPerSecond, isCubic && output[iOutputSlopeOut + 2] / millisPerSecond));
         if (isRotation)
-          sequences[3].push(new AnimationKey(time, output[iOutput + 3], interpolation, isCubic && output[iOutputSlopeIn + 3] / millisPerSecond, isCubic && output[iOutputSlopeOut + 3] / millisPerSecond));
+          sequences.w.push(new AnimationKey(time, output[iOutput + 3], interpolation, isCubic && output[iOutputSlopeIn + 3] / millisPerSecond, isCubic && output[iOutputSlopeOut + 3] / millisPerSecond));
       }
 
       if (isRotation) {
@@ -1167,7 +1167,7 @@ namespace FudgeCore {
         Recycler.store(nextRotation);
       }
 
-      return { x: new AnimationSequence(sequences[0]), y: new AnimationSequence(sequences[1]), z: new AnimationSequence(sequences[2]), w: new AnimationSequence(sequences[3]) };
+      return Object.fromEntries(Object.entries(sequences).map(([_key, _value]) => [_key, new AnimationSequence(_value)]));
     }
 
     private toInternInterpolation(_interpolation: GLTF.AnimationSampler["interpolation"]): ANIMATION_INTERPOLATION {

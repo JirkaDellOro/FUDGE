@@ -78,7 +78,7 @@ namespace FudgeCore {
     private static texDepthStencil: WebGLTexture; // stores the depth of each pixel, currently unused
     private static texBloomSamples: WebGLTexture[]; // stores down and upsampled versions of the color texture, used for bloom
 
-    private static readonly uboFog: WebGLBuffer = RenderWebGL.assert(RenderWebGL.crc3.createBuffer()); // stores the fog parameters
+    private static uboFog: WebGLBuffer; // stores the fog parameters
 
     /**
      * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
@@ -107,6 +107,8 @@ namespace FudgeCore {
 
       RenderWebGL.initializeAttachments();
       RenderWebGL.adjustAttachments();
+
+      RenderWebGL.uboFog = RenderWebGL.assert(crc3.createBuffer());
 
       return crc3;
     }

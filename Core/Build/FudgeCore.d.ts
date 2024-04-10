@@ -1147,7 +1147,7 @@ declare namespace FudgeCore {
         private static texNoise;
         private static texDepthStencil;
         private static texBloomSamples;
-        private static readonly uboFog;
+        private static uboFog;
         /**
          * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
          */
