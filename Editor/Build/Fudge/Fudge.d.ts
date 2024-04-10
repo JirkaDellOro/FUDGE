@@ -1,5 +1,4 @@
 /// <reference types="../../../node_modules/electron/electron" />
-/// <reference types="node" />
 /// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../GoldenLayout/golden-layout" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
@@ -100,7 +99,6 @@ declare namespace Fudge {
         GLTF = "gltf",
         UNKNOWN = "unknown"
     }
-    const Dirent: typeof import("fs").Dirent;
     type Dirent = import("fs").Dirent;
     export class DirectoryEntry {
         path: string;
@@ -118,6 +116,11 @@ declare namespace Fudge {
         getFileContent(): string;
         addEntry(_entry: DirectoryEntry): void;
         getMimeType(): MIME;
+        /**
+         * Returns a path of DirectoryEntries starting at the root and ending at this DirectoryEntry.
+         * The entries in the returned path ONLY have their relative path set. This is solely used for display purposes in {@link ViewExternal}s tree.
+         */
+        getPath(): DirectoryEntry[];
     }
     export {};
 }
@@ -160,7 +163,7 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    let watcher: ƒ.General;
+    let watcher: import("fs").FSWatcher;
     function newProject(): Promise<void>;
     function saveProject(_new?: boolean): Promise<boolean>;
     function promptLoadProject(): Promise<URL>;
@@ -295,12 +298,16 @@ declare namespace Fudge {
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewExternal extends View {
+        #private;
         private tree;
         constructor(_container: ComponentContainer, _state: ViewState);
         setProject(): void;
         getSelection(): DirectoryEntry[];
         getDragDropSources(): DirectoryEntry[];
+        protected getState(): ViewState;
         private hndEvent;
+        private getExpanded;
+        private expand;
     }
 }
 declare namespace Fudge {
@@ -320,7 +327,7 @@ declare namespace Fudge {
         get resourceFolder(): ResourceFolder;
         getSelection(): ƒ.SerializableResource[];
         getDragDropSources(): ƒ.SerializableResource[];
-        protected getState(): ƒ.Serialization;
+        protected getState(): ViewState;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void>;
         protected openContextMenu: (_event: Event) => void;
@@ -394,6 +401,7 @@ declare namespace Fudge {
         getAttributes(_object: DirectoryEntry): string;
         hasChildren(_entry: DirectoryEntry): boolean;
         getChildren(_entry: DirectoryEntry): DirectoryEntry[];
+        equals(_a: DirectoryEntry, _b: DirectoryEntry): boolean;
         delete(_focussed: DirectoryEntry[]): Promise<DirectoryEntry[]>;
         addChildren(_entries: DirectoryEntry[], _target: DirectoryEntry): DirectoryEntry[];
         copy(_originals: DirectoryEntry[]): Promise<DirectoryEntry[]>;

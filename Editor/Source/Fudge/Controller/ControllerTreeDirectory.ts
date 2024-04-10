@@ -36,6 +36,10 @@ namespace Fudge {
       return _entry.getDirectoryContent();
     }
 
+    public equals(_a: DirectoryEntry, _b: DirectoryEntry): boolean {
+      return _a.pathRelative == _b.pathRelative;
+    }
+
     public async delete(_focussed: DirectoryEntry[]): Promise<DirectoryEntry[]> {
       // delete selection independend of focussed item
       let deleted: DirectoryEntry[] = [];

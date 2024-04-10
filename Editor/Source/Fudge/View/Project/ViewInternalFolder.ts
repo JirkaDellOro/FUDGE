@@ -65,8 +65,8 @@ namespace Fudge {
     //   this.contextMenu.popup();
     // }
 
-    protected getState(): ƒ.Serialization {
-      let state: ƒ.Serialization = super.getState();
+    protected getState(): ViewState {
+      let state: ViewState = super.getState();
       state["expanded"] = this.getExpanded();
       return state;
     }

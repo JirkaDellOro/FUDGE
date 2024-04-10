@@ -1,7 +1,7 @@
 namespace Fudge {
-  const fs: ƒ.General = require("fs");
+  const fs: typeof import("fs") = require("fs");
   import ƒui = FudgeUserInterface;
-  export let watcher: ƒ.General;
+  export let watcher: import("fs").FSWatcher;
 
   interface CopyList {
     [src: string]: string;
@@ -114,9 +114,8 @@ namespace Fudge {
     let dir: URL = new URL(".", project.base);
     watcher = fs.watch(dir, { recursive: true }, hndFileChange);
 
-    async function hndFileChange(_event: string, _url: URL): Promise<void> {
-      let filename: string = _url.toString();
-      if (filename == project.fileIndex || filename == project.fileInternal || filename == project.fileScript) {
+    async function hndFileChange(_event: string, _filename: string): Promise<void> {
+      if (_filename == project.fileIndex || _filename == project.fileInternal || _filename == project.fileScript) {
         unwatchFolder();
         let promise: Promise<boolean> = ƒui.Dialog.prompt(null, false, "Important file change", "Reload project?", "Reload", "Cancel");
         if (await promise) {

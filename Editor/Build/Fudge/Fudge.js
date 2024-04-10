@@ -130,23 +130,22 @@ var Fudge;
         [MIME.IMAGE, ["png", "jpg", "jpeg", "tif", "tga", "gif"]],
         [MIME.GLTF, ["gltf", "glb"]]
     ]);
-    const { Dirent, renameSync, existsSync, rmSync, readdirSync, readFileSync, copyFileSync, statSync, constants } = require("fs"); // eslint-disable-line
-    // type PathLike = import("fs").PathLike;
-    const { basename, dirname, join } = require("path");
+    const fs = require("fs");
+    const p = require("path");
     class DirectoryEntry {
         path;
         pathRelative;
         dirent;
         stats;
         constructor(_path, _pathRelative, _dirent, _stats) {
-            this.path = _path;
-            this.pathRelative = _pathRelative;
+            this.path = p.normalize(_path);
+            this.pathRelative = p.normalize(_pathRelative);
             this.dirent = _dirent;
             this.stats = _stats;
         }
         static createRoot(_path) {
-            let dirent = new Dirent();
-            dirent.name = basename(_path);
+            let dirent = new fs.Dirent();
+            dirent.name = p.basename(_path);
             dirent.isDirectory = () => true;
             return new DirectoryEntry(_path, "", dirent, null);
         }
@@ -154,10 +153,10 @@ var Fudge;
             return this.dirent.name;
         }
         set name(_name) {
-            let newPath = join(dirname(this.path), _name);
-            if (existsSync(newPath))
+            let newPath = p.join(p.dirname(this.path), _name);
+            if (fs.existsSync(newPath))
                 throw new Error(`There is already a file with the specified name '${_name}'. Specify a different name.`);
-            renameSync(this.path, newPath);
+            fs.renameSync(this.path, newPath);
             this.path = newPath;
             this.dirent.name = _name;
         }
@@ -168,26 +167,26 @@ var Fudge;
             return this.isDirectory ? "Directory" : "File";
         }
         delete() {
-            rmSync(this.path, { recursive: true });
+            fs.rmSync(this.path, { recursive: true });
         }
         getDirectoryContent() {
-            let dirents = readdirSync(this.path, { withFileTypes: true });
+            let dirents = fs.readdirSync(this.path, { withFileTypes: true });
             let content = [];
             for (let dirent of dirents) {
-                let path = join(this.path, dirent.name);
-                let pathRelative = join(this.pathRelative, dirent.name);
-                let stats = statSync(path);
+                let path = p.join(this.path, dirent.name);
+                let pathRelative = p.join(this.pathRelative, dirent.name);
+                let stats = fs.statSync(path);
                 let entry = new DirectoryEntry(path, pathRelative, dirent, stats);
                 content.push(entry);
             }
             return content;
         }
         getFileContent() {
-            let content = readFileSync(this.path, "utf8");
+            let content = fs.readFileSync(this.path, "utf8");
             return content;
         }
         addEntry(_entry) {
-            copyFileSync(_entry.path, join(this.path, _entry.name), constants.COPYFILE_EXCL);
+            fs.copyFileSync(_entry.path, p.join(this.path, _entry.name), fs.constants.COPYFILE_EXCL);
         }
         getMimeType() {
             let extension = this.name.split(".").pop();
@@ -196,6 +195,21 @@ var Fudge;
                     return type[0];
             }
             return MIME.UNKNOWN;
+        }
+        /**
+         * Returns a path of DirectoryEntries starting at the root and ending at this DirectoryEntry.
+         * The entries in the returned path ONLY have their relative path set. This is solely used for display purposes in {@link ViewExternal}s tree.
+         */
+        getPath() {
+            let trace = [];
+            let currentPath = this.pathRelative;
+            while (currentPath != trace[trace.length - 1]?.pathRelative) {
+                trace.push(new DirectoryEntry("", currentPath, null, null));
+                currentPath = p.dirname(currentPath);
+            }
+            ;
+            trace.reverse();
+            return trace;
         }
     }
     Fudge.DirectoryEntry = DirectoryEntry;
@@ -320,9 +334,8 @@ var Fudge;
     function watchFolder() {
         let dir = new URL(".", Fudge.project.base);
         Fudge.watcher = fs.watch(dir, { recursive: true }, hndFileChange);
-        async function hndFileChange(_event, _url) {
-            let filename = _url.toString();
-            if (filename == Fudge.project.fileIndex || filename == Fudge.project.fileInternal || filename == Fudge.project.fileScript) {
+        async function hndFileChange(_event, _filename) {
+            if (_filename == Fudge.project.fileIndex || _filename == Fudge.project.fileInternal || _filename == Fudge.project.fileScript) {
                 unwatchFolder();
                 let promise = ƒui.Dialog.prompt(null, false, "Important file change", "Reload project?", "Reload", "Cancel");
                 if (await promise) {
@@ -1189,10 +1202,12 @@ var Fudge;
      */
     class ViewExternal extends Fudge.View {
         tree;
+        #expanded; // cache state from constructor
         constructor(_container, _state) {
             super(_container, _state);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.OPEN, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.MODIFY, this.hndEvent);
+            this.#expanded = _state["expanded"];
         }
         setProject() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -1206,6 +1221,8 @@ var Fudge;
             this.dom.appendChild(this.tree);
             this.tree.getItems()[0].expand(true);
             this.dom.title = `Drag & drop external image, audiofile etc. to the "Internal", to create a FUDGE-resource`;
+            if (this.#expanded)
+                this.expand(this.#expanded);
         }
         getSelection() {
             return this.tree.controller.selection;
@@ -1213,10 +1230,36 @@ var Fudge;
         getDragDropSources() {
             return this.tree.controller.dragDrop.sources;
         }
+        getState() {
+            let state = super.getState();
+            state["expanded"] = this.getExpanded();
+            return state;
+        }
         hndEvent = (_event) => {
-            if (!_event.detail.data) // nothing actually selected...
-                this.setProject();
+            if (_event.detail.data) // TODO: inspect if this is ever the case?
+                return;
+            // nothing actually selected...
+            switch (_event.type) {
+                case Fudge.EVENT_EDITOR.OPEN:
+                    this.setProject();
+                    break;
+                case Fudge.EVENT_EDITOR.MODIFY:
+                    this.tree.refresh();
+                    break;
+            }
         };
+        getExpanded() {
+            const expanded = [];
+            for (let item of this.tree) {
+                if (item.expanded)
+                    expanded.push(item.data.pathRelative);
+            }
+            return expanded;
+        }
+        expand(_paths) {
+            const paths = _paths.map(_path => new Fudge.DirectoryEntry("", _path, null, null).getPath());
+            this.tree.expand(paths);
+        }
     }
     Fudge.ViewExternal = ViewExternal;
 })(Fudge || (Fudge = {}));
@@ -1918,6 +1961,9 @@ var Fudge;
         }
         getChildren(_entry) {
             return _entry.getDirectoryContent();
+        }
+        equals(_a, _b) {
+            return _a.pathRelative == _b.pathRelative;
         }
         async delete(_focussed) {
             // delete selection independend of focussed item
