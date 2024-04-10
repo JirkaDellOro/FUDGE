@@ -2695,15 +2695,16 @@ var Fudge;
                 return;
             let source = _viewSource.getDragDropSources()[0];
             if (source instanceof ƒ.Graph)
-                this.dispatch(Fudge.EVENT_EDITOR.SELECT, { bubbles: false, detail: { graph: source, node: this.restoreNode(source) } });
+                this.dispatch(Fudge.EVENT_EDITOR.SELECT, { detail: { graph: source, node: this.restoreNode(source) } });
         }
         hndEvent = async (_event) => {
             const detail = _event.detail;
             switch (_event.type) {
-                case Fudge.EVENT_EDITOR.UPDATE:
+                case Fudge.EVENT_EDITOR.UPDATE: // TODO: inspect if these two should be stopped aswell
                 case Fudge.EVENT_EDITOR.MODIFY:
                     break;
                 case Fudge.EVENT_EDITOR.SELECT:
+                    _event.stopPropagation();
                     const graph = detail.graph;
                     if (graph && graph != this.#graph) {
                         this.storeGraph(graph);
@@ -4787,7 +4788,7 @@ var Fudge;
                     if (this.selectionPrevious.includes(node) && this.selection.includes(node))
                         this.dispatch(Fudge.EVENT_EDITOR.FOCUS, { bubbles: true, detail: { node: node, view: this } });
                     this.selectionPrevious = this.selection.slice(0);
-                    this.dispatchToParent(Fudge.EVENT_EDITOR.SELECT, { bubbles: true, detail: { node: node, view: this } });
+                    this.dispatchToParent(Fudge.EVENT_EDITOR.SELECT, { detail: { node: node, view: this } });
                     break;
             }
         };

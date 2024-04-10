@@ -79,16 +79,17 @@ namespace Fudge {
 
       let source: Object = _viewSource.getDragDropSources()[0];
       if (source instanceof ƒ.Graph)
-        this.dispatch(EVENT_EDITOR.SELECT, { bubbles: false, detail: { graph: source, node: this.restoreNode(source) } });
+        this.dispatch(EVENT_EDITOR.SELECT, { detail: { graph: source, node: this.restoreNode(source) } });
     }
 
     private hndEvent = async (_event: EditorEvent): Promise<void> => {
       const detail: EventDetail = _event.detail;
       switch (_event.type) {
-        case EVENT_EDITOR.UPDATE:
+        case EVENT_EDITOR.UPDATE: // TODO: inspect if these two should be stopped aswell
         case EVENT_EDITOR.MODIFY:
           break;
         case EVENT_EDITOR.SELECT:
+          _event.stopPropagation();
           const graph: ƒ.Graph = detail.graph;
           if (graph && graph != this.#graph) {
             this.storeGraph(graph);
