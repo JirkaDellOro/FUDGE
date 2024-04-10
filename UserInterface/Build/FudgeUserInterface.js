@@ -1504,7 +1504,8 @@ var FudgeUserInterface;
             let currentTree = this;
             for (let data of _path) {
                 let item = currentTree.findItem(data);
-                // item.focus();
+                if (!item)
+                    break;
                 if (!item.expanded)
                     item.expand(true);
                 currentTree = item.getBranch();
@@ -1538,7 +1539,7 @@ var FudgeUserInterface;
          */
         findItem(_data) {
             for (let item of this.children)
-                if (item.data == _data)
+                if (this.controller.equals(item.data, _data))
                     return item;
             return null;
         }
@@ -1568,16 +1569,16 @@ var FudgeUserInterface;
             for (let item of items) {
                 if (!selecting) {
                     selecting = true;
-                    if (item.data == _dataStart)
+                    if (this.controller.equals(item.data, _dataStart))
                         end = _dataEnd;
-                    else if (item.data == _dataEnd)
+                    else if (this.controller.equals(item.data, _dataEnd))
                         end = _dataStart;
                     else
                         selecting = false;
                 }
                 if (selecting) {
                     item.select(true, false);
-                    if (item.data == end)
+                    if (this.controller.equals(item.data, end))
                         break;
                 }
             }
@@ -1595,7 +1596,7 @@ var FudgeUserInterface;
         findVisible(_data) {
             let items = this.querySelectorAll("li");
             for (let item of items)
-                if (_data == item.data)
+                if (this.controller.equals(_data, item.data))
                     return item;
             return null;
         }
@@ -1852,6 +1853,13 @@ var FudgeUserInterface;
          */
         draggable(_object) {
             return true;
+        }
+        /**
+         * Checks if two objects of are equal. Default is _a == _b. Override for more complex comparisons.
+         * Useful when the underlying data is volatile and changes identity while staying the same.
+         */
+        equals(_a, _b) {
+            return _a == _b;
         }
         /**
          * Override if some objects should not be addable to others

@@ -30,8 +30,9 @@ namespace FudgeUserInterface {
 
       for (let data of _path) {
         let item: CustomTreeItem<T> = currentTree.findItem(data);
-        // item.focus();
-
+        if (!item)
+          break;
+        
         if (!item.expanded)
           item.expand(true);
 
@@ -68,7 +69,7 @@ namespace FudgeUserInterface {
      */
     public findItem(_data: T): CustomTreeItem<T> {
       for (let item of this.children)
-        if ((<CustomTreeItem<T>>item).data == _data)
+        if (this.controller.equals((<CustomTreeItem<T>>item).data, _data))
           return <CustomTreeItem<T>>item;
 
       return null;
@@ -103,16 +104,16 @@ namespace FudgeUserInterface {
       for (let item of items) {
         if (!selecting) {
           selecting = true;
-          if (item.data == _dataStart)
+          if (this.controller.equals(item.data, _dataStart))
             end = _dataEnd;
-          else if (item.data == _dataEnd)
+          else if (this.controller.equals(item.data, _dataEnd))
             end = _dataStart;
           else
             selecting = false;
         }
         if (selecting) {
           item.select(true, false);
-          if (item.data == end)
+          if (this.controller.equals(item.data, end))
             break;
         }
       }
@@ -134,7 +135,7 @@ namespace FudgeUserInterface {
     public findVisible(_data: T): CustomTreeItem<T> {
       let items: NodeListOf<CustomTreeItem<T>> = <NodeListOf<CustomTreeItem<T>>>this.querySelectorAll("li");
       for (let item of items)
-        if (_data == item.data)
+        if (this.controller.equals(_data, item.data))
           return item;
       return null;
     }

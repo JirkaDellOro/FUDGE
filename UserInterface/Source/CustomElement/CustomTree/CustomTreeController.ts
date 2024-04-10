@@ -22,6 +22,14 @@ namespace FudgeUserInterface {
     }
 
     /**
+     * Checks if two objects of are equal. Default is _a == _b. Override for more complex comparisons. 
+     * Useful when the underlying data is volatile and changes identity while staying the same.
+     */
+    public equals(_a: T, _b: T): boolean {
+      return _a == _b;
+    }
+
+    /**
      * Override if some objects should not be addable to others
      */
     public canAddChildren(_sources: T[], _target: T): boolean {

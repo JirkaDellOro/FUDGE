@@ -497,6 +497,11 @@ declare namespace FudgeUserInterface {
          */
         draggable(_object: T): boolean;
         /**
+         * Checks if two objects of are equal. Default is _a == _b. Override for more complex comparisons.
+         * Useful when the underlying data is volatile and changes identity while staying the same.
+         */
+        equals(_a: T, _b: T): boolean;
+        /**
          * Override if some objects should not be addable to others
          */
         canAddChildren(_sources: T[], _target: T): boolean;
