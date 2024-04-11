@@ -183,7 +183,8 @@ namespace Fudge {
             this.tree.findItem(this.graph)?.refreshContent();
           break;
         case EVENT_EDITOR.CLOSE:
-          this.storeExpanded(this.graph.idResource, this.getExpanded());
+          if (this.graph)
+            this.storeExpanded(this.graph.idResource, this.getExpanded());
       }
     };
     //#endregion

@@ -39,7 +39,7 @@ namespace Fudge {
       _event.dataTransfer.dropEffect = "none";
 
       let source: Object = _viewSource.getDragDropSources()[0];
-      if (!(_viewSource instanceof ViewHierarchy) || !(source instanceof ƒ.Node) || !source.getComponent(ƒ.ComponentAnimator))
+      if (!(_viewSource instanceof ViewHierarchy) || !(source instanceof ƒ.Node) || !source.getComponent(ƒ.ComponentAnimator)?.animation)
         return;
 
       _event.dataTransfer.dropEffect = "link";
@@ -248,7 +248,7 @@ namespace Fudge {
         this.animate();
       } else {
         this.animation = undefined;
-        this.dom.innerHTML = "Drop a node with an attached component animator here to edit";
+        this.dom.innerHTML = "Drop a node with an attached animation here to edit";
       }
     }
 

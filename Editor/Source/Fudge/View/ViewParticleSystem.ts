@@ -177,9 +177,7 @@ namespace Fudge {
       _event.dataTransfer.dropEffect = "none";
 
       let source: Object = _viewSource.getDragDropSources()[0];
-      if (source instanceof ƒ.Node)
-        source = source.getComponent(ƒ.ComponentParticleSystem);
-      if (!(source instanceof ƒ.ComponentParticleSystem))
+      if (!(_viewSource instanceof ViewHierarchy) || !(source instanceof ƒ.Node) || !source.getComponent(ƒ.ComponentParticleSystem)?.particleSystem)
         return;
 
       _event.dataTransfer.dropEffect = "link";
@@ -351,7 +349,7 @@ namespace Fudge {
       if (!_particleSystem) {
         this.particleSystem = undefined;
         this.tree = undefined;
-        this.dom.innerHTML = "Drop a node with an attached component particle system here to edit";
+        this.dom.innerHTML = "Drop a node with an attached particle system here to edit";
         return;
       }
 

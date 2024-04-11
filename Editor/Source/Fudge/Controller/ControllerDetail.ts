@@ -180,7 +180,7 @@ namespace Fudge {
         return true;
       };
       let setParticleSystem: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
-        this.mutable[ƒ.ParticleSystem.name] = _sources[0];
+        this.mutable["particleSystem"] = _sources[0];
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.MODIFY, { bubbles: true }));
         return true;
       };

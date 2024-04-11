@@ -1734,7 +1734,7 @@ var Fudge;
                 return true;
             };
             let setParticleSystem = (_sources) => {
-                this.mutable[ƒ.ParticleSystem.name] = _sources[0];
+                this.mutable["particleSystem"] = _sources[0];
                 this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.MODIFY, { bubbles: true }));
                 return true;
             };
@@ -3044,9 +3044,7 @@ var Fudge;
         hndDragOver(_event, _viewSource) {
             _event.dataTransfer.dropEffect = "none";
             let source = _viewSource.getDragDropSources()[0];
-            if (source instanceof ƒ.Node)
-                source = source.getComponent(ƒ.ComponentParticleSystem);
-            if (!(source instanceof ƒ.ComponentParticleSystem))
+            if (!(_viewSource instanceof Fudge.ViewHierarchy) || !(source instanceof ƒ.Node) || !source.getComponent(ƒ.ComponentParticleSystem)?.particleSystem)
                 return;
             _event.dataTransfer.dropEffect = "link";
             _event.preventDefault();
@@ -3205,7 +3203,7 @@ var Fudge;
             if (!_particleSystem) {
                 this.particleSystem = undefined;
                 this.tree = undefined;
-                this.dom.innerHTML = "Drop a node with an attached component particle system here to edit";
+                this.dom.innerHTML = "Drop a node with an attached particle system here to edit";
                 return;
             }
             this.particleSystem = _particleSystem;
@@ -3294,7 +3292,7 @@ var Fudge;
         hndDragOver(_event, _viewSource) {
             _event.dataTransfer.dropEffect = "none";
             let source = _viewSource.getDragDropSources()[0];
-            if (!(_viewSource instanceof Fudge.ViewHierarchy) || !(source instanceof ƒ.Node) || !source.getComponent(ƒ.ComponentAnimator))
+            if (!(_viewSource instanceof Fudge.ViewHierarchy) || !(source instanceof ƒ.Node) || !source.getComponent(ƒ.ComponentAnimator)?.animation)
                 return;
             _event.dataTransfer.dropEffect = "link";
             _event.preventDefault();
@@ -3474,7 +3472,7 @@ var Fudge;
             }
             else {
                 this.animation = undefined;
-                this.dom.innerHTML = "Drop a node with an attached component animator here to edit";
+                this.dom.innerHTML = "Drop a node with an attached animation here to edit";
             }
         }
         createPropertyList() {
@@ -4808,7 +4806,8 @@ var Fudge;
                         this.tree.findItem(this.graph)?.refreshContent();
                     break;
                 case Fudge.EVENT_EDITOR.CLOSE:
-                    this.storeExpanded(this.graph.idResource, this.getExpanded());
+                    if (this.graph)
+                        this.storeExpanded(this.graph.idResource, this.getExpanded());
             }
         };
         //#endregion
