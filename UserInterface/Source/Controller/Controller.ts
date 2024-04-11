@@ -112,8 +112,27 @@ namespace FudgeUserInterface {
       }
     }
 
+    // public static findChildElementByKey(_domElement: HTMLElement, _key: string): HTMLElement {
+    //   return _domElement.querySelector(`[key="${_key}"]`);
+    // }
+
+    // public static findChildElementByKey(_domElement: HTMLElement, _key: string): HTMLElement {
+    //   return _domElement.querySelector(`:scope > [key="${_key}"]`) ?? _domElement.querySelector(`:scope > * > [key="${_key}"]`);
+    // }
+
+    /**
+     * Performs a breadth-first search on the given _domElement for an element with the given key.
+     */
     public static findChildElementByKey(_domElement: HTMLElement, _key: string): HTMLElement {
-      return _domElement.querySelector(`[key = "${_key}"]`);
+      let queue: HTMLElement[] = [_domElement];
+      while (queue.length > 0) {
+        let element: HTMLElement = queue.shift();
+        if (element.matches(`[key="${_key}"]`))
+          return element;
+
+        queue.push(...<HTMLElement[]>Array.from(element.children));
+      }
+      return null;
     }
 
     public getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
