@@ -462,12 +462,15 @@ declare namespace FudgeUserInterface {
          * Refresh the whole tree to synchronize with the data the tree is based on
          */
         refresh(): void;
+        /**
+         * Adds the given children to the given target at the given index. If no index is given, the children are appended at the end of the list.
+         */
+        addChildren(_children: T[], _target: T, _index?: number): void;
         private hndExpand;
         private createBranch;
         private hndSelect;
         private hndDrop;
         private hndDragLeave;
-        private addChildren;
         private hndDelete;
         private hndEscape;
         private hndCopyPaste;

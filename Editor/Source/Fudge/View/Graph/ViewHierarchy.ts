@@ -114,8 +114,7 @@ namespace Fudge {
       switch (Number(_item.id)) {
         case CONTEXTMENU.ADD_NODE:
           let child: ƒ.Node = new ƒ.Node("New Node");
-          this.tree.controller.addChildren([child], focus);
-          this.tree.findVisible(focus).expand(true);
+          this.tree.addChildren([child], focus);
           this.tree.findVisible(child).focus();
           break;
         case CONTEXTMENU.ACTIVATE_NODE:

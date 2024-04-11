@@ -70,6 +70,37 @@ namespace FudgeUserInterface {
       }
     }
 
+    /**
+     * Adds the given children to the given target at the given index. If no index is given, the children are appended at the end of the list.
+     */
+    public addChildren(_children: T[], _target: T, _index?: number): void {
+      // if drop target included in children -> refuse
+      if (_children.indexOf(_target) > -1)
+        return;
+
+      // add only the objects the addChildren-method of the controller returns
+      let move: T[] = this.controller.addChildren(_children, _target, _index);
+      if (!move || move.length == 0)
+        return;
+
+      let focus: T = this.getFocussed();
+      // TODO: don't, when copying or coming from another source
+      this.delete(move);
+
+      let targetData: T = <T>_target;
+      let targetItem: CustomTreeItem<T> = this.findVisible(targetData);
+
+      let branch: CustomTreeList<T> = this.createBranch(this.controller.getChildren(targetData));
+      let old: CustomTreeList<T> = targetItem.getBranch();
+      targetItem.hasChildren = true;
+      if (old)
+        old.restructure(branch);
+      else
+        targetItem.expand(true);
+
+      this.findVisible(focus)?.focus();
+    }
+
     private hndExpand(_event: Event): void {
       let item: CustomTreeItem<T> = <CustomTreeItem<T>>_event.target;
       let children: T[] = this.controller.getChildren(item.data);
@@ -126,34 +157,6 @@ namespace FudgeUserInterface {
       if (relatedTarget instanceof HTMLElement && !this.contains(relatedTarget) && !this.contains(relatedTarget.offsetParent)) // offset parent is for weird (invisible) divs which are placed over input elements and trigger leave events... 
         this.controller.dragDropIndicator.remove();
     };
-
-    private addChildren(_children: T[], _target: T, _at?: number): void {
-      // if drop target included in children -> refuse
-      if (_children.indexOf(_target) > -1)
-        return;
-
-      // add only the objects the addChildren-method of the controller returns
-      let move: T[] = this.controller.addChildren(_children, _target, _at);
-      if (!move || move.length == 0)
-        return;
-
-      let focus: T = this.getFocussed();
-      // TODO: don't, when copying or coming from another source
-      this.delete(move);
-
-      let targetData: T = <T>_target;
-      let targetItem: CustomTreeItem<T> = this.findVisible(targetData);
-
-      let branch: CustomTreeList<T> = this.createBranch(this.controller.getChildren(targetData));
-      let old: CustomTreeList<T> = targetItem.getBranch();
-      targetItem.hasChildren = true;
-      if (old)
-        old.restructure(branch);
-      else
-        targetItem.expand(true);
-
-      this.findVisible(focus)?.focus();
-    }
 
     private hndDelete = async (_event: Event): Promise<void> => {
       let target: CustomTreeItem<T> = <CustomTreeItem<T>>_event.target;

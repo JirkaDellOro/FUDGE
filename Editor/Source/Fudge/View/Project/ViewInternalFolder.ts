@@ -162,8 +162,7 @@ namespace Fudge {
 
       if (resource) {
         this.dispatchToParent(EVENT_EDITOR.CREATE, {});
-        this.controller.addChildren([resource], focus);
-        this.tree.findVisible(focus).expand(true);
+        this.tree.addChildren([resource], focus);
         this.tree.findVisible(resource).focus();
       }
     }

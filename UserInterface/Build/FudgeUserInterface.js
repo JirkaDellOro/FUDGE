@@ -1723,6 +1723,31 @@ var FudgeUserInterface;
                     item.expand(false);
             }
         }
+        /**
+         * Adds the given children to the given target at the given index. If no index is given, the children are appended at the end of the list.
+         */
+        addChildren(_children, _target, _index) {
+            // if drop target included in children -> refuse
+            if (_children.indexOf(_target) > -1)
+                return;
+            // add only the objects the addChildren-method of the controller returns
+            let move = this.controller.addChildren(_children, _target, _index);
+            if (!move || move.length == 0)
+                return;
+            let focus = this.getFocussed();
+            // TODO: don't, when copying or coming from another source
+            this.delete(move);
+            let targetData = _target;
+            let targetItem = this.findVisible(targetData);
+            let branch = this.createBranch(this.controller.getChildren(targetData));
+            let old = targetItem.getBranch();
+            targetItem.hasChildren = true;
+            if (old)
+                old.restructure(branch);
+            else
+                targetItem.expand(true);
+            this.findVisible(focus)?.focus();
+        }
         hndExpand(_event) {
             let item = _event.target;
             let children = this.controller.getChildren(item.data);
@@ -1770,28 +1795,6 @@ var FudgeUserInterface;
             if (relatedTarget instanceof HTMLElement && !this.contains(relatedTarget) && !this.contains(relatedTarget.offsetParent)) // offset parent is for weird (invisible) divs which are placed over input elements and trigger leave events... 
                 this.controller.dragDropIndicator.remove();
         };
-        addChildren(_children, _target, _at) {
-            // if drop target included in children -> refuse
-            if (_children.indexOf(_target) > -1)
-                return;
-            // add only the objects the addChildren-method of the controller returns
-            let move = this.controller.addChildren(_children, _target, _at);
-            if (!move || move.length == 0)
-                return;
-            let focus = this.getFocussed();
-            // TODO: don't, when copying or coming from another source
-            this.delete(move);
-            let targetData = _target;
-            let targetItem = this.findVisible(targetData);
-            let branch = this.createBranch(this.controller.getChildren(targetData));
-            let old = targetItem.getBranch();
-            targetItem.hasChildren = true;
-            if (old)
-                old.restructure(branch);
-            else
-                targetItem.expand(true);
-            this.findVisible(focus)?.focus();
-        }
         hndDelete = async (_event) => {
             let target = _event.target;
             _event.stopPropagation();
