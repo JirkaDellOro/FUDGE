@@ -85,10 +85,14 @@ namespace FudgeCore {
      */
     public static initialize(_antialias?: boolean, _alpha?: boolean): WebGL2RenderingContext {
       let fudgeConfig: General = Reflect.get(globalThis, "fudgeConfig") || {};
-      let contextAttributes: WebGLContextAttributes = {
+      const antialias: boolean = (_antialias != undefined) ? _antialias : fudgeConfig.antialias || false;
+      if (antialias)
+        Debug.error("The default antialiasing is not compatible with the current post-processing effects and will therefore be disabled.");
+      let contextAttributes: WebGLContextAttributes = { // TODO: 
         alpha: (_alpha != undefined) ? _alpha : fudgeConfig.alpha || false,
-        antialias: (_antialias != undefined) ? _antialias : fudgeConfig.antialias || false,
-        premultipliedAlpha: false, stencil: true
+        antialias: false,
+        premultipliedAlpha: false, 
+        stencil: true
       };
       Debug.fudge("Initialize RenderWebGL", contextAttributes);
       let canvas: HTMLCanvasElement = document.createElement("canvas");

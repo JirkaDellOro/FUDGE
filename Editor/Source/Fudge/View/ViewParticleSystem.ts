@@ -182,14 +182,13 @@ namespace Fudge {
       if (!(source instanceof ƒ.ComponentParticleSystem))
         return;
 
-      _viewSource.getDragDropSources()[0] = source;
       _event.dataTransfer.dropEffect = "link";
       _event.preventDefault();
       _event.stopPropagation();
     }
 
     protected hndDrop(_event: DragEvent, _viewSource: View): void {
-      this.cmpParticleSystem = <ƒ.ComponentParticleSystem>_viewSource.getDragDropSources()[0];
+      this.cmpParticleSystem = <ƒ.ComponentParticleSystem>(<ƒ.Node>_viewSource.getDragDropSources()[0]).getComponent(ƒ.ComponentParticleSystem);
       this.timeScalePlay = this.cmpParticleSystem.timeScale;
       this.setTime(0);
       this.setParticleSystem(this.cmpParticleSystem.particleSystem);

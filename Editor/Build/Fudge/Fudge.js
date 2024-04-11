@@ -3048,13 +3048,12 @@ var Fudge;
                 source = source.getComponent(ƒ.ComponentParticleSystem);
             if (!(source instanceof ƒ.ComponentParticleSystem))
                 return;
-            _viewSource.getDragDropSources()[0] = source;
             _event.dataTransfer.dropEffect = "link";
             _event.preventDefault();
             _event.stopPropagation();
         }
         hndDrop(_event, _viewSource) {
-            this.cmpParticleSystem = _viewSource.getDragDropSources()[0];
+            this.cmpParticleSystem = _viewSource.getDragDropSources()[0].getComponent(ƒ.ComponentParticleSystem);
             this.timeScalePlay = this.cmpParticleSystem.timeScale;
             this.setTime(0);
             this.setParticleSystem(this.cmpParticleSystem.particleSystem);
@@ -4074,7 +4073,7 @@ var Fudge;
                     if (_event.detail.node != null) {
                         this.animation = _event.detail.node?.getComponent(ƒ.ComponentAnimator)?.animation;
                         // this.animation.removeEventListener(ƒ.EVENT.MUTATE, () => this.resetView);
-                        this.animation.addEventListener("mutate" /* ƒ.EVENT.MUTATE */, () => {
+                        this.animation?.addEventListener("mutate" /* ƒ.EVENT.MUTATE */, () => {
                             this.resetView();
                             this.animate();
                             this.draw(true);
