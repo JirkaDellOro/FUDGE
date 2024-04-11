@@ -1,0 +1,343 @@
+{
+  "gizmosFilter": [
+    [
+      "ComponentAudio",
+      true
+    ],
+    [
+      "ComponentCamera",
+      true
+    ],
+    [
+      "ComponentLight",
+      true
+    ],
+    [
+      "ComponentText",
+      true
+    ],
+    [
+      "ComponentVRDevice",
+      true
+    ],
+    [
+      "ComponentWaypoint",
+      true
+    ]
+  ],
+  "layout": {
+    "root": {
+      "type": "row",
+      "content": [
+        {
+          "type": "stack",
+          "content": [
+            {
+              "type": "component",
+              "content": [],
+              "width": 50,
+              "minWidth": 0,
+              "height": 50,
+              "minHeight": 0,
+              "id": "PanelProject0",
+              "maximised": false,
+              "isClosable": true,
+              "reorderEnabled": true,
+              "title": "Project | AnimationSprite",
+              "componentType": "PanelProject",
+              "componentState": {
+                "layout": {
+                  "root": {
+                    "type": "column",
+                    "content": [
+                      {
+                        "type": "row",
+                        "content": [
+                          {
+                            "type": "stack",
+                            "content": [
+                              {
+                                "type": "component",
+                                "content": [],
+                                "width": 50,
+                                "minWidth": 0,
+                                "height": 50,
+                                "minHeight": 0,
+                                "id": "",
+                                "maximised": false,
+                                "isClosable": true,
+                                "reorderEnabled": true,
+                                "title": "Properties | Sprite",
+                                "componentType": "ViewProperties",
+                                "componentState": {}
+                              }
+                            ],
+                            "width": 78.26704545454545,
+                            "minWidth": 0,
+                            "height": 50,
+                            "minHeight": 0,
+                            "id": "",
+                            "isClosable": true,
+                            "maximised": false,
+                            "activeItemIndex": 0
+                          },
+                          {
+                            "type": "stack",
+                            "content": [
+                              {
+                                "type": "component",
+                                "content": [],
+                                "width": 50,
+                                "minWidth": 0,
+                                "height": 50,
+                                "minHeight": 0,
+                                "id": "",
+                                "maximised": false,
+                                "isClosable": true,
+                                "reorderEnabled": true,
+                                "title": "Preview | Sprite",
+                                "componentType": "ViewPreview",
+                                "componentState": {}
+                              }
+                            ],
+                            "width": 21.73295454545454,
+                            "minWidth": 0,
+                            "height": 50,
+                            "minHeight": 0,
+                            "id": "",
+                            "isClosable": true,
+                            "maximised": false,
+                            "activeItemIndex": 0
+                          }
+                        ],
+                        "width": 50,
+                        "minWidth": 0,
+                        "height": 50,
+                        "minHeight": 0,
+                        "id": "",
+                        "isClosable": true
+                      },
+                      {
+                        "type": "row",
+                        "content": [
+                          {
+                            "type": "column",
+                            "content": [
+                              {
+                                "type": "stack",
+                                "content": [
+                                  {
+                                    "type": "component",
+                                    "content": [],
+                                    "width": 50,
+                                    "minWidth": 0,
+                                    "height": 50,
+                                    "minHeight": 0,
+                                    "id": "",
+                                    "maximised": false,
+                                    "isClosable": true,
+                                    "reorderEnabled": true,
+                                    "title": "External",
+                                    "componentType": "ViewExternal",
+                                    "componentState": {
+                                      "expanded": [
+                                        "."
+                                      ]
+                                    }
+                                  }
+                                ],
+                                "width": 50,
+                                "minWidth": 0,
+                                "height": 50,
+                                "minHeight": 0,
+                                "id": "",
+                                "isClosable": true,
+                                "maximised": false,
+                                "activeItemIndex": 0
+                              },
+                              {
+                                "type": "stack",
+                                "content": [
+                                  {
+                                    "type": "component",
+                                    "content": [],
+                                    "width": 50,
+                                    "minWidth": 0,
+                                    "height": 50,
+                                    "minHeight": 0,
+                                    "id": "",
+                                    "maximised": false,
+                                    "isClosable": true,
+                                    "reorderEnabled": true,
+                                    "title": "Script",
+                                    "componentType": "ViewScript",
+                                    "componentState": {}
+                                  }
+                                ],
+                                "width": 50,
+                                "minWidth": 0,
+                                "height": 50,
+                                "minHeight": 0,
+                                "id": "",
+                                "isClosable": true,
+                                "maximised": false,
+                                "activeItemIndex": 0
+                              }
+                            ],
+                            "width": 50,
+                            "minWidth": 0,
+                            "height": 50,
+                            "minHeight": 0,
+                            "id": "",
+                            "isClosable": true
+                          },
+                          {
+                            "type": "stack",
+                            "content": [
+                              {
+                                "type": "component",
+                                "content": [],
+                                "width": 50,
+                                "minWidth": 0,
+                                "height": 50,
+                                "minHeight": 0,
+                                "id": "",
+                                "maximised": false,
+                                "isClosable": true,
+                                "reorderEnabled": true,
+                                "title": "Internal",
+                                "componentType": "ViewInternalFolder",
+                                "componentState": {
+                                  "expanded": [
+                                    ""
+                                  ]
+                                }
+                              },
+                              {
+                                "type": "component",
+                                "content": [],
+                                "width": 50,
+                                "minWidth": 0,
+                                "height": 50,
+                                "minHeight": 0,
+                                "id": "",
+                                "maximised": false,
+                                "isClosable": true,
+                                "reorderEnabled": true,
+                                "title": "Table",
+                                "componentType": "ViewInternalTable",
+                                "componentState": {}
+                              }
+                            ],
+                            "width": 50,
+                            "minWidth": 0,
+                            "height": 50,
+                            "minHeight": 0,
+                            "id": "",
+                            "isClosable": true,
+                            "maximised": false,
+                            "activeItemIndex": 0
+                          }
+                        ],
+                        "width": 50,
+                        "minWidth": 0,
+                        "height": 50,
+                        "minHeight": 0,
+                        "id": "",
+                        "isClosable": true
+                      }
+                    ],
+                    "width": 50,
+                    "minWidth": 0,
+                    "height": 50,
+                    "minHeight": 0,
+                    "id": "",
+                    "isClosable": true
+                  },
+                  "openPopouts": [],
+                  "settings": {
+                    "constrainDragToContainer": true,
+                    "reorderEnabled": true,
+                    "popoutWholeStack": false,
+                    "blockedPopoutsThrowError": true,
+                    "closePopoutsOnUnload": true,
+                    "responsiveMode": "none",
+                    "tabOverlapAllowance": 0,
+                    "reorderOnTabMenuClick": true,
+                    "tabControlOffset": 10,
+                    "popInOnClose": false
+                  },
+                  "dimensions": {
+                    "borderWidth": 5,
+                    "borderGrabWidth": 5,
+                    "minItemHeight": 10,
+                    "minItemWidth": 10,
+                    "headerHeight": 20,
+                    "dragProxyWidth": 300,
+                    "dragProxyHeight": 200
+                  },
+                  "header": {
+                    "show": "top",
+                    "popout": false,
+                    "dock": "dock",
+                    "close": "close",
+                    "maximise": false,
+                    "minimise": "minimise",
+                    "tabDropdown": "additional tabs"
+                  },
+                  "resolved": true
+                }
+              }
+            }
+          ],
+          "width": 100,
+          "minWidth": 0,
+          "height": 50,
+          "minHeight": 0,
+          "id": "PanelProject0",
+          "isClosable": true,
+          "maximised": false,
+          "activeItemIndex": 0
+        }
+      ],
+      "width": 50,
+      "minWidth": 0,
+      "height": 50,
+      "minHeight": 0,
+      "id": "",
+      "isClosable": false
+    },
+    "openPopouts": [],
+    "settings": {
+      "constrainDragToContainer": true,
+      "reorderEnabled": true,
+      "popoutWholeStack": false,
+      "blockedPopoutsThrowError": true,
+      "closePopoutsOnUnload": true,
+      "responsiveMode": "none",
+      "tabOverlapAllowance": 0,
+      "reorderOnTabMenuClick": true,
+      "tabControlOffset": 10,
+      "popInOnClose": false
+    },
+    "dimensions": {
+      "borderWidth": 5,
+      "borderGrabWidth": 5,
+      "minItemHeight": 10,
+      "minItemWidth": 10,
+      "headerHeight": 20,
+      "dragProxyWidth": 300,
+      "dragProxyHeight": 200
+    },
+    "header": {
+      "show": "top",
+      "popout": false,
+      "dock": "dock",
+      "close": "close",
+      "maximise": "maximise",
+      "minimise": "minimise",
+      "tabDropdown": "additional tabs"
+    },
+    "resolved": true
+  }
+}

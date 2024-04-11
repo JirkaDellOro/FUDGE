@@ -102,25 +102,42 @@ var FudgeUserInterface;
                 }
             }
         }
-        // public static findChildElementByKey(_domElement: HTMLElement, _key: string): HTMLElement {
-        //   return _domElement.querySelector(`[key="${_key}"]`);
-        // }
+        /**
+         * Performs a breadth-first search on the given _domElement for an element with the given key.
+         */
+        static findChildElementByKey(_domElement, _key) {
+            let elements = _domElement.querySelectorAll(`[key="${_key}"]`);
+            if (elements.length < 2)
+                return elements[0];
+            let shortestPath = Infinity;
+            let closestElement = null;
+            for (let element of elements) {
+                let count = 0;
+                for (let parentElement = element.parentElement; parentElement != _domElement; parentElement = parentElement.parentElement)
+                    count++;
+                if (count < shortestPath) {
+                    closestElement = element;
+                    shortestPath = count;
+                }
+            }
+            return closestElement;
+        }
         // public static findChildElementByKey(_domElement: HTMLElement, _key: string): HTMLElement {
         //   return _domElement.querySelector(`:scope > [key="${_key}"]`) ?? _domElement.querySelector(`:scope > * > [key="${_key}"]`);
         // }
         /**
          * Performs a breadth-first search on the given _domElement for an element with the given key.
          */
-        static findChildElementByKey(_domElement, _key) {
-            let queue = [_domElement];
-            while (queue.length > 0) {
-                let element = queue.shift();
-                if (element.matches(`[key="${_key}"]`))
-                    return element;
-                queue.push(...Array.from(element.children));
-            }
-            return null;
-        }
+        // public static findChildElementByKey(_domElement: HTMLElement, _key: string): HTMLElement {
+        //   let queue: HTMLElement[] = [_domElement];
+        //   while (queue.length > 0) {
+        //     let element: HTMLElement = queue.shift();
+        //     if (element.matches(`[key="${_key}"]`))
+        //       return element;
+        //     queue.push(...<HTMLElement[]>Array.from(element.children));
+        //   }
+        //   return null;
+        // }
         getMutator(_mutator, _types) {
             // TODO: should get Mutator for UI or work with this.mutator (examine)
             this.mutable.updateMutator(this.mutator);
