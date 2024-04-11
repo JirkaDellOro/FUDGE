@@ -111,10 +111,29 @@ namespace FudgeUserInterface {
         }
       }
     }
+    
+    /**
+     * Performs a breadth-first search on the given _domElement for an element with the given key.
+     */
+    public static findChildElementByKey(_domElement: HTMLElement, _key: string): HTMLElement {
+      let elements: NodeListOf<HTMLElement> = _domElement.querySelectorAll(`[key="${_key}"]`);
+      if (elements.length < 2)
+        return elements[0];
 
-    // public static findChildElementByKey(_domElement: HTMLElement, _key: string): HTMLElement {
-    //   return _domElement.querySelector(`[key="${_key}"]`);
-    // }
+      let shortestPath: number = Infinity;
+      let closestElement: HTMLElement = null;
+      for (let element of elements) {
+        let count: number = 0;
+        for (let parentElement: HTMLElement = element.parentElement; parentElement != _domElement; parentElement = parentElement.parentElement)
+          count++;
+        if (count < shortestPath) {
+          closestElement = element;
+          shortestPath = count;
+        }
+      }
+
+      return closestElement;
+    }
 
     // public static findChildElementByKey(_domElement: HTMLElement, _key: string): HTMLElement {
     //   return _domElement.querySelector(`:scope > [key="${_key}"]`) ?? _domElement.querySelector(`:scope > * > [key="${_key}"]`);
@@ -123,17 +142,17 @@ namespace FudgeUserInterface {
     /**
      * Performs a breadth-first search on the given _domElement for an element with the given key.
      */
-    public static findChildElementByKey(_domElement: HTMLElement, _key: string): HTMLElement {
-      let queue: HTMLElement[] = [_domElement];
-      while (queue.length > 0) {
-        let element: HTMLElement = queue.shift();
-        if (element.matches(`[key="${_key}"]`))
-          return element;
+    // public static findChildElementByKey(_domElement: HTMLElement, _key: string): HTMLElement {
+    //   let queue: HTMLElement[] = [_domElement];
+    //   while (queue.length > 0) {
+    //     let element: HTMLElement = queue.shift();
+    //     if (element.matches(`[key="${_key}"]`))
+    //       return element;
 
-        queue.push(...<HTMLElement[]>Array.from(element.children));
-      }
-      return null;
-    }
+    //     queue.push(...<HTMLElement[]>Array.from(element.children));
+    //   }
+    //   return null;
+    // }
 
     public getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
       // TODO: should get Mutator for UI or work with this.mutator (examine)

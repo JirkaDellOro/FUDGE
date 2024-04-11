@@ -1,4 +1,5 @@
 /// <reference types="../../../node_modules/electron/electron" />
+/// <reference types="node" />
 /// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../GoldenLayout/golden-layout" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />

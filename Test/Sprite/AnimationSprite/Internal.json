@@ -26,7 +26,8 @@
       "Texture": {
         "idResource": "TextureImage|2023-01-16T14:41:22.268Z|03995",
         "name": "Mario",
-        "mipmap": "CRISP"
+        "mipmap": "CRISP",
+        "wrap": "CLAMP"
       }
     }
   },
@@ -43,8 +44,8 @@
       "framesPerSecond": 30,
       "animationStructure": {
         "components": {
-          "ComponentMesh": [
-            {
+          "ComponentMesh": {
+            "0": {
               "mtxPivot": {
                 "translation": {
                   "x": {
@@ -53,15 +54,13 @@
                         "time": 0,
                         "value": 0,
                         "slopeIn": 0,
-                        "slopeOut": 0,
-                        "constant": false
+                        "slopeOut": 0
                       },
                       {
                         "time": 992.5310225546342,
                         "value": 1,
                         "slopeIn": 0,
-                        "slopeOut": 0,
-                        "constant": false
+                        "slopeOut": 0
                       }
                     ],
                     "animationSequence": true
@@ -69,9 +68,9 @@
                 }
               }
             }
-          ],
-          "ComponentTransform": [
-            {
+          },
+          "ComponentTransform": {
+            "0": {
               "mtxLocal": {
                 "rotation": {
                   "y": {
@@ -80,15 +79,13 @@
                         "time": 0,
                         "value": 0,
                         "slopeIn": 0,
-                        "slopeOut": 0,
-                        "constant": false
+                        "slopeOut": 0
                       },
                       {
                         "time": 992.5310225546342,
                         "value": 60,
                         "slopeIn": 0,
-                        "slopeOut": 0,
-                        "constant": false
+                        "slopeOut": 0
                       }
                     ],
                     "animationSequence": true
@@ -96,7 +93,7 @@
                 }
               }
             }
-          ]
+          }
         }
       }
     }
@@ -358,7 +355,8 @@
       "Texture": {
         "idResource": "TextureImage|2023-01-16T14:08:04.970Z|41098",
         "name": "FUDGE",
-        "mipmap": "CRISP"
+        "mipmap": "CRISP",
+        "wrap": "CLAMP"
       }
     }
   }

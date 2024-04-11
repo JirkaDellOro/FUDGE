@@ -1396,8 +1396,6 @@ var Fudge;
             }
             if (resource) {
                 this.dispatchToParent(Fudge.EVENT_EDITOR.CREATE, {});
-                // this.controller.addChildren([resource], focus);
-                // this.tree.findVisible(focus).expand(true);
                 this.tree.addChildren([resource], focus);
                 this.tree.findVisible(resource).focus();
             }
@@ -4741,7 +4739,6 @@ var Fudge;
             switch (Number(_item.id)) {
                 case Fudge.CONTEXTMENU.ADD_NODE:
                     let child = new ƒ.Node("New Node");
-                    // this.tree.controller.addChildren([child], focus);
                     this.tree.addChildren([child], focus);
                     this.tree.findVisible(child).focus();
                     break;

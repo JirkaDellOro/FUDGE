@@ -1311,9 +1311,9 @@ declare namespace FudgeCore {
     */
     enum BODY_TYPE {
         /** The body ignores the hierarchy of the render graph, is completely controlled  by physics and takes its node with it  */
-        DYNAMIC = 0,
+        DYNAMIC = 0,// = OIMO.RigidBodyType.DYNAMIC,
         /** The body ignores the hierarchy of the render graph, is completely immoveble and keeps its node from moving  */
-        STATIC = 1,
+        STATIC = 1,// = OIMO.RigidBodyType.STATIC,
         /** The body is controlled by its node and moves with it, while it impacts the physical world e.g. by collisions */
         KINEMATIC = 2
     }
@@ -3145,7 +3145,7 @@ declare namespace FudgeCore {
         LAUNCH_APP1 = "LaunchApp1",
         LAUNCH_MAIL = "LaunchMail",
         LAUNCH_MEDIA_PLAYER = "LaunchMediaPlayer",
-        FN = "Fn",
+        FN = "Fn",//no event fired actually
         AGAIN = "Again",
         PROPS = "Props",
         SELECT = "Select",
