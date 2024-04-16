@@ -79,8 +79,8 @@ namespace FudgeCore {
         this.#walkData = { path, totalProgress: 0 };
         this.#promiseResolverOnWalkFinished = _resolve;
 
-        if (this.#rotateInWalkDirection && this.#walkData.path.length > 1) {
-          this.rotateTowards(this.#walkData.path[1].waypoint);
+        if (this.#rotateInWalkDirection && this.#walkData.path.length >= 1) {
+          this.rotateTowards(this.#walkData.path[0].waypoint);
         }
       });
     }
@@ -126,7 +126,7 @@ namespace FudgeCore {
       (<ComponentWaypoint>currentPath.waypoint).dispatchEvent(new CustomEvent(EVENT.WAYPOINT_REACHED, { bubbles: true, detail: this }));
       
       let translate: Vector3 = Vector3.DIFFERENCE(currentPath.waypoint.mtxWorld.translation, this.node.mtxWorld.translation);
-      this.node.mtxLocal.translate(translate);
+      this.node.mtxLocal.translate(translate, false);
       this.node.mtxLocal.scaling = currentPath.waypoint.mtxWorld.scaling;
       this.#walkData.totalProgress++;
 
