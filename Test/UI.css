@@ -1,0 +1,26 @@
+.ui-canvas {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+  color: yellow;
+  text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+  padding: 0.2rem;
+}
+
+span[is="ui-fps"] {
+  position: absolute;
+  top: 2.5rem;
+  left: 0;
+}
+
+span[is="ui-time"] {
+  position: absolute;
+  top: 3.5rem;
+  left: 0;
+}
+
+fudge-boolean,
+fudge-color,
+fudge-stepper,
+fudge-select {
+  display: block;
+}

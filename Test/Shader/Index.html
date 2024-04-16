@@ -10,12 +10,13 @@
   <script src="./../../UserInterface/Build/FudgeUserInterface.js"></script>
 
   <link type="resources" src="Internal.json" />
-
   <script src="Main.js" editor="true"></script>
 
   <link rel="stylesheet" href="../TestInstructions.css" />
+  <link rel="stylesheet" href="../UI.css" />
   <script src="../dialog-polyfill.min.js"></script>
   <script src="../TestInstructions.js"></script>
+  <script src="../UI.js"></script>
   
   <style>
     html,
@@ -31,21 +32,6 @@
       width: 100vw;
       height: 100vh;
     }
-
-    #fps {
-      font-family: Arial, Helvetica, sans-serif;
-      font-weight: bold;
-      color: yellow;
-      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
-      padding: 0.2rem;
-    }
-
-    #fps {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-
   </style>
 <title>Shader</title>
 </head>
@@ -73,7 +59,7 @@
   <!--Canvas for FUDGE to render to-->
   <canvas class="fullscreen">
   </canvas>
-  <span id="fps">
+  <span is="ui-fps" class="ui-canvas">
   </span>
   <div id="ui">
     <!--UI-Elements, will be filled dynamically-->

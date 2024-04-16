@@ -29,6 +29,7 @@ var PostprocessingTest;
         // make the camera interactive (complex method in ƒAid)
         ƒAid.Viewport.expandCameraToInteractiveOrbit(viewport);
         let cmpAmbientOcclusion = new ƒ.ComponentAmbientOcclusion();
+        cmpAmbientOcclusion.activate(false);
         cmpCamera.node.addComponent(cmpAmbientOcclusion);
         let cmpBloom = new ƒ.ComponentBloom();
         cmpBloom.activate(false);
@@ -46,16 +47,9 @@ var PostprocessingTest;
         let uiFog = ƒui.Generator.createDetailsFromMutable(cmpFog);
         new ƒui.Controller(cmpFog, uiFog);
         ui.appendChild(uiFog);
-        let fpsSpan = document.getElementById("fps");
-        let lastUpdateTime = 0;
-        const updateInterval = 200;
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start();
         function update(_event) {
-            if (ƒ.Loop.timeFrameStartReal - lastUpdateTime > updateInterval) {
-                fpsSpan.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
-                lastUpdateTime = ƒ.Loop.timeFrameStartReal;
-            }
             viewport.draw();
         }
     }

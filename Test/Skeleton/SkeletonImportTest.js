@@ -28,13 +28,14 @@ var SkeletonTest;
         // make the camera interactive (complex method in ƒAid)
         ƒAid.Viewport.expandCameraToInteractiveOrbit(SkeletonTest.viewport);
         graph.addChild(new ƒ.Node("placeholder"));
-        let timeSpan = document.getElementById("time");
-        let fpsSpan = document.getElementById("fps");
+        let timeSpan = document.querySelector('span[is="ui-time"]');
+        timeSpan.get = () => {
+            let cmpAnimation = SkeletonTest.loaded?.getComponent(ƒ.ComponentAnimator);
+            return cmpAnimation ? cmpAnimation.time.toFixed(0) : "0";
+        };
         let gPressed = false;
         let iShader = 0;
         const shaders = [ƒ.ShaderFlatSkin, ƒ.ShaderGouraudSkin, ƒ.ShaderPhongSkin];
-        let lastUpdateTime = 0;
-        const updateInterval = 200;
         let cmpLightDirectional = graph.getChildrenByName("Light")[0]?.getComponents(ƒ.ComponentLight)?.find((_cmp) => _cmp.light instanceof ƒ.LightDirectional);
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start();
@@ -56,12 +57,6 @@ var SkeletonTest;
                 gPressed = false;
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H]))
                 setShader(ƒ.ShaderPhong);
-            if (ƒ.Loop.timeFrameStartReal - lastUpdateTime > updateInterval) {
-                fpsSpan.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
-                lastUpdateTime = ƒ.Loop.timeFrameStartReal;
-            }
-            if (SkeletonTest.loaded?.getComponent(ƒ.ComponentAnimator))
-                timeSpan.innerText = "TIME: " + SkeletonTest.loaded?.getComponent(ƒ.ComponentAnimator).time.toFixed(0);
             SkeletonTest.viewport.draw();
         }
         document.addEventListener("keydown", hndKeydown);

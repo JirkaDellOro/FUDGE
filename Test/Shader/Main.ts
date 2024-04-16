@@ -30,20 +30,10 @@ namespace ShaderTest {
     // make the camera interactive (complex method in ƒAid)
     ƒAid.Viewport.expandCameraToInteractiveOrbit(viewport);
 
-    let fpsSpan: HTMLSpanElement = document.getElementById("fps") as HTMLElement;
-
-    let lastUpdateTime: number = 0;
-    const updateInterval: number = 200;
-
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start();
 
     function update(_event: Event): void {
-      if (ƒ.Loop.timeFrameStartReal - lastUpdateTime > updateInterval) {
-        fpsSpan.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
-        lastUpdateTime = ƒ.Loop.timeFrameStartReal;
-      }
-
       viewport.draw();
     }
   }

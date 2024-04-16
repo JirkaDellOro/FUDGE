@@ -1,6 +1,6 @@
 .dialog {
-  margin: 0px;
-  padding: 0.1em 1em;
+  /* margin: 0px;
+  padding: 0.1em 1em; */
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -13,38 +13,37 @@ legend.dialog {
 }
 
 div.dialog-button {
-  --size: 2em;
+  --size: 2.5rem;
   position: absolute;
   z-index: 1000;
   top: 0;
   left: 0;
   width: var(--size);
   height: var(--size);
-  padding: calc(var(--size) / 8);
   cursor: pointer;
-  background-color: rgba(256,256,256,0.5);
 }
 
 div.dialog-button > div {
-  width: var(--size);
-  height: calc(var(--size) / 4);
-  background: black;
+  width: 80%;
+  height: calc(100% / 7);
+  background: yellow;
+  box-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;;
   display: block;
-  margin-bottom: calc(var(--size) / 8);
+  margin: auto;
+  margin-top: calc(100% / 7);
+  transition: all 0.3s;
 }
 
-div.dialog-button > div.a {
-  transform-origin: bottom left;
+div.dialog-button > div:last-child {
+  margin-bottom: calc(100% / 7);
 }
-div.dialog-button > div.c {
-  transform-origin: top left;
-}
+
 div.dialog-button.open > div.a {
-  transform: rotate(45deg);
+  transform: translateY(200%) rotate(45deg);
 }
 div.dialog-button.open > div.b {
   opacity: 0;
 }
 div.dialog-button.open > div.c {
-  transform: rotate(-45deg);
+  transform: translateY(-200%) rotate(-45deg);
 }

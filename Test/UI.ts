@@ -1,8 +1,8 @@
 namespace UI {
   import ƒ = FudgeCore;
 
-  export interface ParamsCamera { aspect?: number; fieldOfView?: number; near?: number; far?: number; }
-  export interface Size { width: number; height: number; }
+  export interface ParamsCamera { aspect?: number; fieldOfView?: number; near?: number; far?: number }
+  export interface Size { width: number; height: number }
 
   export class FieldSet extends HTMLFieldSetElement {
     protected values: {};
@@ -38,7 +38,7 @@ namespace UI {
   }
 
   export class Stepper extends HTMLSpanElement {
-    constructor(_label: string = "Stepper", params: { min?: number, max?: number, step?: number, value?: number } = {}) {
+    public constructor(_label: string = "Stepper", params: { min?: number, max?: number, step?: number, value?: number } = {}) {
       super();
       this.textContent = _label + " ";
       let stepper: HTMLInputElement = document.createElement("input");
@@ -51,7 +51,7 @@ namespace UI {
   }
 
   export class Border extends FieldSet {
-    constructor(_name: string = "Border", _step: number = 1) {
+    public constructor(_name: string = "Border", _step: number = 1) {
       super(_name);
       this.values = { left: 0, right: 0, top: 0, bottom: 0 };
       this.appendChild(new Stepper("left", { step: _step }));
@@ -62,7 +62,7 @@ namespace UI {
   }
 
   export class Rectangle extends FieldSet {
-    constructor(_name: string = "Rectangle") {
+    public constructor(_name: string = "Rectangle") {
       super(_name);
       this.values = { x: 0, y: 0, width: 0, height: 0 };
       this.appendChild(new Stepper("x", { step: 10 }));
@@ -105,7 +105,7 @@ namespace UI {
   }
 
   export class Camera extends FieldSet {
-    constructor(_name: string = "Camera") {
+    public constructor(_name: string = "Camera") {
       super(_name);
       this.values = { aspect: 0, fieldOfView: 0, near: 0, far: 0 };
       this.appendChild(new Stepper("fieldOfView", { min: 5, max: 100, step: 5, value: 45 }));
@@ -116,7 +116,7 @@ namespace UI {
   }
 
   export class Point extends FieldSet {
-    constructor(_name: string = "Point") {
+    public constructor(_name: string = "Point") {
       super(_name);
       this.values = { x: 0, y: 0 };
       this.appendChild(new Stepper("x", { value: 0 }));
@@ -128,7 +128,7 @@ namespace UI {
   export class FramingScaled extends FieldSet {
     result: UI.Rectangle;
 
-    constructor(_name: string = "FramingScaled") {
+    public constructor(_name: string = "FramingScaled") {
       super(_name);
       this.values = { normWidth: 1, normHeight: 1 };
       this.result = new Rectangle("Result");
@@ -147,7 +147,7 @@ namespace UI {
   }
 
   export class FramingComplex extends FieldSet {
-    constructor(_name: string = "FramingComplex") {
+    public constructor(_name: string = "FramingComplex") {
       super(_name);
       this.values = { Result: {}, Padding: {}, Margin: {} };
       let result: UI.Rectangle = new Rectangle("Result");
@@ -179,6 +179,32 @@ namespace UI {
     }
   }
 
+  export class FPS extends HTMLSpanElement {
+    public constructor() {
+      super();
+      ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
+    }
+
+    public update = (): void => {
+      this.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
+    };
+  }
+
+  export class Time extends HTMLSpanElement {
+    public constructor() {
+      super();
+      ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
+    }
+
+    public update = (): void => {
+      this.innerText = "Time: " + this.get();
+    };
+
+    public get = (): string => {
+      return ƒ.Time.game.get().toFixed(0);
+    };
+  }
+
   customElements.define("ui-stepper", Stepper, { extends: "span" });
   customElements.define("ui-framingcomplex", FramingComplex, { extends: "fieldset" });
   customElements.define("ui-scale", FramingScaled, { extends: "fieldset" });
@@ -187,4 +213,6 @@ namespace UI {
   customElements.define("ui-camera", Camera, { extends: "fieldset" });
   customElements.define("ui-point", Point, { extends: "fieldset" });
   customElements.define("ui-fieldset", FieldSet, { extends: "fieldset" });
+  customElements.define("ui-fps", FPS, { extends: "span" });
+  customElements.define("ui-time", Time, { extends: "span" });
 }

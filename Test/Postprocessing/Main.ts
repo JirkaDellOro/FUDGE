@@ -32,6 +32,7 @@ namespace PostprocessingTest {
     ƒAid.Viewport.expandCameraToInteractiveOrbit(viewport);
 
     let cmpAmbientOcclusion: ƒ.ComponentAmbientOcclusion = new ƒ.ComponentAmbientOcclusion();
+    cmpAmbientOcclusion.activate(false);
     cmpCamera.node.addComponent(cmpAmbientOcclusion);
 
     let cmpBloom: ƒ.ComponentBloom = new ƒ.ComponentBloom();
@@ -56,21 +57,10 @@ namespace PostprocessingTest {
     new ƒui.Controller(cmpFog, uiFog);
     ui.appendChild(uiFog);
     
-
-    let fpsSpan: HTMLSpanElement = document.getElementById("fps") as HTMLElement;
-
-    let lastUpdateTime: number = 0;
-    const updateInterval: number = 200;
-
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start();
 
     function update(_event: Event): void {
-      if (ƒ.Loop.timeFrameStartReal - lastUpdateTime > updateInterval) {
-        fpsSpan.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
-        lastUpdateTime = ƒ.Loop.timeFrameStartReal;
-      }
-
       viewport.draw();
     }
   }

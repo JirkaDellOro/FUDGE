@@ -27,16 +27,9 @@ var ShaderTest;
         canvas.addEventListener("mouseup", function () { document.exitPointerLock(); });
         // make the camera interactive (complex method in ƒAid)
         ƒAid.Viewport.expandCameraToInteractiveOrbit(viewport);
-        let fpsSpan = document.getElementById("fps");
-        let lastUpdateTime = 0;
-        const updateInterval = 200;
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start();
         function update(_event) {
-            if (ƒ.Loop.timeFrameStartReal - lastUpdateTime > updateInterval) {
-                fpsSpan.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
-                lastUpdateTime = ƒ.Loop.timeFrameStartReal;
-            }
             viewport.draw();
         }
     }

@@ -12,18 +12,15 @@
   <script src="./../../Core/Build/FudgeCore.js"></script>
   <script src="./../../Aid/Build/FudgeAid.js"></script>
 
-  <!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
   <link type="resources" src="SkeletonImportTest.json" />
-
-  <!--Load scripts-->
   <script src="SkeletonImportTest.js" editor="true"></script>
-  <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-    }
 
+  <link rel="stylesheet" href="../TestInstructions.css" />
+  <link rel="stylesheet" href="../UI.css" />
+  <script src="../dialog-polyfill.min.js"></script>
+  <script src="../TestInstructions.js"></script>
+  <script src="../UI.js"></script>
+  <style>
     canvas.fullscreen {
       position: absolute;
       top: 0;
@@ -32,32 +29,9 @@
       height: 100vh;
     }
 
-    span#fps {
+    #ui {
       position: absolute;
       top: 0;
-      left: 0;
-    }
-
-    span#time {
-      position: absolute;
-      top: 1rem;
-      left: 0;
-    }
-
-    span {
-      color: yellow;
-      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
-    }
-
-    #file {
-      position: absolute;
-      top: 0;
-      right: 0;
-    }
-
-    #amount {
-      position: absolute;
-      top: 1rem;
       right: 0;
     }
   </style>
@@ -67,21 +41,21 @@
   <!--Canvas for FUDGE to render to-->
   <canvas class="fullscreen">
   </canvas>
-  <span id="fps">
-  </span>
-  <span id="time">
-  </span>
+  <span is="ui-fps" class="ui-canvas"></span>
+  <span is="ui-time" class="ui-canvas"></span>
 
-  <select id="file" onchange="load()">
-    <option value="./GLTF/arm.gltf">Arm</option>
-    <option value="./GLTF/robot.gltf">Robot</option>
-    <option value="./GLTF/walk.gltf">Walk</option>
-  </select>
-  <select id="amount" onchange="load()">
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3" selected>3</option>
-  </select>
+  <div id="ui" class="ui-canvas">
+    <select id="file" onchange="load()">
+      <option value="./GLTF/arm.gltf">Arm</option>
+      <option value="./GLTF/robot.gltf">Robot</option>
+      <option value="./GLTF/walk.gltf">Walk</option>
+    </select>
+    <select id="amount" onchange="load()">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3" selected>3</option>
+    </select>
+  </div>
 </body>
 
 </html>

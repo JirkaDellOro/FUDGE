@@ -15,23 +15,14 @@ var ParticleSystemTest;
         }
         // setup the viewport
         let cmpCamera = new ƒ.ComponentCamera();
-        // cmpCamera.clrBackground = ƒ.Color.CSS("SKYBLUE");
         let canvas = document.querySelector("canvas");
         viewport = new ƒ.Viewport();
         viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
         ƒAid.Viewport.expandCameraToInteractiveOrbit(viewport);
-        let fpsSpan = document.getElementById("fps");
-        let lastUpdateTime = 0;
-        const updateInterval = 200;
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.dispatchEvent(new CustomEvent("start"));
         ƒ.Loop.start(); // start the game loop to continously draw the viewport, update the audiosystem and drive the physics i/a
         function update(_event) {
-            if (ƒ.Loop.timeFrameStartReal - lastUpdateTime > updateInterval) {
-                fpsSpan.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
-                lastUpdateTime = ƒ.Loop.timeFrameStartReal;
-            }
-            // ƒ.Physics.simulate();  // if physics is included and used
             viewport.draw();
         }
     }

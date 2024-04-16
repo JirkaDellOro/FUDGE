@@ -12,9 +12,9 @@ canvas.fullscreen {
   height: 100vh;
 }
 
-#info {
+#ui {
   position: absolute;
-  left: 10px;
+  right: 10px;
   top: 10px;
   width: 10em;
   height: 5em;

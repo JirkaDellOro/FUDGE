@@ -37,14 +37,15 @@ namespace SkeletonTest {
 
     graph.addChild(new ƒ.Node("placeholder"));
 
-    let timeSpan: HTMLSpanElement = document.getElementById("time") as HTMLElement;
-    let fpsSpan: HTMLSpanElement = document.getElementById("fps") as HTMLElement;
+    let timeSpan: UI.Time = document.querySelector('span[is="ui-time"]');
+    timeSpan.get = () => {
+      let cmpAnimation: ƒ.ComponentAnimator = loaded?.getComponent(ƒ.ComponentAnimator);
+      return cmpAnimation ? cmpAnimation.time.toFixed(0) : "0";
+    };
+
     let gPressed: boolean = false;
     let iShader: number = 0;
     const shaders: typeof ƒ.Shader[] = [ƒ.ShaderFlatSkin, ƒ.ShaderGouraudSkin, ƒ.ShaderPhongSkin];
-
-    let lastUpdateTime: number = 0;
-    const updateInterval: number = 200;
 
     let cmpLightDirectional: ƒ.ComponentLight = graph.getChildrenByName("Light")[0]?.getComponents(ƒ.ComponentLight)?.find((_cmp: ƒ.ComponentLight) => _cmp.light instanceof ƒ.LightDirectional);
 
@@ -68,14 +69,6 @@ namespace SkeletonTest {
       } else
         gPressed = false;
       if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H])) setShader(ƒ.ShaderPhong);
-
-      if (ƒ.Loop.timeFrameStartReal - lastUpdateTime > updateInterval) {
-        fpsSpan.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
-        lastUpdateTime = ƒ.Loop.timeFrameStartReal;
-      }
-
-      if (loaded?.getComponent(ƒ.ComponentAnimator))
-        timeSpan.innerText = "TIME: " + loaded?.getComponent(ƒ.ComponentAnimator).time.toFixed(0);
 
       viewport.draw();
     }

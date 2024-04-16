@@ -1,33 +1,26 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta charset="utf-8" />
-  <meta type="settings" autoview="Graph|2022-10-12T15:22:44.800Z|84622" project="{'name':'ParticleSystem','graphAutoView':'Graph|2022-10-12T15:22:44.800Z|84622'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2022-10-12T15:22:44.800Z|84622'}},{'type':'PanelParticleSystem','state':{}}]" />
+  <meta type="settings" autoview="Graph|2022-10-12T15:22:44.800Z|84622"
+    project="{'name':'ParticleSystem','graphAutoView':'Graph|2022-10-12T15:22:44.800Z|84622'}"
+    panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2022-10-12T15:22:44.800Z|84622'}},{'type':'PanelParticleSystem','state':{}}]" />
 
-  <title>ParticleSystem</title>
+  <script src="./../../Core/Build/FudgeCore.js"></script>
+  <script src="./../../Aid/Build/FudgeAid.js"></script>
 
-  <!--Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks-->
-  <!-- <script type="text/javascript" src="../../../Physics/OimoPhysics.js"></script> -->
-  <script type="text/javascript" src="./../../Core/Build/FudgeCore.js"></script>
-  <script type="text/javascript" src="./../../Aid/Build/FudgeAid.js"></script>
-  <script type="text/javascript" src="./../../UserInterface/Build/FudgeUserInterface.js"></script>
-
-  <!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
   <link type="resources" src="Internal.json" />
-
-  <!--Load custom scripts-->
   <script src="Main.js" editor="true"></script>
 
-  <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      color: yellow;
-      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
-    }
+  <link rel="stylesheet" href="../TestInstructions.css" />
+  <link rel="stylesheet" href="../UI.css" />
+  <script src="../dialog-polyfill.min.js"></script>
+  <script src="../TestInstructions.js"></script>
+  <script src="../UI.js"></script>
 
+  <style>
     canvas.fullscreen {
       position: absolute;
       top: 0;
@@ -45,19 +38,7 @@
       width: 4rem;
     }
 
-    span#fps {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-
-    span#time {
-      position: absolute;
-      top: 1rem;
-      left: 0;
-    }
-
-    #settings {
+    #ui {
       position: absolute;
       top: 0;
       right: 0;
@@ -66,6 +47,24 @@
 </head>
 
 <body>
+  <script>
+    TestInstructions.display({
+      Name: "Particle System",
+      Test: [
+        "Shows different particle systems."
+      ],
+      Control: [
+        "Use the checkboxes to toggle the effects on and off.",
+        "Use the inputs to change the number of particles."
+      ],
+      Act: [
+        "Move the camera around."
+      ],
+      Observe: [
+        "Check how the effects interact with each other."
+      ]
+    });
+  </script>
   <!--Dialog shown at startup only-->
   <dialog>
     <p>FUDGE Autoview</p>
@@ -75,11 +74,10 @@
   <!--Canvas for FUDGE to render to-->
   <canvas class="fullscreen">
   </canvas>
-  <span id="fps">
-  </span>
+  <span is="ui-fps" class="ui-canvas"></span>
   <span id="time">
   </span>
-  <div id="settings">
+  <div id="ui" class="ui-canvas">
     <div>
       <input id="flame" type="checkbox" />
       <label for="flame">Flame</label>
@@ -99,4 +97,5 @@
     </div>
   </div>
 </body>
+
 </html>

@@ -165,6 +165,29 @@ var UI;
         }
     }
     UI.FramingComplex = FramingComplex;
+    class FPS extends HTMLSpanElement {
+        constructor() {
+            super();
+            ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
+        }
+        update = () => {
+            this.innerText = "FPS: " + ƒ.Loop.fpsRealAverage.toFixed(0);
+        };
+    }
+    UI.FPS = FPS;
+    class Time extends HTMLSpanElement {
+        constructor() {
+            super();
+            ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
+        }
+        update = () => {
+            this.innerText = "Time: " + this.get();
+        };
+        get = () => {
+            return ƒ.Time.game.get().toFixed(0);
+        };
+    }
+    UI.Time = Time;
     customElements.define("ui-stepper", Stepper, { extends: "span" });
     customElements.define("ui-framingcomplex", FramingComplex, { extends: "fieldset" });
     customElements.define("ui-scale", FramingScaled, { extends: "fieldset" });
@@ -173,5 +196,7 @@ var UI;
     customElements.define("ui-camera", Camera, { extends: "fieldset" });
     customElements.define("ui-point", Point, { extends: "fieldset" });
     customElements.define("ui-fieldset", FieldSet, { extends: "fieldset" });
+    customElements.define("ui-fps", FPS, { extends: "span" });
+    customElements.define("ui-time", Time, { extends: "span" });
 })(UI || (UI = {}));
 //# sourceMappingURL=UI.js.map

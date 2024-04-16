@@ -1,31 +1,27 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta charset="utf-8" />
-  <meta type="settings" autoview="Graph|2023-11-13T11:42:50.294Z|18191" project="{'name':'Postprocessing','graphAutoView':'Graph|2023-11-13T11:42:50.294Z|18191','gizmosFilter':'[[\'ComponentAudio\',true],[\'ComponentCamera\',true],[\'ComponentLight\',true],[\'ComponentText\',true],[\'ComponentVRDevice\',false],[\'Transform\',false],[\'WireMesh\',true]]'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-11-13T11:42:50.294Z|18191'}}]" />
+  <meta type="settings" autoview="Graph|2023-11-13T11:42:50.294Z|18191"
+    project="{'name':'Postprocessing','graphAutoView':'Graph|2023-11-13T11:42:50.294Z|18191','gizmosFilter':'[[\'ComponentAudio\',true],[\'ComponentCamera\',true],[\'ComponentLight\',true],[\'ComponentText\',true],[\'ComponentVRDevice\',false],[\'Transform\',false],[\'WireMesh\',true]]'}"
+    panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-11-13T11:42:50.294Z|18191'}}]" />
 
   <script src="./../../../Core/Build/FudgeCore.js"></script>
   <script src="./../../../Aid/Build/FudgeAid.js"></script>
   <script src="./../../UserInterface/Build/FudgeUserInterface.js"></script>
 
   <link type="resources" src="Internal.json" />
-
   <script src="Main.js" editor="true"></script>
 
   <link rel="stylesheet" href="../TestInstructions.css" />
+  <link rel="stylesheet" href="../UI.css" />
   <script src="../dialog-polyfill.min.js"></script>
   <script src="../TestInstructions.js"></script>
+  <script src="../UI.js"></script>
 
   <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      /* color: yellow;
-      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black; */
-    }
-
     canvas.fullscreen {
       position: absolute;
       top: 0;
@@ -34,34 +30,13 @@
       height: 100vh;
     }
 
-    #fps, #ui {
-      font-family: Arial, Helvetica, sans-serif;
-      font-weight: bold;
-      color: yellow;
-      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
-      padding: 0.2rem;
-    }
-
-    #fps {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-
     #ui {
       position: absolute;
       top: 0;
       right: 0;
     }
-
-    fudge-boolean,
-    fudge-color,
-    fudge-stepper,
-    fudge-select {
-      display: block;
-    }
   </style>
-<title>Postprocessing</title>
+  <title>Postprocessing</title>
 </head>
 
 <body>
@@ -87,10 +62,11 @@
   <!--Canvas for FUDGE to render to-->
   <canvas class="fullscreen">
   </canvas>
-  <span id="fps">
+  <span is="ui-fps" class="ui-canvas">
   </span>
-  <div id="ui">
+  <div id="ui" class="ui-canvas">
     <!--UI-Elements, will be filled dynamically-->
   </div>
 </body>
+
 </html>
