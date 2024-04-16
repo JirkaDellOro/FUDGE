@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>ScreenToRay</title>
+  <link rel="stylesheet" href="../../TestInstructions.css">
   <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
   <script type="text/javascript" src="../../../Aid/Build/FudgeAid.js"></script>
   <script type="text/javascript" src="../../UI.js"></script>
@@ -36,12 +37,14 @@
       margin-right: 1em;
     }
 
-    div {
+    #menu {
       width: 30em;
       position: fixed;
       top: 0px;
+      bottom: 0px;
       right: 0px;
       background-color: beige;
+      overflow: auto;
     }
 
     output {
@@ -90,6 +93,6 @@
   <canvas id="viewport"></canvas>
   <canvas id="ray"></canvas>
   <output></output>
-  <div name="menu">
+  <div name="menu" id="menu">
   </div>
 </body>

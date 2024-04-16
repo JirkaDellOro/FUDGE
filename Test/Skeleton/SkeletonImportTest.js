@@ -107,11 +107,20 @@ async function load() {
     const amount = parseInt(SkeletonTest.slcAmount.value);
     if (amount == 1) {
         SkeletonTest.loaded = await SkeletonTest.loader.getGraph();
+        let animation = await SkeletonTest.loader.getAnimation(0);
+        ƒ.Project.register(animation);
+        if (animation && !SkeletonTest.loaded.getComponent(ƒ.ComponentAnimator))
+            SkeletonTest.loaded.addComponent(new ƒ.ComponentAnimator(animation));
     }
     else {
-        SkeletonTest.loaded = new ƒ.Node("loaded");
+        SkeletonTest.loaded = new ƒ.Node("Scene");
         for (let i = 0; i < amount; i++) {
-            let instance = await ƒ.Project.createGraphInstance(await SkeletonTest.loader.getGraph());
+            let graph = await SkeletonTest.loader.getGraph();
+            ƒ.Project.register(graph);
+            let instance = await ƒ.Project.createGraphInstance(graph);
+            let animation = await SkeletonTest.loader.getAnimation(0);
+            if (animation && !instance.getComponent(ƒ.ComponentAnimator))
+                instance.addComponent(new ƒ.ComponentAnimator(animation));
             instance.addComponent(new ƒ.ComponentTransform());
             instance.name = "instance" + i;
             instance.mtxLocal.translateX((i * 2 - (amount - 1)) * 1.5);
@@ -119,10 +128,10 @@ async function load() {
         }
     }
     SkeletonTest.cmpAnimator = SkeletonTest.loaded?.getComponent(ƒ.ComponentAnimator);
-    SkeletonTest.loaded.name = "loaded";
+    // SkeletonTest.loaded.name = "loaded";
     // loaded.getComponent(ƒ.ComponentAnimator)?.activate(false);
     let root = SkeletonTest.viewport.getBranch();
-    let loaded = root.getChildrenByName("loaded")[0];
+    let loaded = root.getChildrenByName("Scene")[0];
     if (loaded)
         root.replaceChild(loaded, SkeletonTest.loaded);
     else

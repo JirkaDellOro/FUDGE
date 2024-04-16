@@ -61,7 +61,7 @@ namespace ScreenToRay {
     viewportRay.initialize("ray", root, cameraRay, canvasRay);
     viewportRay.adjustingFrames = true;
 
-    menu = document.getElementsByTagName("div")[0];
+    menu = <HTMLDivElement>document.getElementById("menu");
     menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
     uiCamera = new UI.Camera();
     menu.appendChild(uiCamera);

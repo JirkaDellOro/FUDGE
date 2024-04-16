@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
   <title>PickBoundingSphere</title>
   <meta charset="utf-8" />
-  <meta type="settings" autoview="Graph|2021-02-26T06:53:19.490Z|55445" project="{'name':'PickBoundingSphere','includeAutoViewScript':true,'graphAutoView':'Graph|2021-02-26T06:53:19.490Z|55445'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2021-02-26T06:53:19.490Z|55445'}}]" />
+  <meta type="settings" autoview="Graph|2021-02-26T06:53:19.490Z|55445"
+    project="{'name':'PickBoundingSphere','includeAutoViewScript':true,'graphAutoView':'Graph|2021-02-26T06:53:19.490Z|55445'}"
+    panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2021-02-26T06:53:19.490Z|55445'}}]" />
   <!--Load FUDGE-->
   <script type="text/javascript" src="../../../Physics/OimoPhysics.js"></script>
   <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
@@ -110,13 +113,14 @@
   <!--Dialog shown at startup only-->
   <script>
     TestInstructions.display({
-      Name: "Pick bounding radius",
+      Name: "Pick component",
       Test: [
-        "Each nodes hold information about the radius of a bounding sphere itself and all its children fit in.",
-        "This can be used for a proximity picking which might be sufficient in many cases or serve as a filter for more precise picking.",
+        "Each nodes has a pick component attached and different pick modes are used."
       ],
       Setup: [
-        "Several meshes in a hierarchy. Additional spheres display the bounding spheres radii.",
+        "Blue pyramid uses physics pick mode. Magenta torus uses camera pick mode.",
+        "Red cube and green sphere use radius pick mode.",
+        "Yellow quad has no pick component attached."
       ],
       Act: [
         "Open the console, move the camera.",
@@ -126,7 +130,7 @@
         "The console output.",
       ],
       Expect: [
-        "The console displays which bounding spheres the mouse ray intersects.",
+        "The display shows which node was picked and which picking mode was used.",
         "Zoo is the sphere of the root node containing all others.",
       ]
     });
@@ -142,4 +146,5 @@
 
 
 </body>
+
 </html>

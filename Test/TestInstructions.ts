@@ -7,7 +7,7 @@ namespace TestInstructions {
   }
 
   let dialog: HTMLDialogElement;
-  let closeButton: HTMLDivElement
+  let closeButton: HTMLDivElement;
   let instructions: object;
 
   export function display(_instructions: object, _open: boolean = true): void {
