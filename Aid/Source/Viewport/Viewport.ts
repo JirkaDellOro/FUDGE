@@ -83,9 +83,7 @@ namespace FudgeAid {
         let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation.clone;
 
         // orbit
-        if (
-          (_event.buttons == 4 && !(_event.ctrlKey || _event.altKey || _event.shiftKey)) ||
-          (_event.buttons == 1 && _event.altKey) || touchState == "orbit") {
+        if ((_event.buttons == 4 && !(_event.ctrlKey || _event.altKey || _event.shiftKey)) || (_event.buttons == 1 && _event.altKey) || touchState == "orbit") {
           cntMouseHorizontal.setInput(_event.movementX);
           cntMouseVertical.setInput(_event.movementY);
         }
@@ -150,12 +148,14 @@ namespace FudgeAid {
 
         flying = (_event.buttons == 2 && !_event.altKey);
 
-        touchState = "orbit";
+        if (_event.pointerType == "touch") {
+          touchState = "orbit";
 
-        if ((_event.pointerType == "touch" && activePointers.size == 2)) {
-          const iterator: IterableIterator<PointerEvent> = activePointers.values();
-          const distance: number = Math.abs(iterator.next().value.offsetX - iterator.next().value.offsetX);
-          touchState = distance < pinchThreshold ? "zoom" : "fly";
+          if (activePointers.size == 2) {
+            const iterator: IterableIterator<PointerEvent> = activePointers.values();
+            const distance: number = Math.abs(iterator.next().value.offsetX - iterator.next().value.offsetX);
+            touchState = distance < pinchThreshold ? "zoom" : "fly";
+          }
         }
 
         const doubleTap: boolean = activePointers.size == 1 &&
