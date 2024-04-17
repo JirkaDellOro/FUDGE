@@ -24,9 +24,13 @@ namespace FudgeAid {
       _viewport.canvas.addEventListener("pointermove", hndPointerMove);
       _viewport.canvas.addEventListener("wheel", hndWheelMove);
 
-      let factorPan: number = 1 / 500;
-      let factorFly: number = 1 / 20;
-      let factorZoom: number = 1 / 3;
+      const factorPan: number = 1 / 500;
+      const factorFly: number = 1 / 20;
+      const factorZoom: number = 1 / 3;
+      const factorZoomTouch: number = 2;
+
+      const doubleTapThreshold = { time: 300, distance: 30 ** 2 }; // eslint-disable-line
+      const pinchThreshold: number = 70; // max horizontal distance between two touches to be recognized as pinch
 
       let flySpeed: number = 0.3;
       let flyAccelerated: number = 10;
@@ -35,6 +39,8 @@ namespace FudgeAid {
       cntFly.setDelay(500);
       let flying: boolean = false;
       console.log(timer);
+
+      let touchState: "orbit" | "fly" | "zoom";
 
       let cntMouseHorizontal: ƒ.Control = new ƒ.Control("MouseHorizontal", -1);
       let cntMouseVertical: ƒ.Control = new ƒ.Control("MouseVertical", -1);
@@ -60,27 +66,32 @@ namespace FudgeAid {
         _viewport.getBranch().addChild(focus);
       }
 
+      const activePointers: Map<number, PointerEvent> = new Map();
+      let prevPointer: PointerEvent;
+      let prevDistance: number;
+
+
       redraw();
       return camera;
-
-
 
       function hndPointerMove(_event: PointerEvent): void {
         if (!_event.buttons)
           return;
+
+        activePointers.set(_event.pointerId, _event);
 
         let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation.clone;
 
         // orbit
         if (
           (_event.buttons == 4 && !(_event.ctrlKey || _event.altKey || _event.shiftKey)) ||
-          (_event.buttons == 1 && _event.altKey)) {
+          (_event.buttons == 1 && _event.altKey) || touchState == "orbit") {
           cntMouseHorizontal.setInput(_event.movementX);
           cntMouseVertical.setInput(_event.movementY);
         }
 
         // fly
-        if (_event.buttons == 2 && !_event.altKey) {
+        if ((_event.buttons == 2 && !_event.altKey) || touchState == "fly") {
           cntMouseHorizontal.setInput(_event.movementX * factorFly);
           cntMouseVertical.setInput(_event.movementY * factorFly);
           ƒ.Render.prepare(camera);
@@ -92,8 +103,17 @@ namespace FudgeAid {
         if ((_event.buttons == 4 && _event.ctrlKey) || (_event.buttons == 2 && _event.altKey))
           zoom(_event.movementX * factorZoom);
 
-        // pan 
+        // pinch zoom
+        if (touchState == "zoom") {
+          const iterator: IterableIterator<PointerEvent> = activePointers.values();
+          const distance: number = Math.abs(iterator.next().value.offsetY - iterator.next().value.offsetY);
+          if (prevDistance)
+            zoom((prevDistance - distance) * factorZoomTouch);
 
+          prevDistance = distance;
+        }
+
+        // pan 
         if (_event.buttons == 4 && (_event.altKey || _event.shiftKey)) {
           camera.translateX(-_event.movementX * camera.distance * factorPan);
           camera.translateY(_event.movementY * camera.distance * factorPan);
@@ -126,9 +146,28 @@ namespace FudgeAid {
       }
 
       function hndPointerDown(_event: PointerEvent): void {
+        activePointers.set(_event.pointerId, _event);
+
         flying = (_event.buttons == 2 && !_event.altKey);
-        if (_event.button != 0 || _event.ctrlKey || _event.altKey || _event.shiftKey)
+
+        touchState = "orbit";
+
+        if ((_event.pointerType == "touch" && activePointers.size == 2)) {
+          const iterator: IterableIterator<PointerEvent> = activePointers.values();
+          const distance: number = Math.abs(iterator.next().value.offsetX - iterator.next().value.offsetX);
+          touchState = distance < pinchThreshold ? "zoom" : "fly";
+        }
+
+        const doubleTap: boolean = activePointers.size == 1 &&
+          (_event.timeStamp - (prevPointer?.timeStamp ?? 0) < doubleTapThreshold.time) &&
+          (prevPointer?.offsetX - _event.offsetX ?? 0) ** 2 + (prevPointer?.offsetY - _event.offsetY ?? 0) ** 2 < doubleTapThreshold.distance;
+
+        prevPointer = doubleTap ? null : _event;
+
+        if (_event.button != 0 || _event.ctrlKey || _event.altKey || _event.shiftKey || (_event.pointerType == "touch" && !doubleTap))
           return;
+
+        touchState = null;
 
         let pos: ƒ.Vector2 = new ƒ.Vector2(_event.offsetX, _event.offsetY);
         let picks: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, pos);
@@ -136,9 +175,9 @@ namespace FudgeAid {
           return;
         // picks.sort((_a: ƒ.Pick, _b: ƒ.Pick) => (_a.zBuffer < _b.zBuffer && _a.gizmo) ? -1 : 1);
         picks.sort((_a, _b) => {
-          if (_a.gizmo && !_b.gizmo) 
+          if (_a.gizmo && !_b.gizmo)
             return -1;
-          if (!_a.gizmo && _b.gizmo) 
+          if (!_a.gizmo && _b.gizmo)
             return 1;
           // If both picks have a gizmo property or if neither does, prioritize based on zBuffer value
           return _a.zBuffer - _b.zBuffer;
@@ -155,6 +194,11 @@ namespace FudgeAid {
       }
 
       function hndPointerUp(_event: PointerEvent): void {
+        activePointers.delete(_event.pointerId);
+        if (activePointers.size < 2)
+          prevDistance = 0;
+
+        touchState = null;
         flying = false;
       }
 

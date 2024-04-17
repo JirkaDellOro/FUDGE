@@ -1,5 +1,3 @@
-/// <reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../../Aid/Build/FudgeAid"/>
 namespace SkeletonTest {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
@@ -85,7 +83,7 @@ namespace SkeletonTest {
     canvas.addEventListener("mousedown", canvas.requestPointerLock);
     canvas.addEventListener("mouseup", () => document.exitPointerLock());
 
-    let timeSpan: HTMLSpanElement = document.querySelector("span") as HTMLElement;
+    let timeSpan: UI.Time = document.querySelector('span[is=ui-time]');
     let gPressed: boolean = false;
     let iShader: number = 0;
     const shaders: typeof ƒ.Shader[] = [ƒ.ShaderFlatSkin, ƒ.ShaderGouraudSkin, ƒ.ShaderPhongSkin];
@@ -114,7 +112,7 @@ namespace SkeletonTest {
       if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.H])) setShader(ƒ.ShaderPhong);
       let cmpAnimator: ƒ.ComponentAnimator = graph.getComponent(ƒ.ComponentAnimator);
       if (cmpAnimator)
-        timeSpan.innerText = cmpAnimator.time.toFixed(0);
+        timeSpan.get = () => cmpAnimator.time.toFixed(0);
       viewport.draw();
       viewport.draw();
     }

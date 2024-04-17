@@ -37,7 +37,6 @@ namespace ImportOBJTest {
     ƒ.Loop.start();
 
     function update(_event: Event): void {
-
       viewport.draw();
     }
   }

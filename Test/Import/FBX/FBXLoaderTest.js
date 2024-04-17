@@ -1,8 +1,4 @@
-/// <reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../../Aid/Build/FudgeAid"/>
 var SkeletonTest;
-/// <reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../../Aid/Build/FudgeAid"/>
 (function (SkeletonTest) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
@@ -75,7 +71,7 @@ var SkeletonTest;
         viewport.canvas.addEventListener("wheel", hndWheelMove);
         canvas.addEventListener("mousedown", canvas.requestPointerLock);
         canvas.addEventListener("mouseup", () => document.exitPointerLock());
-        let timeSpan = document.querySelector("span");
+        let timeSpan = document.querySelector('span[is=ui-time]');
         let gPressed = false;
         let iShader = 0;
         const shaders = [ƒ.ShaderFlatSkin, ƒ.ShaderGouraudSkin, ƒ.ShaderPhongSkin];
@@ -107,7 +103,7 @@ var SkeletonTest;
                 setShader(ƒ.ShaderPhong);
             let cmpAnimator = graph.getComponent(ƒ.ComponentAnimator);
             if (cmpAnimator)
-                timeSpan.innerText = cmpAnimator.time.toFixed(0);
+                timeSpan.get = () => cmpAnimator.time.toFixed(0);
             viewport.draw();
             viewport.draw();
         }

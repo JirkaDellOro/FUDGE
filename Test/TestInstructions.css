@@ -1,6 +1,12 @@
+body {
+  margin: 0;
+  padding: 0;
+  touch-action: none;
+}
+
 .dialog {
-  /* margin: 0px;
-  padding: 0.1em 1em; */
+  margin: 0px;
+  /* padding: 0.1em 1em; */
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -21,17 +27,20 @@ div.dialog-button {
   width: var(--size);
   height: var(--size);
   cursor: pointer;
+  background-color: rgba(255, 255, 0, 0.5);
+  border-bottom-right-radius: 10%;
 }
 
 div.dialog-button > div {
   width: 80%;
   height: calc(100% / 7);
-  background: yellow;
-  box-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;;
+  background: black;
+  /* box-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;; */
   display: block;
   margin: auto;
   margin-top: calc(100% / 7);
   transition: all 0.3s;
+  border-radius: 10%;
 }
 
 div.dialog-button > div:last-child {

@@ -8,13 +8,13 @@
 
 span[is="ui-fps"] {
   position: absolute;
-  top: 2.5rem;
+  bottom: 0;
   left: 0;
 }
 
 span[is="ui-time"] {
   position: absolute;
-  top: 3.5rem;
+  bottom: 1rem;
   left: 0;
 }
 
