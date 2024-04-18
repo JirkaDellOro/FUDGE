@@ -1,21 +1,37 @@
-body {
-  margin: 0;
-  padding: 0;
+canvas {
   touch-action: none;
 }
 
-.dialog {
-  margin: 0px;
-  /* padding: 0.1em 1em; */
+body {
+  margin: 0;
+  padding: 0;
+  text-size-adjust: none;
+  overflow: auto;
+}
+
+dialog.dialog {
   font-family: Arial, Helvetica, sans-serif;
+  overflow: auto;
+}
+
+.dialog {
+  max-height: 100%;
+  box-sizing: border-box; /* Add this line */
 }
 
 fieldset.dialog {
   border: 2px #dddddd solid;
+  margin: 0;
 }
 
 legend.dialog {
   color: gray;
+}
+
+ul.dialog {
+  /* padding: 0;  */
+  padding-inline-start: 1rem;
+  margin: 0;
 }
 
 div.dialog-button {

@@ -22,12 +22,14 @@ namespace FudgeAid {
       _viewport.canvas.addEventListener("pointerup", hndPointerUp);
       _viewport.canvas.addEventListener("pointerdown", hndPointerDown);
       _viewport.canvas.addEventListener("pointermove", hndPointerMove);
+      _viewport.canvas.addEventListener("pointerleave", hndPointerUp);
+      _viewport.canvas.addEventListener("pointercancel", hndPointerUp);
       _viewport.canvas.addEventListener("wheel", hndWheelMove);
 
       const factorPan: number = 1 / 500;
       const factorFly: number = 1 / 20;
       const factorZoom: number = 1 / 3;
-      const factorZoomTouch: number = 2;
+      const factorZoomTouch: number = 2.5;
 
       const doubleTapThreshold = { time: 300, distance: 30 ** 2 }; // eslint-disable-line
       const pinchThreshold: number = 70; // max horizontal distance between two touches to be recognized as pinch

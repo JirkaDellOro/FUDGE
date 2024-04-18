@@ -3,7 +3,6 @@
     "ƒ.MeshOBJ": {
       "idResource": "MeshOBJ|2023-10-13T07:18:14.683Z|37989",
       "name": "cubeFlat.obj",
-      "type": "MeshOBJ",
       "url": "OBJ\\cubeFlat.obj"
     }
   },
@@ -11,7 +10,6 @@
     "ƒ.MeshOBJ": {
       "idResource": "MeshOBJ|2023-10-13T07:18:17.274Z|05163",
       "name": "cubeFlatUV.obj",
-      "type": "MeshOBJ",
       "url": "OBJ\\cubeFlatUV.obj"
     }
   },
@@ -19,7 +17,6 @@
     "ƒ.MeshOBJ": {
       "idResource": "MeshOBJ|2023-10-13T07:18:16.123Z|75380",
       "name": "cubeFlatNormal.obj",
-      "type": "MeshOBJ",
       "url": "OBJ\\cubeFlatNormal.obj"
     }
   },
@@ -27,7 +24,6 @@
     "ƒ.MeshOBJ": {
       "idResource": "MeshOBJ|2023-10-13T07:18:18.333Z|36610",
       "name": "cubeFlatUVNormal.obj",
-      "type": "MeshOBJ",
       "url": "OBJ\\cubeFlatUVNormal.obj"
     }
   },
@@ -35,7 +31,6 @@
     "ƒ.MeshOBJ": {
       "idResource": "MeshOBJ|2023-10-13T07:18:20.015Z|86022",
       "name": "cubeSmooth.obj",
-      "type": "MeshOBJ",
       "url": "OBJ\\cubeSmooth.obj"
     }
   },
@@ -43,7 +38,6 @@
     "ƒ.MeshOBJ": {
       "idResource": "MeshOBJ|2023-10-13T07:18:21.973Z|32015",
       "name": "cubeSmoothUV.obj",
-      "type": "MeshOBJ",
       "url": "OBJ\\cubeSmoothUV.obj"
     }
   },
@@ -51,7 +45,6 @@
     "ƒ.MeshOBJ": {
       "idResource": "MeshOBJ|2023-10-13T07:18:21.002Z|53003",
       "name": "cubeSmoothNormal.obj",
-      "type": "MeshOBJ",
       "url": "OBJ\\cubeSmoothNormal.obj"
     }
   },
@@ -59,7 +52,6 @@
     "ƒ.MeshOBJ": {
       "idResource": "MeshOBJ|2023-10-13T07:18:22.735Z|36572",
       "name": "cubeSmoothUVNormal.obj",
-      "type": "MeshOBJ",
       "url": "OBJ\\cubeSmoothUVNormal.obj"
     }
   },
@@ -197,7 +189,7 @@
                           "Component": {
                             "active": true
                           },
-                          "idMaterial": "Material|2023-10-27T07:42:28.907Z|54148"
+                          "idMaterial": "Material|2024-04-18T15:00:10.955Z|78959"
                         }
                       }
                     ],
@@ -206,6 +198,62 @@
                         "ƒ.ComponentTransform": {
                           "local": {
                             "translation": "[0, 0, 0]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[1, 1, 1]"
+                          },
+                          "Component": {
+                            "active": true
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "children": []
+                }
+              },
+              {
+                "ƒ.Node": {
+                  "name": "CubeFlatNormal",
+                  "active": true,
+                  "components": {
+                    "ComponentMesh": [
+                      {
+                        "ƒ.ComponentMesh": {
+                          "idMesh": "MeshOBJ|2023-10-13T07:18:16.123Z|75380",
+                          "pivot": {
+                            "translation": "[0, 0, 0]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[1, 1, 1]"
+                          },
+                          "Component": {
+                            "active": true
+                          }
+                        }
+                      }
+                    ],
+                    "ComponentMaterial": [
+                      {
+                        "ƒ.ComponentMaterial": {
+                          "sortForAlpha": false,
+                          "clrPrimary": "[1, 1, 1, 1]",
+                          "clrSecondary": "[1, 1, 1, 1]",
+                          "pivot": {
+                            "translation": "[0, 0]",
+                            "rotation": 0,
+                            "scaling": "[1, 1]"
+                          },
+                          "Component": {
+                            "active": true
+                          },
+                          "idMaterial": "Material|2024-04-18T15:00:10.955Z|78959"
+                        }
+                      }
+                    ],
+                    "ComponentTransform": [
+                      {
+                        "ƒ.ComponentTransform": {
+                          "local": {
+                            "translation": "[1.4999998807907104, 0, 0]",
                             "rotation": "[0, 0, 0]",
                             "scaling": "[1, 1, 1]"
                           },
@@ -261,63 +309,7 @@
                       {
                         "ƒ.ComponentTransform": {
                           "local": {
-                            "translation": "[1.4999998807907104, 0, 0]",
-                            "rotation": "[0, 0, 0]",
-                            "scaling": "[1, 1, 1]"
-                          },
-                          "Component": {
-                            "active": true
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  "children": []
-                }
-              },
-              {
-                "ƒ.Node": {
-                  "name": "CubeFlatNormal",
-                  "active": true,
-                  "components": {
-                    "ComponentMesh": [
-                      {
-                        "ƒ.ComponentMesh": {
-                          "idMesh": "MeshOBJ|2023-10-13T07:18:16.123Z|75380",
-                          "pivot": {
-                            "translation": "[0, 0, 0]",
-                            "rotation": "[0, 0, 0]",
-                            "scaling": "[1, 1, 1]"
-                          },
-                          "Component": {
-                            "active": true
-                          }
-                        }
-                      }
-                    ],
-                    "ComponentMaterial": [
-                      {
-                        "ƒ.ComponentMaterial": {
-                          "sortForAlpha": false,
-                          "clrPrimary": "[1, 1, 1, 1]",
-                          "clrSecondary": "[1, 1, 1, 1]",
-                          "pivot": {
-                            "translation": "[0, 0]",
-                            "rotation": 0,
-                            "scaling": "[1, 1]"
-                          },
-                          "Component": {
-                            "active": true
-                          },
-                          "idMaterial": "Material|2023-10-27T07:42:28.907Z|54148"
-                        }
-                      }
-                    ],
-                    "ComponentTransform": [
-                      {
-                        "ƒ.ComponentTransform": {
-                          "local": {
-                            "translation": "[3, 0, 0]",
+                            "translation": "[2.999999523162842, 0, 0]",
                             "rotation": "[0, 0, 0]",
                             "scaling": "[1, 1, 1]"
                           },
@@ -445,7 +437,7 @@
                           "Component": {
                             "active": true
                           },
-                          "idMaterial": "Material|2023-10-27T07:42:28.907Z|54148"
+                          "idMaterial": "Material|2024-04-18T15:00:10.955Z|78959"
                         }
                       }
                     ],
@@ -454,6 +446,62 @@
                         "ƒ.ComponentTransform": {
                           "local": {
                             "translation": "[0, 0, 0]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[1, 1, 1]"
+                          },
+                          "Component": {
+                            "active": true
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "children": []
+                }
+              },
+              {
+                "ƒ.Node": {
+                  "name": "CubeSmoothNormal",
+                  "active": true,
+                  "components": {
+                    "ComponentMesh": [
+                      {
+                        "ƒ.ComponentMesh": {
+                          "idMesh": "MeshOBJ|2023-10-13T07:18:21.002Z|53003",
+                          "pivot": {
+                            "translation": "[0, 0, 0]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[1, 1, 1]"
+                          },
+                          "Component": {
+                            "active": true
+                          }
+                        }
+                      }
+                    ],
+                    "ComponentMaterial": [
+                      {
+                        "ƒ.ComponentMaterial": {
+                          "sortForAlpha": false,
+                          "clrPrimary": "[1, 1, 1, 1]",
+                          "clrSecondary": "[1, 1, 1, 1]",
+                          "pivot": {
+                            "translation": "[0, 0]",
+                            "rotation": 0,
+                            "scaling": "[1, 1]"
+                          },
+                          "Component": {
+                            "active": true
+                          },
+                          "idMaterial": "Material|2024-04-18T15:00:10.955Z|78959"
+                        }
+                      }
+                    ],
+                    "ComponentTransform": [
+                      {
+                        "ƒ.ComponentTransform": {
+                          "local": {
+                            "translation": "[1.4999998807907104, 0, 0]",
                             "rotation": "[0, 0, 0]",
                             "scaling": "[1, 1, 1]"
                           },
@@ -509,63 +557,7 @@
                       {
                         "ƒ.ComponentTransform": {
                           "local": {
-                            "translation": "[1.4999998807907104, 0, 0]",
-                            "rotation": "[0, 0, 0]",
-                            "scaling": "[1, 1, 1]"
-                          },
-                          "Component": {
-                            "active": true
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  "children": []
-                }
-              },
-              {
-                "ƒ.Node": {
-                  "name": "CubeSmoothNormal",
-                  "active": true,
-                  "components": {
-                    "ComponentMesh": [
-                      {
-                        "ƒ.ComponentMesh": {
-                          "idMesh": "MeshOBJ|2023-10-13T07:18:21.002Z|53003",
-                          "pivot": {
-                            "translation": "[0, 0, 0]",
-                            "rotation": "[0, 0, 0]",
-                            "scaling": "[1, 1, 1]"
-                          },
-                          "Component": {
-                            "active": true
-                          }
-                        }
-                      }
-                    ],
-                    "ComponentMaterial": [
-                      {
-                        "ƒ.ComponentMaterial": {
-                          "sortForAlpha": false,
-                          "clrPrimary": "[1, 1, 1, 1]",
-                          "clrSecondary": "[1, 1, 1, 1]",
-                          "pivot": {
-                            "translation": "[0, 0]",
-                            "rotation": 0,
-                            "scaling": "[1, 1]"
-                          },
-                          "Component": {
-                            "active": true
-                          },
-                          "idMaterial": "Material|2023-10-27T07:42:28.907Z|54148"
-                        }
-                      }
-                    ],
-                    "ComponentTransform": [
-                      {
-                        "ƒ.ComponentTransform": {
-                          "local": {
-                            "translation": "[3, 0, 0]",
+                            "translation": "[2.999999523162842, 0, 0]",
                             "rotation": "[0, 0, 0]",
                             "scaling": "[1, 1, 1]"
                           },
@@ -641,6 +633,22 @@
       ],
       "idResource": "Graph|2023-07-25T08:47:48.755Z|05108",
       "type": "Graph"
+    }
+  },
+  "Material|2024-04-18T15:00:10.955Z|78959": {
+    "ƒ.Material": {
+      "name": "ShaderPhong",
+      "idResource": "Material|2024-04-18T15:00:10.955Z|78959",
+      "shader": "ShaderPhong",
+      "coat": {
+        "ƒ.CoatRemissive": {
+          "color": "[1, 1, 1, 1]",
+          "diffuse": 1,
+          "specular": 0.5,
+          "intensity": 0.7,
+          "metallic": 0
+        }
+      }
     }
   }
 }
