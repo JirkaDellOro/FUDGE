@@ -208,7 +208,7 @@ namespace FudgeCore {
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
-      serialization.idResource = this.audio.idResource;
+      serialization.idResource = this.audio?.idResource;
       serialization.playing = this.playing;
       serialization.loop = this.loop;
       serialization.volume = this.volume;
