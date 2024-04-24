@@ -74,10 +74,10 @@ namespace FudgeCore {
         imageData = crc2.getImageData(0, 0, this.texImageSource.width, this.texImageSource.height);
       }
 
-      for (let i: number = 0; i < imageData.data.length; i += 4) 
+      for (let i: number = 0; i < imageData.data.length; i += 4)
         if (imageData.data[i + 3] < 255)
           return this.#hasTransparency = true;
-      
+
       return this.#hasTransparency = false;
     }
 
@@ -233,12 +233,14 @@ namespace FudgeCore {
   export class TextureBase64 extends Texture {
     public image: HTMLImageElement = new Image();
 
-    public constructor(_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP, _wrap: WRAP = WRAP.REPEAT, _width: number = 64, _height: number = 64) {
+    public constructor(_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP, _wrap: WRAP = WRAP.REPEAT, _width?: number, _height?: number) {
       super(_name);
       this.image.src = _base64;
       this.mipmap = _mipmap;
-      this.image.width = _width;
-      this.image.height = _height;
+      if (_width)
+        this.image.width = _width;
+      if (_height)
+        this.image.height = _height;
     }
 
     public get texImageSource(): ImageSource {

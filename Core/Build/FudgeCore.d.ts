@@ -1311,9 +1311,9 @@ declare namespace FudgeCore {
     */
     enum BODY_TYPE {
         /** The body ignores the hierarchy of the render graph, is completely controlled  by physics and takes its node with it  */
-        DYNAMIC = 0,// = OIMO.RigidBodyType.DYNAMIC,
+        DYNAMIC = 0,
         /** The body ignores the hierarchy of the render graph, is completely immoveble and keeps its node from moving  */
-        STATIC = 1,// = OIMO.RigidBodyType.STATIC,
+        STATIC = 1,
         /** The body is controlled by its node and moves with it, while it impacts the physical world e.g. by collisions */
         KINEMATIC = 2
     }
@@ -3145,7 +3145,7 @@ declare namespace FudgeCore {
         LAUNCH_APP1 = "LaunchApp1",
         LAUNCH_MAIL = "LaunchMail",
         LAUNCH_MEDIA_PLAYER = "LaunchMediaPlayer",
-        FN = "Fn",//no event fired actually
+        FN = "Fn",
         AGAIN = "Again",
         PROPS = "Props",
         SELECT = "Select",
@@ -8067,7 +8067,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     abstract class ShaderAmbientOcclusion extends Shader {
-        static readonly iSubclass: number;
         static define: string[];
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -8075,7 +8074,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     abstract class ShaderBloom extends Shader {
-        static readonly iSubclass: number;
         static define: string[];
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;

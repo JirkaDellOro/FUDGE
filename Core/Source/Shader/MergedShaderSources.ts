@@ -859,7 +859,7 @@ void main() {
   #if defined(TEXTURE) || defined(MATCAP)
     
     // TEXTURE: multiply with texel color
-    vec4 vctColorTexture = texture(u_texColor, v_vctTexture);
+    vec4 vctColorTexture = texture(u_texColor, v_vctTexture); // has premultiplied alpha by webgl
     vctFrag *= vctColorTexture;
 
   #endif
@@ -896,10 +896,9 @@ void main() {
         vctFrag.a = mix(vctFrag.a, 0.0, fFog);                          // fade out particle when in fog to make it disappear completely
 
     #endif
+
     vctFrag.rgb *= vctFrag.a; // premultiply alpha
   }
-
-
 }`;
   shaderSources["ShaderUniversal.vert"] = /*glsl*/ `#version 300 es
 /**

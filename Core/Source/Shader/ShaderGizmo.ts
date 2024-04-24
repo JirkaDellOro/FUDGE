@@ -1,6 +1,5 @@
 namespace FudgeCore {
   export abstract class ShaderGizmo extends Shader {
-    // public static readonly iSubclass: number = Shader.registerSubclass(ShaderGizmo);
     public static define: string[] = [];
 
     public static getVertexShaderSource(): string {

@@ -1,7 +1,5 @@
 namespace FudgeCore {
   export abstract class ShaderAmbientOcclusion extends Shader {
-    public static readonly iSubclass: number = Shader.registerSubclass(ShaderAmbientOcclusion);
-
     public static define: string[] = [];
 
     public static getVertexShaderSource(): string {
