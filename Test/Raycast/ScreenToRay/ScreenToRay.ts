@@ -207,7 +207,7 @@ namespace ScreenToRay {
   }
 
   function setCursorPosition(_event: MouseEvent): void {
-    mouse = new ƒ.Vector2(_event.clientX, _event.clientY);
+    mouse = new ƒ.Vector2(_event.offsetX, _event.offsetY);
     mouseButton = _event.buttons;
   }
 
@@ -326,8 +326,11 @@ namespace ScreenToRay {
         }
       }
     }
-    let clientRect: ClientRect = canvas.getBoundingClientRect();
-    uiClient.set(ƒ.Rectangle.GET(clientRect.left, clientRect.top, clientRect.width, clientRect.height));
+
+    let parentRect: DOMRect = canvas.parentElement.getBoundingClientRect();
+    let canvasRect: DOMRect = canvas.getBoundingClientRect();
+    let relativeRect: DOMRect = new DOMRect(canvasRect.left - parentRect.left, canvasRect.top - parentRect.top, canvasRect.width, canvasRect.height);
+    uiClient.set(ƒ.Rectangle.GET(relativeRect.left, relativeRect.top, relativeRect.width, relativeRect.height));
 
     uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView(), near: cmpCamera.getNear(), far: cmpCamera.getFar() });
   }

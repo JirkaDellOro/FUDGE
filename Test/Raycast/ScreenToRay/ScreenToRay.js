@@ -164,7 +164,7 @@ var ScreenToRay;
         return ray;
     }
     function setCursorPosition(_event) {
-        mouse = new ƒ.Vector2(_event.clientX, _event.clientY);
+        mouse = new ƒ.Vector2(_event.offsetX, _event.offsetY);
         mouseButton = _event.buttons;
     }
     function hndKeydown(_event) {
@@ -271,8 +271,10 @@ var ScreenToRay;
                 }
             }
         }
-        let clientRect = canvas.getBoundingClientRect();
-        uiClient.set(ƒ.Rectangle.GET(clientRect.left, clientRect.top, clientRect.width, clientRect.height));
+        let parentRect = canvas.parentElement.getBoundingClientRect();
+        let canvasRect = canvas.getBoundingClientRect();
+        let relativeRect = new DOMRect(canvasRect.left - parentRect.left, canvasRect.top - parentRect.top, canvasRect.width, canvasRect.height);
+        uiClient.set(ƒ.Rectangle.GET(relativeRect.left, relativeRect.top, relativeRect.width, relativeRect.height));
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView(), near: cmpCamera.getNear(), far: cmpCamera.getFar() });
     }
 })(ScreenToRay || (ScreenToRay = {}));

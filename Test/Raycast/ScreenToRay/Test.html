@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>ScreenToRay</title>
   <link rel="stylesheet" href="../../TestInstructions.css">
+  <link rel="stylesheet" href="../../UI.css">
   <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
   <script type="text/javascript" src="../../../Aid/Build/FudgeAid.js"></script>
   <script type="text/javascript" src="../../UI.js"></script>
@@ -16,20 +17,32 @@
       margin: 0;
       width: 100%;
       height: 100%;
-      overflow: hidden;
+      overflow: auto;
     }
 
     canvas {
       image-rendering: pixelated;
-      display: inline-block;
-      width: 300px;
-      height: 300px;
+      height: 100%;
+      width: 100%;
     }
 
-    canvas#viewport {
+    #ray {
+      aspect-ratio: 1;
+    }
+
+    #viewport {
+      position: absolute;
+      width: 75%;
+      height: 75%;
+    }
+
+    #container-viewport,
+    #container-output {
+      position: relative;
       display: block;
-      width: 600px;
-      height: 600px;
+      height: 50%;
+      width: calc(100% - 35rem);
+      overflow: hidden;
     }
 
     input[type=number] {
@@ -38,7 +51,8 @@
     }
 
     #menu {
-      width: 30em;
+      width: 35rem;
+      max-width: 100%;
       position: fixed;
       top: 0px;
       bottom: 0px;
@@ -47,10 +61,26 @@
       overflow: auto;
     }
 
-    output {
-      display: inline-block;
-      width: 300px;
-      vertical-align: top;
+    #output {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: fit-content;
+    }
+
+    @media screen and (max-width: 600px) {
+      #ray {
+        touch-action: pan-y;
+      }
+
+      #container-viewport, #container-output {
+        width: 100vmin;
+      }
+
+      #menu {
+        display: inline-block;
+        position: unset;
+      }
     }
   </style>
 </head>
@@ -90,9 +120,13 @@
       ],
     });
   </script>
-  <canvas id="viewport"></canvas>
-  <canvas id="ray"></canvas>
-  <output></output>
+  <div id="container-viewport">
+    <canvas id="viewport"></canvas>
+  </div>
+  <div id="container-output">
+    <canvas id="ray"></canvas>
+    <output id="output" class="ui-canvas"></output>
+  </div>
   <div name="menu" id="menu">
   </div>
 </body>
