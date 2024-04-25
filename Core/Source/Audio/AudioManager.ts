@@ -64,6 +64,8 @@ namespace FudgeCore {
      * Updates the spatial settings of the AudioNodes effected in the current FUDGE-graph
      */
     public update = (): void => {
+      if (this.state != "running")
+        return;
       // this.graph.broadcastEvent(new Event(EVENT_AUDIO.UPDATE));
       this.graph.broadcastEvent(AudioManager.eventUpdate);
       if (this.cmpListener)
