@@ -49,22 +49,25 @@ namespace FudgeCore {
       */
     public initialize(_name: string, _branch: Node, _cameraXR: ComponentVRDevice /* | ComponentCameraAR*/, _canvas: HTMLCanvasElement): void {
       super.initialize(_name, _branch, _cameraXR, _canvas);
-      this.camera = _cameraXR;
     }
 
     /**
      * The VR Session is initialized here, also VR - Controller are initialized, if boolean is true.
      * Creator has to call FrameRequestXR after this Method to run the viewport in virtual reality.
      */
-    public async initializeVR(_vrSessionMode: XR_SESSION_MODE = XR_SESSION_MODE.IMMERSIVE_VR, _vrReferenceSpaceType: XR_REFERENCE_SPACE = XR_REFERENCE_SPACE.LOCAL,
-                              _vrController: boolean = false): Promise<void> {
+    public async initializeVR(_vrSessionMode: XR_SESSION_MODE = XR_SESSION_MODE.IMMERSIVE_VR, _vrReferenceSpaceType: XR_REFERENCE_SPACE = XR_REFERENCE_SPACE.LOCAL, _vrController: boolean = false): Promise<void> {
       let session: XRSession = await navigator.xr.requestSession(_vrSessionMode);
       this.referenceSpace = await session.requestReferenceSpace(_vrReferenceSpaceType);
       await Render.getRenderingContext().makeXRCompatible();
       let nativeScaleFactor: number = XRWebGLLayer.getNativeFramebufferScaleFactor(session);
       //TODO:  Field of view könnte an der Stelle noch verändert werden.
-      await session.updateRenderState({ baseLayer: new XRWebGLLayer(session, Render.getRenderingContext(), { framebufferScaleFactor: nativeScaleFactor }) });
-
+      let baseLayer: XRWebGLLayer = new XRWebGLLayer(session, Render.getRenderingContext(), { framebufferScaleFactor: nativeScaleFactor });
+      await session.updateRenderState({ baseLayer: baseLayer });
+      Render.setFramebufferTarget(baseLayer.framebuffer);
+      Render.setCanvasSize(baseLayer.framebufferWidth, baseLayer.framebufferHeight);
+      Render.setRenderRectangle(Rectangle.GET(0, 0, baseLayer.framebufferWidth, baseLayer.framebufferHeight));
+      Render.adjustAttachments();
+      this.adjustingFrames = false; // web xr handles this now
       this.vrDevice = <ComponentVRDevice>this.camera;
       this.initializeReferenceSpace();
 
@@ -102,12 +105,10 @@ namespace FudgeCore {
         return;
 
       this.vrDevice.mtxLocal.set(pose.transform.matrix);
+      this.vrDevice.mtxLocal.rotateY(180); // rotate back because the XR Rig is looking in the direction of negative z
       super.prepare(_prepareBranch);
 
       let glLayer: XRWebGLLayer = this.session.renderState.baseLayer;
-      // Render.resetFramebuffer(glLayer.framebuffer); // ⚠️ TODO: this won't work with the new rendering system, find a way to fix this. 
-      // In the past this would change the framebuffer into which fudge rendered but now fudge has its own framebuffers for post processing effects...
-
       for (let view of pose.views) {
         let viewport: globalThis.XRViewport = glLayer.getViewport(view);
         Render.setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
@@ -116,7 +117,7 @@ namespace FudgeCore {
         if (this.useVRController)
           this.setControllerConfigs(_xrFrame);
         this.camera.resetWorldToView(); // TODO: find a less expensive way to do this, maybe use two cameras
-        this.camera.mtxProjection.set(view.projectionMatrix); 
+        this.camera.mtxProjection.set(view.projectionMatrix);
         this.camera.mtxCameraInverse.set(view.transform.inverse.matrix);
 
         if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
@@ -126,22 +127,22 @@ namespace FudgeCore {
         }
       }
 
-      Render.setRenderRectangle(Render.getRenderRectangle()); // TODO: check if this is necessary
+      // reset for other render operations e.g. picking
+      Render.setScissorTest(false);
+      Render.setRenderRectangle(Render.getRenderRectangle());
     }
 
     /**
      * Move the reference space to set the initial position/orientation of the vr device in accordance to the node the vr device is attached to.
      */
     private initializeReferenceSpace(): void {
-      let mtxWorld: Matrix4x4 = this.vrDevice.node?.mtxWorld;
+      let mtxWorld: Matrix4x4 = this.vrDevice.node?.getComponent(ComponentVRDevice)?.mtxWorld;
       if (!mtxWorld)
         return;
 
       mtxWorld = mtxWorld.clone;
       mtxWorld.rotateY(180); // rotate because the XR Rig is looking in the direction of negative z
       let invMtxTransfom: Matrix4x4 = mtxWorld.inverse(); // inverse because we are moving the reference space
-      // let invOrientation: Quaternion = new Quaternion();
-      // invOrientation.eulerAngles = invMtxTransfom.eulerAngles;
       XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invMtxTransfom.translation, invMtxTransfom.quaternion));
     }
 

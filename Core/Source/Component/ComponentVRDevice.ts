@@ -37,60 +37,67 @@ namespace FudgeCore {
     /**
      * Sets a Vector3 as Position of the reference space.
      */
-    public set translation(_newPos: Vector3) {
-      let invTranslation: Vector3 = Vector3.SCALE(Vector3.DIFFERENCE(_newPos, this.#mtxLocal.translation), -1);
-      XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
-      this.#mtxLocal.translation = _newPos;
+    public set translation(_translation: Vector3) {
+      let translation: Vector3 = _translation.clone;
+      translation.subtract(this.#mtxLocal.translation);
+      translation.negate();
+      XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(translation));
+      this.#mtxLocal.translation = _translation;
+      Recycler.store(translation);
     }
 
     /**
      * Sets Vector3 Rotation of the reference space.
-     * Rotation needs to be set in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin. 
      */
-    public set rotation(_newRot: Vector3) {
-      let newRot: Vector3 = Vector3.SCALE(Vector3.SCALE(Vector3.SUM(_newRot, this.#mtxLocal.rotation), -1), Math.PI / 180);
-
+    public set rotation(_rotation: Vector3) {
+      let rotation: Vector3 = _rotation.clone; 
+      rotation.subtract(this.#mtxLocal.rotation);
+      rotation.negate();
       let orientation: Quaternion = new Quaternion();
-      orientation.eulerAngles = newRot;
-      //set xr - rig back to origin
+      orientation.eulerAngles = rotation;
+      // Rotation needs to be set in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin. 
+      // set xr - rig back to origin
       XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(this.#mtxLocal.translation, Vector3.ZERO())));
-      //rotate xr rig in origin
-      XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
-      //set xr - rig back to last position 
+      // rotate xr rig in origin
+      XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), orientation));
+      // set xr - rig back to last position 
       XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(Vector3.ZERO(), this.#mtxLocal.translation)));
-      this.#mtxLocal.rotation = Vector3.SCALE(_newRot, -1);
+      this.#mtxLocal.rotation = _rotation;
+      Recycler.store(rotation);
     }
 
     /**
      * Adds a Vector3 in Position of the reference space.
      */
     public translate(_by: Vector3): void {
-      let invTranslation: Vector3 = Vector3.SCALE(_by, -1);
-      XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(invTranslation));
+      let translation: Vector3 = _by.clone;
+      translation.transform(this.#mtxLocal.quaternion);
+      translation.negate();
+      XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(translation));
       this.#mtxLocal.translate(_by);
+      Recycler.store(translation);
     }
 
     /**
      * Adds a Vector3 in Rotation of the reference space.
-     * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin. 
      */
     public rotate(_by: Vector3): void {
-      let rotAmount: Vector3 = Vector3.SCALE(Vector3.SCALE(_by, -1), Math.PI / 180);
-
+      let rotation: Vector3 = _by.clone.negate(); 
       let orientation: Quaternion = new Quaternion();
-      orientation.eulerAngles = rotAmount;
-      //set xr - rig back to origin
+      orientation.eulerAngles = rotation;
+      // Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin. 
+      // set xr - rig back to origin
       XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(this.#mtxLocal.translation, Vector3.ZERO())));
-      //rotate xr rig in origin
-      XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), <DOMPointInit><unknown>orientation));
-      //set xr - rig back to last position 
+      // rotate xr rig in origin
+      XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.ZERO(), orientation));
+      // set xr - rig back to last position 
       XRViewport.default.referenceSpace = XRViewport.default.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(Vector3.DIFFERENCE(Vector3.ZERO(), this.#mtxLocal.translation)));
-      this.#mtxLocal.rotate(Vector3.SCALE(_by, -1));
+      this.#mtxLocal.rotate(_by);
+      Recycler.store(rotation);
     }
 
     private getMtxLocalFromCmpTransform(): void {
-      this.#mtxLocal = this.node.getComponent(ComponentTransform).mtxLocal;
-
+      this.#mtxLocal = this.node.mtxLocal;
     }
   }
 }

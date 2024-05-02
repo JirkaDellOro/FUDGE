@@ -115,17 +115,12 @@ namespace Fudge {
         // console.log(this.node);
         return;
       }
-      if (cmpNew instanceof ƒ.ComponentFog && this.node.getComponent(ƒ.ComponentCamera) == null) {
-        alert(`To attach a ${ƒ.ComponentFog.name}, first attach a ${ƒ.ComponentCamera.name}.`);
-        return;
-      }
-      if (cmpNew instanceof ƒ.ComponentAmbientOcclusion && this.node.getComponent(ƒ.ComponentCamera) == null) {
-        alert(`To attach a ${ƒ.ComponentAmbientOcclusion.name}, first attach a ${ƒ.ComponentCamera.name}.`);
-        return;
-      }
-      if (cmpNew instanceof ƒ.ComponentBloom && this.node.getComponent(ƒ.ComponentCamera) == null) {
-        alert(`To attach a ${ƒ.ComponentBloom.name}, first attach a ${ƒ.ComponentCamera.name}.`);
-        return;
+      if (cmpNew instanceof ƒ.ComponentFog || cmpNew instanceof ƒ.ComponentAmbientOcclusion || cmpNew instanceof ƒ.ComponentBloom) {
+        let camera: ƒ.ComponentCamera = this.node.getComponent(ƒ.ComponentCamera) ?? this.node.getComponent(ƒ.ComponentVRDevice);
+        if (!camera) {
+          alert(`To attach a ${cmpNew.type}, first attach a ${ƒ.ComponentCamera.name} or ${ƒ.ComponentVRDevice.name}.`);
+          return;
+        }
       }
       ƒ.Debug.info(cmpNew.type, cmpNew);
 

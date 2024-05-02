@@ -15,7 +15,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -45,7 +47,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "specular": 1
+          "specular": 1,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -59,7 +63,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -712,6 +718,8 @@
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
+                    "near": 1,
+                    "far": 2000,
                     "aspect": 1.250778816199377,
                     "pivot": {
                       "translation": "[0, 0, -9]",
@@ -863,7 +871,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 0, 0, 1]",
           "diffuse": 1,
-          "specular": 4
+          "specular": 4,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }

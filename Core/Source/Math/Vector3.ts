@@ -325,6 +325,7 @@ namespace FudgeCore {
      */
     public add(_addend: Vector3): void {
       this.data.set([_addend.x + this.x, _addend.y + this.y, _addend.z + this.z]);
+      // this.x += _addend.x; this.y += _addend.y; this.z += _addend.z;
     }
 
     /**
@@ -332,6 +333,7 @@ namespace FudgeCore {
      */
     public subtract(_subtrahend: Vector3): void {
       this.data.set([this.x - _subtrahend.x, this.y - _subtrahend.y, this.z - _subtrahend.z]);
+      // this.x -= _subtrahend.x; this.y -= _subtrahend.y; this.z -= _subtrahend.z;
     }
 
     /**
@@ -339,6 +341,7 @@ namespace FudgeCore {
      */
     public scale(_scalar: number): void {
       this.data.set([_scalar * this.x, _scalar * this.y, _scalar * this.z]);
+      // this.x *= _scalar; this.y *= _scalar; this.z *= _scalar;
     }
 
     /**
@@ -352,7 +355,9 @@ namespace FudgeCore {
      * Negates this vector by flipping the signs of its components
      */
     public negate(): Vector3 {
-      this.data.set([-this.x, -this.y, -this.z]);
+      // this.data.set([-this.x, -this.y, -this.z]);
+      // TODO: check if index-access is faster than set, as set needs to create a new array
+      this.x = -this.x; this.y = -this.y; this.z = -this.z;
       return this;
     }
 

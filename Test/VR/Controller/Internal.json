@@ -8,7 +8,9 @@
         "ƒ.CoatRemissive": {
           "color": "[1, 1, 1, 1]",
           "diffuse": 1,
-          "specular": 0
+          "specular": 0,
+          "intensity": 0.7,
+          "metallic": 0
         }
       }
     }
@@ -39,39 +41,31 @@
     }
   },
   "MeshObj|2022-12-12T11:05:32.406Z|14446": {
-    "ƒ.MeshImport": {
+    "ƒ.MeshOBJ": {
       "idResource": "MeshObj|2022-12-12T11:05:32.406Z|14446",
       "name": "trigger.obj",
-      "type": "MeshObj",
-      "url": "trigger.obj",
-      "filetype": "OBJ"
+      "url": "trigger.obj"
     }
   },
   "MeshObj|2022-12-12T11:36:32.933Z|22290": {
-    "ƒ.MeshImport": {
+    "ƒ.MeshOBJ": {
       "idResource": "MeshObj|2022-12-12T11:36:32.933Z|22290",
       "name": "controllerRight.obj",
-      "type": "MeshObj",
-      "url": "controllerRight.obj",
-      "filetype": "OBJ"
+      "url": "controllerRight.obj"
     }
   },
   "MeshObj|2022-12-12T11:38:39.086Z|59631": {
-    "ƒ.MeshImport": {
+    "ƒ.MeshOBJ": {
       "idResource": "MeshObj|2022-12-12T11:38:39.086Z|59631",
       "name": "controllerleft.obj",
-      "type": "MeshObj",
-      "url": "controllerleft.obj",
-      "filetype": "OBJ"
+      "url": "controllerleft.obj"
     }
   },
   "MeshObj|2022-12-13T09:30:33.828Z|84475": {
-    "ƒ.MeshImport": {
+    "ƒ.MeshOBJ": {
       "idResource": "MeshObj|2022-12-13T09:30:33.828Z|84475",
       "name": "joystick.obj",
-      "type": "MeshObj",
-      "url": "joystick.obj",
-      "filetype": "OBJ"
+      "url": "joystick.obj"
     }
   },
   "Graph|2022-12-01T12:38:45.569Z|77314": {
@@ -147,7 +141,6 @@
             "name": "Camera",
             "active": true,
             "components": {
-              "ComponentCamera": [],
               "ComponentTransform": [
                 {
                   "ƒ.ComponentTransform": {
@@ -175,6 +168,8 @@
                     "projection": "central",
                     "fieldOfView": 45,
                     "direction": "diagonal",
+                    "near": 1,
+                    "far": 2000,
                     "aspect": 1,
                     "pivot": {
                       "translation": "[0, 0, 7]",

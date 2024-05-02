@@ -68,8 +68,9 @@ namespace FudgeCore {
     private static rectRender: Rectangle = RenderWebGL.getCanvasRect();
     private static sizePick: number;
 
-    private static framebufferMain: WebGLFramebuffer; // used for forward rendering passes, e.g. opaque and transparent objects
-    private static framebufferPost: WebGLFramebuffer; // used for post-processing effects, attachments get swapped for different effects
+    private static fboMain: WebGLFramebuffer; // used for forward rendering passes, e.g. opaque and transparent objects
+    private static fboPost: WebGLFramebuffer; // used for post-processing effects, attachments get swapped for different effects
+    private static fboTarget: WebGLFramebuffer; // used to render the final image to, usually "null" to render to the canvas default framebuffer. Used by XR to render to the XRWebGLLayer framebuffer.
 
     private static texColor: WebGLTexture; // stores the color of each pixel rendered
     private static texPosition: WebGLTexture; // stores the position of each pixel in world space
@@ -91,7 +92,7 @@ namespace FudgeCore {
       let contextAttributes: WebGLContextAttributes = { // TODO: 
         alpha: (_alpha != undefined) ? _alpha : fudgeConfig.alpha || false,
         antialias: false,
-        premultipliedAlpha: false, 
+        premultipliedAlpha: false,
         stencil: true
       };
       Debug.fudge("Initialize RenderWebGL", contextAttributes);
@@ -176,10 +177,18 @@ namespace FudgeCore {
     }
 
     /**
+     * Set the final framebuffer to render to. If null, the canvas default framebuffer is used.
+     * Used by XR to render to the XRWebGLLayer framebuffer.
+     */
+    public static setFramebufferTarget(_buffer: WebGLFramebuffer): void {
+      RenderWebGL.fboTarget = _buffer;
+    }
+
+    /**
      * Reset the framebuffer to the main color buffer.
      */
     public static resetFramebuffer(): void {
-      RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.framebufferMain);
+      RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.fboMain);
     }
 
     /**
@@ -202,7 +211,7 @@ namespace FudgeCore {
     /**
      * Enable / Disable WebGLs scissor test.
      */
-    public static setScissorTest(_test: boolean, _x: number, _y: number, _width: number, _height: number): void {
+    public static setScissorTest(_test: boolean, _x?: number, _y?: number, _width?: number, _height?: number): void {
       if (_test)
         RenderWebGL.crc3.enable(WebGL2RenderingContext.SCISSOR_TEST);
       else
@@ -257,7 +266,7 @@ namespace FudgeCore {
     public static pointRenderToWorld(_render: Vector2): Vector3 {
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       const data: Float32Array = new Float32Array(4);
-      crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.framebufferMain);
+      crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.fboMain);
       crc3.readBuffer(WebGL2RenderingContext.COLOR_ATTACHMENT1);
       crc3.readPixels(_render.x, RenderWebGL.rectRender.height - _render.y, 1, 1, crc3.RGBA, crc3.FLOAT, data);
       crc3.readBuffer(WebGL2RenderingContext.COLOR_ATTACHMENT0);
@@ -272,8 +281,9 @@ namespace FudgeCore {
     public static initializeAttachments(): void {
       RenderWebGL.crc3.getExtension("EXT_color_buffer_float"); // TODO: disable ssao if not supported
 
-      RenderWebGL.framebufferMain = RenderWebGL.assert<WebGLFramebuffer>(RenderWebGL.crc3.createFramebuffer());
-      RenderWebGL.framebufferPost = RenderWebGL.assert<WebGLFramebuffer>(RenderWebGL.crc3.createFramebuffer());
+      RenderWebGL.fboMain = RenderWebGL.assert<WebGLFramebuffer>(RenderWebGL.crc3.createFramebuffer());
+      RenderWebGL.fboPost = RenderWebGL.assert<WebGLFramebuffer>(RenderWebGL.crc3.createFramebuffer());
+      RenderWebGL.fboTarget = null;
 
       RenderWebGL.texColor = createTexture(WebGL2RenderingContext.NEAREST, WebGL2RenderingContext.CLAMP_TO_EDGE);
       RenderWebGL.texPosition = createTexture(WebGL2RenderingContext.NEAREST, WebGL2RenderingContext.CLAMP_TO_EDGE);
@@ -322,7 +332,7 @@ namespace FudgeCore {
       crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texDepthStencil);
       crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.DEPTH24_STENCIL8, width, height, 0, WebGL2RenderingContext.DEPTH_STENCIL, WebGL2RenderingContext.UNSIGNED_INT_24_8, null);
 
-      crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.framebufferMain);
+      crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.fboMain);
       crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texColor, 0);
       crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT1, WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texPosition, 0);
       crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT2, WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texNormal, 0);
@@ -588,7 +598,7 @@ namespace FudgeCore {
       // opaque pass 
       // TODO: think about disabling blending for all opaque objects, this might improve performance 
       // as otherwise the 3 color attachments (color, position and normals) all need to be blended
-      crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.framebufferMain);
+      crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.fboMain);
       crc3.drawBuffers(cmpAmbientOcclusion?.isActive ? // only use position and normal textures if ambient occlusion is active
         [WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.COLOR_ATTACHMENT1, WebGL2RenderingContext.COLOR_ATTACHMENT2] :
         [WebGL2RenderingContext.COLOR_ATTACHMENT0]
@@ -609,7 +619,7 @@ namespace FudgeCore {
         RenderWebGL.drawBloom(cmpBloom);
 
       // transparent pass TODO: think about disabling depth write for all transparent objects -> this might make depth mask option in component particle system obsolete
-      crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.framebufferMain);
+      crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.fboMain);
       crc3.drawBuffers([WebGL2RenderingContext.COLOR_ATTACHMENT0]);
 
       // crc3.depthMask(false);
@@ -618,8 +628,8 @@ namespace FudgeCore {
       // crc3.depthMask(true);
 
       // copy framebuffer to canvas
-      crc3.bindFramebuffer(WebGL2RenderingContext.READ_FRAMEBUFFER, RenderWebGL.framebufferMain);
-      crc3.bindFramebuffer(WebGL2RenderingContext.DRAW_FRAMEBUFFER, null);
+      crc3.bindFramebuffer(WebGL2RenderingContext.READ_FRAMEBUFFER, RenderWebGL.fboMain);
+      crc3.bindFramebuffer(WebGL2RenderingContext.DRAW_FRAMEBUFFER, RenderWebGL.fboTarget);
       crc3.blitFramebuffer(0, 0, crc3.canvas.width, crc3.canvas.height, 0, 0, crc3.canvas.width, crc3.canvas.height, WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT, WebGL2RenderingContext.NEAREST);
     }
 
@@ -644,7 +654,7 @@ namespace FudgeCore {
       crc3.uniform2f(ShaderAmbientOcclusion.uniforms["u_vctResolution"], RenderWebGL.getCanvas().width, RenderWebGL.getCanvas().height);
       crc3.uniform3fv(ShaderAmbientOcclusion.uniforms["u_vctCamera"], _cmpCamera.mtxWorld.translation.get());
 
-      crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.framebufferPost);
+      crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.fboPost);
       crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texColor, 0);
       RenderWebGL.setBlendMode(BLEND.SUBTRACTIVE);
       crc3.drawArrays(WebGL2RenderingContext.TRIANGLES, 0, 3);
@@ -659,7 +669,7 @@ namespace FudgeCore {
       ShaderBloom.useProgram();
 
       // extract bright colors, could move this to main render pass so that individual objects can be exempt from bloom
-      crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.framebufferPost);
+      crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, RenderWebGL.fboPost);
       crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texBloomSamples[0], 0);
       RenderWebGL.clear();
 
@@ -705,7 +715,7 @@ namespace FudgeCore {
         crc3.drawArrays(WebGL2RenderingContext.TRIANGLES, 0, 3);
       }
 
-      Render.crc3.viewport(0, 0, Render.crc3.canvas.width, Render.crc3.canvas.height);
+      crc3.viewport(0, 0, crc3.canvas.width, crc3.canvas.height);
 
       crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, WebGL2RenderingContext.COLOR_ATTACHMENT0, WebGL2RenderingContext.TEXTURE_2D, RenderWebGL.texColor, 0);
       RenderWebGL.bindTexture(ShaderBloom, RenderWebGL.texBloomSamples[0], WebGL2RenderingContext.TEXTURE0, "u_texSource");

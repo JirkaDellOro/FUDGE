@@ -1139,8 +1139,9 @@ declare namespace FudgeCore {
         protected static ƒpicked: Pick[];
         private static rectRender;
         private static sizePick;
-        private static framebufferMain;
-        private static framebufferPost;
+        private static fboMain;
+        private static fboPost;
+        private static fboTarget;
         private static texColor;
         private static texPosition;
         private static texNormal;
@@ -1184,6 +1185,11 @@ declare namespace FudgeCore {
          */
         static clear(_color?: Color): void;
         /**
+         * Set the final framebuffer to render to. If null, the canvas default framebuffer is used.
+         * Used by XR to render to the XRWebGLLayer framebuffer.
+         */
+        static setFramebufferTarget(_buffer: WebGLFramebuffer): void;
+        /**
          * Reset the framebuffer to the main color buffer.
          */
         static resetFramebuffer(): void;
@@ -1198,7 +1204,7 @@ declare namespace FudgeCore {
         /**
          * Enable / Disable WebGLs scissor test.
          */
-        static setScissorTest(_test: boolean, _x: number, _y: number, _width: number, _height: number): void;
+        static setScissorTest(_test: boolean, _x?: number, _y?: number, _width?: number, _height?: number): void;
         /**
          * Set WebGLs viewport.
          */
@@ -2769,19 +2775,17 @@ declare namespace FudgeCore {
         /**
          * Sets a Vector3 as Position of the reference space.
          */
-        set translation(_newPos: Vector3);
+        set translation(_translation: Vector3);
         /**
          * Sets Vector3 Rotation of the reference space.
-         * Rotation needs to be set in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
          */
-        set rotation(_newRot: Vector3);
+        set rotation(_rotation: Vector3);
         /**
          * Adds a Vector3 in Position of the reference space.
          */
         translate(_by: Vector3): void;
         /**
          * Adds a Vector3 in Rotation of the reference space.
-         * Rotation needs to be added in the Origin (0,0,0), otherwise the XR-Rig gets rotated around the origin.
          */
         rotate(_by: Vector3): void;
         private getMtxLocalFromCmpTransform;

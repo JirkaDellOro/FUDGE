@@ -27,8 +27,8 @@ var AudioSceneVR;
     }
     // check device/browser capabilities for XR Session 
     function checkForVRSupport() {
-        navigator.xr.isSessionSupported(f.XR_SESSION_MODE.IMMERSIVE_VR).then((supported) => {
-            if (supported)
+        navigator.xr.isSessionSupported(f.XR_SESSION_MODE.IMMERSIVE_VR).then((_supported) => {
+            if (_supported)
                 setupVR();
             else
                 console.log("Session not supported");
@@ -64,33 +64,19 @@ var AudioSceneVR;
         audioRight = graph.getChildrenByName("AudioR")[0].getComponent(f.ComponentAudio);
     }
     function onSelect(_event) {
-        console.log(_event.inputSource.handedness);
-        if (_event.inputSource.handedness == "right") {
-            if (audioRight.isPlaying)
-                audioRight.play(false);
-            else
-                audioRight.play(true);
-        }
-        if (_event.inputSource.handedness == "left") {
-            if (audioLeft.isPlaying)
-                audioLeft.play(false);
-            else
-                audioLeft.play(true);
-        }
+        let cmpAudio = _event.inputSource.handedness == "right" ? audioRight : _event.inputSource.handedness == "left" ? audioLeft : null;
+        let color = _event.inputSource.handedness == "right" ? f.Color.CSS("lime") : _event.inputSource.handedness == "left" ? f.Color.CSS("red") : null;
+        console.log(_event.inputSource.handedness + " " + !cmpAudio?.isPlaying);
+        if (cmpAudio)
+            cmpAudio.play(!cmpAudio.isPlaying);
+        if (color)
+            cmpAudio.node.getComponent(f.ComponentMaterial).clrPrimary = cmpAudio.isPlaying ? color : f.Color.CSS("white");
     }
     function onSqueeze(_event) {
-        if (_event.inputSource.handedness == "right") {
-            if (audioRight.node.getComponent(AudioSceneVR.Translator).isTranslating)
-                audioRight.node.getComponent(AudioSceneVR.Translator).isTranslating = false;
-            else
-                audioRight.node.getComponent(AudioSceneVR.Translator).isTranslating = true;
-        }
-        if (_event.inputSource.handedness == "left") {
-            if (audioLeft.node.getComponent(AudioSceneVR.Translator).isTranslating)
-                audioLeft.node.getComponent(AudioSceneVR.Translator).isTranslating = false;
-            else
-                audioLeft.node.getComponent(AudioSceneVR.Translator).isTranslating = true;
-        }
+        console.log(_event.inputSource.handedness);
+        let translator = (_event.inputSource.handedness == "right" ? audioRight.node : _event.inputSource.handedness == "left" ? audioLeft.node : null)?.getComponent(AudioSceneVR.Translator);
+        if (translator)
+            translator.isTranslating = !translator.isTranslating;
     }
     function update(_event) {
         xrViewport.draw();
