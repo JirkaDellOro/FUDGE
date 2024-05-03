@@ -1,5 +1,7 @@
 {
-    "entryPoints": ["."],
+    "entryPoints": [
+        "."
+    ],
     "entryPointStrategy": "expand",
     "out": "../../Documentation/Reference/Core/",
     "name": "Fudge Core",
@@ -15,7 +17,25 @@
     ],
     "excludePrivate": true,
     "excludeProtected": true,
-    "exclude": ["Serialization/GLTF/GLTF.ts", "Serialization/FBX/inflate.d.ts"],
-    "intentionallyNotExported": ["GLTF.GlTf", "GLTF.Mesh", "GraphInstancesToResync", "ImageSource", "OIMO.DebugDraw", "OIMO.DebugDrawStyle", "OIMO.Joint", "OIMO.RigidBody", "OIMO.World", "VectorRepresentation"],
-    "plugin": ["typedoc-plugin-merge-modules"]
+    "excludeExternals": true,
+    "exclude": [
+        "Serialization/GLTF/GLTF.ts",
+        "Serialization/FBX/inflate.d.ts",
+        "Serialization/FBX/FBX.ts"
+    ],
+    "intentionallyNotExported": [
+        "GraphInstancesToResync",
+        "ImageSource",
+        "OIMO.DebugDraw",
+        "OIMO.DebugDrawStyle",
+        "OIMO.Joint",
+        "OIMO.RigidBody",
+        "OIMO.World",
+        "FBX.FBX",
+        "FBX.Node",
+        "FBX.Model"
+    ],
+    "plugin": [
+        "typedoc-plugin-merge-modules"
+    ]
 }

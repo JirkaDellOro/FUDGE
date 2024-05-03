@@ -384,7 +384,6 @@ declare namespace FudgeCore {
         private static namespaces;
         /**
          * Registers a namespace to the {@link Serializer}, to enable automatic instantiation of classes defined within
-         * @param _namespace
          */
         static registerNamespace(_namespace: Object): string;
         /**
@@ -396,19 +395,16 @@ declare namespace FudgeCore {
         /**
          * Returns a FUDGE-object reconstructed from the information in the {@link Serialization} given,
          * including attached components, children, superclass-objects
-         * @param _serialization
          */
         static deserialize(_serialization: Serialization): Promise<Serializable>;
         /**
          * Returns an Array of javascript object representing the serializable FUDGE-objects given in the array,
          * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the {@link Serializable} interface
          */
         static serializeArray<T extends Serializable>(_type: new () => T, _objects: Serializable[]): Serialization;
         /**
          * Returns an Array of FUDGE-objects reconstructed from the information in the array of {@link Serialization}s given,
          * including attached components, children, superclass-objects
-         * @param _serializations
          */
         static deserializeArray(_serialization: Serialization): Promise<Serializable[]>;
         /**
@@ -2657,7 +2653,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Holds an array of bones ({@link Node}s within a {@link Graph}). Referenced from a {@link ComponentMesh} it can be associated with a {@link MeshSkin} and enable skinning for the mesh.
+     * Holds an array of bones ({@link Node}s within a {@link Graph}). Referenced from a {@link ComponentMesh} it can be associated with a {@link Mesh} and enable skinning for the mesh.
      * @authors Matthias Roming, HFU, 2022-2023 | Jonas Plotzky, HFU, 2023
      */
     class ComponentSkeleton extends Component {
@@ -2667,7 +2663,7 @@ declare namespace FudgeCore {
         mtxBindInverses: Matrix4x4[];
         protected renderBuffer: unknown;
         protected singleton: boolean;
-        /** Contains the bone transformations applicable to the vertices of a {@link MeshSkin} */
+        /** Contains the bone transformations applicable to the vertices of a {@link Mesh} */
         protected readonly mtxBones: Matrix4x4[];
         constructor(_bones?: Node[], _mtxBoneInverses?: Matrix4x4[]);
         /**
@@ -4236,18 +4232,14 @@ declare namespace FudgeCore {
          */
         /**
          * Computes and returns the product of two passed quaternions.
-         * @param _mtxLeft The quaternion to multiply.
-         * @param _mtxRight The quaternion to multiply by.
          */
         static MULTIPLICATION(_qLeft: Quaternion, _qRight: Quaternion): Quaternion;
         /**
          * Computes and returns the inverse of a passed quaternion.
-         * @param _mtx The quaternion to compute the inverse of.
          */
         static INVERSION(_q: Quaternion): Quaternion;
         /**
          * Computes and returns the conjugate of a passed quaternion.
-         * @param _mtx The quaternion to compute the conjugate of.
          */
         static CONJUGATION(_q: Quaternion): Quaternion;
         /**
@@ -6361,12 +6353,24 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * See {@link Gizmos}.
+     */
     interface Gizmo {
         node?: Node;
+        /**
+         * Draws a gizmo. Use {@link Gizmos} inside this method to draw stuff.
+         */
         drawGizmos?(): void;
+        /**
+         * Draws the selected gizmo. Use {@link Gizmos} inside this method to draw stuff.
+         */
         drawGizmosSelected?(): void;
     }
-    class Gizmos {
+    /**
+     * The gizmos drawing interface. Custom {@link ComponentScript}s that implement {@link Gizmo} can use this to draw gizmos inside the respective methods.
+     */
+    abstract class Gizmos {
         #private;
         static selected: Node;
         static readonly filter: Map<string, boolean>;
@@ -6912,7 +6916,7 @@ declare namespace FudgeCore {
     }
     export {};
 }
-declare namespace FudgeCore.FBX {
+declare namespace FBX {
     /**
      * Reader to read data from an array buffer more conveniently.
      * It saves a current offset which is updated when data is read due to its bytelength.
@@ -6937,7 +6941,7 @@ declare namespace FudgeCore.FBX {
         getSequence<T extends number | bigint>(_getter: () => T, _length: number, _offset?: number): Generator<T>;
     }
 }
-declare namespace FudgeCore.FBX {
+declare namespace FBX {
     /**
      * Interface to represent fbx files containing its documents, definitions, objects and connections.
      * Its objects are devided in all and the different object types.
@@ -6999,15 +7003,15 @@ declare namespace FudgeCore.FBX {
     }
     export interface Model extends ObjectBase {
         Version?: number;
-        LclTranslation?: Vector3 | AnimCurveNode;
-        LclRotation?: Vector3 | AnimCurveNode;
-        LclScaling?: Vector3 | AnimCurveNode;
-        PreRotation?: Vector3;
-        PostRotation?: Vector3;
-        ScalingOffset?: Vector3;
-        ScalingPivot?: Vector3;
-        RotationOffset?: Vector3;
-        RotationPivot?: Vector3;
+        LclTranslation?: FudgeCore.Vector3 | AnimCurveNode;
+        LclRotation?: FudgeCore.Vector3 | AnimCurveNode;
+        LclScaling?: FudgeCore.Vector3 | AnimCurveNode;
+        PreRotation?: FudgeCore.Vector3;
+        PostRotation?: FudgeCore.Vector3;
+        ScalingOffset?: FudgeCore.Vector3;
+        ScalingPivot?: FudgeCore.Vector3;
+        RotationOffset?: FudgeCore.Vector3;
+        RotationPivot?: FudgeCore.Vector3;
         InheritType?: number;
         EulerOrder?: string;
         currentUVSet?: string;
@@ -7015,21 +7019,21 @@ declare namespace FudgeCore.FBX {
     export interface Material extends ObjectBase {
         Version?: number;
         ShadingModel?: string;
-        Diffuse?: Vector3;
-        DiffuseColor?: Vector3 | Texture;
+        Diffuse?: FudgeCore.Vector3;
+        DiffuseColor?: FudgeCore.Vector3 | Texture;
         DiffuseFactor?: number;
-        Ambient?: Vector3;
-        AmbientColor?: Vector3 | Texture;
+        Ambient?: FudgeCore.Vector3;
+        AmbientColor?: FudgeCore.Vector3 | Texture;
         Shininess?: number;
-        ShininessExponent?: Vector3 | Texture;
-        Specular?: Vector3;
-        SpecularColor?: Vector3 | Texture;
+        ShininessExponent?: FudgeCore.Vector3 | Texture;
+        Specular?: FudgeCore.Vector3;
+        SpecularColor?: FudgeCore.Vector3 | Texture;
         SpecularFactor?: number;
         Reflectivity?: number;
         ReflectionFactor?: number;
         Opacity?: number;
         TransparencyFactor?: number;
-        Emissive?: Vector3;
+        Emissive?: FudgeCore.Vector3;
         NormalMap?: Texture;
     }
     export interface Deformer extends ObjectBase {
@@ -7152,7 +7156,7 @@ declare namespace FudgeCore {
         private getOrdered;
     }
 }
-declare namespace FudgeCore.FBX {
+declare namespace FBX {
     /**
      * Interface to represent fbx-nodes containing its name, children and properties.
      * Children and properites are lazy.
@@ -7167,21 +7171,21 @@ declare namespace FudgeCore.FBX {
         get properties(): NodeProperty[];
         get children(): Node[];
     }
-    type Property70 = boolean | number | string | Vector3;
+    type Property70 = boolean | number | string | FudgeCore.Vector3;
     type NodeProperty = boolean | number | string | Uint8Array | Uint16Array | Float32Array;
     enum ARRAY_ENCODING {
         UNCOMPRESSED = 0,
         COMPRESSED = 1
     }
 }
-declare namespace FudgeCore.FBX {
+declare namespace FBX {
     /**
      * Loads an fbx file from its fbx-node array which may be retrieved by parseNodesFromBinary.
      * @author Matthias Roming, HFU, 2023
      */
     function loadFromNodes(_nodes: Node[]): FBX;
 }
-declare namespace FudgeCore.FBX {
+declare namespace FBX {
     /**
      * Parses fbx-nodes array from a binary fbx-file.
      * despite the lazy node implementation it is mostly a copy of the reference: https://github.com/picode7/fbx-parser

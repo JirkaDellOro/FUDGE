@@ -2,7 +2,7 @@
 namespace FudgeCore {
 
   /**
-   * Holds an array of bones ({@link Node}s within a {@link Graph}). Referenced from a {@link ComponentMesh} it can be associated with a {@link MeshSkin} and enable skinning for the mesh.
+   * Holds an array of bones ({@link Node}s within a {@link Graph}). Referenced from a {@link ComponentMesh} it can be associated with a {@link Mesh} and enable skinning for the mesh.
    * @authors Matthias Roming, HFU, 2022-2023 | Jonas Plotzky, HFU, 2023
    */
   @RenderInjectorComponentSkeleton.decorate
@@ -14,7 +14,7 @@ namespace FudgeCore {
 
     protected renderBuffer: unknown;
     protected singleton: boolean = false;
-    /** Contains the bone transformations applicable to the vertices of a {@link MeshSkin} */
+    /** Contains the bone transformations applicable to the vertices of a {@link Mesh} */
     protected readonly mtxBones: Matrix4x4[] = [];
 
     public constructor(_bones: Node[] = [], _mtxBoneInverses: Matrix4x4[] = []) {

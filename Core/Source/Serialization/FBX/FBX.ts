@@ -1,4 +1,4 @@
-namespace FudgeCore.FBX {
+namespace FBX {
   /**
    * Interface to represent fbx files containing its documents, definitions, objects and connections.
    * Its objects are devided in all and the different object types.
@@ -65,15 +65,15 @@ namespace FudgeCore.FBX {
 
   export interface Model extends ObjectBase {
     Version?: number;
-    LclTranslation?: Vector3 | AnimCurveNode;
-    LclRotation?: Vector3 | AnimCurveNode;
-    LclScaling?: Vector3 | AnimCurveNode;
-    PreRotation?: Vector3;
-    PostRotation?: Vector3;
-    ScalingOffset?: Vector3;
-    ScalingPivot?: Vector3;
-    RotationOffset?: Vector3;
-    RotationPivot?: Vector3;
+    LclTranslation?: FudgeCore.Vector3 | AnimCurveNode;
+    LclRotation?: FudgeCore.Vector3 | AnimCurveNode;
+    LclScaling?: FudgeCore.Vector3 | AnimCurveNode;
+    PreRotation?: FudgeCore.Vector3;
+    PostRotation?: FudgeCore.Vector3;
+    ScalingOffset?: FudgeCore.Vector3;
+    ScalingPivot?: FudgeCore.Vector3;
+    RotationOffset?: FudgeCore.Vector3;
+    RotationPivot?: FudgeCore.Vector3;
     InheritType?: number;
     EulerOrder?: string;
     currentUVSet?: string;
@@ -83,18 +83,18 @@ namespace FudgeCore.FBX {
     Version?: number;
     ShadingModel?: string;
 
-    Diffuse?: Vector3;
-    DiffuseColor?: Vector3 | Texture;
+    Diffuse?: FudgeCore.Vector3;
+    DiffuseColor?: FudgeCore.Vector3 | Texture;
     DiffuseFactor?: number;
 
-    Ambient?: Vector3;
-    AmbientColor?: Vector3 | Texture;
+    Ambient?: FudgeCore.Vector3;
+    AmbientColor?: FudgeCore.Vector3 | Texture;
 
     Shininess?: number;
-    ShininessExponent?: Vector3 | Texture;
+    ShininessExponent?: FudgeCore.Vector3 | Texture;
 
-    Specular?: Vector3;
-    SpecularColor?: Vector3 | Texture;
+    Specular?: FudgeCore.Vector3;
+    SpecularColor?: FudgeCore.Vector3 | Texture;
     SpecularFactor?: number;
 
     Reflectivity?: number;
@@ -103,7 +103,7 @@ namespace FudgeCore.FBX {
     Opacity?: number;
     TransparencyFactor?: number;
 
-    Emissive?: Vector3;
+    Emissive?: FudgeCore.Vector3;
     NormalMap?: Texture;
   }
 

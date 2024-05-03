@@ -1,4 +1,4 @@
-namespace FudgeCore.FBX {
+namespace FBX {
   /**
    * Interface to represent fbx-nodes containing its name, children and properties.
    * Children and properites are lazy.
@@ -28,7 +28,7 @@ namespace FudgeCore.FBX {
     }
   }
 
-  export type Property70 = boolean | number | string | Vector3;
+  export type Property70 = boolean | number | string | FudgeCore.Vector3;
 
   export type NodeProperty = boolean | number | string | Uint8Array | Uint16Array | Float32Array;
 

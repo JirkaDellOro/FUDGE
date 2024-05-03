@@ -1,11 +1,27 @@
 namespace FudgeCore {
+
+  // TODO: move this into base component class?
+  /**
+   * See {@link Gizmos}.
+   */
   export interface Gizmo {
     node?: Node;
+
+    /**
+     * Draws a gizmo. Use {@link Gizmos} inside this method to draw stuff.
+     */
     drawGizmos?(): void;
+
+    /**
+     * Draws the selected gizmo. Use {@link Gizmos} inside this method to draw stuff.
+     */
     drawGizmosSelected?(): void;
   }
 
-  export class Gizmos {
+  /**
+   * The gizmos drawing interface. Custom {@link ComponentScript}s that implement {@link Gizmo} can use this to draw gizmos inside the respective methods.
+   */
+  export abstract class Gizmos {
     public static selected: Node;
     public static readonly filter: Map<string, boolean> = new Map(Component.subclasses
       .filter((_class: typeof Component) => (<Gizmo>_class.prototype).drawGizmos || (<Gizmo>_class.prototype).drawGizmosSelected)
@@ -24,7 +40,7 @@ namespace FudgeCore {
     private static readonly arrayBuffer: WebGLBuffer = RenderWebGL.assert(RenderWebGL.getRenderingContext().createBuffer());
     private static readonly indexBuffer: WebGLBuffer = RenderWebGL.assert(RenderWebGL.getRenderingContext().createBuffer());
 
-    static #camera: ComponentCamera;
+    static #camera: ComponentCamera; // TODO: maybe rather pass the camera into the drawGizmos methods on components?
 
     /**
      * The camera which is currently used to draw gizmos.

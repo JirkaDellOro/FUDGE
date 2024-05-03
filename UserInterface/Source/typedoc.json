@@ -1,10 +1,13 @@
 {
-  "entryPoints": ["."],
+  "entryPoints": [
+    "."
+  ],
   "entryPointStrategy": "expand",
   "out": "../../Documentation/Reference/UserInterface/",
   "name": "Fudge User Interface",
   "readme": "none",
-  "excludePrivate": "true",
-  "excludeProtected": "true",
-  "plugin": "typedoc-plugin-merge-modules"
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeExternals": true,
+  "plugin": ["typedoc-plugin-merge-modules"]
 }

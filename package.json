@@ -34,8 +34,8 @@
     "@typescript-eslint/eslint-plugin": "^5.60.0",
     "@typescript-eslint/parser": "^5.60.0",
     "eslint": "^8.43.0",
-    "typedoc": "^0.24.8",
-    "typedoc-plugin-merge-modules": "^5.0.1",
+    "typedoc": "^0.25.13",
+    "typedoc-plugin-merge-modules": "^5.1.0",
     "typescript": "^5.1.3"
   }
 }

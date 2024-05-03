@@ -72,8 +72,6 @@ namespace FudgeCore {
 
     /**
      * Computes and returns the product of two passed quaternions.
-     * @param _mtxLeft The quaternion to multiply.
-     * @param _mtxRight The quaternion to multiply by.
      */
     public static MULTIPLICATION(_qLeft: Quaternion, _qRight: Quaternion): Quaternion {
       const result: Quaternion = _qLeft.clone;
@@ -83,7 +81,6 @@ namespace FudgeCore {
 
     /**
      * Computes and returns the inverse of a passed quaternion.
-     * @param _mtx The quaternion to compute the inverse of.
      */
     public static INVERSION(_q: Quaternion): Quaternion {
       const result: Quaternion = _q.clone;
@@ -93,7 +90,6 @@ namespace FudgeCore {
 
     /**
      * Computes and returns the conjugate of a passed quaternion.
-     * @param _mtx The quaternion to compute the conjugate of.
      */
     public static CONJUGATION(_q: Quaternion): Quaternion {
       const result: Quaternion = _q.clone;

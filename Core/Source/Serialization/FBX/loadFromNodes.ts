@@ -1,4 +1,4 @@
-namespace FudgeCore.FBX {
+namespace FBX {
   /**
    * Loads an fbx file from its fbx-node array which may be retrieved by parseNodesFromBinary.
    * @author Matthias Roming, HFU, 2023
@@ -168,7 +168,7 @@ namespace FudgeCore.FBX {
       case "Lcl Translation":
       case "Lcl Rotation":
       case "Lcl Scaling":
-        return new Vector3(..._node.properties.slice(4, 7) as number[]);
+        return new FudgeCore.Vector3(..._node.properties.slice(4, 7) as number[]);
 
       case "KString":
       default:

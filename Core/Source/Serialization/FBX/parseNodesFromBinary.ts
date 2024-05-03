@@ -1,4 +1,4 @@
-namespace FudgeCore.FBX {
+namespace FBX {
   /**
    * Parses fbx-nodes array from a binary fbx-file.
    * despite the lazy node implementation it is mostly a copy of the reference: https://github.com/picode7/fbx-parser
@@ -88,7 +88,7 @@ namespace FudgeCore.FBX {
     }[typeCode]?.call(_data);
 
     if (value == null)
-      Debug.warn(`Unknown property type ${typeCode.charCodeAt(0)}`);
+      FudgeCore.Debug.warn(`Unknown property type ${typeCode.charCodeAt(0)}`);
 
     return value;
   }

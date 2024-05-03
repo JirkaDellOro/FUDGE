@@ -1,4 +1,4 @@
-namespace FudgeCore.FBX {
+namespace FBX {
   /**
    * Reader to read data from an array buffer more conveniently.
    * It saves a current offset which is updated when data is read due to its bytelength.

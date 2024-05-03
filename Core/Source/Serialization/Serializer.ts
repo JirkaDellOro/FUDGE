@@ -57,7 +57,6 @@ namespace FudgeCore {
 
     /**
      * Registers a namespace to the {@link Serializer}, to enable automatic instantiation of classes defined within
-     * @param _namespace 
      */
     public static registerNamespace(_namespace: Object): string {
       for (let name in Serializer.namespaces)
@@ -102,7 +101,6 @@ namespace FudgeCore {
     /**
      * Returns a FUDGE-object reconstructed from the information in the {@link Serialization} given,
      * including attached components, children, superclass-objects
-     * @param _serialization 
      */
     public static async deserialize(_serialization: Serialization): Promise<Serializable> {
       let reconstruct: Serializable;
@@ -124,7 +122,6 @@ namespace FudgeCore {
     /**
      * Returns an Array of javascript object representing the serializable FUDGE-objects given in the array,
      * including attached components, children, superclass-objects all information needed for reconstruction
-     * @param _object An object to serialize, implementing the {@link Serializable} interface
      */
     public static serializeArray<T extends Serializable>(_type: new () => T, _objects: Serializable[]): Serialization {
       let serializations: Serialization[] = [];
@@ -143,7 +140,6 @@ namespace FudgeCore {
     /**
      * Returns an Array of FUDGE-objects reconstructed from the information in the array of {@link Serialization}s given,
      * including attached components, children, superclass-objects
-     * @param _serializations 
      */
     public static async deserializeArray(_serialization: Serialization): Promise<Serializable[]> {
       let serializables: Serializable[] = [];
