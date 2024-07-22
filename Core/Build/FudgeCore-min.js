@@ -10470,8 +10470,7 @@ var FudgeCore;
                 let points = collisionManifold.getPoints();
                 let normal = collisionManifold.getNormal();
                 if (objHit.getOimoRigidbody() != this.getOimoRigidbody() && this.collisions.indexOf(objHit) == -1) {
-                    let colPos = this.collisionCenterPoint(points, collisionManifold.getNumPoints());
-                    colPoint = new FudgeCore.Vector3(colPos.x, colPos.y, colPos.z);
+                    colPoint = this.collisionCenterPoint(points, collisionManifold.getNumPoints());
                     points.forEach((_value) => {
                         normalImpulse += _value.getNormalImpulse();
                         binormalImpulse += _value.getBinormalImpulse();
@@ -10482,8 +10481,7 @@ var FudgeCore;
                     this.dispatchEvent(event);
                 }
                 if (objHit2 != this && this.collisions.indexOf(objHit2) == -1) {
-                    let colPos = this.collisionCenterPoint(points, collisionManifold.getNumPoints());
-                    colPoint = new FudgeCore.Vector3(colPos.x, colPos.y, colPos.z);
+                    colPoint = this.collisionCenterPoint(points, collisionManifold.getNumPoints());
                     points.forEach((_value) => {
                         normalImpulse += _value.getNormalImpulse();
                         binormalImpulse += _value.getBinormalImpulse();
@@ -10716,7 +10714,6 @@ var FudgeCore;
             return vertices;
         }
         collisionCenterPoint(_colPoints, _numPoints) {
-            let center;
             let totalPoints = 0;
             let totalX = 0;
             let totalY = 0;
@@ -10729,56 +10726,33 @@ var FudgeCore;
                     totalZ += _value.getPosition2().z;
                 }
             });
-            center = new OIMO.Vec3(totalX / _numPoints, totalY / _numPoints, totalZ / _numPoints);
-            return center;
+            return new FudgeCore.Vector3(totalX / _numPoints, totalY / _numPoints, totalZ / _numPoints);
+            ;
         }
         triggerEnter(_contact) {
-            let objHit;
-            let objHit2;
-            let event;
-            let colPoint;
-            let collisionManifold = _contact.getManifold();
-            objHit = _contact.getShape1().userData;
-            if (objHit == null || _contact.isTouching() == false)
+            let bodyA = _contact.getShape1()?.userData;
+            let bodyB = _contact.getShape2()?.userData;
+            if (!bodyA || !bodyB || bodyA.triggerings.includes(bodyB))
                 return;
-            objHit2 = _contact.getShape2().userData;
-            if (objHit2 == null || _contact.isTouching() == false)
-                return;
-            let points = collisionManifold.getPoints();
-            let normal = collisionManifold.getNormal();
-            if (objHit2.triggerings.indexOf(objHit) == -1) {
-                let colPos = objHit2.collisionCenterPoint(points, collisionManifold.getNumPoints());
-                colPoint = new FudgeCore.Vector3(colPos.x, colPos.y, colPos.z);
-                objHit2.triggerings.push(objHit);
-                event = new FudgeCore.EventPhysics("TriggerEnteredCollision", objHit, 0, 0, 0, colPoint, new FudgeCore.Vector3(normal.x, normal.y, normal.z));
-                objHit2.dispatchEvent(event);
-            }
-            if (objHit.triggerings.indexOf(objHit2) == -1) {
-                let colPos = objHit.collisionCenterPoint(points, collisionManifold.getNumPoints());
-                colPoint = new FudgeCore.Vector3(colPos.x, colPos.y, colPos.z);
-                objHit.triggerings.push(objHit2);
-                event = new FudgeCore.EventPhysics("TriggerEnteredCollision", objHit2, 0, 0, 0, colPoint, new FudgeCore.Vector3(normal.x, normal.y, normal.z));
-                objHit.dispatchEvent(event);
-            }
+            bodyA.triggerings.push(bodyB);
+            bodyB.triggerings.push(bodyA);
+            let manifold = _contact.getManifold();
+            let points = manifold.getPoints();
+            let normal = manifold.getNormal();
+            let collisionNormal = new FudgeCore.Vector3(normal.x, normal.y, normal.z);
+            let collisionCenterPoint = bodyA.collisionCenterPoint(points, manifold.getNumPoints());
+            bodyA.dispatchEvent(new FudgeCore.EventPhysics("TriggerEnteredCollision", bodyB, 0, 0, 0, collisionCenterPoint, collisionNormal));
+            bodyB.dispatchEvent(new FudgeCore.EventPhysics("TriggerEnteredCollision", bodyA, 0, 0, 0, collisionCenterPoint, collisionNormal));
         }
         triggerExit(_contact) {
-            let objHit;
-            let objHit2;
-            let event;
-            objHit = _contact.getShape1().userData;
-            objHit2 = _contact.getShape2().userData;
-            let index = objHit.triggerings.indexOf(objHit2);
-            if (index != -1) {
-                objHit.triggerings.splice(index);
-                event = new FudgeCore.EventPhysics("TriggerLeftCollision", objHit2, 0, 0, 0);
-                objHit.dispatchEvent(event);
-            }
-            index = objHit2.triggerings.indexOf(objHit);
-            if (index != -1) {
-                objHit2.triggerings.splice(index);
-                event = new FudgeCore.EventPhysics("TriggerLeftCollision", objHit, 0, 0, 0);
-                objHit2.dispatchEvent(event);
-            }
+            let bodyA = _contact.getShape1()?.userData;
+            let bodyB = _contact.getShape2()?.userData;
+            if (!bodyA || !bodyB || !bodyA.triggerings.includes(bodyB))
+                return;
+            bodyA.triggerings.splice(bodyA.collisions.indexOf(bodyB), 1);
+            bodyB.triggerings.splice(bodyB.collisions.indexOf(bodyA), 1);
+            bodyA.dispatchEvent(new FudgeCore.EventPhysics("TriggerLeftCollision", bodyB, 0, 0, 0));
+            bodyB.dispatchEvent(new FudgeCore.EventPhysics("TriggerLeftCollision", bodyA, 0, 0, 0));
         }
     }
     FudgeCore.ComponentRigidbody = ComponentRigidbody;
