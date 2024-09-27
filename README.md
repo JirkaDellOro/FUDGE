@@ -1,6 +1,6 @@
 # FUDGE has moved!  
 This is the historic repo of fudge including the very first commits from 2018. This repo will not be updated anymore.  
-Please find the current version of FUDGE here **(https://github.com/hs-furtwangen/FUDGE)**
+Please find the current version of FUDGE here **[](https://github.com/hs-furtwangen/FUDGE)**
 
 <a href="https://github.com/JirkaDellOro/FUDGE"><img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="document.querySelector('h1').style.visibility='hidden'"/></a>
 
